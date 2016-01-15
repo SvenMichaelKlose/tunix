@@ -9,7 +9,11 @@
         '("bender/vic-20/vic.asm"
           "zeropage.asm"
           "bender/vic-20/basic-loader.asm"
-          "main.asm")
+          "main.asm"
+          "kernal-start.asm"
+          "reset.asm"
+          "gfx-init.asm"
+          "kernal-end.asm")
         "g.prg.vice.txt"))
 
 (make-program)

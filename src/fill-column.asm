@@ -22,9 +22,12 @@ fill_column:
 
     ldy height
     dey
-l:  lda (scr),y
+l:  tya
+    and #7
+    tax
+    lda (scr),y
     and mask
-    ora line
+    ora pattern,x
     sta (scr),y
     dey
     cpy #255

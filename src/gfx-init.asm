@@ -19,8 +19,16 @@ gfx_init:
     lda #0
     sta mask
     sta ypos
+
+    ldx #6
+l:  lda #$aa
+    sta pattern,x
     lda #$55
-    sta line
+    sta @(++ pattern),x
+    dex
+    dex
+    bpl -l
+
 l:  jsr fill_column
     lda xpos
     sec

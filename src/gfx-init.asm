@@ -1,4 +1,5 @@
 gfx_init:
+    ; Init VIC.
     inc $9000
     inc $9000
     inc $9001
@@ -12,32 +13,7 @@ gfx_init:
     lda #@(+ (* white 16) reverse white)
     sta $900f
 
-    lda #@(* 8 (-- screen_columns))
-    sta xpos
-    lda #@(* 16 screen_rows)
-    sta height
-    lda #0
-    sta mask
-    sta ypos
-
-    ldx #6
-l:  lda #$aa
-    sta pattern,x
-    lda #$55
-    sta @(++ pattern),x
-    dex
-    dex
-    bpl -l
-
-l:  jsr fill_column
-    lda xpos
-    sec
-    sbc #8
-    bcc +done
-    sta xpos
-    bcs -l
-done:
-
+    ; Fill color RAM.
     lda #0
     tax
 l:  sta colors,x
@@ -52,27 +28,48 @@ l:  sta colors,x
     sta @(++ d)
     ldx #11
     lda #@(* (-- screen_columns) screen_rows)
-
 m:  pha
     ldy #@(-- screen_columns)
-
 l:  sta (d),y
     sec
     sbc #screen_rows
     dey
     bpl -l
-
     lda d
     clc
     adc #screen_columns
     sta d
     bcc +n
     inc @(++ d)
-n:
-    pla
+n:  pla
     clc
     adc #1
     dex
     bne -m
+
+    ; Fill screen with pattern.
+    lda #@(* 8 (-- screen_columns))
+    sta xpos
+    lda #@(* 16 screen_rows)
+    sta height
+    lda #0
+    sta mask
+    sta ypos
+    ldx #6
+l:  lda #$aa
+    sta pattern,x
+    lda #$55
+    sta @(++ pattern),x
+    dex
+    dex
+    bpl -l
+l:  jsr fill_column
+    lda xpos
+    sec
+    sbc #8
+    bcc +done
+    sta xpos
+    bcs -l
+done:
 
     rts

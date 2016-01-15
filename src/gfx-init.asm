@@ -12,38 +12,32 @@ gfx_init:
     lda #@(+ (* white 16) reverse white)
     sta $900f
 
-    ; Draw background pattern.
+    lda #@(* 8 (-- screen_columns))
+    sta xpos
+    lda #@(* 16 screen_rows)
+    sta height
+    lda #0
+    sta mask
+    sta ypos
+    lda #$55
+    sta line
+l:  jsr fill_column
+    lda xpos
+    sec
+    sbc #8
+    bcc +done
+    sta xpos
+    bcs -l
+done:
+
     lda #0
     tax
-l:  txa
-    lsr
-    bcc +n
-    lda #$55
-    bne +m
-n:  lda #$aa
-m:  sta $1000,x
-    sta $1100,x
-    sta $1200,x
-    sta $1300,x
-    sta $1400,x
-    sta $1500,x
-    sta $1600,x
-    sta $1700,x
-    sta $1800,x
-    sta $1900,x
-    sta $1a00,x
-    sta $1b00,x
-    sta $1c00,x
-    sta $1d00,x
-    lda #0
-    sta screen,x
-    sta @(+ 256 screen),x
-    lda #black
-    sta colors,x
+l:  sta colors,x
     sta @(+ 256 colors),x
     dex
     bne -l
 
+    ; Make bitmap columns on screen.
     lda #<screen
     sta d
     lda #>screen

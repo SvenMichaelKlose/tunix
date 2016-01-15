@@ -5,8 +5,6 @@ calc_scr:
     lsr
     tax
     lda ypos
-    sec
-    sbc #1
     clc
     adc column_addrs_lo,x
     sta scr
@@ -23,10 +21,13 @@ fill_column:
     jsr calc_scr
 
     ldy height
+    dey
 l:  lda (scr),y
     and mask
     ora line
+    sta (scr),y
     dey
+    cpy #255
     bne -l
 
     rts

@@ -1,4 +1,4 @@
 loaded_kernal:
-    org $1a00
+    org $2000
 
 kernal:

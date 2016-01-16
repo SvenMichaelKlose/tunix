@@ -72,7 +72,38 @@ l:  jsr fill_column
     bcs -l
 done:
 
+    lda #40
+    sta xpos
+    lda #0
+    sta ypos
+    lda #40
+    sta height
+    lda #<pat_solid
+    sta pattern
+    lda #>pat_solid
+    sta @(++ pattern)
+    jsr vline
+
+    lda #80
+    sta xpos
+    jsr vline
+
+    lda #40
+    sta xpos
+    lda #0
+    sta ypos
+    lda #40
+    sta width
+    jsr hline
+
+    lda #40
+    sta ypos
+    jsr hline
+
     rts
+
+pat_solid:
+    $ff $ff $ff $ff $ff $ff $ff $ff
 
 pat_background:
     $aa $55 $aa $55 $aa $55 $aa $55 $aa $55

@@ -4,12 +4,14 @@
 ; ypos: Y position
 ;
 ; Returns:
-; scr: Address of character line
+; scr:    Address of character line
+; xcpos:  X position (column)
 calc_scr:
     lda xpos
     lsr
     lsr
     lsr
+    sta xcpos
     tax
     lda ypos
     clc
@@ -24,7 +26,7 @@ calc_scr:
 column_addrs_lo: @(maptimes [low (+ charset (* 16 screen_rows _))] screen_columns)
 column_addrs_hi: @(maptimes [high (+ charset (* 16 screen_rows _))] screen_columns)
 
-vmasks: %01111111
+vmaskd: %01111111
         %10111111
         %11011111
         %11101111
@@ -33,7 +35,7 @@ vmasks: %01111111
         %11111101
         %11111110
 
-vmaskd: %10000000
+vmasks: %10000000
         %01000000
         %00100000
         %00010000

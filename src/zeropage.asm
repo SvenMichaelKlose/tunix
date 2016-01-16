@@ -13,6 +13,8 @@ d:      0 0
 c:      0 0
 
 tmp:    0
+tmp2:   0
+tmp3:   0
 
 ; Drawing primitives
 
@@ -26,4 +28,6 @@ masks:  0       ; Source mask.
 maskd:  0       ; Destination mask.
 
 pattern:    0 0
+
+xcpos:  0
     end

@@ -15,6 +15,7 @@
              "reset.asm"
              "gfx-init.asm"
              "fill-column.asm"
+             "hline.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))
 

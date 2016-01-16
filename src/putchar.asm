@@ -21,9 +21,21 @@ n:
     ora #$88
     sta @(++ s)
 
-    jsr calcscr
+    ldy #7
     lda #0
+l:  ora (s),y
+    dey
+    bpl -l
     sta tmp
+
+l:  asl
+    bcs +n
+    beq +n
+    dec xpos
+    jmp -l
+n:
+
+    jsr calcscr
     lda xpos
     and #7
     sta tmp2
@@ -33,10 +45,6 @@ n:
 
     ldy #7
 l:  lda (s),y
-    tax
-    ora tmp
-    sta tmp
-    txa
     ldx tmp2
     beq +i
 m:  lsr
@@ -61,24 +69,37 @@ m:  asl
     bpl -l
 
 next_char:
+    lda tmp
+    beq +n
+
     lda xpos
     clc
     adc #8
     sta xpos
-;l:  lsr tmp
-;    bcs +done
-;    beq +done
-;    dec xpos
-;    jmp -l
-done:
+
+    lda tmp
+l:  lsr
+    bcs +done
+    beq +done
+    dec xpos
+    jmp -l
+
+n:  lda xpos
+    clc
+    adc #3
+    sta xpos
     rts
+
+done:
+    inc xpos
+r:  rts
 
 tab_neg:    0 7 6 5 4 3 2 1
 
 putstring:
     ldy #0
     lda (p),y
-    beq done
+    beq -r
     jsr putchar
     inc p
     bne putstring

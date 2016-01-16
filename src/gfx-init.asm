@@ -78,27 +78,18 @@ done:
     sta ypos
     lda #40
     sta height
+    lda #40
+    sta width
     lda #<pat_solid
     sta pattern
     lda #>pat_solid
     sta @(++ pattern)
-    jsr vline
-
-    lda #80
-    sta xpos
-    jsr vline
-
-    lda #40
-    sta xpos
-    lda #0
-    sta ypos
-    lda #40
-    sta width
-    jsr hline
-
-    lda #40
-    sta ypos
-    jsr hline
+l:  jsr rect
+    inc xpos
+    inc ypos
+    lda xpos
+    cmp #80
+    bne -l
 
     rts
 

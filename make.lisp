@@ -16,6 +16,7 @@
              "gfx-init.asm"
              "vfill.asm"
              "hline.asm"
+             "rect.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))
 

@@ -40,14 +40,16 @@ l:  ldy #0
     jmp -l
 
 done:
-w:  jmp -w
+    jsr $ffe4
+    beq -done
+    jmp boot
 
 txt_welcome:
     "UltiGUI v0.1" 0
     " " 0
     " " 0
     "A graphical interface" 0
-    "for UltiMem expansions." 0
+    "for UltiMem applications." 0
     " " 0
     " " 0
     "Booting..." 0

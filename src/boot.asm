@@ -23,15 +23,36 @@ boot:
     sta width
     lda #@(-- screen_height)
     sta height
+    lda #<pat_background
+    sta pattern
+    lda #>pat_background
+    sta @(++ pattern)
+    jsr box
+
+    lda #8
+    sta xpos
+    lda #50
+    sta ypos
+    lda #@(- screen_width 16)
+    sta width
+    lda #@55
+    sta height
+    lda #<pat_empty
+    sta pattern
+    lda #>pat_empty
+    sta @(++ pattern)
+    jsr box
     lda #<pat_solid
     sta pattern
     lda #>pat_solid
     sta @(++ pattern)
     jsr frame
 
-    lda #3
-    sta xpos
-    sta ypos
+    inc xpos
+    inc xpos
+    inc ypos
+    inc ypos
+    inc ypos
     lda #<txt_welcome
     sta p
     lda #>txt_welcome
@@ -66,7 +87,4 @@ txt_welcome:
     " " 0
     "A graphical user interface for" 0
     "the UltiMem memory expansion." 0
-    " " 0
-    " " 0
-    "Booting..." 0
     0

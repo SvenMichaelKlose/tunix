@@ -12,7 +12,6 @@
              "../bender/vic-20/basic-loader.asm"
              "main.asm"
              "kernal-start.asm"
-             "reset.asm"
              "gfx-init.asm"
              "calcscr.asm"
              "vline.asm"
@@ -23,6 +22,7 @@
              "putchar.asm"
              "moveram.asm"
              "patterns.asm"
+             "boot.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))
 

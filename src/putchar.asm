@@ -92,16 +92,21 @@ n:  lda xpos
 
 done:
     inc xpos
-r:  rts
+    rts
 
 tab_neg:    0 7 6 5 4 3 2 1
 
 putstring:
     ldy #0
     lda (p),y
-    beq -r
+    beq +done
     jsr putchar
     inc p
     bne putstring
     inc @(++ p)
     jmp putstring
+done:
+    inc p
+    bne +n
+    inc @(++ p)
+n:  rts

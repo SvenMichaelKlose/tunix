@@ -1,18 +1,4 @@
 gfx_init:
-    ; Init VIC.
-    inc $9000
-    inc $9000
-    inc $9001
-    inc $9001
-    lda #@(+ 128 screen_columns)
-    sta $9002
-    lda #@(+ (* 2 screen_rows) 1)
-    sta $9003
-    lda #$fc    ; screen=$1e00, chars=$1000
-    sta $9005
-    lda #@(+ (* white 16) reverse white)
-    sta $900f
-
     ; Fill color RAM.
     lda #0
     tax
@@ -61,15 +47,19 @@ n:  pla
     sta @(++ pattern)
     jsr box
 
-    lda #12
-    sta xpos
-    sta ypos
-    lda #<txt_welcome
-    sta p
-    lda #>txt_welcome
-    sta @(++ p)
-    lda #@(char-code #\a)
-    jmp putstring
-
-txt_welcome:
-    "UltiGUI v1.0" 0
+    lda $ede4
+    clc
+    adc #2
+    sta $9000
+    lda $ede5
+    adc #2
+    sta $9001
+    lda #@(+ 128 screen_columns)
+    sta $9002
+    lda #@(+ (* 2 screen_rows) 1)
+    sta $9003
+    lda #$fc    ; screen=$1e00, chars=$1000
+    sta $9005
+    lda #@(+ (* white 16) reverse white)
+    sta $900f
+    rts

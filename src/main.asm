@@ -23,7 +23,7 @@ n:  dec c
     dec @(++ c)
     bne -l
 
-    jmp reset
+    jmp boot
 
 kernal_size         = @(- kernal_end kernal)
 loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))

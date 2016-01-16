@@ -1,4 +1,4 @@
-rect:
+frame:
     jsr vline
     jsr hline
     lda xpos

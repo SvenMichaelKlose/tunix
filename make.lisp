@@ -18,8 +18,8 @@
              "vline.asm"
              "vfill.asm"
              "hline.asm"
-             "rect.asm"
-             "frect.asm"
+             "frame.asm"
+             "box.asm"
              "patterns.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))

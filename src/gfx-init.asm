@@ -59,6 +59,4 @@ n:  pla
     sta pattern
     lda #>pat_background
     sta @(++ pattern)
-    jsr frect
-
-    rts
+    jmp box

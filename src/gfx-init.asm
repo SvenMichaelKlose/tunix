@@ -55,13 +55,13 @@ n:  pla
     sta width
     lda #screen_height
     sta height
-    lda #<pat_background
+    lda #<pat_empty
     sta pattern
-    lda #>pat_background
+    lda #>pat_empty
     sta @(++ pattern)
     jsr box
 
-    lda #8
+    lda #12
     sta xpos
     sta ypos
     lda #<txt_welcome

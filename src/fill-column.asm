@@ -60,6 +60,10 @@ vline:
 fill_column:
     jsr calc_scr
 
+    lda pattern
+    sta @(+ 1 +mod_pattern)
+    lda @(+ 1 pattern)
+    sta @(+ 2 +mod_pattern)
     ldy height
     dey
 l:  tya
@@ -68,7 +72,8 @@ l:  tya
     lda (scr),y
     and maskd
     sta tmp
-    lda pattern,x
+mod_pattern:
+    lda $ffff,x
     and masks
     ora tmp
     sta (scr),y

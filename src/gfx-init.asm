@@ -57,16 +57,10 @@ n:  pla
     iny
     sty maskd
     sty ypos
-
-    ; Make pattern.
-    ldx #6
-l:  lda #$aa
-    sta pattern,x
-    lda #$55
-    sta @(++ pattern),x
-    dex
-    dex
-    bpl -l
+    lda #<pat_background
+    sta pattern
+    lda #>pat_background
+    sta @(++ pattern)
 
     ; Fill screen column by column.
 l:  jsr fill_column
@@ -79,3 +73,6 @@ l:  jsr fill_column
 done:
 
     rts
+
+pat_background:
+    $aa $55 $aa $55 $aa $55 $aa $55 $aa $55

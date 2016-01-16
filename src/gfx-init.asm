@@ -62,4 +62,7 @@ n:  pla
     sta $9005
     lda #@(+ (* white 16) reverse white)
     sta $900f
+
+    lda #$88
+    sta font
     rts

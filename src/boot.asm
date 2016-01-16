@@ -3,6 +3,15 @@ boot:
     sta $9002
     jsr gfx_init
 
+    lda #$00
+    sta s
+    sta d
+    lda #$88
+    sta @(++ s)
+    lda #$30
+    sta @(++ d)
+    jsr compress_font
+
     lda #0
     sta xpos
     sta ypos
@@ -32,6 +41,8 @@ l:  ldy #0
     lda ypos
     pha
     jsr putstring
+    lda #$30
+    sta font
     pla
     adc #10
     sta ypos
@@ -40,15 +51,16 @@ l:  ldy #0
     jmp -l
 
 done:
-    jsr $ffe4
-    beq -done
+
+l:  jsr $ffe4
+    beq -l
     jmp boot
 
 txt_welcome:
     "UltiGUI v0.1" 0
     " " 0
     " " 0
-    "A graphical interface" 0
+    "A graphical user interface" 0
     "for UltiMem applications." 0
     " " 0
     " " 0

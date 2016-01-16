@@ -18,7 +18,7 @@ n:
     sta s
     tya
     and #%00000111
-    ora #$88
+    ora font
     sta @(++ s)
 
     ldy #7

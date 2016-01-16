@@ -23,6 +23,7 @@
              "moveram.asm"
              "patterns.asm"
              "boot.asm"
+             "compress-font.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))
 

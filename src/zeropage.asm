@@ -31,6 +31,7 @@ masks:  0       ; Source mask.
 maskd:  0       ; Destination mask.
 
 pattern:    0 0
+font:   0
 
 xcpos:  0
     end

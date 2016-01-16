@@ -12,15 +12,18 @@ s:      0 0
 d:      0 0
 c:      0 0
 
-scr:    0 0
 tmp:    0
 
-xpos:   0
-ypos:   0
-height: 0
-masks:  0
-maskd:  0
-line:   0
+; Drawing primitives
 
-pattern:    0 0 0 0 0 0 0 0
+scr:    0 0     ; Current screen address.
+
+xpos:   0       ; X position in pixles.
+ypos:   0       ; Y position in pixles.
+width:  0       ; Width in pixels.
+height: 0       ; Height in pixels.
+masks:  0       ; Source mask.
+maskd:  0       ; Destination mask.
+
+pattern:    0 0
     end

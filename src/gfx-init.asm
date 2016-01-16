@@ -47,14 +47,18 @@ n:  pla
     dex
     bne -m
 
-    ; Fill screen with pattern.
+    ; Configure box to fill.
     lda #@(* 8 (-- screen_columns))
     sta xpos
     lda #@(* 16 screen_rows)
     sta height
-    lda #0
-    sta mask
-    sta ypos
+    ldy #$ff
+    sty masks
+    iny
+    sty maskd
+    sty ypos
+
+    ; Make pattern.
     ldx #6
 l:  lda #$aa
     sta pattern,x
@@ -63,6 +67,8 @@ l:  lda #$aa
     dex
     dex
     bpl -l
+
+    ; Fill screen column by column.
 l:  jsr fill_column
     lda xpos
     sec

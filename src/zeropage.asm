@@ -13,11 +13,13 @@ d:      0 0
 c:      0 0
 
 scr:    0 0
+tmp:    0
 
 xpos:   0
 ypos:   0
 height: 0
-mask:   0
+masks:  0
+maskd:  0
 line:   0
 
 pattern:    0 0 0 0 0 0 0 0

@@ -13,6 +13,7 @@ charset = $1000
 s:      0 0
 d:      0 0
 c:      0 0
+p:      0 0
 
 tmp:    0
 tmp2:   0

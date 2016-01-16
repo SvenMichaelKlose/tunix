@@ -59,4 +59,17 @@ n:  pla
     sta pattern
     lda #>pat_background
     sta @(++ pattern)
-    jmp box
+    jsr box
+
+    lda #8
+    sta xpos
+    sta ypos
+    lda #<txt_welcome
+    sta p
+    lda #>txt_welcome
+    sta @(++ p)
+    lda #@(char-code #\a)
+    jmp putstring
+
+txt_welcome:
+    "UltiGUI v1.0" 0

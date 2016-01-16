@@ -41,18 +41,11 @@ exec_string:
 
     ; Copy arguments to zero page.
 next_arg:
-    inc sp
-    bne +n
-    inc @(++ sp)
-n:
-
+    jsr inc_sp
     dec num_args
     bmi script_call
 
-    inc sa
-    bne +n
-    inc @(++ sa)
-n:
+    jsr inc_sa
     lda (sa),y      ; Get zero page address from argument info.
     tax
     lda (sp),y      ; Copy in argument value.
@@ -78,13 +71,22 @@ apply:
     lda (sp),y
     tax
     dex
-    inc sp
-    bne +n
-    inc @(++ sp)
-n:
+    jsr inc_sp
     lda syscall_vectors_l,x
     sta @(+ 1 +mod_call)
     lda syscall_vectors_h,x
     sta @(+ 2 +mod_call)
 mod_call:
     jmp $ffff
+
+inc_sp:
+    inc sp
+    bne +n
+    inc @(++ sp)
+n:  rts
+
+inc_sa:
+    inc sa
+    bne +n
+    inc @(++ sa)
+n:  rts

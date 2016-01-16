@@ -72,6 +72,36 @@ l:  jsr vfill
     bcs -l
 done:
 
+    lda #0
+    sta xpos
+    sta ypos
+    lda #screen_width
+    sta width
+    lda #<pat_empty
+    sta pattern
+    lda #>pat_empty
+    sta @(++ pattern)
+l:  jsr hline
+    inc ypos
+    lda ypos
+    cmp #screen_height
+    bne -l
+
+    lda #0
+    sta xpos
+    sta ypos
+    lda #screen_height
+    sta height
+    lda #<pat_smiley
+    sta pattern
+    lda #>pat_smiley
+    sta @(++ pattern)
+l:  jsr vline
+    inc xpos
+    lda xpos
+    cmp #screen_width
+    bne -l
+
     lda #40
     sta xpos
     lda #0
@@ -93,8 +123,21 @@ l:  jsr rect
 
     rts
 
+pat_empty:
+    0 0 0 0 0 0 0 0
+
 pat_solid:
     $ff $ff $ff $ff $ff $ff $ff $ff
 
 pat_background:
     $aa $55 $aa $55 $aa $55 $aa $55 $aa $55
+
+pat_smiley:
+    %00111100
+    %01000010
+    %10100101
+    %10100101
+    %10000001
+    %01011010
+    %00100100
+    %00011000

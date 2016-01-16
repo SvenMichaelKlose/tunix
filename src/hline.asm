@@ -11,7 +11,7 @@ n:  rts
 xposr:  0
 
 hline:
-    jsr calc_scr
+    jsr calcscr
 
     ; Get pattern.
     lda ypos

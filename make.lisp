@@ -14,6 +14,8 @@
              "kernal-start.asm"
              "reset.asm"
              "gfx-init.asm"
+             "calcscr.asm"
+             "vline.asm"
              "vfill.asm"
              "hline.asm"
              "rect.asm"

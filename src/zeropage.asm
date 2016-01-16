@@ -1,5 +1,7 @@
 screen_columns  = 20
 screen_rows     = 11
+screen_width    = @(* 8 screen_columns)
+screen_height   = @(* 16 screen_rows)
 
 screen  = $1e00
 colors  = $9600

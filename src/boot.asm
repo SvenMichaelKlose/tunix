@@ -5,16 +5,13 @@ boot:
 
     lda #0
     sta xpos
+    lda #@(* 10.5 8)
     sta ypos
-    lda #@(-- screen_width)
-    sta width
-    lda #@(-- screen_height)
-    sta height
-    lda #<pat_background
-    sta pattern
-    lda #>pat_background
-    sta @(++ pattern)
-    jsr box
+    lda #<txt_sysfont
+    sta p
+    lda #>txt_sysfont
+    sta @(++ p)
+    jsr putstring
 
     lda #$00
     sta s
@@ -26,8 +23,19 @@ boot:
     lda #2
     sta font_compression
     jsr compress_font
-    lda #1
-    sta do_compress_font_gaps
+
+    lda #0
+    sta xpos
+    sta ypos
+    lda #@(-- screen_width)
+    sta width
+    lda #@(-- screen_height)
+    sta height
+    lda #<pat_background
+    sta pattern
+    lda #>pat_background
+    sta @(++ pattern)
+    jsr box
 
     lda #8
     sta xpos
@@ -76,10 +84,22 @@ l:  ldy #0
     jmp -l
 
 done:
+    lda #70
+    sta xpos
+    lda #20
+    sta ypos
+    lda #60
+    sta width
+    lda #100
+    sta height
+    jsr window
 
 l:  jsr $ffe4
     beq -l
     jmp boot
+
+txt_sysfont:
+    "Generating system font..." 0
 
 txt_welcome:
     "UltiGUI v0.1" 0

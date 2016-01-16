@@ -65,6 +65,8 @@ n:  pla
 
     lda #$88
     sta font
+    lda #1
+    sta do_compress_font_gaps
     lda #2
     sta font_compression
     lda #3

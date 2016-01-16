@@ -28,6 +28,9 @@ l:  ora (s),y
     bpl -l
     sta tmp
 
+    ldx xpos
+    beq +n
+
 l:  asl
     bcs +n
     beq +n

@@ -5,7 +5,7 @@
   (& cmds (make-vice-commands cmds "break .stop")))
 
 (defun make-program ()
-  (make "g.prg"
+  (make "utilgui"
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
@@ -25,7 +25,7 @@
              "boot.asm"
              "compress-font.asm"
              "kernal-end.asm"))
-        "g.prg.vice.txt"))
+        "utilgui.vice.txt"))
 
 (make-program)
 (quit)

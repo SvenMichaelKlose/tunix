@@ -3,19 +3,6 @@ boot:
     sta $9002
     jsr gfx_init
 
-    lda #$00
-    sta s
-    sta d
-    lda #$88
-    sta @(++ s)
-    lda #$30
-    sta @(++ d)
-    lda #2
-    sta font_compression
-    jsr compress_font
-    lda #1
-    sta do_compress_font_gaps
-
     lda #0
     sta xpos
     sta ypos
@@ -28,6 +15,19 @@ boot:
     lda #>pat_background
     sta @(++ pattern)
     jsr box
+
+    lda #$00
+    sta s
+    sta d
+    lda #$88
+    sta @(++ s)
+    lda #$30
+    sta @(++ d)
+    lda #2
+    sta font_compression
+    jsr compress_font
+    lda #1
+    sta do_compress_font_gaps
 
     lda #8
     sta xpos

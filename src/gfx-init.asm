@@ -67,4 +67,6 @@ n:  pla
     sta font
     lda #2
     sta font_compression
+    lda #3
+    sta font_space_size
     rts

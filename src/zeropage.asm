@@ -38,6 +38,7 @@ font_compression:       0
 
 font:   0
 do_compress_font_gaps:  0
+font_space_size:        0
 pattern:    0 0
 
 xcpos:  0

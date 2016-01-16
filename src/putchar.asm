@@ -94,7 +94,7 @@ l:  lsr
 
 n:  lda xpos
     clc
-    adc #3
+    adc font_space_size
     sta xpos
     rts
 

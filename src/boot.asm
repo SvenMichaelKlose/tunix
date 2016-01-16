@@ -10,7 +10,11 @@ boot:
     sta @(++ s)
     lda #$30
     sta @(++ d)
+    lda #2
+    sta font_compression
     jsr compress_font
+    lda #1
+    sta do_compress_font_gaps
 
     lda #0
     sta xpos
@@ -60,8 +64,8 @@ txt_welcome:
     "UltiGUI v0.1" 0
     " " 0
     " " 0
-    "A graphical user interface" 0
-    "for UltiMem applications." 0
+    "A graphical user interface for" 0
+    "the UltiMem memory expansion." 0
     " " 0
     " " 0
     "Booting..." 0

@@ -30,6 +30,8 @@ l:  ora (s),y
 
     ldx xpos
     beq +n
+    ldx do_compress_font_gaps
+    beq +n
 
 l:  asl
     bcs +n
@@ -72,6 +74,9 @@ m:  asl
     bpl -l
 
 next_char:
+    ldx do_compress_font_gaps
+    beq +j
+
     lda tmp
     beq +n
 
@@ -90,6 +95,12 @@ l:  lsr
 n:  lda xpos
     clc
     adc #3
+    sta xpos
+    rts
+
+j:  lda xpos
+    clc
+    adc #8
     sta xpos
     rts
 

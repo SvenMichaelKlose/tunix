@@ -34,9 +34,9 @@ l:  sta buffer2,x
     ; Compress char.
     lda buffer1
     sta buffer2
-    ldx font_compression
-    stx tmp
-    dex
+    lda font_compression
+    sta tmp
+    ldx #1
     ldy #1
 l:  lda buffer1,x
     sta buffer2,y

@@ -1,6 +1,4 @@
 boot:
-    lda #0
-    sta $9002
     jsr gfx_init
 
     lda #<exec_script

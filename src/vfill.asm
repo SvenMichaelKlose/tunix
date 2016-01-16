@@ -59,7 +59,12 @@ vline:
     lda vmaskd,x
     sta maskd
 
-fill_column:
+; SYSCALL: Fill part of column
+;
+; In:   xpos. ypos, height, pattern
+;       masks:  Source mask (ANDed with pattern).
+;       maskd:  Destination mask (ANDed with screen).
+vfill:
     jsr calc_scr
 
     lda pattern

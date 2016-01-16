@@ -63,7 +63,7 @@ n:  pla
     sta @(++ pattern)
 
     ; Fill screen column by column.
-l:  jsr fill_column
+l:  jsr vfill
     lda xpos
     sec
     sbc #8

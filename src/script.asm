@@ -18,49 +18,73 @@ exec_script:
 n:
 
 exec_string:
+    ; Get opcode.
     ldy #0
     lda (sp),y
-    beq +done
+    beq +done   ; Return to native code…
+
+    ; Get pointer to argument info.
     tax
     dex
-    lda syscall_args_l,x
-    sta sa
-    lda syscall_args_h,x
-    sta @(++ sa)
     lda syscall_vectors_l,x
     sta @(+ 1 +mod_call)
     lda syscall_vectors_h,x
     sta @(+ 2 +mod_call)
+    lda syscall_args_l,x
+    sta sa
+    lda syscall_args_h,x
+    sta @(++ sa)
+
+    ; Get number of arguments.
     lda (sa),y
     sta num_args
+
+    ; Copy arguments to zero page.
 next_arg:
+    inc sp
+    bne +n
+    inc @(++ sp)
+n:
+
+    dec num_args
+    bmi script_call
+
     inc sa
     bne +n
     inc @(++ sa)
 n:
-    inc sp
-    bne +n
-    inc @(++ sp)
-n:
-    lda (sa),y
+    lda (sa),y      ; Get zero page address from argument info.
     tax
-    lda (sp),y
+    lda (sp),y      ; Copy in argument value.
     sta 0,x
-    dec num_args
-    bne next_arg
 
-    inc sp
-    bne +n
-    inc @(++ sp)
-n:
+    jmp next_arg
 
+script_call:
 mod_call:
     jsr $ffff
     jmp exec_string
 
+    ; Return to native code.
 done:
     lda @(++ sp)
     pha
     lda sp
     pha
     rts
+
+    ; Call system function without argument mapping.
+apply:
+    lda (sp),y
+    tax
+    dex
+    inc sp
+    bne +n
+    inc @(++ sp)
+n:
+    lda syscall_vectors_l,x
+    sta @(+ 1 +mod_call)
+    lda syscall_vectors_h,x
+    sta @(+ 2 +mod_call)
+mod_call:
+    jmp $ffff

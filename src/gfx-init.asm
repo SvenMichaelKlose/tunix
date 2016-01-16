@@ -33,20 +33,6 @@ n:  pla
     dex
     bne -m
 
-    ; Fill background.
-    lda #0
-    sta xpos
-    sta ypos
-    lda #@(-- screen_width)
-    sta width
-    lda #screen_height
-    sta height
-    lda #<pat_empty
-    sta pattern
-    lda #>pat_empty
-    sta @(++ pattern)
-    jsr box
-
     lda $ede4
     clc
     adc #2

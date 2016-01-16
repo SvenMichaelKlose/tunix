@@ -1,15 +1,12 @@
 window:
-    lda #<pat_empty
-    sta pattern
-    lda #>pat_empty
-    sta @(++ pattern)
-    jsr box
-    lda #<pat_solid
-    sta pattern
-    lda #>pat_solid
-    sta @(++ pattern)
-    jsr frame
+    brk
+    c_setpattern <pat_empty >pat_empty
+    c_apply c_box
+    c_setpattern <pat_solid >pat_solid
+    c_apply c_frame
+    0
 
+    ; Draw bottom of title.
     lda ypos
     pha
     clc
@@ -19,6 +16,7 @@ window:
     pla
     sta ypos
 
+    ; Get rightmost X position.
     lda xpos
     clc
     adc width

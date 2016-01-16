@@ -4,6 +4,7 @@ c_frame         = 3
 c_box           = 4
 c_putstring     = 5
 c_setpattern    = 6
+c_apply         = 7
 
 syscall_vectors_l:
     <hline
@@ -12,6 +13,7 @@ syscall_vectors_l:
     <box
     <putstring
     <dummy
+    <apply
 
 syscall_vectors_h:
     >hline
@@ -20,6 +22,7 @@ syscall_vectors_h:
     >box
     >putstring
     >dummy
+    >apply
 
 syscall_args_l:
     <args_hline
@@ -28,6 +31,7 @@ syscall_args_l:
     <args_box
     <args_putstring
     <args_setpattern
+    <args_apply
 
 syscall_args_h:
     >args_hline
@@ -36,6 +40,7 @@ syscall_args_h:
     >args_box
     >args_putstring
     >args_setpattern
+    >args_apply
 
 args_hline:
     3
@@ -68,6 +73,9 @@ args_setpattern:
     2
     pattern
     @(++ pattern)
+
+args_apply:
+    0
 
 dummy:
     rts

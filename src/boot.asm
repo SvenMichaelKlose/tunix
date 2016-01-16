@@ -8,10 +8,6 @@ boot:
     lda #>exec_script
     sta $317
 
-    brk
-    c_putstring 0 @(* 10.5 8) <txt_sysfont >txt_sysfont
-    0
-
     lda #$00
     sta s
     sta d
@@ -25,12 +21,12 @@ boot:
 
     brk
     c_setpattern <pat_background >pat_background
-    c_box 0 0 @(-- screen_width) @(-- screen_height)
+    c_box 0 0 @(-- screen_width) screen_height
     c_setpattern <pat_empty >pat_empty
     c_box 8 50 @(- screen_width 16) 55
     c_setpattern <pat_solid >pat_solid
+    c_apply c_frame
     0
-    jsr frame
 
     inc xpos
     inc xpos
@@ -73,9 +69,6 @@ done:
 l:  jsr $ffe4
     beq -l
     jmp boot
-
-txt_sysfont:
-    "Generating system font..." 0
 
 txt_welcome:
     "UltiGUI v0.1" 0

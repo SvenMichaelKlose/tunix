@@ -3,15 +3,14 @@ boot:
     sta $9002
     jsr gfx_init
 
-    lda #0
-    sta xpos
-    lda #@(* 10.5 8)
-    sta ypos
-    lda #<txt_sysfont
-    sta p
-    lda #>txt_sysfont
-    sta @(++ p)
-    jsr putstring
+    lda #<exec_script
+    sta $316
+    lda #>exec_script
+    sta $317
+
+    brk
+    c_putstring 0 @(* 10.5 8) <txt_sysfont >txt_sysfont
+    0
 
     lda #$00
     sta s
@@ -24,36 +23,13 @@ boot:
     sta font_compression
     jsr compress_font
 
-    lda #0
-    sta xpos
-    sta ypos
-    lda #@(-- screen_width)
-    sta width
-    lda #@(-- screen_height)
-    sta height
-    lda #<pat_background
-    sta pattern
-    lda #>pat_background
-    sta @(++ pattern)
-    jsr box
-
-    lda #8
-    sta xpos
-    lda #50
-    sta ypos
-    lda #@(- screen_width 16)
-    sta width
-    lda #@55
-    sta height
-    lda #<pat_empty
-    sta pattern
-    lda #>pat_empty
-    sta @(++ pattern)
-    jsr box
-    lda #<pat_solid
-    sta pattern
-    lda #>pat_solid
-    sta @(++ pattern)
+    brk
+    c_setpattern <pat_background >pat_background
+    c_box 0 0 @(-- screen_width) @(-- screen_height)
+    c_setpattern <pat_empty >pat_empty
+    c_box 8 50 @(- screen_width 16) 55
+    c_setpattern <pat_solid >pat_solid
+    0
     jsr frame
 
     inc xpos

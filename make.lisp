@@ -21,6 +21,8 @@
              "box.asm"
              "putchar.asm"
              "moveram.asm"
+             "syscalls.asm"
+             "script.asm"
              "patterns.asm"
              "boot.asm"
              "compress-font.asm"

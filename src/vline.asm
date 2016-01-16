@@ -18,10 +18,8 @@ vmasks: %10000000
 
 ; SYSCALL: Draw a vertical line
 ;
-; xpos:     top X position
-; ypos:     top Y position
-; height:   -
-; pattern:  8-byte pattern to draw
+; In: xpos, ypos, height, pattern
+; Modifies: masks, maskd
 vline:
     lda xpos
     and #7

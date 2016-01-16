@@ -19,6 +19,8 @@
              "vfill.asm"
              "hline.asm"
              "rect.asm"
+             "frect.asm"
+             "patterns.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))
 

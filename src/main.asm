@@ -1,19 +1,10 @@
 main:
-    ldy #@(- cinfo_kernal_end cinfo 1)
-    jsr copy_backwards
-    jmp reset
-
-copy_cinfo:
     ldx #@(- cinfo_end cinfo 1)
-l:  lda cinfo,y
+l:  lda cinfo,x
     sta s,x
-    dey
     dex
     bpl -l
-    rts
 
-copy_backwards:
-    jsr copy_cinfo
     ldy #0
 l:  lda (s),y
     sta (d),y
@@ -31,7 +22,8 @@ n:  dec c
     bne -l
     dec @(++ c)
     bne -l
-    rts
+
+    jmp reset
 
 kernal_size         = @(- kernal_end kernal)
 loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))

@@ -20,6 +20,7 @@
              "hline.asm"
              "frame.asm"
              "box.asm"
+             "moveram.asm"
              "patterns.asm"
              "kernal-end.asm"))
         "g.prg.vice.txt"))

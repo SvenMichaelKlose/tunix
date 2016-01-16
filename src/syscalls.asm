@@ -5,6 +5,11 @@ c_box           = 4
 c_putstring     = 5
 c_setpattern    = 6
 c_apply         = 7
+c_addx          = 8
+c_addy          = 9
+
+dummy:
+    rts
 
 syscall_vectors_l:
     <hline
@@ -14,6 +19,8 @@ syscall_vectors_l:
     <putstring
     <dummy
     <apply
+    <addx
+    <addy
 
 syscall_vectors_h:
     >hline
@@ -23,6 +30,8 @@ syscall_vectors_h:
     >putstring
     >dummy
     >apply
+    >addx
+    >addy
 
 syscall_args_l:
     <args_hline
@@ -32,6 +41,8 @@ syscall_args_l:
     <args_putstring
     <args_setpattern
     <args_apply
+    <args_add
+    <args_add
 
 syscall_args_h:
     >args_hline
@@ -41,6 +52,8 @@ syscall_args_h:
     >args_putstring
     >args_setpattern
     >args_apply
+    >args_add
+    >args_add
 
 args_hline:
     3
@@ -77,5 +90,6 @@ args_setpattern:
 args_apply:
     0
 
-dummy:
-    rts
+args_add:
+    1
+    tmp

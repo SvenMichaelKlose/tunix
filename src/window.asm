@@ -23,10 +23,10 @@ window:
     sta xright
 
     ; Print window title.
-    inc xpos
-    inc xpos
-    inc ypos
-    inc ypos
+    brk
+    c_addx 2
+    c_addy 2
+    0
     lda #<txt_clock
     sta p
     lda #>txt_clock
@@ -43,12 +43,13 @@ window:
     sta width
     inc ypos
     jsr hline
-    inc ypos
-    inc ypos
-    jsr hline
-    inc ypos
-    inc ypos
-    jsr hline
+    ldx #2
+l:  brk
+    c_addy 2
+    c_apply c_hline
+    0
+    dex
+    bne -l
 
 done:
     rts

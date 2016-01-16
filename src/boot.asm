@@ -24,13 +24,10 @@ boot:
     c_box 8 50 @(- screen_width 16) 55
     c_setpattern <pat_solid >pat_solid
     c_apply c_frame
+    c_addx 2
+    c_addy 3
     0
 
-    inc xpos
-    inc xpos
-    inc ypos
-    inc ypos
-    inc ypos
     lda #<txt_welcome
     sta p
     lda #>txt_welcome

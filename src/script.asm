@@ -1,8 +1,21 @@
 num_args:   0
 
+inc_sp:
+    inc sp
+    bne +n
+    inc @(++ sp)
+n:  rts
+
+inc_sa:
+    inc sa
+    bne +n
+    inc @(++ sa)
+n:  rts
+
 exec_script:
     pla ; Y
     pla ; X
+    sta srx
     pla ; A
     plp ; flags
     pla
@@ -64,6 +77,7 @@ done:
     pha
     lda sp
     pha
+    ldx srx
     rts
 
     ; Call system function without argument mapping.
@@ -79,14 +93,16 @@ apply:
 mod_call:
     jmp $ffff
 
-inc_sp:
-    inc sp
-    bne +n
-    inc @(++ sp)
-n:  rts
+addx:
+    lda tmp
+    clc
+    adc xpos
+    sta xpos
+    rts
 
-inc_sa:
-    inc sa
-    bne +n
-    inc @(++ sa)
-n:  rts
+addy:
+    lda tmp
+    clc
+    adc ypos
+    sta ypos
+    rts

@@ -17,6 +17,7 @@ p:      0 0
 
 sa:     0 0
 sp:     0 0
+srx:    0
 
 tmp:    0
 tmp2:   0

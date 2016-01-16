@@ -34,14 +34,19 @@ l:  sta buffer2,x
     ; Compress char.
     lda buffer1
     sta buffer2
-    ldx #1
+    ldx font_compression
+    stx tmp
+    dex
     ldy #1
 l:  lda buffer1,x
     sta buffer2,y
     cmp @(-- buffer2),y
     beq +n
-    iny
-n:  inx
+j:  iny
+    jmp +m
+n:  dec tmp
+    bmi -j
+m:  inx
     cpx #8
     bne -l
 

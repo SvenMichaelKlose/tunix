@@ -29,9 +29,11 @@ width:  0       ; Width in pixels.
 height: 0       ; Height in pixels.
 masks:  0       ; Source mask.
 maskd:  0       ; Destination mask.
+font_compression:   0
 
 pattern:    0 0
 font:   0
 
 xcpos:  0
+
     end

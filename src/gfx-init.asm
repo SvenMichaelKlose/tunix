@@ -65,4 +65,6 @@ n:  pla
 
     lda #$88
     sta font
+    lda #2
+    sta font_compression
     rts

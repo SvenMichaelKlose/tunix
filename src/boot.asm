@@ -1,6 +1,4 @@
 boot:
-    jsr gfx_init
-
     lda #<exec_script
     sta $316
     lda #>exec_script
@@ -16,6 +14,8 @@ boot:
     lda #2
     sta font_compression
     jsr compress_font
+
+    jsr gfx_init
 
     brk
     c_setpattern <pat_background >pat_background

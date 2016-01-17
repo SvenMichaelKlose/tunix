@@ -107,6 +107,12 @@ addy:
     sta ypos
     rts
 
+setzb:
+    ldx tmp
+    lda tmp2
+    sta 0,x
+    rts
+
 setzw:
     ldx tmp
     lda tmp2

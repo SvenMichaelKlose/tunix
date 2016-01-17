@@ -49,6 +49,8 @@ n:  pla
     lda #@(+ (* white 16) reverse white)
     sta $900f
 
+    jsr reset_region
+
     lda #$88
     sta font
     lda #1

@@ -27,6 +27,11 @@ tmp3:   0
 
 scr:    0 0     ; Current screen address.
 
+rxl:    0
+rxr:    0
+ryt:    0
+ryb:    0
+
 xpos:   0       ; X position in pixles.
 ypos:   0       ; Y position in pixles.
 width:  0       ; Width in pixels.

@@ -4,17 +4,12 @@ window:
     c_apply c_box
     c_setpattern <pat_solid >pat_solid
     c_apply c_frame
-    0
 
     ; Draw bottom of title.
-    lda ypos
-    pha
-    clc
-    adc #10
-    sta ypos
-    jsr hline
-    pla
-    sta ypos
+    c_addy 10
+    c_apply c_hline
+    c_addy @(- 256 10)
+    0
 
     ; Get rightmost X position.
     lda xpos

@@ -5,7 +5,6 @@ inc_xcpos:
     sta scr
     bcc +n
     inc @(++ scr)
-done:
 n:  rts
 
 ; In: xpos, ypos, width
@@ -13,20 +12,19 @@ xposr:  0
 
 hline:
     lda xpos
+    pha
     clc
     adc width
     sta xpos2
-    lda ypos
-    clc
-    adc height
-    sta ypos2
+    lda width
+    pha
 
     ; Clip
     lda ypos
     cmp ryt
-    bcc -done
+    bcc +done
     cmp ryb
-    bcs -done
+    bcs +done
 
     lda xpos
     cmp rxl
@@ -45,7 +43,7 @@ n:
     lda xpos2
     sec
     sbc xpos
-    bcc -done
+    bcc +done
     sta width
 
     jsr calcscr
@@ -106,6 +104,11 @@ right_end:
     and hmasks_right,x
     ora tmp
     sta (scr),y
+done:
+    pla
+    sta width
+    pla
+    sta xpos
     rts
 
 single_column:
@@ -128,7 +131,7 @@ single_column:
     and tmp3
     ora tmp
     sta (scr),y
-    rts
+    jmp -done
 
 hmasks_left:
     %11111111

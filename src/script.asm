@@ -106,3 +106,11 @@ addy:
     adc ypos
     sta ypos
     rts
+
+setzw:
+    ldx tmp
+    lda tmp2
+    sta 0,x
+    lda tmp3
+    sta 1,x
+    rts

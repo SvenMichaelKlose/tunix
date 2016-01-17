@@ -26,12 +26,9 @@ window:
     brk
     c_addx 2
     c_addy 2
+    c_setzw p <txt_clock >txt_clock
+    c_apply c_putstring
     0
-    lda #<txt_clock
-    sta p
-    lda #>txt_clock
-    sta @(++ p)
-    jsr putstring
 
     ; Draw title grip.
     lda xright

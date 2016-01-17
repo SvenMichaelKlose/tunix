@@ -7,6 +7,7 @@ c_setpattern    = 6
 c_apply         = 7
 c_addx          = 8
 c_addy          = 9
+c_setzw         = 10
 
 dummy:
     rts
@@ -21,6 +22,7 @@ syscall_vectors_l:
     <apply
     <addx
     <addy
+    <setzw
 
 syscall_vectors_h:
     >hline
@@ -32,6 +34,7 @@ syscall_vectors_h:
     >apply
     >addx
     >addy
+    >setzw
 
 syscall_args_l:
     <args_hline
@@ -43,6 +46,7 @@ syscall_args_l:
     <args_apply
     <args_add
     <args_add
+    <args_setzw
 
 syscall_args_h:
     >args_hline
@@ -54,6 +58,7 @@ syscall_args_h:
     >args_apply
     >args_add
     >args_add
+    >args_setzw
 
 args_hline:
     3
@@ -93,3 +98,9 @@ args_apply:
 args_add:
     1
     tmp
+
+args_setzw:
+    3
+    tmp
+    tmp2
+    tmp3

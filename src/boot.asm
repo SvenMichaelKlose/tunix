@@ -26,12 +26,8 @@ boot:
     c_apply c_frame
     c_addx 2
     c_addy 3
+    c_setzw p <txt_welcome >txt_welcome
     0
-
-    lda #<txt_welcome
-    sta p
-    lda #>txt_welcome
-    sta @(++ p)
 
 l:  ldy #0
     lda (p),y

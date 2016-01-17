@@ -1,4 +1,15 @@
 putchar:
+    pha
+    lda xpos
+    clc
+    adc #8
+    sta xpos2
+    lda ypos
+    clc
+    adc #8
+    sta ypos2
+    pla
+
     ; ASCII to PETSCII
     cmp #@(++ (char-code #\Z)))
     bcc +n
@@ -21,6 +32,7 @@ n:
     ora font
     sta @(++ s)
 
+    ; OR all line together to find the paddings left and right.
     ldy #7
     lda #0
 l:  ora (s),y
@@ -28,11 +40,13 @@ l:  ora (s),y
     bpl -l
     sta tmp
 
-    ldx xpos
+    ; Check if the left gap should be removed.
+    ldx xpos    ; XXX really needed?
     beq +n
     ldx do_compress_font_gaps
     beq +n
 
+    ; Move the character left to remove the gap.
 l:  asl
     bcs +n
     beq +n
@@ -41,6 +55,8 @@ l:  asl
 n:
 
     jsr calcscr
+
+    ; Calculate sub–column shifts.
     lda xpos
     and #7
     sta tmp2
@@ -48,6 +64,7 @@ n:
     lda tab_neg,x
     sta tmp3
 
+    ; Draw left (or only) column.
     ldy #7
 l:  lda (s),y
     ldx tmp2
@@ -60,8 +77,10 @@ i:  ora (scr),y
     dey
     bpl -l
 
+    ; Step to next column.
     jsr inc_xcpos
 
+    ; Draw optional right column.
     ldy #7
 l:  lda (s),y
     ldx tmp3
@@ -73,18 +92,21 @@ m:  asl
     dey
     bpl -l
 
+    ; Update position to next character.
 next_char:
-    ldx do_compress_font_gaps
-    beq +j
-
-    lda tmp
-    beq +n
-
+    ; Do a standard character width jump to the right.
     lda xpos
     clc
     adc #8
     sta xpos
 
+    ; Check if we should remove the right gap.
+    ldx do_compress_font_gaps
+    beq +j
+    lda tmp
+    beq +n      ; Add default gap for spaces…
+
+    ; Move to pointer to the left to close the gap.
     lda tmp
 l:  lsr
     bcs +done
@@ -92,18 +114,16 @@ l:  lsr
     dec xpos
     jmp -l
 
+    ; Add default gap for spaces.
 n:  lda xpos
+    sec
+    sbc #8
     clc
     adc font_space_size
     sta xpos
-    rts
+j:  rts
 
-j:  lda xpos
-    clc
-    adc #8
-    sta xpos
-    rts
-
+    ; Leave 1 pixel gap.
 done:
     inc xpos
     rts

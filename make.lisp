@@ -21,6 +21,7 @@
              "frame.asm"
              "box.asm"
              "putchar.asm"
+             "putstring.asm"
              "moveram.asm"
              "syscalls.asm"
              "script.asm"

@@ -30,9 +30,6 @@ done:
 vline:
     lda ypos
     pha
-    clc
-    adc height
-    sta ypos2
     lda height
     pha
 
@@ -42,26 +39,8 @@ vline:
     bcc -done
     cmp rxr
     bcs -done
-
-    lda ypos
-    cmp ryt
-    bcs +n
-    lda ryt
-    sta ypos
-n:
-
-    lda ypos2
-    cmp ryb
-    bcc +n
-    lda ryb
-    sta ypos2
-n:
-
-    lda ypos2
-    sec
-    sbc ypos
+    jsr clip_y
     bcc -done
-    sta height
 
     lda xpos
     and #7

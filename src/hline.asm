@@ -13,9 +13,6 @@ xposr:  0
 hline:
     lda xpos
     pha
-    clc
-    adc width
-    sta xpos2
     lda width
     pha
 
@@ -25,26 +22,8 @@ hline:
     bcc +done
     cmp ryb
     bcs +done
-
-    lda xpos
-    cmp rxl
-    bcs +n
-    lda rxl
-    sta xpos
-n:
-
-    lda xpos2
-    cmp rxr
-    bcc +n
-    lda rxr
-    sta xpos2
-n:
-
-    lda xpos2
-    sec
-    sbc xpos
+    jsr clip_x
     bcc +done
-    sta width
 
     jsr calcscr
 

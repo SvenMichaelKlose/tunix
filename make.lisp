@@ -15,6 +15,7 @@
              "patterns.asm"
              "calcscr.asm"
              "reset-region.asm"
+             "clip.asm"
              "vline.asm"
              "vfill.asm"
              "hline.asm"

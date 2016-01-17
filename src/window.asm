@@ -11,8 +11,16 @@ window:
     c_addy @(- 256 10)
     0
 
+    lda height
+    pha
+    lda width
+    pha
+    lda ypos
+    pha
+
     ; Get rightmost X position.
     lda xpos
+    pha
     clc
     adc width
     sta xright
@@ -43,6 +51,26 @@ l:  brk
     dex
     bne -l
 
+    pla
+    sta xpos
+    pla
+    sta ypos
+    pla
+    sec
+    sbc #2
+    sta width
+    pla
+    sec
+    sbc #11
+    sta height
+
+    brk
+    c_addy 11
+    c_addx 1
+    c_setpattern <pat_pits >pat_pits
+    c_apply c_box
+    0
+    
 done:
     rts
 

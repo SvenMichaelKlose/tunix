@@ -12,6 +12,7 @@
              "../bender/vic-20/basic-loader.asm"
              "main.asm"
              "kernal-start.asm"
+             "patterns.asm"
              "gfx-init.asm"
              "calcscr.asm"
              "vline.asm"
@@ -23,10 +24,9 @@
              "moveram.asm"
              "syscalls.asm"
              "script.asm"
-             "patterns.asm"
+             "window.asm"
              "boot.asm"
              "compress-font.asm"
-             "window.asm"
              "kernal-end.asm"))
         "ultigui.vice.txt"))
 

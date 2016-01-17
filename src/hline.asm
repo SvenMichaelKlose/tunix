@@ -5,12 +5,49 @@ inc_xcpos:
     sta scr
     bcc +n
     inc @(++ scr)
+done:
 n:  rts
 
 ; In: xpos, ypos, width
 xposr:  0
 
 hline:
+    lda xpos
+    clc
+    adc width
+    sta xpos2
+    lda ypos
+    clc
+    adc height
+    sta ypos2
+
+    ; Clip
+    lda ypos
+    cmp ryt
+    bcc -done
+    cmp ryb
+    bcs -done
+
+    lda xpos
+    cmp rxl
+    bcs +n
+    lda rxl
+    sta xpos
+n:
+
+    lda xpos2
+    cmp rxr
+    bcc +n
+    lda rxr
+    sta xpos2
+n:
+
+    lda xpos2
+    sec
+    sbc xpos
+    bcc -done
+    sta width
+
     jsr calcscr
 
     ; Get pattern.

@@ -32,8 +32,10 @@ rxr:    0
 ryt:    0
 ryb:    0
 
-xpos:   0       ; X position in pixles.
-ypos:   0       ; Y position in pixles.
+xpos:   0       ; X position in pixels.
+ypos:   0       ; Y position in pixels.
+xpos2:  0       ; X position in pixels.
+ypos2:  0       ; Y position in pixels.
 width:  0       ; Width in pixels.
 height: 0       ; Height in pixels.
 masks:  0       ; Source mask.

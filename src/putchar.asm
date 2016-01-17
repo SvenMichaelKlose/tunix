@@ -1,15 +1,7 @@
-putchar:
-    pha
-    lda xpos
-    clc
-    adc #8
-    sta xpos2
-    lda ypos
-    clc
-    adc #8
-    sta ypos2
-    pla
+done:
+    rts
 
+putchar:
     ; ASCII to PETSCII
     cmp #@(++ (char-code #\Z)))
     bcc +n
@@ -53,6 +45,27 @@ l:  asl
     dec xpos
     jmp -l
 n:
+
+    lda xpos
+    clc
+    adc #8
+    sta xpos2
+    lda ypos
+    clc
+    adc #8
+    sta ypos2
+    lda xpos
+    cmp rxr
+    bcs -done
+    lda xpos2
+    cmp rxl
+    bcc -done
+    lda ypos
+    cmp ryb
+    bcs -done
+    lda ypos2
+    cmp ryt
+    bcc -done
 
     jsr calcscr
 

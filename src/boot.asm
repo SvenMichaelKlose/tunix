@@ -17,6 +17,7 @@ boot:
 
     jsr gfx_init
 
+redraw:
     brk
     c_setpattern <pat_background >pat_background
     c_box 0 0 @(-- screen_width) screen_height
@@ -59,7 +60,7 @@ done:
 
 l:  jsr $ffe4
     beq -l
-    jmp boot
+    jmp redraw
 
 txt_welcome:
     "UltiGUI v0.1" 0

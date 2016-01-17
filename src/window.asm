@@ -21,7 +21,7 @@ window:
     pha
 
     brk
-    c_addzb xright xpos width
+    c_addzb xpos2 xpos width
 
     ; Print window title.
     c_addx 2
@@ -30,7 +30,7 @@ window:
     c_apply c_putstring
 
     ; Draw title grip.
-    c_sbczb width xright xpos
+    c_sbczb width xpos2 xpos
     c_sbczbi width 2
     c_addy 1
     c_apply c_hline

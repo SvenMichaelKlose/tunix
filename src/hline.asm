@@ -21,8 +21,9 @@ hline:
     cmp ryt
     bcc +done
     cmp ryb
+    beq +n
     bcs +done
-    jsr clip_x
+n:  jsr clip_x
     bcc +done
 
     jsr calcscr

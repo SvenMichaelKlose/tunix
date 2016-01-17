@@ -38,8 +38,9 @@ vline:
     cmp rxl
     bcc -done
     cmp rxr
+    beq +n
     bcs -done
-    jsr clip_y
+n:  jsr clip_y
     bcc -done
 
     lda xpos

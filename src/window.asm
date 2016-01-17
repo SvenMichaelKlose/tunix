@@ -17,32 +17,24 @@ window:
     pha
     lda ypos
     pha
-
-    ; Get rightmost X position.
     lda xpos
     pha
-    clc
-    adc width
-    sta xright
+
+    brk
+    c_addzb xright xpos width
 
     ; Print window title.
-    brk
     c_addx 2
     c_addy 2
     c_setzw p <txt_clock >txt_clock
     c_apply c_putstring
-    0
 
     ; Draw title grip.
-    lda xright
-    sec
-    sbc xpos
-    bcc +done
-    sbc #2
-    bcc +done
-    sta width
-    inc ypos
-    jsr hline
+    c_sbczb width xright xpos
+    c_sbczbi width 2
+    c_addy 1
+    c_apply c_hline
+    0
     ldx #2
 l:  brk
     c_addy 2
@@ -56,25 +48,20 @@ l:  brk
     pla
     sta ypos
     pla
-    sec
-    sbc #2
     sta width
     pla
-    sec
-    sbc #11
     sta height
-
     brk
+    c_sbczbi width 2
+    c_sbczbi height 11
+
     c_addy 11
     c_addx 1
     c_setpattern <pat_pits >pat_pits
     c_apply c_box
     0
     
-done:
     rts
 
 txt_clock:
     "Clock" 0
-
-xright: 0

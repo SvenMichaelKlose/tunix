@@ -47,4 +47,7 @@ pattern:    0 0
 
 xcpos:  0
 
+; Temp
+xright: 0
+
     end

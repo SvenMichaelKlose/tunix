@@ -1,6 +1,3 @@
-done:
-    rts
-
 putchar:
     ; ASCII to PETSCII
     cmp #@(++ (char-code #\Z)))
@@ -56,16 +53,16 @@ n:
     sta ypos2
     lda xpos
     cmp rxr
-    bcs -done
+    bcs +next_char
     lda xpos2
     cmp rxl
-    bcc -done
+    bcc +next_char
     lda ypos
     cmp ryb
-    bcs -done
+    bcs +next_char
     lda ypos2
     cmp ryt
-    bcc -done
+    bcc +next_char
 
     jsr calcscr
 

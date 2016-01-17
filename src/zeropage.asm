@@ -24,6 +24,7 @@ srx:    0       ; Saved X register.
 tmp:    0
 tmp2:   0
 tmp3:   0
+tmp4:   0
 
 scr:    0 0     ; Current screen address.
 xcpos:  0       ; X columns.
@@ -59,4 +60,7 @@ do_compress_font_gaps: 0
 masks:  0       ; Source mask.
 maskd:  0       ; Destination mask.
 
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Application space ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;
     end

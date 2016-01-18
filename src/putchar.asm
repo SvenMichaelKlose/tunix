@@ -43,6 +43,7 @@ l:  asl
     jmp -l
 n:
 
+    ; Calculate right bottom point.
     lda xpos
     clc
     adc #8
@@ -51,6 +52,8 @@ n:
     clc
     adc #8
     sta ypos2
+
+    ; Skip character if it's outside the visible region.
     lda xpos
     cmp rxr
     bcs +next_char
@@ -124,6 +127,11 @@ l:  lsr
     dec xpos
     jmp -l
 
+    ; Leave 1 pixel gap.
+done:
+    inc xpos
+    rts
+
     ; Add default gap for spaces.
 n:  lda xpos
     sec
@@ -132,10 +140,5 @@ n:  lda xpos
     adc font_space_size
     sta xpos
 j:  rts
-
-    ; Leave 1 pixel gap.
-done:
-    inc xpos
-    rts
 
 tab_neg:    0 7 6 5 4 3 2 1

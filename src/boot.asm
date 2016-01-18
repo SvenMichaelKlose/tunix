@@ -22,7 +22,7 @@ redraw:
     c_setpattern <pat_background >pat_background
     c_box 0 0 @(-- screen_width) screen_height
     c_setpattern <pat_empty >pat_empty
-    c_box 8 50 @(- screen_width 16) 55
+    c_box 8 4 @(- screen_width 16) 55
     c_setpattern <pat_solid >pat_solid
     c_apply c_frame
     c_addx 2
@@ -48,9 +48,9 @@ l:  ldy #0
     jmp -l
 
 done:
-    lda #70
+    lda #80
     sta xpos
-    lda #20
+    lda #63
     sta ypos
     lda #60
     sta width

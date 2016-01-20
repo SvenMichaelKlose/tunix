@@ -14,7 +14,8 @@ charset = $1000
 s:      0 0
 d:      0 0
 c:      0 0
-p:      0 0
+p:      0
+ph:     0
 
 sa:     0 0     ; Bytecode argument list.
 sp:     0 0     ; Bytecode pointer.
@@ -51,7 +52,8 @@ ypos2:  0       ; Y position
 width:  0       ; Width
 height: 0       ; Height
 
-pattern: 0 0
+pattern: 0
+patternh: 0
 
 font:   0       ; Font starting page.
 font_space_size: 0 ; Width of an empty character.

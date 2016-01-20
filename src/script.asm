@@ -149,3 +149,5 @@ sbczbi:
     sta 0,x
     rts
 
+setpattern:
+    rts

@@ -1,5 +1,7 @@
 (= *model* :vic-20+xk)
 
+(load "syscalls.lisp")
+
 (defun make (to files &optional (cmds nil))
   (apply #'assemble-files to files)
   (& cmds (make-vice-commands cmds "break .stop")))
@@ -12,6 +14,7 @@
              "../bender/vic-20/basic-loader.asm"
              "main.asm"
              "kernal-start.asm"
+             "syscalls.asm"
              "patterns.asm"
              "calcscr.asm"
              "reset-region.asm"
@@ -24,7 +27,6 @@
              "putchar.asm"
              "putstring.asm"
              "moveram.asm"
-             "syscalls.asm"
              "script.asm"
              "gfx-init.asm"
              "window.asm"

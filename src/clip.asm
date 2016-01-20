@@ -1,61 +1,36 @@
 clip_x:
-    lda xpos
-    clc
-    adc width
-    sta xpos2
+    ldx #0
 
-    lda xpos
-    cmp rxl
+clip:
+    lda xpos,x
+    clc
+    adc width,x
+    sta xpos2,x
+
+    lda xpos,x
+    cmp rxl,x
     bcs +n
-    lda rxl
-    sta xpos
+    lda rxl,x
+    sta xpos,x
 n:
 
-    lda xpos2
-    cmp rxr
+    lda xpos2,x
+    cmp rxr,x
     bcc +n
-    lda rxr
-    sta xpos2
+    lda rxr,x
+    sta xpos2,x
 n:
 
-    lda xpos2
+    lda xpos2,x
     sec
-    sbc xpos
+    sbc xpos,x
     bcc +done
-    sta width
+    sta width,x
 
-    lda ypos
-    clc
-    adc height
-    sta ypos2
     sec
 done:
     rts
 
 clip_y:
-    lda ypos
-    clc
-    adc height
-    sta ypos2
-
-    lda ypos
-    cmp ryt
-    bcs +n
-    lda ryt
-    sta ypos
-n:
-
-    lda ypos2
-    cmp ryb
-    bcc +n
-    lda ryb
-    sta ypos2
-n:
-
-    lda ypos2
-    sec
-    sbc ypos
-    bcc -done
-    sta height
-    sec
-    rts
+    ldx #1
+    bne clip    ; (jmp)

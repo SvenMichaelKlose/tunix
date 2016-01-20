@@ -40,8 +40,8 @@ font_compression: 0
 
 ; Visible region.
 rxl:    0
-rxr:    0
 ryt:    0
+rxr:    0
 ryb:    0
 
 ; Cursor

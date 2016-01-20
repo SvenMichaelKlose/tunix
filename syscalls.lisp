@@ -30,21 +30,41 @@
      (acons! name args *syscalls*))
   nil)
 
-(define-syscall vline xpos ypos height)
-(define-syscall hline xpos ypos width)
-(define-syscall frame xpos ypos width height)
-(define-syscall putstring p ph)
-(define-syscall putchar)
-(define-syscall box xpos ypos width height)
-(define-syscall calcscr xpos ypos)
-(define-syscall setpattern pattern patternh)
-(define-syscall apply)
-(define-syscall addx tmp)
-(define-syscall addy tmp)
+;;;;;;;;;;;;;;;;;;;
+;;; Moving data ;;;
+;;;;;;;;;;;;;;;;;;;
+
 (define-syscall setzb tmp tmp2)
 (define-syscall setzw tmp tmp2 tmp3)
 (define-syscall setzs d tmp)
+
+;;;;;;;;;;;;;;;;;;;
+;;; Arithmetics ;;;
+;;;;;;;;;;;;;;;;;;;
+
 (define-syscall addzb tmp tmp2 tmp3)
 (define-syscall sbczb tmp tmp2 tmp3)
 ;(define-syscall addzbi tmp tmp2 tmp3)
 (define-syscall sbczbi tmp tmp2)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Graphics primitives ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-syscall calcscr xpos ypos)
+(define-syscall setpattern pattern patternh)
+(define-syscall vline xpos ypos height)
+(define-syscall hline xpos ypos width)
+(define-syscall frame xpos ypos width height)
+(define-syscall putstring p ph)
+(define-syscall box xpos ypos width height)
+(define-syscall putchar)
+(define-syscall addx tmp)
+(define-syscall addy tmp)
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;; Function calls :::
+;;;;;;;;;;;;;;;;;;;;;;
+(define-syscall apply)
+
+(= *syscalls* (reverse *syscalls*))

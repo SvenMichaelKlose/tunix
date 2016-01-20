@@ -43,6 +43,7 @@
 (define-syscall addy tmp)
 (define-syscall setzb tmp tmp2)
 (define-syscall setzw tmp tmp2 tmp3)
+(define-syscall setzs d tmp)
 (define-syscall addzb tmp tmp2 tmp3)
 (define-syscall sbczb tmp tmp2 tmp3)
 ;(define-syscall addzbi tmp tmp2 tmp3)

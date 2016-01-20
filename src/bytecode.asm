@@ -69,3 +69,15 @@ sbczbi:
 
 setpattern:
     rts
+
+setzs:
+    sty @(++ d)
+l:  lda (sp),y
+    sta (d),y
+    jsr inc_sp
+    inc d
+    bne +n
+    inc @(++ d)
+n:  dec tmp
+    bne -l
+    rts

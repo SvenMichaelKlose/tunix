@@ -3,7 +3,6 @@ clip_x:
     clc
     adc width
     sta xpos2
-    lda width
 
     lda xpos
     cmp rxl
@@ -34,6 +33,11 @@ done:
     rts
 
 clip_y:
+    lda ypos
+    clc
+    adc height
+    sta ypos2
+
     lda ypos
     cmp ryt
     bcs +n

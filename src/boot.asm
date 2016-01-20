@@ -4,15 +4,11 @@ boot:
     lda #>exec_script
     sta $317
 
-    lda #$00
-    sta s
-    sta d
-    lda #$88
-    sta @(++ s)
-    lda #$30
-    sta @(++ d)
-    lda #2
-    sta font_compression
+    brk
+    c_setzw s $00 $88
+    c_setzw d $00 $30
+    c_setzb font_compression 2
+    0
     jsr compress_font
 
     jsr gfx_init
@@ -48,14 +44,12 @@ l:  ldy #0
     jmp -l
 
 done:
-    lda #80
-    sta xpos
-    lda #63
-    sta ypos
-    lda #60
-    sta width
-    lda #100
-    sta height
+    brk
+    c_setzb xpos 80
+    c_setzb ypos 63
+    c_setzb width 60
+    c_setzb height 100
+    0
     jsr window
 
 l:  jsr $ffe4

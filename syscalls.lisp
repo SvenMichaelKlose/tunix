@@ -6,9 +6,13 @@
 (defun syscall-name (x)
   (downcase (symbol-name x.)))
 
+(defun syscall-bytecodes-source ()
+  (apply #'+ (maptimes [format nil "c_~A=~A~%" (syscall-name (syscallbyindex _)) (++ _)]
+                       (length *syscalls*))))
+
 (defun syscall-bytecodes ()
   (apply #'+ (maptimes [asm (format nil "c_~A=~A" (syscall-name (syscallbyindex _)) (++ _))]
-            (length *syscalls*))))
+                       (length *syscalls*))))
 
 (defun syscall-vectors (label prefix)
   (+ (asm label)
@@ -68,3 +72,6 @@
 (define-syscall apply)
 
 (= *syscalls* (reverse *syscalls*))
+
+(with-output-file o "bytecodes.asm"
+  (princ (syscall-bytecodes-source) o))

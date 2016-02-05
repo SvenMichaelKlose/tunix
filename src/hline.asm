@@ -55,10 +55,10 @@ n:  jsr clip_x
     tax
     ldy #0
     lda (scr),y
-    and hmaskd_left,x
+    and maskd_left,x
     sta tmp
     lda tmp2
-    and hmasks_left,x
+    and masks_left,x
     ora tmp
     sta (scr),y
 
@@ -78,10 +78,10 @@ right_end:
     and #7
     tax
     lda (scr),y
-    and hmaskd_right,x
+    and maskd_right,x
     sta tmp
     lda tmp2
-    and hmasks_right,x
+    and masks_right,x
     ora tmp
     sta (scr),y
 done:
@@ -99,11 +99,11 @@ single_column:
     lda xposr
     and #7
     tay
-    lda hmasks_left,x
-    and hmasks_right,x
+    lda masks_left,x
+    and masks_right,x
     sta tmp3
-    lda hmaskd_left,x
-    ora hmaskd_right,x
+    lda maskd_left,x
+    ora maskd_right,x
     ldy #0
     and (scr),y
     sta tmp
@@ -112,25 +112,3 @@ single_column:
     ora tmp
     sta (scr),y
     jmp -done
-
-hmasks_left:
-    %11111111
-hmaskd_right:
-    %01111111
-    %00111111
-    %00011111
-    %00001111
-    %00000111
-    %00000011
-    %00000001
-hmaskd_left:
-    %00000000
-hmasks_right:
-    %10000000
-    %11000000
-    %11100000
-    %11110000
-    %11111000
-    %11111100
-    %11111110
-    %11111111

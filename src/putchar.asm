@@ -1,27 +1,6 @@
 buf_clipped_char:
     fill 8
 
-masks_chars_left:
-    %11111111
-    %01111111
-    %00111111
-    %00011111
-    %00001111
-    %00000111
-    %00000011
-    %00000001
-
-masks_chars_right:
-    %00000000
-    %10000000
-    %11000000
-    %11100000
-    %11110000
-    %11111000
-    %11111100
-    %11111110
-    %11111111
-
 blit_char:
     ; Calculate sub–column shifts.
     lda xpos
@@ -110,7 +89,7 @@ n:
     sbc xpos
     bcc +n
     tay
-    lda masks_chars_left,y
+    lda masks_left,y
     sta tmp2
 n:
 
@@ -120,7 +99,7 @@ n:
     sbc rxr
     bcc +n
     tay
-    lda masks_chars_right,y
+    lda masks_right,y
     and tmp2
     sta tmp2
 n:

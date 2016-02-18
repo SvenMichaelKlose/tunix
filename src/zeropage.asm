@@ -38,6 +38,8 @@ font_compression: 0
 ;;; Drawing context ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 
+context_start:
+
 ; Visible region.
 rxl:    0
 ryt:    0
@@ -61,6 +63,10 @@ do_compress_font_gaps: 0
 
 masks:  0       ; Source mask.
 maskd:  0       ; Destination mask.
+
+context_end:
+
+context_size = @(- context_end context_start)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Application space ;;;

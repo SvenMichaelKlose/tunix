@@ -11,16 +11,8 @@ window:
     c_addy @(- 256 10)
     0
 
-    lda height
-    pha
-    lda width
-    pha
-    lda ypos
-    pha
-    lda xpos
-    pha
-
     brk
+    c_pushz xpos context_size
     c_addzb tmp4 xpos width
     0
     lda tmp4
@@ -52,16 +44,8 @@ l:  brk
     dex
     bne -l
 
-    pla
-    sta xpos
-    pla
-    sta ypos
-    pla
-    sta width
-    pla
-    sta height
-
     brk
+    c_popz xpos context_size
     c_sbczbi width 2
     c_sbczbi height 11
     c_addy 11

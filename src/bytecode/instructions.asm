@@ -81,3 +81,30 @@ l:  lda (sp),y
 n:  dec tmp
     bne -l
     rts
+
+pushz:
+    pla
+    pla
+    ldx tmp
+    ldy tmp2
+l:  lda 0,x
+    inx
+    pha
+    dey
+    bne -l
+    jmp next_bytecode
+
+popz:
+    pla
+    pla
+    ldy tmp2
+    tya
+    clc
+    adc tmp
+    tax
+l:  pla
+    dex
+    sta 0,x
+    dey
+    bne -l
+    jmp next_bytecode

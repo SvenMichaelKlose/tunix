@@ -62,6 +62,13 @@
 (define-bytecode addx tmp)
 (define-bytecode addy tmp)
 
+;;;;;;;;;;;;;
+;;; Stack ;;;
+;;;;;;;;;;;;;
+
+(define-bytecode pushz tmp tmp2)
+(define-bytecode popz tmp tmp2)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Graphics primitives ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -71,8 +78,8 @@
 (define-syscall vline xpos ypos height)
 (define-syscall hline xpos ypos width)
 (define-syscall frame xpos ypos width height)
-(define-syscall putstring p ph)
 (define-syscall box xpos ypos width height)
+(define-syscall putstring p ph)
 (define-syscall putchar)
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -85,3 +92,9 @@
 
 (with-output-file o "bytecodes.asm"
   (princ (syscall-bytecodes-source) o))
+
+(with-output-file o "syscalls.asm"
+  (let x #xa000
+    (adolist *syscalls*
+      (format o "~A = $~A~%" (syscall-name !) (print-hexword x nil))
+      (+! x 3))))

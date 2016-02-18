@@ -30,7 +30,7 @@ exec_script:
     dec @(++ sp)
 n:
 
-exec_string:
+next_bytecode:
     ; Get opcode.
     ldy #0
     lda (sp),y
@@ -69,7 +69,7 @@ next_arg:
 script_call:
 mod_call:
     jsr $ffff
-    jmp exec_string
+    jmp next_bytecode
 
     ; Return to native code.
 done:

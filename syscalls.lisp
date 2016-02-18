@@ -1,22 +1,23 @@
 (defvar *syscalls* nil)
+(defvar *bytecodes* nil)
 
 (defun syscallbyindex (x)
-  (elt *syscalls* x))
+  (elt (+ *syscalls* *bytecodes*) x))
 
 (defun syscall-name (x)
   (downcase (symbol-name x.)))
 
 (defun syscall-bytecodes-source ()
   (apply #'+ (maptimes [format nil "c_~A=~A~%" (syscall-name (syscallbyindex _)) (++ _)]
-                       (length *syscalls*))))
+                       (length (+ *syscalls* *bytecodes*)))))
 
 (defun syscall-bytecodes ()
   (apply #'+ (maptimes [asm (format nil "c_~A=~A" (syscall-name (syscallbyindex _)) (++ _))]
-                       (length *syscalls*))))
+                       (length (+ *syscalls* *bytecodes*)))))
 
 (defun syscall-vectors (label prefix)
   (+ (asm label)
-     (mapcan [asm (format nil "~A~A" prefix (syscall-name _))] *syscalls*)))
+     (mapcan [asm (format nil "~A~A" prefix (syscall-name _))] (+ *syscalls* *bytecodes*))))
 
 (defun syscall-vectors-l () (syscall-vectors "syscall_vectors_l:" "<"))
 (defun syscall-vectors-h () (syscall-vectors "syscall_vectors_h:" ">"))
@@ -27,29 +28,39 @@
   (mapcan [+ (asm (format nil "args_~A:" (syscall-name _)))
              (asm (princ (length ._) nil))
              (mapcan [asm (downcase (symbol-name _))] ._)]
-          *syscalls*))
+          (+ *syscalls* *bytecodes*)))
 
 (defmacro define-syscall (name &rest args)
   (| (assoc name *syscalls*)
      (acons! name args *syscalls*))
   nil)
 
+(defmacro define-bytecode (name &rest args)
+  (| (assoc name *bytecodes*)
+     (acons! name args *bytecodes*))
+  nil)
+
+(defun syscall-table ()
+  (mapcan [asm (format nil "jmp ~A" (syscall-name _))] *syscalls*))
+
 ;;;;;;;;;;;;;;;;;;;
 ;;; Moving data ;;;
 ;;;;;;;;;;;;;;;;;;;
 
-(define-syscall setzb tmp tmp2)
-(define-syscall setzw tmp tmp2 tmp3)
-(define-syscall setzs d tmp)
+(define-bytecode setzb tmp tmp2)
+(define-bytecode setzw tmp tmp2 tmp3)
+(define-bytecode setzs d tmp)
 
 ;;;;;;;;;;;;;;;;;;;
 ;;; Arithmetics ;;;
 ;;;;;;;;;;;;;;;;;;;
 
-(define-syscall addzb tmp tmp2 tmp3)
-(define-syscall sbczb tmp tmp2 tmp3)
-;(define-syscall addzbi tmp tmp2 tmp3)
-(define-syscall sbczbi tmp tmp2)
+(define-bytecode addzb tmp tmp2 tmp3)
+(define-bytecode sbczb tmp tmp2 tmp3)
+;(define-bytecode addzbi tmp tmp2 tmp3)
+(define-bytecode sbczbi tmp tmp2)
+(define-bytecode addx tmp)
+(define-bytecode addy tmp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Graphics primitives ;;;
@@ -63,15 +74,14 @@
 (define-syscall putstring p ph)
 (define-syscall box xpos ypos width height)
 (define-syscall putchar)
-(define-syscall addx tmp)
-(define-syscall addy tmp)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; Function calls :::
 ;;;;;;;;;;;;;;;;;;;;;;
-(define-syscall apply)
+(define-bytecode apply)
 
 (= *syscalls* (reverse *syscalls*))
+(= *bytecodes* (reverse *bytecodes*))
 
 (with-output-file o "bytecodes.asm"
   (princ (syscall-bytecodes-source) o))

@@ -118,7 +118,7 @@ putchar:
     cmp #@(++ (char-code #\Z)))
     bcc +n
     sec
-    sbc #@(-- #\a)
+    sbc #@(-- (char-code #\a))
 n:
 
     ; Get character address.

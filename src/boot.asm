@@ -15,6 +15,7 @@ boot:
 
 redraw:
     brk
+    c_setzb font $88
     c_setpattern <pat_background >pat_background
     c_box 0 0 @(-- screen_width) screen_height
     c_setpattern <pat_empty >pat_empty

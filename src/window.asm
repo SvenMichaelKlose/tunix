@@ -73,4 +73,4 @@ l:  brk
     rts
 
 txt_clock:
-    "Clock" 0
+    "untitled" 0

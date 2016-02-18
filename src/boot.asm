@@ -18,7 +18,7 @@ redraw:
     c_setpattern <pat_background >pat_background
     c_box 0 0 @(-- screen_width) screen_height
     c_setpattern <pat_empty >pat_empty
-    c_box 8 4 @(- screen_width 16) 55
+    c_box 8 4 @(- screen_width 16) 119
     c_setpattern <pat_solid >pat_solid
     c_apply c_frame
     c_addx 2
@@ -46,9 +46,9 @@ l:  ldy #0
 done:
     brk
     c_setzb xpos 80
-    c_setzb ypos 63
+    c_setzb ypos 120
     c_setzb width 60
-    c_setzb height 100
+    c_setzb height 50
     0
     jsr window
 
@@ -57,9 +57,15 @@ l:  jsr $ffe4
     jmp redraw
 
 txt_welcome:
-    "UltiGUI v0.1" 0
+    "Commodore VIC-20 GUI" 0
     " " 0
     " " 0
-    "A graphical user interface for" 0
-    "the UltiMem memory expansion." 0
+    "Graphics primitives for over-" 0
+    "lapping windows and dynamic" 0
+    "font rendering in less than 2K." 0
+    " " 0
+    "This font is generated from" 0
+    "the system font at startup." 0
+    " " 0
+    "All drawing is clipped." 0
     0

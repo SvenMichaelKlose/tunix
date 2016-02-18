@@ -7,7 +7,7 @@
   (& cmds (make-vice-commands cmds "break .stop")))
 
 (defun make-program ()
-  (make "ultigui"
+  (make "g"
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
@@ -34,7 +34,7 @@
              "boot.asm"
              "gfx/compress-font.asm"
              "kernal-end.asm"))
-        "ultigui.vice.txt"))
+        "g.vice.txt"))
 
 (make-program)
 (quit)

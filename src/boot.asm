@@ -61,9 +61,9 @@ txt_welcome:
     "Commodore VIC-20 GUI" 0
     " " 0
     " " 0
-    "Graphics primitives for over-" 0
-    "lapping windows and dynamic" 0
-    "font rendering in less than 2K." 0
+    "Graphics primitives and" 0
+    "variable width font rendering" 0
+    "in less than 2K." 0
     " " 0
     "This font is generated from" 0
     "the system font at startup." 0

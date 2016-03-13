@@ -1,5 +1,5 @@
 loaded_kernal:
-    org $a000
+    org $2000
 
 kernal:
     @(syscall-table)

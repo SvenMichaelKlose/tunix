@@ -46,7 +46,7 @@ n:  pla
     sta $9003
     lda #$fc    ; screen=$1e00, chars=$1000
     sta $9005
-    lda #@(+ (* white 16) reverse white)
+    lda #@(+ (* white 16) reverse cyan)
     sta $900f
 
     jsr reset_region

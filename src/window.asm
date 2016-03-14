@@ -9,17 +9,15 @@ window:
     c_addy 10
     c_apply c_hline
     c_addy @(- 256 10)
-    0
 
-    brk
     c_pushz xpos context_size
     c_addzb tmp4 xpos width
     0
     lda tmp4
     pha
 
-    brk
     ; Print window title.
+    brk
     c_addx 2
     c_addy 2
     c_setzw p <txt_clock >txt_clock

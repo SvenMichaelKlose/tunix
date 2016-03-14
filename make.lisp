@@ -6,14 +6,14 @@
   (apply #'assemble-files to files)
   (& cmds (make-vice-commands cmds "break .stop")))
 
-(defun make-program ()
-  (make "g"
+(defun make-core ()
+  (make "compiled/g"
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
              "../bender/vic-20/basic-loader.asm"
-             "main.asm"
-             "kernal-start.asm"
+             "core/main.asm"
+             "core/kernal-start.asm"
              "syscalls.asm"
              "core/memory.asm"
              "gfx/masks.asm"
@@ -34,8 +34,34 @@
              "window.asm"
              "boot.asm"
              "gfx/compress-font.asm"
-             "kernal-end.asm"))
+             "core/kernal-end.asm"))
         "g.vice.txt"))
 
-(make-program)
+(defun make-gfx ()
+  (make "compiled/lib/gfx"
+        (@ [+ "src/" _]
+           '("../bender/vic-20/vic.asm"
+             "zeropage.asm"
+             "gfx/main.asm"
+             "syscalls.asm"
+             "gfx/masks.asm"
+             "gfx/patterns.asm"
+             "gfx/calcscr.asm"
+             "gfx/reset-region.asm"
+             "gfx/clip.asm"
+             "gfx/vline.asm"
+             "gfx/vfill.asm"
+             "gfx/hline.asm"
+             "gfx/frame.asm"
+             "gfx/box.asm"
+             "gfx/putchar.asm"
+             "gfx/putstring.asm"
+             "gfx/compress-font.asm"
+             "gfx/init.asm"
+             "bytecode/interpreter.asm"
+             "bytecode/instructions.asm"))
+        "gfx.vice.txt"))
+
+(make-core)
+(make-gfx)
 (quit)

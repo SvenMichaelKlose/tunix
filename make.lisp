@@ -1,4 +1,4 @@
-(= *model* :vic-20+xk)
+(= *model* :vic-20)
 
 (load "syscalls.lisp")
 

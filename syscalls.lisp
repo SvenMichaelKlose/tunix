@@ -92,9 +92,3 @@
 
 (with-output-file o "bytecodes.asm"
   (princ (syscall-bytecodes-source) o))
-
-(with-output-file o "syscalls.asm"
-  (let x #xa000
-    (adolist *syscalls*
-      (format o "~A = $~A~%" (syscall-name !) (print-hexword x nil))
-      (+! x 3))))

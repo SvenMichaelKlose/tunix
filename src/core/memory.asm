@@ -1,7 +1,7 @@
 alloc_bank:
     ; Find something free in the bitmap of allocated banks.
 mod_max_banks:
-    ldx #$ff
+    ldx #@(-- (/ 1024 8))
 l:  lda banks,x
     cmp #$ff
     bne found_bank
@@ -81,4 +81,6 @@ bitmasks:
     %10111111
     %01111111
 
-banks:  fill 256
+banks:
+    %00111111
+    fill 255

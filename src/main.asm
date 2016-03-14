@@ -24,6 +24,7 @@ found_ultimem8m:
     ldy #>txt_ultimem8m
     jmp +l
 found_ultimem512k:
+    inc found_memory_expansion
     lda #<txt_ultimem512k
     ldy #>txt_ultimem512k
 l:  jsr $cb1e
@@ -35,12 +36,14 @@ l:  lda mem_init,x
     dex
     bpl -l
 
+    ; Initialise copying the core to its intended location.
     ldx #@(- cinfo_end cinfo 1)
 l:  lda cinfo,x
     sta s,x
     dex
     bpl -l
 
+    ; Copy the core.
     ldy #0
 l:  lda (s),y
     sta (d),y
@@ -59,7 +62,14 @@ n:  dec c
     dec @(++ c)
     bne -l
 
-    jmp boot
+    ; Initialise bank allocator.
+    lda found_memory_expansion
+    beq +n
+    lda #@(-- (/ 128 8))
+    sta @(++ mod_max_banks)
+n:  jmp boot
+
+found_memory_expansion:   0
 
 kernal_size         = @(- kernal_end kernal)
 loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))

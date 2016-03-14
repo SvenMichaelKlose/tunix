@@ -15,6 +15,7 @@
              "main.asm"
              "kernal-start.asm"
              "syscalls.asm"
+             "core/memory.asm"
              "gfx/masks.asm"
              "gfx/patterns.asm"
              "gfx/calcscr.asm"

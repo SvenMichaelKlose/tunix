@@ -1,5 +1,6 @@
 alloc_bank:
     ; Find something free in the bitmap of allocated banks.
+mod_max_banks:
     ldx #$ff
 l:  lda banks,x
     cmp #$ff
@@ -56,7 +57,6 @@ free_bank:
     ror tmp
     lsr @(++ tmp)
     ror tmp
-    ldy tmp
     lda banks,x
     and bits,y
     beq err_not_allocated

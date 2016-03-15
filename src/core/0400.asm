@@ -1,3 +1,6 @@
+    lda #1
+    sta do_load_library
+
     ;;; Check if the core is requested.
     ldy #0
     lda (s),y
@@ -16,6 +19,12 @@
 
 error:
     rts
+
+do_load_library:    0
+
+load:
+    lda #0
+    sta do_load_library
 
 load_library:
     ;;; Save pointer to symbol list and want jump table.
@@ -71,11 +80,14 @@ load_library:
     sta @(++ bank_ram)
 
     ;;; Load index into upper half of +3K area.
+    lda do_load_library
+    beq +n
     lda #$00
     sta d
     lda #$30
     sta @(++ d)
     jsr gload
+n:
 
     ;;; Allocate and assign blocks.
     ; Get destination address.
@@ -125,6 +137,9 @@ l:  jsr alloc_bank
     jsr gclose
 
     ;;; Make jump table for caller.
+    lda do_load_library
+    beq done_loading_program
+
     ; Restore pointers to symbol list and jump table.
     pla
     sta @(++ d)
@@ -150,6 +165,10 @@ n:  lda #$00
 
     ; Make jump table.
     jmp make_jump_table
+
+done_loading_program:
+    clc
+    rts
 
 error2:
     jsr gclose

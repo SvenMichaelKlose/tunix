@@ -27,6 +27,20 @@ load:
     sta do_load_library
 
 load_library:
+    ;;; Save current process' core bank.
+    lda $9ff8
+    pha
+    lda $9ff9
+    pha
+    lda $9ffa
+    pha
+    lda $9ffb
+    pha
+    lda $9ff4
+    pha
+    lda $9ff5
+    pha
+
     ;;; Save pointer to symbol list and want jump table.
     lda s
     pha
@@ -164,11 +178,11 @@ n:  lda #$00
     sta @(++ c)
 
     ; Make jump table.
-    jmp make_jump_table
+    jsr make_jump_table
 
 done_loading_program:
     clc
-    rts
+    jmp return_from_process
 
 error2:
     jsr gclose
@@ -178,7 +192,7 @@ error:
     pla
     pla
     sec
-    rts
+    jmp return_from_process
 
 switch_to_new_3k:
     lda $9ff8

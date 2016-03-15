@@ -17,6 +17,7 @@
              "core/0400.asm"
              "core/memory.asm"
              "core/make-jump-table.asm"
+             "core/load.asm"
              "core/kernal-end.asm"))
         "g.vice.txt"))
 

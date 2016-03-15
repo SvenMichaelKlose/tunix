@@ -22,7 +22,7 @@ sa:     0 0     ; Bytecode argument list.
 sp:     0 0     ; Bytecode pointer.
 srx:    0       ; Saved X register.
 
-; Temporaries on the very bottom.
+; Temporaries.
 tmp:    0
 tmp2:   0
 tmp3:   0

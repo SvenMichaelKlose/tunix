@@ -67,7 +67,10 @@ n:  dec c
     beq +n
     lda #@(-- (/ 128 8))
     sta @(++ mod_max_banks)
-n:  jmp boot
+n:
+
+    ; Load process manager.
+    rts
 
 found_memory_expansion:   0
 
@@ -99,13 +102,13 @@ txt_booting:
     $93 @(ascii2petscii "BOOTING G...") 13 0
 
 txt_checking_memory:
-    @(ascii2petscii "CHECKING MEMORY...") 13 0
+    @(ascii2petscii "CHECKING MEMORY...") 0
 
 txt_ultimem8m:
-    @(ascii2petscii "FOUND ULTIMEM 8M.") 13 0
+    @(ascii2petscii "ULTIMEM 1024K RAM.") 13 0
 
 txt_ultimem512k:
-    @(ascii2petscii "FOUND ULTIMEM 512K.") 13 0
+    @(ascii2petscii "ULTIMEM 128K RAM.") 13 0
 
 txt_no_memory:
     13

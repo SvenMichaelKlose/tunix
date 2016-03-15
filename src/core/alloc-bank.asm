@@ -1,4 +1,9 @@
 alloc_bank:
+    txa
+    pha
+    tya
+    pha
+
     ; Find something free in the bitmap of allocated banks.
 mod_max_banks:
     ldx #@(-- (/ 1024 8))
@@ -9,6 +14,12 @@ l:  lda banks,x
     cpx #$ff
     bne -l
     sec
+
+return:
+    pla
+    tay
+    pla
+    tax
     rts
 
     ; Calculate number of bank for bit 0.
@@ -45,7 +56,7 @@ n:  lda bits,y
     ora banks,x
     sta banks,x
     clc
-    rts
+    jmp -return
 
 free_bank:
     lda tmp

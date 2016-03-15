@@ -25,10 +25,14 @@ n:  tya
     jsr setnam
 
     jsr open
-    bcs error
+    bcs +error
 
     ldx #2
     jmp chkin
+
+error:
+    sec
+    rts
 
 gchrin:
     jsr $ffb7

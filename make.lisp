@@ -15,9 +15,11 @@
              "core/main.asm"
              "core/kernal-start.asm"
              "core/0400.asm"
+             "core/moveram.asm"
              "core/alloc-bank.asm"
              "core/make-jump-table.asm"
              "core/load.asm"
+             "core/process-data.asm"
              "core/kernal-end.asm"))
         "g.vice.txt"))
 

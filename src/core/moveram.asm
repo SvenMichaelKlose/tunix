@@ -1,6 +1,7 @@
 moveram:
     inc @(++ c)
-    bmi copy_backwards
+    tay
+    bne copy_backwards
 
 copy_forwards:
     ldy #0

@@ -14,6 +14,7 @@
              "../bender/vic-20/basic-loader.asm"
              "core/main.asm"
              "core/kernal-start.asm"
+             "core/0400.asm"
              "core/memory.asm"
              "core/make-jump-table.asm"
              "core/kernal-end.asm"))

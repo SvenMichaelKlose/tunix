@@ -2,10 +2,8 @@ try_next:
     ; Step to next entry in index.
     ldy #0
 l:  lda (tmp),y
-    inc s
-    bne +n
-    inc @(++ tmp)
-n:  iny
+    jsr inc_s
+    iny
     tax
     bne -l
     lda tmp
@@ -68,10 +66,8 @@ n:
     ; Step to next wanted symbol.
     ldy #0
 l:  lda (s),y
-    inc s
-    bne +n
-    inc @(++ s)
-n:  iny
+    jsr inc_s
+    iny
     tax
     bne -l
     jmp -get_entry

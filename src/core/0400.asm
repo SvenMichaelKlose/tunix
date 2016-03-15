@@ -1,6 +1,36 @@
+    ;;; Check if the core is requested.
+    ldy #0
+    lda (s),y
+    cmp #@(char-code #\g)
+    bne load_library
+    iny
+    lda (s),y
+    beq load_library
+
+    ; Make jump table to core.
+    lda #<syscall_index
+    sta c
+    lda #>syscall_index
+    sta @(++ c)
+    jmp make_jump_table
+
+error:
+    rts
+
+load_library:
+    ;;; Save pointer to symbol list and want jump table.
+    lda s
+    pha
+    lda @(++ s)
+    pha
+    lda d
+    pha
+    lda @(++ d)
+    pha
+
     ;;; Open the library.
     jsr gopen
-    bcs +error
+    bcs -error
 
     ;;; Allocate and populate +3K area.
 
@@ -19,10 +49,6 @@
     sta $9ffb
 
     ; Copy template to new bank.
-    lda s
-    pha
-    lda @(++ s)
-    pha
     lda #$00
     sta s
     sta d
@@ -32,9 +58,6 @@
     lda #$20
     sta @(++ d)
     sta @(++ c)
-    pla
-    sta @(++ s)
-    sta s
     lda #0
     jsr moveram
 
@@ -66,6 +89,30 @@
     jsr gclose
 
     ;;; Make jump table for caller.
+    ; Restore pointers to symbol list and jump table.
+    pla
+    sta @(++ d)
+    pla
+    sta d
+    pla
+    sta @(++ s)
+    pla
+    sta s
+
+    ; Step over library path.
+    ldy #0
+l:  lda (s),y
+    beq +n
+    jsr inc_s
+    jmp -l
+
+    ; Set pointer to index.
+n:  lda #$00
+    sta c
+    lda #$30
+    sta @(++ c)
+
+    ; Make jump table.
     jmp make_jump_table
 
 error2:

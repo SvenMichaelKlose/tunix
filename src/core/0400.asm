@@ -77,14 +77,50 @@ load_library:
     sta @(++ d)
     jsr gload
 
-    ;;; Load rest of library like a regular program, so it gets linked.
+    ;;; Allocate and assign blocks.
+    ; Get destination address.
     jsr gchrin
     bcs +error2
     sta d
     jsr gchrin
     bcs +error2
     sta @(++ d)
-    jsr gload
+
+    ; Load code size.
+    jsr gwordin
+    bcs error2
+
+    ; Get first block.
+    lda d
+    bpl not_blk5
+    ldy #4
+    jmp +l
+not_blk5:
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    tay
+
+    ; Get number of blocks.
+    lda c
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    tax
+
+    ; Allocate banks and assign them to blocks.
+l:  jsr alloc_bank
+    sta bank1,y
+    iny
+    dex
+    bpl -l
+
+    ;;; Load code.
+    jsr gloadn
 
     jsr gclose
 
@@ -118,6 +154,10 @@ n:  lda #$00
 error2:
     jsr gclose
 error:
+    pla
+    pla
+    pla
+    pla
     sec
     rts
 

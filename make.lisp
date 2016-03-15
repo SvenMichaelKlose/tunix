@@ -15,7 +15,7 @@
              "core/main.asm"
              "core/kernal-start.asm"
              "core/0400.asm"
-             "core/memory.asm"
+             "core/alloc-bank.asm"
              "core/make-jump-table.asm"
              "core/load.asm"
              "core/kernal-end.asm"))

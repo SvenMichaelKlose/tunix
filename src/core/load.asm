@@ -48,16 +48,21 @@ eof:
     sec
     rts
 
-gload:
+
     ; Get size of block.
+gwordin:
     jsr gchrin
     bcs +e
     sta c
     jsr gchrin
     bcs +e
-    tay
-    dey
-    sty @(++ c)
+    sta @(++ c)
+
+gload:
+    jsr gwordin
+
+gloadn:
+    inc @(++ c)
 
 l:  jsr gchrin
     bcs +done

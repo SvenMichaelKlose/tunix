@@ -23,7 +23,7 @@
              "core/syscall-index.asm"
              "core/process-data.asm"
              "core/kernal-end.asm"))
-        "g.vice.txt"))
+        "obj/g.vice.txt"))
 
 (defun make-gfx ()
   (make "compiled/lib/gfx"
@@ -48,8 +48,17 @@
              "gfx/init.asm"
              "bytecode/interpreter.asm"
              "bytecode/instructions.asm"))
-        "gfx.vice.txt"))
+        "obj/gfx.vice.txt"))
+
+(defun make-init ()
+  (make "compiled/init"
+        (@ [+ "src/" _]
+           '("../bender/vic-20/vic.asm"
+             "zeropage.asm"
+             "init/main.asm"))
+        "obj/init.vice.txt"))
 
 (make-core)
 (make-gfx)
+(make-init)
 (quit)

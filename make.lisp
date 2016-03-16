@@ -18,6 +18,7 @@
              "core/alloc-bank.asm"
              "core/make-jump-table.asm"
              "core/load.asm"
+             "core/switch-banks-in.asm"
              "core/moveram.asm"
              "core/pointer-manipulation.asm"
              "core/syscall-index.asm"

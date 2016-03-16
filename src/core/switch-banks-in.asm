@@ -1,34 +1,34 @@
 switch_banks_in:
-    lda bank_1
-    ora @(++ bank_1)
+    lda bank1
+    ora @(++ bank1)
     beq +n
-    lda bank_1
+    lda bank1
     sta $9ff8
-    lda @(++ bank_1)
+    lda @(++ bank1)
     sta $9ff9
 
-    lda bank_2
-    ora @(++ bank_2)
+n:  lda bank2
+    ora @(++ bank2)
     beq +n
-    lda bank_2
+    lda bank2
     sta $9ffa
-    lda @(++ bank_2)
+    lda @(++ bank2)
     sta $9ffb
 
-    lda bank_3
-    ora @(++ bank_3)
+n:  lda bank3
+    ora @(++ bank3)
     beq +n
-    lda bank_3
+    lda bank3
     sta $9ffc
-    lda @(++ bank_3)
+    lda @(++ bank3)
     sta $9ffd
 
-    lda bank_5
-    ora @(++ bank_5)
+n:  lda bank5
+    ora @(++ bank5)
     beq +n
-    lda bank_5
+    lda bank5
     sta $9ffe
-    lda @(++ bank_5)
+    lda @(++ bank5)
     sta $9fff
 
     rts

@@ -88,8 +88,29 @@ n:  dec c
     sta @(++ mod_max_banks)
 n:
 
-    ; Load process manager.
-    rts
+    ;; Initialise init process.
+    ; Set BLK1 bank.
+    lda #1
+    sta bank1
+
+    ; Set up register contents.
+    lda #<init
+    sta saved_pc
+    lda #>init
+    sta @(++ saved_pc)
+    tsx
+    stx saved_sp
+
+    ; Make copy of stack.
+    ldx #0
+l:  lda $100,x
+    sta saved_stack,x
+    inx
+    bne -l
+
+    ; Run it.
+    lda #0
+    jmp switch_to_process
 
 found_memory_expansion:   0
 

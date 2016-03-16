@@ -15,7 +15,7 @@ saved_a:            0
 saved_x:            0
 saved_y:            0
 saved_flags:        0
-saved_stackpointer: 0
+saved_sp:           0
 saved_stack:        fill 256
 saved_zeropage:     fill $a0    ; BASIC part only.
 

@@ -4,7 +4,7 @@ init_process:
     stx saved_pc
     sty @(++ saved_pc)
     lda #$ff
-    sta saved_stackpointer
+    sta saved_sp
     rts
 
 ; Input:
@@ -14,7 +14,7 @@ switch_to_process:
     sta $9ff8
 
     ; Restore stack contents.
-    ldx saved_stackpointer
+    ldx saved_sp
 l:  lda saved_stack,x
     sta $100,x
     inx
@@ -32,3 +32,6 @@ l:  lda saved_stack,x
     ldy saved_x
     lda saved_a
     rti
+
+exit_process:
+    rts

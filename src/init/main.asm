@@ -1,6 +1,4 @@
-    org $2000
-    $00 $20
-
+init:
     lda #<txt_init
     ldy #>txt_init
     jsr $cb1e

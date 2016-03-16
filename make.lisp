@@ -13,6 +13,7 @@
              "zeropage.asm"
              "../bender/vic-20/basic-loader.asm"
              "core/main.asm"
+             "init/main.asm"
              "core/kernal-start.asm"
              "core/0400.asm"
              "core/alloc-bank.asm"
@@ -51,15 +52,6 @@
              "bytecode/instructions.asm"))
         "obj/gfx.vice.txt"))
 
-(defun make-init ()
-  (make "compiled/init"
-        (@ [+ "src/" _]
-           '("../bender/vic-20/vic.asm"
-             "zeropage.asm"
-             "init/main.asm"))
-        "obj/init.vice.txt"))
-
 (make-core)
 (make-gfx)
-(make-init)
 (quit)

@@ -22,8 +22,8 @@
              "core/moveram.asm"
              "core/pointer-manipulation.asm"
              "core/syscall-index.asm"
-             "core/process-data.asm"
-             "core/kernal-end.asm"))
+             "core/kernal-end.asm"
+             "core/process-data.asm"))
         "obj/g.vice.txt"))
 
 (defun make-gfx ()

@@ -27,7 +27,7 @@ load:
     sta do_load_library
 
 load_library:
-    ;;; Save current process' core bank.
+    ;;; Save current process' banks.
     lda $9ff4
     pha
     lda $9ff8
@@ -61,13 +61,10 @@ load_library:
     ; Map it to $2000.
     lda tmp
     sta $9ff8
-    lda @(++ tmp)
-    sta $9ff9
 
     ; Map +3K template to $4000.
     lda #0
     sta $9ffa
-    sta $9ffb
 
     ; Copy template to new bank.
     lda #$00

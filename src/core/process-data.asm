@@ -10,6 +10,7 @@ bank5:      0
 banks:      %00111111
             fill @(-- (/ 1024 8))
 
+saved_pc:           0 0
 saved_a:            0
 saved_x:            0
 saved_y:            0

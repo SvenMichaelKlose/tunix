@@ -8,18 +8,10 @@ init_process:
     rts
 
 ; Input:
-; X/Y: Core bank of process.
+; A: Core bank of process.
 switch_to_process:
-    ; Save BLK1 bank.
-    lda $9ff8
-    pha
-    lda $9ff9
-    pha
-    jmp @(+ #x2000 (- #x0400 +l))
-
     ; Switch in process' core bank.
-l:  stx $9ff8
-    sty $9ff9
+    sta $9ff8
 
     ; Restore stack contents.
     ldx saved_stackpointer

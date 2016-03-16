@@ -28,16 +28,8 @@ found_bank:
     txa
     pha
     asl
-    adc #0
     asl
-    adc #0
     asl
-    adc #0
-    tax
-    and #%00000111
-    sta @(++ tmp)
-    txa
-    and #%11111000
     sta tmp
     pla
     tax
@@ -62,12 +54,11 @@ free_bank:
     lda tmp
     and #%00000111
     tay
-    lsr @(++ tmp)
-    ror tmp
-    lsr @(++ tmp)
-    ror tmp
-    lsr @(++ tmp)
-    ror tmp
+    lda tmp
+    lsr
+    lsr
+    lsr
+    tax
     lda banks,x
     and bits,y
     beq err_not_allocated

@@ -28,17 +28,15 @@ load:
 
 load_library:
     ;;; Save current process' core bank.
-    lda $9ff8
+    lda $9ff4
     pha
-    lda $9ff9
+    lda $9ff8
     pha
     lda $9ffa
     pha
-    lda $9ffb
+    lda $9ffc
     pha
-    lda $9ff4
-    pha
-    lda $9ff5
+    lda $9ffe
     pha
 
     ;;; Save pointer to symbol list and want jump table.
@@ -85,13 +83,11 @@ load_library:
     jsr moveram
 
     ;;; Map new 3K bank in.
-    jsr @(+ #x2000 (- #x0400 switch_to_new_3k))
+    lda $9ff8
+    sta $9ff4
 
     ;;; Save bank number.
-    lda $9ff4
     sta bank_ram
-    lda $9ff5
-    sta @(++ bank_ram)
 
     ;;; Load index into upper half of +3K area.
     lda do_load_library
@@ -182,21 +178,10 @@ n:  lda #$00
 
 done_loading_program:
     clc
-    jmp return_from_process
+    jmp return_to_process
 
 error2:
     jsr gclose
 error:
-    pla
-    pla
-    pla
-    pla
     sec
-    jmp return_from_process
-
-switch_to_new_3k:
-    lda $9ff8
-    sta $9ff4
-    lda $9ff9
-    sta $9ff5
-    rts
+    jmp return_to_process

@@ -36,6 +36,25 @@ l:  lda mem_init,x
     dex
     bpl -l
 
+    ; Clear +3K area.
+    ldy #0
+    sty d
+    sty c
+    lda #$04
+    sta @(++ d)
+    lda #$0d
+    sta @(++ c)
+    tya
+l:  sta (d),y
+    inc d
+    bne +n
+    inc @(++ d)
+n:  dec c
+    bne +n
+    dec @(++ c)
+    bne -l
+n:
+
     ; Initialise copying the core to its intended location.
     ldx #@(- cinfo_end cinfo 1)
 l:  lda cinfo,x

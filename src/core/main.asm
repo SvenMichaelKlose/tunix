@@ -8,7 +8,7 @@ main:
     lda #<txt_checking_memory
     ldy #>txt_checking_memory
     jsr $cb1e
-    lda $9f55
+    lda $9f55       ; Unhide registers.
     lda $9faa
     lda $9f01
     lda $9ff3

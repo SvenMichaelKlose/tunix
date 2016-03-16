@@ -11,4 +11,11 @@ banks:
     %00111111
     fill 255
 
+saved_stack:
+    fill 256
+
+; Copy of what would be the BASIC part of the zero page.
+saved_zeropage:
+    fill $a0
+
     end

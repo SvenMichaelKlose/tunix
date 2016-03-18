@@ -6,7 +6,7 @@ alloc_bank:
 
     ; Find something free in the bitmap of allocated banks.
 mod_max_banks:
-    ldx #@(-- (/ 1024 8))
+    ldx #@(-- (/ 1024 8 8))
 l:  lda banks,x
     cmp #$ff
     bne found_bank

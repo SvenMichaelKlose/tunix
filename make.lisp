@@ -26,7 +26,7 @@
              "core/syscall-index.asm"
              "core/kernal-end.asm"
              "core/process-data.asm"))
-        "obj/g.vice.txt"))
+        "compiled/g.vice.txt"))
 
 (defun make-sh ()
   (make "compiled/sh"
@@ -34,7 +34,7 @@
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
              "sh/main.asm"))
-        "obj/sh.vice.txt"))
+        "compiled/sh.vice.txt"))
 
 (defun make-gfx ()
   (make "compiled/lib/gfx"
@@ -59,7 +59,7 @@
              "gfx/init.asm"
              "bytecode/interpreter.asm"
              "bytecode/instructions.asm"))
-        "obj/gfx.vice.txt"))
+        "compiled/gfx.vice.txt"))
 
 (make-core)
 (make-sh)

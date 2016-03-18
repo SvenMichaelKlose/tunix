@@ -84,7 +84,7 @@ n:  dec c
     ; Initialise bank allocator.
     lda found_memory_expansion
     beq +n
-    lda #@(-- (/ 128 8))
+    lda #@(-- (/ 128 8 8))
     sta @(++ mod_max_banks)
 n:
 

@@ -1,3 +1,4 @@
+readst  = $ffb7
 setlf   = $ffba
 setnam  = $ffbd
 open    = $ffc0
@@ -20,8 +21,8 @@ l:  lda (s),y
     iny
     jmp -l
 n:  tya
-    ldx #<s
-    ldy #>s
+    ldx s
+    ldy @(++ s)
     jsr setnam
 
     jsr open
@@ -35,7 +36,7 @@ error:
     rts
 
 gchrin:
-    jsr $ffb7
+    jsr readst
     bne +eof
 
     jsr chrin
@@ -57,6 +58,7 @@ gwordin:
     jsr gchrin
     bcs +e
     sta @(++ c)
+    rts
 
 gload:
     jsr gwordin

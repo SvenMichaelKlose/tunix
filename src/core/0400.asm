@@ -40,6 +40,8 @@ load_library:
     pha
 
     ;;; Save pointer to symbol list and want jump table.
+    lda do_load_library
+    beq +n
     lda s
     pha
     lda @(++ s)
@@ -48,6 +50,7 @@ load_library:
     pha
     lda @(++ d)
     pha
+n:
 
     ;;; Open the library.
     jsr gopen
@@ -110,7 +113,7 @@ n:
     bcs error2
 
     ; Get first block.
-    lda d
+    lda @(++ d)
     bpl not_blk5
     ldy #4
     jmp +l
@@ -120,10 +123,12 @@ not_blk5:
     lsr
     lsr
     lsr
+    lsr
     tay
 
     ; Get number of blocks.
-    lda c
+    lda @(++ c)
+    lsr
     lsr
     lsr
     lsr
@@ -133,6 +138,7 @@ not_blk5:
 
     ; Allocate banks and assign them to blocks.
 l:  jsr alloc_bank
+    lda tmp
     sta bank1,y
     iny
     dex

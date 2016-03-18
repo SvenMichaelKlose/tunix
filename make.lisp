@@ -28,6 +28,14 @@
              "core/process-data.asm"))
         "obj/g.vice.txt"))
 
+(defun make-sh ()
+  (make "compiled/sh"
+        (@ [+ "src/" _]
+           '("../bender/vic-20/vic.asm"
+             "zeropage.asm"
+             "sh/main.asm"))
+        "obj/sh.vice.txt"))
+
 (defun make-gfx ()
   (make "compiled/lib/gfx"
         (@ [+ "src/" _]
@@ -54,5 +62,6 @@
         "obj/gfx.vice.txt"))
 
 (make-core)
+(make-sh)
 (make-gfx)
 (quit)

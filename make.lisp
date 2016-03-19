@@ -41,6 +41,7 @@
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
+             "gfx/start.asm"
              "gfx/main.asm"
              "syscalls.asm"
              "gfx/masks.asm"
@@ -58,7 +59,8 @@
              "gfx/compress-font.asm"
              "gfx/init.asm"
              "bytecode/interpreter.asm"
-             "bytecode/instructions.asm"))
+             "bytecode/instructions.asm"
+             "gfx/end.asm"))
         "compiled/gfx.vice.txt"))
 
 (make-core)

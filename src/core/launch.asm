@@ -1,11 +1,13 @@
 launch:
+nop
+stop:
     jsr load
     bcs +error
-    pha
+    stx $9ff4
     ldx program_start
     ldy @(++ program_start)
     jsr init_process
-    pla
+    lda $9ff4
     jmp switch_to_process
 error:
     rts

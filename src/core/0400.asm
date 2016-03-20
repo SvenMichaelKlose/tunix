@@ -147,6 +147,9 @@ l:  jsr alloc_bank
     dex
     bpl -l
 
+    ; Map allocated banks.
+    jsr switch_banks_in
+
     ;;; Load code.
     jsr readn
 
@@ -183,7 +186,7 @@ n:  lda #$00
     jsr make_jump_table
 
 done_loading_program:
-    lda tmp2    ; Core bank of program.
+    ldx tmp2    ; Core bank of program.
     clc
     jmp return_to_process
 

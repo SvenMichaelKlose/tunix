@@ -110,6 +110,10 @@ l:  lda $100,x
     inx
     bne -l
 
+    ; Init process state.
+    lda #128
+    sta process_states
+
     ; Run it.
     lda #0
     jmp switch_to_process

@@ -11,6 +11,6 @@ program_start:
     rts
 
 txt_prompt:
-    ">" 0
+    @(ascii2petscii ">") 0
 
 program_end:

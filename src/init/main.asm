@@ -9,7 +9,7 @@ init:
     lda #>path_sh
     sta @(++ s)
     jsr launch
-    rts
+l:  jmp -l
 
 txt_init:
     @(ascii2petscii "INIT PROCESS RUNNING.") 13 0

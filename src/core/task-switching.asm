@@ -57,7 +57,7 @@ l:  lda saved_stack,x
     lda saved_flags
     pha
     ldx saved_x
-    ldy saved_x
+    ldy saved_y
     lda saved_a
     rti
 

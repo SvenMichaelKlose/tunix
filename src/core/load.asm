@@ -35,7 +35,7 @@ error:
     sec
     rts
 
-gchrin:
+read:
     jsr readst
     bne +eof
 
@@ -51,22 +51,22 @@ eof:
 
 
     ; Get size of block.
-gwordin:
-    jsr gchrin
+readw:
+    jsr read
     bcs +e
     sta c
-    jsr gchrin
+    jsr read
     bcs +e
     sta @(++ c)
     rts
 
-gload:
-    jsr gwordin
+readm:
+    jsr readw
 
-gloadn:
+readn:
     inc @(++ c)
 
-l:  jsr gchrin
+l:  jsr read
     bcs +done
 
     ldy #0

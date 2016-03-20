@@ -97,22 +97,22 @@ n:
     sta d
     lda #$30
     sta @(++ d)
-    jsr gload
+    jsr readm
 n:
 
     ;;; Allocate and assign blocks.
     ; Get destination address.
-    jsr gchrin
+    jsr read
     bcs +error2
     sta d
     sta program_start
-    jsr gchrin
+    jsr read
     bcs +error2
     sta @(++ d)
     sta @(++ program_start)
 
     ; Load code size.
-    jsr gwordin
+    jsr readw
     bcs error2
 
     ; Get first block.
@@ -148,7 +148,7 @@ l:  jsr alloc_bank
     bpl -l
 
     ;;; Load code.
-    jsr gloadn
+    jsr readn
 
     jsr gclose
 

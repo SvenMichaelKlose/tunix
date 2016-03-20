@@ -1,5 +1,5 @@
 init:
-    jsr init_task_switching
+;    jsr init_task_switching
 
     ; Load sh.
     lda #<path_sh
@@ -7,6 +7,9 @@ init:
     lda #>path_sh
     sta @(++ s)
     jsr launch
+
+init_daemon:
+
 l:  jmp -l
 
 txt_init:

@@ -1,4 +1,6 @@
 switch:
+    jsr overtake
+
     ;;; Save process status.
     ; Save registers.
     sta saved_a
@@ -59,10 +61,44 @@ l:  lda saved_stack,x
     pha
     lda saved_flags
     pha
+    lda saved_a
     ldx saved_x
     ldy saved_y
-    lda saved_a
+
+    jsr resume
     rti
+
+save_process_state:
+    ; Save register contents.
+    sta saved_a
+    stx saved_x
+    sty saved_y
+    php
+    pla
+    sta saved_flags
+
+    ; Set return address to RTS that'll return from system call.
+    lda #<+return
+    sta saved_pc
+    lda #>+return
+    sta @(++ saved_pc)
+
+    ; Save stack.
+    tsx
+    inx         ; Undo return address of this procedure.
+    inx
+    stx saved_sp
+l:  lda $100,x
+    sta saved_stack,x
+    inx
+    bne -l
+
+    ; Restore registers destroyed by thos procedure except the flags.
+    lda saved_a
+    ldx saved_x
+
+return:
+    rts
 
 init_task_switching:
     ; Disable interrupts and NMI.
@@ -83,6 +119,10 @@ init_task_switching:
     sta $9116
     lda #$80
     sta $9117
+
+    ; Reset "overtake".
+    lda #0
+    sta overtakes
 
     ; Re–enable NMI.
     lda #$c0

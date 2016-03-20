@@ -1,23 +1,37 @@
 ; Input:
-; X/Y: Initial program counter.
-; X: Process slot.
+;   A: Process core.
+;   X/Y: Initial program counter.
+;
+; Returns:
+;   X: Process slot.
 init_process:
+    sta $9ff4
     stx saved_pc
     sty @(++ saved_pc)
 
     ; Find new task slot.
     tay     ; Save core bank.
+    lda #0
+    sta $9ff4
     ldx current_process
 l:  inx
     cpx #max_num_processes
     beq -l
+    lda process_states,x
+    bne -l
+
+    ; Mark slot as being taken (1) and process as running (128).
+    lda #129
+    sta process_states,x
 
     ; Save core bank.
-    sty process_cores,x
+    tya
+    sta process_cores,x
 
-    ; Mark as running.
-    lda #128
-    sta process_states,x
+    ; Switch to new process' core.
+    sty $9ff4
+
+    ; Save process' slot index.
 
     ; Initialise stack.
     lda #@(high (-- exit_process))
@@ -47,7 +61,9 @@ n:
 
     lda #0
     sta $9ff4
+    inc overtakes
     ldx current_process
     sta process_states,x
 
+stop:
     jmp switch_to_next_process

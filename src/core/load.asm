@@ -85,6 +85,8 @@ n:
     bne -l
 
 done:
+    ldy #0
+    sta (d),y
     clc
     rts
 

@@ -1,7 +1,8 @@
 launch:
     jsr load
     bcs +error
-    stx $9ff4
+    txa
+    sta $9ff4
     ldx program_start
     ldy @(++ program_start)
     jsr init_process

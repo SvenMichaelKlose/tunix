@@ -110,9 +110,11 @@ l:  lda $100,x
     inx
     bne -l
 
-    ; Init process state.
+    ; Init process info.
     lda #128
     sta process_states
+    lda #0
+    sta process_cores
 
     ; Run it.
     lda #0

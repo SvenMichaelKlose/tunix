@@ -3,6 +3,18 @@
 init_process:
     stx saved_pc
     sty @(++ saved_pc)
+
+    ; Find new task slot.
+    tay     ; Save core bank.
+    ldx current_process
+l:  inx
+    cpx #max_num_processes
+    beq -l
+
+    ; Save core bank.
+    sty process_cores,x
+
+    ; Initialise stack.
     lda #@(high (-- exit_process))
     sta @(+ saved_stack 255)
     lda #@(low (-- exit_process))

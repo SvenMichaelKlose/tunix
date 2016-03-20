@@ -1,6 +1,4 @@
 launch:
-nop
-stop:
     jsr load
     bcs +error
     stx $9ff4

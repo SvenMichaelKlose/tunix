@@ -35,7 +35,11 @@
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
-             "sh/main.asm"))
+             "sh/start.asm"
+             "sh/main.asm"
+             "core/pointer-manipulation.asm"
+             "core/print.asm"
+             "sh/end.asm"))
         "compiled/sh.vice.txt"))
 
 (defun make-gfx ()

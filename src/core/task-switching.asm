@@ -24,6 +24,7 @@ l:  lda $100,x
     lda #0
     sta $9ff4
 
+switch_to_next_process:
     ldx current_process
 m:  inx
     cpx #max_num_processes
@@ -43,6 +44,7 @@ switch_to_process:
 
     ; Restore stack contents.
     ldx saved_sp
+    txs
 l:  lda saved_stack,x
     sta $100,x
     inx

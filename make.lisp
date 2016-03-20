@@ -37,8 +37,8 @@
              "zeropage.asm"
              "sh/start.asm"
              "sh/main.asm"
+             "sh/print.asm"
              "core/pointer-manipulation.asm"
-             "core/print.asm"
              "sh/end.asm"))
         "compiled/sh.vice.txt"))
 

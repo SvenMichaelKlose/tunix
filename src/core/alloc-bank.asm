@@ -1,8 +1,13 @@
 alloc_bank:
+    lda $9ff4
+    pha
     txa
     pha
     tya
     pha
+
+    lda #0
+    sta $9ff4
 
     ; Find something free in the bitmap of allocated banks.
 mod_max_banks:
@@ -20,6 +25,8 @@ return:
     tay
     pla
     tax
+    pla
+    sta $9ff4
     rts
 
     ; Calculate number of bank for bit 0.
@@ -51,6 +58,12 @@ n:  lda bits,y
     jmp -return
 
 free_bank:
+    ldx $9ff4
+    ldy #0
+    sty $9ff4
+    sta tmp
+    txa
+    pha
     lda tmp
     and #%00000111
     tay
@@ -63,11 +76,15 @@ free_bank:
     and bits,y
     beq err_not_allocated
     lda banks,x
-    and bitmasks,x
+    and bitmasks,y
     sta banks,x
+    pla
+    sta $9ff4
     clc
     rts
 err_not_allocated:
+    pla
+    sta $9ff4
     sec
     rts
 

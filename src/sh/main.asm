@@ -1,7 +1,7 @@
     ldx #<txt_prompt
     ldy #>txt_prompt
-stop:
     jsr print
+stop:
     rts
 
 txt_prompt:

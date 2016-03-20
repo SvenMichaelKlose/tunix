@@ -85,6 +85,7 @@ n:
     ;;; Map new 3K bank in.
     lda $9ff8
     sta $9ff4
+    sta tmp2
 
     ;;; Save bank number.
     sta bank_ram
@@ -104,9 +105,11 @@ n:
     jsr gchrin
     bcs +error2
     sta d
+    sta program_start
     jsr gchrin
     bcs +error2
     sta @(++ d)
+    sta @(++ program_start)
 
     ; Load code size.
     jsr gwordin
@@ -180,6 +183,7 @@ n:  lda #$00
     jsr make_jump_table
 
 done_loading_program:
+    lda tmp2    ; Core bank of program.
     clc
     jmp return_to_process
 

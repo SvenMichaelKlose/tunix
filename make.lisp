@@ -21,6 +21,7 @@
              "core/load.asm"
              "core/process.asm"
              "core/switch-banks-in.asm"
+             "core/launch.asm"
              "core/moveram.asm"
              "core/pointer-manipulation.asm"
              "core/syscall-index.asm"

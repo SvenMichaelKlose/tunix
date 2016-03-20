@@ -8,7 +8,7 @@ init:
     sta s
     lda #>path_sh
     sta @(++ s)
-    jsr load
+    jsr launch
     rts
 
 txt_init:

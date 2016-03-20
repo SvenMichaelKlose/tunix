@@ -19,4 +19,6 @@ saved_sp:           0
 saved_stack:        fill 256
 saved_zeropage:     fill $a0    ; BASIC part only.
 
+program_start:      0 0
+
     end

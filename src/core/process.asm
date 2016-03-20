@@ -11,7 +11,7 @@ init_process:
 ; A: Core bank of process.
 switch_to_process:
     ; Switch in process' core bank.
-    sta $9ff8
+    sta $9ff4
 
     ; Restore stack contents.
     ldx saved_sp

@@ -29,7 +29,7 @@ return:
     tax
     pla
     sta $9ff4
-    jmp resume
+    jmp release
 
     ; Calculate number of bank for bit 0.
 found_bank:
@@ -84,12 +84,12 @@ free_bank:
     pla
     sta $9ff4
     clc
-    jmp resume
+    jmp release
 err_not_allocated:
     pla
     sta $9ff4
     sec
-    jmp resume
+    jmp release
 
 bits:   1 2 4 8 16 32 64 128
 

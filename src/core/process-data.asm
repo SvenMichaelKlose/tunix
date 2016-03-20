@@ -6,7 +6,6 @@ current_process:    0   ; Index into following tables.
 process_states: fill max_num_processes
 process_cores:  fill max_num_processes
 
-overtakes:  0   ; Calls over "overtake"s that haven't been "resume"d.
 
 ;;; Per–process information in each core bank.
 

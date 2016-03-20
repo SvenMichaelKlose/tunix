@@ -65,7 +65,7 @@ l:  lda saved_stack,x
     ldx saved_x
     ldy saved_y
 
-    jsr resume
+    jsr release
     rti
 
 save_process_state:
@@ -100,15 +100,28 @@ l:  lda $100,x
 return:
     rts
 
-init_task_switching:
-    ; Disable interrupts and NMI.
+overtake:
+    pha
     lda #$7F
+    sta $911e
+    pla
+    inc takeovers
+    rts
+
+release:
+    dec takeovers
+    beq restart_task_switching
+    rts
+
+restart_task_switching:
+    sei
+    pha
+
+    ; Disable NMI.
+    lda #$7f
     sta $911e
 
     ; Enable Timer #1 on VIA 1 for NMI.
-    lda #$40
-    sta $911b
-
     lda #<switch
     sta $0318
     lda #>switch
@@ -116,33 +129,16 @@ init_task_switching:
 
     ; Load timer.
     lda #$00
-    sta $9116
+    sta $9114
     lda #$80
-    sta $9117
-
-    ; Reset "overtake".
-    lda #0
-    sta overtakes
+    sta $9115
 
     ; Re–enable NMI.
+    lda #$40        ; free–running
+    sta $911b
     lda #$c0
     sta $911e
 
-    rts
-
-overtake:
-    pha
-    lda #$7F
-    sta $911e
     pla
-    inc overtakes
+    cli
     rts
-
-resume:
-    dec overtakes
-    bne +n
-    pha
-    lda #$c0
-    sta $911e
-    pla
-n:  rts

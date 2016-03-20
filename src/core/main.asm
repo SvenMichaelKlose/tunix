@@ -92,7 +92,7 @@ n:
 
     ;; Initialise init process.
     ; Set BLK1 bank.
-    lda #1
+    lda #2
     sta bank1
 
     ; Set up register contents.

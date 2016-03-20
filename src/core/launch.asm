@@ -16,4 +16,4 @@ launch:
     pla
     jmp switch_to_process
 error:
-    jmp resume
+    jmp release

@@ -34,12 +34,12 @@ n:  tya
     jsr chkin
 
     php
-    jsr resume
+    jsr release
     plp
     rts
 
 error:
-    jsr resume
+    jsr release
     sec
     rts
 
@@ -54,9 +54,9 @@ read:
     lda $90
     cmp #1   ; set carry when ST>0 (i.e., <>0!)
     pla      ; keep carry, and possibly set Z flag for byte=0
-    jmp resume
+    jmp release
 eof:
-    jsr resume
+    jsr release
     sec
     rts
 
@@ -110,4 +110,4 @@ gclose:
     jsr clrchn
     lda #2
     jsr close
-    jmp resume
+    jmp release

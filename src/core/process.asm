@@ -61,9 +61,8 @@ n:
 
     lda #0
     sta $9ff4
-    inc overtakes
+    inc takeovers
     ldx current_process
     sta process_states,x
 
-stop:
     jmp switch_to_next_process

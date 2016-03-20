@@ -31,6 +31,9 @@ tmp4:   0
 scr:    0 0     ; Current screen address.
 xcpos:  0       ; X columns.
 
+; Calls over "overtake"s that haven't been "resume"d.
+takeovers:  0
+
 ; Utils
 
 font_compression: 0

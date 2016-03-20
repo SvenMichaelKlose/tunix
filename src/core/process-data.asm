@@ -1,4 +1,13 @@
     data
+
+;;; Information init process' core.
+
+current_process:    0   ; Index into following tables.
+process_states: fill max_num_processes
+process_cores:  fill max_num_processes
+
+;;; Per–process information in each core bank.
+
 bank_ram:   0
 bank1:      0
 bank2:      0

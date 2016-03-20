@@ -1,3 +1,5 @@
+max_num_processes = 32
+
 main:
     ; Welcome the user.
     lda #<txt_booting

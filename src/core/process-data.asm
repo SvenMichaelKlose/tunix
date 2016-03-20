@@ -28,6 +28,10 @@ saved_flags:        0
 saved_sp:           0
 saved_stack:        fill 256
 saved_zeropage:     fill $a0    ; BASIC part only.
+saved_blk1:         0
+saved_blk2:         0
+saved_blk3:         0
+saved_blk5:         0
 
 program_start:      0 0
 process_slot:       0

@@ -94,6 +94,7 @@ n:
     ; Set BLK1 bank.
     lda #2
     sta bank1
+    sta saved_blk1
 
     ; Set up register contents.
     lda #<init

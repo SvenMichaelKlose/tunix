@@ -21,6 +21,16 @@ l:  lda $100,x
     inx
     bne -l
 
+    ; Save set of banks.
+    lda $9ff8
+    sta saved_blk1
+    lda $9ffa
+    sta saved_blk2
+    lda $9ffc
+    sta saved_blk3
+    lda $9ffd
+    sta saved_blk5
+
     ;;; Get next process.
     ; Switch to master core.
     lda #0
@@ -53,7 +63,14 @@ l:  lda saved_stack,x
     inx
     bne -l
 
-    jsr switch_banks_in
+    lda saved_blk1
+    sta $9ff8
+    lda saved_blk2
+    sta $9ffa
+    lda saved_blk3
+    sta $9ffc
+    lda saved_blk5
+    sta $9ffe
 
     lda @(++ saved_pc)
     pha

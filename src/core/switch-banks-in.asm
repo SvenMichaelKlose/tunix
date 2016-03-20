@@ -24,4 +24,4 @@ return_to_process:
     sta $9ff8
     pla
     sta $9ff4
-    rts
+    jmp resume

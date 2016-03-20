@@ -35,6 +35,7 @@ l:  lda process_states,x
 
     ;;; Switch to found process.
     lda process_cores,x
+    stx current_process
 
 ; Input:
 ; A: Core bank of process.
@@ -65,7 +66,6 @@ l:  lda saved_stack,x
 
 init_task_switching:
     ; Disable interrupts and NMI.
-    sei
     lda #$7F
     sta $911e
 
@@ -87,6 +87,22 @@ init_task_switching:
     ; Re–enable NMI.
     lda #$c0
     sta $911e
-    cli
 
     rts
+
+overtake:
+    pha
+    lda #$7F
+    sta $911e
+    pla
+    inc overtakes
+    rts
+
+resume:
+    dec overtakes
+    bne +n
+    pha
+    lda #$c0
+    sta $911e
+    pla
+n:  rts

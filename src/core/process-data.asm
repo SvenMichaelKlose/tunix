@@ -6,6 +6,8 @@ current_process:    0   ; Index into following tables.
 process_states: fill max_num_processes
 process_cores:  fill max_num_processes
 
+overtakes:  0   ; Calls over "overtake"s that haven't been "resume"d.
+
 ;;; Per–process information in each core bank.
 
 bank_ram:   0
@@ -29,5 +31,6 @@ saved_stack:        fill 256
 saved_zeropage:     fill $a0    ; BASIC part only.
 
 program_start:      0 0
+process_slot:       0
 
     end

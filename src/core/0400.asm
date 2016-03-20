@@ -23,12 +23,17 @@ error:
 do_load_library:    0
 
 load:
+    jsr overtake
+
     lda #0
     sta do_load_library
+    jmp +l
 
 load_library:
+    jsr overtake
+
     ;;; Save current process' banks.
-    lda $9ff4
+l:  lda $9ff4
     pha
     lda $9ff8
     pha

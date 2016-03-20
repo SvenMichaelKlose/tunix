@@ -1,7 +1,5 @@
 init:
-    lda #<txt_init
-    ldy #>txt_init
-    jsr $cb1e
+    jsr init_task_switching
 
     ; Load sh.
     lda #<path_sh

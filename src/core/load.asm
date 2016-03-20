@@ -9,6 +9,8 @@ chrin   = $ffcf
 clall   = $ffe7
 
 gopen:
+    jsr overtake
+
     lda #2
     ldx #8
     ldy #0
@@ -29,13 +31,21 @@ n:  tya
     bcs +error
 
     ldx #2
-    jmp chkin
+    jsr chkin
+
+    php
+    jsr resume
+    plp
+    rts
 
 error:
+    jsr resume
     sec
     rts
 
 read:
+    jsr overtake
+
     jsr readst
     bne +eof
 
@@ -44,8 +54,9 @@ read:
     lda $90
     cmp #1   ; set carry when ST>0 (i.e., <>0!)
     pla      ; keep carry, and possibly set Z flag for byte=0
-    rts
+    jmp resume
 eof:
+    jsr resume
     sec
     rts
 
@@ -95,6 +106,8 @@ e:  sec
 
 error:
 gclose:
+    jsr overtake
     jsr clrchn
     lda #2
-    jmp close
+    jsr close
+    jmp resume

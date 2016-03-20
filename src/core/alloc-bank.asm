@@ -1,4 +1,6 @@
 alloc_bank:
+    jsr overtake
+
     lda $9ff4
     pha
     txa
@@ -27,7 +29,7 @@ return:
     tax
     pla
     sta $9ff4
-    rts
+    jmp resume
 
     ; Calculate number of bank for bit 0.
 found_bank:
@@ -58,6 +60,7 @@ n:  lda bits,y
     jmp -return
 
 free_bank:
+    jsr overtake
     ldx $9ff4
     ldy #0
     sty $9ff4
@@ -81,12 +84,12 @@ free_bank:
     pla
     sta $9ff4
     clc
-    rts
+    jmp resume
 err_not_allocated:
     pla
     sta $9ff4
     sec
-    rts
+    jmp resume
 
 bits:   1 2 4 8 16 32 64 128
 

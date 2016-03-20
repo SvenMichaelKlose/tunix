@@ -1,5 +1,6 @@
 ; Input:
 ; X/Y: Initial program counter.
+; X: Process slot.
 init_process:
     stx saved_pc
     sty @(++ saved_pc)
@@ -13,6 +14,10 @@ l:  inx
 
     ; Save core bank.
     sty process_cores,x
+
+    ; Mark as running.
+    lda #128
+    sta process_states,x
 
     ; Initialise stack.
     lda #@(high (-- exit_process))

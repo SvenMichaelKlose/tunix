@@ -60,3 +60,31 @@ l:  lda saved_stack,x
     ldy saved_x
     lda saved_a
     rti
+
+init_task_switching:
+    ; Disable interrupts and NMI.
+    sei
+    lda #$7F
+    sta $911e
+
+    ; Enable Timer #1 on VIA 1 for NMI.
+    lda #$40
+    sta $911b
+
+    lda #<switch
+    sta $0318
+    lda #>switch
+    sta $0319   
+
+    ; Load timer.
+    lda #$00
+    sta $9116
+    lda #$80
+    sta $9117
+
+    ; Re–enable NMI.
+    lda #$c0
+    sta $911e
+    cli
+
+    rts

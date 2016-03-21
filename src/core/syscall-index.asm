@@ -1,5 +1,6 @@
 syscall_index:
     "moveram" 0 <moveram >moveram
+    "compare_asciiz" 0 <compare_asciiz >compare_asciiz
     "inc_s" 0 <inc_s >inc_s
     "inc_d" 0 <inc_d >inc_d
 

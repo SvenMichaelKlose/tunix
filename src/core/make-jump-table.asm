@@ -2,20 +2,16 @@ try_next:
     ;;; Step to next entry in index.
     ; Step over name.
     ldy #0
-l:  lda (tmp),y
-    inc tmp
+l:  lda (d),y
+    inc d
     bne +n
-    inc @(++ tmp)
+    inc @(++ d)
 n:  tax
     bne -l
 
-    ; Step over address' high byte.
-    lda tmp
-    clc
-    adc #2
-    sta tmp
-    bcc +compare
-    inc @(++ tmp)
+    ; Step over address.
+    jsr inc_d
+    jsr inc_d
     jmp +compare
 
 ; Inputs:
@@ -23,12 +19,17 @@ n:  tax
 ; d: Where the jump table should go.
 ; c: Index of library.
 make_jump_table:
+    lda d
+    sta tmp3
+    lda @(++ d)
+    sta @(++ tmp3)
+
 get_entry:
     ; Get base address of library's index.
     lda c
-    sta tmp
+    sta d
     lda @(++ c)
-    sta @(++ tmp)
+    sta @(++ d)
 
     ; Check if jump table is complete.
     ldy #0
@@ -37,34 +38,30 @@ get_entry:
 
     ; Compare ASCIIZ string.
 compare:
-    lda (s),y
-    cmp (tmp),y
+    jsr compare_asciiz
     bne -try_next
-    iny
-    cmp #0
-    bne -compare
 
     ; Make jump.
-    lda (tmp),y
+    lda (d),y
     tax
     iny
-    lda (tmp),y
+    lda (d),y
     ldy #2
-    sta (d),y
+    sta (tmp3),y
     dey
     txa
-    sta (d),y
+    sta (tmp3),y
     lda #$4c    ; Opcode for JMP.
     dey
-    sta (d),y
+    sta (tmp3),y
 
     ; Step to next jump table entry.
-    lda d
+    lda tmp3
     clc
     adc #3
-    sta d
+    sta tmp3
     bcc +n
-    inc @(++ d)
+    inc @(++ tmp3)
 n:
 
     ; Step to next wanted symbol.

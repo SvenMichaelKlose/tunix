@@ -24,6 +24,7 @@
              "core/switch-banks-in.asm"
              "core/launch.asm"
              "core/moveram.asm"
+             "core/string.asm"
              "core/pointer-manipulation.asm"
              "core/syscall-index.asm"
              "core/kernal-end.asm"

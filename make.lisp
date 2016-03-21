@@ -38,7 +38,6 @@
              "sh/start.asm"
              "sh/main.asm"
              "sh/print.asm"
-             "core/pointer-manipulation.asm"
              "sh/end.asm"))
         "compiled/sh.vice.txt"))
 

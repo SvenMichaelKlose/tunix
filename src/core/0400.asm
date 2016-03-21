@@ -8,14 +8,21 @@
     bne load_library
     iny
     lda (s),y
-    beq load_library
+    bne load_library
+
+    ;;; Link to core.
+    ; Skip over library name.
+    jsr inc_s
+    jsr inc_s
 
     ; Make jump table to core.
     lda #<syscall_index
     sta c
     lda #>syscall_index
     sta @(++ c)
-    jmp make_jump_table
+    jsr overtake
+    jsr make_jump_table
+    jmp release
 
 error:
     rts

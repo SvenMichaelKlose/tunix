@@ -1,11 +1,15 @@
 try_next:
-    ; Step to next entry in index.
+    ;;; Step to next entry in index.
+    ; Step over name.
     ldy #0
 l:  lda (tmp),y
-    jsr inc_s
-    iny
-    tax
+    inc tmp
+    bne +n
+    inc @(++ tmp)
+n:  tax
     bne -l
+
+    ; Step over address' high byte.
     lda tmp
     clc
     adc #2
@@ -41,10 +45,10 @@ compare:
     bne -compare
 
     ; Make jump.
-    lda (s),y
+    lda (tmp),y
     tax
     iny
-    lda (s),y
+    lda (tmp),y
     ldy #2
     sta (d),y
     dey
@@ -67,7 +71,6 @@ n:
     ldy #0
 l:  lda (s),y
     jsr inc_s
-    iny
     tax
     bne -l
     jmp -get_entry

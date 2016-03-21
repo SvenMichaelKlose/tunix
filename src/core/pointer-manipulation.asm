@@ -1,11 +1,11 @@
 inc_s:
     inc s
-    bcc +n
+    bne +n
     inc @(++ s)
 n:  rts
 
 inc_d:
     inc d
-    bcc +n
+    bne +n
     inc @(++ d)
 n:  rts

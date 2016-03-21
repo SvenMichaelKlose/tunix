@@ -2,7 +2,6 @@
 takeovers = $02a1
 
 switch:
-inc $900f
     jsr take_over
 
     ;;; Save process status.
@@ -109,7 +108,6 @@ l:  lda saved_zeropage,x
     ldy saved_y
 
     jsr release
-dec $900f
     rti
 
 save_process_state:

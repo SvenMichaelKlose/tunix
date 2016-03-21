@@ -23,42 +23,71 @@ components backward–compatible as long as possible.
 
 Libraries are loaded for each program that request it.
 
-### $0400 – Link process to core or a library.
-### "launch" – Launch program on file system.
-### "fork" – Create child process.
-### "control" – Stop or resume a process.
-### "quit" – Quit a process or unload a library.
+### Core zero page locations
 
-### "alloc" – Allocate memory bank.
-### "free" – Free memory bank.
-### "setblock" – Assign bank to block.
-### "freeblock" – Free block.
+#### $0000: s – Source pointer
+#### $0002: d – Destination pointer
+#### $0004: c – Counter/extra pointer
+#### $0006: tmp
+#### $0006: tmp
+#### $0006: tmp
+#### $0006: tmp
 
-### "create" – Create file.
-### "mount" – Mount process to directory.
-### "mknode" – Mount process to virtual file.
-### "remove" – Remove file or node.
-### "open" – Open file.
-### "setin" – Set input channel.
-### "setout" – Set output channel.
-### "chkin" – Check input channel data availability.
-### "read" – Read byte.
-### "readw" – Read word.
-### "readn" – Read multiple bytes.
-### "readm" – Read block of unknown size.
-### "load" – Like "readm" but also allocating memory banks.
-### "write" – Write byte.
-### "writew" – Write word.
-### "writen" – Write multiple bytes.
-### "writem" – Write block starting with size.
-### "close" – Close file.
+### Process
+#### $0400 – Link process to core or a library.
+s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call names.
+d: Jump table address.
 
-### "cd" – Change working directory.
-### "mkdir" – Make directory.
-### "rmdir" – Remove directory.
+#### "launch" – Launch program on file system.
+s: Program name.
 
-### "settimer" – Set timer.
-### "cleartimer" – Clear timer.
+Returns:
+A: Process ID.
 
-### "take_over" – Stop multitasking.
-### "release" – Continue multitasking.
+#### "fork" – Create child process.
+#### "control" – Stop or resume a process.
+#### "quit" – Quit a process or unload a library.
+
+### Strings
+#### "inc_s" – Increment pointer s.
+#### "inc_d" – Increment pointer d.
+#### "compare_asciiz" – Compare ASCIIZ strings at s and d.
+
+### Memory
+#### "alloc" – Allocate memory bank.
+#### "free" – Free memory bank.
+#### "setblock" – Assign bank to block.
+#### "freeblock" – Free block.
+
+### File I/O
+#### "create" – Create file.
+#### "mount" – Mount process to directory.
+#### "mknode" – Mount process to virtual file.
+#### "remove" – Remove file or node.
+#### "open" – Open file.
+#### "setin" – Set input channel.
+#### "setout" – Set output channel.
+#### "chkin" – Check input channel data availability.
+#### "read" – Read byte.
+#### "readw" – Read word.
+#### "readn" – Read multiple bytes.
+#### "readm" – Read block of unknown size.
+#### "load" – Like "readm" but also allocating memory banks.
+#### "write" – Write byte.
+#### "writew" – Write word.
+#### "writen" – Write multiple bytes.
+#### "writem" – Write block starting with size.
+#### "close" – Close file.
+
+### Directories
+#### "cd" – Change working directory.
+#### "mkdir" – Make directory.
+#### "rmdir" – Remove directory.
+
+### Timer
+#### "settimer" – Set timer.
+#### "cleartimer" – Clear timer.
+
+### Multitasking control
+#### "take_over" – Stop multitasking.
+#### "release" – Continue multitasking.

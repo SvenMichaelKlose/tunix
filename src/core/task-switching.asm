@@ -25,7 +25,7 @@ l:  lda $100,x
     bne -l
 
     ; Save zero page.
-    ldx #$9f
+    ldx #$8f
 l:  lda 0,x
     sta saved_zeropage,x
     dex
@@ -78,7 +78,7 @@ l:  lda saved_stack,x
     bne -l
 
     ; Restore zero page.
-    ldx #$9f
+    ldx #$8f
 l:  lda saved_zeropage,x
     sta 0,x
     dex

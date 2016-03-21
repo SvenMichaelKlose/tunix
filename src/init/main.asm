@@ -17,6 +17,7 @@ init:
 
 init_daemon:
 
+    ; Show that we're multitasking.
 l:  inc $1e00
     jmp -l
 

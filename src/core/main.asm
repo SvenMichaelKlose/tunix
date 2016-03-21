@@ -129,7 +129,7 @@ kernal_end2         = @(-- kernal_end)
 
 mem_init:
     %00000001   ; LED on.
-    %00000011   ; +3K R/W RAM
+    %00111111   ; IO3/2 RAM, +3K R/W RAM
     %11111111   ; All BLKs R/W RAM
     0           ; (ID)
     0 0         ; +3K

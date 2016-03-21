@@ -2,6 +2,7 @@
 takeovers = $02a1
 
 switch:
+inc $900f
     jsr take_over
 
     ;;; Save process status.
@@ -29,7 +30,9 @@ l:  lda $100,x
 l:  lda 0,x
     sta saved_zeropage,x
     dex
-    bpl -l
+    bne -l
+    lda 0
+    sta saved_zeropage,x
 
     ; Save set of banks.
     lda $9ff6
@@ -80,7 +83,9 @@ l:  lda saved_stack,x
 l:  lda saved_zeropage,x
     sta 0,x
     dex
-    bpl -l
+    bne -l
+    lda saved_zeropage
+    sta 0
 
     lda saved_blk_io
     sta $9ff6
@@ -104,6 +109,7 @@ l:  lda saved_zeropage,x
     ldy saved_y
 
     jsr release
+dec $900f
     rti
 
 save_process_state:

@@ -47,6 +47,7 @@
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
+             "gfx/zeropage.asm"
              "gfx/start.asm"
              "gfx/main.asm"
              "syscalls.asm"

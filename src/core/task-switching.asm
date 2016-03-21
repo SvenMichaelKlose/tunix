@@ -24,6 +24,13 @@ l:  lda $100,x
     inx
     bne -l
 
+    ; Save zero page.
+    ldx #$9f
+l:  lda 0,x
+    sta saved_zeropage,x
+    dex
+    bpl -l
+
     ; Save set of banks.
     lda $9ff8
     sta saved_blk1
@@ -65,6 +72,13 @@ l:  lda saved_stack,x
     sta $100,x
     inx
     bne -l
+
+    ; Restore zero page.
+    ldx #$9f
+l:  lda saved_zeropage,x
+    sta 0,x
+    dex
+    bpl -l
 
     lda saved_blk1
     sta $9ff8
@@ -112,6 +126,13 @@ l:  lda $100,x
     sta saved_stack,x
     inx
     bne -l
+
+    ; Save zero page.
+    ldx #$9f
+l:  lda 0,x
+    sta saved_zeropage,x
+    dex
+    bpl -l
 
     ; Restore registers destroyed by thos procedure except the flags.
     lda saved_a

@@ -5,12 +5,12 @@ launch:
     ;;; Load the program.
     jsr load
     bcs +error
+    txa     ; Save process info slot index.
 
     ;;; Save state for switching to it.
     ;;; The next task switch back to the current process will return from
     ;;; this system call.
     jsr save_process_state
-    txa     ; Save process info slot index.
 
     ;;; Initialise process info.
     ; Switch to master core.

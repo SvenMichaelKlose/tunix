@@ -33,12 +33,14 @@ Libraries are loaded for each program that request it.
 ### Process
 #### $0400 – Link process to core or a library.
 s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call names.
+
 d: Jump table address.
 
 #### "launch" – Launch program on file system.
 s: Program name.
 
 Returns:
+
 A: Process ID.
 
 #### "fork" – Create child process.

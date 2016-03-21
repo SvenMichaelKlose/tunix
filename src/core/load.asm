@@ -9,7 +9,7 @@ chrin   = $ffcf
 clall   = $ffe7
 
 gopen:
-    jsr overtake
+    jsr take_over
 
     lda #2
     ldx #8
@@ -44,7 +44,7 @@ error:
     rts
 
 read:
-    jsr overtake
+    jsr take_over
 
     jsr readst
     bne +eof
@@ -106,7 +106,7 @@ e:  sec
 
 error:
 gclose:
-    jsr overtake
+    jsr take_over
     jsr clrchn
     lda #2
     jsr close

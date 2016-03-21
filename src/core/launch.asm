@@ -1,6 +1,6 @@
 launch:
     ;;; Stop multitasking.
-    jsr overtake
+    jsr take_over
 
     ;;; Load the program.
     jsr load

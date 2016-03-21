@@ -20,7 +20,7 @@
     sta c
     lda #>syscall_index
     sta @(++ c)
-    jsr overtake
+    jsr take_over
     jsr make_jump_table
     jmp release
 
@@ -30,14 +30,14 @@ error:
 do_load_library:    0
 
 load:
-    jsr overtake
+    jsr take_over
 
     lda #0
     sta do_load_library
     jmp +l
 
 load_library:
-    jsr overtake
+    jsr take_over
 
     ;;; Save current process' banks.
 l:  lda $9ff4

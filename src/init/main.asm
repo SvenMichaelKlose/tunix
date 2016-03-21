@@ -1,5 +1,5 @@
 init:
-    ; Reset "overtake".
+    ; Reset "take_over".
     lda #0
     sta takeovers
 

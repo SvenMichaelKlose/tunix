@@ -13,6 +13,6 @@ syscall_index:
     "readm" 0 <readm >readm
     "close" 0 <gclose >gclose
 
-    "overtake" 0 <overtake >overtake
+    "take_over" 0 <take_over >take_over
     "release" 0 <release >release
     0

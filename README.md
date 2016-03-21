@@ -60,5 +60,6 @@ Libraries are loaded for each program that request it.
 
 ### "settimer" – Set timer.
 ### "cleartimer" – Clear timer.
-### "overtake" – Stop multitasking.
+
+### "take_over" – Stop multitasking.
 ### "release" – Continue multitasking.

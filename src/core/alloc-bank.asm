@@ -1,5 +1,5 @@
 alloc_bank:
-    jsr overtake
+    jsr take_over
 
     lda $9ff4
     pha
@@ -60,7 +60,7 @@ n:  lda bits,y
     jmp -return
 
 free_bank:
-    jsr overtake
+    jsr take_over
     ldx $9ff4
     ldy #0
     sty $9ff4

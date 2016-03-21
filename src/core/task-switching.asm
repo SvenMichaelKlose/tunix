@@ -1,5 +1,8 @@
+; Calls over "take_over"s that haven't been "resume"d.
+takeovers = $02a1
+
 switch:
-    jsr overtake
+    jsr take_over
 
     ;;; Save process status.
     ; Save registers.
@@ -117,7 +120,7 @@ l:  lda $100,x
 return:
     rts
 
-overtake:
+take_over:
     pha
     lda #$7F
     sta $911e

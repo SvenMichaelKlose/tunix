@@ -32,6 +32,8 @@ l:  lda 0,x
     bpl -l
 
     ; Save set of banks.
+    lda $9ff6
+    sta saved_blk_io
     lda $9ff8
     sta saved_blk1
     lda $9ffa
@@ -80,6 +82,8 @@ l:  lda saved_zeropage,x
     dex
     bpl -l
 
+    lda saved_blk_io
+    sta $9ff6
     lda saved_blk1
     sta $9ff8
     lda saved_blk2

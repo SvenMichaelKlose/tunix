@@ -2,7 +2,7 @@
 
 This is a work in progress aiming for
 
-* 32Kb directly addressable RAM for programs
+* 34Kb directly addressable RAM for programs
 * shared libraries
 * multitasking
 * hibernating to ROM

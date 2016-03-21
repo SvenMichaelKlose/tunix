@@ -45,7 +45,10 @@ l:  inx
 exit_process:
     lda $9ff4
     jsr free_bank
-    lda bank1
+    lda bank_io
+    beq +n
+    jsr free_bank
+n:  lda bank1
     beq +n
     jsr free_bank
 n:  lda bank2

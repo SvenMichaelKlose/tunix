@@ -31,6 +31,8 @@ launch:
     sta $9ff4
     pha
     jsr switch_banks_in
+    lda bank_io
+    sta saved_blk_io
     lda bank1
     sta saved_blk1
     lda bank2

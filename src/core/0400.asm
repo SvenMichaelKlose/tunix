@@ -51,10 +51,6 @@ l:  lda $9ff4
     pha
     lda $9ffa
     pha
-    lda $9ffc
-    pha
-    lda $9ffe
-    pha
 
     ;;; Save pointer to symbol list and want jump table.
     lda do_load_library
@@ -211,4 +207,11 @@ error2:
     jsr gclose
 error:
     sec
-    jmp return_to_process
+return_to_process:
+    pla
+    sta $9ffa
+    pla
+    sta $9ff8
+    pla
+    sta $9ff4
+    jmp release

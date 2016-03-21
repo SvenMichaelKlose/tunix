@@ -83,12 +83,15 @@ n:  dec c
     dec @(++ c)
     bne -l
 
-    ; Initialise bank allocator.
+    ;;; Initialise bank allocator.
+    ; Set number of banks.
     lda found_memory_expansion
     beq +n
     lda #@(-- (/ 128 8 8))
     sta @(++ mod_max_banks)
-n:
+    ; Pre–allocate bank of master core and init process.
+n:  lda #%00000011
+    sta banks
 
     ;; Initialise init process.
     ; Set BLK1 bank.
@@ -128,16 +131,16 @@ loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))
 kernal_end2         = @(-- kernal_end)
 
 mem_init:
-    %00000001   ; LED on.
+    %00000000   ; LED off.
     %00111111   ; IO3/2 RAM, +3K R/W RAM
     %11111111   ; All BLKs R/W RAM
     0           ; (ID)
     0 0         ; +3K
-    1 0         ; IO
-    2 0         ; BLK 1
-    3 0         ; BLK 2
-    4 0         ; BLK 3
-    5 0         ; BLK 5
+    0 0         ; IO
+    1 0         ; BLK 1
+    0 0         ; BLK 2
+    0 0         ; BLK 3
+    0 0         ; BLK 5
 
 cinfo:
 cinfo_kernal:

@@ -17,8 +17,7 @@ bank_io2:   0
 bank_io3:   0
 bank5:      0
 
-banks:      %00111111
-            fill @(-- (/ 1024 8))
+banks:      fill @(/ 1024 8)
 
 saved_pc:           0 0
 saved_a:            0

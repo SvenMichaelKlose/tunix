@@ -29,9 +29,9 @@ Libraries are loaded for each program that request it.
 #### $0002: d – Destination pointer
 #### $0004: c – Counter/extra pointer
 #### $0006: tmp
-#### $0006: tmp
-#### $0006: tmp
-#### $0006: tmp
+#### $0007: tmp2
+#### $0008: tmp3
+#### $0009: tmp4
 
 ### Process
 #### $0400 – Link process to core or a library.

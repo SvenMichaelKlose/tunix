@@ -17,7 +17,7 @@ A program may populate $2000-$7fff and $a000-$bfff.
 
 ## Program format
 
-g automatically load "sh" which you can replace by your own application
+g automatically loads "sh" which you can replace by your own application
 to fool around.
 
 ```
@@ -31,9 +31,9 @@ The load address does NOT include the address and size.
 ## System calls
 
 Programs need to request jump tables for system calls or calls to shared
-libraries by passing a list ASCIIZ strings to this function.
-The first ASCIIZ is the path to the library requested in order to keep the
-components backward–compatible as long as possible.
+libraries by passing a list ASCIIZ strings to the function at $0400.
+The first ASCIIZ string is the path to the library requested in order to
+keep the components backward–compatible as long as possible.
 
 Libraries are loaded for each program that request it.
 

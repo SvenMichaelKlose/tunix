@@ -19,7 +19,7 @@ txt_prompt:
     @(ascii2petscii ">") 0
 
 syms_core:
-    "g" 0
+    "/g" 0
     "inc_s" 0
     "inc_d" 0
     "launch" 0

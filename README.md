@@ -18,9 +18,8 @@ A program may populate $2000-$7fff and $a000-$bfff.
 
 Programs need to request jump tables for system calls or calls to shared
 libraries by passing a list ASCIIZ strings to this function.
-The first ASCIIZ is the path to the library requested or just "g" to
-denote the core in order to keep the components backward–compatible as
-long as possible.
+The first ASCIIZ is the path to the library requested in order to keep the
+components backward–compatible as long as possible.
 
 Libraries are loaded for each program that request it.
 

@@ -4,6 +4,10 @@
     ;;; Check if the core is requested.
     ldy #0
     lda (s),y
+    cmp #@(char-code #\/)
+    bne load_library
+    iny
+    lda (s),y
     cmp #@(char-code #\g)
     bne load_library
     iny
@@ -12,6 +16,7 @@
 
     ;;; Link to core.
     ; Skip over library name.
+    jsr inc_s
     jsr inc_s
     jsr inc_s
 

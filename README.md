@@ -9,12 +9,26 @@ This is a work in progress aiming for
 
 without requiring special tools to make applications.
 
+A compiled version can be downloaded from http://hugbox.org/pixel/external/denial/g.zip
+
 ## Memory layout
 
 A program may populate $2000-$7fff and $a000-$bfff.
 
-## System calls
+## Program format
 
+g automatically load "sh" which you can replace by your own application
+to fool around.
+
+```
+load address (2 bytes)
+program size (2 bytes)
+program
+```
+
+The load address does NOT include the address and size.
+
+## System calls
 
 Programs need to request jump tables for system calls or calls to shared
 libraries by passing a list ASCIIZ strings to this function.

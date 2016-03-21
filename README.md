@@ -44,18 +44,23 @@ Libraries are loaded for each program that request it.
 #### $0004: c – Counter/extra pointer
 #### $0006–$000f: Reserved
 
-### Process
+### Process management
 #### $0400 – Link process to core or a library.
+```
 s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call names.
-
 d: Jump table address.
+```
+
+To link core functions (the only thing that can be linked at this time),
+specify "/g".
 
 #### "launch" – Launch program on file system.
-s: Program name.
+```
+s: Program name (ASCIIZ string).
 
 Returns:
-
 A: Process ID.
+```
 
 #### "fork" – Create child process.
 #### "control" – Stop or resume a process.

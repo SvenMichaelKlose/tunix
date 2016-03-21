@@ -11,6 +11,6 @@ tmp2:   0
 tmp3:   0
 tmp4:   0
 
-zp_end_core:
+zp_end_core = $10
 
     end

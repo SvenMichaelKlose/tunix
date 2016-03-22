@@ -14,7 +14,9 @@ switch:
     pla
     sta @(++ saved_pc)
     tsx
-    sta saved_sp
+    stx saved_sp
+
+    jsr take_over
 
     ; Save stack.
 l:  lda $100,x
@@ -50,8 +52,6 @@ l:  lda 0,x
     sta process_cores_saved,x
 
 switch_to_next_process:
-    inc takeovers
-
     ; Switch to master core.
     lda #0
     sta $9ff4

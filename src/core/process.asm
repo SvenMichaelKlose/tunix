@@ -52,6 +52,8 @@ l:  inx
     rts
 
 exit_process:
+    jsr take_over
+
     lda $9ff4
     jsr free_bank
     lda bank_io

@@ -1,4 +1,15 @@
 boot:
+    ; Get jumps to core.
+    lda #<syms_core
+    sta s
+    lda #>syms_core
+    sta @(++ s)
+    lda #<jt_core
+    sta d
+    lda #>jt_core
+    sta @(++ d)
+    jsr $0400
+
     lda #<exec_script
     sta $316
     lda #>exec_script
@@ -53,7 +64,9 @@ done:
     0
     jsr window
 
-l:  jsr $ffe4
+l:  jsr take_over
+    jsr $ffe4
+    jsr release
     beq -l
     jmp redraw
 
@@ -70,3 +83,18 @@ txt_welcome:
     " " 0
     "All drawing is clipped." 0
     0
+
+;;; Wanted jumps to the core.
+syms_core:
+    "/g" 0
+    "inc_s" 0
+    "take_over" 0
+    "release" 0
+    0
+
+;;; Jump table to core.
+
+jt_core:
+inc_s:      0 0 0
+take_over:  0 0 0
+release:    0 0 0

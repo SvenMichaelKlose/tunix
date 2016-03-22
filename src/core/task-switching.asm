@@ -178,8 +178,10 @@ take_over:
     rts
 
 release:
+    php
     dec takeovers
     beq restart_task_switching
+    plp
     rts
 
 restart_task_switching:
@@ -209,5 +211,5 @@ restart_task_switching:
     sta $911e
 
     pla
-    cli
+    plp
     rts

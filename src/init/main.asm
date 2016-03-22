@@ -1,21 +1,13 @@
+loaded_init:
+    org $2000
+
 init:
-    ; Reset "take_over".
-    lda #0
-    sta takeovers
-
-    ; Disable interrupts and NMI.
-    lda #$7F
-    sta $911d
-    sta $912e
-
     ; Load sh.
     lda #<path_sh
     sta s
     lda #>path_sh
     sta @(++ s)
     jsr launch
-
-init_daemon:
 
     ; Show that we're multitasking.
 l:  inc $1e00
@@ -26,3 +18,6 @@ txt_init:
 
 path_sh:
     @(ascii2petscii "SH") 0
+
+init_end:
+    org @(+ loaded_init (- init_end init))

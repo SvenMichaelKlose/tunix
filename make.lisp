@@ -13,7 +13,6 @@
              "zeropage.asm"
              "../bender/vic-20/basic-loader.asm"
              "core/main.asm"
-             "init/main.asm"
              "core/kernal-start.asm"
              "core/0400.asm"
              "core/alloc-bank.asm"
@@ -27,6 +26,7 @@
              "core/string.asm"
              "core/pointer-manipulation.asm"
              "core/syscall-index.asm"
+             "init/main.asm"
              "core/kernal-end.asm"
              "core/process-data.asm"))
         "compiled/g.vice.txt"))

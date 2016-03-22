@@ -96,7 +96,7 @@ n:  lda #%00000111
 
     ;; Initialise init process.
     ; Set BLK1 bank.
-    lda #2
+    lda #1
     sta bank1
     sta saved_bank1
 
@@ -108,16 +108,22 @@ n:  lda #%00000111
     tsx
     stx saved_sp
 
-    ; Make copy of stack.
+    ; Make copy of stack and init process
     ldx #0
 l:  lda $100,x
     sta saved_stack,x
+    lda loaded_init,x
+    sta init,x
     inx
     bne -l
 
     ; Init process info.
     lda #129
     sta process_states
+
+    ; Reset "take_over".
+    lda #0
+    sta takeovers
 
     ; Run it.
     lda #0

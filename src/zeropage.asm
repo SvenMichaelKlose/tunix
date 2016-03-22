@@ -10,7 +10,14 @@ tmp:    0
 tmp2:   0
 tmp3:   0
 tmp4:   0
+tmp5:   0
+tmp6:   0
+tmp7:   0
+tmp8:   0
+tmp9:   0
 
-zp_end_core = $10
+do_load_library:       0
+do_make_jumps_to_core: 0
 
+zp_end_core:
     end

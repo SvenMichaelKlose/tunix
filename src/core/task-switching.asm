@@ -31,7 +31,7 @@ l:  lda 0,x
     dex
     bne -l
     lda 0
-    sta saved_zeropage,x
+    sta saved_zeropage
 
     ; Save set of banks.
     lda $9ff6
@@ -42,7 +42,7 @@ l:  lda 0,x
     sta saved_blk2
     lda $9ffc
     sta saved_blk3
-    lda $9ffd
+    lda $9ffe
     sta saved_blk5
 
     ;;; Get next process.

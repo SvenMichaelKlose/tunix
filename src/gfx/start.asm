@@ -3,6 +3,7 @@ symbol_index_size = @(- symbol_index_end symbol_index_start)
     <symbol_index_size >symbol_index_size
 
 symbol_index_start:
+    "boot" 0 <boot >boot
     "calcscr" 0 <calcscr >calcscr
     "setpattern" 0 <setpattern >setpattern
     "vline" 0 <vline >vline
@@ -16,6 +17,8 @@ symbol_index_end:
 
 program_size = @(- program_end program_start)
 
+    <program_start >program_start
     <program_size >program_size
 
+    org $a000
 program_start:

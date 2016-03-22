@@ -32,6 +32,7 @@ l:  inx
     sty $9ff4
 
     ; Save process' slot index.
+    stx process_slot
 
     ; Initialise stack.
     lda #@(high (-- exit_process))
@@ -40,6 +41,12 @@ l:  inx
     sta @(+ saved_stack 254)
     lda #$fd
     sta saved_sp
+
+    ; Set pointer to first library call to be generated.
+    lda #<library_calls
+    sta end_of_library_calls
+    lda #>library_calls
+    sta @(++ end_of_library_calls)
     rts
 
 exit_process:

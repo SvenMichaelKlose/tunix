@@ -1,4 +1,5 @@
 max_num_processes = 32
+max_num_libraries_per_process = 32
 
 main:
     ; Welcome the user.
@@ -89,8 +90,8 @@ n:  dec c
     beq +n
     lda #@(-- (/ 128 8 8))
     sta @(++ mod_max_banks)
-    ; Pre–allocate bank of master core and init process.
-n:  lda #%00000011
+    ; Pre–allocate bank of master core, init process and IO (for linking).
+n:  lda #%00000111
     sta banks
 
     ;; Initialise init process.
@@ -136,7 +137,7 @@ mem_init:
     %11111111   ; All BLKs R/W RAM
     0           ; (ID)
     0 0         ; +3K
-    0 0         ; IO
+    2 0         ; IO
     1 0         ; BLK 1
     0 0         ; BLK 2
     0 0         ; BLK 3

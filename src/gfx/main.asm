@@ -1,6 +1,3 @@
-    $00 $a0
-    org $a000
-
     jmp gfx_init
 
     ; Reset VIC to KERNAL defaults.

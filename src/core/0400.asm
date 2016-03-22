@@ -1,8 +1,9 @@
-    lda #1
-    sta do_load_library
+    ldy #1
+    sty do_load_library
+    dey
+    sty do_make_jumps_to_core
 
     ;;; Check if the core is requested.
-    ldy #0
     lda (s),y
     cmp #@(char-code #\/)
     bne load_library
@@ -15,6 +16,8 @@
     bne load_library
 
     ;;; Link to core.
+    inc do_make_jumps_to_core
+
     ; Skip over library name.
     jsr inc_s
     jsr inc_s
@@ -32,14 +35,31 @@
 error:
     rts
 
-do_load_library:    0
-
 load:
     jsr take_over
 
     lda #0
     sta do_load_library
     jmp +l
+
+error2:
+    lda do_load_library
+    beq +n
+    pla
+    pla
+    pla
+    pla
+n:  jsr gclose
+error:
+    sec
+return_to_process:
+    pla
+    sta $9ffa
+    pla
+    sta $9ff8
+    pla
+    sta $9ff4
+    jmp release
 
 load_library:
     jsr take_over
@@ -70,7 +90,6 @@ n:
     bcs -error
 
     ;;; Allocate and populate +3K area.
-
     ; Get a bank.
     jsr alloc_bank
 
@@ -102,13 +121,16 @@ n:
 
     ;;; Save bank number.
     sta bank_ram
+    sta tmp7    ; For generating library calls.
 
     ;;; Load index into upper half of +3K area.
     lda do_load_library
     beq +n
+    lda #2
+    sta $9ff6
     lda #$00
     sta d
-    lda #$30
+    lda #$98
     sta @(++ d)
     jsr readm
 n:
@@ -116,22 +138,24 @@ n:
     ;;; Allocate and assign blocks.
     ; Get destination address.
     jsr read
-    bcs +error2
-    sta d
+    bcc +n
+e:  jmp -error2
+n:  sta d
     sta program_start
     jsr read
-    bcs +error2
+    bcs -e
     sta @(++ d)
     sta @(++ program_start)
 
     ; Load code size.
     jsr readw
-    bcs error2
+    bcs -e
 
     ; Get first block.
     lda @(++ d)
     bpl not_blk5
-    ldy #4
+    ldx #0
+    ldy #3
     jmp +l
 not_blk5:
     lsr
@@ -156,6 +180,7 @@ not_blk5:
 l:  jsr alloc_bank
     lda tmp
     sta bank1,y
+    sta saved_blk1,y
     iny
     dex
     bpl -l
@@ -182,36 +207,39 @@ l:  jsr alloc_bank
     pla
     sta s
 
-    ; Step over library path.
-    ldy #0
-l:  lda (s),y
-    beq +n
-    jsr inc_s
-    jmp -l
-
-    ; Set pointer to index.
-n:  lda #$00
-    sta c
-    lda #$30
-    sta @(++ c)
-
-    ; Make jump table.
-    jsr make_jump_table
-
-done_loading_program:
-    ldx tmp2    ; Core bank of program.
-    clc
-    jmp return_to_process
-
-error2:
-    jsr gclose
-error:
-    sec
-return_to_process:
+    ; Get callee's banks.
     pla
     sta $9ffa
     pla
     sta $9ff8
     pla
     sta $9ff4
-    jmp release
+
+    ; Step over library path.
+    ldy #0
+l:  lda (s),y
+    beq +n
+    jsr inc_s
+    jmp -l
+n:  jsr inc_s
+
+    ; Set pointer to index.
+    lda #$00
+    sta c
+    lda #$98
+    sta @(++ c)
+
+    ; Bank index in.
+    lda #2
+    sta $9ff6
+
+    ; Make jump table.
+    jsr make_jump_table
+    jsr release
+    clc
+    rts
+
+done_loading_program:
+    ldx tmp2    ; Core bank of loaded program.
+    clc
+    jmp return_to_process

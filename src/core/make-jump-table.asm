@@ -1,3 +1,8 @@
+opcode_jmp = $4c
+opcode_lda_imm = $a9
+opcode_ldx_imm = $a2
+opcode_ldy_imm = $a0
+
 try_next:
     ;;; Step to next entry in index.
     ; Step over name.
@@ -24,6 +29,11 @@ make_jump_table:
     lda @(++ d)
     sta @(++ tmp3)
 
+    lda end_of_library_calls
+    sta tmp8
+    lda @(++ end_of_library_calls)
+    sta @(++ tmp8)
+
 get_entry:
     ; Get base address of library's index.
     lda c
@@ -41,7 +51,10 @@ compare:
     jsr compare_asciiz
     bne -try_next
 
-    ; Make jump.
+    lda do_make_jumps_to_core
+    beq +n
+
+    ; Make jump to core.
     lda (d),y
     tax
     iny
@@ -51,12 +64,35 @@ compare:
     dey
     txa
     sta (tmp3),y
-    lda #$4c    ; Opcode for JMP.
+    lda #opcode_jmp
     dey
     sta (tmp3),y
+    jmp +l
+
+    ; Make jump to library.
+n:  lda (d),y
+    sec
+    sbc #1
+    sta tmp5
+    iny
+    lda (d),y
+    sbc #0
+    sta tmp6
+
+    ldy #0
+    lda #opcode_jmp
+    sta (tmp3),y
+    iny
+    lda tmp8
+    sta (tmp3),y
+    iny
+    lda @(++ tmp8)
+    sta (tmp3),y
+
+    jsr make_library_call
 
     ; Step to next jump table entry.
-    lda tmp3
+l:  lda tmp3
     clc
     adc #3
     sta tmp3
@@ -73,4 +109,81 @@ l:  lda (s),y
     jmp -get_entry
 
 done:
+    lda tmp8
+    sta end_of_library_calls
+    lda @(++ tmp8)
+    sta @(++ end_of_library_calls)
     rts
+
+library_core:   0
+
+library_call:
+    sta library_core
+    lda $9ff4
+    pha
+    lda #>library_return
+    pha
+    lda #<library_return
+    pha
+    tya
+    pha
+    txa
+    pha
+    lda library_core
+    sta $9ff4
+    jmp switch_banks_in
+
+library_return:
+    pla
+    php
+    jsr switch_banks_in
+    php
+    rts
+    
+; Generate:
+;   ldx #>fun
+;   ldy #<fun
+;   lda #library_core
+;   jmp library_call
+make_library_call:
+    ldy #0
+
+    lda #opcode_ldx_imm
+    sta (tmp8),y
+    iny
+    lda tmp5
+    sta (tmp8),y
+    iny
+
+    lda #opcode_ldy_imm
+    sta (tmp8),y
+    iny
+    lda tmp6
+    sta (tmp8),y
+    iny
+
+    lda #opcode_lda_imm
+    sta (tmp8),y
+    iny
+    lda tmp7
+    sta (tmp8),y
+    iny
+
+    lda #opcode_jmp
+    sta (tmp8),y
+    iny
+    lda #<library_call
+    sta (tmp8),y
+    iny
+    lda #>library_call
+    sta (tmp8),y
+    iny
+
+    ; Add Y to tmp8.
+    tya
+    clc
+    adc tmp8
+    sta tmp8
+    bcc +n
+    inc tmp9
+n:  rts

@@ -82,12 +82,7 @@ l:  jsr read
 
     ldy #0
     sta (d),y
-
-    ; Step to next destination address.
-    inc d
-    bcc +n
-    inc @(++ d)
-n:
+    jsr inc_d
 
     ; Decrement counter and check if done.
     dec c

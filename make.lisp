@@ -43,7 +43,7 @@
         "compiled/sh.vice.txt"))
 
 (defun make-gfx ()
-  (make "compiled/lib/gfx"
+  (make "compiled//gfx"
         (@ [+ "src/" _]
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
@@ -65,6 +65,8 @@
              "gfx/putstring.asm"
              "gfx/compress-font.asm"
              "gfx/init.asm"
+             "window.asm"
+             "boot.asm"
              "bytecode/interpreter.asm"
              "bytecode/instructions.asm"
              "gfx/end.asm"))

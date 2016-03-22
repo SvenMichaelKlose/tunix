@@ -25,7 +25,7 @@
     ldy #>txt_prompt
     jsr print
 
-    jsr boot
+;    jsr boot
 
     ; Show that we're multitasking.
 l:  inc $1e01

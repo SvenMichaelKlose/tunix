@@ -98,7 +98,7 @@ n:  lda #%00000111
     ; Set BLK1 bank.
     lda #2
     sta bank1
-    sta saved_blk1
+    sta saved_bank1
 
     ; Set up register contents.
     lda #<init
@@ -116,10 +116,8 @@ l:  lda $100,x
     bne -l
 
     ; Init process info.
-    lda #128
+    lda #129
     sta process_states
-    lda #0
-    sta process_cores
 
     ; Run it.
     lda #0

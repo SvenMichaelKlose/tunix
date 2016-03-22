@@ -9,8 +9,9 @@ init_process:
     stx saved_pc
     sty @(++ saved_pc)
 
-    ; Find new task slot.
     tay     ; Save core bank.
+
+    ; Find new task slot.
     lda #0
     sta $9ff4
     ldx current_process
@@ -27,6 +28,7 @@ l:  inx
     ; Save core bank.
     tya
     sta process_cores,x
+    sta process_cores_saved,x
 
     ; Switch to new process' core.
     sty $9ff4
@@ -71,7 +73,6 @@ n:
 
     lda #0
     sta $9ff4
-    inc takeovers
     ldx current_process
     sta process_states,x
 

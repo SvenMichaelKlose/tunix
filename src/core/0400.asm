@@ -180,7 +180,7 @@ not_blk5:
 l:  jsr alloc_bank
     lda tmp
     sta bank1,y
-    sta saved_blk1,y
+    sta saved_bank1,y
     iny
     dex
     bpl -l
@@ -213,6 +213,11 @@ l:  jsr alloc_bank
     pla
     sta $9ff8
     pla
+    ldy $9ff4
+    sta $9ff4
+    ldx process_slot
+    sty $9ff4
+    stx process_slot
     sta $9ff4
 
     ; Step over library path.

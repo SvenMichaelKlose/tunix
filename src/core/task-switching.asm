@@ -2,8 +2,6 @@
 takeovers = $02a1
 
 switch:
-    jsr take_over
-
     ;;; Save process status.
     ; Save registers.
     sta saved_a
@@ -35,22 +33,30 @@ l:  lda 0,x
 
     ; Save set of banks.
     lda $9ff6
-    sta saved_blk_io
+    sta saved_bank_io
     lda $9ff8
-    sta saved_blk1
+    sta saved_bank1
     lda $9ffa
-    sta saved_blk2
+    sta saved_bank2
     lda $9ffc
-    sta saved_blk3
+    sta saved_bank3
     lda $9ffe
-    sta saved_blk5
+    sta saved_bank5
+    ldy $9ff4
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    tya
+    sta process_cores_saved,x
 
-    ;;; Get next process.
+switch_to_next_process:
+    inc takeovers
+
     ; Switch to master core.
     lda #0
     sta $9ff4
 
-switch_to_next_process:
+    ; Get next process.
     ldx current_process
 m:  inx
     cpx #max_num_processes
@@ -60,14 +66,20 @@ l:  lda process_states,x
     bpl -m      ; Not running.
 
     ;;; Switch to found process.
-    lda process_cores,x
-    stx current_process
+    lda process_cores_saved,x
 
 ; Input:
 ; A: Core bank of process.
 switch_to_process:
     ; Switch in process' core bank.
     sta $9ff4
+
+    tay
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    stx current_process
+    sty $9ff4
 
     ; Restore stack contents.
     ldx saved_sp
@@ -86,15 +98,15 @@ l:  lda saved_zeropage,x
     lda saved_zeropage
     sta 0
 
-    lda saved_blk_io
+    lda saved_bank_io
     sta $9ff6
-    lda saved_blk1
+    lda saved_bank1
     sta $9ff8
-    lda saved_blk2
+    lda saved_bank2
     sta $9ffa
-    lda saved_blk3
+    lda saved_bank3
     sta $9ffc
-    lda saved_blk5
+    lda saved_bank5
     sta $9ffe
 
     lda @(++ saved_pc)
@@ -119,6 +131,14 @@ save_process_state:
     pla
     sta saved_flags
 
+    ; Save actually used core bank.
+    ldy $9ff4
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    sta process_cores_saved,x
+    sty $9ff4
+
     ; Set return address to RTS that'll return from system call.
     lda #<+return
     sta saved_pc
@@ -142,7 +162,7 @@ l:  lda 0,x
     dex
     bpl -l
 
-    ; Restore registers destroyed by thos procedure except the flags.
+    ; Restore registers destroyed by this procedure except the flags.
     lda saved_a
     ldx saved_x
 

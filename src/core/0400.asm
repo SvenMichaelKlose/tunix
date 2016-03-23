@@ -252,10 +252,12 @@ n:  jsr inc_s
     jsr make_jump_table
 
     ; Put library on process' list of libraries.
-    ldx num_libraries
     lda tmp2
+    beq +n
+    ldx num_libraries
     sta libraries,x
     inc num_libraries
+n:
 
     jsr release
 

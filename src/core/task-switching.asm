@@ -169,10 +169,16 @@ l:  lda 0,x
 return:
     rts
 
+old_nmi:    0 0
+
 take_over:
     pha
     lda #$7F
     sta $911e
+    lda old_nmi
+    sta $0318
+    lda @(++ old_nmi)
+    sta $0319
     pla
     inc takeovers
     rts

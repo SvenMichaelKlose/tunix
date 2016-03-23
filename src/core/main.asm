@@ -121,6 +121,12 @@ l:  lda $100,x
     lda #129
     sta process_states
 
+    ; Save old NMI vector.
+    lda $0318
+    sta old_nmi
+    lda $0319
+    sta @(++ old_nmi)
+
     ; Run it.
     jsr take_over
     lda #0

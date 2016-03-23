@@ -126,11 +126,15 @@ n:
     ;;; Clear map of process' allocated banks.
     lda $9ff4
     beq +n
-    ldx @(++ mod_max_banks)
-    lda #0
-j:  sta banks,x
-    dex
-    bpl -j
+    lda #<per_process_data_start
+    sta d
+    lda #>per_process_data_start
+    sta @(++ d)
+    lda #<per_process_data_size
+    sta c
+    lda #>per_process_data_size
+    sta @(++ c)
+    jsr clrram
 n:
 
     ;;; Load index into upper half of +3K area.

@@ -185,7 +185,6 @@ release:
     rts
 
 restart_task_switching:
-    sei
     pha
 
     ; Disable NMI.

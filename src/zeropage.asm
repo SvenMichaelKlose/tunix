@@ -14,7 +14,6 @@ tmp5:   0
 tmp6:   0
 tmp7:   0
 tmp8:   0
-tmp9:   0
 
 do_load_library:       0
 do_make_jumps_to_core: 0

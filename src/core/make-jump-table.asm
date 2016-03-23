@@ -30,9 +30,9 @@ make_jump_table:
     sta @(++ tmp3)
 
     lda end_of_library_calls
-    sta tmp8
+    sta tmp7
     lda @(++ end_of_library_calls)
-    sta @(++ tmp8)
+    sta @(++ tmp7)
 
 get_entry:
     ; Get base address of library's index.
@@ -83,10 +83,10 @@ n:  lda (d),y
     lda #opcode_jmp
     sta (tmp3),y
     iny
-    lda tmp8
+    lda tmp7
     sta (tmp3),y
     iny
-    lda @(++ tmp8)
+    lda @(++ tmp7)
     sta (tmp3),y
 
     jsr make_library_call
@@ -109,9 +109,9 @@ l:  lda (s),y
     jmp -get_entry
 
 done:
-    lda tmp8
+    lda tmp7
     sta end_of_library_calls
-    lda @(++ tmp8)
+    lda @(++ tmp7)
     sta @(++ end_of_library_calls)
     rts
 
@@ -149,41 +149,41 @@ make_library_call:
     ldy #0
 
     lda #opcode_ldx_imm
-    sta (tmp8),y
+    sta (tmp7),y
     iny
     lda tmp5
-    sta (tmp8),y
+    sta (tmp7),y
     iny
 
     lda #opcode_ldy_imm
-    sta (tmp8),y
+    sta (tmp7),y
     iny
     lda tmp6
-    sta (tmp8),y
+    sta (tmp7),y
     iny
 
     lda #opcode_lda_imm
-    sta (tmp8),y
+    sta (tmp7),y
     iny
-    lda tmp7
-    sta (tmp8),y
+    lda tmp2
+    sta (tmp7),y
     iny
 
     lda #opcode_jmp
-    sta (tmp8),y
+    sta (tmp7),y
     iny
     lda #<library_call
-    sta (tmp8),y
+    sta (tmp7),y
     iny
     lda #>library_call
-    sta (tmp8),y
+    sta (tmp7),y
     iny
 
-    ; Add Y to tmp8.
+    ; Add Y to tmp7.
     tya
     clc
-    adc tmp8
-    sta tmp8
+    adc tmp7
+    sta tmp7
     bcc +n
-    inc tmp9
+    inc tmp8
 n:  rts

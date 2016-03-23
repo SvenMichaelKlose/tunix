@@ -173,43 +173,82 @@ old_nmi:    0 0
 
 take_over:
     pha
+    ;; Don't do anything if multitasking has already been turned off.
+    lda takeovers
+    bne +n
+
+    ;; Disable NMI,
     lda #$7F
     sta $911e
+
+    ;; Restore old NMI vector.
+    ; Switch to master core.
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
+    ; Restore old NMI vector.
     lda old_nmi
     sta $0318
     lda @(++ old_nmi)
     sta $0319
+
+    ;; Switch back to current core.
     pla
+    sta $9ff4
+
+n:  pla
     inc takeovers
     rts
 
 release:
     php
+
+    ;; Don't do anything if calls are still nested.
     dec takeovers
     beq restart_task_switching
+
     plp
     rts
 
 restart_task_switching:
     pha
 
-    ; Disable NMI.
+    ;; Disable NMI.
     lda #$7f
     sta $911e
 
-    ; Enable Timer #1 on VIA 1 for NMI.
+    ;; Save old NMI vector.
+    ; Switch to master core.
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
+    ; Save vector.
+    lda $0318
+    sta old_nmi
+    lda $0319
+    sta @(++ old_nmi)
+
+    ; Switch back to current core.
+    pla
+    sta $9ff4
+
+    ;; Set NMI vector to task switcher.
     lda #<switch
     sta $0318
     lda #>switch
     sta $0319   
 
-    ; Load timer.
+    ;; Load timer.
     lda #$00
     sta $9114
     lda #$80
     sta $9115
 
-    ; Re–enable NMI.
+    ;; Re–enable NMI.
     lda #$40        ; free–running
     sta $911b
     lda #$c0

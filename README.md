@@ -30,12 +30,11 @@ The load address does NOT include the address and size.
 
 ## System calls
 
-Programs need to request jump tables for system calls or calls to shared
-libraries by passing a list ASCIIZ strings to the function at $0400.
-The first ASCIIZ string is the path to the library requested in order to
-keep the components backward–compatible as long as possible.
+Programs need to request jump tables via the function at address $0400.
 
-Libraries are loaded for each program that request it.
+### Errors
+
+Core functions return with the carry flag set if an error occurred.
 
 ### Core zero page locations
 
@@ -47,12 +46,76 @@ Libraries are loaded for each program that request it.
 ### Process management
 #### $0400 – Link process to core or a library.
 ```
-s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call names.
+s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call names.  Pass "/g" to link to core functions.
 d: Jump table address.
 ```
 
-To link core functions (the only thing that can be linked at this time),
-specify "/g".
+Example to access the core:
+```
+;; Say hello, launch another program and exit.
+
+program_size = program_end - program_start
+
+    .word program_start  ; Load address (not loaded).
+    .word program_size   ; Does not affect the load address.
+
+    org $2000
+
+program_start:
+    ;; Request core system call jump table.
+    lda #<symbols
+    sta s
+    lda #>symbols
+    sta s+1
+    lda #<jump_table
+    sta d
+    lda #>jump_table
+    sta d+1
+    jsr $0400
+    bcs error
+
+    ;; Say something nice.
+    ldx #<txt_welcome
+    ldy #>txt_welcome
+    jsr print
+
+    ;; Launch program.
+    lda #<path_program
+    sta s
+    lda #>path_program
+    sta s+1
+    jsr launch
+
+    rts
+
+;; Print a zero–terminated string.
+print:                                                                          
+    stx s
+    sty @(++ s)
+l:  ldy #0
+    lda (s),y
+    beq +done
+    jsr take_over   ; Stop multitasking.
+    jsr $ffd2       ; Print character via KERNAL.
+    jsr release     ; Resume multitasking.
+    jsr inc_s
+    jmp l
+done:
+    rts
+
+txt_welcome:    .ascii "HELLO WORLD!", 13, 0
+path_program:   .ascii "MYPROG", 0
+
+symbols:
+    .ascii "/g", 0      ; Function in the core please.
+    .ascii "launch", 0
+    .byte 0             ; End of symbol list.
+
+jump_table:
+launch: .byte 0, 0, 0
+
+program_end:
+```
 
 #### "launch" – Launch program on file system.
 ```
@@ -62,20 +125,34 @@ Returns:
 A: Process ID.
 ```
 
+Loads a program and runs it independently from the invoking task.
+
 #### "fork" – Create child process.
 #### "control" – Stop or resume a process.
 #### "quit" – Quit a process or unload a library.
 
 ### Strings
 #### "inc_s" – Increment pointer s.
+
+Increments zero page word "s".
+
 #### "inc_d" – Increment pointer d.
 #### "compare_asciiz" – Compare ASCIIZ strings at s and d.
 
 ### Memory
-#### "alloc" – Allocate memory bank.
-#### "free" – Free memory bank.
-#### "setblock" – Assign bank to block.
-#### "freeblock" – Free block.
+#### "alloc_bank" – Allocate memory bank.
+```
+Returns:
+tmp: Allocated bank number.
+```
+
+#### "free_bank" – Free memory bank.
+```
+A: Bank number
+```
+
+#### "set_block" – Assign bank to block.
+#### "free_block" – Free block.
 
 ### File I/O
 #### "create" – Create file.
@@ -108,4 +185,16 @@ A: Process ID.
 
 ### Multitasking control
 #### "take_over" – Stop multitasking.
+
+Turns off multitasking and restores the NMI vector.  Use this before doing
+time–critical operations or calling KERNAL functions.
+
+Calls to "take_over" may happen multiple times.
+
 #### "release" – Continue multitasking.
+
+Turns on multitasking and diverts the NMI vector to the task switcher.
+Flags and registers are not affected.
+
+"release" has to be called as often as "take_over" before multitasking is
+actually turned back on.

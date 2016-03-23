@@ -108,11 +108,17 @@ path_program:   .ascii "MYPROG", 0
 
 symbols:
     .ascii "/g", 0      ; Function in the core please.
+    .ascii "take_over", 0
+    .ascii "release", 0
+    .ascii "inc_s", 0
     .ascii "launch", 0
     .byte 0             ; End of symbol list.
 
 jump_table:
-launch: .byte 0, 0, 0
+take_over: .byte 0, 0, 0
+release:   .byte 0, 0, 0
+inc_s:     .byte 0, 0, 0
+launch:    .byte 0, 0, 0
 
 program_end:
 ```

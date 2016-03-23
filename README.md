@@ -140,10 +140,20 @@ Loads a program and runs it independently of the invoking task.
 ### Strings
 #### "inc_s" – Increment pointer s.
 
-Increments zero page word "s".
+Increments zero page pointer "s".
 
 #### "inc_d" – Increment pointer d.
+
+Increments zero page pointer "d".
+
 #### "compare_asciiz" – Compare ASCIIZ strings at s and d.
+```
+s:  String A.
+d:  String A.
+
+Returns:
+Zero flag clear if strings match.
+```
 
 ### Memory
 #### "alloc_bank" – Allocate memory bank.

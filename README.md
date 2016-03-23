@@ -167,6 +167,20 @@ tmp: Allocated bank number.
 A: Bank number
 ```
 
+#### "moveram" – Move memory block.
+```
+A:  0 = forwards, 1 = backwards
+s: Source address
+d: Destination address
+c: Number of bytes
+```
+
+#### "clrram" – Clear memory block.
+```
+d: Destination address
+c: Number of bytes
+```
+
 #### "set_block" – Assign bank to block.
 #### "free_block" – Free block.
 

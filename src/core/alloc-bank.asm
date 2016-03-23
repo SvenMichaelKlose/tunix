@@ -1,11 +1,11 @@
 alloc_bank:
     jsr take_over
 
-    lda $9ff4
-    pha
     txa
     pha
     tya
+    pha
+    lda $9ff4
     pha
 
     lda #0
@@ -20,15 +20,17 @@ l:  lda banks,x
     dex
     cpx #$ff
     bne -l
+
     sec
+
+    pla
+    sta $9ff4
 
 return:
     pla
     tay
     pla
     tax
-    pla
-    sta $9ff4
     jmp release
 
     ; Calculate number of bank for bit 0.
@@ -56,40 +58,84 @@ l:  lsr
 n:  lda bits,y
     ora banks,x
     sta banks,x
+
+    pla
+    sta $9ff4
+    lda bits,y
+    ora banks,x
+    sta banks,x
+
     clc
     jmp -return
 
 free_bank:
     jsr take_over
-    ldx $9ff4
-    ldy #0
-    sty $9ff4
+
     sta tmp
-    txa
+
+    lda $9ff4
     pha
+
     lda tmp
     and #%00000111
     tay
+
     lda tmp
     lsr
     lsr
     lsr
     tax
+
     lda banks,x
     and bits,y
     beq err_not_allocated
+
     lda banks,x
     and bitmasks,y
     sta banks,x
+
+    lda $9ff4
+    pha
+
+    lda #0
+    sta $9ff4
+
+    lda banks,x
+    and bitmasks,y
+    sta banks,x
+
     pla
     sta $9ff4
+
     clc
     jmp release
+
 err_not_allocated:
     pla
     sta $9ff4
     sec
     jmp release
+
+free_process_banks:
+    ldy $9ff4
+    ldx @(++ mod_max_banks)
+l:  lda banks,x
+    eor #$ff
+
+    pha
+    lda #0
+    sta $9ff4
+    pla
+
+    and banks,x
+    sta banks,x
+
+    sty $9ff4
+
+    dex
+    bpl -l
+
+    rts
 
 bits:   1 2 4 8 16 32 64 128
 

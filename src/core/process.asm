@@ -54,24 +54,10 @@ l:  inx
 exit_process:
     jsr take_over
 
+    jsr free_process_banks
+
     lda $9ff4
     jsr free_bank
-    lda bank_io
-    beq +n
-    jsr free_bank
-n:  lda bank1
-    beq +n
-    jsr free_bank
-n:  lda bank2
-    beq +n
-    jsr free_bank
-n:  lda bank3
-    beq +n
-    jsr free_bank
-n:  lda bank5
-    beq +n
-    jsr free_bank
-n:
 
     lda #0
     sta $9ff4

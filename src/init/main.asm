@@ -9,6 +9,7 @@ init:
     sta @(++ s)
     jsr launch
 
+rts
     ; Show that we're multitasking.
 l:  inc $1e00
     jmp -l

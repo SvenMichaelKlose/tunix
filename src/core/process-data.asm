@@ -39,7 +39,7 @@ program_start:      0 0
 process_slot:       0
 
 num_libraries:      0
-library_cores:      fill max_num_libraries_per_process
+libraries:          fill max_num_libraries_per_process
 
 end_of_library_calls: 0 0
 library_calls:

@@ -250,7 +250,16 @@ n:  jsr inc_s
 
     ; Make jump table.
     jsr make_jump_table
+
+    ; Put library on process' list of libraries.
+    ldx num_libraries
+    lda tmp2
+    sta libraries,x
+    inc num_libraries
+
     jsr release
+
+    tax
     clc
     rts
 

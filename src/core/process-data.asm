@@ -8,7 +8,9 @@ process_cores:  fill max_num_processes
 process_cores_saved:  fill max_num_processes
 
 
-;;; Per–process information in each core bank.
+;;; Per–process information in each copy of the core.
+per_process_data_size = @(- per_process_data_end per_process_data_start)
+per_process_data_start:
 
 bank_ram:   0
 bank_io:    0
@@ -41,5 +43,7 @@ library_cores:      fill max_num_libraries_per_process
 
 end_of_library_calls: 0 0
 library_calls:
+
+per_process_data_end:
 
     end

@@ -123,6 +123,16 @@ n:
     sta bank_ram
     sta tmp7    ; For generating library calls.
 
+    ;;; Clear map of process' allocated banks.
+    lda $9ff4
+    beq +n
+    ldx @(++ mod_max_banks)
+    lda #0
+j:  sta banks,x
+    dex
+    bpl -j
+n:
+
     ;;; Load index into upper half of +3K area.
     lda do_load_library
     beq +n

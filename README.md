@@ -131,7 +131,7 @@ Returns:
 A: Process ID.
 ```
 
-Loads a program and runs it independently from the invoking task.
+Loads a program and runs it independently of the invoking task.
 
 #### "fork" – Create child process.
 #### "control" – Stop or resume a process.

@@ -35,16 +35,13 @@ return:
 
     ; Calculate number of bank for bit 0.
 found_bank:
-    pha
+    tay
     txa
-    pha
     asl
     asl
     asl
     sta tmp
-    pla
-    tax
-    pla
+    tya
 
     ; Find free bank (unset bit).
     ldy #0

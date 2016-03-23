@@ -135,9 +135,10 @@ library_call:
 
 library_return:
     pla
+    sta $9ff4
     php
     jsr switch_banks_in
-    php
+    plp
     rts
     
 ; Generate:

@@ -6,6 +6,7 @@ syscall_index:
     "inc_d" 0 <inc_d >inc_d
 
     "launch" 0 <launch >launch
+    "kill" 0 <kill >kill
 
     "open" 0 <gopen >gopen
     "read" 0 <read >read

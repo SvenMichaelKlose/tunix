@@ -52,7 +52,30 @@ l:  inx
     rts
 
 exit_process:
+    lda $9ff4
+
+kill:
+    pha
     jsr take_over
+
+    tax
+    lda $9ff4
+    pha
+    stx $9ff4
+
+    ; Exit all linked libraries.
+    ldx num_libraries
+    beq +no_libraries
+    dex
+l:  txa
+    pha
+    lda libraries,x
+    jsr kill
+    pla
+    tax
+    dex
+    bpl -l
+no_libraries:
 
     jsr free_process_banks
 
@@ -64,4 +87,12 @@ exit_process:
     ldx current_process
     sta process_states,x
 
+    ; Switch to next process if the current one has been killed.
+    pla
+    sta $9ff4
+    pla
+    cmp $9ff4
+    beq +n
     jmp switch_to_next_process
+
+n:  rts

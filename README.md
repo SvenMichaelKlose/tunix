@@ -135,7 +135,12 @@ Loads a program and runs it independently of the invoking task.
 
 #### "fork" – Create child process.
 #### "control" – Stop or resume a process.
-#### "quit" – Quit a process or unload a library.
+#### "kill" – Kill a process and its libraries
+```
+A: Process ID.
+```
+
+Does not return if process killed itself.
 
 ### Strings
 #### "inc_s" – Increment pointer s.

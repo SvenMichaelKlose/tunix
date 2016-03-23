@@ -1,6 +1,7 @@
 #!/bin/sh
 
-mkdir -p compiled
+mkdir -pv compiled
 sbcl --noinform --core bender/bender make.lisp
-rm g.zip
+rm -v g.zip
+cp -v README.md compiled
 cd compiled && zip -r ../g.zip *

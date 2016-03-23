@@ -121,11 +121,8 @@ l:  lda $100,x
     lda #129
     sta process_states
 
-    ; Reset "take_over".
-    lda #0
-    sta takeovers
-
     ; Run it.
+    jsr take_over
     lda #0
     jmp switch_to_process
 

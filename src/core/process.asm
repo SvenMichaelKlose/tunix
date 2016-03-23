@@ -55,36 +55,42 @@ exit_process:
     lda $9ff4
 
 kill:
+    ;; Save X register for recursions.
+    sta tmp
+    txa
     pha
+
+    ;; Stop multitasking
     jsr take_over
 
-    tax
+    ;; Save current process' core and switch to one's to kill.
     lda $9ff4
     pha
-    stx $9ff4
+    lda tmp
+    sta $9ff4
+    pha
 
-    ; Exit all linked libraries.
+    ;; Kill libraroes of process.
     ldx num_libraries
     beq +no_libraries
     dex
-l:  txa
-    pha
-    lda libraries,x
+l:  lda libraries,x
     jsr kill
-    pla
-    tax
     dex
     bpl -l
 no_libraries:
 
+    ;; Free banks of process.
     jsr free_process_banks
 
+    ;; Free core of process.
     lda $9ff4
     jsr free_bank
 
+    ;; Free process slot.
+    ldx process_slot
     lda #0
     sta $9ff4
-    ldx current_process
     sta process_states,x
 
     ; Switch to next process if the current one has been killed.
@@ -95,4 +101,8 @@ no_libraries:
     beq +n
     jmp switch_to_next_process
 
-n:  rts
+    ;; Switch back to callee's core and return.
+n:  sta $9ff4
+    pla
+    tax
+    rts

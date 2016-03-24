@@ -9,8 +9,7 @@
 (defun make-core ()
   (make "compiled/g"
         (@ [+ "src/" _]
-           '("../bender/vic-20/vic.asm"
-             "zeropage.asm"
+           '("zeropage.asm"
              "../bender/vic-20/basic-loader.asm"
              "core/main.asm"
              "core/kernal-start.asm"
@@ -35,13 +34,21 @@
 (defun make-sh ()
   (make "compiled/sh"
         (@ [+ "src/" _]
-           '("../bender/vic-20/vic.asm"
-             "zeropage.asm"
+           '("zeropage.asm"
              "sh/start.asm"
              "sh/main.asm"
              "sh/print.asm"
              "sh/end.asm"))
         "compiled/sh.vice.txt"))
+
+(defun make-clock ()
+  (make "compiled/clock"
+        (@ [+ "src/" _]
+           '("zeropage.asm"
+             "clock/start.asm"
+             "clock/main.asm"
+             "clock/end.asm"))
+        "compiled/clock.vice.txt"))
 
 (defun make-gfx ()
   (make "compiled//gfx"
@@ -75,5 +82,6 @@
 
 (make-core)
 (make-sh)
+(make-clock)
 (make-gfx)
 (quit)

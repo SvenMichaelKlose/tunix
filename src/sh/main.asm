@@ -25,6 +25,12 @@
     ldy #>txt_prompt
     jsr print
 
+    lda #<path_clock
+    sta s
+    lda #>path_clock
+    sta @(++ s)
+    jsr launch
+
     jsr boot
 
     ; Show that we're multitasking.
@@ -34,12 +40,16 @@ l:  inc $1e01
 txt_prompt:
     @(ascii2petscii "HELLO WORLD!") 0
 
+path_clock:
+    "CLOCK" 0
+
 ;;; Wanted jumps to the core.
 syms_core:
     "/g" 0
     "inc_s" 0
     "take_over" 0
     "release" 0
+    "launch" 0
     0
 
 ;;; Jump table to core.
@@ -48,6 +58,7 @@ jt_core:
 inc_s:      0 0 0
 take_over:  0 0 0
 release:    0 0 0
+launch:     0 0 0
 
 syms_gfx:
     "GFX" 0

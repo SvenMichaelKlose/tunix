@@ -5,7 +5,7 @@ clrram:
 l:  sta (d),y
     jsr inc_d
     dec c
-    bne +n
-    dec c
     bne -l
-n:  rts
+    dec @(++ c)
+    bne -l
+    rts

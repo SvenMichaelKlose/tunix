@@ -1,7 +1,22 @@
+found_memory_expansion = $80
+
+    org $a009
+
 max_num_processes = 32
 max_num_libraries_per_process = 32
 
 main:
+    sei
+    cld
+    lda #$7f
+    sta $911d
+    sta $911e
+
+    jsr $fd8d   ; Init memory.
+    jsr $fd52   ; Init KERNAL I/O vectors.
+    jsr $fdf9   ; Init VIAs.
+    jsr $e518
+
     ; Welcome the user.
     lda #<txt_booting
     ldy #>txt_booting
@@ -19,25 +34,35 @@ main:
     beq found_ultimem8m
     cmp #$12
     beq found_ultimem512k
+
+    ; No suitable memory extension found – cannot boot.
     lda #<txt_no_memory
     ldy #>txt_no_memory
-    jmp $cb1e
+    jsr $cb1e
+    jsr $ffd2       ; Wait for keypress.
+    jmp ($c000)     ; Start BASIC.
+
 found_ultimem8m:
+
     lda #<txt_ultimem8m
     ldy #>txt_ultimem8m
     jmp +l
+
 found_ultimem512k:
     inc found_memory_expansion
     lda #<txt_ultimem512k
     ldy #>txt_ultimem512k
 l:  jsr $cb1e
 
-    ; Init RAM.
-    ldx #15
-l:  lda mem_init,x
-    sta $9ff0,x
-    dex
-    bpl -l
+    ; Map in master core and init process bank.
+    lda #%00111111   ; IO3/2 RAM, +3K R/W RAM
+    sta $9ff1
+    lda #%01000011   ; BLK5 ROM, BLK1 R/W RAM
+    sta $9ff2
+    ldx #0
+    stx $9ff4
+    inx
+    stx $9ff8
 
     ; Clear +3K area.
     ldy #0
@@ -59,30 +84,91 @@ n:  dec c
 n:
 
     ; Initialise copying the core to its intended location.
-    ldx #@(- cinfo_end cinfo 1)
-l:  lda cinfo,x
+    ldx #@(- cinfo_core_end cinfo_core 1)
+l:  lda cinfo_core,x
     sta s,x
     dex
     bpl -l
 
     ; Copy the core.
+    jsr copy
+
+    ; Initialise copying the init process to its intended location.
+    ldx #@(- cinfo_init_end cinfo_init 1)
+l:  lda cinfo_init,x
+    sta s,x
+    dex
+    bpl -l
+
+    ; Copy init process.
+    jsr copy
+
+    jmp relocated_init
+
+copy:
     ldy #0
 l:  lda (s),y
     sta (d),y
-    dec s
-    lda s
-    cmp #$ff
+    inc s
     bne +n
-    dec @(++ s)
-n:  dec d
-    lda d
-    cmp #$ff
+    inc @(++ s)
+n:  inc d
     bne +n
-    dec @(++ d)
+    inc @(++ d)
 n:  dec c
     bne -l
     dec @(++ c)
     bne -l
+    rts
+
+kernal_size         = @(- kernal_end kernal)
+loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))
+kernal_end2         = @(-- kernal_end)
+
+dispatched_core = @(+ (- loaded_kernal #x2000) #xa000)
+
+cinfo:
+cinfo_core:
+    <dispatched_core >dispatched_core
+    <kernal >kernal
+    <kernal_size @(++ >kernal_size)
+cinfo_core_end:
+
+cinfo_init:
+    $00 $a0
+    $00 $20
+    $00 $30
+cinfo_init_end:
+cinfo_end:
+
+txt_booting:
+    $93 @(ascii2petscii "BOOTING G...") 13 0
+
+txt_checking_memory:
+    @(ascii2petscii "CHECKING MEMORY...") 0
+
+txt_ultimem8m:
+    @(ascii2petscii "ULTIMEM 1024K RAM.") 13 0
+
+txt_ultimem512k:
+    @(ascii2petscii "ULTIMEM 128K RAM.") 13 0
+
+txt_no_memory:
+    13
+    @(ascii2petscii "ERROR: NO ULTIMEM EXPANSION FOUND.") 13 13
+    @(ascii2petscii "CHECK HTTP://GO4RETRO.COM TO GET ONE.") 13 13
+    @(ascii2petscii "FOR VICE PLEASE ADJUST YOUR CONFIGURATION.") 13 13
+    @(ascii2petscii "SORRY. EXITING...") 13 0
+
+    org @(+ (- *pc* #xa000) #x2000)
+
+relocated_init:
+    ; Init RAM.
+    ldx #15
+l:  lda mem_init,x
+    sta $9ff0,x
+    dex
+    bpl -l
 
     ;;; Initialise bank allocator.
     ; Set number of banks.
@@ -126,12 +212,6 @@ l:  lda $100,x
     lda #0
     jmp switch_to_process
 
-found_memory_expansion:   0
-
-kernal_size         = @(- kernal_end kernal)
-loaded_kernal_end   = @(+ loaded_kernal (-- kernal_size))
-kernal_end2         = @(-- kernal_end)
-
 mem_init:
     %00000000   ; LED off.
     %00111111   ; IO3/2 RAM, +3K R/W RAM
@@ -143,30 +223,3 @@ mem_init:
     0 0         ; BLK 2
     0 0         ; BLK 3
     0 0         ; BLK 5
-
-cinfo:
-cinfo_kernal:
-    <loaded_kernal_end >loaded_kernal_end
-    <kernal_end2 >kernal_end2
-    <kernal_size @(++ >kernal_size)
-cinfo_kernal_end:
-cinfo_end:
-
-txt_booting:
-    $93 @(ascii2petscii "BOOTING G...") 13 0
-
-txt_checking_memory:
-    @(ascii2petscii "CHECKING MEMORY...") 0
-
-txt_ultimem8m:
-    @(ascii2petscii "ULTIMEM 1024K RAM.") 13 0
-
-txt_ultimem512k:
-    @(ascii2petscii "ULTIMEM 128K RAM.") 13 0
-
-txt_no_memory:
-    13
-    @(ascii2petscii "ERROR: NO ULTIMEM EXPANSION FOUND.") 13 13
-    @(ascii2petscii "CHECK HTTP://GO4RETRO.COM TO GET ONE.") 13 13
-    @(ascii2petscii "FOR VICE PLEASE ADJUST YOUR CONFIGURATION.") 13 13
-    @(ascii2petscii "SORRY. EXITING...") 13 0

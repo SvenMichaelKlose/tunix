@@ -29,6 +29,7 @@
     sta s
     lda #>path_clock
     sta @(++ s)
+stop:
     jsr launch
 
     jsr boot

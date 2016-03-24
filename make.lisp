@@ -7,10 +7,9 @@
   (& cmds (make-vice-commands cmds "break .stop")))
 
 (defun make-core ()
-  (make "compiled/g"
+  (make "obj/core"
         (@ [+ "src/" _]
            '("zeropage.asm"
-             "../bender/vic-20/basic-loader.asm"
              "core/main.asm"
              "core/kernal-start.asm"
              "core/0400.asm"
@@ -29,7 +28,7 @@
              "init/main.asm"
              "core/kernal-end.asm"
              "core/process-data.asm"))
-        "compiled/g.vice.txt"))
+        "compiled/core.vice.txt"))
 
 (defun make-sh ()
   (make "compiled/sh"
@@ -80,8 +79,23 @@
              "gfx/end.asm"))
         "compiled/gfx.vice.txt"))
 
+(defun make-image ()
+  (with-output-file o "compiled/g.img"
+    (write-word #xa009 o)
+    (write-word #xa009 o)
+    (princ "A0" o)
+    ; PETSCII "CBM"
+    (write-byte #xc3 o)
+    (write-byte #xc2 o)
+    (write-byte #xcd o)
+    (alet (fetch-file "obj/core")
+      (princ ! o)
+      (adotimes ((- (* 512 1024) (length !) 9))
+        (write-byte #x23 o)))))
+
 (make-core)
 (make-sh)
 (make-clock)
 (make-gfx)
+(make-image)
 (quit)

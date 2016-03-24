@@ -83,6 +83,9 @@ no_libraries:
     ;; Free banks of process.
     jsr free_process_banks
 
+    lda process_slot
+    pha
+
     ;; Free core of process.
     lda $9ff4
     ldx #0
@@ -90,7 +93,9 @@ no_libraries:
     jsr free_bank
 
     ;; Free process slot.
-    ldx process_slot
+    pla
+    tax
+    lda #0
     sta process_states,x
 
     ; Switch to next process if the current one has been killed.
@@ -106,4 +111,4 @@ no_libraries:
 n:  sta $9ff4
     pla
     tax
-    rts
+    jmp release

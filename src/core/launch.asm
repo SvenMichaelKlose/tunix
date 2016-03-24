@@ -9,8 +9,7 @@ launch:
     jsr load
     bcs +error
     pla
-    txa     ; Save process core.
-    pha
+    stx tmp
 
     ;; Save state for switching to it.
     ;; The next task switch back to the current process will return from
@@ -18,7 +17,7 @@ launch:
     jsr save_process_state
 
     ;; Initialise process info.
-    pla
+    lda tmp
     sta $9ff4
     ldx program_start
     ldy @(++ program_start)

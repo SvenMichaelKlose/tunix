@@ -2,9 +2,6 @@ launch:
     lda $9ff4
     pha
 
-    ;; Stop multitasking.
-    jsr take_over
-
     ;; Load the program.
     jsr load
     bcs +error
@@ -15,6 +12,9 @@ launch:
     ;; The next task switch back to the current process will return from
     ;; this system call.
     jsr save_process_state
+
+    ;; Stop multitasking.
+    jsr take_over
 
     ;; Initialise process info.
     lda tmp
@@ -34,7 +34,6 @@ launch:
 
 error:
     ;; Enable multitasking again and return.
-    jsr release
     pla
     pla
     sta $9ff4

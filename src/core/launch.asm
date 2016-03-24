@@ -1,37 +1,43 @@
 launch:
-    ;;; Stop multitasking.
+    lda $9ff4
+    pha
+
+    ;; Stop multitasking.
     jsr take_over
 
-    ;;; Load the program.
+    ;; Load the program.
     jsr load
     bcs +error
-    txa     ; Save process info slot index.
+    pla
+    txa     ; Save process core.
+    pha
 
-    ;;; Save state for switching to it.
-    ;;; The next task switch back to the current process will return from
-    ;;; this system call.
+    ;; Save state for switching to it.
+    ;; The next task switch back to the current process will return from
+    ;; this system call.
     jsr save_process_state
 
-    ;;; Initialise process info.
-    ; Switch to master core.
-    ldx #0
+    ;; Initialise process info.
+    pla
     sta $9ff4
     ldx program_start
     ldy @(++ program_start)
-    pha
     jsr init_process
 
     ; Save process info slot index.
-    lda #0
-    sta $9ff4
+    lda $9ff4
+    ldy #0
+    sty $9ff4
     stx current_process
 
-    ;;; Run the new process.
-    pla
+    ;; Run the new process.
     jmp switch_to_process
 
 error:
-    ;;; Enable multitasking again and return.
+    ;; Enable multitasking again and return.
     jsr release
+    pla
+    pla
+    sta $9ff4
     sec     ; Signal error.
     rts

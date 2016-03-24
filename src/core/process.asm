@@ -85,12 +85,12 @@ no_libraries:
 
     ;; Free core of process.
     lda $9ff4
+    ldx #0
+    stx $9ff4
     jsr free_bank
 
     ;; Free process slot.
     ldx process_slot
-    lda #0
-    sta $9ff4
     sta process_states,x
 
     ; Switch to next process if the current one has been killed.
@@ -98,7 +98,8 @@ no_libraries:
     sta $9ff4
     pla
     cmp $9ff4
-    beq +n
+    bne +n
+    pla
     jmp switch_to_next_process
 
     ;; Switch back to callee's core and return.

@@ -68,39 +68,42 @@ n:  lda bits,y
 free_bank:
     jsr take_over
 
-    sta tmp
+    ;; Save bank to free.
+    tax
 
-    lda $9ff4
-    pha
-
-    lda tmp
+    ;; Get bit number in bank map.
     and #%00000111
     tay
 
-    lda tmp
+    ;; Get byte index in bank map.
+    txa
     lsr
     lsr
     lsr
     tax
 
+    ;; Check if bank has been allocated.
     lda banks,x
     and bits,y
     beq err_not_allocated
 
+    ;; Unset bit in map.
     lda banks,x
     and bitmasks,y
     sta banks,x
 
+    ;; Switch to master core.
     lda $9ff4
     pha
-
     lda #0
     sta $9ff4
 
+    ;; Unset bit in master core map.
     lda banks,x
     and bitmasks,y
     sta banks,x
 
+    ;; Restore callee's core.
     pla
     sta $9ff4
 
@@ -108,25 +111,31 @@ free_bank:
     jmp release
 
 err_not_allocated:
-    pla
-    sta $9ff4
     sec
     jmp release
 
 free_process_banks:
+    ;; Save process' core.
     ldy $9ff4
+
+    ;; Mask out bit in master core's bank map.
     ldx @(++ mod_max_banks)
+
+    ; Get byte and invert it.
 l:  lda banks,x
     eor #$ff
 
+    ; Switch to master core.
     pha
     lda #0
     sta $9ff4
     pla
 
+    ; Mask out bits.
     and banks,x
     sta banks,x
 
+    ; Return to process' core.
     sty $9ff4
 
     dex

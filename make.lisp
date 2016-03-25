@@ -1,7 +1,5 @@
 (= *model* :vic-20)
 
-(load "syscalls.lisp")
-
 (defun make (to files &optional (cmds nil))
   (apply #'assemble-files to files)
   (& cmds (make-vice-commands cmds "break .stop")))
@@ -48,6 +46,8 @@
              "clock/main.asm"
              "clock/end.asm"))
         "compiled/clock.vice.txt"))
+
+(load "src/gfx/calls.lisp")
 
 (defun make-gfx ()
   (make "compiled//gfx"

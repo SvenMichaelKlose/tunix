@@ -90,5 +90,5 @@
 (= *syscalls* (reverse *syscalls*))
 (= *bytecodes* (reverse *bytecodes*))
 
-(with-output-file o "bytecodes.asm"
-  (princ (syscall-bytecodes-source) o))
+;(with-output-file o "bytecodes.asm"
+;  (princ (syscall-bytecodes-source) o))

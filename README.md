@@ -23,10 +23,35 @@ to fool around.
 ```
 load address (2 bytes)
 program size (2 bytes)
-program
+program code
 ```
 
 The load address does NOT include the address and size.
+
+## Library format
+
+Libraries are programs like described above with an additional header
+containing the names of available calls as ASCIIZ strings and their
+addresses. Here's an example of a short symbol index:
+
+```
+    .word index_size    ; Does NOT include these two bytes.
+    .ascii "call1", 0
+    .word call1
+    .ascii "call2", 0
+    .word call2
+    .byte 0             ; End of index.
+```
+
+All in all libraries have the following format:
+
+```
+symbol index size (2 bytes)
+symbol index
+load address (2 bytes)
+library size (2 bytes)
+library code
+```
 
 ## System calls
 

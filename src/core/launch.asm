@@ -36,7 +36,6 @@ launch:
 error:
     ;; Enable multitasking again and return.
     pla
-    pla
     sta $9ff4
     sec     ; Signal error.
     rts

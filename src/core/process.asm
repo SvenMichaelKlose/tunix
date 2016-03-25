@@ -55,12 +55,14 @@ exit_process:
     lda $9ff4
 
 kill:
-    ;; Save X register for recursions.
+    ;; Save process' core.
     sta tmp
+
+    ;; Save X register for recursions.
     txa
     pha
 
-    ;; Stop multitasking
+    ;; Stop multitasking.
     jsr take_over
 
     ;; Save current process' core and switch to one's to kill.
@@ -83,6 +85,7 @@ no_libraries:
     ;; Free banks of process.
     jsr free_process_banks
 
+    ;; Save process' slot.
     lda process_slot
     pha
 

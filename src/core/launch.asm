@@ -6,7 +6,7 @@ launch:
     jsr load
     bcs +error
     pla
-    stx tmp
+    stx tmp     ; Save core.
 
     ;; Save state for switching to it.
     ;; The next task switch back to the current process will return from
@@ -17,6 +17,7 @@ launch:
     jsr take_over
 
     ;; Initialise process info.
+    ; Switch to new process' core.
     lda tmp
     sta $9ff4
     ldx program_start

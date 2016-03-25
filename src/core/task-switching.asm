@@ -136,6 +136,7 @@ save_process_state:
     ldx process_slot
     lda #0
     sta $9ff4
+    tya
     sta process_cores_saved,x
     sty $9ff4
 

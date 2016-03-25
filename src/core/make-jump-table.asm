@@ -121,9 +121,9 @@ library_call:
     sta library_core
     lda $9ff4
     pha
-    lda #>library_return
+    lda #@(high (-- library_return))
     pha
-    lda #<library_return
+    lda #@(low (-- library_return))
     pha
     tya
     pha

@@ -1,9 +1,30 @@
-found_memory_expansion = $80
-
-    org $a009
-
 max_num_processes = 32
 max_num_libraries_per_process = 8
+
+found_memory_expansion = $80
+
+    org $a000
+
+    ; ROM autostart info.
+    <main >main     ; Cold start vector
+    <main >main     ; Warm start vector
+    "A0"
+    $c3 $c2 $cd     ; "CBM"
+
+    ; Ultimem file system info.
+    "ULTIFS" 0              ; ID
+    $01 $00                 ; File system version.
+    @(low *img-blocks*)     ; Number of blocks.
+    @(high *img-blocks*)
+    $00 $00                 ; Relative bank of block allocation map.
+relative_ultifs_block_map = @(- ultifs_block_map #xa000)
+    <relative_ultifs_block_map  ; Address of BAM.
+    >relative_ultifs_block_map
+    $01 $00                 ; Physical first block.
+
+ultifs_block_map:
+    1
+    fill @(- *img-blocks* 2)
 
 main:
     sei

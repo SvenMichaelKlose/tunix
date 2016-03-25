@@ -81,23 +81,29 @@
              "gfx/end.asm"))
         "compiled/gfx.vice.txt"))
 
+(defun write-zeroes (x o)
+  (adotimes x
+    (write-byte 0 o)))
+
+(defun write-block (x o)
+  (& x
+     (princ x o))
+  (write-zeroes (- (* 8 1024) (? x
+                                 (length x)
+                                 0))
+                o))
+
+(defvar *img-blocks* (/ 8192 8))
+
 (defun make-image ()
   (with-output-file o "compiled/g.img"
-    (write-word #xa009 o)
-    (write-word #xa009 o)
-    (princ "A0" o)
-    ; PETSCII "CBM"
-    (write-byte #xc3 o)
-    (write-byte #xc2 o)
-    (write-byte #xcd o)
-    (alet (fetch-file "obj/core")
-      (princ ! o)
-      (adotimes ((- (* 512 1024) (length !) 9))
-        (write-byte #x23 o)))))
+    (write-block (fetch-file "obj/core") o)
+    (adotimes ((- *img-blocks* 1))
+      (write-block nil o))))
 
 (make-sh)
 (make-clock)
 (make-gfx)
-(make-image)
 (make-core)
+(make-image)
 (quit)

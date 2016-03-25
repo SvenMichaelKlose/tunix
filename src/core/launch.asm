@@ -1,4 +1,7 @@
+do_exec:    0
+
 launch:
+    sta do_exec
     lda $9ff4
     pha
 
@@ -16,6 +19,22 @@ launch:
 
     ;; Stop multitasking.
     jsr take_over
+
+    ;; Stop parent process.
+    lda do_exec
+    beq +n
+    ldx process_slot
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+    lda process_states,x
+    ora #2      ; Mark as waiting for child process.
+    and #$7f
+    sta process_states,x
+    pla
+    sta $9ff4
+n:
 
     ;; Initialise process info.
     ; Switch to new process' core.

@@ -29,6 +29,7 @@
     sta s
     lda #>path_clock
     sta @(++ s)
+    lda #1      ; Wait until launched process has been killed.
     jsr launch
 
     jsr boot

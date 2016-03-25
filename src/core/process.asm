@@ -72,6 +72,21 @@ kill:
     sta $9ff4
     pha
 
+    ;; Resume waiting parent process.
+    ldy parent_process
+    sty $9ff4
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    lda process_states,x
+    and #%00000010
+    beq +n
+    tya
+    jsr resume
+n:  pla
+    sta $9ff4
+    pha
+
     ;; Kill libraroes of process.
     ldx num_libraries
     beq +no_libraries
@@ -115,3 +130,34 @@ n:  sta $9ff4
     pla
     tax
     jmp release
+
+halt:
+    tax
+    lda $9ff4
+    pha
+    stx $9ff4
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    lda process_states,x
+    and #%01111111
+    sta process_states,x
+    pla
+    sta $9ff4
+    rts
+
+resume:
+    tax
+    lda $9ff4
+    pha
+    stx $9ff4
+    ldx process_slot
+    lda #0
+    sta $9ff4
+    lda process_states,x
+    and #%11111101
+    ora #%10000000
+    sta process_states,x
+    pla
+    sta $9ff4
+    rts

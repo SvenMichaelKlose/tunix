@@ -7,6 +7,8 @@ syscall_index:
 
     "launch" 0 <launch >launch
     "kill" 0 <kill >kill
+    "halt" 0 <halt >halt
+    "resume" 0 <resume >resume
 
     "open" 0 <gopen >gopen
     "read" 0 <read >read

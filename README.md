@@ -150,6 +150,7 @@ program_end:
 
 #### "launch" – Launch program on file system.
 ```
+A: If not 0 the parent process is halted until the launched process is killed.
 s: Program name (ASCIIZ string).
 
 Returns:
@@ -159,7 +160,19 @@ A: Process ID.
 Loads a program and runs it independently of the invoking task.
 
 #### "fork" – Create child process.
-#### "control" – Stop or resume a process.
+
+#### "halt" – Halt a process.
+```
+A: Process ID.
+```
+
+Can be resumed with "resume".
+
+#### "resume" – Resumes a halted process.
+```
+A: Process ID.
+```
+
 #### "kill" – Kill a process and its libraries
 ```
 A: Process ID.

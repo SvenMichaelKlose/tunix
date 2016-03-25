@@ -6,6 +6,7 @@ launch:
     jsr load
     bcs +error
     pla
+    sta tmp2
     stx tmp     ; Save core.
 
     ;; Save state for switching to it.
@@ -20,8 +21,16 @@ launch:
     ; Switch to new process' core.
     lda tmp
     sta $9ff4
+
+    ; Save parent process.
+    ldx tmp2
+    stx parent_process
+
+    ; Get program start.
     ldx program_start
     ldy @(++ program_start)
+
+    ; Init per–process data.
     jsr init_process
 
     ; Save process info slot index.

@@ -15,6 +15,8 @@ process_cores_saved:    fill max_num_processes
 per_process_data_size = @(- per_process_data_end per_process_data_start)
 per_process_data_start:
 
+parent_process: 0
+
 bank_ram:   0
 bank_io:    0
 bank1:      0

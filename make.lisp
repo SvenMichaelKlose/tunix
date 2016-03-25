@@ -26,7 +26,9 @@
              "init/main.asm"
              "core/kernal-end.asm"
              "core/process-data.asm"))
-        "compiled/core.vice.txt"))
+        "compiled/core.vice.txt")
+  (alet (get-label 'library_calls)
+    (format t "Number of possible linked library functions per process: ~A~%" (integer (/ (- #xfff !) 9)))))
 
 (defun make-sh ()
   (make "compiled/sh"
@@ -93,9 +95,9 @@
       (adotimes ((- (* 512 1024) (length !) 9))
         (write-byte #x23 o)))))
 
-(make-core)
 (make-sh)
 (make-clock)
 (make-gfx)
 (make-image)
+(make-core)
 (quit)

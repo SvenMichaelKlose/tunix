@@ -3,7 +3,7 @@ found_memory_expansion = $80
     org $a009
 
 max_num_processes = 32
-max_num_libraries_per_process = 32
+max_num_libraries_per_process = 8
 
 main:
     sei

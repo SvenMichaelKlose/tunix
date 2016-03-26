@@ -1,6 +1,5 @@
 fs_create:
-    jsr bs_alloc
-    rts
+    jmp bs_alloc
 
 fs_get_last_block:
     ldx #$ff

@@ -1,5 +1,5 @@
 ; Returns:
-; s: Index of found block.
+; d: Index of found block.
 bs_alloc:
     ;; Find free block in allocation map.
     lda bs_bam_start
@@ -29,23 +29,23 @@ n:  lda d
 f:  lda d
     sec
     sbc bs_bam_start
-    sta s
+    sta d
     lda @(++ d)
     sbc @(++ bs_bam_start)
-    sta @(++ s)
-    asl s
-    rol @(++ s)
-    asl s
-    rol @(++ s)
-    asl s
-    rol @(++ s)
+    sta @(++ d)
+    asl d
+    rol @(++ d)
+    asl d
+    rol @(++ d)
+    asl d
+    rol @(++ d)
 
     txa
 l:  lsr
     bcs +l
-    inc s
+    inc d
     bne -l
-    inc @(++ s)
+    inc @(++ d)
     jmp -l
 
 r:  pla

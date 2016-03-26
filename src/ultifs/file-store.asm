@@ -65,10 +65,12 @@ fs_shrink:
 
 ; Get particular or last block.
 fs_free:
-    ldy #0
+    ; Free on block store.
+    jsr bs_free
 
     ; Check on last block (0).
-l:  lda #2
+    ldy #0
+    lda #2
     sta $9ff8
     lda (s),y
     inc $9ff8
@@ -76,9 +78,7 @@ l:  lda #2
     bne +n
     lda (s),y
     beq +f
-
-    ; Free on block store.
-n:  jsr bs_free
+n:
 
     ; Clear entry in FAM.
     pha
@@ -95,8 +95,8 @@ n:  jsr bs_free
     stx s
 
     dec c
-    bne -l
+    bne fs_free
     dec @(++ c)
-    bne -l
+    bne fs_free
 
 f:  rts

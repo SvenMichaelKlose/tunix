@@ -95,6 +95,9 @@
 
 (defvar *img-blocks* (/ 8192 8))
 
+(defvar *fs-block-size* 10) ; 1Kb
+(defvar *fs-blocks* (/ 8192 2))
+
 (defun make-image ()
   (with-output-file o "compiled/g.img"
     (write-block (fetch-file "obj/core") o)

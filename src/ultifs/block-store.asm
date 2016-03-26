@@ -1,52 +1,51 @@
-; X/Y: First block of store.
-;
 ; Returns:
-; bs_found_block: Index of found block.
+; s: Index of found block.
 bs_alloc:
-    ;; Map in first block of store to $2000.
-    lda $9ff8
-    pha     ; Save old bank.
-    stx $9ff8
-    sty $9ff9
-
     ;; Find free block in allocation map.
     lda bs_bam_start
-    sta bs_bam_ptr
+    sta d
     lda @(++ bs_bam_start)
-    sta @(++ bs_bam_ptr)
+    sta @(++ d)
+
     ldy #0
-l:  ldx (bs_bam_ptr),y
+l:  ldx (d),y
     cpx #$ff
     bne +f
-    inc bs_bam_ptr
+    inc d
     bne +n
-    inc @(++ bs_bam_ptr)
-n:  lda bs_bam_ptr
+    inc @(++ d)
+n:  lda d
     cmp bs_bam_end
     bne -l
-    lda @(++ bs_bam_ptr)
+    lda @(++ d)
     cmp @(++ bs_bam_end)
     bne -l
     lda bs_bam_start
-    sta bs_bam_ptr
+    sta d
     lda @(++ bs_bam_start)
-    sta @(++ bs_bam_ptr)
+    sta @(++ d)
     jmp -l
 
-f:  lda bs_bam_ptr
+f:  lda d
     sec
     sbc bs_bam_start
-    sta bs_found_block
-    lda @(++ bs_bam_tr)
+    sta s
+    lda @(++ d)
     sbc @(++ bs_bam_start)
-    sta @(++ bs_found_block)
+    sta @(++ s)
+    asl s
+    rol @(++ s)
+    asl s
+    rol @(++ s)
+    asl s
+    rol @(++ s)
 
     txa
 l:  lsr
     bcs +l
-    inc bs_found_block
+    inc s
     bne -l
-    inc @(++ bs_found_block)
+    inc @(++ s)
     jmp -l
 
 r:  pla
@@ -55,34 +54,30 @@ r:  pla
     sta $9ff9
     rts
 
-; X/Y: First block of store.
-: bs_block: Block index to free.
+; d: Block index to free.
 bs_free:
-    ;; Map in first block of store to $2000.
-    lda $9ff8
-    pha     ; Save old bank.
-    stx $9ff8
-    sty $9ff9
+    lda #2
+    sta $9ff8
 
-    lda bs_block
+    lda d
     and #%00000111
     tax
-    lsr @(++ bs_block)
-    ror bs_block
-    lsr @(++ bs_block)
-    ror bs_block
-    lsr @(++ bs_block)
-    ror bs_block
-    lda bs_block
+    lsr @(++ d)
+    ror d
+    lsr @(++ d)
+    ror d
+    lsr @(++ d)
+    ror d
+    lda d
     clc
     adc bs_bam_start
-    sta bs_block
-    lda @(++ bs_block)
+    sta d
+    lda @(++ d)
     adc @(++ bs_bam_start)
-    sta @(++ bs_block)
+    sta @(++ d)
     ldy #0
-    lda (bs_block),y
+    lda (d),y
     and bitmasks,x
-    sta (bs_block),y
+    sta (d),y
 
     jmp -r

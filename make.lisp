@@ -104,8 +104,8 @@
     (adotimes ((- *img-blocks* 1))
       (write-block nil o))))
 
-(make-sh)
-(make-clock)
+;(make-sh)
+;(make-clock)
 (make-gfx)
 (make-core)
 (make-image)

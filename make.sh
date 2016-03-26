@@ -2,6 +2,7 @@
 
 mkdir -pv compiled
 mkdir -pv obj
+cd src/sh && ./make.sh && cd ../.. && cp src/sh/sh compiled
 sbcl --noinform --core bender/bender make.lisp
 rm -v g.zip
 cp -v README.md compiled

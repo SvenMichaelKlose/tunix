@@ -161,3 +161,24 @@ resume:
     pla
     sta $9ff4
     rts
+
+init_per_process_data:
+    lda #<per_process_data_start
+    sta d
+    lda #>per_process_data_start
+    sta @(++ d)
+    lda #<per_process_data_size
+    sta c
+    lda #>per_process_data_size
+    sta @(++ c)
+    jsr clrram
+
+    ; Make jump to link().
+    lda #$4c
+    sta $0400
+    lda #<link
+    sta $0401
+    lda #>link
+    sta $0402
+
+    rts

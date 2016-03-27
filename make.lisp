@@ -9,22 +9,27 @@
         (@ [+ "src/" _]
            '("zeropage.asm"
              "core/main.asm"
-             "core/kernal-start.asm"
-             "core/0400.asm"
-             "core/alloc-bank.asm"
-             "core/make-jump-table.asm"
-             "core/load.asm"
-             "core/process.asm"
-             "core/task-switching.asm"
-             "core/switch-banks-in.asm"
-             "core/launch.asm"
+
+             "core/pointer-manipulation.asm"
              "core/moveram.asm"
              "core/clrram.asm"
              "core/string.asm"
-             "core/pointer-manipulation.asm"
+
+             "core/alloc-bank.asm"
+
+             "core/process.asm"
+             "core/task-switching.asm"
+             "core/switch-banks-in.asm"
+
+             "core/make-jump-table.asm"
+             "core/link.asm"
+             "core/load.asm"
+             "core/launch.asm"
+
              "core/syscall-index.asm"
+
              "init/main.asm"
-             "core/kernal-end.asm"
+
              "core/process-data.asm"))
         "compiled/core.vice.txt")
   (alet (get-label 'library_calls)

@@ -1,5 +1,9 @@
     data
 
+    org $0400
+
+    0 0 0       ; JMP to link().
+
 core_data_start = @*pc*
 
 ;;; Information in master core 0.

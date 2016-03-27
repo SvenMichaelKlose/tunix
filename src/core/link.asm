@@ -1,3 +1,4 @@
+link:
     ldy #1
     sty do_load_library
     dey
@@ -54,9 +55,7 @@ error:
     sec
 return_to_process:
     pla
-    sta $9ffa
-    pla
-    sta $9ff8
+    sta $9ff6
     pla
     sta $9ff4
     jmp release
@@ -67,9 +66,7 @@ load_library:
     ;;; Save current process' banks.
 l:  lda $9ff4
     pha
-    lda $9ff8
-    pha
-    lda $9ffa
+    lda $9ff6
     pha
 
     ;;; Save pointer to symbol list and want jump table.
@@ -92,55 +89,21 @@ n:
     ;;; Allocate and populate +3K area.
     ; Get a bank.
     jsr alloc_bank
-
-    ; Map it to $2000.
     lda tmp
-    sta $9ff8
-
-    ; Map +3K template to $4000.
-    lda #0
-    sta $9ffa
-
-    ; Copy template to new bank.
-    lda #$00
-    sta s
-    sta d
-    sta c
-    lda #$40
-    sta @(++ s)
-    lda #$20
-    sta @(++ d)
-    sta @(++ c)
-    lda #0
-    jsr moveram
-
-    ;;; Map new 3K bank in.
-    lda $9ff8
     sta $9ff4
     sta tmp2
-
-    ;;; Save bank number.
     sta bank_ram
     sta tmp7    ; For generating library calls.
 
-    ;;; Clear map of process' allocated banks.
-    lda $9ff4
+    ;;; Initialise per–process data in +3K area.
     beq +n
-    lda #<per_process_data_start
-    sta d
-    lda #>per_process_data_start
-    sta @(++ d)
-    lda #<per_process_data_size
-    sta c
-    lda #>per_process_data_size
-    sta @(++ c)
-    jsr clrram
+    jsr init_per_process_data
 n:
 
-    ;;; Load index into upper half of +3K area.
+    ;;; Load index into upper half of +3K area bank and map it to IO.
     lda do_load_library
     beq +n
-    lda #2
+    lda #1
     sta $9ff6
     lda #$00
     sta d
@@ -223,9 +186,7 @@ l:  jsr alloc_bank
 
     ; Get callee's banks.
     pla
-    sta $9ffa
-    pla
-    sta $9ff8
+    sta $9ff6
     pla
     ldy $9ff4
     sta $9ff4
@@ -249,7 +210,7 @@ n:  jsr inc_s
     sta @(++ c)
 
     ; Bank index in.
-    lda #2
+    lda #1
     sta $9ff6
 
     ; Make jump table.

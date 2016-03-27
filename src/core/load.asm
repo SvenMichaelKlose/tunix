@@ -1,20 +1,10 @@
-readst  = $ffb7
-setlf   = $ffba
-setnam  = $ffbd
-open    = $ffc0
-close   = $ffc3
-chkin   = $ffc6
-clrchn  = $ffcc
-chrin   = $ffcf
-clall   = $ffe7
-
 gopen:
     jsr take_over
 
     lda #2
     ldx #8
     ldy #0
-    jsr setlf
+    jsr setlfs
 
     ; Get length of file name and set it.
     ldy #0

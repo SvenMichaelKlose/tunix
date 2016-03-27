@@ -1,4 +1,4 @@
-FILE_OPENED     = 128
+FILE_OPEN       = 128
 FILE_STREAM     = 64    ; Otherwise block–oriented.
 FILE_READABLE   = 1
 FILE_WRITABLE   = 2
@@ -34,6 +34,8 @@ vfile_states:       fill max_num_vfiles ; Like in file_states.
 vfile_drivers:      fill max_num_vfiles
 vfile_handles:      fill max_num_vfiles ; Within drivers.
 
+;;; /dev/con
+devcon_logical_file_numbers:    fill 8
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Per–process information in each copy of the core. ;;;

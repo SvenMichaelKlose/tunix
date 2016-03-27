@@ -26,6 +26,9 @@
              "core/load.asm"
              "core/launch.asm"
 
+             "core/kernal.asm"
+             "core/dev-con.asm"
+
              "core/syscall-index.asm"
 
              "init/main.asm"

@@ -138,8 +138,8 @@ mem_init:
     %01111111   ; BLK5 ROM, BLK1,2,3 R/W RAM
     0           ; (ID)
     0 0         ; +3K
-    2 0         ; IO
-    1 0         ; BLK 1
+    0 0         ; IO
+    0 0         ; BLK 1
     0 0         ; BLK 2
     0 0         ; BLK 3
     0 0         ; BLK 5

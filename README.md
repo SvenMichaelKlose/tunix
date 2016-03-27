@@ -2,18 +2,22 @@
 
 This is a work in progress aiming for
 
-* 34Kb directly addressable RAM for programs
+* 28Kb directly addressable RAM for programs
 * shared libraries
 * multitasking
 * hibernating to ROM
 
 without requiring special tools to make applications.
 
-A compiled version can be downloaded from http://hugbox.org/pixel/external/denial/g.zip
+A compiled version can be downloaded from
+http://hugbox.org/pixel/external/denial/g.zip
+A version of the cc65 C compiler with "vic20g" target is to be found at
+https://github.com/SvenMichaelKlose/cc65g
 
 ## Memory layout
 
-A program may populate $2000-$7fff and $a000-$bfff.
+A program may populate $2000-$7fff and use the IO area but it must not
+hide the Ultimem expansion's registers.
 
 ## Program format
 
@@ -36,9 +40,9 @@ addresses. Here's an example of a short symbol index:
 
 ```
     .word index_size    ; Does NOT include these two bytes.
-    .ascii "call1", 0
+    .asciiz "call1"
     .word call1
-    .ascii "call2", 0
+    .asciiz "call2"
     .word call2
     .byte 0             ; End of index.
 ```
@@ -126,17 +130,18 @@ l:  ldy #0
     jsr inc_s
     jmp l
 done:
+error:
     rts
 
-txt_welcome:    .ascii "HELLO WORLD!", 13, 0
-path_program:   .ascii "MYPROG", 0
+txt_welcome:    .asciiz "HELLO WORLD!"
+path_program:   .asciiz "MYPROG"
 
 symbols:
-    .ascii "/g", 0      ; Function in the core please.
-    .ascii "take_over", 0
-    .ascii "release", 0
-    .ascii "inc_s", 0
-    .ascii "launch", 0
+    .asciiz "/g"        ; Function in the core please.
+    .asciiz "take_over"
+    .asciiz "release"
+    .asciiz "inc_s"
+    .asciiz "launch"
     .byte 0             ; End of symbol list.
 
 jump_table:
@@ -223,9 +228,6 @@ c: Number of bytes
 d: Destination address
 c: Number of bytes
 ```
-
-#### "set_block" – Assign bank to block.
-#### "free_block" – Free block.
 
 ### File I/O
 #### "create" – Create file.

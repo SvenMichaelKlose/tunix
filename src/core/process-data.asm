@@ -2,34 +2,33 @@
 
     org $0400
 
-    0 0 0       ; JMP to link().
+0 0 0       ; JMP to link().
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Information in master core 0. ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This area is not used in other banks than #0.
 
 core_data_start = @*pc*
-
-;;; Information in master core 0.
 
 current_process:        0   ; Index into following tables.
 process_states:         fill max_num_processes
 process_cores:          fill max_num_processes
 process_cores_saved:    fill max_num_processes
 
-    org core_data_start
+;; Banks allocated by "alloc_block":
+master_banks:      fill @(/ 1024 8)
 
-;;; Per–process information in each copy of the core.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Per–process information in each copy of the core. ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 per_process_data_size = @(- per_process_data_end per_process_data_start)
 per_process_data_start:
 
-parent_process: 0
-
-bank_ram:   0
-bank_io:    0
-bank1:      0
-bank2:      0
-bank3:      0
-bank5:      0
-
-banks:      fill @(/ 1024 8)
-
+;; Task state.
 saved_pc:           0 0
 saved_a:            0
 saved_x:            0
@@ -38,14 +37,27 @@ saved_flags:        0
 saved_sp:           0
 saved_stack:        fill 256
 saved_zeropage:     fill $90    ; BASIC part only.
+; +3K area is stored in process_cores_save in the master core.
 saved_bank_io:      0
 saved_bank1:        0
 saved_bank2:        0
 saved_bank3:        0
 saved_bank5:        0
 
+;; Banks allocated via "load".
+bank_ram:   0
+bank_io:    0
+bank1:      0
+bank2:      0
+bank3:      0
+bank5:      0
+
+parent_process: 0
 program_start:      0 0
-process_slot:       0
+process_slot:       0       ; Indexes in master core tables.
+
+;; Banks allocated by "alloc_block":
+banks:      fill @(/ 1024 8)
 
 num_libraries:      0
 libraries:          fill max_num_libraries_per_process

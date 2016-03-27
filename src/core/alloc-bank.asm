@@ -14,7 +14,7 @@ alloc_bank:
     ; Find something free in the bitmap of allocated banks.
 mod_max_banks:
     ldx #@(-- (/ 1024 8 8))
-l:  lda banks,x
+l:  lda master_banks,x
     cmp #$ff
     bne found_bank
     dex
@@ -53,8 +53,8 @@ l:  lsr
 
     ; Mark bank as allocated.
 n:  lda bits,y
-    ora banks,x
-    sta banks,x
+    ora master_banks,x
+    sta master_banks,x
 
     pla
     sta $9ff4
@@ -99,9 +99,9 @@ free_bank:
     sta $9ff4
 
     ;; Unset bit in master core map.
-    lda banks,x
+    lda master_banks,x
     and bitmasks,y
-    sta banks,x
+    sta master_banks,x
 
     ;; Restore callee's core.
     pla
@@ -132,8 +132,8 @@ l:  lda banks,x
     pla
 
     ; Mask out bits.
-    and banks,x
-    sta banks,x
+    and master_banks,x
+    sta master_banks,x
 
     ; Return to process' core.
     sty $9ff4

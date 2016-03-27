@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 mkdir -pv compiled
 mkdir -pv obj
 cd src/sh && ./make.sh && cd ../.. && cp src/sh/sh compiled

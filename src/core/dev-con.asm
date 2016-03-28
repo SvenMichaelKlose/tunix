@@ -7,6 +7,8 @@ devcon_init:
     jsr chrout
     lda #%11110010      ; Up/locase chars.
     sta $9005
+    lda #$00            ; Blink cursor.
+    sta $cc             ; (BLNSW)
 
     lda #FILE_OPENED
     sta vfile_states

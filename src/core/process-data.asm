@@ -17,6 +17,7 @@ FILE_WRITABLE   = 2
 
 core_data_start = @*pc*
 
+
 ;;; Processes
 
 current_process:        0   ; Index into following tables.
@@ -31,11 +32,15 @@ master_banks:       fill @(/ 1024 8)
 
 ;;; Virtual files which can be shared by processes.
 vfile_states:       fill max_num_vfiles ; Like in file_states.
-vfile_drivers:      fill max_num_vfiles
+vfile_ops_l:        fill max_num_vfiles
+vfile_ops_h:        fill max_num_vfiles
 vfile_handles:      fill max_num_vfiles ; Within drivers.
+vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
+
 
 ;;; /dev/con
 devcon_logical_file_numbers:    fill 8
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Per–process information in each copy of the core. ;;;
@@ -79,8 +84,8 @@ process_slot:   0       ; Indexes in master core tables.
 ;; States of opened files.
 file_states:    fill max_num_files_per_process
 
-;; Indexes into virtual file nodes which may be shared amongst processes.
-file_nodes:     fill max_num_files_per_process
+;; Indexes into virtual files in master core.
+file_vfiles:    fill max_num_files_per_process
 
 
 ;;; Banks allocated by "alloc_block":

@@ -1,3 +1,6 @@
+;;; CBM KERNAL
+
+;; SYSTEM CALLS
 ; Based on Simon Rowe's list at:
 ; http://sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?f=2&t=7795&p=84292
 ACPTR = $ffa5
@@ -36,3 +39,14 @@ UDTIM = $ffea
 UNLSN = $ffae
 UNTLK = $ffab
 VECTOR = $ff8d
+
+;; DEVICE NUMBERS
+CBMDEV_KEYBOARD = 0
+CBMDEV_DATASSETTE = 1
+CBMDEV_RS232 = 2
+CBMDEV_SCREEN = 3
+CBMDEV_PRINTER0 = 4
+CBMDEV_PRINTER1 = 5
+CBMDEV_PLOTTER0 = 6
+CBMDEV_PLOTTER1 = 7
+CBMDEV_DRIVE8 = 8

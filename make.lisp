@@ -26,6 +26,7 @@
              "core/load.asm"
              "core/launch.asm"
 
+             "core/vfile.asm"
              "core/fs.asm"
 
              "core/kernal.asm"
@@ -39,25 +40,6 @@
         "compiled/core.vice.txt")
   (alet (get-label 'library_calls)
     (format t "Number of possible linked library functions per process: ~A~%" (integer (/ (- #xfff !) 9)))))
-
-(defun make-sh ()
-  (make "compiled/sh"
-        (@ [+ "src/" _]
-           '("zeropage.asm"
-             "sh/start.asm"
-             "sh/main.asm"
-             "sh/print.asm"
-             "sh/end.asm"))
-        "compiled/sh.vice.txt"))
-
-(defun make-clock ()
-  (make "compiled/clock"
-        (@ [+ "src/" _]
-           '("zeropage.asm"
-             "clock/start.asm"
-             "clock/main.asm"
-             "clock/end.asm"))
-        "compiled/clock.vice.txt"))
 
 (load "src/gfx/calls.lisp")
 
@@ -114,8 +96,6 @@
     (adotimes ((- *img-blocks* 1))
       (write-block nil o))))
 
-;(make-sh)
-;(make-clock)
 (make-gfx)
 (make-core)
 (make-image)

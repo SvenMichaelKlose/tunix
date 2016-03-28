@@ -107,6 +107,9 @@ l:  lda mem_init,x
 n:  lda #%00000011
     sta banks
 
+    ; Initialise drivers.
+    jsr devcon_init     ; Console
+
     jsr init_per_process_data
 
     ;; Initialise init process.

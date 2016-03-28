@@ -3,7 +3,15 @@
 int
 main (char ** argv, int argc)
 { 
-    printf ("Hello!\n");
+    char c;
+
+    printf ("$ ");
+
+    while (1) {
+        c = fgetc (stdin);
+        if (c)
+            putchar (c);
+    }
 
     return 0;
 }

@@ -1,6 +1,33 @@
+; X: File handle
+;
+; Returns:
+; A: Byte.
+fs_read:
+    pha
+    lda file_states,x
+    tay
+    and #FILE_OPENED
+    beq +err_not_open
+
+    tya
+    and #FILE_READABLE
+    beq +err_not_writable
+
+    lda file_vfiles,x
+    tax
+    ldy #VOP_READ
+    pla
+    jmp call_vfile_op
+
+err_not_open:
+err_not_writable:
+    pla
+    sec
+    rts
+
 ; A: Byte
 ; X: File handle
-write:
+fs_write:
     pha
     lda file_states,x
     tay
@@ -55,8 +82,10 @@ call_vfile_op:
     sta tmp4
     lda tmp5
     jsr +l
+    sta tmp5
     pla
     sta $9ff4
+    lda tmp5
     rts
 
 l:  jmp (tmp3)

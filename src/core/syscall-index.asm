@@ -11,11 +11,11 @@ syscall_index:
     "resume" 0 <resume >resume
 
     "open" 0 <gopen >gopen
-    "read" 0 <read >read
+    "read" 0 <fs_read >fs_read
     "readw" 0 <readw >readw
     "readn" 0 <readn >readn
     "readm" 0 <readm >readm
-    "write" 0 <write >write
+    "write" 0 <fs_write >fs_write
     "close" 0 <gclose >gclose
 
     "take_over" 0 <take_over >take_over

@@ -1,4 +1,4 @@
-FILE_OPEN       = 128
+FILE_OPENED     = 128
 FILE_STREAM     = 64    ; Otherwise block–oriented.
 FILE_READABLE   = 1
 FILE_WRITABLE   = 2

@@ -181,4 +181,10 @@ init_per_process_data:
     lda #>link
     sta $0402
 
+    ; Init stdout.
+    lda #@(+ FILE_STREAM FILE_OPENED FILE_READABLE)
+    sta file_states
+    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
+    sta @(++ file_states)
+
     rts

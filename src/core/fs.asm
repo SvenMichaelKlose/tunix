@@ -1,4 +1,7 @@
+; A: Byte
+; X: File handle
 write:
+    pha
     lda file_states,x
     tay
     and #FILE_OPENED
@@ -11,7 +14,14 @@ write:
     lda file_vfiles,x
     tax
     ldy #VOP_WRITE
-    jmp call_vop
+    pla
+    jmp call_vfile_op
+
+err_not_open:
+err_not_writable:
+    pla
+    sec
+    rts
 
 ;; File VOPs.
 VOP_READ = 0
@@ -26,18 +36,27 @@ VOP_WRITE = 2
 ;VOP_UPDATE = 8
 ;VOP_REMOVE = 10
 
-call_fop:
+; X: vfile index.
+; Y: Operation index.
+call_vfile_op:
+    sta tmp5
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
     lda vfile_ops_l,x
-    sty tmp2
-    clc
-    adc #tmp2
     sta tmp
     lda vfile_ops_h,x
-    adc #0
     sta tmp2
-    jmp (tmp)
+    lda (tmp),y
+    sta tmp3
+    iny
+    lda (tmp),y
+    sta tmp4
+    lda tmp5
+    jsr +l
+    pla
+    sta $9ff4
+    rts
 
-err_not_open:
-err_not_writable:
-    sec
-    clc
+l:  jmp (tmp3)

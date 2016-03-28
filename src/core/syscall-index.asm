@@ -15,6 +15,7 @@ syscall_index:
     "readw" 0 <readw >readw
     "readn" 0 <readn >readn
     "readm" 0 <readm >readm
+    "write" 0 <write >write
     "close" 0 <gclose >gclose
 
     "take_over" 0 <take_over >take_over

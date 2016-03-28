@@ -8,16 +8,21 @@ devcon_init:
     lda #%11110010      ; Up/locase chars.
     sta $9005
 
-    lda #FILE_OPEN
+    lda #FILE_OPENED
     sta vfile_states
+    sta @(++ vfile_states)
     lda #0
     sta vfile_handles
+    sta @(++ vfile_handles)
     lda #CBMDEV_SCREEN
     sta devcon_logical_file_numbers
+    sta @(++ devcon_logical_file_numbers)
     lda #<devcon_screen_vops
     sta vfile_ops_l
+    sta @(++ vfile_ops_l)
     lda #>devcon_screen_vops
     sta vfile_ops_h
+    sta @(++ vfile_ops_h)
 
     ; Initialse stdout and stderr.
     lda #CBMDEV_SCREEN

@@ -30,6 +30,7 @@
              "core/fs.asm"
 
              "core/kernal.asm"
+             "core/dev-kbd.asm"
              "core/dev-con.asm"
 
              "core/syscall-index.asm"

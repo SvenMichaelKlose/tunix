@@ -1,3 +1,5 @@
+; Based on matrix table at http://sta.c64.org/cbm64kbdlay.html
+
 CLR_HOME = 235
 INS_DEL  = 255
 CURSOR_LEFT = 254

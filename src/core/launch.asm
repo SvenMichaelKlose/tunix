@@ -9,8 +9,8 @@ launch:
     jsr load
     bcs +error
     pla
-    sta tmp2
-    stx tmp     ; Save core.
+    sta tmp2    ; Save parent process' core.
+    stx tmp     ; Save new child process' core.
 
     ;; Save state for switching to it.
     ;; The next task switch back to the current process will return from

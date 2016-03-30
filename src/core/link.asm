@@ -36,6 +36,10 @@ link:
 error:
     rts
 
+; s: Path of program to load.
+;
+; Returns:
+; X: Core of program.
 load:
     jsr take_over
 

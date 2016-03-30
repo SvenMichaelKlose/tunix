@@ -1,5 +1,4 @@
 ; Calls over "take_over"s that haven't been "resume"d.
-takeovers = $02a1
 
 switch:
     ;;; Save process status.

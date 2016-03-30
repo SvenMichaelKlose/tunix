@@ -1,5 +1,5 @@
 devcon_keyboard_vops:
-    <devcon_read >devcon_read
+    <devcon_read_keyboard >devcon_read_keyboard
     <devcon_error >devcon_error
 
 devcon_screen_vops:
@@ -57,6 +57,11 @@ devcon_error:
     sec
     rts
 
+devcon_read_keyboard:
+    jsr take_over
+    jsr wait_key
+    jmp release
+
 ; X: vfile index
 devcon_read:
     jsr take_over
@@ -71,21 +76,11 @@ devcon_read:
 ; X: vfile index
 ; A: character
 devcon_write_screen:
-    cmp #@(char-code #\A)
-    bcc +n
-    cmp #@(++ (char-code #\Z))
-    bcs +n
-    sbc #@(- (char-code #\A) (char-code #\a) 1)
-    jmp +l
-
-n:  cmp #@(char-code #\a)
-    bcc +l
-    cmp #@(++ (char-code #\z))
-    bcs +l
-    sbc #@(- (char-code #\a) (char-code #\A) 1)
+    tay
+    beq +r
 
 devcon_write:
-l:  jsr take_over
+    jsr take_over
 
     pha
     lda vfile_handles,x
@@ -97,3 +92,5 @@ l:  jsr take_over
     jsr chrout
 
     jmp release
+
+r:  rts

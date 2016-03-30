@@ -43,3 +43,75 @@ devkbd_map_normal:
     "+PL->[@<"
     POUND "*]" CLR_HOME RIGHT_SHIFT "=^?"
     "!" ESCAPE CTRL "\"" " " COMMODORE "Q" RUN_STOP
+
+; Based on http://vicpp.blogspot.de/2012_06_01_archive.html
+
+via2_portb0 = $9120
+via2_porta0 = $9121
+
+; X: row mask
+; Y: column mask
+;
+; Returns:
+; X: row
+; Y: column
+scan_keyboard:
+    sei
+    txa
+    eor #$ff
+    sta column_mask
+    sty row_mask
+
+    ldy #7
+next_column:
+    ldx #7
+    lda bits,y
+    and column_mask
+    beq no_keypress
+    eor #$ff
+    sta via2_portb0
+
+    lda via2_porta0
+    ora row_mask
+
+next_row:
+    asl
+    bcc got_row
+
+    dex
+    bpl next_row
+
+    dey
+    bpl next_column
+
+no_keypress:
+    sec
+got_row:
+    cli
+    rts
+
+wait_key:
+    ldx #0
+    ldy #0
+    jsr scan_keyboard
+    bcs wait_key
+
+    stx tmp
+    tya
+    asl
+    asl
+    asl
+    ora tmp
+    tay
+    lda devkbd_map_normal,y
+    rts
+
+reverse_bits:
+    %01111111
+    %10111111
+    %11011111
+    %11101111
+    %11110111
+    %11111011
+    %11111101
+    %11111110

@@ -3,7 +3,8 @@
 ; Returns:
 ; A: Byte.
 fs_read:
-    pha
+    jsr take_over
+
     lda file_states,x
     tay
     and #FILE_OPENED
@@ -11,23 +12,27 @@ fs_read:
 
     tya
     and #FILE_READABLE
-    beq +err_not_writable
+    beq +err_not_readable
 
     lda file_vfiles,x
     tax
     ldy #VOP_READ
-    pla
-    jmp call_vfile_op
+
+    jsr call_vfile_op
+
+    jmp release
 
 err_not_open:
-err_not_writable:
-    pla
+    nop
+err_not_readable:
     sec
-    rts
+    jmp release
 
 ; A: Byte
 ; X: File handle
 fs_write:
+    jsr take_over
+
     pha
     lda file_states,x
     tay
@@ -42,10 +47,14 @@ fs_write:
     tax
     ldy #VOP_WRITE
     pla
-    jmp call_vfile_op
+    jsr call_vfile_op
+
+    clc
+    jmp release
 
 err_not_open:
+    nop
 err_not_writable:
     pla
     sec
-    rts
+    jmp release

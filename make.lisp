@@ -10,6 +10,8 @@
            '("zeropage.asm"
              "core/main.asm"
 
+             "core/low-data.asm"
+
              "core/pointer-manipulation.asm"
              "core/moveram.asm"
              "core/clrram.asm"

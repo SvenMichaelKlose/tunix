@@ -28,6 +28,7 @@
              "core/fs/fs.asm"
 
              "core/dev/kbd.asm"
+             "core/dev/charset-4x8.asm"
              "core/dev/con.asm"
              "core/dev/cbm/kernal.asm"
              "core/dev/cbm/control.asm"

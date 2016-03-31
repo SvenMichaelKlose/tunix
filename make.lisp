@@ -12,28 +12,31 @@
 
              "core/low-data.asm"
 
-             "core/pointer-manipulation.asm"
-             "core/moveram.asm"
-             "core/clrram.asm"
+             "core/mem/pointer-manipulation.asm"
+             "core/mem/moveram.asm"
+             "core/mem/clrram.asm"
+             "core/mem/alloc-bank.asm"
+
              "core/string.asm"
 
-             "core/alloc-bank.asm"
+             "core/proc/switch-banks-in.asm"
+             "core/proc/switch.asm"
+             "core/proc/process.asm"
 
-             "core/process.asm"
-             "core/task-switching.asm"
-             "core/switch-banks-in.asm"
+             "core/fs/vfile.asm"
+             "core/fs/open.asm"
+             "core/fs/fs.asm"
 
+             "core/dev/kbd.asm"
+             "core/dev/con.asm"
+             "core/dev/cbm/kernal.asm"
+             "core/dev/cbm/control.asm"
+             "core/dev/cbm/directory.asm"
+
+             "core/load.asm"
              "core/make-jump-table.asm"
              "core/link.asm"
-             "core/load.asm"
              "core/launch.asm"
-
-             "core/vfile.asm"
-             "core/fs.asm"
-
-             "core/kernal.asm"
-             "core/dev-kbd.asm"
-             "core/dev-con.asm"
 
              "core/syscall-index.asm"
 

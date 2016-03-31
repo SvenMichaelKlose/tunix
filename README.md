@@ -273,3 +273,16 @@ Flags and registers are not affected.
 
 "release" has to be called as often as "take_over" before multitasking is
 actually turned back on.
+
+## Virtual file system
+
+To support multitasking, g maintains a set of file descriptors for each
+process.
+
+### vfile structure
+
+Each file descriptor points to a vfile that is global and unique. When
+many processes access the same, file their file handles point
+to the same vfile. vfiles are created when a file is opened and removed
+when it isn't used by a process anymore. Only the vfile for the root
+directory is never removed.

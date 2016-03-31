@@ -1,3 +1,5 @@
+; XXX This is intended to go into dev/cbm if there's a working virtual
+; file system.
 gopen:
     jsr take_over
 

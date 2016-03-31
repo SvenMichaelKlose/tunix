@@ -32,10 +32,12 @@ master_banks:       fill @(/ 1024 8)
 
 ;;; Virtual files which can be shared by processes.
 vfile_states:       fill max_num_vfiles ; Like in file_states.
+vfile_parents:      fill max_num_vfiles ; (Parent) directory.
 vfile_ops_l:        fill max_num_vfiles
 vfile_ops_h:        fill max_num_vfiles
 vfile_handles:      fill max_num_vfiles ; Within drivers.
 vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
+vfile_root:         0
 
 
 ;;; /dev/con
@@ -87,6 +89,10 @@ file_states:    fill max_num_files_per_process
 ;; Indexes into virtual files in master core.
 file_vfiles:    fill max_num_files_per_process
 
+path_component: fill @(++ max_file_name_length)
+
+;; Working directory vfile.
+pwd:            0
 
 ;;; Banks allocated by "alloc_block":
 banks:      fill @(/ 1024 8)

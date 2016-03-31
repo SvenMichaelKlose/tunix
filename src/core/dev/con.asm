@@ -1,10 +1,12 @@
 devcon_keyboard_vops:
-    <devcon_read_keyboard >devcon_read_keyboard
-    <devcon_error >devcon_error
+    <devcon_read_keyboard >devcon_read_keyboard ; read
+    <devcon_error >devcon_error ; write
+    <devcon_error >devcon_error ; lookup
 
 devcon_screen_vops:
-    <devcon_error >devcon_error
-    <devcon_write_screen >devcon_write_screen
+    <devcon_error >devcon_error ; read
+    <devcon_write_screen >devcon_write_screen ; write
+    <devcon_error >devcon_error ; lookup
 
 devcon_init:
     lda #$93            ; Clear screen.

@@ -1,15 +1,7 @@
 ;; File VOPs.
 VOP_READ = 0
 VOP_WRITE = 2
-;VOP_CLOSE_FILE = 4
-
-;; Directory VOPs.
-;VOP_OPEN_FILE = 0
-;VOP_OPEN_DIR = 2
-;VOP_CLOSE_DIR = 4
-;VOP_LOOKUP = 6
-;VOP_UPDATE = 8
-;VOP_REMOVE = 10
+VOP_LOOKUP = 4
 
 ; X: vfile index.
 ; Y: Operation index.

@@ -1,4 +1,4 @@
-gfx_init:
+init_bitmap_mode:
     ; Fill color RAM.
     lda #0
     tax
@@ -53,15 +53,4 @@ n:
     sta $9003
     lda #$cc    ; screen=$1e00, chars=$1000
     sta $9005
-    lda #@(+ (* white 16) reverse cyan)
-    sta $900f
-
-    jsr reset_region
-
-    brk
-    c_setzb font $88
-    c_setzb do_compress_font_gaps 1
-    c_setzb font_compression 2
-    c_setzb font_space_size 3
-    0
     rts

@@ -8,6 +8,7 @@
   (make "obj/core"
         (@ [+ "src/" _]
            '("zeropage.asm"
+             "lib/gfx/vic-settings.inc.asm"
              "core/main.asm"
 
              "core/low-data.asm"
@@ -28,8 +29,11 @@
              "core/fs/fs.asm"
 
              "core/dev/kbd.asm"
-             "core/dev/charset-4x8.asm"
-             "core/dev/con.asm"
+             "lib/gfx/calcscr.asm"
+             "lib/gfx/clear-screen.asm"
+             "lib/gfx/init-bitmap-mode.asm"
+             "core/dev/con/charset-4x8.asm"
+             "core/dev/con/main.asm"
              "core/dev/cbm/kernal.asm"
              "core/dev/cbm/control.asm"
              "core/dev/cbm/directory.asm"
@@ -48,36 +52,39 @@
   (alet (get-label 'library_calls)
     (format t "Number of possible linked library functions per process: ~A~%" (integer (/ (- #xfff !) 9)))))
 
-(load "src/gfx/calls.lisp")
+(load "src/lib/gfx/calls.lisp")
 
 (defun make-gfx ()
   (make "compiled//gfx"
         (@ [+ "src/" _]
-           '("../bender/vic-20/vic.asm"
+           `("../bender/vic-20/vic.asm"
              "zeropage.asm"
-             "gfx/zeropage.asm"
-             "gfx/start.asm"
-             "gfx/main.asm"
+             ,@(@ [+ "lib/gfx/" _]
+                  '("zeropage.asm"
+                    "vic-settings.inc.asm"
+                    "start.asm"
+                    "main.asm"
+                    "masks.asm"
+                    "patterns.asm"
+                    "calcscr.asm"
+                    "reset-region.asm"
+                    "clip.asm"
+                    "vline.asm"
+                    "vfill.asm"
+                    "hline.asm"
+                    "frame.asm"
+                    "box.asm"
+                    "putchar.asm"
+                    "putstring.asm"
+                    "compress-font.asm"
+                    "init-bitmap-mode.asm"
+                    "init.asm"))
              "ui/syscalls.asm"
-             "gfx/masks.asm"
-             "gfx/patterns.asm"
-             "gfx/calcscr.asm"
-             "gfx/reset-region.asm"
-             "gfx/clip.asm"
-             "gfx/vline.asm"
-             "gfx/vfill.asm"
-             "gfx/hline.asm"
-             "gfx/frame.asm"
-             "gfx/box.asm"
-             "gfx/putchar.asm"
-             "gfx/putstring.asm"
-             "gfx/compress-font.asm"
-             "gfx/init.asm"
              "ui/window.asm"
              "ui/main.asm"
              "bytecode/interpreter.asm"
              "bytecode/instructions.asm"
-             "gfx/end.asm"))
+             "lib/gfx/end.asm"))
         "compiled/gfx.vice.txt"))
 
 (defun write-zeroes (x o)

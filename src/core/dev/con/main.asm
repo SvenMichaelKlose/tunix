@@ -9,12 +9,8 @@ devcon_screen_vops:
     <devcon_error >devcon_error ; lookup
 
 devcon_init:
-    lda #$93            ; Clear screen.
-    jsr chrout
-    lda #%11110010      ; Up/locase chars.
-    sta $9005
-    lda #$00            ; Blink cursor.
-    sta $cc             ; (BLNSW)
+    jsr init_bitmap_mode
+    jsr clear_screen
 
     lda #FILE_OPENED
     sta vfile_states

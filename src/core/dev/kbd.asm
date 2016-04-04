@@ -25,24 +25,24 @@ F8 = 236
 RETURN  = 13
 
 devkbd_map_normal:
-    "1" RETURN CURSOR_RIGHT CURSOR_DOWN " " F3 F5 "2"
+    "1" RETURN CURSOR_RIGHT CURSOR_DOWN " " F3 "q" "2"
     "3wa" LEFT_SHIFT "zse4"
     "5rdxcft6"
     "7ygvbhu8"
     "9ijnmko0"
     "+pl,.:@-"
     POUND "*;/" RIGHT_SHIFT "=^" CLR_HOME
-    INS_DEL ESCAPE CTRL RUN_STOP F1 COMMODORE "q" F7
+    INS_DEL ESCAPE CTRL RUN_STOP F1 COMMODORE F5 F7
 
 devkbd_map_shifted:
-    "!" RETURN CURSOR_LEFT CURSOR_UP " " F4 F6 "\""
+    "!" RETURN CURSOR_LEFT CURSOR_UP " " F4 "Q" "\""
     "#WA" LEFT_SHIFT "ZSE$"
     "%RDXCFT&"
     "'YGVBHU("
     ")IJNMKO0"
     "+PL<>[@-"
     POUND "*]?" RIGHT_SHIFT "=^" CLR_HOME
-    INS_DEL ESCAPE CTRL RUN_STOP F2 COMMODORE "Q" F8
+    INS_DEL ESCAPE CTRL RUN_STOP F2 COMMODORE F6 F8
 
 ; Based on http://vicpp.blogspot.de/2012_06_01_archive.html
 

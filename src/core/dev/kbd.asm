@@ -25,24 +25,24 @@ F8 = 236
 RETURN  = 13
 
 devkbd_map_normal:
-    INS_DEL RETURN CURSOR_RIGHT F7 F1 F3 F5 CURSOR_DOWN
-    "3wa4zse" LEFT_SHIFT
-    "5rd6cftx"
-    "7yg8bhuv"
-    "9ij0mkon"
-    "+pl-.:@,"
-    POUND "*;" CLR_HOME RIGHT_SHIFT "=^/"
-    "1" ESCAPE CTRL 2 " " COMMODORE "q" RUN_STOP
+    "1" RETURN CURSOR_RIGHT CURSOR_DOWN F1 F3 F5 F7
+    "3wa" LEFT_SHIFT "zse4"
+    "5rdxcft6"
+    "7ygvbhu8"
+    "9ijnmko0"
+    "+pl,.:@-"
+    POUND "*;/" RIGHT_SHIFT "=^" CLR_HOME
+    INS_DEL ESCAPE CTRL RUN_STOP " " COMMODORE "q" "2"
 
-devkbd_map_normal:
-    INS_DEL RETURN CURSOR_LEFT F8 F2 F4 F6 CURSOR_UP
-    "#WA$ZSE" LEFT_SHIFT
-    "%RD&CFTX"
-    "'YG(BHUV"
-    ")IJ0MKON"
-    "+PL->[@<"
-    POUND "*]" CLR_HOME RIGHT_SHIFT "=^?"
-    "!" ESCAPE CTRL "\"" " " COMMODORE "Q" RUN_STOP
+devkbd_map_shifted:
+    "!" RETURN CURSOR_LEFT CURSOR_UP F2 F4 F6 F8
+    "#WA" LEFT_SHIFT "ZSE$"
+    "%RDXCFT&"
+    "'YGVBHU("
+    ")IJNMKO0"
+    "+PL<>[@-"
+    POUND "*]?" RIGHT_SHIFT "=^" CLR_HOME
+    INS_DEL ESCAPE CTRL RUN_STOP " " COMMODORE "Q" "\""
 
 ; Based on http://vicpp.blogspot.de/2012_06_01_archive.html
 
@@ -94,10 +94,14 @@ wait_key:
     ldx #0
     ldy #0
     jsr scan_keyboard
-    bcs wait_key
+    bcc wait_key
+l:  ldx #0
+    ldy #0
+    jsr scan_keyboard
+    bcs -l
 
-    stx tmp
-    tya
+    sty tmp
+    txa
     asl
     asl
     asl
@@ -105,13 +109,3 @@ wait_key:
     tay
     lda devkbd_map_normal,y
     rts
-
-reverse_bits:
-    %01111111
-    %10111111
-    %11011111
-    %11101111
-    %11110111
-    %11111011
-    %11111101
-    %11111110

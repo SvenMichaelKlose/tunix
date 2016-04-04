@@ -37,19 +37,11 @@ devcon_init:
     sta @(++ vfile_ops_h)
     sta @(+ 2 vfile_ops_h)
 
-    ; Initialse stdin.
-    lda #CBMDEV_KEYBOARD
-    ldx #CBMDEV_KEYBOARD
-    ldy #0              ; (read)
-    jsr setlfs
-    jsr open
+    lda #0
+    sta xpos
+    sta ypos
 
-    ; Initialse stdout and stderr.
-    lda #CBMDEV_SCREEN
-    ldx #CBMDEV_SCREEN  ; Screen
-    ldy #1              ; (write)
-    jsr setlfs
-    jmp open
+    rts
 
 devcon_error:
     sec
@@ -74,8 +66,7 @@ devcon_read:
 ; X: vfile index
 ; A: character
 devcon_write_screen:
-    tay
-    beq +r
+    jmp devcon_print
 
 devcon_write:
     jsr take_over

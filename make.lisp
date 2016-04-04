@@ -33,6 +33,7 @@
              "lib/gfx/clear-screen.asm"
              "lib/gfx/init-bitmap-mode.asm"
              "core/dev/con/charset-4x8.asm"
+             "core/dev/con/print.asm"
              "core/dev/con/main.asm"
              "core/dev/cbm/kernal.asm"
              "core/dev/cbm/control.asm"

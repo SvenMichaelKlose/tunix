@@ -1,9 +1,10 @@
 clear_screen:
-    lda #$00
+    lda #<charset
     sta d
-    sta c
-    lda #$10
+    lda #>charset
     sta @(++ d)
-    lda #$20
+    lda #<charset_size
+    sta c
+    lda #>charset_size
     sta @(++ c)
     jmp clrram

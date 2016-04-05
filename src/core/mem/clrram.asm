@@ -1,10 +1,10 @@
 clrram:
     ldy d
     ldx c
-    inx
     lda #0
     sta d
     sta c
+    inc @(++ c)
 l:  sta (d),y
     iny
     beq +m

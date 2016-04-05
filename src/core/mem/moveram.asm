@@ -10,16 +10,20 @@ copy_forwards:
 l:  lda (s),y
     sta (d),y
     inc s
-    bne +n
-    inc @(++ s)
+    bne +k
 n:  inc d
-    bne +n
-    inc @(++ d)
-n:  dex
+    beq +m
+q:  dex
     bne -l
     dec @(++ c)
     bne -l
     rts
+
+k:  inc @(++ s)
+    jmp -n
+
+m:  inc @(++ d)
+    jmp -q
 
 copy_backwards:
 l:  lda (s),y
@@ -27,15 +31,19 @@ l:  lda (s),y
     dec s
     lda s
     cmp #$ff
-    bne +n
-    dec @(++ s)
+    beq +m
 n:  dec d
     lda d
     cmp #$ff
-    bne +n
-    dec @(++ d)
-n:  dex
-    bne -l
+    beq +j
+q:  dex
+    beq -l
     dec @(++ c)
     bne -l
     rts
+
+m:  dec @(++ s)
+    jmp -n
+
+j:  dec @(++ d)
+    jmp -q

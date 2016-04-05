@@ -39,6 +39,13 @@ devcon_init:
 
     lda #0
     sta xpos
+    sta ypos
+
+    rts
+
+devcon_print_charset:
+    lda #0
+    sta xpos
     lda #2
     sta ypos
 
@@ -62,7 +69,6 @@ n:  lda xpos
     sta xpos
     inx
     bne -l
-
     rts
 
 devcon_error:
@@ -83,12 +89,16 @@ devcon_read:
     tax
     jsr chkin
     jsr chrin
-    jmp release
+r:  jmp release
 
 ; X: vfile index
 ; A: character
 devcon_write_screen:
-    jmp devcon_print
+    jsr take_over
+    tay
+    beq -r
+    jsr devcon_print
+    jmp release
 
 devcon_write:
     jsr take_over

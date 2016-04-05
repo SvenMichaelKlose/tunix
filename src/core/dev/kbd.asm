@@ -100,7 +100,6 @@ l:  ldx #0
     jsr scan_keyboard
     bcs -l
 
-stop:
     sty tmp
     txa
     asl

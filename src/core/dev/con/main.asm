@@ -39,7 +39,29 @@ devcon_init:
 
     lda #0
     sta xpos
+    lda #2
     sta ypos
+
+    lda #32
+    jsr devcon_print
+    ldx #0
+l:  txa
+    jsr devcon_print
+    and #15
+    cmp #15
+    bne +n
+    lda #0
+    sta xpos
+    lda ypos
+    clc
+    adc #12
+    sta ypos
+n:  lda xpos
+    clc
+    adc #4
+    sta xpos
+    inx
+    bne -l
 
     rts
 

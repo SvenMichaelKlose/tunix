@@ -50,9 +50,9 @@ main:
     txs
 
     jsr $fd8d   ; Init memory.
-    jsr $fd52   ; Init KERNAL I/O vectors.
+    jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
-    jsr $e518
+    jsr $e518   ; Init VIC.
 
     ; Welcome the user.
     lda #<txt_booting

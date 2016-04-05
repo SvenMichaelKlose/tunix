@@ -1,4 +1,8 @@
 init:
+    jsr wait_key
+    jsr devcon_print
+    jmp init
+
     ; Load sh.
     lda #<path_sh
     sta s

@@ -1,10 +1,12 @@
 moveram:
+    ldy #0
+    ldx c
+    sty c
     inc @(++ c)
-    tay
+    cmp #0
     bne copy_backwards
 
 copy_forwards:
-    ldy #0
 l:  lda (s),y
     sta (d),y
     inc s
@@ -13,14 +15,13 @@ l:  lda (s),y
 n:  inc d
     bne +n
     inc @(++ d)
-n:  dec c
+n:  dex
     bne -l
     dec @(++ c)
     bne -l
     rts
 
 copy_backwards:
-    ldy #0
 l:  lda (s),y
     sta (d),y
     dec s
@@ -33,7 +34,7 @@ n:  dec d
     cmp #$ff
     bne +n
     dec @(++ d)
-n:  dec c
+n:  dex
     bne -l
     dec @(++ c)
     bne -l

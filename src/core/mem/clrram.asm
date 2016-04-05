@@ -1,11 +1,18 @@
 clrram:
-    inc @(++ c)
+    ldy d
+    ldx c
+    inx
     lda #0
-    tay
+    sta d
+    sta c
 l:  sta (d),y
-    jsr inc_d
-    dec c
+    iny
+    beq +m
+    dex
     bne -l
     dec @(++ c)
     bne -l
     rts
+
+m:  inc @(++ d)
+    jmp -l

@@ -45,6 +45,9 @@ main (char ** argv, int argc)
     char line[MAX_LINE_LENGTH];
     int count;
 
+    for (count = 0; count < 100; count++)
+        printf ("testtestsdfasfdasfsfsfdsfsdfsf!!!!!!!!!\n");
+
     while (1) {
         count = get_line (stdout, stdin, line);
     }

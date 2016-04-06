@@ -125,12 +125,14 @@ last_screen_row = @(+ charset (- screen_height 8))
     sta s
     lda #>last_screen_row
     sta @(++ s)
+
     ldx #screen_columns
     ldy #7
     lda #0
 l:  sta (s),y
     dey
     bpl -l
+
     lda s
     clc
     adc #screen_height

@@ -176,5 +176,5 @@ txt_no_memory:
     @(ascii2petscii "SORRY. EXITING...") 13 0
 
 txt_g:
-    "g operating system" 13
-    13 0
+    "g operating system" 10
+    10 0

@@ -10,7 +10,7 @@ copy_forwards:
 l:  lda (s),y
     sta (d),y
     inc s
-    bne +k
+    beq +k
 n:  inc d
     beq +m
 q:  dex

@@ -1,13 +1,33 @@
-devcon_printstr:
+devcon_print_string:
     ldy #0
 l:  lda (s),y
     beq +done
-    jsr devcon_print
+    jsr devcon_print_ctrl
     jsr inc_s
     jmp -l
 
 done:
     rts
+
+devcon_print_ctrl:
+    sta tmp2
+    txa
+    pha
+    tya
+    pha
+
+    lda tmp2
+    beq +done
+    cmp #13
+    bne +l
+    lda #0
+    sta xpos
+    lda ypos
+    clc
+    adc #8
+    sta ypos
+    jmp +done
+    jmp +l
 
 devcon_print:
     sta tmp2
@@ -16,7 +36,7 @@ devcon_print:
     tya
     pha
 
-    lda tmp2
+l:  lda tmp2
     ldy #0
     sty tmp2
     asl
@@ -73,6 +93,7 @@ m:  lda xpos
     bne +n
 n:  
 
+done:
     pla
     tay
     pla

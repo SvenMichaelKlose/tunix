@@ -37,10 +37,6 @@ devcon_init:
     sta @(++ vfile_ops_h)
     sta @(+ 2 vfile_ops_h)
 
-    lda #0
-    sta xpos
-    sta ypos
-
     rts
 
 devcon_print_charset:
@@ -95,9 +91,7 @@ r:  jmp release
 ; A: character
 devcon_write_screen:
     jsr take_over
-    tay
-    beq -r
-    jsr devcon_print
+    jsr devcon_print_ctrl
     jmp release
 
 devcon_write:

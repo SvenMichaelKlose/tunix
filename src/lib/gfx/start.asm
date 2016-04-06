@@ -19,6 +19,7 @@ program_size = @(- program_end program_start)
 
     <program_start >program_start
     <program_size >program_size
+    0 0         ; Data size.
 
     org $2000
 program_start:

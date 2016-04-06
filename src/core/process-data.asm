@@ -81,6 +81,7 @@ bank5:      0
 
 parent_process: 0
 program_start:  0 0
+bss_size:       0 0
 process_slot:   0       ; Indexes in master core tables.
 
 

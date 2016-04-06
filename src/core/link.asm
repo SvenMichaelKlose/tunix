@@ -132,6 +132,22 @@ n:  sta d
     jsr readw
     bcs -e
 
+    ; Load data size.
+    lda c
+    pha
+    lda @(++ c)
+    pha
+    jsr readw
+    bcs -e
+    lda c
+    sta bss_size
+    lda @(++ c)
+    sta @(++ bss_size)
+    pla
+    sta @(++ c)
+    pla
+    sta c
+
     ; Get first block.
     lda @(++ d)
     bpl not_blk5
@@ -147,8 +163,13 @@ not_blk5:
     lsr
     tay
 
-    ; Get number of blocks.
+    ; Get total number of blocks.
+stop:
+    lda c
+    clc
+    adc bss_size
     lda @(++ c)
+    adc @(++ bss_size)
     lsr
     lsr
     lsr
@@ -156,6 +177,7 @@ not_blk5:
     lsr
     lsr
     tax
+    inx
 
     ; Allocate banks and assign them to blocks.
 l:  jsr alloc_bank

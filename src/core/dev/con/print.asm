@@ -9,6 +9,13 @@ l:  lda (s),y
 done:
     rts
 
+done:
+    pla
+    tay
+    pla
+    tax
+    rts
+
 devcon_print_ctrl:
     sta tmp2
     txa
@@ -17,17 +24,10 @@ devcon_print_ctrl:
     pha
 
     lda tmp2
-    beq +done
+    beq -done
     cmp #10
     bne +l
-    lda #0
-    sta xpos
-    lda ypos
-    clc
-    adc #8
-    sta ypos
-    jmp +done
-    jmp +l
+    jmp next_line
 
 devcon_print:
     sta tmp2
@@ -83,19 +83,66 @@ m:  lda xpos
     sta xpos
     cmp #screen_width
     bne +n
+
+next_line:
     lda #0
     sta xpos
     lda ypos
     clc
     adc #8
     sta ypos
+
     cmp #screen_height
     bne +n
+    jsr devcon_scroll_up
+    lda #@(- screen_height 8)
+    sta ypos
 n:  
+    jmp -done
 
-done:
+devcon_scroll_up:
+    lda s
+    pha
+    lda @(++ s)
+    pha
+
+    lda #@(low (+ charset 8))
+    sta s
+    lda #<charset
+    sta d
+    lda #>charset
+    sta @(++ s)
+    sta @(++ d)
+    lda #@(low (- charset_size 8))
+    sta c
+    lda #@(high (- charset_size 8))
+    sta @(++ c)
+    lda #0
+    jsr moveram
+
+last_screen_row = @(+ charset (- screen_height 8))
+    lda #<last_screen_row
+    sta s
+    lda #>last_screen_row
+    sta @(++ s)
+    ldx #screen_columns
+    ldy #7
+    lda #0
+l:  sta (s),y
+    dey
+    bpl -l
+    lda s
+    clc
+    adc #screen_height
+    sta s
+    bcc +n
+    inc @(++ s)
+n:  dex
+    bne -l
+
     pla
-    tay
+    sta @(++ s)
     pla
-    tax
+    sta s
+
     rts

@@ -20,10 +20,10 @@ fs_read:
 
     jsr call_vfile_op
 
+    clc
     jmp release
 
 err_not_open:
-    nop
 err_not_readable:
     sec
     jmp release
@@ -53,7 +53,6 @@ fs_write:
     jmp release
 
 err_not_open:
-    nop
 err_not_writable:
     pla
     sec

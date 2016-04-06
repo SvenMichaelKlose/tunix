@@ -74,6 +74,7 @@ devcon_error:
 devcon_read_keyboard:
     jsr take_over
     jsr wait_key
+    clc
     jmp release
 
 ; X: vfile index
@@ -85,13 +86,14 @@ devcon_read:
     tax
     jsr chkin
     jsr chrin
-r:  jmp release
+    jmp release
 
 ; X: vfile index
 ; A: character
 devcon_write_screen:
     jsr take_over
     jsr devcon_print_ctrl
+    clc
     jmp release
 
 devcon_write:
@@ -107,5 +109,3 @@ devcon_write:
     jsr chrout
 
     jmp release
-
-r:  rts

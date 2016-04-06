@@ -164,7 +164,6 @@ not_blk5:
     tay
 
     ; Get total number of blocks.
-stop:
     lda c
     clc
     adc bss_size

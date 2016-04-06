@@ -18,7 +18,7 @@ devcon_print_ctrl:
 
     lda tmp2
     beq +done
-    cmp #13
+    cmp #10
     bne +l
     lda #0
     sta xpos

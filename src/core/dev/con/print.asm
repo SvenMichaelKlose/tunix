@@ -130,7 +130,7 @@ last_screen_row = @(+ charset (- screen_height 8))
     sta @(++ s)
 
     ldx #screen_columns
-    ldy #7
+m:  ldy #7
     lda #0
 l:  sta (s),y
     dey
@@ -143,7 +143,7 @@ l:  sta (s),y
     bcc +n
     inc @(++ s)
 n:  dex
-    bne -l
+    bne -m
 
     pla
     sta @(++ s)

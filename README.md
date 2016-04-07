@@ -71,7 +71,7 @@ Core functions return with the carry flag set if an error occurred.
 #### $0000: s – Source pointer
 #### $0002: d – Destination pointer
 #### $0004: c – Counter/extra pointer
-#### $0006–$000f: Reserved
+#### $0006–$0010: Reserved
 
 ### Process management
 #### $0400 – Link process to core or a library.

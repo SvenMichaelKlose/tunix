@@ -25,10 +25,7 @@ n:  tya
     ldx #2
     jsr chkin
 
-    jmp start_task_switching
-
 error:
-    sec
     jmp start_task_switching
 
 read:

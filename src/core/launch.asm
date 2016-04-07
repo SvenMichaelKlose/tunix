@@ -1,7 +1,7 @@
-do_exec:    0
-
+; s: Path name
+; A: != 0: Stop parent process until return.
 launch:
-    sta do_exec
+    pha
     lda $9ff4
     pha
 
@@ -21,7 +21,8 @@ launch:
     jsr take_over
 
     ;; Stop parent process.
-    lda do_exec
+    pla
+    tax
     beq +n
     ldx process_slot
     lda $9ff4
@@ -63,6 +64,7 @@ n:
 
 error:
     ;; Enable multitasking again and return.
+    pla
     pla
     sta $9ff4
     sec     ; Signal error.

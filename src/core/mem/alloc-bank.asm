@@ -21,6 +21,8 @@ l:  lda master_banks,x
     cpx #$ff
     bne -l
 
+    lda #ENOMEM
+    sta last_error
     sec
 
     pla
@@ -111,8 +113,8 @@ free_bank:
     jmp release
 
 err_not_allocated:
-    sec
-    jmp release
+    lda #EINVAL
+    jmp set_error
 
 free_process_banks:
     ;; Save process' core.

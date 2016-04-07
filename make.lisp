@@ -10,11 +10,13 @@
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
              "lib/gfx/vic-settings.inc.asm"
-             "core/errno.inc.asm"
 
              "core/main.asm"
 
              "core/low-data.asm"
+
+             "core/errno.inc.asm"
+             "core/error.asm"
 
              "core/mem/pointer-manipulation.asm"
              "core/mem/moveram.asm"
@@ -35,12 +37,13 @@
              "lib/gfx/calcscr.asm"
              "lib/gfx/clear-screen.asm"
              "lib/gfx/init-bitmap-mode.asm"
+             "core/dev/cbm/kernal.asm"
+             "core/dev/cbm/error.asm"
+             "core/dev/cbm/control.asm"
+             "core/dev/cbm/directory.asm"
              "core/dev/con/charset-4x8.asm"
              "core/dev/con/print.asm"
              "core/dev/con/main.asm"
-             "core/dev/cbm/kernal.asm"
-             "core/dev/cbm/control.asm"
-             "core/dev/cbm/directory.asm"
 
              "core/load.asm"
              "core/make-jump-table.asm"

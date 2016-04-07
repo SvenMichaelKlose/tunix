@@ -23,7 +23,10 @@ m:  tya
 
     lda #$0f
     jsr CLOSE
+    bcs +error
     jsr CLRCHN
-    clc
-error:
+    bcs +error
     rts
+
+error:
+    jmp return_cbm_error

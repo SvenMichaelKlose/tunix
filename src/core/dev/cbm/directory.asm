@@ -17,6 +17,7 @@ n:  ldy #$00       ; secondary address 0 (required for dir reading!)
 
     LDX #$02
     jsr CHKIN
+    bcs +error
 
     ldy #$04       ; skip 4 bytes on the first dir line
     bne +m
@@ -27,8 +28,10 @@ m:  jsr getbyte    ; get a byte from dir and ignore it
     bne -m
 
     jsr getbyte    ; get low byte of basic line number
+    bcs +error
     tay
     jsr getbyte    ; get high byte of basic line number
+    bcs +error
     pha
     tya            ; transfer Y to X without changing Akku
     tax
@@ -36,14 +39,18 @@ m:  jsr getbyte    ; get a byte from dir and ignore it
     jsr $ddcd      ; print basic line number
     lda #$20       ; print a space first
 l:  jsr CHROUT
+    bcs +error
     jsr getbyte
+    bcs +error
     bne -l      ; continue until end of line
 
     lda #$0D
     jsr CHROUT
+    bcs +error
     jsr CBM_STOP   ; RUN/STOP pressed?
     bne loop      ; no RUN/STOP -> continue
 error:
+    jmp return_cbm_error
     ; Akkumulator contains BASIC error code
 
     ; most likely error:
@@ -51,6 +58,7 @@ error:
 done:
     lda #$02
     jsr CLOSE
+    bcs -error
 
     jmp CLRCHN
 

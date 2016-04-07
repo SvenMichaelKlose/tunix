@@ -33,9 +33,6 @@ link:
     jsr make_jump_table
     jmp release
 
-error:
-    rts
-
 ; s: Path of program to load.
 ;
 ; Returns:
@@ -56,13 +53,17 @@ error2:
     pla
 n:  jsr gclose
 error:
-    sec
+    jsr set_cbm_error
 return_to_process:
     pla
     sta $9ff6
     pla
     sta $9ff4
     jmp release
+
+err_nomem:
+    lda #ENOMEM
+    jmp set_error
 
 load_library:
     jsr take_over
@@ -93,6 +94,7 @@ n:
     ;;; Allocate and populate +3K area.
     ; Get a bank.
     jsr alloc_bank
+    bcs -err_nomem
     lda tmp
     sta $9ff4
     sta tmp2
@@ -180,7 +182,10 @@ not_blk5:
 
     ; Allocate banks and assign them to blocks.
 l:  jsr alloc_bank
-    lda tmp
+    bcc +ok
+    lda #ENOMEM
+    jmp set_error
+ok: lda tmp
     sta bank1,y
     sta saved_bank1,y
     iny

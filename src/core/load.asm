@@ -24,8 +24,11 @@ n:  tya
 
     ldx #2
     jsr chkin
+    bcs +error
+    jmp start_task_switching
 
 error:
+    jsr set_cbm_error
     jmp start_task_switching
 
 read:
@@ -83,7 +86,6 @@ done:
 e:  sec
     rts
 
-error:
 gclose:
     jsr stop_task_switching
     jsr clrchn

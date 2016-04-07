@@ -68,8 +68,8 @@ n:  lda xpos
     rts
 
 devcon_error:
-    sec
-    rts
+    lda #ENOSYS
+    jmp set_error
 
 devcon_read_keyboard:
     jsr take_over
@@ -85,7 +85,9 @@ devcon_read:
     lda devcon_logical_file_numbers,x
     tax
     jsr chkin
+    bcs +error
     jsr chrin
+    bcs +error
     jmp release
 
 ; X: vfile index
@@ -105,7 +107,12 @@ devcon_write:
     lda devcon_logical_file_numbers,x
     tax
     jsr chkout
+    bcs +error
     pla
     jsr chrout
+    bcs +error
 
     jmp release
+
+error:
+    jmp return_cbm_error

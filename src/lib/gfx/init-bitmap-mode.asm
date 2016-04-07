@@ -1,11 +1,15 @@
-init_bitmap_mode:
-    ; Fill color RAM.
-    lda #0
-    tax
+fill_colors:
+    ldx #0
 l:  sta colors,x
     sta @(+ 256 colors),x
     dex
     bne -l
+    rts
+
+init_bitmap_mode:
+    ; Fill color RAM.
+    lda #0
+    jsr fill_colors
 
     ; Make bitmap columns on screen.
     lda #<screen

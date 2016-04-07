@@ -21,11 +21,6 @@ call_vfile_op:
     lda vfile_ops_h,x
     sta tmp2
 
-    ; Return to callee's core.
-    pla
-    sta $9ff4
-    pha
-
     ; Fetch operation vectors that needs to be called.
     lda (tmp),y
     sta tmp3

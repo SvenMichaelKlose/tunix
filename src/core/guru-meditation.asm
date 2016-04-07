@@ -111,12 +111,10 @@ l:  lda $9ff4,x
     ; Print process core.
     lda #@(char-code #\-)
     jsr devcon_print
-    ldy $9ff4
     lda #0
     sta $9ff4
     ldx current_process
     lda process_cores,x
-    sty $9ff4
     jsr print_hex
 
 l:  jmp -l

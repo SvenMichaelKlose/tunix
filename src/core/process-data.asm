@@ -42,9 +42,6 @@ vfile_root:         0
 
 ;;; /dev/con
 devcon_logical_file_numbers:    fill 8
-xpos:   0
-ypos:   0
-xcpos:  0
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

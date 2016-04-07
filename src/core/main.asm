@@ -14,31 +14,6 @@ found_memory_expansion = $80
     "A0"
     $c3 $c2 $cd     ; "CBM"
 
-    ;; Ultimem file system info.
-    "ULTIFS" 0              ; ID
-    $01 $00                 ; File system version.
-
-    ; Block store info.
-    @*fs-block-size*        ; Logical logarithmic block size (1Kb).
-    @(low *fs-blocks*)      ; Number of logical blocks.
-    @(high *fs-blocks*)
-    $01 $00                 ; Physical block of block allocation map.
-relative_ultifs_bam = @(- ultifs_bam #xa000)
-    <relative_ultifs_bam    ; Address of BAM.
-    >relative_ultifs_bam
-    $02 $00                 ; Physical first block (8Kb sized).
-
-    ; File store info.
-    $02 $00                 ; First physical block of file allocation map.
-relative_ultifs_fam = @(- ultifs_bam #xa000)
-    <relative_ultifs_fam    ; Address of BAM.
-    >relative_ultifs_fam
-
-
-ultifs_bam:
-    1
-    fill @(- *img-blocks* 2)
-
 main:
     sei
     lda #$7f

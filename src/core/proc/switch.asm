@@ -169,8 +169,6 @@ l:  lda 0,x
 return:
     rts
 
-old_nmi:    0 0
-
 take_over:
     pha
     ;; Don't do anything if multitasking has already been turned off.
@@ -181,23 +179,6 @@ take_over:
     lda #$7F
     sta $911e
 
-    ;; Restore old NMI vector.
-    ; Switch to master core.
-    lda $9ff4
-    pha
-    lda #0
-    sta $9ff4
-
-    ; Restore old NMI vector.
-    lda old_nmi
-    sta $0318
-    lda @(++ old_nmi)
-    sta $0319
-
-    ;; Switch back to current core.
-    pla
-    sta $9ff4
-
 n:  pla
     inc takeovers
     rts
@@ -207,34 +188,24 @@ release:
 
     ;; Don't do anything if calls are still nested.
     dec takeovers
-    beq restart_task_switching
+    bne +n
 
-    plp
+    pha
+    lda #$00
+    sta $9114
+    lda #$80
+    sta $9115
+    lda #$c0
+    sta $911e
+    pla
+
+n:  plp
     rts
 
-restart_task_switching:
-    pha
-
+start_task_switching:
     ;; Disable NMI.
     lda #$7f
     sta $911e
-
-    ;; Save old NMI vector.
-    ; Switch to master core.
-    lda $9ff4
-    pha
-    lda #0
-    sta $9ff4
-
-    ; Save vector.
-    lda $0318
-    sta old_nmi
-    lda $0319
-    sta @(++ old_nmi)
-
-    ; Switch back to current core.
-    pla
-    sta $9ff4
 
     ;; Set NMI vector to task switcher.
     lda #<switch
@@ -254,6 +225,4 @@ restart_task_switching:
     lda #$c0
     sta $911e
 
-    pla
-    plp
     rts

@@ -190,7 +190,7 @@ take_over:
 release:
     php
     dec takeovers
-;    beq +n
+    beq +n
     plp
     rts
 
@@ -202,7 +202,6 @@ n:  pha
     rts
 
 n:  pla
-stop:
     jmp switch
 
 stop_task_switching:
@@ -218,10 +217,6 @@ stop_task_switching:
 start_task_switching:
     php
     pha
-
-    ;; Disable NMI.
-    lda #$7f
-    sta $911e
 
     ;; Set NMI vector to task switcher.
     lda #<switch

@@ -21,8 +21,8 @@ fs_read:
     ldy #VOP_READ
 
     jsr call_vfile_op
+    bcs +r
 
-    clc
     jsr release
 
     pla
@@ -34,7 +34,7 @@ g:  jsr guru_meditation
 err_not_open:
 err_not_readable:
     sec
-    jmp release
+r:  jmp release
 
 ; A: Byte
 ; X: File handle
@@ -60,6 +60,7 @@ fs_write:
     ldy #VOP_WRITE
     pla
     jsr call_vfile_op
+    bcs +e
 
     clc
     jsr release
@@ -71,6 +72,7 @@ g:  jsr guru_meditation
 
 err_not_open:
 err_not_writable:
-    pla
     sec
+    pla
+e:  pla
     jmp release

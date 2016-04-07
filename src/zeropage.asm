@@ -19,5 +19,7 @@ tmp8:   0
 do_load_library:       0
 do_make_jumps_to_core: 0
 
+last_error: 0
+
 zp_end_core:
     end

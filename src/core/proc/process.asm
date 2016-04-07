@@ -10,10 +10,10 @@ init_process:
     sty @(++ saved_pc)
 
     tay     ; Save core bank.
-
-    ; Find new task slot.
     lda #0
     sta $9ff4
+
+    ; Find new task slot.
     ldx current_process
 l:  inx
     cpx #max_num_processes

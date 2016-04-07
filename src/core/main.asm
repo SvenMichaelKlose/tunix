@@ -98,6 +98,7 @@ l:  lda mem_init,x
     dex
     bpl -l
 
+    ; Clear RAM bank 0.
     lda #$00
     sta d
     sta c

@@ -10,6 +10,7 @@
            '("../bender/vic-20/vic.asm"
              "zeropage.asm"
              "lib/gfx/vic-settings.inc.asm"
+             "core/errno.inc.asm"
 
              "core/main.asm"
 

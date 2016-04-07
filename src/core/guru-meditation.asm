@@ -33,6 +33,10 @@ guru_middle:
     jmp devcon_print
 
 guru_meditation:
+    sei
+    lda #$7f
+    sta $911e
+
     lda #%00001000
     sta $900f
     jsr clear_screen
@@ -68,7 +72,7 @@ guru_meditation:
     jsr devcon_print_string
 
     ; Get to next line.
-    lda #8
+    lda #12
     sta xpos
     lda #16
     sta ypos
@@ -107,10 +111,12 @@ l:  lda $9ff4,x
     ; Print process core.
     lda #@(char-code #\-)
     jsr devcon_print
+    ldy $9ff4
     lda #0
     sta $9ff4
     ldx current_process
     lda process_cores,x
+    sty $9ff4
     jsr print_hex
 
 l:  jmp -l

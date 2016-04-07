@@ -1,10 +1,4 @@
 init:
-    jsr wait_key
-    jsr clear_screen
-    jsr devcon_print_charset
-    jsr wait_key
-    jsr guru_meditation
-
     ; Load sh.
     lda #<path_sh
     sta s

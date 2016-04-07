@@ -98,6 +98,14 @@ l:  lda mem_init,x
     dex
     bpl -l
 
+    lda #$00
+    sta d
+    sta c
+    lda #$20
+    sta @(++ d)
+    sta @(++ c)
+    jsr clrram
+
     ;; Initialise memory bank allocator.
     ; Set number of banks.
     lda found_memory_expansion

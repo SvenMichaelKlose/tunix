@@ -3,6 +3,7 @@
 ; Returns:
 ; A: Byte.
 fs_read:
+    jsr guru_meditation
     jsr take_over
 
     lda file_states,x

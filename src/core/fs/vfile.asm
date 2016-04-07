@@ -12,7 +12,6 @@ call_vfile_op:
     ; Save current core.
     lda $9ff4
     pha
-
     lda #0
     sta $9ff4
 
@@ -21,6 +20,11 @@ call_vfile_op:
     sta tmp
     lda vfile_ops_h,x
     sta tmp2
+
+    ; Return to callee's core.
+    pla
+    sta $9ff4
+    pha
 
     ; Fetch operation vectors that needs to be called.
     lda (tmp),y
@@ -32,17 +36,18 @@ call_vfile_op:
     ; Restore A and call operation.
     lda tmp5
     jsr +l
-
-    ; Save return value.
     sta tmp5
 
-    ; Return to callee's core.
+    php
+    pla
+    sta tmp6
+
     pla
     sta $9ff4
-
-    ; Restore return value.
+    lda tmp6
+    pha
     lda tmp5
-
+    plp
     rts
 
 l:  jmp (tmp3)

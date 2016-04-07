@@ -12,10 +12,15 @@ switch:
     sta saved_pc
     pla
     sta @(++ saved_pc)
-    tsx
-    stx saved_sp
 
+    lda takeovers
     jsr take_over
+    beq +l
+    inc needs_switch
+    jmp return_from_switch
+
+l:  tsx
+    stx saved_sp
 
     ; Save stack.
 l:  lda $100,x
@@ -57,7 +62,10 @@ switch_to_next_process:
 
     ; Get next process.
     ldx current_process
-m:  inx
+    ldy #max_num_processes
+m:  dey
+    bmi +g
+    inx
     cpx #max_num_processes
     bne +l
     ldx #0
@@ -77,6 +85,7 @@ switch_to_process:
     ldx process_slot
     lda #0
     sta $9ff4
+    sta needs_switch
     stx current_process
     sty $9ff4
 
@@ -108,6 +117,7 @@ l:  lda saved_zeropage,x
     lda saved_bank5
     sta $9ffe
 
+return_from_switch:
     lda @(++ saved_pc)
     pha
     lda saved_pc
@@ -120,6 +130,8 @@ l:  lda saved_zeropage,x
 
     jsr release
     rti
+
+g:  jsr guru_meditation
 
 save_process_state:
     ; Save register contents.
@@ -170,39 +182,43 @@ return:
     rts
 
 take_over:
-    pha
-    ;; Don't do anything if multitasking has already been turned off.
-    lda takeovers
-    bne +n
-
-    ;; Disable NMI,
-    lda #$7F
-    sta $911e
-
-n:  pla
+    php
     inc takeovers
+    plp
     rts
 
 release:
     php
-
-    ;; Don't do anything if calls are still nested.
     dec takeovers
-    bne +n
+;    beq +n
+    plp
+    rts
 
+n:  pha
+    lda needs_switch
+    bne +n
+    pla
+    plp
+    rts
+
+n:  pla
+stop:
+    jmp switch
+
+stop_task_switching:
+    php
     pha
-    lda #$00
-    sta $9114
-    lda #$80
-    sta $9115
-    lda #$c0
+    ;; Disable NMI.
+    lda #$7f
     sta $911e
     pla
-
-n:  plp
+    plp
     rts
 
 start_task_switching:
+    php
+    pha
+
     ;; Disable NMI.
     lda #$7f
     sta $911e
@@ -225,4 +241,6 @@ start_task_switching:
     lda #$c0
     sta $911e
 
+    pla
+    plp
     rts

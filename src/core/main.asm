@@ -149,6 +149,7 @@ l:  lda $100,x
     sta process_states
 
     ; Run it.
+    jsr start_task_switching
     jsr take_over
     lda #0
     jmp switch_to_process

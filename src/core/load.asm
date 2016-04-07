@@ -1,7 +1,7 @@
 ; XXX This is intended to go into dev/cbm if there's a working virtual
 ; file system.
 gopen:
-    jsr take_over
+    jsr stop_task_switching
 
     lda #2
     ldx #8
@@ -25,18 +25,14 @@ n:  tya
     ldx #2
     jsr chkin
 
-    php
-    jsr release
-    plp
-    rts
+    jmp start_task_switching
 
 error:
-    jsr release
     sec
-    rts
+    jmp start_task_switching
 
 read:
-    jsr take_over
+    jsr stop_task_switching
 
     jsr readst
     bne +eof
@@ -46,11 +42,10 @@ read:
     lda $90
     cmp #1   ; set carry when ST>0 (i.e., <>0!)
     pla      ; keep carry, and possibly set Z flag for byte=0
-    jmp release
+    jmp start_task_switching
 eof:
-    jsr release
     sec
-    rts
+    jmp start_task_switching
 
 
     ; Get size of block.
@@ -93,8 +88,8 @@ e:  sec
 
 error:
 gclose:
-    jsr take_over
+    jsr stop_task_switching
     jsr clrchn
     lda #2
     jsr close
-    jmp release
+    jmp start_task_switching

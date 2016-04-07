@@ -4,7 +4,7 @@ init:
     sta s
     lda #>path_sh
     sta @(++ s)
-    lda #1      ; Wait until launched process has been killed.
+    lda #0
     jsr launch
 
     ; Show that we're multitasking.

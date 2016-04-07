@@ -45,7 +45,7 @@ main (char ** argv, int argc)
     char line[MAX_LINE_LENGTH];
     int count;
 
-    for (count = 0; count < 10; count++)
+    for (count = 0; count < 100; count++)
         printf ("testtestsdfasfdasfsfsfdsfsdfsf!!!!!!!!!\n");
 
     while (1) {

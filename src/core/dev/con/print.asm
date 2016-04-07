@@ -14,10 +14,12 @@ done:
     tay
     pla
     tax
+    pla
     rts
 
 devcon_print_ctrl:
     sta tmp2
+    pha
     txa
     pha
     tya
@@ -31,6 +33,7 @@ devcon_print_ctrl:
 
 devcon_print:
     sta tmp2
+    pha
     txa
     pha
     tya

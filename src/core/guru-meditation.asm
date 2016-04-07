@@ -24,6 +24,14 @@ l:  jsr devcon_print
     bne -l
     rts
 
+guru_middle:
+    lda #$ba
+    jsr devcon_print
+    lda #$20
+    jsr guru_line
+    lda #$ba
+    jmp devcon_print
+
 guru_meditation:
     lda #%00001000
     sta $900f
@@ -37,12 +45,10 @@ guru_meditation:
     jsr guru_line
     lda #$bb
     jsr devcon_print
-    lda #$ba
-    jsr devcon_print
-    lda #$20
-    jsr guru_line
-    lda #$ba
-    jsr devcon_print
+
+    jsr guru_middle
+    jsr guru_middle
+
     lda #$c8
     jsr devcon_print
     lda #$cd
@@ -53,6 +59,7 @@ guru_meditation:
     ; Print guru message.
     lda #8
     sta xpos
+    lda #8
     sta ypos
     lda #<txt_guru
     sta s
@@ -60,12 +67,34 @@ guru_meditation:
     sta @(++ s)
     jsr devcon_print_string
 
-    ; Print process ID.
-    lda $9ff4
-    jsr print_hex
+    ; Get to next line.
+    lda #8
+    sta xpos
+    lda #16
+    sta ypos
 
+    lda #<txt_guru_error
+    sta s
+    lda #>txt_guru_error
+    sta @(++ s)
+    jsr devcon_print_string
+
+    ; Print error code.
+    lda last_error
+    jsr print_hex
+    lda #$20
+    jsr devcon_print
+
+    ; Print current banks.
+    ldx #0
+l:  lda $9ff4,x
+    jsr print_hex
     lda #@(char-code #\:)
     jsr devcon_print
+    inx
+    inx
+    cpx #12
+    bne -l
 
     ; Print callee's address.
     pla
@@ -74,7 +103,19 @@ guru_meditation:
     jsr print_hex
     tya
     jsr print_hex
+
+    ; Print process core.
+    lda #@(char-code #\-)
+    jsr devcon_print
+    lda #0
+    sta $9ff4
+    ldx current_process
+    lda process_cores,x
+    jsr print_hex
+
 l:  jmp -l
 
 txt_guru:
-    "Guru Meditation at " 0
+    "Guru Meditation.  Meditate and reset." 0
+txt_guru_error:
+    "Error: " 0

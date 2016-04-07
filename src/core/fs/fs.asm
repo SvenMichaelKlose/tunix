@@ -3,7 +3,8 @@
 ; Returns:
 ; A: Byte.
 fs_read:
-    jsr guru_meditation
+    lda takeovers
+    pha
     jsr take_over
 
     lda file_states,x
@@ -22,7 +23,13 @@ fs_read:
     jsr call_vfile_op
 
     clc
-    jmp release
+    jsr release
+
+    pla
+    cmp takeovers
+    bne +g
+    rts
+g:  jsr guru_meditation
 
 err_not_open:
 err_not_readable:
@@ -32,6 +39,10 @@ err_not_readable:
 ; A: Byte
 ; X: File handle
 fs_write:
+    sta tmp
+    lda takeovers
+    pha
+    lda tmp
     jsr take_over
 
     pha
@@ -51,7 +62,12 @@ fs_write:
     jsr call_vfile_op
 
     clc
-    jmp release
+    jsr release
+    pla
+    cmp takeovers
+    bne +g
+    rts
+g:  jsr guru_meditation
 
 err_not_open:
 err_not_writable:

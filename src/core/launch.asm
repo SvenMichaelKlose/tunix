@@ -1,7 +1,11 @@
+g:  jsr guru_meditation
+
 ; s: Path name
 ; A: != 0: Stop parent process until return.
 launch:
     pha
+    lda takeovers
+    bne -g
     lda $9ff4
     pha
 

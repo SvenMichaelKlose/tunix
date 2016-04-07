@@ -7,8 +7,10 @@
 (defun make-core ()
   (make "obj/core"
         (@ [+ "src/" _]
-           '("zeropage.asm"
+           '("../bender/vic-20/vic.asm"
+             "zeropage.asm"
              "lib/gfx/vic-settings.inc.asm"
+
              "core/main.asm"
 
              "core/low-data.asm"
@@ -43,6 +45,8 @@
              "core/make-jump-table.asm"
              "core/link.asm"
              "core/launch.asm"
+
+             "core/guru-meditation.asm"
 
              "core/syscall-index.asm"
 

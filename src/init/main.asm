@@ -1,4 +1,6 @@
 init:
+    jsr guru_meditation
+
     ; Load sh.
     lda #<path_sh
     sta s

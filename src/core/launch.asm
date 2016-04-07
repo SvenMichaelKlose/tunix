@@ -12,6 +12,9 @@ launch:
     sta tmp2    ; Save parent process' core.
     stx tmp     ; Save new child process' core.
 
+    pla
+    sta tmp3
+
     ;; Save state for switching to it.
     ;; The next task switch back to the current process will return from
     ;; this system call.
@@ -21,7 +24,7 @@ launch:
     jsr take_over
 
     ;; Stop parent process.
-    pla
+    lda tmp3
     tax
     beq +n
     ldx process_slot

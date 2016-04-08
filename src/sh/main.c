@@ -26,7 +26,7 @@ get_line (FILE * out, FILE * in, char * line)
         c = fgetc (in);
         if (c == CHAR_RETURN) {
             line[count++] = 0;
-            fputc (10, out);
+            fputc ('\n', out);
             return count;
         }
         if (c == CHAR_BACKSPACE) {
@@ -70,11 +70,44 @@ void
 free_values (char ** values)
 {
     int i;
-    for (i = 0;; i++) {
-        if (!values[i])
-            break;
+    for (i = 0; values[i]; i++)
         free (values[i]);
+}
+
+int
+echo (char ** values)
+{
+    int i;
+
+    for (i = 1; values[i]; i++) {
+        if (i > 1)
+            fputc (' ', stdout);
+        fputs (values[i], stdout);
     }
+    fputc ('\n', stdout);
+
+    return 0;
+}
+
+typedef int (*command_function) (char **);
+
+struct command {
+    char * name;
+    command_function fun;
+} commands[] = {
+    { "echo", echo },
+    { NULL, NULL }
+};
+
+command_function
+find_command (char * name)
+{
+    int i;
+
+    for (i = 0; commands[i].name; i++)
+        if (!strcmp (commands[i].name, name))
+            return commands[i].fun;
+    return NULL;
 }
 
 int
@@ -82,7 +115,7 @@ main (char ** argv, int argc)
 { 
     char * line = malloc (MAX_LINE_LENGTH + 1);
     char * values[MAX_PARAMS];
-    int count;
+    command_function f;
 
     while (1) {
         get_line (stdout, stdin, line);
@@ -90,6 +123,10 @@ main (char ** argv, int argc)
             continue;
         if (!strcmp ("exit", values[0]))
             break;
+        if (f = find_command (values[0])) {
+            f (values);
+            continue;
+        }
         printf ("%s: command not found\n", values[0]);
     }
 

@@ -19,14 +19,14 @@ launch:
     pla
     sta tmp3
 
+    ;; Stop multitasking.
+    jsr take_over
+
     ;; Save state for switching to it.
     ;; The next task switch back to the current process will return from
     ;; this system call.
     clc
     jsr save_process_state
-
-    ;; Stop multitasking.
-    jsr take_over
 
     ;; Stop parent process.
     lda tmp3

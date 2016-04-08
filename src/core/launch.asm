@@ -62,12 +62,10 @@ n:
     jsr init_process
 
     ; Save process info slot index.
-    lda $9ff4
-    ldy #0
-    sty $9ff4
     stx current_process
 
     ;; Run the new process.
+    lda $9ff4
     jmp switch_to_process
 
 error:

@@ -20,7 +20,6 @@ core_data_start = @*pc*
 
 ;;; Processes
 
-current_process:        0   ; Index into following tables.
 process_states:         fill max_num_processes
 process_cores:          fill max_num_processes
 process_cores_saved:    fill max_num_processes

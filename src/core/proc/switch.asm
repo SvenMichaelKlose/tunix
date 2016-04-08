@@ -93,13 +93,10 @@ switch_to_process:
     ; Switch in process' core bank.
     sta $9ff4
 
-    tay
-    ldx process_slot
     lda #0
-    sta $9ff4
     sta needs_switch
-    stx current_process
-    sty $9ff4
+    lda process_slot
+    sta current_process
 
     ; Restore stack contents.
     ldx saved_sp

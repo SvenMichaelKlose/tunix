@@ -299,7 +299,8 @@ The filesystem interface is responsible for maintaining files in directories.
 
 The store maintains allocated and free chunks in a binary tree sorted by
 occurrence.  Nodes may be split or merged without immediate need to rewrite
-banks of Flash memory.  Garbage collection is done separately on demand.
+complete banks of Flash memory.  Garbage collection is done separately on
+demand.
 
 ### File store
 

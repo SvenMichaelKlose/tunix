@@ -114,7 +114,7 @@ free_bank:
 
 err_not_allocated:
     lda #EINVAL
-    jmp set_error
+    jmp return_error
 
 free_process_banks:
     ;; Save process' core.

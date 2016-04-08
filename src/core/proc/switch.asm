@@ -184,15 +184,25 @@ return:
 take_over:
     php
     inc takeovers
+    beq +g
     plp
     rts
+
+g:  jsr guru_meditation
 
 release:
     php
     dec takeovers
     beq +n
+    pha
+    lda takeovers
+    cmp #$ff
+    beq +g
+    pla
     plp
     rts
+
+g:  jsr guru_meditation
 
 n:  pha
     lda needs_switch

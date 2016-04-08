@@ -38,6 +38,7 @@ read:
     bne +eof
 
     jsr chrin
+    bcs -error
     pha
     lda $90
     cmp #1   ; set carry when ST>0 (i.e., <>0!)

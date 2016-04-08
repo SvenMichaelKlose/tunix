@@ -45,6 +45,7 @@ load:
     jmp +l
 
 error2:
+    jsr set_cbm_error
     lda do_load_library
     beq +n
     pla
@@ -52,6 +53,7 @@ error2:
     pla
     pla
 n:  jsr gclose
+    bcc return_to_process
 error:
     jsr set_cbm_error
 return_to_process:
@@ -63,7 +65,7 @@ return_to_process:
 
 err_nomem:
     lda #ENOMEM
-    jmp set_error
+    jmp return_error
 
 load_library:
     jsr take_over
@@ -183,8 +185,9 @@ not_blk5:
     ; Allocate banks and assign them to blocks.
 l:  jsr alloc_bank
     bcc +ok
+    ; TODO: Free allocated banks.
     lda #ENOMEM
-    jmp set_error
+    jmp return_error
 ok: lda tmp
     sta bank1,y
     sta saved_bank1,y

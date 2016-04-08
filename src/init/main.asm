@@ -4,15 +4,10 @@ init:
     sta s
     lda #>path_sh
     sta @(++ s)
-    lda #0
+    lda #1          ; Wait until process finishes.
     jsr launch
-    bcs +g
 
-    ; Show that we're multitasking.
-l:  inc $1e00
-    jmp -l
-
-g:  jsr guru_meditation
+    jsr guru_meditation
 
 path_sh:
     @(ascii2petscii "SH") 0

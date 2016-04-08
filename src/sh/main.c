@@ -1,8 +1,9 @@
 #define MAX_LINE_LENGTH 255
 #define MAX_PARAMS 16
 
-#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CHAR_RETURN     10
 #define CHAR_BACKSPACE  8
@@ -65,6 +66,17 @@ parse (char ** values, char * in)
     return 1 + parse (++values, in);
 }
 
+void
+free_values (char ** values)
+{
+    int i;
+    for (i = 0;; i++) {
+        if (!values[i])
+            break;
+        free (values[i]);
+    }
+}
+
 int
 main (char ** argv, int argc)
 { 
@@ -75,13 +87,10 @@ main (char ** argv, int argc)
     while (1) {
         get_line (stdout, stdin, line);
         count = parse (values, line);
-        printf ("%d\n", count);
-        for (count = 0;; count++) {
-            if (!values[count])
-                break;
-            printf ("%s\n", values[count]);
-            free (values[count]);
-        }
+        if (!count)
+            continue;
+        if (!strcmp ("exit", values[0]))
+            break;
     }
 
     return 0;

@@ -56,7 +56,6 @@ via2_porta0 = $9121
 ; X: row
 ; Y: column
 scan_keyboard:
-    sei
     txa
     eor #$ff
     sta column_mask
@@ -87,7 +86,6 @@ next_row:
 no_keypress:
     sec
 got_row:
-    cli
     rts
 
 wait_key:

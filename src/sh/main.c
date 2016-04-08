@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#define CHAR_RETURN     13
+#define CHAR_RETURN     10
 #define CHAR_BACKSPACE  8
 
 void
@@ -23,6 +23,7 @@ get_line (FILE * out, FILE * in, char * line)
         c = fgetc (in);
         if (c == CHAR_RETURN) {
             line[count++] = 0;
+            fputc (10, out);
             return count;
         }
         if (c == CHAR_BACKSPACE) {
@@ -45,14 +46,9 @@ main (char ** argv, int argc)
     char line[MAX_LINE_LENGTH];
     int count;
 
-    for (count = 0; count < 30; count++)
-        printf ("testtestsdfasfdasfsfsfdsfsdfsf!!!!!!!!!\n");
-
-/*
     while (1) {
         count = get_line (stdout, stdin, line);
     }
-*/
 
     return 0;
 }

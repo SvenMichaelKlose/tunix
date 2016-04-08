@@ -1,5 +1,14 @@
 ; Calls over "take_over"s that haven't been "resume"d.
 
+force_switch:
+    ; Increment return address for RTI.
+    stx saved_x
+    tsx
+    inx
+    inx
+    inc $0100,x
+    ldx saved_x
+
 switch:
     ;;; Save process status.
     ; Save registers.
@@ -212,7 +221,7 @@ n:  pha
     rts
 
 n:  pla
-    jmp switch
+    jmp force_switch
 
 stop_task_switching:
     php

@@ -4,9 +4,7 @@ force_switch:
     ; Increment return address for RTI.
     stx saved_x
     tsx
-    inx
-    inx
-    inc $0100,x
+    inc $0102,x
     ldx saved_x
 
 switch:

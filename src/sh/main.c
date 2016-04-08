@@ -1,6 +1,8 @@
 #define MAX_LINE_LENGTH 255
+#define MAX_PARAMS 16
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define CHAR_RETURN     10
 #define CHAR_BACKSPACE  8
@@ -41,13 +43,45 @@ get_line (FILE * out, FILE * in, char * line)
 }
 
 int
+parse (char ** values, char * in)
+{
+    char * tmp;
+    char * out;
+    size_t len;
+
+    *values = NULL;
+    while (*in == ' ')
+        in++;
+    if (!*in)
+        return 0;
+    tmp = in;
+    len = 0;
+    while (*tmp++ > ' ')
+        len++;
+    *values = out = malloc (len + 1);
+    while (*in > ' ')
+        *out++ = *in++;
+    *out = 0;
+    return 1 + parse (++values, in);
+}
+
+int
 main (char ** argv, int argc)
 { 
-    char line[MAX_LINE_LENGTH];
+    char * line = malloc (MAX_LINE_LENGTH + 1);
+    char * values[MAX_PARAMS];
     int count;
 
     while (1) {
-        count = get_line (stdout, stdin, line);
+        get_line (stdout, stdin, line);
+        count = parse (values, line);
+        printf ("%d\n", count);
+        for (count = 0;; count++) {
+            if (!values[count])
+                break;
+            printf ("%s\n", values[count]);
+            free (values[count]);
+        }
     }
 
     return 0;

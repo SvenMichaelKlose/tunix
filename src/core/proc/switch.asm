@@ -8,6 +8,22 @@ force_switch:
     ldx saved_x
 
 switch:
+    pha
+
+    ;;; Restart NMI.
+    lda #$80
+    sta $9115
+
+    ;;; Return if multitasking has been turned off.
+    lda takeovers
+    beq +l
+    sta needs_switch
+    pla
+    rti
+
+l:  pla
+    jsr take_over
+
     ;;; Save process status.
     ; Save registers.
     sta saved_a
@@ -19,18 +35,7 @@ switch:
     sta saved_pc
     pla
     sta @(++ saved_pc)
-
-    ; Restart NMI.
-    lda #$80
-    sta $9115
-
-    lda takeovers
-    jsr take_over
-    beq +l
-    inc needs_switch
-    jmp return_from_switch
-
-l:  tsx
+    tsx
     stx saved_sp
 
     ; Save stack.

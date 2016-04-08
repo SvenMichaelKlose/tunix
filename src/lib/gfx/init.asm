@@ -1,4 +1,7 @@
 gfx_init:
+    lda #black
+    ldx #white
+    ldy #cyan
     jsr init_bitmap_mode
 
     lda #@(+ (* white 16) reverse cyan)

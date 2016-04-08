@@ -9,6 +9,9 @@ devcon_screen_vops:
     <devcon_error >devcon_error ; lookup
 
 devcon_init:
+    lda #green
+    ldx #black
+    ldy #black
     jsr init_bitmap_mode
     jsr clear_screen
 

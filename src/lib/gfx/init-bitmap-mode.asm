@@ -6,9 +6,15 @@ l:  sta colors,x
     bne -l
     rts
 
+; A: text colour
+; X: screen colour
+; Y: border colour
 init_bitmap_mode:
+    stx tmp
+    sty tmp2
+
     ; Fill color RAM.
-    lda #0
+    lda #green
     jsr fill_colors
 
     ; Make bitmap columns on screen.
@@ -57,4 +63,12 @@ n:
     sta $9003
     lda #$cc    ; screen=$1e00, chars=$1000
     sta $9005
+    lda tmp
+    asl
+    asl
+    asl
+    asl
+    ora #%00001000
+    ora tmp2
+    sta $900f
     rts

@@ -4,7 +4,7 @@ init:
     sta s
     lda #>path_sh
     sta @(++ s)
-    lda #0
+    lda #1
     jsr launch
     bcs +g
 

@@ -6,6 +6,8 @@ VOP_LOOKUP = 4
 ; X: vfile index.
 ; Y: Operation index.
 call_vfile_op:
+    jsr take_over
+
     ; Save whatever is in A.
     sta tmp5
 
@@ -43,6 +45,6 @@ call_vfile_op:
     pha
     lda tmp5
     plp
-    rts
+    jmp release
 
 l:  jmp (tmp3)

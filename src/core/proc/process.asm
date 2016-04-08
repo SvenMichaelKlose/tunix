@@ -1,3 +1,37 @@
+init_per_process_data:
+    lda #<per_process_data_start
+    sta d
+    lda #>per_process_data_start
+    sta @(++ d)
+    lda #<per_process_data_size
+    sta c
+    lda #>per_process_data_size
+    sta @(++ c)
+    jsr clrram
+
+    ; Make jump to link().
+    lda #$4c
+    sta $0400
+    lda #<link
+    sta $0401
+    lda #>link
+    sta $0402
+
+    ; Init standard streeams.
+    lda #@(+ FILE_STREAM FILE_OPENED FILE_READABLE)
+    sta file_states
+    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
+    sta @(++ file_states)
+    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
+    sta @(+ 2 file_states)
+    ldy #0
+    sty file_vfiles
+    iny
+    sty @(++ file_vfiles)
+    sty @(+ 2 file_vfiles)
+
+    rts
+
 ; Input:
 ;   A: Process core.
 ;   X/Y: Initial program counter.
@@ -160,38 +194,4 @@ resume:
     sta process_states,x
     pla
     sta $9ff4
-    rts
-
-init_per_process_data:
-    lda #<per_process_data_start
-    sta d
-    lda #>per_process_data_start
-    sta @(++ d)
-    lda #<per_process_data_size
-    sta c
-    lda #>per_process_data_size
-    sta @(++ c)
-    jsr clrram
-
-    ; Make jump to link().
-    lda #$4c
-    sta $0400
-    lda #<link
-    sta $0401
-    lda #>link
-    sta $0402
-
-    ; Init standard streeams.
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_READABLE)
-    sta file_states
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
-    sta @(++ file_states)
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
-    sta @(+ 2 file_states)
-    ldy #0
-    sty file_vfiles
-    iny
-    sty @(++ file_vfiles)
-    sty @(+ 2 file_vfiles)
-
     rts

@@ -20,6 +20,10 @@ switch:
     pla
     sta @(++ saved_pc)
 
+    ; Restart NMI.
+    lda #$80
+    sta $9115
+
     lda takeovers
     jsr take_over
     beq +l

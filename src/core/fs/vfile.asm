@@ -6,22 +6,22 @@ VOP_LOOKUP = 4
 ; X: vfile index.
 ; Y: Operation index.
 call_vfile_op:
-    jsr take_over
-
     ; Save whatever is in A.
     sta tmp5
 
-    ; Save current core.
+    ; Get pointer to vfile operation vector table.
+    jsr take_over
     lda $9ff4
     pha
     lda #0
     sta $9ff4
-
-    ; Get pointer to vfile operation vector table.
     lda vfile_ops_l,x
     sta tmp
     lda vfile_ops_h,x
     sta tmp2
+    pla
+    sta $9ff4
+    jsr release
 
     ; Fetch operation vectors that needs to be called.
     lda (tmp),y
@@ -39,12 +39,10 @@ call_vfile_op:
     pla
     sta tmp6
 
-    pla
-    sta $9ff4
     lda tmp6
     pha
     lda tmp5
     plp
-    jmp release
+    rts
 
 l:  jmp (tmp3)

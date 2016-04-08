@@ -86,11 +86,11 @@ main (char ** argv, int argc)
 
     while (1) {
         get_line (stdout, stdin, line);
-        count = parse (values, line);
-        if (!count)
+        if (!parse (values, line))
             continue;
         if (!strcmp ("exit", values[0]))
             break;
+        printf ("%s: command not found\n", values[0]);
     }
 
     return 0;

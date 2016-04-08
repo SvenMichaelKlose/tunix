@@ -95,12 +95,6 @@ n:  lda #%00000011
     ; Initialise drivers.
     jsr devcon_init     ; Console
 
-    lda #<txt_g
-    sta s
-    lda #>txt_g
-    sta @(++ s)
-    jsr devcon_print_string
-
     ;; Initialise init process.
     jsr init_per_process_data
 
@@ -159,7 +153,3 @@ txt_no_memory:
     @(ascii2petscii "CHECK HTTP://GO4RETRO.COM TO GET ONE.") 13 13
     @(ascii2petscii "FOR VICE PLEASE ADJUST YOUR CONFIGURATION.") 13 13
     @(ascii2petscii "SORRY. EXITING...") 13 0
-
-txt_g:
-    "g operating system" 10
-    10 0

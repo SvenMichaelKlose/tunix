@@ -1,5 +1,3 @@
-found_memory_expansion = $80
-
 test_ultimem:
     ; Check for Ultimem expansion.
     lda #<txt_checking_memory
@@ -18,7 +16,7 @@ test_ultimem:
     lda #<txt_no_memory
     ldy #>txt_no_memory
     jsr $cb1e
-    jsr $ffd2       ; Wait for keypress.
+    jsr chrin       ; Wait for keypress.
     jmp ($c000)     ; Start BASIC.
 
 found_ultimem8m:

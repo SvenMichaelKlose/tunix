@@ -78,6 +78,10 @@ l:  inx
     lda #$fd
     sta saved_sp
 
+    lda #2
+    sta saved_bank5
+    sta bank5
+
     ; Set pointer to first library call to be generated.
     lda #<library_calls
     sta end_of_library_calls

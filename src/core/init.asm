@@ -1,4 +1,10 @@
-init_core:
+core_size = @(- core_end core_start)
+
+    <core_size >core_size
+
+    org $a000
+
+core_start:
     ; Configure Ultimem expansion.
     ldx #15
 l:  lda mem_init,x
@@ -17,12 +23,14 @@ l:  lda mem_init,x
 
     ;; Initialise memory bank allocator.
     ; Set number of banks.
+    ldy #@(-- (/ 1024 8 8))
     lda found_memory_expansion
     beq +n
-    lda #@(-- (/ 128 8 8))
-    sta @(++ mod_max_banks)
-    ; Pre–allocate bank of master core and IO (for linking).
-n:  lda #%00000011
+    ldy #@(-- (/ 128 8 8))
+n:  sty max_banks
+
+    ; Pre–allocate bank of master core data, code and IO (for linking).
+n:  lda #%00000111
     sta banks
 
     ; Initialise drivers.
@@ -46,6 +54,10 @@ l:  lda $100,x
     inx
     bne -l
 
+    lda #2
+    sta saved_bank5
+    sta bank5
+
     ; Init process info.
     lda #129
     sta process_states
@@ -59,11 +71,11 @@ l:  lda $100,x
 mem_init:
     %00000000   ; LED off.
     %00111111   ; IO3/2 RAM, +3K R/W RAM
-    %01111111   ; BLK5 ROM, BLK1,2,3 R/W RAM
+    %10111111   ; BLK5 ro RAM, BLK1,2,3 R/W RAM
     0           ; (ID)
     0 0         ; +3K
     0 0         ; IO
     0 0         ; BLK 1
     0 0         ; BLK 2
     0 0         ; BLK 3
-    0 0         ; BLK 5
+    2 0         ; BLK 5

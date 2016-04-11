@@ -1,23 +1,22 @@
 (= *model* :vic-20)
 
+(defvar *rom?* nil)
+
 (defun make (to files &optional (cmds nil))
   (apply #'assemble-files to files)
   (& cmds (make-vice-commands cmds "break .stop")))
 
-(defun make-core ()
-  (make "obj/core"
+(defun make-core (path)
+  (make "compiled/core"
         (@ [+ "src/" _]
-           '("../bender/vic-20/vic.asm"
+           `("../bender/vic-20/vic.asm"
              "zeropage.asm"
              "lib/gfx/vic-settings.inc.asm"
-
              "core/settings.asm"
-             "core/rom-info.asm"
-             "core/main.asm"
-             "core/test-ultimem.asm"
-             "core/init.asm"
 
              "core/low-data.asm"
+
+             "core/init.asm"
 
              "core/errno.inc.asm"
              "core/error.asm"
@@ -59,16 +58,34 @@
              "core/syscall-index.asm"
 
              "init/main.asm"
+             "core/end.asm"
 
              "core/process-data.asm"))
         "compiled/core.vice.txt")
   (alet (get-label 'library_calls)
     (format t "Number of possible linked library functions per process: ~A~%" (integer (/ (- #xfff !) 9)))))
 
+(defun make-loader ()
+  (make "compiled/g"
+        (@ [+ "src/" _]
+           '("zeropage.asm"
+             "core/low-data.asm"
+             "../bender/vic-20/basic-loader.asm"
+             "core/main.asm"
+             "core/test-ultimem.asm"
+             "core/errno.inc.asm"
+             "core/mem/pointer-manipulation.asm"
+             "core/mem/clrram.asm"
+             "core/mem/moveram.asm"
+             "core/dev/cbm/kernal.asm"
+             "core/dev/cbm/error.asm"
+             "core/load.asm"))
+        "compiled/g.vice.txt"))
+
 (load "src/lib/gfx/calls.lisp")
 
 (defun make-gfx ()
-  (make "compiled//gfx"
+  (make "compiled/gfx"
         (@ [+ "src/" _]
            `("../bender/vic-20/vic.asm"
              "zeropage.asm"
@@ -119,11 +136,13 @@
 
 (defun make-image ()
   (with-output-file o "compiled/g.img"
-    (write-block (fetch-file "obj/core") o)
+    (write-block (fetch-file "compiled/core") o)
     (adotimes ((- *img-blocks* 1))
       (write-block nil o))))
 
 (make-gfx)
-(make-core)
-(make-image)
+(with-temporary *rom?* t
+  (make-core))
+(make-loader)
+;(make-image)
 (quit)

@@ -12,8 +12,7 @@ alloc_bank:
     sta $9ff4
 
     ; Find something free in the bitmap of allocated banks.
-mod_max_banks:
-    ldx #@(-- (/ 1024 8 8))
+    ldx max_banks
 l:  lda master_banks,x
     cmp #$ff
     bne found_bank
@@ -121,7 +120,7 @@ free_process_banks:
     ldy $9ff4
 
     ;; Mask out bit in master core's bank map.
-    ldx @(++ mod_max_banks)
+    ldx max_banks
 
     ; Get byte and invert it.
 l:  lda banks,x

@@ -1,17 +1,14 @@
 switch_banks_in:
-    lda bank_io
-    beq +n
-    sta $9ff6
-n:  lda bank1
+    lda saved_bank1
     beq +n
     sta $9ff8
-n:  lda bank2
+n:  lda saved_bank2
     beq +n
     sta $9ffa
-n:  lda bank3
+n:  lda saved_bank3
     beq +n
     sta $9ffc
-n:  lda bank5
+n:  lda saved_bank5
     beq +n
     sta $9ffe
 n:  rts

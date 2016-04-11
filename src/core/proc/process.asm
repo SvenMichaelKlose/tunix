@@ -30,6 +30,9 @@ init_per_process_data:
     sty @(++ file_vfiles)
     sty @(+ 2 file_vfiles)
 
+    lda #2
+    sta saved_bank5
+
     rts
 
 ; Input:
@@ -77,10 +80,6 @@ l:  inx
     sta @(+ saved_stack 254)
     lda #$fd
     sta saved_sp
-
-    lda #2
-    sta saved_bank5
-    sta bank5
 
     ; Set pointer to first library call to be generated.
     lda #<library_calls

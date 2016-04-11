@@ -54,10 +54,6 @@ l:  lda $100,x
     inx
     bne -l
 
-    lda #2
-    sta saved_bank5
-    sta bank5
-
     ; Init process info.
     lda #129
     sta process_states

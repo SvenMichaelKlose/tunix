@@ -60,20 +60,13 @@ saved_flags:        0
 saved_sp:           0
 saved_stack:        fill 256
 saved_zeropage:     fill $90    ; BASIC part only.
+saved_bank_ram:     0
 saved_bank_io:      0
 saved_bank1:        0
 saved_bank2:        0
 saved_bank3:        0
 saved_bank5:        0
 
-
-;;; Banks allocated via "load".
-bank_ram:   0
-bank_io:    0
-bank1:      0
-bank2:      0
-bank3:      0
-bank5:      0
 
 parent_process: 0
 program_start:  0 0

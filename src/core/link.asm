@@ -100,7 +100,7 @@ n:
     lda tmp
     sta $9ff4
     sta tmp2
-    sta bank_ram
+    sta saved_bank_ram
     sta tmp7    ; For generating library calls.
 
     ;;; Initialise per–process data in +3K area.
@@ -189,7 +189,6 @@ l:  jsr alloc_bank
     lda #ENOMEM
     jmp return_error
 ok: lda tmp
-    sta bank1,y
     sta saved_bank1,y
     iny
     dex

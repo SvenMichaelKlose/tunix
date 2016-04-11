@@ -11,7 +11,11 @@
              "zeropage.asm"
              "lib/gfx/vic-settings.inc.asm"
 
+             "core/settings.asm"
+             "core/rom-info.asm"
              "core/main.asm"
+             "core/test-ultimem.asm"
+             "core/init.asm"
 
              "core/low-data.asm"
 

@@ -14,7 +14,6 @@ end
     jsr test_ultimem
 
 if @(not *rom?*)
-stop:
     ;; Load core to block5.
     lda #255
     sta $9ff2
@@ -42,6 +41,7 @@ stop:
 
     cld
     ldx #$ff
+    txs
 
     jmp $a000
 
@@ -60,6 +60,7 @@ if @(not *rom?*)
 
     cld
     ldx #$ff
+    txs
 
     jmp $a000
 end

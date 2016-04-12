@@ -5,13 +5,8 @@ takeovers = $02a2
 needs_switch = $02a3
 max_banks = $02a4
 
-;;; /dev/kbd
-
-column_mask = $2a5
-row_mask = $2a6
-
 ;;; /dev/con
 
-xpos = $2a7
-ypos = $2a8
-xcpos = $2a9
+xpos = $2a5
+ypos = $2a6
+xcpos = $2a7

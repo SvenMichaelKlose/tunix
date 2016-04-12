@@ -25,86 +25,50 @@ F8 = 236
 
 RETURN  = 10
 
+; TODO: Fix this map and pass it to Simon Rowe.
+; 00 1      10 none     20 [SPACE]  30 Q
+; 01 3      11 A        21 Z        31 E
+; 02 5      12 D        22 C        32 T
+; 03 7      13 G        23 B        33 U
+; 04 9      14 J        24 M        34 O
+; 05 +      15 L        25 .        35 @
+; 06 £      16 ;        26 none     36 ^
+; 07 [DEL]  17 [CSR R]  27 [F1]     37 [F5]
+; 08 [<-]   18 [STOP]   28 none     38 2
+; 09 W      19 none     29 S        39 4
+; 0A R      1A X        2A F        3A 6
+; 0B Y      1B V        2B H        3B 8
+; 0C I      1C N        2C K        3C 0
+; 0D P      1D ,        2D :        3D -
+; 0E *      1E /        2E =        3E [HOME]
+; 0F [RET]  1F [CSR D]  2F [F3]     3F [F7]
+
 devkbd_map_normal:
-    "1" ESCAPE CURSOR_RIGHT CURSOR_DOWN " " F3 "q" "2"
-    "3wa" LEFT_SHIFT "zse4"
-    "5rdxcft6"
-    "7ygvbhu8"
-    "9ijnmko0"
-    "+pl,.:@-"
-    POUND "*;/" RIGHT_SHIFT "=^" CLR_HOME
-    BACKSPACE RETURN CTRL RUN_STOP F1 COMMODORE F5 F7
+    "13579+£" BACKSPACE "wryip*" RETURN
+    0 "adgjl;" CURSOR_RIGHT RUN_STOP 0 "xvn,/" CURSOR_DOWN
+    " zcbm." 0 F1 0 "sfhk:=" F3
+    "qetuo@^" F5 "24680-" CLR_HOME F7
+    0
 
 devkbd_map_shifted:
-    "!" ESCAPE CURSOR_LEFT CURSOR_UP " " F4 "Q" "\""
-    "#WA" LEFT_SHIFT "ZSE$"
-    "%RDXCFT&"
-    "'YGVBHU("
-    ")IJNMKO0"
-    "+PL<>[@-"
-    POUND "*]?" RIGHT_SHIFT "=^" CLR_HOME
-    INS_DEL RETURN CTRL RUN_STOP F2 COMMODORE F6 F8
-
-; Based on http://vicpp.blogspot.de/2012_06_01_archive.html
-
-via2_portb0 = $9120
-via2_porta0 = $9121
-
-; X: row mask
-; Y: column mask
-;
-; Returns:
-; X: row
-; Y: column
-scan_keyboard:
-    txa
-    eor #$ff
-    sta column_mask
-    sty row_mask
-
-    ldy #7
-next_column:
-    ldx #7
-    lda bits,y
-    and column_mask
-    beq no_keypress
-    eor #$ff
-    sta via2_portb0
-
-    lda via2_porta0
-    ora row_mask
-
-next_row:
-    asl
-    bcc got_row
-
-    dex
-    bpl next_row
-
-    dey
-    bpl next_column
-
-no_keypress:
-    sec
-got_row:
-    rts
+    "!#%')+£" BACKSPACE "WRYIP*" RETURN
+    0 "ADGIL]" CURSOR_RIGHT RUN_STOP 0 "XVN./" CURSOR_DOWN
+    " ZCBM>" 0 F2 0 "SFHK[=" F4
+    "QETUO@^" F6 "\"$(0-" CLR_HOME F8
+    0
 
 wait_key:
-    ldx #0
-    ldy #0
-    jsr scan_keyboard
-    bcc wait_key
-l:  ldx #0
-    ldy #0
-    jsr scan_keyboard
-    bcs -l
-
-    sty tmp
-    txa
-    asl
-    asl
-    asl
-    ora tmp
-    tay
-    lda devkbd_map_normal,y
+    lda $c6         ; Key in buffer?
+    beq wait_key
+    lda #0          ; Reset buffer.
+    sta $c6
+    ldx $c5         ; Get scan code.
+    cpx #$40        ; No key pressed?
+    beq wait_key
+    lda $28d        ; Get CTRL/SHIFT/C= status.
+    and #1          ; Shift?
+    beq +n
+    lda devkbd_map_shifted,x
+    rts
+n:  lda devkbd_map_normal,x
     rts

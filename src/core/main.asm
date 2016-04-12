@@ -35,17 +35,6 @@ stop:
     bcs +e
     jsr gclose
 
-;    lda #$00
-;    sta s
-;    sta d
-;    sta c
-;    lda #$20
-;    sta @(++ s)
-;    sta @(++ c)
-;    lda #$a0
-;    sta @(++ d)
-;    jsr moveram
-
     sei
     lda #$7f
     sta $911d
@@ -58,7 +47,9 @@ stop:
 
 e:  ldx #<txt_cant_open
     ldy #>txt_cant_open
-    jmp $cb1e
+    jsr $cb1e
+    jsr CHRIN
+    jmp ($c000)
 end
 
 if @(not *rom?*)

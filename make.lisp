@@ -33,7 +33,7 @@
              "core/proc/process.asm"
 
              "core/fs/vfile.asm"
-             "core/fs/open.asm"
+             "core/fs/lookup.asm"
              "core/fs/fs.asm"
 
              "core/dev/kbd.asm"

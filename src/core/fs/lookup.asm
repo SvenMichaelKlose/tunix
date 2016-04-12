@@ -24,7 +24,6 @@ done:
     jmp init_path_component_ptr
 
 ; d: Path.
-; A: vfile
 lookup_vfile:
     ; Prepare relative path.
     lda pwd

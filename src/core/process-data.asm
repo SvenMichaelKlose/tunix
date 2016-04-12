@@ -85,7 +85,10 @@ file_vfiles:    fill max_num_files_per_process
 path_component: fill @(++ max_file_name_length)
 
 ;; Working directory vfile.
-pwd:            0
+pwd:        0
+
+;; Flags for fs_open().
+fs_mode:    0
 
 ;;; Banks allocated by "alloc_block":
 banks:      fill @(/ 1024 8)

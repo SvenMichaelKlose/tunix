@@ -3,6 +3,26 @@ VOP_READ = 0
 VOP_WRITE = 2
 VOP_LOOKUP = 4
 
+alloc_vfile:
+    lda $9ff4
+    pha
+    ldx #0
+    stx $9ff4
+l:  lda file_states,x
+    beq +done
+    inx
+    cpx #max_num_vfiles
+    bne -l
+    pla
+    sta $9ff4
+    sec
+    rts
+done:
+    pla
+    sta $9ff4
+    clc
+    rts
+
 ; X: vfile index.
 ; Y: Operation index.
 call_vfile_op:

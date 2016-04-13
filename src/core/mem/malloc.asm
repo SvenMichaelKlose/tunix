@@ -55,7 +55,7 @@ l:  ldy #1
     sta tmp4
 
     ;; Get next record.
-n:  ldy #3
+n:  ldy #4
     lda (s),y
     tax
     iny

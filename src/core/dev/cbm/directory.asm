@@ -1,15 +1,13 @@
 ; Based on http://codebase64.org/doku.php?id=base:reading_the_directory
-cbm_list:
-    lda #@(- dirname_end dirname)
-    ldx #<dirname
-    ldy #>dirname
+devcbm_open_directory:
+;    lda #@(- dirname_end dirname)
+;    ldx #<dirname
+;    ldy #>dirname
     jsr SETNAM
 
     lda #$02
-    ldx $BA
-    bne +n
     ldx #$08       ; default to device number 8
-n:  ldy #$00       ; secondary address 0 (required for dir reading!)
+    ldy #$00       ; secondary address 0 (required for dir reading!)
     jsr SETLFS
 
     jsr OPEN
@@ -19,42 +17,43 @@ n:  ldy #$00       ; secondary address 0 (required for dir reading!)
     jsr CHKIN
     bcs +error
 
-    ldy #$04       ; skip 4 bytes on the first dir line
-    bne +m
-loop:
-    ldy #$02       ; skip 2 bytes on all other lines
-m:  jsr getbyte    ; get a byte from dir and ignore it
-    dey
-    bne -m
+    ; Skip load address.
+    jsr devcbm_read
+    bcs +error
+    jsr devcbm_read
+    bcs +error
+    rts
 
-    jsr getbyte    ; get low byte of basic line number
+devcbm_read_directory:
+    LDX #$02
+    jsr CHKIN
     bcs +error
-    tay
-    jsr getbyte    ; get high byte of basic line number
+
+    ; Skip address of next line.
+    jsr devcbm_read
     bcs +error
-    pha
-    tya            ; transfer Y to X without changing Akku
-    tax
-    pla
-    jsr $ddcd      ; print basic line number
-    lda #$20       ; print a space first
-l:  jsr CHROUT
+    jsr devcbm_read
     bcs +error
-    jsr getbyte
+
+    ; Read BASIC line number, which is the size in blocks.
+    jsr devcbm_read
+    bcs +error
+    sta dirent_size
+    jsr devcbm_read
+    bcs +error
+    sta @(+ 1 dirent_size)
+    lda #0
+    sta @(+ 2 dirent_size)
+    sta @(+ 3 dirent_size)
+
+l:  jsr devcbm_read
     bcs +error
     bne -l      ; continue until end of line
+    rts
 
-    lda #$0D
-    jsr CHROUT
-    bcs +error
-    jsr CBM_STOP   ; RUN/STOP pressed?
-    bne loop      ; no RUN/STOP -> continue
 error:
     jmp return_cbm_error
-    ; Akkumulator contains BASIC error code
 
-    ; most likely error:
-    ; A = $05 (DEVICE NOT PRESENT)
 done:
     lda #$02
     jsr CLOSE
@@ -62,15 +61,21 @@ done:
 
     jmp CLRCHN
 
-getbyte:
+devcbm_read:
+    lda #0
+    sta devcbm_eof
     jsr READST
-    bne +e         ; read error or end of file
-    jmp CHRIN
+    bne +eof
 
-e:  pla            ; don't return to dir reading loop
-    pla
-    jmp -done
+    jsr CHRIN
+    bcs -error
+    pha
+    lda $90
+    cmp #1   ; set carry when ST>0 (i.e., <>0!)
+    pla      ; keep carry, and possibly set Z flag for byte=0
+    rts
 
-dirname:
-    "$"             ; filename used to access directory
-dirname_end:
+eof:
+    inc devcbm_eof
+    sec
+    rts

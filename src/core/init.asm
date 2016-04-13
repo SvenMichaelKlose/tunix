@@ -33,6 +33,9 @@ n:  sty max_banks
 n:  lda #%00000111
     sta banks
 
+    ; Initialise chunk allocator.
+    jsr malloc_init
+
     ; Initialise drivers.
     jsr devcon_init     ; Console
 

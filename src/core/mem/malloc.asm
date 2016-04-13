@@ -7,6 +7,11 @@
 malloc_chunk_header_size = 6
 
 malloc_init:
+    jsr alloc_bank
+    lda tmp
+    sta malloc_bank
+    sta $9ff8
+
     lda #$00
     sta d
     sta c
@@ -21,6 +26,15 @@ malloc_init:
 ; Returns:
 ; s: Allocated block.
 malloc:
+    ;; Increase chunk size by header size.
+    lda c
+    clc
+    adc #malloc_chunk_header_size
+    sta c
+    bcc +n
+    inc @(++ c)
+n:
+
     ;; Point to first and previous record.
     lda #$00
     sta s
@@ -93,7 +107,7 @@ l:  ldy #0
     ;; Make pointer to data part of chunk.
     lda s
     clc
-    adc #malloc_chunk_header
+    adc #malloc_chunk_header_size
     sta s
     bcc +l
     inc @(++ s)

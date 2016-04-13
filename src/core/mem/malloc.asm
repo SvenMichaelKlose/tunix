@@ -74,32 +74,32 @@ n:  ldy #3
 f:  ldy #1
     lda (s),y
     cmp @(++ c)
-    beq +l
     bcc -n
-l:  dey
+    bne +l
+    dey
     lda (s),y
     cmp c
-    beq +l
     bcc -n
-l:
 
-    ;; Split up record.
-    ldy #0
-    lda c
+    ;; Rest size of rest of chunk.
+l:  ldy #0
+    lda (s),y
     sec
-    sbc (s),y
+    sbc c
     sta tmp
     iny
-    lda @(++ c)
-    sbc (c),y
+    lda (s),y
+    sbc @(++ c)
     sta tmp2
+
+    ;; Check if record is large enough to get split.
     bne +split
     lda tmp
     cmp #7
     bcs +split
 
-    ;; Don't split record – it's too small.
-l:  ldy #0
+    ;; Mark record as being allocated.
+m:  ldy #1
     lda (s),y
     ora #128
     sta (s),y
@@ -164,7 +164,7 @@ split:
     lda @(++ c)
     sta (s),y
 
-    jmp -l
+    jmp -m
 
 err_inval:
     lda #EINVAL

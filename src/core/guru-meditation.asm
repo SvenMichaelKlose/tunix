@@ -36,7 +36,9 @@ guru_meditation:
     sei
     lda #$7f
     sta $911e
+    sta $912e
 
+    jsr init_bitmap_mode
     lda #%00001000
     sta $900f
     jsr clear_screen

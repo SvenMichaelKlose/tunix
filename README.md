@@ -285,35 +285,3 @@ and unique. When many processes access the same, file their file handles
 point to the same vfile. vfiles are created when a file is opened and
 removed when it has been closed by all process. Only the vfile for the root
 directory is never removed.
-
-## Ultifs
-
-The store is responsible for breaking up the media into byte–sized chunks.
-
-The file store is responible for connecting chunks on the store to larger
-files.
-
-The filesystem interface is responsible for maintaining files in directories.
-
-### Store
-
-The store maintains allocated and free chunks in a binary tree sorted by
-occurrence.  Nodes may be split or merged without immediate need to rewrite
-complete banks of Flash memory.  Garbage collection is done separately on
-demand.
-
-### File store
-
-The file store starts each chunk with the address of the btree node of
-the former and the next chunk and an optional address of an updated chunk.
-
-### Directories
-
-Directories are files of a minimum size, so they can get filled up with
-new entries.  This happens quickly when file sizes change.
-
-### File removal
-
-* Copy btnode updates onto their originals.
-* Clear contents of nodes with status REMOVAL_PENDING.
-* Remove nodes with status REMOVAL_COMPLETE.

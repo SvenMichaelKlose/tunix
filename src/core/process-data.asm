@@ -39,8 +39,8 @@ vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
 vfile_root:         0
 
 
-;;; /dev/con
-devcon_logical_file_numbers:    fill 8
+;;; /dev/cbm
+devcbm_logical_file_numbers:    fill 8
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -76,11 +76,12 @@ process_slot:   0       ; Indexes in master core tables.
 
 ;;; File system
 
-;; States of opened files.
-file_states:    fill max_num_files_per_process
-
-;; Indexes into virtual files in master core.
-file_vfiles:    fill max_num_files_per_process
+file_states:    fill max_num_files_per_process ; States of opened files.
+file_vfiles:    fill max_num_files_per_process ; Indexes into virtual files in master core.
+file_positions_0: fill max_num_files_per_process
+file_positions_1: fill max_num_files_per_process
+file_positions_2: fill max_num_files_per_process
+file_positions_3: fill max_num_files_per_process
 
 path_component: fill @(++ max_file_name_length)
 

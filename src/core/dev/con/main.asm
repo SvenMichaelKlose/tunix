@@ -8,6 +8,10 @@ devcon_screen_vops:
     <devcon_write_screen >devcon_write_screen ; write
     <devcon_error >devcon_error ; lookup
 
+devcon_error:
+    lda #ENOSYS
+    jmp set_error
+
 devcon_init:
     lda #green
     ldx #black
@@ -24,15 +28,10 @@ devcon_init:
     iny
     sty @(++ vfile_handles)
     sty @(+ 2 vfile_handles)
-    lda #CBMDEV_KEYBOARD
-    sta devcon_logical_file_numbers
     lda #<devcon_keyboard_vops
     sta vfile_ops_l
     lda #>devcon_keyboard_vops
     sta vfile_ops_h
-    lda #CBMDEV_SCREEN
-    sta @(++ devcon_logical_file_numbers)
-    sta @(+ 2 devcon_logical_file_numbers)
     lda #<devcon_screen_vops
     sta @(++ vfile_ops_l)
     sta @(+ 2 vfile_ops_l)
@@ -70,27 +69,10 @@ n:  lda xpos
     bne -l
     rts
 
-devcon_error:
-    lda #ENOSYS
-    jmp set_error
-
 devcon_read_keyboard:
     jsr take_over
     jsr wait_key
     clc
-    jmp release
-
-; X: vfile index
-devcon_read:
-    jsr take_over
-    lda vfile_handles,x
-    tax
-    lda devcon_logical_file_numbers,x
-    tax
-    jsr chkin
-    bcs +error
-    jsr chrin
-    bcs +error
     jmp release
 
 ; X: vfile index
@@ -100,22 +82,3 @@ devcon_write_screen:
     jsr devcon_print_ctrl
     clc
     jmp release
-
-devcon_write:
-    jsr take_over
-
-    pha
-    lda vfile_handles,x
-    tax
-    lda devcon_logical_file_numbers,x
-    tax
-    jsr chkout
-    bcs +error
-    pla
-    jsr chrout
-    bcs +error
-
-    jmp release
-
-error:
-    jmp return_cbm_error

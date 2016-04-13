@@ -44,6 +44,7 @@
              "core/dev/cbm/error.asm"
              "core/dev/cbm/control.asm"
              "core/dev/cbm/directory.asm"
+             "core/dev/cbm/main.asm"
              "core/dev/con/charset-4x8.asm"
              "core/dev/con/print.asm"
              "core/dev/con/main.asm"

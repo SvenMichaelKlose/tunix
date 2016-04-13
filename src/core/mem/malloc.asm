@@ -109,10 +109,22 @@ m:  ldy #1
     clc
     adc #malloc_chunk_header_size
     sta s
+    sta d
     bcc +l
     inc @(++ s)
+l:  lda @(++ s)
+    sta @(++ d)
+
+    ;; Clear allocated chunk.
+    lda c
+    sec
+    sbc #malloc_chunk_header_size
+    sta c
+    bcs +l
+    dec @(++ c)
+l:  jsr clrram
     clc
-l:  rts
+    rts
 
 split:
     ;; Make pointer to new record following.

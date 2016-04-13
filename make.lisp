@@ -25,6 +25,7 @@
              "core/mem/moveram.asm"
              "core/mem/clrram.asm"
              "core/mem/alloc-bank.asm"
+             "core/mem/malloc.asm"
 
              "core/string.asm"
 

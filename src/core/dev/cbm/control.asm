@@ -9,7 +9,7 @@ l:  lda (tmp),y
     iny
     jmp -l
 
-m:  tya
+n:  tya
     ldy tmp2
     jsr SETNAM
 

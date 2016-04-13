@@ -186,23 +186,31 @@ n:
     lda (s),y
     bpl -err_inval
 
-    ;; Mark chunk to free.
+    ;; Mark chunk as being free.
     and #%0111111
-    sta (d),y
+    sta (s),y
 
+    ;; Get previous chunk.
     ldy #2
     lda (s),y
+    sta d
     iny
-    ora (s),y
+    lda (s),y
+    sta @(++ d)
+
+    ;; Check if there's a previous chunk at all.
+    ora d
     beq +n
 
-    ;; Get back link.
-    ldy #2
-    lda (s),y
-    tax
-    iny
-    lda (s),y
-    stx s
+    ;; Check if previous chunk is free.
+    ldy #1
+    lda (d),y
+    bmi +n
+
+    ;; Step to free previous chunk.
+    lda d
+    sta s
+    lda @(++ d)
     sta @(++ s)
 
     ;; Get link to next.
@@ -211,7 +219,11 @@ n:  ldy #4
     sta d
     iny
     lda (s),y
-    sta @(++ s)
+    sta @(++ d)
+
+    ;; Check if there's a next chunk at all.
+    ora d
+    beq +n
 
     ;; Check if it's allocated.
     ldy #1
@@ -233,10 +245,10 @@ n:  ldy #4
     ; Make link to next.
     ldy #4
     lda (d),y
-    sta (d),y
+    sta (s),y
     iny
     lda (d),y
-    sta (d),y
+    sta (s),y
     jmp -n
 
 n:  clc

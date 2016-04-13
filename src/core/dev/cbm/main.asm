@@ -1,6 +1,6 @@
 ; X: vfile index
 devcbm_read:
-    jsr take_over
+    jsr stop_task_switching
 
     lda vfile_handles,x
     tax
@@ -11,10 +11,10 @@ devcbm_read:
     jsr chrin
     bcs +error
 
-    jmp release
+    jmp start_task_switching
 
 devcbm_write:
-    jsr take_over
+    jsr stop_task_switching
 
     pha
     lda vfile_handles,x
@@ -27,7 +27,7 @@ devcbm_write:
     jsr chrout
     bcs +error
 
-    jmp release
+    jmp start_task_switching
 
 error:
     jmp set_cbm_error

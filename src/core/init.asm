@@ -74,10 +74,10 @@ mem_init:
     %00000000   ; LED off.
     %00111111   ; IO3/2 RAM, +3K R/W RAM
     %10111111   ; BLK5 ro RAM, BLK1,2,3 R/W RAM
-    0           ; (ID)
-    0 0         ; +3K
-    0 0         ; IO
-    0 0         ; BLK 1
-    0 0         ; BLK 2
-    0 0         ; BLK 3
-    2 0         ; BLK 5
+    0                   ; (ID)
+    BANK_CORE_DATA 0    ; +3K
+    0 0                 ; IO
+    0 0                 ; BLK 1
+    0 0                 ; BLK 2
+    0 0                 ; BLK 3
+    BANK_CORE_CODE 0    ; BLK 5

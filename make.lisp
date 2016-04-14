@@ -24,6 +24,7 @@
              "core/lib/pointer-manipulation.asm"
              "core/lib/strlen.asm"
 
+             "core/mem/reserved-banks.asm"
              "core/mem/moveram.asm"
              "core/mem/clrram.asm"
              "core/mem/alloc-bank.asm"
@@ -81,6 +82,7 @@
              "core/errno.inc.asm"
              "core/lib/pointer-manipulation.asm"
              "core/lib/strlen.asm"
+             "core/mem/reserved-banks.asm"
              "core/mem/clrram.asm"
              "core/mem/moveram.asm"
              "core/dev/cbm/kernal.asm"

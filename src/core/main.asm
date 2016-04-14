@@ -17,7 +17,7 @@ if @(not *rom?*)
     ;; Load core to block5.
     lda #255
     sta $9ff2
-    lda #2
+    lda #BANK_CORE_CODE
     sta $9ffe
 
     lda #<path_core

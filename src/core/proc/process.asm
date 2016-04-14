@@ -30,7 +30,7 @@ init_per_process_data:
     sty @(++ file_vfiles)
     sty @(+ 2 file_vfiles)
 
-    lda #2
+    lda #BANK_CORE_CODE
     sta saved_bank5
 
     rts

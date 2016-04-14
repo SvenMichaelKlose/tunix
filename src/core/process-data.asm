@@ -1,5 +1,4 @@
 FILE_OPENED     = 128
-FILE_STREAM     = 64    ; Otherwise block–oriented.
 FILE_READABLE   = 1
 FILE_WRITABLE   = 2
 
@@ -43,7 +42,8 @@ dirent_size:        0 0 0 0
 dirent_privileges:  0
 
 ;;; /dev/cbm
-devcbm_logical_file_numbers:    fill 8
+devcbm_logical_file_numbers:    fill max_num_vfiles
+devcbm_device_numbers:          fill max_num_vfiles
 devcbm_eof: 0
 
 

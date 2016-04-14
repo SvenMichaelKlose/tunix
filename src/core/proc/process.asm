@@ -18,11 +18,11 @@ init_per_process_data:
     sta $0402
 
     ; Init standard streeams.
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_READABLE)
+    lda #@(+ FILE_OPENED FILE_READABLE)
     sta file_states
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
+    lda #@(+ FILE_OPENED FILE_WRITABLE)
     sta @(++ file_states)
-    lda #@(+ FILE_STREAM FILE_OPENED FILE_WRITABLE)
+    lda #@(+ FILE_OPENED FILE_WRITABLE)
     sta @(+ 2 file_states)
     ldy #0
     sty file_vfiles

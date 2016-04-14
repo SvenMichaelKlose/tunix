@@ -1,3 +1,22 @@
+devcbm_ops_directory:
+    <devcon_error >devcon_error ; read
+    <devcon_error >devcon_error ; write
+    <devcon_error >devcon_error ; lookup
+
+devcbm_make_root:
+    lda #FILE_OPENED
+    sta @(+ 3 vfile_states)
+    lda #<devcbm_ops_directory
+    sta @(+ 3 vfile_ops_l)
+    lda #>devcbm_ops_directory
+    sta @(+ 3 vfile_ops_h)
+    lda #1
+    sta @(+ 3 vfile_refcnts)
+    sta vfile_root
+    lda $ba     ; Get default device number.
+    sta devcbm_device_numbers
+    rts
+
 ; X: vfile index
 devcbm_read:
     jsr stop_task_switching

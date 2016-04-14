@@ -33,11 +33,14 @@ n:  sty max_banks
 n:  lda #%00000111
     sta banks
 
-    ; Initialise drivers.
-    jsr devcon_init     ; Console
+    ; Initialise console.
+    jsr devcon_init
 
     ; Initialise chunk allocator.
     jsr malloc_init
+
+    ; Initialise CBM driver as root file syste.
+    jsr devcbm_make_root
 
     ;; Initialise init process.
     jsr init_per_process_data

@@ -41,7 +41,7 @@ guru_meditation:
     jsr init_bitmap_mode
     lda #%00001000
     sta $900f
-    jsr clear_screen
+    jsr devcon_clear_screen
     lda #red
     jsr fill_colors
 

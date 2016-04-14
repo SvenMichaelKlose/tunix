@@ -50,6 +50,7 @@
              "core/dev/cbm/main.asm"
              "core/dev/con/charset-4x8.asm"
              "core/dev/con/print.asm"
+             "core/dev/con/cursor.asm"
              "core/dev/con/main.asm"
 
              "core/load.asm"

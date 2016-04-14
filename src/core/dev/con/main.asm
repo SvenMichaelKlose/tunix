@@ -17,7 +17,9 @@ devcon_init:
     ldx #black
     ldy #black
     jsr init_bitmap_mode
-    jsr clear_screen
+    jsr devcon_clear_screen
+    lda #DEVCON_MODE_OR
+    sta devcon_mode
 
     lda #FILE_OPENED
     sta vfile_states
@@ -40,6 +42,13 @@ devcon_init:
     sta @(+ 2 vfile_ops_h)
 
     rts
+
+devcon_clear_screen:
+    lda #0
+    sta devcon_cursor_x
+    sta devcon_cursor_y
+    jsr clear_screen
+    jmp devcon_draw_cursor
 
 devcon_print_charset:
     lda #0

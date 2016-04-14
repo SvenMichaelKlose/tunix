@@ -1,15 +1,19 @@
+DEVCON_MODE_OR = 0
+DEVCON_MODE_XOR = 1
+
 devcon_print_string:
     ldy #0
 l:  lda (s),y
-    beq +done
+    beq +n
     jsr devcon_print_ctrl
     jsr inc_s
     jmp -l
 
-done:
-    rts
+n:  rts
 
-done:
+devcon_print_return:
+    jsr devcon_pop_cursor_disable
+
     pla
     tay
     pla
@@ -18,90 +22,51 @@ done:
     rts
 
 devcon_print_ctrl:
-    sta tmp2
+    sta tmp3
     pha
     txa
     pha
     tya
     pha
 
-    lda tmp2
-    beq -done
+    jsr devcon_push_cursor_disable
+
+    lda tmp3
+    beq -devcon_print_return
     cmp #10
     bne +l
     jmp next_line
 
 devcon_print:
-    sta tmp2
+    sta tmp3
     pha
     txa
     pha
     tya
     pha
 
-l:  lda tmp2
-    ldy #0
-    sty tmp2
-    asl
-    rol tmp2
-    asl
-    rol tmp2
-    asl
-    rol tmp2
-    clc
-    adc #<charset_4x8
-    sta tmp
-    lda tmp2
-    adc #>charset_4x8
-    sta tmp2
-    
-    jsr calcscr
+    jsr devcon_push_cursor_disable
 
-    lda xpos
-    and #4
-    bne +n
+l:  lda tmp3
+    jsr devcon_draw_char
 
-    ldy #7
-l:  lda (tmp),y
-    asl
-    asl
-    asl
-    asl
-    ora (scr),y
-    sta (scr),y
-    dey
-    bpl -l
-    bmi +m
-
-n:  ldy #7
-l:  lda (tmp),y
-    ora (scr),y
-    sta (scr),y
-    dey
-    bpl -l
-
-m:  lda xpos
-    clc
-    adc #4
-    sta xpos
-    cmp #screen_width
+    inc devcon_cursor_x
+    lda devcon_cursor_x
+    cmp #@(/ screen_width 4)
     bne +n
 
 next_line:
     lda #0
-    sta xpos
-    lda ypos
-    clc
-    adc #8
-    sta ypos
+    sta devcon_cursor_x
 
-    cmp #screen_height
-    bne +n
+    lda devcon_cursor_y
+    cmp #@(-- (/ screen_height 8))
+    bne +l
     jsr devcon_scroll_up
-    lda #@(- screen_height 8)
-    sta ypos
-n:  
-    jmp -done
+    jmp +n
+
+l:  inc devcon_cursor_y
+n:  jmp devcon_print_return
 
 devcon_scroll_up:
     lda s
@@ -149,5 +114,87 @@ n:  dex
     sta @(++ s)
     pla
     sta s
+
+    rts
+
+devcon_draw_char:
+    ldy #0
+    sty tmp2
+    asl
+    rol tmp2
+    asl
+    rol tmp2
+    asl
+    rol tmp2
+    clc
+    adc #<charset_4x8
+    sta tmp
+    lda tmp2
+    adc #>charset_4x8
+    sta tmp2
+
+devcon_blit_char:
+    lda devcon_cursor_x
+    asl
+    asl
+    sta xpos
+    lda devcon_cursor_y
+    asl
+    asl
+    asl
+    sta ypos
+    jsr calcscr
+
+    lda devcon_mode
+    bne xor_mode
+
+    lda devcon_cursor_x
+    lsr
+    bcs +n
+
+    ldy #7
+l:  lda (tmp),y
+    asl
+    asl
+    asl
+    asl
+    ora (scr),y
+    sta (scr),y
+    dey
+    bpl -l
+    bmi +m
+
+n:  ldy #7
+l:  lda (tmp),y
+    ora (scr),y
+    sta (scr),y
+    dey
+    bpl -l
+    bmi +m
+
+xor_mode:
+    lda devcon_cursor_x
+    lsr
+    bcs +n
+
+    ldy #7
+l:  lda (tmp),y
+    asl
+    asl
+    asl
+    asl
+    eor (scr),y
+    sta (scr),y
+    dey
+    bpl -l
+    bmi +m
+
+n:  ldy #7
+l:  lda (tmp),y
+    eor (scr),y
+    sta (scr),y
+    dey
+    bpl -l
+m:
 
     rts

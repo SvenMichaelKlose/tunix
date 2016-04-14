@@ -11,3 +11,6 @@ malloc_bank = $02a5
 xpos = $2a6
 ypos = $2a7
 xcpos = $2a8
+devcon_mode = $2a9
+devcon_cursor_x = $2aa
+devcon_cursor_y = $2ab

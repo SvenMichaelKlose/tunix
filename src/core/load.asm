@@ -8,13 +8,8 @@ gopen:
     ldy #0
     jsr setlfs
 
-    ; Get length of file name and set it.
-    ldy #0
-l:  lda (s),y
-    beq +n
-    iny
-    jmp -l
-n:  tya
+    jsr strlen
+    tya
     ldx s
     ldy @(++ s)
     jsr setnam

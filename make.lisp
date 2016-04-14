@@ -21,7 +21,9 @@
              "core/errno.inc.asm"
              "core/error.asm"
 
-             "core/mem/pointer-manipulation.asm"
+             "core/lib/pointer-manipulation.asm"
+             "core/lib/strlen.asm"
+
              "core/mem/moveram.asm"
              "core/mem/clrram.asm"
              "core/mem/alloc-bank.asm"
@@ -76,7 +78,8 @@
              "core/main.asm"
              "core/test-ultimem.asm"
              "core/errno.inc.asm"
-             "core/mem/pointer-manipulation.asm"
+             "core/lib/pointer-manipulation.asm"
+             "core/lib/strlen.asm"
              "core/mem/clrram.asm"
              "core/mem/moveram.asm"
              "core/dev/cbm/kernal.asm"

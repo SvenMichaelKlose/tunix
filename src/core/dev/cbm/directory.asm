@@ -1,19 +1,26 @@
-; Based on http://codebase64.org/doku.php?id=base:reading_the_directory
-devcbm_open_directory:
-;    lda #@(- dirname_end dirname)
-;    ldx #<dirname
-;    ldy #>dirname
+; X: vfile
+; s: CBM path name
+devcbm_update_directory:
+    lda vfile_handles,x
+    sta tmp
+
+    jsr strlen
+    tya
+    ldx s
+    ldy @(++ s)
     jsr SETNAM
 
-    lda #$02
-    ldx #$08       ; default to device number 8
-    ldy #$00       ; secondary address 0 (required for dir reading!)
+    ldx tmp
+    lda devcbm_device_numbers,x
+    tax
+    ldy #$00    ; Read.
+    lda #$02    ; Reserved logical file number.
     jsr SETLFS
 
     jsr OPEN
     bcs +error
 
-    LDX #$02
+    ldx #$02
     jsr CHKIN
     bcs +error
 
@@ -22,12 +29,10 @@ devcbm_open_directory:
     bcs +error
     jsr devcbm_read
     bcs +error
-    rts
 
-devcbm_read_directory:
-    LDX #$02
-    jsr CHKIN
-    bcs +error
+next_entry:
+    jsr READST
+    bne +done
 
     ; Skip address of next line.
     jsr devcbm_read
@@ -49,7 +54,8 @@ devcbm_read_directory:
 l:  jsr devcbm_read
     bcs +error
     bne -l      ; continue until end of line
-    rts
+
+    jmp -next_entry
 
 error:
     jmp return_cbm_error

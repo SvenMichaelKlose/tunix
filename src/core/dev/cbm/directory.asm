@@ -148,10 +148,19 @@ done:
     lda #BANK_DIRENTS
     sta $9ff8
 
+    ; Write terminating zero.
+    ldy #0
+    tya
+    sta (d),y
+
     ; Allocate area in dirent bank.
     lda tmp2
+    clc
+    adc #1
     sta c
     lda tmp3
+    clc
+    adc #0
     and #$1f
     sta @(++ c)
     jsr malloc

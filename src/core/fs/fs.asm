@@ -27,20 +27,25 @@ fs_create:
     rts
 
 ; s: Path name
-; tmp: Mode
+; A: mode
 fs_open:
+    sta fs_mode
+
     lda s
     sta d
     lda @(++ s)
     sta @(++ d)
     jsr lookup_vfile
     bcc +n
+
     lda fs_mode
     and #O_CREAT
     beq +err_enoent
+
     jsr fs_create
     bcc fs_open
     rts
+
 n:  jsr assign_vfile_to_file
     bcs +err_emfile
     rts

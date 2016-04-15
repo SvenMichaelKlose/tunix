@@ -62,3 +62,39 @@ done:
 
 error:
     rts
+
+; Default lookup in dirent cache.
+;
+; X: vfile
+; s: name
+vfile_default_lookup:
+    lda $9ff8
+    pha
+    lda #BANK_DIRENTS
+    sta $9ff8
+
+    lda vfile_data_l,x
+    sta d
+    lda vfile_data_h,x
+    sta @(++ d)
+
+l:  ldy #0
+    lda (d),y
+    beq +not_found
+    jsr strcmp
+    beq +found
+    lda d
+    clc
+    adc #dirent_size
+    sta d
+    bcc -l
+    inc @(++ d)
+    jmp -l
+
+not_found:
+    sec
+    rts
+
+found:
+    ldy #VOP_OPEN
+    jmp call_vfile_op

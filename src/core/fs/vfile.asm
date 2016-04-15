@@ -2,6 +2,7 @@
 VOP_READ = 0
 VOP_WRITE = 2
 VOP_LOOKUP = 4
+VOP_OPEN = 6
 
 alloc_vfile:
     lda $9ff4

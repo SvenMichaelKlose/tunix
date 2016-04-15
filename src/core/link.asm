@@ -65,7 +65,7 @@ return_to_process:
 
 err_nomem:
     lda #ENOMEM
-    jmp return_error
+    jmp release_with_error
 
 load_library:
     jsr take_over
@@ -187,7 +187,8 @@ l:  jsr alloc_bank
     bcc +ok
     ; TODO: Free allocated banks.
     lda #ENOMEM
-    jmp return_error
+    jmp release_with_error
+
 ok: lda tmp
     sta saved_bank1,y
     iny

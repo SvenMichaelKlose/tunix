@@ -205,5 +205,5 @@ devcbm_read:
 
 eof:
     inc devcbm_eof
-    sec
+    clc
     jmp start_task_switching

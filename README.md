@@ -64,7 +64,8 @@ Programs need to request jump tables via the function at address $0400.
 
 ### Errors
 
-Core functions return with the carry flag set if an error occurred.
+System calls that fail return with the carry flag set and the error
+code in the A register.
 
 ### Core zero page locations
 

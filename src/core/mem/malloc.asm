@@ -70,7 +70,7 @@ n:  ldy #4
     pla
     pla
     lda #ENOMEM
-    jmp return_error
+    jmp release_with_error
 
     ;; Check if record is large enough.
 f:  ldy #1
@@ -196,7 +196,7 @@ err_inval:
     pla
     pla
     lda #EINVAL
-    jmp return_error
+    jmp release_with_error
     
 ; s: Chunk to free.
 malloc_free:

@@ -1,9 +1,8 @@
 set_error:
-    sta last_error
     sec
     rts
 
-return_error:
+release_with_error:
     jsr set_error
     jmp release
 

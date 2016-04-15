@@ -36,6 +36,12 @@ n:  lda #%00011111
     ; Initialise console.
     jsr devcon_init
 
+    lda #<txt_welcome
+    sta s
+    lda #>txt_welcome
+    sta @(++ s)
+    jsr devcon_print_string
+
     ; Initialise dirent bank.
     lda #BANK_DIRENTS
     sta $9ff8
@@ -80,3 +86,9 @@ mem_init:
     0 0                 ; BLK 2
     0 0                 ; BLK 3
     BANK_CORE_CODE 0    ; BLK 5
+
+txt_welcome:
+    "Welcome to g!" 10
+    "Starting init process..." 10 0
+
+

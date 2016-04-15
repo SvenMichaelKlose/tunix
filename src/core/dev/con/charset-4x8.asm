@@ -1,6 +1,7 @@
 ; Codepage 437
 
-charset_4x8:
+    $00 $08     ; 2K
+
 ; NULL
     %1110
     %1010

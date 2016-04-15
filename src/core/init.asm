@@ -29,8 +29,8 @@ l:  lda mem_init,x
     ldy #@(-- (/ 128 8 8))
 n:  sty max_banks
 
-    ; Pre–allocate bank of master core data, code and IO (for linking).
-n:  lda #%00001111
+    ; Pre–allocate reserved banks. See 'src/core/mem/reserved-banks.asm'.
+n:  lda #%00011111
     sta banks
 
     ; Initialise console.

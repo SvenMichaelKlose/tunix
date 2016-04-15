@@ -51,7 +51,6 @@
              "core/dev/cbm/control.asm"
              "core/dev/cbm/directory.asm"
              "core/dev/cbm/main.asm"
-             "core/dev/con/charset-4x8.asm"
              "core/dev/con/print.asm"
              "core/dev/con/cursor.asm"
              "core/dev/con/main.asm"
@@ -72,6 +71,9 @@
         "compiled/core.vice.txt")
   (alet (get-label 'library_calls)
     (format t "Number of possible linked library functions per process: ~A~%" (integer (/ (- #xfff !) 9)))))
+
+(defun make-charset ()
+  (make "compiled/charset" '("src/core/dev/con/charset-4x8.asm")))
 
 (defun make-loader ()
   (make "compiled/g"
@@ -153,6 +155,7 @@
 (make-gfx)
 (with-temporary *rom?* t
   (make-core))
+(make-charset)
 (make-loader)
 ;(make-image)
 (quit)

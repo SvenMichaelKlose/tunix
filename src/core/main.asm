@@ -15,6 +15,10 @@ end
 
 if @(not *rom?*)
     ;; Load core to block5.
+    lda #<txt_loading_core
+    ldy #>txt_loading_core
+    jsr $cb1e
+
     lda #255
     sta $9ff2
     lda #BANK_CORE_CODE
@@ -34,6 +38,29 @@ if @(not *rom?*)
     bcs +e
     jsr gclose
 
+    ;; Load charset.
+    lda #<txt_loading_charset
+    ldy #>txt_loading_charset
+    jsr $cb1e
+
+    lda #BANK_DEVCON_CHARSET
+    sta $9ff8
+
+    lda #<path_charset
+    sta s
+    lda #>path_charset
+    sta @(++ s)
+    jsr gopen
+    bcs +e2
+    lda #$00
+    sta d
+    lda #$20
+    sta @(++ d)
+    jsr readm
+    bcs +e
+    jsr gclose
+
+    ;; Get ready.
     sei
     lda #$7f
     sta $911d
@@ -45,10 +72,15 @@ if @(not *rom?*)
 
     jmp $a000
 
-e:  ldx #<txt_cant_open
-    ldy #>txt_cant_open
+e2: lda #<txt_cant_load_charset
+    ldy #>txt_cant_load_charset
     jsr $cb1e
-    jsr CHRIN
+    jmp +l
+
+e:  lda #<txt_cant_load_core
+    ldy #>txt_cant_load_core
+    jsr $cb1e
+l:  jsr CHRIN
     jmp ($c000)
 end
 
@@ -68,13 +100,26 @@ end
 txt_booting:
     $93 @(ascii2petscii "BOOTING G...") 13 0
 
+txt_loading_core:
+    "LOADING CORE..." 13 0
+
+txt_loading_charset:
+    "LOADING CHARSET..." 13 0
+
 if @(not *rom?*)
-txt_cant_open:
+txt_cant_load_core:
     "CANNOT LOAD 'CORE'." 13
+    "EXITING..." 13 0
+
+txt_cant_load_charset:
+    "CANNOT LOAD 'CHARSET'." 13
     "EXITING..." 13 0
 
 path_core:
     "CORE" 0
+
+path_charset:
+    "CHARSET" 0
 
 take_over:
 release:

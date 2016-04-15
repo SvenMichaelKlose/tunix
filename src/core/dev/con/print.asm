@@ -126,12 +126,20 @@ devcon_draw_char:
     rol tmp2
     asl
     rol tmp2
-    clc
-    adc #<charset_4x8
     sta tmp
     lda tmp2
-    adc #>charset_4x8
+    ora #$20
     sta tmp2
+
+    lda $9ff8
+    pha
+    lda #BANK_DEVCON_CHARSET
+    sta $9ff8
+    jsr devcon_blit_char
+    pla
+    sta $9ff8
+
+    rts
 
 devcon_blit_char:
     lda devcon_cursor_x

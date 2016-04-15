@@ -46,9 +46,9 @@ get_entry:
     lda (s),y
     beq +done
 
-    ; Compare ASCIIZ string.
+    ; Compare string.
 compare:
-    jsr compare_asciiz
+    jsr strcmp
     bne -try_next
 
     lda do_make_jumps_to_core

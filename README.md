@@ -195,7 +195,7 @@ Increments zero page pointer "s".
 
 Increments zero page pointer "d".
 
-#### "compare_asciiz" – Compare ASCIIZ strings at s and d.
+#### "strcmp" – Compare zero–terminated strings at s and d.
 ```
 s:  String A.
 d:  String A.

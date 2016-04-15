@@ -1,9 +1,10 @@
-compare_asciiz:
-    lda (s),y
+strcmp:
+    ldy #0
+l:  lda (s),y
     cmp (d),y
     bne +done
     iny
     cmp #0
-    bne compare_asciiz
+    bne -l
 done:
     rts

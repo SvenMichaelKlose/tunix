@@ -30,13 +30,15 @@ l:  lda mem_init,x
 n:  sty max_banks
 
     ; Pre–allocate bank of master core data, code and IO (for linking).
-n:  lda #%00000111
+n:  lda #%00001111
     sta banks
 
     ; Initialise console.
     jsr devcon_init
 
-    ; Initialise chunk allocator.
+    ; Initialise dirent bank.
+    lda #BANK_DIRENTS
+    sta $9ff8
     jsr malloc_init
 
     ; Initialise CBM driver as root file syste.

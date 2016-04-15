@@ -1,6 +1,9 @@
+error:
+    jmp return_cbm_error
+
 ; X: vfile
 ; s: CBM path name
-devcbm_update_directory:
+devcbm_read_directory:
     lda vfile_handles,x
     sta tmp
 
@@ -18,19 +21,52 @@ devcbm_update_directory:
     jsr SETLFS
 
     jsr OPEN
-    bcs +error
+    bcs -error
 
     ldx #$02
     jsr CHKIN
-    bcs +error
+    bcs -error
 
     ; Skip load address.
     jsr devcbm_read
-    bcs +error
+    bcs -error
     jsr devcbm_read
-    bcs +error
+    bcs -error
+
+    ;; Skip first three lines.
+    ldx #3
+    ; Skip load address, first address of next line and line number.
+m:  ldy #6
+l:  jsr devcbm_read
+    bcs -error
+    dey
+    bne -l
+
+    ; Skip line.
+    ldy #0
+l:  jsr devcbm_read
+    bcs -error
+    bne -l      ; continue until end of line
+
+    dex
+    bne -m
+
+    ; Get temporary bank.
+    lda $9ffa
+    pha
+    jsr prepare_temporary_bank
+
+    lda #<temporary_bank
+    sta d
+    lda #>temporary_bank
+    sta @(++ d)
 
 next_entry:
+    lda d
+    sta tmp2
+    lda @(++ d)
+    sta tmp3
+
     jsr READST
     bne +done
 
@@ -43,21 +79,53 @@ next_entry:
     ; Read BASIC line number, which is the size in blocks.
     jsr devcbm_read
     bcs +error
-    sta dirent_size
+    ldy #dirent_length
+    sta (d),y
     jsr devcbm_read
     bcs +error
-    sta @(+ 1 dirent_size)
-    lda #0
-    sta @(+ 2 dirent_size)
-    sta @(+ 3 dirent_size)
+    iny
+    sta (d),y
 
+    ; Read until first double quote.
+l:  jsr devcbm_read
+    beq -next_entry
+    cmp #$22
+    bne -l
+
+    ; Read name till quote.
+    ldy #dirent_name
 l:  jsr devcbm_read
     bcs +error
-    bne -l      ; continue until end of line
+    beq -next_entry
+    cmp #$22
+    beq +n
+    sta (d),y
+    iny
+    jmp -l
+n:
 
+    ; Read till end of line.
+l:  jsr devcbm_read
+    bne -l
+
+    ; Step to next dirent and also save, so we can ignore the last line.
+    lda d
+    clc
+    adc #dirent_size
+    sta d
+    bcc -next_entry
+    inc @(++ d)
     jmp -next_entry
 
+error2:
+    pla
+    jmp +l
+
 error:
+    jsr READST
+    bne +done
+l:  pla
+    sta $9ffa
     jmp return_cbm_error
 
 done:
@@ -65,7 +133,38 @@ done:
     jsr CLOSE
     bcs -error
 
-    jmp CLRCHN
+    jsr CLRCHN
+
+    lda $9ff8
+    pha
+    lda #BANK_DIRENTS
+    sta $9ff8
+
+    ; Allocate area in dirent bank.
+    lda tmp2
+    sta c
+    lda tmp3
+    and #$1f
+    sta @(++ c)
+    jsr malloc
+
+    bcs -error2
+    lda s
+    sta d
+    lda @(++ s)
+    sta @(++ d)
+    lda #<temporary_bank
+    sta s
+    lda #>temporary_bank
+    sta @(++ s)
+    lda #0
+    jsr moveram
+
+    pla
+    sta $9ff8
+    pla
+    sta $9ffa
+    rts
 
 devcbm_read:
     lda #0

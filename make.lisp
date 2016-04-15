@@ -28,6 +28,7 @@
              "core/mem/moveram.asm"
              "core/mem/clrram.asm"
              "core/mem/alloc-bank.asm"
+             "core/mem/temporary.asm"
              "core/mem/malloc.asm"
 
              "core/string.asm"
@@ -37,6 +38,7 @@
              "core/proc/process.asm"
 
              "core/fs/vfile.asm"
+             "core/fs/dirent.asm"
              "core/fs/lookup.asm"
              "core/fs/fs.asm"
 

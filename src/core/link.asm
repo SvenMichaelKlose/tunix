@@ -111,7 +111,7 @@ n:
     ;;; Load index into upper half of +3K area bank and map it to IO.
     lda do_load_library
     beq +n
-    lda #BANK_TMP
+    lda #BANK_TEMPORARY
     sta $9ff6
     lda #$00
     sta d
@@ -242,7 +242,7 @@ n:  jsr inc_s
     sta @(++ c)
 
     ; Bank index in.
-    lda #BANK_TMP
+    lda #BANK_TEMPORARY
     sta $9ff6
 
     ; Make jump table.

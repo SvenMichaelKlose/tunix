@@ -37,9 +37,6 @@ vfile_handles:      fill max_num_vfiles ; Within drivers.
 vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
 vfile_root:         0
 
-dirent_name:        fill max_file_name_length
-dirent_size:        0 0 0 0
-dirent_privileges:  0
 
 ;;; /dev/cbm
 devcbm_logical_file_numbers:    fill max_num_vfiles

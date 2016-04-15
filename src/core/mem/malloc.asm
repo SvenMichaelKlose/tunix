@@ -7,11 +7,6 @@
 malloc_chunk_header_size = 6
 
 malloc_init:
-    jsr alloc_bank
-    lda tmp
-    sta malloc_bank
-    sta $9ff8
-
     lda #$00
     sta d
     sta c
@@ -119,10 +114,17 @@ l:  lda @(++ s)
     lda c
     sec
     sbc #malloc_chunk_header_size
+    pha
     sta c
     bcs +l
     dec @(++ c)
-l:  jsr clrram
+l:  lda @(++ c)
+    pha
+    jsr clrram
+    pla
+    sta @(++ c)
+    pla
+    sta c
     clc
     rts
 

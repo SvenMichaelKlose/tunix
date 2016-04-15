@@ -15,7 +15,15 @@ devcbm_make_root:
     sta vfile_root
     lda $ba     ; Get default device number.
     sta devcbm_device_numbers
+    ldx #3
+    lda #<path_root
+    sta s
+    lda #>path_root
+    sta @(++ s)
+    jsr devcbm_read_directory
     rts
+
+path_root:  "$" 0
 
 ; X: vfile index
 devcbm_read:

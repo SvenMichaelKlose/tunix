@@ -231,9 +231,17 @@ n:  pla
 stop_task_switching:
     php
     pha
+
     ;; Disable NMI.
     lda #$7f
     sta $911e
+
+    ;; Restore old NMI vector.
+    lda old_nmi
+    sta $318
+    lda @(++ old_nmi)
+    sta $319
+
     pla
     plp
     rts
@@ -242,11 +250,17 @@ start_task_switching:
     php
     pha
 
+    ;; Save old NMI vector.
+    lda $318
+    sta old_nmi
+    lda $319
+    sta @(++ old_nmi)
+
     ;; Set NMI vector to task switcher.
     lda #<switch
-    sta $0318
+    sta $318
     lda #>switch
-    sta $0319   
+    sta $319
 
     ;; Load timer.
     lda #$00

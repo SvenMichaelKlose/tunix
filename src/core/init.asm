@@ -41,9 +41,6 @@ n:  lda #%00001111
     sta $9ff8
     jsr malloc_init
 
-    ; Initialise CBM driver as root file syste.
-    jsr devcbm_make_root
-
     ;; Initialise init process.
     jsr init_per_process_data
 

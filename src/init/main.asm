@@ -1,4 +1,6 @@
 init:
+    jsr devcbm_make_root
+
     ; Load sh.
     lda #<path_sh
     sta s

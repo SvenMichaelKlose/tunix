@@ -5,12 +5,13 @@ takeovers = $02a2
 needs_switch = $02a3
 max_banks = $02a4
 malloc_bank = $02a5
+old_nmi = $02a6
 
 ;;; /dev/con
 
-xpos = $2a6
-ypos = $2a7
-xcpos = $2a8
-devcon_mode = $2a9
-devcon_cursor_x = $2aa
-devcon_cursor_y = $2ab
+xpos = $2a8
+ypos = $2a9
+xcpos = $2aa
+devcon_mode = $2ab
+devcon_cursor_x = $2ac
+devcon_cursor_y = $2ad

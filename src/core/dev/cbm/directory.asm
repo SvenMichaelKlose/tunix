@@ -20,11 +20,15 @@ devcbm_read_directory:
     lda #$02    ; Reserved logical file number.
     jsr SETLFS
 
+    jsr stop_task_switching
     jsr OPEN
+    jsr start_task_switching
     bcs -error
 
     ldx #$02
+    jsr stop_task_switching
     jsr CHKIN
+    jsr start_task_switching
     bcs -error
 
     ; Skip load address.
@@ -130,10 +134,14 @@ l:  pla
 
 done:
     lda #$02
+    jsr stop_task_switching
     jsr CLOSE
+    jsr start_task_switching
     bcs -error
 
+    jsr stop_task_switching
     jsr CLRCHN
+    jsr start_task_switching
 
     lda $9ff8
     pha
@@ -167,12 +175,14 @@ done:
     rts
 
 devcbm_read:
+    jsr stop_task_switching
     lda #0
     sta devcbm_eof
     jsr READST
     bne +eof
 
     jsr CHRIN
+    jsr start_task_switching
     bcs -error
     pha
     lda $90
@@ -183,4 +193,4 @@ devcbm_read:
 eof:
     inc devcbm_eof
     sec
-    rts
+    jmp start_task_switching

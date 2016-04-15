@@ -4,6 +4,12 @@ devcbm_ops_directory:
     <devcon_error >devcon_error ; lookup
 
 devcbm_make_root:
+    jsr stop_task_switching
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
     lda #FILE_OPENED
     sta @(+ 3 vfile_states)
     lda #<devcbm_ops_directory
@@ -15,12 +21,18 @@ devcbm_make_root:
     sta vfile_root
     lda $ba     ; Get default device number.
     sta devcbm_device_numbers
+
+    pla
+    sta $9ff4
+    jsr start_task_switching
+
     ldx #3
     lda #<path_root
     sta s
     lda #>path_root
     sta @(++ s)
     jsr devcbm_read_directory
+
     rts
 
 path_root:  "$" 0

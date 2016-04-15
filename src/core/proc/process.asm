@@ -17,7 +17,10 @@ init_per_process_data:
     lda #>link
     sta $0402
 
-    ; Init standard streeams.
+    lda #BANK_CORE_CODE
+    sta saved_bank5
+
+    ; Initialise standard streeams.
     lda #@(+ FILE_OPENED FILE_READABLE)
     sta file_states
     lda #@(+ FILE_OPENED FILE_WRITABLE)
@@ -30,8 +33,17 @@ init_per_process_data:
     sty @(++ file_vfiles)
     sty @(+ 2 file_vfiles)
 
-    lda #BANK_CORE_CODE
-    sta saved_bank5
+    ; Initialise path working directory.
+    lda #@(+ FILE_OPENED FILE_DIRECTORY)
+    sta @(+ 3 file_states)
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+    ldy vfile_root
+    pla
+    sta $9ff4
+    sty @(+ 3 file_vfiles)
 
     rts
 

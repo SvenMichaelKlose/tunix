@@ -18,6 +18,7 @@ devcbm_make_root:
     sta @(+ 3 vfile_ops_h)
     lda #1
     sta @(+ 3 vfile_refcnts)
+    lda #3
     sta vfile_root
     lda $ba     ; Get default device number.
     sta devcbm_device_numbers

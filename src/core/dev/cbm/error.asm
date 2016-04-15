@@ -15,9 +15,10 @@ m:  lda (s),y
     jmp -l
 
 n:  lda (s),y
-    sta last_error
+    pha
     jsr inc_s
     jsr devcon_print_string
+    pla
     sec
     rts
 

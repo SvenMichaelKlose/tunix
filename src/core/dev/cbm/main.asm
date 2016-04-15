@@ -38,6 +38,34 @@ devcbm_make_root:
 
 path_root:  "$" 0
 
+; X: Parent vfile.
+; s: Name
+devcbm_make_vfile:
+    jsr stop_task_switching
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
+    lda #FILE_OPENED
+    sta vfile_states,x
+    lda #<devcbm_ops_directory
+    sta vfile_ops_l,x
+    lda #>devcbm_ops_directory
+    sta vfile_ops_h,x
+    lda #1
+    sta vfile_refcnts,x
+    lda #3
+    sta vfile_root
+    lda $ba     ; Get default device number.
+    sta devcbm_device_numbers,X
+
+    pla
+    sta $9ff4
+    jsr start_task_switching
+
+    rts
+
 ; X: vfile index
 devcbm_read:
     jsr stop_task_switching

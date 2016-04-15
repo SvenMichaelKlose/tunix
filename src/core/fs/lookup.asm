@@ -92,9 +92,75 @@ l:  ldy #0
     jmp -l
 
 not_found:
+    pla
+    sta $9ff8
     sec
     rts
 
 found:
+    pla
+    sta $9ff8
     ldy #VOP_OPEN
     jmp call_vfile_op
+
+; Add empty dirent to vfile.
+;
+; X: vfile
+;
+; Returns:
+; d: Pointer to empty dirent.
+vfile_add_dirent:
+    lda $9ff8
+    pha
+    lda #BANK_DIRENTS
+    sta $9ff8
+
+    lda vfile_data_l,x
+    sta d
+    sta tmp
+    lda vfile_data_h,x
+    sta @(++ d)
+    sta tmp2
+
+    ;; Fetch size of dirent list.
+    lda tmp
+    sec
+    sbc #malloc_chunk_header_size
+    sta tmp
+    bcs +n
+    dec tmp2
+n:  ldy #0
+    lda (tmp),y
+    sta c
+    pha
+    iny
+    lda (tmp),y
+    pha
+    sta @(++ c)
+
+    ;; Allocate larger chunk for dirent list.
+    lda c
+    clc
+    adc #dirent_size
+    sta c
+    bcc +n
+    inc @(++ c)
+n:  jsr malloc
+
+    ;; Make vfile point to new chunk.
+    lda s
+    sta vfile_data_l,x
+    lda @(++ s)
+    sta vfile_data_h,x
+
+    ;; Copy dirent list into new chunk.
+    pla
+    sta @(++ c)
+    pla
+    sta c
+    lda #0
+    jsr moveram
+
+    pla
+    sta $9ff8
+    rts

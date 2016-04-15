@@ -4,6 +4,8 @@ VOP_WRITE = 2
 VOP_LOOKUP = 4
 VOP_OPEN = 6
 
+; Returns:
+; X: vfile
 alloc_vfile:
     lda $9ff4
     pha

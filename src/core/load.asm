@@ -4,7 +4,7 @@ gopen:
     jsr stop_task_switching
 
     lda #2
-    ldx #8
+    ldx $ba
     ldy #0
     jsr setlfs
 

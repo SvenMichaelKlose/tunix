@@ -155,11 +155,15 @@ done:
     and #$1f
     sta @(++ c)
     jsr malloc
-
     bcs -error2
+
+    ; Copy directory entries.
+    ldx tmp
     lda s
+    sta vfile_data_l,x
     sta d
     lda @(++ s)
+    sta vfile_data_h,x
     sta @(++ d)
     lda #<temporary_bank
     sta s

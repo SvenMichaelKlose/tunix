@@ -21,6 +21,11 @@ malloc_init:
 ; Returns:
 ; s: Allocated block.
 malloc:
+    txa
+    pha
+    tya
+    pha
+
     ;; Increase chunk size by header size.
     lda c
     clc
@@ -62,6 +67,8 @@ n:  ldy #4
     ora s
     bne -l
 
+    pla
+    pla
     lda #ENOMEM
     jmp return_error
 
@@ -125,6 +132,11 @@ l:  lda @(++ c)
     sta @(++ c)
     pla
     sta c
+
+    pla
+    tay
+    pla
+    tax
     clc
     rts
 
@@ -181,11 +193,18 @@ split:
     jmp -m
 
 err_inval:
+    pla
+    pla
     lda #EINVAL
     jmp return_error
     
 ; s: Chunk to free.
 malloc_free:
+    txa
+    pha
+    tya
+    pha
+
     ;; Make pointer to header of chunk.
     lda s
     sec
@@ -265,5 +284,9 @@ n:  ldy #4
     sta (s),y
     jmp -n
 
-n:  clc
+n:  pla
+    tay
+    pla
+    tax
+    clc
     rts

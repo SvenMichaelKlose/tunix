@@ -34,6 +34,8 @@ vfile_parents:      fill max_num_vfiles ; (Parent) directory.
 vfile_ops_l:        fill max_num_vfiles
 vfile_ops_h:        fill max_num_vfiles
 vfile_handles:      fill max_num_vfiles ; Within drivers.
+vfile_data_l:       fill max_num_vfiles ; Pointer to loaded directory entry or something else.
+vfile_data_h:       fill max_num_vfiles
 vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
 vfile_root:         0
 

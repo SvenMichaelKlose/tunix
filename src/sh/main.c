@@ -89,6 +89,28 @@ echo (char ** values)
     return 0;
 }
 
+struct g_dirent {
+    char name[16];
+    long size;
+};
+
+int
+ls (char ** values)
+{
+    struct g_dirent dirent;
+    FILE * dir;
+    size_t bytes_read;
+
+    dir = fopen ("/", "r");
+    while (!feof (dir)) {
+        bytes_read = fread (&dirent, sizeof (struct g_dirent), 1, dir);
+        printf ("%s\n", &dirent.name);
+    }
+    fclose (dir);
+
+    return 0;
+}
+
 typedef int (*command_function) (char **);
 
 struct command {
@@ -96,6 +118,7 @@ struct command {
     command_function fun;
 } commands[] = {
     { "echo", echo },
+    { "ls", ls },
     { NULL, NULL }
 };
 

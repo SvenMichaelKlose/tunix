@@ -114,8 +114,7 @@ program_start:
     sta s
     lda #>path_program
     sta s+1
-    jsr launch
-
+    jsr launch 
     rts
 
 ;; Print a zero–terminated string.
@@ -275,13 +274,17 @@ Flags and registers are not affected.
 "release" has to be called as often as "take_over" before multitasking is
 actually turned back on.
 
-## Virtual file system
+## File system
 
 To support multitasking, g maintains a set of file descriptors for each
-process.
+process.  Each file descriptor points to a unique vfile that is can be
+shared by processes and which hides file system specific implementations.
 
-Each file descriptor points to a vfile that is can be shared by processes
-and unique. When many processes access the same, file their file handles
-point to the same vfile. vfiles are created when a file is opened and
-removed when it has been closed by all process. Only the vfile for the root
-directory is never removed.
+vfiles are created when a file is opened, and it is removed when it has
+been closed by all processes that reference it.  Only the vfile for the
+root directory is never removed.
+
+### Directories
+
+Directories are always read in completely and saved as lists of dirent
+structures in a dedicated memory bank.

@@ -123,6 +123,7 @@ vfile_add_dirent:
     sta tmp2
 
     ;; Fetch size of dirent list.
+    ;; TODO: Fix! May be larger that intended!
     lda tmp
     sec
     sbc #malloc_chunk_header_size

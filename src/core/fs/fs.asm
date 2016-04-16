@@ -36,6 +36,7 @@ fs_open:
     lda @(++ s)
     sta @(++ d)
     jsr lookup_vfile
+    pha
     bcc +n
 
     lda fs_mode
@@ -44,9 +45,11 @@ fs_open:
 
     jsr fs_create
     bcc fs_open
+    pla
     rts
 
-n:  jsr assign_vfile_to_file
+n:  pla
+    jsr assign_vfile_to_file
     bcs +err_emfile
     rts
 
@@ -55,8 +58,13 @@ err_emfile:
     jmp set_error
 
 err_enoent:
+    pla
     lda #ENOENT
     jmp set_error
+
+fs_close:
+    clc
+    rts
 
 ; X: File handle
 ;

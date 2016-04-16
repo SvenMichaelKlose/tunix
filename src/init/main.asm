@@ -1,12 +1,25 @@
 init:
+    ;; Mount root file system.
+    ; Print message.
     lda #<txt_mounting_root
     sta s
     lda #>txt_mounting_root
     sta @(++ s)
     jsr devcon_print_string
 
+    ; Make vfile.
     jsr devcbm_make_root
 
+    ; Correct path working directory for this process.
+    ldy $9ff4
+    lda #0
+    sta $9ff4
+    lda vfile_root
+    sty $9ff4
+    sta pwd
+
+    ;; Start shell.
+    ; Print message.
     lda #<txt_starting_sh
     sta s
     lda #>txt_starting_sh
@@ -21,12 +34,15 @@ init:
     lda #1          ; Wait until process finishes.
     jsr launch
 
+    ;; Shutdown g.
+    ; Print message.
     lda #<txt_shutdown
     sta s
     lda #>txt_shutdown
     sta @(++ s)
     jsr devcon_print_string
 
+    ; Wait forever.
 w:  jmp -w
 
 txt_mounting_root:

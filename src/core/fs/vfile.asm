@@ -55,17 +55,4 @@ call_vfile_op:
 
     ; Restore A and call operation.
     lda tmp5
-    jsr +l
-    sta tmp5
-
-    php
-    pla
-    sta tmp6
-
-    lda tmp6
-    pha
-    lda tmp5
-    plp
-    rts
-
-l:  jmp (tmp3)
+    jmp (tmp3)

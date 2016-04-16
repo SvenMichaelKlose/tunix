@@ -8,20 +8,51 @@ O_APPEND = $40  ; Append to end of file.
 O_EXCL   = $80  ; Ensure that O_CREAT creates a new file.
 
 alloc_file:
-    ldx #0
-l:  lda file_states,x
+    ldy #0
+l:  lda file_states,y
     beq +done
-    inx
-    cpx #max_num_files_per_process
+    iny
+    cpy #max_num_files_per_process
     bne -l
+    lda #EMFILE
     sec
     rts
 done:
     clc
     rts
     
+; A: vfile
+;
+; Returns:
+; Y: file
 assign_vfile_to_file:
-    rts
+    ; Allocate file.
+    tax
+    jsr alloc_file
+    bcs +r
+
+    ; Assign vfile.
+    txa
+    sta file_vfiles,y
+    lda #FILE_OPENED
+    sta file_states,y
+
+    ; Increment reference counts up to root vfile.
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
+l:  inc vfile_refcnts,x
+    lda vfile_parents,x
+    beq +l
+    tax
+    jmp -l
+
+l:  pla
+    sta $9ff4
+
+r:  rts
 
 fs_create:
     rts
@@ -31,6 +62,7 @@ fs_create:
 fs_open:
     sta fs_mode
 
+stop:
     lda s
     sta d
     lda @(++ s)
@@ -49,13 +81,7 @@ fs_open:
     rts
 
 n:  pla
-    jsr assign_vfile_to_file
-    bcs +err_emfile
-    rts
-
-err_emfile:
-    lda #EMFILE
-    jmp set_error
+    jmp assign_vfile_to_file
 
 err_enoent:
     pla

@@ -24,16 +24,22 @@ done:
     jmp init_path_component_ptr
 
 ; d: Path.
+;
+; Returns:
+; A: vfile
 lookup_vfile:
-    ; Prepare relative path.
+    ;; Get vfile to start with.
+    ; Prepare for relative path.
     lda pwd
     sta tmp
 
+    ; Check if path is absolute.
     ldy #0
     lda (s),y
     cmp #@(char-code #\/)
     bne +not_absolute
 
+    ; Start with root vfile.
     lda $9ff4
     pha
     lda #0
@@ -41,9 +47,14 @@ lookup_vfile:
     ldx vfile_root
     pla
     sta $9ff4
-    sty tmp
+    stx tmp
 
+    ;; Step along vfiles for each path component.
 not_absolute:
+    lda (d),y
+    cmp #@(char-code #\/)
+    bne +l
+    jsr inc_d
 l:  jsr get_path_component
     lda path_component
     beq +done
@@ -94,6 +105,7 @@ l:  ldy #0
 not_found:
     pla
     sta $9ff8
+    lda #ENOENT
     sec
     rts
 

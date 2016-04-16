@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #define CHAR_RETURN     10
 #define CHAR_BACKSPACE  8
@@ -95,13 +97,22 @@ struct g_dirent {
 };
 
 int
+print_error ()
+{
+    fprintf (stderr, "sh: %s (%d)\n", strerror (errno), errno);
+    return -1;
+}
+
+int
 ls (char ** values)
 {
     struct g_dirent dirent;
     FILE * dir;
     size_t bytes_read;
 
-    dir = fopen ("/", "r");
+    if (!(dir = fopen ("/", "r")))
+        return print_error ();
+
     while (!feof (dir)) {
         bytes_read = fread (&dirent, sizeof (struct g_dirent), 1, dir);
         printf ("%s\n", &dirent.name);

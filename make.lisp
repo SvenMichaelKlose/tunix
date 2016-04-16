@@ -39,6 +39,7 @@
 
              "core/fs/vfile.asm"
              "core/fs/dirent.asm"
+             "core/fs/directory.asm"
              "core/fs/lookup.asm"
              "core/fs/fs.asm"
 

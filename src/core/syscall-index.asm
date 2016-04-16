@@ -21,5 +21,4 @@ syscall_index:
     "take_over" 0 <take_over >take_over
     "release" 0 <release >release
 
-    "get_error" 0 <get_error >get_error
     0

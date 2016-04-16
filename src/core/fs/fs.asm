@@ -62,7 +62,6 @@ fs_create:
 fs_open:
     sta fs_mode
 
-stop:
     lda s
     sta d
     lda @(++ s)
@@ -86,7 +85,8 @@ n:  pla
 err_enoent:
     pla
     lda #ENOENT
-    jmp set_error
+    sec
+    rts
 
 fs_close:
     clc

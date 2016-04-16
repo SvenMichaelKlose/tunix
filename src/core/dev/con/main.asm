@@ -1,16 +1,12 @@
 devcon_keyboard_vops:
     <devcon_read_keyboard >devcon_read_keyboard ; read
-    <devcon_error >devcon_error ; write
-    <devcon_error >devcon_error ; lookup
+    <return_enosys >return_enosys ; write
+    <return_enosys >return_enosys ; lookup
 
 devcon_screen_vops:
-    <devcon_error >devcon_error ; read
+    <return_enosys >return_enosys ; read
     <devcon_write_screen >devcon_write_screen ; write
-    <devcon_error >devcon_error ; lookup
-
-devcon_error:
-    lda #ENOSYS
-    jmp set_error
+    <return_enosys >return_enosys ; lookup
 
 devcon_init:
     lda #green

@@ -1,11 +1,8 @@
-set_error:
+return_enosys:
+    lda #ENOSYS
     sec
     rts
 
 release_with_error:
-    jsr set_error
+    sec
     jmp release
-
-get_error:
-    lda last_error
-    rts

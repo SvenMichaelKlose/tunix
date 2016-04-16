@@ -1,6 +1,6 @@
 devcbm_ops_directory:
-    <devcon_error >devcon_error ; read
-    <devcon_error >devcon_error ; write
+    <return_enosys >return_enosys ; read
+    <return_enosys >return_enosys ; write
     <vfile_default_lookup >vfile_default_lookup ; lookup
 
 devcbm_make_root:

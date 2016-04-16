@@ -17,3 +17,6 @@ ESPIPE =    14  ; Illegal seek.
 ERANGE =    15  ; Range error.
 EBADF =     16  ; Bad file number.
 EUNKNOWN =  17  ; Unknown OS specific error.
+
+; g specific errors.
+EEOF =      18  ; End of file.

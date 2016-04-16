@@ -114,7 +114,11 @@ ls (char ** values)
         return print_error ();
 
     while (!feof (dir)) {
-        bytes_read = fread (&dirent, sizeof (struct g_dirent), 1, dir);
+        if (!(bytes_read = fread (&dirent, sizeof (struct g_dirent), 1, dir))) {
+            if (errno)
+                return print_error ();
+            break;
+        }
         printf ("%s\n", &dirent.name);
     }
     fclose (dir);

@@ -32,6 +32,7 @@ init_per_process_data:
     iny
     sty @(++ file_vfiles)
     sty @(+ 2 file_vfiles)
+    sty @(+ 3 file_vfiles)
 
     ; Initialise path working directory.
     lda #@(+ FILE_OPENED FILE_DIRECTORY)
@@ -44,6 +45,8 @@ init_per_process_data:
     pla
     sta $9ff4
     sty @(+ 3 file_vfiles)
+    lda #3
+    sta pwd
 
     rts
 

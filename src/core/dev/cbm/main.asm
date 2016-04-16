@@ -1,7 +1,7 @@
 devcbm_ops_directory:
     <devcon_error >devcon_error ; read
     <devcon_error >devcon_error ; write
-    <devcon_error >devcon_error ; lookup
+    <vfile_default_lookup >vfile_default_lookup ; lookup
 
 devcbm_make_root:
     jsr stop_task_switching

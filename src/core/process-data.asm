@@ -37,8 +37,6 @@ vfile_ops_h:        fill max_num_vfiles
 vfile_handles:      fill max_num_vfiles ; Within drivers.
 vfile_data_l:       fill max_num_vfiles ; Pointer to loaded directory entry or something else.
 vfile_data_h:       fill max_num_vfiles
-vfile_sizes_0:      fill max_num_vfiles ; Dirent list size.
-vfile_sizes_1:      fill max_num_vfiles
 vfile_refcnts:      fill max_num_vfiles ; Number of processes using vfiles.
 vfile_root:         0
 

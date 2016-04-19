@@ -1,3 +1,19 @@
+split_path:
+    ldy #255
+l:  iny
+    lda (s),y
+    bne -l
+
+l:  dey
+    lda (s),y
+    cmp #@(char-code #\/)
+    bne -l
+
+    lda #0
+    sta (s),y
+
+    rts
+    
 init_path_component_ptr:
     lda #<path_component
     sta s

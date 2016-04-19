@@ -101,7 +101,7 @@ int
 print_error ()
 {
     fprintf (stderr, "sh: %s (%d)\n", strerror (errno), errno);
-    return -1;
+    return errno;
 }
 
 int
@@ -127,6 +127,42 @@ ls (char ** values)
     return 0;
 }
 
+int
+cat_single (char * path)
+{
+    char buffer[128];
+    FILE * file;
+    size_t bytes_read;
+
+    if (!(file = fopen (path, "r")))
+        return print_error ();
+
+    while (!feof (file)) {
+        if (!(bytes_read = fread (&buffer, sizeof (buffer), 1, file))) {
+            if (errno)
+                return print_error ();
+            break;
+        }
+        fwrite (&buffer, sizeof (buffer), 1, stdout);
+    }
+    fclose (file);
+
+    return 0;
+}
+
+
+int
+cat (char ** values)
+{
+    int r;
+
+    while (*values)
+        if (r = cat_single (*values++))
+            return r;
+
+    return 0;
+}
+
 typedef int (*command_function) (char **);
 
 struct command {
@@ -135,6 +171,7 @@ struct command {
 } commands[] = {
     { "echo", echo },
     { "ls", ls },
+    { "cat", cat },
     { NULL, NULL }
 };
 

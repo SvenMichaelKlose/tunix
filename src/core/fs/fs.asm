@@ -37,6 +37,13 @@ assign_vfile_to_file:
     lda #FILE_OPENED
     sta file_states,y
 
+    ; Reset file position.
+    lda #0
+    sta file_positions_0,y
+    sta file_positions_1,y
+    sta file_positions_2,y
+    sta file_positions_3,y
+
     ; Increment reference counts up to root vfile.
     lda $9ff4
     pha

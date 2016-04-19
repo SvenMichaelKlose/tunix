@@ -4,6 +4,7 @@ error:
 ; X: vfile
 ; s: CBM path name
 devcbm_read_directory:
+    stx tmp6
     lda vfile_handles,x
     sta tmp5
 
@@ -167,7 +168,7 @@ done:
     bcs -error2
 
     ; Copy directory entries.
-    ldx tmp5
+    ldx tmp6
     lda s
     sta vfile_data_l,x
     sta d

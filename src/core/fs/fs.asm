@@ -119,8 +119,8 @@ fs_close:
 ; Returns:
 ; A: byte
 fs_read:
+    stx tmp8
     lda file_states,x
-stop:
     tay
     and #FILE_OPENED
     beq +err_not_open
@@ -136,12 +136,16 @@ stop:
 
 err_not_open:
 err_not_readable:
+    lda #EINVAL
     sec
     rts
 
+; Write byte to file.
+;
 ; A: Byte
 ; X: File handle
 fs_write:
+    stx tmp8
     pha
     lda file_states,x
     tay
@@ -160,6 +164,7 @@ fs_write:
 
 err_not_open:
 err_not_writable:
-    sec
     pla
+    lda #EINVAL
+    sec
     rts

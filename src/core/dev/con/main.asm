@@ -80,7 +80,6 @@ devcon_read_keyboard:
     clc
     jmp release
 
-; X: vfile index
 ; A: character
 devcon_write_screen:
     jsr take_over

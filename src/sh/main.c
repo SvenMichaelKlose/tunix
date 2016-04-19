@@ -94,6 +94,7 @@ echo (char ** values)
 struct g_dirent {
     char name[16];
     long size;
+    char type;
 };
 
 int

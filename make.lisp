@@ -41,7 +41,7 @@
              "core/fs/dirent.asm"
              "core/fs/directory.asm"
              "core/fs/lookup.asm"
-             "core/fs/fs.asm"
+             "core/fs/main.asm"
 
              "core/dev/kbd.asm"
              "lib/gfx/calcscr.asm"

@@ -5,7 +5,7 @@ error:
 ; s: CBM path name
 devcbm_read_directory:
     lda vfile_handles,x
-    sta tmp
+    sta tmp5
 
     jsr strlen
     tya
@@ -13,7 +13,7 @@ devcbm_read_directory:
     ldy @(++ s)
     jsr SETNAM
 
-    ldx tmp
+    ldx tmp5
     lda devcbm_device_numbers,x
     tax
     ldy #$00    ; Read.
@@ -167,7 +167,7 @@ done:
     bcs -error2
 
     ; Copy directory entries.
-    ldx tmp
+    ldx tmp5
     lda s
     sta vfile_data_l,x
     sta d

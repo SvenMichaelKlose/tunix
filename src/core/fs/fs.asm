@@ -69,6 +69,34 @@ l:  lda vfile_states,x
 
 r:  rts
 
+; X: file
+unassign_vfile:
+    stx tmp8
+    lda file_vfiles,x
+    tay
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
+    ; TODO: Remove vfiles that reach a reference count of 0.
+    tya
+    tax
+l:  dec vfile_refcnts,x
+    lda vfile_parents,x
+    beq +l
+    tax
+    jmp -l
+
+l:  pla
+    sta $9ff4
+
+    ldx tmp8
+    lda #0
+    sta file_states,x
+
+    rts
+
 fs_create:
     rts
 
@@ -108,8 +136,20 @@ err_enoent:
     sec
     rts
 
+; A: file
 fs_close:
+    tax
+    lda file_states,x
+    and #FILE_OPENED
+    beq +err_einval
+    jsr unassign_vfile
+    sta file_states,x
     clc
+    rts
+
+err_einval:
+    lda #EINVAL
+    sec
     rts
 
 ; Read byte from file

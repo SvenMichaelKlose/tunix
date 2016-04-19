@@ -1,5 +1,5 @@
 devcbm_ops_directory:
-    <return_enosys >return_enosys ; read
+    <vfile_directory_read >vfile_directory_read ; read
     <return_enosys >return_enosys ; write
     <vfile_default_lookup >vfile_default_lookup ; lookup
 
@@ -10,7 +10,7 @@ devcbm_make_root:
     lda #0
     sta $9ff4
 
-    lda #FILE_OPENED
+    lda #@(+ FILE_OPENED FILE_READABLE)
     sta @(+ 3 vfile_states)
     lda #<devcbm_ops_directory
     sta @(+ 3 vfile_ops_l)

@@ -7,6 +7,10 @@ O_TRUNC  = $20  ; On O_CREAT, truncate the file to 0 if it already exists.
 O_APPEND = $40  ; Append to end of file.
 O_EXCL   = $80  ; Ensure that O_CREAT creates a new file.
 
+; Allocate file slot.
+;
+; Returns:
+; Y: file
 alloc_file:
     ldy #0
 l:  lda file_states,y
@@ -24,7 +28,7 @@ done:
 ; A: vfile
 ;
 ; Returns:
-; Y: file
+; A: file
 assign_vfile_to_file:
     ; Allocate file.
     tax
@@ -34,8 +38,6 @@ assign_vfile_to_file:
     ; Assign vfile.
     txa
     sta file_vfiles,y
-    lda #FILE_OPENED
-    sta file_states,y
 
     ; Reset file position.
     lda #0
@@ -56,16 +58,27 @@ l:  inc vfile_refcnts,x
     tax
     jmp -l
 
-l:  pla
+l:  lda vfile_states,x
+    tax
+    pla
     sta $9ff4
+    txa
+    ora #FILE_OPENED
+    sta file_states,y
+    tya
 
 r:  rts
 
 fs_create:
     rts
 
+; Open file specified by path name.
+;
 ; s: Path name
 ; A: mode
+;
+; Returns:
+; A: File
 fs_open:
     sta fs_mode
 
@@ -99,12 +112,15 @@ fs_close:
     clc
     rts
 
-; X: File handle
+; Read byte from file
+;
+; X: file
 ;
 ; Returns:
-; A: Byte.
+; A: byte
 fs_read:
     lda file_states,x
+stop:
     tay
     and #FILE_OPENED
     beq +err_not_open

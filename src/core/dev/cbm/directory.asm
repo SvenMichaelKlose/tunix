@@ -4,6 +4,11 @@ error:
 ; X: vfile
 ; s: CBM path name
 devcbm_read_directory:
+    lda $9ff4
+    pha
+    lda #0
+    sta $9ff4
+
     stx tmp6
     lda vfile_handles,x
     sta tmp5
@@ -131,6 +136,8 @@ error:
     bne +done
 l:  pla
     sta $9ffa
+    pla
+    sta $9ff4
     jmp return_cbm_error
 
 done:
@@ -186,7 +193,11 @@ done:
     sta $9ff8
     pla
     sta $9ffa
+    pla
+    sta $9ff4
     rts
+
+e:  jmp -error
 
 devcbm_read:
     jsr stop_task_switching
@@ -197,7 +208,7 @@ devcbm_read:
 
     jsr CHRIN
     jsr start_task_switching
-    bcs -error
+    bcs -e
     pha
     lda $90
     cmp #1   ; set carry when ST>0 (i.e., <>0!)

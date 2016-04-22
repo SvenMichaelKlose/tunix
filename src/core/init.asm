@@ -69,16 +69,23 @@ l:  lda $100,x
     lda #129
     sta process_states
 
+    ; Init linker.
+    lda #<library_calls
+    sta end_of_library_calls
+    lda #>library_calls
+    sta @(++ end_of_library_calls)
+
     ; Run it.
     jsr start_task_switching
     jsr take_over
-    lda #0
+    lda #BANK_CORE_INIT
     jmp switch_to_process
 
 mem_init:
     %00000000   ; LED off.
     %00111111   ; IO3/2 RAM, +3K R/W RAM
-    %10111111   ; BLK5 ro RAM, BLK1,2,3 R/W RAM
+    %11111111   ; BLK5 ro RAM, BLK1,2,3 R/W RAM
+;    %10111111   ; BLK5 ro RAM, BLK1,2,3 R/W RAM
     0                   ; (ID)
     BANK_CORE_DATA 0    ; +3K
     0 0                 ; IO

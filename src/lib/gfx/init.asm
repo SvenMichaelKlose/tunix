@@ -4,9 +4,6 @@ gfx_init:
     ldy #cyan
     jsr init_bitmap_mode
 
-    lda #@(+ (* white 16) reverse cyan)
-    sta $900f
-
     jsr reset_region
 
     brk

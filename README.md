@@ -14,6 +14,11 @@ http://hugbox.org/pixel/external/denial/g.zip
 A version of the cc65 C compiler with "vic20g" target is to be found at
 https://github.com/SvenMichaelKlose/cc65g
 
+## Status
+
+g can do most basic multitasking and boots a "shell" which is written in C.
+
+
 ## Memory layout
 
 A program may populate $2000-$7fff and use the IO area but it must not
@@ -48,7 +53,7 @@ addresses. Here's an example of a short symbol index:
     .byte 0             ; End of index.
 ```
 
-All in all libraries have the following format:
+Libraries have the following format:
 
 ```
 symbol index size (2 bytes)
@@ -64,7 +69,7 @@ Programs need to request jump tables via the function at address $0400.
 
 ### Errors
 
-System calls that fail return with the carry flag set and the error
+System calls that fail return with the carry flag set and an error
 code in the A register.
 
 ### Core zero page locations

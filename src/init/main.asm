@@ -42,6 +42,19 @@ init:
     sta @(++ s)
     jsr devcon_print_string
 
+    ;; Start GUI.
+    lda #<ui_symbols
+    sta s
+    lda #>ui_symbols
+    sta @(++ s)
+    lda #<ui_jumps
+    sta d
+    lda #>ui_jumps
+    sta @(++ d)
+    jsr $400
+
+    jsr boot_ui
+
     ; Wait forever.
 w:  jmp -w
 
@@ -56,3 +69,11 @@ txt_starting_sh:
 
 path_sh:
     @(ascii2petscii "SH") 0
+
+ui_symbols:
+    "GFX" 0
+    "boot" 0
+    0
+
+ui_jumps:
+boot_ui:    jmp $0000

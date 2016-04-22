@@ -14,7 +14,6 @@ init_bitmap_mode:
     sty tmp2
 
     ; Fill color RAM.
-    lda #green
     jsr fill_colors
 
     ; Make bitmap columns on screen.

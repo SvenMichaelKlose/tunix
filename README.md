@@ -302,6 +302,10 @@ Flags and registers are not affected.
 "release" has to be called as often as "take_over" before multitasking is
 actually turned back on.
 
+When multitasking has been switched back on and the system tried to switch
+while it was turned off "release" will do a task switch immediately, so
+processes cannot block the system by accident.
+
 ## File system
 
 To support multitasking, g maintains a set of file descriptors for each

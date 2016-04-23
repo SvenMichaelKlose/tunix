@@ -1,6 +1,9 @@
 #define MAX_LINE_LENGTH 255
 #define MAX_PARAMS 16
 
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -108,25 +111,26 @@ int
 ls (char ** values)
 {
     struct g_dirent dirent;
-    FILE * dir;
+    int dir;
     size_t bytes_read;
 
-    if (!(dir = fopen ("/", "r")))
+    if (!(dir = open ("/", 0)))
         return print_error ();
 
-    while (!feof (dir)) {
-        if (!(bytes_read = fread (&dirent, sizeof (struct g_dirent), 1, dir))) {
+    while (1) {
+        if (!(bytes_read = read (dir, &dirent, sizeof (struct g_dirent)))) {
             if (errno)
                 return print_error ();
             break;
         }
         printf ("%s\n", &dirent.name);
     }
-    fclose (dir);
+    close (dir);
 
     return 0;
 }
 
+/*
 int
 cat_single (char * path)
 {
@@ -150,7 +154,6 @@ cat_single (char * path)
     return 0;
 }
 
-
 int
 cat (char ** values)
 {
@@ -162,6 +165,7 @@ cat (char ** values)
 
     return 0;
 }
+*/
 
 typedef int (*command_function) (char **);
 
@@ -171,7 +175,9 @@ struct command {
 } commands[] = {
     { "echo", echo },
     { "ls", ls },
+/*
     { "cat", cat },
+*/
     { NULL, NULL }
 };
 

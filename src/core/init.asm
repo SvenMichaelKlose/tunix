@@ -97,5 +97,3 @@ mem_init:
 txt_welcome:
     "Welcome to g!" 10
     "Starting init process..." 10 0
-
-

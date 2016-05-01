@@ -26,51 +26,47 @@ end
 
     jsr gfx_init
 
-redraw:
     brk
-    c_setzb font $88
-    c_setpattern <pat_background >pat_background
-    c_box 0 0 @(-- screen_width) screen_height
-    c_setpattern <pat_empty >pat_empty
-    c_box 8 4 @(- screen_width 16) 119
-    c_setpattern <pat_solid >pat_solid
-    c_apply c_frame
-    c_addx 2
-    c_addy 3
-    c_setzw p <txt_welcome >txt_welcome
-    0
-
-l:  ldy #0
-    lda (p),y
-    beq +done
-    lda xpos
-    pha
-    lda ypos
-    pha
-    jsr putstring
-    lda #$30
-    sta font
-    pla
-    adc #10
-    sta ypos
-    pla
-    sta xpos
-    jmp -l
-
-done:
-    brk
-    c_setzb xpos 80
-    c_setzb ypos 120
-    c_setzb width 60
-    c_setzb height 50
+    c_setzb xpos 0
+    c_setzb ypos 0
+    c_setzb width 80
+    c_setzb height 191
     0
     jsr window
 
-l:  jsr take_over
-    jsr $ffe4
-    jsr release
+    brk
+    c_setzb xpos 80
+    c_setzb ypos 0
+    c_setzb width 79
+    c_setzb height 191
+    0
+    jsr window
+
+l:  jsr $ffe4
     beq -l
-    jmp redraw
+
+    ldx #15
+    lda #0
+l:  sta $9000,x
+    dex
+    bpl -l
+
+    sei
+    lda #$7f
+    sta $911d
+    sta $911e
+
+    cld
+    ldx #$ff
+    txs
+
+    jsr $fd8d   ; Init memory.
+    jsr $fd52   ; Init KERNAL.
+    jsr $fdf9   ; Init VIAs.
+    jsr $e518   ; Init VIC.
+
+    cli
+    jmp ($c000)
 
 txt_welcome:
     "Commodore VIC-20 GUI" 0

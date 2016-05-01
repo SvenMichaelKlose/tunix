@@ -48,7 +48,7 @@ l:  brk
     c_sbczbi height 11
     c_addy 11
     c_addx 1
-    c_setpattern <pat_woven >pat_woven
+    c_setpattern <pat_empty >pat_empty
     c_apply c_box
     0
     

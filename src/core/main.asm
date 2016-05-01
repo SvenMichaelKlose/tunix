@@ -1,11 +1,4 @@
 main:
-if @*rom?*
-    jsr $fd8d   ; Init memory.
-    jsr $fd52   ; Init KERNAL.
-    jsr $fdf9   ; Init VIAs.
-    jsr $e518   ; Init VIC.
-end
-
     ; Welcome the user.
     lda #<txt_booting
     ldy #>txt_booting
@@ -13,7 +6,6 @@ end
 
     jsr test_ultimem
 
-if @(not *rom?*)
     ;; Load core to block5.
     lda #<txt_loading_core
     ldy #>txt_loading_core
@@ -82,20 +74,6 @@ e:  lda #<txt_cant_load_core
     jsr $cb1e
 l:  jsr CHRIN
     jmp ($c000)
-end
-
-if @(not *rom?*)
-    sei
-    lda #$7f
-    sta $911d
-    sta $911e
-
-    cld
-    ldx #$ff
-    txs
-
-    jmp $a000
-end
 
 txt_booting:
     $93 @(ascii2petscii "BOOTING G...") 13 0
@@ -106,7 +84,6 @@ txt_loading_core:
 txt_loading_charset:
     "LOADING CHARSET..." 13 0
 
-if @(not *rom?*)
 txt_cant_load_core:
     "CANNOT LOAD 'CORE'." 13
     "EXITING..." 13 0
@@ -131,4 +108,3 @@ devcon_print_string:
     ldx s
     ldy @(++ s)
     jmp $cb1e
-end

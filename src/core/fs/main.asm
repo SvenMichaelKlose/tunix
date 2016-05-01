@@ -58,6 +58,7 @@ l:  inc vfile_refcnts,x
     tax
     jmp -l
 
+    ; Copy vfile state over to file state.
 l:  lda vfile_states,x
     tax
     pla
@@ -72,8 +73,12 @@ r:  rts
 ; X: file
 unassign_vfile:
     stx tmp8
+
+    ; Get vfile.
     lda file_vfiles,x
     tay
+
+    ; Switch to master core.
     lda $9ff4
     pha
     lda #0
@@ -88,9 +93,11 @@ l:  dec vfile_refcnts,x
     tax
     jmp -l
 
+    ; Switch back to process' core.
 l:  pla
     sta $9ff4
 
+    ; Mark file as unused.
     ldx tmp8
     lda #0
     sta file_states,x

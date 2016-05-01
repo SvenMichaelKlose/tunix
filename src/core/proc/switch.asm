@@ -10,11 +10,11 @@ force_switch:
 switch:
     pha
 
-    ;;; Restart NMI.
+    ;; Restart NMI.
     lda #$80
     sta $9115
 
-    ;;; Return if multitasking has been turned off.
+    ;; Return if multitasking has been turned off.
     lda takeovers
     beq +l
     sta needs_switch
@@ -24,7 +24,7 @@ switch:
 l:  pla
     jsr take_over
 
-    ;;; Save process status.
+    ;; Save process status.
     ; Save registers.
     sta saved_a
     stx saved_x
@@ -92,14 +92,18 @@ l:  lda process_states,x
     ;;; Switch to found process.
     lda process_cores_saved,x
 
+; Switch to particular process.
+;
 ; Input:
 ; A: Core bank of process.
 switch_to_process:
     ; Switch in process' core bank.
     sta $9ff4
 
+    ; Keep next call of "release" from forcing a switch.
     lda #0
     sta needs_switch
+
     lda process_slot
     sta current_process
 

@@ -18,13 +18,14 @@ window:
 
     ; Print window title.
     brk
+    c_setzb font $30
     c_addx 2
     c_addy 2
     c_setzw p <txt_clock >txt_clock
     c_apply c_putstring
+    0
 
     ; Draw title grip.
-    0
     pla
     sta tmp4
 

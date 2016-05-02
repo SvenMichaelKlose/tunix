@@ -1,17 +1,4 @@
 boot:
-if @(not *no-core?*)
-    ; Get jumps to core.
-    lda #<syms_core
-    sta s
-    lda #>syms_core
-    sta @(++ s)
-    lda #<jt_core
-    sta d
-    lda #>jt_core
-    sta @(++ d)
-    jsr $0400
-end
-
     lda #<exec_script
     sta $316
     lda #>exec_script
@@ -67,32 +54,3 @@ l:  sta $9000,x
 
     cli
     jmp ($c000)
-
-txt_welcome:
-    "Commodore VIC-20 GUI" 0
-    " " 0
-    " " 0
-    "Graphics primitives and" 0
-    "variable width font rendering" 0
-    "in less than 2K." 0
-    " " 0
-    "This font is generated from" 0
-    "the system font at startup." 0
-    " " 0
-    "All drawing is clipped." 0
-    0
-
-;;; Wanted jumps to the core.
-syms_core:
-    "/g" 0
-    "inc_s" 0
-    "take_over" 0
-    "release" 0
-    0
-
-;;; Jump table to core.
-
-jt_core:
-inc_s:      0 0 0
-take_over:  0 0 0
-release:    0 0 0

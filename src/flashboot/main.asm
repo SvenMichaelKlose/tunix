@@ -1,4 +1,5 @@
 main:
+    ; Don't get interrupted.
     sei
     lda #$7f
     sta $911d
@@ -13,6 +14,7 @@ main:
     jsr $fdf9   ; Init VIAs.
     jsr $e518   ; Init VIC.
 
+    ; Activate all RAM (except I/O area).
     lda #%01111111
     sta $9ff2
     lda #0
@@ -28,19 +30,32 @@ main:
     inx
     stx $9ffc
     sta $9ffd
-
     cli
 
+    ; Make dummy call to g's link().
+    lda #$4c
+    sta $0400
+    lda #<dummy_link
+    sta $0401
+    lda #>dummy_link
+    sta $0402
+
+    ; Copy following code in Flash to $2000 (skip first 4 header bytes).
     lda #<boot_end
     sta s
     lda #>boot_end
     sta @(++ s)
-    lda #$00
+    lda #$fc
     sta d
     sta c
-    lda #$20
+    lda #$1f
     sta @(++ d)
     sta @(++ c)
     lda #0
     jsr moveram
+
+    ; Run it.
     jmp $2000
+
+dummy_link:
+    rts

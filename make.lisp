@@ -82,7 +82,7 @@
            '("zeropage.asm"
              "core/low-data.asm"
              "../bender/vic-20/basic-loader.asm"
-             "core/main.asm"
+             "loader/main.asm"
              "core/test-ultimem.asm"
              "core/errno.inc.asm"
              "core/lib/pointer-manipulation.asm"

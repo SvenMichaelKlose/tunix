@@ -1,7 +1,23 @@
-buf_clipped_char:
-    fill 8
+.export putchar
 
-blit_char:
+.import inc_xcpos, calcscr
+.import masks_left, masks_right
+.importzp tmp, tmp2, tmp3
+.importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr, font_space_size, do_compress_font_gaps
+
+.bss
+
+buf_clipped_char:
+    .byte 0, 0, 0, 0, 0, 0, 0, 0
+
+.data
+
+tab_neg:
+    .byte 0, 7, 6, 5, 4, 3, 2, 1
+
+.code
+
+.proc blit_char
     ; Calculate sub–column shifts.
     lda xpos
     and #7
@@ -14,71 +30,72 @@ blit_char:
     ldy #7
 l:  lda (s),y
     ldx tmp2
-    beq +i
+    beq i
 m:  lsr
     dex
-    bne -m
+    bne m
 i:  ora (scr),y
     sta (scr),y
     dey
-    bpl -l
+    bpl l
 
     ; Step to next column.
     jsr inc_xcpos
 
     ; Draw optional right column.
     ldy #7
-l:  lda (s),y
+l2: lda (s),y
     ldx tmp3
-m:  asl
+m2: asl
     dex
-    bne -m
+    bne m2
     ora (scr),y
     sta (scr),y
     dey
-    bpl -l
+    bpl l2
     rts
+.endproc
 
-clip_char:
+.proc clip_char
     ; Copy character into buffer.
     ldy #7
-l:  lda (s),y
+l3: lda (s),y
     sta buf_clipped_char,y
     dey
-    bpl -l
+    bpl l3
 
     lda #<buf_clipped_char
     sta s
     lda #>buf_clipped_char
-    sta @(++ s)
+    sta s+1
 
     ; Clip top of character.
     lda ryt
     sec
     sbc ypos
-    bcc +n
+    bcc n4
     tay
     dey
     lda #0
-l:  sta buf_clipped_char,y
+l4: sta buf_clipped_char,y
     dey
-    bpl -l
-n:
+    bpl l4
+n4:
 
     ; Clip bottom of character.
     lda ypos2
     cmp ryb
-    bcc +n
+    bcc n5
     lda ryb
     sec
     sbc ypos
     tay
     lda #0
-l:  sta buf_clipped_char,y
+l5: sta buf_clipped_char,y
     iny
     cpy #8
-    bne -l
-n:
+    bne l5
+n5:
 
     lda #$ff
     sta tmp2
@@ -87,38 +104,39 @@ n:
     lda rxl
     sec
     sbc xpos
-    bcc +n
+    bcc n6
     tay
     lda masks_left,y
     sta tmp2
-n:
+n6:
 
     ; Clip right of character.
     lda xpos2
     sec
     sbc rxr
-    bcc +n
+    bcc n7
     tay
     lda masks_right,y
     and tmp2
     sta tmp2
-n:
+n7:
 
     ; Run mask for sides over character.
     ldy #7
-l:  lda tmp2
+l6: lda tmp2
     and buf_clipped_char,y
     sta buf_clipped_char,y
     dey
-    bpl -l
+    bpl l6
     rts
+.endproc
 
-putchar:
+.proc putchar
     ; ASCII to PETSCII
-    cmp #@(++ (char-code #\Z)))
-    bcc +n
+    cmp #'Z'+1
+    bcc n
     sec
-    sbc #@(-- (char-code #\a))
+    sbc #'a'-1
 n:
 
     ; Get character address.
@@ -134,29 +152,29 @@ n:
     tya
     and #%00000111
     ora font
-    sta @(++ s)
+    sta s+1
 
     ; OR all line together to find the paddings left and right.
     ldy #7
     lda #0
 l:  ora (s),y
     dey
-    bpl -l
+    bpl l
     sta tmp
 
     ; Check if the left gap should be removed.
     ldx xpos    ; XXX really needed?
-    beq +n
+    beq n2
     ldx do_compress_font_gaps
-    beq +n
+    beq n2
 
     ; Move the character left to remove the gap.
-l:  asl
-    bcs +n
-    beq +n
+l2: asl
+    bcs n2
+    beq n2
     dec xpos
-    jmp -l
-n:
+    jmp l2
+n2:
 
     ; Calculate right bottom point.
     lda xpos
@@ -171,32 +189,32 @@ n:
     ; Skip character if it's outside the visible region.
     lda xpos
     cmp rxr
-    bcs +next_char
+    bcs next_char
     lda xpos2
     cmp rxl
-    bcc +next_char
+    bcc next_char
     lda ypos
     cmp ryb
-    bcs +next_char
+    bcs next_char
     lda ypos2
     cmp ryt
-    bcc +next_char
+    bcc next_char
 
     ; Check if character needs to get clipped.
     lda xpos
     cmp rxl
-    bcc +m
+    bcc m
     lda rxr
     cmp xpos2
-    bcc +m
+    bcc m
     lda ypos
     cmp ryt
-    bcc +m
+    bcc m
     lda ryb
     cmp ypos2
-    bcs +n
+    bcs n3
 m:  jsr clip_char
-n:
+n3:
 
     jsr calcscr
     jsr blit_char
@@ -211,17 +229,17 @@ next_char:
 
     ; Check if we should remove the right gap.
     ldx do_compress_font_gaps
-    beq +j
+    beq j
     lda tmp
-    beq +n      ; Add default gap for spaces…
+    beq n4      ; Add default gap for spaces…
 
     ; Move to pointer to the left to close the gap.
     lda tmp
-l:  lsr
-    bcs +done
-    beq +done
+l3: lsr
+    bcs done
+    beq done
     dec xpos
-    jmp -l
+    jmp l3
 
     ; Leave 1 pixel gap.
 done:
@@ -229,12 +247,11 @@ done:
     rts
 
     ; Add default gap for spaces.
-n:  lda xpos
+n4: lda xpos
     sec
     sbc #8
     clc
     adc font_space_size
     sta xpos
 j:  rts
-
-tab_neg:    0 7 6 5 4 3 2 1
+.endproc

@@ -1,20 +1,18 @@
-    data
-    org zp_end_core
+.zeropage
 
-p:      0
-ph:     0
+p:      .byte 0
+ph:     .byte 0
 
-sa:     0 0     ; Bytecode argument list.
-sp:     0 0     ; Bytecode pointer.
-srx:    0       ; Saved X register.
+sa:     .word 0     ; Bytecode argument list.
+sp:     .word 0     ; Bytecode pointer.
+srx:    .byte 0       ; Saved X register.
 
-scr:    0 0     ; Current screen address.
-xcpos:  0       ; X columns.
+xcpos:  .byte 0       ; X columns.
 
 
 ; Utils
 
-font_compression: 0
+font_compression: .byte 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Drawing context ;;;
@@ -23,34 +21,29 @@ font_compression: 0
 context_start:
 
 ; Visible region.
-rxl:    0
-ryt:    0
-rxr:    0
-ryb:    0
+rxl:    .byte 0
+ryt:    .byte 0
+rxr:    .byte 0
+ryb:    .byte 0
 
 ; Cursor
-xpos:   0       ; X position
-ypos:   0       ; Y position
-xpos2:  0       ; X position
-ypos2:  0       ; Y position
-width:  0       ; Width
-height: 0       ; Height
+xpos:   .byte 0       ; X position
+ypos:   .byte 0       ; Y position
+xpos2:  .byte 0       ; X position
+ypos2:  .byte 0       ; Y position
+width:  .byte 0       ; Width
+height: .byte 0       ; Height
 
-pattern: 0
-patternh: 0
+pattern: .byte 0
+patternh: .byte 0
 
-font:   0       ; Font starting page.
-font_space_size: 0 ; Width of an empty character.
-do_compress_font_gaps: 0
+font:   .byte 0       ; Font starting page.
+font_space_size: .byte 0 ; Width of an empty character.
+do_compress_font_gaps: .byte 0
 
-masks:  0       ; Source mask.
-maskd:  0       ; Destination mask.
+masks:  .byte 0       ; Source mask.
+maskd:  .byte 0       ; Destination mask.
 
 context_end:
 
-context_size = @(- context_end context_start)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Application space ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;
-    end
+context_size = context_end-context_start

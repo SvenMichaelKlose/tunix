@@ -1,4 +1,8 @@
-frame:
+.export frame
+.import vline, hline, xpos, ypos, width, height
+.code
+
+.proc frame
     jsr vline
     jsr hline
     lda xpos
@@ -18,3 +22,4 @@ frame:
     pla
     sta ypos
     rts
+.endproc

@@ -1,15 +1,23 @@
-fill_colors:
+.export init_bitmap_mode
+
+.importzp d, ryt, ryb, rxl, rxr, font_space_size
+.importzp tmp, tmp2
+
+.include "vic-settings.inc.asm"
+
+.proc fill_colors
     ldx #0
 l:  sta colors,x
-    sta @(+ 256 colors),x
+    sta colors+256,x
     dex
-    bne -l
+    bne l
     rts
+.endproc
 
 ; A: text colour
 ; X: screen colour
 ; Y: border colour
-init_bitmap_mode:
+.proc init_bitmap_mode
     stx tmp
     sty tmp2
 
@@ -20,33 +28,33 @@ init_bitmap_mode:
     lda #<screen
     sta d
     lda #>screen
-    sta @(++ d)
+    sta d+1
     ldx #screen_rows
-    lda #@(+ 16 (* (-- screen_columns) screen_rows))
+    lda #16+((screen_columns-1)*screen_rows)
 
 m:  pha
 
     ; Fill character row.
-    ldy #@(-- screen_columns)
+    ldy #screen_columns-1
 l:  sta (d),y
     sec
     sbc #screen_rows
     dey
-    bpl -l
+    bpl l
 
     lda d
     clc
     adc #screen_columns
     sta d
-    bcc +n
-    inc @(++ d)
+    bcc n
+    inc d+1
 n:
 
     pla
     clc
     adc #1
     dex
-    bne -m
+    bne m
 
     ; Initialise VIC.
     ldx $ede4
@@ -56,9 +64,9 @@ n:
     ldx $ede5
     dex
     stx $9001
-    lda #@screen_columns
+    lda #screen_columns
     sta $9002
-    lda #@(+ (* 2 screen_rows) 1)
+    lda #2*screen_rows+1
     sta $9003
     lda #$cc    ; screen=$1e00, chars=$1000
     sta $9005
@@ -71,3 +79,4 @@ n:
     ora tmp2
     sta $900f
     rts
+.endproc

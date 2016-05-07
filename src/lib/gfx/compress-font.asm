@@ -1,4 +1,9 @@
-compress_font:
+.export compress_font
+
+.importzp s, d, tmp, tmp2, font_compression
+.code
+
+.proc compress_font
     lda #0
     sta tmp2
 
@@ -12,24 +17,24 @@ next_bit:
 next_line:
     lda (s),y
     and tmp
-    beq +n
+    beq n
     sec
-    jmp +m
+    jmp m
 n:  clc
 m:  ror buffer1,x
     iny
     cpy #8
-    bne -next_line
+    bne next_line
     inx
     lsr tmp
-    bne -next_bit
+    bne next_bit
 
     ; Clear second buffer.
     ldx #7
     lda #0
 l:  sta buffer2,x
     dex
-    bpl -l
+    bpl l
 
     ; Compress char.
     lda buffer1
@@ -38,66 +43,68 @@ l:  sta buffer2,x
     sta tmp
     ldx #1
     ldy #1
-l:  lda buffer1,x
+l2: lda buffer1,x
     sta buffer2,y
-    cmp @(-- buffer2),y
-    beq +n
+    cmp buffer2-1,y
+    beq n2
 j:  iny
-    jmp +m
-n:  dec tmp
-    bmi -j
-m:  inx
+    jmp m2
+n2: dec tmp
+    bmi j
+m2: inx
     cpx #8
-    bne -l
+    bne l2
 
     ; Turn char +90°.
     lda #1
     sta tmp
     ldx #0
-next_bit:
+next_bit2:
     ldy #0
-next_line:
+next_line2:
     lda buffer2,y
     and tmp
-    beq +n
+    beq n3
     sec
-    jmp +m
-n:  clc
-m:  rol buffer1,x
+    jmp m3
+n3: clc
+m3: rol buffer1,x
     iny
     cpy #8
-    bne -next_line
+    bne next_line2
     inx
     asl tmp
-    bne -next_bit
+    bne next_bit2
 
     ldy #7
-l:  lda buffer1,y
+l3: lda buffer1,y
     sta (d),y
     dey
-    bpl -l
+    bpl l3
 
     lda s
     clc
     adc #8
     sta s
-    bcc +n
-    inc @(++ s)
-n:
+    bcc n4
+    inc s+1
+n4:
 
     lda d
     clc
     adc #8
     sta d
-    bcc +n
-    inc @(++ d)
-n:
+    bcc n5
+    inc d+1
+n5:
 
     dec tmp2
-    beq +done
+    beq done
     jmp next_char
 done:
     rts
+.endproc
 
-buffer1:    fill 8
-buffer2:    fill 8
+.bss
+buffer1:    .byte 0, 0, 0, 0, 0, 0, 0, 0
+buffer2:    .byte 0, 0, 0, 0, 0, 0, 0, 0

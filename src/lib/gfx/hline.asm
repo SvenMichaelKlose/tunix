@@ -1,16 +1,30 @@
-inc_xcpos:
+.export hline
+
+.import masks_left, masks_right, maskd_left, maskd_right
+.import calcscr, clip_x
+.importzp scr, xpos, ypos, width, c, xcpos, ryb, ryt, pattern
+.importzp tmp, tmp2, tmp3
+
+.include "vic-settings.inc.asm"
+
+.bss
+xposr:  .byte 0
+
+.code
+
+.proc inc_xcpos
     lda scr
     clc
-    adc #@(* 16 screen_rows)
+    adc #16*screen_rows
     sta scr
-    bcc +n
-    inc @(++ scr)
+    bcc n
+    inc scr+1
 n:  rts
+.endproc
 
 ; In: xpos, ypos, width
-xposr:  0
 
-hline:
+.proc hline
     lda xpos
     pha
     lda width
@@ -19,12 +33,12 @@ hline:
     ; Clip
     lda ypos
     cmp ryt
-    bcc +done
+    bcc done
     cmp ryb
-    beq +n
-    bcs +done
+    beq n
+    bcs done
 n:  jsr clip_x
-    bcc +done
+    bcc done
 
     jsr calcscr
 
@@ -70,7 +84,7 @@ l:  lda tmp2
     sta (scr),y
     jsr inc_xcpos
     dec c
-    bne -l
+    bne l
 
     ; Draw right end.
 right_end:
@@ -111,4 +125,5 @@ single_column:
     and tmp3
     ora tmp
     sta (scr),y
-    jmp -done
+    jmp done
+.endproc

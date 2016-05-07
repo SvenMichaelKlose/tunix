@@ -1,33 +1,15 @@
-vmaskd: %01111111
-        %10111111
-        %11011111
-        %11101111
-        %11110111
-        %11111011
-        %11111101
-        %11111110
+.export vline
 
-vmasks: %10000000
-        %01000000
-        %00100000
-        %00010000
-        %00001000
-        %00000100
-        %00000010
-        %00000001
+.import xpos, ypos, height, rxl, rxr, masks, maskd
+.import clip_y, vfill
 
-done:
-    pla
-    sta height
-    pla
-    sta ypos
-    rts
+.code
 
 ; SYSCALL: Draw a vertical line
 ;
 ; In: xpos, ypos, height, pattern
 ; Modifies: masks, maskd
-vline:
+.proc vline
     lda ypos
     pha
     lda height
@@ -36,12 +18,12 @@ vline:
     ; Clip
     lda xpos
     cmp rxl
-    bcc -done
+    bcc done
     cmp rxr
     beq +n
-    bcs -done
+    bcs done
 n:  jsr clip_y
-    bcc -done
+    bcc done
 
     lda xpos
     and #7
@@ -52,4 +34,33 @@ n:  jsr clip_y
     sta maskd
 
     jsr vfill
-    jmp -done
+
+done:
+    pla
+    sta height
+    pla
+    sta ypos
+    rts
+.endproc
+
+.data
+
+vmaskd:
+    .byte %01111111
+    .byte %10111111
+    .byte %11011111
+    .byte %11101111
+    .byte %11110111
+    .byte %11111011
+    .byte %11111101
+    .byte %11111110
+
+vmasks:
+    .byte %10000000
+    .byte %01000000
+    .byte %00100000
+    .byte %00010000
+    .byte %00001000
+    .byte %00000100
+    .byte %00000010
+    .byte %00000001

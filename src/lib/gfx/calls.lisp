@@ -11,13 +11,13 @@
   (apply #'+ (maptimes [format nil "c_~A=~A~%" (syscall-name (syscallbyindex _)) (++ _)]
                        (length (+ *syscalls* *bytecodes*)))))
 
-(defun syscall-bytecodes ()
-  (apply #'+ (maptimes [asm (format nil "c_~A=~A" (syscall-name (syscallbyindex _)) (++ _))]
-                       (length (+ *syscalls* *bytecodes*)))))
-
 (defun syscall-vectors (label prefix)
-  (+ (asm label)
-     (mapcan [asm (format nil "~A~A" prefix (syscall-name _))] (+ *syscalls* *bytecodes*))))
+  (+ label
+     " .byte "
+     (apply #'+ (pad (mapcar [format nil "~A~A" prefix (syscall-name _)]
+                             (+ *syscalls* *bytecodes*))
+                     ", "))
+     (format nil "~%")))
 
 (defun syscall-vectors-l () (syscall-vectors "syscall_vectors_l:" "<"))
 (defun syscall-vectors-h () (syscall-vectors "syscall_vectors_h:" ">"))
@@ -25,10 +25,10 @@
 (defun syscall-args-h () (syscall-vectors "syscall_args_h:" ">args_"))
 
 (defun syscall-args ()
-  (mapcan [+ (asm (format nil "args_~A:" (syscall-name _)))
-             (asm (princ (length ._) nil))
-             (mapcan [asm (downcase (symbol-name _))] ._)]
-          (+ *syscalls* *bytecodes*)))
+  (apply #'+ (mapcar [+ (format nil "args_~A:" (syscall-name _))
+                        (princ (length ._) nil)
+                        (apply #'+ (mapcar [asm (downcase (symbol-name _))] ._))]
+                     (+ *syscalls* *bytecodes*))))
 
 (defmacro define-syscall (name &rest args)
   (| (assoc name *syscalls*)

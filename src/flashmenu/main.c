@@ -5,7 +5,7 @@
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
-#define WINDOW_TITLE_HEIGHT     10
+#define WINDOW_TITLE_HEIGHT     11
 
 #define WHITE   1
 
@@ -110,7 +110,7 @@ draw_window (void * _w)
     short ix = x + 1;
     short iy = y + 1;
     short iw = r->w - 2;
-    short xr = x + iw;
+    short xr = x + iw - 1;
     short yb = y + WINDOW_TITLE_HEIGHT - 1;
     short cx;
     short gw;
@@ -135,7 +135,7 @@ draw_window (void * _w)
     }
 
     /* Draw contents. */
-    gfx_draw_frame (x, y + WINDOW_TITLE_HEIGHT, w, h - WINDOW_TITLE_HEIGHT);
+    gfx_draw_frame (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
 /*
     gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
     draw_obj (win->obj.node.children);
@@ -189,7 +189,7 @@ main (int argc, char ** argv)
     gfx_reset_region ();
     gfx_set_pattern (pattern);
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
-	wleft = make_window (0, 0, 80, 176, "Left");
+	wleft = make_window (0, 0, 81, 176, "Left");
 	draw_window (wleft);
 	wright = make_window (80, 0, 80, 176, "Right");
 	draw_window (wright);

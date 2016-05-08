@@ -25,13 +25,18 @@ main:
     jsr $fdf9   ; Init VIAs.
     jsr $e518   ; Init VIC.
 
-    ; Activate all RAM (except I/O area).
+    ; Activate all RAM.
+    lda #%00111111
+    sta $9ff1
     lda #%01111111
     sta $9ff2
     lda #0
     tax
     stx $9ff4
     sta $9ff5
+    inx
+    stx $9ff6
+    sta $9ff7
     inx
     stx $9ff8
     sta $9ff9
@@ -44,19 +49,15 @@ main:
     cli
 
     ; Make dummy call to g's link().
-    lda #$4c
+    lda #$60	; RTS
     sta $0400
-    lda #<dummy_link
-    sta $0401
-    lda #>dummy_link
-    sta $0402
 
     ; Copy following code in Flash to $2000 (skip first 4 header bytes).
     lda #<__PRGEND__
     sta s
     lda #>__PRGEND__
     sta s+1
-    lda #$fc
+    lda #$fa
     sta d
     sta c
     lda #$1f

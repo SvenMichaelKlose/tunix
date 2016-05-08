@@ -130,76 +130,6 @@
              "lib/gfx/end.asm"))
         "compiled/gfx.vice.txt"))
 
-(defun make-flashboot ()
-  (make "compiled/flashboot.bin"
-        (@ [+ "src/" _]
-           `("../bender/vic-20/vic.asm"
-             "zeropage.asm"
-             "flashboot/rom-info.asm"
-             "flashboot/main.asm"
-             "core/mem/moveram.asm"
-             "flashboot/end.asm"))
-        "compiled/flashboot.bin.vice.txt"))
-
-(defun make-menu ()
-  (with-temporary *no-core?* t
-  (make "compiled/menu.bin"
-        (@ [+ "src/" _]
-           `("../bender/vic-20/vic.asm"
-             "zeropage.asm"
-             "lib/gfx/zeropage.asm"
-             "lib/gfx/vic-settings.inc.asm"
-             "flashmenu/start.asm"
-             "flashmenu/main.asm"
-             ,@(@ [+ "lib/gfx/" _]
-                  '("main.asm"
-                    "masks.asm"
-                    "patterns.asm"
-                    "calcscr.asm"
-                    "reset-region.asm"
-                    "clip.asm"
-                    "vline.asm"
-                    "vfill.asm"
-                    "hline.asm"
-                    "frame.asm"
-                    "box.asm"
-                    "putchar.asm"
-                    "putstring.asm"
-                    "compress-font.asm"
-                    "init-bitmap-mode.asm"
-                    "init.asm"))
-             "ui/syscalls.asm"
-             "ui/window.asm"
-             "bytecode/interpreter.asm"
-             "bytecode/instructions.asm"
-             "lib/gfx/end.asm"))
-        "compiled/menu.bin.vice.txt")))
-
-(defun write-zeroes (x o)
-  (adotimes x
-    (write-byte 0 o)))
-
-(defun write-block (x o)
-  (& x
-     (princ x o))
-  (write-zeroes (- (* 8 1024) (? x
-                                 (length x)
-                                 0))
-                o))
-
-(defvar *img-blocks* (/ 8192 8))
-
-(defvar *fs-block-size* 10) ; 1Kb
-(defvar *fs-blocks* (/ 8192 2))
-
-(defun make-image ()
-  (with-output-file o "compiled/ultimem.img"
-    (write-block (+ (fetch-file "compiled/flashboot.bin")
-                    (fetch-file "compiled/menu.bin"))
-                 o)
-    (adotimes ((- *img-blocks* 1))
-      (write-block nil o))))
-
 (with-output-file o "src/lib/gfx/_bytecodes.asm"
   (princ (+ (syscall-imports)
 			(format nil ".data~%")
@@ -225,7 +155,5 @@
 ;  (make-core))
 ;(make-charset)
 ;(make-loader)
-;(make-flashboot)
-;(make-menu)
 ;(make-image)
 (quit)

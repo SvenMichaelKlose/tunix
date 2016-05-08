@@ -211,11 +211,11 @@
 			(syscall-args))
          o))
 (with-output-file o "src/lib/gfx/_column-addrs.asm"
-  (princ (+ (format nil ".export column_addrs_l, column_addrs_h~%")
-			"column_addrs_l: .byte "
+  (princ (+ (format nil ".export column_addrs_lo, column_addrs_hi~%.data~%")
+			"column_addrs_lo: .byte "
 			(apply #'+ (pad (maptimes [princ (low (+ #x1100 (* 16 12 _))) nil] 20) ", "))
 			(format nil "~%")
-  			"column_addrs_h: .byte "
+  			"column_addrs_hi: .byte "
 			(apply #'+ (pad (maptimes [princ (high (+ #x1100 (* 16 12 _))) nil] 20) ", "))
 			(format nil "~%"))
 		 o))

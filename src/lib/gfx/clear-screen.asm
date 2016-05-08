@@ -1,7 +1,8 @@
 .export clear_screen
-.import s, d, c
-.import xpos, ypos, charset, charset_size
-.import clrram
+
+.importzp s, d, c, xpos, ypos
+.import clrram, charset, charset_size
+
 .code
 
 .proc clear_screen

@@ -10,4 +10,4 @@ all:
 
 clean:
 	$(MAKE) -C src clean
-	rm -rv g.zip compiled
+	rm -frv g.zip compiled

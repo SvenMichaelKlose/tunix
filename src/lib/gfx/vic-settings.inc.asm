@@ -1,3 +1,6 @@
+.exportzp screen_columns, screen_rows, screen_width, screen_height
+.export screen, colors, charset, charset_size, char_offset
+
 screen_columns  = 20                                                            
 screen_rows     = 12
 screen_width    = 8 * screen_columns

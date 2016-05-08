@@ -1,5 +1,5 @@
 SOURCES=main.c
-ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm
+ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm ../core/mem/clrram.asm
 PROGRAM=flashmenu.bin
 
 include ../Makefile.rules

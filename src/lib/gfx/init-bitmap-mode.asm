@@ -1,9 +1,8 @@
 .export init_bitmap_mode
 
-.importzp d, ryt, ryb, rxl, rxr, font_space_size
+.importzp d, ryt, ryb, rxl, rxr, font_space_size, screen_columns, screen_rows
 .importzp tmp, tmp2
-
-.include "vic-settings.inc.asm"
+.import screen, colors
 
 .proc fill_colors
     ldx #0

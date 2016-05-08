@@ -2,10 +2,8 @@
 
 .import masks_left, masks_right, maskd_left, maskd_right
 .import calcscr, clip_x
-.importzp c, scr, xpos, ypos, width, c, xcpos, ryb, ryt, pattern
+.importzp c, scr, xpos, ypos, width, c, xcpos, ryb, ryt, pattern, screen_rows
 .importzp tmp, tmp2, tmp3
-
-.include "vic-settings.inc.asm"
 
 .bss
 xposr:  .byte 0

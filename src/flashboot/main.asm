@@ -1,3 +1,14 @@
+.export main
+.exportzp s, d, c
+
+.import moveram, __PRGEND__
+
+s = 0
+d = 2
+c = 4
+
+.segment "STARTUP"
+
 main:
     ; Don't get interrupted.
     sei
@@ -41,16 +52,16 @@ main:
     sta $0402
 
     ; Copy following code in Flash to $2000 (skip first 4 header bytes).
-    lda #<boot_end
+    lda #<__PRGEND__
     sta s
-    lda #>boot_end
-    sta @(++ s)
+    lda #>__PRGEND__
+    sta s+1
     lda #$fc
     sta d
     sta c
     lda #$1f
-    sta @(++ d)
-    sta @(++ c)
+    sta d+1
+    sta c+1
     lda #0
     jsr moveram
 

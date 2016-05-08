@@ -1,8 +1,14 @@
-moveram:
+.export moveram
+
+.importzp s, d, c
+
+.code
+
+.proc moveram
     ldy #0
     ldx c
     sty c
-    inc @(++ c)
+    inc c+1
     cmp #0
     bne copy_backwards
 
@@ -10,40 +16,41 @@ copy_forwards:
 l:  lda (s),y
     sta (d),y
     inc s
-    beq +k
+    beq k
 n:  inc d
-    beq +m
+    beq m
 q:  dex
-    bne -l
-    dec @(++ c)
-    bne -l
+    bne l
+    dec c+1
+    bne l
     rts
 
-k:  inc @(++ s)
-    jmp -n
+k:  inc s+1
+    jmp n
 
-m:  inc @(++ d)
-    jmp -q
+m:  inc d+1
+    jmp q
 
 copy_backwards:
-l:  lda (s),y
+l2: lda (s),y
     sta (d),y
     dec s
     lda s
     cmp #$ff
-    beq +m
-n:  dec d
+    beq m2
+n2: dec d
     lda d
     cmp #$ff
-    beq +j
-q:  dex
-    beq -l
-    dec @(++ c)
-    bne -l
+    beq j2
+q2: dex
+    beq l2
+    dec c+1
+    bne l2
     rts
 
-m:  dec @(++ s)
-    jmp -n
+m2: dec s+1
+    jmp n2
 
-j:  dec @(++ d)
-    jmp -q
+j2: dec d+1
+    jmp q2
+.endproc

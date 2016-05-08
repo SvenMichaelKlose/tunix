@@ -12,12 +12,12 @@
 l:  sta (d),y
     iny
     beq m
-    dex
+n:  dex
     bne l
     dec c+1
     bne l
     rts
 
 m:  inc d+1
-    jmp l
+    jmp n
 .endproc

@@ -165,11 +165,20 @@ init_filewindow (struct window * w, char device)
 int
 main (int argc, char ** argv)
 {
+	char pattern[8] = {
+		0xaa, 0x55,
+		0xaa, 0x55,
+		0xaa, 0x55,
+		0xaa, 0x55
+	};
+
     gfx_init ();
-	while (1);
     gfx_clear_screen (WHITE);
     gfx_reset_region ();
+    gfx_set_pattern (pattern);
+    gfx_draw_box (0, 0, 20 * 8, 12 * 16, 1);
 
+	while (1);
     probe_devices ();
     seek_and_load_config ();
 

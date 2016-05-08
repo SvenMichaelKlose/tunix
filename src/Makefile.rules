@@ -1,7 +1,8 @@
 CC65_HOME = /usr/local
+CC65_TARGET = vic20g
 AS      = $(CC65_HOME)/bin/ca65
 CC      = $(CC65_HOME)/bin/cl65
 AR      = $(CC65_HOME)/bin/ar65
 LD      = $(CC65_HOME)/bin/ld65
-CFLAGS  = -t $(CC65_TARGET) --create-dep -O
+CFLAGS  = -t $(CC65_TARGET) -O
 LDFLAGS = -t $(CC65_TARGET) -m $(PROGRAM).map

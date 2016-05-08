@@ -1,3 +1,5 @@
+.exportzp s, d, c, tmp, tmp2, tmp3, tmp4, tmp5, tmp6, scr, tmp7, tmp8, do_load_library, do_make_jumps_to_core, last_error, zp_end_core
+
 .zeropage
 
 s:      .word 0     ; Source pointer.

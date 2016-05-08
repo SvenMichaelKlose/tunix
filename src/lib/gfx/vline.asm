@@ -1,6 +1,6 @@
 .export vline
 
-.import xpos, ypos, height, rxl, rxr, masks, maskd
+.importzp xpos, ypos, height, rxl, rxr, masks, maskd
 .import clip_y, vfill
 
 .code

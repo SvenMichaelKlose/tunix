@@ -1,6 +1,9 @@
 .export calcscr
-.import xpos, xcpos, ypos, column_addrs_lo, column_addrs_hi, scr
-.segment "CODE"
+
+.importzp xpos, xcpos, ypos, scr
+.import column_addrs_lo, column_addrs_hi
+
+.code
 
 ; SYSCALL: Calculate screen bitmap address
 ;

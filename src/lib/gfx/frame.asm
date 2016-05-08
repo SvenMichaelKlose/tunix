@@ -1,5 +1,8 @@
 .export frame
-.import vline, hline, xpos, ypos, width, height
+
+.importzp xpos, ypos, width, height
+.import vline, hline
+
 .code
 
 .proc frame

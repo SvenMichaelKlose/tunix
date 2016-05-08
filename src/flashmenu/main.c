@@ -8,7 +8,7 @@ short gfx_x () {}
 void __fastcall__ gfx_clear_screen (char colour) {}
 void gfx_reset_region () {}
 void __fastcall__ gfx_set_region (short x, short y, short w, short h) {}
-void __fastcall__ gfx_draw_hline (short x, short y, short w, char colour) {}
+void __fastcall__ gfx_draw_hline (short x, short y, short w, char colour);
 void __fastcall__ gfx_draw_vline (short x, short y, short h, char colour) {}
 void __fastcall__ gfx_draw_frame (short x, short y, short w, short h, char colour) {}
 void __fastcall__ gfx_draw_box (short x, short y, short w, short h, char colour) {}
@@ -165,6 +165,7 @@ int
 main (int argc, char ** argv)
 {
     gfx_init ();
+	while (1);
     gfx_clear_screen (WHITE);
     gfx_reset_region ();
 

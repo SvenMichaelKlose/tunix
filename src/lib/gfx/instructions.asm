@@ -1,45 +1,58 @@
+.export apply, addx, addy, setzb, setzw, addzb, sbczb, sbczbi, setpattern, setzs, pushz, popz
+
+.importzp d, tmp, tmp2, tmp3, sp, xpos, ypos
+.import syscall_vectors_l, syscall_vectors_h
+.import next_bytecode, inc_sp
+
+.code
+
 ; Call system function without argument mapping.
-apply:
+.proc apply
     lda (sp),y
     tax
     dex
     jsr inc_sp
     lda syscall_vectors_l,x
-    sta @(+ 1 +mod_call)
+    sta mod_call+1
     lda syscall_vectors_h,x
-    sta @(+ 2 +mod_call)
+    sta mod_call+2
 mod_call:
     jmp $ffff
+.endproc
 
-addx:
+.proc addx
     lda tmp
     clc
     adc xpos
     sta xpos
     rts
+.endproc
 
-addy:
+.proc addy
     lda tmp
     clc
     adc ypos
     sta ypos
     rts
+.endproc
 
-setzb:
+.proc setzb
     ldx tmp
     lda tmp2
     sta 0,x
     rts
+.endproc
 
-setzw:
+.proc setzw
     ldx tmp
     lda tmp2
     sta 0,x
     lda tmp3
     sta 1,x
     rts
+.endproc
 
-addzb:
+.proc addzb
     ldx tmp2
     ldy tmp3
     lda 0,x
@@ -48,8 +61,9 @@ addzb:
     ldx tmp
     sta 0,x
     rts
+.endproc
 
-sbczb:
+.proc sbczb
     ldx tmp2
     ldy tmp3
     lda 0,x
@@ -58,31 +72,35 @@ sbczb:
     ldx tmp
     sta 0,x
     rts
+.endproc
 
-sbczbi:
+.proc sbczbi
     ldx tmp
     lda 0,x
     sec
     sbc tmp2
     sta 0,x
     rts
+.endproc
 
-setpattern:
+.proc setpattern
     rts
+.endproc
 
-setzs:
-    sty @(++ d)
+.proc setzs
+    sty d+1
 l:  lda (sp),y
     sta (d),y
     jsr inc_sp
     inc d
-    bne +n
-    inc @(++ d)
+    bne n
+    inc d+1
 n:  dec tmp
-    bne -l
+    bne l
     rts
+.endproc
 
-pushz:
+.proc pushz
     pla
     pla
     ldx tmp
@@ -91,10 +109,11 @@ l:  lda 0,x
     inx
     pha
     dey
-    bne -l
+    bne l
     jmp next_bytecode
+.endproc
 
-popz:
+.proc popz
     pla
     pla
     ldy tmp2
@@ -106,5 +125,6 @@ l:  pla
     dex
     sta 0,x
     dey
-    bne -l
+    bne l
     jmp next_bytecode
+.endproc

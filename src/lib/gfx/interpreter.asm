@@ -1,18 +1,29 @@
-num_args:   0
+.export exec_script, next_bytecode, inc_sp
 
-inc_sp:
+.importzp sp, sa, srx
+.import syscall_vectors_l, syscall_vectors_h, syscall_args_l, syscall_args_h
+
+.bss
+
+num_args:   .byte 0
+
+.code
+
+.proc inc_sp
     inc sp
-    bne +n
-    inc @(++ sp)
+    bne n
+    inc sp+1
 n:  rts
+.endproc
 
-inc_sa:
+.proc inc_sa
     inc sa
-    bne +n
-    inc @(++ sa)
+    bne n
+    inc sa+1
 n:  rts
+.endproc
 
-exec_script:
+.proc exec_script
     pla ; Y
     pla ; X
     sta srx
@@ -21,13 +32,13 @@ exec_script:
     pla
     sta sp
     pla
-    sta @(++ sp)
+    sta sp+1
     lda sp
     sec
     sbc #1
     sta sp
-    bcs +n
-    dec @(++ sp)
+    bcs n
+    dec sp+1
 n:
 
 next_bytecode:
@@ -40,13 +51,13 @@ next_bytecode:
     tax
     dex
     lda syscall_vectors_l,x
-    sta @(+ 1 +mod_call)
+    sta mod_call+1
     lda syscall_vectors_h,x
-    sta @(+ 2 +mod_call)
+    sta mod_call+2
     lda syscall_args_l,x
     sta sa
     lda syscall_args_h,x
-    sta @(++ sa)
+    sta sa+1
 
     ; Get number of arguments.
     lda (sa),y
@@ -73,9 +84,12 @@ mod_call:
 
     ; Return to native code.
 done:
-    lda @(++ sp)
+    lda sp+1
     pha
     lda sp
     pha
     ldx srx
     rts
+.endproc
+
+next_bytecode = exec_script::next_bytecode

@@ -1,0 +1,19 @@
+SOURCES=main.c
+ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm
+PROGRAM=flashmenu.bin
+
+include ../Makefile.rules
+
+%.o: %.asm
+	$(AS) -o $@ $<
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+
+$(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
+	$(LD) -t vic20g -o $@ $^ --lib ../lib/gfx/libgfx.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib
+
+all: $(PROGRAM)
+
+clean:
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM)

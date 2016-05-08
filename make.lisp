@@ -210,12 +210,22 @@
             (syscall-args-h)
 			(syscall-args))
          o))
-(make-gfx)
-(with-temporary *rom?* t
-  (make-core))
-(make-charset)
-(make-loader)
-(make-flashboot)
-(make-menu)
-(make-image)
+(with-output-file o "src/lib/gfx/_column-addrs.asm"
+  (princ (+ (format nil ".export column_addrs_l, column_addrs_h~%")
+			"column_addrs_l: .byte "
+			(apply #'+ (pad (maptimes [princ (low (+ #x1100 (* 16 12 _))) nil] 20) ", "))
+			(format nil "~%")
+  			"column_addrs_h: .byte "
+			(apply #'+ (pad (maptimes [princ (high (+ #x1100 (* 16 12 _))) nil] 20) ", "))
+			(format nil "~%"))
+		 o))
+
+;(make-gfx)
+;(with-temporary *rom?* t
+;  (make-core))
+;(make-charset)
+;(make-loader)
+;(make-flashboot)
+;(make-menu)
+;(make-image)
 (quit)

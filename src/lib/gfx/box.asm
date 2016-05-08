@@ -1,6 +1,7 @@
 .export box
 
-.import height, ypos, hline
+.importzp height, ypos
+.import hline
 
 .code
 

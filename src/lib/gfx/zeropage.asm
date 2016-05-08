@@ -1,3 +1,9 @@
+.exportzp p, ph, sa, sp, srx, xcpos, font_compression
+.exportzp rxl, ryt, rxr, ryb, xpos, ypos, xpos2, ypos2, width, height, pattern, patternh
+.exportzp font, font_space_size, do_compress_font_gaps
+.exportzp masks, maskd
+.exportzp context_start, context_end, context_size
+
 .zeropage
 
 p:      .byte 0

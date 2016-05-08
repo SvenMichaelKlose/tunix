@@ -98,8 +98,6 @@ make_window (short x, short y, short w, short h, char * title)
 void __fastcall__
 draw_window (void * _w)
 {
-    char empty_pattern[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-    char solid_pattern[8] = { 255, 255, 255, 255, 255, 255, 255, 255 };
     struct window * win = _w;
     struct rect * r = &win->obj.rect;
     short x = r->x;
@@ -117,9 +115,9 @@ draw_window (void * _w)
 
     /* Draw window title. */
     gfx_reset_region ();
-    gfx_set_pattern (empty_pattern);
+    gfx_set_pattern (pattern_empty);
     gfx_draw_box (x, y, w, WINDOW_TITLE_HEIGHT);
-    gfx_set_pattern (solid_pattern);
+    gfx_set_pattern (pattern_solid);
     gfx_draw_frame (x, y, w, WINDOW_TITLE_HEIGHT);
 /*
     gfx_set_region (ix, iy, iw, WINDOW_TITLE_HEIGHT - 2);
@@ -177,17 +175,10 @@ main (int argc, char ** argv)
 	struct window * wleft;
 	struct window * wright;
 
-	char pattern[8] = {
-		0xaa, 0x55,
-		0xaa, 0x55,
-		0xaa, 0x55,
-		0xaa, 0x55
-	};
-
     gfx_init ();
     gfx_clear_screen (WHITE);
     gfx_reset_region ();
-    gfx_set_pattern (pattern);
+    gfx_set_pattern (pattern_gray);
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
 	wleft = make_window (0, 0, 81, 176, "Left");
 	draw_window (wleft);

@@ -1,12 +1,23 @@
-pat_empty:
+.export _pattern_empty
+.export _pattern_solid
+.export _pattern_leaves
+.export _pattern_ovals
+.export _pattern_woven
+.export _pattern_pits
+.export _pattern_gray
+.export _pattern_smileys
+
+.data
+
+_pattern_empty:
     .byte 0, 0, 0, 0, 0, 0, 0, 0
 
-pat_solid:
+_pattern_solid:
     .byte $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 
-pat_background:
+_pattern_background:
 
-pat_leaves:
+_pattern_leaves:
     .byte %11000000
     .byte %00100001
     .byte %00010010
@@ -17,7 +28,7 @@ pat_leaves:
     .byte %10000000
     .byte %11000000
 
-pat_ovals:
+_pattern_ovals:
     .byte %01000001
     .byte %00100010
     .byte %10011100
@@ -28,7 +39,7 @@ pat_ovals:
     .byte %10000000
     .byte %01000001
 
-pat_woven:
+_pattern_woven:
     .byte %00011111
     .byte %00101110
     .byte %01000100
@@ -38,7 +49,7 @@ pat_woven:
     .byte %01000100
     .byte %10001110
 
-pat_pits:
+_pattern_pits:
     .byte %11111011
     .byte %00000000
     .byte %11111011
@@ -48,10 +59,10 @@ pat_pits:
     .byte %00001010
     .byte %00001010
 
-pat_gray:
+_pattern_gray:
     .byte $aa, $55, $aa, $55, $aa, $55, $aa, $55, $aa, $55
 
-pat_smiley:
+_pattern_smileys:
     .byte %00111100
     .byte %01000010
     .byte %10100101

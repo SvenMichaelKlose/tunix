@@ -1,4 +1,4 @@
-.export _gfx_draw_hline
+.export _gfx_init, _gfx_draw_hline
 
 .importzp xpos, ypos, width, color
 .import popax

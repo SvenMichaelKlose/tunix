@@ -3,7 +3,7 @@
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
-void gfx_init () {}
+void gfx_init ();
 short gfx_x () {}
 void __fastcall__ gfx_clear_screen (char colour) {}
 void gfx_reset_region () {}

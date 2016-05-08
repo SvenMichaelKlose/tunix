@@ -4,7 +4,7 @@ LIBRARY=libgfx.a
 include ../../Makefile.rules
 
 %.o: %.asm
-	$(AS) -o $@ $<
+	$(AS) -g -o $@ $<
 
 $(LIBRARY): $(SOURCES:.asm=.o)
 	$(AR) a $@ $^

@@ -1,17 +1,17 @@
 .export apply, addx, addy, setzb, setzw, addzb, sbczb, sbczbi, setpattern, setzs, pushz, popz
 
-.importzp d, tmp, tmp2, tmp3, sp, xpos, ypos
+.importzp d, tmp, tmp2, tmp3, bcp, xpos, ypos
 .import syscall_vectors_l, syscall_vectors_h
-.import next_bytecode, inc_sp
+.import next_bytecode, inc_bcp
 
 .code
 
 ; Call system function without argument mapping.
 .proc apply
-    lda (sp),y
+    lda (bcp),y
     tax
     dex
-    jsr inc_sp
+    jsr inc_bcp
     lda syscall_vectors_l,x
     sta mod_call+1
     lda syscall_vectors_h,x
@@ -89,9 +89,9 @@ mod_call:
 
 .proc setzs
     sty d+1
-l:  lda (sp),y
+l:  lda (bcp),y
     sta (d),y
-    jsr inc_sp
+    jsr inc_bcp
     inc d
     bne n
     inc d+1

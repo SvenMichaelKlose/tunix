@@ -1,4 +1,5 @@
 .export _gfx_init
+.export _gfx_x
 .export _gfx_clear_screen
 .export _gfx_reset_region
 .export _gfx_set_region
@@ -18,6 +19,13 @@
 ; void gfx_init ()
 .proc _gfx_init
 	jmp gfx_init
+.endproc
+
+; void gfx_x ();
+.proc _gfx_x
+    lda xpos
+    ldx #0
+    rts
 .endproc
 
 ; void __fastcall__ gfx_clear_screen (char colour);
@@ -48,10 +56,8 @@
 	rts
 .endproc
 
-; void __fastcall__ gfx_draw_hline (short x, short y, short w, char colour);
+; void __fastcall__ gfx_draw_hline (short x, short y, short w);
 .proc _gfx_draw_hline
-    ;sta color
-    jsr popax
     sta width
     jsr popax
     sta ypos
@@ -60,10 +66,8 @@
     jmp hline
 .endproc
 
-; void __fastcall__ gfx_draw_vline (short x, short y, short h, char colour);
+; void __fastcall__ gfx_draw_vline (short x, short y, short h);
 .proc _gfx_draw_vline
-    ;sta color
-    jsr popax
     sta height
     jsr popax
     sta ypos
@@ -72,10 +76,8 @@
     jmp vline
 .endproc
 
-; void __fastcall__ gfx_draw_frame (short x, short y, short w, short h, char colour);
+; void __fastcall__ gfx_draw_frame (short x, short y, short w, short h);
 .proc _gfx_draw_frame
-    ;sta color
-    jsr popax
     sta height
     jsr popax
     sta width
@@ -86,10 +88,8 @@
     jmp frame
 .endproc
 
-; void __fastcall__ gfx_draw_box (short x, short y, short w, short h, char colour);
+; void __fastcall__ gfx_draw_box (short x, short y, short w, short h);
 .proc _gfx_draw_box
-    ;sta color
-    jsr popax
     sta height
     jsr popax
     sta width
@@ -100,10 +100,8 @@
     jmp box
 .endproc
 
-; void __fastcall__ gfx_draw_text (short x, short y, char * txt, char colour);
+; void __fastcall__ gfx_draw_text (short x, short y, char * txt);
 .proc _gfx_draw_text
-    ;sta color
-    jsr popax
     sta p
 	stx p+1
     jsr popax

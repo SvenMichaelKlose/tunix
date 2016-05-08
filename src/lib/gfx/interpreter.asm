@@ -1,6 +1,6 @@
-.export exec_script, next_bytecode, inc_sp
+.export exec_script, next_bytecode, inc_bcp
 
-.importzp sp, sa, srx
+.importzp bcp, bca, srx
 .import syscall_vectors_l, syscall_vectors_h, syscall_args_l, syscall_args_h
 
 .bss
@@ -9,17 +9,17 @@ num_args:   .byte 0
 
 .code
 
-.proc inc_sp
-    inc sp
+.proc inc_bcp
+    inc bcp
     bne n
-    inc sp+1
+    inc bcp+1
 n:  rts
 .endproc
 
-.proc inc_sa
-    inc sa
+.proc inc_bca
+    inc bca
     bne n
-    inc sa+1
+    inc bca+1
 n:  rts
 .endproc
 
@@ -30,22 +30,22 @@ n:  rts
     pla ; A
     plp ; flags
     pla
-    sta sp
+    sta bcp
     pla
-    sta sp+1
-    lda sp
+    sta bcp+1
+    lda bcp
     sec
     sbc #1
-    sta sp
+    sta bcp
     bcs n
-    dec sp+1
+    dec bcp+1
 n:
 
 next_bytecode:
     ; Get opcode.
     ldy #0
-    lda (sp),y
-    beq +done   ; Return to native code…
+    lda (bcp),y
+    beq done    ; Return to native code…
 
     ; Get pointer to argument info.
     tax
@@ -55,24 +55,24 @@ next_bytecode:
     lda syscall_vectors_h,x
     sta mod_call+2
     lda syscall_args_l,x
-    sta sa
+    sta bca
     lda syscall_args_h,x
-    sta sa+1
+    sta bca+1
 
     ; Get number of arguments.
-    lda (sa),y
+    lda (bca),y
     sta num_args
 
     ; Copy arguments to zero page.
 next_arg:
-    jsr inc_sp
+    jsr inc_bcp
     dec num_args
     bmi script_call
 
-    jsr inc_sa
-    lda (sa),y      ; Get zero page address from argument info.
+    jsr inc_bca
+    lda (bca),y     ; Get zero page address from argument info.
     tax
-    lda (sp),y      ; Copy in argument value.
+    lda (bcp),y     ; Copy in argument value.
     sta 0,x
 
     jmp next_arg
@@ -84,9 +84,9 @@ mod_call:
 
     ; Return to native code.
 done:
-    lda sp+1
+    lda bcp+1
     pha
-    lda sp
+    lda bcp
     pha
     ldx srx
     rts

@@ -1,4 +1,4 @@
-.exportzp p, ph, sa, sp, srx, xcpos, font_compression
+.exportzp p, ph, bca, bcp, srx, xcpos, font_compression
 .exportzp rxl, ryt, rxr, ryb, xpos, ypos, xpos2, ypos2, width, height, pattern, patternh
 .exportzp font, font_space_size, do_compress_font_gaps
 .exportzp masks, maskd
@@ -9,8 +9,8 @@
 p:      .byte 0
 ph:     .byte 0
 
-sa:     .word 0     ; Bytecode argument list.
-sp:     .word 0     ; Bytecode pointer.
+bca:    .word 0     ; Bytecode argument list.
+bcp:    .word 0     ; Bytecode pointer.
 srx:    .byte 0       ; Saved X register.
 
 xcpos:  .byte 0       ; X columns.

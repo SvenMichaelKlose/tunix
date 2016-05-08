@@ -1,6 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
+#define NULL    ((void *) 0)
+
 struct _configuration {
     char type;
 };
@@ -31,5 +33,8 @@ struct scrollable {
     struct obj  obj;
     char        bank;
 };
+
+extern void __fastcall__ free_obj (struct obj *);
+extern void __fastcall__ draw_obj (struct obj *);
 
 #endif /* #ifndef OBJ_H */

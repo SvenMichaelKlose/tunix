@@ -15,12 +15,20 @@ struct window * __fastcall__
 make_window (short x, short y, short w, short h, char * title)
 {
     struct window * win = malloc (sizeof (struct window));
+    struct obj * obj;
+    struct treenode * node;
     struct rect * rect;
 
     if (!win)
         errnomem ();
 
-	rect = &win->obj.rect;
+	obj = &win->obj;
+    node = &obj->node;
+    node->prev = NULL;
+    node->next = NULL;
+    node->children = NULL;
+
+	rect = &obj->rect;
 	rect->x = x;
 	rect->y = y;
 	rect->w = w;
@@ -72,8 +80,6 @@ draw_window (void * _w)
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
-/*
     gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
     draw_obj (win->obj.node.children);
-*/
 }

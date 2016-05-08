@@ -74,6 +74,7 @@ main (int argc, char ** argv)
     gfx_reset_region ();
     gfx_set_pattern (pattern_gray);
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
+
 	wleft = make_window (0, 0, 81, 176, "#8");
 	draw_window (wleft);
 	wright = make_window (80, 0, 80, 176, "#1");

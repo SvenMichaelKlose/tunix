@@ -1,4 +1,4 @@
-SOURCES=main.c
+SOURCES=main.c window.c
 ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm ../core/mem/clrram.asm
 PROGRAM=flashmenu.bin
 

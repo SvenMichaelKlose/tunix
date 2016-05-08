@@ -127,13 +127,16 @@ draw_window (void * _w)
     /* Draw title grip. */
     cx = gfx_x ();
     if (cx <= xr) {
-        gw = xr - cx;
+        gw = xr - cx + 1;
         for (; y2 < yb; y2 += 2)
             gfx_draw_hline (cx, y2, gw);
     }
 
     /* Draw contents. */
-    gfx_draw_frame (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
+    gfx_draw_frame (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
+
 /*
     gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
     draw_obj (win->obj.node.children);
@@ -180,9 +183,9 @@ main (int argc, char ** argv)
     gfx_reset_region ();
     gfx_set_pattern (pattern_gray);
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
-	wleft = make_window (0, 0, 81, 176, "Left");
+	wleft = make_window (0, 0, 81, 176, "#8");
 	draw_window (wleft);
-	wright = make_window (80, 0, 80, 176, "Right");
+	wright = make_window (80, 0, 80, 176, "#1");
 	draw_window (wright);
 
 	while (1);

@@ -6,7 +6,7 @@
 
 .proc reset_region
     brk
-    .byte c_setzs, rxl, 4, 0, 0, screen_width-1, screen_height-1
+    .byte c_setzs, rxl, 4, 0, 0, screen_width, screen_height
     .byte 0
     rts
 .endproc

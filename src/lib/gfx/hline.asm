@@ -52,6 +52,7 @@ n:  jsr clip_x
     tay
     clc
     adc width
+    sbc #0
     sta xposr
     lsr
     lsr
@@ -112,10 +113,10 @@ single_column:
     and #7
     tay
     lda masks_left,x
-    and masks_right,x
+    and masks_right,y
     sta tmp3
     lda maskd_left,x
-    ora maskd_right,x
+    ora maskd_right,y
     ldy #0
     and (scr),y
     sta tmp

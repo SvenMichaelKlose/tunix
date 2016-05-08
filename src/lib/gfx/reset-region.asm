@@ -1,9 +1,6 @@
 .export reset_region
 
-.importzp rxl
-.importzp c_setzs
-
-.include "vic-settings.inc.asm"
+.importzp rxl, c_setzs, screen_width, screen_height
 
 .code
 

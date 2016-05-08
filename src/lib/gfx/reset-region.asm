@@ -1,8 +1,8 @@
 .export reset_region
 
 .importzp rxl
+.importzp c_setzs
 
-.include "_bytecodes.asm"
 .include "vic-settings.inc.asm"
 
 .code

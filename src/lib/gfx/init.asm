@@ -1,9 +1,8 @@
 .export gfx_init
 
 .import init_bitmap_mode, reset_region
+.importzp c_setzb
 .importzp font, font_space_size, font_compression, do_compress_font_gaps
-
-.include "_bytecodes.asm"
 
 .code
 

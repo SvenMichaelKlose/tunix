@@ -8,27 +8,39 @@
   (downcase (symbol-name x.)))
 
 (defun syscall-bytecodes-source ()
-  (apply #'+ (maptimes [format nil "c_~A=~A~%" (syscall-name (syscallbyindex _)) (++ _)]
+  (apply #'+ (maptimes [format nil "c_~A=~A~%.export c_~A~%" (syscall-name (syscallbyindex _)) (++ _) (syscall-name (syscallbyindex _))]
                        (length (+ *syscalls* *bytecodes*)))))
 
 (defun syscall-vectors (label prefix)
-  (+ label
+  (+ (format nil ".export ~A~%" label)
+	 label ": "
      " .byte "
      (apply #'+ (pad (mapcar [format nil "~A~A" prefix (syscall-name _)]
                              (+ *syscalls* *bytecodes*))
                      ", "))
      (format nil "~%")))
 
-(defun syscall-vectors-l () (syscall-vectors "syscall_vectors_l:" "<"))
-(defun syscall-vectors-h () (syscall-vectors "syscall_vectors_h:" ">"))
-(defun syscall-args-l () (syscall-vectors "syscall_args_l:" "<args_"))
-(defun syscall-args-h () (syscall-vectors "syscall_args_h:" ">args_"))
+(defun syscall-vectors-l () (syscall-vectors "syscall_vectors_l" "<"))
+(defun syscall-vectors-h () (syscall-vectors "syscall_vectors_h" ">"))
+(defun syscall-args-l () (syscall-vectors "syscall_args_l" "<args_"))
+(defun syscall-args-h () (syscall-vectors "syscall_args_h" ">args_"))
 
 (defun syscall-args ()
-  (apply #'+ (mapcar [+ (format nil "args_~A:" (syscall-name _))
-                        (princ (length ._) nil)
-                        (apply #'+ (mapcar [asm (downcase (symbol-name _))] ._))]
+  (apply #'+ (mapcar [+ (format nil ".export args_~A~%" (syscall-name _))
+					    (format nil "args_~A: .byte " (syscall-name _))
+                        (apply #'+ (pad (+ (list (princ (length ._) nil))
+									       (mapcar [downcase (symbol-name _)] ._))
+										", "))
+						(format nil "~%")]
                      (+ *syscalls* *bytecodes*))))
+
+(defun syscall-imports ()
+  (+ (format nil ".importzp d, tmp, tmp2, tmp3, ph, p, width, height, patternh, pattern, xpos, ypos~%")
+	 (apply #'+ ".import "
+		        (pad (mapcar [format nil "~A" (syscall-name _)]
+                             (print (+ *syscalls* *bytecodes*)))
+				     ", "))
+	 (format nil "~%")))
 
 (defmacro define-syscall (name &rest args)
   (| (assoc name *syscalls*)
@@ -89,6 +101,3 @@
 
 (= *syscalls* (reverse *syscalls*))
 (= *bytecodes* (reverse *bytecodes*))
-
-;(with-output-file o "bytecodes.asm"
-;  (princ (syscall-bytecodes-source) o))

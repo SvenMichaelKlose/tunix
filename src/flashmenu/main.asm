@@ -47,6 +47,17 @@ l:  sta $9000,x
     ldx #$ff
     txs
 
+    ldx #@(- trampoline_end trampoline)
+l:  lda trampoline,x
+    sta $1d00,x
+    dex
+    bpl -l
+    jmp $1d00
+
+trampoline:
+    lda #%00000000
+    sta $9ff2
+
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
@@ -54,3 +65,4 @@ l:  sta $9000,x
 
     cli
     jmp ($c000)
+trampoline_end:

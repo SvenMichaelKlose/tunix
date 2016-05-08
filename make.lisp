@@ -200,6 +200,16 @@
     (adotimes ((- *img-blocks* 1))
       (write-block nil o))))
 
+(with-output-file o "src/lib/gfx/_bytecodes.asm"
+  (princ (+ (syscall-imports)
+			(format nil ".data~%")
+			(syscall-bytecodes-source)
+            (syscall-vectors-l)
+            (syscall-vectors-h)
+            (syscall-args-l)
+            (syscall-args-h)
+			(syscall-args))
+         o))
 (make-gfx)
 (with-temporary *rom?* t
   (make-core))

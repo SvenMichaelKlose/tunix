@@ -1,0 +1,24 @@
+include "Makefile.rules"
+
+define MAKEDEPEND
+sed -e"s!$(<:.c=.s)!$@!p" -e"s![^:]*:.\(.*\)!\1:!" < $(<:.c=.u) > $(@:.o=.d)
+$(RM) $(<:.c=.u)
+endef
+
+.SUFFIXES:
+.PHONY: all clean
+all: $(PROGRAM)
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(SOURCES:.c=.d)
+endif
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) -o $@ $<
+	@$(MAKEDEPEND)
+
+$(PROGRAM): $(SOURCES:.c=.o) $(SOURCES:.asm=.o)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+clean:
+	$(RM) $(SOURCES:.c=.o) $(SOURCES:.c=.d) $(PROGRAM) $(PROGRAM).map

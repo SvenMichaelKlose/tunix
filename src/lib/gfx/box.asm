@@ -1,8 +1,8 @@
-    .export box
+.export box
 
-    .import height, ypos, hline
+.import height, ypos, hline
 
-    .segment "CODE"
+.code
 
 .proc box
     lda height

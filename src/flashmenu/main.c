@@ -4,19 +4,6 @@
 #include "window.h"
 #include "libgfx.h"
 
-typedef unsigned short ushort;
-typedef unsigned char uchar;
-
-#define WHITE   1
-
-void
-draw_scrollable (struct scrollable * x)
-{}
-
-void
-draw_message (char * txt)
-{}
-
 struct window * wleft;
 struct window * wright;
 

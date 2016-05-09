@@ -1,8 +1,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "obj.h"
-
 struct window {
     struct obj  obj;
     char *      title;

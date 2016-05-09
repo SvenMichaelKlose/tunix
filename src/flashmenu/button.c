@@ -7,29 +7,8 @@
 struct button * __fastcall__
 make_button (short x, short y, short w, short h, char * text)
 {
-    struct button * b = malloc (sizeof (struct button));
-    struct obj * obj;
-    struct treenode * node;
-    struct rect * rect;
-
-/*
-    if (!win)
-        errnomem ();
-*/
-
-	obj = &b->obj;
-    node = &obj->node;
-    node->prev = NULL;
-    node->next = NULL;
-    node->children = NULL;
-
-	rect = &obj->rect;
-	rect->x = x;
-	rect->y = y;
-	rect->w = w;
-	rect->h = h;
+    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h);
     b->text = text;
-
     return b;
 }
 

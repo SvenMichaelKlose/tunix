@@ -34,6 +34,7 @@ struct scrollable {
     char        bank;
 };
 
+extern void * __fastcall__ alloc_obj (short size, short x, short y, short w, short h);
 extern void __fastcall__ free_obj (struct obj *);
 extern void __fastcall__ draw_obj (struct obj *);
 

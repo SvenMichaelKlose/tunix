@@ -6,40 +6,11 @@
 
 #define WINDOW_TITLE_HEIGHT     11
 
-void
-errnomem ()
-{
-    gfx_clear_screen (1);
-    gfx_set_font (charset_4x8, 2);
-    gfx_set_pencil_mode (1);
-    gfx_draw_text (0, 84, "Error: Out of heap memory.");
-    while (1);
-}
-
 struct window * __fastcall__
 make_window (short x, short y, short w, short h, char * title)
 {
-    struct window * win = malloc (sizeof (struct window));
-    struct obj * obj;
-    struct treenode * node;
-    struct rect * rect;
-
-    if (!win)
-        errnomem ();
-
-	obj = &win->obj;
-    node = &obj->node;
-    node->prev = NULL;
-    node->next = NULL;
-    node->children = NULL;
-
-	rect = &obj->rect;
-	rect->x = x;
-	rect->y = y;
-	rect->w = w;
-	rect->h = h;
+    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h);
     win->title = title;
-
     return win;
 }
 

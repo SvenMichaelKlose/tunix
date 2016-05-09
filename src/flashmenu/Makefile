@@ -1,5 +1,15 @@
-SOURCES=main.c obj.c window.c
-ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm ../core/mem/clrram.asm ../core/dev/con/charset-4x8.asm
+SOURCES= \
+    button.c \
+    main.c \
+    obj.c \
+    window.c
+
+ASMSOURCES= \
+    libgfx-wrapper.asm \
+    ../zeropage.asm \
+    ../core/mem/clrram.asm \
+    ../core/dev/con/charset-4x8.asm
+
 PROGRAM=flashmenu.bin
 
 include ../Makefile.rules

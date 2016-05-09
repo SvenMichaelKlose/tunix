@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "obj.h"
+#include "button.h"
 #include "window.h"
 #include "libgfx.h"
 
@@ -60,11 +61,13 @@ win_basic_start ()
         NULL
     };
 	struct window * win = make_window (20, 44, 120, 88, "Start BASIC...");
+	struct button * b = make_button (50, 150, 40, 12, "OK");
 
 	draw_window (win);
     gfx_set_pattern (pattern_solid);
     draw_list (45, 66, buttons);
     draw_list (59, 66, labels);
+    draw_button (b);
 }
 
 int

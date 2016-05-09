@@ -61,7 +61,7 @@ win_basic_start ()
         NULL
     };
 	struct window * win = make_window (20, 44, 120, 88, "Start BASIC...");
-	struct button * b = make_button (50, 150, 40, 12, "OK");
+	struct button * b = make_button (50, 118, 20, 12, "OK");
 
 	draw_window (win);
     gfx_set_pattern (pattern_solid);

@@ -11,11 +11,12 @@
 .export _gfx_draw_box
 .export _gfx_set_font
 .export _gfx_draw_text
+.export _gfx_get_text_width
 
-.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p
+.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, s
 .importzp pattern, font, pencil_mode, font_space_size
 .import popax
-.import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring
+.import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
 
 .code
 
@@ -134,4 +135,13 @@
     jsr popax
     sta xpos
     jmp putstring
+.endproc
+
+; short __fastcall__ gfx_get_text_size (char *);
+.proc _gfx_get_text_width
+    sta s
+    stx s+1
+    jsr get_text_width
+    ldx #0
+	rts
 .endproc

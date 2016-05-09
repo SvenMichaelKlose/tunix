@@ -93,6 +93,7 @@
 (define-syscall box xpos ypos width height)
 (define-syscall putstring p ph)
 (define-syscall putchar)
+(define-syscall get_text_width s s+1)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; Function calls :::

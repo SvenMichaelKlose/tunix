@@ -132,6 +132,7 @@
 
 (with-output-file o "src/lib/gfx/_bytecodes.asm"
   (princ (+ (syscall-imports)
+			(format nil ".importzp s~%")
 			(format nil ".data~%")
 			(syscall-bytecodes-source)
             (syscall-vectors-l)

@@ -1,5 +1,6 @@
 .importzp d, tmp, tmp2, tmp3, ph, p, width, height, patternh, pattern, xpos, ypos
-.import calcscr, setpattern, vline, hline, frame, box, putstring, putchar, setzb, setzw, setzs, addzb, sbczb, sbczbi, addx, addy, pushz, popz, apply
+.import calcscr, setpattern, vline, hline, frame, box, putstring, putchar, get_text_width, setzb, setzw, setzs, addzb, sbczb, sbczbi, addx, addy, pushz, popz, apply
+.importzp s
 .data
 c_calcscr=1
 .export c_calcscr
@@ -17,36 +18,38 @@ c_putstring=7
 .export c_putstring
 c_putchar=8
 .export c_putchar
-c_setzb=9
+c_get_text_width=9
+.export c_get_text_width
+c_setzb=10
 .export c_setzb
-c_setzw=10
+c_setzw=11
 .export c_setzw
-c_setzs=11
+c_setzs=12
 .export c_setzs
-c_addzb=12
+c_addzb=13
 .export c_addzb
-c_sbczb=13
+c_sbczb=14
 .export c_sbczb
-c_sbczbi=14
+c_sbczbi=15
 .export c_sbczbi
-c_addx=15
+c_addx=16
 .export c_addx
-c_addy=16
+c_addy=17
 .export c_addy
-c_pushz=17
+c_pushz=18
 .export c_pushz
-c_popz=18
+c_popz=19
 .export c_popz
-c_apply=19
+c_apply=20
 .export c_apply
 .export syscall_vectors_l
-syscall_vectors_l:  .byte <calcscr, <setpattern, <vline, <hline, <frame, <box, <putstring, <putchar, <setzb, <setzw, <setzs, <addzb, <sbczb, <sbczbi, <addx, <addy, <pushz, <popz, <apply
+syscall_vectors_l:  .byte <calcscr, <setpattern, <vline, <hline, <frame, <box, <putstring, <putchar, <get_text_width, <setzb, <setzw, <setzs, <addzb, <sbczb, <sbczbi, <addx, <addy, <pushz, <popz, <apply
 .export syscall_vectors_h
-syscall_vectors_h:  .byte >calcscr, >setpattern, >vline, >hline, >frame, >box, >putstring, >putchar, >setzb, >setzw, >setzs, >addzb, >sbczb, >sbczbi, >addx, >addy, >pushz, >popz, >apply
+syscall_vectors_h:  .byte >calcscr, >setpattern, >vline, >hline, >frame, >box, >putstring, >putchar, >get_text_width, >setzb, >setzw, >setzs, >addzb, >sbczb, >sbczbi, >addx, >addy, >pushz, >popz, >apply
 .export syscall_args_l
-syscall_args_l:  .byte <args_calcscr, <args_setpattern, <args_vline, <args_hline, <args_frame, <args_box, <args_putstring, <args_putchar, <args_setzb, <args_setzw, <args_setzs, <args_addzb, <args_sbczb, <args_sbczbi, <args_addx, <args_addy, <args_pushz, <args_popz, <args_apply
+syscall_args_l:  .byte <args_calcscr, <args_setpattern, <args_vline, <args_hline, <args_frame, <args_box, <args_putstring, <args_putchar, <args_get_text_width, <args_setzb, <args_setzw, <args_setzs, <args_addzb, <args_sbczb, <args_sbczbi, <args_addx, <args_addy, <args_pushz, <args_popz, <args_apply
 .export syscall_args_h
-syscall_args_h:  .byte >args_calcscr, >args_setpattern, >args_vline, >args_hline, >args_frame, >args_box, >args_putstring, >args_putchar, >args_setzb, >args_setzw, >args_setzs, >args_addzb, >args_sbczb, >args_sbczbi, >args_addx, >args_addy, >args_pushz, >args_popz, >args_apply
+syscall_args_h:  .byte >args_calcscr, >args_setpattern, >args_vline, >args_hline, >args_frame, >args_box, >args_putstring, >args_putchar, >args_get_text_width, >args_setzb, >args_setzw, >args_setzs, >args_addzb, >args_sbczb, >args_sbczbi, >args_addx, >args_addy, >args_pushz, >args_popz, >args_apply
 .export args_calcscr
 args_calcscr: .byte 2, xpos, ypos
 .export args_setpattern
@@ -63,6 +66,8 @@ args_box: .byte 4, xpos, ypos, width, height
 args_putstring: .byte 2, p, ph
 .export args_putchar
 args_putchar: .byte 0
+.export args_get_text_width
+args_get_text_width: .byte 2, s, s+1
 .export args_setzb
 args_setzb: .byte 2, tmp, tmp2
 .export args_setzw

@@ -28,5 +28,6 @@ extern void __fastcall__ gfx_draw_frame (short x, short y, short w, short h);
 extern void __fastcall__ gfx_draw_box (short x, short y, short w, short h);
 extern void __fastcall__ gfx_set_font (void *, char space_size);
 extern void __fastcall__ gfx_draw_text (short x, short y, char * txt);
+extern short __fastcall__ gfx_get_text_width (char *);
 
 #endif /* #ifndef LIBGFX_H */

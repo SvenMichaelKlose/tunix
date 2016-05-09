@@ -2,6 +2,7 @@
 
 .export charset_4x8, _charset_4x8
 
+.data
     .byte $00, $08     ; 2K
 
 charset_4x8:

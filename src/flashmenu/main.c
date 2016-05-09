@@ -80,23 +80,49 @@ draw_background ()
 }
 
 void
+draw_list (short x, short y, char ** txts)
+{
+    while (*txts) {
+        gfx_draw_text (x, y, *txts++);
+        y += 10;
+    }
+}
+
+void
 win_basic_start ()
 {
-	struct window * win = make_window (0, 0, 160, 176, "Start BASIC...");
+    short x = 20;
+    char * buttons[] = {
+        "( )",
+        "[ ]",
+        "( )",
+        "( )",
+        "( )",
+        NULL
+    };
+    char * labels[] = {
+        "no extra memory",
+        "+3K",
+        "+8K",
+        "+16K",
+        "+24K",
+        NULL
+    };
+	struct window * win = make_window (40, 50, 80, 80, "Start BASIC...");
 
 	draw_window (win);
     gfx_set_pattern (pattern_solid);
-    gfx_draw_text (2, 50, "( ) no extra memory");
-    gfx_draw_text (2, 60, "[ ] +3K");
-    gfx_draw_text (2, 70, "( ) +8K");
-    gfx_draw_text (2, 80, "( ) +16K");
-    gfx_draw_text (2, 90, "( ) +24K");
+    draw_list (45, 66, buttons);
+    draw_list (59, 66, labels);
 }
+
+extern char charset_4x8[2048];
 
 int
 main (int argc, char ** argv)
 {
     gfx_init ();
+    gfx_set_font (charset_4x8);
     draw_background ();
     win_basic_start ();
 

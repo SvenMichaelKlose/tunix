@@ -40,10 +40,10 @@ ypos2:  .byte 0       ; Y position
 width:  .byte 0       ; Width
 height: .byte 0       ; Height
 
-pattern: .byte 0
+pattern: .byte 0        ; Pencil for everything.
 patternh: .byte 0
 
-font:   .byte 0       ; Font starting page.
+font:   .word 0
 font_space_size: .byte 0 ; Width of an empty character.
 do_compress_font_gaps: .byte 0
 

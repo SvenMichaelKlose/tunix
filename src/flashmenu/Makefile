@@ -1,5 +1,5 @@
 SOURCES=main.c window.c
-ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm ../core/mem/clrram.asm
+ASMSOURCES=libgfx-wrapper.asm ../zeropage.asm ../core/mem/clrram.asm ../core/dev/con/charset-4x8.asm
 PROGRAM=flashmenu.bin
 
 include ../Makefile.rules
@@ -8,7 +8,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ $<
+	$(CC) -O -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -t vic20g -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/gfx/libgfx.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib

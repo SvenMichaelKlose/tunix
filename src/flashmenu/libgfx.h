@@ -6,12 +6,13 @@ extern short gfx_x ();
 extern void __fastcall__ gfx_clear_screen (char colour);
 extern void gfx_reset_region ();
 extern void __fastcall__ gfx_set_region (short x, short y, short w, short h);
+extern void __fastcall__ gfx_set_pattern (void *);
 extern void __fastcall__ gfx_draw_hline (short x, short y, short w);
 extern void __fastcall__ gfx_draw_vline (short x, short y, short h);
 extern void __fastcall__ gfx_draw_frame (short x, short y, short w, short h);
 extern void __fastcall__ gfx_draw_box (short x, short y, short w, short h);
+extern void __fastcall__ gfx_set_font (void *);
 extern void __fastcall__ gfx_draw_text (short x, short y, char * txt);
-extern void __fastcall__ gfx_set_pattern (void *);
 
 extern char pattern_empty[8];
 extern char pattern_solid[8];

@@ -80,6 +80,8 @@ draw_window (void * _w)
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
+/*
     gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
+*/
     draw_obj (win->obj.node.children);
 }

@@ -3,14 +3,15 @@
 .export _gfx_clear_screen
 .export _gfx_reset_region
 .export _gfx_set_region
+.export _gfx_set_pattern
 .export _gfx_draw_hline
 .export _gfx_draw_vline
 .export _gfx_draw_frame
 .export _gfx_draw_box
+.export _gfx_set_font
 .export _gfx_draw_text
-.export _gfx_set_pattern
 
-.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, pattern
+.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, pattern, font
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring
 
@@ -53,6 +54,13 @@
 	clc
 	adc rxr
 	sta rxr
+	rts
+.endproc
+
+; void __fastcall__ gfx_set_pattern (void *);
+.proc _gfx_set_pattern
+    sta pattern
+    stx pattern+1
 	rts
 .endproc
 
@@ -100,6 +108,13 @@
     jmp box
 .endproc
 
+; void __fastcall__ gfx_set_font (void *);
+.proc _gfx_set_font
+    sta font
+    stx font+1
+	rts
+.endproc
+
 ; void __fastcall__ gfx_draw_text (short x, short y, char * txt);
 .proc _gfx_draw_text
     sta p
@@ -109,11 +124,4 @@
     jsr popax
     sta xpos
     jmp putstring
-.endproc
-
-; void __fastcall__ gfx_set_pattern (void *);
-.proc _gfx_set_pattern
-    sta pattern
-    stx pattern+1
-	rts
 .endproc

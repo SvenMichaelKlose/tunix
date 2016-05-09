@@ -131,13 +131,15 @@ l6: lda tmp2
     rts
 .endproc
 
-.proc putchar
-    ; ASCII to PETSCII
+.proc ascii2petscii
     cmp #'Z'+1
     bcc n
     sec
     sbc #'a'-1
-n:
+n:  rts
+.endproc
+
+.proc putchar
 
     ; Get character address.
     asl
@@ -148,10 +150,12 @@ n:
     adc #0
     tay
     and #%11111000
+    clc
+    adc font
     sta s
     tya
     and #%00000111
-    ora font
+    adc font+1
     sta s+1
 
     ; OR all line together to find the paddings left and right.

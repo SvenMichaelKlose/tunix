@@ -71,7 +71,6 @@ int
 main (int argc, char ** argv)
 {
     gfx_init ();
-    gfx_set_font (charset_4x8);
     draw_background ();
     win_basic_start ();
 

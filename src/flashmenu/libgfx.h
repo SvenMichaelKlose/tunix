@@ -26,7 +26,7 @@ extern void __fastcall__ gfx_draw_hline (short x, short y, short w);
 extern void __fastcall__ gfx_draw_vline (short x, short y, short h);
 extern void __fastcall__ gfx_draw_frame (short x, short y, short w, short h);
 extern void __fastcall__ gfx_draw_box (short x, short y, short w, short h);
-extern void __fastcall__ gfx_set_font (void *);
+extern void __fastcall__ gfx_set_font (void *, char space_size);
 extern void __fastcall__ gfx_draw_text (short x, short y, char * txt);
 
 #endif /* #ifndef LIBGFX_H */

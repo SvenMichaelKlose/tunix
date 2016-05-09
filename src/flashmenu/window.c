@@ -10,7 +10,7 @@ void
 errnomem ()
 {
     gfx_clear_screen (1);
-    gfx_set_font (charset_4x8);
+    gfx_set_font (charset_4x8, 2);
     gfx_set_pencil_mode (1);
     gfx_draw_text (0, 84, "Error: Out of heap memory.");
     while (1);
@@ -65,6 +65,7 @@ draw_window (void * _w)
     gfx_reset_region ();
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_pattern (pattern_empty);
+    gfx_set_font (charset_4x8, 2);
     gfx_draw_box (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pattern (pattern_solid);
     gfx_draw_frame (x, y, w, WINDOW_TITLE_HEIGHT);

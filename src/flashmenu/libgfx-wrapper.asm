@@ -12,7 +12,8 @@
 .export _gfx_set_font
 .export _gfx_draw_text
 
-.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, pattern, font, pencil_mode
+.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p
+.importzp pattern, font, pencil_mode, font_space_size
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring
 
@@ -115,8 +116,10 @@
     jmp box
 .endproc
 
-; void __fastcall__ gfx_set_font (void *);
+; void __fastcall__ gfx_set_font (void *, char space_size);
 .proc _gfx_set_font
+    sta font_space_size
+    jsr popax
     sta font
     stx font+1
 	rts

@@ -3,6 +3,7 @@
 .export _gfx_clear_screen
 .export _gfx_reset_region
 .export _gfx_set_region
+.export _gfx_set_pencil_mode
 .export _gfx_set_pattern
 .export _gfx_draw_hline
 .export _gfx_draw_vline
@@ -11,7 +12,7 @@
 .export _gfx_set_font
 .export _gfx_draw_text
 
-.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, pattern, font
+.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, pattern, font, pencil_mode
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring
 
@@ -54,6 +55,12 @@
 	clc
 	adc rxr
 	sta rxr
+	rts
+.endproc
+
+; void __fastcall__ gfx_set_pencil_mode (char);
+.proc _gfx_set_pencil_mode
+    sta pencil_mode
 	rts
 .endproc
 

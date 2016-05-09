@@ -1,11 +1,15 @@
 #ifndef LIBGFX_H
 #define LIBGFX_H
 
+#define PENCIL_MODE_OFF     0
+#define PENCIL_MODE_OR      1
+
 extern void gfx_init ();
 extern short gfx_x ();
 extern void __fastcall__ gfx_clear_screen (char colour);
 extern void gfx_reset_region ();
 extern void __fastcall__ gfx_set_region (short x, short y, short w, short h);
+extern void __fastcall__ gfx_set_pencil_mode (char);
 extern void __fastcall__ gfx_set_pattern (void *);
 extern void __fastcall__ gfx_draw_hline (short x, short y, short w);
 extern void __fastcall__ gfx_draw_vline (short x, short y, short h);

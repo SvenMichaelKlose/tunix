@@ -58,6 +58,7 @@ draw_window (void * _w)
 
     /* Draw window title. */
     gfx_reset_region ();
+    gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pattern (pattern_solid);

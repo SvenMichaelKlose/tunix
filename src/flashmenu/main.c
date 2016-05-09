@@ -108,7 +108,7 @@ win_basic_start ()
         "+24K",
         NULL
     };
-	struct window * win = make_window (40, 50, 80, 80, "Start BASIC...");
+	struct window * win = make_window (20, 44, 120, 88, "Start BASIC...");
 
 	draw_window (win);
     gfx_set_pattern (pattern_solid);

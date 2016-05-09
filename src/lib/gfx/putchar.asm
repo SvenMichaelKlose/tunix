@@ -3,7 +3,8 @@
 .import inc_xcpos, calcscr
 .import masks_left, masks_right
 .importzp tmp, tmp2, tmp3
-.importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr, font_space_size, do_compress_font_gaps
+.importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr
+.importzp font_space_size, do_compress_font_gaps, pencil_mode
 
 .bss
 
@@ -140,7 +141,6 @@ n:  rts
 .endproc
 
 .proc putchar
-
     ; Get character address.
     asl
     adc #0
@@ -220,6 +220,8 @@ n2:
 m:  jsr clip_char
 n3:
 
+    lda pencil_mode
+    beq next_char
     jsr calcscr
     jsr blit_char
 

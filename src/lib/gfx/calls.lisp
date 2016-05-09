@@ -86,7 +86,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-syscall calcscr xpos ypos)
-(define-syscall setpattern pattern patternh)
+(define-syscall setpattern pattern pattern+1)
 (define-syscall vline xpos ypos height)
 (define-syscall hline xpos ypos width)
 (define-syscall frame xpos ypos width height)

@@ -50,7 +50,7 @@ syscall_args_h:  .byte >args_calcscr, >args_setpattern, >args_vline, >args_hline
 .export args_calcscr
 args_calcscr: .byte 2, xpos, ypos
 .export args_setpattern
-args_setpattern: .byte 2, pattern, patternh
+args_setpattern: .byte 2, pattern, pattern+1
 .export args_vline
 args_vline: .byte 3, xpos, ypos, height
 .export args_hline

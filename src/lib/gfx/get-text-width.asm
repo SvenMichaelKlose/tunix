@@ -15,18 +15,21 @@
     pha
     lda pencil_mode
     pha
+
     lda #0
     sta pencil_mode
     sta xpos
     sta ypos
     jsr putstring
     ldy xpos
+
     pla
     sta pencil_mode
     pla
     sta ypos
     pla
     sta xpos
+
     tya
     rts
 .endproc

@@ -9,31 +9,6 @@ typedef unsigned char uchar;
 
 #define WHITE   1
 
-#define CONFIG_TYPE     1
-
-void __fastcall__
-free_obj (struct obj * x)
-{
-    struct obj * c;
-
-    while (x) {
-        c = x->node.children;
-        if (c)
-            free_obj (c);
-        free (x);
-        x = x->node.next;
-    }
-}
-
-void __fastcall__
-draw_obj (struct obj * x)
-{
-    while (x) {
-        x->draw (x);
-        x = x->node.next;
-    }
-}
-
 void
 draw_scrollable (struct scrollable * x)
 {}
@@ -42,17 +17,6 @@ void
 draw_message (char * txt)
 {}
 
-void probe_devices ()
-{
-    draw_message ("Probing devices...");
-}
-
-void seek_and_load_config ()
-{
-    draw_message ("Seeking config...");
-}
-
-short devices;
 struct window * wleft;
 struct window * wright;
 
@@ -116,8 +80,6 @@ win_basic_start ()
     draw_list (59, 66, labels);
 }
 
-extern char charset_4x8[2048];
-
 int
 main (int argc, char ** argv)
 {
@@ -127,8 +89,5 @@ main (int argc, char ** argv)
     win_basic_start ();
 
     while (1);
-    probe_devices ();
-    seek_and_load_config ();
-
     return 0;
 }

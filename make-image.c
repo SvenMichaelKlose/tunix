@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,7 +16,7 @@ copy_file (int out, char * path)
 
     printf ("<- %s\n", path);
     data = malloc (65536);
-    bzero (data, 65536);
+    memset (data, 255, 65536);
     if ((in = open (path, O_RDONLY)) < 0)
         perror ("open in");
     if (!read (in, data, 65536))
@@ -31,7 +32,7 @@ main (int argv, char ** argc)
     int i;
     int out;
     char * data = malloc (65536);
-    bzero (data, 65536);
+    memset (data, 255, 65536);
 
     if ((out = open ("compiled/ultimem.img", O_CREAT | O_WRONLY | O_TRUNC, 0644)) < 0)
         perror ("open out");

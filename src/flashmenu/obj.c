@@ -86,11 +86,13 @@ append_obj (struct obj * parent, struct obj * x)
 
     if (!c) {
         parent->node.children = x;
-        return;
+        goto link_parent;
     }
     while (n = c->node.next)
         c = n;
     c->node.next = x;
     x->node.prev = c;
+
+link_parent:
     x->node.parent = parent;
 }

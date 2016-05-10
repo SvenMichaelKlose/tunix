@@ -53,7 +53,7 @@ win_basic_start ()
 	struct button * b_cancel = make_button (90, 108, 20, 12, "Cancel");
 
     append_obj (OBJ(win), OBJ(b_ok));
-//    append_obj (OBJ(win), OBJ(b_cancel));
+    append_obj (OBJ(win), OBJ(b_cancel));
     layout_obj ((struct obj *) win);
     draw_obj ((struct obj *) win);
 }

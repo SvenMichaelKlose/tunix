@@ -42,8 +42,8 @@ win_basic_start ()
 
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
 	struct hlist * hlist = make_hlist (22, 34, 120, 110);
-	struct button * b_ok = make_button (50, 108, 20, 12, "OK");
-	struct button * b_cancel = make_button (90, 108, 20, 12, "Cancel");
+	struct button * b_ok = make_button (0, 0, 30, 12, "OK");
+	struct button * b_cancel = make_button (0, 0, 30, 12, "Cancel");
 
     append_obj (OBJ(win), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));

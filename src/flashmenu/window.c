@@ -21,7 +21,7 @@ make_window (gpos x, gpos y, gsize w, gsize h, char * title)
     return win;
 }
 
-void
+void __fastcall__
 draw_window_content (struct window * win)
 {
     if (!win->obj.node.children)

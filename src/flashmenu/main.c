@@ -4,6 +4,7 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "button.h"
+#include "error.h"
 #include "window.h"
 
 struct window * wleft;
@@ -44,31 +45,16 @@ draw_list (gpos x, gpos y, char ** txts)
 void
 win_basic_start ()
 {
-    gpos x = 20;
-    char * buttons[] = {
-        "( )",
-        "[ ]",
-        "( )",
-        "( )",
-        "( )",
-        NULL
-    };
-    char * labels[] = {
-        "no extra memory",
-        "+3K",
-        "+8K",
-        "+16K",
-        "+24K",
-        NULL
-    };
-	struct window * win = make_window (20, 44, 120, 88, "Start BASIC...");
-	struct button * b = make_button (50, 118, 20, 12, "OK");
+    char * msg = malloc (256);
+    struct obj * o;
 
-	draw_window (win);
-    gfx_set_pattern (pattern_solid);
-    draw_list (45, 66, buttons);
-    draw_list (59, 66, labels);
-    draw_button (b);
+	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
+	struct button * b_ok = make_button (50, 108, 20, 12, "OK");
+	struct button * b_cancel = make_button (90, 108, 20, 12, "Cancel");
+
+    append_obj (OBJ(win), OBJ(b_ok));
+    append_obj (OBJ(win), OBJ(b_cancel));
+    draw_obj ((struct obj *) win);
 }
 
 void
@@ -83,8 +69,8 @@ shift_charset ()
 int
 main (int argc, char ** argv)
 {
-    shift_charset ();
     gfx_init ();
+    shift_charset ();
     draw_background ();
     win_basic_start ();
 

@@ -7,7 +7,7 @@
 struct button * __fastcall__
 make_button (gpos x, gpos y, gsize w, gsize h, char * text)
 {
-    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h);
+    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h, draw_button);
     b->text = text;
     return b;
 }

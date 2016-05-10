@@ -2,7 +2,7 @@ all:
 	$(CC) -o make-image make-image.c
 	mkdir -pv compiled
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
-	cd src/sh && ./make.sh && cd ../.. && cp src/sh/sh compiled
+#	cd src/sh && ./make.sh && cd ../.. && cp src/sh/sh compiled
 	$(MAKE) -C src all
 	./make-image
 	rm -fv g.zip compiled/charset.lst

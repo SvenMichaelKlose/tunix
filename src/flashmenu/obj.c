@@ -6,7 +6,7 @@
 #include "obj.h"
 
 void *
-alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h)
+alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, func_draw_t draw)
 {
     struct obj * obj = malloc (size);
     struct treenode * node;
@@ -26,6 +26,8 @@ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h)
     rect->y = y;
     rect->w = w;
     rect->h = h;
+
+    obj->draw = draw;
 
     return obj;
 }
@@ -51,4 +53,19 @@ draw_obj (struct obj * x)
         x->draw (x);
         x = x->node.next;
     }
+}
+
+void __fastcall__
+append_obj (struct obj * parent, struct obj * x)
+{
+    struct obj * c = parent->node.children;
+    struct obj * n;
+
+    if (!c) {
+        parent->node.children = x;
+        return;
+    }
+    while (n = c->node.next)
+        c = n;
+    c->node.next = x;
 }

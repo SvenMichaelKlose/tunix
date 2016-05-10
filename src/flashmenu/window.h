@@ -4,7 +4,6 @@
 struct window {
     struct obj  obj;
     char *      title;
-    char        canvas_bank;
 };
 
 extern struct window * __fastcall__ make_window (gpos x, gpos y, gsize w, gsize h, char * title);

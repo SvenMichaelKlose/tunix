@@ -3,15 +3,24 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "window.h"
+#include "error.h"
 
 #define WINDOW_TITLE_HEIGHT     11
 
 struct window * __fastcall__
 make_window (gpos x, gpos y, gsize w, gsize h, char * title)
 {
-    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h);
+    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h, draw_window);
     win->title = title;
     return win;
+}
+
+void
+draw_window_content (struct window * win)
+{
+    if (!win->obj.node.children)
+        print_error ("no kids");
+    draw_obj (win->obj.node.children);
 }
 
 void __fastcall__
@@ -61,5 +70,5 @@ draw_window (void * _w)
 /*
     gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
 */
-    draw_obj (win->obj.node.children);
+    draw_window_content (win);
 }

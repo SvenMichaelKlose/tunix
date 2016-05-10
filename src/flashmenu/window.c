@@ -7,7 +7,7 @@
 #define WINDOW_TITLE_HEIGHT     11
 
 struct window * __fastcall__
-make_window (short x, short y, short w, short h, char * title)
+make_window (gpos x, gpos y, gsize w, gsize h, char * title)
 {
     struct window * win = alloc_obj (sizeof (struct window), x, y, w, h);
     win->title = title;
@@ -19,18 +19,18 @@ draw_window (void * _w)
 {
     struct window * win = _w;
     struct rect * r = &win->obj.rect;
-    short x = r->x;
-    short y = r->y;
-    short y2 = y + 2;
-    short w = r->w;
-    short h = r->h;
-    short ix = x + 1;
-    short iy = y + 1;
-    short iw = r->w - 2;
-    short xr = x + iw - 1;
-    short yb = y + WINDOW_TITLE_HEIGHT - 1;
-    short cx;
-    short gw;
+    gpos x = r->x;
+    gpos y = r->y;
+    gpos y2 = y + 2;
+    gsize w = r->w;
+    gsize h = r->h;
+    gpos ix = x + 1;
+    gpos iy = y + 1;
+    gsize iw = r->w - 2;
+    gpos xr = x + iw - 1;
+    gpos yb = y + WINDOW_TITLE_HEIGHT - 1;
+    gpos cx;
+    gsize gw;
 
     /* Draw window title. */
     gfx_reset_region ();

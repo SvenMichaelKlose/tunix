@@ -1,9 +1,9 @@
 #include <stdlib.h>
 
+#include "libgfx.h"
 #include "obj.h"
 #include "button.h"
 #include "window.h"
-#include "libgfx.h"
 
 struct window * wleft;
 struct window * wright;
@@ -32,7 +32,7 @@ draw_background ()
 }
 
 void
-draw_list (short x, short y, char ** txts)
+draw_list (gpos x, gpos y, char ** txts)
 {
     while (*txts) {
         gfx_draw_text (x, y, *txts++);
@@ -43,7 +43,7 @@ draw_list (short x, short y, char ** txts)
 void
 win_basic_start ()
 {
-    short x = 20;
+    gpos x = 20;
     char * buttons[] = {
         "( )",
         "[ ]",

@@ -5,7 +5,7 @@
 #include "button.h"
 
 struct button * __fastcall__
-make_button (short x, short y, short w, short h, char * text)
+make_button (gpos x, gpos y, gsize w, gsize h, char * text)
 {
     struct button * b = alloc_obj (sizeof (struct button), x, y, w, h);
     b->text = text;
@@ -17,7 +17,7 @@ draw_button (void * _b)
 {
     struct button * b = _b;
     struct rect * r = &b->obj.rect;
-    short textwidth = gfx_get_text_width (b->text);
+    gsize textwidth = gfx_get_text_width (b->text);
 
     gfx_set_pencil_mode (1);
     gfx_set_pattern (pattern_empty);

@@ -8,7 +8,7 @@ struct button {
     char *      text;
 };
 
-extern struct button * __fastcall__ make_button (short x, short y, short w, short h, char * text);
+extern struct button * __fastcall__ make_button (gpos x, gpos y, gsize w, gsize h, char * text);
 extern void __fastcall__ draw_button (void *);
 
 #endif /* #ifndef BUTTON_H */

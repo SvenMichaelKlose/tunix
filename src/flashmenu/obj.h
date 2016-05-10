@@ -8,10 +8,10 @@ struct _configuration {
 };
 
 struct rect {
-    short x;
-    short y;
-    short w;
-    short h;
+    gpos x;
+    gpos y;
+    gsize w;
+    gsize h;
 };
 
 struct treenode {
@@ -34,7 +34,7 @@ struct scrollable {
     char        bank;
 };
 
-extern void * __fastcall__ alloc_obj (short size, short x, short y, short w, short h);
+extern void * __fastcall__ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h);
 extern void __fastcall__ free_obj (struct obj *);
 extern void __fastcall__ draw_obj (struct obj *);
 

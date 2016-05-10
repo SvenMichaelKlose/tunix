@@ -25,14 +25,14 @@
 	jmp gfx_init
 .endproc
 
-; void gfx_x ();
+; gpos gfx_x ();
 .proc _gfx_x
     lda xpos
     ldx #0
     rts
 .endproc
 
-; void __fastcall__ gfx_clear_screen (char colour);
+; void __fastcall__ gfx_clear_screen (gcolor);
 .proc _gfx_clear_screen
 	jmp clear_screen
 .endproc
@@ -42,7 +42,7 @@
 	jmp reset_region
 .endproc
 
-; void __fastcall__ gfx_set_region (short x, short y, short w, short h) {}
+; void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h) {}
 .proc _gfx_set_region
 	sta ryb
     jsr popax
@@ -73,7 +73,7 @@
 	rts
 .endproc
 
-; void __fastcall__ gfx_draw_hline (short x, short y, short w);
+; void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);
 .proc _gfx_draw_hline
     sta width
     jsr popax
@@ -83,7 +83,7 @@
     jmp hline
 .endproc
 
-; void __fastcall__ gfx_draw_vline (short x, short y, short h);
+; void __fastcall__ gfx_draw_vline (gpos x, gpos y, gsize h);
 .proc _gfx_draw_vline
     sta height
     jsr popax
@@ -93,7 +93,7 @@
     jmp vline
 .endproc
 
-; void __fastcall__ gfx_draw_frame (short x, short y, short w, short h);
+; void __fastcall__ gfx_draw_frame (gpos x, gpos y, gsize w, gsize h);
 .proc _gfx_draw_frame
     sta height
     jsr popax
@@ -105,7 +105,7 @@
     jmp frame
 .endproc
 
-; void __fastcall__ gfx_draw_box (short x, short y, short w, short h);
+; void __fastcall__ gfx_draw_box (gpos x, gpos y, gsize w, gsize h);
 .proc _gfx_draw_box
     sta height
     jsr popax
@@ -126,7 +126,7 @@
 	rts
 .endproc
 
-; void __fastcall__ gfx_draw_text (short x, short y, char * txt);
+; void __fastcall__ gfx_draw_text (gpos x, gpos y, char * txt);
 .proc _gfx_draw_text
     sta p
 	stx p+1
@@ -137,7 +137,7 @@
     jmp putstring
 .endproc
 
-; short __fastcall__ gfx_get_text_size (char *);
+; gsize __fastcall__ gfx_get_text_size (char *);
 .proc _gfx_get_text_width
     sta s
     stx s+1

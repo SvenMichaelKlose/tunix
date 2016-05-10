@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
+#include "libgfx.h"
 #include "error.h"
 #include "obj.h"
-#include "libgfx.h"
 
 void *
-alloc_obj (short size, short x, short y, short w, short h)
+alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h)
 {
     struct obj * obj = malloc (size);
     struct treenode * node;

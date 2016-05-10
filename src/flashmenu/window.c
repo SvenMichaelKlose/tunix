@@ -7,10 +7,14 @@
 
 #define WINDOW_TITLE_HEIGHT     11
 
+struct obj_ops window_ops = {
+    draw_window
+};
+
 struct window * __fastcall__
 make_window (gpos x, gpos y, gsize w, gsize h, char * title)
 {
-    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h, draw_window);
+    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h, &window_ops);
     win->title = title;
     return win;
 }

@@ -4,10 +4,14 @@
 #include "obj.h"
 #include "button.h"
 
+struct obj_ops button_ops = {
+    draw_button
+};
+
 struct button * __fastcall__
 make_button (gpos x, gpos y, gsize w, gsize h, char * text)
 {
-    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h, draw_button);
+    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h, &button_ops);
     b->text = text;
     return b;
 }

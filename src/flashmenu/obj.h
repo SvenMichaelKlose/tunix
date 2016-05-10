@@ -3,8 +3,6 @@
 
 #define OBJ(x)  ((struct obj *) x)
 
-typedef void (*func_draw_t) (void *);
-
 struct _configuration {
     char type;
 };
@@ -24,11 +22,16 @@ struct treenode {
     struct obj *    children;
 };
 
-struct obj {
-    struct treenode node;
-    struct rect     rect;
+typedef void (*func_draw_t) (void *);
 
+struct obj_ops {
     func_draw_t     draw;
+};
+
+struct obj {
+    struct treenode   node;
+    struct rect       rect;
+    struct obj_ops *  ops;
 };
 
 struct scrollable {
@@ -36,7 +39,7 @@ struct scrollable {
     char        bank;
 };
 
-extern void * __fastcall__ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, func_draw_t);
+extern void * __fastcall__ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, struct obj_ops *);
 extern void __fastcall__ free_obj (struct obj *);
 extern void __fastcall__ draw_obj (struct obj *);
 extern void __fastcall__ append_obj (struct obj * parent, struct obj * x);

@@ -4,8 +4,8 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "button.h"
-#include "hlist.h"
 #include "error.h"
+#include "list.h"
 #include "window.h"
 
 struct window * wleft;
@@ -41,16 +41,16 @@ win_basic_start ()
     struct obj * o;
 
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
-	struct hlist * hlist = make_hlist (22, 34, 120, 110);
+	struct list * list = make_list (22, 34, 120, 110, LIST_HORIZONTAL);
 	struct button * b_ok = make_button (0, 0, 30, 12, "OK");
 	struct button * b_cancel = make_button (0, 0, 30, 12, "Cancel");
 
-    append_obj (OBJ(win), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
+    append_obj (OBJ(win), OBJ(list));
+    append_obj (OBJ(list), OBJ(b_ok));
+    append_obj (OBJ(list), OBJ(b_cancel));
 
-    layout_obj ((struct obj *) win);
-    draw_obj ((struct obj *) win);
+    layout_obj (OBJ(win));
+    draw_obj (OBJ(win));
 }
 
 void

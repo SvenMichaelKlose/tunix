@@ -28,7 +28,7 @@ main:
     ; Activate all RAM.
     lda #%00111111
     sta $9ff1
-    lda #%01111111
+    lda #%01011111
     sta $9ff2
     lda #0
     tax
@@ -52,19 +52,43 @@ main:
     lda #$60	; RTS
     sta $0400
 
-    ; Copy following code in Flash to $2000 (skip first 4 header bytes).
-    lda #<__PRGEND__
+    ;; Copy first 16K of second 64K flash segment to RAM.
+    ; First 8K – skips 6 byte program header.
+    lda #$08
+    sta $9ffc
+    lda #$06
     sta s
-    lda #>__PRGEND__
+    lda #$60
     sta s+1
-    lda #$fa
+    lda #$00
     sta d
+    lda #$20
+    sta d+1
+    lda #$fa
     sta c
     lda #$1f
-    sta d+1
     sta c+1
     lda #0
     jsr moveram
+
+    inc $9ffc
+    lda #$00
+    sta s
+    lda #$60
+    sta s+1
+    lda #$fa
+    sta d
+    lda #$3f
+    sta d+1
+    lda #$00
+    sta c
+    lda #$20
+    sta c+1
+    lda #0
+    jsr moveram
+
+    lda #%01111111
+    sta $9ff2
 
     ; Run it.
     jmp $2000

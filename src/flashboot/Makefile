@@ -10,9 +10,9 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) --config rom.cfg -o $@ $^
+	$(LD) --config rom.cfg -Ln $(PROGRAM).lst -o $@ $^
 
 all: $(PROGRAM)
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM)
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst

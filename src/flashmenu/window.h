@@ -1,6 +1,8 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+extern struct obj_ops window_ops;
+
 struct window {
     struct obj  obj;
     char *      title;

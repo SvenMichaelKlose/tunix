@@ -3,6 +3,8 @@
 
 #include "obj.h"
 
+extern struct obj_ops button_ops;
+
 struct button {
     struct obj  obj;
     char *      text;

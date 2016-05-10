@@ -1,6 +1,7 @@
 SOURCES= \
     button.c \
     error.c \
+    layout-ops.c \
     main.c \
     obj.c \
     window.c

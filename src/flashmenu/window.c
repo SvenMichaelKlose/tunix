@@ -2,13 +2,15 @@
 
 #include "libgfx.h"
 #include "obj.h"
+#include "layout-ops.h"
 #include "window.h"
 #include "error.h"
 
 #define WINDOW_TITLE_HEIGHT     11
 
 struct obj_ops window_ops = {
-    draw_window
+    draw_window,
+    layout_none
 };
 
 struct window * __fastcall__
@@ -24,7 +26,7 @@ draw_window_content (struct window * win)
 {
     if (!win->obj.node.children)
         print_error ("no kids");
-    draw_obj (win->obj.node.children);
+    draw_obj_children (OBJ(win));
 }
 
 void __fastcall__

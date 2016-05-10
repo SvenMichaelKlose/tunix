@@ -3,9 +3,11 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "button.h"
+#include "layout-ops.h"
 
 struct obj_ops button_ops = {
-    draw_button
+    draw_button,
+    layout_center
 };
 
 struct button * __fastcall__

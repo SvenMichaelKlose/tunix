@@ -49,8 +49,31 @@ free_obj (struct obj * x)
 void __fastcall__
 draw_obj (struct obj * x)
 {
+    x->ops->draw (x);
+}
+
+void __fastcall__
+draw_obj_children (struct obj * x)
+{
+    x = x->node.children;
     while (x) {
         x->ops->draw (x);
+        x = x->node.next;
+    }
+}
+
+void __fastcall__
+layout_obj (struct obj * x)
+{
+    x->ops->layout (x);
+}
+
+void __fastcall__
+layout_obj_children (struct obj * x)
+{
+    x = x->node.children;
+    while (x) {
+        x->ops->layout (x);
         x = x->node.next;
     }
 }
@@ -68,4 +91,6 @@ append_obj (struct obj * parent, struct obj * x)
     while (n = c->node.next)
         c = n;
     c->node.next = x;
+    x->node.prev = c;
+    x->node.parent = parent;
 }

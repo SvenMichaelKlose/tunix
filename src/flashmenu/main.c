@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "libgfx.h"
 #include "obj.h"
@@ -70,9 +71,19 @@ win_basic_start ()
     draw_button (b);
 }
 
+void
+shift_charset ()
+{
+    int i;
+
+    for (i = 0; i < 2048; i++)
+        charset_4x8[i] <<= 4;
+}
+
 int
 main (int argc, char ** argv)
 {
+    shift_charset ();
     gfx_init ();
     draw_background ();
     win_basic_start ();

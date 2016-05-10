@@ -1,8 +1,6 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#define NULL    ((void *) 0)
-
 struct _configuration {
     char type;
 };

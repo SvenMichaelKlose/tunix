@@ -19,6 +19,9 @@ draw_button (void * _b)
     struct rect * r = &b->obj.rect;
     gsize textwidth = gfx_get_text_width (b->text);
 
+    if (textwidth > r->w)
+        r->w = textwidth + 4;
+
     gfx_set_pencil_mode (1);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (r->x + 1, r->y + 1, r->w - 2, r->h - 2);

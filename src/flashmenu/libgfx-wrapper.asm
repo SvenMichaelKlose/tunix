@@ -139,8 +139,8 @@
 
 ; gsize __fastcall__ gfx_get_text_size (char *);
 .proc _gfx_get_text_width
-    sta s
-    stx s+1
+    sta p
+    stx p+1
     jsr get_text_width
     ldx #0
 	rts

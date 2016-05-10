@@ -39,15 +39,27 @@ win_basic_start ()
 {
     char * msg = malloc (256);
     struct obj * o;
-
+	struct list * hlist;
+	struct button * b_ok;
+	struct button * b_cancel;
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
-	struct list * list = make_list (22, 34, 120, 110, LIST_HORIZONTAL);
-	struct button * b_ok = make_button (0, 0, 30, 12, "OK");
-	struct button * b_cancel = make_button (0, 0, 30, 12, "Cancel");
+	struct list * vlist = make_list (22, 34, 120, 110, LIST_VERTICAL);
 
-    append_obj (OBJ(win), OBJ(list));
-    append_obj (OBJ(list), OBJ(b_ok));
-    append_obj (OBJ(list), OBJ(b_cancel));
+    append_obj (OBJ(win), OBJ(vlist));
+
+	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+	b_ok = make_button (0, 0, 30, 12, "OK");
+	b_cancel = make_button (0, 0, 30, 12, "Cancel");
+    append_obj (OBJ(vlist), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+	b_ok = make_button (0, 0, 30, 12, "OK");
+	b_cancel = make_button (0, 0, 30, 12, "Cancel");
+    append_obj (OBJ(vlist), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
 
     layout_obj (OBJ(win));
     draw_obj (OBJ(win));

@@ -6,7 +6,7 @@
 extern struct obj_ops list_ops;
 
 #define LIST_HORIZONTAL     0
-#define LIST_VERTICAL       0
+#define LIST_VERTICAL       1
 
 struct list {
     struct obj  obj;

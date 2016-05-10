@@ -7,7 +7,7 @@
 
 struct obj_ops button_ops = {
     draw_button,
-    layout_center
+    layout_none
 };
 
 struct button * __fastcall__

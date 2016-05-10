@@ -1,6 +1,7 @@
 SOURCES= \
     button.c \
     error.c \
+    hlist.c \
     layout-ops.c \
     main.c \
     obj.c \
@@ -20,7 +21,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -Oi -c $(CFLAGS) -o $@ $<
+	$(CC) -O -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -t vic20g -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/gfx/libgfx.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib

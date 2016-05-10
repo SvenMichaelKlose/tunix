@@ -4,6 +4,7 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "button.h"
+#include "hlist.h"
 #include "error.h"
 #include "window.h"
 
@@ -34,26 +35,20 @@ draw_background ()
 }
 
 void
-draw_list (gpos x, gpos y, char ** txts)
-{
-    while (*txts) {
-        gfx_draw_text (x, y, *txts++);
-        y += 10;
-    }
-}
-
-void
 win_basic_start ()
 {
     char * msg = malloc (256);
     struct obj * o;
 
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
+	struct hlist * hlist = make_hlist (22, 34, 120, 110);
 	struct button * b_ok = make_button (50, 108, 20, 12, "OK");
 	struct button * b_cancel = make_button (90, 108, 20, 12, "Cancel");
 
-    append_obj (OBJ(win), OBJ(b_ok));
-    append_obj (OBJ(win), OBJ(b_cancel));
+    append_obj (OBJ(win), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
     layout_obj ((struct obj *) win);
     draw_obj ((struct obj *) win);
 }

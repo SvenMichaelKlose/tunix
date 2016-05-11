@@ -5,9 +5,11 @@
 #include "button.h"
 #include "layout-ops.h"
 
+void __fastcall__ layout_button_minsize (struct obj *);
+
 struct obj_ops button_ops = {
     draw_button,
-    layout_none
+    layout_button_minsize
 };
 
 struct button * __fastcall__
@@ -31,4 +33,13 @@ draw_button (void * _b)
     gfx_set_pattern (pattern_solid);
     gfx_draw_frame (r->x, r->y, r->w, r->h);
     gfx_draw_text (r-> x + (r->w - textwidth) / 2, r->y + (r->h - 8) / 2, b->text);
+}
+
+void __fastcall__
+layout_button_minsize (struct obj * x)
+{
+    struct button * b = (struct button *) x;
+    gsize textwidth = gfx_get_text_width (b->text);
+
+    x->rect.w = textwidth + 4;
 }

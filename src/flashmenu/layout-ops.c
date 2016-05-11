@@ -1,7 +1,9 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "obj.h"
 #include "layout-ops.h"
+#include "table.h"
 
 void
 layout_none (struct obj * x)

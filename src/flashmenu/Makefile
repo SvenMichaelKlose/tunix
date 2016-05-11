@@ -3,6 +3,7 @@ SOURCES= \
     error.c \
     layout-ops.c \
     list.c \
+    table.c \
     main.c \
     obj.c \
     window.c

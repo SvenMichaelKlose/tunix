@@ -5,6 +5,8 @@
 
 #define OBJ(x)  ((struct obj *) x)
 
+typedef unsigned char uchar;
+
 struct _configuration {
     char type;
 };
@@ -24,8 +26,8 @@ struct treenode {
     struct obj *    children;
 };
 
-typedef void (*func_draw_t) (void *);
-typedef void (*func_layout_t) (struct obj *);
+typedef void __fastcall__ (*func_draw_t) (void *);
+typedef void __fastcall__ (*func_layout_t) (struct obj *);
 
 struct obj_ops {
     func_draw_t     draw;

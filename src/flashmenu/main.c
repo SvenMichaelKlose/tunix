@@ -6,6 +6,7 @@
 #include "button.h"
 #include "error.h"
 #include "list.h"
+#include "table.h"
 #include "window.h"
 
 struct window * wleft;
@@ -43,21 +44,21 @@ win_basic_start ()
 	struct button * b_ok;
 	struct button * b_cancel;
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
-	struct list * vlist = make_list (22, 34, 120, 110, LIST_VERTICAL);
+	struct obj * table = make_table (22, 34, 120, 110);
 
-    append_obj (OBJ(win), OBJ(vlist));
+    append_obj (OBJ(win), OBJ(table));
 
 	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
 	b_ok = make_button (0, 0, 30, 12, "OK");
-	b_cancel = make_button (0, 0, 30, 12, "Cancel");
-    append_obj (OBJ(vlist), OBJ(hlist));
+    b_cancel = make_button (0, 0, 30, 12, "Cancel");
+    append_obj (OBJ(table), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
 
-	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-	b_ok = make_button (0, 0, 30, 12, "OK");
-	b_cancel = make_button (0, 0, 30, 12, "Cancel");
-    append_obj (OBJ(vlist), OBJ(hlist));
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
 

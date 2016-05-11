@@ -37,6 +37,9 @@ get_common_column_sizes (uchar * column_sizes, struct obj * row)
     uchar h = 0;
 
     while (c) {
+        if (i == MAX_TABLE_COLUMNS)
+            break;
+
         layout_obj (c);
         if (column_sizes[i] < c->rect.w)
             column_sizes[i] = c->rect.w;
@@ -50,6 +53,16 @@ get_common_column_sizes (uchar * column_sizes, struct obj * row)
 }
 
 void __fastcall__
+get_common_column_sizes_for_all_rows (uchar * column_sizes, struct obj * c)
+{
+    c = c->node.children;
+    while (c) {
+        get_common_column_sizes (column_sizes, c);
+        c = c->node.next;
+    }
+}
+
+void __fastcall__
 set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct obj * row)
 {
     uchar i = 0;
@@ -57,6 +70,9 @@ set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct o
     char msg[32];
 
     while (c) {
+        if (i == MAX_TABLE_COLUMNS)
+            break;
+
         c->rect.x = x;
         c->rect.y = y;
         c->rect.w = column_sizes[i];
@@ -68,24 +84,14 @@ set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct o
 }
 
 void __fastcall__
-layout_table (struct obj * t)
+relocate_and_resize (uchar * column_sizes, struct obj * t)
 {
-    uchar * column_sizes = malloc (MAX_TABLE_COLUMNS);
+    struct obj * c = t->node.children;
     gpos x = t->rect.x;
     gpos y = t->rect.y;
     uchar h;
-    struct obj * c;
-
-    /* Get common column sizes. */
-    bzero (column_sizes, MAX_TABLE_COLUMNS);
-    c = t->node.children;
-    while (c) {
-        get_common_column_sizes (column_sizes, c);
-        c = c->node.next;
-    }
 
     /* Relocate and resize. */
-    c = t->node.children;
     while (c) {
         c->rect.x = x;
         c->rect.y = y;
@@ -94,7 +100,16 @@ layout_table (struct obj * t)
         y += h;
         c = c->node.next;
     }
+}
 
-end:
+void __fastcall__
+layout_table (struct obj * t)
+{
+    uchar * column_sizes = malloc (MAX_TABLE_COLUMNS);
+    bzero (column_sizes, MAX_TABLE_COLUMNS);
+
+    get_common_column_sizes_for_all_rows (column_sizes, t);
+    relocate_and_resize (column_sizes, t);
+
     free (column_sizes);
 }

@@ -217,7 +217,9 @@ n2:
     lda ryb
     cmp ypos2
     bcs n3
-m:  jsr clip_char
+m:  lda pencil_mode
+    beq next_char
+    jsr clip_char
 n3:
 
     lda pencil_mode

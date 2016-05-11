@@ -62,6 +62,48 @@ win_basic_start ()
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
 
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
+    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
+    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
+    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    append_obj (OBJ(table), OBJ(hlist));
+    append_obj (OBJ(hlist), OBJ(b_ok));
+    append_obj (OBJ(hlist), OBJ(b_cancel));
+
     layout_obj (OBJ(win));
     draw_obj (OBJ(win));
 }

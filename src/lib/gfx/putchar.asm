@@ -190,6 +190,10 @@ n2:
     adc #8
     sta ypos2
 
+    ; Don't clip or draw if pencil mode is 0.
+    lda pencil_mode
+    beq next_char
+
     ; Skip character if it's outside the visible region.
     lda xpos
     cmp rxr
@@ -217,13 +221,9 @@ n2:
     lda ryb
     cmp ypos2
     bcs n3
-m:  lda pencil_mode
-    beq next_char
-    jsr clip_char
+m:  jsr clip_char
 n3:
 
-    lda pencil_mode
-    beq next_char
     jsr calcscr
     jsr blit_char
 

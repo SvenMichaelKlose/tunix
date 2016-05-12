@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "libgfx.h"
 #include "error.h"
@@ -47,6 +48,37 @@ free_obj (struct obj * x)
 }
 
 void __fastcall__
+append_obj (struct obj * parent, struct obj * x)
+{
+    struct obj * c = parent->node.children;
+    struct obj * n;
+
+    if (!c) {
+        parent->node.children = x;
+        goto link_parent;
+    }
+    while (n = c->node.next)
+        c = n;
+    c->node.next = x;
+    x->node.prev = c;
+
+link_parent:
+    x->node.parent = parent;
+}
+
+void __fastcall__
+get_obj_ops (struct obj * x, struct obj_ops * o)
+{
+    memcpy (o, &x->ops, sizeof (struct obj_ops));
+}
+
+void __fastcall__
+set_obj_ops (struct obj * x, struct obj_ops * o)
+{
+    memcpy (&x->ops, o, sizeof (struct obj_ops));
+}
+
+void __fastcall__
 draw_obj (struct obj * x)
 {
     x->ops->draw (x);
@@ -76,23 +108,4 @@ layout_obj_children (struct obj * x)
         x->ops->layout (x);
         x = x->node.next;
     }
-}
-
-void __fastcall__
-append_obj (struct obj * parent, struct obj * x)
-{
-    struct obj * c = parent->node.children;
-    struct obj * n;
-
-    if (!c) {
-        parent->node.children = x;
-        goto link_parent;
-    }
-    while (n = c->node.next)
-        c = n;
-    c->node.next = x;
-    x->node.prev = c;
-
-link_parent:
-    x->node.parent = parent;
 }

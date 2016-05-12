@@ -62,12 +62,13 @@ get_common_column_sizes_for_all_rows (uchar * column_sizes, struct obj * c)
     }
 }
 
-void __fastcall__
+gsize __fastcall__
 set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct obj * row)
 {
     uchar i = 0;
     struct obj * c = row->node.children;
     char msg[32];
+    gsize w = 0;
 
     while (c) {
         if (i == MAX_TABLE_COLUMNS)
@@ -78,9 +79,12 @@ set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct o
         c->rect.w = column_sizes[i];
         c->rect.h = h;
         x += column_sizes[i];
+        w += column_sizes[i];
         c = c->node.next;
         i++;
     }
+
+    return w;
 }
 
 void __fastcall__
@@ -90,16 +94,20 @@ relocate_and_resize (uchar * column_sizes, struct obj * t)
     gpos x = t->rect.x;
     gpos y = t->rect.y;
     uchar h;
+    gsize w;
 
     /* Relocate and resize. */
     while (c) {
         c->rect.x = x;
         c->rect.y = y;
         h = get_common_column_sizes (column_sizes, c);
-        set_common_column_sizes (column_sizes, x, y, h, c);
+        w = set_common_column_sizes (column_sizes, x, y, h, c);
         y += h;
         c = c->node.next;
     }
+
+    t->rect.w = w;
+    t->rect.h = y - t->rect.y;
 }
 
 void __fastcall__

@@ -109,3 +109,12 @@ layout_obj_children (struct obj * x)
         x = x->node.next;
     }
 }
+
+void __fastcall__
+set_obj_region (struct obj * o)
+{
+    gpos rxl = gfx_rxl ();
+    gpos ryt = gfx_ryt ();
+
+    gfx_set_region (rxl + o->rect.x, ryt + o->rect.y, rxl + o->rect.w, ryt + o->rect.h);
+}

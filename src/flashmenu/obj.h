@@ -54,5 +54,6 @@ extern void __fastcall__ layout_obj_children (struct obj *);
 extern void __fastcall__ append_obj (struct obj * parent, struct obj * x);
 extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
 extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
+extern void __fastcall__ set_obj_region (struct obj *);
 
 #endif /* #ifndef OBJ_H */

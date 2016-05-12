@@ -91,8 +91,8 @@ void __fastcall__
 relocate_and_resize (uchar * column_sizes, struct obj * t)
 {
     struct obj * c = t->node.children;
-    gpos x = t->rect.x;
-    gpos y = t->rect.y;
+    gpos x = 0;
+    gpos y = 0;
     uchar h;
     gsize w;
 

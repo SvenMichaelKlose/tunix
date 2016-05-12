@@ -46,6 +46,7 @@ draw_window (void * _w)
     gpos y2;
 
     /* Draw window title. */
+    gfx_push_region ();
     gfx_set_region (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_pattern (pattern_empty);
@@ -62,6 +63,7 @@ draw_window (void * _w)
         for (y2 = 2; y2 < yb; y2 += 2)
             gfx_draw_hline (cx, y2, gw);
     }
+    gfx_pop_region ();
 
     /* Draw contents. */
     gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
@@ -69,6 +71,8 @@ draw_window (void * _w)
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
+    gfx_push_region ();
     gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
     draw_window_content (win);
+    gfx_pop_region ();
 }

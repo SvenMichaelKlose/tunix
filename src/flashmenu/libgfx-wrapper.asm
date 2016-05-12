@@ -1,5 +1,7 @@
 .export _gfx_init
 .export _gfx_x
+.export _gfx_rxl
+.export _gfx_ryt
 .export _gfx_clear_screen
 .export _gfx_reset_region
 .export _gfx_set_region
@@ -31,6 +33,20 @@
 ; gpos gfx_x ();
 .proc _gfx_x
     lda xpos
+    ldx #0
+    rts
+.endproc
+
+; gpos gfx_rxl ();
+.proc _gfx_rxl
+    lda rxl
+    ldx #0
+    rts
+.endproc
+
+; gpos gfx_ryt ();
+.proc _gfx_ryt
+    lda ryt
     ldx #0
     rts
 .endproc

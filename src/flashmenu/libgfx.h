@@ -21,6 +21,8 @@ extern char pattern_smileys[8];
 
 extern void gfx_init ();
 extern gpos gfx_x ();
+extern gpos gfx_rxl ();
+extern gpos gfx_ryt ();
 extern void __fastcall__ gfx_clear_screen (gcolor);
 extern void gfx_reset_region ();
 extern void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h);

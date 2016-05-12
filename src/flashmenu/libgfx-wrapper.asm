@@ -12,11 +12,14 @@
 .export _gfx_set_font
 .export _gfx_draw_text
 .export _gfx_get_text_width
+.export _gfx_push_region = push_region
+.export _gfx_pop_region = pop_region
 
 .importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, s
 .importzp pattern, font, pencil_mode, font_space_size
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
+.import push_region, pop_region
 
 .code
 

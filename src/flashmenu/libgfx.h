@@ -24,6 +24,8 @@ extern gpos gfx_x ();
 extern void __fastcall__ gfx_clear_screen (gcolor);
 extern void gfx_reset_region ();
 extern void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h);
+extern void gfx_push_region ();
+extern void gfx_pop_region ();
 extern void __fastcall__ gfx_set_pencil_mode (char);
 extern void __fastcall__ gfx_set_pattern (void *);
 extern void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);

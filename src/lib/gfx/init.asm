@@ -1,6 +1,6 @@
 .export gfx_init
 
-.import init_bitmap_mode, reset_region
+.import init_bitmap_mode, reset_region, init_region_stack
 .importzp c_setzb
 .importzp font, font_space_size, font_compression, do_compress_font_gaps
 .import exec_script
@@ -18,6 +18,7 @@
     ldy #3
     jsr init_bitmap_mode
 
+    jsr init_region_stack
     jsr reset_region
 
     brk

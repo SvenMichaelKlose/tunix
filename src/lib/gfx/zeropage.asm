@@ -1,5 +1,5 @@
 .exportzp p, ph, bca, bcp, srx, xcpos, font_compression
-.exportzp rxl, ryt, rxr, ryb, xpos, ypos, xpos2, ypos2, width, height, pattern
+.exportzp rxl, ryt, rxr, ryb, region_sp, xpos, ypos, xpos2, ypos2, width, height, pattern
 .exportzp font, font_space_size, do_compress_font_gaps, pencil_mode
 .exportzp masks, maskd
 .exportzp context_start, context_end, context_size
@@ -31,6 +31,10 @@ rxl:    .byte 0
 ryt:    .byte 0
 rxr:    .byte 0
 ryb:    .byte 0
+
+; Region stack.
+region_sp:
+        .word 0
 
 ; Cursor
 xpos:   .byte 0     ; X position

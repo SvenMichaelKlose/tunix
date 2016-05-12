@@ -1,6 +1,6 @@
 .export putchar
 
-.import inc_xcpos, calcscr
+.import inc_xcpos, calcscr, add_region, sub_region
 .import masks_left, masks_right
 .importzp tmp, tmp2, tmp3
 .importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr
@@ -141,6 +141,10 @@ n:  rts
 .endproc
 
 .proc putchar
+    pha
+    jsr add_region
+    pla
+
     ; Get character address.
     asl
     adc #0
@@ -252,7 +256,7 @@ l3: lsr
     ; Leave 1 pixel gap.
 done:
     inc xpos
-    rts
+    jmp sub_region
 
     ; Add default gap for spaces.
 n4: lda xpos
@@ -261,5 +265,5 @@ n4: lda xpos
     clc
     adc font_space_size
     sta xpos
-j:  rts
+j:  jmp sub_region
 .endproc

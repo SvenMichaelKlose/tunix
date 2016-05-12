@@ -16,6 +16,7 @@ SOURCES= \
     patterns.asm \
     putchar.asm \
     putstring.asm \
+    region-stack.asm \
     reset-region.asm \
     start.asm \
     vfill.asm \

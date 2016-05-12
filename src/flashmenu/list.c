@@ -23,9 +23,8 @@ draw_list (void * _l)
 {
     struct list * l = _l;
     struct obj * o = (struct obj *) l;
-    struct rect * r = &o->rect;
-    gpos x = r->x;
-    gpos y = r->y;
+    gpos x = 0;
+    gpos y = 0;
     char orientation = l->orientation;
 
     o = o->node.children;

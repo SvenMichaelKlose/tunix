@@ -16,9 +16,10 @@ void __fastcall__
 layout_center (struct obj * x)
 {
     struct obj * parent = x->node.parent;
+
     if (!parent)
         return;
 
-    x->rect.x = parent->rect.x + (parent->rect.w - x->rect.w) / 2;
-    x->rect.y = parent->rect.y + (parent->rect.h - x->rect.h) / 2;
+    x->rect.x = (parent->rect.w - x->rect.w) / 2;
+    x->rect.y = (parent->rect.h - x->rect.h) / 2;
 }

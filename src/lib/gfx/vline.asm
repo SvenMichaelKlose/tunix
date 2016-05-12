@@ -1,7 +1,7 @@
 .export vline
 
 .importzp xpos, ypos, height, rxl, rxr, masks, maskd
-.import clip_y, vfill
+.import clip_y, vfill, add_region, sub_region
 
 .code
 
@@ -10,6 +10,7 @@
 ; In: xpos, ypos, height, pattern
 ; Modifies: masks, maskd
 .proc vline
+    jsr add_region
     lda ypos
     pha
     lda height
@@ -40,7 +41,7 @@ done:
     sta height
     pla
     sta ypos
-    rts
+    jmp sub_region
 .endproc
 
 .data

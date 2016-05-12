@@ -36,45 +36,39 @@ draw_window (void * _w)
     struct rect * r = &win->obj.rect;
     gpos x = r->x;
     gpos y = r->y;
-    gpos y2 = y + 2;
     gsize w = r->w;
     gsize h = r->h;
-    gpos ix = x + 1;
-    gpos iy = y + 1;
     gsize iw = r->w - 2;
-    gpos xr = x + iw - 1;
+    gpos xr = iw - 1;
     gpos yb = y + WINDOW_TITLE_HEIGHT - 1;
     gpos cx;
     gsize gw;
+    gpos y2;
 
     /* Draw window title. */
-    gfx_reset_region ();
+    gfx_set_region (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_pattern (pattern_empty);
     gfx_set_font (charset_4x8, 2);
-    gfx_draw_box (x, y, w, WINDOW_TITLE_HEIGHT);
+    gfx_draw_box (0, 0, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pattern (pattern_solid);
-    gfx_draw_frame (x, y, w, WINDOW_TITLE_HEIGHT);
-/*
-    gfx_set_region (ix, iy, iw, WINDOW_TITLE_HEIGHT - 2);
-*/
-    gfx_draw_text (ix + 1, iy + 1, win->title);
+    gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT);
+    gfx_draw_text (2, 2, win->title);
 
     /* Draw title grip. */
     cx = gfx_x ();
     if (cx <= xr) {
         gw = xr - cx + 1;
-        for (; y2 < yb; y2 += 2)
+        for (y2 = 2; y2 < yb; y2 += 2)
             gfx_draw_hline (cx, y2, gw);
     }
 
     /* Draw contents. */
-    gfx_draw_frame (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
+    gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
+    gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
     gfx_set_pattern (pattern_empty);
-    gfx_draw_box (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
-/*
-    gfx_set_region (ix, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
-*/
+    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
     draw_window_content (win);
 }

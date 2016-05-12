@@ -5,6 +5,7 @@
 #include "obj.h"
 #include "button.h"
 #include "error.h"
+#include "layout-ops.h"
 #include "list.h"
 #include "table.h"
 #include "window.h"
@@ -35,6 +36,16 @@ draw_background ()
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
 }
 
+struct obj_ops table_ops_center;
+func_layout_t former_table_layout;
+
+void __fastcall__
+layout_table_center (struct obj * obj)
+{
+    former_table_layout (obj);
+    layout_center (obj);
+}
+
 void
 win_basic_start ()
 {
@@ -46,53 +57,13 @@ win_basic_start ()
 	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
 	struct obj * table = make_table (22, 34, 120, 110);
 
+    set_obj_ops (table, &table_ops_center);
+
     append_obj (OBJ(win), OBJ(table));
 
 	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
 	b_ok = make_button (0, 0, 30, 12, "OK");
     b_cancel = make_button (0, 0, 30, 12, "Cancel");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
     append_obj (OBJ(table), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
@@ -122,6 +93,11 @@ main (int argc, char ** argv)
 {
     gfx_init ();
     shift_charset ();
+
+    copy_obj_ops (&table_ops_center, &table_ops);
+    former_table_layout = table_ops_center.layout;
+    table_ops_center.layout = layout_table_center;
+
     draw_background ();
     win_basic_start ();
 

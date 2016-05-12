@@ -52,7 +52,7 @@ extern void __fastcall__ draw_obj_children (struct obj *);
 extern void __fastcall__ layout_obj (struct obj *);
 extern void __fastcall__ layout_obj_children (struct obj *);
 extern void __fastcall__ append_obj (struct obj * parent, struct obj * x);
-extern void __fastcall__ get_obj_ops (struct obj * x, struct obj_ops * o);
-extern void __fastcall__ set_obj_ops (struct obj * x, struct obj_ops * o);
+extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
+extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
 
 #endif /* #ifndef OBJ_H */

@@ -4,18 +4,20 @@
 #include "obj.h"
 #include "layout-ops.h"
 #include "table.h"
+#include "error.h"
 
-void
+void __fastcall__
 layout_none (struct obj * x)
 {
     layout_obj_children (x);
 }
 
-void
+void __fastcall__
 layout_center (struct obj * x)
 {
     struct obj * parent = x->node.parent;
     if (!parent)
+        print_error ("no kids");
         return;
 
     x->rect.x = parent->rect.x + (parent->rect.w - x->rect.w) / 2;

@@ -67,15 +67,15 @@ link_parent:
 }
 
 void __fastcall__
-get_obj_ops (struct obj * x, struct obj_ops * o)
+copy_obj_ops (struct obj_ops * dest, struct obj_ops * src)
 {
-    memcpy (o, &x->ops, sizeof (struct obj_ops));
+    memcpy (dest, src, sizeof (struct obj_ops));
 }
 
 void __fastcall__
 set_obj_ops (struct obj * x, struct obj_ops * o)
 {
-    memcpy (&x->ops, o, sizeof (struct obj_ops));
+    x->ops = o;
 }
 
 void __fastcall__

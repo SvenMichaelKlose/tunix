@@ -1,0 +1,71 @@
+.export _ultimem_send_command
+.export _ultimem_write_byte
+.export _ultimem_erase_chip
+.export _ultimem_erase_block
+
+.importzp s, d
+.import popax
+
+.proc _ultimem_send_command
+    ldx #$aa
+    stx $8aaa
+    ldx #$55
+    stx $8555
+    sta $8aaa
+    rts
+.endproc
+
+.proc _ultimem_write_byte
+    sta d
+    jsr popax
+    sta s
+    stx s+1
+    lda #$a0
+    jsr _ultimem_send_command
+    lda d
+    ldx #0
+    sta (s,x)
+
+l:  lda $a000
+    eor $a000
+    and #$80
+    bne l
+    rts
+.endproc
+
+.proc _ultimem_erase_chip
+    lda #$80
+    jsr _ultimem_send_command
+    lda #$10
+    jsr _ultimem_send_command
+    jmp erase_poll
+.endproc
+
+.proc erase_poll
+l:  lda $a000
+    eor $a000
+    and #$44
+    eor #$44
+    beq l
+    rts
+.endproc
+
+.proc _ultimem_erase_block
+    ldx #0
+    stx s
+    asl
+    rol s
+    asl
+    rol s
+    asl
+    rol s
+    sta $9ffe
+    lda s
+    sta $9fff
+
+    lda #$80
+    jsr _ultimem_send_command
+    lda #$30
+    jsr _ultimem_send_command
+    jmp erase_poll
+.endproc

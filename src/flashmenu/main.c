@@ -37,7 +37,7 @@ win_basic_start ()
 	struct button * b_ok;
 	struct button * b_cancel;
 	struct window * win = make_window ("Start BASIC...");
-	struct obj * table = make_table (0);
+	struct obj * table = make_table ();
 
 	set_obj_position_and_size (OBJ(win), 20, 22, 120, 110);
     set_obj_ops (table, &table_ops_center);

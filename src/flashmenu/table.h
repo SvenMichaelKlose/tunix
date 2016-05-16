@@ -5,7 +5,7 @@
 
 extern struct obj_ops table_ops;
 
-struct obj * make_table (char cc65_bug_workaround);
+struct obj * make_table (void);
 void __fastcall__ draw_table (void *);
 
 #endif /* #ifndef TABLE_H */

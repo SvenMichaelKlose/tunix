@@ -15,8 +15,8 @@ struct obj_ops table_ops = {
     layout_table
 };
 
-struct obj * __fastcall__
-make_table (char cc65_bug_workaround)
+struct obj *
+make_table ()
 {
     struct obj * table = OBJ(make_list (LIST_VERTICAL));
     table->ops = &table_ops;

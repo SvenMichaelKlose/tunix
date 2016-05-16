@@ -4,7 +4,6 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "button.h"
-#include "error.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "table.h"

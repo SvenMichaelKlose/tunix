@@ -1,11 +1,11 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "libgfx.h"
 #include "obj.h"
 #include "list.h"
 #include "table.h"
-#include "error.h"
 #include "layout-ops.h"
 
 void __fastcall__ layout_table (struct obj * t);
@@ -26,7 +26,10 @@ make_table (char cc65_bug_workaround)
 void __fastcall__
 draw_table (void * _t)
 {
+    gfx_push_region ();
+    set_obj_region (OBJ(_t));
     draw_obj_children (OBJ(_t));
+    gfx_pop_region ();
 }
 
 uchar __fastcall__
@@ -34,7 +37,7 @@ get_common_column_sizes (uchar * column_sizes, struct obj * row)
 {
     struct obj * c = row->node.children;
     uchar i = 0;
-    uchar h = 0;
+    gsize h = 0;
 
     while (c) {
         if (i == MAX_TABLE_COLUMNS)
@@ -92,8 +95,8 @@ relocate_and_resize (uchar * column_sizes, struct obj * t)
     struct obj * c = t->node.children;
     gpos x = 0;
     gpos y = 0;
-    uchar h;
     gsize w;
+    gsize h;
 
     /* Relocate and resize. */
     while (c) {

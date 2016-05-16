@@ -4,7 +4,6 @@
 #include "obj.h"
 #include "layout-ops.h"
 #include "window.h"
-#include "error.h"
 
 #define WINDOW_TITLE_HEIGHT     11
 

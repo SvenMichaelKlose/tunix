@@ -5,6 +5,7 @@ SOURCES= \
     list.c \
     table.c \
     main.c \
+    message.c \
     obj.c \
     window.c
 

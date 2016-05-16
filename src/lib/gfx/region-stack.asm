@@ -13,11 +13,9 @@
 .endproc
 
 .proc push_region
-    ldx #3
     ldy #3
-l:  lda rxl,x
+l:  lda rxl,y
     sta (region_sp),y
-    dex
     dey
     bpl l
 
@@ -41,11 +39,9 @@ n:
     dec region_sp+1
 n:
 
-    ldx #3
     ldy #3
 l:  lda (region_sp),y
-    sta rxl,x
-    dex
+    sta rxl,y
     dey
     bpl l
 

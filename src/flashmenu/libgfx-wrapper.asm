@@ -1,9 +1,9 @@
-.export _gfx_init
+.export _gfx_init = gfx_init
 .export _gfx_x
 .export _gfx_rxl
 .export _gfx_ryt
-.export _gfx_clear_screen
-.export _gfx_reset_region
+.export _gfx_clear_screen = clear_screen
+.export _gfx_reset_region = reset_region
 .export _gfx_set_region
 .export _gfx_set_pencil_mode
 .export _gfx_set_pattern
@@ -25,11 +25,6 @@
 
 .code
 
-; void gfx_init ()
-.proc _gfx_init
-	jmp gfx_init
-.endproc
-
 ; gpos gfx_x ();
 .proc _gfx_x
     lda xpos
@@ -49,16 +44,6 @@
     lda ryt
     ldx #0
     rts
-.endproc
-
-; void __fastcall__ gfx_clear_screen (gcolor);
-.proc _gfx_clear_screen
-	jmp clear_screen
-.endproc
-
-; void gfx_reset_region ()
-.proc _gfx_reset_region
-	jmp reset_region
 .endproc
 
 ; void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h) {}

@@ -22,14 +22,6 @@ make_window (char * title)
 }
 
 void __fastcall__
-draw_window_content (struct window * win)
-{
-    if (!win->obj.node.children)
-        print_error ("no kids");
-    draw_obj_children (OBJ(win));
-}
-
-void __fastcall__
 draw_window (void * _w)
 {
     struct window * win = _w;
@@ -73,6 +65,6 @@ draw_window (void * _w)
 
     gfx_push_region ();
     gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
-    draw_window_content (win);
+    draw_obj_children (OBJ(win));
     gfx_pop_region ();
 }

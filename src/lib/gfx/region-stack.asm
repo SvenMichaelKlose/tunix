@@ -43,8 +43,8 @@ n:
 
     ldx #3
     ldy #3
-l:  lda rxl,x
-    sta (region_sp),y
+l:  lda (region_sp),y
+    sta rxl,x
     dex
     dey
     bpl l

@@ -45,15 +45,17 @@ struct scrollable {
     char        bank;
 };
 
-extern void * __fastcall__ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, struct obj_ops *);
-extern void __fastcall__ free_obj (struct obj *);
-extern void __fastcall__ draw_obj (struct obj *);
-extern void __fastcall__ draw_obj_children (struct obj *);
-extern void __fastcall__ layout_obj (struct obj *);
-extern void __fastcall__ layout_obj_children (struct obj *);
-extern void __fastcall__ append_obj (struct obj * parent, struct obj * x);
-extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
-extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
-extern void __fastcall__ set_obj_region (struct obj *);
+void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);
+void __fastcall__ free_obj (struct obj *);
+void __fastcall__ set_obj_size (struct obj *, gsize w, gsize h);
+void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
+void __fastcall__ draw_obj (struct obj *);
+void __fastcall__ draw_obj_children (struct obj *);
+void __fastcall__ layout_obj (struct obj *);
+void __fastcall__ layout_obj_children (struct obj *);
+void __fastcall__ append_obj (struct obj * parent, struct obj * x);
+void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
+void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
+void __fastcall__ set_obj_region (struct obj *);
 
 #endif /* #ifndef OBJ_H */

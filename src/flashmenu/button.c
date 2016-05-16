@@ -13,9 +13,10 @@ struct obj_ops button_ops = {
 };
 
 struct button * __fastcall__
-make_button (gpos x, gpos y, gsize w, gsize h, char * text)
+make_button (char * text)
 {
-    struct button * b = alloc_obj (sizeof (struct button), x, y, w, h, &button_ops);
+    struct button * b = alloc_obj (sizeof (struct button), &button_ops);
+    b->obj.rect.h = 12;
     b->text = text;
     return b;
 }

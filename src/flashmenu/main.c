@@ -14,21 +14,6 @@ struct window * wleft;
 struct window * wright;
 
 void
-init_filewindow (struct window * w, char device)
-{
-
-    /* Make window. */
-    /* Draw window. */
-    /* Load directory listing. */
-    /* Draw window content. */
-
-	wleft = make_window (0, 0, 81, 176, "#8");
-	draw_window (wleft);
-    wright = make_window (80, 0, 80, 176, "#1");
-    draw_window (wright);
-}
-
-void
 draw_background ()
 {
     gfx_reset_region ();
@@ -49,28 +34,27 @@ layout_table_center (struct obj * obj)
 void
 win_basic_start ()
 {
-    char * msg = malloc (256);
-    struct obj * o;
 	struct list * hlist;
 	struct button * b_ok;
 	struct button * b_cancel;
-	struct window * win = make_window (20, 22, 120, 110, "Start BASIC...");
-	struct obj * table = make_table (0, 0, 0, 0);
+	struct window * win = make_window ("Start BASIC...");
+	struct obj * table = make_table (0);
 
+	set_obj_position_and_size (OBJ(win), 20, 22, 120, 110);
     set_obj_ops (table, &table_ops_center);
 
     append_obj (OBJ(win), OBJ(table));
 
-	hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-	b_ok = make_button (0, 0, 30, 12, "OK");
-    b_cancel = make_button (0, 0, 30, 12, "Cancel");
+	hlist = make_list (LIST_HORIZONTAL);
+	b_ok = make_button ("OK");
+    b_cancel = make_button ("Cancel");
     append_obj (OBJ(table), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
 
-    hlist = make_list (0, 0, 60, 12, LIST_HORIZONTAL);
-    b_ok = make_button (0, 0, 30, 12, "Perhaps this works");
-    b_cancel = make_button (0, 0, 30, 12, "Panic");
+    hlist = make_list (LIST_HORIZONTAL);
+    b_ok = make_button ("Perhaps this works");
+    b_cancel = make_button ("Panic");
     append_obj (OBJ(table), OBJ(hlist));
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));

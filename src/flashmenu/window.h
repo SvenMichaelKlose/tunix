@@ -8,7 +8,7 @@ struct window {
     char *      title;
 };
 
-extern struct window * __fastcall__ make_window (gpos x, gpos y, gsize w, gsize h, char * title);
-extern void __fastcall__ draw_window (void * _w);
+struct window * __fastcall__ make_window (char * title);
+void __fastcall__ draw_window (void * _w);
 
 #endif /* #ifndef WINDOW_H */

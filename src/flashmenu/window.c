@@ -14,9 +14,9 @@ struct obj_ops window_ops = {
 };
 
 struct window * __fastcall__
-make_window (gpos x, gpos y, gsize w, gsize h, char * title)
+make_window (char * title)
 {
-    struct window * win = alloc_obj (sizeof (struct window), x, y, w, h, &window_ops);
+    struct window * win = alloc_obj (sizeof (struct window), &window_ops);
     win->title = title;
     return win;
 }

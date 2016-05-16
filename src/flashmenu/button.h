@@ -1,8 +1,6 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "obj.h"
-
 extern struct obj_ops button_ops;
 
 struct button {
@@ -10,7 +8,7 @@ struct button {
     char *      text;
 };
 
-extern struct button * __fastcall__ make_button (gpos x, gpos y, gsize w, gsize h, char * text);
-extern void __fastcall__ draw_button (void *);
+struct button * __fastcall__ make_button (char * text);
+void __fastcall__ draw_button (void *);
 
 #endif /* #ifndef BUTTON_H */

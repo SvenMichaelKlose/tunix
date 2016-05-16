@@ -13,9 +13,9 @@ struct obj_ops list_ops = {
 };
 
 struct list * __fastcall__
-make_list (gpos x, gpos y, gsize w, gsize h, char orientation)
+make_list (char orientation)
 {
-    struct list * list = alloc_obj (sizeof (struct list), x, y, w, h, &list_ops);
+    struct list * list = alloc_obj (sizeof (struct list), &list_ops);
     list->orientation = orientation;
     return list;
 }

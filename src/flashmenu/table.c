@@ -16,9 +16,9 @@ struct obj_ops table_ops = {
 };
 
 struct obj * __fastcall__
-make_table (gpos x, gpos y, gsize w, gsize h)
+make_table (char cc65_bug_workaround)
 {
-    struct obj * table = OBJ(make_list (x, y, w, h, LIST_VERTICAL));
+    struct obj * table = OBJ(make_list (LIST_VERTICAL));
     table->ops = &table_ops;
     return table;
 }
@@ -67,7 +67,6 @@ set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct o
 {
     uchar i = 0;
     struct obj * c = row->node.children;
-    char msg[32];
     gsize w = 0;
 
     while (c) {

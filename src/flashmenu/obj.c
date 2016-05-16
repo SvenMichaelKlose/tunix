@@ -7,7 +7,7 @@
 #include "obj.h"
 
 void *
-alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, struct obj_ops * ops)
+alloc_obj (size_t size, struct obj_ops * ops)
 {
     struct obj * obj = malloc (size);
     struct treenode * node;
@@ -23,10 +23,10 @@ alloc_obj (size_t size, gpos x, gpos y, gsize w, gsize h, struct obj_ops * ops)
     node->children = NULL;
 
     rect = &obj->rect;
-    rect->x = x;
-    rect->y = y;
-    rect->w = w;
-    rect->h = h;
+    rect->x = 0;
+    rect->y = 0;
+    rect->w = 0;
+    rect->h = 0;
 
     obj->ops = ops;
 
@@ -64,6 +64,26 @@ append_obj (struct obj * parent, struct obj * x)
 
 link_parent:
     x->node.parent = parent;
+}
+
+void __fastcall__
+set_obj_size (struct obj * o, gsize w, gsize h)
+{
+    struct rect * r = &o->rect;
+
+    r->w = w;
+    r->h = h;
+}
+
+void __fastcall__
+set_obj_position_and_size (struct obj * o, gpos x, gpos y, gsize w, gsize h)
+{
+    struct rect * r = &o->rect;
+
+    r->x = x;
+    r->y = y;
+    r->w = w;
+    r->h = h;
 }
 
 void __fastcall__

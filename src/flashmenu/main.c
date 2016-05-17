@@ -9,6 +9,8 @@
 #include "table.h"
 #include "window.h"
 #include "error.h"
+#include "basic-starter.h"
+#include "file-window.h"
 
 void
 draw_background ()
@@ -48,6 +50,9 @@ main (int argc, char ** argv)
     table_ops_center.layout = layout_table_center;
 
     draw_background ();
+
+    launch_file_window ();
+    while (1);
 
     print_error ("Program exited.");
     return 0;

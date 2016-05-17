@@ -6,9 +6,10 @@
 #include "list.h"
 #include "table.h"
 #include "window.h"
+#include "basic-starter.h"
 
 void
-win_basic_start ()
+lauch_basic_starter ()
 {
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();

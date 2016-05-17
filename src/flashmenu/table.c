@@ -96,6 +96,7 @@ layout_rows (uchar * column_sizes, struct obj * t)
 
     /* Relocate and resize. */
     while (row) {
+        row->rect.y = y;
         h = get_common_column_sizes (column_sizes, row);
         w = layout_row (column_sizes, h, row);
         y += h;

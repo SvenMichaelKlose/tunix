@@ -9,6 +9,7 @@
 .export _gfx_set_region
 .export _gfx_set_pencil_mode
 .export _gfx_set_pattern
+.export _gfx_set_screen_base
 .export _gfx_draw_hline
 .export _gfx_draw_vline
 .export _gfx_draw_frame
@@ -21,6 +22,7 @@
 
 .importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, s
 .importzp pattern, font, pencil_mode, font_space_size
+.importzp scrbase
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
 .import push_region, pop_region
@@ -90,6 +92,13 @@
 .proc _gfx_set_pattern
     sta pattern
     stx pattern+1
+	rts
+.endproc
+
+; void __fastcall__ gfx_set_screen_base (unsigned short);
+.proc _gfx_set_screen_base
+    sta scrbase
+    stx scrbase+1
 	rts
 .endproc
 

@@ -32,6 +32,7 @@ extern void gfx_push_region (void);
 extern void gfx_pop_region (void);
 extern void __fastcall__ gfx_set_pencil_mode (char);
 extern void __fastcall__ gfx_set_pattern (void *);
+extern void __fastcall__ gfx_set_screen_base (unsigned short);
 extern void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);
 extern void __fastcall__ gfx_draw_vline (gpos x, gpos y, gsize h);
 extern void __fastcall__ gfx_draw_frame (gpos x, gpos y, gsize w, gsize h);

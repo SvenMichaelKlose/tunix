@@ -4,7 +4,8 @@
 #include "obj.h"
 #include "message.h"
 
-gpos my = 0;
+gpos my = 140;
+
 void
 print_message (char * text)
 {

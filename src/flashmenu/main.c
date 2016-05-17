@@ -8,6 +8,9 @@
 #include "list.h"
 #include "table.h"
 #include "window.h"
+#include "message.h"
+
+struct obj * ourtab;
 
 void
 draw_background ()
@@ -36,8 +39,10 @@ win_basic_start ()
 	struct button * b_ok;
 	struct button * b_cancel;
 
+ourtab = table;
+
 	set_obj_position_and_size (OBJ(win), 0, 0, 120, 110);
-    set_obj_ops (table, &table_ops_center);
+//    set_obj_ops (table, &table_ops_center);
 
     append_obj (OBJ(win), OBJ(table));
 

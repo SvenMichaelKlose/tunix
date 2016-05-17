@@ -4,6 +4,7 @@
 #include "obj.h"
 #include "layout-ops.h"
 #include "table.h"
+#include "message.h"
 
 void __fastcall__
 layout_none (struct obj * x)

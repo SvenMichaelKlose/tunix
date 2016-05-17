@@ -8,10 +8,13 @@
 #include "table.h"
 #include "layout-ops.h"
 
+#include "message.h"
+#include "error.h"
+
 void __fastcall__ layout_table (struct obj * t);
 
 struct obj_ops table_ops = {
-    draw_table,
+    draw_list,
     layout_table
 };
 
@@ -21,15 +24,6 @@ make_table ()
     struct obj * table = OBJ(make_list (LIST_VERTICAL));
     table->ops = &table_ops;
     return table;
-}
-
-void __fastcall__
-draw_table (void * _t)
-{
-    gfx_push_region ();
-    set_obj_region (OBJ(_t));
-    draw_obj_children (OBJ(_t));
-    gfx_pop_region ();
 }
 
 uchar __fastcall__
@@ -48,6 +42,7 @@ get_common_column_sizes (uchar * column_sizes, struct obj * row)
             column_sizes[i] = c->rect.w;
         if (h < c->rect.h)
             h = c->rect.h;
+
         c = c->node.next;
         i++;
     }
@@ -66,50 +61,49 @@ get_common_column_sizes_for_all_rows (uchar * column_sizes, struct obj * c)
 }
 
 gsize __fastcall__
-set_common_column_sizes (uchar * column_sizes, gpos x, gpos y, uchar h, struct obj * row)
+layout_row (uchar * column_sizes, gsize h, struct obj * row)
 {
-    uchar i = 0;
     struct obj * c = row->node.children;
-    gsize w = 0;
+    uchar i = 0;
+    gpos x = 0;
 
     while (c) {
         if (i == MAX_TABLE_COLUMNS)
             break;
 
         c->rect.x = x;
-        c->rect.y = y;
+        c->rect.y = 0;
         c->rect.w = column_sizes[i];
         c->rect.h = h;
         x += column_sizes[i];
-        w += column_sizes[i];
         c = c->node.next;
         i++;
     }
 
-    return w;
+    row->rect.w = x;
+    row->rect.h = h;
+
+    return x;
 }
 
 void __fastcall__
-relocate_and_resize (uchar * column_sizes, struct obj * t)
+layout_rows (uchar * column_sizes, struct obj * t)
 {
-    struct obj * c = t->node.children;
-    gpos x = 0;
+    struct obj * row = t->node.children;
     gpos y = 0;
-    gsize w;
     gsize h;
+    gsize w;
 
     /* Relocate and resize. */
-    while (c) {
-        c->rect.x = x;
-        c->rect.y = y;
-        h = get_common_column_sizes (column_sizes, c);
-        w = set_common_column_sizes (column_sizes, x, y, h, c);
+    while (row) {
+        h = get_common_column_sizes (column_sizes, row);
+        w = layout_row (column_sizes, h, row);
         y += h;
-        c = c->node.next;
+        row = row->node.next;
     }
 
     t->rect.w = w;
-    t->rect.h = y - t->rect.y;
+    t->rect.h = y;
 }
 
 void __fastcall__
@@ -119,7 +113,7 @@ layout_table (struct obj * t)
     bzero (column_sizes, MAX_TABLE_COLUMNS);
 
     get_common_column_sizes_for_all_rows (column_sizes, t);
-    relocate_and_resize (column_sizes, t);
+    layout_rows (column_sizes, t);
 
     free (column_sizes);
 }

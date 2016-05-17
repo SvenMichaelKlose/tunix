@@ -44,5 +44,10 @@ l2: lda (tmp),y
     bpl l2
 
 done:
+    lda xpos
+    clc
+    adc #4
+    sta xpos
+
     rts
 .endproc

@@ -1,6 +1,6 @@
 .exportzp p, ph, bca, bcp, srx, xcpos, font_compression
 .exportzp rxl, ryt, rxr, ryb, region_sp, xpos, ypos, xpos2, ypos2, width, height, pattern
-.exportzp font, font_space_size, do_compress_font_gaps, pencil_mode
+.exportzp font, font_space_size, do_compress_font_gaps, pencil_mode, scrbase
 .exportzp masks, maskd
 .exportzp context_start, context_end, context_size
 
@@ -55,6 +55,8 @@ do_compress_font_gaps: .byte 0
 
 masks:  .byte 0     ; Source mask.
 maskd:  .byte 0     ; Destination mask.
+
+scrbase:.word 0     ; Screen bitmap base address.
 
 context_end:
 

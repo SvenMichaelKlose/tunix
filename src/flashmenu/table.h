@@ -4,6 +4,7 @@
 #define MAX_TABLE_COLUMNS   32
 
 extern struct obj_ops table_ops;
+extern struct obj_ops table_ops_center;
 
 struct obj * make_table (void);
 void __fastcall__ draw_table (void *);

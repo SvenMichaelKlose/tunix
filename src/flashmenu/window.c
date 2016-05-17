@@ -4,7 +4,6 @@
 #include "obj.h"
 #include "layout-ops.h"
 #include "window.h"
-#include "main.h"
 #include "message.h"
 #include "frame.h"
 

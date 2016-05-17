@@ -11,11 +11,17 @@
 #include "message.h"
 #include "error.h"
 
-void __fastcall__ layout_table (struct obj * t);
+void __fastcall__ layout_table (struct obj *);
+void __fastcall__ layout_table_center (struct obj *);
 
 struct obj_ops table_ops = {
     draw_list,
     layout_table
+};
+
+struct obj_ops table_ops_center = {
+    draw_list,
+    layout_table_center
 };
 
 struct obj *
@@ -117,4 +123,11 @@ layout_table (struct obj * t)
     layout_rows (column_sizes, t);
 
     free (column_sizes);
+}
+
+void __fastcall__
+layout_table_center (struct obj * obj)
+{
+    layout_table (obj);
+    layout_center (obj);
 }

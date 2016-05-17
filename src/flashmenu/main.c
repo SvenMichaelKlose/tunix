@@ -9,6 +9,7 @@
 #include "table.h"
 #include "window.h"
 #include "error.h"
+#include "bank-allocator.h"
 #include "basic-starter.h"
 #include "file-window.h"
 
@@ -42,6 +43,7 @@ shift_charset ()
 int
 main (int argc, char ** argv)
 {
+    init_bank_allocator ();
     gfx_init ();
     shift_charset ();
 

@@ -10,7 +10,7 @@ void *
 alloc_obj (size_t size, struct obj_ops * ops)
 {
     struct obj * obj = malloc (size);
-    struct treenode * node;
+    struct node * node;
     struct rect * rect;
 
     if (!obj)

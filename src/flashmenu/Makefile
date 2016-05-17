@@ -7,6 +7,7 @@ SOURCES= \
     file-window.c \
     layout-ops.c \
     list.c \
+    scrollable.c \
     table.c \
     main.c \
     message.c \

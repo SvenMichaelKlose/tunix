@@ -18,7 +18,7 @@ struct rect {
     gsize h;
 };
 
-struct treenode {
+struct node {
     char            type;
     struct obj *    prev;
     struct obj *    next;
@@ -35,14 +35,9 @@ struct obj_ops {
 };
 
 struct obj {
-    struct treenode   node;
+    struct node   node;
     struct rect       rect;
     struct obj_ops *  ops;
-};
-
-struct scrollable {
-    struct obj  obj;
-    char        bank;
 };
 
 void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);

@@ -5,6 +5,7 @@
 #include "layout-ops.h"
 #include "table.h"
 #include "message.h"
+#include "error.h"
 
 void __fastcall__
 layout_none (struct obj * x)
@@ -18,7 +19,7 @@ layout_center (struct obj * x)
     struct obj * parent = x->node.parent;
 
     if (!parent)
-        return;
+        print_error ("layout_center has no parent.");
 
     x->rect.x = (parent->rect.w - x->rect.w) / 2;
     x->rect.y = (parent->rect.h - x->rect.h) / 2;

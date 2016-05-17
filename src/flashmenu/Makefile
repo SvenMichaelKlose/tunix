@@ -1,4 +1,5 @@
 SOURCES= \
+    bank-allocator.c \
     button.c \
     error.c \
     frame.c \

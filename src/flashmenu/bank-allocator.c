@@ -17,8 +17,8 @@ alloc_bank ()
     unsigned int i;
 
     for (i = 0; i < NUM_BANKS; i++)
-        if (allocated_banks[i / 8] & 1 << i % 8) {
-            allocated_banks[i / 8] |= 1 << i % 8;
+        if (!(allocated_banks[i / 8] & (1 << (i % 8)))) {
+            allocated_banks[i / 8] |= (1 << (i % 8));
             return i;
         }
 
@@ -28,5 +28,5 @@ alloc_bank ()
 void __fastcall__
 free_bank (char i)
 {
-    allocated_banks[i / 8] &= (1 << i % 8) ^ 255;
+    allocated_banks[i / 8] &= ((1 << (i % 8)) ^ 255);
 }

@@ -2,6 +2,7 @@
 
 #include "libgfx.h"
 #include "obj.h"
+#include "message.h"
 #include "list.h"
 #include "layout-ops.h"
 
@@ -21,52 +22,42 @@ make_list (char orientation)
 }
 
 void __fastcall__
-draw_and_layout_list (struct obj * o, char do_layout)
+layout_list (struct obj * o)
 {
     struct list * l = (struct list *) o;
+    struct obj * last_child;
     gpos x = 0;
     gpos y = 0;
     char orientation = l->orientation;
-
-    gfx_push_region ();
-    set_obj_region (OBJ(l));
 
     o = o->node.children;
     while (o) {
         o->rect.x = x;
         o->rect.y = y;
-        if (do_layout)
-            layout_obj (o);
-        else
-            draw_obj (o);
+        layout_obj (o);
         if (orientation == LIST_HORIZONTAL)
             x += o->rect.w;
         else
             y += o->rect.h;
+        last_child = o;
         o = o->node.next;
     }
 
-    /* Get bottom right corner position. */
     if (orientation == LIST_HORIZONTAL)
-        y += o->rect.h;
+        y += last_child->rect.h;
     else
-        x += o->rect.w;
+        x += last_child->rect.w;
 
     /* Resize to corner. */
     l->obj.rect.w = x;
     l->obj.rect.h = y;
+}
 
+void __fastcall__
+draw_list (void * o)
+{
+    gfx_push_region ();
+    set_obj_region (o);
+    draw_obj_children (o);
     gfx_pop_region ();
-}
-
-void __fastcall__
-layout_list (struct obj * l)
-{
-    draw_and_layout_list (l, 1);
-}
-
-void __fastcall__
-draw_list (void * l)
-{
-    draw_and_layout_list (OBJ(l), 0);
 }

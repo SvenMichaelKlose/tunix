@@ -14,6 +14,15 @@ layout_none (struct obj * x)
 }
 
 void __fastcall__
+layout_max_size (struct obj * x)
+{
+    struct obj * parent = x->node.parent;
+    struct rect * rparent = &parent->rect;
+
+    set_obj_size (x, rparent->w, rparent->h);
+}
+
+void __fastcall__
 layout_center (struct obj * x)
 {
     struct obj * parent = x->node.parent;
@@ -24,3 +33,4 @@ layout_center (struct obj * x)
     x->rect.x = (parent->rect.w - x->rect.w) / 2;
     x->rect.y = (parent->rect.h - x->rect.h) / 2;
 }
+

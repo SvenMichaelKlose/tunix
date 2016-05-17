@@ -2,6 +2,8 @@
 .export _gfx_x
 .export _gfx_rxl
 .export _gfx_ryt
+.export _gfx_rxr
+.export _gfx_ryb
 .export _gfx_clear_screen = clear_screen
 .export _gfx_reset_region = reset_region
 .export _gfx_set_region
@@ -42,6 +44,20 @@
 ; gpos gfx_ryt ();
 .proc _gfx_ryt
     lda ryt
+    ldx #0
+    rts
+.endproc
+
+; gpos gfx_rxr ();
+.proc _gfx_rxr
+    lda rxr
+    ldx #0
+    rts
+.endproc
+
+; gpos gfx_ryb ();
+.proc _gfx_ryb
+    lda ryb
     ldx #0
     rts
 .endproc

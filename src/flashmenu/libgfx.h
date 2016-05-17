@@ -23,6 +23,8 @@ extern void gfx_init (void);
 extern gpos gfx_x (void);
 extern gpos gfx_rxl (void);
 extern gpos gfx_ryt (void);
+extern gpos gfx_rxr (void);
+extern gpos gfx_ryb (void);
 extern void __fastcall__ gfx_clear_screen (gcolor);
 extern void gfx_reset_region (void);
 extern void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h);

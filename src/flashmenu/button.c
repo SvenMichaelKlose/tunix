@@ -22,9 +22,9 @@ make_button (char * text)
 }
 
 void __fastcall__
-draw_button (void * _b)
+draw_button (struct obj * _b)
 {
-    struct button * b = _b;
+    struct button * b = (struct button *) _b;
     struct rect * r = &b->obj.rect;
     gsize textwidth;
 

@@ -9,6 +9,6 @@ struct window {
 };
 
 struct window * __fastcall__ make_window (char * title);
-void __fastcall__ draw_window (void * _w);
+void __fastcall__ draw_window (struct obj * _w);
 
 #endif /* #ifndef WINDOW_H */

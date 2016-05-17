@@ -1,6 +1,7 @@
 SOURCES= \
     button.c \
     error.c \
+    frame.c \
     layout-ops.c \
     list.c \
     table.c \

@@ -6,26 +6,32 @@
 #include "window.h"
 #include "main.h"
 #include "message.h"
+#include "frame.h"
 
 #define WINDOW_TITLE_HEIGHT     11
+
+void __fastcall__ layout_window_content_frame (struct obj *);
 
 struct obj_ops window_ops = {
     draw_window,
     layout_none
+//    layout_window_content_frame
 };
 
 struct window * __fastcall__
 make_window (char * title)
 {
     struct window * win = alloc_obj (sizeof (struct window), &window_ops);
+//    struct obj * f = make_frame ();
+//    append_obj (OBJ(win), f);
     win->title = title;
     return win;
 }
 
 void __fastcall__
-draw_window (void * _w)
+draw_window (struct obj * _w)
 {
-    struct window * win = _w;
+    struct window * win = (struct window *) _w;
     struct rect * r = &win->obj.rect;
     gpos x = r->x;
     gpos y = r->y;
@@ -68,4 +74,14 @@ draw_window (void * _w)
     gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
     draw_obj_children (OBJ(win));
     gfx_pop_region ();
+
+//    draw_obj_children (OBJ(win));
+}
+
+void
+layout_window_content_frame (struct obj * win)
+{
+    set_obj_position_and_size (win->node.children,
+                               1, WINDOW_TITLE_HEIGHT,
+                               win->rect.w - 2, win->rect.h - WINDOW_TITLE_HEIGHT - 1);
 }

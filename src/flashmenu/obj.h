@@ -26,7 +26,7 @@ struct treenode {
     struct obj *    children;
 };
 
-typedef void __fastcall__ (*func_draw_t) (void *);
+typedef void __fastcall__ (*func_draw_t) (struct obj *);
 typedef void __fastcall__ (*func_layout_t) (struct obj *);
 
 struct obj_ops {

@@ -14,6 +14,6 @@ struct list {
 };
 
 struct list * __fastcall__ make_list (char orientation);
-void __fastcall__ draw_list (void *);
+void __fastcall__ draw_list (struct obj *);
 
 #endif /* #ifndef LIST_H */

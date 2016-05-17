@@ -54,7 +54,7 @@ layout_list (struct obj * o)
 }
 
 void __fastcall__
-draw_list (void * o)
+draw_list (struct obj * o)
 {
     gfx_push_region ();
     set_obj_region (o);

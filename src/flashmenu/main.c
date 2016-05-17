@@ -42,7 +42,7 @@ win_basic_start ()
 	set_obj_position_and_size (OBJ(win), 20, 20, 120, 110);
     set_obj_ops (table, &table_ops_center);
 
-    append_obj (OBJ(win), OBJ(table));
+    append_obj (OBJ(win->obj.node.children), OBJ(table));
 
 	hlist = make_list (LIST_HORIZONTAL);
 	b_ok = make_button ("Hotkey");
@@ -94,7 +94,6 @@ win_basic_start ()
     append_obj (OBJ(hlist), OBJ(b_cancel));
 
     layout_obj (OBJ(win));
-print_obj (win->obj.node.children);
     draw_obj (OBJ(win));
 }
 

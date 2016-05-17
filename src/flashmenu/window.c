@@ -14,16 +14,15 @@ void __fastcall__ layout_window_content_frame (struct obj *);
 
 struct obj_ops window_ops = {
     draw_window,
-    layout_none
-//    layout_window_content_frame
+    layout_window_content_frame
 };
 
 struct window * __fastcall__
 make_window (char * title)
 {
     struct window * win = alloc_obj (sizeof (struct window), &window_ops);
-//    struct obj * f = make_frame ();
-//    append_obj (OBJ(win), f);
+    struct obj * f = make_frame ();
+    append_obj (OBJ(win), f);
     win->title = title;
     return win;
 }
@@ -64,18 +63,14 @@ draw_window (struct obj * _w)
     }
     gfx_pop_region ();
 
-    /* Draw contents. */
+    /* Draw content frame. */
     gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
-    gfx_push_region ();
-    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    /* Draw contents. */
     draw_obj_children (OBJ(win));
-    gfx_pop_region ();
-
-//    draw_obj_children (OBJ(win));
 }
 
 void
@@ -84,4 +79,5 @@ layout_window_content_frame (struct obj * win)
     set_obj_position_and_size (win->node.children,
                                1, WINDOW_TITLE_HEIGHT,
                                win->rect.w - 2, win->rect.h - WINDOW_TITLE_HEIGHT - 1);
+    layout_obj_children (win);
 }

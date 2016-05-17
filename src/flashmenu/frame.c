@@ -4,6 +4,7 @@
 #include "obj.h"
 #include "frame.h"
 #include "layout-ops.h"
+#include "message.h"
 
 void __fastcall__ draw_frame (struct obj *);
 

@@ -9,7 +9,7 @@
 #include "basic-starter.h"
 
 void
-lauch_basic_starter ()
+launch_basic_starter ()
 {
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();

@@ -1,5 +1,7 @@
 .import program_end
-.import boot, calcscr, setpattern, vline, hline, frame, box, putchar, putchar_fixed, putstring, copy_area
+.import boot, calcscr, setpattern
+.import push_context, pop_context
+.import vline, hline, frame, box, putchar, putchar_fixed, putstring, copy_area
 
 symbol_index_size = symbol_index_end-symbol_index_start
 
@@ -28,6 +30,10 @@ symbol_index_start:
     .word putstring
     .asciiz "copy_area" 
     .word copy_area
+    .asciiz "push_context" 
+    .word push_context
+    .asciiz "pop_context" 
+    .word pop_context
     .byte 0
 symbol_index_end:
 

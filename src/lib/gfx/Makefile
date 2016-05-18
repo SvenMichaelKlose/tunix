@@ -6,6 +6,7 @@ SOURCES= \
     clip.asm \
     _column-addrs.asm \
     compress-font.asm \
+    copy-area.asm \
     get-text-width.asm \
     end.asm frame.asm \
     hline.asm init.asm \

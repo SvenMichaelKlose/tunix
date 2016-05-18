@@ -21,14 +21,16 @@
 .export _gfx_get_text_width
 .export _gfx_push_context = push_context
 .export _gfx_pop_context = pop_context
+.export _gfx_copy_area
 
-.importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, s
+.importzp xpos, ypos, xpos2, ypos2, width, height, color, rxr, rxl, ryt, ryb, p, s, d
 .importzp pattern, font, pencil_mode, font_space_size
 .importzp scrbase
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
 .import putchar_fixed
 .import push_context, pop_context
+.import copy_area
 
 .code
 
@@ -184,4 +186,26 @@
     jsr get_text_width
     ldx #0
 	rts
+.endproc
+
+; void __fastcall__ gfx_copy_area (unsigned short sbase, unsigned short dbase, gpos sx, gpos sy, gpos dx, gpos dy, gsize width, gsize height);
+.proc _gfx_copy_area
+    sta height
+    jsr popax
+    sta width
+    jsr popax
+    sta ypos2
+    jsr popax
+    sta xpos2
+    jsr popax
+    sta ypos
+    jsr popax
+    sta xpos
+    jsr popax
+    sta d
+    stx d+1
+    jsr popax
+    sta s
+    stx s+1
+    jmp copy_area
 .endproc

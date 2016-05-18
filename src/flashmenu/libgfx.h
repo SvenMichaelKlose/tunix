@@ -42,5 +42,6 @@ extern void __fastcall__ gfx_set_font (void *, char space_size);
 extern void __fastcall__ gfx_draw_text (gpos x, gpos y, char * txt);
 extern void __fastcall__ gfx_putchar_fixed (char);
 extern gsize __fastcall__ gfx_get_text_width (char *);
+extern void __fastcall__ gfx_copy_area (unsigned short sbase, unsigned short dbase, gpos sx, gpos sy, gpos dx, gpos dy, gsize width, gsize height);
 
 #endif /* #ifndef LIBGFX_H */

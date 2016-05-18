@@ -7,6 +7,7 @@
 #include "error.h"
 #include "bank-allocator.h"
 #include "scrollable.h"
+#include "ultimem.h"
 
 void __fastcall__ draw_scrollable (struct obj *);
 
@@ -32,6 +33,9 @@ make_scrollable ()
 void __fastcall__
 draw_scrollable (struct obj * s)
 {
+    char old_blk5 = *ULTIMEM_BLK5;
     gfx_push_context ();
+    gfx_copy_area (0xa000, 0x1100, 0, 0, s->rect.x + gfx_rxl (), s->rect.y + gfx_ryt (), s->rect.w, s->rect.h);
+    *ULTIMEM_BLK5 = old_blk5;
     gfx_pop_context ();
 }

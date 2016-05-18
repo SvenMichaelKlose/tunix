@@ -1,4 +1,4 @@
-.export clip, clip_x, clip_y
+.export clip_x, clip_y
 
 .importzp xpos, xpos2, width, rxl, rxr
 

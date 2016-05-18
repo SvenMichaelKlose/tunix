@@ -6,7 +6,7 @@ all:
 	$(MAKE) -C src all
 	./make-image
 	rm -fv g.zip compiled/charset.lst
-	cp -v README.md compiled
+	cp -v src/flashmenu/README.md compiled
 	cd compiled && zip -r ../g.zip *
 
 clean:

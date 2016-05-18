@@ -16,21 +16,16 @@ layout_none (struct obj * x)
 void __fastcall__
 layout_max_size (struct obj * x)
 {
-    struct obj * parent = x->node.parent;
-    struct rect * rparent = &parent->rect;
+    struct rect * prect = &x->node.parent->rect;
 
-    set_obj_size (x, rparent->w, rparent->h);
+    set_obj_size (x, prect->w, prect->h);
 }
 
 void __fastcall__
 layout_center (struct obj * x)
 {
-    struct obj * parent = x->node.parent;
+    struct rect * prect = &x->node.parent->rect;
 
-    if (!parent)
-        print_error ("layout_center has no parent.");
-
-    x->rect.x = (parent->rect.w - x->rect.w) / 2;
-    x->rect.y = (parent->rect.h - x->rect.h) / 2;
+    set_obj_position (x, (prect->w - x->rect.w) / 2, (prect->h - x->rect.h) / 2);
 }
 

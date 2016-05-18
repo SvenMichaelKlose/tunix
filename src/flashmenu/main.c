@@ -27,8 +27,8 @@ shift_charset ()
         charset_4x8[i] <<= 4;
 }
 
-int
-main (int argc, char ** argv)
+void
+init_desktop ()
 {
     init_bank_allocator ();
     gfx_init ();
@@ -37,7 +37,15 @@ main (int argc, char ** argv)
 
     desktop = OBJ(make_box (pattern_leaves));
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16);
+}
+
+int
+main (int argc, char ** argv)
+{
+    init_desktop ();
+
     append_obj (desktop, make_basic_starter ());
+//    append_obj (desktop, make_file_window ());
 
     layout_obj (desktop);
     draw_obj (desktop);

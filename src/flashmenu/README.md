@@ -7,15 +7,18 @@ It's supposed to become a "Norton Commander"–style file
 manager to move and copy files across floppy/SD2IEC,
 tape and the Ultimem's Flash ROM.
 
+This also lays the foundation for g's Graphical User Interface.
+
+Since this is work under construction the only true source for
+up–to–date information is the source itself.  This also applies
+to the rest of this file.
+
 ## The Graphical User Interface
 
 Everything displayed are elements connected via a tree of lists,
-very much like a HTML document. Some elements aren't visible but
-layout the elements they contain. All elements can also be
-assigned a layout function that modifiy their position and size.
-
-Since this is work under construction the only source for
-detailed information is the source itself.
+very much like a HTML document.  Some elements aren't visible but
+layout the elements they contain.  An element can also be
+assigned a layout function.
 
 ### Visible elements
 

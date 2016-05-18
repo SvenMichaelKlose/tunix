@@ -23,14 +23,14 @@
 
     ldy #7
     lda xpos
-    and #%00001111
+    and #4
     beq l2
 
 l1: lda (tmp),y
-    asl
-    asl
-    asl
-    asl
+    lsr
+    lsr
+    lsr
+    lsr
     ora (scr),y
     sta (scr),y
     dey

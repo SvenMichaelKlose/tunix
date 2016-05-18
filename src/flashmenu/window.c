@@ -69,17 +69,17 @@ draw_window (struct obj * _w)
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
-    gfx_push_context ();
 
     /* Draw contents. */
     draw_obj_children (OBJ(win));
+    gfx_pop_context ();
 }
 
 void
 layout_window_content_frame (struct obj * win)
 {
     set_obj_position_and_size (win->node.children,
-                               1, WINDOW_TITLE_HEIGHT,
+                               1, 1,
                                win->rect.w - 2, win->rect.h - WINDOW_TITLE_HEIGHT - 1);
     layout_obj_children (win);
 }

@@ -10,12 +10,14 @@
 .export _gfx_set_pencil_mode
 .export _gfx_set_pattern
 .export _gfx_set_screen_base
+.export _gfx_set_position
 .export _gfx_draw_hline
 .export _gfx_draw_vline
 .export _gfx_draw_frame
 .export _gfx_draw_box
 .export _gfx_set_font
 .export _gfx_draw_text
+.export _gfx_putchar_fixed = putchar_fixed
 .export _gfx_get_text_width
 .export _gfx_push_region = push_region
 .export _gfx_pop_region = pop_region
@@ -25,6 +27,7 @@
 .importzp scrbase
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
+.import putchar_fixed
 .import push_region, pop_region
 
 .code
@@ -99,6 +102,14 @@
 .proc _gfx_set_screen_base
     sta scrbase
     stx scrbase+1
+	rts
+.endproc
+
+; void __fastcall__ gfx_set_position (gpos x, gpos y);
+.proc _gfx_set_position
+	sta ypos
+    jsr popax
+	sta xpos
 	rts
 .endproc
 

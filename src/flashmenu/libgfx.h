@@ -33,12 +33,14 @@ extern void gfx_pop_region (void);
 extern void __fastcall__ gfx_set_pencil_mode (char);
 extern void __fastcall__ gfx_set_pattern (void *);
 extern void __fastcall__ gfx_set_screen_base (unsigned short);
+extern void __fastcall__ gfx_set_position (gpos x, gpos y);
 extern void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);
 extern void __fastcall__ gfx_draw_vline (gpos x, gpos y, gsize h);
 extern void __fastcall__ gfx_draw_frame (gpos x, gpos y, gsize w, gsize h);
 extern void __fastcall__ gfx_draw_box (gpos x, gpos y, gsize w, gsize h);
 extern void __fastcall__ gfx_set_font (void *, char space_size);
 extern void __fastcall__ gfx_draw_text (gpos x, gpos y, char * txt);
+extern void __fastcall__ gfx_putchar_fixed (char);
 extern gsize __fastcall__ gfx_get_text_width (char *);
 
 #endif /* #ifndef LIBGFX_H */

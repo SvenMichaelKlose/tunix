@@ -17,7 +17,7 @@ void
 draw_background ()
 {
     gfx_reset_region ();
-    gfx_set_pattern (pattern_empty);
+    gfx_set_pattern (pattern_leaves);
     gfx_draw_box (0, 0, 20 * 8, 12 * 16);
 }
 

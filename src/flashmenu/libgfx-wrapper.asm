@@ -19,8 +19,8 @@
 .export _gfx_draw_text
 .export _gfx_putchar_fixed = putchar_fixed
 .export _gfx_get_text_width
-.export _gfx_push_region = push_region
-.export _gfx_pop_region = pop_region
+.export _gfx_push_context = push_context
+.export _gfx_pop_context = pop_context
 
 .importzp xpos, ypos, width, height, color, rxr, rxl, ryt, ryb, p, s
 .importzp pattern, font, pencil_mode, font_space_size
@@ -28,7 +28,7 @@
 .import popax
 .import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
 .import putchar_fixed
-.import push_region, pop_region
+.import push_context, pop_context
 
 .code
 

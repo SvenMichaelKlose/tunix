@@ -1,6 +1,7 @@
-.export init_region_stack, push_region, pop_region, add_region, sub_region
+.export init_region_stack, push_context, pop_context, add_region_position, sub_region_position
 
 .importzp xpos, ypos, rxl, ryt, region_sp
+.importzp context_start, context_size
 
 .code
 
@@ -12,9 +13,9 @@
     rts
 .endproc
 
-.proc push_region
-    ldy #3
-l:  lda rxl,y
+.proc push_context
+    ldy #context_size-1
+l:  lda context_start,y
     sta (region_sp),y
     dey
     bpl l
@@ -30,7 +31,7 @@ n:
     rts
 .endproc
 
-.proc pop_region
+.proc pop_context
     lda region_sp
     sec
     sbc #4
@@ -39,16 +40,16 @@ n:
     dec region_sp+1
 n:
 
-    ldy #3
+    ldy #context_size-1
 l:  lda (region_sp),y
-    sta rxl,y
+    sta context_start,y
     dey
     bpl l
 
     rts
 .endproc
 
-.proc add_region
+.proc add_region_position
     lda rxl
     clc
     adc xpos
@@ -62,7 +63,7 @@ l:  lda (region_sp),y
     rts
 .endproc
 
-.proc sub_region
+.proc sub_region_position
     lda xpos
     sec
     sbc rxl

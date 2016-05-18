@@ -23,8 +23,8 @@ make_frame ()
 void __fastcall__
 draw_frame (struct obj * f)
 {
-    gfx_push_region ();
+    gfx_push_context ();
 //    set_obj_region (f);
     draw_obj_children (f);
-    gfx_pop_region ();
+    gfx_pop_context ();
 }

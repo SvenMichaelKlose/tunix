@@ -32,6 +32,6 @@ make_scrollable ()
 void __fastcall__
 draw_scrollable (struct obj * s)
 {
-    gfx_push_region ();
-    gfx_pop_region ();
+    gfx_push_context ();
+    gfx_pop_context ();
 }

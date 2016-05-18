@@ -1,7 +1,7 @@
 .export hline, inc_xcpos
 
 .import masks_left, masks_right, maskd_left, maskd_right
-.import calcscr, clip_x, add_region, sub_region
+.import calcscr, clip_x, add_region_position, sub_region_position
 .importzp c, scr, xpos, ypos, width, c, xcpos, ryb, ryt, pattern, screen_rows
 .importzp tmp, tmp2, tmp3
 
@@ -23,7 +23,7 @@ n:  rts
 ; In: xpos, ypos, width
 
 .proc hline
-    jsr add_region
+    jsr add_region_position
     lda xpos
     pha
     lda width
@@ -103,7 +103,7 @@ done:
     sta width
     pla
     sta xpos
-    jmp sub_region
+    jmp sub_region_position
 
 single_column:
     ; Draw left end.

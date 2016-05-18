@@ -43,7 +43,7 @@ draw_window (struct obj * _w)
     gpos y2;
 
     /* Draw window title. */
-    gfx_push_region ();
+    gfx_push_context ();
     gfx_set_region (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_pattern (pattern_empty);
@@ -60,13 +60,16 @@ draw_window (struct obj * _w)
         for (y2 = 2; y2 < yb; y2 += 2)
             gfx_draw_hline (cx, y2, gw);
     }
-    gfx_pop_region ();
+    gfx_pop_context ();
 
     /* Draw content frame. */
+    gfx_push_context ();
+    gfx_set_pattern (pattern_solid);
     gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    gfx_push_context ();
 
     /* Draw contents. */
     draw_obj_children (OBJ(win));

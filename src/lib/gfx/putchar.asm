@@ -1,6 +1,6 @@
 .export putchar
 
-.import inc_xcpos, calcscr, add_region, sub_region
+.import inc_xcpos, calcscr, add_region_position, sub_region_position
 .import masks_left, masks_right
 .importzp tmp, tmp2, tmp3
 .importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr
@@ -142,7 +142,7 @@ n:  rts
 
 .proc putchar
     pha
-    jsr add_region
+    jsr add_region_position
     pla
 
     ; Get character address.
@@ -256,7 +256,7 @@ l3: lsr
     ; Leave 1 pixel gap.
 done:
     inc xpos
-    jmp sub_region
+    jmp sub_region_position
 
     ; Add default gap for spaces.
 n4: lda xpos
@@ -265,5 +265,5 @@ n4: lda xpos
     clc
     adc font_space_size
     sta xpos
-j:  jmp sub_region
+j:  jmp sub_region_position
 .endproc

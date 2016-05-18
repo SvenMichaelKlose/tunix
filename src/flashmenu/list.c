@@ -32,8 +32,7 @@ layout_list (struct obj * o)
 
     o = o->node.children;
     while (o) {
-        o->rect.x = x;
-        o->rect.y = y;
+        set_obj_position (o, x, y);
         layout_obj (o);
         if (orientation == LIST_HORIZONTAL)
             x += o->rect.w;
@@ -49,8 +48,7 @@ layout_list (struct obj * o)
         x += last_child->rect.w;
 
     /* Resize to corner. */
-    l->obj.rect.w = x;
-    l->obj.rect.h = y;
+    set_obj_size (OBJ(l), x, y);
 }
 
 void __fastcall__

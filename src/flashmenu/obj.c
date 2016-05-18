@@ -76,6 +76,15 @@ set_obj_size (struct obj * o, gsize w, gsize h)
 }
 
 void __fastcall__
+set_obj_position (struct obj * o, gpos x, gpos y)
+{
+    struct rect * r = &o->rect;
+
+    r->x = x;
+    r->y = y;
+}
+
+void __fastcall__
 set_obj_position_and_size (struct obj * o, gpos x, gpos y, gsize w, gsize h)
 {
     struct rect * r = &o->rect;

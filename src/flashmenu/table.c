@@ -77,17 +77,13 @@ layout_row (uchar * column_sizes, gsize h, struct obj * row)
         if (i == MAX_TABLE_COLUMNS)
             break;
 
-        c->rect.x = x;
-        c->rect.y = 0;
-        c->rect.w = column_sizes[i];
-        c->rect.h = h;
+        set_obj_position_and_size (c, x, 0, column_sizes[i], h);
         x += column_sizes[i];
         c = c->node.next;
         i++;
     }
 
-    row->rect.w = x;
-    row->rect.h = h;
+    set_obj_size (row, x, h);
 
     return x;
 }
@@ -109,8 +105,7 @@ layout_rows (uchar * column_sizes, struct obj * t)
         row = row->node.next;
     }
 
-    t->rect.w = w;
-    t->rect.h = y;
+    set_obj_size (t, w, y);
 }
 
 void __fastcall__

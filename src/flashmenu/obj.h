@@ -47,6 +47,7 @@ struct obj {
 void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);
 void __fastcall__ free_obj (struct obj *);
 void __fastcall__ set_obj_size (struct obj *, gsize w, gsize h);
+void __fastcall__ set_obj_position (struct obj *, gpos x, gpos y);
 void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
 
 /* Append new object to list of children. */

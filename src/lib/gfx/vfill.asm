@@ -1,4 +1,4 @@
-.export vfill
+.export vfill, vcopy
 
 .import calcscr
 .importzp scr, pattern, height, masks, maskd, tmp
@@ -7,12 +7,11 @@
 
 ; SYSCALL: Fill part of column
 ;
-; In:   xpos. ypos, height, pattern
+; In:   height, pattern
 ;       masks:  Source mask (ANDed with pattern).
 ;       maskd:  Destination mask (ANDed with screen).
+;       scr:    Starting address.
 .proc vfill
-    jsr calcscr
-
     lda pattern
     sta mod_pattern+1
     lda pattern+1
@@ -36,3 +35,25 @@ mod_pattern:
 
     rts
 .endproc
+
+.proc vcopy
+    lda pattern
+    sta mod_pattern+1
+    lda pattern+1
+    sta mod_pattern+2
+    ldy height
+    dey
+l:  tya
+    and #7
+    tax
+mod_pattern:
+    lda $ffff,x
+    sta (scr),y
+    dey
+    cpy #255
+    bne l
+
+    rts
+.endproc
+
+

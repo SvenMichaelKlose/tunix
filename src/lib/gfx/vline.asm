@@ -1,7 +1,7 @@
 .export vline
 
 .importzp xpos, ypos, height, rxl, rxr, masks, maskd
-.import clip_y, vfill, calcscr, add_region_position, sub_region_position
+.import clip_y, vfill, calcscr, add_region_position, sub_region_position, dec_scr
 
 .code
 
@@ -35,6 +35,7 @@ n:  jsr clip_y
     sta maskd
 
     jsr calcscr
+    jsr dec_scr
     jsr vfill
 
 done:

@@ -1,7 +1,7 @@
 .export box
 
 .import masks, maskd, masks_left, masks_right, maskd_left, maskd_right
-.import calcscr, clip_x, clip_y, add_region_position, sub_region_position, vfill, vcopy, inc_xcpos
+.import calcscr, dec_scr, clip_x, clip_y, add_region_position, sub_region_position, vfill, vcopy, inc_xcpos
 .importzp c, scr, xpos, ypos, width, c, xcpos, pattern
 
 .bss
@@ -24,6 +24,7 @@ xposr:  .byte 0
     bcc done
 
     jsr calcscr
+    jsr dec_scr
 
     ; Get width in characters.
     lda xpos

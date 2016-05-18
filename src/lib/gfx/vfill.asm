@@ -17,7 +17,6 @@
     lda pattern+1
     sta mod_pattern+2
     ldy height
-    dey
 l:  tya
     and #7
     tax
@@ -30,7 +29,6 @@ mod_pattern:
     ora tmp
     sta (scr),y
     dey
-    cpy #255
     bne l
 
     rts
@@ -42,7 +40,6 @@ mod_pattern:
     lda pattern+1
     sta mod_pattern+2
     ldy height
-    dey
 l:  tya
     and #7
     tax
@@ -50,7 +47,6 @@ mod_pattern:
     lda $ffff,x
     sta (scr),y
     dey
-    cpy #255
     bne l
 
     rts

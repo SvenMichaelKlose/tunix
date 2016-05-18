@@ -1,4 +1,4 @@
-.export calcscr
+.export calcscr, dec_scr
 
 .importzp xpos, xcpos, ypos, scr, scrbase
 .import column_addrs_lo, column_addrs_hi
@@ -35,5 +35,16 @@
     lda scr+1
     adc scrbase+1
     sta scr+1
+    rts
+.endproc
+
+.proc dec_scr
+    lda scr
+    sec
+    sbc #1
+    sta scr
+    bcs done
+    dec scr+1
+done:
     rts
 .endproc

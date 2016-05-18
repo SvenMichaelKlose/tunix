@@ -9,11 +9,12 @@
 #include "ultimem.h"
 #include "scrollable.h"
 
-void
-launch_file_window ()
+struct obj *
+make_file_window ()
 {
 	struct window * win = make_window ("#8");
 	struct scrollable * scrollable = make_scrollable ();
+    char old_blk5;
     int i;
 
 	set_obj_position_and_size (OBJ(win), 0, 0, 80, 12 * 16);
@@ -28,6 +29,5 @@ launch_file_window ()
         gfx_putchar_fixed ('A');
     gfx_pop_context ();
 
-    layout_obj (OBJ(win));
-    draw_obj (OBJ(win));
+    return OBJ(win);
 }

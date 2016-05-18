@@ -3,23 +3,20 @@
 
 #include "libgfx.h"
 #include "obj.h"
+#include "box.h"
 #include "button.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "table.h"
 #include "window.h"
 #include "error.h"
+#include "message.h"
 #include "bank-allocator.h"
 #include "basic-starter.h"
 #include "file-window.h"
+#include "main.h"
 
-void
-draw_background ()
-{
-    gfx_reset_region ();
-    gfx_set_pattern (pattern_leaves);
-    gfx_draw_box (0, 0, 20 * 8, 12 * 16);
-}
+struct obj * desktop;
 
 void
 shift_charset ()
@@ -38,11 +35,14 @@ main (int argc, char ** argv)
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
-    draw_background ();
+    desktop = OBJ(make_box (pattern_leaves));
+    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16);
+    append_obj (desktop, make_basic_starter ());
 
-    launch_file_window ();
+    layout_obj (desktop);
+    draw_obj (desktop);
+
     while (1);
 
-    print_error ("Program exited.");
     return 0;
 }

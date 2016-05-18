@@ -6,10 +6,12 @@
 #include "list.h"
 #include "table.h"
 #include "window.h"
+#include "main.h"
 #include "basic-starter.h"
+#include "error.h"
 
-void
-launch_basic_starter ()
+struct obj *
+make_basic_starter ()
 {
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();
@@ -18,8 +20,8 @@ launch_basic_starter ()
 	struct button * b_cancel;
 
 	set_obj_position_and_size (OBJ(win), 20, 20, 120, 110);
-    set_obj_ops (table, &table_ops_center);
 
+    set_obj_ops (table, &table_ops_center);
     append_obj (OBJ(win->obj.node.children), OBJ(table));
 
 	hlist = make_list (LIST_HORIZONTAL);
@@ -71,6 +73,5 @@ launch_basic_starter ()
     append_obj (OBJ(hlist), OBJ(b_ok));
     append_obj (OBJ(hlist), OBJ(b_cancel));
 
-    layout_obj (OBJ(win));
-    draw_obj (OBJ(win));
+    return OBJ(win);
 }

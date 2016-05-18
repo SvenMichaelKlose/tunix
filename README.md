@@ -17,11 +17,6 @@ https://github.com/SvenMichaelKlose/cc65g
 ## Building g
 
 ```
-sudo aptitude install automake autoconf libtool
-libtoolize
-autoreconf -i
-automake --add-missing
-./configure
 make
 ```
 

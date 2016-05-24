@@ -7,19 +7,19 @@
 #include "table.h"
 #include "window.h"
 #include "ultimem.h"
-#include "scrollable.h"
+#include "scroll.h"
 
 struct obj *
 make_file_window ()
 {
 	struct window * win = make_window ("#8");
-	struct scrollable * scrollable = make_scrollable ();
+	struct scroll * scroll = make_scroll ();
     char old_blk5;
     int i;
 
 	set_obj_position_and_size (OBJ(win), 0, 0, 80, 12 * 16);
 
-    append_obj (OBJ(win->obj.node.children), OBJ(scrollable));
+    append_obj (OBJ(win->obj.node.children), OBJ(scroll));
 
     gfx_push_context ();
     *ULTIMEM_CONFIG2 = 0xff;

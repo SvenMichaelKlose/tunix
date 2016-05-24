@@ -6,24 +6,24 @@
 #include "layout-ops.h"
 #include "error.h"
 #include "bank-allocator.h"
-#include "scrollable.h"
+#include "scroll.h"
 #include "ultimem.h"
 
-void __fastcall__ draw_scrollable (struct obj *);
+void __fastcall__ draw_scroll (struct obj *);
 
-struct obj_ops scrollable_ops = {
-    draw_scrollable,
+struct obj_ops scroll_ops = {
+    draw_scroll,
     layout_max_size
 };
 
-struct scrollable *
-make_scrollable ()
+struct scroll *
+make_scroll ()
 {
-    struct scrollable * s = alloc_obj (sizeof (struct scrollable), &scrollable_ops);
+    struct scroll * s = alloc_obj (sizeof (struct scroll), &scroll_ops);
     char bank = alloc_bank ();
 
     if (!bank)
-        print_error ("Can't allocate bank for scrollable.");
+        print_error ("Can't allocate bank for scroll.");
 
     s->bank = bank;
 
@@ -31,13 +31,13 @@ make_scrollable ()
 }
 
 void __fastcall__
-draw_scrollable (struct obj * s)
+draw_scroll (struct obj * s)
 {
-    struct scrollable * scrollable = (struct scrollable *) s;
+    struct scroll * scroll = (struct scroll *) s;
     char old_blk5 = *ULTIMEM_BLK5;
 
     gfx_push_context ();
-    *ULTIMEM_BLK5 = scrollable->bank;
+    *ULTIMEM_BLK5 = scroll->bank;
     gfx_copy_area (0xa000, 0x1100, 0, 0, s->rect.x + gfx_rxl (), s->rect.y + gfx_ryt (), s->rect.w, s->rect.h);
     *ULTIMEM_BLK5 = old_blk5;
     gfx_pop_context ();

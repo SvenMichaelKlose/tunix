@@ -739,13 +739,13 @@ _charset_4x8:
     .byte %0000
 
 ; I
+    .byte %1110
     .byte %0100
     .byte %0100
     .byte %0100
     .byte %0100
     .byte %0100
-    .byte %0100
-    .byte %0100
+    .byte %1110
     .byte %0000
 
 ; J
@@ -1092,7 +1092,7 @@ _charset_4x8:
     .byte %1000
     .byte %1000
     .byte %1000
-    .byte %0110
+    .byte %1000
     .byte %0000
 
 ; m

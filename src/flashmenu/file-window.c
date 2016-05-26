@@ -23,6 +23,7 @@ make_file_window ()
 
     gfx_push_context ();
     *ULTIMEM_CONFIG2 = 0xff;
+    *ULTIMEM_BLK5 = scroll->bank;
     gfx_set_screen_base (0xa000);
     gfx_set_position (0, 0);
     for (i = 0; i < 16; i++)

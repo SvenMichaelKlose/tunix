@@ -45,11 +45,12 @@ main (int argc, char ** argv)
     init_desktop ();
 
     append_obj (desktop, make_basic_starter ());
-//    append_obj (desktop, make_file_window ());
+    append_obj (desktop, make_file_window ());
 
     layout_obj (desktop);
     draw_obj (desktop);
 
+    print_message ("System halted. Please reset.");
     while (1);
 
     return 0;

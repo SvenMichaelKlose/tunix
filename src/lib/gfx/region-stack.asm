@@ -22,7 +22,7 @@ l:  lda context_start,y
 
     lda region_sp
     clc
-    adc #4
+    adc #context_size
     sta region_sp
     bcc n
     inc region_sp+1
@@ -34,7 +34,7 @@ n:
 .proc pop_context
     lda region_sp
     sec
-    sbc #4
+    sbc #context_size
     sta region_sp
     bcs n
     dec region_sp+1

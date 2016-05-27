@@ -4,6 +4,7 @@ SOURCES= \
     box.c \
     button.c \
     error.c \
+    event.c \
     frame.c \
     file-window.c \
     layout-ops.c \

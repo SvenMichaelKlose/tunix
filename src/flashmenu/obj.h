@@ -39,6 +39,7 @@ struct obj {
     struct node         node;
     struct rect         rect;
     struct obj_ops *    ops;
+    char                event_handler;
 };
 
 /* Derived objects need to be cast. Therefore this convenience macro. */

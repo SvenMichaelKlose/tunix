@@ -361,9 +361,9 @@ _charset_4x8:
 
 ; #
     .byte %0000
-    .byte %0000
     .byte %0101
     .byte %1111
+    .byte %0101
     .byte %0101
     .byte %1111
     .byte %0101

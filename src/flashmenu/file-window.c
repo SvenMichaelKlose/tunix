@@ -9,15 +9,15 @@
 #include "ultimem.h"
 #include "scroll.h"
 
-struct obj *
-make_file_window ()
+struct obj *__fastcall__
+make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
-	struct window * win = make_window ("#8");
+	struct window * win = make_window (title);
 	struct scroll * scroll = make_scroll ();
     char old_blk5;
     int i;
 
-	set_obj_position_and_size (OBJ(win), 0, 0, 80, 12 * 16);
+	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
     append_obj (OBJ(win->obj.node.children), OBJ(scroll));
 

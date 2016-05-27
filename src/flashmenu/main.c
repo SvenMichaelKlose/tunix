@@ -44,8 +44,9 @@ main (int argc, char ** argv)
 {
     init_desktop ();
 
+    append_obj (desktop, make_file_window ("#8", 0, 0, 81, 12 * 16 - 9));
+    append_obj (desktop, make_file_window ("#1", 80, 0, 80, 12 * 16 - 9));
     append_obj (desktop, make_basic_starter ());
-    append_obj (desktop, make_file_window ());
 
     layout_obj (desktop);
     draw_obj (desktop);

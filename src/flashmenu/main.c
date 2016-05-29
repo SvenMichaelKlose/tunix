@@ -15,6 +15,7 @@
 #include "basic-starter.h"
 #include "file-window.h"
 #include "main.h"
+#include "ultimem.h"
 
 struct obj * desktop;
 
@@ -28,21 +29,35 @@ shift_charset ()
 }
 
 void
-init_desktop ()
+init_ultimem ()
 {
-    init_bank_allocator ();
+    char m[32];
+
+    if (!ultimem_is_installed ()) {
+        print_message ("No Ultimem expansion detected.");
+        while (1);
+    }
+    sprintf (m, "Ultimem size: %dK", ultimem_get_size () * 8);
+    print_message (m);
+}
+
+void
+init ()
+{
     gfx_init ();
+    init_ultimem ();
+    init_bank_allocator ();
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
     desktop = OBJ(make_box (pattern_leaves));
-    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16);
+    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
 }
 
 int
 main (int argc, char ** argv)
 {
-    init_desktop ();
+    init ();
 
     append_obj (desktop, make_file_window ("#8", 0, 0, 81, 12 * 16 - 9));
     append_obj (desktop, make_file_window ("#1", 80, 0, 80, 12 * 16 - 9));
@@ -51,7 +66,7 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
-    print_message ("System halted. Please reset.");
+//    print_message ("System halted. Please reset.");
     while (1);
 
     return 0;

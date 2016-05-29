@@ -14,11 +14,12 @@ SOURCES= \
     main.c \
     message.c \
     obj.c \
+    ultimem.c \
     window.c
 
 ASMSOURCES= \
     libgfx-wrapper.asm \
-    ultimem.asm \
+    ultimem-basics.asm \
     ../zeropage.asm \
     ../core/mem/clrram.asm \
     ../core/dev/con/charset-4x8.asm

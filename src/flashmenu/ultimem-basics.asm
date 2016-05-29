@@ -8,10 +8,10 @@
 
 .proc _ultimem_send_command
     ldx #$aa
-    stx $8aaa
+    stx $aaaa
     ldx #$55
-    stx $8555
-    sta $8aaa
+    stx $a555
+    sta $aaaa
     rts
 .endproc
 
@@ -25,12 +25,7 @@
     lda d
     ldx #0
     sta (s,x)
-
-l:  lda $a000
-    eor $a000
-    and #$80
-    bne l
-    rts
+    jmp poll
 .endproc
 
 .proc _ultimem_erase_chip
@@ -38,15 +33,14 @@ l:  lda $a000
     jsr _ultimem_send_command
     lda #$10
     jsr _ultimem_send_command
-    jmp erase_poll
+    jmp poll
 .endproc
 
-.proc erase_poll
+.proc poll
 l:  lda $a000
     eor $a000
-    and #$44
-    eor #$44
-    beq l
+    and #$80
+    bne l
     rts
 .endproc
 
@@ -67,5 +61,5 @@ l:  lda $a000
     jsr _ultimem_send_command
     lda #$30
     jsr _ultimem_send_command
-    jmp erase_poll
+    jmp poll
 .endproc

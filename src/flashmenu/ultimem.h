@@ -17,4 +17,7 @@ void __fastcall__ ultimem_write_byte (unsigned short addr, char);
 void ultimem_erase_chip (void);
 void __fastcall__ ultimem_erase_block (char);
 
+char ultimem_is_installed (void);
+unsigned short ultimem_get_size (void);
+
 #endif /* #define ULTIMEM_H */

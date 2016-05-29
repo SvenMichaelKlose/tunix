@@ -66,7 +66,7 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
-//    print_message ("System halted. Please reset.");
+    print_message ("System halted.");
     while (1);
 
     return 0;

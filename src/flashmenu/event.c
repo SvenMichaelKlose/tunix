@@ -4,8 +4,6 @@
 #include "obj.h"
 #include "event.h"
 
-typedef char (*event_handler_t) (struct obj *, struct event *, gpos x, gpos y);
-
 event_handler_t event_handlers[NUM_EVENT_HANDLERS];
 
 struct obj * __fastcall__

@@ -6,6 +6,8 @@
 #define EVT_KEYPRESS    1
 #define EVT_CLICK       2
 
+typedef char (*event_handler_t) (struct obj *, struct event *, gpos x, gpos y);
+
 struct event {
     char type;
 };

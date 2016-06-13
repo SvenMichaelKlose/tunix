@@ -5,6 +5,7 @@
 #include "obj.h"
 #include "box.h"
 #include "button.h"
+#include "frame.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "table.h"
@@ -46,7 +47,7 @@ init ()
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
-    desktop = OBJ(make_box (pattern_leaves));
+    desktop = OBJ(make_frame ());
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
 }
 

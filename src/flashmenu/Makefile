@@ -18,6 +18,7 @@ SOURCES= \
     window.c
 
 ASMSOURCES= \
+    cbm.asm \
     libgfx-wrapper.asm \
     ultimem-basics.asm \
     ../zeropage.asm \

@@ -8,6 +8,7 @@
 #include "window.h"
 #include "ultimem.h"
 #include "scroll.h"
+#include "cbm.h"
 
 struct obj *__fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)

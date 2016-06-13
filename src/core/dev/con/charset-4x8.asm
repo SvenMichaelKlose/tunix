@@ -502,7 +502,7 @@ _charset_4x8:
 ; 1
     .byte %0010
     .byte %0110
-    .byte %1010
+    .byte %0010
     .byte %0010
     .byte %0010
     .byte %0010

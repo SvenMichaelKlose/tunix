@@ -31,14 +31,10 @@ shift_charset ()
 void
 init_ultimem ()
 {
-    char m[32];
-
     if (!ultimem_is_installed ()) {
         print_message ("No Ultimem expansion detected.");
         while (1);
     }
-    sprintf (m, "Ultimem size: %dK", ultimem_get_size () * 8);
-    print_message (m);
 }
 
 void

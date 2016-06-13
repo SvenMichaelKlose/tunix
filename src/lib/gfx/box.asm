@@ -1,8 +1,8 @@
 .export box
 
-.import masks, maskd, masks_left, masks_right, maskd_left, maskd_right
+.import masks_left, masks_right, maskd_left, maskd_right
 .import calcscr, dec_scr, clip_x, clip_y, add_region_position, sub_region_position, vfill, vcopy, inc_xcpos
-.importzp c, scr, xpos, ypos, width, c, xcpos, pattern
+.importzp c, scr, xpos, ypos, width, c, xcpos, pattern, masks, maskd
 
 .bss
 xposr:  .byte 0

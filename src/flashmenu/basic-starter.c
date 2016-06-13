@@ -10,13 +10,23 @@
 #include "basic-starter.h"
 #include "error.h"
 
+void
+make_table_button (struct obj * table, char * cmd, char * descr)
+{
+	struct obj * hlist = OBJ(make_list (LIST_HORIZONTAL));
+	struct obj * b_ok = OBJ(make_button (cmd));
+	struct obj * b_cancel = OBJ(make_button (descr));
+    append_obj (table, hlist);
+    append_obj (hlist, b_ok);
+    append_obj (hlist, b_cancel);
+}
+
 struct obj *
 make_basic_starter ()
 {
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();
 	struct list * hlist;
-	struct button * b_ok;
 	struct button * b_cancel;
 
 	set_obj_position_and_size (OBJ(win), 20, 20, 120, 110);
@@ -24,54 +34,13 @@ make_basic_starter ()
     set_obj_ops (table, &table_ops_center);
     append_obj (OBJ(win->obj.node.children), OBJ(table));
 
-	hlist = make_list (LIST_HORIZONTAL);
-	b_ok = make_button ("Hotkey");
-    b_cancel = make_button ("Type of expansion.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-	hlist = make_list (LIST_HORIZONTAL);
-	b_ok = make_button ("0");
-    b_cancel = make_button ("No memory expansion.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (LIST_HORIZONTAL);
-    b_ok = make_button ("1");
-    b_cancel = make_button ("Toggle +3K.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (LIST_HORIZONTAL);
-    b_ok = make_button ("2");
-    b_cancel = make_button ("+8K.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (LIST_HORIZONTAL);
-    b_ok = make_button ("3");
-    b_cancel = make_button ("+16K.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (LIST_HORIZONTAL);
-    b_ok = make_button ("4");
-    b_cancel = make_button ("+24K.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
-
-    hlist = make_list (LIST_HORIZONTAL);
-    b_ok = make_button ("5");
-    b_cancel = make_button ("+32K.");
-    append_obj (OBJ(table), OBJ(hlist));
-    append_obj (OBJ(hlist), OBJ(b_ok));
-    append_obj (OBJ(hlist), OBJ(b_cancel));
+	make_table_button (table, "Hotkey", "Type of expansion.");
+	make_table_button (table, "0", "No memory expansion.");
+    make_table_button (table, "1", "Toggle +3K.");
+    make_table_button (table, "2", "+8K.");
+    make_table_button (table, "3", "+16K.");
+    make_table_button (table, "4", "+24K.");
+    make_table_button (table, "5", "+32K.");
 
     return OBJ(win);
 }

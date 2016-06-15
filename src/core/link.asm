@@ -1,4 +1,4 @@
-link:
+.proc link
     ldy #1
     sty do_load_library
     dey
@@ -6,11 +6,11 @@ link:
 
     ;;; Check if the core is requested.
     lda (s),y
-    cmp #@(char-code #\/)
+    cmp #'/'
     bne load_library
     iny
     lda (s),y
-    cmp #@(char-code #\g)
+    cmp #'g'
     bne load_library
     iny
     lda (s),y
@@ -28,16 +28,17 @@ link:
     lda #<syscall_index
     sta c
     lda #>syscall_index
-    sta @(++ c)
+    sta c+1
     jsr take_over
     jsr make_jump_table
     jmp release
+.endproc
 
 ; s: Path of program to load.
 ;
 ; Returns:
 ; X: Core of program.
-load:
+.proc load
     jsr take_over
 
     lda #0
@@ -76,16 +77,16 @@ l:  lda $9ff4
     lda $9ff6
     pha
 
-    ;;; Save pointer to symbol list and want jump table.
+    ;;; Save pointer to symbol list and wanted jump table.
     lda do_load_library
     beq +n
     lda s
     pha
-    lda @(++ s)
+    lda s+1
     pha
     lda d
     pha
-    lda @(++ d)
+    lda d+1
     pha
 n:
 
@@ -116,12 +117,12 @@ n:
     lda #$00
     sta d
     lda #$98
-    sta @(++ d)
+    sta d+1
     jsr readm
 n:
 
     ;;; Allocate and assign blocks.
-    ; Get destination address.
+    ; Read destination address.
     jsr read
     bcc +n
 e:  jmp -error2
@@ -129,31 +130,31 @@ n:  sta d
     sta program_start
     jsr read
     bcs -e
-    sta @(++ d)
-    sta @(++ program_start)
+    sta d+1
+    sta program_start+1
 
-    ; Load code size.
+    ; Read code size.
     jsr readw
     bcs -e
 
-    ; Load data size.
+    ; Read data size.
     lda c
     pha
-    lda @(++ c)
+    lda c+1
     pha
     jsr readw
     bcs -e
     lda c
     sta bss_size
-    lda @(++ c)
-    sta @(++ bss_size)
+    lda c+1
+    sta bss_size+1
     pla
-    sta @(++ c)
+    sta c+1
     pla
     sta c
 
     ; Get first block.
-    lda @(++ d)
+    lda d+1
     bpl not_blk5
     ldx #0
     ldy #3
@@ -188,32 +189,28 @@ l:  jsr alloc_bank
     ; TODO: Free allocated banks.
     lda #ENOMEM
     jmp release_with_error
-
 ok: lda tmp
     sta saved_bank1,y
     iny
     dex
     bpl -l
-
-    ; Map allocated banks.
     jsr switch_banks_in
 
     ;;; Load code.
     jsr readn
 
     jsr gclose
-
-    ;;; Make jump table for caller.
     lda do_load_library
     beq done_loading_program
 
+    ;;; Make jump table for caller.
     ; Restore pointers to symbol list and jump table.
     pla
-    sta @(++ d)
+    sta d+1
     pla
     sta d
     pla
-    sta @(++ s)
+    sta s+1
     pla
     sta s
 
@@ -240,7 +237,7 @@ n:  jsr inc_s
     lda #$00
     sta c
     lda #$98
-    sta @(++ c)
+    sta c+1
 
     ; Bank index in.
     lda #BANK_TEMPORARY
@@ -258,7 +255,6 @@ n:  jsr inc_s
 n:
 
     jsr release
-
     tax
     clc
     rts

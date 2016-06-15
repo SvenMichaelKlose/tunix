@@ -1,4 +1,6 @@
-print_hex:
+.import devcon_print
+
+.proc print_hex
     pha
     lsr
     lsr
@@ -7,32 +9,37 @@ print_hex:
     jsr print_nibble
     pla
     and #$0f
+    jmp print_nibble
+.endproc
 
-print_nibble:
+.proc print_nibble
     cmp #10
-    bcc +n
+    bcc n
     clc
-    adc #@(- (char-code #\A) 10)
+    adc #'A'-10
     jmp devcon_print
-n:  adc #@(char-code #\0)
+n:  adc #'0'
     jmp devcon_print
+.endproc
 
-guru_line:
-    ldx #@(- (* 2 screen_columns) 2)
+.proc guru_line
+    ldx #screen_columns * 2 - 2
 l:  jsr devcon_print
     dex
-    bne -l
+    bne l
     rts
+.endproc
 
-guru_middle:
+.proc guru_middle
     lda #$ba
     jsr devcon_print
     lda #$20
     jsr guru_line
     lda #$ba
     jmp devcon_print
+.endproc
 
-guru_meditation:
+.proc guru_meditation
     sei
     lda #$7f
     sta $911e
@@ -70,7 +77,7 @@ guru_meditation:
     lda #<txt_guru
     sta s
     lda #>txt_guru
-    sta @(++ s)
+    sta s+1
     jsr devcon_print_string
 
     ; Get to next line.
@@ -82,7 +89,7 @@ guru_meditation:
     lda #<txt_guru_error
     sta s
     lda #>txt_guru_error
-    sta @(++ s)
+    sta s+1
     jsr devcon_print_string
 
     ; Print error code.
@@ -93,14 +100,14 @@ guru_meditation:
 
     ; Print current banks.
     ldx #0
-l:  lda $9ff4,x
+l2: lda $9ff4,x
     jsr print_hex
     lda #@(char-code #\:)
     jsr devcon_print
     inx
     inx
     cpx #12
-    bne -l
+    bne l2
 
     ; Print callee's address.
     pla
@@ -119,9 +126,12 @@ l:  lda $9ff4,x
     lda process_cores,x
     jsr print_hex
 
-l:  jmp -l
+w:  jmp w
+.endproc
+
+.bss
 
 txt_guru:
-    "Guru Meditation.  Meditate and reset." 0
+    .asciiz "Guru Meditation.  Meditate and reset."
 txt_guru_error:
-    "Error: " 0
+    .asciiz "Error: "

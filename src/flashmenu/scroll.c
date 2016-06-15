@@ -24,7 +24,6 @@ make_scroll ()
 
     if (!bank)
         print_error ("Can't allocate bank for scroll.");
-
     s->bank = bank;
 
     return s;

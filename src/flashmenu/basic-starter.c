@@ -26,8 +26,6 @@ make_basic_starter ()
 {
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();
-	struct list * hlist;
-	struct button * b_cancel;
 
 	set_obj_position_and_size (OBJ(win), 20, 20, 120, 110);
 

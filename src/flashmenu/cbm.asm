@@ -111,11 +111,12 @@ l4: jsr read
     bcs error2
     beq next_entry
     cmp #$22
-    beq +n
+    beq n
     sta (d),y
     iny
     jmp l4
-n:
+n:  lda #0
+    sta (d),y
 
     ; Read till end of line.
 l5: jsr read

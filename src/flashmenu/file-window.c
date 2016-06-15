@@ -17,11 +17,11 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
 	struct window * win = make_window (title);
 	struct scroll * scroll = make_scroll ();
-    char old_blk5;
     int i, j;
     char name[16];
     char dir_bank = alloc_bank ();
     char * p = (char *) 0xa000;
+    char c;
 
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
@@ -39,8 +39,12 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
         *ULTIMEM_BLK5 = scroll->bank;
         gfx_set_screen_base (0xa000);
         gfx_set_position (0, j * 8);
-        for (i = 0; i < 16; i++)
+        for (i = 0; i < 16; i++) {
+            c = name[i];
+            if (!c)
+                break;
             gfx_putchar_fixed (name[i]);
+        }
     }
     gfx_pop_context ();
 

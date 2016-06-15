@@ -36,15 +36,16 @@ alloc_obj (size_t size, struct obj_ops * ops)
 void __fastcall__
 free_obj (struct obj * x)
 {
-    struct obj * c;
+    struct obj * c = x->node.children;
 
-    while (x) {
-        c = x->node.children;
+    while (c) {
         if (c)
             free_obj (c);
-        free (x);
-        x = x->node.next;
+        c = c->node.next;
     }
+
+    x->ops->free (x);
+    free (x);
 }
 
 void __fastcall__
@@ -146,4 +147,10 @@ set_obj_region (struct obj * o)
     gpos ryt = gfx_ryt ();
 
     gfx_set_region (rxl + o->rect.x, ryt + o->rect.y, rxl + o->rect.w, ryt + o->rect.h);
+}
+
+void __fastcall__
+obj_noop (struct obj * x)
+{
+    (void) x;
 }

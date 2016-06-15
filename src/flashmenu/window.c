@@ -13,7 +13,8 @@ void __fastcall__ layout_window_content_frame (struct obj *);
 
 struct obj_ops window_ops = {
     draw_window,
-    layout_window_content_frame
+    layout_window_content_frame,
+    obj_noop
 };
 
 struct window * __fastcall__

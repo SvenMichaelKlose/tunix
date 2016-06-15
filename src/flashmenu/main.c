@@ -63,6 +63,7 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
+    free_obj (desktop);
     print_message ("System halted.");
     while (1);
 

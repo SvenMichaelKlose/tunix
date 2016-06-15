@@ -28,11 +28,15 @@ struct node {
 
 typedef void __fastcall__ (*func_draw_t) (struct obj *);
 typedef void __fastcall__ (*func_layout_t) (struct obj *);
+typedef void __fastcall__ (*func_free_t) (struct obj *);
 
 struct obj_ops {
     func_draw_t     draw;       // Draws object.
     func_layout_t   layout;     // Layouts object before drawing.
+    func_free_t     free;       // Removes object resources.
 };
+
+void __fastcall__ obj_noop (struct obj *);
 
 // The object. This must be the first element in derived objects.
 struct obj {

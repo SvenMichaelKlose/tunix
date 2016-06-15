@@ -10,7 +10,8 @@ void __fastcall__ draw_box (struct obj *);
 
 struct obj_ops box_ops = {
     draw_box,
-    layout_none
+    layout_none,
+    obj_noop
 };
 
 struct box * __fastcall__

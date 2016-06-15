@@ -10,7 +10,8 @@ void __fastcall__ layout_list (struct obj *);
 
 struct obj_ops list_ops = {
     draw_list,
-    layout_list
+    layout_list,
+    obj_noop
 };
 
 struct list * __fastcall__

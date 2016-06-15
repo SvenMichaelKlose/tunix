@@ -10,7 +10,8 @@ void __fastcall__ draw_frame (struct obj *);
 
 struct obj_ops frame_ops = {
     draw_frame,
-    layout_none
+    layout_none,
+    obj_noop
 };
 
 struct obj *

@@ -10,10 +10,12 @@
 #include "ultimem.h"
 
 void __fastcall__ draw_scroll (struct obj *);
+void __fastcall__ free_scroll (struct obj *);
 
 struct obj_ops scroll_ops = {
     draw_scroll,
-    layout_max_size
+    layout_max_size,
+    free_scroll
 };
 
 struct scroll *
@@ -40,4 +42,10 @@ draw_scroll (struct obj * s)
     gfx_copy_area (0xa000, 0x1100, 0, 0, s->rect.x + gfx_rxl (), s->rect.y + gfx_ryt (), s->rect.w, s->rect.h);
     *ULTIMEM_BLK5 = old_blk5;
     gfx_pop_context ();
+}
+
+void __fastcall__
+free_scroll (struct obj * s)
+{
+    free_bank (((struct scroll *) s)->bank);
 }

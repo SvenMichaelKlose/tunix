@@ -16,12 +16,14 @@ void __fastcall__ layout_table_center (struct obj *);
 
 struct obj_ops table_ops = {
     draw_list,
-    layout_table
+    layout_table,
+    obj_noop
 };
 
 struct obj_ops table_ops_center = {
     draw_list,
-    layout_table_center
+    layout_table_center,
+    obj_noop
 };
 
 struct obj *

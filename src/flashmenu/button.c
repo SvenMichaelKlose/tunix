@@ -9,7 +9,8 @@ void __fastcall__ layout_button_minsize (struct obj *);
 
 struct obj_ops button_ops = {
     draw_button,
-    layout_button_minsize
+    layout_button_minsize,
+    obj_noop
 };
 
 struct button * __fastcall__

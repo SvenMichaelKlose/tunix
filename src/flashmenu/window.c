@@ -68,8 +68,9 @@ draw_window (struct obj * _w)
     gfx_set_pattern (pattern_solid);
     gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
+    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
     gfx_set_pattern (pattern_empty);
-    gfx_draw_box (1, 1, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    gfx_draw_box (0, 0, iw, h - WINDOW_TITLE_HEIGHT - 1);
 
     /* Draw contents. */
     draw_obj_children (OBJ(win));

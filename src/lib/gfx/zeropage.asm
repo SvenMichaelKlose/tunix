@@ -1,4 +1,4 @@
-.exportzp p, ph, bca, bcp, srx, xcpos, font_compression
+.exportzp p, ph, bca, bcp, srx, xcpos, xcpos2, font_compression
 .exportzp rxl, ryt, rxr, ryb, region_sp, xpos, ypos, xpos2, ypos2, width, height, pattern
 .exportzp font, font_space_size, do_compress_font_gaps, pencil_mode, scrbase
 .exportzp masks, maskd
@@ -14,6 +14,7 @@ bcp:    .word 0     ; Bytecode pointer.
 srx:    .byte 0     ; Saved X register.
 
 xcpos:  .byte 0     ; X columns.
+xcpos2: .byte 0     ; X columns.
 
 
 ; Utils

@@ -1,4 +1,4 @@
-.export masks_left, masks_right, maskd_left, maskd_right
+.export masks_left, masks_right, maskd_left, maskd_right, masksr_left
 
 .data
 
@@ -22,4 +22,15 @@ masks_right:
     .byte %11111000
     .byte %11111100
     .byte %11111110
+    .byte %11111111
+
+masksr_left:
+    .byte %00000000
+    .byte %00000001
+    .byte %00000011
+    .byte %00000111
+    .byte %00001111
+    .byte %00011111
+    .byte %00111111
+    .byte %01111111
     .byte %11111111

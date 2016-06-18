@@ -47,7 +47,7 @@ init ()
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
-    desktop = OBJ(make_frame ());
+    desktop = OBJ(make_box (pattern_solid));
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
 }
 

@@ -36,15 +36,13 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
         *ULTIMEM_BLK5 = dir_bank;
         memcpy (name, p, 16);
         p += 21;
+
         *ULTIMEM_BLK5 = scroll->bank;
         gfx_set_screen_base (0xa000);
         gfx_set_position (0, j * 8);
-        for (i = 0; i < 16; i++) {
-            c = name[i];
-            if (!c)
-                break;
-            gfx_putchar_fixed (name[i]);
-        }
+        for (i = 0; i < 16; i++)
+            if (c = name[i])
+                gfx_putchar_fixed (name[i]);
     }
     gfx_pop_context ();
 

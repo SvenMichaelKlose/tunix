@@ -14,13 +14,18 @@ init_bank_allocator ()
 char
 alloc_bank ()
 {
-    unsigned int i;
+    char i;
+    char byte;
+    char bit;
 
-    for (i = 0; i < NUM_BANKS; i++)
-        if (!(allocated_banks[i / 8] & (1 << (i % 8)))) {
-            allocated_banks[i / 8] |= (1 << (i % 8));
+    for (i = 1; i < NUM_BANKS; i++) {
+        byte = i >> 3;
+        bit = 1 << (i & 7);
+        if (!(allocated_banks[byte] & bit)) {
+            allocated_banks[byte] |= bit;
             return i;
         }
+    }
 
     return 0;
 }
@@ -28,5 +33,5 @@ alloc_bank ()
 void __fastcall__
 free_bank (char i)
 {
-    allocated_banks[i / 8] &= ((1 << (i % 8)) ^ 255);
+    allocated_banks[i >> 3] &= ~(1 << (i & 7));
 }

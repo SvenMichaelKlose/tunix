@@ -1,4 +1,4 @@
-ASMSOURCES=main.asm rom-info.asm prgend.asm ../core/mem/moveram.asm
+ASMSOURCES=main.asm rom-info.asm prgend.asm ../core/mem/moveram.asm ../core/mem/clrram.asm
 PROGRAM=flashboot.bin
 
 include ../Makefile.rules

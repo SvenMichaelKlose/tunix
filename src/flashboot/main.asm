@@ -1,7 +1,7 @@
 .export main
 .exportzp s, d, c
 
-.import moveram, __PRGEND__
+.import clrram, moveram, __PRGEND__
 
 s = 0
 d = 2
@@ -20,10 +20,21 @@ main:
     ldx #$ff
     txs
 
+    lda #0
+    sta $9002
+
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
-    jsr $e518   ; Init VIC.
+
+    ; Clear screen.
+    lda #$00
+    sta d
+    sta c
+    lda #$10
+    sta d+1
+    sta c+1
+    jsr clrram
 
     ; Activate all RAM.
     lda #%00111111
@@ -52,6 +63,7 @@ main:
     lda #$60	; RTS
     sta $0400
 
+    ; Save blocks.
     lda $9ff9
     pha
     lda $9ffc
@@ -61,6 +73,7 @@ main:
     ; First 8K – skips 6 byte program header.
     lda #$08
     sta $9ffc
+
     lda #$06
     sta s
     lda #$60
@@ -95,7 +108,6 @@ main:
 
     lda #9
     sta $9ff9
-
     pla
     sta $9ffc
 
@@ -119,6 +131,8 @@ main:
 
     lda #%01111111
     sta $9ff2
+
+    jsr $e518   ; Init VIC.
 
     ; Run it.
     jmp $2000

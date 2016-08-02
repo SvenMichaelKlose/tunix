@@ -27,7 +27,7 @@ make_basic_starter ()
 	struct window * win = make_window ("Start BASIC...");
 	struct obj * table = make_table ();
 
-	set_obj_position_and_size (OBJ(win), 20, 20, 120, 110);
+	set_obj_position_and_size (OBJ(win), 20, 24, 120, 110);
 
     set_obj_ops (table, &table_ops_center);
     append_obj (OBJ(win->obj.node.children), OBJ(table));

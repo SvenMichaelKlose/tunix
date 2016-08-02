@@ -29,6 +29,7 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 
     *ULTIMEM_CONFIG2 = 0xff;
     *ULTIMEM_BLK5 = dir_bank;
+    bzero (0xa000, 0x2000);
     cbm_read_directory ("$", 8);
 
     gfx_push_context ();

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "libgfx.h"
 #include "obj.h"
@@ -23,10 +24,16 @@ make_scroll ()
 {
     struct scroll * s = alloc_obj (sizeof (struct scroll), &scroll_ops);
     char bank = alloc_bank ();
+    char old_blk5 = *ULTIMEM_BLK5;
 
     if (!bank)
         print_error ("Can't allocate bank for scroll.");
+
+    // Clear scroll.
     s->bank = bank;
+    *ULTIMEM_BLK5 = s->bank;
+    bzero (0xa000, 0x2000);
+    *ULTIMEM_BLK5 = old_blk5;
 
     return s;
 }

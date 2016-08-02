@@ -20,8 +20,12 @@ main:
     ldx #$ff
     txs
 
+    ; Reset VIC:
     lda #0
-    sta $9002
+    ldx #$0f
+l:  sta $9000,x
+    dex
+    bpl l
 
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
@@ -131,8 +135,6 @@ main:
 
     lda #%01111111
     sta $9ff2
-
-    jsr $e518   ; Init VIC.
 
     ; Run it.
     jmp $2000

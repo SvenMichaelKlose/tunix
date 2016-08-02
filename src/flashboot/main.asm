@@ -52,7 +52,12 @@ main:
     lda #$60	; RTS
     sta $0400
 
-    ;; Copy first 16K of second 64K flash segment to RAM.
+    lda $9ff9
+    pha
+    lda $9ffc
+    pha
+
+    ;; Copy first 24K of second 64K flash segment to RAM.
     ; First 8K – skips 6 byte program header.
     lda #$08
     sta $9ffc
@@ -72,6 +77,7 @@ main:
     jsr moveram
 
     inc $9ffc
+
     lda #$00
     sta s
     lda #$60
@@ -86,6 +92,30 @@ main:
     sta c+1
     lda #0
     jsr moveram
+
+    lda #9
+    sta $9ff9
+
+    pla
+    sta $9ffc
+
+    lda #$00
+    sta s
+    lda #$20
+    sta s+1
+    lda #$fa
+    sta d
+    lda #$5f
+    sta d+1
+    lda #$00
+    sta c
+    lda #$20
+    sta c+1
+    lda #0
+    jsr moveram
+
+    pla
+    sta $9ff9
 
     lda #%01111111
     sta $9ff2

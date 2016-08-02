@@ -1,6 +1,6 @@
 .export clrram
 
-.importzp s, d, c
+.importzp d, c
 
 .proc clrram
     ldy d

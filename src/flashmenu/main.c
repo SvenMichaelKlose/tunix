@@ -44,10 +44,12 @@ init ()
     gfx_init ();
     init_ultimem ();
     init_bank_allocator ();
+    print_message ("Preparing font...");
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
+    print_message ("");
 
-    desktop = OBJ(make_box (pattern_solid));
+    desktop = OBJ(make_frame ());
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
 }
 

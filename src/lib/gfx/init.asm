@@ -16,7 +16,7 @@
 
     lda #0
     ldx #1
-    ldy #3
+    ldy #5
     jsr init_bitmap_mode
 
     jsr init_region_stack

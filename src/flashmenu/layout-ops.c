@@ -22,6 +22,14 @@ layout_max_size (struct obj * x)
 }
 
 void __fastcall__
+layout_inside (struct obj * x)
+{
+    struct rect * prect = &x->node.parent->rect;
+
+    set_obj_position_and_size (x, 1, 1, prect->w - 7, prect->h - 2);
+}
+
+void __fastcall__
 layout_center (struct obj * x)
 {
     struct rect * prect = &x->node.parent->rect;

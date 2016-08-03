@@ -15,7 +15,7 @@ void __fastcall__ free_scroll (struct obj *);
 
 struct obj_ops scroll_ops = {
     draw_scroll,
-    layout_max_size,
+    layout_inside,
     free_scroll
 };
 

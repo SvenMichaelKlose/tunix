@@ -30,24 +30,12 @@ shift_charset ()
 }
 
 void
-init_ultimem ()
-{
-    if (!ultimem_is_installed ()) {
-        print_message ("No Ultimem expansion detected.");
-        while (1);
-    }
-}
-
-void
 init ()
 {
-    gfx_init ();
-    init_ultimem ();
-    init_bank_allocator ();
-    print_message ("Preparing font...");
     shift_charset ();
+    init_bank_allocator ();
+    gfx_init ();
     gfx_set_font (charset_4x8, 2);
-    print_message ("");
 
     desktop = OBJ(make_frame ());
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
@@ -60,13 +48,13 @@ main (int argc, char ** argv)
 
     append_obj (desktop, make_file_window ("#8", 0, 0, 81, 12 * 16 - 9));
     append_obj (desktop, make_file_window ("#1", 80, 0, 80, 12 * 16 - 9));
-//    append_obj (desktop, make_basic_starter ());
+    append_obj (desktop, make_basic_starter ());
 
     layout_obj (desktop);
     draw_obj (desktop);
 
     free_obj (desktop);
-    print_message ("System halted.");
+    print_message ("F1: Help");
     while (1);
 
     return 0;

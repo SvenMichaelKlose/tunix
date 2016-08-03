@@ -37,8 +37,9 @@ init ()
     gfx_init ();
     gfx_set_font (charset_4x8, 2);
 
-    desktop = OBJ(make_frame ());
-    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - 9);
+    desktop = OBJ(make_box (pattern_leaves));
+    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16);
+    draw_obj (desktop);
 }
 
 int
@@ -46,15 +47,16 @@ main (int argc, char ** argv)
 {
     init ();
 
+    print_message ("F7: BASIC  F1: Help");
     append_obj (desktop, make_file_window ("#8", 0, 0, 81, 12 * 16 - 9));
     append_obj (desktop, make_file_window ("#1", 80, 0, 80, 12 * 16 - 9));
     append_obj (desktop, make_basic_starter ());
 
     layout_obj (desktop);
-    draw_obj (desktop);
+    draw_obj_children (desktop);
+    print_message ("F7: Back");
 
     free_obj (desktop);
-    print_message ("F1: Help");
     while (1);
 
     return 0;

@@ -31,7 +31,5 @@ draw_box (struct obj * o)
     gfx_set_pencil_mode (1);
     gfx_set_pattern (b->pattern);
     gfx_draw_box (0, 0, r->w, r->h);
-    if (!o->node.children)
-        print_message ("no kids");
     draw_obj_children (o);
 }

@@ -22,10 +22,29 @@ make
 
 ## Status
 
-g can do most basic multitasking and boots a "shell" which is written in C.
+Development of g is currently limited to src/flashboot and src/flashmenu.
 
-## how it works.
+## How it works.
 
+First, let's take a look at the memory map:
+
+0000    Core zero page
+0020    Application zero page
+0090    KERNAL zero page
+0100    Stack
+0200    KERNAL area
+0400    "load" system call entry point
+04xx    Core data per application
+1000    Screen
+1100    Character set
+2000    Application
+8000    Character ROM
+9000    I/O area
+a000    Application
+c000    BASIC
+e000    KERNAL
+
+g's kernel is call 'core' to avoid confusion with the KERNAL ROM.
 g's core (not called "kernel" to avoid confusion with the KERNAL in ROM)
 resides at memory block 5 ($a000-$bfff) and cannot be occupied by anything
 else. Also, the +3K area is reserved for process-related data and jump

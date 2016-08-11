@@ -1078,7 +1078,7 @@ _charset_4x8:
 ; k
     .byte %1000
     .byte %1000
-    .byte %1000
+    .byte %1010
     .byte %1010
     .byte %1100
     .byte %1010

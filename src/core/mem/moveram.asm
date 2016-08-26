@@ -43,7 +43,7 @@ n2: dec d
     cmp #$ff
     beq j2
 q2: dex
-    beq l2
+    bne l2
     dec c+1
     bne l2
     rts

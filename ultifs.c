@@ -172,7 +172,7 @@ emit_image ()
 }
 
 int32_t
-find_end (int32_t start, size_t record_size, int num_records)
+find_free (int32_t start, size_t record_size, int num_records)
 {
     int32_t p;
     char i;
@@ -201,21 +201,19 @@ void
 mount_journal (struct ultifs_header * h)
 {
     journal = JOURNAL_START;
-    journal_free = find_end (JOURNAL_START + sizeof (struct ultifs_header), 8, (JOURNAL_SIZE - sizeof (struct ultifs_header)) / 8);
+    journal_free = find_free (JOURNAL_START + sizeof (struct ultifs_header), 8, (JOURNAL_SIZE - sizeof (struct ultifs_header)) / 8);
 }
 
 void
 mount_blocks (struct ultifs_header * h)
 {
     blocks = h->blocks;
-    blocks_free = find_end (BLOCKS_START, sizeof (struct block), BLOCKS_SIZE / sizeof (struct block));
 }
 
 void
 mount_files (struct ultifs_header * h)
 {
     files = h->files;
-    files_free = find_end (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
 }
 
 void

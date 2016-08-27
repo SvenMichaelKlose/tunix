@@ -402,8 +402,10 @@ create_file (size_t size)
     return alloc_file (blocks);
 }
 
+typedef void (*fileop) (int32_t pos, void * data, size_t size);
+
 void
-write_file (int16_t fi, int32_t ofs, void * data, size_t size)
+data_xfer (fileop op, int16_t fi, int32_t ofs, void * data, size_t size)
 {
     struct file f;
     struct block b;
@@ -421,9 +423,7 @@ write_file (int16_t fi, int32_t ofs, void * data, size_t size)
             s = bs - ofs;
             if (s > size)
                 s = size;
-            printf ("%d\n", (int) s);
-            img_write_mem (b.pos + ofs, data, s);
-            printf ("g\n");
+            op (b.pos + ofs, data, s);
             if (!(size -= s))
                 return;
             data += s;
@@ -435,6 +435,30 @@ write_file (int16_t fi, int32_t ofs, void * data, size_t size)
             exit (1);
         }
     }
+}
+
+void
+op_write (int32_t pos, void * data, size_t size)
+{
+    img_write_mem (pos, data, size);
+}
+
+void
+op_read (int32_t pos, void * data, size_t size)
+{
+    img_read_mem (data, pos, size);
+}
+
+void
+write_file (int16_t fi, int32_t ofs, void * data, size_t size)
+{
+    data_xfer (op_write, fi, ofs, data, size);
+}
+
+void
+read_file (int16_t fi, int32_t ofs, void * data, size_t size)
+{
+    data_xfer (op_read, fi, ofs, data, size);
 }
 
 int

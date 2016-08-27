@@ -1,3 +1,7 @@
+/*
+ * UltiFS
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -107,6 +111,12 @@ img_read_char (int32_t pos)
     return ((char *) &image)[pos];
 }
 
+int16_t
+img_read_word (int32_t pos)
+{
+    return ((int16_t *) &image)[pos];
+}
+
 void
 mk_bootloader ()
 {
@@ -174,6 +184,9 @@ emit_image ()
     fclose (out);
 }
 
+/*
+ * Find a free record in journal, block chains or file index.
+ */
 int32_t
 find_free (int32_t start, size_t record_size, int num_records)
 {
@@ -200,18 +213,41 @@ find_free (int32_t start, size_t record_size, int num_records)
     return p;
 }
 
+/*
+ * Find update of a record.
+ */
+int32_t
+get_update (int32_t pos)
+{
+    int16_t update;
+
+    while (1) {
+        update = img_read_word (pos);
+        if (update == -1)
+            return pos;
+        pos = ((int32_t) update << 3) + JOURNAL_START;
+    }
+
+    return pos;
+}
+
 void
 get_block (struct block * b, int16_t idx)
 {
     int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
-    while (1) {
-        img_read_mem (b, pos, sizeof (struct block));
-        if (b->update == -1)
-            return;
-        pos = b->update << 3;
-    }
+    img_read_mem (b, get_update (pos), sizeof (struct block));
 }
 
+void
+put_block (struct block * b, int16_t idx)
+{
+    int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
+    img_write_mem (pos, b, sizeof (struct block));
+}
+
+/*
+ * Find the first officially free byte in the data area.
+ */
 int32_t
 find_last_block_address ()
 {
@@ -231,6 +267,11 @@ find_last_block_address ()
     return highest;
 }
 
+/*
+ * Find the first free byte in the data area.
+ *
+ * Skips garbage resulting from incomplete writes.
+ */
 void
 find_data_free ()
 {
@@ -282,6 +323,7 @@ int16_t
 alloc_journal (void * src, size_t size)
 {
     int16_t j = journal_free >> 3;
+
     if (journal_free & 7)
         j++;
     img_write_mem (journal_free, src, size);
@@ -294,33 +336,36 @@ alloc_block (int16_t size)
 {
     int32_t i = find_free (BLOCKS_START, sizeof (struct block), BLOCKS_SIZE / sizeof (struct block));
     struct block b;
+
     b.update = -1;
     b.pos = data_free;
     b.size = size;
     b.next = -1;
     data_free += size ? size : 0x10000;
     IMG_WRITE_STRUCT(i, b);
-    return i >> 3;
+    return (i - BLOCKS_START) >> 3;
 }
 
 int16_t
-alloc_file (int16_t b)
+alloc_file (int16_t first_block)
 {
-    int32_t i = find_free (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
+    int32_t pos = find_free (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
     struct file f;
+
     f.update = -1;
-    f.first_block = b;
-    IMG_WRITE_STRUCT(i, f);
-    return i / sizeof (struct file);
+    f.first_block = first_block;
+    IMG_WRITE_STRUCT(pos, f);
+    return pos / sizeof (struct file);
 }
 
 void
 link_block (int16_t idx, int16_t next)
 {
     struct block b;
+
     get_block (&b, idx);
     b.next = next;
-    IMG_WRITE_STRUCT(idx, b);
+    put_block (&b, idx);
 }
 
 int16_t
@@ -330,16 +375,25 @@ alloc_block_chain (size_t size)
     int16_t last_block = -1;
     int16_t b;
     size_t s;
+
     while (size) {
         s = size > 65536 ? 65536 : size;
         b = alloc_block (s);
-        if (last_block != -1)
+        if (last_block != -1) {
             link_block (last_block, b);
-        else
+            last_block = b;
+        } else
             first_block = b;
         size -= s;
     }
     return first_block;
+}
+
+int16_t
+create_file (size_t size)
+{
+    int16_t blocks = alloc_block_chain (size);
+    return alloc_file (blocks);
 }
 
 int
@@ -347,7 +401,7 @@ main (int argc, char ** argv)
 {
     mkfs ();
     mount ();
-    alloc_block_chain (0x40000);
+    create_file (0x40000);
     emit_image ();
 
     return 0;

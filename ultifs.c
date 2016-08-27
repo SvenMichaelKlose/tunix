@@ -242,7 +242,7 @@ void
 put_block (struct block * b, int16_t idx)
 {
     int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
-    img_write_mem (pos, b, sizeof (struct block));
+    img_write_mem (get_update (pos), b, sizeof (struct block));
 }
 
 /*
@@ -316,7 +316,6 @@ mount ()
     mount_blocks (&h);
     mount_files (&h);
     find_data_free ();
-    printf ("%d\n", (int) data_free);
 }
 
 int16_t
@@ -379,12 +378,12 @@ alloc_block_chain (size_t size)
     while (size) {
         s = size > 65536 ? 65536 : size;
         b = alloc_block (s);
-        if (last_block != -1) {
+        if (last_block != -1)
             link_block (last_block, b);
-            last_block = b;
-        } else
+        else
             first_block = b;
         size -= s;
+        last_block = b;
     }
     return first_block;
 }

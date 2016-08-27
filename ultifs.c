@@ -60,11 +60,11 @@ struct file {
 #define MAX_FILENAME_LENGTH     16
 
 struct ultifs_dirent {
-    short   update;
+    int16_t update;
     char    name[MAX_FILENAME_LENGTH];
     char    type;
-    short   file;
-    long    size;
+    int16_t file;
+    size_t  size;
 };
 
 #ifdef __GNUC__
@@ -194,7 +194,6 @@ find_free (int32_t start, size_t record_size, int num_records)
     char i;
     int j;
     char is_free;
-    int n = 0;
 
     p = start;
     for (j = 0; j < num_records; j++) {
@@ -208,8 +207,8 @@ find_free (int32_t start, size_t record_size, int num_records)
         if (is_free)
             break;
         p += record_size;
-        n++;
     }
+
     return p;
 }
 
@@ -224,7 +223,7 @@ get_update (int32_t pos)
     while (1) {
         update = img_read_word (pos);
         if (update == -1)
-            return pos;
+            break;
         pos = ((int32_t) update << 3) + JOURNAL_START;
     }
 
@@ -271,6 +270,7 @@ find_last_block_address ()
         if (highest < tmp)
             highest = tmp;
     }
+
     return highest;
 }
 
@@ -291,6 +291,7 @@ find_data_free ()
         data_free = i + 1;
         return;
     }
+
     data_free = highest;
 }
 
@@ -334,6 +335,7 @@ alloc_journal (void * src, size_t size)
         j++;
     img_write_mem (journal_free, src, size);
     journal_free += size;
+
     return j;
 }
 
@@ -349,6 +351,7 @@ alloc_block (int16_t size)
     b.next = -1;
     data_free += size ? size : 0x10000;
     IMG_WRITE_STRUCT(i, b);
+
     return (i - BLOCKS_START) >> 3;
 }
 
@@ -361,6 +364,7 @@ alloc_file (int16_t first_block)
     f.update = -1;
     f.first_block = first_block;
     IMG_WRITE_STRUCT(pos, f);
+
     return (pos - FILES_START) / sizeof (struct file);
 }
 
@@ -392,6 +396,7 @@ alloc_block_chain (size_t size)
         size -= s;
         last_block = b;
     }
+
     return first_block;
 }
 
@@ -431,7 +436,7 @@ data_xfer (fileop op, int16_t fi, int32_t ofs, void * data, size_t size)
         }
         bi = b.next;
         if (bi == -1) {
-            printf ("Write across block chain end.\n");
+            printf ("File %d: access beyond end of block chain.\n", fi);
             exit (1);
         }
     }
@@ -465,11 +470,15 @@ int
 main (int argc, char ** argv)
 {
     int16_t f;
+    char buf[256];
 
+    bzero (buf, 256);
     mkfs ();
     mount ();
     f = create_file (0x40000);
     write_file (f, 0, "Hello world!", 12);
+    read_file (f, 0, buf, 12);
+    printf ("%s\n", buf);
     emit_image ();
 
     return 0;

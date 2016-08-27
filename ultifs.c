@@ -6,7 +6,7 @@
 #define FALSE   0
 #define TRUE    1
 
-#define IMAGE_SIZE  (8 * 1024 * 1024)
+#define IMAGE_SIZE      (8 * 1024 * 1024)
 
 #define ULTIFS_ID       "ULTIFS"
 #define JOURNAL_START   (64 * 1024)
@@ -140,6 +140,7 @@ mk_root_directory_block ()
     block.update = -1;
     block.pos = DATA_START;
     block.size = INITIAL_ROOT_DIRECTORY_SIZE;
+    block.next = -1;
     IMG_WRITE_STRUCT(BLOCKS_START, block);
 }
 
@@ -296,7 +297,8 @@ alloc_block (int16_t size)
     b.update = -1;
     b.pos = data_free;
     b.size = size;
-    data_free += size;
+    b.next = -1;
+    data_free += size ? size : 0x10000;
     IMG_WRITE_STRUCT(i, b);
     return i >> 3;
 }
@@ -312,11 +314,40 @@ alloc_file (int16_t b)
     return i / sizeof (struct file);
 }
 
+void
+link_block (int16_t idx, int16_t next)
+{
+    struct block b;
+    get_block (&b, idx);
+    b.next = next;
+    IMG_WRITE_STRUCT(idx, b);
+}
+
+int16_t
+alloc_block_chain (size_t size)
+{
+    int16_t first_block = -1;
+    int16_t last_block = -1;
+    int16_t b;
+    size_t s;
+    while (size) {
+        s = size > 65536 ? 65536 : size;
+        b = alloc_block (s);
+        if (last_block != -1)
+            link_block (last_block, b);
+        else
+            first_block = b;
+        size -= s;
+    }
+    return first_block;
+}
+
 int
 main (int argc, char ** argv)
 {
     mkfs ();
     mount ();
+    alloc_block_chain (0x40000);
     emit_image ();
 
     return 0;

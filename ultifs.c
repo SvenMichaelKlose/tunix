@@ -13,6 +13,7 @@
 #define JOURNAL_SIZE    (64 * 1024)
 #define BLOCKS_START    (JOURNAL_START + JOURNAL_SIZE)
 #define BLOCKS_SIZE     (64 * 1024)
+#define NUM_BLOCKS      (BLOCKS_SIZE / sizeof (struct block))
 #define FILES_START     (BLOCKS_START + BLOCKS_SIZE)
 #define FILES_SIZE      (64 * 1024)
 #define DATA_START      (FILES_START + FILES_SIZE)
@@ -22,9 +23,8 @@ char image[IMAGE_SIZE];
 int32_t journal;
 int32_t journal_free;
 int32_t blocks;
-int32_t blocks_free;
 int32_t files;
-int32_t files_free;
+int32_t data_free;
 
 #ifdef __GNUC__
 #pragma pack(push, 1)   /* Disable struct padding. */
@@ -125,6 +125,8 @@ mk_journal ()
     header.is_active = 0;
     strcpy (header.id, ULTIFS_ID);
     header.version = 1;
+    header.blocks = BLOCKS_START;
+    header.files = FILES_START;
     IMG_WRITE_STRUCT(JOURNAL_START, header);
 }
 
@@ -198,6 +200,52 @@ find_free (int32_t start, size_t record_size, int num_records)
 }
 
 void
+get_block (struct block * b, int16_t idx)
+{
+    int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
+    while (1) {
+        img_read_mem (b, pos, sizeof (struct block));
+        if (b->update == -1)
+            return;
+        pos = b->update << 3;
+    }
+}
+
+int32_t
+find_last_block_address ()
+{
+    struct block b;
+    int i;
+    int32_t highest = 0;
+    int32_t tmp;
+
+    for (i = 0; i < NUM_BLOCKS; i++) {
+        get_block (&b, i);
+        if (b.pos == -1)
+            continue;
+        tmp = b.pos + b.size;
+        if (highest < tmp)
+            highest = tmp;
+    }
+    return highest;
+}
+
+void
+find_data_free ()
+{
+    int32_t highest = find_last_block_address ();
+    int i;
+
+    for (i = IMAGE_SIZE - 1; i > highest; i--) {
+        if (img_read_char (i) == -1)
+            continue;
+        data_free = i + 1;
+        return;
+    }
+    data_free = highest;
+}
+
+void
 mount_journal (struct ultifs_header * h)
 {
     journal = JOURNAL_START;
@@ -225,6 +273,43 @@ mount ()
     mount_journal (&h);
     mount_blocks (&h);
     mount_files (&h);
+    find_data_free ();
+    printf ("%d\n", (int) data_free);
+}
+
+int16_t
+alloc_journal (void * src, size_t size)
+{
+    int16_t j = journal_free >> 3;
+    if (journal_free & 7)
+        j++;
+    img_write_mem (journal_free, src, size);
+    journal_free += size;
+    return j;
+}
+
+int16_t
+alloc_block (int16_t size)
+{
+    int32_t i = find_free (BLOCKS_START, sizeof (struct block), BLOCKS_SIZE / sizeof (struct block));
+    struct block b;
+    b.update = -1;
+    b.pos = data_free;
+    b.size = size;
+    data_free += size;
+    IMG_WRITE_STRUCT(i, b);
+    return i >> 3;
+}
+
+int16_t
+alloc_file (int16_t b)
+{
+    int32_t i = find_free (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
+    struct file f;
+    f.update = -1;
+    f.first_block = b;
+    IMG_WRITE_STRUCT(i, f);
+    return i / sizeof (struct file);
 }
 
 int
@@ -232,6 +317,7 @@ main (int argc, char ** argv)
 {
     mkfs ();
     mount ();
+    emit_image ();
 
     return 0;
 }

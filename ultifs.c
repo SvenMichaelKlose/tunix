@@ -245,6 +245,13 @@ put_block (struct block * b, int16_t idx)
     img_write_mem (get_update (pos), b, sizeof (struct block));
 }
 
+void
+get_file (struct file * b, int16_t idx)
+{
+    int32_t pos = idx * sizeof (struct file) + FILES_START;
+    img_read_mem (b, get_update (pos), sizeof (struct file));
+}
+
 /*
  * Find the first officially free byte in the data area.
  */
@@ -354,7 +361,7 @@ alloc_file (int16_t first_block)
     f.update = -1;
     f.first_block = first_block;
     IMG_WRITE_STRUCT(pos, f);
-    return pos / sizeof (struct file);
+    return (pos - FILES_START) / sizeof (struct file);
 }
 
 void
@@ -395,12 +402,50 @@ create_file (size_t size)
     return alloc_file (blocks);
 }
 
+void
+write_file (int16_t fi, int32_t ofs, void * data, size_t size)
+{
+    struct file f;
+    struct block b;
+    int16_t bi;
+    int32_t bend;
+    size_t s;
+    size_t bs;
+
+    get_file (&f, fi);
+    bi = f.first_block;
+    while (2) {
+        get_block (&b, bi);
+        bs = b.size ? b.size : 0x10000;
+        if (ofs < bs) {
+            s = bs - ofs;
+            if (s > size)
+                s = size;
+            printf ("%d\n", (int) s);
+            img_write_mem (b.pos + ofs, data, s);
+            printf ("g\n");
+            if (!(size -= s))
+                return;
+            data += s;
+            ofs += s;
+        }
+        bi = b.next;
+        if (bi == -1) {
+            printf ("Write across block chain end.\n");
+            exit (1);
+        }
+    }
+}
+
 int
 main (int argc, char ** argv)
 {
+    int16_t f;
+
     mkfs ();
     mount ();
-    create_file (0x40000);
+    f = create_file (0x40000);
+    write_file (f, 0, "Hello world!", 12);
     emit_image ();
 
     return 0;

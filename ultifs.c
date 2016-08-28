@@ -16,6 +16,7 @@
 #define IMAGE_SIZE      (8 * 1024 * 1024)
 #endif
 
+/* NOTE: No secondary bookkeeping areas for GC till it's about to get implemented. */
 #define ULTIFS_ID       "ULTIFS"
 #define JOURNAL_START   (64 * 1024)
 #define JOURNAL_SIZE    (64 * 1024)
@@ -66,12 +67,15 @@ struct file {
 
 #define MAX_FILENAME_LENGTH     16
 
+#define ULTIFS_TYPE_FILE        0
+#define ULTIFS_TYPE_DIRECTORY   1
+
 struct ultifs_dirent {
     index_t update;
     char    name[MAX_FILENAME_LENGTH];
     char    type;
     index_t file;
-    size_t  size;
+    int32_t size;
 };
 
 #ifdef __GNUC__
@@ -115,13 +119,13 @@ img_read_mem (void * dest, offset_t pos, size_t size)
 char
 img_read_char (offset_t pos)
 {
-    return ((char *) &image)[pos];
+    return image[pos];
 }
 
 int16_t
 img_read_word (offset_t pos)
 {
-    return ((int16_t *) &image)[pos];
+    return *(int16_t *) &image[pos];
 }
 
 void
@@ -372,7 +376,7 @@ alloc_file (index_t first_block)
     f.first_block = first_block;
     IMG_WRITE_STRUCT(i, f);
 
-    return (pos - FILES_START) / sizeof (struct file);
+    return (i - FILES_START) / sizeof (struct file);
 }
 
 void
@@ -444,7 +448,7 @@ data_xfer (fileop op, index_t fi, offset_t ofs, void * data, size_t size)
             if (!(size -= s))
                 return;
             data += s;
-            ofs += s;
+            ofs = 0;
         }
         bi = b.next;
         if (bi == -1) {
@@ -478,19 +482,121 @@ read_file (index_t fi, offset_t ofs, void * data, size_t size)
     data_xfer (op_read, fi, ofs, data, size);
 }
 
+/*
+ * Get size of file's block chain.
+ *
+ * The real size of a file is stored in its directory to
+ * allow for preallocation of data areas which in turn
+ * reduces the need for journaling.
+ */
+size_t
+get_raw_filesize (index_t fi)
+{
+    struct file  f;
+    struct block b;
+    size_t      acc_size = 0;
+    index_t     bi;
+
+    get_file (&f, fi);
+    bi = f.first_block;
+    do {
+        get_block (&b, bi);
+        acc_size += b.size;
+        bi = b.next;
+    } while (bi != -1);
+
+    return acc_size;
+}
+
+char
+area_is_free (void * data, size_t size)
+{
+    int    i;
+    char * p = (char *) data;
+
+    for (i = 0; i < size; i++)
+        if (p[i] != -1)
+            return FALSE;
+
+    return TRUE;
+}
+
+offset_t
+find_free_dirent (index_t d)
+{
+    size_t   dsize = get_raw_filesize (d);
+    offset_t p;
+    char     buf[sizeof (struct ultifs_dirent)];
+
+    for (p = 0; (p + sizeof (struct ultifs_dirent)) < dsize; p += sizeof (struct ultifs_dirent)) {
+        read_file (d, p, buf, sizeof (struct ultifs_dirent));
+        if (area_is_free (buf, sizeof (struct ultifs_dirent)))
+            return p;
+    }
+
+    printf ("Error: directory is full.\n");
+    exit (1);
+}
+
+void
+create_dirent (index_t d, index_t f, char * name, char type, size_t size)
+{
+    offset_t             free_entry = find_free_dirent (d);
+    struct ultifs_dirent e;
+
+    e.update = -1;
+    strncpy (e.name, name, MAX_FILENAME_LENGTH);
+    e.type = type;
+    e.file = f;
+    e.size = size;
+    write_file (d, free_entry, &e, sizeof (struct ultifs_dirent));
+}
+
+#define ROOT_DIRECTORY_INDEX    0
+
+index_t
+add_file (index_t di, char * name, char type, size_t size)
+{
+    index_t fi = create_file (size);
+
+    create_dirent (di, fi, name, type, size);
+
+    return fi;
+}
+
+void *
+load_file (size_t * rs, char * pathname)
+{
+    FILE * f = fopen (pathname, "r");
+    size_t s;
+    char * loader;
+
+    fseek (f, 0, SEEK_END);
+    *rs = s = ftell (f);
+    rewind (f);
+    loader = malloc (s);
+    fread (loader, s, 1, f);
+    fclose (f);
+
+    return loader;
+}
+
+void
+add_secondary_bootloader ()
+{
+    size_t s;
+    char * loader = load_file (&s, "src/flashmenu/flashmenu.bin");
+    index_t fi = add_file (ROOT_DIRECTORY_INDEX, "boot", ULTIFS_TYPE_FILE, s);
+    write_file (fi, 0, loader, s);
+    free (loader);
+}
+
 int
 main (int argc, char ** argv)
 {
-    index_t f;
-    char    buf[256];
-
-    bzero (buf, 256);
     mkfs ();
     mount ();
-    f = create_file (0x40000);
-    write_file (f, 0, "Hello world!", 12);
-    read_file (f, 0, buf, 12);
-    printf ("%s\n", buf);
+    add_secondary_bootloader ();
     emit_image ();
 
     return 0;

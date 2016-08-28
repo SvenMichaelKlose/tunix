@@ -1,5 +1,7 @@
 /*
  * UltiFS
+ *
+ * Journaling file system for Flash memory.
  */
 
 #include <stdlib.h>
@@ -10,7 +12,9 @@
 #define FALSE   0
 #define TRUE    1
 
+#ifndef IMAGE_SIZE
 #define IMAGE_SIZE      (8 * 1024 * 1024)
+#endif
 
 #define ULTIFS_ID       "ULTIFS"
 #define JOURNAL_START   (64 * 1024)
@@ -24,11 +28,14 @@
 
 char image[IMAGE_SIZE];
 
-int32_t journal;
-int32_t journal_free;
-int32_t blocks;
-int32_t files;
-int32_t data_free;
+typedef int16_t index_t;
+typedef int32_t offset_t;
+
+offset_t journal;
+offset_t journal_free;
+offset_t blocks;
+offset_t files;
+offset_t data_free;
 
 #ifdef __GNUC__
 #pragma pack(push, 1)   /* Disable struct padding. */
@@ -38,32 +45,32 @@ int32_t data_free;
  * File system/journal header
  */
 struct ultifs_header {
-    char    is_active;
-    char    id[sizeof (ULTIFS_ID)];
-    int16_t version;
-    int32_t blocks;
-    int32_t files;
+    char     is_active;
+    char     id[sizeof (ULTIFS_ID)];
+    int16_t  version;
+    offset_t blocks;
+    offset_t files;
 };
 
 struct block {
-    int16_t update;
-    int32_t pos;
-    int16_t size;
-    int16_t next;
+    index_t  update;
+    offset_t pos;
+    int16_t  size;
+    index_t  next;
 };
 
 struct file {
-    int16_t update;
-    int16_t first_block;
+    index_t update;
+    index_t first_block;
 };
 
 #define MAX_FILENAME_LENGTH     16
 
 struct ultifs_dirent {
-    int16_t update;
+    index_t update;
     char    name[MAX_FILENAME_LENGTH];
     char    type;
-    int16_t file;
+    index_t file;
     size_t  size;
 };
 
@@ -78,7 +85,7 @@ clear_image ()
 }
 
 void
-img_write_mem (int32_t pos, void * str, size_t size)
+img_write_mem (offset_t pos, void * str, size_t size)
 {
     memcpy (&image[pos], str, size);
 }
@@ -98,7 +105,7 @@ img_write_char (int pos, char x)
 }
 
 void
-img_read_mem (void * dest, int32_t pos, size_t size)
+img_read_mem (void * dest, offset_t pos, size_t size)
 {
     memcpy (dest, &image[pos], size);
 }
@@ -106,13 +113,13 @@ img_read_mem (void * dest, int32_t pos, size_t size)
 #define IMG_READ_STRUCT(x, pos)    img_read_mem (&x, pos, sizeof (x))
 
 char
-img_read_char (int32_t pos)
+img_read_char (offset_t pos)
 {
     return ((char *) &image)[pos];
 }
 
 int16_t
-img_read_word (int32_t pos)
+img_read_word (offset_t pos)
 {
     return ((int16_t *) &image)[pos];
 }
@@ -187,13 +194,13 @@ emit_image ()
 /*
  * Find a free record in journal, block chains or file index.
  */
-int32_t
-find_free (int32_t start, size_t record_size, int num_records)
+offset_t
+find_free (offset_t start, size_t record_size, int num_records)
 {
-    int32_t p;
-    char i;
-    int j;
-    char is_free;
+    offset_t p;
+    char     i;
+    int      j;
+    char     is_free;
 
     p = start;
     for (j = 0; j < num_records; j++) {
@@ -215,52 +222,52 @@ find_free (int32_t start, size_t record_size, int num_records)
 /*
  * Find update of a record.
  */
-int32_t
-get_update (int32_t pos)
+offset_t
+get_update (offset_t pos)
 {
-    int16_t update;
+    index_t update;
 
     while (1) {
         update = img_read_word (pos);
         if (update == -1)
             break;
-        pos = ((int32_t) update << 3) + JOURNAL_START;
+        pos = ((offset_t) update << 3) + JOURNAL_START;
     }
 
     return pos;
 }
 
 void
-get_block (struct block * b, int16_t idx)
+get_block (struct block * b, index_t idx)
 {
-    int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
+    offset_t pos = idx * sizeof (struct block) + BLOCKS_START;
     img_read_mem (b, get_update (pos), sizeof (struct block));
 }
 
 void
-put_block (struct block * b, int16_t idx)
+put_block (struct block * b, index_t idx)
 {
-    int32_t pos = idx * sizeof (struct block) + BLOCKS_START;
+    offset_t pos = idx * sizeof (struct block) + BLOCKS_START;
     img_write_mem (get_update (pos), b, sizeof (struct block));
 }
 
 void
-get_file (struct file * b, int16_t idx)
+get_file (struct file * b, index_t idx)
 {
-    int32_t pos = idx * sizeof (struct file) + FILES_START;
+    offset_t pos = idx * sizeof (struct file) + FILES_START;
     img_read_mem (b, get_update (pos), sizeof (struct file));
 }
 
 /*
  * Find the first officially free byte in the data area.
  */
-int32_t
-find_last_block_address ()
+offset_t
+find_highest_ending_block_address ()
 {
     struct block b;
-    int i;
-    int32_t highest = 0;
-    int32_t tmp;
+    int          i;
+    offset_t     highest = 0;
+    offset_t     tmp;
 
     for (i = 0; i < NUM_BLOCKS; i++) {
         get_block (&b, i);
@@ -282,8 +289,8 @@ find_last_block_address ()
 void
 find_data_free ()
 {
-    int32_t highest = find_last_block_address ();
-    int i;
+    offset_t highest = find_highest_ending_block_address ();
+    int      i;
 
     for (i = IMAGE_SIZE - 1; i > highest; i--) {
         if (img_read_char (i) == -1)
@@ -326,10 +333,10 @@ mount ()
     find_data_free ();
 }
 
-int16_t
+index_t
 alloc_journal (void * src, size_t size)
 {
-    int16_t j = journal_free >> 3;
+    index_t j = journal_free >> 3;
 
     if (journal_free & 7)
         j++;
@@ -339,10 +346,10 @@ alloc_journal (void * src, size_t size)
     return j;
 }
 
-int16_t
+index_t
 alloc_block (int16_t size)
 {
-    int32_t i = find_free (BLOCKS_START, sizeof (struct block), BLOCKS_SIZE / sizeof (struct block));
+    offset_t     i = find_free (BLOCKS_START, sizeof (struct block), BLOCKS_SIZE / sizeof (struct block));
     struct block b;
 
     b.update = -1;
@@ -355,21 +362,21 @@ alloc_block (int16_t size)
     return (i - BLOCKS_START) >> 3;
 }
 
-int16_t
-alloc_file (int16_t first_block)
+index_t
+alloc_file (index_t first_block)
 {
-    int32_t pos = find_free (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
+    offset_t    i = find_free (FILES_START, sizeof (struct file), FILES_SIZE / sizeof (struct file));
     struct file f;
 
     f.update = -1;
     f.first_block = first_block;
-    IMG_WRITE_STRUCT(pos, f);
+    IMG_WRITE_STRUCT(i, f);
 
     return (pos - FILES_START) / sizeof (struct file);
 }
 
 void
-link_block (int16_t idx, int16_t next)
+link_block (index_t idx, index_t next)
 {
     struct block b;
 
@@ -378,12 +385,12 @@ link_block (int16_t idx, int16_t next)
     put_block (&b, idx);
 }
 
-int16_t
+index_t
 alloc_block_chain (size_t size)
 {
-    int16_t first_block = -1;
-    int16_t last_block = -1;
-    int16_t b;
+    index_t first_block = -1;
+    index_t last_block = -1;
+    index_t b;
     size_t s;
 
     while (size) {
@@ -400,24 +407,29 @@ alloc_block_chain (size_t size)
     return first_block;
 }
 
-int16_t
+index_t
 create_file (size_t size)
 {
-    int16_t blocks = alloc_block_chain (size);
+    index_t blocks = alloc_block_chain (size);
     return alloc_file (blocks);
 }
 
-typedef void (*fileop) (int32_t pos, void * data, size_t size);
+typedef void (*fileop) (offset_t pos, void * data, size_t size);
 
+/*
+ * Transfer data from or to file.
+ *
+ * The data transferred must not cross the end of the block chain.
+ */
 void
-data_xfer (fileop op, int16_t fi, int32_t ofs, void * data, size_t size)
+data_xfer (fileop op, index_t fi, offset_t ofs, void * data, size_t size)
 {
-    struct file f;
+    struct file  f;
     struct block b;
-    int16_t bi;
-    int32_t bend;
-    size_t s;
-    size_t bs;
+    index_t      bi;
+    offset_t     bend;
+    size_t       s;
+    size_t       bs;
 
     get_file (&f, fi);
     bi = f.first_block;
@@ -436,32 +448,32 @@ data_xfer (fileop op, int16_t fi, int32_t ofs, void * data, size_t size)
         }
         bi = b.next;
         if (bi == -1) {
-            printf ("File %d: access beyond end of block chain.\n", fi);
+            printf ("Internal error: file %d: access beyond end of block chain.\n", fi);
             exit (1);
         }
     }
 }
 
 void
-op_write (int32_t pos, void * data, size_t size)
+op_write (offset_t pos, void * data, size_t size)
 {
     img_write_mem (pos, data, size);
 }
 
 void
-op_read (int32_t pos, void * data, size_t size)
+op_read (offset_t pos, void * data, size_t size)
 {
     img_read_mem (data, pos, size);
 }
 
 void
-write_file (int16_t fi, int32_t ofs, void * data, size_t size)
+write_file (index_t fi, offset_t ofs, void * data, size_t size)
 {
     data_xfer (op_write, fi, ofs, data, size);
 }
 
 void
-read_file (int16_t fi, int32_t ofs, void * data, size_t size)
+read_file (index_t fi, offset_t ofs, void * data, size_t size)
 {
     data_xfer (op_read, fi, ofs, data, size);
 }
@@ -469,8 +481,8 @@ read_file (int16_t fi, int32_t ofs, void * data, size_t size)
 int
 main (int argc, char ** argv)
 {
-    int16_t f;
-    char buf[256];
+    index_t f;
+    char    buf[256];
 
     bzero (buf, 256);
     mkfs ();

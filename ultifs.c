@@ -4,6 +4,7 @@
  * Journaling file system for Flash memory.
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -591,9 +592,30 @@ add_secondary_bootloader ()
     free (loader);
 }
 
+void
+make_asm_info ()
+{
+    FILE * f = fopen ("src/lib/ultifs/internals.asm", "w");
+    fprintf (f, "journal_start = %d\n", JOURNAL_START);
+    fprintf (f, "blocks_start = %d\n", BLOCKS_START);
+    fprintf (f, "files_start = %d\n", FILES_START);
+    fprintf (f, "\n");
+    fprintf (f, "block_record_size = %lu\n", sizeof (struct block));
+    fprintf (f, "block_pos = %lu\n", offsetof(struct block, pos));
+    fprintf (f, "block_size = %lu\n", offsetof(struct block, size));
+    fprintf (f, "block_next = %lu\n", offsetof(struct block, next));
+    fprintf (f, "\n");
+    fprintf (f, "dirent_name = %lu\n", offsetof(struct ultifs_dirent, name));
+    fprintf (f, "dirent_type = %lu\n", offsetof(struct ultifs_dirent, type));
+    fprintf (f, "dirent_file = %lu\n", offsetof(struct ultifs_dirent, file));
+    fprintf (f, "dirent_size = %lu\n", offsetof(struct ultifs_dirent, size));
+    fclose (f);
+}
+
 int
 main (int argc, char ** argv)
 {
+    make_asm_info ();
     mkfs ();
     mount ();
     add_secondary_bootloader ();

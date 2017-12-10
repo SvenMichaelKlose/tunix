@@ -15,10 +15,8 @@
 copy_forwards:
 l:  lda (s),y
     sta (d),y
-    inc s
+    iny
     beq k
-n:  inc d
-    beq m
 q:  dex
     bne l
     dec c+1
@@ -26,22 +24,15 @@ q:  dex
     rts
 
 k:  inc s+1
-    jmp n
-
-m:  inc d+1
+    inc d+1
     jmp q
 
 copy_backwards:
 l2: lda (s),y
     sta (d),y
-    dec s
-    lda s
-    cmp #$ff
+    dey
+    cpy #$ff
     beq m2
-n2: dec d
-    lda d
-    cmp #$ff
-    beq j2
 q2: dex
     bne l2
     dec c+1
@@ -49,8 +40,6 @@ q2: dex
     rts
 
 m2: dec s+1
-    jmp n2
-
-j2: dec d+1
+    dec d+1
     jmp q2
 .endproc

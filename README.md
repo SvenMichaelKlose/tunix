@@ -39,7 +39,8 @@ First, let's take a look at the memory map:
 1100    Character set
 2000    Application
 8000    Character ROM
-9000    I/O area
+9000    VIC area
+9800    I/O area
 a000    Application
 c000    BASIC
 e000    KERNAL

@@ -24,21 +24,23 @@ make_table_button (struct obj * table, char * cmd, char * descr)
 struct obj *
 make_basic_starter ()
 {
-	struct window * win = make_window ("Start BASIC...");
+	struct window * win = make_window ("Boot options");
 	struct obj * table = make_table ();
 
-	set_obj_position_and_size (OBJ(win), 20, 24, 120, 110);
+	set_obj_position_and_size (OBJ(win), 20, 24, 120, 130);
 
     set_obj_ops (table, &table_ops_center);
     append_obj (OBJ(win->obj.node.children), OBJ(table));
 
-	make_table_button (table, "Hotkey", "Type of expansion.");
+	make_table_button (table, "Key", "Action");
 	make_table_button (table, "0", "No memory expansion.");
-    make_table_button (table, "1", "Toggle +3K.");
-    make_table_button (table, "2", "+8K.");
-    make_table_button (table, "3", "+16K.");
-    make_table_button (table, "4", "+24K.");
-    make_table_button (table, "5", "+32K.");
+    make_table_button (table, "1", "Toggle BASIC +3K.");
+    make_table_button (table, "2", "BASIC +8K.");
+    make_table_button (table, "3", "BASIC +16K.");
+    make_table_button (table, "4", "BASIC +24K.");
+    make_table_button (table, "5", "BASIC +32K.");
+    make_table_button (table, "F7", "Boot desktop");
+    make_table_button (table, "F5", "Boot shell");
 
     return OBJ(win);
 }

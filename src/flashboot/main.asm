@@ -27,18 +27,21 @@ l:  sta $9000,x
     dex
     bpl l
 
+    lda #$22    ; Red screen.
+    sta $900f
+
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
 
     ; Clear screen.
-    lda #$00
-    sta d
-    sta c
-    lda #$10
-    sta d+1
-    sta c+1
-    jsr clrram
+;    lda #$00
+;    sta d
+;    sta c
+;    lda #$10
+;    sta d+1
+;    sta c+1
+;    jsr clrram
 
     ; Activate all RAM.
     lda #%00111111
@@ -73,7 +76,7 @@ l:  sta $9000,x
     lda $9ffc
     pha
 
-    ;; Copy first 24K of second 64K flash segment to RAM.
+    ;; Copy first 24K of second 64K flash segment to RAM $2000.
     ; First 8K – skips 6 byte program header.
     lda #$08
     sta $9ffc
@@ -135,6 +138,9 @@ l:  sta $9000,x
 
     lda #%01111111
     sta $9ff2
+
+    lda #$77    ; Yello screen.
+    sta $900f
 
     ; Run it.
     jmp $2000

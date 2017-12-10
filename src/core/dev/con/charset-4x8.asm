@@ -781,20 +781,20 @@ _charset_4x8:
 ; M
     .byte %1010
     .byte %1110
-    .byte %1110
-    .byte %1110
+    .byte %1010
+    .byte %1010
     .byte %1010
     .byte %1010
     .byte %1010
     .byte %0000
 
 ; N
+    .byte %1100
     .byte %1010
-    .byte %1110
-    .byte %1110
-    .byte %1110
-    .byte %1110
-    .byte %1110
+    .byte %1010
+    .byte %1010
+    .byte %1010
+    .byte %1010
     .byte %1010
     .byte %0000
 

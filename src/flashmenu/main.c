@@ -37,9 +37,8 @@ init ()
     gfx_init ();
     gfx_set_font (charset_4x8, 2);
 
-    desktop = OBJ(make_box (pattern_leaves));
+    desktop = OBJ(make_box (pattern_woven));
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
-    draw_obj (desktop);
 }
 
 int
@@ -48,17 +47,12 @@ main (int argc, char ** argv)
     struct obj * tmp;
     init ();
 
-    print_message ("F7: BASIC  F1: Help");
+    print_message ("Welcome!");
     append_obj (desktop, tmp = make_file_window ("#8", 0, 0, 81, 12 * 16 - MESSAGE_HEIGHT));
-    layout_obj (tmp);
-    draw_obj (tmp);
-    append_obj (desktop, tmp = make_file_window ("#1", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
-    layout_obj (tmp);
-    draw_obj (tmp);
+    append_obj (desktop, tmp = make_file_window ("#8", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
     append_obj (desktop, tmp = make_basic_starter ());
-    layout_obj (tmp);
-    draw_obj (tmp);
-    print_message ("F7: Back");
+    layout_obj (desktop);
+    draw_obj (desktop);
 
     while (1);
 

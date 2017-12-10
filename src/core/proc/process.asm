@@ -20,7 +20,7 @@ init_per_process_data:
     lda #BANK_CORE_CODE
     sta saved_bank5
 
-    ; Initialise standard streeams.
+    ; Initialise standard streams.
     lda #@(+ FILE_OPENED FILE_READABLE)
     sta file_states
     lda #@(+ FILE_OPENED FILE_WRITABLE)
@@ -139,7 +139,7 @@ n:  pla
     sta $9ff4
     pha
 
-    ;; Kill libraroes of process.
+    ;; Kill libraries of process.
     ldx num_libraries
     beq +no_libraries
     dex

@@ -42,20 +42,15 @@ error:
     lda tmp3
     tax
     beq n
-    ldx process_slot
 
-    lda $9ff4
-    pha
+    ldx $9ff4
     lda #0
     sta $9ff4
-
     lda process_states,x
     ora #2      ; Mark as waiting for child process.
     and #$7f
     sta process_states,x
-
-    pla
-    sta $9ff4
+    stx $9ff4
 
 n:  rts
 .endproc

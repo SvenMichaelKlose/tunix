@@ -115,32 +115,6 @@ done:
     sta @(++ end_of_library_calls)
     rts
 
-library_core:   0
-
-library_call:
-    sta library_core
-    lda $9ff4
-    pha
-    lda #@(high (-- library_return))
-    pha
-    lda #@(low (-- library_return))
-    pha
-    tya
-    pha
-    txa
-    pha
-    lda library_core
-    sta $9ff4
-    jmp switch_banks_in
-
-library_return:
-    pla
-    sta $9ff4
-    php
-    jsr switch_banks_in
-    plp
-    rts
-    
 ; Generate:
 ;   ldx #>fun
 ;   ldy #<fun

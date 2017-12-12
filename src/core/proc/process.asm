@@ -62,31 +62,13 @@ init_process:
     sty @(++ saved_pc)
 
     tay     ; Save core bank.
+
+    ; Mark process as running (128).
     lda #0
     sta $9ff4
-
-    ; Find new task slot.
-    ldx current_process
-l:  inx
-    cpx #max_num_processes
-    beq -l
-    lda process_states,x
-    bne -l
-
-    ; Mark slot as being taken (1) and process as running (128).
     lda #129
-    sta process_states,x
-
-    ; Save core bank.
-    tya
-    sta process_cores,x
-    sta process_cores_saved,x
-
-    ; Switch to new process' core.
+    sta process_states,y
     sty $9ff4
-
-    ; Save process' slot index.
-    stx process_slot
 
     ; Initialise stack.
     lda #@(high (-- exit_process))
@@ -127,10 +109,9 @@ kill:
     ;; Resume waiting parent process.
     ldy parent_process
     sty $9ff4
-    ldx process_slot
     lda #0
     sta $9ff4
-    lda process_states,x
+    lda process_states,y
     and #%00000010
     beq +n
     tya
@@ -152,12 +133,9 @@ no_libraries:
     ;; Free banks of process.
     jsr free_process_banks
 
-    ;; Save process' slot.
-    lda process_slot
-    pha
-
     ;; Free core of process.
     lda $9ff4
+    pha
     ldx #0
     stx $9ff4
     jsr free_bank
@@ -185,31 +163,24 @@ n:  sta $9ff4
 
 halt:
     tax
-    lda $9ff4
-    pha
-    stx $9ff4
-    ldx process_slot
+    ldy $9ff4
     lda #0
     sta $9ff4
     lda process_states,x
     and #%01111111
     sta process_states,x
-    pla
-    sta $9ff4
+    sty $9ff4
     rts
 
 resume:
     tax
-    lda $9ff4
-    pha
+    ldy $9ff4
     stx $9ff4
-    ldx process_slot
     lda #0
     sta $9ff4
     lda process_states,x
     and #%11111101
     ora #%10000000
     sta process_states,x
-    pla
-    sta $9ff4
+    sty $9ff4
     rts

@@ -5,27 +5,23 @@ force_switch:
     stx saved_x
     tsx
     inc $0102,x
-    ldx saved_x
+    bne +n
+    inc $0103,x
+n:  ldx saved_x
 
-switch:
-    pha
+current_bank_ram: 0
 
-    ;; Restart NMI.
-    lda #$80
-    sta $9115
-
-    ;; Return if multitasking has been turned off.
-    lda takeovers
-    beq +l
-    sta needs_switch
-    pla
-    rti
-
-l:  pla
+switch2:
     jsr take_over
+
+    lda $9ff4
+    sta current_bank_ram
+    lda current_process
+    sta $9ff4
 
     ;; Save process status.
     ; Save registers.
+    pla
     sta saved_a
     stx saved_x
     sty saved_y
@@ -54,6 +50,8 @@ l:  lda 0,x
     sta saved_zeropage
 
     ; Save set of banks.
+    lda current_bank_ram
+    sta saved_bank_ram
     lda $9ff6
     sta saved_bank_io
     lda $9ff8
@@ -64,15 +62,8 @@ l:  lda 0,x
     sta saved_bank3
     lda $9ffe
     sta saved_bank5
-    ldy $9ff4
-    ldx process_slot
-    lda #0
-    sta $9ff4
-    tya
-    sta process_cores_saved,x
 
-
-switch_to_next_process:
+switch_to_next_process: ; Called when a process has been killed.
     ; Switch to master core.
     lda #0
     sta $9ff4
@@ -87,10 +78,9 @@ m:  dey
     bne +l
     ldx #0
 l:  lda process_states,x
-    bpl -m      ; Not running.
+    bpl -m      ; Running.
 
-    ;;; Switch to found process.
-    lda process_cores_saved,x
+    txa
 
 ; Switch to particular process.
 ;
@@ -99,13 +89,14 @@ l:  lda process_states,x
 switch_to_process:
     ; Switch in process' core bank.
     sta $9ff4
+    tay
 
     ; Keep next call of "release" from forcing a switch.
     lda #0
     sta needs_switch
 
-    lda process_slot
-    sta current_process
+    sty current_process
+    sty $9ff4
 
     ; Restore stack contents.
     ldx saved_sp
@@ -132,22 +123,17 @@ l:  lda saved_zeropage,x
     sta $9ffa
     lda saved_bank3
     sta $9ffc
-    lda saved_bank5
-    sta $9ffe
 
-return_from_switch:
     lda @(++ saved_pc)
     pha
     lda saved_pc
     pha
     lda saved_flags
     pha
-    lda saved_a
     ldx saved_x
     ldy saved_y
 
-    jsr release
-    rti
+    jmp return_from_switch
 
 g:  jsr guru_meditation
 
@@ -159,15 +145,6 @@ save_process_state:
     php
     pla
     sta saved_flags
-
-    ; Save actually used core bank.
-    ldy $9ff4
-    ldx process_slot
-    lda #0
-    sta $9ff4
-    tya
-    sta process_cores_saved,x
-    sty $9ff4
 
     ; Set return address to RTS that'll return from system call.
     lda #<+return

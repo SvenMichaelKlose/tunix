@@ -21,8 +21,6 @@ core_data_start = @*pc*
 ;;; Processes
 
 process_states:         fill max_num_processes
-process_cores:          fill max_num_processes
-process_cores_saved:    fill max_num_processes
 
 
 ;;; Banks allocated by "alloc_block":
@@ -54,8 +52,6 @@ devcbm_eof: 0
 per_process_data_size = @(- per_process_data_end per_process_data_start)
 per_process_data_start:
 
-;;; Task state.
-; +3K area is stored in process_cores_saved in the master core.
 saved_pc:           0 0
 saved_a:            0
 saved_x:            0
@@ -75,7 +71,6 @@ saved_bank5:        0
 parent_process: 0
 program_start:  0 0
 bss_size:       0 0
-process_slot:   0       ; Indexes in master core tables.
 
 
 ;;; File system

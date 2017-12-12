@@ -214,15 +214,10 @@ ok: lda tmp
     pla
     sta s
 
-    ; Get callee's banks.
+    ; Get callee's banks back.
     pla
     sta $9ff6
     pla
-    ldy $9ff4
-    sta $9ff4
-    ldx process_slot
-    sty $9ff4
-    stx process_slot
     sta $9ff4
 
     ; Step over library path.

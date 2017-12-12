@@ -16,13 +16,6 @@ num_args:   .byte 0
 n:  rts
 .endproc
 
-.proc inc_bca
-    inc bca
-    bne n
-    inc bca+1
-n:  rts
-.endproc
-
 .proc exec_script
     pla ; Y
     pla ; X
@@ -34,12 +27,9 @@ n:  rts
     pla
     sta bcp+1
     lda bcp
-    sec
-    sbc #1
-    sta bcp
-    bcs n
+    bne n
     dec bcp+1
-n:
+n:  dec bcp
 
 next_bytecode:
     ; Get opcode.
@@ -69,8 +59,10 @@ next_arg:
     dec num_args
     bmi script_call
 
-    jsr inc_bca
-    lda (bca),y     ; Get zero page address from argument info.
+    inc bca
+    bne m
+    inc bca+1
+m:  lda (bca),y     ; Get zero page address from argument info.
     tax
     lda (bcp),y     ; Copy in argument value.
     sta 0,x

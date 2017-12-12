@@ -20,28 +20,18 @@ main:
     ldx #$ff
     txs
 
-    ; Reset VIC:
-    lda #0
-    ldx #$0f
-l:  sta $9000,x
-    dex
-    bpl l
-
     lda #$22    ; Red screen.
     sta $900f
 
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
+    jsr $e518   ; Init hardware.
 
-    ; Clear screen.
-;    lda #$00
-;    sta d
-;    sta c
-;    lda #$10
-;    sta d+1
-;    sta c+1
-;    jsr clrram
+    lda #0
+    sta $9002
+    lda #$77    ; Yellow screen.
+    sta $900f
 
     ; Activate all RAM.
     lda #%00111111
@@ -138,9 +128,6 @@ l:  sta $9000,x
 
     lda #%01111111
     sta $9ff2
-
-    lda #$77    ; Yello screen.
-    sta $900f
 
     ; Run it.
     jmp $2000

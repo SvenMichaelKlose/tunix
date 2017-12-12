@@ -1,5 +1,5 @@
 .export _ultimem_send_command
-.export _ultimem_write_byte
+.export _ultimem_burn_byte
 .export _ultimem_erase_chip
 .export _ultimem_erase_block
 
@@ -15,7 +15,7 @@
     rts
 .endproc
 
-.proc _ultimem_write_byte
+.proc _ultimem_burn_byte
     sta d
     jsr popax
     sta s

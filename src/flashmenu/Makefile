@@ -14,6 +14,7 @@ SOURCES= \
     main.c \
     message.c \
     obj.c \
+    ultifs.c \
     ultimem.c \
     window.c
 

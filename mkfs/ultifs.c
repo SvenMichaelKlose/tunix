@@ -1,50 +1,67 @@
+/*
+ * Ultimem Flash ROM file system
+ */
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __CC65__
-#include "ultimem.h"
+#ifndef __CC65__
+#define STORE_SIZE      (8 * 1024 * 1024)
+#else
+#define STORE_SIZE      1
 #endif
 
-#define STORE_SIZE      (8 * 1024 * 1024)
 #define ULTIFS_START    0x1800
 
 #ifndef __CC65__
 char store[STORE_SIZE];
 #endif
 
-typedef unsigned long upos;
-typedef unsigned long usize;
-typedef unsigned short uid;
-
-upos last_free;
-
-struct _block {
-    usize   size;
-    char    type;
-    upos    replacement;
-    upos    next;           /* Next file in directory. */
-    char    name_length;
-};
-
-typedef struct _block block;
-
-struct _bfile {
-    upos    start;
-    upos    ptr;
-    upos    directory;
-    upos    replaced;
-};
-
-typedef struct _bfile bfile;
-
+/*
+ * ROM autostart header
+ */
 struct ultifs {
     short cold_start;
     short warm_start;
     char autostart_id[5];
     unsigned version;
 };
+
+typedef unsigned long upos;
+typedef unsigned long usize;
+
+/*
+ * Header of file data
+ */
+struct _block {
+    usize   size;           /* Size of file data. */
+    char    type;
+    upos    replacement;    /* Replacement if this file or -1. */
+    upos    next;           /* Next file in directory or -1. Not valid if replaced. */
+    char    name_length;
+    /* name */
+    /* file data */
+};
+typedef struct _block block;
+
+/*
+ * File access info
+ */
+struct _bfile {
+    upos    start;
+    upos    ptr;
+    upos    directory;
+    upos    replaced;
+};
+typedef struct _bfile bfile;
+
+upos last_free;
+
+/*
+ * ULTIMEM ACCESS
+ */
 
 unsigned char
 ultimem_read_byte (upos p)
@@ -65,19 +82,25 @@ ultimem_read_long (upos p)
 }
 
 void
+ultimem_readm (char * dest, char len, upos p)
+{
+}
+
+void
 ultimem_write_byte (upos p, unsigned char v)
 {
     return;
 }
-
-#ifndef __CC65__
-#endif
 
 void
 ultimem_write_long (upos p, unsigned long v)
 {
     return;
 }
+
+/*
+ * BFILE FUNCTIONS
+ */
 
 usize
 block_header_size (upos p)
@@ -91,10 +114,9 @@ file_data (upos p)
     return p + block_header_size (p);
 }
 
-bfile *
-bfile_open (upos p)
+upos
+bfile_get_replacement (upos p)
 {
-    bfile * b = malloc (sizeof (bfile));
     upos r;
 
     while (1) {
@@ -103,6 +125,17 @@ bfile_open (upos p)
             break;
         p = r;
     }
+
+    return p;
+}
+
+bfile *
+bfile_open (upos p)
+{
+    bfile * b = malloc (sizeof (bfile));
+
+    p = bfile_get_replacement (p);
+    b->start = p;
     b->ptr = file_data (p);
 
     return b;
@@ -190,6 +223,61 @@ bfile_close (bfile * b)
         bfile_append_to_directory (b);
 
     free (b);
+}
+
+upos
+bfile_lookup_name (upos p, char * name, char ln)
+{
+    char * buf = malloc (ln);
+    char lh;
+
+    do {
+        lh = ultimem_read_byte (p + offsetof (block, name_length));
+        if (ln != lh)
+            continue;
+        ultimem_readm (buf, ln, p + offsetof (block, name_length + 1));
+        if (!memcmp (buf, name, ln))
+            break;
+    } while ((p = ultimem_read_long (p + offsetof (block, next))) != -1);
+
+    free (buf);
+
+    if (p == -1)
+        return 0;
+    return bfile_get_replacement (p);
+}
+
+char
+pathname_length (char * s)
+{
+    char n = 0;
+    char c;
+
+    while (1) {
+        c = *s;
+        if (!c || c == '/')
+            break;
+        n++;
+    }
+
+    return n;
+}
+
+upos
+bfile_lookup (char * name)
+{
+    upos p = ULTIFS_START;
+    char l;
+
+    while (1) {
+        l = pathname_length (name);
+        p = bfile_lookup_name (p, name, l);
+        if (!p || !name[l])
+            break;
+        name = &name[l + 1];
+    }
+
+    return p;
 }
 
 void

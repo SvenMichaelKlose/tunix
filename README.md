@@ -29,7 +29,7 @@ Development of g is currently limited to src/flashboot and src/flashmenu.
 First, let's take a look at the memory map:
 
 0000    Core zero page
-0020    Application zero page
+0020    Application
 0090    KERNAL zero page
 0100    Stack
 0200    KERNAL area
@@ -40,7 +40,7 @@ First, let's take a look at the memory map:
 2000    Application
 8000    Character ROM
 9000    VIC area
-9800    I/O area
+9800    Application
 a000    Application
 c000    BASIC
 e000    KERNAL
@@ -117,78 +117,14 @@ s: ASCIIZ library path followed zero–terminated list of ASCIIZ system call nam
 d: Jump table address.
 ```
 
-Example to access the core:
-```
-;; Say hello, launch another program and exit.
+"link" loads the library and creates a jump table to it.
 
-program_size = program_end - program_start
+This function also creates trampline procedures in the +3K core
+bank of the process which must be switched in before making a
+call.
 
-    .word program_start  ; Load address (not loaded).
-    .word program_size   ; Does not affect the load address.
+A dedicated +3K bank will be allocated.
 
-    org $2000
-
-program_start:
-    ;; Request core system call jump table.
-    lda #<symbols
-    sta s
-    lda #>symbols
-    sta s+1
-    lda #<jump_table
-    sta d
-    lda #>jump_table
-    sta d+1
-    jsr $0400
-    bcs error
-
-    ;; Say something nice.
-    ldx #<txt_welcome
-    ldy #>txt_welcome
-    jsr print
-
-    ;; Launch program.
-    lda #<path_program
-    sta s
-    lda #>path_program
-    sta s+1
-    jsr launch 
-    rts
-
-;; Print a zero–terminated string.
-print:                                                                          
-    stx s
-    sty @(++ s)
-l:  ldy #0
-    lda (s),y
-    beq +done
-    jsr take_over   ; Stop multitasking.
-    jsr $ffd2       ; Print character via KERNAL.
-    jsr release     ; Resume multitasking.
-    jsr inc_s
-    jmp l
-done:
-error:
-    rts
-
-txt_welcome:    .asciiz "HELLO WORLD!"
-path_program:   .asciiz "MYPROG"
-
-symbols:
-    .asciiz "/g"        ; Function in the core please.
-    .asciiz "take_over"
-    .asciiz "release"
-    .asciiz "inc_s"
-    .asciiz "launch"
-    .byte 0             ; End of symbol list.
-
-jump_table:
-take_over: .byte 0, 0, 0
-release:   .byte 0, 0, 0
-inc_s:     .byte 0, 0, 0
-launch:    .byte 0, 0, 0
-
-program_end:
-```
 
 #### "launch" – Launch program on file system.
 ```
@@ -200,6 +136,7 @@ A: Process ID.
 ```
 
 Loads a program and runs it independently of the invoking task.
+
 
 #### "fork" – Create child process.
 

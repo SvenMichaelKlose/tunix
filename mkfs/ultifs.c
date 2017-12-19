@@ -430,8 +430,11 @@ void
 mkfs ()
 {
     struct ultifs * ultifs = (void *) store;
+    memset (store, 0xff, STORE_SIZE);
     bzero (ultifs, sizeof (struct ultifs));
     strcpy (ultifs->autostart_id, "A0\xc3\xc2\xcd");
+    last_free = ULTIFS_START;
+    printf ("Created new image.\n");
 }
 
 void
@@ -468,37 +471,89 @@ void import_directory (upos bparent, char * name, int indent)
 
     while (entry = readdir (dir)) {
         char path[1024];
-        if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, "..") || !strcmp (entry->d_name, "fs.img"))
+        if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, ".."))
             continue;
         snprintf (path, sizeof (path), "%s/%s", name, entry->d_name);
  
         if (entry->d_type == DT_DIR) {
-            printf ("%*s[%s]\n", indent, "", entry->d_name);
+            printf ("Importing %*s%s/\n", indent, "", entry->d_name);
             bsubdir = bfile_create_directory (bparent, entry->d_name);
             import_directory (bsubdir, path, indent + 2);
         } else {
-            printf ("%*s- %s\n", indent, "", entry->d_name);
+            printf ("Importing %*s%s\n", indent, "", entry->d_name);
             load_file (bparent, entry->d_name, path);
         }
     }
-    closedir(dir);
+    closedir (dir);
+}
+
+void
+help ()
+{
+    printf ("UltiFS image manager\n");
+    printf ("\n");
+    printf ("Usage: ultifs image command [options]\n");
+    printf ("\n");
+    printf ("Commands:\n");
+    printf ("\n");
+    printf ("  n             Format image.\n");
+    printf ("  i directory   Import directory recursively.\n");
+    printf ("  w             Write image.\n");
+    exit (255);
+}
+
+void
+invalid (char * msg)
+{
+    fprintf (stderr, "Invalid arguments: %s\n", msg);
+    exit (255);
+}
+
+char * image_name;
+
+void
+write_image ()
+{
+    FILE * img = fopen (image_name, "w");
+    fwrite (store, STORE_SIZE, 1, img);
+    fclose (img);
 }
 
 int
-main (char ** argv, int argc)
+main (int argc, char ** argv)
 {
     bfile * b;
     upos dir;
+    int i;
 
-    memset (store, 0xff, STORE_SIZE);
-    mkfs ();
-    last_free = ULTIFS_START;
-
-    import_directory (0, ".", 0);
-
-    FILE * img = fopen ("fs.img", "w");
-    fwrite (store, STORE_SIZE, 1, img);
-    fclose (img);
+    if (argc == 1)
+        help ();
+    if (argc < 3)
+        invalid ("Invalid number of arguments.");
+    image_name = argv[1];
+    printf ("Image file: %s\n", image_name);
+    i = 2;
+    do {
+        char * command = argv[i++];
+        if (strlen (command) != 1)
+            invalid ("Command must be a single character.");
+        switch (*command) {
+            case 'n':
+                mkfs ();
+                continue;
+            case 'i':
+                if (i == argc)
+                    invalid ("Path of directory to import missing.");
+                import_directory (0, argv[i++], 0);
+                continue;
+            case 'w':
+                write_image ();
+                printf ("Image written.\n");
+                continue;
+            default:
+                invalid ("Unknown command.");
+        }
+    } while (i < argc);
 
     return 0;
 }

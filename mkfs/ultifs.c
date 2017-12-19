@@ -16,6 +16,50 @@
 #define ULTIFS_START    0x400
 #define EMPTY_PTR       -1
 
+#ifdef __CC65__
+
+char *
+strsep (char ** str, char * delim)
+{
+    char * p = *str;
+    char * n;
+
+    if (!p)
+        return NULL;
+
+    n = strtok (p, delim);
+    *str = n;
+    *--n = 0;
+
+    return n;
+}
+
+#endif
+
+char **
+split_pathname (char * pathname)
+{
+    char * pn = strdup (pathname);
+    char ** arr = malloc (sizeof (char *) * 8);
+    char n = 0;
+
+    bzero (arr, sizeof (char *) * 8);
+    while (arr[n++] = strdup (strsep (&pn, ",")));
+
+    free (pn);
+    return arr;
+}
+
+void
+free_pathname (char ** arr)
+{
+    char n = 0;
+
+    while (arr[n])
+        free (arr[n++]);
+    free (arr);
+}
+
 unsigned char store[STORE_SIZE];
 
 /*
@@ -47,7 +91,11 @@ struct _block {
     char    name_length;
     /* name */
     /* file data */
+#ifndef __CC65__
 }__attribute__((packed));
+#else
+};
+#endif
 typedef struct _block block;
 
 #define BLOCKTYPE_FILE       ~1
@@ -260,6 +308,7 @@ directory_last (upos p)
     upos n;
 
     while (1) {
+        p = bfile_get_replacement (p);
         n = ultimem_read_int (p + offsetof (block, next));
         if (n == EMPTY_PTR)
             break;
@@ -313,6 +362,8 @@ bfile_create_directory (upos parent, char * name)
     return d;
 }
 
+#define IS_BFILE_REMOVED(p) (!ultimem_read_int (p + offsetof (block, size)))
+
 upos
 bfile_lookup_name (upos p, char * name, char ln)
 {
@@ -333,53 +384,9 @@ bfile_lookup_name (upos p, char * name, char ln)
 
     free (buf);
 
-    if (p == EMPTY_PTR)
+    if (p == EMPTY_PTR || IS_BFILE_REMOVED(p))
         return 0;
     return bfile_get_replacement (p);
-}
-
-#ifdef __CC65__
-
-char *
-strsep (char ** str, char * delim)
-{
-    char * p = *str;
-    char * n;
-
-    if (!p)
-        return NULL;
-
-    n = strtok (p, delim);
-    *str = n;
-    *--n = 0;
-
-    return n;
-}
-
-#endif
-
-char **
-split_pathname (char * pathname)
-{
-    char * pn = strdup (pathname);
-    char ** arr = malloc (sizeof (char *) * 8);
-    char n = 0;
-
-    bzero (arr, sizeof (char *) * 8);
-    while (arr[n++] = strdup (strsep (&pn, ",")));
-
-    free (pn);
-    return arr;
-}
-
-void
-free_pathname (char ** arr)
-{
-    char n = 0;
-
-    while (arr[n])
-        free (arr[n++]);
-    free (arr);
 }
 
 upos
@@ -450,25 +457,25 @@ load_file (upos dir, char * name, char * pathname)
 #include <sys/types.h>
 #include <dirent.h>
 
-void listdir (upos bparent, char * name, int indent)
+void import_directory (upos bparent, char * name, int indent)
 {
     DIR * dir;
     struct dirent * entry;
     upos bsubdir;
 
-    if (!(dir = opendir(name)))
+    if (!(dir = opendir (name)))
         return;
 
-    while (entry = readdir(dir)) {
+    while (entry = readdir (dir)) {
         char path[1024];
         if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, "..") || !strcmp (entry->d_name, "fs.img"))
             continue;
-        snprintf (path, sizeof(path), "%s/%s", name, entry->d_name);
+        snprintf (path, sizeof (path), "%s/%s", name, entry->d_name);
  
         if (entry->d_type == DT_DIR) {
             printf ("%*s[%s]\n", indent, "", entry->d_name);
             bsubdir = bfile_create_directory (bparent, entry->d_name);
-            listdir (bsubdir, path, indent + 2);
+            import_directory (bsubdir, path, indent + 2);
         } else {
             printf ("%*s- %s\n", indent, "", entry->d_name);
             load_file (bparent, entry->d_name, path);
@@ -487,7 +494,7 @@ main (char ** argv, int argc)
     mkfs ();
     last_free = ULTIFS_START;
 
-    listdir (0, ".", 0);
+    import_directory (0, ".", 0);
 
     FILE * img = fopen ("fs.img", "w");
     fwrite (store, STORE_SIZE, 1, img);

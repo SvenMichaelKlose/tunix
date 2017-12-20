@@ -33,6 +33,14 @@ shift_charset ()
 void
 init ()
 {
+    /* Active RAM in BANK5. */
+    * (char *) 0x9ff2 = 0xff;
+
+    /* Add memory blocks for malloc(). */
+    _heapadd (0x400, 0xc00);    /* +3K */
+    _heapadd (0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
+    _heapadd (0xa000, 0x2000);  /* BANK5 */
+
     shift_charset ();
     init_bank_allocator ();
     gfx_init ();
@@ -45,15 +53,19 @@ init ()
 int
 main (int argc, char ** argv)
 {
+    size_t freemem;
+    char msg[32];
     struct obj * tmp;
-    init ();
 
-    print_message ("Welcome!");
+    init ();
     append_obj (desktop, tmp = make_file_window ("#8", 0, 0, 81, 12 * 16 - MESSAGE_HEIGHT));
     append_obj (desktop, tmp = make_file_window ("#8", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
     append_obj (desktop, tmp = make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
+
+    sprintf (msg, "%d bytes free.", _heapmemavail ());
+    print_message (msg);
 
     while (1) {
         if (cbm_read_char () == 'R') {

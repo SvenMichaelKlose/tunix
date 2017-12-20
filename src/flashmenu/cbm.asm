@@ -1,6 +1,6 @@
 temporary_bank  = $a000
 
-.export _cbm_read_directory
+.export _cbm_read_directory, _cbm_read_char
 
 .importzp s, d, tmp, tmp2, tmp3
 .import popax
@@ -176,5 +176,11 @@ l:  lda (s),y
     iny
     jmp l
 n:  pla
+    rts
+.endproc
+
+.proc _cbm_read_char
+    jsr $ffe4
+    ldx #0
     rts
 .endproc

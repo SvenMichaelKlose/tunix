@@ -1,5 +1,5 @@
 /*
- * Ultimem Flash ROM file system
+ * Ultimem Flash file system
  */
 
 #include <stddef.h>
@@ -13,7 +13,7 @@
 #define STORE_SIZE      1
 #endif
 
-#define ULTIFS_START    0x400
+#define ULTIFS_START    0x10000
 #define EMPTY_PTR       -1
 
 #ifdef __CC65__
@@ -62,16 +62,6 @@ free_pathname (char ** arr)
 
 unsigned char store[STORE_SIZE];
 
-/*
- * ROM autostart header
- */
-struct ultifs {
-    short cold_start;
-    short warm_start;
-    char autostart_id[5];
-    unsigned version;
-};
-
 #ifndef __CC65__
 typedef unsigned int upos;
 typedef unsigned int usize;
@@ -81,7 +71,7 @@ typedef unsigned long usize;
 #endif
 
 /*
- * Header of file data
+ * File header
  */
 struct _block {
     usize   size;           /* Size of file data. */
@@ -429,10 +419,7 @@ mount ()
 void
 mkfs ()
 {
-    struct ultifs * ultifs = (void *) store;
     memset (store, 0xff, STORE_SIZE);
-    bzero (ultifs, sizeof (struct ultifs));
-    strcpy (ultifs->autostart_id, "A0\xc3\xc2\xcd");
     last_free = ULTIFS_START;
     printf ("Created new image.\n");
 }
@@ -497,6 +484,7 @@ help ()
     printf ("Commands:\n");
     printf ("\n");
     printf ("  n             Format image.\n");
+    printf ("  l file        Load file to start of image.\n");
     printf ("  i directory   Import directory recursively.\n");
     printf ("  w             Write image.\n");
     exit (255);
@@ -510,6 +498,15 @@ invalid (char * msg)
 }
 
 char * image_name;
+
+void
+load (char * pathname)
+{
+    FILE * f = fopen (pathname, "rb");
+    fread (store, 65536, 1, f);
+    fclose (f);
+    printf ("Loaded boot file '%s'.\n", pathname);
+}
 
 void
 write_image ()
@@ -540,6 +537,11 @@ main (int argc, char ** argv)
         switch (*command) {
             case 'n':
                 mkfs ();
+                continue;
+            case 'l':
+                if (i == argc)
+                    invalid ("Path of boot file.");
+                load (argv[i++]);
                 continue;
             case 'i':
                 if (i == argc)

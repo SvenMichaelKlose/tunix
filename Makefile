@@ -1,12 +1,13 @@
 all:
-	$(CC) -o make-image make-image.c
-	mkdir -pv compiled
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 #	cd src/sh && ./make.sh && cd ../.. && cp src/sh/sh compiled
 	$(MAKE) -C src all
-	./make-image
-	rm -fv g.zip compiled/charset.lst
-	cp -v src/flashmenu/README.md compiled
+	$(MAKE) -C mkfs all
+	rm -fv g.zip
+	rm -rfv compiled
+	mkdir -pv compiled
+	cp src/flashmenu/flashmenu.bin compiled/boot
+	./mkfs/mkfs.ultifs compiled/ultimem.img n l src/flashboot/flashboot.bin i compiled w
 	cd compiled && zip -r ../g.zip *
 
 clean:

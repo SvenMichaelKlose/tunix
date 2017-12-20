@@ -1,66 +1,61 @@
-.export load
-.importzp s, d, c
+.export ultimem_read_byte
+.export ultimem_write_byte
+.exportzp bp
+.importzp s, d, c, tmp
 
-.segment "STARTUP"
+.zeropage
 
-journal_start = 65536                                                                                                       
-blocks_start = 131072
-files_start = 196608
+bp:     .res 4
 
-block_record_size = 10
-block_pos = 2
-block_size = 6
-block_next = 8
+.code
 
-dirent_name = 2
-dirent_type = 18
-dirent_file = 19
-dirent_size = 21
+.proc ultimem_get_bank
+    lda 1,x
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    sta $9ff8
+    lda 2,x
+    asl
+    asl
+    asl
+    ora $9ff8
+    sta $9ff8
+    lda 2,x
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    sta $9ff9
+    lda 0,x
+    sta s
+    lda 1,x
+    and #%00011111
+    ora #$20
+    sta s+1
+    ldy #0
+    rts
+.endproc
 
-bp = 6
-
-; Fetch byte from Flash memory at 24-bit offset 'bp'.
-.proc get_byte
+; Fetch byte from Flash memory at 24-bit offset in 0,X.
+.proc ultimem_read_byte
+    tya
+    pha
     lda $9ff2
     pha
-    lda #%01111110
+    lda #%01111101
     sta $9ff2
     lda $9ff8
     pha
     lda $9ff9
     pha
 
-    lda bp+1
-    lsr
-    lsr
-    lsr
-    lsr
-    lsr
-    sta $9ff8
-    lda bp+2
-    asl
-    asl
-    asl
-    asl
-    asl
-    ora $9ff8
-    sta $9ff8
-    lda bp+2
-    lsr
-    lsr
-    lsr
-    lsr
-    lsr
-    sta $9ff9
-    lda bp
-    sta s
-    lda bp+1
-    and #%00000111
-    ora #$20
-    sta s+1
-    ldy #0
+    jsr ultimem_get_bank
     lda (s),y
-    tax
+    sta tmp
 
     pla
     sta $9ff9
@@ -68,64 +63,37 @@ bp = 6
     sta $9ff8
     pla
     sta $9ff2
-    txa
+    pla
+    tay
+    lda tmp
     rts
 .endproc
 
-.proc inc_bp
-    inc bp
-    bne done
-    inc bp+1
-    bne done
-    inc bp+2
-done:
-    rts
-.endproc
-
-block_record = blocks_start + block_record_size + block_pos
-
-.proc load
-    lda #block_record .and $ff
-    sta bp
-    lda #(block_record >> 8) .and $ff
-    sta bp+1
-    lda #(block_record >> 16) .and $ff
-    sta bp+2
-    jsr get_byte
+; Write byte to RAM at 24-bit offset in 0,X.
+.proc ultimem_write_byte
+    sta tmp
+    tya
     pha
-    inc bp
-    jsr get_byte
+    lda $9ff2
     pha
-    inc bp
-    jsr get_byte
+    lda #%01111111
+    sta $9ff2
+    lda $9ff8
     pha
-    inc bp      ; Skip convenience byte.
-    inc bp
-    jsr get_byte
-    sta c
-    inc bp
-    jsr get_byte
-    sta c+1
-    inc c+1
-    pla
-    sta bp+2
-    pla
-    sta bp+1
-    pla
-    sta bp
+    lda $9ff9
+    pha
 
-    lda #$00
-    sta d
-    lda #$20
-    sta d+1
-l:  jsr get_byte
-    ldy #0
-    sta (d),y
-    jsr inc_bp
-    dec c
-    bne l
-    dec c+1
-    bne l
+    jsr ultimem_get_bank
+    lda tmp
+    sta (s),y
 
+    pla
+    sta $9ff9
+    pla
+    sta $9ff8
+    pla
+    sta $9ff2
+    pla
+    tay
     rts
 .endproc

@@ -5,6 +5,7 @@
 #include "obj.h"
 #include "box.h"
 #include "button.h"
+#include "cbm.h"
 #include "frame.h"
 #include "layout-ops.h"
 #include "list.h"
@@ -54,7 +55,12 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
-    while (1);
+    while (1) {
+        if (cbm_read_char () == 'R') {
+            layout_obj (desktop);
+            draw_obj (desktop);
+        }
+    }
 
     return 0;
 }

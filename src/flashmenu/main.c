@@ -39,9 +39,9 @@ init ()
     * (char *) 0x9ff2 = 0xff;
 
     /* Add memory blocks for malloc(). */
-    _heapadd (0x400, 0xc00);    /* +3K */
-    _heapadd (0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
-    _heapadd (0xa000, 0x2000);  /* BANK5 */
+    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
+    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
+    _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
 
     shift_charset ();
     init_bank_allocator ();

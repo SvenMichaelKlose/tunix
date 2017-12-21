@@ -9,14 +9,13 @@
 #include "table.h"
 #include "window.h"
 #include "ultimem.h"
-#include "scroll.h"
 #include "cbm.h"
 
 struct obj *__fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
 	struct window * win = make_window (title);
-	struct scroll * scroll = make_scroll ();
+//	struct scroll * scroll = make_scroll ();
     int i, j;
     char name[16];
     char dir_bank = alloc_bank ();
@@ -25,8 +24,9 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
-    append_obj (OBJ(win->obj.node.children), OBJ(scroll));
+//    append_obj (OBJ(win->obj.node.children), OBJ(scroll));
 
+/*
     *ULTIMEM_CONFIG2 = 0xff;
     *ULTIMEM_BLK5 = dir_bank;
     bzero (0xa000, 0x2000);
@@ -46,6 +46,7 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
                 gfx_putchar_fixed (name[i]);
     }
     gfx_pop_context ();
+    */
 
     free_bank (dir_bank);
     return OBJ(win);

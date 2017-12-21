@@ -1,26 +1,13 @@
 SOURCES= \
     bank-allocator.c \
     basic-starter.c \
-    box.c \
-    button.c \
-    error.c \
-    event.c \
-    frame.c \
     file-window.c \
-    layout-ops.c \
-    list.c \
-    scroll.c \
-    table.c \
     main.c \
-    message.c \
-    obj.c \
     ultifs.c \
-    ultimem.c \
-    window.c
+    ultimem.c
 
 ASMSOURCES= \
     cbm.asm \
-    libgfx-wrapper.asm \
     ultimem-basics.asm \
     ../zeropage.asm \
     ../core/mem/clrram.asm \
@@ -34,10 +21,10 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -O -c $(CFLAGS) -o $@ $<
+	$(CC) -O -c $(CFLAGS) -I../lib/gfx/ -I../lib/gui/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -t vic20g -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/gfx/libgfx.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib
+	$(LD) -t vic20g -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib
 
 all: $(PROGRAM)
 

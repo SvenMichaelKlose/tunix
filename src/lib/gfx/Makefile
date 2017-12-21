@@ -13,6 +13,7 @@ SOURCES= \
     init-bitmap-mode.asm \
     instructions.asm \
     interpreter.asm \
+    libgfx-wrapper.asm \
     masks.asm \
     patterns.asm \
     putchar.asm \

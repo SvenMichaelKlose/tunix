@@ -1,6 +1,6 @@
 temporary_bank  = $a000
 
-.export _cbm_read_directory, _cbm_read_char
+.export _cbm_opendir, _cbm_readdir, _cbm_closedir, _cbm_read_char
 
 .importzp s, d, tmp, tmp2, tmp3
 .import popax
@@ -18,9 +18,9 @@ dirent_size     = dirent_type + 1
     rts
 .endproc
 
-; int __fastcall__ cbm_read_directory (char * pathname, char device);
+; int __fastcall__ cbm_opendir (char * pathname, char device);
 ; s: CBM path name
-.proc _cbm_read_directory
+.proc _cbm_opendir
     pha
     jsr popax
     sta s
@@ -68,13 +68,10 @@ l2: jsr read
     dex
     bne m
 
-    ; Get temporary bank.
-    lda #<temporary_bank
-    sta d
-    lda #>temporary_bank
-    sta d+1
+    rts
+.endproc
 
-next_entry:
+.proc _cbm_readdir
     lda d
     sta tmp2
     lda d+1
@@ -101,7 +98,7 @@ next_entry:
 
     ; Read until first double quote.
 l3: jsr read
-    beq next_entry
+    beq _cbm_readdir
     cmp #$22
     bne l3
 
@@ -109,7 +106,7 @@ l3: jsr read
     ldy #dirent_name
 l4: jsr read
     bcs error2
-    beq next_entry
+    beq _cbm_readdir
     cmp #$22
     beq n
     sta (d),y
@@ -121,33 +118,30 @@ n:  lda #0
     ; Read till end of line.
 l5: jsr read
     bne l5
-
-    ; Step to next dirent and also save, so we can ignore the last line.
-    lda d
-    clc
-    adc #dirent_size
-    sta d
-    bcc next_entry
-    inc d+1
-    jmp next_entry
+done:
+    lda #0
+    tax
+    rts
 
 error2:
     jsr READST
     bne done
+    lda #255
+    tax
     rts
+.endproc
 
-done:
+.proc _cbm_closedir
     lda #$02
     jsr CLOSE
     bcs e
     jsr CLRCHN
-    lda d
-    ldx d+1
     rts
 
 e:  jmp error
+.endproc
 
-read:
+.proc read
     jsr READST
     bne eof
 
@@ -162,6 +156,8 @@ read:
 eof:
     clc
     rts
+
+e:  jmp error
 .endproc
 
 ; s: String                                                                                          

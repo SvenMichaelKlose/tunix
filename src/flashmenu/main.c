@@ -30,6 +30,8 @@ shift_charset ()
         charset_4x8[i] <<= 4;
 }
 
+char do_shutdown = 0;
+
 void
 init ()
 {
@@ -50,29 +52,38 @@ init ()
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 }
 
+void
+show_free_memory ()
+{
+    char msg[32];
+
+    sprintf (msg, "%d B free.", _heapmemavail ());
+    print_message (msg);
+}
+
 int
 main (int argc, char ** argv)
 {
-    size_t freemem;
-    char msg[32];
     struct obj * tmp;
+    char key;
 
     init ();
     append_obj (desktop, tmp = make_file_window ("#8", 0, 0, 81, 12 * 16 - MESSAGE_HEIGHT));
-    append_obj (desktop, tmp = make_file_window ("#8", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
+//    append_obj (desktop, tmp = make_file_window ("#8", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
     append_obj (desktop, tmp = make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
 
-    sprintf (msg, "%d bytes free.", _heapmemavail ());
-    print_message (msg);
+    *(char *) 0x900f = 0x18;
 
-    while (1) {
-        if (cbm_read_char () == 'R') {
+    do {
+        show_free_memory ();
+        while (!(key = cbm_read_char ()));
+        if (key == 'R') {
             layout_obj (desktop);
             draw_obj (desktop);
         }
-    }
+    } while (!do_shutdown);
 
     return 0;
 }

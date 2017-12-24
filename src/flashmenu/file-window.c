@@ -11,21 +11,12 @@
 #include "ultimem.h"
 #include "cbm.h"
 
-struct obj *__fastcall__
-make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
+void __fastcall__
+draw_file_window (struct obj * w)
 {
-	struct window * win = make_window (title);
-//	struct scroll * scroll = make_scroll ();
     int i, j;
-    char name[16];
-    char dir_bank = alloc_bank ();
-    char * p = (char *) 0xa000;
-    char c;
 
-	set_obj_position_and_size (OBJ(win), x, y, w, h);
-
-//    append_obj (OBJ(win->obj.node.children), OBJ(scroll));
-
+    window_ops.draw (w);
 /*
     *ULTIMEM_CONFIG2 = 0xff;
     *ULTIMEM_BLK5 = dir_bank;
@@ -47,7 +38,19 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
     }
     gfx_pop_context ();
     */
+}
 
-    free_bank (dir_bank);
+struct obj *__fastcall__
+make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
+{
+	struct window * win = make_window (title);
+	struct obj_ops * ops = malloc (sizeof (struct obj_ops));
+    char name[16];
+
+    copy_obj_ops (ops, &window_ops);
+    ops->draw = draw_file_window;
+    set_obj_ops (OBJ(win), ops);
+	set_obj_position_and_size (OBJ(win), x, y, w, h);
+
     return OBJ(win);
 }

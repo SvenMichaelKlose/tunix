@@ -7,7 +7,7 @@ all:
 	rm -rfv compiled
 	mkdir -pv compiled
 	cp src/flashmenu/flashmenu.bin compiled/boot
-	./mkfs/mkfs.ultifs compiled/ultimem.img n l src/flashboot/flashboot.bin i compiled w
+	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 	cd compiled && zip -r ../g.zip *
 
 clean:

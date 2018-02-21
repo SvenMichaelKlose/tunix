@@ -1,3 +1,5 @@
+NOT THE CURRENT STATE OF AFFAIRS.
+
 # G
 
 This is a file and boot manager for Commodore VIC-20s with the

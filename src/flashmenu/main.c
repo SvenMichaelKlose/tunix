@@ -76,8 +76,6 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
-    *(char *) 0x900f = 0x18;
-
     do {
         show_free_memory ();
         while (!(key = cbm_read_char ()));

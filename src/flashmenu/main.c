@@ -1,18 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "libgfx.h"
+#include <libgfx.h>
+
 #include "obj.h"
 #include "box.h"
 #include "button.h"
 #include "cbm.h"
+#include "error.h"
 #include "frame.h"
 #include "layout-ops.h"
 #include "list.h"
+#include "message.h"
 #include "table.h"
 #include "window.h"
-#include "error.h"
-#include "message.h"
+
 #include "bank-allocator.h"
 #include "basic-starter.h"
 #include "file-window.h"

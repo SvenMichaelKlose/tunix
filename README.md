@@ -1,34 +1,12 @@
-NOT THE CURRENT STATE OF AFFAIRS.
-
 # G
 
-This is a file and boot manager for Commodore VIC-20s with the
-Ultimem expansion. 
+This is about to become a boot and file manager for the
+Ultimem memory expander for the Commodore VIC-20, featuring
+a journaling a Flash ROM file system, called "UltiFS".
 
-G allows you to move files and directories across tapes, disk
-drives and the journaling Flash file system "UltiFS" which
-supports adding, removing or replacing data.
+# TODO
 
-# Installation
-
-G can be launched or installed into Flash from tape or disk
-depending on what you choose at startup.  You can also copy it
-over an existing installation while keeping all files.
-
-# Usage
-
-G is to be used with the keyboard.
-
-arrow keys
-space           Select item.
-enter           Open item.
-<-              Close window.
-ctrl            Context menu with hotkeys.
-
-G welcomes you with a icons that represent the available devices.
-
-# Archive tapes
-
-When the tape starts running with REC & PLAY, a short snippet can
-be read that has not been erased, providing the program with a
-time stamp.
+* Make an assembly version of ultifs.c.
+* Hook UltiFS into the KERNAL. I/O area could be a nice
+  place for it.
+* Make the file manager a regular (non-cc65g) app.

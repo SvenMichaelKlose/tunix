@@ -1,6 +1,5 @@
 .export vfill, vcopy
 
-.import calcscr
 .importzp scr, pattern, height, masks, maskd, tmp
 
 .code
@@ -51,5 +50,3 @@ mod_pattern:
 
     rts
 .endproc
-
-

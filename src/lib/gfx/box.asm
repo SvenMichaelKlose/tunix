@@ -24,15 +24,12 @@ xposr:  .byte 0
     bcc done
 
     jsr calcscr
-    jsr dec_scr
 
     ; Get width in characters.
     lda xpos
     tay
     clc
     adc width
-    sbc #0
-    sta xposr
     lsr
     lsr
     lsr

@@ -5,7 +5,9 @@
 .importzp c, scr, xpos, ypos, width, c, xcpos, pattern, masks, maskd
 
 .bss
+
 xposr:  .byte 0
+tmp:    .byte 0
 
 .code
 
@@ -24,17 +26,29 @@ xposr:  .byte 0
     bcc done
 
     jsr calcscr
+    lda scr     ; One off in VFILL.
+    sec
+    sbc #1
+    sta scr
+    bcs l2
+    dec scr+1
 
     ; Get width in characters.
-    lda xpos
+l2: lda xpos
     tay
+    lsr
+    lsr
+    lsr
+    sta tmp
+    tya
     clc
     adc width
+    sta xposr
     lsr
     lsr
     lsr
     sec
-    sbc xcpos
+    sbc tmp
     beq single_column
     sta c
 
@@ -73,6 +87,7 @@ done:
     sta width
     pla
     sta xpos
+rts
     jmp sub_region_position
 
 single_column:

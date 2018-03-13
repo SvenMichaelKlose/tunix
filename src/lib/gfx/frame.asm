@@ -12,7 +12,6 @@
     pha
     clc
     adc width
-    sbc #0
     sta xpos
     jsr vline
     pla
@@ -21,7 +20,6 @@
     pha
     clc
     adc height
-    sbc #0
     sta ypos
     jsr hline
     pla

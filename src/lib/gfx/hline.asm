@@ -51,15 +51,19 @@ n:  jsr clip_x
     ; Get width in characters.
     lda xpos
     tay
+    lsr
+    lsr
+    lsr
+    sta tmp
+    tya
     clc
     adc width
-    sbc #0
     sta xposr
     lsr
     lsr
     lsr
     sec
-    sbc xcpos
+    sbc tmp
     beq single_column
     sta c
 

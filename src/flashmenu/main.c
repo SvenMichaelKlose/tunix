@@ -47,6 +47,7 @@ init ()
 
     shift_charset ();
     init_bank_allocator ();
+    gfx_clear_screen (0);
     gfx_init ();
     gfx_set_font (charset_4x8, 2);
 

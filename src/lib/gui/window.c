@@ -32,16 +32,16 @@ draw_window (struct obj * _w)
 {
     struct window * win = (struct window *) _w;
     struct rect * r = &win->obj.rect;
-    gpos x = r->x;
-    gpos y = r->y;
-    gsize w = r->w;
-    gsize h = r->h;
-    gsize iw = r->w - 2;
-    gpos xr = iw - 1;
-    gpos yb = y + WINDOW_TITLE_HEIGHT - 1;
-    gpos cx;
-    gsize gw;
-    gpos y2;
+    gpos   x = r->x;
+    gpos   y = r->y;
+    gsize  w = r->w;
+    gsize  h = r->h;
+    gsize  iw = r->w - 2;
+    gpos   xr = iw - 1;
+    gpos   yb = y + WINDOW_TITLE_HEIGHT - 1;
+    gpos   cx;
+    gsize  gw;
+    gpos   y2;
 
     /* Draw window title. */
     gfx_push_context ();
@@ -67,10 +67,10 @@ draw_window (struct obj * _w)
     gfx_push_context ();
     gfx_set_pattern (pattern_solid);
     gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
-    gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT + 1);
+    gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT);
 
     /* Clear content area. */
-    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (0, 0, iw, h - WINDOW_TITLE_HEIGHT - 1);
 

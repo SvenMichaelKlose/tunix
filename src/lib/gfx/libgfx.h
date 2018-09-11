@@ -34,6 +34,7 @@ extern void __fastcall__ gfx_set_pencil_mode (char);
 extern void __fastcall__ gfx_set_pattern (void *);
 extern void __fastcall__ gfx_set_screen_base (unsigned short);
 extern void __fastcall__ gfx_set_position (gpos x, gpos y);
+extern void __fastcall__ gfx_draw_line (gpos x, gpos y, gpos x2, gpos y2);
 extern void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);
 extern void __fastcall__ gfx_draw_vline (gpos x, gpos y, gsize h);
 extern void __fastcall__ gfx_draw_frame (gpos x, gpos y, gsize w, gsize h);

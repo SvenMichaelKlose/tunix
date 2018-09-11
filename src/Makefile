@@ -4,7 +4,7 @@ all:
 	$(MAKE) -C lib/ultimem-basics all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C flashmenu all
-	$(MAKE) -C paint all
+#	$(MAKE) -C paint all
 
 clean:
 	$(MAKE) -C lib/gfx clean
@@ -12,4 +12,4 @@ clean:
 	$(MAKE) -C lib/ultimem-basics clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C flashmenu clean
-	$(MAKE) -C paint clean
+#	$(MAKE) -C paint clean

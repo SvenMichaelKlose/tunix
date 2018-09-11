@@ -3,6 +3,7 @@
 .import init_bitmap_mode, reset_region, init_region_stack
 .importzp c_setzb
 .importzp font, font_space_size, font_compression, do_compress_font_gaps, scrbase
+.importzp xpos, ypos, xpos2, ypos2, width, height
 .import exec_script
 .import screen
 

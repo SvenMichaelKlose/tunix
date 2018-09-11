@@ -14,6 +14,7 @@ SOURCES= \
     instructions.asm \
     interpreter.asm \
     libgfx-wrapper.asm \
+    line.asm \
     masks.asm \
     patterns.asm \
     putchar.asm \

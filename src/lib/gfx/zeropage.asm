@@ -6,20 +6,20 @@
 
 .zeropage
 
-p:      .byte 0
-ph:     .byte 0
+p:      .res 1
+ph:     .res 1
 
-bca:    .word 0     ; Bytecode argument list.
-bcp:    .word 0     ; Bytecode pointer.
-srx:    .byte 0     ; Saved X register.
+bca:    .res 2     ; Bytecode argument list.
+bcp:    .res 2     ; Bytecode pointer.
+srx:    .res 1     ; Saved X register.
 
-xcpos:  .byte 0     ; X columns.
-xcpos2: .byte 0     ; X columns.
+xcpos:  .res 1     ; X columns.
+xcpos2: .res 1     ; X columns.
 
 
 ; Utils
 
-font_compression: .byte 0
+font_compression: .res 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Drawing context ;;;
@@ -28,36 +28,36 @@ font_compression: .byte 0
 context_start:
 
 ; Visible region.
-rxl:    .byte 0
-ryt:    .byte 0
-rxr:    .byte 0
-ryb:    .byte 0
+rxl:    .res 1
+ryt:    .res 1
+rxr:    .res 1
+ryb:    .res 1
 
 ; Region stack.
 region_sp:
-        .word 0
+        .res 2
 
 ; Cursor
-xpos:   .byte 0     ; X position
-ypos:   .byte 0     ; Y position
-xpos2:  .byte 0     ; X position
-ypos2:  .byte 0     ; Y position
-width:  .byte 0     ; Width
-height: .byte 0     ; Height
+xpos:   .res 1     ; X position
+ypos:   .res 1     ; Y position
+xpos2:  .res 1     ; X position
+ypos2:  .res 1     ; Y position
+width:  .res 1     ; Width
+height: .res 1     ; Height
 
 pencil_mode:
-        .byte 0     ; 0: Don't draw.
-        .byte 1     ; 1: OR pixel values.
-pattern:.word 0     ; Address of 8 byte pattern.
+        .res 1     ; 0: Don't draw.
+                    ; 1: OR pixel values.
+pattern:.res 2     ; Address of 8 byte pattern.
 
-font:   .word 0
-font_space_size: .byte 0 ; Width of an empty character.
-do_compress_font_gaps: .byte 0
+font:   .res 2
+font_space_size: .res 1 ; Width of an empty character.
+do_compress_font_gaps: .res 1
 
-masks:  .byte 0     ; Source mask.
-maskd:  .byte 0     ; Destination mask.
+masks:  .res 1     ; Source mask.
+maskd:  .res 1     ; Destination mask.
 
-scrbase:.word 0     ; Screen bitmap base address.
+scrbase:.res 2     ; Screen bitmap base address.
 
 context_end:
 

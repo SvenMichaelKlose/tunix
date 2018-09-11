@@ -68,6 +68,7 @@ main (int argc, char ** argv)
 {
     struct obj * tmp;
     char key;
+    int i;
 
     init ();
     append_obj (desktop, tmp = make_file_window ("#8", 0, 0, 81, 12 * 16 - MESSAGE_HEIGHT));
@@ -75,6 +76,9 @@ main (int argc, char ** argv)
     append_obj (desktop, tmp = make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
+
+//    for (i = 0; i < 50; i++)
+//        gfx_draw_line (0, 0, 120, i);
 
     do {
         show_free_memory ();

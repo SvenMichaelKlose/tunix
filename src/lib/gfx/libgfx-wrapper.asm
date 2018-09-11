@@ -11,6 +11,7 @@
 .export _gfx_set_pattern
 .export _gfx_set_screen_base
 .export _gfx_set_position
+.export _gfx_draw_line
 .export _gfx_draw_hline
 .export _gfx_draw_vline
 .export _gfx_draw_frame
@@ -23,13 +24,15 @@
 .export _gfx_pop_context = pop_context
 .export _gfx_copy_area
 
-.importzp xpos, ypos, xpos2, ypos2, width, height, color, rxr, rxl, ryt, ryb, p, s, d
-.importzp pattern, font, pencil_mode, font_space_size
 .importzp scrbase
+.importzp color, pattern, pencil_mode
+.importzp xpos, ypos, xpos2, ypos2, width, height, rxr, rxl, ryt, ryb, p, s, d
+.importzp font, font_space_size
 .import popax
-.import gfx_init, clear_screen, reset_region, hline, vline, frame, box, putstring, get_text_width
-.import putchar_fixed
-.import push_context, pop_context
+.import gfx_init, clear_screen
+.import reset_region, push_context, pop_context
+.import line, hline, vline, frame, box
+.import putstring, get_text_width, putchar_fixed
 .import copy_area
 
 .code
@@ -69,7 +72,7 @@
     rts
 .endproc
 
-; void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h) {}
+; void __fastcall__ gfx_set_region (gpos x, gpos y, gsize w, gsize h);
 .proc _gfx_set_region
 	sta ryb
     jsr popax
@@ -113,6 +116,18 @@
     jsr popax
 	sta xpos
 	rts
+.endproc
+
+; void __fastcall__ gfx_draw_line (gpos x, gpos y, gpos x2, gpos y2);
+.proc _gfx_draw_line
+    sta ypos2
+    jsr popax
+    sta xpos2
+    jsr popax
+    sta ypos
+    jsr popax
+    sta xpos
+	jmp line
 .endproc
 
 ; void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);

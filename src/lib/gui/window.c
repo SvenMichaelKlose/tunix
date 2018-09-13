@@ -40,6 +40,7 @@ draw_window (struct obj * _w)
     gpos   xr = iw - 1;
     gpos   yb = y + WINDOW_TITLE_HEIGHT - 1;
     gpos   cx;
+    gpos   ch = h - WINDOW_TITLE_HEIGHT;
     gsize  gw;
     gpos   y2;
 
@@ -66,13 +67,13 @@ draw_window (struct obj * _w)
     /* Draw content frame. */
     gfx_push_context ();
     gfx_set_pattern (pattern_solid);
-    gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT);
+    gfx_set_region (x, y + WINDOW_TITLE_HEIGHT - 1, w, ch);
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT);
 
     /* Clear content area. */
-    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, h - WINDOW_TITLE_HEIGHT);
+    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, ch);
     gfx_set_pattern (pattern_empty);
-    gfx_draw_box (0, 0, iw, h - WINDOW_TITLE_HEIGHT - 1);
+    gfx_draw_box (0, 0, iw, ch - 1);
 
     /* Draw contents. */
     draw_obj_children (OBJ(win));

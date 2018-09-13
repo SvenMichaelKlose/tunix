@@ -17,7 +17,9 @@
 .export _gfx_draw_frame
 .export _gfx_draw_box
 .export _gfx_set_font
+.export _gfx_set_font_compression
 .export _gfx_draw_text
+.export _gfx_putchar = putchar
 .export _gfx_putchar_fixed = putchar_fixed
 .export _gfx_get_text_width
 .export _gfx_push_context = push_context
@@ -27,12 +29,12 @@
 .importzp scrbase
 .importzp color, pattern, pencil_mode
 .importzp xpos, ypos, xpos2, ypos2, width, height, rxr, rxl, ryt, ryb, p, s, d
-.importzp font, font_space_size
-.import popax
+.importzp font, font_space_size, font_compression, do_compress_font_gaps
+.import popa, popax
 .import gfx_init, clear_screen
 .import reset_region, push_context, pop_context
 .import line, hline, vline, frame, box
-.import putstring, get_text_width, putchar_fixed
+.import putstring, get_text_width, putchar, putchar_fixed
 .import copy_area
 
 .code
@@ -181,6 +183,12 @@
     sta font
     stx font+1
 	rts
+.endproc
+
+; void __fastcall__ gfx_set_font_compression (char boolean);
+.proc _gfx_set_font_compression
+    sta do_compress_font_gaps
+    rts
 .endproc
 
 ; void __fastcall__ gfx_draw_text (gpos x, gpos y, char * txt);

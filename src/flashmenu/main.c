@@ -45,10 +45,10 @@ init ()
     _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
     _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
 
-    shift_charset ();
     init_bank_allocator ();
     gfx_clear_screen (0);
     gfx_init ();
+    shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
     desktop = OBJ(make_box (pattern_woven));
@@ -72,9 +72,9 @@ main (int argc, char ** argv)
     int i;
 
     init ();
-    append_obj (desktop, tmp = make_file_window ("#8", 0, 0, 81, 12 * 16 - MESSAGE_HEIGHT));
-//    append_obj (desktop, tmp = make_file_window ("#8", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
-    append_obj (desktop, tmp = make_basic_starter ());
+    append_obj (desktop, tmp = make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
+//    append_obj (desktop, tmp = make_file_window ("#10 Ultimem", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
+//    append_obj (desktop, tmp = make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
 

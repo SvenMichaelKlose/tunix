@@ -33,7 +33,7 @@ make_basic_starter ()
     append_obj (OBJ(win->obj.node.children), OBJ(table));
 
 	make_table_button (table, "Key", "Action");
-	make_table_button (table, "0", "+0K");
+	make_table_button (table, "0", "unexpanded");
     make_table_button (table, "1", "+3K");
     make_table_button (table, "2", "+8K");
     make_table_button (table, "3", "+16K");

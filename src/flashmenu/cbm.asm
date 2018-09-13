@@ -1,8 +1,6 @@
-temporary_bank  = $a000
-
 .export _cbm_opendir, _cbm_readdir, _cbm_closedir, _cbm_read_char
 
-.importzp s, d, tmp, tmp2, tmp3
+.importzp s, d
 .import popax
 
 .include "../core/dev/cbm/kernal.asm"
@@ -19,7 +17,6 @@ dirent_size     = dirent_type + 1
 .endproc
 
 ; int __fastcall__ cbm_opendir (char * pathname, char device);
-; s: CBM path name
 .proc _cbm_opendir
     pha
     jsr popax
@@ -68,14 +65,19 @@ l2: jsr read
     dex
     bne m
 
+    lda #0
+    tax
     rts
 .endproc
 
+; int __fastcall__ cbm_readdir (char * buffer)
 .proc _cbm_readdir
-    lda d
-    sta tmp2
-    lda d+1
-    sta tmp3
+    sta d
+    stx d+1
+
+    lda #0
+    ldy #dirent_name
+    sta (d),y
 
     jsr READST
     bne done
@@ -131,11 +133,15 @@ error2:
     rts
 .endproc
 
+; int __fastcall__ cbm_closedir ();
 .proc _cbm_closedir
     lda #$02
     jsr CLOSE
     bcs e
     jsr CLRCHN
+
+    lda #0
+    tax
     rts
 
 e:  jmp error

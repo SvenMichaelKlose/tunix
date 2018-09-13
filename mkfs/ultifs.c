@@ -463,7 +463,7 @@ void import_directory (upos bparent, char * name, int indent)
         snprintf (path, sizeof (path), "%s/%s", name, entry->d_name);
  
         if (entry->d_type == DT_DIR) {
-            printf ("Importing %*s%s/\n", indent, "", entry->d_name);
+            printf ("Importing directory %*s%s/\n", indent, "", entry->d_name);
             bsubdir = bfile_create_directory (bparent, entry->d_name);
             import_directory (bsubdir, path, indent + 2);
         } else {
@@ -546,6 +546,7 @@ main (int argc, char ** argv)
             case 'i':
                 if (i == argc)
                     invalid ("Path of directory to import missing.");
+                printf ("Recurisvely importing direcotry '%s'…\n", argv[i]);
                 import_directory (0, argv[i++], 0);
                 continue;
             case 'w':

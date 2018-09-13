@@ -34,6 +34,6 @@ layout_center (struct obj * x)
 {
     struct rect * prect = &x->node.parent->rect;
 
-    set_obj_position (x, (prect->w - x->rect.w) / 2, (prect->h - x->rect.h) / 2);
+    set_obj_position (x, (prect->w - x->rect.w) / 2, (prect->h - x->rect.h) / 2 - 2);
 }
 

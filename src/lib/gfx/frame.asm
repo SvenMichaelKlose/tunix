@@ -6,6 +6,8 @@
 .code
 
 .proc frame
+    dec width
+
     jsr vline
     jsr hline
     lda xpos

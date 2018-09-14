@@ -2,7 +2,7 @@
 
 .import masks_left, masks_right, maskd_left, maskd_right
 .import calcscr, dec_scr, clip_x, clip_y, add_region_position, sub_region_position, vfill, vcopy, inc_xcpos
-.importzp c, scr, xpos, ypos, width, c, xcpos, pattern, masks, maskd
+.importzp c, scr, xpos, ypos, width, height, c, xcpos, pattern, masks, maskd
 
 .bss
 
@@ -14,6 +14,8 @@ tmp:    .byte 0
 ; In: xpos, ypos, width, height
 
 .proc box
+    dec width
+
     jsr add_region_position
     lda xpos
     pha

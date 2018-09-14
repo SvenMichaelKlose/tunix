@@ -30,7 +30,7 @@ dirent_size     = dirent_type + 1
 
     pla
     tax
-    ldy #$00    ; Read.
+    ldy #$60    ; Read.
     lda #$02    ; Reserved logical file number.
     jsr SETLFS
 
@@ -166,7 +166,7 @@ eof:
 e:  jmp error
 .endproc
 
-; s: String                                                                                          
+; s: String
 ;
 ; Returns:
 ; Y: length, excluding terminating zero.
@@ -182,7 +182,7 @@ n:  pla
 .endproc
 
 .proc _cbm_read_char
-    jsr $ffe4
+    jsr GETIN
     ldx #0
     rts
 .endproc

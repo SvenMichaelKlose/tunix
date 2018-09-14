@@ -27,9 +27,11 @@ draw_file_window (struct obj * w)
     gfx_set_font_compression (0);
     for (j = 0; j < 21; j++) {
         cbm_readdir (name);
-        gfx_set_position (2, 12 + j * 8);
         if (!name[0])
             break;
+        gfx_set_position (2, 12 + j * 8);
+        gfx_putchar (name[16] + 192);
+        gfx_putchar (32);
         for (i = 0; i < 16; i++)
             if (c = name[i])
                 gfx_putchar (c + 192);

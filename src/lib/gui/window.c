@@ -48,9 +48,9 @@ draw_window (struct obj * _w)
     gfx_push_context ();
     gfx_set_region (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
-    gfx_set_pattern (pattern_empty);
     gfx_set_font (charset_4x8, 2);
-    gfx_draw_box (0, 0, w, WINDOW_TITLE_HEIGHT);
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (1, 1, w - 2, WINDOW_TITLE_HEIGHT - 2);
     gfx_set_pattern (pattern_solid);
     gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT);
     gfx_draw_text (2, 2, win->title);
@@ -58,7 +58,7 @@ draw_window (struct obj * _w)
     /* Draw title grip. */
     cx = gfx_x ();
     if (cx <= xr) {
-        gw = xr - cx + 1;
+        gw = xr - cx;
         for (y2 = 2; y2 < yb; y2 += 2)
             gfx_draw_hline (cx, y2, gw);
     }

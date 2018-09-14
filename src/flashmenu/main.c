@@ -84,6 +84,11 @@ main (int argc, char ** argv)
     do {
         show_free_memory ();
         while (!(key = cbm_read_char ()));
+        if (key == 'F') {
+            ((struct window *) tmp)->flags ^= W_FULLSCREEN;
+            layout_obj (desktop);
+            draw_obj (tmp);
+        }
         if (key == 'R') {
             layout_obj (desktop);
             draw_obj (desktop);

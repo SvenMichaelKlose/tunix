@@ -97,6 +97,11 @@ l2: jsr read
     bcs error2
     iny
     sta (d),y
+    lda #0
+    iny
+    sta (d),y
+    iny
+    sta (d),y
 
     ; Read until first double quote.
 l3: jsr read
@@ -117,9 +122,19 @@ l4: jsr read
 n:  lda #0
     sta (d),y
 
+    ; Read over spaces.
+l6: jsr read
+    cmp #$20
+    beq l6
+
+    ; Save file type.
+    ldy #dirent_type
+    sta (d),y
+
     ; Read till end of line.
 l5: jsr read
     bne l5
+
 done:
     lda #0
     tax

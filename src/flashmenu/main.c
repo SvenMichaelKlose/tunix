@@ -4,6 +4,7 @@
 #include <libgfx.h>
 
 #include "obj.h"
+#include "event.h"
 #include "box.h"
 #include "button.h"
 #include "cbm.h"
@@ -22,6 +23,7 @@
 #include "ultimem.h"
 
 struct obj * desktop;
+struct window * focussed_window;
 
 void
 shift_charset ()
@@ -69,11 +71,11 @@ main (int argc, char ** argv)
 {
     struct obj * tmp;
     char key;
-    int i;
+    struct event * e;
 
     init ();
     append_obj (desktop, tmp = make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
-//    append_obj (desktop, tmp = make_file_window ("#10 Ultimem", 80, 0, 80, 12 * 16 - MESSAGE_HEIGHT));
+    focussed_window = (struct window *) tmp;
 //    append_obj (desktop, tmp = make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
@@ -84,15 +86,13 @@ main (int argc, char ** argv)
     do {
         show_free_memory ();
         while (!(key = cbm_read_char ()));
-        if (key == 'F') {
-            ((struct window *) tmp)->flags ^= W_FULLSCREEN;
-            layout_obj (desktop);
-            draw_obj (tmp);
-        }
-        if (key == 'R') {
-            layout_obj (desktop);
-            draw_obj (desktop);
-        }
+
+        /* Send keyboard event. */
+        e = malloc (sizeof (struct event));
+        e->type = EVT_KEYPRESS;
+        e->data_char = key;
+        send_event ((struct obj *) focussed_window, e);
+        free (e);
     } while (!do_shutdown);
 
     return 0;

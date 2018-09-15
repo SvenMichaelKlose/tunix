@@ -14,12 +14,26 @@
 
 char name[21];
 
-struct dirent *
-file_window_read_directory (char * path)
+void
+file_window_free_files (struct file_window * fw)
+{
+    struct dirent * d = fw->files;
+    struct dirent * n;
+
+    while (d) {
+        n = d->next;
+        free (d);
+        d = n;
+    }
+}
+
+void
+file_window_read_directory (struct file_window * fw, char * path)
 {
     struct dirent * first_dirent = NULL;
     struct dirent * last_dirent = NULL;
     struct dirent * d;
+    unsigned len = 0;
 
     cbm_opendir (path, 8);
 
@@ -27,6 +41,7 @@ file_window_read_directory (char * path)
         cbm_readdir (name);
         if (!name[0])
             break;
+        len++;
         d = malloc (sizeof (struct dirent));
         if (last_dirent)
             last_dirent->next = d;
@@ -37,19 +52,8 @@ file_window_read_directory (char * path)
     }
     cbm_closedir ();
 
-    return first_dirent;
-}
-
-void
-file_window_free_files (struct dirent * d)
-{
-    struct dirent * n;
-
-    while (d) {
-        n = d->next;
-        free (d);
-        d = n;
-    }
+    fw->files = first_dirent;
+    fw->len = len;
 }
 
 void __fastcall__
@@ -63,24 +67,36 @@ draw_file_window (struct obj * w)
     char c;
     char size[8];
     struct dirent * d;
+    unsigned rpos = fw->wpos;
+    unsigned y;
 
-    file_window_free_files (fw->files);
-    fw->files = file_window_read_directory ("$");
+    file_window_free_files (fw);
+    file_window_read_directory (fw, "$");
     d = fw->files;
 
     window_ops.draw (w);
 
     gfx_push_context ();
     for (j = 0; j < 21; j++) {
-        if (!d || !d->name[0])
-            break;
+        y = yofs + j * 8;
 
+        /* Clear entry. */
+        gfx_set_pattern (pattern_empty);
+        gfx_draw_box (0, y, win->obj.rect.w, y + 8);
+
+        if (rpos >= fw->len)
+            goto next;
+        if (!d || !d->name[0])
+            goto next;
+
+        /* Print file type. */
         gfx_set_font (charset_4x8, 0);
         gfx_set_font_compression (1);
         gfx_set_position (xofs, yofs + j * 8);
         gfx_putchar (d->type);
         gfx_putchar (32);
 
+        /* Print file size. */
         gfx_set_position (xofs + 6, yofs + j * 8);
         memset (size, 32, sizeof (size));
         sprintf (size, "%u", (unsigned int) d->size);
@@ -89,6 +105,7 @@ draw_file_window (struct obj * w)
             gfx_putchar (size[i]);
         gfx_putchar (32);
 
+        /* Print file name. */
         gfx_set_font ((void *) 0x8000, 0);
         gfx_set_font_compression (0);
         gfx_set_position (xofs + 28, yofs + j * 8);
@@ -97,7 +114,19 @@ draw_file_window (struct obj * w)
                 gfx_putchar (c + 192);
             else
                 break;
+
+        /* Highlight current entry. */
+        if (fw->pos == rpos) {
+            gfx_push_context ();
+            gfx_set_pattern (pattern_solid);
+            gfx_set_pencil_mode (PENCIL_MODE_XOR);
+            gfx_draw_box (0, y, win->obj.rect.w, y + 8);
+            gfx_pop_context ();
+        }
+
         d = d->next;
+next:
+        rpos++;
     }
     gfx_pop_context ();
 }

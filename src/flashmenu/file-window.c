@@ -57,28 +57,20 @@ file_window_read_directory (struct file_window * fw, char * path)
 }
 
 void __fastcall__
-draw_file_window (struct obj * w)
+draw_file_window_list (struct obj * w)
 {
     struct window * win = (struct window *) w;
     struct file_window * fw = (struct file_window *) w;
     char xofs = win->flags & W_FULLSCREEN ? 1 : 2;
     char yofs = win->flags & W_FULLSCREEN ? 11 : 12;
-    int i, j;
     char c;
     char size[8];
-    struct dirent * d;
+    struct dirent * d = fw->files;
     unsigned rpos = fw->wpos;
-    unsigned y;
-
-    file_window_free_files (fw);
-    file_window_read_directory (fw, "$");
-    d = fw->files;
-
-    window_ops.draw (w);
+    unsigned y = yofs;
+    int i = 0;
 
     gfx_push_context ();
-    j = 0;
-    y = yofs;
     while (1) {
         if (y > win->obj.rect.h)
             break;
@@ -135,6 +127,29 @@ next:
     gfx_pop_context ();
 }
 
+
+void __fastcall__
+draw_file_window (struct obj * w)
+{
+    struct window * win = (struct window *) w;
+    struct file_window * fw = (struct file_window *) w;
+
+    file_window_free_files (fw);
+    file_window_read_directory (fw, "$");
+
+    window_ops.draw (w);
+    draw_file_window_list (w);
+}
+
+char
+file_window_event_handler (struct obj * o, struct event * e)
+{
+    gfx_reset_region ();
+    set_obj_region (o);
+    draw_file_window_list (o);
+    return FALSE;
+}
+
 struct obj *__fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
@@ -151,6 +166,7 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
     copy_obj_ops (ops, &window_ops);
     ops->draw = draw_file_window;
     set_obj_ops (OBJ(fw), ops);
+    fw->win.obj.ops->event_handler = file_window_event_handler;
 
 	set_obj_position_and_size (OBJ(fw), x, y, w, h);
 

@@ -19,12 +19,34 @@ struct obj_ops window_ops = {
     event_handler_passthrough
 };
 
+void __fastcall__
+draw_window_content (struct obj * o)
+{
+    gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region (o);
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (0, 0, o->rect.w, o->rect.h);
+    gfx_pop_context ();
+    gfx_push_context ();
+    draw_obj_children (OBJ(o));
+    gfx_pop_context ();
+}
+
+struct obj_ops window_content_ops = {
+    draw_window_content,
+    layout_window_content_frame,
+    obj_noop,
+    event_handler_passthrough
+};
+
 struct window * __fastcall__
-make_window (char * title)
+make_window (char * title, struct obj * content)
 {
     struct window * win = alloc_obj (sizeof (struct window), &window_ops);
-    struct obj * f = make_frame ();
-    append_obj (OBJ(win), f);
+    if (!content)
+        content = alloc_obj (sizeof (struct obj), &window_content_ops);
+    append_obj (OBJ(win), content);
     win->title = title;
     return win;
 }
@@ -65,15 +87,8 @@ draw_window_fullscreen (struct window * win)
     }
     gfx_pop_context ();
 
-    /* Draw content frame. */
-    gfx_push_context ();
-
-    /* Clear content area. */
-    gfx_set_region (0, WINDOW_TITLE_HEIGHT - 1, w, ch);
-    gfx_set_pattern (pattern_empty);
-    gfx_draw_box (0, 0, w, ch);
-
     /* Draw contents. */
+    gfx_push_context ();
     draw_obj_children (OBJ(win));
     gfx_pop_context ();
 }
@@ -122,13 +137,8 @@ draw_window_standard (struct window * win)
     gfx_draw_frame (0, 0, w, h - WINDOW_TITLE_HEIGHT);
     gfx_pop_context ();
 
-    /* Clear content area. */
-    gfx_push_context ();
-    gfx_set_region (x + 1, y + WINDOW_TITLE_HEIGHT, iw, ch);
-    gfx_set_pattern (pattern_empty);
-    gfx_draw_box (0, 0, iw, ch - 1);
-
     /* Draw contents. */
+    gfx_push_context ();
     draw_obj_children (OBJ(win));
     gfx_pop_context ();
 }
@@ -145,10 +155,16 @@ draw_window (struct obj * _w)
 }
 
 void
-layout_window_content_frame (struct obj * win)
+layout_window_content_frame (struct obj * o)
 {
-    set_obj_position_and_size (win->node.children,
-                               1, 1,
-                               win->rect.w - 2, win->rect.h - WINDOW_TITLE_HEIGHT - 1);
-    layout_obj_children (win);
+    struct window * win = (struct window *) o;
+    gpos w = o->rect.w;
+    gpos h = o->rect.h;
+
+    if (win->flags && W_FULLSCREEN)
+        set_obj_position_and_size (o->node.children, 0, WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
+    else
+        set_obj_position_and_size (o->node.children, 1, WINDOW_TITLE_HEIGHT, w - 2, h - WINDOW_TITLE_HEIGHT - 1);
+
+    layout_obj_children (o);
 }

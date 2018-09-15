@@ -24,7 +24,7 @@ make_table_button (struct obj * table, char * cmd, char * descr)
 struct obj *
 make_basic_starter ()
 {
-	struct window * win = make_window ("Boot options");
+	struct window * win = make_window ("Boot options", 0);
 	struct obj * table = make_table ();
 
 	set_obj_position_and_size (OBJ(win), 20, 24, 120, 120);

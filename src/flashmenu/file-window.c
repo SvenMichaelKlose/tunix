@@ -11,6 +11,7 @@
 #include "window.h"
 #include "file-window.h"
 #include "cbm.h"
+#include "main.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17
@@ -18,9 +19,9 @@
 char name[21];
 
 void
-file_window_free_files (struct file_window * fw)
+file_window_free_files (struct file_window_content * content)
 {
-    struct dirent * d = fw->files;
+    struct dirent * d = content->files;
     struct dirent * n;
 
     while (d) {
@@ -31,7 +32,7 @@ file_window_free_files (struct file_window * fw)
 }
 
 void
-file_window_read_directory (struct file_window * fw, char * path)
+file_window_read_directory (struct file_window_content * content, char * path)
 {
     struct dirent * first_dirent = NULL;
     struct dirent * last_dirent = NULL;
@@ -55,21 +56,24 @@ file_window_read_directory (struct file_window * fw, char * path)
     }
     cbm_closedir ();
 
-    fw->files = first_dirent;
-    fw->len = len;
+    content->files = first_dirent;
+    content->len = len;
 }
 
 void
-file_window_invert_position (struct file_window * fw)
+file_window_invert_position (struct file_window_content * content)
 {
-    char yofs = fw->win.flags & W_FULLSCREEN ? 11 : 12;
+    unsigned y = (content->pos - content->wpos) * 8;
+
+    if (y > content->obj.rect.h)
+        return;
 
     gfx_push_context ();
     gfx_reset_region ();
-    set_obj_region ((struct obj *) fw);
+    set_obj_region ((struct obj *) content);
     gfx_set_pattern (pattern_solid);
     gfx_set_pencil_mode (PENCIL_MODE_XOR);
-    gfx_draw_box (0, yofs + (fw->pos - fw->wpos) * 8, fw->win.obj.rect.w, 8);
+    gfx_draw_box (0, y, content->obj.rect.w, 8);
     gfx_pop_context ();
 }
 
@@ -77,26 +81,26 @@ void __fastcall__
 file_window_draw_list (struct obj * w)
 {
     struct window * win = (struct window *) w;
-    struct file_window * fw = (struct file_window *) w;
-    char xofs = win->flags & W_FULLSCREEN ? 1 : 2;
-    char yofs = win->flags & W_FULLSCREEN ? 11 : 12;
+    struct file_window_content * content = (struct file_window_content *) w;
+    char xofs = 1;
+    char yofs = 0;
     char c;
     char size[8];
-    struct dirent * d = fw->files;
-    unsigned rpos = fw->wpos;
+    struct dirent * d = content->files;
+    unsigned rpos = content->wpos;
     unsigned y = yofs;
     int i = 0;
 
     gfx_push_context ();
     while (1) {
-        if (y > win->obj.rect.h)
+        if (y > w->rect.h)
             break;
 
         /* Clear entry. */
         gfx_set_pattern (pattern_empty);
-        gfx_draw_box (0, y, win->obj.rect.w, 8);
+        gfx_draw_box (0, y, w->rect.w, 8);
 
-        if (rpos >= fw->len)
+        if (rpos >= content->len)
             goto next;
         if (!d || !d->name[0])
             goto next;
@@ -139,35 +143,36 @@ next:
 void __fastcall__
 file_window_draw (struct obj * w)
 {
-    struct window * win = (struct window *) w;
-    struct file_window * fw = (struct file_window *) w;
+    struct file_window_content * content = (struct file_window_content *) w;
 
-    file_window_free_files (fw);
-    file_window_read_directory (fw, "$");
-
-    window_ops.draw (w);
+    gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region (w);
+    file_window_free_files (content);
+    file_window_read_directory (content, "$");
     file_window_draw_list (w);
-    file_window_invert_position (fw);
+    file_window_invert_position (content);
+    gfx_pop_context ();
 }
 
 char
 file_window_event_handler (struct obj * o, struct event * e)
 {
-    struct file_window * fw = (struct file_window *) o;
+    struct file_window_content * content = (struct file_window_content *) o;
 
-    file_window_invert_position (fw);
+    file_window_invert_position (content);
 
     switch (e->data_char) {
         case KEY_UP:
-            if (!fw->pos)
+            if (!content->pos)
                 goto done;
-            fw->pos--;
+            content->pos--;
             break;
 
         case KEY_DOWN:
-            if (fw->pos == fw->len - 1)
+            if (content->pos == content->len - 1)
                 goto done;
-            fw->pos++;
+            content->pos++;
             break;
 
         default:
@@ -175,29 +180,39 @@ file_window_event_handler (struct obj * o, struct event * e)
     }
 
 done:
-    file_window_invert_position (fw);
+    file_window_invert_position (content);
     return FALSE;
 }
 
-struct obj *__fastcall__
+struct obj_ops obj_ops_file_window_content = {
+    file_window_draw,
+    obj_noop,
+    obj_noop,
+    file_window_event_handler
+};
+
+struct obj *
+make_file_window_content ()
+{
+	struct obj * obj =  alloc_obj (sizeof (struct obj), &obj_ops_file_window_content);
+    struct file_window_content * content = malloc (sizeof (struct file_window_content));
+
+    memcpy (content, obj, sizeof (struct obj));
+    free (obj);
+    content->files = NULL;
+
+    return OBJ(content);
+}
+
+struct obj * __fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
-	struct window * win = make_window (title);
-	struct obj_ops * ops = malloc (sizeof (struct obj_ops));
-    struct file_window * fw = malloc (sizeof (struct file_window));
+    struct obj * content = make_file_window_content ();
+	struct window * win = make_window (title, content);
 
+    focussed_window = content;
     win->flags |= W_FULLSCREEN;
+	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
-    memcpy (fw, win, sizeof (struct window));
-    free (win);
-    fw->files = NULL;
-
-    copy_obj_ops (ops, &window_ops);
-    ops->draw = file_window_draw;
-    set_obj_ops (OBJ(fw), ops);
-    fw->win.obj.ops->event_handler = file_window_event_handler;
-
-	set_obj_position_and_size (OBJ(fw), x, y, w, h);
-
-    return OBJ(fw);
+    return OBJ(win);
 }

@@ -143,10 +143,18 @@ layout_obj_children (struct obj * x)
 void __fastcall__
 set_obj_region (struct obj * o)
 {
-    gpos rxl = gfx_rxl ();
-    gpos ryt = gfx_ryt ();
+    gpos x = 0;
+    gpos y = 0;
+    gpos w = o->rect.w;
+    gpos h = o->rect.h;
 
-    gfx_set_region (rxl + o->rect.x, ryt + o->rect.y, rxl + o->rect.w, ryt + o->rect.h);
+    do {
+        x += o->rect.x;
+        y += o->rect.y;
+        o = o->node.parent;
+    } while (o);
+
+    gfx_set_region (x, y, w, h);
 }
 
 void __fastcall__

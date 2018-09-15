@@ -10,8 +10,8 @@ struct dirent {
     struct dirent * next;
 };
 
-struct file_window {
-    struct window win;
+struct file_window_content {
+    struct obj obj;
     struct dirent * files;
     unsigned    len;
     unsigned    pos;    /* User's position in list. */

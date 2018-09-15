@@ -23,7 +23,7 @@
 #include "ultimem.h"
 
 struct obj * desktop;
-struct window * focussed_window;
+struct obj * focussed_window;
 
 void
 shift_charset ()
@@ -53,6 +53,7 @@ init ()
     shift_charset ();
     gfx_set_font (charset_4x8, 2);
 
+    focussed_window = NULL;
     desktop = OBJ(make_box (pattern_woven));
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 }
@@ -76,10 +77,10 @@ main (int argc, char ** argv)
 
     init ();
     append_obj (desktop, tmp = make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
-    focussed_window = (struct window *) tmp;
-//    append_obj (desktop, tmp = make_basic_starter ());
+//    append_obj (desktop, make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
+    print_message ("Welcome to G - press F1 for help.");
 
 //    for (i = 0; i < 50; i++)
 //        gfx_draw_line (0, 0, 120, i);
@@ -88,8 +89,8 @@ main (int argc, char ** argv)
 //        show_free_memory ();
         while (!(key = cbm_read_char ()));
 
-        sprintf (msg, "%u B free.", key);
-        print_message (msg);
+//        sprintf (msg, "%u B free.", key);
+//        print_message (msg);
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));
         e->type = EVT_KEYPRESS;

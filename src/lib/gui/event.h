@@ -6,13 +6,19 @@
 #define EVT_KEYPRESS    1
 #define EVT_CLICK       2
 
-typedef char (*event_handler_t) (struct obj *, struct event *, gpos x, gpos y);
+typedef char (*event_handler_t) (struct obj *, struct event *);
 
 struct event {
     char type;
+    union {
+        char data_char;
+        int  data_int;
+    };
 };
 
-char __fastcall__ send_event (struct obj * o, struct event * ev, gpos x, gpos y);
-void __fastcall__ dispatch_event (struct obj * o, struct event * ev, gpos x, gpos y);
+extern char event_handler_passthrough (struct obj *, struct event *);
+extern char __fastcall__ send_event (struct obj *, struct event *);
+
+//extern void __fastcall__ dispatch_event (struct obj *, struct event *, gpos x, gpos y);
 
 #endif /* #ifndef EVENT_H */

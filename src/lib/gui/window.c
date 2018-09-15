@@ -3,6 +3,7 @@
 #include "libgfx.h"
 #include "obj.h"
 #include "layout-ops.h"
+#include "event.h"
 #include "window.h"
 #include "message.h"
 #include "frame.h"
@@ -14,7 +15,8 @@ void __fastcall__ layout_window_content_frame (struct obj *);
 struct obj_ops window_ops = {
     draw_window,
     layout_window_content_frame,
-    obj_noop
+    obj_noop,
+    event_handler_passthrough
 };
 
 struct window * __fastcall__

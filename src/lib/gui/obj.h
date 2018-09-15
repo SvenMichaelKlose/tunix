@@ -2,6 +2,10 @@
 #define OBJ_H
 
 #include "libgfx.h"
+#include "event.h"
+
+#define FALSE   0
+#define TRUE    1
 
 typedef unsigned char uchar;
 
@@ -31,9 +35,10 @@ typedef void __fastcall__ (*func_layout_t) (struct obj *);
 typedef void __fastcall__ (*func_free_t) (struct obj *);
 
 struct obj_ops {
-    func_draw_t     draw;       // Draws object.
-    func_layout_t   layout;     // Layouts object before drawing.
-    func_free_t     free;       // Removes object resources.
+    func_draw_t         draw;           // Draws object.
+    func_layout_t       layout;         // Layouts object before drawing.
+    func_free_t         free;           // Removes object resources.
+    event_handler_t     event_handler;  // Removes object resources.
 };
 
 void __fastcall__ obj_noop (struct obj *);
@@ -61,6 +66,7 @@ void __fastcall__ append_obj (struct obj * parent, struct obj * x);
 // Copy obj_ops structure most probably to replace some of its functions and
 // reassign the new structure with set_obj_ops().
 void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
+
 // Assign new obj_ops structure to object.
 void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
 

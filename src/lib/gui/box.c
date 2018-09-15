@@ -1,17 +1,20 @@
 #include <stdlib.h>
 
 #include "libgfx.h"
+
 #include "obj.h"
-#include "box.h"
+#include "event.h"
 #include "layout-ops.h"
 #include "message.h"
+#include "box.h"
 
 void __fastcall__ draw_box (struct obj *);
 
 struct obj_ops box_ops = {
     draw_box,
     layout_none,
-    obj_noop
+    obj_noop,
+    event_handler_passthrough
 };
 
 struct box * __fastcall__

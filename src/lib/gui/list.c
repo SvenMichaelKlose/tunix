@@ -1,6 +1,8 @@
 #include <stdlib.h>
 
 #include "libgfx.h"
+
+#include "event.h"
 #include "obj.h"
 #include "message.h"
 #include "list.h"

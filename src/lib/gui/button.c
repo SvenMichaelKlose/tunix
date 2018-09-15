@@ -1,7 +1,9 @@
 #include <stdlib.h>
 
 #include "libgfx.h"
+
 #include "obj.h"
+#include "event.h"
 #include "button.h"
 #include "layout-ops.h"
 
@@ -10,7 +12,8 @@ void __fastcall__ layout_button_minsize (struct obj *);
 struct obj_ops button_ops = {
     draw_button,
     layout_button_minsize,
-    obj_noop
+    obj_noop,
+    event_handler_passthrough
 };
 
 struct button * __fastcall__

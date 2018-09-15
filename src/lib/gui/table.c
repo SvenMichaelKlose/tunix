@@ -4,9 +4,10 @@
 
 #include "libgfx.h"
 #include "obj.h"
+#include "event.h"
+#include "layout-ops.h"
 #include "list.h"
 #include "table.h"
-#include "layout-ops.h"
 
 #include "message.h"
 #include "error.h"
@@ -23,7 +24,8 @@ struct obj_ops table_ops = {
 struct obj_ops table_ops_center = {
     draw_list,
     layout_table_center,
-    obj_noop
+    obj_noop,
+    event_handler_passthrough
 };
 
 struct obj *

@@ -4,18 +4,23 @@
 #include "obj.h"
 #include "event.h"
 
-event_handler_t event_handlers[NUM_EVENT_HANDLERS];
+char
+event_handler_passthrough (struct obj * obj, struct event * event)
+{
+    return TRUE;
+}
 
+char __fastcall__
+send_event (struct obj * o, struct event * e)
+{
+    return o->ops->event_handler (o, e);
+}
+
+/*
 struct obj * __fastcall__
 find_obj_at (struct obj * o, struct event * ev, gpos x, gpos y)
 {
     return NULL;
-}
-
-char __fastcall__
-send_event (struct obj * o, struct event * ev, gpos x, gpos y)
-{
-    return event_handlers[o->event_handler] (o, ev, x, y);
 }
 
 void __fastcall__
@@ -35,3 +40,4 @@ dispatch_event (struct obj * o, struct event * ev, gpos x, gpos y)
         o = o->node.parent;
     }
 }
+*/

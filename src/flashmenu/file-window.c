@@ -82,7 +82,7 @@ draw_file_window (struct obj * w)
 
         /* Clear entry. */
         gfx_set_pattern (pattern_empty);
-        gfx_draw_box (0, y, win->obj.rect.w, y + 8);
+        gfx_draw_box (0, y, win->obj.rect.w, 8);
 
         if (rpos >= fw->len)
             goto next;

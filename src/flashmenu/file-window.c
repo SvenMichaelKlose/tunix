@@ -77,8 +77,11 @@ draw_file_window (struct obj * w)
     window_ops.draw (w);
 
     gfx_push_context ();
-    for (j = 0; j < 21; j++) {
-        y = yofs + j * 8;
+    j = 0;
+    y = yofs;
+    while (1) {
+        if (y > win->obj.rect.h)
+            break;
 
         /* Clear entry. */
         gfx_set_pattern (pattern_empty);
@@ -92,12 +95,12 @@ draw_file_window (struct obj * w)
         /* Print file type. */
         gfx_set_font (charset_4x8, 0);
         gfx_set_font_compression (1);
-        gfx_set_position (xofs, yofs + j * 8);
+        gfx_set_position (xofs, y);
         gfx_putchar (d->type);
         gfx_putchar (32);
 
         /* Print file size. */
-        gfx_set_position (xofs + 6, yofs + j * 8);
+        gfx_set_position (xofs + 6, y);
         memset (size, 32, sizeof (size));
         sprintf (size, "%u", (unsigned int) d->size);
         size[strlen (size)] = 32;
@@ -108,7 +111,7 @@ draw_file_window (struct obj * w)
         /* Print file name. */
         gfx_set_font ((void *) 0x8000, 0);
         gfx_set_font_compression (0);
-        gfx_set_position (xofs + 28, yofs + j * 8);
+        gfx_set_position (xofs + 28, y);
         for (i = 0; i < 16; i++)
             if (c = d->name[i])
                 gfx_putchar (c + 192);
@@ -126,6 +129,7 @@ draw_file_window (struct obj * w)
 
         d = d->next;
 next:
+        y += 8;
         rpos++;
     }
     gfx_pop_context ();

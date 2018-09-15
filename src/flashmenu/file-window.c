@@ -120,7 +120,7 @@ draw_file_window (struct obj * w)
             gfx_push_context ();
             gfx_set_pattern (pattern_solid);
             gfx_set_pencil_mode (PENCIL_MODE_XOR);
-            gfx_draw_box (0, y, win->obj.rect.w, y + 8);
+            gfx_draw_box (0, y, win->obj.rect.w, 8);
             gfx_pop_context ();
         }
 

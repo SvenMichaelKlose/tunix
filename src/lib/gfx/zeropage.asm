@@ -45,9 +45,11 @@ ypos2:  .res 1     ; Y position
 width:  .res 1     ; Width
 height: .res 1     ; Height
 
+; XXX Pencil mode isn't regarded in all places.
 pencil_mode:
         .res 1     ; 0: Don't draw.
-                    ; 1: OR pixel values.
+                   ; 1: OR pixel values.
+                   ; 2: XOR pixel values.
 pattern:.res 2     ; Address of 8 byte pattern.
 
 font:   .res 2

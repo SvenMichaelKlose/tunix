@@ -4,6 +4,7 @@
 .importzp c_setzb
 .importzp font, font_space_size, font_compression, do_compress_font_gaps, scrbase
 .importzp xpos, ypos, xpos2, ypos2, width, height
+.importzp pencil_mode
 .import exec_script
 .import screen
 
@@ -29,6 +30,7 @@
     sta scrbase+1
 
     brk
+    .byte c_setzb, pencil_mode, 1
     .byte c_setzb, font, $00
     .byte c_setzb, font+1, $88
     .byte c_setzb, do_compress_font_gaps, 1

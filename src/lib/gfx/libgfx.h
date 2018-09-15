@@ -3,6 +3,7 @@
 
 #define PENCIL_MODE_OFF     0
 #define PENCIL_MODE_OR      1
+#define PENCIL_MODE_XOR     2
 
 typedef short gpos;
 typedef short gsize;

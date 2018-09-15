@@ -72,6 +72,7 @@ main (int argc, char ** argv)
     struct obj * tmp;
     char key;
     struct event * e;
+    char msg[16];
 
     init ();
     append_obj (desktop, tmp = make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
@@ -84,9 +85,11 @@ main (int argc, char ** argv)
 //        gfx_draw_line (0, 0, 120, i);
 
     do {
-        show_free_memory ();
+//        show_free_memory ();
         while (!(key = cbm_read_char ()));
 
+        sprintf (msg, "%u B free.", key);
+        print_message (msg);
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));
         e->type = EVT_KEYPRESS;

@@ -12,6 +12,9 @@
 #include "file-window.h"
 #include "cbm.h"
 
+#define KEY_UP      145
+#define KEY_DOWN    17
+
 char name[21];
 
 void
@@ -56,8 +59,22 @@ file_window_read_directory (struct file_window * fw, char * path)
     fw->len = len;
 }
 
+void
+file_window_invert_position (struct file_window * fw)
+{
+    char yofs = fw->win.flags & W_FULLSCREEN ? 11 : 12;
+
+    gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region ((struct obj *) fw);
+    gfx_set_pattern (pattern_solid);
+    gfx_set_pencil_mode (PENCIL_MODE_XOR);
+    gfx_draw_box (0, yofs + (fw->pos - fw->wpos) * 8, fw->win.obj.rect.w, 8);
+    gfx_pop_context ();
+}
+
 void __fastcall__
-draw_file_window_list (struct obj * w)
+file_window_draw_list (struct obj * w)
 {
     struct window * win = (struct window *) w;
     struct file_window * fw = (struct file_window *) w;
@@ -110,15 +127,6 @@ draw_file_window_list (struct obj * w)
             else
                 break;
 
-        /* Highlight current entry. */
-        if (fw->pos == rpos) {
-            gfx_push_context ();
-            gfx_set_pattern (pattern_solid);
-            gfx_set_pencil_mode (PENCIL_MODE_XOR);
-            gfx_draw_box (0, y, win->obj.rect.w, 8);
-            gfx_pop_context ();
-        }
-
         d = d->next;
 next:
         y += 8;
@@ -129,7 +137,7 @@ next:
 
 
 void __fastcall__
-draw_file_window (struct obj * w)
+file_window_draw (struct obj * w)
 {
     struct window * win = (struct window *) w;
     struct file_window * fw = (struct file_window *) w;
@@ -138,15 +146,36 @@ draw_file_window (struct obj * w)
     file_window_read_directory (fw, "$");
 
     window_ops.draw (w);
-    draw_file_window_list (w);
+    file_window_draw_list (w);
+    file_window_invert_position (fw);
 }
 
 char
 file_window_event_handler (struct obj * o, struct event * e)
 {
-    gfx_reset_region ();
-    set_obj_region (o);
-    draw_file_window_list (o);
+    struct file_window * fw = (struct file_window *) o;
+
+    file_window_invert_position (fw);
+
+    switch (e->data_char) {
+        case KEY_UP:
+            if (!fw->pos)
+                goto done;
+            fw->pos--;
+            break;
+
+        case KEY_DOWN:
+            if (fw->pos == fw->len - 1)
+                goto done;
+            fw->pos++;
+            break;
+
+        default:
+            goto done;
+    }
+
+done:
+    file_window_invert_position (fw);
     return FALSE;
 }
 
@@ -164,7 +193,7 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
     fw->files = NULL;
 
     copy_obj_ops (ops, &window_ops);
-    ops->draw = draw_file_window;
+    ops->draw = file_window_draw;
     set_obj_ops (OBJ(fw), ops);
     fw->win.obj.ops->event_handler = file_window_event_handler;
 

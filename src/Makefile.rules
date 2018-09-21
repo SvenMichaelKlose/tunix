@@ -1,9 +1,8 @@
 CC65_HOME = /usr/local
-CC65_TARGET = vic20g
 CC65_INCLUDE = $(CC65_HOME)/share/cc65/include/
 AS      = $(CC65_HOME)/bin/ca65
 CC      = $(CC65_HOME)/bin/cl65
 AR      = $(CC65_HOME)/bin/ar65
 LD      = $(CC65_HOME)/bin/ld65
-CFLAGS  = -t $(CC65_TARGET) -O --check-stack
-LDFLAGS = -t $(CC65_TARGET) -m $(PROGRAM).map
+CFLAGS  = -O --check-stack
+LDFLAGS = -m $(PROGRAM).map

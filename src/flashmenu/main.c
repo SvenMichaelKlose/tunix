@@ -1,3 +1,5 @@
+#include "g.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -65,7 +67,7 @@ void
 show_free_memory ()
 {
     char * msg = malloc (64);
-    sprintf (msg, "%d B free.", _heapmemavail ());
+    sprintf (msg, "%U B free.", _heapmemavail ());
     print_message (msg);
     free (msg);
 }

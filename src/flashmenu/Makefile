@@ -7,6 +7,8 @@ SOURCES= \
     ultimem.c
 
 ASMSOURCES= \
+    prgsize.asm \
+    prgend.asm \
     ../zeropage.asm \
     ../core/mem/clrram.asm \
     ../core/dev/con/charset-4x8.asm
@@ -22,7 +24,7 @@ include ../Makefile.rules
 	$(CC) -O -c $(CFLAGS) -I $(CC65_INCLUDE) -I../lib/ultimem-basics/ -I../lib/gfx/ -I../lib/gui/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ultimem-basics/libultimem-basics.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20g.lib
+	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ultimem-basics/libultimem-basics.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

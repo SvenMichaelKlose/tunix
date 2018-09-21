@@ -161,8 +161,8 @@ file_window_draw (struct obj * w)
 char
 file_window_event_handler (struct obj * o, struct event * e)
 {
-    struct file_window_content * content = (struct file_window_content *) o;
-    int visible_lines = o->rect.h / 8 - 1;
+    struct file_window_content * content = (struct file_window_content *) o->node.children;
+    int visible_lines = content->obj.rect.h / 8 - 1;
 
     file_window_invert_position (content);
 
@@ -193,7 +193,7 @@ done:
     return FALSE;
 
 new_page:
-    file_window_draw (o);
+    file_window_draw ((struct obj *) content);
     return FALSE;
 }
 
@@ -201,7 +201,7 @@ struct obj_ops obj_ops_file_window_content = {
     file_window_draw,
     obj_noop,
     obj_noop,
-    file_window_event_handler
+    event_handler_passthrough
 };
 
 struct obj *
@@ -221,9 +221,8 @@ struct obj * __fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
     struct obj * content = make_file_window_content ();
-	struct window * win = make_window (title, content);
+	struct window * win = make_window (title, content, file_window_event_handler);
 
-    focussed_window = content;
     win->flags |= W_FULLSCREEN;
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 

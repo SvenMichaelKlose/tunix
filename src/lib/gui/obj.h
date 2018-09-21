@@ -61,7 +61,7 @@ void __fastcall__ set_obj_position (struct obj *, gpos x, gpos y);
 void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
 
 // Append new object to list of children.
-void __fastcall__ append_obj (struct obj * parent, struct obj * x);
+struct obj * __fastcall__ append_obj (struct obj * parent, struct obj * x);
 
 // Copy obj_ops structure most probably to replace some of its functions and
 // reassign the new structure with set_obj_ops().

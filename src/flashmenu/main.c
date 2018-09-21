@@ -23,7 +23,7 @@
 #include "ultimem.h"
 
 struct obj * desktop;
-struct obj * focussed_window;
+struct obj * focussed_window = NULL;
 
 void
 shift_charset ()
@@ -70,13 +70,11 @@ show_free_memory ()
 int
 main (int argc, char ** argv)
 {
-    struct obj * tmp;
     char key;
     struct event * e;
-    char msg[16];
 
     init ();
-    append_obj (desktop, tmp = make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
+    focussed_window = append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
 //    append_obj (desktop, make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
@@ -84,8 +82,6 @@ main (int argc, char ** argv)
 
     do {
         while (!(key = cbm_read_char ()));
-//        sprintf (msg, "%u", key);
-//        print_message (msg);
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));
         e->type = EVT_KEYPRESS;

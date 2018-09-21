@@ -48,7 +48,7 @@ free_obj (struct obj * x)
     free (x);
 }
 
-void __fastcall__
+struct obj * __fastcall__
 append_obj (struct obj * parent, struct obj * x)
 {
     struct obj * c = parent->node.children;
@@ -65,6 +65,8 @@ append_obj (struct obj * parent, struct obj * x)
 
 link_parent:
     x->node.parent = parent;
+
+    return x;
 }
 
 void __fastcall__

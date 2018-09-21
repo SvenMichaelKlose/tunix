@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 #include "libgfx.h"
 #include "obj.h"
@@ -33,20 +34,32 @@ draw_window_content (struct obj * o)
     gfx_pop_context ();
 }
 
+void __fastcall__
+free_window (struct obj * o)
+{
+    free (o->ops);
+}
+
 struct obj_ops window_content_ops = {
     draw_window_content,
     layout_window_content_frame,
-    obj_noop,
+    free_window,
     event_handler_passthrough
 };
 
 struct window * __fastcall__
-make_window (char * title, struct obj * content)
+make_window (char * title, struct obj * content, event_handler_t event_handler)
 {
-    struct window * win = alloc_obj (sizeof (struct window), &window_ops);
+    struct obj_ops * ops = malloc (sizeof (struct obj_ops));
+    struct window * win;
+
+    memcpy (ops, &window_ops, sizeof (struct obj_ops));
+    win = alloc_obj (sizeof (struct window), ops);
     if (!content)
         content = alloc_obj (sizeof (struct obj), &window_content_ops);
     append_obj (OBJ(win), content);
+    if (event_handler)
+        ops->event_handler = event_handler;
     win->title = title;
     return win;
 }

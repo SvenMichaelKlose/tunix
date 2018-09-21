@@ -11,7 +11,7 @@ struct window {
     char        flags;
 };
 
-struct window * __fastcall__ make_window (char * title, struct obj * content);
+struct window * __fastcall__ make_window (char * title, struct obj * content, event_handler_t handler);
 void __fastcall__ draw_window (struct obj * _w);
 
 #endif /* #ifndef WINDOW_H */

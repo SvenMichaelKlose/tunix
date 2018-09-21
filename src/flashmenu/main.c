@@ -68,6 +68,8 @@ show_free_memory ()
     print_message (msg);
 }
 
+char buf[64];
+
 int
 main (int argc, char ** argv)
 {
@@ -85,10 +87,11 @@ main (int argc, char ** argv)
     focussed_window = desktop->node.children;
     do {
         idle = 0;
-        while (!(key = cbm_read_char ())) {
+        while (!(key = cbm_read_char ()))
             if (!++idle)
                 show_free_memory ();
-        }
+        sprintf (buf, "Key code %u", key);
+        print_message (buf);
 
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));

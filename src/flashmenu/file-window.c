@@ -11,11 +11,13 @@
 #include "list.h"
 #include "table.h"
 #include "window.h"
+#include "message.h"
 #include "file-window.h"
 #include "main.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17
+#define KEY_RETURN  13
 
 struct cbm_dirent dirent;
 
@@ -81,6 +83,17 @@ file_window_invert_position (struct file_window_content * content)
     gfx_pop_context ();
 }
 
+struct dirent * __fastcall__
+file_window_get_file_by_index (struct file_window_content * content, unsigned x)
+{
+    struct dirent * d = content->files;
+
+    while (d && x--)
+        d = d->next;
+
+    return d;
+}
+
 void __fastcall__
 file_window_draw_list (struct obj * w)
 {
@@ -95,9 +108,9 @@ file_window_draw_list (struct obj * w)
     unsigned wpos = content->pos - (content->pos % visible_lines);
     unsigned rpos = wpos;
     uchar i;
+    uchar t;
 
-    while (d && wpos--)
-        d = d->next;
+    d = file_window_get_file_by_index (content, wpos);
 
     gfx_push_context ();
     while (1) {
@@ -117,7 +130,31 @@ file_window_draw_list (struct obj * w)
         gfx_set_font (charset_4x8, 0);
         gfx_set_font_compression (1);
         gfx_set_position (xofs, y);
-        gfx_putchar (d->type);
+        switch (d->type) {
+            case CBM_T_SEQ:
+                t = 's'; break;
+            case CBM_T_PRG:
+                t = 'p'; break;
+            case CBM_T_USR:
+                t = 'u'; break;
+            case CBM_T_REL:
+                t = 'r'; break;
+            case CBM_T_VRP:
+                t = 'v'; break;
+            case CBM_T_DEL:
+                t = 'x'; break;
+            case CBM_T_CBM:
+                t = 'c'; break;
+            case CBM_T_DIR:
+                t = 'd'; break;
+            case CBM_T_LNK:
+                t = 'l'; break;
+            case CBM_T_HEADER:
+                t = 'h'; break;
+            default:
+                t = 'o';
+        }
+        gfx_putchar (t);
         gfx_putchar (32);
 
         /* Print file size. */
@@ -176,6 +213,10 @@ file_window_event_handler (struct obj * o, struct event * e)
     file_window_invert_position (content);
 
     switch (e->data_char) {
+        case KEY_RETURN:
+            print_message (file_window_get_file_by_index (content, content->pos)->name);
+            break;
+
         case KEY_UP:
             if (!content->pos)
                 goto done;

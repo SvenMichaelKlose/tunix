@@ -58,12 +58,12 @@ init ()
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 }
 
+char msg[64];
+
 void
 show_free_memory ()
 {
-    char msg[32];
-
-    sprintf (msg, "%d B free.", _heapmemavail ());
+    sprintf (msg, "%d B free. Press ? for help.", _heapmemavail ());
     print_message (msg);
 }
 
@@ -80,16 +80,11 @@ main (int argc, char ** argv)
 //    append_obj (desktop, make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
-    print_message ("Welcome to G - press F1 for help.");
-
-//    for (i = 0; i < 50; i++)
-//        gfx_draw_line (0, 0, 120, i);
+    show_free_memory ();
 
     do {
-//        show_free_memory ();
         while (!(key = cbm_read_char ()));
-
-//        sprintf (msg, "%u B free.", key);
+//        sprintf (msg, "%u", key);
 //        print_message (msg);
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));

@@ -83,13 +83,16 @@ file_window_draw_list (struct obj * w)
     struct window * win = (struct window *) w;
     struct file_window_content * content = (struct file_window_content *) w;
     char xofs = 1;
-    char yofs = 0;
     char c;
     char size[8];
     struct dirent * d = content->files;
+    unsigned y = 0;
     unsigned rpos = content->wpos;
-    unsigned y = yofs;
-    int i = 0;
+    unsigned wpos = rpos;
+    uchar i;
+
+    while (d && wpos--)
+        d = d->next;
 
     gfx_push_context ();
     while (1) {
@@ -159,6 +162,7 @@ char
 file_window_event_handler (struct obj * o, struct event * e)
 {
     struct file_window_content * content = (struct file_window_content *) o;
+    int visible_lines = o->rect.h / 8 - 1;
 
     file_window_invert_position (content);
 
@@ -167,20 +171,29 @@ file_window_event_handler (struct obj * o, struct event * e)
             if (!content->pos)
                 goto done;
             content->pos--;
+            if (content->pos < content->wpos) {
+                content->wpos -= visible_lines;
+                goto new_page;
+            }
             break;
 
         case KEY_DOWN:
             if (content->pos == content->len - 1)
                 goto done;
             content->pos++;
+            if (content->pos > content->wpos + visible_lines) {
+                content->wpos += visible_lines;
+                goto new_page;
+            }
             break;
-
-        default:
-            goto done;
     }
 
 done:
     file_window_invert_position (content);
+    return FALSE;
+
+new_page:
+    file_window_draw (o);
     return FALSE;
 }
 

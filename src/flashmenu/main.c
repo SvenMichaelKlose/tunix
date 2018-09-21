@@ -121,7 +121,7 @@ main (int argc, char ** argv)
         while (!(key = cbm_k_getin ()))
             if (!++idle)
                 show_free_memory ();
-//        sprintf (buf, "Key code %u", key);
+//        sprintf (buf, "Key code %U", key);
 //        print_message (buf);
 
         switch (key) {

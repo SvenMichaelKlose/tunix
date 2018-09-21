@@ -130,17 +130,17 @@ char
 hexdump_event_handler (struct obj * o, struct event * e)
 {
     struct hexdump_content * content = (struct hexdump_content *) o->node.children;
-    int visible_bytes = (content->obj.rect.h / 8 - 1) * 8;
+    int visible_bytes = (content->obj.rect.h / 8) * 8;
 
     switch (e->data_char) {
         case KEY_UP:
-            if (!content->pos)
+            if (content->len != -1 && !content->pos)
                 goto done;
             content->pos -= visible_bytes;
             break;
 
         case KEY_DOWN:
-            if ((content->pos + visible_bytes) >= content->len)
+            if (content->len != -1 && (content->pos + visible_bytes) >= content->len)
                 goto done;
             content->pos += visible_bytes;
             break;
@@ -159,7 +159,7 @@ struct obj_ops obj_ops_hexdump_content = {
     event_handler_passthrough
 };
 
-struct obj *
+struct hexdump_content *
 make_hexdump_content ()
 {
 	struct obj * obj =  alloc_obj (sizeof (struct obj), &obj_ops_hexdump_content);
@@ -168,16 +168,17 @@ make_hexdump_content ()
     memcpy (content, obj, sizeof (struct obj));
     free (obj);
 
-    return OBJ(content);
+    return content;
 }
 
 struct obj * __fastcall__
-make_hexdump (char * title, gpos x, gpos y, gpos w, gpos h)
+make_hexdump (char * data, unsigned len, char * title, gpos x, gpos y, gpos w, gpos h)
 {
-    struct obj * content = make_hexdump_content ();
-	struct window * win = make_window (title, content, hexdump_event_handler);
+    struct hexdump_content * content = make_hexdump_content ();
+	struct window * win = make_window (title, (struct obj *) content, hexdump_event_handler);
 
-    hexdump_read_directory ((struct hexdump_content *) content, "$");
+    content->data = data;
+    content->len = len;
     win->flags |= W_FULLSCREEN;
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 

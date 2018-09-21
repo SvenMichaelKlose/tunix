@@ -10,6 +10,6 @@ struct hexdump_content {
     int    pos;    /* User's position in list. */
 };
 
-struct obj * __fastcall__ make_hexdump (char * title, gpos x, gpos y, gsize w, gsize h);
+struct obj * __fastcall__ make_hexdump (char * data, unsigned len, char * title, gpos x, gpos y, gsize w, gsize h);
 
 #endif /* #ifndef HEXDUMP_H */

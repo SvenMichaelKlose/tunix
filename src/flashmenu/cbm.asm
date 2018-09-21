@@ -31,7 +31,7 @@ dirent_size     = dirent_type + 1
 
     pla
     tax
-    ldy #$00    ; Raw directory read.
+    ldy #$00    ; Read.
     lda #$02    ; Reserved logical file number.
     jsr SETLFS
 

@@ -9,6 +9,8 @@
 #include "message.h"
 #include "frame.h"
 
+extern struct obj * focussed_window;
+
 #define WINDOW_TITLE_HEIGHT     11
 
 void __fastcall__ layout_window_content_frame (struct obj *);
@@ -65,6 +67,21 @@ make_window (char * title, struct obj * content, event_handler_t event_handler)
 }
 
 void __fastcall__
+draw_title_grip (gpos y, gpos yb, gsize iw)
+{
+    gpos   cx;
+    gsize  gw;
+
+    cx = gfx_x ();
+    if (cx > iw)
+        return;
+
+    gw = iw - cx;
+    for (; y < yb; y += 2)
+        gfx_draw_hline (cx, y, gw);
+}
+
+void __fastcall__
 draw_window_fullscreen (struct window * win)
 {
     struct rect * r = &win->obj.rect;
@@ -74,10 +91,7 @@ draw_window_fullscreen (struct window * win)
     gsize  h = 183;
     gsize  iw = r->w - 2;
     gpos   yb = WINDOW_TITLE_HEIGHT - 3;
-    gpos   cx;
     gpos   ch = h - WINDOW_TITLE_HEIGHT;
-    gsize  gw;
-    gpos   y2;
 
     /* Draw window title. */
     gfx_push_context ();
@@ -90,14 +104,7 @@ draw_window_fullscreen (struct window * win)
     gfx_draw_hline (0, WINDOW_TITLE_HEIGHT - 2, w);
     gfx_set_font (charset_4x8, 2);
     gfx_draw_text (1, 1, win->title);
-
-    /* Draw title grip. */
-    cx = gfx_x ();
-    if (cx <= iw) {
-        gw = iw - cx;
-        for (y2 = 1; y2 < yb; y2 += 2)
-            gfx_draw_hline (cx, y2, gw);
-    }
+    draw_title_grip (1, yb, iw);
     gfx_pop_context ();
 
     /* Draw contents. */
@@ -118,10 +125,7 @@ draw_window_standard (struct window * win)
     gsize  iw = r->w - 2;
     gpos   xr = iw - 1;
     gpos   yb = y + WINDOW_TITLE_HEIGHT - 1;
-    gpos   cx;
     gpos   ch = h - WINDOW_TITLE_HEIGHT;
-    gsize  gw;
-    gpos   y2;
 
     /* Draw window title. */
     gfx_push_context ();
@@ -133,14 +137,8 @@ draw_window_standard (struct window * win)
     gfx_set_pattern (pattern_solid);
     gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT);
     gfx_draw_text (2, 2, win->title);
-
-    /* Draw title grip. */
-    cx = gfx_x ();
-    if (cx <= xr) {
-        gw = xr - cx;
-        for (y2 = 2; y2 < yb; y2 += 2)
-            gfx_draw_hline (cx, y2, gw);
-    }
+    if (focussed_window == (struct obj *) win)
+        draw_title_grip (2, yb, iw);
     gfx_pop_context ();
 
     /* Draw content frame. */

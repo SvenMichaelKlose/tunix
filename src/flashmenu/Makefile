@@ -3,7 +3,6 @@ SOURCES= \
     basic-starter.c \
     file-window.c \
     main.c \
-    ultifs.c \
     ultimem.c
 
 ASMSOURCES= \

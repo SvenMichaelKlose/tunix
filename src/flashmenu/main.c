@@ -40,6 +40,29 @@ shift_charset ()
 
 char do_shutdown = 0;
 
+void __fastcall__
+desktop_draw (struct obj * o)
+{
+    struct window * w = (struct window *) o->node.children;
+
+    while (w) {
+        if (w->flags & W_FULLSCREEN) {
+            draw_obj ((struct obj *) w);
+            return;
+        }
+        w = (struct window *) w->obj.node.next;
+    }
+
+    draw_box (o);
+}
+
+struct obj_ops desktop_obj_ops = {
+    desktop_draw,
+    layout_obj_children,
+    obj_noop,
+    event_handler_passthrough
+};
+
 void
 init ()
 {
@@ -59,6 +82,7 @@ init ()
 
     focussed_window = NULL;
     desktop = OBJ(make_box (pattern_woven));
+    desktop->ops = &desktop_obj_ops;
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 }
 
@@ -85,13 +109,13 @@ main (int argc, char ** argv)
 
     init ();
     show_free_memory ();
-    append_obj (desktop, make_file_window ("#31 Ultimem", 0, 11 * 8, 20 * 8, 11 * 8));
-    append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 11 * 8));
+    append_obj (desktop, make_file_window ("#31 Ultimem", 0, DESKTOP_HEIGHT / 2, 20 * 8, 11 * 8));
+    append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
+    focussed_window = desktop->node.children->node.next;
     layout_obj (desktop);
     draw_obj (desktop);
 
-    focussed_window = desktop->node.children->node.next;
     do {
         idle = 0;
         while (!(key = cbm_k_getin ()))

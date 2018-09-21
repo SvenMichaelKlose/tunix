@@ -9,5 +9,7 @@ struct box {
 };
 
 struct box * make_box (char * pattern);
+void __fastcall__ draw_box (struct obj * o);
+
 
 #endif /* #ifndef BOX_H */

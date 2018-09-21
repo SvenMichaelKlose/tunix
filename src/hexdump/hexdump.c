@@ -10,27 +10,10 @@
 #include "table.h"
 #include "window.h"
 #include "hexdump.h"
-#include "cbm.h"
 #include "main.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17
-
-void
-hexdump_read_directory (struct hexdump_content * content, char * path)
-{
-    char * buf = malloc (1024);
-    unsigned i = 0;
-
-    cbm_opendir (path, 8);
-    while (!cbm_readst ()) {
-        buf[i++] = cbm_read_char ();
-    }
-    cbm_closedir ();
-
-    content->data = buf;
-    content->len = i;
-}
 
 void __fastcall__
 print_hexnibble (char v)

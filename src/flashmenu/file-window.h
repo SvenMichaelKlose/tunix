@@ -4,7 +4,7 @@
 #include "window.h"
 
 struct dirent {
-    char            name[16];
+    char            name[17];
     unsigned long   size;
     unsigned char   type;
     struct dirent * next;

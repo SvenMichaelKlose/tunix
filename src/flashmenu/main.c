@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <conio.h>
+
 #include <libgfx.h>
 
 #include "obj.h"
@@ -18,7 +20,6 @@
 
 #include "bank-allocator.h"
 #include "basic-starter.h"
-#include "hexdump.h"
 #include "file-window.h"
 #include "main.h"
 #include "ultimem.h"
@@ -59,16 +60,16 @@ init ()
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 }
 
-char msg[64];
-
 void
 show_free_memory ()
 {
+    char * msg = malloc (64);
     sprintf (msg, "%d B free.", _heapmemavail ());
     print_message (msg);
+    free (msg);
 }
 
-char buf[64];
+//char buf[64];
 
 int
 main (int argc, char ** argv)
@@ -87,11 +88,11 @@ main (int argc, char ** argv)
     focussed_window = desktop->node.children;
     do {
         idle = 0;
-        while (!(key = cbm_read_char ()))
+        while (!(key = cbm_k_getin ()))
             if (!++idle)
                 show_free_memory ();
-        sprintf (buf, "Key code %u", key);
-        print_message (buf);
+//        sprintf (buf, "Key code %u", key);
+//        print_message (buf);
 
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));

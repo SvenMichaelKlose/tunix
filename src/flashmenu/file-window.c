@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <cbm.h>
+
 #include "bank-allocator.h"
 #include "obj.h"
 #include "button.h"
@@ -10,13 +12,12 @@
 #include "table.h"
 #include "window.h"
 #include "file-window.h"
-#include "cbm.h"
 #include "main.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17
 
-char name[21];
+struct cbm_dirent dirent;
 
 void
 file_window_free_files (struct file_window_content * content)
@@ -39,22 +40,23 @@ file_window_read_directory (struct file_window_content * content, char * path)
     struct dirent * d;
     unsigned len = 0;
 
-    cbm_opendir (path, 8);
+    cbm_opendir (2, 8, path);
 
     while (1) {
-        cbm_readdir (name);
-        if (!name[0])
+        if (cbm_readdir (2, &dirent))
             break;
         len++;
         d = malloc (sizeof (struct dirent));
         if (last_dirent)
             last_dirent->next = d;
         else
-            first_dirent = d;
-        last_dirent = d;
-        memcpy (d, &name, 21);
+            first_dirent = d; last_dirent = d;
+
+        d->size = dirent.size;
+        d->type = dirent.type;
+        memcpy (&d->name, &dirent.name, 17);
     }
-    cbm_closedir ();
+    cbm_closedir (2);
 
     content->files = first_dirent;
     content->len = len;
@@ -65,7 +67,7 @@ file_window_invert_position (struct file_window_content * content)
 {
     unsigned y = (content->pos - content->wpos) * 8;
 
-    if (y > content->obj.rect.h)
+    if (y > content->obj.rect.h || !content->len)
         return;
 
     gfx_push_context ();
@@ -138,6 +140,11 @@ file_window_draw_list (struct obj * w)
 next:
         y += 8;
         rpos++;
+    }
+
+    if (!content->len) {
+        gfx_set_font (charset_4x8, 2);
+        gfx_draw_text (1, 1, "No files.");
     }
     gfx_pop_context ();
 }

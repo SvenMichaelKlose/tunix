@@ -880,9 +880,9 @@ _charset_4x8:
 
 ; W
     .byte %1010
-    .byte %1110
-    .byte %1110
-    .byte %1110
+    .byte %1010
+    .byte %1010
+    .byte %1010
     .byte %1110
     .byte %1110
     .byte %0100

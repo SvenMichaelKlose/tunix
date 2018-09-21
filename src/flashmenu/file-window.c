@@ -158,8 +158,6 @@ file_window_draw (struct obj * w)
     gfx_push_context ();
     gfx_reset_region ();
     set_obj_region (w);
-    file_window_free_files (content);
-    file_window_read_directory (content, "$");
     file_window_draw_list (w);
     file_window_invert_position (content);
     gfx_pop_context ();
@@ -227,11 +225,13 @@ make_file_window_content ()
 struct obj * __fastcall__
 make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 {
-    struct obj * content = make_file_window_content ();
-	struct window * win = make_window (title, content, file_window_event_handler);
+    struct file_window_content * content = (struct file_window_content *) make_file_window_content ();
+	struct window * win = make_window (title, (struct obj *) content, file_window_event_handler);
 
-    win->flags |= W_FULLSCREEN;
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
+
+    file_window_free_files (content);
+    file_window_read_directory (content, "$");
 
     return OBJ(win);
 }

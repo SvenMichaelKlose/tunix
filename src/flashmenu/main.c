@@ -48,9 +48,8 @@ init ()
 
     /* Add memory blocks for malloc(). */
     _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
-// Breaks free().
-//    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
-//    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
+    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
+    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
 
     init_bank_allocator ();
     gfx_clear_screen (0);
@@ -67,28 +66,32 @@ void
 show_free_memory ()
 {
     char * msg = malloc (64);
-    sprintf (msg, "%U B free.", _heapmemavail ());
+    sprintf (msg, "%U/%U B free.", _heapmemavail (), _heapmaxavail ());
     print_message (msg);
     free (msg);
 }
 
 //char buf[64];
 
+#define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
+
 int
 main (int argc, char ** argv)
 {
     char key;
     struct event * e;
+    struct window * w;
     unsigned idle;
 
     init ();
-    print_message ("Welcome to G! Press ? for help.");
-    append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
+    show_free_memory ();
+    append_obj (desktop, make_file_window ("#31 Ultimem", 0, 11 * 8, 20 * 8, 11 * 8));
+    append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 11 * 8));
 
     layout_obj (desktop);
     draw_obj (desktop);
 
-    focussed_window = desktop->node.children;
+    focussed_window = desktop->node.children->node.next;
     do {
         idle = 0;
         while (!(key = cbm_k_getin ()))
@@ -96,6 +99,20 @@ main (int argc, char ** argv)
                 show_free_memory ();
 //        sprintf (buf, "Key code %u", key);
 //        print_message (buf);
+
+        switch (key) {
+            case 'F':
+                w = (struct window *) focussed_window;
+                w->flags ^= W_FULLSCREEN;
+                if (w->flags & W_FULLSCREEN)
+                    set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT);
+                else
+                    set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT / 2);
+                layout_obj (desktop);
+                draw_obj (desktop);
+                show_free_memory ();
+                continue;
+        }
 
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));

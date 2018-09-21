@@ -174,7 +174,7 @@ layout_window_content_frame (struct obj * o)
     gpos w = o->rect.w;
     gpos h = o->rect.h;
 
-    if (win->flags && W_FULLSCREEN)
+    if (win->flags & W_FULLSCREEN)
         set_obj_position_and_size (o->node.children, 0, WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
     else
         set_obj_position_and_size (o->node.children, 1, WINDOW_TITLE_HEIGHT, w - 2, h - WINDOW_TITLE_HEIGHT - 1);

@@ -130,7 +130,7 @@ file_window_draw_list (struct obj * w)
         gfx_set_position (xofs + 28, y);
         for (i = 0; i < 16; i++)
             if (c = d->name[i])
-                gfx_putchar (c + 192);
+                gfx_putchar (c - 64);
             else
                 break;
 

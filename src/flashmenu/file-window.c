@@ -65,7 +65,9 @@ file_window_read_directory (struct file_window_content * content, char * path)
 void
 file_window_invert_position (struct file_window_content * content)
 {
-    unsigned y = (content->pos - content->wpos) * 8;
+    unsigned visible_lines = content->obj.rect.h / 8 - 1;
+    unsigned wpos = content->pos - (content->pos % visible_lines);
+    unsigned y = (content->pos - wpos) * 8;
 
     if (y > content->obj.rect.h || !content->len)
         return;
@@ -84,13 +86,14 @@ file_window_draw_list (struct obj * w)
 {
     struct window * win = (struct window *) w;
     struct file_window_content * content = (struct file_window_content *) w;
+    unsigned visible_lines = content->obj.rect.h / 8 - 1;
     char xofs = 1;
     char c;
     char size[8];
     struct dirent * d = content->files;
     unsigned y = 0;
-    unsigned rpos = content->wpos;
-    unsigned wpos = rpos;
+    unsigned wpos = content->pos - (content->pos % visible_lines);
+    unsigned rpos = wpos;
     uchar i;
 
     while (d && wpos--)
@@ -168,6 +171,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 {
     struct file_window_content * content = (struct file_window_content *) o->node.children;
     int visible_lines = content->obj.rect.h / 8 - 1;
+    unsigned wpos = content->pos - (content->pos % visible_lines);
 
     file_window_invert_position (content);
 
@@ -176,20 +180,16 @@ file_window_event_handler (struct obj * o, struct event * e)
             if (!content->pos)
                 goto done;
             content->pos--;
-            if (content->pos < content->wpos) {
-                content->wpos -= visible_lines;
+            if (content->pos < wpos)
                 goto new_page;
-            }
             break;
 
         case KEY_DOWN:
-            if (content->pos == content->len - 1)
+            if (content->pos > content->len)
                 goto done;
             content->pos++;
-            if (content->pos > content->wpos + visible_lines) {
-                content->wpos += visible_lines;
+            if (content->pos > wpos + visible_lines - 1)
                 goto new_page;
-            }
             break;
     }
 

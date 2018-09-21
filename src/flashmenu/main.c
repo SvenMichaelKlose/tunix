@@ -18,6 +18,7 @@
 
 #include "bank-allocator.h"
 #include "basic-starter.h"
+#include "hexdump.h"
 #include "file-window.h"
 #include "main.h"
 #include "ultimem.h"
@@ -74,14 +75,17 @@ main (int argc, char ** argv)
     struct event * e;
 
     init ();
-    focussed_window = append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
+    focussed_window = append_obj (desktop, make_hexdump ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
 //    append_obj (desktop, make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
-    show_free_memory ();
 
     do {
-        while (!(key = cbm_read_char ()));
+        if (!(key = cbm_read_char ())) {
+            show_free_memory ();
+            while (!(key = cbm_read_char ()));
+        }
+
         /* Send keyboard event. */
         e = malloc (sizeof (struct event));
         e->type = EVT_KEYPRESS;

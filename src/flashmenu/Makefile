@@ -1,6 +1,7 @@
 SOURCES= \
     bank-allocator.c \
     basic-starter.c \
+    hexdump.c \
     file-window.c \
     main.c \
     ultifs.c \

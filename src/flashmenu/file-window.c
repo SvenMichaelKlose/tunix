@@ -16,8 +16,6 @@
 #define KEY_UP      145
 #define KEY_DOWN    17
 
-char name[21];
-
 void
 file_window_free_files (struct file_window_content * content)
 {
@@ -31,6 +29,8 @@ file_window_free_files (struct file_window_content * content)
     }
 }
 
+char dirbuf[29];
+
 void
 file_window_read_directory (struct file_window_content * content, char * path)
 {
@@ -42,8 +42,8 @@ file_window_read_directory (struct file_window_content * content, char * path)
     cbm_opendir (path, 8);
 
     while (1) {
-        cbm_readdir (name);
-        if (!name[0])
+        cbm_readdir (dirbuf);
+        if (!(dirbuf[0] | dirbuf[1]))
             break;
         len++;
         d = malloc (sizeof (struct dirent));
@@ -52,7 +52,7 @@ file_window_read_directory (struct file_window_content * content, char * path)
         else
             first_dirent = d;
         last_dirent = d;
-        memcpy (d, &name, 21);
+        memcpy (&d->name, &dirbuf[3], 15);
     }
     cbm_closedir ();
 

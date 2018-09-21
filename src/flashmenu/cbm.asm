@@ -1,4 +1,5 @@
 .export _cbm_opendir, _cbm_readdir, _cbm_closedir, _cbm_read_char
+.export _cbm_readst = READST
 
 .importzp s, d
 .import popax
@@ -30,7 +31,7 @@ dirent_size     = dirent_type + 1
 
     pla
     tax
-    ldy #$00
+    ldy #$00    ; Raw directory read.
     lda #$02    ; Reserved logical file number.
     jsr SETLFS
 
@@ -41,29 +42,11 @@ dirent_size     = dirent_type + 1
     jsr CHKIN
     bcs error
 
-    ; Skip load address.
+    ; Skip pointer to next sector.
     jsr read
     bcs error
     jsr read
     bcs error
-
-    ;; Skip first three lines.
-    ldx #3
-    ; Skip load address, first address of next line and line number.
-m:  ldy #6
-l1: jsr read
-    bcs error
-    dey
-    bne l1
-
-    ; Skip line.
-    ldy #0
-l2: jsr read
-    bcs error
-    bne l2     ; continue until end of line
-
-    dex
-    bne m
 
     lda #0
     tax
@@ -76,64 +59,20 @@ l2: jsr read
     stx d+1
 
     lda #0
-    ldy #dirent_name
+    tay
     sta (d),y
 
     jsr READST
     bne done
 
-    ; Skip address of next line.
-    jsr read
+    ldx #31
+    ldy #0
+l:  jsr read
     bcs error2
-    jsr read
-    bcs error2
-
-    ; Read BASIC line number, which is the size in blocks.
-    jsr read
-    bcs error2
-    ldy #dirent_length
-    sta (d),y
-    jsr read
-    bcs error2
-    iny
-    sta (d),y
-    lda #0
-    iny
     sta (d),y
     iny
-    sta (d),y
-
-    ; Read until first double quote.
-l3: jsr read
-    beq _cbm_readdir
-    cmp #$22
-    bne l3
-
-    ; Read name till quote.
-    ldy #dirent_name
-l4: jsr read
-    bcs error2
-    beq _cbm_readdir
-    cmp #$22
-    beq n
-    sta (d),y
-    iny
-    jmp l4
-n:  lda #0
-    sta (d),y
-
-    ; Read over spaces.
-l6: jsr read
-    cmp #$20
-    beq l6
-
-    ; Save file type.
-    ldy #dirent_type
-    sta (d),y
-
-    ; Read till end of line.
-l5: jsr read
-    bne l5
+    dex
+    bne l
 
 done:
     lda #0

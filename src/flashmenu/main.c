@@ -64,24 +64,8 @@ char msg[64];
 void
 show_free_memory ()
 {
-    sprintf (msg, "%d B free. Press ? for help.", _heapmemavail ());
+    sprintf (msg, "%d B free.", _heapmemavail ());
     print_message (msg);
-}
-
-void
-hexdump_read_directory (struct hexdump_content * content, char * path)
-{
-    char * buf = malloc (1024);
-    unsigned i = 0;
-
-    cbm_opendir (path, 8);
-    while (!cbm_readst ()) {
-        buf[i++] = cbm_read_char ();
-    }
-    cbm_closedir ();
-
-    content->data = buf;
-    content->len = i;
 }
 
 int
@@ -89,21 +73,21 @@ main (int argc, char ** argv)
 {
     char key;
     struct event * e;
-    struct obj * hexdump;
+    unsigned idle;
 
     init ();
-    hexdump = append_obj (desktop, make_hexdump (0, -1, "#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
-//    hexdump_read_directory ((struct hexdump_content *) hexdump->node.children, "$");
+    print_message ("Welcome to G! Press ? for help.");
+    append_obj (desktop, make_file_window ("#8 SD2IEC", 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT));
 
-//    append_obj (desktop, make_basic_starter ());
     layout_obj (desktop);
     draw_obj (desktop);
 
     focussed_window = desktop->node.children;
     do {
-        if (!(key = cbm_read_char ())) {
-            show_free_memory ();
-            while (!(key = cbm_read_char ()));
+        idle = 0;
+        while (!(key = cbm_read_char ())) {
+            if (!++idle)
+                show_free_memory ();
         }
 
         /* Send keyboard event. */

@@ -194,7 +194,7 @@ next:
 
 
 void __fastcall__
-file_window_draw (struct obj * w)
+file_window_draw_content (struct obj * w)
 {
     struct file_window_content * content = (struct file_window_content *) w;
 
@@ -209,7 +209,7 @@ file_window_draw (struct obj * w)
 typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 
 void
-file_window_launch (struct dirent * d)
+file_window_launch_program (struct dirent * d)
 {
     unsigned start;
     unsigned read_bytes;
@@ -217,10 +217,6 @@ file_window_launch (struct dirent * d)
     uchar oldblk5 = *ULTIMEM_BLK5RAM;
     launch_t launcher = (void *) 0x9800;
 
-    if (d->type != CBM_T_PRG) {
-        print_message ("Not a program.");
-        return;
-    }
     print_message ("Loading...");
 
     cbm_open (2, 8, 0, d->name);
@@ -251,6 +247,38 @@ error:
     launcher (start, size);
 }
 
+void
+file_window_enter_directory (struct file_window_content * content, struct dirent * d)
+{
+    sprintf (message_buffer, "CD/%S/", d->name);
+    print_message (message_buffer);
+    cbm_open (15, 8, 15, message_buffer);
+    cbm_read (15, message_buffer, 63);
+    message_buffer[63] = 0;
+    print_message (message_buffer);
+    cbm_close (15);
+    file_window_free_files (content);
+    file_window_read_directory (content, "$");
+    file_window_draw_content ((struct obj *) content);
+}
+
+void
+file_window_launch (struct file_window_content * content, struct dirent * d)
+{
+    switch (d->type) {
+        case CBM_T_PRG:
+            file_window_launch_program (d);
+            break;
+
+        case CBM_T_DIR:
+            file_window_enter_directory (content, d);
+            break;
+
+        default:
+            print_message ("Don't know how to open this.");
+    }
+}
+
 char
 file_window_event_handler (struct obj * o, struct event * e)
 {
@@ -262,7 +290,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 
     switch (e->data_char) {
         case KEY_RETURN:
-            file_window_launch (file_window_get_file_by_index (content, content->pos));
+            file_window_launch (content, file_window_get_file_by_index (content, content->pos));
             break;
 
         case KEY_UP:
@@ -287,12 +315,12 @@ done:
     return FALSE;
 
 new_page:
-    file_window_draw ((struct obj *) content);
+    file_window_draw_content ((struct obj *) content);
     return FALSE;
 }
 
 struct obj_ops obj_ops_file_window_content = {
-    file_window_draw,
+    file_window_draw_content,
     obj_noop,
     obj_noop,
     event_handler_passthrough

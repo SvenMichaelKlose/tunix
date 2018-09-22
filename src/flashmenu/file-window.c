@@ -50,6 +50,8 @@ file_window_read_directory (struct file_window_content * content, char * path)
     while (1) {
         if (cbm_readdir (2, &dirent))
             break;
+        if (dirent.type == CBM_T_HEADER || (dirent.type == CBM_T_DIR && (!strcmp (".", dirent.name) || !strcmp ("..", dirent.name))))
+            continue;
         len++;
         d = malloc (sizeof (struct dirent));
         if (last_dirent)
@@ -174,9 +176,9 @@ file_window_draw_list (struct obj * w)
         gfx_set_font_compression (0);
         gfx_set_position (xofs + 28, y);
         for (i = 0; i < 16; i++)
-            if (c = d->name[i])
-                gfx_putchar (c - 64);
-            else
+            if (c = d->name[i]) {
+                gfx_putchar ((c - 64) & 127);
+            } else
                 break;
 
         d = d->next;
@@ -250,7 +252,7 @@ error:
 void
 file_window_enter_directory (struct file_window_content * content, struct dirent * d)
 {
-    sprintf (message_buffer, "CD/%S/", d->name);
+    sprintf (message_buffer, "cd/%S/", d->name);
     print_message (message_buffer);
     cbm_open (15, 8, 15, message_buffer);
     cbm_read (15, message_buffer, 63);

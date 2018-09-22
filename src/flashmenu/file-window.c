@@ -6,6 +6,7 @@
 #include "g.h"
 
 #include "ultimem.h"
+#include "launch.h"
 #include "bank-allocator.h"
 #include "obj.h"
 #include "button.h"
@@ -205,6 +206,8 @@ file_window_draw (struct obj * w)
     gfx_pop_context ();
 }
 
+typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
+
 void
 file_window_launch (struct dirent * d)
 {
@@ -212,6 +215,7 @@ file_window_launch (struct dirent * d)
     unsigned read_bytes;
     unsigned size;
     uchar oldblk5 = *ULTIMEM_BLK5RAM;
+    launch_t launcher = (void *) 0x9800;
 
     if (d->type != CBM_T_PRG) {
         print_message ("Not a program.");
@@ -234,14 +238,17 @@ file_window_launch (struct dirent * d)
         size += read_bytes;
         *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
 
-        sprintf (message_buffer, "%D read...", size);
+        sprintf (message_buffer, "%U read...", size);
         print_message (message_buffer);
     }
 
-    print_message ("Launching...");
+    sprintf (message_buffer, "Launching at %U...", start);
+    print_message (message_buffer);
 error:
     cbm_close (2);
     *ULTIMEM_BLK5RAM = oldblk5;
+    memcpy (launcher, launch, 128);
+    launcher (start, size);
 }
 
 char

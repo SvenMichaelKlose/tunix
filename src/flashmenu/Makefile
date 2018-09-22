@@ -6,6 +6,7 @@ SOURCES= \
     ultimem.c
 
 ASMSOURCES= \
+    launch.asm \
     prgsize.asm \
     prgend.asm \
     ../zeropage.asm \

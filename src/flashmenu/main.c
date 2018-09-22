@@ -68,6 +68,7 @@ init ()
 {
     /* Active RAM in BANK5. */
     * (char *) 0x9ff2 = 0xff;
+    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
 
     /* Add memory blocks for malloc(). */
     _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */

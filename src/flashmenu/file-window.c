@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include <cbm.h>
+#include "g.h"
 
 #include "bank-allocator.h"
 #include "obj.h"
@@ -160,7 +161,7 @@ file_window_draw_list (struct obj * w)
         /* Print file size. */
         gfx_set_position (xofs + 6, y);
         memset (size, 32, sizeof (size));
-        sprintf (size, "%u", (unsigned int) d->size);
+        sprintf (size, "%U", (unsigned int) d->size);
         size[strlen (size)] = 32;
         for (i = 0; i < 5; i++)
             gfx_putchar (size[i]);
@@ -203,6 +204,22 @@ file_window_draw (struct obj * w)
     gfx_pop_context ();
 }
 
+void
+file_window_launch (struct dirent * d)
+{
+    unsigned startaddr;
+
+    if (d->type != CBM_T_PRG) {
+        print_message ("Not a program.");
+        return;
+    }
+    print_message ("Launching...");
+    cbm_open (2, 8, 0, d->name);
+    cbm_read (2, &startaddr, 2);
+    cbm_close (2);
+    cbm_load (d->name, 8, 0);
+}
+
 char
 file_window_event_handler (struct obj * o, struct event * e)
 {
@@ -214,7 +231,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 
     switch (e->data_char) {
         case KEY_RETURN:
-            print_message (file_window_get_file_by_index (content, content->pos)->name);
+            file_window_launch (file_window_get_file_by_index (content, content->pos));
             break;
 
         case KEY_UP:

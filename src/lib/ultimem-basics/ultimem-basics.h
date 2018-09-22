@@ -11,6 +11,7 @@
 #define ULTIMEM_BLK2        ((unsigned short *) 0x9ffa)
 #define ULTIMEM_BLK3        ((unsigned short *) 0x9ffc)
 #define ULTIMEM_BLK5        ((unsigned short *) 0x9ffe)
+#define ULTIMEM_BLK5RAM     ((unsigned char *) 0x9ffe)
 
 void __fastcall__ ultimem_send_command (char);
 void __fastcall__ ultimem_burn_byte (unsigned short addr, char);

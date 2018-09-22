@@ -19,13 +19,13 @@ print_message (char * text)
     gfx_pop_context ();
 }
 
-char msg[256];
+char message_buffer[64];
 
 void
 print_obj (struct obj * o)
 {
-    sprintf (msg, "cd: %d %d %d %d - r: %d %d %d %d",
-                  o->rect.x, o->rect.y, o->rect.w, o->rect.h,
-                  gfx_rxl (), gfx_ryt (), gfx_rxr (), gfx_ryb ());
-    print_message (msg);
+    sprintf (message_buffer, "cd: %d %d %d %d - r: %d %d %d %d",
+                             o->rect.x, o->rect.y, o->rect.w, o->rect.h,
+                             gfx_rxl (), gfx_ryt (), gfx_rxr (), gfx_ryb ());
+    print_message (message_buffer);
 }

@@ -5,6 +5,7 @@
 #include <cbm.h>
 #include "g.h"
 
+#include "ultimem.h"
 #include "bank-allocator.h"
 #include "obj.h"
 #include "button.h"
@@ -207,17 +208,40 @@ file_window_draw (struct obj * w)
 void
 file_window_launch (struct dirent * d)
 {
-    unsigned startaddr;
+    unsigned start;
+    unsigned read_bytes;
+    unsigned size;
+    uchar oldblk5 = *ULTIMEM_BLK5RAM;
 
     if (d->type != CBM_T_PRG) {
         print_message ("Not a program.");
         return;
     }
-    print_message ("Launching...");
+    print_message ("Loading...");
+
     cbm_open (2, 8, 0, d->name);
-    cbm_read (2, &startaddr, 2);
+    cbm_read (2, &start, 2);
+
+    *ULTIMEM_BLK5RAM = 8;
+    while (1) {
+        if (cbm_k_readst ())    /* cbm_read() returns 1 on end-of-file. */
+            break;
+        read_bytes = cbm_read (2, (void *) 0xa000, 0x2000);
+        if (read_bytes == -1) {
+            print_message ("Read error!");
+            goto error;
+        }
+        size += read_bytes;
+        *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
+
+        sprintf (message_buffer, "%D read...", size);
+        print_message (message_buffer);
+    }
+
+    print_message ("Launching...");
+error:
     cbm_close (2);
-    cbm_load (d->name, 8, 0);
+    *ULTIMEM_BLK5RAM = oldblk5;
 }
 
 char

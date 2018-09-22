@@ -3,7 +3,9 @@
 
 #define MESSAGE_HEIGHT  10
 
-void print_message (char *);
-void print_obj (struct obj *);
+extern char message_buffer[64];
+
+extern void print_message (char *);
+extern void print_obj (struct obj *);
 
 #endif /* #ifndef MESSAGE_H */

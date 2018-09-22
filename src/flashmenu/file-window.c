@@ -247,7 +247,7 @@ file_window_launch (struct dirent * d)
 error:
     cbm_close (2);
     *ULTIMEM_BLK5RAM = oldblk5;
-    memcpy (launcher, launch, 128);
+    memcpy (launcher, launch, 256);
     launcher (start, size);
 }
 

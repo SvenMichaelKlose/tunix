@@ -1,5 +1,5 @@
 .export _launch
-.importzp s, d, c
+.importzp s, d, c, tmp, tmp2
 .import popax
 
 bstart  = $2b       ; start of BASIC program text
@@ -18,9 +18,18 @@ ultimem_config = $9fe0
     stx c+1
     jsr popax
     sta d
+    sta tmp
     stx d+1
+    stx tmp2
     lda #0
     sta s
+
+    ; Don't get interrupted.
+    sei
+    lda #$7f
+    sta $911d
+    sta $911e
+
     lda #7
     sta $9ffe
 l4: inc $9ffe
@@ -47,10 +56,27 @@ l3: dec c
     cmp #$ff
     bne l
 
-    lda #>$1000     ; A => screen at $1000
+    lda tmp2
+    cmp #$10
+    bne l5
+
+    ; unexpanded
+    lda #%00111100  ; No RAM1/2/3
+    sta $9ff1
+    lda #0
+    sta $9ff2
+
+    lda #>$1e00     ; A => screen at $1000
+    ldx #>$1000     ; X => BASIC at $1200
+    ldy #>$1e00     ; Y => BASIC ends at $8000
+    bne l6
+
+    ; +24/32/35
+l5: lda #>$1000     ; A => screen at $1000
     ldx #>$1200     ; X => BASIC at $1200
     ldy #>$8000     ; Y => BASIC ends at $8000
-    sty $c2         ; end of RAM at $8000
+
+l6: sty $c2         ; end of RAM at $8000
     sta screen
     stx membot
     sty memtop

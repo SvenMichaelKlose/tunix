@@ -252,7 +252,7 @@ error:
 void
 file_window_enter_directory (struct file_window_content * content, struct dirent * d)
 {
-    sprintf (message_buffer, "cd/%S/", d->name);
+    sprintf (message_buffer, "CD/%S/", d->name);
     print_message (message_buffer);
     cbm_open (15, 8, 15, message_buffer);
     cbm_read (15, message_buffer, 63);

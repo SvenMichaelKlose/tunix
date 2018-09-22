@@ -117,9 +117,7 @@ main (int argc, char ** argv)
 
     do {
         idle = 0;
-        while (!(key = cbm_k_getin ()))
-            if (!++idle)
-                show_free_memory ();
+        while (!(key = cbm_k_getin ()));
 //        sprintf (message_buffer, "Key code %U", key);
 //        print_message (message_buffer);
 
@@ -133,6 +131,10 @@ main (int argc, char ** argv)
                     set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT / 2);
                 layout_obj (desktop);
                 draw_obj (desktop);
+                show_free_memory ();
+                continue;
+
+            case 'M':
                 show_free_memory ();
                 continue;
         }

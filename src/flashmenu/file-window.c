@@ -24,6 +24,63 @@
 
 struct cbm_dirent dirent;
 
+char
+gcbm_opendir ()
+{
+    return cbm_opendir (2, 8, "$");
+}
+
+char
+gcbm_readdir (struct cbm_dirent * dirent)
+{
+    return cbm_readdir (2, dirent);
+}
+
+void
+gcbm_closedir ()
+{
+    cbm_closedir (2);
+}
+
+char
+gcbm_enterdir (char * name)
+{
+    sprintf (message_buffer, "CD/%S/", name);
+    cbm_open (15, 8, 15, message_buffer);
+    cbm_read (15, message_buffer, 63);
+    cbm_close (15);
+
+    return 0;
+}
+
+char
+gcbm_open (char * name)
+{
+    return cbm_open (2, 8, 0, name);
+}
+
+int
+gcbm_read (void * data, unsigned size)
+{
+    return cbm_read (2, data, size);
+}
+
+void
+gcbm_close ()
+{
+    cbm_close (2);
+}
+
+struct drive_ops cbm_drive_ops = {
+    gcbm_opendir,
+    gcbm_readdir,
+    gcbm_closedir,
+    gcbm_enterdir,
+    gcbm_open,
+    gcbm_read,
+    gcbm_close
+};
+
 void
 file_window_free_files (struct file_window_content * content)
 {
@@ -38,17 +95,17 @@ file_window_free_files (struct file_window_content * content)
 }
 
 void
-file_window_read_directory (struct file_window_content * content, char * path)
+file_window_read_directory (struct file_window_content * content)
 {
     struct dirent * first_dirent = NULL;
     struct dirent * last_dirent = NULL;
     struct dirent * d;
     unsigned len = 0;
 
-    cbm_opendir (2, 8, path);
+    content->drive_ops->opendir ();
 
     while (1) {
-        if (cbm_readdir (2, &dirent))
+        if (content->drive_ops->readdir (&dirent))
             break;
         if (dirent.type == CBM_T_HEADER || (dirent.type == CBM_T_DIR && (!strcmp (".", dirent.name) || !strcmp ("..", dirent.name))))
             continue;
@@ -63,7 +120,7 @@ file_window_read_directory (struct file_window_content * content, char * path)
         d->type = dirent.type;
         memcpy (&d->name, &dirent.name, 17);
     }
-    cbm_closedir (2);
+    content->drive_ops->closedir ();
 
     content->files = first_dirent;
     content->len = len;
@@ -211,24 +268,25 @@ file_window_draw_content (struct obj * w)
 typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 
 void
-file_window_launch_program (struct dirent * d)
+file_window_launch_program (struct file_window_content * content, struct dirent * d)
 {
+    uchar oldblk5 = *ULTIMEM_BLK5RAM;
+    launch_t launcher = (void *) 0x9800;
+    struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
     unsigned read_bytes;
     unsigned size;
-    uchar oldblk5 = *ULTIMEM_BLK5RAM;
-    launch_t launcher = (void *) 0x9800;
 
     print_message ("Loading...");
 
-    cbm_open (2, 8, 0, d->name);
-    cbm_read (2, &start, 2);
+    drive_ops->open (d->name);
+    drive_ops->read (&start, 2);
 
     *ULTIMEM_BLK5RAM = 8;
     while (1) {
         if (cbm_k_readst ())    /* cbm_read() returns 1 on end-of-file. */
             break;
-        read_bytes = cbm_read (2, (void *) 0xa000, 0x2000);
+        read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
         if (read_bytes == -1) {
             print_message ("Read error!");
             goto error;
@@ -242,8 +300,9 @@ file_window_launch_program (struct dirent * d)
 
     sprintf (message_buffer, "Launching at %U...", start);
     print_message (message_buffer);
+
 error:
-    cbm_close (2);
+    drive_ops->close ();
     *ULTIMEM_BLK5RAM = oldblk5;
     memcpy (launcher, launch, 256);
     launcher (start, size);
@@ -252,15 +311,9 @@ error:
 void
 file_window_enter_directory (struct file_window_content * content, struct dirent * d)
 {
-    sprintf (message_buffer, "CD/%S/", d->name);
-    print_message (message_buffer);
-    cbm_open (15, 8, 15, message_buffer);
-    cbm_read (15, message_buffer, 63);
-    message_buffer[63] = 0;
-    print_message (message_buffer);
-    cbm_close (15);
+    content->drive_ops->enterdir (d->name);
     file_window_free_files (content);
-    file_window_read_directory (content, "$");
+    file_window_read_directory (content);
     file_window_draw_content ((struct obj *) content);
 }
 
@@ -269,7 +322,7 @@ file_window_launch (struct file_window_content * content, struct dirent * d)
 {
     switch (d->type) {
         case CBM_T_PRG:
-            file_window_launch_program (d);
+            file_window_launch_program (content, d);
             break;
 
         case CBM_T_DIR:
@@ -337,6 +390,7 @@ make_file_window_content ()
     memcpy (content, obj, sizeof (struct obj));
     free (obj);
     content->files = NULL;
+    content->drive_ops = &cbm_drive_ops;
 
     return OBJ(content);
 }
@@ -350,7 +404,7 @@ make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
     file_window_free_files (content);
-    file_window_read_directory (content, "$");
+    file_window_read_directory (content);
 
     return OBJ(win);
 }

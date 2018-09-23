@@ -115,6 +115,7 @@ bfile * bfile_create (upos directory, char * name, usize size, char type);
 upos bfile_lookup_name (upos p, char * name, char namelen);
 void bfile_close (bfile * b);
 
+
 /*
  * ULTIMEM ACCESS
  */
@@ -181,14 +182,39 @@ ultimem_readm (char * dest, char len, upos p)
         *dest++ = ultimem_read_byte (p);
 }
 
+
 /*
- * BFILE FUNCTIONS
+ * BLOCK FUNCTIONS
  */
+
+unsigned char
+block_get_name_length (p)
+{
+    return ultimem_read_byte (p + offsetof (block, name_length));
+}
+
+upos
+block_get_replacement (p)
+{
+    return ultimem_read_int (p + offsetof (block, replacement));
+}
+
+upos
+block_get_next (p)
+{
+    return ultimem_read_int (p + offsetof (block, next));
+}
+
+usize
+block_get_size (p)
+{
+    return ultimem_read_int (p + offsetof (block, size));
+}
 
 usize
 block_header_size (upos p)
 {
-    return sizeof (block) + ultimem_read_byte (p + offsetof (block, name_length));
+    return sizeof (block) + block_get_name_length (p);
 }
 
 upos
@@ -198,7 +224,7 @@ file_data (upos p)
 }
 
 upos
-bfile_get_replacement (upos p)
+block_get_latest_version (upos p)
 {
     upos r;
 
@@ -206,7 +232,7 @@ bfile_get_replacement (upos p)
         return p;
 
     while (1) {
-        r = ultimem_read_int (p + offsetof (block, replacement));
+        r = block_get_replacement (p);
         if (r == EMPTY_PTR)
             break;
         p = r;
@@ -215,12 +241,43 @@ bfile_get_replacement (upos p)
     return p;
 }
 
+upos
+block_directory_get_first (upos p)
+{
+    upos d = ultimem_read_int (file_data (p));
+
+    if (d == EMPTY_PTR)
+        return d;
+    return block_get_latest_version (d);
+}
+
+upos
+block_get_last (upos p)
+{
+    upos n;
+
+    while (1) {
+        p = block_get_latest_version (p);
+        n = block_get_next (p);
+        if (n == EMPTY_PTR)
+            break;
+        p = n;
+    }
+
+    return p;
+}
+
+
+/*
+ * bfile functions
+ */
+
 bfile *
 bfile_open (upos p)
 {
     bfile * b = calloc (1, sizeof (bfile));
 
-    p = bfile_get_replacement (p);
+    p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
 
@@ -285,33 +342,7 @@ bfile_link_replacement (bfile * new)
     upos old = new->replaced;
 
     ultimem_write_int (old + offsetof (block, replacement), new->start);
-    ultimem_write_int (new->start + offsetof (block, next), ultimem_read_int (old + offsetof (block, next)));
-}
-
-upos
-directory_first (upos p)
-{
-    upos d = ultimem_read_int (file_data (p));
-
-    if (d == EMPTY_PTR)
-        return d;
-    return bfile_get_replacement (d);
-}
-
-upos
-directory_last (upos p)
-{
-    upos n;
-
-    while (1) {
-        p = bfile_get_replacement (p);
-        n = ultimem_read_int (p + offsetof (block, next));
-        if (n == EMPTY_PTR)
-            break;
-        p = n;
-    }
-
-    return p;
+    ultimem_write_int (new->start + offsetof (block, next), block_get_next (old));
 }
 
 void
@@ -320,7 +351,7 @@ bfile_append_to_directory (bfile * b)
     upos p = ULTIFS_START;
 
     if (b->directory) {
-        p = directory_first (b->directory);
+        p = block_directory_get_first (b->directory);
         if (p == EMPTY_PTR) {
             /* Create pointer to first file of directory. */
             ultimem_write_int (file_data (b->directory), b->start);
@@ -328,7 +359,7 @@ bfile_append_to_directory (bfile * b)
         }
     }
 
-    p = directory_last (p);
+    p = block_get_last (p);
     if (p != b->start)  /* Avoid circularity in very first file. */
         ultimem_write_int (p + offsetof (block, next), b->start);
 }
@@ -358,7 +389,7 @@ bfile_create_directory (upos parent, char * name)
     return d;
 }
 
-#define IS_BFILE_REMOVED(p) (!ultimem_read_int (p + offsetof (block, size)))
+#define IS_BFILE_REMOVED(p) (!block_get_size (p))
 
 upos
 bfile_lookup_name (upos p, char * name, char namelen)
@@ -369,18 +400,18 @@ bfile_lookup_name (upos p, char * name, char namelen)
         p = ULTIFS_START;
 
     do {
-        if (namelen != ultimem_read_byte (p + offsetof (block, name_length)))
+        if (namelen != block_get_name_length (p))
             continue;
         ultimem_readm (buf, namelen, file_data (p));
         if (!memcmp (buf, name, namelen))
             break;
-    } while (EMPTY_PTR != (p = ultimem_read_int (p + offsetof (block, next))));
+    } while (EMPTY_PTR != (p = block_get_next (p)));
 
     free (buf);
 
     if (p == EMPTY_PTR)
         return 0;
-    p = bfile_get_replacement (p);
+    p = block_get_latest_version (p);
     if (IS_BFILE_REMOVED(p))
         return 0;
     return p;

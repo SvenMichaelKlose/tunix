@@ -280,7 +280,7 @@ block_get_last (upos p)
 
 
 /*
- * bfile functions
+ * API
  */
 
 /*
@@ -299,13 +299,14 @@ typedef struct _bfile bfile;
 upos last_free;
 
 bfile *
-bfile_open (upos p)
+bfile_open (upos directory, upos p)
 {
     bfile * b = calloc (1, sizeof (bfile));
 
     p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
+    b->directory = directory;
 
     return b;
 }

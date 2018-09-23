@@ -30,7 +30,7 @@ gcbm_opendir ()
     return cbm_opendir (2, 8, "$");
 }
 
-char
+char __fastcall__
 gcbm_readdir (struct cbm_dirent * dirent)
 {
     return cbm_readdir (2, dirent);
@@ -42,7 +42,7 @@ gcbm_closedir ()
     cbm_closedir (2);
 }
 
-char
+char __fastcall__
 gcbm_enterdir (char * name)
 {
     sprintf (message_buffer, "CD/%S/", name);
@@ -53,13 +53,13 @@ gcbm_enterdir (char * name)
     return 0;
 }
 
-char
+char __fastcall__
 gcbm_open (char * name)
 {
     return cbm_open (2, 8, 0, name);
 }
 
-int
+int __fastcall__
 gcbm_read (void * data, unsigned size)
 {
     return cbm_read (2, data, size);
@@ -81,7 +81,7 @@ struct drive_ops cbm_drive_ops = {
     gcbm_close
 };
 
-void
+void __fastcall__
 file_window_free_files (struct file_window_content * content)
 {
     struct dirent * d = content->files;
@@ -94,7 +94,7 @@ file_window_free_files (struct file_window_content * content)
     }
 }
 
-void
+void __fastcall__
 file_window_read_directory (struct file_window_content * content)
 {
     struct dirent * first_dirent = NULL;
@@ -126,7 +126,7 @@ file_window_read_directory (struct file_window_content * content)
     content->len = len;
 }
 
-void
+void __fastcall__
 file_window_invert_position (struct file_window_content * content)
 {
     unsigned visible_lines = content->obj.rect.h / 8 - 1;
@@ -267,7 +267,7 @@ file_window_draw_content (struct obj * w)
 
 typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 
-void
+void __fastcall__
 file_window_launch_program (struct file_window_content * content, struct dirent * d)
 {
     uchar oldblk5 = *ULTIMEM_BLK5RAM;
@@ -308,7 +308,7 @@ error:
     launcher (start, size);
 }
 
-void
+void __fastcall__
 file_window_enter_directory (struct file_window_content * content, struct dirent * d)
 {
     content->drive_ops->enterdir (d->name);
@@ -317,7 +317,7 @@ file_window_enter_directory (struct file_window_content * content, struct dirent
     file_window_draw_content ((struct obj *) content);
 }
 
-void
+void __fastcall__
 file_window_launch (struct file_window_content * content, struct dirent * d)
 {
     switch (d->type) {
@@ -334,7 +334,7 @@ file_window_launch (struct file_window_content * content, struct dirent * d)
     }
 }
 
-char
+char __fastcall__
 file_window_event_handler (struct obj * o, struct event * e)
 {
     struct file_window_content * content = (struct file_window_content *) o->node.children;

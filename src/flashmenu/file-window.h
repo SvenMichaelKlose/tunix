@@ -10,9 +10,20 @@ struct dirent {
     struct dirent * next;
 };
 
+struct drive_ops {
+    char              (*opendir)  (void);
+    char __fastcall__ (*readdir)  (struct cbm_dirent *);
+    void              (*closedir) (void);
+    char __fastcall__ (*enterdir) (char * name);
+    char __fastcall__ (*open)     (char * name);
+    int  __fastcall__ (*read)     (void *, unsigned);
+    void              (*close)    (void);
+};
+
 struct file_window_content {
-    struct obj obj;
-    struct dirent * files;
+    struct obj          obj;
+    struct drive_ops *  drive_ops;
+    struct dirent *     files;
     int    len;
     int    pos;    /* User's position in list. */
 };

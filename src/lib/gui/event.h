@@ -6,7 +6,7 @@
 #define EVT_KEYPRESS    1
 #define EVT_CLICK       2
 
-typedef char (*event_handler_t) (struct obj *, struct event *);
+typedef char __fastcall__ (*event_handler_t) (struct obj *, struct event *);
 
 struct event {
     char type;

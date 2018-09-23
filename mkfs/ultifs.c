@@ -460,6 +460,7 @@ load_file (upos dir, char * name, char * pathname)
     fread (data, s, 1, f);
     fclose (f);
     bfile_writem (b, data, s);
+    free (data);
     bfile_close (b);
 }
 

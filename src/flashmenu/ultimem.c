@@ -13,7 +13,7 @@ ultimem_is_installed ()
     return id == 1 && dev == 0x7e;
 }
 
-unsigned short
+unsigned
 ultimem_get_size ()
 {
     unsigned short s;

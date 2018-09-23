@@ -41,7 +41,7 @@ struct obj_ops {
     event_handler_t     event_handler;  // Removes object resources.
 };
 
-void __fastcall__ obj_noop (struct obj *);
+extern void __fastcall__ obj_noop (struct obj *);
 
 // The object. This must be the first element in derived objects.
 struct obj {
@@ -54,29 +54,29 @@ struct obj {
 // Derived objects need to be cast. Therefore this convenience macro.
 #define OBJ(x)  ((struct obj *) x)
 
-void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);
-void __fastcall__ free_obj (struct obj *);
-void __fastcall__ set_obj_size (struct obj *, gsize w, gsize h);
-void __fastcall__ set_obj_position (struct obj *, gpos x, gpos y);
-void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
+extern void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);
+extern void __fastcall__ free_obj (struct obj *);
+extern void __fastcall__ set_obj_size (struct obj *, gsize w, gsize h);
+extern void __fastcall__ set_obj_position (struct obj *, gpos x, gpos y);
+extern void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
 
 // Append new object to list of children.
-struct obj * __fastcall__ append_obj (struct obj * parent, struct obj * x);
+extern struct obj * __fastcall__ append_obj (struct obj * parent, struct obj * x);
 
 // Copy obj_ops structure most probably to replace some of its functions and
 // reassign the new structure with set_obj_ops().
-void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
+extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);
 
 // Assign new obj_ops structure to object.
-void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
+extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
 
-void __fastcall__ draw_obj (struct obj *);
-void __fastcall__ draw_obj_children (struct obj *);
+extern void __fastcall__ draw_obj (struct obj *);
+extern void __fastcall__ draw_obj_children (struct obj *);
 
-void __fastcall__ layout_obj (struct obj *);
-void __fastcall__ layout_obj_children (struct obj *);
+extern void __fastcall__ layout_obj (struct obj *);
+extern void __fastcall__ layout_obj_children (struct obj *);
 
 // Set libgfx clipping and offset region to area of object.
-void __fastcall__ set_obj_region (struct obj *);
+extern void __fastcall__ set_obj_region (struct obj *);
 
 #endif // #ifndef OBJ_H

@@ -3,6 +3,6 @@
 
 extern struct obj_ops frame_ops;
 
-struct obj * make_frame (void);
+extern struct obj * make_frame (void);
 
 #endif /* #ifndef FRAME_H */

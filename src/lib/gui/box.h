@@ -8,8 +8,7 @@ struct box {
     char * pattern;
 };
 
-struct box * make_box (char * pattern);
-void __fastcall__ draw_box (struct obj * o);
-
+extern struct box * make_box (char * pattern);
+extern void __fastcall__ draw_box (struct obj * o);
 
 #endif /* #ifndef BOX_H */

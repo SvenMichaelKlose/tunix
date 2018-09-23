@@ -4,7 +4,7 @@
 #include "obj.h"
 #include "message.h"
 
-void
+void __fastcall__
 print_message (char * text)
 {
     gfx_push_context ();
@@ -21,7 +21,7 @@ print_message (char * text)
 
 char message_buffer[64];
 
-void
+void __fastcall__
 print_obj (struct obj * o)
 {
     sprintf (message_buffer, "cd: %d %d %d %d - r: %d %d %d %d",

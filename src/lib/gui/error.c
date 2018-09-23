@@ -1,7 +1,7 @@
 #include "message.h"
 #include "error.h"
 
-void
+void __fastcall__
 print_error (char * text)
 {
     print_message (text);

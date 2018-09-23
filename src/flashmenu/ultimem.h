@@ -3,7 +3,7 @@
 
 #include "ultimem-basics.h"
 
-char ultimem_is_installed (void);
-unsigned short ultimem_get_size (void);
+extern char     ultimem_is_installed (void);
+extern unsigned ultimem_get_size (void);
 
 #endif /* #define ULTIMEM_H */

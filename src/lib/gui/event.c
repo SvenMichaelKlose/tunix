@@ -4,7 +4,7 @@
 #include "obj.h"
 #include "event.h"
 
-char
+char __fastcall__
 event_handler_passthrough (struct obj * obj, struct event * event)
 {
     return TRUE;

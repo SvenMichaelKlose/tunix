@@ -6,7 +6,7 @@
 extern struct obj_ops table_ops;
 extern struct obj_ops table_ops_center;
 
-struct obj * make_table (void);
-void __fastcall__ draw_table (void *);
+extern struct obj * make_table (void);
+extern void __fastcall__ draw_table (void *);
 
 #endif /* #ifndef TABLE_H */

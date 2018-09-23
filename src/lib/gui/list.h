@@ -13,7 +13,7 @@ struct list {
     char        orientation;
 };
 
-struct list * __fastcall__ make_list (char orientation);
-void __fastcall__ draw_list (struct obj *);
+extern struct list * __fastcall__ make_list (char orientation);
+extern void          __fastcall__ draw_list (struct obj *);
 
 #endif /* #ifndef LIST_H */

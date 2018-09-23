@@ -28,6 +28,6 @@ struct file_window_content {
     int    pos;    /* User's position in list. */
 };
 
-struct obj * __fastcall__ make_file_window (char * title, gpos x, gpos y, gsize w, gsize h);
+extern struct obj * __fastcall__ make_file_window (char * title, gpos x, gpos y, gsize w, gsize h);
 
 #endif /* #ifndef FILE_WINDOW_H */

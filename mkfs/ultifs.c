@@ -96,25 +96,6 @@ struct _block {
 #endif
 typedef struct _block block;
 
-/*
- * File access info
- *
- * For the API.  Not stored anywhere on the file system.
- */
-struct _bfile {
-    upos    start;          /* Start of file data. */
-    upos    ptr;            /* Current position in file data. */
-    upos    directory;      /* The directory this file is in. */
-    upos    replaced;       /* Position of block this one replaced. */
-};
-typedef struct _bfile bfile;
-
-upos last_free;
-
-bfile * bfile_create (upos directory, char * name, usize size, char type);
-upos bfile_lookup_name (upos p, char * name, char namelen);
-void bfile_close (bfile * b);
-
 
 /*
  * ULTIMEM ACCESS
@@ -188,25 +169,25 @@ ultimem_readm (char * dest, char len, upos p)
  */
 
 unsigned char
-block_get_name_length (p)
+block_get_name_length (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, name_length));
 }
 
 upos
-block_get_replacement (p)
+block_get_replacement (upos p)
 {
     return ultimem_read_int (p + offsetof (block, replacement));
 }
 
 upos
-block_get_next (p)
+block_get_next (upos p)
 {
     return ultimem_read_int (p + offsetof (block, next));
 }
 
 usize
-block_get_size (p)
+block_get_size (upos p)
 {
     return ultimem_read_int (p + offsetof (block, size));
 }
@@ -272,6 +253,21 @@ block_get_last (upos p)
  * bfile functions
  */
 
+/*
+ * File access info
+ *
+ * For the API.  Not stored anywhere on the file system.
+ */
+struct _bfile {
+    upos    start;          /* Start of file data. */
+    upos    ptr;            /* Current position in file data. */
+    upos    directory;      /* The directory this file is in. */
+    upos    replaced;       /* Position of block this one replaced. */
+};
+typedef struct _bfile bfile;
+
+upos last_free;
+
 bfile *
 bfile_open (upos p)
 {
@@ -282,15 +278,6 @@ bfile_open (upos p)
     b->ptr = file_data (p);
 
     return b;
-}
-
-bfile *
-bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
-{
-    bfile * new = bfile_create (directory, name, size, type);
-    new->replaced = old->start;
-
-    return new;
 }
 
 bfile *
@@ -314,6 +301,15 @@ bfile_create (upos directory, char * name, usize size, char type)
     last_free += size;
 
     return b;
+}
+
+bfile *
+bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
+{
+    bfile * new = bfile_create (directory, name, size, type);
+    new->replaced = old->start;
+
+    return new;
 }
 
 void

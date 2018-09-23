@@ -21,8 +21,9 @@ tmp:            .res 1
 .segment "STARTUP"
 
 block_size = 0
-block_next = 4
-block_replacement = 8
+block_replacement = 4
+block_next = 8
+block_type = 12
 block_namelen = 13
 
 .proc main
@@ -74,7 +75,7 @@ block_namelen = 13
     lda #$60	; RTS
     sta $0400
 
-    ; Make pointer to start of file system.
+    ; Make pointer to start of file system at $10000.
     lda #$00
     ldx #$01
     sta base
@@ -104,7 +105,7 @@ next_block:
     jsr is_empty
     beq check_name
 
-    ldx #ptr
+    ldx #replacement
     ldy #base
     jsr copyd
     jmp next_block
@@ -178,7 +179,6 @@ l3: ldx #base
 
     ; Run it.
     jmp $2000
-
 .endproc
 
 .proc dummy_link

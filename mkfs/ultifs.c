@@ -16,6 +16,7 @@
 #define ULTIFS_START    0x10000
 #define EMPTY_PTR       -1
 
+/*
 #ifdef __CC65__
 
 char *
@@ -35,6 +36,7 @@ strsep (char ** str, char * delim)
 }
 
 #endif
+*/
 
 char **
 split_pathname (char * pathname)
@@ -383,6 +385,8 @@ bfile_lookup_name (upos p, char * name, char ln)
     return bfile_get_replacement (p);
 }
 
+#ifndef __CC65__
+
 upos
 bfile_lookup (char * name)
 {
@@ -403,22 +407,6 @@ bfile_lookup (char * name)
     free_pathname (arr);
     return p;
 }
-
-void
-mount ()
-{
-    upos p = ULTIFS_START;
-    usize size;
-
-    while (1) {
-        size = ultimem_read_int (p);
-        if (size == EMPTY_PTR)
-            break;
-        p += size + block_header_size (p);
-    }
-}
-
-#ifndef __CC65__
 
 void
 mkfs ()

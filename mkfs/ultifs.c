@@ -112,7 +112,7 @@ typedef struct _bfile bfile;
 upos last_free;
 
 bfile * bfile_create (upos directory, char * name, usize size, char type);
-upos bfile_lookup_name (upos p, char * name, char ln);
+upos bfile_lookup_name (upos p, char * name, char namelen);
 void bfile_close (bfile * b);
 
 /*
@@ -361,28 +361,29 @@ bfile_create_directory (upos parent, char * name)
 #define IS_BFILE_REMOVED(p) (!ultimem_read_int (p + offsetof (block, size)))
 
 upos
-bfile_lookup_name (upos p, char * name, char ln)
+bfile_lookup_name (upos p, char * name, char namelen)
 {
-    char * buf = malloc (ln);
-    char lh;
+    char * buf = malloc (namelen);
 
     if (!p)
         p = ULTIFS_START;
 
     do {
-        lh = ultimem_read_byte (p + offsetof (block, name_length));
-        if (ln != lh)
+        if (namelen != ultimem_read_byte (p + offsetof (block, name_length)))
             continue;
-        ultimem_readm (buf, ln, file_data (p));
-        if (!memcmp (buf, name, ln))
+        ultimem_readm (buf, namelen, file_data (p));
+        if (!memcmp (buf, name, namelen))
             break;
     } while (EMPTY_PTR != (p = ultimem_read_int (p + offsetof (block, next))));
 
     free (buf);
 
-    if (p == EMPTY_PTR || IS_BFILE_REMOVED(p))
+    if (p == EMPTY_PTR)
         return 0;
-    return bfile_get_replacement (p);
+    p = bfile_get_replacement (p);
+    if (IS_BFILE_REMOVED(p))
+        return 0;
+    return p;
 }
 
 #ifndef __CC65__

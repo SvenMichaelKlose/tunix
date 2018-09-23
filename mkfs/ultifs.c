@@ -7,19 +7,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef __CC65__
-#define STORE_SIZE      (8 * 1024 * 1024)
-#else
-#define STORE_SIZE      1
-#endif
-
 #define ULTIFS_START    0x10000
 #define EMPTY_PTR       ((upos) -1)
+
+#ifndef __CC65__
+    #define CC65FASTCALL
+    #define STORE_SIZE      (8 * 1024 * 1024)
+    unsigned char store[STORE_SIZE];
+#else
+    #define CC65FASTCALL    __fastcall__
+    #include <ultimem-basics.h>
+    unsigned char * store = (void *) 0xa000;
+#endif
+
+
+#ifndef __CC65__
+typedef unsigned int upos;
+typedef unsigned int usize;
+#else
+typedef unsigned long upos;
+typedef unsigned long usize;
+#endif
+
 
 /*
 #ifdef __CC65__
 
-char *
+char * CC65FASTCALL
 strsep (char ** str, char * delim)
 {
     char * p = *str;
@@ -36,9 +50,8 @@ strsep (char ** str, char * delim)
 }
 
 #endif
-*/
 
-char **
+char ** CC65FASTCALL
 split_pathname (char * pathname)
 {
     char * pn = strdup (pathname);
@@ -52,7 +65,7 @@ split_pathname (char * pathname)
     return arr;
 }
 
-void
+void CC65FASTCALL
 free_pathname (char ** arr)
 {
     unsigned char n = 0;
@@ -61,16 +74,7 @@ free_pathname (char ** arr)
         free (arr[n++]);
     free (arr);
 }
-
-unsigned char store[STORE_SIZE];
-
-#ifndef __CC65__
-typedef unsigned int upos;
-typedef unsigned int usize;
-#else
-typedef unsigned long upos;
-typedef unsigned long usize;
-#endif
+*/
 
 /*
  * File header
@@ -109,54 +113,59 @@ ultimem_read_byte (upos p)
     return store[p];
 }
 
-upos
-ultimem_read_int (upos p)
-{
-    return store[p] | (store[p + 1] << 8) | (store[p + 2] << 16) | (store[p + 3] << 24);
-}
-
 void
 ultimem_write_byte (upos p, unsigned char v)
 {
     store[p] = v & 0xff;
-}
-
-void
-ultimem_write_int (upos p, upos v)
-{
-    store[p] = v & 0xff;
-    store[p + 1] = (v >> 8) & 0xff;
-    store[p + 2] = (v >> 16) & 0xff;
-    store[p + 3] = (v >> 24) & 0xff;
 }
 
 #else
 
-unsigned char
+unsigned char CC65FASTCALL
 ultimem_read_byte (upos p)
 {
-    return 0;
+    unsigned char bank = p >> 13;
+    unsigned char addr = (p & 0x1fff) | 0xa000;
+    unsigned char oldbank = *ULTIMEM_BLK5RAM;
+    unsigned char v;
+
+    *ULTIMEM_BLK5RAM = bank;
+    v = *(unsigned char *) p;
+    *ULTIMEM_BLK5RAM = oldbank;
+
+    return v;
 }
 
-upos
-ultimem_read_int (upos p)
-{
-    return 0;
-}
-
-void
+void CC65FASTCALL
 ultimem_write_byte (upos p, unsigned char v)
 {
-}
+    unsigned char bank = p >> 13;
+    unsigned char addr = (p & 0x1fff) | 0xa000;
+    unsigned char oldbank = *ULTIMEM_BLK5RAM;
 
-void
-ultimem_write_int (upos p, upos v)
-{
+    *ULTIMEM_BLK5RAM = bank;
+    *(unsigned char *) p = v;
+    *ULTIMEM_BLK5RAM = oldbank;
 }
 
 #endif
 
-void
+upos CC65FASTCALL
+ultimem_read_int (upos p)
+{
+    return ultimem_read_byte (p) | ultimem_read_byte (p + 1) << 8 | ultimem_read_byte (p + 2) << 16 | ultimem_read_byte (p + 3) << 24;
+}
+
+void CC65FASTCALL
+ultimem_write_int (upos p, upos v)
+{
+    ultimem_write_byte (p, v);
+    ultimem_write_byte (p + 1, (v >> 8));
+    ultimem_write_byte (p + 2, (v >> 16));
+    ultimem_write_byte (p + 3, (v >> 24));
+}
+
+void CC65FASTCALL
 ultimem_readm (char * dest, char len, upos p)
 {
     while (len--)
@@ -168,73 +177,73 @@ ultimem_readm (char * dest, char len, upos p)
  * BLOCK FUNCTIONS
  */
 
-unsigned char
+unsigned char CC65FASTCALL
 block_get_name_length (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, name_length));
 }
 
-upos
+upos CC65FASTCALL
 block_get_replacement (upos p)
 {
     return ultimem_read_int (p + offsetof (block, replacement));
 }
 
-upos
+upos CC65FASTCALL
 block_get_next (upos p)
 {
     return ultimem_read_int (p + offsetof (block, next));
 }
 
-usize
+usize CC65FASTCALL
 block_get_size (upos p)
 {
     return ultimem_read_int (p + offsetof (block, size));
 }
 
-void
+void CC65FASTCALL
 block_set_size (upos p, usize size)
 {
     ultimem_write_int (p + offsetof (block, size), size);
 }
 
-void
+void CC65FASTCALL
 block_set_next (upos p, upos next)
 {
     ultimem_write_int (p + offsetof (block, next), next);
 }
 
-void
+void CC65FASTCALL
 block_set_replacement (upos p, upos replacement)
 {
     ultimem_write_int (p + offsetof (block, replacement), replacement);
 }
 
-void
+void CC65FASTCALL
 block_set_type (upos p, char type)
 {
     ultimem_write_byte (p + offsetof (block, type), type);
 }
 
-void
+void CC65FASTCALL
 block_set_name_length (upos p, char name_length)
 {
     ultimem_write_byte (p + offsetof (block, name_length), name_length);
 }
 
-usize
+usize CC65FASTCALL
 block_header_size (upos p)
 {
     return sizeof (block) + block_get_name_length (p);
 }
 
-upos
+upos CC65FASTCALL
 file_data (upos p)
 {
     return p + block_header_size (p);
 }
 
-upos
+upos CC65FASTCALL
 block_get_latest_version (upos p)
 {
     upos r;
@@ -252,7 +261,7 @@ block_get_latest_version (upos p)
     return p;
 }
 
-upos
+upos CC65FASTCALL
 block_directory_get_first (upos parent)
 {
     upos d = ultimem_read_int (file_data (parent));
@@ -262,7 +271,7 @@ block_directory_get_first (upos parent)
     return block_get_latest_version (d);
 }
 
-upos
+upos CC65FASTCALL
 block_get_last (upos p)
 {
     upos n;
@@ -298,7 +307,7 @@ typedef struct _bfile bfile;
 
 upos last_free;
 
-bfile *
+bfile * CC65FASTCALL
 bfile_open (upos directory, upos p)
 {
     bfile * b = calloc (1, sizeof (bfile));
@@ -311,7 +320,7 @@ bfile_open (upos directory, upos p)
     return b;
 }
 
-bfile *
+bfile * CC65FASTCALL
 bfile_create (upos directory, char * name, usize size, char type)
 {
     char name_length = strlen (name);
@@ -334,7 +343,7 @@ bfile_create (upos directory, char * name, usize size, char type)
     return b;
 }
 
-bfile *
+bfile * CC65FASTCALL
 bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
 {
     bfile * new = bfile_create (directory, name, size, type);
@@ -343,27 +352,27 @@ bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
     return new;
 }
 
-void
+void CC65FASTCALL
 bfile_remove (bfile * b)
 {
     (void) bfile_replace (b, 0, "", 0, 0);
 }
 
-void
+void CC65FASTCALL
 bfile_write (bfile * b, char byte)
 {
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
 }
 
-void
+void CC65FASTCALL
 bfile_writem (bfile * b, char * bytes, usize len)
 {
     while (len--)
         bfile_write (b, *bytes++);
 }
 
-void
+void CC65FASTCALL
 bfile_link_replacement (bfile * new)
 {
     upos old = new->replaced;
@@ -372,7 +381,7 @@ bfile_link_replacement (bfile * new)
     block_set_next (new->start, block_get_next (old));
 }
 
-void
+void CC65FASTCALL
 bfile_append_to_directory (bfile * b)
 {
     upos p = ULTIFS_START;
@@ -391,7 +400,7 @@ bfile_append_to_directory (bfile * b)
         block_set_next (p, b->start);
 }
 
-void
+void CC65FASTCALL
 bfile_close (bfile * b)
 {
     /* Connect file to directory tree. */
@@ -403,7 +412,7 @@ bfile_close (bfile * b)
     free (b);
 }
 
-upos
+upos CC65FASTCALL
 bfile_create_directory (upos parent, char * name)
 {
     upos d;
@@ -418,7 +427,7 @@ bfile_create_directory (upos parent, char * name)
 
 #define IS_BFILE_REMOVED(p) (!block_get_size (p))
 
-upos
+upos CC65FASTCALL
 bfile_lookup_name (upos p, char * name, char namelen)
 {
     char * buf = malloc (namelen);
@@ -446,6 +455,7 @@ bfile_lookup_name (upos p, char * name, char namelen)
 
 #ifndef __CC65__
 
+/*
 upos
 bfile_lookup (char * name)
 {
@@ -466,6 +476,7 @@ bfile_lookup (char * name)
     free_pathname (arr);
     return p;
 }
+*/
 
 void
 mkfs ()

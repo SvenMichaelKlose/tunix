@@ -192,6 +192,36 @@ block_get_size (upos p)
     return ultimem_read_int (p + offsetof (block, size));
 }
 
+void
+block_set_size (upos p, usize size)
+{
+    ultimem_write_int (p + offsetof (block, size), size);
+}
+
+void
+block_set_next (upos p, upos next)
+{
+    ultimem_write_int (p + offsetof (block, next), next);
+}
+
+void
+block_set_replacement (upos p, upos replacement)
+{
+    ultimem_write_int (p + offsetof (block, replacement), replacement);
+}
+
+void
+block_set_type (upos p, char type)
+{
+    ultimem_write_int (p + offsetof (block, type), type);
+}
+
+void
+block_set_name_length (upos p, char name_length)
+{
+    ultimem_write_int (p + offsetof (block, name_length), name_length);
+}
+
 usize
 block_header_size (upos p)
 {
@@ -283,18 +313,18 @@ bfile_open (upos p)
 bfile *
 bfile_create (upos directory, char * name, usize size, char type)
 {
-    char l = strlen (name);
+    char name_length = strlen (name);
     bfile * b;
 
     b = calloc (1, sizeof (bfile));
     b->directory = directory;
     b->start = last_free;
 
-    ultimem_write_int (last_free + offsetof (block, size), size);
-    ultimem_write_byte (last_free + offsetof (block, type), type);
-    ultimem_write_byte (last_free + offsetof (block, name_length), l);
+    block_set_size (last_free, size);
+    block_set_type (last_free, type);
+    block_set_name_length (last_free, name_length);
     last_free += 1 + offsetof (block, name_length);
-    while (l--)
+    while (name_length--)
         ultimem_write_byte (last_free++, *name++);
 
     b->ptr = last_free;
@@ -337,8 +367,8 @@ bfile_link_replacement (bfile * new)
 {
     upos old = new->replaced;
 
-    ultimem_write_int (old + offsetof (block, replacement), new->start);
-    ultimem_write_int (new->start + offsetof (block, next), block_get_next (old));
+    block_set_replacement (old, new->start);
+    block_set_next (new->start, block_get_next (old));
 }
 
 void
@@ -357,7 +387,7 @@ bfile_append_to_directory (bfile * b)
 
     p = block_get_last (p);
     if (p != b->start)  /* Avoid circularity in very first file. */
-        ultimem_write_int (p + offsetof (block, next), b->start);
+        block_set_next (p, b->start);
 }
 
 void
@@ -448,18 +478,18 @@ void
 load_file (upos dir, char * name, char * pathname)
 {
     FILE * f = fopen (pathname, "rb");
-    usize s;
+    usize size;
     void * data;
     bfile * b;
 
     fseek (f, 0, SEEK_END);
-    s = ftell (f);
-    b = bfile_create (dir, name, s, BLOCKTYPE_FILE);
-    data = malloc (s);
+    size = ftell (f);
+    b = bfile_create (dir, name, size, BLOCKTYPE_FILE);
+    data = malloc (size);
     fseek (f, 0, 0);
-    fread (data, s, 1, f);
+    fread (data, size, 1, f);
     fclose (f);
-    bfile_writem (b, data, s);
+    bfile_writem (b, data, size);
     free (data);
     bfile_close (b);
 }

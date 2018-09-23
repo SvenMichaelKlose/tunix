@@ -1,5 +1,5 @@
 /*
- * Ultimem Flash file system
+ * Ultimem file system
  */
 
 #include <stddef.h>
@@ -72,7 +72,13 @@ typedef unsigned long usize;
 
 /*
  * File header
+ *
+ * The one and only data structure keeping the file system together.
  */
+
+#define BLOCKTYPE_FILE       ~1
+#define BLOCKTYPE_DIRECTORY  ~2
+
 struct _block {
     usize   size;           /* Size of file data. */
     upos    replacement;    /* Replacement if this file or EMPTY_PTR. */
@@ -82,23 +88,22 @@ struct _block {
     /* name */
     /* file data */
 #ifndef __CC65__
-}__attribute__((packed));
+} __attribute__((packed));
 #else
 };
 #endif
 typedef struct _block block;
 
-#define BLOCKTYPE_FILE       ~1
-#define BLOCKTYPE_DIRECTORY  ~2
-
 /*
  * File access info
+ *
+ * For the API.  Not stored anywhere on the file system.
  */
 struct _bfile {
-    upos    start;
-    upos    ptr;
-    upos    directory;
-    upos    replaced;
+    upos    start;          /* Start of file data. */
+    upos    ptr;            /* Current position in file data. */
+    upos    directory;      /* The directory this file is in. */
+    upos    replaced;       /* Position of block this one replaced. */
 };
 typedef struct _bfile bfile;
 
@@ -228,7 +233,6 @@ bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
 
     return new;
 }
-
 
 bfile *
 bfile_create (upos directory, char * name, usize size, char type)

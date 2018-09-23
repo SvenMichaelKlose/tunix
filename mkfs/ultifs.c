@@ -43,10 +43,10 @@ split_pathname (char * pathname)
 {
     char * pn = strdup (pathname);
     char ** arr = malloc (sizeof (char *) * 8);
-    char n = 0;
+    unsigned char n = 0;
 
     bzero (arr, sizeof (char *) * 8);
-    while (arr[n++] = strdup (strsep (&pn, ",")));
+    while ((arr[n++] = strdup (strsep (&pn, ","))));
 
     free (pn);
     return arr;
@@ -55,7 +55,7 @@ split_pathname (char * pathname)
 void
 free_pathname (char ** arr)
 {
-    char n = 0;
+    unsigned char n = 0;
 
     while (arr[n])
         free (arr[n++]);
@@ -450,11 +450,11 @@ bfile_lookup (char * name)
 {
     char ** arr = split_pathname (name);
     upos p = 0;
-    char i = 0;
+    unsigned char i = 0;
     char l;
     char * n;
 
-    while (n = arr[i]) {
+    while ((n = arr[i])) {
         l = strlen (name);
         p = bfile_lookup_name (p, n, l);
         if (!p || !arr[i + 1])
@@ -507,7 +507,7 @@ void import_directory (upos bparent, char * name, int indent)
     if (!(dir = opendir (name)))
         return;
 
-    while (entry = readdir (dir)) {
+    while ((entry = readdir (dir))) {
         char path[1024];
         if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, ".."))
             continue;
@@ -570,9 +570,7 @@ write_image ()
 int
 main (int argc, char ** argv)
 {
-    bfile * b;
-    upos dir;
-    int i;
+    unsigned i;
 
     if (argc == 1)
         help ();

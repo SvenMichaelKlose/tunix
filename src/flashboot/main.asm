@@ -131,7 +131,7 @@ check_name:
     jsr is_empty
     beq boot_not_found
 
-    ldx #ptr
+    ldx #next
     ldy #base
     jsr copyd
 next_block2:

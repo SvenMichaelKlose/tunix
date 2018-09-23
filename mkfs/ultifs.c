@@ -14,7 +14,7 @@
 #endif
 
 #define ULTIFS_START    0x10000
-#define EMPTY_PTR       -1
+#define EMPTY_PTR       ((upos) -1)
 
 /*
 #ifdef __CC65__
@@ -213,13 +213,13 @@ block_set_replacement (upos p, upos replacement)
 void
 block_set_type (upos p, char type)
 {
-    ultimem_write_int (p + offsetof (block, type), type);
+    ultimem_write_byte (p + offsetof (block, type), type);
 }
 
 void
 block_set_name_length (upos p, char name_length)
 {
-    ultimem_write_int (p + offsetof (block, name_length), name_length);
+    ultimem_write_byte (p + offsetof (block, name_length), name_length);
 }
 
 usize
@@ -253,9 +253,9 @@ block_get_latest_version (upos p)
 }
 
 upos
-block_directory_get_first (upos p)
+block_directory_get_first (upos parent)
 {
-    upos d = ultimem_read_int (file_data (p));
+    upos d = ultimem_read_int (file_data (parent));
 
     if (d == EMPTY_PTR)
         return d;

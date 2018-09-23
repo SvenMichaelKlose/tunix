@@ -478,11 +478,22 @@ mkfs ()
 void
 load_file (upos dir, char * name, char * pathname)
 {
-    FILE * f = fopen (pathname, "rb");
+    FILE * f;
     usize size;
     void * data;
     bfile * b;
+    int pid;
 
+    if (0) { //dir) {
+        pid = fork ();
+        if (!pid)
+            execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-B", "-o", "tmp.prg", pathname, NULL);
+        else
+            wait (pid);
+        pathname = "tmp.prg";
+    }
+    
+    f = fopen (pathname, "rb");
     fseek (f, 0, SEEK_END);
     size = ftell (f);
     b = bfile_create (dir, name, size, BLOCKTYPE_FILE);

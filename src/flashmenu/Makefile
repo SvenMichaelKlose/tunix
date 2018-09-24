@@ -1,6 +1,4 @@
 SOURCES= \
-    bank-allocator.c \
-    basic-starter.c \
     file-window.c \
     main.c \
     ultimem.c \

@@ -1,5 +1,6 @@
 .export ultimem_read_byte
 .export ultimem_write_byte
+.export ultimem_get_bank
 .exportzp bp
 .importzp s, d, c, tmp
 
@@ -16,25 +17,24 @@ bp:     .res 4
     lsr
     lsr
     lsr
-    sta $9ff8
+    sta $9ff0,y
     lda 2,x
     asl
     asl
     asl
-    ora $9ff8
-    sta $9ff8
+    ora $9ff0,y
+    sta $9ff0,y
     lda 2,x
     lsr
     lsr
     lsr
     lsr
     lsr
-    sta $9ff9
+    sta $9ff1,y
     lda 0,x
     sta s
     lda 1,x
     and #%00011111
-    ora #$20
     sta s+1
     ldy #0
     rts
@@ -53,7 +53,11 @@ bp:     .res 4
     lda $9ff9
     pha
 
+    ldy #8
     jsr ultimem_get_bank
+    lda s+1
+    ora #$20
+    sta s+1
     lda (s),y
     sta tmp
 
@@ -83,7 +87,11 @@ bp:     .res 4
     lda $9ff9
     pha
 
+    ldy #8
     jsr ultimem_get_bank
+    lda s+1
+    ora #$20
+    sta s+1
     lda tmp
     sta (s),y
 

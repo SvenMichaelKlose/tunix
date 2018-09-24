@@ -4,6 +4,7 @@
 
 .import ultimem_read_byte
 .import ultimem_write_byte
+.import ultimem_get_bank
 .import clrram, moveram, __PRGEND__
 
 .zeropage
@@ -39,6 +40,8 @@ block_namelen = 13
 
     lda #$22    ; Red screen.
     sta $900f
+    lda #$00    ; Blank screen.
+    sta $9002
 
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
@@ -48,27 +51,8 @@ block_namelen = 13
     lda #$7f    ; Yellow screen.
     sta $900f
 
-    ; Activate all RAM.
-    lda #%00111111
-    sta $9ff1
-    lda #%01111111
-    sta $9ff2
-    lda #0
-    ldx #1
-    stx $9ff4
-    sta $9ff5
-    inx
-    stx $9ff6
-    sta $9ff7
-    inx
-    stx $9ff8
-    sta $9ff9
-    inx
-    stx $9ffa
-    sta $9ffb
-    inx
-    stx $9ffc
-    sta $9ffd
+    jsr init_ram_banks
+
     cli
 
     ; Make dummy call to g's link().
@@ -161,27 +145,96 @@ l2: jsr ultimem_read_byte
     sta d+3
 
     ; Load data
+    lda #%01111101  ; ROMRAMRAMROM…
+    sta $9ff2
+
     lda #4
     ldx #ptr
     ldy #base
     jsr add_ofs
-    inc size+1
-l3: ldx #base
-    jsr ultimem_read_byte
-    jsr inczpd
+
+    ldx #base
+    ldy #$08
+    jsr ultimem_get_bank
+    lda base+1
+    ora #$20
+    sta base+1
+
     ldx #d
-    jsr ultimem_write_byte
-    jsr inczpd
-    dec size
+    ldy #$0a
+    jsr ultimem_get_bank
+    lda d+1
+    ora #$40
+    sta d+1
+
+l3: ldy #0
+    lda (base),y
+    sta (d),y
+    inc base
+    bne l4
+    inc base+1
+    lda base+1
+    cmp #$40
+    bne l4
+    lda #$20
+    sta base+1
+    inc $9ff8
+    bne l4
+    inc $9ff9
+
+l4: inc d
+    bne l5
+    inc d+1
+    lda d+1
+    cmp #$60
+    bne l5
+    lda #$40
+    sta d+1
+    inc $9ffa
+    bne l5
+    inc $9ffb
+
+l5: dec size
+    lda size
+    cmp #255
     bne l3
     dec size+1
+    lda size+1
+    cmp #255
     bne l3
+
+    jsr init_ram_banks
 
     ; Run it.
     jmp $2000
 .endproc
 
 .proc dummy_link
+    rts
+.endproc
+
+.proc init_ram_banks
+    ; Activate all RAM.
+    lda #%00111111
+    sta $9ff1
+    lda #%01111111
+    sta $9ff2
+    lda #0
+    ldx #1
+    stx $9ff4
+    sta $9ff5
+    inx
+    stx $9ff6
+    sta $9ff7
+    inx
+    stx $9ff8
+    sta $9ff9
+    inx
+    stx $9ffa
+    sta $9ffb
+    inx
+    stx $9ffc
+    sta $9ffd
     rts
 .endproc
 

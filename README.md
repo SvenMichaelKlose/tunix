@@ -1,4 +1,4 @@
 # G
 
-This is about to become a disk browser for the Commodore VIC-20
-featuring a graphical user interface.
+This is a tiny directory browser for the Commodore VIC-20
+with Ultimem expansion.

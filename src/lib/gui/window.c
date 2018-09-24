@@ -104,7 +104,8 @@ draw_window_fullscreen (struct window * win)
     gfx_draw_hline (0, WINDOW_TITLE_HEIGHT - 2, w);
     gfx_set_font (charset_4x8, 2);
     gfx_draw_text (1, 1, win->title);
-    draw_title_grip (1, yb, iw);
+    if (focussed_window == (struct obj *) win)
+        draw_title_grip (1, yb, iw);
     gfx_pop_context ();
 
     /* Draw contents. */

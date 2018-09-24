@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bank-allocator.h"
 #include "obj.h"
 #include "button.h"
 #include "layout-ops.h"

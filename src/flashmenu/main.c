@@ -20,7 +20,6 @@
 #include "table.h"
 #include "window.h"
 
-#include "bank-allocator.h"
 #include "basic-starter.h"
 #include "file-window.h"
 #include "main.h"

@@ -26,7 +26,7 @@
 #include "ultimem.h"
 
 struct obj * desktop;
-struct obj * focussed_window = NULL;
+struct obj * focussed_window;
 
 void
 shift_charset ()
@@ -94,6 +94,20 @@ show_free_memory ()
     free (msg);
 }
 
+struct obj *
+get_last_window ()
+{
+    struct obj * i = desktop->node.children;
+
+    while (1)
+        if (!i->node.next)
+            break;
+        else
+            i = i->node.next;
+
+    return i;
+}
+
 #define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 
 int
@@ -103,14 +117,15 @@ main (int argc, char ** argv)
     struct event * e;
     struct window * w;
     unsigned idle;
+    struct obj * f;
+    struct obj * i;
 
     init ();
     show_free_memory ();
     append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
     append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
 
-    focussed_window = desktop->node.children;
-//    ((struct window *) focussed_window)->flags |= W_FULLSCREEN;
+    focussed_window = get_last_window ();
     layout_obj (desktop);
     draw_obj (desktop);
 
@@ -135,6 +150,19 @@ main (int argc, char ** argv)
             case 'M':
                 show_free_memory ();
                 continue;
+
+            case 'N':
+                f = desktop->node.children;
+                if (!desktop->node.children->node.next)
+                    continue;
+                f = desktop->node.children;
+                i = get_last_window ();
+                desktop->node.children = desktop->node.children->node.next;
+                i->node.next = f;
+                f->node.next = NULL;
+                focussed_window = f;
+
+                draw_obj_children (desktop);
         }
 
         /* Send keyboard event. */

@@ -1,7 +1,7 @@
 #ifndef ULTIMEM_BASICS_H
 #define ULTIMEM_BASICS_H
 
-#define ULTIMEM_CONFIG0     ((char *) 0x9ff0)
+#define ULTIMEM_CONTROL     ((char *) 0x9ff0)
 #define ULTIMEM_CONFIG1     ((char *) 0x9ff1)
 #define ULTIMEM_CONFIG2     ((char *) 0x9ff2)
 #define ULTIMEM_ID          ((unsigned short *) 0x9ff3)

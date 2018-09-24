@@ -118,13 +118,15 @@ ultimem_write_byte (upos p, unsigned char v)
 unsigned char __cc65fastcall__
 ultimem_read_byte (upos p)
 {
-    unsigned char bank = p >> 13;
-    unsigned char addr = (p & 0x1fff) | 0xa000;
-    unsigned char oldbank = *ULTIMEM_BLK5RAM;
-    unsigned char v;
+    unsigned char * addr = (void *) ((p & 0x1fff) | 0xa000);
+    unsigned        oldbank = *ULTIMEM_BLK5RAM;
+    unsigned char   oldcfg = *ULTIMEM_CONFIG2;
+    unsigned char   v;
 
-    *ULTIMEM_BLK5RAM = bank;
-    v = *(unsigned char *) p;
+    *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
+    *ULTIMEM_BLK5 = p >> 13;
+    v = *addr;
+    *ULTIMEM_CONFIG2 = oldcfg;
     *ULTIMEM_BLK5RAM = oldbank;
 
     return v;
@@ -469,6 +471,10 @@ ultifs_opendir ()
     return 0;
 }
 
+#include "message.h"
+#include "g.h"
+#include "ctype.h"
+
 char __fastcall__
 ultifs_readdir (struct cbm_dirent * dirent)
 {
@@ -493,6 +499,7 @@ ultifs_readdir (struct cbm_dirent * dirent)
     name_length = block_get_name_length (current_directory);
     for (i = 0; i < name_length; i++)
         dirent->name[i] = block_get_name (current_directory, i);
+    dirent->name[i] = 0;
 
     dirent->size = block_get_size (current_directory) >> 8;
 

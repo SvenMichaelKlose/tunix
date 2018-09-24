@@ -361,16 +361,13 @@ void __fastcall__
 file_window_launch (struct file_window_content * content, struct dirent * d)
 {
     switch (d->type) {
-        case CBM_T_PRG:
-            file_window_launch_program (content, d);
-            break;
-
         case CBM_T_DIR:
             file_window_enter_directory (content, d);
             break;
 
         default:
-            print_message ("Don't know how to open this.");
+            file_window_launch_program (content, d);
+            break;
     }
 }
 
@@ -425,7 +422,7 @@ struct obj * __fastcall__
 make_file_window_content (struct drive_ops * drive_ops)
 {
 	struct obj * obj =  alloc_obj (sizeof (struct obj), &obj_ops_file_window_content);
-    struct file_window_content * content = malloc (sizeof (struct file_window_content));
+    struct file_window_content * content = calloc (1, sizeof (struct file_window_content));
 
     memcpy (content, obj, sizeof (struct obj));
     free (obj);

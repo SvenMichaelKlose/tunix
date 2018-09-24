@@ -328,6 +328,7 @@ bfile_create (upos directory, char * name, char type)
     b->directory = directory;
     b->start = last_free;
     b->size = 0;
+    b->mode = 1;    // write mode
 
     block_set_type (last_free, type);
     block_set_name_length (last_free, name_length);
@@ -377,7 +378,7 @@ bfile_writem (bfile * b, char * bytes, usize len)
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, usize len)
 {
-    int size;
+    int size = 0;
 
     if (b->mode)
         return -1;
@@ -481,6 +482,15 @@ bfile_lookup_name (upos p, char * name, char namelen)
 }
 
 #ifdef __CC65__
+
+bfile * __fastcall__
+ultifs_open (upos directory, char * name, char mode)
+{
+    upos file = bfile_lookup_name (directory, name, strlen (name));
+    if (!file)
+        return -1;
+    return bfile_open (directory, file, mode);
+}
 
 upos current_directory;
 upos pwd = ULTIFS_START;

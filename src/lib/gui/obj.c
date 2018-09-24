@@ -9,7 +9,7 @@
 void *
 alloc_obj (size_t size, struct obj_ops * ops)
 {
-    struct obj * obj = malloc (size);
+    struct obj * obj = calloc (1, size);
     struct node * node;
     struct rect * rect;
 

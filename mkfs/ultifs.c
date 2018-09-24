@@ -315,6 +315,8 @@ bfile_open (upos directory, upos p, char mode)
     p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
+    b->bank = b->ptr >> 13;
+    b->addr = (void *) ((b->ptr & 0x1fff) | 0xa000);
     b->directory = directory;
     if (!mode)
         b->size = block_get_size (p);
@@ -381,22 +383,47 @@ bfile_writem (bfile * b, char * bytes, unsigned len)
 }
 
 #ifdef __CC65__
+
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, unsigned len)
 {
+    unsigned oldbank = *ULTIMEM_BLK5;
+    char     oldcfg = *ULTIMEM_CONFIG2;
+    char     newcfg = oldcfg & 0x3f | 0x40;
+    char *   addr = b->addr;
+    upos     ptr = b->ptr;
+    unsigned bank = b->bank;
     int size = 0;
     upos end = file_data (b->start) + b->size;
+    char v;
 
     if (b->mode)
         return -1;
 
-    while (len-- && b->ptr != end) {
-        *bytes++ = ultimem_read_byte (b->ptr++);
+    while (len-- && ptr != end) {
+        *ULTIMEM_CONFIG2 = newcfg;
+        *ULTIMEM_BLK5 = bank;
+        v = *addr++;
+        *ULTIMEM_CONFIG2 = oldcfg;
+        *ULTIMEM_BLK5 = oldbank;
+
+        *bytes++ = v;
+        ptr++;
+
+        if (addr == (void *) 0xc000) {
+            addr = (void *) 0xa000;
+            bank++;
+            *ULTIMEM_BLK5 = bank;
+        }
         size++;
     }
 
+    b->addr = addr;
+    b->bank = bank;
+    b->ptr = ptr;
     return size;
 }
+
 #endif
 
 void __cc65fastcall__

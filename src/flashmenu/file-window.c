@@ -340,8 +340,6 @@ error:
     *ULTIMEM_BLK5 = oldblk5;
     drive_ops->close ();
 
-    sprintf (message_buffer, "Launching at %U...", start);
-    print_message (message_buffer);
     memcpy (launcher, launch, 256);
     launcher (start, size);
 }

@@ -380,11 +380,12 @@ bfile_writem (bfile * b, char * bytes, unsigned len)
         bfile_write (b, *bytes++);
 }
 
+#ifdef __CC65__
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, unsigned len)
 {
     int size = 0;
-    upos end = b->start + b->size;
+    upos end = file_data (b->start) + b->size;
 
     if (b->mode)
         return -1;
@@ -396,6 +397,7 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
 
     return size;
 }
+#endif
 
 void __cc65fastcall__
 bfile_link_replacement (bfile * new)

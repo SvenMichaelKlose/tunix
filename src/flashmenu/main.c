@@ -130,7 +130,6 @@ main (int argc, char ** argv)
                     set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT / 2);
                 layout_obj (desktop);
                 draw_obj (desktop);
-                show_free_memory ();
                 continue;
 
             case 'M':

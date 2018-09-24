@@ -5,6 +5,7 @@
 .proc clrram
     ldy d
     ldx c
+    inx
     lda #0
     sta d
     sta c

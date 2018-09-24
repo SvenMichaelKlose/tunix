@@ -305,7 +305,7 @@ block_get_last (upos p)
 upos last_free;
 
 bfile * __cc65fastcall__
-bfile_open (upos directory, upos p)
+bfile_open (upos directory, upos p, char mode)
 {
     bfile * b = calloc (1, sizeof (bfile));
 
@@ -313,6 +313,7 @@ bfile_open (upos directory, upos p)
     b->start = p;
     b->ptr = file_data (p);
     b->directory = directory;
+    b->mode = mode;
 
     return b;
 }
@@ -357,6 +358,8 @@ bfile_remove (bfile * b)
 void __cc65fastcall__
 bfile_write (bfile * b, char byte)
 {
+    if (!b->mode)
+        return; // TODO: error!
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
     b->size++;
@@ -365,8 +368,25 @@ bfile_write (bfile * b, char byte)
 void __cc65fastcall__
 bfile_writem (bfile * b, char * bytes, usize len)
 {
+    if (!b->mode)
+        return; // TODO: error!
     while (len--)
         bfile_write (b, *bytes++);
+}
+
+int __cc65fastcall__
+bfile_readm (bfile * b, char * bytes, usize len)
+{
+    int size;
+
+    if (b->mode)
+        return -1;
+    while (len-- && size != b->size) {
+        *bytes++ = ultimem_read_byte (b->ptr++);
+        size++;
+    }
+
+    return size;
 }
 
 void __cc65fastcall__
@@ -400,6 +420,9 @@ bfile_append_to_directory (bfile * b)
 void __cc65fastcall__
 bfile_close (bfile * b)
 {
+    if (!b->mode)
+        return;
+
     block_set_size (b->start, b->size);
     last_free = b->ptr;
 

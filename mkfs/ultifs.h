@@ -17,10 +17,11 @@ struct _bfile {
     upos    size;           /* Current size (grows on writes). */
     upos    directory;      /* The directory this file is in. */
     upos    replaced;       /* Position of block this one replaced. Yet unused? */
+    char    mode;           /* Mode at bfile_open(). */
 };
 typedef struct _bfile bfile;
 
-extern bfile * __cc65fastcall__ bfile_open (upos directory, upos p);
+extern bfile * __cc65fastcall__ bfile_open (upos directory, upos p, char mode);
 extern bfile * __cc65fastcall__ bfile_create (upos directory, char * name, char type);
 extern void    __cc65fastcall__ bfile_remove (bfile *);
 extern void    __cc65fastcall__ bfile_close (bfile *);

@@ -12,7 +12,7 @@ warmstt = $c7ae     ; BASIC warm start
 
 ultimem_config = $9fe0
 
-; extern void __fastcall__ launch (unsigned start, unsigned size);
+; void __fastcall__ launch (unsigned start, unsigned size);
 .proc _launch
     sta c
     stx c+1

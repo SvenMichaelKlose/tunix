@@ -8,6 +8,7 @@
 #include "ultimem.h"
 #include "ultifs.h"
 #include "launch.h"
+#include "bank-allocator.h"
 #include "obj.h"
 #include "button.h"
 #include "layout-ops.h"
@@ -83,14 +84,37 @@ struct drive_ops cbm_drive_ops = {
     gcbm_close
 };
 
+bfile * current_file;
+
+char __fastcall__
+u_open (char * name, char mode)
+{
+    current_file = ultifs_open (ultifs_pwd, name, mode);
+    if (!current_file)
+        return -1;
+    return 0;
+}
+
+int __fastcall__
+u_read (void * data, unsigned size)
+{
+    return bfile_readm (current_file, data, size);
+}
+
+void
+u_close ()
+{
+}
+
+
 struct drive_ops ultifs_drive_ops = {
     ultifs_opendir,
     ultifs_readdir,
     ultifs_closedir,
     gcbm_enterdir,
-    gcbm_open,
-    gcbm_read,
-    gcbm_close
+    u_open,
+    u_read,
+    u_close
 };
 
 void __fastcall__
@@ -283,19 +307,21 @@ typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 void __fastcall__
 file_window_launch_program (struct file_window_content * content, struct dirent * d)
 {
-    uchar oldblk5 = *ULTIMEM_BLK5RAM;
+    unsigned oldblk5 = *ULTIMEM_BLK5;
     launch_t launcher = (void *) 0x9800;
     struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
     unsigned read_bytes;
-    unsigned size = 0;
+    upos size = 0;
 
     print_message ("Loading...");
 
-    drive_ops->open (d->name, 0);
+    if (drive_ops->open (d->name, 0)) {
+        print_message ("Can't open file.");
+        return;
+    }
     drive_ops->read (&start, 2);
-
-    *ULTIMEM_BLK5RAM = 8;
+    *ULTIMEM_BLK5 = 8;
     while (1) {
         read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
         if (!read_bytes)
@@ -307,16 +333,15 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
         size += read_bytes;
         *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
 
-        sprintf (message_buffer, "%U read...", size);
+        sprintf (message_buffer, "%U read...", (unsigned) size);
         print_message (message_buffer);
     }
+error:
+    *ULTIMEM_BLK5 = oldblk5;
+    drive_ops->close ();
 
     sprintf (message_buffer, "Launching at %U...", start);
     print_message (message_buffer);
-
-error:
-    drive_ops->close ();
-    *ULTIMEM_BLK5RAM = oldblk5;
     memcpy (launcher, launch, 256);
     launcher (start, size);
 }

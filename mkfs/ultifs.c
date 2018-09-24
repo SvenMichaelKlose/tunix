@@ -21,6 +21,7 @@
 #else
     #include <cbm.h>
     #include <ultimem-basics.h>
+    #include <message.h>
     unsigned char * store = (void *) 0xa000;
 #endif
 
@@ -167,7 +168,7 @@ void __cc65fastcall__
 ultimem_readm (char * dest, char len, upos p)
 {
     while (len--)
-        *dest++ = ultimem_read_byte (p);
+        *dest++ = ultimem_read_byte (p++);
 }
 
 
@@ -208,7 +209,8 @@ block_get_next (upos p)
 usize __cc65fastcall__
 block_get_size (upos p)
 {
-    return ultimem_read_int (p + offsetof (block, size));
+    upos r = ultimem_read_int (p + offsetof (block, size));
+    return r;
 }
 
 void __cc65fastcall__
@@ -257,6 +259,7 @@ upos __cc65fastcall__
 block_get_latest_version (upos p)
 {
     upos r;
+return p;
 
     if (p == EMPTY_PTR)
         return p;
@@ -313,6 +316,8 @@ bfile_open (upos directory, upos p, char mode)
     b->start = p;
     b->ptr = file_data (p);
     b->directory = directory;
+    if (!mode)
+        b->size = block_get_size (p);
     b->mode = mode;
 
     return b;
@@ -367,7 +372,7 @@ bfile_write (bfile * b, char byte)
 }
 
 void __cc65fastcall__
-bfile_writem (bfile * b, char * bytes, usize len)
+bfile_writem (bfile * b, char * bytes, unsigned len)
 {
     if (!b->mode)
         return; // TODO: error!
@@ -376,13 +381,15 @@ bfile_writem (bfile * b, char * bytes, usize len)
 }
 
 int __cc65fastcall__
-bfile_readm (bfile * b, char * bytes, usize len)
+bfile_readm (bfile * b, char * bytes, unsigned len)
 {
     int size = 0;
+    upos end = b->start + b->size;
 
     if (b->mode)
         return -1;
-    while (len-- && size != b->size) {
+
+    while (len-- && b->ptr != end) {
         *bytes++ = ultimem_read_byte (b->ptr++);
         size++;
     }
@@ -455,6 +462,8 @@ bfile_create_directory (upos parent, char * name)
 
 #define IS_BFILE_REMOVED(p) (!block_get_size (p))
 
+#ifdef __CC65__
+
 upos __cc65fastcall__
 bfile_lookup_name (upos p, char * name, char namelen)
 {
@@ -466,7 +475,7 @@ bfile_lookup_name (upos p, char * name, char namelen)
     do {
         if (namelen != block_get_name_length (p))
             continue;
-        ultimem_readm (buf, namelen, file_data (p));
+        ultimem_readm (buf, namelen, p + offsetof (block, name_length) + 1);
         if (!memcmp (buf, name, namelen))
             break;
     } while (EMPTY_PTR != (p = block_get_next (p)));
@@ -475,30 +484,25 @@ bfile_lookup_name (upos p, char * name, char namelen)
 
     if (p == EMPTY_PTR)
         return 0;
-    p = block_get_latest_version (p);
-    if (IS_BFILE_REMOVED(p))
-        return 0;
-    return p;
+    return block_get_latest_version (p);
 }
-
-#ifdef __CC65__
 
 bfile * __fastcall__
 ultifs_open (upos directory, char * name, char mode)
 {
     upos file = bfile_lookup_name (directory, name, strlen (name));
     if (!file)
-        return -1;
+        return NULL;
     return bfile_open (directory, file, mode);
 }
 
 upos current_directory;
-upos pwd = ULTIFS_START;
+upos ultifs_pwd = ULTIFS_START;
 
 char
 ultifs_opendir ()
 {
-    current_directory = pwd;
+    current_directory = ultifs_pwd;
 
     return 0;
 }

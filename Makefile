@@ -7,7 +7,8 @@ all:
 	rm -rfv compiled
 	mkdir -pv compiled
 	cp src/flashmenu/flashmenu.bin compiled/boot
-	cp -r archive/* compiled
+	#cp -r archive/* compiled
+	cp *.prg compiled
 	touch compiled/FNORD
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 

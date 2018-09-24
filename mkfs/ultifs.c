@@ -298,7 +298,7 @@ bfile_open (upos directory, upos p)
 }
 
 bfile * __cc65fastcall__
-bfile_create (upos directory, char * name, usize size, char type)
+bfile_create (upos directory, char * name, char type)
 {
     char name_length = strlen (name);
     bfile * b;
@@ -306,8 +306,8 @@ bfile_create (upos directory, char * name, usize size, char type)
     b = calloc (1, sizeof (bfile));
     b->directory = directory;
     b->start = last_free;
+    b->size = 0;
 
-    block_set_size (last_free, size);
     block_set_type (last_free, type);
     block_set_name_length (last_free, name_length);
     last_free += 1 + offsetof (block, name_length);
@@ -315,15 +315,14 @@ bfile_create (upos directory, char * name, usize size, char type)
         ultimem_write_byte (last_free++, *name++);
 
     b->ptr = last_free;
-    last_free += size;
 
     return b;
 }
 
 bfile * __cc65fastcall__
-bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
+bfile_replace (bfile * old, upos directory, char * name, char type)
 {
-    bfile * new = bfile_create (directory, name, size, type);
+    bfile * new = bfile_create (directory, name, type);
     new->replaced = old->start;
 
     return new;
@@ -332,7 +331,7 @@ bfile_replace (bfile * old, upos directory, char * name, usize size, char type)
 void __cc65fastcall__
 bfile_remove (bfile * b)
 {
-    (void) bfile_replace (b, 0, "", 0, 0);
+    (void) bfile_replace (b, 0, "", 0); /* bs */
 }
 
 void __cc65fastcall__
@@ -340,6 +339,7 @@ bfile_write (bfile * b, char byte)
 {
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
+    b->size++;
 }
 
 void __cc65fastcall__
@@ -380,6 +380,9 @@ bfile_append_to_directory (bfile * b)
 void __cc65fastcall__
 bfile_close (bfile * b)
 {
+    block_set_size (b->start, b->size);
+    last_free = b->ptr;
+
     /* Connect file to directory tree. */
     if (b->replaced)
         bfile_link_replacement (b);
@@ -395,7 +398,11 @@ bfile_create_directory (upos parent, char * name)
     upos d;
 
     // Create file with empty pointer to the first file.
-    bfile * b = bfile_create (parent, name, sizeof (upos), BLOCKTYPE_DIRECTORY);
+    bfile * b = bfile_create (parent, name, BLOCKTYPE_DIRECTORY);
+    bfile_write (b, 255);
+    bfile_write (b, 255);
+    bfile_write (b, 255);
+    bfile_write (b, 255);
     d = b->start;
     bfile_close (b);
 
@@ -475,7 +482,7 @@ load_file (upos dir, char * name, char * pathname)
     if (0) { //dir) {
         pid = fork ();
         if (!pid)
-            execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-B", "-o", "tmp.prg", pathname, NULL);
+            execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-o", "tmp.prg", pathname, NULL);
         else
             wait (pid);
         pathname = "tmp.prg";
@@ -484,7 +491,7 @@ load_file (upos dir, char * name, char * pathname)
     f = fopen (pathname, "rb");
     fseek (f, 0, SEEK_END);
     size = ftell (f);
-    b = bfile_create (dir, name, size, BLOCKTYPE_FILE);
+    b = bfile_create (dir, name, BLOCKTYPE_FILE);
     data = malloc (size);
     fseek (f, 0, 0);
     fread (data, size, 1, f);
@@ -514,11 +521,11 @@ void import_directory (upos bparent, char * name, int indent)
         snprintf (path, sizeof (path), "%s/%s", name, entry->d_name);
  
         if (entry->d_type == DT_DIR) {
-            printf ("Importing directory %*s%s/\n", indent, "", entry->d_name);
+            printf ("%*sImporting directory %s/\n", indent, "", entry->d_name);
             bsubdir = bfile_create_directory (bparent, entry->d_name);
             import_directory (bsubdir, path, indent + 2);
         } else {
-            printf ("Importing %*s%s\n", indent, "", entry->d_name);
+            printf ("%*sImporting %s\n", indent, "", entry->d_name);
             load_file (bparent, entry->d_name, path);
         }
     }

@@ -63,6 +63,8 @@ gcbm_open (char * name)
 int __fastcall__
 gcbm_read (void * data, unsigned size)
 {
+    if (cbm_k_readst ())    /* cbm_read() returns 1 on end-of-file. */
+        return 0;
     return cbm_read (2, data, size);
 }
 
@@ -287,7 +289,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
     unsigned read_bytes;
-    unsigned size;
+    unsigned size = 0;
 
     print_message ("Loading...");
 
@@ -296,9 +298,9 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
 
     *ULTIMEM_BLK5RAM = 8;
     while (1) {
-        if (cbm_k_readst ())    /* cbm_read() returns 1 on end-of-file. */
-            break;
         read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
+        if (!read_bytes)
+            break;
         if (read_bytes == -1) {
             print_message ("Read error!");
             goto error;

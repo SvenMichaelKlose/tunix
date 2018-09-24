@@ -55,9 +55,9 @@ gcbm_enterdir (char * name)
 }
 
 char __fastcall__
-gcbm_open (char * name)
+gcbm_open (char * name, char mode)
 {
-    return cbm_open (2, 8, 0, name);
+    return cbm_open (2, 8, mode, name);
 }
 
 int __fastcall__
@@ -293,7 +293,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
 
     print_message ("Loading...");
 
-    drive_ops->open (d->name);
+    drive_ops->open (d->name, 0);
     drive_ops->read (&start, 2);
 
     *ULTIMEM_BLK5RAM = 8;

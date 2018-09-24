@@ -15,7 +15,7 @@ struct drive_ops {
     char __fastcall__ (*readdir)  (struct cbm_dirent *);
     void              (*closedir) (void);
     char __fastcall__ (*enterdir) (char * name);
-    char __fastcall__ (*open)     (char * name);
+    char __fastcall__ (*open)     (char * name, char mode);
     int  __fastcall__ (*read)     (void *, unsigned);
     void              (*close)    (void);
 };

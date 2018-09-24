@@ -26,4 +26,11 @@ extern void    __cc65fastcall__ bfile_remove (bfile *);
 extern void    __cc65fastcall__ bfile_close (bfile *);
 extern upos    __cc65fastcall__ bfile_create_directory (upos parent, char * name);
 
+#ifdef __CC65__
+extern struct cbm_dirent;
+extern char    __cc65fastcall__ ultifs_opendir (void);
+extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);
+extern void                     ultifs_closedir (void);
+#endif
+
 #endif // #ifndef ULTIFS_H

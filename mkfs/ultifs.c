@@ -13,9 +13,13 @@
 #define EMPTY_PTR       ((upos) -1)
 
 #ifndef __CC65__
+    #include <sys/types.h>
+    #include <unistd.h>
+    #include <wait.h>
     #define STORE_SIZE      (8 * 1024 * 1024)
     unsigned char store[STORE_SIZE];
 #else
+    #include <cbm.h>
     #include <ultimem-basics.h>
     unsigned char * store = (void *) 0xa000;
 #endif
@@ -72,8 +76,8 @@ free_pathname (char ** arr)
  * The one and only data structure keeping the file system together.
  */
 
-#define BLOCKTYPE_FILE       ~1
-#define BLOCKTYPE_DIRECTORY  ~2
+#define BLOCKTYPE_FILE       0xfe
+#define BLOCKTYPE_DIRECTORY  0xfd
 
 struct _block {
     usize   size;           /* Size of file data. */
@@ -143,7 +147,10 @@ ultimem_write_byte (upos p, unsigned char v)
 upos __cc65fastcall__
 ultimem_read_int (upos p)
 {
-    return ultimem_read_byte (p) | ultimem_read_byte (p + 1) << 8 | ultimem_read_byte (p + 2) << 16 | ultimem_read_byte (p + 3) << 24;
+    return ultimem_read_byte (p)
+               | ((upos) ultimem_read_byte (p + 1)) << 8
+               | ((upos) ultimem_read_byte (p + 2)) << 16
+               | ((upos) ultimem_read_byte (p + 3)) << 24;
 }
 
 void __cc65fastcall__
@@ -168,9 +175,21 @@ ultimem_readm (char * dest, char len, upos p)
  */
 
 unsigned char __cc65fastcall__
+block_get_type (upos p)
+{
+    return ultimem_read_byte (p + offsetof (block, type));
+}
+
+unsigned char __cc65fastcall__
 block_get_name_length (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, name_length));
+}
+
+unsigned char __cc65fastcall__
+block_get_name (upos p, unsigned char i)
+{
+    return ultimem_read_byte (p + offsetof (block, name_length) + 1 + i);
 }
 
 upos __cc65fastcall__
@@ -437,6 +456,58 @@ bfile_lookup_name (upos p, char * name, char namelen)
     return p;
 }
 
+#ifdef __CC65__
+
+upos current_directory;
+upos pwd = ULTIFS_START;
+
+char
+ultifs_opendir ()
+{
+    current_directory = pwd;
+
+    return 0;
+}
+
+char __fastcall__
+ultifs_readdir (struct cbm_dirent * dirent)
+{
+    char type = 0;
+    char name_length;
+    char i;
+
+    if (current_directory == EMPTY_PTR)
+        return 1;
+
+    switch (block_get_type (current_directory)) {
+        case BLOCKTYPE_FILE:
+            type = CBM_T_PRG;
+            break;
+
+        case BLOCKTYPE_DIRECTORY:
+            type = CBM_T_DIR;
+            break;
+    }
+    dirent->type = type;
+
+    name_length = block_get_name_length (current_directory);
+    for (i = 0; i < name_length; i++)
+        dirent->name[i] = block_get_name (current_directory, i);
+
+    dirent->size = block_get_size (current_directory) >> 8;
+
+    current_directory = block_get_next (current_directory);
+
+    return 0;
+}
+
+void
+ultifs_closedir ()
+{
+}
+
+#endif
+
 #ifndef __CC65__
 
 /*
@@ -477,14 +548,12 @@ load_file (upos dir, char * name, char * pathname)
     usize size;
     void * data;
     bfile * b;
-    int pid;
 
     if (0) { //dir) {
-        pid = fork ();
-        if (!pid)
+        if (!fork ())
             execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-o", "tmp.prg", pathname, NULL);
         else
-            wait (pid);
+            wait (NULL);
         pathname = "tmp.prg";
     }
     

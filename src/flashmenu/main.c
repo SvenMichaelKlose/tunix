@@ -107,10 +107,11 @@ main (int argc, char ** argv)
 
     init ();
     show_free_memory ();
-    append_obj (desktop, make_file_window (&ultifs_drive_ops, "#8 SD2IEC", 0, 0, 20 * 8, DESKTOP_HEIGHT));
+    append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
+    append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
     focussed_window = desktop->node.children;
-    ((struct window *) focussed_window)->flags |= W_FULLSCREEN;
+//    ((struct window *) focussed_window)->flags |= W_FULLSCREEN;
     layout_obj (desktop);
     draw_obj (desktop);
 

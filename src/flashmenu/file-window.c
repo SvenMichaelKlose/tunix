@@ -125,7 +125,8 @@ file_window_read_directory (struct file_window_content * content)
         if (last_dirent)
             last_dirent->next = d;
         else
-            first_dirent = d; last_dirent = d;
+            first_dirent = d;
+        last_dirent = d;
 
         d->size = dirent.size;
         d->type = dirent.type;
@@ -240,12 +241,12 @@ file_window_draw_list (struct obj * w)
         gfx_putchar (32);
 
         /* Print file name. */
-        gfx_set_font ((void *) 0x8000, 0);
-        gfx_set_font_compression (0);
+//        gfx_set_font ((void *) 0x8000, 0);
+//        gfx_set_font_compression (0);
         gfx_set_position (xofs + 28, y);
         for (i = 0; i < 16; i++)
             if (c = d->name[i]) {
-                gfx_putchar ((c - 64) & 127);
+                gfx_putchar (c); //(c - 64) & 127);
             } else
                 break;
 

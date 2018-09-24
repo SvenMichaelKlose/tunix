@@ -119,7 +119,7 @@ unsigned char __cc65fastcall__
 ultimem_read_byte (upos p)
 {
     unsigned char * addr = (void *) ((p & 0x1fff) | 0xa000);
-    unsigned        oldbank = *ULTIMEM_BLK5RAM;
+    unsigned        oldbank = *ULTIMEM_BLK5;
     unsigned char   oldcfg = *ULTIMEM_CONFIG2;
     unsigned char   v;
 
@@ -127,7 +127,7 @@ ultimem_read_byte (upos p)
     *ULTIMEM_BLK5 = p >> 13;
     v = *addr;
     *ULTIMEM_CONFIG2 = oldcfg;
-    *ULTIMEM_BLK5RAM = oldbank;
+    *ULTIMEM_BLK5 = oldbank;
 
     return v;
 }
@@ -135,13 +135,12 @@ ultimem_read_byte (upos p)
 void __cc65fastcall__
 ultimem_write_byte (upos p, unsigned char v)
 {
-    unsigned char bank = p >> 13;
-    unsigned char addr = (p & 0x1fff) | 0xa000;
-    unsigned char oldbank = *ULTIMEM_BLK5RAM;
+    unsigned char * addr = (void *) ((p & 0x1fff) | 0xa000);
+    unsigned        oldbank = *ULTIMEM_BLK5;
 
-    *ULTIMEM_BLK5RAM = bank;
-    *(unsigned char *) p = v;
-    *ULTIMEM_BLK5RAM = oldbank;
+    *ULTIMEM_BLK5 = p >> 13;
+    *addr = v;
+    *ULTIMEM_BLK5 = oldbank;
 }
 
 #endif
@@ -504,7 +503,6 @@ ultifs_readdir (struct cbm_dirent * dirent)
     dirent->size = block_get_size (current_directory) >> 8;
 
     current_directory = block_get_next (current_directory);
-
     return 0;
 }
 

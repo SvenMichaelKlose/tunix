@@ -294,6 +294,9 @@ file_window_draw_content (struct obj * w)
 {
     struct file_window_content * content = (struct file_window_content *) w;
 
+    if (!content->files)
+        file_window_read_directory (content);
+
     gfx_push_context ();
     gfx_reset_region ();
     set_obj_region (w);
@@ -437,9 +440,6 @@ make_file_window (struct drive_ops * drive_ops, char * title, gpos x, gpos y, gp
 	struct window * win = make_window (title, (struct obj *) content, file_window_event_handler);
 
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
-
-    file_window_free_files (content);
-    file_window_read_directory (content);
 
     return OBJ(win);
 }

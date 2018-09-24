@@ -30,6 +30,9 @@ ultimem_config = $9fe0
     sta $911d
     sta $911e
 
+    lda #0      ; Blank screen.
+    sta $9002
+
     lda #7
     sta $9ffe
 l4: inc $9ffe

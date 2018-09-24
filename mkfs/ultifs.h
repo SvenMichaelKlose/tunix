@@ -36,6 +36,7 @@ extern int     __cc65fastcall__ bfile_readm (bfile * b, char * bytes, unsigned l
 extern char    __cc65fastcall__ ultifs_opendir (void);
 extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);
 extern void                     ultifs_closedir (void);
+extern char    __cc65fastcall__ ultifs_enterdir (char * name);
 #endif
 
 #endif // #ifndef ULTIFS_H

@@ -489,7 +489,7 @@ bfile_lookup_name (upos p, char * name, char namelen)
     return block_get_latest_version (p);
 }
 
-bfile * __fastcall__
+bfile * __cc65fastcall__
 ultifs_open (upos directory, char * name, char mode)
 {
     upos file = bfile_lookup_name (directory, name, strlen (name));
@@ -497,6 +497,8 @@ ultifs_open (upos directory, char * name, char mode)
         return NULL;
     return bfile_open (directory, file, mode);
 }
+
+#endif
 
 upos current_directory;
 upos ultifs_pwd = ULTIFS_START;
@@ -509,11 +511,8 @@ ultifs_opendir ()
     return 0;
 }
 
-#include "message.h"
-#include "g.h"
-#include "ctype.h"
-
-char __fastcall__
+#ifdef __CC65__
+char __cc65fastcall__
 ultifs_readdir (struct cbm_dirent * dirent)
 {
     char type = 0;
@@ -548,6 +547,22 @@ ultifs_readdir (struct cbm_dirent * dirent)
 void
 ultifs_closedir ()
 {
+}
+
+char __cc65fastcall__
+ultifs_enterdir (char * name)
+{
+    bfile * b = ultifs_open (ultifs_pwd, name, 0);
+    if (!b) {
+#ifdef __CC65__
+        print_message ("No dir.");
+#endif
+        return -1;
+    }
+    bfile_readm (b, (void *) &ultifs_pwd, 4);
+    bfile_close (b);
+
+    return 0;
 }
 
 #endif

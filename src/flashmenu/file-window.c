@@ -111,7 +111,7 @@ struct drive_ops ultifs_drive_ops = {
     ultifs_opendir,
     ultifs_readdir,
     ultifs_closedir,
-    gcbm_enterdir,
+    ultifs_enterdir,
     u_open,
     u_read,
     u_close
@@ -350,9 +350,11 @@ void __fastcall__
 file_window_enter_directory (struct file_window_content * content, struct dirent * d)
 {
     content->drive_ops->enterdir (d->name);
+    content->pos = 0;
     file_window_free_files (content);
     file_window_read_directory (content);
     file_window_draw_content ((struct obj *) content);
+    file_window_invert_position (content);
 }
 
 void __fastcall__

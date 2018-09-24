@@ -20,6 +20,9 @@ struct drive_ops {
     void              (*close)    (void);
 };
 
+extern struct drive_ops cbm_drive_ops;
+extern struct drive_ops ultifs_drive_ops;
+
 struct file_window_content {
     struct obj          obj;
     struct drive_ops *  drive_ops;
@@ -28,6 +31,6 @@ struct file_window_content {
     int    pos;    /* User's position in list. */
 };
 
-extern struct obj * __fastcall__ make_file_window (char * title, gpos x, gpos y, gsize w, gsize h);
+extern struct obj * __fastcall__ make_file_window (struct drive_ops *, char * title, gpos x, gpos y, gsize w, gsize h);
 
 #endif /* #ifndef FILE_WINDOW_H */

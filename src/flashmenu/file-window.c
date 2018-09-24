@@ -6,6 +6,7 @@
 #include "g.h"
 
 #include "ultimem.h"
+#include "ultifs.h"
 #include "launch.h"
 #include "bank-allocator.h"
 #include "obj.h"
@@ -75,6 +76,16 @@ struct drive_ops cbm_drive_ops = {
     gcbm_opendir,
     gcbm_readdir,
     gcbm_closedir,
+    gcbm_enterdir,
+    gcbm_open,
+    gcbm_read,
+    gcbm_close
+};
+
+struct drive_ops ultifs_drive_ops = {
+    ultifs_opendir,
+    ultifs_readdir,
+    ultifs_closedir,
     gcbm_enterdir,
     gcbm_open,
     gcbm_read,
@@ -381,8 +392,8 @@ struct obj_ops obj_ops_file_window_content = {
     event_handler_passthrough
 };
 
-struct obj *
-make_file_window_content ()
+struct obj * __fastcall__
+make_file_window_content (struct drive_ops * drive_ops)
 {
 	struct obj * obj =  alloc_obj (sizeof (struct obj), &obj_ops_file_window_content);
     struct file_window_content * content = malloc (sizeof (struct file_window_content));
@@ -390,15 +401,15 @@ make_file_window_content ()
     memcpy (content, obj, sizeof (struct obj));
     free (obj);
     content->files = NULL;
-    content->drive_ops = &cbm_drive_ops;
+    content->drive_ops = drive_ops;
 
     return OBJ(content);
 }
 
 struct obj * __fastcall__
-make_file_window (char * title, gpos x, gpos y, gpos w, gpos h)
+make_file_window (struct drive_ops * drive_ops, char * title, gpos x, gpos y, gpos w, gpos h)
 {
-    struct file_window_content * content = (struct file_window_content *) make_file_window_content ();
+    struct file_window_content * content = (struct file_window_content *) make_file_window_content (drive_ops);
 	struct window * win = make_window (title, (struct obj *) content, file_window_event_handler);
 
 	set_obj_position_and_size (OBJ(win), x, y, w, h);

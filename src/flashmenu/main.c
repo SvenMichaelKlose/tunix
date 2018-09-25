@@ -121,13 +121,13 @@ main (int argc, char ** argv)
     struct obj * i;
 
     init ();
-    show_free_memory ();
     append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
     append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
     focussed_window = get_last_window ();
     layout_obj (desktop);
     draw_obj (desktop);
+    show_free_memory ();
 
     do {
         idle = 0;

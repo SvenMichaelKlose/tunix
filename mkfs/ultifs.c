@@ -18,11 +18,13 @@
     #include <wait.h>
     #define STORE_SIZE      (8 * 1024 * 1024)
     unsigned char store[STORE_SIZE];
+    #define cc65register
 #else
     #include <cbm.h>
     #include <ultimem-basics.h>
     #include <message.h>
-    unsigned char * store = (void *) 0xa000;
+    unsigned char * store = (void *) 0xa000u;
+    #define cc65register    register
 #endif
 
 /*
@@ -119,7 +121,7 @@ ultimem_write_byte (upos p, unsigned char v)
 unsigned char __cc65fastcall__
 ultimem_read_byte (upos p)
 {
-    unsigned char * addr = (void *) ((p & 0x1fff) | 0xa000);
+    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
     unsigned        oldbank = *ULTIMEM_BLK5;
     unsigned char   oldcfg = *ULTIMEM_CONFIG2;
     unsigned char   v;
@@ -136,7 +138,7 @@ ultimem_read_byte (upos p)
 void __cc65fastcall__
 ultimem_write_byte (upos p, unsigned char v)
 {
-    unsigned char * addr = (void *) ((p & 0x1fff) | 0xa000);
+    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
     unsigned        oldbank = *ULTIMEM_BLK5;
 
     *ULTIMEM_BLK5 = p >> 13;
@@ -316,7 +318,7 @@ bfile_open (upos directory, upos p, char mode)
     b->start = p;
     b->ptr = file_data (p);
     b->bank = b->ptr >> 13;
-    b->addr = (void *) ((b->ptr & 0x1fff) | 0xa000);
+    b->addr = (void *) ((((unsigned) b->ptr) & 0x1fff) | 0xa000u);
     b->directory = directory;
     if (!mode)
         b->size = block_get_size (p);
@@ -387,35 +389,37 @@ bfile_writem (bfile * b, char * bytes, unsigned len)
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, unsigned len)
 {
-    unsigned oldbank = *ULTIMEM_BLK5;
-    char     oldcfg = *ULTIMEM_CONFIG2;
-    char     newcfg = oldcfg & 0x3f | 0x40;
-    char *   addr = b->addr;
-    upos     ptr = b->ptr;
-    unsigned bank = b->bank;
-    int size = 0;
-    upos end = file_data (b->start) + b->size;
-    char v;
+    cc65register unsigned oldbank = *ULTIMEM_BLK5;
+    cc65register char     oldcfg = *ULTIMEM_CONFIG2;
+    cc65register char     newcfg = oldcfg & 0x3f | 0x40;
+    cc65register char *   addr = b->addr;
+    cc65register upos     ptr = b->ptr;
+    cc65register unsigned bank = b->bank;
+    cc65register int size = 0;
+    cc65register upos end = file_data (b->start) + b->size;
+    cc65register char v;
 
     if (b->mode)
         return -1;
 
-    while (len-- && ptr != end) {
+    while (len && ptr != end) {
+        --len;
         *ULTIMEM_CONFIG2 = newcfg;
         *ULTIMEM_BLK5 = bank;
-        v = *addr++;
+        v = *addr;
+        ++addr;
         *ULTIMEM_CONFIG2 = oldcfg;
         *ULTIMEM_BLK5 = oldbank;
 
         *bytes++ = v;
-        ptr++;
+        ++ptr;
 
-        if (addr == (void *) 0xc000) {
-            addr = (void *) 0xa000;
-            bank++;
+        if (addr == (void *) 0xc000u) {
+            addr = (void *) 0xa000u;
+            ++bank;
             *ULTIMEM_BLK5 = bank;
         }
-        size++;
+        ++size;
     }
 
     b->addr = addr;
@@ -635,9 +639,9 @@ load_file (upos dir, char * name, char * pathname)
     void * data;
     bfile * b;
 
-    if (0) { //dir) {
+    if (0) { // dir) {
         if (!fork ())
-            execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-o", "tmp.prg", pathname, NULL);
+            execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-B", "-o", "tmp.prg", pathname, NULL);
         else
             wait (NULL);
         pathname = "tmp.prg";

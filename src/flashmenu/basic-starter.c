@@ -1,5 +1,7 @@
 #include <stdlib.h>
 
+#include "g.h"
+
 #include "obj.h"
 #include "button.h"
 #include "layout-ops.h"

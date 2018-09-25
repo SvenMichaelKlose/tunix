@@ -124,7 +124,6 @@ draw_window_standard (struct window * win)
     gsize  w = r->w;
     gsize  h = r->h;
     gsize  iw = r->w - 2;
-    gpos   xr = iw - 1;
     gpos   yb = y + WINDOW_TITLE_HEIGHT - 1;
     gpos   ch = h - WINDOW_TITLE_HEIGHT;
 

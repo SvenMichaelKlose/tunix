@@ -8,7 +8,6 @@ all:
 	mkdir -pv compiled
 	cp src/flashmenu/flashmenu.bin compiled/boot
 	cp -r archive/* compiled
-	cp  *.prg compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 
 clean:

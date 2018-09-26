@@ -403,7 +403,11 @@ file_window_event_handler (struct obj * o, struct event * e)
             break;
 
         case KEY_DOWN:
-            if (content->pos > content->len)
+            if (content->pos > content->len) {
+                content->pos = content->len - 1;
+                goto done;
+            }
+            if (content->pos == content->len - 1)
                 goto done;
             content->pos++;
             if (content->pos > wpos + visible_lines - 1)

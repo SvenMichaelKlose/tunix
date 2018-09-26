@@ -2,6 +2,8 @@
  * Ultimem file system
  */
 
+//#define COMPRESS_FILE_DATA_WITH_EXOMIZER
+
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -639,13 +641,15 @@ load_file (upos dir, char * name, char * pathname)
     void * data;
     bfile * b;
 
-    if (0) { // dir) {
+#ifdef COMPRESS_FILE_DATA_WITH_EXOMIZER
+    if (dir) {
         if (!fork ())
             execl ("/usr/local/bin/exomizer", "exomizer", "raw", "-B", "-o", "tmp.prg", pathname, NULL);
         else
             wait (NULL);
         pathname = "tmp.prg";
     }
+#endif
     
     f = fopen (pathname, "rb");
     fseek (f, 0, SEEK_END);

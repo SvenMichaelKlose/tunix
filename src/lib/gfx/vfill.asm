@@ -26,13 +26,10 @@ pm_xor:
     sta mod_pattern+1
     lda pattern+1
     sta mod_pattern+2
-l:  lda (scr),y
-    and maskd
-    sta tmp
+l:
 mod_pattern:
     lda $ffff,x
     and masks
-    ora tmp
     eor (scr),y
     sta (scr),y
     inx

@@ -156,14 +156,18 @@ l2: jsr ultimem_read_byte
     ldx #base
     ldy #$08
     jsr ultimem_get_bank
-    lda base+1
+    lda s
+    sta base
+    lda s+1
     ora #$20
     sta base+1
 
     ldx #d
     ldy #$0a
     jsr ultimem_get_bank
-    lda d+1
+    lda s
+    sta d
+    lda s+1
     ora #$40
     sta d+1
 

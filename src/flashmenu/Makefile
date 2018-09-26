@@ -6,7 +6,6 @@ SOURCES= \
 
 ASMSOURCES= \
     launch.asm \
-    prgsize.asm \
     prgend.asm \
     ../zeropage.asm \
     ../core/mem/clrram.asm \

@@ -209,18 +209,21 @@ file_window_draw_list (struct obj * w)
     struct file_window_content * content = (struct file_window_content *) w;
     unsigned visible_lines = content->obj.rect.h / 8 - 1;
     char xofs = 1;
-    char c;
-    char size[8];
     struct dirent * d = content->files;
     unsigned y = 0;
     unsigned wpos = content->pos - (content->pos % visible_lines);
     unsigned rpos = wpos;
     uchar i;
     uchar t;
+    char c;
+    char size[8];
 
     d = file_window_get_file_by_index (content, wpos);
 
     gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region (w);
+
     while (1) {
         if (y > w->rect.h)
             break;
@@ -294,6 +297,7 @@ next:
         gfx_set_font (charset_4x8, 2);
         gfx_draw_text (1, 1, "No files.");
     }
+
     gfx_pop_context ();
 }
 
@@ -306,12 +310,8 @@ file_window_draw_content (struct obj * w)
     if (!content->files)
         file_window_read_directory (content);
 
-    gfx_push_context ();
-    gfx_reset_region ();
-    set_obj_region (w);
     file_window_draw_list (w);
     file_window_invert_position (content);
-    gfx_pop_context ();
 }
 
 typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);

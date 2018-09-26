@@ -21,6 +21,7 @@
 
 #define KEY_UP      145
 #define KEY_DOWN    17
+#define KEY_LEFT    157
 #define KEY_RETURN  13
 
 struct cbm_dirent dirent;
@@ -54,6 +55,11 @@ gcbm_enterdir (char * name)
     return 0;
 }
 
+void
+gcbm_leavedir ()
+{
+}
+
 char __fastcall__
 gcbm_open (char * name, char mode)
 {
@@ -79,6 +85,7 @@ struct drive_ops cbm_drive_ops = {
     gcbm_readdir,
     gcbm_closedir,
     gcbm_enterdir,
+    gcbm_leavedir,
     gcbm_open,
     gcbm_read,
     gcbm_close
@@ -112,6 +119,7 @@ struct drive_ops ultifs_drive_ops = {
     ultifs_readdir,
     ultifs_closedir,
     ultifs_enterdir,
+    ultifs_leavedir,
     u_open,
     u_read,
     u_close
@@ -138,8 +146,9 @@ file_window_read_directory (struct file_window_content * content)
     struct dirent * d;
     unsigned len = 0;
 
-    content->drive_ops->opendir ();
+    file_window_free_files (content);
 
+    content->drive_ops->opendir ();
     while (1) {
         if (content->drive_ops->readdir (&dirent))
             break;
@@ -352,7 +361,6 @@ file_window_enter_directory (struct file_window_content * content, struct dirent
 {
     content->drive_ops->enterdir (d->name);
     content->pos = 0;
-    file_window_free_files (content);
     file_window_read_directory (content);
     file_window_draw_content ((struct obj *) content);
     file_window_invert_position (content);
@@ -401,11 +409,19 @@ file_window_event_handler (struct obj * o, struct event * e)
             if (content->pos > wpos + visible_lines - 1)
                 goto new_page;
             break;
+
+        case KEY_LEFT:
+            content->drive_ops->leavedir ();
+            goto new_directory;
     }
 
 done:
     file_window_invert_position (content);
     return FALSE;
+
+new_directory:
+    content->pos = 0;
+    file_window_read_directory (content);
 
 new_page:
     file_window_draw_content ((struct obj *) content);

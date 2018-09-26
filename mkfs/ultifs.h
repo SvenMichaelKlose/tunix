@@ -39,6 +39,7 @@ extern char    __cc65fastcall__ ultifs_opendir (void);
 extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);
 extern void                     ultifs_closedir (void);
 extern char    __cc65fastcall__ ultifs_enterdir (char * name);
+extern void                     ultifs_leavedir (void);
 #endif
 
 #endif // #ifndef ULTIFS_H

@@ -29,6 +29,9 @@
     #define cc65register    register
 #endif
 
+unsigned char current_parent = 0;
+upos parents[8];
+
 /*
 #ifdef __CC65__
 
@@ -592,10 +595,20 @@ ultifs_enterdir (char * name)
 #endif
         return -1;
     }
+    parents[current_parent++] = ultifs_pwd;
     bfile_readm (b, (void *) &ultifs_pwd, 4);
     bfile_close (b);
 
     return 0;
+}
+
+void
+ultifs_leavedir ()
+{
+    if (!current_parent)
+        return;
+
+    ultifs_pwd = parents[--current_parent];
 }
 
 #endif

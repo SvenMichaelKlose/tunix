@@ -132,8 +132,8 @@ main (int argc, char ** argv)
     do {
         idle = 0;
         while (!(key = cbm_k_getin ()));
-//        sprintf (message_buffer, "Key code %U", key);
-//        print_message (message_buffer);
+        sprintf (message_buffer, "Key code %U", key);
+        print_message (message_buffer);
 
         switch (key) {
             case 'F':

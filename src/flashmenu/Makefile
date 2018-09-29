@@ -2,7 +2,8 @@ SOURCES= \
     file-window.c \
     main.c \
     ultimem.c \
-    ultifs.c
+    ultifs.c \
+    wrap-ultifs.c
 
 ASMSOURCES= \
     launch.asm \

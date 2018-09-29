@@ -35,7 +35,7 @@ extern struct cbm_dirent;
 extern bfile * __cc65fastcall__ ultifs_open (upos directory, char * name, char mode);
 extern int     __cc65fastcall__ bfile_readm (bfile * b, char * bytes, unsigned len);
 
-extern char    __cc65fastcall__ ultifs_opendir (void);
+extern char                     ultifs_opendir (void);
 extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);
 extern void                     ultifs_closedir (void);
 extern char    __cc65fastcall__ ultifs_enterdir (char * name);

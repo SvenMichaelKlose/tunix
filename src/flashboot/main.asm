@@ -162,10 +162,9 @@ l2: jsr ultimem_read_byte
     lda #%01111101  ; ROMRAMRAMROM…
     sta $9ff2
 
-    lda #2
     ldx #ptr
     ldy #base
-    jsr add_ofs
+    jsr copyd
 
     ldx #base
     ldy #$08

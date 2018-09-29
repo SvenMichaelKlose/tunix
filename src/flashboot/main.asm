@@ -18,6 +18,8 @@ size:           .res 4
 next:           .res 4
 replacement:    .res 4
 tmp:            .res 1
+namelen:        .res 1
+name:           .res 2
 
 .segment "STARTUP"
 
@@ -59,6 +61,26 @@ block_namelen = 13
     lda #$60	; RTS
     sta $0400
 
+    lda #$00
+    sta d
+    lda #$60
+    sta d+1
+    lda #$00
+    sta d+2
+    sta d+3
+    lda #<fn_boot
+    sta name
+    lda #>fn_boot
+    sta name+1
+    lda #fn_boot_end-fn_boot
+    sta namelen
+
+    jsr ultifs_load
+
+    ; Run it.
+    jmp $2000
+
+ultifs_load:
     ; Make pointer to start of file system at $10000.
     lda #$00
     ldx #$01
@@ -101,7 +123,7 @@ check_name:
     jsr add_ofs
     ldx #ptr
     jsr ultimem_read_byte
-    cmp #bootfile_end - bootfile
+    cmp namelen
     beq found
  
     lda #block_next
@@ -129,20 +151,12 @@ found:
     jsr inczpd
     ldy #0
 l2: jsr ultimem_read_byte
-    cmp bootfile,y
+    cmp (name),y
     bne next_block2
     jsr inczpd
     iny
-    cpy #bootfile_end - bootfile
+    cpy namelen
     bne l2
-
-    lda #$00
-    sta d
-    lda #$60
-    sta d+1
-    lda #$00
-    sta d+2
-    sta d+3
 
     ; Load data
     lda #%01111101  ; ROMRAMRAMROM…
@@ -207,10 +221,7 @@ l5: dec size
     cmp #255
     bne l3
 
-    jsr init_ram_banks
-
-    ; Run it.
-    jmp $2000
+    jmp init_ram_banks
 .endproc
 
 .proc dummy_link
@@ -313,6 +324,6 @@ n:  rts
     rts
 .endproc
 
-bootfile:
+fn_boot:
     .byte "boot"
-bootfile_end:
+fn_boot_end:

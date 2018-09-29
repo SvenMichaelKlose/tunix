@@ -7,9 +7,12 @@ all:
 	rm -rfv compiled
 	mkdir -pv compiled
 	cp src/flashmenu/flashmenu.bin compiled/boot
+	cp src/flashmenu/desktop.bin compiled/desktop
+	cp src/flashmenu/ultifs.bin compiled/ultifs
 	cp -r archive/* compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 
 clean:
 	$(MAKE) -C src clean
-	rm -frv g.zip compiled make-image
+	$(MAKE) -C mkfs clean
+	rm -frv g.img g.zip compiled make-image

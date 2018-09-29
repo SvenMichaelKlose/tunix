@@ -57,13 +57,9 @@ block_namelen = 13
 
     cli
 
-    ; Make dummy call to g's link().
-    lda #$60	; RTS
-    sta $0400
-
     lda #$00
     sta d
-    lda #$60
+    lda #$80
     sta d+1
     lda #$00
     sta d+2
@@ -74,11 +70,25 @@ block_namelen = 13
     sta name+1
     lda #fn_boot_end-fn_boot
     sta namelen
+    jsr ultifs_load
 
+    lda #$00
+    sta d
+    lda #$60
+    sta d+1
+    lda #$00
+    sta d+2
+    sta d+3
+    lda #<fn_desktop
+    sta name
+    lda #>fn_desktop
+    sta name+1
+    lda #fn_desktop_end-fn_desktop
+    sta namelen
     jsr ultifs_load
 
     ; Run it.
-    jmp $2000
+    jmp $4000
 
 ultifs_load:
     ; Make pointer to start of file system at $10000.
@@ -326,3 +336,7 @@ n:  rts
 fn_boot:
     .byte "boot"
 fn_boot_end:
+
+fn_desktop:
+    .byte "desktop"
+fn_desktop_end:

@@ -1,3 +1,5 @@
+#pragma codeseg ("DESKTOP")
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

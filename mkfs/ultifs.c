@@ -22,6 +22,7 @@
     unsigned char store[STORE_SIZE];
     #define cc65register
 #else
+    #pragma codeseg ("ULTIFS")
     #include <cbm.h>
     #include <ultimem-basics.h>
     #include <message.h>

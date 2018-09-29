@@ -49,6 +49,16 @@ struct obj_ops window_content_ops = {
     event_handler_passthrough
 };
 
+void
+window_set_position_and_size (struct window * win, gpos x, gpos y, gsize w, gsize h)
+{
+    set_obj_position_and_size ((struct obj *) win, x, y, w, h);
+    win->user_x = x;
+    win->user_y = y;
+    win->user_w = w;
+    win->user_h = h;
+}
+
 struct window * __fastcall__
 make_window (char * title, struct obj * content, event_handler_t event_handler)
 {

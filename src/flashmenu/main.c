@@ -144,7 +144,7 @@ main (int argc, char ** argv)
                 if (w->flags & W_FULLSCREEN)
                     set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT);
                 else
-                    set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT / 2);
+                    set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
                 layout_obj (desktop);
                 draw_obj (desktop);
                 continue;

@@ -462,7 +462,7 @@ make_file_window (struct drive_ops * drive_ops, char * title, gpos x, gpos y, gp
     struct file_window_content * content = (struct file_window_content *) make_file_window_content (drive_ops);
 	struct window * win = make_window (title, (struct obj *) content, file_window_event_handler);
 
-	set_obj_position_and_size (OBJ(win), x, y, w, h);
+	window_set_position_and_size (win, x, y, w, h);
 
     return OBJ(win);
 }

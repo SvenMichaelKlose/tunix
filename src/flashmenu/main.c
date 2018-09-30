@@ -90,10 +90,8 @@ init ()
 void
 show_free_memory ()
 {
-    char * msg = malloc (64);
-    sprintf (msg, "%U/%U B free.", _heapmemavail (), _heapmaxavail ());
-    print_message (msg);
-    free (msg);
+    sprintf (message_buffer, "%U/%UB RAM free.", _heapmemavail (), _heapmaxavail ());
+    print_message (message_buffer);
 }
 
 struct obj *
@@ -164,7 +162,11 @@ main (int argc, char ** argv)
                 f->node.next = NULL;
                 focussed_window = f;
 
-                draw_obj_children (desktop);
+                w = (struct window *) focussed_window;
+                if (w->flags & W_FULLSCREEN)
+                    draw_obj ((struct obj *) w);
+                else
+                    draw_obj_children (desktop);
         }
 
         /* Send keyboard event. */

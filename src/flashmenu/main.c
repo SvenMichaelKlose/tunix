@@ -1,4 +1,4 @@
-#pragma codeseg ("DESKTOP")
+#pragma code-name ("DESKTOP")
 
 #include "g.h"
 

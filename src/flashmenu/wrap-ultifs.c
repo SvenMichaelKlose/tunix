@@ -4,7 +4,7 @@
 #include "ultifs.h"
 #include "wrap-ultifs.h"
 
-#define ULTIFS_BANK     6
+#define ULTIFS_BANK     4
 
 bfile * __fastcall__
 w_ultifs_open (upos directory, char * name, char mode)

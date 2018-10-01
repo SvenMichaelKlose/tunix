@@ -59,7 +59,7 @@ block_namelen = 13
 
     lda #$00
     sta d
-    lda #$80
+    lda #$40
     sta d+1
     lda #$00
     sta d+2
@@ -74,7 +74,7 @@ block_namelen = 13
 
     lda #$00
     sta d
-    lda #$60
+    lda #$20
     sta d+1
     lda #$00
     sta d+2
@@ -89,7 +89,7 @@ block_namelen = 13
 
     lda #$00
     sta d
-    lda #$c0
+    lda #$80
     sta d+1
     lda #$00
     sta d+2
@@ -259,10 +259,9 @@ l5: dec size
     lda #%01111111
     sta $9ff2
     lda #0
-    ldx #1
+    tax
     stx $9ff4
     sta $9ff5
-    inx
     stx $9ff6
     sta $9ff7
     inx

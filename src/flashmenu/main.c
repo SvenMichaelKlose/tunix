@@ -47,7 +47,7 @@ desktop_draw (struct obj * o)
     struct window * w = (struct window *) o->node.children;
 
     while (w) {
-        if (w->flags & W_FULLSCREEN) {
+        if (w->flags & W_FULLSCREEN && ((struct obj *) w) == focussed_window) {
             draw_obj ((struct obj *) w);
             return;
         }

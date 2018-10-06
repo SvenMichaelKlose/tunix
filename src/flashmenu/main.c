@@ -161,12 +161,13 @@ main (int argc, char ** argv)
                 i->node.next = f;
                 f->node.next = NULL;
                 focussed_window = f;
+                window_draw_title ((struct window *) i);
 
                 w = (struct window *) focussed_window;
                 if (w->flags & W_FULLSCREEN)
                     draw_obj ((struct obj *) w);
                 else
-                    draw_obj_children (desktop);
+                    draw_obj (focussed_window);
         }
 
         /* Send keyboard event. */

@@ -116,6 +116,8 @@ window_draw_title (struct window * win)
     }
 
     gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region ((struct obj *) win);
     gfx_set_region (x, y, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (bxy, bxy, bw, WINDOW_TITLE_HEIGHT - 2);
@@ -123,7 +125,7 @@ window_draw_title (struct window * win)
     if (is_fullscreen)
         gfx_draw_hline (0, WINDOW_TITLE_HEIGHT - 2, w);
     else
-        gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT);
+        gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT - 1);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_font (charset_4x8, 2, FONT_BANK);
     gfx_draw_text (txy, txy, win->title);

@@ -20,6 +20,7 @@ replacement:    .res 4
 tmp:            .res 1
 namelen:        .res 1
 name:           .res 2
+ultifs_base:    .res 4
 
 .segment "STARTUP"
 
@@ -56,6 +57,14 @@ block_namelen = 13
     jsr init_ram_banks
 
     cli
+
+    ; Set root directory.
+    lda #$00
+    ldx #$01
+    sta ultifs_base
+    sta ultifs_base+1
+    stx ultifs_base+2
+    sta ultifs_base+3
 
     lda #$00
     sta d
@@ -119,14 +128,22 @@ block_namelen = 13
 
     ; Run it.
     jmp $4000
+.endproc
 
-ultifs_load:
-    ; Make pointer to start of file system at $10000.
-    lda #$00
-    ldx #$01
+.proc ultifs_load
+    jsr ultifs_find
+n:  bcc n
+    jmp ultifs_copy2ram
+.endproc
+
+.proc ultifs_find
+    lda ultifs_base
     sta base
+    lda ultifs_base+1
     sta base+1
-    stx base+2
+    lda ultifs_base+2
+    sta base+2
+    lda ultifs_base+3
     sta base+3
 
 next_block:
@@ -184,7 +201,8 @@ next_block2:
     jmp next_block
    
 boot_not_found:
-    jmp boot_not_found
+    clc
+    rts
 
 found:
     ldx #ptr
@@ -198,7 +216,11 @@ l2: jsr ultimem_read_byte
     cpy namelen
     bne l2
 
-    ; Load data
+    sec
+    rts
+.endproc
+
+.proc ultifs_copy2ram
     lda #%01111101  ; ROMRAMRAMROM…
     sta $9ff2
 
@@ -361,6 +383,10 @@ n:  rts
     cmp #$ff
     rts
 .endproc
+
+fn_g:
+    .byte "g"
+fn_g_end:
 
 fn_boot:
     .byte "boot"

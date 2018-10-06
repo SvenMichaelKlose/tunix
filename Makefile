@@ -9,6 +9,7 @@ all:
 	cp src/flashmenu/flashmenu.bin compiled/boot
 	cp src/flashmenu/desktop.bin compiled/desktop
 	cp src/flashmenu/ultifs.bin compiled/ultifs
+	cp src/flashmenu/charset-4x8.bin compiled/charset-4x8
 	cp -r archive/* compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 

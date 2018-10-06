@@ -1,6 +1,6 @@
 .exportzp p, ph, bca, bcp, srx, xcpos, xcpos2, font_compression
 .exportzp rxl, ryt, rxr, ryb, region_sp, xpos, ypos, xpos2, ypos2, width, height, pattern
-.exportzp font, font_space_size, do_compress_font_gaps, pencil_mode, scrbase
+.exportzp font, font_bank, font_space_size, do_compress_font_gaps, pencil_mode, scrbase
 .exportzp masks, maskd
 .exportzp context_start, context_end, context_size
 
@@ -53,6 +53,7 @@ pencil_mode:
 pattern:.res 2     ; Address of 8 byte pattern.
 
 font:   .res 2
+font_bank: .res 1
 font_space_size: .res 1 ; Width of an empty character.
 do_compress_font_gaps: .res 1
 

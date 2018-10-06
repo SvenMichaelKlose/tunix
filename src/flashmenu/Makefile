@@ -9,8 +9,7 @@ ASMSOURCES= \
     launch.asm \
     prgend.asm \
     ../zeropage.asm \
-    ../core/mem/clrram.asm \
-    ../core/dev/con/charset-4x8.asm
+    ../core/mem/clrram.asm
 
 PROGRAM=flashmenu.bin
 
@@ -26,6 +25,8 @@ $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ultimem-basics/libultimem-basics.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
+	$(AS) -o charset-4x8.o ../core/dev/con/charset-4x8.asm
+	$(LD) -C ../core/dev/con/charset.cfg -o charset-4x8.bin charset-4x8.o
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst $(PROGRAM).map desktop.bin ultifs.bin
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst $(PROGRAM).map desktop.bin ultifs.bin charset-4x8.o charset-4x8.bin

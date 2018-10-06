@@ -125,7 +125,7 @@ window_draw_title (struct window * win)
     else
         gfx_draw_frame (0, 0, w, WINDOW_TITLE_HEIGHT);
     gfx_set_pencil_mode (PENCIL_MODE_OR);
-    gfx_set_font (charset_4x8, 2);
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
     gfx_draw_text (txy, txy, win->title);
     if (focussed_window == (struct obj *) win)
         draw_title_grip (txy, yb, iw);

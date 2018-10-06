@@ -241,7 +241,7 @@ file_window_draw_list (struct obj * w)
             goto next;
 
         /* Print file type. */
-        gfx_set_font (charset_4x8, 0);
+        gfx_set_font (charset_4x8, 0, FONT_BANK);
         gfx_set_font_compression (1);
         gfx_set_position (xofs, y);
         switch (d->type) {
@@ -297,7 +297,7 @@ next:
     }
 
     if (!content->len) {
-        gfx_set_font (charset_4x8, 2);
+        gfx_set_font (charset_4x8, 2, FONT_BANK);
         gfx_draw_text (1, 1, "No files.");
     }
 

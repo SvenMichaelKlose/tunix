@@ -5,11 +5,12 @@
 #define PENCIL_MODE_OR      1
 #define PENCIL_MODE_XOR     2
 
+#define charset_4x8     ((void *) 0xa000)
+#define FONT_BANK   5
+
 typedef short gpos;
 typedef short gsize;
 typedef unsigned char gcolor;
-
-extern char charset_4x8[2048];
 
 extern char pattern_empty[8];
 extern char pattern_solid[8];
@@ -40,7 +41,7 @@ extern void __fastcall__ gfx_draw_hline (gpos x, gpos y, gsize w);
 extern void __fastcall__ gfx_draw_vline (gpos x, gpos y, gsize h);
 extern void __fastcall__ gfx_draw_frame (gpos x, gpos y, gsize w, gsize h);
 extern void __fastcall__ gfx_draw_box (gpos x, gpos y, gsize w, gsize h);
-extern void __fastcall__ gfx_set_font (void *, char space_size);
+extern void __fastcall__ gfx_set_font (void *, char space_size, char bank);
 extern void __fastcall__ gfx_set_font_compression (char boolean);
 extern void __fastcall__ gfx_draw_text (gpos x, gpos y, char * txt);
 extern void __fastcall__ gfx_putchar (char);

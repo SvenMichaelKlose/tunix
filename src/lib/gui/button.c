@@ -32,7 +32,7 @@ draw_button (struct obj * _b)
     struct rect * r = &b->obj.rect;
     gsize textwidth;
 
-    gfx_set_font (charset_4x8, 2);
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
     textwidth = gfx_get_text_width (b->text);
     gfx_set_pencil_mode (1);
 //    gfx_set_pattern (pattern_empty);
@@ -48,7 +48,7 @@ layout_button_minsize (struct obj * x)
     struct button * b = (struct button *) x;
     gsize textwidth;
 
-    gfx_set_font (charset_4x8, 2);
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
     textwidth = gfx_get_text_width (b->text);
     x->rect.w = textwidth + 4;
 }

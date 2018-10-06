@@ -102,6 +102,21 @@ block_namelen = 13
     sta namelen
     jsr ultifs_load
 
+    lda #$00
+    sta d
+    lda #$a0
+    sta d+1
+    lda #$00
+    sta d+2
+    sta d+3
+    lda #<fn_charset4x8
+    sta name
+    lda #>fn_charset4x8
+    sta name+1
+    lda #fn_charset4x8_end-fn_charset4x8
+    sta namelen
+    jsr ultifs_load
+
     ; Run it.
     jmp $4000
 
@@ -358,3 +373,7 @@ fn_desktop_end:
 fn_ultifs:
     .byte "ultifs"
 fn_ultifs_end:
+
+fn_charset4x8:
+    .byte "charset-4x8"
+fn_charset4x8_end:

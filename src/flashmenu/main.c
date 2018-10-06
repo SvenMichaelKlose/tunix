@@ -33,10 +33,14 @@ struct obj * focussed_window;
 void
 shift_charset ()
 {
+    short old_bank = *ULTIMEM_BLK5;
     int i;
+    char * charset = (char *) 0xa000;
 
+    *ULTIMEM_BLK5 = FONT_BANK;
     for (i = 0; i < 2048; i++)
-        charset_4x8[i] <<= 4;
+        charset[i] <<= 4;
+    *ULTIMEM_BLK5 = old_bank;
 }
 
 char do_shutdown = 0;
@@ -79,7 +83,7 @@ init ()
     gfx_clear_screen (0);
     gfx_init ();
     shift_charset ();
-    gfx_set_font (charset_4x8, 2);
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
 
     focussed_window = NULL;
     desktop = OBJ(make_box (pattern_woven));

@@ -3,8 +3,8 @@
 .import inc_xcpos, calcscr, add_region_position, sub_region_position
 .import masks_left, masks_right
 .importzp tmp, tmp2, tmp3
-.importzp xpos, ypos, xpos2, ypos2, s, scr, font, ryb, ryt, rxl, rxr
-.importzp font_space_size, do_compress_font_gaps, pencil_mode
+.importzp xpos, ypos, xpos2, ypos2, s, scr, ryb, ryt, rxl, rxr
+.importzp font, font_bank, font_space_size, do_compress_font_gaps, pencil_mode
 
 .bss
 
@@ -141,9 +141,19 @@ n:  rts
 .endproc
 
 .proc putchar
-    pha
+    pha     ; Remove?
     jsr add_region_position
     pla
+    sta tmp
+    lda $9ffe
+    pha
+    lda $9fff
+    pha
+    lda font_bank
+    sta $9ffe
+    lda #0
+    sta $9fff
+    lda tmp
 
     ; Get character address.
     asl
@@ -256,7 +266,7 @@ l3: lsr
     ; Leave 1 pixel gap.
 done:
     inc xpos
-    jmp sub_region_position
+    jmp j
 
     ; Add default gap for spaces.
 n4: lda xpos
@@ -265,5 +275,10 @@ n4: lda xpos
     clc
     adc font_space_size
     sta xpos
-j:  jmp sub_region_position
+j:  
+    pla
+    sta $9fff
+    pla
+    sta $9ffe
+    jmp sub_region_position
 .endproc

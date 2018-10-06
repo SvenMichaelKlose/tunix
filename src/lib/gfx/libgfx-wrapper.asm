@@ -29,7 +29,7 @@
 .importzp scrbase
 .importzp color, pattern, pencil_mode
 .importzp xpos, ypos, xpos2, ypos2, width, height, rxr, rxl, ryt, ryb, p, s, d
-.importzp font, font_space_size, font_compression, do_compress_font_gaps
+.importzp font, font_bank, font_space_size, font_compression, do_compress_font_gaps
 .import popa, popax
 .import gfx_init, clear_screen
 .import reset_region, push_context, pop_context
@@ -176,8 +176,10 @@
     jmp box
 .endproc
 
-; void __fastcall__ gfx_set_font (void *, char space_size);
+; void __fastcall__ gfx_set_font (void *, char space_size, char bank);
 .proc _gfx_set_font
+    sta font_bank
+    jsr popa
     sta font_space_size
     jsr popax
     sta font

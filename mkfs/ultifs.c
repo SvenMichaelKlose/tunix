@@ -391,7 +391,7 @@ bfile_writem (bfile * b, char * bytes, unsigned len)
 }
 
 #ifdef __CC65__
-
+#pragma codesize (push, 1000)
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, unsigned len)
 {
@@ -433,6 +433,7 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
     b->ptr = ptr;
     return size;
 }
+#pragma codesize (pop)
 
 #endif
 

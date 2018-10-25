@@ -155,7 +155,7 @@ draw_window_content_frame (struct window * win)
 void __fastcall__
 draw_window (struct obj * _w)
 {
-    struct window * win = (struct window *) _w;
+    struct window * win = WINDOW(_w);
 
     window_draw_title (win);
 
@@ -170,7 +170,7 @@ draw_window (struct obj * _w)
 void
 layout_window_content_frame (struct obj * o)
 {
-    struct window * win = (struct window *) o;
+    struct window * win = WINDOW(o);
     gpos w = o->rect.w;
     gpos h = o->rect.h;
 

@@ -48,14 +48,14 @@ char do_shutdown = 0;
 void __fastcall__
 desktop_draw (struct obj * o)
 {
-    struct window * w = (struct window *) o->node.children;
+    struct window * w = WINDOW(o->node.children);
 
     while (w) {
         if (w->flags & W_FULLSCREEN && ((struct obj *) w) == focussed_window) {
             draw_obj ((struct obj *) w);
             return;
         }
-        w = (struct window *) w->obj.node.next;
+        w = WINDOW(w->obj.node.next);
     }
 
     draw_box (o);
@@ -135,7 +135,7 @@ main (int argc, char ** argv)
 
         switch (key) {
             case 'F':
-                w = (struct window *) focussed_window;
+                w = WINDOW(focussed_window);
                 w->flags ^= W_FULLSCREEN;
                 if (w->flags & W_FULLSCREEN)
                     set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT);
@@ -159,9 +159,9 @@ main (int argc, char ** argv)
                 i->node.next = f;
                 f->node.next = NULL;
                 focussed_window = f;
-                window_draw_title ((struct window *) i);
+                window_draw_title (WINDOW(i));
 
-                w = (struct window *) focussed_window;
+                w = WINDOW(focussed_window);
                 if (w->flags & W_FULLSCREEN)
                     draw_obj ((struct obj *) w);
                 else

@@ -1,6 +1,8 @@
 #ifndef BOX_H
 #define BOX_H
 
+#define BOX(x)  ((struct box *) x)
+
 extern struct obj_ops box_ops;
 
 struct box {

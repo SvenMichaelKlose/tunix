@@ -28,7 +28,7 @@ make_button (char * text)
 void __fastcall__
 draw_button (struct obj * _b)
 {
-    struct button * b = (struct button *) _b;
+    struct button * b = BUTTON(_b);
     struct rect * r = &b->obj.rect;
     gsize textwidth;
 
@@ -45,7 +45,7 @@ draw_button (struct obj * _b)
 void __fastcall__
 layout_button_minsize (struct obj * x)
 {
-    struct button * b = (struct button *) x;
+    struct button * b = BUTTON(x);
     gsize textwidth;
 
     gfx_set_font (charset_4x8, 2, FONT_BANK);

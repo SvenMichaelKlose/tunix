@@ -1,6 +1,8 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
+#define BUTTON(x)   ((struct button *) x)
+
 extern struct obj_ops button_ops;
 
 struct button {

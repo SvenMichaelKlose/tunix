@@ -27,7 +27,7 @@ make_list (char orientation)
 void __fastcall__
 layout_list (struct obj * o)
 {
-    struct list * l = (struct list *) o;
+    struct list * l = LIST(o);
     struct obj * last_child;
     gpos x = 0;
     gpos y = 0;

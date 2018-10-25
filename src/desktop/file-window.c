@@ -208,7 +208,7 @@ file_window_get_file_by_index (struct file_window_content * content, unsigned x)
 void __fastcall__
 file_window_draw_list (struct obj * w)
 {
-    struct window * win = (struct window *) w;
+    struct window * win = WINDOW(w);
     struct file_window_content * content = (struct file_window_content *) w;
     unsigned visible_lines = content->obj.rect.h / 8 - 1;
     char xofs = 1;

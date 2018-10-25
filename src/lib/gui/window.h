@@ -4,6 +4,7 @@
 extern struct obj_ops window_ops;
 
 #define W_FULLSCREEN    1
+#define WINDOW(x)       ((struct window *) x)
 
 struct window {
     struct obj  obj;

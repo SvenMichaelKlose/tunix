@@ -28,7 +28,7 @@ make_box (char * pattern)
 void __fastcall__
 draw_box (struct obj * o)
 {
-    struct box * b = (struct box *) o;
+    struct box * b = BOX(o);
     struct rect * r = &o->rect;
 
     gfx_set_pencil_mode (1);

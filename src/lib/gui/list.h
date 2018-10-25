@@ -3,6 +3,8 @@
 
 #include "obj.h"
 
+#define LIST(x)     ((struct list *) x)
+
 extern struct obj_ops list_ops;
 
 #define LIST_HORIZONTAL     0

@@ -42,7 +42,7 @@ print_hexword (unsigned v)
 void __fastcall__
 hexdump_draw_list (struct obj * w)
 {
-    struct window * win = (struct window *) w;
+    struct window * win = WINDOW(w);
     struct hexdump_content * content = (struct hexdump_content *) w;
     char * data = content->data;
     unsigned y = 0;

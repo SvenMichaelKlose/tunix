@@ -66,6 +66,17 @@ block_namelen = 13
     stx ultifs_base+2
     sta ultifs_base+3
 
+    lda #<fn_g
+    sta name
+    lda #>fn_g
+    sta name+1
+    lda #fn_g_end-fn_g
+    sta namelen
+    jsr ultifs_find
+n:  bcc n
+    ldy #ultifs_base
+    jsr read_int
+
     lda #$00
     sta d
     lda #$40
@@ -389,17 +400,17 @@ fn_g:
 fn_g_end:
 
 fn_boot:
-    .byte "boot"
+    .byte "flashmenu.bin"
 fn_boot_end:
 
 fn_desktop:
-    .byte "desktop"
+    .byte "desktop.bin"
 fn_desktop_end:
 
 fn_ultifs:
-    .byte "ultifs"
+    .byte "ultifs.bin"
 fn_ultifs_end:
 
 fn_charset4x8:
-    .byte "charset-4x8"
+    .byte "charset-4x8.bin"
 fn_charset4x8_end:

@@ -49,7 +49,7 @@ block_namelen = 13
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
-    jsr $e518   ; Init hardware.
+    jsr $e518   ; Init VIC.
 
     lda #$7f    ; Yellow screen.
     sta $900f
@@ -138,6 +138,8 @@ n:  bcc n
     jsr ultifs_load
 
     ; Run it.
+    lda #$5d    ; Green screen.
+    sta $900f
     jmp $4000
 .endproc
 

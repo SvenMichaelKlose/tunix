@@ -69,29 +69,6 @@ struct obj_ops desktop_obj_ops = {
 };
 
 void
-init ()
-{
-    /* Active RAM in BANK5. */
-    * (char *) 0x9ff2 = 0xff;
-    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
-
-    /* Add memory blocks for malloc(). */
-    _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
-    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
-    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
-
-    gfx_clear_screen (0);
-    gfx_init ();
-    shift_charset ();
-    gfx_set_font (charset_4x8, 2, FONT_BANK);
-
-    focussed_window = NULL;
-    desktop = OBJ(make_box (pattern_woven));
-    desktop->ops = &desktop_obj_ops;
-    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
-}
-
-void
 show_free_memory ()
 {
     sprintf (message_buffer, "%U/%UB RAM free.", _heapmemavail (), _heapmaxavail ());
@@ -124,14 +101,31 @@ main (int argc, char ** argv)
     struct obj * f;
     struct obj * i;
 
-    init ();
+    /* Active RAM in BANK5. */
+    * (char *) 0x9ff2 = 0xff;
+    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
+
+    /* Add memory blocks for malloc(). */
+    _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
+    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
+    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
+
+    shift_charset ();
+    gfx_clear_screen (0);
+
+    focussed_window = NULL;
+    desktop = OBJ(make_box (pattern_woven));
+    desktop->ops = &desktop_obj_ops;
+    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
+
     append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
     append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
     focussed_window = get_last_window ();
     layout_obj (desktop);
+    gfx_init ();
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
     draw_obj (desktop);
-    show_free_memory ();
 
     do {
         idle = 0;

@@ -32,7 +32,7 @@ make_basic_starter ()
 	set_obj_position_and_size (OBJ(win), 20, 24, 120, 120);
 
     set_obj_ops (table, &table_ops_center);
-    append_obj (OBJ(win->obj.node.children), OBJ(table));
+    append_obj (win->obj.node.children, table);
 
 	make_table_button (table, "Key", "Action");
 	make_table_button (table, "0", "unexpanded");

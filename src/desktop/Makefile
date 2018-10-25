@@ -11,7 +11,7 @@ ASMSOURCES= \
     ../zeropage.asm \
     ../core/mem/clrram.asm
 
-PROGRAM=flashmenu.bin
+PROGRAM=filewindow.bin
 
 include ../Makefile.rules
 

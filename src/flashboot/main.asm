@@ -84,11 +84,11 @@ n:  bcc n
     lda #$00
     sta d+2
     sta d+3
-    lda #<fn_boot
+    lda #<fn_filewindow
     sta name
-    lda #>fn_boot
+    lda #>fn_filewindow
     sta name+1
-    lda #fn_boot_end-fn_boot
+    lda #fn_filewindow_end-fn_filewindow
     sta namelen
     jsr ultifs_load
 
@@ -399,9 +399,9 @@ fn_g:
     .byte "g"
 fn_g_end:
 
-fn_boot:
-    .byte "flashmenu.bin"
-fn_boot_end:
+fn_filewindow:
+    .byte "filewindow.bin"
+fn_filewindow_end:
 
 fn_desktop:
     .byte "desktop.bin"

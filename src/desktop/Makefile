@@ -11,7 +11,7 @@ ASMSOURCES= \
     ../zeropage.asm \
     ../core/mem/clrram.asm
 
-PROGRAM=filewindow.bin
+PROGRAM=core.bin
 
 include ../Makefile.rules
 

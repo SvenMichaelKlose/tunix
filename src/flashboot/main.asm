@@ -84,11 +84,11 @@ n:  bcc n
     lda #$00
     sta d+2
     sta d+3
-    lda #<fn_filewindow
+    lda #<fn_core
     sta name
-    lda #>fn_filewindow
+    lda #>fn_core
     sta name+1
-    lda #fn_filewindow_end-fn_filewindow
+    lda #fn_core_end-fn_core
     sta namelen
     jsr ultifs_load
 
@@ -401,9 +401,9 @@ fn_g:
     .byte "g"
 fn_g_end:
 
-fn_filewindow:
-    .byte "filewindow.bin"
-fn_filewindow_end:
+fn_core:
+    .byte "core.bin"
+fn_core_end:
 
 fn_desktop:
     .byte "desktop.bin"

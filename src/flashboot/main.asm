@@ -107,7 +107,7 @@ n:  bcc n
 
     lda #$00
     sta d
-    lda #$80
+    lda #$a0
     sta d+1
     lda #$00
     sta d+2
@@ -122,7 +122,7 @@ n:  bcc n
 
     lda #$00
     sta d
-    lda #$a0
+    lda #$c0
     sta d+1
     lda #$00
     sta d+2
@@ -138,6 +138,7 @@ n:  bcc n
     ; Run it.
     lda #$5d    ; Green screen.
     sta $900f
+    jsr init_ram_banks
     jmp $4000
 .endproc
 
@@ -293,7 +294,7 @@ l5: dec size
     cmp #255
     bne l3
 
-    jmp init_ram_banks
+    rts
 .endproc
 
 .proc dummy_link

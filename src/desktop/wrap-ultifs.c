@@ -4,7 +4,7 @@
 #include "ultifs.h"
 #include "wrap-ultifs.h"
 
-#define ULTIFS_BANK     4
+#define ULTIFS_BANK     5
 
 void
 w_ultifs_mount ()

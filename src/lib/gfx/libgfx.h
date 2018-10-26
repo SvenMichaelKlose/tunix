@@ -6,7 +6,7 @@
 #define PENCIL_MODE_XOR     2
 
 #define charset_4x8     ((void *) 0xa000)
-#define FONT_BANK   5
+#define FONT_BANK   6
 
 typedef short gpos;
 typedef short gsize;

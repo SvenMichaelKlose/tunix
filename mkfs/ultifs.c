@@ -619,7 +619,7 @@ ultifs_leavedir ()
 
 /*
 upos
-bfile_lookup (char * name)
+bfile_lookup_pathname (char * name)
 {
     char ** arr = split_pathname (name);
     upos p = 0;

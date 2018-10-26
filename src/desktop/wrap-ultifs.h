@@ -1,6 +1,8 @@
 #ifndef WRAP_ULTIFS_H
 #define WRAP_ULTIFS_H
 
+extern void w_ultifs_mount (void);
+
 extern bfile * __fastcall__ w_ultifs_open (upos directory, char * name, char mode);
 extern int     __fastcall__ w_bfile_readm (bfile * b, char * bytes, unsigned len);
 extern void    __fastcall__ w_bfile_close (bfile * b);

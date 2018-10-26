@@ -4,7 +4,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-
 #include <conio.h>
 
 #include <libgfx.h>
@@ -22,6 +21,8 @@
 #include "table.h"
 #include "window.h"
 
+#include "ultifs.h"
+#include "wrap-ultifs.h"
 #include "basic-starter.h"
 #include "file-window.h"
 #include "main.h"
@@ -112,6 +113,7 @@ main (int argc, char ** argv)
 
     shift_charset ();
     gfx_clear_screen (0);
+//    w_ultifs_mount ();
 
     focussed_window = NULL;
     desktop = OBJ(make_box (pattern_woven));

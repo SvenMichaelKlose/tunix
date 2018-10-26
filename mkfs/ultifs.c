@@ -550,6 +550,7 @@ ultifs_opendir ()
 }
 
 #ifdef __CC65__
+
 char __cc65fastcall__
 ultifs_readdir (struct cbm_dirent * dirent)
 {
@@ -612,8 +613,36 @@ ultifs_leavedir ()
 
     ultifs_pwd = parents[--current_parent];
 }
-
 #endif
+
+void
+ultifs_mount_traverse (upos dir)
+{
+    upos p;
+    upos n;
+
+    while (1) {
+        dir = block_get_latest_version (dir);
+//        if (block_get_type (p) == BLOCKTYPE_DIRECTORY)
+//            ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
+        n = block_get_next (dir);
+        if (n != EMPTY_PTR) {
+            dir = n;
+            continue;
+        }
+        p = file_data (dir) + block_get_size (dir);
+        if (last_free < p)
+            last_free = p;
+        break;
+    }
+}
+
+void
+ultifs_mount ()
+{
+    last_free = 0;
+    ultifs_mount_traverse (ULTIFS_START);
+}
 
 #ifndef __CC65__
 
@@ -784,6 +813,7 @@ main (int argc, char ** argv)
                 import_directory (0, argv[i++], 0);
                 continue;
             case 'w':
+                ultifs_mount ();
                 write_image ();
                 printf ("Image written.\n");
                 continue;

@@ -4,6 +4,7 @@ all:
 	$(MAKE) -C lib/ultimem-basics all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C desktop all
+	$(MAKE) -C installer all
 #	$(MAKE) -C paint all
 
 clean:
@@ -12,4 +13,5 @@ clean:
 	$(MAKE) -C lib/ultimem-basics clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C desktop clean
+	$(MAKE) -C installer clean
 #	$(MAKE) -C paint clean

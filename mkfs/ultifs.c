@@ -623,8 +623,8 @@ ultifs_mount_traverse (upos dir)
 
     while (1) {
         dir = block_get_latest_version (dir);
-//        if (block_get_type (p) == BLOCKTYPE_DIRECTORY)
-//            ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
+        if (block_get_type (dir) == BLOCKTYPE_DIRECTORY)
+            ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
         n = block_get_next (dir);
         if (n != EMPTY_PTR) {
             dir = n;

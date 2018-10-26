@@ -54,8 +54,6 @@ block_namelen = 13
     lda #$7f    ; Yellow screen.
     sta $900f
 
-    jsr init_ram_banks
-
     cli
 
     ; Set root directory.

@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "ultimem-basics.h"
+
 #include "obj.h"
 #include "event.h"
 
@@ -13,7 +15,13 @@ event_handler_passthrough (struct obj * obj, struct event * event)
 char __fastcall__
 send_event (struct obj * o, struct event * e)
 {
-    return o->ops->event_handler (o, e);
+    unsigned short oldbank = *ULTIMEM_BLK1;
+    int r;
+
+    *ULTIMEM_BLK1 = o->ops->event_handler_bank;
+    r = o->ops->event_handler (o, e);
+    *ULTIMEM_BLK1 = oldbank;
+    return r;
 }
 
 /*

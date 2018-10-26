@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ultimem-basics.h"
+
 #include "libgfx.h"
 #include "obj.h"
 #include "layout-ops.h"
@@ -70,8 +72,10 @@ make_window (char * title, struct obj * content, event_handler_t event_handler)
     if (!content)
         content = alloc_obj (sizeof (struct obj), &window_content_ops);
     append_obj (OBJ(win), content);
-    if (event_handler)
+    if (event_handler) {
         ops->event_handler = event_handler;
+        ops->event_handler_bank = *ULTIMEM_BLK1;
+    }
     win->title = title;
     return win;
 }

@@ -9,10 +9,6 @@
 
 typedef unsigned char uchar;
 
-struct _configuration {
-    char type;
-};
-
 // Position and size of an object.
 struct rect {
     gpos x;
@@ -39,6 +35,7 @@ struct obj_ops {
     func_layout_t       layout;         // Layouts object before drawing.
     func_free_t         free;           // Removes object resources.
     event_handler_t     event_handler;
+    unsigned short      event_handler_bank;
 };
 
 extern void __fastcall__ obj_noop (struct obj *);

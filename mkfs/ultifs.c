@@ -776,10 +776,10 @@ load (char * pathname)
 }
 
 void
-write_image ()
+write_image (char make_truncated)
 {
     FILE * img = fopen (image_name, "w");
-    fwrite (store, STORE_SIZE, 1, img);
+    fwrite (store, make_truncated ? last_free : STORE_SIZE, 1, img);
     fclose (img);
 }
 
@@ -816,8 +816,13 @@ main (int argc, char ** argv)
                 continue;
             case 'w':
                 ultifs_mount ();
-                write_image ();
+                write_image (0);
                 printf ("Image written.\n");
+                continue;
+            case 'W':
+                ultifs_mount ();
+                write_image (1);
+                printf ("Short image written.\n");
                 continue;
             default:
                 invalid ("Unknown command.");

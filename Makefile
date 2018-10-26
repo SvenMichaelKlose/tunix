@@ -10,6 +10,7 @@ all:
 	cp -r archive/* compiled
 	cp README.md compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
+	./mkfs/mkfs.ultifs gdata.bin n l src/flashboot/flashboot.bin i compiled W
 
 clean:
 	$(MAKE) -C src clean

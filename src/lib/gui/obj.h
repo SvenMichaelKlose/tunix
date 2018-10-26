@@ -38,7 +38,7 @@ struct obj_ops {
     func_draw_t         draw;           // Draws object.
     func_layout_t       layout;         // Layouts object before drawing.
     func_free_t         free;           // Removes object resources.
-    event_handler_t     event_handler;  // Removes object resources.
+    event_handler_t     event_handler;
 };
 
 extern void __fastcall__ obj_noop (struct obj *);
@@ -48,7 +48,6 @@ struct obj {
     struct node         node;
     struct rect         rect;
     struct obj_ops *    ops;
-    char                event_handler;  // In event.c/event_handlers[].
 };
 
 // Derived objects need to be cast. Therefore this convenience macro.

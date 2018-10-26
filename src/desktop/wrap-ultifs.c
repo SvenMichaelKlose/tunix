@@ -6,14 +6,17 @@
 
 #define ULTIFS_BANK     5
 
-void
+char
 w_ultifs_mount ()
 {
     unsigned oldbank = *ULTIMEM_BLK1;
+    char r;
 
     *ULTIMEM_BLK1 = ULTIFS_BANK;
-    ultifs_mount ();
+    r = ultifs_mount ();
     *ULTIMEM_BLK1 = oldbank;
+
+    return r;
 }
 
 bfile * __fastcall__

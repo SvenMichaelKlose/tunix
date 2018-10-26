@@ -637,11 +637,13 @@ ultifs_mount_traverse (upos dir)
     }
 }
 
-void
+char
 ultifs_mount ()
 {
     last_free = 0;
     ultifs_mount_traverse (ULTIFS_START);
+
+    return ultimem_read_int (file_data (last_free)) != EMPTY_PTR;
 }
 
 #ifndef __CC65__

@@ -25,7 +25,7 @@ typedef struct _bfile bfile;
 
 extern upos ultifs_pwd;
 
-extern void ultifs_mount (void);
+extern char ultifs_mount (void);
 
 extern bfile * __cc65fastcall__ bfile_create (upos directory, char * name, char type);
 extern void    __cc65fastcall__ bfile_remove (bfile *);

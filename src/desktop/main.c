@@ -112,7 +112,6 @@ main (int argc, char ** argv)
     _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
 
     shift_charset ();
-    w_ultifs_mount ();
     gfx_clear_screen (0);
     gfx_init ();
     gfx_set_font (charset_4x8, 2, FONT_BANK);
@@ -122,6 +121,8 @@ main (int argc, char ** argv)
     desktop->ops = &desktop_obj_ops;
     set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
 
+    if (w_ultifs_mount ())
+        print_message ("UltiFS corrupt! Read-only.");
     append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
     append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 

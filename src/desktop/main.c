@@ -112,8 +112,10 @@ main (int argc, char ** argv)
     _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
 
     shift_charset ();
+    w_ultifs_mount ();
     gfx_clear_screen (0);
-//    w_ultifs_mount ();
+    gfx_init ();
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
 
     focussed_window = NULL;
     desktop = OBJ(make_box (pattern_woven));
@@ -125,8 +127,6 @@ main (int argc, char ** argv)
 
     focussed_window = get_last_window ();
     layout_obj (desktop);
-    gfx_init ();
-    gfx_set_font (charset_4x8, 2, FONT_BANK);
     draw_obj (desktop);
 
     do {

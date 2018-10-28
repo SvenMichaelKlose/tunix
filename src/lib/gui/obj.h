@@ -35,6 +35,9 @@ struct obj_ops {
     func_layout_t       layout;         // Layouts object before drawing.
     func_free_t         free;           // Removes object resources.
     event_handler_t     event_handler;
+    unsigned short      draw_bank;
+    unsigned short      layout_bank;
+    unsigned short      free_bank;
     unsigned short      event_handler_bank;
 };
 

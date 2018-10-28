@@ -1,4 +1,4 @@
-#pragma code-name ("DESKTOP")
+#pragma code-name ("FILEWINDOW")
 
 #include <string.h>
 #include <stdio.h>
@@ -439,7 +439,11 @@ struct obj_ops obj_ops_file_window_content = {
     file_window_draw_content,
     obj_noop,
     obj_noop,
-    event_handler_passthrough
+    event_handler_passthrough,
+    FILE_WINDOW_BANK,
+    FILE_WINDOW_BANK,
+    FILE_WINDOW_BANK,
+    FILE_WINDOW_BANK
 };
 
 struct obj * __fastcall__

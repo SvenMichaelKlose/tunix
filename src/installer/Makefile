@@ -1,4 +1,4 @@
-ASMSOURCES=main.asm
+ASMSOURCES=zeropage.asm main.asm
 PROGRAM=ginstall
 
 include ../Makefile.rules
@@ -10,7 +10,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -t vic20 -Ln $(PROGRAM).lst -o $@ $^ /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -t vic20 -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem-basics/libultimem-basics.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

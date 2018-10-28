@@ -64,6 +64,7 @@ block_namelen = 13
     stx ultifs_base+2
     sta ultifs_base+3
 
+    ; Enter directory 'g'.
     lda #<fn_g
     sta name
     lda #>fn_g
@@ -74,6 +75,22 @@ block_namelen = 13
 n:  bcc n
     ldy #ultifs_base
     jsr read_int
+
+    ; Load file window.
+    lda #$00
+    sta d
+    lda #$e0
+    sta d+1
+    lda #$00
+    sta d+2
+    sta d+3
+    lda #<fn_file_window
+    sta name
+    lda #>fn_file_window
+    sta name+1
+    lda #fn_file_window_end-fn_file_window
+    sta namelen
+    jsr ultifs_load
 
     lda #$00
     sta d
@@ -144,8 +161,12 @@ n:  bcc n
 
 .proc ultifs_load
     jsr ultifs_find
-n:  bcc n
-    jmp ultifs_copy2ram
+    bcs l
+    lda #<txt_not_found
+    ldy #>txt_not_found
+    jsr $cb1e
+n:  jmp n
+l:  jmp ultifs_copy2ram
 .endproc
 
 .proc ultifs_find
@@ -195,6 +216,7 @@ check_name:
     cmp namelen
     beq found
  
+next_block2:
     lda #block_next
     ldx #base
     ldy #ptr
@@ -209,7 +231,6 @@ check_name:
     ldx #next
     ldy #base
     jsr copyd
-next_block2:
     jmp next_block
    
 boot_not_found:
@@ -396,6 +417,9 @@ n:  rts
     rts
 .endproc
 
+txt_not_found:
+    .byte "FILE NOT FOUND.", 0
+
 fn_g:
     .byte "g"
 fn_g_end:
@@ -415,3 +439,7 @@ fn_ultifs_end:
 fn_charset4x8:
     .byte "charset-4x8.bin"
 fn_charset4x8_end:
+
+fn_file_window:
+    .byte "file-window.bin"
+fn_file_window_end:

@@ -28,6 +28,8 @@
 #include "main.h"
 #include "ultimem.h"
 
+#define DESKTOP_BANK    1
+
 struct obj * desktop;
 struct obj * focussed_window;
 
@@ -66,7 +68,11 @@ struct obj_ops desktop_obj_ops = {
     desktop_draw,
     layout_obj_children,
     obj_noop,
-    event_handler_passthrough
+    event_handler_passthrough,
+    DESKTOP_BANK,
+    DESKTOP_BANK,
+    DESKTOP_BANK,
+    DESKTOP_BANK
 };
 
 void
@@ -123,8 +129,8 @@ main (int argc, char ** argv)
 
     if (w_ultifs_mount ())
         print_message ("UltiFS corrupt! Read-only.");
-    append_obj (desktop, make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
-    append_obj (desktop, make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
+    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
+    append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
     focussed_window = get_last_window ();
     layout_obj (desktop);

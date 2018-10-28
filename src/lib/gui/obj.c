@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <ultimem-basics.h>
+
 #include "libgfx.h"
 #include "error.h"
 #include "obj.h"
@@ -37,7 +39,9 @@ void __fastcall__
 free_obj (struct obj * x)
 {
     struct obj * c = x->node.children;
+    unsigned short oldbank = *ULTIMEM_BLK1;
 
+    *ULTIMEM_BLK1 = x->ops->free_bank;
     while (c) {
         if (c)
             free_obj (c);
@@ -45,6 +49,7 @@ free_obj (struct obj * x)
     }
 
     x->ops->free (x);
+    *ULTIMEM_BLK1 = oldbank;
     free (x);
 }
 
@@ -113,7 +118,11 @@ set_obj_ops (struct obj * x, struct obj_ops * o)
 void __fastcall__
 draw_obj (struct obj * x)
 {
+    unsigned short oldbank = *ULTIMEM_BLK1;
+
+    *ULTIMEM_BLK1 = x->ops->draw_bank;
     x->ops->draw (x);
+    *ULTIMEM_BLK1 = oldbank;
 }
 
 void __fastcall__
@@ -121,7 +130,7 @@ draw_obj_children (struct obj * x)
 {
     x = x->node.children;
     while (x) {
-        x->ops->draw (x);
+        draw_obj (x);
         x = x->node.next;
     }
 }
@@ -129,7 +138,11 @@ draw_obj_children (struct obj * x)
 void __fastcall__
 layout_obj (struct obj * x)
 {
+    unsigned short oldbank = *ULTIMEM_BLK1;
+
+    *ULTIMEM_BLK1 = x->ops->layout_bank;
     x->ops->layout (x);
+    *ULTIMEM_BLK1 = oldbank;
 }
 
 void __fastcall__

@@ -3,6 +3,8 @@
 
 #include "window.h"
 
+#define FILE_WINDOW_BANK    7
+
 struct dirent {
     char            name[17];
     unsigned long   size;
@@ -33,5 +35,6 @@ struct file_window_content {
 };
 
 extern struct obj * __fastcall__ make_file_window (struct drive_ops *, char * title, gpos x, gpos y, gsize w, gsize h);
+extern struct obj * __fastcall__ w_make_file_window (struct drive_ops *, char * title, gpos x, gpos y, gsize w, gsize h);
 
 #endif /* #ifndef FILE_WINDOW_H */

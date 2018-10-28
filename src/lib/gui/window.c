@@ -72,6 +72,9 @@ make_window (char * title, struct obj * content, event_handler_t event_handler)
     if (!content)
         content = alloc_obj (sizeof (struct obj), &window_content_ops);
     append_obj (OBJ(win), content);
+    ops->draw_bank = *ULTIMEM_BLK1;
+    ops->layout_bank = *ULTIMEM_BLK1;
+    ops->free_bank = *ULTIMEM_BLK1;
     if (event_handler) {
         ops->event_handler = event_handler;
         ops->event_handler_bank = *ULTIMEM_BLK1;

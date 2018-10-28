@@ -3,6 +3,7 @@ SOURCES= \
     main.c \
     ultimem.c \
     ultifs.c \
+    wrap-file-window.c \
     wrap-ultifs.c
 
 ASMSOURCES= \

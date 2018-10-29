@@ -10,7 +10,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) --config rom.cfg -Ln $(PROGRAM).lst -o $@ $^
+	$(LD) --config rom.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem-basics/libultimem-basics.a
 
 all: $(PROGRAM)
 

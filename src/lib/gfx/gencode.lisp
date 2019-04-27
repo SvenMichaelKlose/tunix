@@ -1,17 +1,17 @@
-(defvar *syscalls* nil)
-(defvar *bytecodes* nil)
+(var *syscalls* nil)
+(var *bytecodes* nil)
 
-(defun syscallbyindex (x)
+(fn syscallbyindex (x)
   (elt (+ *syscalls* *bytecodes*) x))
 
-(defun syscall-name (x)
+(fn syscall-name (x)
   (downcase (symbol-name x.)))
 
-(defun syscall-bytecodes-source ()
+(fn syscall-bytecodes-source ()
   (apply #'+ (maptimes [format nil "c_~A=~A~%.export c_~A~%" (syscall-name (syscallbyindex _)) (++ _) (syscall-name (syscallbyindex _))]
                        (length (+ *syscalls* *bytecodes*)))))
 
-(defun syscall-vectors (label prefix)
+(fn syscall-vectors (label prefix)
   (+ (format nil ".export ~A~%" label)
 	 label ": "
      " .byte "
@@ -20,12 +20,12 @@
                      ", "))
      (format nil "~%")))
 
-(defun syscall-vectors-l () (syscall-vectors "syscall_vectors_l" "<"))
-(defun syscall-vectors-h () (syscall-vectors "syscall_vectors_h" ">"))
-(defun syscall-args-l () (syscall-vectors "syscall_args_l" "<args_"))
-(defun syscall-args-h () (syscall-vectors "syscall_args_h" ">args_"))
+(fn syscall-vectors-l () (syscall-vectors "syscall_vectors_l" "<"))
+(fn syscall-vectors-h () (syscall-vectors "syscall_vectors_h" ">"))
+(fn syscall-args-l () (syscall-vectors "syscall_args_l" "<args_"))
+(fn syscall-args-h () (syscall-vectors "syscall_args_h" ">args_"))
 
-(defun syscall-args ()
+(fn syscall-args ()
   (apply #'+ (mapcar [+ (format nil ".export args_~A~%" (syscall-name _))
 					    (format nil "args_~A: .byte " (syscall-name _))
                         (apply #'+ (pad (+ (list (princ (length ._) nil))
@@ -34,7 +34,7 @@
 						(format nil "~%")]
                      (+ *syscalls* *bytecodes*))))
 
-(defun syscall-imports ()
+(fn syscall-imports ()
   (+ (format nil ".importzp d, tmp, tmp2, tmp3, ph, p, width, height, patternh, pattern, xpos, ypos~%")
 	 (apply #'+ ".import "
 		        (pad (mapcar [format nil "~A" (syscall-name _)]
@@ -42,18 +42,18 @@
 				     ", "))
 	 (format nil "~%")))
 
-(defmacro define-syscall (name &rest args)
+(macro define-syscall (name &rest args)
   (| (assoc name *syscalls*)
      (acons! name args *syscalls*))
   nil)
 
-(defmacro define-bytecode (name &rest args)
+(macro define-bytecode (name &rest args)
   (| (assoc name *bytecodes*)
      (acons! name args *bytecodes*))
   nil)
 
-(defun syscall-table ()
-  (mapcan [asm (format nil "jmp ~A" (syscall-name _))] *syscalls*))
+;(fn syscall-table ()
+;  (mapcan [asm (format nil "jmp ~A" (syscall-name _))] *syscalls*))
 
 ;;;;;;;;;;;;;;;;;;;
 ;;; Moving data ;;;
@@ -124,3 +124,5 @@
             (apply #'+ (pad (maptimes [princ (high (* 16 12 _)) nil] 20) ", "))
             (format nil "~%"))
          o))
+
+(quit)

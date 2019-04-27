@@ -78,19 +78,18 @@ n:  bcc n
     ldy #ultifs_base
     jsr read_int
 
-    ; Load file window.
     lda #$00
     sta d
-    lda #$e0
+    lda #$20
     sta d+1
     lda #$00
     sta d+2
     sta d+3
-    lda #<fn_file_window
+    lda #<fn_desktop
     sta name
-    lda #>fn_file_window
+    lda #>fn_desktop
     sta name+1
-    lda #fn_file_window_end-fn_file_window
+    lda #fn_desktop_end-fn_desktop
     sta namelen
     jsr ultifs_load
 
@@ -106,21 +105,6 @@ n:  bcc n
     lda #>fn_core
     sta name+1
     lda #fn_core_end-fn_core
-    sta namelen
-    jsr ultifs_load
-
-    lda #$00
-    sta d
-    lda #$20
-    sta d+1
-    lda #$00
-    sta d+2
-    sta d+3
-    lda #<fn_desktop
-    sta name
-    lda #>fn_desktop
-    sta name+1
-    lda #fn_desktop_end-fn_desktop
     sta namelen
     jsr ultifs_load
 
@@ -151,6 +135,22 @@ n:  bcc n
     lda #>fn_charset4x8
     sta name+1
     lda #fn_charset4x8_end-fn_charset4x8
+    sta namelen
+    jsr ultifs_load
+
+    ; Load file window.
+    lda #$00
+    sta d
+    lda #$e0
+    sta d+1
+    lda #$00
+    sta d+2
+    sta d+3
+    lda #<fn_file_window
+    sta name
+    lda #>fn_file_window
+    sta name+1
+    lda #fn_file_window_end-fn_file_window
     sta namelen
     jsr ultifs_load
 

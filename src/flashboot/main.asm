@@ -362,7 +362,7 @@ fn_g:
 fn_g_end:
 
 fn_core:
-    .byte "core.bin"
+    .byte "desktop-lib.bin"
 fn_core_end:
 
 fn_desktop:
@@ -370,7 +370,7 @@ fn_desktop:
 fn_desktop_end:
 
 fn_ultifs:
-    .byte "ultifs.bin"
+    .byte "desktop-ultifs.bin"
 fn_ultifs_end:
 
 fn_charset4x8:
@@ -378,5 +378,5 @@ fn_charset4x8:
 fn_charset4x8_end:
 
 fn_file_window:
-    .byte "file-window.bin"
+    .byte "desktop-file-window.bin"
 fn_file_window_end:

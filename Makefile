@@ -17,4 +17,4 @@ all:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
-	rm -frv g.img g.zip compiled make-image
+	rm -frv g.img g.zip compiled make-image gdata.bin ginstall

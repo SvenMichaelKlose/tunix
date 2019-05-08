@@ -25,7 +25,6 @@
     #pragma code-name ("ULTIFS")
     #include <cbm.h>
     #include <ultimem-basics.h>
-    #include <message.h>
     unsigned char * store = (void *) 0xa000u;
     #define cc65register    register
 #endif
@@ -592,12 +591,8 @@ char __cc65fastcall__
 ultifs_enterdir (char * name)
 {
     bfile * b = ultifs_open (ultifs_pwd, name, 0);
-    if (!b) {
-#ifdef __CC65__
-        print_message ("No dir.");
-#endif
+    if (!b)
         return -1;
-    }
     parents[current_parent++] = ultifs_pwd;
     bfile_readm (b, (void *) &ultifs_pwd, 4);
     bfile_close (b);

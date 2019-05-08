@@ -7,6 +7,7 @@ all:
 	rm -rfv compiled
 	mkdir -pv compiled/g
 	cp src/desktop/*.bin compiled/g/
+	cp src/tgi-demo/*.bin compiled/g/
 	cp -r archive/* compiled
 	cp README.md compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w

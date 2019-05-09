@@ -69,17 +69,17 @@ l3: dec c
     lda #0
     sta $9ff2
 
-    lda #>$1e00     ; A => screen at $1000
-    ldx #>$1000     ; X => BASIC at $1200
-    ldy #>$1e00     ; Y => BASIC ends at $8000
+    lda #>$1e00     ; screen
+    ldx #>$1000     ; BASIC
+    ldy #>$1e00     ; BASIC end
     bne l6
 
     ; +24/32/35
-l5: lda #>$1000     ; A => screen at $1000
-    ldx #>$1200     ; X => BASIC at $1200
-    ldy #>$8000     ; Y => BASIC ends at $8000
+l5: lda #>$1000     ; screen
+    ldx #>$1200     ; BASIC
+    ldy #>$8000     ; BASIC end
 
-l6: sty $c2         ; end of RAM at $8000
+l6: sty $c2         ; end of BASIC
     sta screen
     stx membot
     sty memtop

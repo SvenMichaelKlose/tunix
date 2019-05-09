@@ -1,7 +1,6 @@
 # G
 
-This is a tiny directory browser for the Commodore VIC-20
-with Ultimem expansion.
+This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 
 # Keys
 
@@ -13,19 +12,20 @@ with Ultimem expansion.
 * F: Toggle full-screen mode of current window.
 * M: Show available memory and largest available block size.
 
-# Missing
+# Roadmap
+
+## Wanted commands.
 
 * C: Copy
 * Space: (Un)select
 * A: Select all
 * K: Delete
 * D: Make directory
-* R: Make directory
+* R: Rename
 * C=: Menu
 
-# Memory layout
+## Services
 
-$0400-$0fff heap
-$2000-$3fff switched bank
-$4000-$7fff wrappers, shared code, bss, data, stack, heap
-$a000-$bfff heap
+* Hook up KERNAL for regular file access to Ultifs.
+* Fast loader
+* Stack of processes.

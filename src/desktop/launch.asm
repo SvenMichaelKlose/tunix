@@ -10,8 +10,6 @@ screen  = $288      ; start page of text matrix
 
 warmstt = $c7ae     ; BASIC warm start
 
-ultimem_config = $9fe0
-
 ; void __fastcall__ launch (unsigned start, unsigned size);
 .proc _launch
     sta c
@@ -94,14 +92,5 @@ l6: sty $c2         ; end of BASIC
     jsr $c408       ; check memory overlap
     jsr $c659       ; CLR
 
-    jmp warmstt
-.endproc
-
-.proc reset
-    ldx #$0f
-l:  lda ultimem_config,x
-    sta $9ff0,x
-    dex
-    bpl l
     jmp warmstt
 .endproc

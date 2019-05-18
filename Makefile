@@ -12,6 +12,7 @@ all:
 	cp README.md compiled
 	./mkfs/mkfs.ultifs g.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs gdata.bin n l src/flashboot/flashboot.bin i compiled W
+	rm -fv tmp.prg
 	cp src/installer/ginstall .
 
 clean:

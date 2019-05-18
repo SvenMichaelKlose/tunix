@@ -118,6 +118,10 @@ ultimem_read_byte (upos p)
 void
 ultimem_write_byte (upos p, unsigned char v)
 {
+    if (p > sizeof (store)) {
+        printf ("ERROR: Image full.\n");
+        exit (-1);
+    }
     store[p] = v & 0xff;
 }
 
@@ -696,7 +700,8 @@ load_file (upos dir, char * name, char * pathname)
     fseek (f, 0, SEEK_END);
     size = ftell (f);
     b = bfile_create (dir, name, BLOCKTYPE_FILE);
-    data = malloc (size);
+    if (!(data = malloc (size)))
+        printf ("ERROR: Cannot allocate memory of size %d.\n", size);
     fseek (f, 0, 0);
     fread (data, size, 1, f);
     fclose (f);

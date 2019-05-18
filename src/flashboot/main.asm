@@ -1,5 +1,5 @@
 .export main
-.exportzp s, d, c
+.exportzp s, d, c, tmp
 .importzp name, namelen
 
 .import ultifs_enter_root, ultifs_enter, ultifs_load
@@ -9,6 +9,7 @@
 s:              .res 2
 d:              .res 4
 c:              .res 2
+tmp:            .res 1
 
 .segment "STARTUP"
 

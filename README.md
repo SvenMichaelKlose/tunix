@@ -1,4 +1,4 @@
-# G
+# Ingle
 
 This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 
@@ -14,18 +14,20 @@ This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 
 # Roadmap
 
-## Wanted commands.
+## Wanted commands
 
 * C: Copy
 * Space: (Un)select
 * A: Select all
-* K: Delete
-* D: Make directory
+* D: Delete
+* K: Make directory
 * R: Rename
 * C=: Menu
 
-## Services
+## Hook up KERNAL for regular file access to UltiFS
 
-* Hook up KERNAL for regular file access to Ultifs.
-* Fast loader
-* Stack of processes.
+Enable regular applications to use RAM and ROM as a CBM device.
+
+## Stack of processes
+
+Save program state to Ultimem RAM, launch app, restore on reset.

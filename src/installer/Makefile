@@ -1,5 +1,5 @@
 ASMSOURCES=zeropage.asm main.asm
-PROGRAM=ginstall
+PROGRAM=ingleinstall
 
 include ../Makefile.rules
 

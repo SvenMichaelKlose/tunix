@@ -42,11 +42,11 @@ tmp:            .res 1
     jsr ultifs_enter_root
 
     ; Enter directory 'g'.
-    lda #<fn_g
+    lda #<fn_ingle
     sta name
-    lda #>fn_g
+    lda #>fn_ingle
     sta name+1
-    lda #fn_g_end-fn_g
+    lda #fn_ingle_end-fn_ingle
     sta namelen
     jsr ultifs_enter
 
@@ -164,9 +164,9 @@ tmp:            .res 1
 txt_not_found:
     .byte "FILE NOT FOUND.", 0
 
-fn_g:
-    .byte "g"
-fn_g_end:
+fn_ingle:
+    .byte "ingle"
+fn_ingle_end:
 
 fn_core:
     .byte "desktop-lib.bin"

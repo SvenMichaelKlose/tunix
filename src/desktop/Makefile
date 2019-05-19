@@ -9,6 +9,7 @@ SOURCES= \
 ASMSOURCES= \
     launch.asm \
     prgend.asm \
+    save-state.asm \
     ../zeropage.asm \
     ../attic/core/mem/clrram.asm
 

@@ -1,11 +1,15 @@
-.exportzp s, d, c, tmp
+.exportzp s, d, c, tmp, base, ptr, size
 .exportzp tmp5, tmp6, scr, tmp7, tmp8, do_load_library, do_make_jumps_to_core, last_error, zp_end_core
 
 .zeropage
 
-s:      .word 0     ; Source pointer.
-d:      .word 0     ; Destination pointer.
-c:      .word 0     ; Counter.
+s:      .res 2     ; Source pointer.
+d:      .res 2     ; Destination pointer.
+c:      .res 2     ; Counter.
+
+base:   .res 4
+ptr:    .res 4
+size:   .res 4
 
 ; Temporaries.
 tmp:    .byte 0

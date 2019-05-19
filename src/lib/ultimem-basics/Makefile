@@ -1,5 +1,6 @@
 SOURCES= \
     ultimem-basics.asm \
+    calc-bank.asm \
     copy-rom2ram.asm
 
 LIBRARY=libultimem-basics.a

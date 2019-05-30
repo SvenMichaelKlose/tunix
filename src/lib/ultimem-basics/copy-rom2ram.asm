@@ -26,6 +26,15 @@ dofs = $4000
 .endproc
 
 .proc ultimem_copy
+    lda sreg
+    pha
+    lda sreg+1
+    pha
+    lda dreg
+    pha
+    lda dreg+1
+    pha
+
     ldx #ptr
     ldy #base
     jsr copyd
@@ -100,14 +109,6 @@ l5: dec size
 .proc ultimem_copy_rom2ram
     lda $9ff2
     pha
-    lda sreg
-    pha
-    lda sreg+1
-    pha
-    lda dreg
-    pha
-    lda dreg+1
-    pha
 
     lda #%01111101  ; ROMROMRAMROM…
     sta $9ff2
@@ -116,14 +117,6 @@ l5: dec size
 
 .proc ultimem_copy_ram2rom
     lda $9ff2
-    pha
-    lda sreg
-    pha
-    lda sreg+1
-    pha
-    lda dreg
-    pha
-    lda dreg+1
     pha
 
     lda #%01110101  ; ROMRAMROMROM…

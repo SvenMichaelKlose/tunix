@@ -26,7 +26,6 @@ l1: asl
 ; void save_state (unsigned restart);
 .proc _save_state
     ; Save return address.
-    jsr popax
     sta $104
     stx $105
 
@@ -48,8 +47,9 @@ l1: lda $9000,x
     sta $102
     lda #'E'
     sta $103
+rts
 
-    ; Copy main RAM.
+    ; Save $0000-$1fff.
     lda #0
     sta s
     sta s+1

@@ -20,6 +20,7 @@
 #include "window.h"
 #include "message.h"
 #include "file-window.h"
+#include "save-state.h"
 #include "main.h"
 
 #define KEY_UP      145
@@ -328,6 +329,9 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     unsigned start;
     unsigned read_bytes;
     upos size = 0;
+
+    print_message ("Saving state...");
+    save_state (restart);
 
     print_message ("Loading...");
 

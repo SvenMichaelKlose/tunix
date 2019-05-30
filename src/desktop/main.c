@@ -101,7 +101,6 @@ get_last_window ()
 void
 restart ()
 {
-    unsigned idle;
     char key;
     struct window * w;
     struct obj * f;
@@ -109,7 +108,6 @@ restart ()
     struct event * e;
 
     do {
-        idle = 0;
         while (!(key = cbm_k_getin ()));
         //sprintf (message_buffer, "Key code %U", key);
         //print_message (message_buffer);

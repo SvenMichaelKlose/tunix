@@ -30,6 +30,8 @@
 
 #define DESKTOP_BANK    1
 
+#define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
+
 struct obj * desktop;
 struct obj * focussed_window;
 
@@ -96,45 +98,15 @@ get_last_window ()
     return i;
 }
 
-#define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
-
-int
-main (int argc, char ** argv)
+void
+restart ()
 {
-    char key;
-    struct event * e;
-    struct window * w;
     unsigned idle;
+    char key;
+    struct window * w;
     struct obj * f;
     struct obj * i;
-
-    /* Active RAM in BANK5. */
-    * (char *) 0x9ff2 = 0xff;
-    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
-
-    /* Add memory blocks for malloc(). */
-    _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
-    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
-    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
-
-    shift_charset ();
-    gfx_clear_screen (0);
-    gfx_init ();
-    gfx_set_font (charset_4x8, 2, FONT_BANK);
-
-    focussed_window = NULL;
-    desktop = OBJ(make_box (pattern_woven));
-    desktop->ops = &desktop_obj_ops;
-    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
-
-    if (w_ultifs_mount ())
-        print_message ("UltiFS corrupt! Read-only.");
-    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
-    append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
-
-    focussed_window = get_last_window ();
-    layout_obj (desktop);
-    draw_obj (desktop);
+    struct event * e;
 
     do {
         idle = 0;
@@ -184,6 +156,39 @@ main (int argc, char ** argv)
         send_event ((struct obj *) focussed_window, e);
         free (e);
     } while (!do_shutdown);
+}
 
+int
+main (int argc, char ** argv)
+{
+    /* Active RAM in BANK5. */
+    * (char *) 0x9ff2 = 0xff;
+    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
+
+    /* Add memory blocks for malloc(). */
+    _heapadd ((void *) 0xa000, 0x2000);  /* BANK5 */
+    _heapadd ((void *) 0x400, 0xc00);    /* +3K */
+    _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
+
+    shift_charset ();
+    gfx_clear_screen (0);
+    gfx_init ();
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
+
+    focussed_window = NULL;
+    desktop = OBJ(make_box (pattern_woven));
+    desktop->ops = &desktop_obj_ops;
+    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
+
+    if (w_ultifs_mount ())
+        print_message ("UltiFS corrupt! Read-only.");
+    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
+    append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
+
+    focussed_window = get_last_window ();
+    layout_obj (desktop);
+    draw_obj (desktop);
+
+    restart ();
     return 0;
 }

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include <cbm.h>
-#include "g.h"
+#include "ingle.h"
 
 #include "ultimem.h"
 #include "ultifs.h"

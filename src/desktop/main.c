@@ -1,6 +1,6 @@
 #pragma code-name ("DESKTOP")
 
-#include "g.h"
+#include "ingle.h"
 
 #include <stdlib.h>
 #include <stdio.h>

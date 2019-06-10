@@ -29,14 +29,14 @@ warmstt = $c7ae     ; BASIC warm start
     sta $911e
 
     lda #0      ; Blank screen.
-    sta $9002
+;    sta $9002   ; TODO: Uncomment on first release.
 
     lda #7
     sta $9ffe
-l4: inc $9ffe
-    lda #$a0
-    sta s+1
     ldy #0
+l4: inc $9ffe
+    lda #>$a000
+    sta s+1
 l:  lda (s),y
     sta (d),y
     inc d
@@ -46,7 +46,7 @@ l2: inc s
     bne l3
     inc s+1
     lda s+1
-    cmp #$c0
+    cmp #>$c000
     beq l4
 l3: dec c
     lda c
@@ -58,7 +58,7 @@ l3: dec c
     bne l
 
     lda tmp2
-    cmp #$10
+    cmp #>$1000
     bne l5
 
     ; unexpanded

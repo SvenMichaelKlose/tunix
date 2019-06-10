@@ -41,7 +41,7 @@ tmp:            .res 1
 
     jsr ultifs_enter_root
 
-    ; Enter directory 'g'.
+    ; Enter directory 'ingle'.
     lda #<fn_ingle
     sta name
     lda #>fn_ingle
@@ -110,7 +110,6 @@ tmp:            .res 1
     sta namelen
     jsr ultifs_load
 
-    ; Load file window.
     lda #$00
     sta d
     lda #$e0

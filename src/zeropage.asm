@@ -1,11 +1,12 @@
 .exportzp s, d, c, tmp, base, ptr, size
-.exportzp tmp5, tmp6, scr, tmp7, tmp8, do_load_library, do_make_jumps_to_core, last_error, zp_end_core
+.exportzp tmp5, tmp6, scr, tmp7, tmp8
+;.exportzp do_load_library, do_make_jumps_to_core, last_error, zp_end_core
 
 .zeropage
 
-s:      .res 4     ; Source pointer.
-d:      .res 4     ; Destination pointer.
-c:      .res 4     ; Counter.
+s = $0000   ; Source pointer.
+d = $0004   ; Destination pointer.
+c = $0008   ; Counter.
 
 base:   .res 4
 ptr:    .res 4
@@ -22,9 +23,9 @@ scr:
 tmp7:   .byte 0
 tmp8:   .byte 0
 
-do_load_library:       .byte 0
-do_make_jumps_to_core: .byte 0
+;do_load_library:       .byte 0
+;do_make_jumps_to_core: .byte 0
 
-last_error: .byte 0
+;last_error: .byte 0
 
 zp_end_core:

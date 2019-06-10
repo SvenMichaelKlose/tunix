@@ -29,28 +29,24 @@ warmstt = $c7ae     ; BASIC warm start
     sta $911e
 
     lda #0      ; Blank screen.
-;    sta $9002   ; TODO: Uncomment on first release.
+    sta $9002
 
+    ; Copy loaded data starting at bank 8 to RAM via BLK5.
     lda #7
     sta $9ffe
     ldy #0
+    ldx c
 l4: inc $9ffe
     lda #>$a000
     sta s+1
 l:  lda (s),y
     sta (d),y
     inc d
-    bne l2
-    inc d+1
+    beq d1
 l2: inc s
-    bne l3
-    inc s+1
-    lda s+1
-    cmp #>$c000
-    beq l4
-l3: dec c
-    lda c
-    cmp #$ff
+    beq d2
+l3: dex
+    cpx #$ff
     bne l
     dec c+1
     lda c+1
@@ -93,4 +89,14 @@ l6: sty $c2         ; end of BASIC
     jsr $c659       ; CLR
 
     jmp warmstt
+
+d1: inc d+1
+    bne l2
+    beq l2
+
+d2: inc s+1
+    lda s+1
+    cmp #>$c000
+    beq l4
+    bne l3
 .endproc

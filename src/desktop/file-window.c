@@ -397,6 +397,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 
     switch (e->data_char) {
         case KEY_RETURN:
+            file_window_invert_position (content);
             file_window_launch (content, file_window_get_file_by_index (content, content->pos));
             break;
 

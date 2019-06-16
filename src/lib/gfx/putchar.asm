@@ -145,6 +145,11 @@ n:  rts
     jsr add_region_position
     pla
     sta tmp
+    lda $9ff2
+    pha
+    and #%00111111
+    ora #%11000000
+    sta $9ff2
     lda $9ffe
     pha
     lda $9fff
@@ -280,5 +285,7 @@ j:
     sta $9fff
     pla
     sta $9ffe
+    pla
+    sta $9ff2
     jmp sub_region_position
 .endproc

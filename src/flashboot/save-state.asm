@@ -3,31 +3,20 @@
 .import popax
 .import ultimem_copy_ram2rom
 
-.proc copy_bank
-    ; Get source bank offset.
-    ldx #0
-    stx s+0
-    stx s+1
-    stx s+2
-    ldx #5
-l1: asl
-    rol s+2
-    dex
-    bne l1
-    sta s+1
-
-    lda #$00
-    sta c
-    lda #$20
-    sta c+1
-    jmp ultimem_copy_ram2rom
-.endproc
-
 .proc save_state
-    rts
     ; Save return address.
-    sty $104
+    sta $104
     stx $105
+
+    ; Write restore marker.
+    lda #'S'
+    sta $100
+    lda #'T'
+    sta $101
+    lda #'A'
+    sta $102
+    lda #'E'
+    sta $103
 
     ; Save VIC and Ultimem.
     ldx #$0f
@@ -37,16 +26,7 @@ l1: lda $9000,x
     sta $0116,x
     dex
     bpl l1
-
-    ; Set restore marker.
-    lda #'S'
-    sta $100
-    lda #'T'
-    sta $101
-    lda #'A'
-    sta $102
-    lda #'E'
-    sta $103
+    rts
 
     ; Save $0000-$1fff.
     lda #0
@@ -78,4 +58,24 @@ l1: lda $9000,x
     sta s+1
     lda $9ffc
     jmp copy_bank   ; $a000-$bfff
+.endproc
+
+.proc copy_bank
+    ; Get offset of bank # in A.
+    ldx #0
+    stx s+0
+    stx s+1
+    stx s+2
+    ldx #5
+l1: asl
+    rol s+2
+    dex
+    bne l1
+    sta s+1
+
+    lda #$00
+    sta c
+    lda #$20
+    sta c+1
+    jmp ultimem_copy_ram2rom
 .endproc

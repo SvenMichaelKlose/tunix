@@ -22,7 +22,7 @@ namelen:        .res 1
 name:           .res 2
 ultifs_base:    .res 4
 
-.segment "STARTUP"
+.code
 
 block_size = 0
 block_replacement = 4

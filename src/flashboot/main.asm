@@ -11,7 +11,7 @@ d:              .res 4
 c:              .res 2
 tmp:            .res 1
 
-.segment "STARTUP"
+.code
 
 .proc main
     ; Don't get interrupted.

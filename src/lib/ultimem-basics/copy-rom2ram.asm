@@ -126,7 +126,7 @@ inc_d:
     lda $9ff2
     pha
 
-    lda #%01110101  ; ROMRAMROMROM…
+    lda #%01110111  ; ROMRAMROMROM…
     sta $9ff2
     jmp ultimem_copy
 .endproc
@@ -135,7 +135,7 @@ inc_d:
     lda $9ff2
     pha
 
-    lda #%01111101  ; ROMRAMRAMROM…
+    lda #%01111111  ; ROMRAMRAMRAM…
     sta $9ff2
     jmp ultimem_copy
 .endproc

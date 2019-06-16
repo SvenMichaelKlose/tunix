@@ -40,7 +40,7 @@ block_namelen = 13
     rts
 .endproc
 
-    ; Enter directory 'g'.
+    ; Enter directory.
 .proc ultifs_enter
     jsr ultifs_find
     bcc n

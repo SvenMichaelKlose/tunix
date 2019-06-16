@@ -29,12 +29,12 @@
     lda #%01000000
     sta $9ff2
 
-    jsr restore_state
-
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
     jsr $e518   ; Init VIC.
+
+    jsr restore_state
 
     lda #$7f    ; Yellow screen.
     sta $900f

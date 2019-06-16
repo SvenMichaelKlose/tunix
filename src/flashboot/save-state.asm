@@ -103,9 +103,23 @@ l5: lda 0,x
     lda #0
     jsr moveram
 
+    ; Save color RAM.
+    inc $9ff8
+    ldx #0
+l7: lda $9400,x
+    sta $2000,x
+    lda $9500,x
+    sta $2100,x
+    lda $9600,x
+    sta $2200,x
+    lda $9700,x
+    sta $2300,x
+    dex
+    bne l7
+
     lda #0
     sta d
-    ldy #$20
+    ldy #$40
     sty d+1
     ldy #$08
     sty d+2
@@ -116,7 +130,7 @@ l5: lda 0,x
 
     lda #0
     sta d
-    ldy #$40
+    ldy #$60
     sty d+1
     ldy #$08
     sty d+2
@@ -127,7 +141,7 @@ l5: lda 0,x
 
     lda #0
     sta d
-    ldy #$60
+    ldy #$80
     sty d+1
     ldy #$08
     sty d+2
@@ -138,7 +152,7 @@ l5: lda 0,x
 
     lda #0
     sta d
-    ldy #$80
+    ldy #$c0
     sty d+1
     ldy #$08
     sty d+2
@@ -196,7 +210,7 @@ l1: lda $2110,x
     dex
     bpl l1
 
-    ; Restore $0000-$1fff.
+    ; Restore $0200-$1fff.
     lda #%01111111
     sta $9ff2
     lda #$40
@@ -227,13 +241,26 @@ l6: lda $2120,x
     lda $2105
     sta $0105
 
+    ; Restore color RAM.
+    inc $9ff8
+    ldx #0
+l7: lda $2000,x
+    sta $9400,x
+    lda $2100,x
+    sta $9500,x
+    lda $2200,x
+    sta $9600,x
+    lda $2300,x
+    sta $9700,x
+    dex
+    bne l7
+
     lda #0
     sta ptr
-    lda #$20
-    sta ptr+1
-    lda #$08
-    sta ptr+2
-    lda #0
+    ldy #$20
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
     sta ptr+3
     lda $0124
     jsr bank2d
@@ -241,11 +268,10 @@ l6: lda $2120,x
 
     lda #0
     sta ptr
-    lda #$40
-    sta ptr+1
-    lda #$08
-    sta ptr+2
-    lda #0
+    ldy #$40
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
     sta ptr+3
     lda $0126
     jsr bank2d
@@ -253,11 +279,10 @@ l6: lda $2120,x
 
     lda #0
     sta ptr
-    lda #$60
-    sta ptr+1
-    lda #$08
-    sta ptr+2
-    lda #0
+    ldy #$60
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
     sta ptr+3
     lda $0128
     jsr bank2d
@@ -265,11 +290,10 @@ l6: lda $2120,x
 
     lda #0
     sta ptr
-    lda #$80
-    sta ptr+1
-    lda #$08
-    sta ptr+2
-    lda #0
+    ldy #$80
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
     sta ptr+3
     lda $012c
     jsr bank2d
@@ -304,10 +328,15 @@ l4: lda $0120,x
     dex
     bpl l4
 
+    ; TODO: Remove workaround.
+    lda #1
+    sta $9ff8
+
     ; Call restart function.
     lda $105
     pha
     lda $104
     pha
+    cli
     rts
 .endproc

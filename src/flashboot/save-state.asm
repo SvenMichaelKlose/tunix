@@ -372,7 +372,7 @@ l3: lda $2000,x
 
     ; Restore VIC.
     ldx #$0f
-l1: lda $0110,x
+l1: lda $2110,x
     sta $9000,x
     dex
     bpl l1
@@ -393,6 +393,7 @@ l4: lda $0120,x
     pha
     lda $104
     pha
+    jsr $fdf9   ; Init VIAs.
     cli
     rts
 .endproc

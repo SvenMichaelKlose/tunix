@@ -226,12 +226,10 @@ l6: lda $2000,x
 r:  rts
 l:
 
-    ; Restore VIC.
-    ldx #$0f
-l1: lda $2110,x
-    sta $9000,x
-    dex
-    bpl l1
+    lda #$00    ; Blank yellow screen.
+    sta $9002
+    lda #$7f
+    sta $900f
 
     ; Restore $0200-$1fff.
     lda #%01111111
@@ -351,7 +349,7 @@ l7: lda $2000,x
     jsr copy_bank   ; BLK5
 
     ; Make and call trampoline.
-    ldx #$30
+    ldx #$40
 l2: lda restart_trampoline,x
     sta $180,x
     dex
@@ -371,6 +369,13 @@ l3: lda $2000,x
     sta $0,x
     dex
     bne l3
+
+    ; Restore VIC.
+    ldx #$0f
+l1: lda $0110,x
+    sta $9000,x
+    dex
+    bpl l1
 
     ; Restore Ultimem.
     ldx #$0f

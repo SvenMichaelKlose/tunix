@@ -1,5 +1,6 @@
 .export ultimem_copy_rom2ram
 .export ultimem_copy_ram2rom
+.export ultimem_copy_ram2ram
 .importzp s, d, c, base, size, ptr
 
 .import ultimem_get_bank
@@ -61,28 +62,10 @@ l3: ldy #0
     lda (base),y
     sta (d),y
     inc base
-    bne l4
-    inc base+1
-    lda base+1
-    cmp #>sofs+$20
-    bne l4
-    lda #>sofs
-    sta base+1
-    inc sreg
-    bne l4
-    inc sreg+1
+    beq inc_base
 
 l4: inc d
-    bne l5
-    inc d+1
-    lda d+1
-    cmp #>dofs+$20
-    bne l5
-    lda #>dofs
-    sta d+1
-    inc dreg
-    bne l5
-    inc dreg+1
+    beq inc_d
 
 l5: dec size
     lda size
@@ -104,6 +87,30 @@ l5: dec size
     pla
     sta $9ff2
     rts
+
+inc_base:
+    inc base+1
+    lda base+1
+    cmp #>sofs+$20
+    bne l4
+    lda #>sofs
+    sta base+1
+    inc sreg
+    bne l4
+    inc sreg+1
+    jmp l4
+
+inc_d:
+    inc d+1
+    lda d+1
+    cmp #>dofs+$20
+    bne l5
+    lda #>dofs
+    sta d+1
+    inc dreg
+    bne l5
+    inc dreg+1
+    jmp l5
 .endproc
 
 .proc ultimem_copy_rom2ram
@@ -120,6 +127,15 @@ l5: dec size
     pha
 
     lda #%01110101  ; ROMRAMROMROM…
+    sta $9ff2
+    jmp ultimem_copy
+.endproc
+
+.proc ultimem_copy_ram2ram
+    lda $9ff2
+    pha
+
+    lda #%01111101  ; ROMRAMRAMROM…
     sta $9ff2
     jmp ultimem_copy
 .endproc

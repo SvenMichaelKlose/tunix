@@ -89,11 +89,11 @@ get_last_window ()
 {
     struct obj * i = desktop->node.children;
 
-    while (1)
+    while (1) {
         if (!i->node.next)
             break;
-        else
-            i = i->node.next;
+        i = i->node.next;
+    }
 
     return i;
 }
@@ -106,6 +106,12 @@ restart ()
     struct obj * f;
     struct obj * i;
     struct event * e;
+
+    /* Active RAM in BANK5. */
+    * (char *) 0x9ff2 = 0xff;
+    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
+
+    print_message ("");
 
     do {
         while (!(key = cbm_k_getin ()));

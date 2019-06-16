@@ -15,7 +15,7 @@
     lda #0
     sta $9ffe
     lda $9fff
-    jsr l1
+    jsr $a009
     pla
     sta $9fff
     pla
@@ -23,6 +23,4 @@
     pla
     sta $9ff2
     rts
-
-l1: jmp ($a009)
 .endproc

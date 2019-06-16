@@ -7,4 +7,4 @@
     .word main	; Warm start vector
     .byte "A0", $c3, $c2, $cd	; "CBM"
 
-    .word save_state
+    jmp save_state

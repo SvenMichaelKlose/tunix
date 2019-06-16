@@ -1,8 +1,9 @@
 .export save_state
 .importzp s, d, c
 .import popax
-.import ultimem_copy_ram2rom
+.import ultimem_copy_ram2ram
 
+; Saves program state to $080000 in Ultimem RAM.
 .proc save_state
     ; Save return address.
     sta $104
@@ -26,7 +27,6 @@ l1: lda $9000,x
     sta $0116,x
     dex
     bpl l1
-    rts
 
     ; Save $0000-$1fff.
     lda #0
@@ -46,7 +46,7 @@ l1: lda $9000,x
     sta c
     lda #$20
     sta c+1
-    jsr ultimem_copy_ram2rom
+    jsr ultimem_copy_ram2ram
 
     lda $9ff4
     jsr copy_bank   ; $2000-$3fff
@@ -77,5 +77,5 @@ l1: asl
     sta c
     lda #$20
     sta c+1
-    jmp ultimem_copy_ram2rom
+    jmp ultimem_copy_ram2ram
 .endproc

@@ -1,4 +1,4 @@
-ASMSOURCES=main.asm save-state.asm ultifs.asm ultimem.asm rom-info.asm prgend.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm
+ASMSOURCES=main.asm save-state.asm ultifs.asm ultimem.asm rom-info.asm prgend.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm ../zeropage.asm
 PROGRAM=flashboot.bin
 
 include ../Makefile.rules

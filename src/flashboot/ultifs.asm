@@ -2,7 +2,7 @@
 .export ultifs_enter
 .export ultifs_load
 .export copyd
-.exportzp name, namelen, base, ptr, size
+.exportzp name, namelen
 
 .import ultimem_read_byte
 .import ultimem_write_byte
@@ -10,12 +10,13 @@
 .import ultimem_copy_rom2ram
 .import clrram, moveram, __PRGEND__
 .importzp s, d, c
+.importzp base, ptr, size
 
 .zeropage
 
-base:           .res 4
-ptr:            .res 4
-size:           .res 4
+;base:           .res 4
+;ptr:            .res 4
+;size:           .res 4
 next:           .res 4
 replacement:    .res 4
 namelen:        .res 1

@@ -1,15 +1,9 @@
 .export main
-.exportzp s, d, c, tmp
+.importzp s, d, c, tmp
 .importzp name, namelen
 
 .import ultifs_enter_root, ultifs_enter, ultifs_load
-
-.zeropage
-
-s:              .res 2
-d:              .res 4
-c:              .res 2
-tmp:            .res 1
+.import restore_state
 
 .code
 
@@ -34,6 +28,8 @@ tmp:            .res 1
     sta $9ff1
     lda #%01000000
     sta $9ff2
+
+    jsr restore_state
 
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.

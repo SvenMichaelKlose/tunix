@@ -29,6 +29,12 @@ tmp:            .res 1
     lda #$00    ; Blank screen.
     sta $9002
 
+    ; No expanded RAM.
+    lda #%00000000
+    sta $9ff1
+    lda #%01000000
+    sta $9ff2
+
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.

@@ -12,6 +12,19 @@ This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 * F: Toggle full-screen mode of current window.
 * M: Show available memory and largest available block size.
 
+# Bank layout
+
+## ROM
+
+0: Boot loader + kernal
+1-7: reserved
+8-8191: file system
+
+## RAM
+
+0: INGLE kernal
+1-127: allocated on demand
+
 # Roadmap
 
 These are the things planned to have in INGLE.
@@ -51,7 +64,7 @@ multiple native programs in memory and switch between them.
 The boot ROM bank will provide some utility functions, callable when
 mapped to BLK5 ($A000-$BFFF).
 
-### $A009 – Push state
+### $a009 – Push state
 
 Makes a copy of currently mapped RAM contents that will be copied
 back on reset. Expects the restart address in register A (low) and
@@ -59,23 +72,23 @@ X (high).
 
 Multiple calls of this will stack up the states.
 
-### $A009 – Pop state
+### $a00c – Pop state
 
 Pops the last saved state from the stack.
 
-### $A00C – Launch from RAM
+### $a00f – Launch from RAM
 
 ```
 void __fastcall__ launch (unsigned start, unsigned size);
 ```
 
-### $A00F – Allocate RAM bank
+### $a012 – Allocate RAM bank
 
 ```
 unsigned char alloc_ram_bank (void);
 ```
 
-### $A012 – Free RAM bank
+### $a015 – Free RAM bank
 
 ```
 void __fastcall__ free_ram_bank (unsigned char);

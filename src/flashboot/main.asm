@@ -32,14 +32,11 @@
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.
-    jsr $e518   ; Init VIC.
-
     jsr restore_state
+    jsr $e518   ; Init VIC.
 
     lda #$7f    ; Yellow screen.
     sta $900f
-
-    cli
 
     jsr ultifs_enter_root
 

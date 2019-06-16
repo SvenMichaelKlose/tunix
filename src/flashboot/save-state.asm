@@ -90,6 +90,7 @@ l5: lda 0,x
     dex
     bne l5
 
+    ; Save $0100-$1fff
     lda #$00
     sta s
     ldy #$01
@@ -126,7 +127,7 @@ l7: lda $9400,x
     sta d+3
     lda $0124
     jsr bank2ptr
-    jsr copy_bank   ; $2000-$3fff
+    jsr copy_bank   ; RAM1,2,3
 
     lda #0
     sta d
@@ -137,7 +138,7 @@ l7: lda $9400,x
     sta d+3
     lda $0126
     jsr bank2ptr
-    jsr copy_bank   ; $4000-$5fff
+    jsr copy_bank   ; IO2/IO3
 
     lda #0
     sta d
@@ -148,7 +149,18 @@ l7: lda $9400,x
     sta d+3
     lda $0128
     jsr bank2ptr
-    jsr copy_bank   ; $6000-$7fff
+    jsr copy_bank   ; BLK1
+
+    lda #0
+    sta d
+    ldy #$a0
+    sty d+1
+    ldy #$08
+    sty d+2
+    sta d+3
+    lda $012a
+    jsr bank2ptr
+    jsr copy_bank   ; BLK2
 
     lda #0
     sta d
@@ -159,7 +171,18 @@ l7: lda $9400,x
     sta d+3
     lda $012c
     jsr bank2ptr
-    jsr copy_bank   ; $a000-$bfff
+    jsr copy_bank   ; BLK3
+
+    lda #0
+    sta d
+    ldy #$e0
+    sty d+1
+    ldy #$08
+    sty d+2
+    sta d+3
+    lda $012e
+    jsr bank2ptr
+    jsr copy_bank   ; BLK5
 
     ; Restore zeropage.
     lda #%01111111
@@ -240,6 +263,12 @@ l6: lda $2120,x
     sta $0104
     lda $2105
     sta $0105
+    dec $0104
+    lda $0104
+    cmp #$ff
+    bne n
+    dec $0105
+n:
 
     ; Restore color RAM.
     inc $9ff8
@@ -257,25 +286,14 @@ l7: lda $2000,x
 
     lda #0
     sta ptr
-    ldy #$20
+    ldy #$40
     sty ptr+1
     ldy #$08
     sty ptr+2
     sta ptr+3
     lda $0124
     jsr bank2d
-    jsr copy_bank   ; $2000-$3fff
-
-    lda #0
-    sta ptr
-    ldy #$40
-    sty ptr+1
-    ldy #$08
-    sty ptr+2
-    sta ptr+3
-    lda $0126
-    jsr bank2d
-    jsr copy_bank   ; $4000-$5fff
+    jsr copy_bank   ; RAM1,2,3
 
     lda #0
     sta ptr
@@ -284,9 +302,9 @@ l7: lda $2000,x
     ldy #$08
     sty ptr+2
     sta ptr+3
-    lda $0128
+    lda $0126
     jsr bank2d
-    jsr copy_bank   ; $6000-$7fff
+    jsr copy_bank   ; IO1,2,3
 
     lda #0
     sta ptr
@@ -295,9 +313,42 @@ l7: lda $2000,x
     ldy #$08
     sty ptr+2
     sta ptr+3
+    lda $0128
+    jsr bank2d
+    jsr copy_bank   ; BLK1
+
+    lda #0
+    sta ptr
+    ldy #$a0
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
+    sta ptr+3
+    lda $012a
+    jsr bank2d
+    jsr copy_bank   ; BLK2
+
+    lda #0
+    sta ptr
+    ldy #$c0
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
+    sta ptr+3
     lda $012c
     jsr bank2d
-    jsr copy_bank   ; $a000-$bfff
+    jsr copy_bank   ; BLK3
+
+    lda #0
+    sta ptr
+    ldy #$e0
+    sty ptr+1
+    ldy #$08
+    sty ptr+2
+    sta ptr+3
+    lda $012e
+    jsr bank2d
+    jsr copy_bank   ; BLK5
 
     ; Make and call trampoline.
     ldx #$30

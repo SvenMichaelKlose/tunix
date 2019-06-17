@@ -55,7 +55,7 @@ l3: dex
 
     lda tmp2
     cmp #>$1000
-    bne l5
+    bne l7
 
     ; unexpanded
     lda #%00111100  ; No RAM1/2/3
@@ -65,6 +65,14 @@ l3: dex
 
     lda #>$1e00     ; screen
     ldx #>$1000     ; BASIC
+    ldy #>$1e00     ; BASIC end
+    bne l6
+
+l7: bcs l5
+
+    ; +3K
+    lda #>$1e00     ; screen
+    ldx #>$0400     ; BASIC
     ldy #>$1e00     ; BASIC end
     bne l6
 

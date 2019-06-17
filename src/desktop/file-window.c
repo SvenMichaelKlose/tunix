@@ -358,7 +358,7 @@ error:
     *ULTIMEM_BLK5 = oldblk5;
     drive_ops->close ();
 
-    memcpy (launcher, launch, 256);
+    memcpy (launcher, launch, 512);
     launcher (start, size);
 }
 

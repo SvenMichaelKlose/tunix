@@ -73,7 +73,6 @@ l1: lda $9000,x
     dex
     bpl l1
 
-    ; Save internal RAM + RAM1,2,3.
     lda $9ff2
     pha
     lda $9ff8

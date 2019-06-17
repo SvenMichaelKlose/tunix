@@ -377,6 +377,10 @@ l1: lda $2110,x
     dex
     bpl l1
 
+    ; Disable state.
+    lda #0
+    sta $2100,x
+
     ; Restore Ultimem.
     ldx #$0f
 l4: lda $0120,x

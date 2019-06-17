@@ -23,6 +23,8 @@ screen  = $288      ; start page of text matrix
     ldx #$ff
     txs
 
+    lda #%00000001  ; Ultimem LED on.
+    sta $9ff0
     lda #$22    ; Red screen.
     sta $900f
     lda #$00    ; Blank screen.

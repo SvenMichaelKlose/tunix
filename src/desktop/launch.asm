@@ -75,6 +75,9 @@ l6: sta screen
     jsr $c408       ; check memory overlap
     jsr $c659       ; CLR
 
+    lda #%10000000  ; Hide registers, LED off.
+    sta $9ff0
+
     lda #>warmstt
     pha
     lda #<warmstt

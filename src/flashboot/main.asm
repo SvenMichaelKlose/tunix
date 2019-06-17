@@ -3,9 +3,14 @@
 .importzp name, namelen
 
 .import ultifs_enter_root, ultifs_enter, ultifs_load
+.import ultimem_unhide_regs
 .import restore_state
 
 .code
+
+membot  = $282      ; start page of BASIC RAM
+memtop  = $284      ; end page of BASIC RAM
+screen  = $288      ; start page of text matrix
 
 .proc main
     ; Don't get interrupted.
@@ -23,6 +28,8 @@
     lda #$00    ; Blank screen.
     sta $9002
 
+    jsr ultimem_unhide_regs
+
     ; No expanded RAM.
     lda #%00000000
     sta $9ff1
@@ -30,6 +37,7 @@
     sta $9ff2
 
     jsr restore_state
+
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.
     jsr $fdf9   ; Init VIAs.

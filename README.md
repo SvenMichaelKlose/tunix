@@ -12,6 +12,12 @@ This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 * F: Toggle full-screen mode of current window.
 * M: Show available memory and largest available block size.
 
+# Restore on reset
+
+INGLE will jump back to where it was before program launch after reset.
+To skip restoring and do a regular boot of INGLE, keep switch 1
+(left-most) during reset.
+
 # Bank layout
 
 ## ROM

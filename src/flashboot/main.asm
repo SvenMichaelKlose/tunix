@@ -38,7 +38,11 @@ screen  = $288      ; start page of text matrix
     lda #%01000000
     sta $9ff2
 
+    lda $9ff0
+    and #%00000100
+    beq no_restore
     jsr restore_state
+no_restore:
 
     jsr $fd8d   ; Init memory.
     jsr $fd52   ; Init KERNAL.

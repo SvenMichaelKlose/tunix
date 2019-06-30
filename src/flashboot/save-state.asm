@@ -77,10 +77,14 @@ l1: lda $9000,x
     pha
     lda $9ff8
     pha
+    lda $9ff9
+    pha
     lda #%01111111
     sta $9ff2
     lda #$40
     sta $9ff8
+    lda #$00
+    sta $9ff9
 
     ; (Save zeropage without modifying it.)
     ldx #0
@@ -195,6 +199,8 @@ l6: lda $2000,x
     bne l6
 
     pla
+    sta $9ff9
+    pla
     sta $9ff8
     pla
     sta $9ff2
@@ -208,6 +214,8 @@ l6: lda $2000,x
     sta $9ff2
     lda #$40
     sta $9ff8
+    lda #0
+    sta $9ff9
 
     ; Check on restore marker.
     lda $2100
@@ -231,10 +239,6 @@ l:
     sta $900f
 
     ; Restore $0200-$1fff.
-    lda #%01111111
-    sta $9ff2
-    lda #$40
-    sta $9ff8
     lda #0
     sta d
     ldy #$02

@@ -58,6 +58,9 @@ dofs = $4000
     ora #>dofs
     sta d+1
 
+    inc size
+    inc size+1
+
 l3: ldy #0
     lda (base),y
     sta (d),y
@@ -68,12 +71,8 @@ l4: inc d
     beq inc_d
 
 l5: dec size
-    lda size
-    cmp #255
     bne l3
     dec size+1
-    lda size+1
-    cmp #255
     bne l3
 
     pla

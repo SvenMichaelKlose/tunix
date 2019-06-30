@@ -7,7 +7,6 @@
 .proc moveram
     ldy #0
     ldx c
-    sty c
     cmp #0
     bne copy_backwards
 

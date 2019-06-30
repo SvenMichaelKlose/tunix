@@ -73,12 +73,15 @@ l1: lda $9000,x
     dex
     bpl l1
 
+    ; Save bank config and BLK1.
     lda $9ff2
     pha
     lda $9ff8
     pha
     lda $9ff9
     pha
+
+    ; Map in first bank of saved state.
     lda #%01111111
     sta $9ff2
     lda #$40
@@ -86,14 +89,14 @@ l1: lda $9000,x
     lda #$00
     sta $9ff9
 
-    ; (Save zeropage without modifying it.)
+    ; Save zeropage to $2000.
     ldx #0
 l5: lda 0,x
     sta $2000,x
     dex
     bne l5
 
-    ; Save $0100-$1fff
+    ; Save $0100-$1fff to $2100.
     lda #$00
     sta s
     ldy #$01
@@ -107,7 +110,7 @@ l5: lda 0,x
     lda #0
     jsr moveram
 
-    ; Save color RAM.
+    ; Save color RAM to $2000.
     inc $9ff8
     ldx #0
 l7: lda $9400,x
@@ -390,10 +393,6 @@ l4: lda $0120,x
     sta $9ff0,x
     dex
     bpl l4
-
-    ; TODO: Remove workaround.
-    lda #1
-    sta $9ff8
 
     ; Call restart function.
     lda $105

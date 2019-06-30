@@ -13,19 +13,19 @@ ptr:    .res 4
 size:   .res 4
 
 ; Temporaries.
-tmp:    .byte 0
-;tmp2:   .byte 0
-;tmp3:   .byte 0
-;tmp4:   .byte 0
-tmp5:   .byte 0
-tmp6:   .byte 0
+tmp:    .res 1
+;tmp2:   .res 1
+;tmp3:   .res 1
+;tmp4:   .res 1
+tmp5:   .res 1
+tmp6:   .res 1
 scr:
-tmp7:   .byte 0
-tmp8:   .byte 0
+tmp7:   .res 1
+tmp8:   .res 1
 
-;do_load_library:       .byte 0
-;do_make_jumps_to_core: .byte 0
+;do_load_library:       .res 1
+;do_make_jumps_to_core: .res 1
 
-;last_error: .byte 0
+;last_error: .res 1
 
 zp_end_core:

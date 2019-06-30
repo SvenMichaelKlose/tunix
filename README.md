@@ -15,21 +15,47 @@ This is a GUI for the Commodore VIC-20 with Ultimem expansion.
 # Restore on reset
 
 INGLE will jump back to where it was before program launch after reset.
-To skip restoring and do a regular boot of INGLE, keep switch 1
-(left-most) during reset.
+If you press switch1 (the left-most switch on the Ultimem), a regular
+boot will be performed.
 
 # Bank layout
 
 ## ROM
 
 0: Boot loader + kernal
-1-7: reserved
+1-7: at user's disposal, options in boot loader
 8-8191: file system
 
 ## RAM
 
 0: INGLE kernal
 1-127: allocated on demand
+
+# ROM functions
+
+The boot ROM bank will provide some utility functions, callable when
+mapped to BLK5 ($A000-$BFFF).  libingle provides wrapper functions
+that take care of banking.
+
+## $a009 – Save state
+
+```
+void __fastcall__ save_state (unsigned restart_address);
+```
+
+Makes a copy of currently mapped RAM contents that will be copied
+back on reset. Expects the restart address in register A (low) and
+X (high).
+
+### $a00c – Launch from RAM
+
+```
+void __fastcall__ launch (unsigned start, unsigned size);
+```
+
+Copies program of $0d/0e bytes from bank 8 on to RAM in $09/$0a
+and launches it.
+
 
 # Roadmap
 
@@ -54,11 +80,6 @@ most of the time.
 ## UltiFS hooks
 
 Enable regular applications to use RAM and ROM as a CBM device.
-
-## Restore on reset
-
-The file manager is supposed to save its state before launching another
-program which the boot loader should restore instantly on reset.
 
 ## Multiprocessing
 

@@ -7,9 +7,7 @@ SOURCES= \
     wrap-ultifs.c
 
 ASMSOURCES= \
-    launch.asm \
     prgend.asm \
-    ../zeropage.asm \
     ../attic/core/mem/clrram.asm
 
 PROGRAM=desktop-lib.bin

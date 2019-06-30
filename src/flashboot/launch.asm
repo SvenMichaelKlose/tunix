@@ -1,5 +1,6 @@
-.export _launch
-.importzp s, d, c, tmp, tmp2
+.export launch
+.exportzp tmp2
+.importzp s, d, c, tmp
 .import popax
 
 bstart  = $2b       ; start of BASIC program text
@@ -10,18 +11,17 @@ screen  = $288      ; start page of text matrix
 
 warmstt = $c7ae     ; BASIC warm start
 
-; void __fastcall__ launch (unsigned start, unsigned size);
-.proc _launch
-    .org $9800
-    sta c
-    stx c+1
-    jsr popax
-    sta d
+.zeropage
+
+tmp2:   .res 1
+
+.code
+
+.proc launch
+    lda d
     sta tmp
-    stx d+1
-    stx tmp2
-    lda #0
-    sta s
+    lda d+1
+    sta tmp2
 
     ; Don't get interrupted.
     sei
@@ -88,12 +88,22 @@ l6: sta screen
 
     ; Copy loaded data starting at bank 8 to RAM via BLK5.
 copy_loaded_to_ram:
+    lda $9ff8
+    pha
+    lda $9ff9
+    pha
+    lda $9ffa
+    pha
+    lda $9ffb
+    pha
+
     lda #7
-    sta $9ffe
+    sta $9ffa
     ldy #0
+    sty s
     ldx c
-l4: inc $9ffe
-    lda #>$a000
+l4: inc $9ffa
+    lda #>$4000
     sta s+1
 l:  lda (s),y
     sta (d),y
@@ -108,15 +118,29 @@ l3: dex
     lda c+1
     cmp #$ff
     bne l
+
+    pla
+    sta $9ffb
+    pla
+    sta $9ffa
+    pla
+    sta $9ff9
+    pla
+    sta $9ff8
     rts
 
 d1: inc d+1
+    lda d+1
+    cmp #>$4000
     bne l2
-    beq l2
+    lda #>$2000
+    sta d+1
+    inc $9ff8
+    jmp l2
 
 d2: inc s+1
     lda s+1
-    cmp #>$c000
+    cmp #>$6000
     beq l4
     bne l3
 .endproc

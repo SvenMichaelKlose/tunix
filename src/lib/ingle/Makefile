@@ -1,5 +1,7 @@
 SOURCES= \
-    save-state.asm
+    launch.asm \
+    save-state.asm \
+    zeropage.asm
 
 LIBRARY=libingle.a
 

@@ -75,6 +75,31 @@ l6: sta screen
     jsr $c408       ; check memory overlap
     jsr $c659       ; CLR
 
+    ldx #trampoline_end-trampoline-1
+l8: lda trampoline,x
+    sta $33c,x
+    dex
+    bpl l8
+    jmp $33c
+
+trampoline:
+    ; Map RAM banks.
+    lda #%11111111
+    sta $9ff2
+    ldx #$01
+    ldy #$00
+    stx $9ff8
+    sty $9ff9
+    inx
+    stx $9ffa
+    sty $9ffb
+    inx
+    stx $9ffc
+    sty $9ffd
+    inx
+    stx $9ffe
+    sty $9fff
+
     lda #%10000000  ; Hide registers, LED off.
     sta $9ff0
 
@@ -85,21 +110,19 @@ l6: sta screen
     lda #0
     pha
     rti
+trampoline_end:
+.endproc
 
     ; Copy loaded data starting at bank 8 to RAM via BLK5.
-copy_loaded_to_ram:
-    lda $9ff8
-    pha
-    lda $9ff9
-    pha
-    lda $9ffa
-    pha
-    lda $9ffb
-    pha
-
+.proc copy_loaded_to_ram
+    lda #1
+    ldy #0
+    sta $9ff8
+    sty $9ff9
     lda #7
     sta $9ffa
-    ldy #0
+    sty $9ffb
+
     sty s
     ldx c
 l4: inc $9ffa
@@ -119,28 +142,20 @@ l3: dex
     cmp #$ff
     bne l
 
-    pla
-    sta $9ffb
-    pla
-    sta $9ffa
-    pla
-    sta $9ff9
-    pla
-    sta $9ff8
     rts
 
 d1: inc d+1
     lda d+1
     cmp #>$4000
     bne l2
+    inc $9ff8
     lda #>$2000
     sta d+1
-    inc $9ff8
-    jmp l2
+    bne l2  ; (jmp)
 
 d2: inc s+1
     lda s+1
     cmp #>$6000
     beq l4
-    bne l3
+    bne l3  ; (jmp)
 .endproc

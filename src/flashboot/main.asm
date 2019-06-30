@@ -150,7 +150,7 @@ no_restore:
 .endproc
 
 .proc init_ram_banks
-    ; Activate all RAM.
+    ; Activate all RAM below $8000.
     lda #%00111111
     sta $9ff1
     lda #%01111111

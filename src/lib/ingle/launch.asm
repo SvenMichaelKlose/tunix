@@ -3,11 +3,11 @@
 
 ; void __fastcall__ launch (unsigned start, unsigned size);
 .proc _launch
-    sta $0d     ; c
-    stx $0e
+    sta $0c     ; c
+    stx $0d
     jsr popax
-    sta $09     ; d
-    stx $0a
+    sta $04     ; d
+    stx $05
 
     lda $9ff2
     and #%00111111

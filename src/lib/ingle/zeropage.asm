@@ -4,9 +4,9 @@
 
 .zeropage
 
-s:      .res 4 ; Source pointer.
-d:      .res 4 ; Destination pointer.
-c:      .res 4 ; Counter.
+s = 0 ; Source pointer.
+d = 4 ; Destination pointer.
+c = 8 ; Counter.
 
 base:   .res 4
 ptr:    .res 4

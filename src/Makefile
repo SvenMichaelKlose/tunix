@@ -1,4 +1,5 @@
 all:
+	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem-basics all
 	$(MAKE) -C lib/ultifs all
 	$(MAKE) -C lib/gfx all
@@ -10,6 +11,7 @@ all:
 #	$(MAKE) -C paint all
 
 clean:
+	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem-basics clean
 	$(MAKE) -C lib/ultifs clean
 	$(MAKE) -C lib/gfx clean

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include <cbm.h>
+#include "cc65-charmap.h"
 #include "ingle.h"
 
 #include "ultimem.h"
@@ -19,7 +20,6 @@
 #include "window.h"
 #include "message.h"
 #include "file-window.h"
-#include "save-state.h"
 #include "main.h"
 
 #define KEY_UP      145

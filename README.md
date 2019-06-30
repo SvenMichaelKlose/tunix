@@ -22,14 +22,26 @@ boot will be performed.
 
 ## ROM
 
+```
 0: Boot loader + kernal
 1-7: at user's disposal, options in boot loader
 8-8191: file system
+```
 
 ## RAM
 
-0: INGLE kernal
-1-127: allocated on demand
+```
+0: RAM1,2,3/IO
+1: BLK1
+2: BLK2
+3: BLK3
+4: BLK5
+5: desktop UltiFS code
+6: 4x4 charset
+7: desktop file window code
+8-11: Program to launch via ROM function.
+12-127: allocated on demand
+```
 
 # ROM functions
 

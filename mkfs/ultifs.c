@@ -426,7 +426,6 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
         if (addr == (void *) 0xc000u) {
             addr = (void *) 0xa000u;
             ++bank;
-            *ULTIMEM_BLK5 = bank;
         }
         ++size;
     }

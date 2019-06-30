@@ -7,6 +7,8 @@
 .proc moveram
     ldy #0
     ldx c
+    inx
+    inc c+1
     cmp #0
     bne copy_backwards
 
@@ -16,11 +18,8 @@ l:  lda (s),y
     iny
     beq k
 q:  dex
-    cpx #$ff
     bne l
     dec c+1
-    lda c+1
-    cmp #$ff
     bne l
     rts
 
@@ -35,11 +34,8 @@ l2: lda (s),y
     cpy #$ff
     beq m2
 q2: dex
-    cpx #$ff
     bne l2
     dec c+1
-    lda c+1
-    cmp #$ff
     bne l2
     rts
 

@@ -340,7 +340,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
         return;
     }
     drive_ops->read (&start, 2);
-    *ULTIMEM_BLK5 = 8;
+    *ULTIMEM_BLK5 = 12;
     while (1) {
         read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
         if (!read_bytes)

@@ -113,18 +113,20 @@ trampoline:
 trampoline_end:
 .endproc
 
-    ; Copy loaded data starting at bank 8 to RAM via BLK5.
+    ; Copy loaded data starting at bank 12 to RAM via BLK5.
 .proc copy_loaded_to_ram
     lda #1
     ldy #0
     sta $9ff8
     sty $9ff9
-    lda #7
+    lda #11
     sta $9ffa
     sty $9ffb
 
     sty s
     ldx c
+    inx
+    inc c+1
 l4: inc $9ffa
     lda #>$4000
     sta s+1
@@ -135,11 +137,8 @@ l:  lda (s),y
 l2: inc s
     beq d2
 l3: dex
-    cpx #$ff
     bne l
     dec c+1
-    lda c+1
-    cmp #$ff
     bne l
 
     rts

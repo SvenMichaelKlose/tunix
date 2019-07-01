@@ -49,11 +49,9 @@ l1: asl
 .endproc
 
 ; Saves program state to $080000 in Ultimem RAM.
+; Expects restart address at $0104.
+; Expects Ultimem register set at $0120.
 .proc save_state
-    ; Save return address.
-    sta $104
-    stx $105
-
     ; Write restore marker.
     lda #'S'
     sta $100
@@ -64,12 +62,10 @@ l1: asl
     lda #'E'
     sta $103
 
-    ; Save VIC and Ultimem.
+    ; Save VIC.
     ldx #$0f
 l1: lda $9000,x
     sta $0110,x
-    lda $9ff0,x
-    sta $0120,x
     dex
     bpl l1
 
@@ -95,6 +91,7 @@ l5: lda 0,x
     sta $2000,x
     dex
     bne l5
+    ; Now we can use the zeropage ourselves.
 
     ; Save $0100-$1fff to $2100.
     lda #$00
@@ -107,7 +104,6 @@ l5: lda 0,x
     sta c
     ldy #$1f
     sty c+1
-    lda #0
     jsr moveram
 
     ; Save color RAM to $2000.
@@ -131,7 +127,7 @@ l7: lda $9400,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $0124
+    lda $0124       ; (saved Ultimem reg)
     jsr bank2ptr
     jsr copy_bank   ; RAM1,2,3
 
@@ -236,7 +232,7 @@ l6: lda $2000,x
 r:  rts
 l:
 
-    lda #$00    ; Blank yellow screen.
+    lda #$00    ; Blank, yellow screen.
     sta $9002
     lda #$7f
     sta $900f
@@ -355,16 +351,17 @@ l7: lda $2000,x
     jsr copy_bank   ; BLK5
 
     ; Make and call trampoline.
-    ldx #$40
-l2: lda restart_trampoline,x
-    sta $180,x
+    ldx #restart_trampoline_end-restart_trampoline_start
+l2: lda restart_trampoline-1,x
+    sta $180-1,x
     dex
-    bpl l2
+    bne l2
     jmp $180
 
 restart_trampoline:
     .org $180
 
+restart_trampoline_start:
     ; Restore zeropage.
     lda #%01111111
     sta $9ff2
@@ -402,4 +399,5 @@ l4: lda $0120,x
     jsr $fdf9   ; Init VIAs.
     cli
     rts
+restart_trampoline_end:
 .endproc

@@ -1,8 +1,13 @@
 .export _save_state
 
 ; void __fastcall__ save_state (unsigned restart);
+; Expects Ultimem regs for return at $120.
 .proc _save_state
-    tay
+    ; Save restart address.
+    sta $0104
+    stx $0105
+
+    ; Map ROM in BLK5.
     lda $9ff2
     pha
     and #%00111111
@@ -14,8 +19,11 @@
     pha
     lda #0
     sta $9ffe
-    lda $9fff
+    sta $9fff
+
     jsr $a009
+
+    ; Restore BLK5.
     pla
     sta $9fff
     pla

@@ -39,7 +39,7 @@ screen  = $288      ; start page of text matrix
     sta $9ff2
 
     lda $9ff0
-    and #%00000100
+    and #%00000100  ; switch1
     beq no_restore
     jsr restore_state
 no_restore:

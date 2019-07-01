@@ -28,8 +28,6 @@
 #include "main.h"
 #include "ultimem.h"
 
-#define DESKTOP_BANK    1
-
 #define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 
 struct obj * desktop;

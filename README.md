@@ -56,8 +56,8 @@ void __fastcall__ save_state (unsigned restart_address);
 ```
 
 Makes a copy of currently mapped RAM contents that will be copied
-back on reset. Expects the restart address in register A (low) and
-X (high).
+back on reset. Expects the restart address at $0104/$0105 and the
+required Ultimem register set at $0120.
 
 ### $a00c – Launch from RAM
 
@@ -99,27 +99,6 @@ The mechanics of "restore on reset" can also be used to keep
 multiple native programs in memory and switch between them.
 
 ## ROM functions
-
-The boot ROM bank will provide some utility functions, callable when
-mapped to BLK5 ($A000-$BFFF).
-
-### $a009 – Push state
-
-Makes a copy of currently mapped RAM contents that will be copied
-back on reset. Expects the restart address in register A (low) and
-X (high).
-
-Multiple calls of this will stack up the states.
-
-### $a00c – Pop state
-
-Pops the last saved state from the stack.
-
-### $a00f – Launch from RAM
-
-```
-void __fastcall__ launch (unsigned start, unsigned size);
-```
 
 ### $a012 – Allocate RAM bank
 

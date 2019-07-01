@@ -329,6 +329,8 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     upos size = 0;
 
     print_message ("Saving state...");
+    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
+    *(unsigned int *) 0x128 = DESKTOP_BANK;
     save_state (restart);
 
     print_message ("Loading...");

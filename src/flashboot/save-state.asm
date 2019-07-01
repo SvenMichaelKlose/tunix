@@ -108,17 +108,17 @@ l5: lda 0,x
 
     ; Save color RAM to $2000.
     inc $9ff8
-    ldx #0
-l7: lda $9400,x
-    sta $2000,x
-    lda $9500,x
-    sta $2100,x
-    lda $9600,x
-    sta $2200,x
-    lda $9700,x
-    sta $2300,x
-    dex
-    bne l7
+    lda #$00
+    sta s
+    ldy #$94
+    sty s+1
+    sta d
+    ldy #$20
+    sty d+1
+    sta c
+    ldy #$04
+    sty c+1
+    jsr moveram
 
     lda #0
     sta d
@@ -248,7 +248,6 @@ l:
     sta c
     ldy #$1e
     sty c+1
-    lda #0
     jsr moveram
 
     ; Copy Ultimem.
@@ -272,17 +271,17 @@ n:
 
     ; Restore color RAM.
     inc $9ff8
-    ldx #0
-l7: lda $2000,x
-    sta $9400,x
-    lda $2100,x
-    sta $9500,x
-    lda $2200,x
-    sta $9600,x
-    lda $2300,x
-    sta $9700,x
-    dex
-    bne l7
+    lda #0
+    sta d
+    ldy #$94
+    sty d+1
+    sta s
+    ldy #$20
+    sty s+1
+    sta c
+    ldy #$04
+    sty c+1
+    jsr moveram
 
     lda #0
     sta ptr

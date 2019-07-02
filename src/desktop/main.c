@@ -124,6 +124,8 @@ restart ()
                     set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT);
                 else
                     set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+
+            case 'R':
                 layout_obj (desktop);
                 draw_obj (desktop);
                 continue;

@@ -75,27 +75,34 @@ l6: sta screen
     jsr $c408       ; check memory overlap
     jsr $c659       ; CLR
 
+    ; Create trampoline in tape buffer.
     ldx #trampoline_end-trampoline-1
 l8: lda trampoline,x
     sta $33c,x
     dex
     bpl l8
-    jmp $33c
 
-trampoline:
-    ; Map RAM banks.
-    lda #%11111111
-    sta $9ff2
-    ldx #$02
+    ; Set up BLK1-BLK5.
+    ldx #$01
     ldy #$00
+    stx $9ff8
+    sty $9ff9
+    inx
     stx $9ffa
     sty $9ffb
     inx
     stx $9ffc
     sty $9ffd
     inx
+
+    jmp $33c
+trampoline:
     stx $9ffe
     sty $9fff
+
+    ; Map RAM banks.
+    lda #%11111111
+    sta $9ff2
 
     lda #%10000000  ; Hide registers, LED off.
     sta $9ff0
@@ -112,14 +119,15 @@ trampoline_end:
 
     ; Copy loaded data starting at bank 12 to RAM via BLK5.
 .proc copy_loaded_to_ram
+    ; Setup banks.
     lda #%00111111
     sta $9ff1
     lda #%01111111
     sta $9ff2
     ldy #0
-    sty $9ff4
+    sty $9ff4   ; RAM1,2,3
     sty $9ff5
-    sty $9ff6
+    sty $9ff6   ; IO2/IO3, so it does not have to happen in the trampoline.
     sty $9ff7
     lda #1
     sta $9ff8

@@ -86,11 +86,8 @@ trampoline:
     ; Map RAM banks.
     lda #%11111111
     sta $9ff2
-    ldx #$01
+    ldx #$02
     ldy #$00
-    stx $9ff8
-    sty $9ff9
-    inx
     stx $9ffa
     sty $9ffb
     inx
@@ -115,8 +112,16 @@ trampoline_end:
 
     ; Copy loaded data starting at bank 12 to RAM via BLK5.
 .proc copy_loaded_to_ram
-    lda #1
+    lda #%00111111
+    sta $9ff1
+    lda #%01111111
+    sta $9ff2
     ldy #0
+    sty $9ff4
+    sty $9ff5
+    sty $9ff6
+    sty $9ff7
+    lda #1
     sta $9ff8
     sty $9ff9
     lda #11

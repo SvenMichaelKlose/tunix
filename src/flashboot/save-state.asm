@@ -93,7 +93,7 @@ l5: lda 0,x
     bne l5
     ; Now we can use the zeropage ourselves.
 
-    ; Save $0100-$1fff to $2100.
+    ; Save $0100-$03ff to $2100.
     lda #$00
     sta s
     ldy #$01
@@ -102,24 +102,49 @@ l5: lda 0,x
     ldy #$21
     sty d+1
     sta c
-    ldy #$1f
+    ldy #$03
     sty c+1
     jsr moveram
 
-    ; Save color RAM to $2000.
-    inc $9ff8
+    ; Save color RAM to $2400.
     lda #$00
     sta s
     ldy #$94
     sty s+1
     sta d
-    ldy #$20
+    ldy #$24
     sty d+1
     sta c
     ldy #$04
     sty c+1
     jsr moveram
 
+    ; Save $1000-$1fff to $3000.
+    lda #$00
+    sta s
+    ldy #$10
+    sty s+1
+    sta d
+    ldy #$30
+    sty d+1
+    sta c
+    ldy #$10
+    sty c+1
+    jsr moveram
+
+    ; Save RAM1,2,3.
+    lda #0
+    sta d
+    ldy #$20
+    sty d+1
+    ldy #$08
+    sty d+2
+    sta d+3
+    lda $0124       ; (saved Ultimem reg)
+    jsr bank2ptr
+    jsr copy_bank
+
+    ; Save IO2/IO3.
     lda #0
     sta d
     ldy #$40
@@ -127,10 +152,11 @@ l5: lda 0,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $0124       ; (saved Ultimem reg)
+    lda $0126
     jsr bank2ptr
-    jsr copy_bank   ; RAM1,2,3
+    jsr copy_bank
 
+    ; Save BLK1.
     lda #0
     sta d
     ldy #$60
@@ -138,10 +164,11 @@ l5: lda 0,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $0126
+    lda $0128
     jsr bank2ptr
-    jsr copy_bank   ; IO2/IO3
+    jsr copy_bank
 
+    ; Save BLK2.
     lda #0
     sta d
     ldy #$80
@@ -149,10 +176,11 @@ l5: lda 0,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $0128
+    lda $012a
     jsr bank2ptr
-    jsr copy_bank   ; BLK1
+    jsr copy_bank
 
+    ; Save BLK3.
     lda #0
     sta d
     ldy #$a0
@@ -160,10 +188,11 @@ l5: lda 0,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $012a
+    lda $012c
     jsr bank2ptr
-    jsr copy_bank   ; BLK2
+    jsr copy_bank
 
+    ; Save BLK5.
     lda #0
     sta d
     ldy #$c0
@@ -171,22 +200,11 @@ l5: lda 0,x
     ldy #$08
     sty d+2
     sta d+3
-    lda $012c
-    jsr bank2ptr
-    jsr copy_bank   ; BLK3
-
-    lda #0
-    sta d
-    ldy #$e0
-    sty d+1
-    ldy #$08
-    sty d+2
-    sta d+3
     lda $012e
     jsr bank2ptr
-    jsr copy_bank   ; BLK5
+    jsr copy_bank
 
-    ; Restore zeropage.
+    ; Restore zeropage which we might have destroyed.
     lda #%01111111
     sta $9ff2
     lda #$40
@@ -237,7 +255,7 @@ l:
     lda #$7f
     sta $900f
 
-    ; Restore $0200-$1fff.
+    ; Restore $0200-$03ff.
     lda #0
     sta d
     ldy #$02
@@ -246,7 +264,7 @@ l:
     ldy #$22
     sty s+1
     sta c
-    ldy #$1e
+    ldy #$02
     sty c+1
     jsr moveram
 
@@ -262,6 +280,8 @@ l6: lda $2120,x
     sta $0104
     lda $2105
     sta $0105
+
+    ; Decrement restart address.
     dec $0104
     lda $0104
     cmp #$ff
@@ -269,23 +289,35 @@ l6: lda $2120,x
     dec $0105
 n:
 
-    ; Restore color RAM.
-    inc $9ff8
+    ; Restore color RAM $9400-$97ff.
     lda #0
     sta d
     ldy #$94
     sty d+1
     sta s
-    ldy #$20
+    ldy #$24
     sty s+1
     sta c
     ldy #$04
     sty c+1
     jsr moveram
 
+    ; Restore $1000-$1fff.
+    lda #0
+    sta d
+    ldy #$10
+    sty d+1
+    sta s
+    ldy #$30
+    sty s+1
+    sta c
+    ldy #$10
+    sty c+1
+    jsr moveram
+
     lda #0
     sta ptr
-    ldy #$40
+    ldy #$20
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -296,7 +328,7 @@ n:
 
     lda #0
     sta ptr
-    ldy #$60
+    ldy #$40
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -307,7 +339,7 @@ n:
 
     lda #0
     sta ptr
-    ldy #$80
+    ldy #$60
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -318,7 +350,7 @@ n:
 
     lda #0
     sta ptr
-    ldy #$a0
+    ldy #$80
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -329,7 +361,7 @@ n:
 
     lda #0
     sta ptr
-    ldy #$c0
+    ldy #$a0
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -340,7 +372,7 @@ n:
 
     lda #0
     sta ptr
-    ldy #$e0
+    ldy #$c0
     sty ptr+1
     ldy #$08
     sty ptr+2
@@ -381,7 +413,7 @@ l1: lda $2110,x
 
     ; Disable state.
     lda #0
-    sta $2100,x
+    sta $2100
 
     ; Restore Ultimem.
     ldx #$0f

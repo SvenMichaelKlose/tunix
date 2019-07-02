@@ -149,6 +149,8 @@ restart ()
                     draw_obj ((struct obj *) w);
                 else
                     draw_obj (focussed_window);
+
+                continue;
         }
 
         /* Send keyboard event. */

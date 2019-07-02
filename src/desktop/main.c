@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <conio.h>
 
+#include <ultimem.h>
 #include <libgfx.h>
 
 #include "obj.h"
@@ -26,7 +27,6 @@
 #include "basic-starter.h"
 #include "file-window.h"
 #include "main.h"
-#include "ultimem.h"
 
 #define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 

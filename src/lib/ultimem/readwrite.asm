@@ -1,7 +1,6 @@
+.export ultimem_get_bank
 .export ultimem_read_byte
 .export ultimem_write_byte
-.export ultimem_get_bank
-.export ultimem_unhide_regs
 .exportzp bp
 .importzp s, d, c, tmp
 
@@ -104,14 +103,5 @@ bp:     .res 4
     sta $9ff2
     pla
     tay
-    rts
-.endproc
-
-; Returns ID.
-.proc ultimem_unhide_regs
-    lda $9f55
-    lda $9faa
-    lda $9f01
-    lda $9ff3
     rts
 .endproc

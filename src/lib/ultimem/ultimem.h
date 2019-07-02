@@ -1,5 +1,5 @@
-#ifndef ULTIMEM_BASICS_H
-#define ULTIMEM_BASICS_H
+#ifndef ULTIMEM_H
+#define ULTIMEM_H
 
 #define ULTIMEM_CONTROL     ((char *) 0x9ff0)
 #define ULTIMEM_CONFIG1     ((char *) 0x9ff1)
@@ -13,9 +13,12 @@
 #define ULTIMEM_BLK5        ((unsigned short *) 0x9ffe)
 #define ULTIMEM_BLK5RAM     ((unsigned char *) 0x9ffe)
 
-void __fastcall__ ultimem_send_command (char);
-void __fastcall__ ultimem_burn_byte (unsigned short addr, char);
-void ultimem_erase_chip (void);
-void __fastcall__ ultimem_erase_block (char);
+extern char     ultimem_is_installed (void);
+extern unsigned ultimem_get_size (void);
 
-#endif /* #define ULTIMEM_BASICS_H */
+extern void __fastcall__ ultimem_send_command (char);
+extern void __fastcall__ ultimem_burn_byte (unsigned short addr, char);
+extern void ultimem_erase_chip (void);
+extern void __fastcall__ ultimem_erase_block (char);
+
+#endif /* #define ULTIMEM_H */

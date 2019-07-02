@@ -5,10 +5,11 @@
 #include <stdlib.h>
 
 #include <cbm.h>
-#include "cc65-charmap.h"
-#include "ingle.h"
 
-#include "ultimem.h"
+#include <ingle.h>
+#include <ultimem.h>
+
+#include "cc65-charmap.h"
 #include "ultifs.h"
 #include "wrap-ultifs.h"
 #include "obj.h"

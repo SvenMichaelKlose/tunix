@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ultimem-basics.h"
+#include "ultimem.h"
 
 #include "libgfx.h"
 #include "obj.h"

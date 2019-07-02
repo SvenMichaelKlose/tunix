@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <ultimem-basics.h>
+#include <ultimem.h>
 
 #include "libgfx.h"
 #include "error.h"

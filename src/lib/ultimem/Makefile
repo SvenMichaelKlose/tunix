@@ -1,9 +1,11 @@
 SOURCES= \
-    ultimem-basics.asm \
     calc-bank.asm \
-    copy-rom2ram.asm
+    commands.asm \
+    copy-rom2ram.asm \
+    readwrite.asm \
+    unhide.asm
 
-LIBRARY=libultimem-basics.a
+LIBRARY=libultimem.a
 
 include ../../Makefile.rules
 

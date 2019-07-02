@@ -23,6 +23,8 @@ screen  = $288      ; start page of text matrix
     ldx #$ff
     txs
 
+    jsr ultimem_unhide_regs
+
     lda #%00000001  ; Ultimem LED on.
     sta $9ff0
     lda #$22    ; Red screen.
@@ -30,14 +32,13 @@ screen  = $288      ; start page of text matrix
     lda #$00    ; Blank screen.
     sta $9002
 
-    jsr ultimem_unhide_regs
-
     ; No expanded RAM.
     lda #%00000000
     sta $9ff1
     lda #%01000000
     sta $9ff2
 
+    ; Restore saved state unless switch1 is being pressed.
     lda $9ff0
     and #%00000100  ; switch1
     beq no_restore

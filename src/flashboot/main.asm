@@ -55,6 +55,8 @@ no_restore:
 
     lda #$7f    ; Yellow screen.
     sta $900f
+    lda #$00    ; Blank screen.
+    sta $9002
 
     jsr ultifs_enter_root
 

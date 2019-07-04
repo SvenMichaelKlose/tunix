@@ -227,13 +227,13 @@ file_window_draw_list (struct obj * w)
     gfx_reset_region ();
     set_obj_region (w);
 
+    /* Clear window. */
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (0, 0, w->rect.w, w->rect.h);
+
     while (1) {
         if (y > w->rect.h)
             break;
-
-        /* Clear entry. */
-        gfx_set_pattern (pattern_empty);
-        gfx_draw_box (0, y, w->rect.w, 8);
 
         if (rpos >= content->len)
             goto next;

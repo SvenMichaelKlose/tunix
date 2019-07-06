@@ -55,7 +55,10 @@ n:  rts
     jsr ultifs_find
     bcs l
     rts
-l:  jmp ultimem_copy_rom2ram
+l:  ldx #ptr
+    ldy #s
+    jsr copyd
+    jmp ultimem_copy_rom2ram
 .endproc
 
 .proc ultifs_find

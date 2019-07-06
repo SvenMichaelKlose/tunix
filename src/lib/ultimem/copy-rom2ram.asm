@@ -36,7 +36,7 @@ dofs = $4000
     lda dreg+1
     pha
 
-    ldx #ptr
+    ldx #s
     ldy #base
     jsr copyd
 

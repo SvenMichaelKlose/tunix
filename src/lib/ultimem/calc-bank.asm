@@ -10,6 +10,8 @@ bp:     .res 4
 
 .code
 
+; Set bank register at $9ff0+Y to match offset at
+; zero page address X.
 .proc ultimem_get_bank
     lda 1,x
     lsr

@@ -1,9 +1,13 @@
 .export save_state
 .export restore_state
+
 .importzp s, d, c, ptr, size
+
 .import popax
-.import ultimem_copy_ram2ram
 .import moveram
+.import ultimem_copy_ram2ram
+.import ultimem_get_bank
+.import copy_bank
 
 .proc bank2ptr
     ; Get offset of bank # in A.
@@ -37,7 +41,27 @@ l1: asl
     rts
 .endproc
 
-.proc copy_bank
+.proc copy_to_state
+    sta $9ffa
+    stx $9ffb
+    ldx #d
+    ldy #$08
+    jsr ultimem_get_bank
+;    jsr bank2ptr
+    jmp copy
+.endproc
+
+.proc copy_from_state
+    sta $9ff8
+    stx $9ff9
+    ldx #ptr
+    ldy #$0a
+    jsr ultimem_get_bank
+;    jsr bank2d
+    jmp copy
+.endproc
+
+.proc copy
     lda #$00
     sta size
     lda #$20
@@ -45,7 +69,8 @@ l1: asl
     lda #$00
     sta size+2
     sta size+3
-    jmp ultimem_copy_ram2ram
+;    jsr ultimem_copy_ram2ram
+    jmp copy_bank
 .endproc
 
 ; Saves program state to $080000 in Ultimem RAM.
@@ -75,6 +100,14 @@ l1: lda $9000,x
     lda $9ff8
     pha
     lda $9ff9
+    pha
+    lda $9ffa
+    pha
+    lda $9ffb
+    pha
+    lda $9ffc
+    pha
+    lda $9ffd
     pha
 
     ; Map in first bank of saved state.
@@ -141,8 +174,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $0124       ; (saved Ultimem reg)
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $0125
+    jsr copy_to_state
 
     ; Save IO2/IO3.
     lda #0
@@ -153,8 +186,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $0126
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $0127
+    jsr copy_to_state
 
     ; Save BLK1.
     lda #0
@@ -165,8 +198,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $0128
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $0129
+    jsr copy_to_state
 
     ; Save BLK2.
     lda #0
@@ -177,8 +210,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $012a
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $012b
+    jsr copy_to_state
 
     ; Save BLK3.
     lda #0
@@ -189,8 +222,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $012c
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $012d
+    jsr copy_to_state
 
     ; Save BLK5.
     lda #0
@@ -201,8 +234,8 @@ l5: lda 0,x
     sty d+2
     sta d+3
     lda $012e
-    jsr bank2ptr
-    jsr copy_bank
+    ldx $012f
+    jsr copy_to_state
 
     ; Restore zeropage which we might have destroyed.
     lda #%01111111
@@ -215,6 +248,14 @@ l6: lda $2000,x
     dex
     bne l6
 
+    pla
+    sta $9ffd
+    pla
+    sta $9ffc
+    pla
+    sta $9ffb
+    pla
+    sta $9ffa
     pla
     sta $9ff9
     pla
@@ -323,8 +364,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $0124
-    jsr bank2d
-    jsr copy_bank   ; RAM1,2,3
+    lda $0125
+    jsr copy_from_state   ; RAM1,2,3
 
     lda #0
     sta ptr
@@ -334,8 +375,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $0126
-    jsr bank2d
-    jsr copy_bank   ; IO1,2,3
+    ldx $0127
+    jsr copy_from_state   ; IO1,2,3
 
     lda #0
     sta ptr
@@ -345,8 +386,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $0128
-    jsr bank2d
-    jsr copy_bank   ; BLK1
+    ldx $0129
+    jsr copy_from_state   ; BLK1
 
     lda #0
     sta ptr
@@ -356,8 +397,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $012a
-    jsr bank2d
-    jsr copy_bank   ; BLK2
+    ldx $012b
+    jsr copy_from_state   ; BLK2
 
     lda #0
     sta ptr
@@ -367,8 +408,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $012c
-    jsr bank2d
-    jsr copy_bank   ; BLK3
+    ldx $012d
+    jsr copy_from_state   ; BLK3
 
     lda #0
     sta ptr
@@ -378,8 +419,8 @@ n:
     sty ptr+2
     sta ptr+3
     lda $012e
-    jsr bank2d
-    jsr copy_bank   ; BLK5
+    ldx $012f
+    jsr copy_from_state   ; BLK5
 
     ; Make and call trampoline.
     ldx #restart_trampoline_end-restart_trampoline_start

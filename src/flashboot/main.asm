@@ -6,6 +6,7 @@
 .import ultimem_unhide_regs
 .import restore_state
 .import init_alloc
+.import init_copy_bank
 
 .code
 
@@ -40,7 +41,8 @@ screen  = $288      ; start page of text matrix
     jsr restore_state
 no_restore:
 
-    jsr init_alloc  ; Init bank allocator.
+    jsr init_alloc      ; RAM bank allocator.
+    jsr init_copy_bank  ; Fast bank copy from $4000 to $2000.
 
     ; No expanded RAM.
     lda #%00000000

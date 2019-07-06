@@ -31,3 +31,7 @@ Modifies all registers.
 
 Expects bank numer in A.  Returns with carry flag set
 if bank has not been allocated.  Modifies all registers.
+
+### $a015 – Copy $4000-5fff to $2000
+
+Speed code to copy banks.

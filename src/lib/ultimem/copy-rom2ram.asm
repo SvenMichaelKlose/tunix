@@ -115,7 +115,6 @@ inc_d:
 .proc ultimem_copy_rom2ram
     lda $9ff2
     pha
-
     lda #%01111101  ; ROMROMRAMROM…
     sta $9ff2
     jmp ultimem_copy
@@ -124,7 +123,6 @@ inc_d:
 .proc ultimem_copy_ram2rom
     lda $9ff2
     pha
-
     lda #%01110111  ; ROMRAMROMROM…
     sta $9ff2
     jmp ultimem_copy
@@ -133,7 +131,6 @@ inc_d:
 .proc ultimem_copy_ram2ram
     lda $9ff2
     pha
-
     lda #%01111111  ; ROMRAMRAMRAM…
     sta $9ff2
     jmp ultimem_copy

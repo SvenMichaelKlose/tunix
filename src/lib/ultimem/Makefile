@@ -1,5 +1,6 @@
 SOURCES= \
     calc-bank.asm \
+    c-copy.asm \
     commands.asm \
     copy-rom2ram.asm \
     readwrite.asm \

@@ -21,4 +21,6 @@ extern void __fastcall__ ultimem_burn_byte (unsigned short addr, char);
 extern void ultimem_erase_chip (void);
 extern void __fastcall__ ultimem_erase_block (char);
 
+extern void __fastcall__ ultimem_copy_rom2ram (long src, long dst, unsigned size);
+
 #endif /* #define ULTIMEM_H */

@@ -29,6 +29,33 @@
 
 struct cbm_dirent dirent;
 
+unsigned
+gen_launch (struct drive_ops * drive_ops)
+{
+    unsigned oldblk5 = *ULTIMEM_BLK5;
+    unsigned read_bytes;
+    unsigned size = 0;
+
+    *ULTIMEM_BLK5 = 12;
+    while (1) {
+        read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
+        if (!read_bytes)
+            break;
+        if (read_bytes == -1) {
+            print_message ("Read error!");
+            return -1;
+        }
+        size += read_bytes;
+        *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
+
+        sprintf (message_buffer, "%U read...", (unsigned) size);
+        print_message (message_buffer);
+    }
+    *ULTIMEM_BLK5 = oldblk5;
+
+    return size;
+}
+
 char
 gcbm_opendir ()
 {
@@ -91,7 +118,8 @@ struct drive_ops cbm_drive_ops = {
     gcbm_leavedir,
     gcbm_open,
     gcbm_read,
-    gcbm_close
+    gcbm_close,
+    gen_launch
 };
 
 bfile * current_file;
@@ -125,7 +153,8 @@ struct drive_ops ultifs_drive_ops = {
     w_ultifs_leavedir,
     u_open,
     u_read,
-    u_close
+    u_close,
+    gen_launch
 };
 
 void __fastcall__
@@ -322,12 +351,10 @@ typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 void __fastcall__
 file_window_launch_program (struct file_window_content * content, struct dirent * d)
 {
-    unsigned oldblk5 = *ULTIMEM_BLK5;
     launch_t launcher = (void *) 0x9800;
     struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
-    unsigned read_bytes;
-    upos size = 0;
+    unsigned size;
 
     print_message ("Saving state...");
     memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
@@ -335,29 +362,13 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     save_state (restart);
 
     print_message ("Loading...");
-
     if (drive_ops->open (d->name, 0)) {
         print_message ("Can't open file.");
         return;
     }
     drive_ops->read (&start, 2);
-    *ULTIMEM_BLK5 = 12;
-    while (1) {
-        read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
-        if (!read_bytes)
-            break;
-        if (read_bytes == -1) {
-            print_message ("Read error!");
-            goto error;
-        }
-        size += read_bytes;
-        *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
-
-        sprintf (message_buffer, "%U read...", (unsigned) size);
-        print_message (message_buffer);
-    }
+    size = drive_ops->launch (drive_ops);
 error:
-    *ULTIMEM_BLK5 = oldblk5;
     drive_ops->close ();
 
     memcpy (launcher, launch, 512);

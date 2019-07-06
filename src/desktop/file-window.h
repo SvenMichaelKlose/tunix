@@ -21,6 +21,7 @@ struct drive_ops {
     char __fastcall__ (*open)     (char * name, char mode);
     int  __fastcall__ (*read)     (void *, unsigned);
     void              (*close)    (void);
+    unsigned          (*launch)   (struct drive_ops *);
 };
 
 extern struct drive_ops cbm_drive_ops;

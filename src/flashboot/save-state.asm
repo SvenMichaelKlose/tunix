@@ -9,19 +9,19 @@
 .import ultimem_get_bank
 .import copy_bank
 
-.proc bank2ptr
+.proc bank2s
     ; Get offset of bank # in A.
     ldx #0
-    stx ptr+0
-    stx ptr+1
-    stx ptr+2
-    stx ptr+3
+    stx s+0
+    stx s+1
+    stx s+2
+    stx s+3
     ldx #5
 l1: asl
-    rol ptr+2
+    rol s+2
     dex
     bne l1
-    sta ptr+1
+    sta s+1
     rts
 .endproc
 
@@ -47,7 +47,7 @@ l1: asl
     ldx #d
     ldy #$08
     jsr ultimem_get_bank
-;    jsr bank2ptr
+;    jsr bank2s
     jmp copy
 .endproc
 

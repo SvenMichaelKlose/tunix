@@ -5,12 +5,12 @@ num_banks = 1024 / 8    ; TODO: Use detection for VIC-MIDI.
 .data
 
 ram_map:            .res 16
-last_bank_in_map:   .res 0
+last_bank_in_map:   .res 1
 free_banks:         .res 1
 
 .code
 
-alloc_masks:
+free_masks:
     .byte %00000001
     .byte %00000010
     .byte %00000100
@@ -20,7 +20,7 @@ alloc_masks:
     .byte %01000000
     .byte %10000000
 
-free_masks:
+alloc_masks:
     .byte %11111110
     .byte %11111101
     .byte %11111011
@@ -33,8 +33,9 @@ free_masks:
 .proc init_alloc
     lda #%00000011
     sta $9ff1
-    lda #$ff
+    lda #$7f
     sta $9ff4
+    lda #$00
     sta $9ff5
 
     ldx #num_banks/8
@@ -46,6 +47,10 @@ l1: sta ram_map-1,x
     dex
     bne l1
 
+    lda #0
+    sta ram_map
+    sta ram_map+1
+
     lda #num_banks-1
     sta free_banks
     lda #0
@@ -54,6 +59,10 @@ l1: sta ram_map-1,x
 .endproc
 
 .proc alloc_bank
+    txa
+    pha
+    tya
+    pha
     lda $9ff4
     pha
     lda $9ff5
@@ -61,10 +70,11 @@ l1: sta ram_map-1,x
     lda $9ff1
     pha
     and #%11111100
-    ora #%00000001
+    ora #%00000011
     sta $9ff1
-    lda #$ff
+    lda #$7f
     sta $9ff4
+    lda #$00
     sta $9ff5
 
     ldx free_banks
@@ -77,7 +87,7 @@ again:
     inx
     bpl again
     ldx #0
-    bne again       ; (jmp)
+    beq again       ; (jmp)
 
 found:
     ldy #0
@@ -96,16 +106,21 @@ got_it:
     asl
     asl
     sty $33c
-    dec free_banks  ; (Clear carry, too.)
+    clc
     adc $33c
     sta $33c
+    dec free_banks
 return:
+    pla
+    sta $9ff1
     pla
     sta $9ff5
     pla
     sta $9ff4
     pla
-    sta $9ff1
+    tay
+    pla
+    tax
     lda $33c
     rts
 
@@ -123,10 +138,11 @@ all_gone:
     lda $9ff1
     pha
     and #%11111100
-    ora #%00000001
+    ora #%00000011
     sta $9ff1
-    lda #$ff
+    lda #$7f
     sta $9ff4
+    lda #$00
     sta $9ff5
 
     txa
@@ -170,10 +186,11 @@ error:
     lda $9ff1
     pha
     and #%11111100
-    ora #%00000001
+    ora #%00000011
     sta $9ff1
-    lda #$ff
+    lda #$7f
     sta $9ff4
+    lda #$00
     sta $9ff5
 
     txa

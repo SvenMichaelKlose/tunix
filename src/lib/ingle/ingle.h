@@ -6,6 +6,7 @@
 #define INGLE_FULL_STATE_COPY   1
 
 extern void __fastcall__ save_state (unsigned int restart_addr, char flags);
+extern void __fastcall__ ingle_exec (unsigned long offset, unsigned start, unsigned size);
 extern void __fastcall__ launch (unsigned long offset, unsigned start, unsigned size);
 extern void copy_bank (void);
 

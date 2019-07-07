@@ -1,4 +1,4 @@
-ASMSOURCES=alloc.asm copy-bank.asm launch.asm main.asm save-state.asm rom-info.asm prgend.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm
+ASMSOURCES=alloc.asm copy-bank.asm launch.asm main.asm process.asm save-state.asm rom-info.asm prgend.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm
 PROGRAM=flashboot.bin
 
 include ../Makefile.rules

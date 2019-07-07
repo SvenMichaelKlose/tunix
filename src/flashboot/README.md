@@ -37,3 +37,20 @@ if bank has not been allocated.  Modifies all registers.
 ### $a015 – Copy $4000-5fff to $2000
 
 Speed code to copy banks.
+
+### $a018 – Launch program from ROM as new process
+
+To be replacing $a00c perhaps.
+
+Creates a new process with own RAM banks, not overwriting
+the currently running program.  Does only need to save
+unbanked RAM which is much faster.
+
+Parameters:
+
+* $0000 dword offset of program in Ultmem Flash ROM
+* $0008 word program size
+* $0104 word start address
+* $0120 Ultimem register set
+
+

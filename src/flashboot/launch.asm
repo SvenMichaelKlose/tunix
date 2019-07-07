@@ -1,5 +1,7 @@
 .export launch
+.export copy_loaded_to_ram
 .exportzp tmp2
+
 .importzp s, d, c, tmp
 .import popax
 .import ultimem_offset2bank

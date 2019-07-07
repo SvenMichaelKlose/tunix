@@ -13,15 +13,15 @@ struct dirent {
 };
 
 struct drive_ops {
-    char              (*opendir)  (void);
-    char __fastcall__ (*readdir)  (struct cbm_dirent *);
-    void              (*closedir) (void);
-    char __fastcall__ (*enterdir) (char * name);
-    void              (*leavedir) (void);
-    char __fastcall__ (*open)     (char * name, char mode);
-    int  __fastcall__ (*read)     (void *, unsigned);
-    void              (*close)    (void);
-    unsigned          (*launch)   (struct drive_ops *, unsigned start);
+    char                    (*opendir)  (void);
+    char __fastcall__       (*readdir)  (struct cbm_dirent *);
+    void                    (*closedir) (void);
+    char __fastcall__       (*enterdir) (char * name);
+    void                    (*leavedir) (void);
+    char __fastcall__       (*open)     (char * name, char mode);
+    int  __fastcall__       (*read)     (void *, unsigned);
+    void                    (*close)    (void);
+    unsigned __fastcall__   (*launch)   (struct drive_ops *, unsigned start);
 };
 
 extern struct drive_ops cbm_drive_ops;

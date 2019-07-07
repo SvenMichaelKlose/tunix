@@ -29,7 +29,7 @@
 
 struct cbm_dirent dirent;
 
-unsigned
+unsigned __fastcall__
 gen_launch (struct drive_ops * drive_ops, unsigned start)
 {
     unsigned oldblk5 = *ULTIMEM_BLK5;
@@ -145,16 +145,20 @@ u_close ()
     w_bfile_close (current_file);
 }
 
-unsigned
+
+void __fastcall__
+gen_exec (unsigned long ptr, unsigned start, unsigned size)
+{
+    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
+    *(unsigned int *) 0x128 = DESKTOP_BANK;
+    save_state ((unsigned) restart, 0);
+    ingle_exec (ptr, start, size);
+}
+
+unsigned __fastcall__
 ultifs_launch (struct drive_ops * drive_ops, unsigned start)
 {
-    *(int *) 0x0124 = 0;
-    *(int *) 0x0126 = 0;
-    *(int *) 0x0128 = 1;
-    *(int *) 0x012a = 2;
-    *(int *) 0x012c = 3;
-    *(int *) 0x012e = 4;
-    launch (current_file->ptr, start, current_file->size);
+    gen_exec (current_file->ptr, start, current_file->size);
 
     return current_file-> size;
 }
@@ -372,10 +376,6 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
 
     print_message ("Loading...");
 
-    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
-    *(unsigned int *) 0x128 = DESKTOP_BANK;
-    save_state ((unsigned) restart, INGLE_FULL_STATE_COPY);
-
     if (drive_ops->open (d->name, 0)) {
         print_message ("Can't open file.");
         return;
@@ -384,13 +384,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     size = drive_ops->launch (drive_ops, start);
     drive_ops->close ();
 
-    *(int *) 0x0124 = 0;
-    *(int *) 0x0126 = 0;
-    *(int *) 0x0128 = 1;
-    *(int *) 0x012a = 2;
-    *(int *) 0x012c = 3;
-    *(int *) 0x012e = 4;
-    launch (12 * 0x2000u, start, size);
+    gen_exec (12 * 0x2000u, start, size);
 }
 
 void __fastcall__

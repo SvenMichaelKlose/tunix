@@ -1,4 +1,4 @@
-.import main, save_state, launch, alloc_bank, free_bank, copy_bank
+.import main, save_state, launch, alloc_bank, free_bank, copy_bank, ingle_exec
 
 .segment "ROMINFO"
 
@@ -12,3 +12,4 @@
     jmp alloc_bank
     jmp free_bank
     jmp copy_bank
+    jmp ingle_exec

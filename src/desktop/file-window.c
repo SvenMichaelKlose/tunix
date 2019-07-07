@@ -36,7 +36,9 @@ gen_launch (struct drive_ops * drive_ops, unsigned start)
     unsigned read_bytes;
     unsigned size = 0;
 
+    print_message ("Loading...");
     *ULTIMEM_BLK5 = 12;
+
     while (1) {
         read_bytes = drive_ops->read ((void *) 0xa000, 0x2000);
         if (!read_bytes)
@@ -373,8 +375,6 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
     unsigned size;
-
-    print_message ("Loading...");
 
     if (drive_ops->open (d->name, 0)) {
         print_message ("Can't open file.");

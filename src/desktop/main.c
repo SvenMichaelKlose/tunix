@@ -2,12 +2,14 @@
 
 #include "cc65-charmap.h"
 
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
 
 #include <ultimem.h>
 #include <libgfx.h>
+#include <ingle.h>
 
 #include "obj.h"
 #include "event.h"
@@ -32,6 +34,7 @@
 
 struct obj * desktop;
 struct obj * focussed_window;
+char do_shutdown = 0;
 
 void
 shift_charset ()
@@ -46,7 +49,13 @@ shift_charset ()
     *ULTIMEM_BLK5 = old_bank;
 }
 
-char do_shutdown = 0;
+void
+save_desktop_state ()
+{
+    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
+    *(unsigned int *) 0x128 = DESKTOP_BANK;
+    save_state ((unsigned) restart);
+}
 
 void __fastcall__
 desktop_draw (struct obj * o)
@@ -100,6 +109,7 @@ void
 restart ()
 {
     char key;
+    int timer;
     struct window * w;
     struct obj * f;
     struct obj * i;
@@ -112,7 +122,12 @@ restart ()
     print_message ("");
 
     do {
-        while (!(key = cbm_k_getin ()));
+        while (!(key = cbm_k_getin ())) {
+            if (!++timer) {
+                save_desktop_state ();
+                timer = 0;
+            }
+        }
         //sprintf (message_buffer, "Key code %U", key);
         //print_message (message_buffer);
 
@@ -195,6 +210,7 @@ main (int argc, char ** argv)
     layout_obj (desktop);
     draw_obj (desktop);
 
+    save_desktop_state ();
     restart ();
     return 0;
 }

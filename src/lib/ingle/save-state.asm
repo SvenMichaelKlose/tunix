@@ -1,9 +1,14 @@
 .export _save_state
 
-; void __fastcall__ save_state (unsigned restart);
+.import popax
+
+; void __fastcall__ save_state (unsigned restart, char flags);
 ; Expects Ultimem regs for return at $120.
 .proc _save_state
+    sta $0106
+
     ; Save restart address.
+    jsr popax
     sta $0104
     stx $0105
 

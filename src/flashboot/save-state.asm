@@ -56,13 +56,6 @@
     lda #'E'
     sta $103
 
-    ; Save VIC.
-    ldx #$0f
-l1: lda $9000,x
-    sta $0110,x
-    dex
-    bpl l1
-
     ; Save bank config and BLK1.
     lda $9ff2
     pha
@@ -94,6 +87,13 @@ l5: lda 0,x
     dex
     bne l5
     ; Now we can use the zeropage ourselves.
+
+    ; Save VIC.
+    ldx #$0f
+l1: lda $9000,x
+    sta $0110,x
+    dex
+    bpl l1
 
     ; Save $0100-$03ff to $2100.
     lda #$00
@@ -133,6 +133,11 @@ l5: lda 0,x
     ldy #$10
     sty c+1
     jsr moveram
+
+    lda $0106
+    bne n1
+    jmp no_bank_copies
+n1:
 
     ; Save RAM1,2,3.
     lda #0
@@ -207,6 +212,7 @@ l5: lda 0,x
     jsr copy_to_state
 
     ; Restore zeropage which we might have destroyed.
+no_bank_copies:
     lda #%01111111
     sta $9ff2
     lda #$40
@@ -299,6 +305,9 @@ l6: lda $2120,x
     dec $0105
 n:
 
+    lda $2106
+    sta $0106
+
     ; Restore color RAM $9400-$97ff.
     lda #0
     sta d
@@ -324,6 +333,11 @@ n:
     ldy #$10
     sty c+1
     jsr moveram
+
+    lda $106
+    bne n1
+    jmp no_bank_copies
+n1:
 
     lda #0
     sta s
@@ -392,6 +406,7 @@ n:
     jsr copy_from_state   ; BLK5
 
     ; Make and call trampoline.
+no_bank_copies:
     ldx #restart_trampoline_end-restart_trampoline_start
 l2: lda restart_trampoline-1,x
     sta $180-1,x

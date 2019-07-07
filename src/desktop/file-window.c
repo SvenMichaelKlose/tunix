@@ -369,7 +369,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
 
     memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
     *(unsigned int *) 0x128 = DESKTOP_BANK;
-    save_state ((unsigned) restart);
+    save_state ((unsigned) restart, INGLE_FULL_STATE_COPY);
 
     if (drive_ops->open (d->name, 0)) {
         print_message ("Can't open file.");

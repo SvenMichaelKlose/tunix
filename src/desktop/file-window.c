@@ -309,13 +309,14 @@ file_window_draw_list (struct obj * w)
         gfx_putchar (32);
 
         /* Print file size. */
-        gfx_set_position (xofs + 6, y);
-        memset (size, 32, sizeof (size));
-        sprintf (size, "%U", (unsigned int) d->size);
-        size[strlen (size)] = 32;
-        for (i = 0; i < 5; i++)
-            gfx_putchar (size[i]);
-        gfx_putchar (32);
+        if (d->type != CBM_T_DIR) {
+            gfx_set_position (xofs + 6, y);
+            memset (size, 32, sizeof (size));
+            sprintf (size, "%U", (unsigned int) d->size);
+            size[strlen (size)] = 32;
+            for (i = 0; i < 5; i++)
+                gfx_putchar (size[i]);
+        }
 
         /* Print file name. */
 //        gfx_set_font ((void *) 0x8000, 0);

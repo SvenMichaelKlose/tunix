@@ -31,11 +31,11 @@ free_masks:
     .byte %01111111
 
 .proc init_alloc
-    lda #%01000011
-    sta $9ff2
+    lda #%00000011
+    sta $9ff1
     lda #$ff
-    sta $9ff8
-    sta $9ff9
+    sta $9ff4
+    sta $9ff5
 
     ldx #num_banks/8
     lda #$7f
@@ -54,18 +54,18 @@ l1: sta ram_map-1,x
 .endproc
 
 .proc alloc_bank
-    lda $9ff8
+    lda $9ff4
     pha
-    lda $9ff9
+    lda $9ff5
     pha
-    lda $9ff2
+    lda $9ff1
     pha
     and #%11111100
     ora #%00000001
-    sta $9ff2
+    sta $9ff1
     lda #$ff
-    sta $9ff8
-    sta $9ff9
+    sta $9ff4
+    sta $9ff5
 
     ldx free_banks
     beq all_gone
@@ -101,9 +101,9 @@ got_it:
     sta $33c
 return:
     pla
-    sta $9ff9
+    sta $9ff5
     pla
-    sta $9ff8
+    sta $9ff4
     pla
     sta $9ff1
     lda $33c
@@ -116,18 +116,18 @@ all_gone:
 
 .proc free_bank
     tax
-    lda $9ff8
+    lda $9ff4
     pha
-    lda $9ff9
+    lda $9ff5
     pha
-    lda $9ff2
+    lda $9ff1
     pha
     and #%11111100
     ora #%00000001
-    sta $9ff2
+    sta $9ff1
     lda #$ff
-    sta $9ff8
-    sta $9ff9
+    sta $9ff4
+    sta $9ff5
 
     txa
     and #%00000111
@@ -147,11 +147,11 @@ all_gone:
     clc
 return:
     pla
-    sta $9ff9
-    pla
-    sta $9ff8
-    pla
     sta $9ff1
+    pla
+    sta $9ff5
+    pla
+    sta $9ff4
     rts
 
 error:
@@ -163,18 +163,18 @@ error:
     tax
     tya
     pha
-    lda $9ff8
+    lda $9ff4
     pha
-    lda $9ff9
+    lda $9ff5
     pha
-    lda $9ff2
+    lda $9ff1
     pha
     and #%11111100
     ora #%00000001
-    sta $9ff2
+    sta $9ff1
     lda #$ff
-    sta $9ff8
-    sta $9ff9
+    sta $9ff4
+    sta $9ff5
 
     txa
     and #%00000111
@@ -190,11 +190,11 @@ error:
     sta ram_map,x
 
     pla
-    sta $9ff2
+    sta $9ff1
     pla
-    sta $9ff9
+    sta $9ff5
     pla
-    sta $9ff8
+    sta $9ff4
     pla
     tay
     rts

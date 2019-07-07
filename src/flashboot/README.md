@@ -21,6 +21,7 @@ Parameters:
 * $0000 dword offset of program in Ultmem Flash ROM
 * $0008 word program size
 * $0104 word start address
+* $0120 Ultimem register set
 
 ### $a00f – Allocate RAM bank.
 

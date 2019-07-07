@@ -83,18 +83,29 @@ l8: lda trampoline,x
     dex
     bpl l8
 
-    ; Set up BLK1-BLK5.
-    ldx #$01
-    ldy #$00
+    ; Set up banks.
+    ldx $0124
+    ldy $0125
+    stx $9ff4
+    sty $9ff5
+    ldx $0126
+    ldy $0127
+    stx $9ff6
+    sty $9ff7
+    ldx $0128
+    ldy $0129
     stx $9ff8
     sty $9ff9
-    inx
+    ldx $012a
+    ldy $012b
     stx $9ffa
     sty $9ffb
-    inx
+    ldx $012c
+    ldy $012d
     stx $9ffc
     sty $9ffd
-    inx
+    ldx $012e
+    ldy $012f
 
     jmp $33c
 trampoline:
@@ -118,22 +129,29 @@ trampoline:
 trampoline_end:
 .endproc
 
-    ; Copy loaded data starting at bank 12 to RAM via BLK5.
+; Copy loaded data starting at bank 12 to RAM via BLK5.
+current_bank = $33c
 .proc copy_loaded_to_ram
     ; Setup banks.
     lda #%00111111
     sta $9ff1
     lda #%01110111
     sta $9ff2
-    ldy #0
-    sty $9ff4   ; RAM1,2,3
+    ldx $0124
+    ldy $0125
+    stx $9ff4
     sty $9ff5
-    sty $9ff6   ; IO2/IO3, so it does not have to happen in the trampoline.
+    ldx $0126
+    ldy $0127
+    stx $9ff6
     sty $9ff7
-    lda #1
-    sta $9ff8
+    ldx $0128
+    ldy $0129
+    stx $9ff8
     sty $9ff9
+
     ldy #$0a
+    sty current_bank
     ldx #s
     jsr ultimem_offset2bank
     lda s+1
@@ -166,7 +184,17 @@ d1: inc d+1
     lda d+1
     cmp #>$4000
     bne l2
-    inc $9ff8
+
+    stx current_bank+1
+    ldx current_bank
+    lda $0120,x
+    sta $9ff8
+    lda $0121,x
+    sta $9ff9
+    inc current_bank
+    inc current_bank
+    ldx current_bank+1
+
     lda #>$2000
     sta d+1
     bne l2  ; (jmp)

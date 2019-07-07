@@ -148,6 +148,12 @@ u_close ()
 unsigned
 ultifs_launch (struct drive_ops * drive_ops, unsigned start)
 {
+    *(int *) 0x0124 = 0;
+    *(int *) 0x0126 = 0;
+    *(int *) 0x0128 = 1;
+    *(int *) 0x012a = 2;
+    *(int *) 0x012c = 3;
+    *(int *) 0x012e = 4;
     launch (current_file->ptr, start, current_file->size);
 
     return current_file-> size;
@@ -360,7 +366,6 @@ typedef void __fastcall__ (*launch_t) (unsigned start, unsigned size);
 void __fastcall__
 file_window_launch_program (struct file_window_content * content, struct dirent * d)
 {
-    launch_t launcher = (void *) 0x9800;
     struct drive_ops * drive_ops = content->drive_ops;
     unsigned start;
     unsigned size;
@@ -379,8 +384,13 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     size = drive_ops->launch (drive_ops, start);
     drive_ops->close ();
 
-    memcpy (launcher, launch, 512);
-    launcher (start, size);
+    *(int *) 0x0124 = 0;
+    *(int *) 0x0126 = 0;
+    *(int *) 0x0128 = 1;
+    *(int *) 0x012a = 2;
+    *(int *) 0x012c = 3;
+    *(int *) 0x012e = 4;
+    launch (12 * 0x2000u, start, size);
 }
 
 void __fastcall__

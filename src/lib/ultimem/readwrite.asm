@@ -1,44 +1,11 @@
-.export ultimem_get_bank
 .export ultimem_read_byte
 .export ultimem_write_byte
-.exportzp bp
+
 .importzp s, d, c, tmp
 
-.zeropage
-
-bp:     .res 4
+.import ultimem_offset2bank
 
 .code
-
-.proc ultimem_get_bank
-    lda 1,x
-    lsr
-    lsr
-    lsr
-    lsr
-    lsr
-    sta $9ff0,y
-    lda 2,x
-    asl
-    asl
-    asl
-    ora $9ff0,y
-    sta $9ff0,y
-    lda 2,x
-    lsr
-    lsr
-    lsr
-    lsr
-    lsr
-    sta $9ff1,y
-    lda 0,x
-    sta s
-    lda 1,x
-    and #%00011111
-    sta s+1
-    ldy #0
-    rts
-.endproc
 
 ; Fetch byte from Flash memory at 24-bit offset in 0,X.
 .proc ultimem_read_byte
@@ -54,10 +21,11 @@ bp:     .res 4
     pha
 
     ldy #8
-    jsr ultimem_get_bank
+    jsr ultimem_offset2bank
     lda s+1
     ora #$20
     sta s+1
+    ldy #0
     lda (s),y
     sta tmp
 
@@ -88,10 +56,11 @@ bp:     .res 4
     pha
 
     ldy #8
-    jsr ultimem_get_bank
+    jsr ultimem_offset2bank
     lda s+1
     ora #$20
     sta s+1
+    ldy #0
     lda tmp
     sta (s),y
 

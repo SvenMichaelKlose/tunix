@@ -2,7 +2,7 @@
 .exportzp tmp2
 .importzp s, d, c, tmp
 .import popax
-.import ultimem_get_bank
+.import ultimem_offset2bank
 
 bstart  = $2b       ; start of BASIC program text
 bend    = $2d       ; end of basic program text
@@ -135,7 +135,7 @@ trampoline_end:
     sty $9ff9
     ldy #$0a
     ldx #s
-    jsr ultimem_get_bank
+    jsr ultimem_offset2bank
     lda s+1
     ora #$40
     sta s+1

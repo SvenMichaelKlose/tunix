@@ -1,18 +1,13 @@
-.export ultimem_read_byte
-.export ultimem_write_byte
-.export ultimem_get_bank
-.exportzp bp
+.export ultimem_offset2bank
+.export ultimem_bank2offset
+
 .importzp s, d, c, tmp
-
-.zeropage
-
-bp:     .res 4
 
 .code
 
 ; Set bank register at $9ff0+Y to match offset at
 ; zero page address X.
-.proc ultimem_get_bank
+.proc ultimem_offset2bank
     lda 1,x
     lsr
     lsr
@@ -42,68 +37,18 @@ bp:     .res 4
     rts
 .endproc
 
-; Fetch byte from Flash memory at 24-bit offset in 0,X.
-.proc ultimem_read_byte
-    tya
-    pha
-    lda $9ff2
-    pha
-    lda #%01111101
-    sta $9ff2
-    lda $9ff8
-    pha
-    lda $9ff9
-    pha
-
-    ldy #8
-    jsr ultimem_get_bank
-    lda s+1
-    ora #$20
-    sta s+1
-    lda (s),y
-    sta tmp
-
-    pla
-    sta $9ff9
-    pla
-    sta $9ff8
-    pla
-    sta $9ff2
-    pla
-    tay
-    lda tmp
-    rts
-.endproc
-
-; Write byte to RAM at 24-bit offset in 0,X.
-.proc ultimem_write_byte
-    sta tmp
-    tya
-    pha
-    lda $9ff2
-    pha
-    lda #%01111111
-    sta $9ff2
-    lda $9ff8
-    pha
-    lda $9ff9
-    pha
-
-    ldy #8
-    jsr ultimem_get_bank
-    lda s+1
-    ora #$20
-    sta s+1
-    lda tmp
-    sta (s),y
-
-    pla
-    sta $9ff9
-    pla
-    sta $9ff8
-    pla
-    sta $9ff2
-    pla
-    tay
+; Get offset of bank # in A to 0,X
+.proc ultimem_bank2offset
+    ldx #0
+    sty 0,x
+    sty 1,x
+    sty 2,x
+    sty 3,x
+    ldx #5
+l1: asl
+    rol 2,x
+    dex
+    bne l1
+    sta 1,x
     rts
 .endproc

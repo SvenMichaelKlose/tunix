@@ -3,7 +3,7 @@
 .export ultimem_copy_ram2ram
 .importzp s, d, c, base, size, ptr
 
-.import ultimem_get_bank
+.import ultimem_offset2bank
 
 sreg = $9ff8
 dreg = $9ffa
@@ -42,7 +42,7 @@ dofs = $4000
 
     ldx #base
     ldy #sregidx
-    jsr ultimem_get_bank
+    jsr ultimem_offset2bank
     lda s
     sta base
     lda s+1
@@ -51,7 +51,7 @@ dofs = $4000
 
     ldx #d
     ldy #dregidx
-    jsr ultimem_get_bank
+    jsr ultimem_offset2bank
     lda s
     sta d
     lda s+1

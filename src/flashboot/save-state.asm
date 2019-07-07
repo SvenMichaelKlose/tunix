@@ -6,48 +6,17 @@
 .import popax
 .import moveram
 .import ultimem_copy_ram2ram
-.import ultimem_get_bank
+.import ultimem_offset2bank
+.import ultimem_bank2offset
 .import copy_bank
-
-.proc bank2s
-    ; Get offset of bank # in A.
-    ldx #0
-    stx s+0
-    stx s+1
-    stx s+2
-    stx s+3
-    ldx #5
-l1: asl
-    rol s+2
-    dex
-    bne l1
-    sta s+1
-    rts
-.endproc
-
-.proc bank2d
-    ; Get offset of bank # in A.
-    ldx #0
-    stx d+0
-    stx d+1
-    stx d+2
-    stx d+3
-    ldx #5
-l1: asl
-    rol d+2
-    dex
-    bne l1
-    sta d+1
-    rts
-.endproc
 
 .proc copy_to_state
     sta $9ffa
     stx $9ffb
     ldx #d
     ldy #$08
-    jsr ultimem_get_bank
-;    jsr bank2s
+    jsr ultimem_offset2bank
+;    jsr ultimem_bank2offset
     jmp copy
 .endproc
 
@@ -56,8 +25,8 @@ l1: asl
     stx $9ff9
     ldx #s
     ldy #$0a
-    jsr ultimem_get_bank
-;    jsr bank2d
+    jsr ultimem_offset2bank
+;    jsr ultimem_bank2offset
     jmp copy
 .endproc
 

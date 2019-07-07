@@ -1,4 +1,4 @@
-.export init_alloc, alloc_bank, free_bank
+.export init_alloc, alloc_bank, free_bank, lock_bank
 
 num_banks = 1024 / 8    ; TODO: Use detection for VIC-MIDI.
 
@@ -157,4 +157,45 @@ return:
 error:
     sec
     bcs return
+.endproc
+
+.proc lock_bank
+    tax
+    tya
+    pha
+    lda $9ff8
+    pha
+    lda $9ff9
+    pha
+    lda $9ff2
+    pha
+    and #%11111100
+    ora #%00000001
+    sta $9ff2
+    lda #$ff
+    sta $9ff8
+    sta $9ff9
+
+    txa
+    and #%00000111
+    tay
+    txa
+    lsr
+    lsr
+    lsr
+    tax
+
+    lda ram_map,x
+    and alloc_masks,y
+    sta ram_map,x
+
+    pla
+    sta $9ff2
+    pla
+    sta $9ff9
+    pla
+    sta $9ff8
+    pla
+    tay
+    rts
 .endproc

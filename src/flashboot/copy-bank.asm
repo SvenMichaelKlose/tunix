@@ -1,5 +1,6 @@
 .export init_copy_bank, copy_bank
 
+.import lock_bank
 .importzp s, d, c
 
 first_bank = 120
@@ -13,6 +14,7 @@ OPCODE_RTS = $60
 .proc init_copy_bank
     lda #first_bank
     sta $9ff8
+    jsr lock_bank
 
     lda #$00
     sta s
@@ -71,7 +73,8 @@ return:
     lda #$20
     sta d+1
     inc $9ff8
-    rts
+    lda $9ff8
+    jmp lock_bank
     
 l2: inc d+1
 l3: rts

@@ -1,7 +1,7 @@
 .export save_state
 .export restore_state
 
-.importzp s, d, c, ptr, size
+.importzp s, d, c, size ; TODO: Use c in copy.
 
 .import popax
 .import moveram
@@ -54,7 +54,7 @@ l1: asl
 .proc copy_from_state
     sta $9ff8
     stx $9ff9
-    ldx #ptr
+    ldx #s
     ldy #$0a
     jsr ultimem_get_bank
 ;    jsr bank2d
@@ -357,67 +357,67 @@ n:
     jsr moveram
 
     lda #0
-    sta ptr
+    sta s
     ldy #$20
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $0124
     lda $0125
     jsr copy_from_state   ; RAM1,2,3
 
     lda #0
-    sta ptr
+    sta s
     ldy #$40
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $0126
     ldx $0127
     jsr copy_from_state   ; IO1,2,3
 
     lda #0
-    sta ptr
+    sta s
     ldy #$60
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $0128
     ldx $0129
     jsr copy_from_state   ; BLK1
 
     lda #0
-    sta ptr
+    sta s
     ldy #$80
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $012a
     ldx $012b
     jsr copy_from_state   ; BLK2
 
     lda #0
-    sta ptr
+    sta s
     ldy #$a0
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $012c
     ldx $012d
     jsr copy_from_state   ; BLK3
 
     lda #0
-    sta ptr
+    sta s
     ldy #$c0
-    sty ptr+1
+    sty s+1
     ldy #$08
-    sty ptr+2
-    sta ptr+3
+    sty s+2
+    sta s+3
     lda $012e
     ldx $012f
     jsr copy_from_state   ; BLK5

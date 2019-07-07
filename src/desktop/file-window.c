@@ -30,7 +30,7 @@
 struct cbm_dirent dirent;
 
 unsigned
-gen_launch (struct drive_ops * drive_ops)
+gen_launch (struct drive_ops * drive_ops, unsigned start)
 {
     unsigned oldblk5 = *ULTIMEM_BLK5;
     unsigned read_bytes;
@@ -145,6 +145,14 @@ u_close ()
     w_bfile_close (current_file);
 }
 
+unsigned
+ultifs_launch (struct drive_ops * drive_ops, unsigned start)
+{
+    launch (current_file->ptr, start, current_file->size);
+
+    return current_file-> size;
+}
+
 struct drive_ops ultifs_drive_ops = {
     w_ultifs_opendir,
     w_ultifs_readdir,
@@ -154,7 +162,7 @@ struct drive_ops ultifs_drive_ops = {
     u_open,
     u_read,
     u_close,
-    gen_launch
+    ultifs_launch
 };
 
 void __fastcall__
@@ -356,19 +364,18 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     unsigned start;
     unsigned size;
 
-    print_message ("Saving state...");
+    print_message ("Loading...");
+
     memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
     *(unsigned int *) 0x128 = DESKTOP_BANK;
-    save_state (restart);
+    save_state ((unsigned) restart);
 
-    print_message ("Loading...");
     if (drive_ops->open (d->name, 0)) {
         print_message ("Can't open file.");
         return;
     }
     drive_ops->read (&start, 2);
-    size = drive_ops->launch (drive_ops);
-error:
+    size = drive_ops->launch (drive_ops, start);
     drive_ops->close ();
 
     memcpy (launcher, launch, 512);

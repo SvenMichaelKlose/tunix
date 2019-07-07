@@ -14,12 +14,13 @@ copied back on reset and restarted at the address in
 registers X (high) and A (low).  Also the regular RAM, VIC
 and Ultimem registers are copied.
 
-### $a00c – Launch program
+### $a00c – Launch program from ROM
 
-The program size is expected at $0008/$0009, the start
-address at $0124/$0125 and the Ultimem register set at
-$0120-$012f.  The program is copied from bank 12 on in to
-the RAM as configured by that register set.
+Parameters:
+
+* $0000 dword offset of program in Ultmem Flash ROM
+* $0008 word program size
+* $0104 word start address
 
 ### $a00f – Allocate RAM bank.
 

@@ -1,13 +1,19 @@
 .export _launch
 .import popax
 
-; void __fastcall__ launch (unsigned start, unsigned size);
+; void __fastcall__ launch (unsigned long offset, unsigned start, unsigned size);
 .proc _launch
     sta $08     ; c
     stx $09
     jsr popax
     sta $04     ; d
     stx $05
+    jsr popax   ; s
+    sta $00
+    stx $01
+    jsr popax
+    sta $02
+    stx $03
 
     lda $9ff2
     and #%00111111

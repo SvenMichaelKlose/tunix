@@ -2,6 +2,7 @@
 .exportzp tmp2
 .importzp s, d, c, tmp
 .import popax
+.import ultimem_get_bank
 
 bstart  = $2b       ; start of BASIC program text
 bend    = $2d       ; end of basic program text
@@ -122,7 +123,7 @@ trampoline_end:
     ; Setup banks.
     lda #%00111111
     sta $9ff1
-    lda #%01111111
+    lda #%01110111
     sta $9ff2
     ldy #0
     sty $9ff4   ; RAM1,2,3
@@ -132,14 +133,19 @@ trampoline_end:
     lda #1
     sta $9ff8
     sty $9ff9
-    lda #11
-    sta $9ffa
-    sty $9ffb
+    ldy #$0a
+    ldx #s
+    jsr ultimem_get_bank
+    lda s+1
+    ora #$40
+    sta s+1
 
-    sty s
+    ldy #0
     ldx c
     inx
     inc c+1
+    jmp l
+
 l4: inc $9ffa
     lda #>$4000
     sta s+1

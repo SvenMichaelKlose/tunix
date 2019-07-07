@@ -185,7 +185,7 @@ txt_not_found:
     .byte "FILE NOT FOUND.", 0
 
 fn_ingle:
-    .byte "ingle"
+    .byte ".ingle"
 fn_ingle_end:
 
 fn_core:

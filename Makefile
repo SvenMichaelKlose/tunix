@@ -5,9 +5,9 @@ all:
 	$(MAKE) -C mkfs all
 	rm -fv ingle.zip
 	rm -rfv compiled
-	mkdir -pv compiled/ingle
-	cp src/desktop/*.bin compiled/ingle/
-#	cp src/tgi-demo/*.bin compiled/ingle/
+	mkdir -pv compiled/.ingle
+	cp src/desktop/*.bin compiled/.ingle/
+#	cp src/tgi-demo/*.bin compiled/.ingle/
 	cp -r archive/* compiled
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W

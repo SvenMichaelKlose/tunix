@@ -192,7 +192,7 @@ file_window_read_directory (struct file_window_content * content)
     while (1) {
         if (content->drive_ops->readdir (&dirent))
             break;
-        if (dirent.type == CBM_T_HEADER || (dirent.type == CBM_T_DIR && (!strcmp (".", dirent.name) || !strcmp ("..", dirent.name))))
+        if (dirent.type == CBM_T_HEADER || dirent.name[0] == '.' || (dirent.type == CBM_T_DIR && (!strcmp (".", dirent.name) || !strcmp ("..", dirent.name))))
             continue;
         len++;
         d = malloc (sizeof (struct dirent));

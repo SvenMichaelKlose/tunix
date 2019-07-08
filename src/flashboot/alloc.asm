@@ -51,7 +51,6 @@ l1: sta ram_map-1,x
 
     lda #0
     sta ram_map
-    sta ram_map+1
 
     lda #num_banks-1
     sta free_banks

@@ -17,11 +17,14 @@ proc_blk2:      .res NUM_PROCESSES
 proc_blk3:      .res NUM_PROCESSES
 proc_blk5:      .res NUM_PROCESSES
 
+current_proc:   .res 0
+
 .code
 
 .proc init_proc
     ldx #NUM_PROCESSES
     lda #0
+    sta current_proc
 l1: sta procs,x
     dex
     bpl l1

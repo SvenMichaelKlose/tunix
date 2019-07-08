@@ -1,4 +1,4 @@
-.export ingle_exec, init_proc, alloc_proc
+.export ingle_exec, init_proc, alloc_proc, free_proc
 
 .import save_state
 .import launch
@@ -110,6 +110,8 @@ got_slot:
     sta $9ff5
 
     jsr alloc_proc
+    bcs return
+    stx current_proc
 
     lda proc_ram123,x
     ldy #0

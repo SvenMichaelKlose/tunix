@@ -2,7 +2,7 @@
 
 .import save_state
 .import launch
-.import alloc_bank
+.import alloc_bank, free_bank
 
 .data
 
@@ -29,6 +29,7 @@ l1: sta procs,x
     rts
 .endproc
 
+; Return new process in X.
 .proc alloc_proc
     lda $9ff1
     pha
@@ -55,6 +56,8 @@ error:
     bcs return      ; (jmp)
 
 got_slot:
+    lda #1
+    sta procs,x
     jsr alloc_bank
     bcs error
     sta proc_ram,x
@@ -129,4 +132,47 @@ got_slot:
     sty $012f
 
     jmp launch
+.endproc
+
+; Free process X.
+.proc free_proc
+    lda $9ff1
+    pha
+    and #%11111100
+    ora #%00000011
+    sta $9ff1
+    lda $9ff4
+    pha
+    lda $9ff5
+    pha
+    lda #$7f
+    sta $9ff4
+    lda #$00
+    sta $9ff5
+
+    lda procs,x
+    bne ok
+error:
+    sec
+    jmp return
+
+ok: lda #0
+    sta procs,x
+    lda proc_ram,x
+    jsr free_bank
+    lda proc_ram123,x
+    jsr free_bank
+    lda proc_io23,x
+    jsr free_bank
+    lda proc_blk1,x
+    jsr free_bank
+    lda proc_blk2,x
+    jsr free_bank
+    lda proc_blk3,x
+    jsr free_bank
+    lda proc_blk5,x
+    jsr free_bank
+
+    clc
+    jmp return
 .endproc

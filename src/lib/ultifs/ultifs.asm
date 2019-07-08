@@ -8,7 +8,6 @@
 .import ultimem_write_byte
 .import ultimem_get_bank
 .import ultimem_copy_rom2ram
-.import clrram, moveram, __PRGEND__
 .importzp s, d, c
 .importzp base, ptr, size
 

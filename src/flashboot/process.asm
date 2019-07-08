@@ -4,7 +4,7 @@
 .import launch
 .import alloc_bank, free_bank
 
-.data
+.bss
 
 NUM_PROCESSES = 32
 

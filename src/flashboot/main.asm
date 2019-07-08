@@ -183,6 +183,8 @@ no_restore:
     rts
 .endproc
 
+.rodata
+
 txt_not_found:
     .byte "FILE NOT FOUND.", 0
 

@@ -2,13 +2,13 @@
 
 num_banks = 1024 / 8    ; TODO: Use detection for VIC-MIDI.
 
-.data
+.bss
 
 ram_map:            .res 16
 last_bank_in_map:   .res 1
 free_banks:         .res 1
 
-.code
+.data
 
 free_masks:
     .byte %00000001
@@ -29,6 +29,8 @@ alloc_masks:
     .byte %11011111
     .byte %10111111
     .byte %01111111
+
+.code
 
 .proc init_alloc
     lda #%00000011

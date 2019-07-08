@@ -5,7 +5,7 @@
 
 .code
 
-; SYSCALL: Calculate screen bitmap address
+; Calculate screen bitmap address
 ;
 ; xpos: X position (pixels)
 ; ypos: Y position

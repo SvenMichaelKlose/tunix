@@ -154,6 +154,11 @@ gen_exec (unsigned long ptr, unsigned start, unsigned size)
     memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
     *(unsigned int *) 0x128 = DESKTOP_BANK;
     save_state ((unsigned) restart, 0);
+
+    // Workaround for MINIGRAFIK files.
+    if (start == 0x10f1)
+        start = 0x1201;
+
     ingle_exec (ptr, start, size);
 }
 

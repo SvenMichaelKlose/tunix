@@ -36,27 +36,23 @@ on the Ultimem), a regular boot will be performed.
 
 ## RAM
 
-There's no allocator yet, so things look like this:
-
 ```
-0: RAM1,2,3/IO
-1: BLK1
-2: BLK2
-3: BLK3
-4: BLK5
-5: desktop UltiFS code
-6: 4x4 charset
+0: desktop RAM1,2,3/IO
+1: desktop BLK1
+2: desktop BLK2
+3: desktop BLK3
+4: desktop BLK5
+5: desktop desktop UltiFS code
+6: desktop 4x4 charset
 7: desktop file window code
-8-11: unused
-12-15: Program to launch via ROM function.
-16-63: free
-64-69: saved state
-70-127: free
+8-120: free
+120-126: saved state
+127: Ingle ROM function BSS.
 ```
 
 # ROM functions
 
-The boot ROM bank will provide some utility functions, callable when
+The boot ROM bank provides some utility functions, callable when
 mapped to BLK5 ($A000-$BFFF).  libingle provides wrapper functions
 that take care of banking.
 

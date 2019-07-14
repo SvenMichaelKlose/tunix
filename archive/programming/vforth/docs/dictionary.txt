@@ -1,0 +1,132 @@
+DICTIONARY ENTRY LAYOUT
+=======================
+
+Each word has the following structure:
+
+    +------------------+
+    |   Link field     |
+    +------------------+
+    |   b7 = 1         |
+    |   b6 - immediate |
+    |   b5 - smudge    |
+    | b4-0 - name      |
+    |        length    |
+    +------------------+
+    |   b7 = 0         |
+    |    Name byte     |
+    +------------------+
+    |                  |
+
+    |                  |
+    +------------------+
+    |   b7 = 1         |
+    |    Name byte     |
+    +------------------+
+    |      0xA0        |
+    |  Padding (opt)   |
+    +------------------+
+    |   Code field     |
+    +------------------+
+    | Parameter field  |
+    |                  |
+
+The link field contains the name field address of the previous word,
+the link field address of the first word is 0x000.
+
+    +--------+     +--------+     +--------+
+    | 0x0000 |   +-|        |   +-|        |
+    +--------+   | +--------|   | +--------|
+    | WORDA  | <-+ | WORDB  | <-+ | WORDC  |
+
+A padding byte is inserted to prevent the code field crossing a page
+boundary.
+
+The code field for a word defined using 'CODE' is the parameter field
+address. The parameter field contains the machine code implementation
+of the word.
+
+    +---------+
+    |  WORDA  |
+    +---------+
+    |   cfa   |--+
+    +---------+  |
+    | Machine |<-+
+    |  code   |
+
+The code field for a word defined using ':' is the code field address
+of ':'. The parameter field contains the code field address of each
+word in the definition ending with the code field address of 'EXIT'.
+
+    : WORDB   BL  EMIT  ;
+
+    +---------+     +-----+     +----+     +------+     +------+
+    |  WORDB  |     |  :  |     | BL |     | EMIT |     | EXIT |
+    +---------+     +-----+     +----+     +------+     +------+
+    |   cf    | --> | cf  | +-> | cf | +-> |  cf  | +-> |  cf  |
+    +---------+             |          |            |
+    |   BL    |-------------+          |            |
+    |  EMIT   |------------------------+            |
+    |  EXIT   |-------------------------------------+
+    +---------+
+
+
+VOCABULARY ENTRY LAYOUT
+=======================
+
+A vocabulary word has the following structure:
+
+    |                  |
+    +------------------+
+    |   Code field     |
+    +------------------+
+    |  Head word field |
+    +------------------+
+    |   0x81, 0xA0     |
+    +------------------+
+    |  Voc link field  |
+    +------------------+
+
+A vocabulary word contains an embedded word named ' ' which serves as
+the head of a vocabulary. The link field of this embedded word points
+to the first word in the vocabulary. Instead of a code field there is
+a link to the previous vocabulary.
+
+    | WORDP | <-+ | VOCABX | <-+ | FORTH  |
+    +-------+   | +--------+   | +--------+
+    |  cf   |   | |   cf   |   | |   cf   |
+    +-------+   | +--------+   | +--------+
+                +-|        |   +-|        |
+                  +--------+     +--------+
+                  |  ' '   |     |  ' '   |
+                  +--------+     +--------+
+                  |        | --> |        |
+
+The user variable VOC-LINK contains the address of the vocabulary link
+field of the latest vocabulary. The vocabulary link field address of
+'FORTH' is 0x000.
+
+    | FORTH  |     | VOCABX |
+    +--------+     +--------+
+    |   cf   |     |   cf   |
+    +--------+     +--------|
+    |        |     |        |
+    +--------+     +--------+
+    |  ' '   |     |  ' '   |
+    +--------+     +--------+
+    | 0x0000 | <-- |        | <-- VOC-LINK
+    +--------+     +--------+
+
+The first word in a vocabulary points to the embedded word of the
+preceeding vocabulary.
+
+    +-------+     +-------+
+    |  lf   |-+   |  lf   |
+    +-------+ |   +-------+
+    | WORDP | |   | FORTH |
+    +-------+ |   +-------+
+    |  cf   | |   |  cf   |
+    +-------+ |   +-------+
+              |   |       |
+              |   +-------+
+              +-> |  ' '  |
+                  +-------+

@@ -10,7 +10,7 @@ all:
 	cp src/desktop/*.bin compiled/.ingle/
 	mkdir -pv compiled/office
 	cp src/writenow/writenow compiled/office/writenow/
-	cp src/vforth/vforth compiled/programming/
+	cp src/vforth/vforth compiled/programming/vforth/
 #	cp src/tgi-demo/*.bin compiled/.ingle/
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W

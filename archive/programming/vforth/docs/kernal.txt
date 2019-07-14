@@ -1,0 +1,95 @@
+V-Forth defines words that provide access to a number of KERNAL
+subroutines. In addition words are defined that provide efficient ways
+of invoking multiple KERNAL subroutine calls.
+
+Many of the words return serr, a combination of the KERNAL return
+value and appropriate flags
+
+        15  14-8   7-0
+	--------------
+        Cb   .A   STATUS/
+                  RSSTAT
+
+where Cb and .A are the carry bit and accumulator after the KERNAL
+call and the bottom 8 bits are the contents of RSSTAT (if the last
+call was to the RS-232 device) or STATUS flags.
+
+
+$PLOT   ( x y -- )
+
+Set screen co-ordinates to given row and column.
+
+$SETNAM   ( addr count -- )
+
+Set file name for later KERNAL calls.
+
+$SETLFS   ( sa da lfn -- )
+
+Set logical file number, device address and secondary address for
+later KERNAL calls.
+
+$READST   ( -- st )
+
+Returns value of the STATUS or RSSTAT flags.
+
+$OPEN   ( -- serr )
+
+Opens a logical file specified by parameters given in prior calls to
+$SETNAM and $SETLFS.
+
+$CLOSE   ( lfn -- serr )
+
+Close a logical file.
+
+$CHKOUT   ( lfs -- da serr )
+
+Set the output channel to a logical file, returns the error state and
+the device of the previous output channel.
+
+$RSTOUT   ( da -- )
+
+Restore the output channel to a previous device.
+
+$WRITEB   ( 8b -- serr )
+
+Send a byte to the output channel using the CHROUT subroutine.
+
+$WRITE   ( addr count -- serr )
+
+Send a block of count bytes to the output channel.
+
+$CHKIN   ( lfn -- da serr )
+
+Set the input channel to a logical file, returns the error state and
+the device of the previous input channel.
+
+$RSTIN   ( da -- )
+
+Restore the input channel to a previous device.
+
+$READ   (addr count1 -- count2 serr )
+
+Receive a block of up to count1 bytes from the input channel. Returns
+the number of bytes read.
+
+$READLINE   (addr count -- serr )
+
+Receive up to count bytes into memory starting at addr, or until a CR
+is read. The length read is stored in addr, the CR is not included in
+the length.
+
+$CLRCHN   ( -- )
+
+Reset both input and output channels to the defaults.
+
+$SAVE   ( start end -- serr )
+
+Save a region of memory between start and end-1 to the file name and
+device given in prior calls to $SETNAM and $SETLFS.
+
+$LOAD   ( start -- end serr )
+
+Load a region of memory from the file name and device given in prior
+calls to $SETNAM and $SETLFS. If the secondary address is zero the
+file is loaded to start, otherwise the start address is defined by the
+contents of the file.

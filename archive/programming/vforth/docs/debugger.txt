@@ -1,0 +1,50 @@
+DEBUGGER
+========
+
+The DEBUGGER vocabulary implements a set of words that allow any
+colon-defined word to be traced.  Words can be stepped into or each
+contained word executed in turn. The data and return stacks can also
+be inspected and manipulated.
+
+The debugger can be used by first executing
+
+    INCLUDE DEBUGGER.FS
+
+a number of warnings (MSG # 4) will be reported as words that
+manipulate the return stack are redefined.
+
+
+Definitions
+-----------
+
+DUMP   ( addr count -- )
+
+    Display the contents of count bytes of memory starting at addr.
+
+TRACE nnnn
+
+    Begin tracing word nnnn. IP is set to the first word and the
+    vocabulary is changed to DEBUGGER.
+
+W   ( Where )
+
+    Display the next word.
+
+N   ( Next )
+
+    Display the next word and execute it.
+
+S   ( Step )
+
+    If the next word is a colon-defined word step into it, otherwise
+    execute it.
+
+S.  ( Print data stack )
+
+    Print the number of stack items followed by the stack
+    contents. The leftmost item is on the top of the stack.
+
+R.  ( Print return stack )
+
+    Print the number of stack items followed by the stack
+    contents. The leftmost item is on the top of the stack.

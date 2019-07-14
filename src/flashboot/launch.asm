@@ -34,6 +34,8 @@ tmp2:   .res 1
 
     lda #0      ; Blank screen.
     sta $9002
+    lda #$7f    ; Yellow.
+    sta $900f
 
     jsr copy_loaded_to_ram
 

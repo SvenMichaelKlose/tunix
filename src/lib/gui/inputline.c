@@ -11,6 +11,13 @@
 #include "layout-ops.h"
 #include "message.h"
 
+#define MAX_INPUTLINE_LENGTH    256
+
+#define KEY_RUNSTOP     3
+#define KEY_DELETE      20
+#define KEY_LEFT        157
+#define KEY_RIGHT       29
+
 extern struct obj * inputline;
 gpos inputline_x;
 unsigned char inputline_pos;
@@ -36,8 +43,8 @@ make_inputline (char * text)
     inputline_x = 0;
     inputline_pos = 0;
     if (!inputline_buf) {
-        inputline_buf = malloc (256);
-        inputline_widths = malloc (256);
+        inputline_buf = malloc (MAX_INPUTLINE_LENGTH);
+        inputline_widths = malloc (MAX_INPUTLINE_LENGTH);
     }
 
     return b;
@@ -80,20 +87,40 @@ inputline_init_draw ()
     gfx_set_region (r->x, r->y, r->w, r->h);
 }
 
+void
+inputline_show_cursor (void)
+{
+    gfx_set_pattern (pattern_solid);
+    gfx_draw_vline (inputline_x + 2, 1, 10);
+}
+
+
+void
+inputline_hide_cursor (void)
+{
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_vline (inputline_x + 2, 1, 10);
+}
+
 void __fastcall__
 inputline_insert (char c)
 {
     gpos old_x = gfx_x ();
     unsigned char char_width;
 
+    if (inputline_pos == MAX_INPUTLINE_LENGTH - 2)
+        return;
+
     inputline_init_draw ();
+    inputline_hide_cursor ();
     gfx_set_position (inputline_x + 2, 2);
     gfx_putchar (c);
-    inputline_bug[inputline_pos] = c;
+    inputline_buf[inputline_pos] = c;
     char_width = gfx_x () - old_x;
     inputline_x += char_width;
     inputline_widths[inputline_pos] = char_width;
     ++inputline_pos;
+    inputline_show_cursor ();
 }
 
 void __fastcall__

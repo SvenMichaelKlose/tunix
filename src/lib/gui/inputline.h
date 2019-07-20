@@ -10,6 +10,7 @@ struct inputline {
 };
 
 extern struct inputline * __fastcall__ make_inputline (char * text);
+extern void inputline_close (void);
 extern void __fastcall__ draw_inputline (struct obj *);
 extern void __fastcall__ inputline_input (char);
 

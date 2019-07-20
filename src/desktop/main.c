@@ -133,10 +133,6 @@ restart ()
         timer = 0;
         //sprintf (message_buffer, "Key code %U", key);
         //print_message (message_buffer);
-        if (inputline) {
-            inputline_input (key);
-            continue;
-        }
 
         switch (key) {
             case 'F':

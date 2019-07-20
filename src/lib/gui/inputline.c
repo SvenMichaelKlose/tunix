@@ -141,3 +141,15 @@ make_inputline (char * text)
 
     return b;
 }
+
+void
+inputline_close ()
+{
+    if (!inputline)
+        return;
+    free (inputline_buf);
+    free (inputline_widths);
+    unlink_obj (inputline);
+    free_obj (inputline);
+    inputline = NULL;
+}

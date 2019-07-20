@@ -28,14 +28,22 @@ tab_neg:
     sta tmp3
 
     ; Draw left (or only) column.
+    lda #7
+    sec
+    sbc tmp2
+    sta j+1
     ldy #7
 l:  lda (s),y
-    ldx tmp2
-    beq i
-m:  lsr
-    dex
-    bne m
-i:  ora (scr),y
+    clc
+j:  bcc j
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    ora (scr),y
     sta (scr),y
     dey
     bpl l
@@ -47,12 +55,21 @@ i:  ora (scr),y
     jsr inc_xcpos
 
     ; Draw optional right column.
+    lda #7
+    sec
+    sbc tmp3
+    sta j2+1
     ldy #7
 l2: lda (s),y
-    ldx tmp3
-m2: asl
-    dex
-    bne m2
+    clc
+j2: bcc j2
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
     ora (scr),y
     sta (scr),y
     dey

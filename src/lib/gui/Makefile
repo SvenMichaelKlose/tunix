@@ -19,7 +19,7 @@ include ../../Makefile.rules
 	$(AS) -g -o $@ $<
 
 %.o: %.c
-	$(CC) -O -c $(CFLAGS) -I../gfx/ -I../ultimem/ -o $@ $<
+	$(CC) -O -c $(CFLAGS) -I../ingle/ -I../gfx/ -I../ultimem/ -o $@ $<
 
 $(LIBRARY): $(SOURCES:.c=.o)
 	$(AR) a $@ $^

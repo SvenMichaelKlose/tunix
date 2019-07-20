@@ -39,11 +39,12 @@ draw_inputline (struct obj * _b)
     gfx_set_font (charset_4x8, 2, FONT_BANK);
     textwidth = gfx_get_text_width (b->text);
     gfx_set_pencil_mode (1);
-//    gfx_set_pattern (pattern_empty);
-//    gfx_draw_box (r->x + 1, r->y + 1, r->w - 2, r->h - 2);
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (r->x + 1, r->y + 1, r->w - 2, r->h - 2);
     gfx_set_pattern (pattern_solid);
     gfx_draw_frame (r->x, r->y, r->w, r->h);
-    gfx_draw_text (r-> x + (r->w - textwidth) / 2 + 1, r->y + (r->h - 8) / 2 + 1, b->text);
+    gfx_draw_text (r-> x + 2, r->y + (r->h - 8) / 2 + 1, b->text);
+//    gfx_draw_text (r-> x + (r->w - textwidth) / 2 + 1, r->y + (r->h - 8) / 2 + 1, b->text);
 }
 
 void __fastcall__

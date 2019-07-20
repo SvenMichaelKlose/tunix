@@ -46,6 +46,7 @@ make_inputline (char * text)
         inputline_buf = malloc (MAX_INPUTLINE_LENGTH);
         inputline_widths = malloc (MAX_INPUTLINE_LENGTH);
     }
+    inputline_buf[0] = 0;
 
     return b;
 }
@@ -91,7 +92,7 @@ void
 inputline_show_cursor (void)
 {
     gfx_set_pattern (pattern_solid);
-    gfx_draw_vline (inputline_x + 2, 1, 10);
+    gfx_draw_vline (inputline_x + 2, 2, 8);
 }
 
 
@@ -99,7 +100,7 @@ void
 inputline_hide_cursor (void)
 {
     gfx_set_pattern (pattern_empty);
-    gfx_draw_vline (inputline_x + 2, 1, 10);
+    gfx_draw_vline (inputline_x + 2, 2, 8);
 }
 
 void __fastcall__
@@ -116,6 +117,7 @@ inputline_insert (char c)
     gfx_set_position (inputline_x + 2, 2);
     gfx_putchar (c);
     inputline_buf[inputline_pos] = c;
+    inputline_buf[inputline_pos + 1] = 0;
     char_width = gfx_x () - old_x;
     inputline_x += char_width;
     inputline_widths[inputline_pos] = char_width;
@@ -123,8 +125,30 @@ inputline_insert (char c)
     inputline_show_cursor ();
 }
 
+void
+inputline_delete (void)
+{
+    gpos old_x = gfx_x ();
+    unsigned char char_width = inputline_widths[inputline_pos - 1];
+
+    if (!inputline_pos)
+        return;
+
+    inputline_hide_cursor ();
+    inputline_init_draw ();
+    gfx_set_pattern (pattern_empty);
+    inputline_x -= char_width;
+    gfx_draw_box (inputline_x + 1, 2, char_width, 8);
+    inputline_buf[inputline_pos] = 0;
+    --inputline_pos;
+    inputline_show_cursor ();
+}
+
 void __fastcall__
 inputline_input (char c)
 {
-    inputline_insert (c);
+    if (c == KEY_DELETE)
+        inputline_delete ();
+    else
+        inputline_insert (c);
 }

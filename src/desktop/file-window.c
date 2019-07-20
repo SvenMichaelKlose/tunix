@@ -458,7 +458,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 
         case 'K':
             print_message ("Make directory:");
-            inputline = (struct obj *) make_inputline ("");
+            inputline = (struct obj *) make_inputline ("New directory");
             set_obj_position_and_size (inputline, 0, 0, 20 * 8, 12);
             append_obj (desktop, inputline);
             draw_obj (inputline);

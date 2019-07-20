@@ -11,6 +11,12 @@
 #include "layout-ops.h"
 #include "message.h"
 
+extern struct obj * inputline;
+gpos inputline_x;
+unsigned char inputline_pos;
+char * inputline_buf = NULL;
+char * inputline_widths = NULL;
+
 void __fastcall__ layout_inputline_minsize (struct obj *);
 
 struct obj_ops inputline_ops = {
@@ -26,6 +32,14 @@ make_inputline (char * text)
     struct inputline * b = alloc_obj (sizeof (struct inputline), &inputline_ops);
     b->obj.rect.h = 12;
     b->text = text;
+
+    inputline_x = 0;
+    inputline_pos = 0;
+    if (!inputline_buf) {
+        inputline_buf = malloc (256);
+        inputline_widths = malloc (256);
+    }
+
     return b;
 }
 
@@ -58,16 +72,32 @@ layout_inputline_minsize (struct obj * x)
     x->rect.w = textwidth + 4;
 }
 
-extern struct obj * inputline;
+void
+inputline_init_draw ()
+{
+    struct rect * r = &inputline->rect;
+    gfx_reset_region ();
+    gfx_set_region (r->x, r->y, r->w, r->h);
+}
+
+void __fastcall__
+inputline_insert (char c)
+{
+    gpos old_x = gfx_x ();
+    unsigned char char_width;
+
+    inputline_init_draw ();
+    gfx_set_position (inputline_x + 2, 2);
+    gfx_putchar (c);
+    inputline_bug[inputline_pos] = c;
+    char_width = gfx_x () - old_x;
+    inputline_x += char_width;
+    inputline_widths[inputline_pos] = char_width;
+    ++inputline_pos;
+}
 
 void __fastcall__
 inputline_input (char c)
 {
-    struct rect * r = &inputline->rect;
-
-    gfx_reset_region ();
-    gfx_set_region (r->x, r->y, r->w, r->h);
-    gfx_set_position (2, 2);
-    draw_inputline (OBJ(inputline));
-    gfx_putchar (c);
+    inputline_insert (c);
 }

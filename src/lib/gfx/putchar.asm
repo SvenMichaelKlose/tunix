@@ -177,7 +177,7 @@ n:  rts
     adc font+1
     sta s+1
 
-    ; OR all line together to find the paddings left and right.
+    ; OR all lines together to find the paddings left and right.
     ldy #7
     lda #0
 l:  ora (s),y

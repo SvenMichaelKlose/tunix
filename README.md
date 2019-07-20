@@ -72,7 +72,7 @@ These functions are being provided by src/flashboot.
 * R: Rename
 * C=: Application menu (if there're additional apps)
 
-## UltiFS hooks
+## UltiFS hooks/SJLOAD
 
 Enable regular applications to use RAM and ROM as a CBM device.
 

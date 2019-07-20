@@ -51,7 +51,6 @@ inputline_show_cursor (void)
     gfx_draw_vline (inputline_x, 0, 8);
 }
 
-
 void
 inputline_hide_cursor (void)
 {
@@ -129,7 +128,6 @@ make_inputline (char * text)
     char c;
 
     b->obj.rect.h = 8;
-    b->text = text;
 
     inputline_x = 0;
     inputline_pos = 0;

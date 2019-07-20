@@ -7,7 +7,6 @@ extern struct obj_ops inputline_ops;
 
 struct inputline {
     struct obj  obj;
-    char *      text;
 };
 
 extern struct inputline * __fastcall__ make_inputline (char * text);

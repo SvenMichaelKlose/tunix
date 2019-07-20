@@ -14,6 +14,7 @@
 #include "wrap-ultifs.h"
 #include "obj.h"
 #include "button.h"
+#include "inputline.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "table.h"
@@ -454,6 +455,13 @@ file_window_event_handler (struct obj * o, struct event * e)
         case KEY_LEFT:
             content->drive_ops->leavedir ();
             goto new_directory;
+
+        case 'K':
+            print_message ("Make directory:");
+            inputline = (struct obj *) make_inputline ("Name");
+            set_obj_position_and_size (inputline, 0, 0, 20 * 8, 12);
+            append_obj (desktop, inputline);
+            break;
     }
 
 done:

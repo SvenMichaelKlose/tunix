@@ -40,6 +40,9 @@ i:  ora (scr),y
     dey
     bpl l
 
+    ldx tmp2
+    beq r
+
     ; Step to next column.
     jsr inc_xcpos
 
@@ -54,7 +57,8 @@ m2: asl
     sta (scr),y
     dey
     bpl l2
-    rts
+
+r:  rts
 .endproc
 
 .proc clip_char

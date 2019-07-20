@@ -58,8 +58,16 @@ layout_inputline_minsize (struct obj * x)
     x->rect.w = textwidth + 4;
 }
 
+extern struct obj * inputline;
+
 void __fastcall__
 inputline_input (char c)
 {
-    print_message ("Message to inputline.");
+    struct rect * r = &inputline->rect;
+
+    gfx_reset_region ();
+    gfx_set_region (r->x, r->y, r->w, r->h);
+    gfx_set_position (2, 2);
+    draw_inputline (OBJ(inputline));
+    gfx_putchar (c);
 }

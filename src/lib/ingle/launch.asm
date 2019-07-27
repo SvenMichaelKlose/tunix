@@ -22,7 +22,7 @@
     sta $9ff2
     lda #0
     sta $9ffe
-    lda $9fff
+    sta $9fff
     
     jmp $a00c
 .endproc
@@ -47,7 +47,7 @@
     sta $9ff2
     lda #0
     sta $9ffe
-    lda $9fff
+    sta $9fff
 
     jmp $a018
 .endproc

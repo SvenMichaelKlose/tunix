@@ -108,17 +108,15 @@ l8: lda trampoline,x
     ldy $012d
     stx $9ffc
     sty $9ffd
+    lda $0122
     ldx $012e
     ldy $012f
 
     jmp $33c
 trampoline:
+    sta $9ff2
     stx $9ffe
     sty $9fff
-
-    ; Map RAM banks.
-    lda #%11111111
-    sta $9ff2
 
     lda #%10000000  ; Hide registers, LED off.
     sta $9ff0

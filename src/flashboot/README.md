@@ -5,8 +5,6 @@ the UltiFS file system on the Flash ROM starting at bank 9.
 
 ## Vectors
 
-There only two entries at the moment.
-
 ### $a009 – Save state of current process.
 
 Copies the currently visible RAM to reserved banks.  They are
@@ -31,7 +29,7 @@ Modifies all registers.
 
 ### $a012 – Free RAM bank.
 
-Expects bank numer in A.  Returns with carry flag set
+Expects bank number in A.  Returns with carry flag set
 if bank has not been allocated.  Modifies all registers.
 
 ### $a015 – Copy $4000-5fff to $2000
@@ -52,5 +50,3 @@ Parameters:
 * $0008 word program size
 * $0104 word start address
 * $0120 Ultimem register set
-
-

@@ -3,7 +3,8 @@
 
 #define INPUTLINE(x)   ((struct inputline *) x)
 
-extern struct obj_ops inputline_ops;
+extern struct obj *     inputline;
+extern struct obj_ops   inputline_ops;
 
 struct inputline {
     struct obj  obj;

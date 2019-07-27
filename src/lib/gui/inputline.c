@@ -19,7 +19,7 @@
 #define KEY_LEFT        157
 #define KEY_RIGHT       29
 
-extern struct obj * inputline;
+struct obj * inputline;
 gpos inputline_x;
 unsigned char inputline_pos;
 char * inputline_buf = NULL;
@@ -84,10 +84,11 @@ void
 inputline_delete (void)
 {
     gpos old_x = gfx_x ();
-    unsigned char char_width = inputline_widths[inputline_pos - 1];
+    unsigned char char_width;
 
     if (!inputline_pos)
         return;
+    char_width = inputline_widths[inputline_pos - 1];
 
     inputline_hide_cursor ();
     inputline_init_draw ();

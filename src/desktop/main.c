@@ -35,7 +35,6 @@
 
 struct obj * desktop;
 struct obj * focussed_window;
-struct obj * inputline;
 char do_shutdown = 0;
 
 void

@@ -2,6 +2,7 @@
 
 #include "cc65-charmap.h"
 
+#include <cbm.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -15,9 +16,9 @@
 #include "event.h"
 #include "box.h"
 #include "button.h"
-#include "cbm.h"
 #include "error.h"
 #include "frame.h"
+#include "inputline.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "message.h"
@@ -183,7 +184,7 @@ restart ()
 int
 main (int argc, char ** argv)
 {
-    /* Active RAM in BANK5. */
+    /* RAM in BANK5. */
     * (char *) 0x9ff2 = 0xff;
     *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
 

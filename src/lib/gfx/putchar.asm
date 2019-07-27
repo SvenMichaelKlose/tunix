@@ -48,6 +48,9 @@ j:  bcc j
     dey
     bpl l
 
+    ldx tmp2
+    beq r
+
     ; Step to next column.
     jsr inc_xcpos
 
@@ -71,7 +74,8 @@ j2: bcc j2
     sta (scr),y
     dey
     bpl l2
-    rts
+
+r:  rts
 .endproc
 
 .proc clip_char
@@ -194,7 +198,7 @@ n:  rts
     adc font+1
     sta s+1
 
-    ; OR all line together to find the paddings left and right.
+    ; OR all lines together to find the paddings left and right.
     ldy #7
     lda #0
 l:  ora (s),y

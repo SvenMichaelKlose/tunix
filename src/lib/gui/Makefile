@@ -4,6 +4,7 @@ SOURCES= \
     error.c \
     event.c \
     frame.c \
+    inputline.c \
     layout-ops.c \
     list.c \
     table.c \

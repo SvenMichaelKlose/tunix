@@ -62,6 +62,9 @@ extern void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y
 // Append new object to list of children.
 extern struct obj * __fastcall__ append_obj (struct obj * parent, struct obj *);
 
+// Unlink object from tree.
+extern void __fastcall__ unlink_obj (struct obj *);
+
 // Copy obj_ops structure most probably to replace some of its functions and
 // reassign the new structure with set_obj_ops().
 extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * src);

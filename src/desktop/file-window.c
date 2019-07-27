@@ -14,6 +14,7 @@
 #include "wrap-ultifs.h"
 #include "obj.h"
 #include "button.h"
+#include "inputline.h"
 #include "layout-ops.h"
 #include "list.h"
 #include "table.h"
@@ -423,6 +424,14 @@ file_window_event_handler (struct obj * o, struct event * e)
     int visible_lines = content->obj.rect.h / 8 - 1;
     unsigned wpos = content->pos - (content->pos % visible_lines);
 
+    if (inputline) {
+        if (e->data_char == KEY_RETURN)
+            inputline_close ();
+        else
+            inputline_input (e->data_char);
+        return FALSE;
+    }
+
     file_window_invert_position (content);
 
     switch (e->data_char) {
@@ -454,6 +463,14 @@ file_window_event_handler (struct obj * o, struct event * e)
         case KEY_LEFT:
             content->drive_ops->leavedir ();
             goto new_directory;
+
+        case 'K':
+            print_message ("Make directory:");
+            inputline = (struct obj *) make_inputline ("New directory");
+            set_obj_position_and_size (inputline, 0, 0, 20 * 8, 8);
+            append_obj (o, inputline);
+            draw_obj (inputline);
+            break;
     }
 
 done:

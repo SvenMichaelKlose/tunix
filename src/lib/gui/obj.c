@@ -36,6 +36,22 @@ alloc_obj (size_t size, struct obj_ops * ops)
 }
 
 void __fastcall__
+unlink_obj (struct obj * x)
+{
+    struct obj * n = x->node.next;
+    struct obj * p = x->node.prev;
+
+    if (n)
+        n->node.prev = p;
+    if (p)
+        p->node.prev = n;
+    if (x->node.parent == x)
+        x->node.parent = n;
+
+    x->node.next = x->node.prev = NULL;
+}
+
+void __fastcall__
 free_obj (struct obj * x)
 {
     struct obj * c = x->node.children;

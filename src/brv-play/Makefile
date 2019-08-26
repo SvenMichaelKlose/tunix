@@ -1,5 +1,5 @@
-ASMSOURCES= main.asm
-PROGRAM=brv-play
+ASMSOURCES= main.asm ../attic/core/mem/clrram.asm
+PROGRAM=play
 
 include ../Makefile.rules
 
@@ -10,7 +10,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C /usr/local/share/cc65/cfg/vic20-32k.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/ingle/libingle.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C vic20.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/ingle/libingle.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

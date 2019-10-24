@@ -97,7 +97,7 @@ done_loading:
     lda #$a0    ; Aux light red
     sta $900e
     lda #9      ; Text white multicolour
-    ldx #$28    ; Screen red, border black
+    ldx #$20    ; Screen red, border black
     jsr init_bitmap_mode
 
     lda #%00000000
@@ -194,8 +194,7 @@ l:  sta colors,x
 .endproc
 
 ; A: text colour
-; X: screen colour
-; Y: border colour
+; X: screen colour / reverse / border colour
 .proc init_bitmap_mode
     stx $900f
 

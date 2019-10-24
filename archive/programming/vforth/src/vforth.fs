@@ -477,7 +477,7 @@ END-CODE
 : C,   HERE  C!  1   ALLOT  ;    ( ENTER STACK BYTE TO DICT. *)
 : -   NEGATE  +  ;                ( LEAVE DIFF. SEC - BOTTOM *)
 : =   -  0=  ;                   ( LEAVE BOOLEAN OF EQUALITY *)
-: 0>   NEGATE  0<  ;
+: 0>   0  >  ;
 
 CODE <                          ( LEAVE BOOLEAN OF SEC < BOT *)
    SEC,  SEC LDA,  BOT SBC,  SEC 1+ LDA,
@@ -673,7 +673,7 @@ END-CODE
 
 : CREATE                      ( A CODE HEADER TO PARAM FIELD *)
                      ( WARNING IF DUPLICATING A CURRENT NAME *)
-      FENCE  HERE  0A0  +  <  2  ?ERROR  ( 6502 only )
+      ASSEMBLER  MEMHIGH  @  HERE  0A0  +  <  2  ?ERROR  ( CHECK SPACE FREE )
       LAST  @  ,
       NAME  FIND    ( CHECK IF UNIQUE IN CURRENT AND CONTEXT )
       IF ( WARN USER )  >NAME  ID.
@@ -769,7 +769,7 @@ VOCABULARY  FORTH     IMMEDIATE       ( THE TRUNK VOCABULARY *)
 
 : ABORT                  ( WARM RESTART, INCLUDING REGISTERS *)
       SP!  DECIMAL  8  DEVICE#  !
-      93  EMIT  ." **** V-FORTH  3.8 ****"
+      93  EMIT  ." **** V-FORTH  4.0 ****"
       [COMPILE]  FORTH  DEFINITIONS  QUIT  ;
 
 CODE COLD               ( COLD START, INITIALIZING USER AREA *)
@@ -790,7 +790,7 @@ CODE COLD               ( COLD START, INITIALIZING USER AREA *)
 #endif
       COLDEND CFENCE - 1- # LDY, ( INDEX TO VOC-LINK )
       0C0 # LDA, UP STA,  ( LOAD UP FROM MEMHIGH )
-      284 LDX,  DEX,  UP 1+ STX,
+      MEMHIGH 1+ DEC,  MEMHIGH 1+ LDX,  UP 1+ STX,
        BEGIN,  CFENCE ,Y LDA,  ( FROM LITERAL AREA )
                        UP )Y STA,  ( TO USER AREA )
             DEY,  0< UNTIL,

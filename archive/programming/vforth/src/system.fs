@@ -72,7 +72,7 @@ CODE $SETLFS   ( sa da lfn  --  )
 
 LABEL GETST
     0BA LDA,  2 # CMP,  0=   ( Check for RS-232 )
-    IF,  0 # LDY,  297 LDA,  297 STY,
+    IF,  297 LDA,  PHA,  0 # LDA,  297 STA,  PLA,
     ELSE,  90 LDA,
     THEN,  RTS,
 END-CODE
@@ -368,7 +368,7 @@ END-CODE
 
 ( Conditionally include a file if the first word is not defined )
 : INCLUDE?
-    NAME  FIND  IF  BL  WORD  DROP  ELSE  INCLUDE  THEN  ;
+    NAME  FIND  IF  BL  WORD  2DROP  ELSE  INCLUDE  THEN  ;
 
 ( Save the dictionary to the file named by the following word )
 : DSAVE

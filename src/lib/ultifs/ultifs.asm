@@ -13,9 +13,6 @@
 
 .zeropage
 
-;base:           .res 4
-;ptr:            .res 4
-;size:           .res 4
 next:           .res 4
 replacement:    .res 4
 namelen:        .res 1

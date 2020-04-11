@@ -26,14 +26,14 @@ screen  = $288      ; start page of text matrix
     ldx #$ff
     txs
 
-    jsr ultimem_unhide_regs
-
-    lda #%00000001  ; Ultimem LED on.
-    sta $9ff0
     lda #$22    ; Red screen.
     sta $900f
     lda #$00    ; Blank screen.
     sta $9002
+
+    jsr ultimem_unhide_regs
+    lda #%00000001  ; Ultimem LED on.
+    sta $9ff0
 
     ; Restore saved state unless switch1 is being pressed.
     lda $9ff0

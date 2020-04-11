@@ -87,7 +87,7 @@ free_pathname (char ** arr)
 #define BLOCKTYPE_FILE       0xfe
 #define BLOCKTYPE_DIRECTORY  0xfd
 
-struct _block {
+typedef struct _block {
     usize   size;           /* Size of file data. */
     upos    replacement;    /* Replacement if this file or EMPTY_PTR. */
     upos    next;           /* Next file in directory or EMPTY_PTR. Not valid if replaced. */
@@ -95,12 +95,11 @@ struct _block {
     char    name_length;
     /* name */
     /* file data */
+}
 #ifndef __CC65__
-} __attribute__((packed));
-#else
-};
+    __attribute__((packed))
 #endif
-typedef struct _block block;
+    block;
 
 
 /*

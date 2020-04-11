@@ -11,17 +11,16 @@ typedef unsigned long usize;
 #define __cc65fastcall__    __fastcall__
 #endif
 
-struct _bfile {
+typedef struct _bfile {
     upos    start;          /* Start of file data. */
     upos    ptr;            /* Current position in file data. */
     unsigned  bank;
     char    * addr;
     usize   size;           /* Current size (grows on writes). */
     upos    directory;      /* The directory this file is in. */
-    upos    replaced;       /* Position of block this one replaced. Yet unused? */
+    upos    replaced;       /* Position of block this one replaced. */
     char    mode;           /* Mode at bfile_open(). */
-};
-typedef struct _bfile bfile;
+} bfile;
 
 extern upos ultifs_pwd;
 

@@ -43,7 +43,7 @@ on the Ultimem), a regular boot will be performed.
 3: desktop BLK3
 4: desktop BLK5
 5: desktop desktop UltiFS code
-6: desktop 4x4 charset
+6: desktop 4x8 charset
 7: desktop file window code
 8-120: free
 120-126: saved state
@@ -76,7 +76,8 @@ These functions are being provided by src/flashboot.
 
 Enable regular applications to use RAM and ROM as a CBM device.
 
-## Multiprocessing
+## Multi-processing
 
+*Not* multi-tasking.
 The mechanics of "restore on reset" can also be used to keep
 multiple native programs in memory and switch between them.

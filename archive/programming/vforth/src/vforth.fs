@@ -46,6 +46,10 @@ LABEL COLDEND
 
 FORTH DEFINITIONS
 
+( {mutable} )
+CREATE IRQW  2 ALLOT
+( {immutable} )
+
 CODE LIT                   ( PUSH FOLLOWING LITERAL TO STACK *)
      IP )Y LDA,  PHA,  IP INC,  0= IF,  IP 1+ INC,  THEN,
      IP )Y LDA,  LABEL L31  IP INC,  0= IF,  IP 1+ INC,  THEN,
@@ -54,12 +58,20 @@ LABEL PUSH      ( PUSH ACCUM AS HI-BYTE, ML STACK AS LO-BYTE *)
 LABEL PUT          ( REPLACE BOTTOM WITH ACCUM. AND ML STACK *)
      BOT 1+ STA,  PLA,  BOT STA,
 LABEL NEXT           ( EXECUTE NEXT FORTH ADDRESS, MOVING IP *)
-     1 # LDY,  IP )Y LDA,  W 1+ STA,     ( FETCH CODE ADDRESS )
+     IRQNOT LDY,  0= NOT IF,
+     IP )Y LDA,  W 1+ STA,               ( FETCH CODE ADDRESS )
          DEY,  IP )Y LDA,  W    STA,
      CLC,  IP LDA,  2 # ADC,  IP STA,         ( MOVE IP AHEAD )
-     CS IF,  IP 1+ INC,  THEN,
-     W 1 - JMP,   ( JUMP INDIR. VIA W THRU CODE FIELD TO CODE )
-END-CODE
+
+     CS NOT IF,
+         W 1- JMP,  THEN,
+     IP 1+ INC,  W 1- JMP,
+                  ( JUMP INDIR. VIA W THRU CODE FIELD TO CODE )
+     THEN,
+     ( EXECUTE INTERRUPT WORD )
+     IRQNOT INC,  IRQW 1+ LDA,  W 1+ STA,  IRQW LDA,  W STA,
+     W 1- JMP,
+    END-CODE
 
 CODE CLIT
      IP )Y LDA,  PHA,  TYA,  L31  0=  NOT  UNTIL,
@@ -449,7 +461,6 @@ HEX
 04   USER  VOC-LINK                   ( TO NEWEST VOCABULARY *)
 06   USER  CSP                        ( CHECK STACK POSITION *)
 08   USER  HLD        ( POINTS TO LAST CHARACTER HELD IN PAD *)
-0A   USER  FREEPGS                    ( BITMAP OF FREE PAGES *)
 0C   USER  INBUF                     ( INTERPRETATION BUFFER *)
 0E   USER  >IN                     ( OFFSET INTO SOURCE TEXT *)
 10   USER  OUT                     ( DISPLAY CURSOR POSITION *)
@@ -621,9 +632,6 @@ END-CODE
 : ERASE           ( FILL MEMORY WITH ZEROS  BEGIN-2,  QUAN-1 *)
         0  FILL  ;
 
-: BLANK                   ( FILL WITH BLANKS BEGIN-2, QUAN-1 *)
-        BL  FILL  ;
-
 : HOLD                               ( HOLD CHARACTER IN PAD *)
         -1  HLD  +!   HLD  @  C!  ;
 
@@ -634,7 +642,7 @@ END-CODE
    INBUF  @
    >IN  @  +  SWAP   ( ADDRESS-2, DELIMITER-1 )
    ENCLOSE         ( ADDRESS-4, START-3, END-2, TOTAL COUNT-1 )
-   HERE  22  BLANK       ( PREPARE FIELD OF 34 BLANKS )
+   HERE  22  BL  FILL    ( PREPARE FIELD OF 34 BLANKS )
    >IN  +!         ( STEP OVER THIS STRING )
    OVER  -  >R     ( SAVE CHAR COUNT )
    R@  HERE  C!    ( LENGTH STORED FIRST )
@@ -762,14 +770,13 @@ VOCABULARY  FORTH     IMMEDIATE       ( THE TRUNK VOCABULARY *)
        29  WORD  DROP  ;   IMMEDIATE
 
 : QUIT                   ( RESTART,  INTERPRET FROM TERMINAL *)
-      0FFC  FREEPGS  !
       TIB  INBUF  !  [COMPILE]  [
       BEGIN  RP!  CR  QUERY  INTERPRET
              STATE  @  0=  IF  ."  OK"  THEN  AGAIN  ;
 
 : ABORT                  ( WARM RESTART, INCLUDING REGISTERS *)
       SP!  DECIMAL  8  DEVICE#  !
-      93  EMIT  ." **** V-FORTH  4.0 ****"
+      93  EMIT  ." **** V-FORTH  4.1 ****"
       [COMPILE]  FORTH  DEFINITIONS  QUIT  ;
 
 CODE COLD               ( COLD START, INITIALIZING USER AREA *)
@@ -796,7 +803,7 @@ CODE COLD               ( COLD START, INITIALIZING USER AREA *)
             DEY,  0< UNTIL,
      INY,
 LABEL ZBRK
-     00 STY,
+     00 STY,  INY,  IRQNOT STY,
      COLDIP 1+ LDA,  IP 1+ STA,
      COLDIP    LDA,  IP    STA,
       6C # LDA,  W 1 - STA,    'T RP! JMP, ( RUN )

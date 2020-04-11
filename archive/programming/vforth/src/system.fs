@@ -275,18 +275,18 @@ END-CODE
 
 ( Allocate and free pages from memory in the region 0x1200 to 0x1FFF )
 
+( {mutable} )
+VARIABLE NXTPAGE
+( {immutable} )
+1200 NXTPAGE !
+
 : GETPAGE   (  --  addr )
-    -10  1  10  0  DO
-       FREEPGS  @  OVER  AND  ?DUP  IF
-           NOT  FREEPGS  @  AND  FREEPGS  !  DROP  I  SWAP  LEAVE
-       THEN
-       2*  LOOP
-    DROP  10  +  8  LSHIFT  ;
+    NXTPAGE  @  DUP  1FFF  >  1E  ?ERROR
+    DUP  100  +  NXTPAGE  !  ;
 
 : PUTPAGE   ( addr  --  )
-    ?DUP  IF
-       8  RSHIFT  10  -  1  SWAP  LSHIFT  FREEPGS  @  OR
-       FREEPGS  !  THEN  ;
+    DUP  NXTPAGE  @  100  -  -  1E  ?ERROR
+    NXTPAGE !  ;
 
 
 ( High-level words resembling ANS Forth File-Access set )
@@ -378,6 +378,11 @@ END-CODE
 : DLOAD
     NAME  COUNT  LOADD  ?IOERR  ;
 
+: IORESET
+    1200  NXTPAGE  !  $CLRCHN  ;
+
 ( {mutable} )
-' $CLRCHN  EX-ERROR  CATCH
+' IORESET  EX-ERROR  CATCH
 ( {immutable} )
+
+' NXTPAGE @  ' IRQW  !

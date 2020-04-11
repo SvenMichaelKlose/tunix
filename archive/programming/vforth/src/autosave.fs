@@ -1,5 +1,7 @@
 decimal
 
+' lit 0< 31 ?error  ( this process does not work with the ROM image )
+
 16 +origin constant coldip
 
 : autostart   ( -- )

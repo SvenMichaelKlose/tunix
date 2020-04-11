@@ -135,10 +135,13 @@ graphics definitions
 8000 constant charset1
 8800 constant charset2
 
+16 constant cellx
+17 constant celly
+
 
 ( Common definitions for bitmaps )
-14 constant cellx
-0c constant celly  ( double height )
+14 constant bmcellx
+0c constant bmcelly  ( double height )
 
 1100 constant bmstart
 
@@ -148,9 +151,9 @@ graphics definitions
 
 ( Tile screen )
 : scrntile  (  --  )
-    cellx  0  do
-	celly  0  do
-	    10  i  +  j  celly  *  +  i  cellx  *  j  +  ramlo  +  c!
+    bmcellx  0  do
+	bmcelly  0  do
+	    10  i  +  j  bmcelly  *  +  i  bmcellx  *  j  +  ramlo  +  c!
 	loop
     loop  ;
 
@@ -160,7 +163,7 @@ graphics definitions
 
 ( Set VIC registers )
 : regset  (  --  )
-    cellx  xmax!  celly  ymax!  10  cellh!  screenbase@  charbase!  ;
+    bmcellx  xmax!  bmcelly  ymax!  10  cellh!  screenbase@  charbase!  ;
 
 
 ( Restore screen to defaults )

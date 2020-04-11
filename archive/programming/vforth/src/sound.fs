@@ -11,7 +11,7 @@ sound definitions
 
 
 : volume   ( vol -- )
-    7  and  900e  c@  0f0  and  or  900e  c!  ;
+    0f  and  900e  c@  0f0  and  or  900e  c!  ;
 
 : tune   ( nnnn )
     create  here  6  +  ,  0.  ,  ,  ;

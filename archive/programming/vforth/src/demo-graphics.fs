@@ -12,6 +12,24 @@ create ship
     loop  cr  ;
 
 
+include gfx-lores.fs
+
+: shape
+    graphics lores
+    clear
+    30 0 do
+	10  i  +  10  plot
+	red  10  i  +  10  fgset
+	10  i  +  20  plot
+	green  10  i  +  20  fgset
+	10  i  +  30  plot
+	black  10  i  +  30  fgset
+	10  i  +  40  plot
+	10  i  +  dup  xplot
+	40  i  -  10  i  +  xplot
+    loop  ;
+
+
 include gfx-hires.fs
 include trig.fs
 
@@ -22,8 +40,7 @@ include trig.fs
         320  0  do
             i  2/  i  j  +  sin  90  10000  */  95  +  plot
         2  +loop
-    5  +loop
-    key  drop  ;
+    5  +loop  ;
 
 
 include gfx-multicol.fs
@@ -39,5 +56,15 @@ include gfx-multicol.fs
 	79  i  -  i  100  +  auxplot
 	i dup  10  +  plot
 	79  i  -  i  105  +  plot
-    loop
-    key  drop  ;
+    loop  ;
+
+forth
+
+: demo
+    ships  key  drop
+    shape  key  drop
+    plotsin  key drop
+    lines  key  drop
+    graphics  reset-screen  lores  clear  ;
+
+forth

@@ -12,7 +12,7 @@ hex
 : clear  (  --  )
     bitclear  scrntile  286  c@  multi  or  fgfill  ;
 
-( Initialize hires graphics )
+( Initialize multicolour graphics )
 : init  (  --  )
     regset  clear  ;
 
@@ -26,29 +26,29 @@ hex
 
  3  0c  30  0c0  bmask  bpair
 
-( Set a pixel to foreground colour at x, y )
+( Set a pixel to foreground colour at X, Y )
 : plot  ( x y  --  )
     over  getbad  swap  bpair  over  c@  over  not  and  swap  0aa  and  or  swap  c!  ;
 
-( Set a pixel to border colour at x, y )
+( Set a pixel to border colour at X, Y )
 : brdplot  ( x y  --  )
     over  getbad  swap  bpair  over  c@  over  not  and  swap  055  and  or  swap  c!  ;
 
-( Set a pixel to auxiliary colour at x, y )
+( Set a pixel to auxiliary colour at X, Y )
 : auxplot  ( x y  --  )
     over  getbad  swap  bpair  over  c@  over  not  and  or  swap  c!  ;
 
-( Set a pixel to background colour at x, y )
+( Set a pixel to background colour at X, Y )
 : bgplot  ( x y  --  )
     over  getbad  swap  bpair  not  over  c@  and  swap  c!  ;
 
 ( Get colour attribute address )
 : getcad  ( x y  --  caddr )
-    4  rshift  cellx  *  swap  2  rshift  +  colourbase@  +  ;
+    4  rshift  bmcellx  *  swap  2  rshift  +  colourbase@  +  ;
 
 ( Set foreground colour )
 : fgset  ( col8 x y  --  )
-    multi  or  getcad  c!  ;
+   getcad  swap  multi  or  swap  c!  ;
 
 forth definitions
 decimal

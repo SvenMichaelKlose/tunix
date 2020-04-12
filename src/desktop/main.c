@@ -151,19 +151,30 @@ hide_windows ()
 char key;
 
 void
+send_key_event ()
+{
+    struct event * e = malloc (sizeof (struct event));
+    e->type = EVT_KEYPRESS;
+    e->data_char = key;
+    enqueue_event (focussed_window, e);
+}
+
+void
+wait_for_key ()
+{
+    int timer = 0;
+
+    while (!(key = cbm_k_getin ()))
+        send_queued_event ();
+        if (!++timer)
+            save_desktop_state ();
+}
+
+void
 restart ()
 {
-    int timer = -1;     // Trigger state backup right away.
-    struct event * e;
-
     do {
-        while (!(key = cbm_k_getin ())) {
-            if (!++timer) {
-                save_desktop_state ();
-                timer = 0;
-            }
-        }
-        timer = 0;
+        wait_for_key ();
         //sprintf (message_buffer, "Key code %U", key);
         //print_message (message_buffer);
 
@@ -189,12 +200,7 @@ restart ()
                 continue;
         }
 
-        /* Send keyboard event. */
-        e = malloc (sizeof (struct event));
-        e->type = EVT_KEYPRESS;
-        e->data_char = key;
-        send_event (focussed_window, e);
-        free (e);
+        send_key_event ();
     } while (!do_shutdown);
 }
 
@@ -214,6 +220,8 @@ main (int argc, char ** argv)
     gfx_clear_screen (0);
     gfx_init ();
     gfx_set_font (charset_4x8, 2, FONT_BANK);
+
+    init_event_queue ();
 
     /* Create desktop as the root element. */
     desktop = OBJ(make_box (pattern_woven));

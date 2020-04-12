@@ -415,7 +415,7 @@ file_window_launch (struct file_window_content * content, struct dirent * d)
     }
 }
 
-char __fastcall__
+void __fastcall__
 file_window_event_handler (struct obj * o, struct event * e)
 {
     struct file_window_content * content = (struct file_window_content *) o->node.children;
@@ -427,7 +427,7 @@ file_window_event_handler (struct obj * o, struct event * e)
             inputline_close ();
         else
             inputline_input (e->data_char);
-        return FALSE;
+        return;
     }
 
     file_window_invert_position (content);
@@ -473,7 +473,7 @@ file_window_event_handler (struct obj * o, struct event * e)
 
 done:
     file_window_invert_position (content);
-    return FALSE;
+    return;
 
 new_directory:
     content->pos = 0;
@@ -482,7 +482,6 @@ new_directory:
 new_page:
     file_window_draw_content ((struct obj *) content);
     save_desktop_state ();
-    return FALSE;
 }
 
 struct obj_ops obj_ops_file_window_content = {

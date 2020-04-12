@@ -8,6 +8,7 @@
 .import init_alloc
 .import init_proc
 .import init_copy_bank
+.import init_ultifs_dev
 
 .code
 
@@ -147,6 +148,8 @@ no_restore:
     lda #fn_file_window_end-fn_file_window
     sta namelen
     jsr ultifs_load
+
+    jsr init_ultifs_dev
 
     ; Run it.
     lda #$5d    ; Green screen.

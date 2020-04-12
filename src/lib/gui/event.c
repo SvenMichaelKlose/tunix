@@ -6,16 +6,13 @@
 #include "obj.h"
 #include "event.h"
 
-#define EVENT_QUEUE_SIZE    8
-#define EVENT_QUEUE_MASK    (EVENT_QUEUE_SIZE - 1)
-
 struct queued_event {
-    struct event * event;
-    struct obj *   obj;
+    struct queued_event *  next;
+    struct event *         event;
+    struct obj *           obj;
 };
 
-struct queued_event event_queue[EVENT_QUEUE_SIZE];
-unsigned char event_queue_index = 0;
+struct queued_event * first_event = NULL;
 
 void __fastcall__
 event_handler_passthrough (struct obj * obj, struct event * event)
@@ -33,60 +30,36 @@ send_event (struct obj * o, struct event * e)
 }
 
 void
-init_event_queue ()
-{
-    char i;
-
-    for (i = 0; i < EVENT_QUEUE_SIZE; i++)
-        event_queue[i].event = NULL;
-}
-
-void
 send_queued_event ()
 {
-    char i;
-    struct queued_event * q;
+    struct queued_event * q = first_event;
     struct event * e;
 
-    for (i = 0; i < EVENT_QUEUE_SIZE; i++) {
-        q = &event_queue[event_queue_index++ & EVENT_QUEUE_MASK];
-        if (q->event) {
-            e = q->event;
-            q->event = NULL;
-            send_event (q->obj, e);
-            free (e);
-            return;
-        }
-    }
-}
+    if (!q)
+        return;
 
-char
-free_event_queue_index ()
-{
-    char i;
-    char i2;
+    first_event = q->next;
 
-    for (i = 0; i < EVENT_QUEUE_SIZE; i++) {
-        i2 = event_queue_index++ & EVENT_QUEUE_MASK;
-        if (!event_queue[i2].event)
-            return i2;
-    }
+    send_event (q->obj, q->event);
 
-    return 0;
+    free (e);
+    free (q);
 }
 
 void
 enqueue_event (struct obj * o, struct event * e)
 {
-    char idx;
-    struct queued_event * q;
-
-    while (!(idx = free_event_queue_index ()))
-        send_queued_event ();
-
-    q = &event_queue[idx];
+    struct queued_event * p;
+    struct queued_event * q = malloc (sizeof (struct queued_event));
+    q->next = NULL;
     q->obj = o;
     q->event = e;
+
+    if (first_event) {
+        for (p = first_event; p->next; p = p->next);
+        p->next = q;
+    } else
+        first_event = q;
 }
 
 /*

@@ -215,8 +215,6 @@ main (int argc, char ** argv)
     gfx_init ();
     gfx_set_font (charset_4x8, 2, FONT_BANK);
 
-    init_event_queue ();
-
     /* Create desktop as the root element. */
     desktop = OBJ(make_box (pattern_woven));
     desktop->ops = &desktop_obj_ops;

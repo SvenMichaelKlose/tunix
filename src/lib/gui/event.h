@@ -16,8 +16,8 @@ struct event {
     };
 };
 
-extern void init_event_queue (void);
 extern void __fastcall__ event_handler_passthrough (struct obj *, struct event *);
+
 extern void __fastcall__ send_event (struct obj *, struct event *);
 extern void __fastcall__ enqueue_event (struct obj *, struct event *);
 extern void __fastcall__ send_queued_event (void);

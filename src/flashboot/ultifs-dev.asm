@@ -77,7 +77,7 @@ l:  lda $031a,x
 .endproc
 
 .proc open
-    lda LA
+    lda FA
     cmp #9
     beq found_dev
     jmp (uopen)

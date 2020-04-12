@@ -149,7 +149,7 @@ no_restore:
     sta namelen
     jsr ultifs_load
 
-    jsr init_ultifs_dev
+    ;jsr init_ultifs_dev
 
     ; Run it.
     lda #$5d    ; Green screen.

@@ -13,15 +13,15 @@
     stx $0105
 
     ; Map ROM in BLK5.
+    lda $9ffe
+    pha
+    lda $9fff
+    pha
     lda $9ff2
     pha
     and #%00111111
     ora #%01000000
     sta $9ff2
-    lda $9ffe
-    pha
-    lda $9fff
-    pha
     lda #0
     sta $9ffe
     sta $9fff
@@ -30,10 +30,10 @@
 
     ; Restore BLK5.
     pla
+    sta $9ff2
+    pla
     sta $9fff
     pla
     sta $9ffe
-    pla
-    sta $9ff2
     rts
 .endproc

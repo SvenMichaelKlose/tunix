@@ -18,7 +18,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) --register-space 19 -O -c $(CFLAGS) -I $(CC65_INCLUDE) -I../lib/ingle/ -I../lib/ultimem/ -I../lib/gfx/ -I../lib/gui/ -o $@ $<
+	$(CC) --register-space 19 -O -Or -c $(CFLAGS) -I $(CC65_INCLUDE) -I../lib/ingle/ -I../lib/ultimem/ -I../lib/gfx/ -I../lib/gui/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ingle/libingle.a --lib ../lib/ultimem/libultimem.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib

@@ -161,7 +161,7 @@ wait_for_key ()
         save_desktop_state ();
     }
 
-    timer = -0x1000;
+    timer = -0x6000;
 }
 
 void

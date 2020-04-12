@@ -299,27 +299,27 @@ file_window_draw_list (struct obj * w)
         gfx_set_position (xofs, y);
         switch (d->type) {
             case CBM_T_SEQ:
-                t = 's'; break;
+                t = 'S'; break;
             case CBM_T_PRG:
-                t = 'p'; break;
+                t = 'P'; break;
             case CBM_T_USR:
-                t = 'u'; break;
+                t = 'U'; break;
             case CBM_T_REL:
-                t = 'r'; break;
+                t = 'R'; break;
             case CBM_T_VRP:
-                t = 'v'; break;
+                t = 'V'; break;
             case CBM_T_DEL:
-                t = 'x'; break;
+                t = 'X'; break;
             case CBM_T_CBM:
-                t = 'c'; break;
+                t = 'C'; break;
             case CBM_T_DIR:
-                t = 'd'; break;
+                t = 'D'; break;
             case CBM_T_LNK:
-                t = 'l'; break;
+                t = 'L'; break;
             case CBM_T_HEADER:
-                t = 'h'; break;
+                t = 'H'; break;
             default:
-                t = 'o';
+                t = 'O';
         }
         gfx_putchar (t);
         gfx_putchar (32);

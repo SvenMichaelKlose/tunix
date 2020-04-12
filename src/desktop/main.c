@@ -143,7 +143,8 @@ send_key_event ()
     struct event * e = malloc (sizeof (struct event));
     e->type = EVT_KEYPRESS;
     e->data_char = key;
-    enqueue_event (focussed_window, e);
+    send_event (focussed_window, e);
+    free (e);
 }
 
 int timer = -1;

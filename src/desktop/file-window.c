@@ -481,7 +481,6 @@ new_directory:
 
 new_page:
     file_window_draw_content ((struct obj *) content);
-    save_desktop_state ();
 }
 
 struct obj_ops obj_ops_file_window_content = {

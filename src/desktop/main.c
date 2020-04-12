@@ -151,10 +151,16 @@ int timer = -1;
 void
 wait_for_key ()
 {
-    while (!(key = cbm_k_getin ()))
+    while (!(key = cbm_k_getin ())) {
         send_queued_event ();
-        if (!++timer)
-            save_desktop_state ();
+
+        if (++timer)
+            continue;
+
+        save_desktop_state ();
+    }
+
+    timer = -0x1000;
 }
 
 void

@@ -58,8 +58,8 @@ desktop_draw (struct obj * o)
 
     /* Look up full-screen window and draw only that. */
     while (w) {
-        if (w->flags & W_FULLSCREEN && ((struct obj *) w) == focussed_window) {
-            draw_obj ((struct obj *) w);
+        if (w->flags & W_FULLSCREEN && OBJ(w) == focussed_window) {
+            draw_obj (OBJ(w));
             return;
         }
         w = WINDOW(w->obj.node.next);
@@ -86,20 +86,6 @@ show_free_memory ()
     print_message (message_buffer);
 }
 
-struct obj *
-get_last_window ()
-{
-    struct obj * i = desktop->node.children;
-
-    while (1) {
-        if (!i->node.next)
-            break;
-        i = i->node.next;
-    }
-
-    return i;
-}
-
 void
 toggle_fullscreen ()
 {
@@ -107,31 +93,32 @@ toggle_fullscreen ()
 
     w->flags ^= W_FULLSCREEN;
 
-    if (w->flags & W_FULLSCREEN)
+    if (w->flags & W_FULLSCREEN) {
         set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
-    else
+        draw_obj (focussed_window);
+    } else {
         set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+        draw_obj (desktop);
+    }
 }
 
 void
 focus_next_window ()
 {
-    struct obj * f = desktop->node.children;
-    struct obj * i;
+    struct obj * next = desktop->node.children;
+    struct obj * f = focussed_window;
 
-    if (!desktop->node.children || !desktop->node.children->node.next)
+    if (!next || !next->node.next)
         return;
 
-    f = desktop->node.children;
-    i = get_last_window ();
-    desktop->node.children = desktop->node.children->node.next;
-    i->node.next = f;
-    f->node.next = NULL;
-    f->node.flags &= ~OBJ_NODE_INVISIBLE;
-    focussed_window = f;
+    desktop->node.children = next->node.next;
+    f->node.next = next;
+    next->node.next = NULL;
+    next->node.flags &= ~OBJ_NODE_INVISIBLE;
+    focussed_window = next;
 
-    if (!(i->node.flags & OBJ_NODE_INVISIBLE))
-        window_draw_title (WINDOW(i));
+    if (!(f->node.flags & OBJ_NODE_INVISIBLE))
+        window_draw_title (WINDOW(f));
     draw_obj (focussed_window);
 }
 

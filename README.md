@@ -23,3 +23,4 @@ on the Ultimem), a regular boot will be performed.
 * N: Step to next window.
 * F: Toggle full-screen mode of current window.
 * M: Show available memory and largest available block size.
+* D: Hide windows.

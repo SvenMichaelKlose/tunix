@@ -136,6 +136,9 @@ draw_obj (struct obj * x)
 {
     unsigned short oldbank = *ULTIMEM_BLK1;
 
+    if (x->node.flags & OBJ_NODE_INVISIBLE)
+        return;
+
     *ULTIMEM_BLK1 = x->ops->draw_bank;
     x->ops->draw (x);
     *ULTIMEM_BLK1 = oldbank;

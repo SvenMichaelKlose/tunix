@@ -31,6 +31,7 @@
 #include "file-window.h"
 #include "main.h"
 
+#define DESKTOP_WIDTH  (20 * 8)
 #define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 
 struct obj * desktop;
@@ -50,19 +51,12 @@ shift_charset ()
     *ULTIMEM_BLK5 = old_bank;
 }
 
-void
-save_desktop_state ()
-{
-    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
-    *(unsigned int *) 0x128 = DESKTOP_BANK;
-    save_state ((unsigned) restart, INGLE_FULL_STATE_COPY);
-}
-
 void __fastcall__
 desktop_draw (struct obj * o)
 {
     struct window * w = WINDOW(o->node.children);
 
+    /* Look up full-screen window and draw only that. */
     while (w) {
         if (w->flags & W_FULLSCREEN && ((struct obj *) w) == focussed_window) {
             draw_obj ((struct obj *) w);
@@ -107,20 +101,60 @@ get_last_window ()
 }
 
 void
+toggle_fullscreen ()
+{
+    struct window * w = WINDOW(focussed_window);
+
+    w->flags ^= W_FULLSCREEN;
+
+    if (w->flags & W_FULLSCREEN)
+        set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+    else
+        set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+}
+
+void
+focus_next_window ()
+{
+    struct obj * f = desktop->node.children;
+    struct obj * i;
+
+    if (!desktop->node.children || !desktop->node.children->node.next)
+        return;
+
+    f = desktop->node.children;
+    i = get_last_window ();
+    desktop->node.children = desktop->node.children->node.next;
+    i->node.next = f;
+    f->node.next = NULL;
+    f->node.flags &= ~OBJ_NODE_INVISIBLE;
+    focussed_window = f;
+
+    if (!(i->node.flags & OBJ_NODE_INVISIBLE))
+        window_draw_title (WINDOW(i));
+    draw_obj (focussed_window);
+}
+
+void
+hide_windows ()
+{
+    struct obj * i = desktop->node.children;
+
+    while (i) {
+        i->node.flags |= OBJ_NODE_INVISIBLE;
+        i = i->node.next;
+    }
+
+    draw_obj (desktop);
+}
+
+char key;
+
+void
 restart ()
 {
-    char key;
-    int timer;
-    struct window * w;
-    struct obj * f;
-    struct obj * i;
+    int timer = -1;     // Trigger state backup right away.
     struct event * e;
-
-    /* Active RAM in BANK5. */
-    * (char *) 0x9ff2 = 0xff;
-    *ULTIMEM_BLK5 = *ULTIMEM_BLK3 + 1;
-
-    print_message ("");
 
     do {
         while (!(key = cbm_k_getin ())) {
@@ -135,15 +169,10 @@ restart ()
 
         switch (key) {
             case 'F':
-                w = WINDOW(focussed_window);
-                w->flags ^= W_FULLSCREEN;
-                if (w->flags & W_FULLSCREEN)
-                    set_obj_position_and_size (focussed_window, 0, 0, 20 * 8, DESKTOP_HEIGHT);
-                else
-                    set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+                toggle_fullscreen ();
+                continue;
 
             case 'R':
-                layout_obj (desktop);
                 draw_obj (desktop);
                 continue;
 
@@ -152,23 +181,11 @@ restart ()
                 continue;
 
             case 'N':
-                f = desktop->node.children;
-                if (!desktop->node.children->node.next)
-                    continue;
-                f = desktop->node.children;
-                i = get_last_window ();
-                desktop->node.children = desktop->node.children->node.next;
-                i->node.next = f;
-                f->node.next = NULL;
-                focussed_window = f;
-                window_draw_title (WINDOW(i));
+                focus_next_window ();
+                continue;
 
-                w = WINDOW(focussed_window);
-                if (w->flags & W_FULLSCREEN)
-                    draw_obj ((struct obj *) w);
-                else
-                    draw_obj (focussed_window);
-
+            case 'D':
+                hide_windows ();
                 continue;
         }
 
@@ -176,7 +193,7 @@ restart ()
         e = malloc (sizeof (struct event));
         e->type = EVT_KEYPRESS;
         e->data_char = key;
-        send_event ((struct obj *) focussed_window, e);
+        send_event (focussed_window, e);
         free (e);
     } while (!do_shutdown);
 }
@@ -193,26 +210,28 @@ main (int argc, char ** argv)
     _heapadd ((void *) 0x400, 0xc00);    /* +3K */
     _heapadd ((void *) 0x9800, 0x7f0);   /* IO2/3 excluding Ultimem registers. */
 
+    /* Init display. */
     shift_charset ();
     gfx_clear_screen (0);
     gfx_init ();
     gfx_set_font (charset_4x8, 2, FONT_BANK);
 
-    focussed_window = NULL;
+    /* Create desktop as the root element. */
     desktop = OBJ(make_box (pattern_woven));
     desktop->ops = &desktop_obj_ops;
-    set_obj_position_and_size (desktop, 0, 0, 20 * 8, 12 * 16 - MESSAGE_HEIGHT);
+    set_obj_position_and_size (desktop, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
 
+    /* Mount file systems. */
     if (w_ultifs_mount ())
         print_message ("UltiFS corrupt! Read-only.");
-    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, 20 * 8, DESKTOP_HEIGHT / 2));
-    append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, 20 * 8, DESKTOP_HEIGHT / 2));
 
-    focussed_window = get_last_window ();
+    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
+    focussed_window = append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
+
+    print_message ("Welcome to Ingle! Press 'H' for help.");
     layout_obj (desktop);
     draw_obj (desktop);
 
-    save_desktop_state ();
     restart ();
     return 0;
 }

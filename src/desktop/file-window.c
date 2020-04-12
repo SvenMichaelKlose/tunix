@@ -152,9 +152,7 @@ u_close ()
 void __fastcall__
 gen_exec (unsigned long ptr, unsigned start, unsigned size)
 {
-    memcpy ((void *) 0x120, (void *) 0x9ff0, 16);
-    *(unsigned int *) 0x128 = DESKTOP_BANK;
-    save_state ((unsigned) restart, 0);
+    save_desktop_state ();
 
     // Workaround for MINIGRAFIK files.
     if (start == 0x10f1)
@@ -483,6 +481,7 @@ new_directory:
 
 new_page:
     file_window_draw_content ((struct obj *) content);
+    save_desktop_state ();
     return FALSE;
 }
 

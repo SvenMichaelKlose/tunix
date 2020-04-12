@@ -17,9 +17,11 @@ struct rect {
     gsize h;
 };
 
+#define OBJ_NODE_INVISIBLE    1
+
 // Node of tree of doubly–linked lists.
 struct node {
-    char          type;      // Yet unused.
+    char          flags;
     struct obj *  prev;
     struct obj *  next;
     struct obj *  parent;

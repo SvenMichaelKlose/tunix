@@ -159,11 +159,11 @@ send_key_event ()
     enqueue_event (focussed_window, e);
 }
 
+int timer = -1;
+
 void
 wait_for_key ()
 {
-    int timer = 0;
-
     while (!(key = cbm_k_getin ()))
         send_queued_event ();
         if (!++timer)

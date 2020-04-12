@@ -46,13 +46,15 @@ send_queued_event ()
 {
     char i;
     struct queued_event * q;
+    struct event * e;
 
     for (i = 0; i < EVENT_QUEUE_SIZE; i++) {
         q = &event_queue[event_queue_index++ & EVENT_QUEUE_MASK];
         if (q->event) {
-            send_event (q->obj, q->event);
-            free (q->event);
+            e = q->event;
             q->event = NULL;
+            send_event (q->obj, e);
+            free (e);
             return;
         }
     }

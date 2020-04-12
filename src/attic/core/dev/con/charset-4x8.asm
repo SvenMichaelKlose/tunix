@@ -347,9 +347,9 @@ _charset_4x8:
     .byte %0000
 
 ; "
+    .byte %1010
+    .byte %1010
     .byte %0000
-    .byte %1010
-    .byte %1010
     .byte %0000
     .byte %0000
     .byte %0000
@@ -397,9 +397,9 @@ _charset_4x8:
     .byte %0000
 
 ; '
-    .byte %0000
-    .byte %0100
     .byte %1000
+    .byte %1000
+    .byte %0000
     .byte %0000
     .byte %0000
     .byte %0000

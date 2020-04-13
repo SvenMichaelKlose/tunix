@@ -1,4 +1,4 @@
-ASMSOURCES=alloc.asm copy-bank.asm launch.asm main.asm process.asm save-state.asm rom-info.asm prgend.asm ultifs-dev.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm
+ASMSOURCES=alloc.asm api.asm copy-bank.asm launch.asm main.asm process.asm save-state.asm rom-info.asm prgend.asm ultifs-dev.asm ../attic/core/mem/moveram.asm ../attic/core/mem/clrram.asm
 PROGRAM=flashboot.bin
 
 include ../Makefile.rules
@@ -15,4 +15,4 @@ $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 all: $(PROGRAM)
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst ultifs.bin desktop.bin
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).map $(PROGRAM).lst ultifs.bin desktop.bin

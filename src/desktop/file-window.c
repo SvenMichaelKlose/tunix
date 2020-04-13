@@ -21,7 +21,7 @@
 #include "window.h"
 #include "message.h"
 #include "file-window.h"
-#include "main.h"
+#include "desktop.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17

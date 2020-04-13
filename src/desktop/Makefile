@@ -1,4 +1,5 @@
 SOURCES= \
+    desktop.c \
     file-window.c \
     main.c \
     save-state.c \

@@ -9,7 +9,7 @@
 #include "table.h"
 #include "window.h"
 #include "hexdump.h"
-#include "main.h"
+#include "desktop.h"
 
 #define KEY_UP      145
 #define KEY_DOWN    17

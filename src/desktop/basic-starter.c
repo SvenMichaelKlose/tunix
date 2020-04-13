@@ -8,7 +8,7 @@
 #include "list.h"
 #include "table.h"
 #include "window.h"
-#include "main.h"
+#include "desktop.h"
 #include "basic-starter.h"
 #include "error.h"
 

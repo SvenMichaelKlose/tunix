@@ -83,10 +83,12 @@ l:  lda $031a,x
     jmp (uopen)
 found_dev:
 
+    ; Init directory output.
 .endproc
 
 .proc close
     jmp (uclose)
+    ; Check if file was opened.
 .endproc
 
 .proc chkin
@@ -99,6 +101,7 @@ found_dev:
 
 .proc clrcn
     jmp (uclrcn)
+    ; Do nothing.
 .endproc
 
 .proc basin
@@ -114,11 +117,16 @@ found_dev:
 .endproc
 
 .proc getin
+    lda FA
+    beq keyboard
     jmp (ugetin)
+keyboard:
+    jmp basin
 .endproc
 
 .proc clall
     jmp (uclall)
+    ; Do nothing.
 .endproc
 
 .proc usrcmd
@@ -127,8 +135,10 @@ found_dev:
 
 .proc load
     jmp (uload)
+    ; Get source bank.
 .endproc
 
 .proc save
     jmp (usave)
+    ; Get destination bank.
 .endproc

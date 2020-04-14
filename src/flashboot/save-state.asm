@@ -10,13 +10,23 @@
 .import ultimem_bank2offset
 .import copy_bank
 
+.proc copy
+    lda #$00
+    sta size
+    lda #$20
+    sta size+1
+    lda #$00
+    sta size+2
+    sta size+3
+    jmp copy_bank
+.endproc
+
 .proc copy_to_state
     sta $9ffa
     stx $9ffb
     ldx #d
     ldy #$08
     jsr ultimem_offset2bank
-;    jsr ultimem_bank2offset
     jmp copy
 .endproc
 
@@ -26,25 +36,13 @@
     ldx #s
     ldy #$0a
     jsr ultimem_offset2bank
-;    jsr ultimem_bank2offset
     jmp copy
 .endproc
 
-.proc copy
-    lda #$00
-    sta size
-    lda #$20
-    sta size+1
-    lda #$00
-    sta size+2
-    sta size+3
-;    jsr ultimem_copy_ram2ram
-    jmp copy_bank
-.endproc
-
 ; Saves program state to $080000 in Ultimem RAM.
-; Expects restart address at $0104.
-; Expects Ultimem register set at $0120.
+; $104: restart address
+; $106: If not 0, extension banks are also saved.
+; $120: Ultimem register set
 .proc save_state
     ; Write restore marker.
     lda #'S'

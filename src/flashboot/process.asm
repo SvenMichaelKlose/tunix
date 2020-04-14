@@ -3,6 +3,7 @@
 .import save_state
 .import launch
 .import alloc_bank, free_bank
+.import set_banks, restore_banks
 
 .bss
 
@@ -34,19 +35,13 @@ l1: sta procs,x
 
 ; Return new process in X.
 .proc alloc_proc
-    lda $9ff1
-    pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
     lda $9ff4
     pha
     lda $9ff5
     pha
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    lda $9ff1
+    pha
+    jsr set_banks
 
     ldx #0
 l1: lda procs,x
@@ -84,33 +79,18 @@ got_slot:
     sta proc_blk5,x
 
     clc
-    jmp return
-.endproc
-
-.proc return
-    pla
-    sta $9ff5
-    pla
-    sta $9ff4
-    pla
-    sta $9ff1
-    rts
+return:
+    jmp restore_banks
 .endproc
 
 .proc ingle_exec
-    lda $9ff1       ; RAM in BLK5
-    pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
     lda $9ff4       ; Save RAM.
     pha
     lda $9ff5
     pha
-    lda #$7f        ; ROM data in RAM
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    lda $9ff1       ; RAM in BLK5
+    pha
+    jsr set_banks
 
     jsr alloc_proc
     bcs return
@@ -138,29 +118,26 @@ got_slot:
     sty $012f
 
     jmp launch
+
+return:
+    jmp restore_banks
 .endproc
 
 ; Free process X.
 .proc free_proc
-    lda $9ff1
-    pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
     lda $9ff4
     pha
     lda $9ff5
     pha
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    lda $9ff1
+    pha
+    jsr set_banks
 
     lda procs,x
     bne ok
 error:
     sec
-    jmp return
+    jmp restore_banks
 
 ok: lda #0
     sta procs,x
@@ -180,5 +157,5 @@ ok: lda #0
     jsr free_bank
 
     clc
-    jmp return
+    jmp restore_banks
 .endproc

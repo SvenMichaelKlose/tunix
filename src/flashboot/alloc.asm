@@ -1,10 +1,12 @@
 .export init_alloc, alloc_bank, free_bank, lock_bank
 
+.import set_banks, restore_banks, restore_banks_and_y
+
 num_banks = 1024 / 8    ; TODO: Use detection for VIC-MIDI.
 
 .bss
 
-ram_map:            .res 16
+ram_map:            .res num_banks / 8
 last_bank_in_map:   .res 1
 free_banks:         .res 1
 tmp:                .res 1
@@ -35,25 +37,21 @@ alloc_masks:
 
 .proc init_alloc
     lda #%00000011
-    sta $9ff1
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    jsr set_banks
 
-    ldx #num_banks/8
+    ldx #num_banks / 8
     lda #$7f
-    sta ram_map-1,x
+    sta ram_map - 1,x
     dex
     lda #$ff
-l1: sta ram_map-1,x
+l1: sta ram_map - 1,x
     dex
     bne l1
 
     lda #0
     sta ram_map
 
-    lda #num_banks-1
+    lda #num_banks - 1
     sta free_banks
     lda #0
     sta last_bank_in_map
@@ -69,13 +67,7 @@ l1: sta ram_map-1,x
     pha
     lda $9ff1
     pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    jsr set_banks
 
     ldx free_banks
     beq all_gone
@@ -135,13 +127,7 @@ all_gone:
     pha
     lda $9ff1
     pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    jsr set_banks
 
     txa
     and #%00000111
@@ -160,13 +146,7 @@ all_gone:
 
     clc
 return:
-    pla
-    sta $9ff1
-    pla
-    sta $9ff5
-    pla
-    sta $9ff4
-    rts
+    jmp restore_banks
 
 error:
     sec
@@ -183,13 +163,7 @@ error:
     pha
     lda $9ff1
     pha
-    and #%11111100
-    ora #%00000011
-    sta $9ff1
-    lda #$7f
-    sta $9ff4
-    lda #$00
-    sta $9ff5
+    jsr set_banks
 
     txa
     and #%00000111
@@ -204,13 +178,5 @@ error:
     and alloc_masks,y
     sta ram_map,x
 
-    pla
-    sta $9ff1
-    pla
-    sta $9ff5
-    pla
-    sta $9ff4
-    pla
-    tay
-    rts
+    jmp restore_banks_and_y
 .endproc

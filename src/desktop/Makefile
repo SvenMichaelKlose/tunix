@@ -25,7 +25,7 @@ $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ingle/libingle.a --lib ../lib/ultimem/libultimem.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
-	$(AS) -o charset-4x8.o ../attic/core/dev/con/charset-4x8.asm
+	$(AS) -o charset-4x8.o charset-4x8-light.asm
 	$(LD) -C ../attic/core/dev/con/charset.cfg -o charset-4x8.bin charset-4x8.o
 
 clean:

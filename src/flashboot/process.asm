@@ -98,16 +98,16 @@ got_slot:
 .endproc
 
 .proc ingle_exec
-    lda $9ff1
+    lda $9ff1       ; RAM in BLK5
     pha
     and #%11111100
     ora #%00000011
     sta $9ff1
-    lda $9ff4
+    lda $9ff4       ; Save RAM.
     pha
     lda $9ff5
     pha
-    lda #$7f
+    lda #$7f        ; ROM data in RAM
     sta $9ff4
     lda #$00
     sta $9ff5
@@ -116,6 +116,7 @@ got_slot:
     bcs return
     stx current_proc
 
+    ; Configure banks for launch().
     lda proc_ram123,x
     ldy #0
     sta $0124

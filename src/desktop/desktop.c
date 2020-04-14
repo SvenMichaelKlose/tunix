@@ -89,13 +89,15 @@ textview_draw_content (struct obj * w)
 
         gfx_putchar (c);
 
-        if (gfx_x () > w->rect.w - 4)
-            goto next;
-
-        continue;
+        if (gfx_x () <= w->rect.w - 4)
+            continue;
 
 next:
-        y += 9;
+        y += 10;
+        if (c == 10)
+            while (*ptr == 10)
+                ++ptr, y += 5;
+
         if (y > w->rect.h)
             break;
 
@@ -347,9 +349,10 @@ desktop_loop ()
             case '?':
                 show_help ();
                 continue;
-        }
 
-        send_key_event ();
+            default:
+                send_key_event ();
+        }
     } while (!do_shutdown);
 }
 

@@ -25,36 +25,162 @@
 #include "table.h"
 #include "window.h"
 
-#include "basic-starter.h"
 #include "file-window.h"
 #include "desktop.h"
 
 #define DESKTOP_WIDTH  (20 * 8)
 #define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 
+//
+// Text viewer place here due to linker problems.
+//
+
+char txt_help[] =
+    "INGLE is graphical user interface for the "
+    "VIC with Ultimem expansion. It provides "
+    "a ROM file system with a collection of "
+    "programs on it already.\n"
+    "\n"
+    "Desktop commands:\n"
+    "\n"
+    "N: Step to next window.\n"
+    "F: Toggle full-screen window.\n"
+    "D: Minimize all windows.\n"
+    "R: Redraw all windows.\n"
+    "\n"
+    "File manager commands:\n"
+    "\n"
+    "Up/down: Step to next file.\n"
+    "Enter: Launch file.\n"
+    "\n"
+    "INGLE is being developed by\n"
+    "Sven Michael Klose <pixel@hugbox.org>."
+    ;
+
+struct textview_content {
+    struct obj  obj;
+    char        * data;
+    char        * ptr;
+    unsigned    size;
+};
+
+void __fastcall__
+textview_draw_content (struct obj * w)
+{
+    struct window * win = WINDOW(w);
+    struct textview_content * content = (struct textview_content *) w;
+    char * ptr = content->ptr;
+    unsigned y = 0;
+    char c;
+
+    gfx_push_context ();
+
+    gfx_set_font (charset_4x8, 4, FONT_BANK);
+    gfx_set_font_compression (1);
+    gfx_set_pattern (pattern_empty);
+    gfx_draw_box (0, 0, w->rect.w, w->rect.h);
+
+    gfx_set_position (1, 1);
+    while (*ptr) {
+        if (y > w->rect.h)
+            break;
+
+        c = *ptr++;
+        if (c == 10)
+            goto next;
+
+        gfx_putchar (c);
+
+        if (gfx_x () > w->rect.w - 4)
+            goto next;
+
+        continue;
+
+next:
+        y += 8;
+        gfx_set_position (1, y);
+    }
+/*
+*/
+    gfx_pop_context ();
+}
+
+
+void __fastcall__
+textview_draw (struct obj * w)
+{
+    struct textview_content * content = (struct textview_content *) w;
+
+    gfx_push_context ();
+    gfx_reset_region ();
+    set_obj_region (w);
+    textview_draw_content (w);
+    gfx_pop_context ();
+}
+
+void
+textview_event_handler (struct obj * o, struct event * e)
+{
+    struct textview_content * content = (struct textview_content *) o->node.children;
+    int visible_bytes = (content->obj.rect.h / 8) * 8;
+
+    switch (e->data_char) {
+        case CH_CURS_UP:
+            content->ptr -= 1024;
+            break;
+
+        case CH_CURS_DOWN:
+            content->ptr += 1024;
+            break;
+    }
+
+    textview_draw ((struct obj *) content);
+}
+
+struct obj_ops obj_ops_textview_content = {
+    textview_draw,
+    obj_noop,
+    obj_noop,
+    event_handler_passthrough,
+    DESKTOP_BANK,
+    DESKTOP_BANK,
+    DESKTOP_BANK,
+    DESKTOP_BANK
+};
+
+struct textview_content *
+make_textview_content ()
+{
+	struct obj * obj =  alloc_obj (sizeof (struct obj), &obj_ops_textview_content);
+    struct textview_content * content = malloc (sizeof (struct textview_content));
+
+    memcpy (content, obj, sizeof (struct obj));
+    free (obj);
+
+    return content;
+}
+
+struct obj * __fastcall__
+make_textview (char * data, unsigned size, char * title, gpos x, gpos y, gpos w, gpos h)
+{
+    struct textview_content * content = make_textview_content ();
+	struct window * win = make_window (title, (struct obj *) content, textview_event_handler);
+
+    content->data = data;
+    content->ptr = data;
+    content->size = size;
+    win->flags |= W_FULLSCREEN;
+	set_obj_position_and_size (OBJ(win), x, y, w, h);
+
+    return OBJ(win);
+}
+
 struct obj * desktop;
 struct obj * focussed_window;
 char do_shutdown = 0;
 
-void __fastcall__
-desktop_draw (struct obj * o)
-{
-    struct window * w = WINDOW(o->node.children);
-
-    /* Look up full-screen window and draw only that. */
-    while (w) {
-        if (w->flags & W_FULLSCREEN && OBJ(w) == focussed_window) {
-            draw_obj (OBJ(w));
-            return;
-        }
-        w = WINDOW(w->obj.node.next);
-    }
-
-    draw_box (o);
-}
-
 struct obj_ops desktop_obj_ops = {
-    desktop_draw,
+    draw_box,
     layout_obj_children,
     obj_noop,
     event_handler_passthrough,
@@ -88,6 +214,21 @@ toggle_fullscreen ()
 }
 
 void
+blur_windows ()
+{
+    struct obj * i = desktop->node.children;
+
+    WINDOW(focussed_window)->flags &= ~W_HAS_FOCUS;
+    if (focussed_window && !(focussed_window->node.flags & OBJ_NODE_INVISIBLE))
+        window_draw_title (WINDOW(focussed_window));
+
+    while (i) {
+        WINDOW(i)->flags &= ~W_HAS_FOCUS;
+        i = i->node.next;
+    }
+}
+
+void
 focus_next_window ()
 {
     struct obj *     next = desktop->node.children;
@@ -96,7 +237,7 @@ focus_next_window ()
     if (!next || !next->node.next)
         return;
 
-    WINDOW(f)->flags &= ~W_HAS_FOCUS;
+    blur_windows ();
 
     desktop->node.children = next->node.next;
     f->node.next = next;
@@ -106,8 +247,6 @@ focus_next_window ()
 
     WINDOW(next)->flags |= W_HAS_FOCUS;
 
-    if (!(f->node.flags & OBJ_NODE_INVISIBLE))
-        window_draw_title (WINDOW(f));
     draw_obj (focussed_window);
 }
 
@@ -122,6 +261,24 @@ hide_windows ()
     }
 
     draw_obj (desktop);
+}
+
+void __fastcall__
+append_window (struct obj * win)
+{
+    blur_windows ();
+    focussed_window = append_obj (desktop, win);
+    WINDOW(focussed_window)->flags |= W_HAS_FOCUS;
+    layout_obj (focussed_window);
+    draw_obj (focussed_window);
+}
+
+void
+show_help ()
+{
+    blur_windows ();
+    append_window (make_textview (txt_help, sizeof (txt_help), "Help: INGLE", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT));
+    print_message ("Welcome to INGLE!");
 }
 
 char key;
@@ -181,6 +338,10 @@ desktop_loop ()
             case 'D':
                 hide_windows ();
                 continue;
+
+            case '?':
+                show_help ();
+                continue;
         }
 
         send_key_event ();
@@ -194,13 +355,12 @@ start_desktop ()
     desktop->ops = &desktop_obj_ops;
     set_obj_position_and_size (desktop, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
 
-    append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
-    focussed_window = append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
-    WINDOW(focussed_window)->flags |= W_HAS_FOCUS;
-
-    print_message ("Welcome to Ingle! Press 'H' for help.");
+    print_message ("Press '?' for help.");
     layout_obj (desktop);
     draw_obj (desktop);
+
+    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
+    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
 
     desktop_loop ();
 }

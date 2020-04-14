@@ -228,10 +228,16 @@ file_window_read_directory (struct file_window_content * content)
     content->len = len;
 }
 
+unsigned __fastcall__
+file_window_visible_lines (struct file_window_content * content)
+{
+    return content->obj.rect.h / 8;
+}
+
 void __fastcall__
 file_window_invert_position (struct file_window_content * content)
 {
-    unsigned visible_lines = content->obj.rect.h / 8 - 1;
+    unsigned visible_lines = file_window_visible_lines (content);
     unsigned wpos = content->pos - (content->pos % visible_lines);
     unsigned y = (content->pos - wpos) * 8;
 
@@ -263,12 +269,12 @@ file_window_draw_list (struct obj * w)
 {
     struct window * win = WINDOW(w);
     struct file_window_content * content = (struct file_window_content *) w;
-    unsigned visible_lines = content->obj.rect.h / 8 - 1;
+    unsigned visible_lines = file_window_visible_lines (content);
+    unsigned wpos = content->pos - (content->pos % visible_lines);
+    unsigned rpos = wpos;
     char xofs = 1;
     struct dirent * d = content->files;
     unsigned y = 0;
-    unsigned wpos = content->pos - (content->pos % visible_lines);
-    unsigned rpos = wpos;
     uchar i;
     uchar t;
     char c;
@@ -285,11 +291,10 @@ file_window_draw_list (struct obj * w)
     gfx_draw_box (0, 0, w->rect.w, w->rect.h);
 
     while (1) {
-        if (y > w->rect.h)
-            break;
-
         if (rpos >= content->len)
-            goto next;
+            break;
+        if (y >= w->rect.h)
+            break;
         if (!d || !d->name[0])
             goto next;
 
@@ -419,7 +424,7 @@ void __fastcall__
 file_window_event_handler (struct obj * o, struct event * e)
 {
     struct file_window_content * content = (struct file_window_content *) o->node.children;
-    int visible_lines = content->obj.rect.h / 8 - 1;
+    unsigned visible_lines = file_window_visible_lines (content);
     unsigned wpos = content->pos - (content->pos % visible_lines);
 
     if (inputline) {
@@ -447,14 +452,15 @@ file_window_event_handler (struct obj * o, struct event * e)
             break;
 
         case KEY_DOWN:
-            if (content->pos > content->len) {
+            if (content->pos >= content->len) {
                 content->pos = content->len - 1;
                 goto done;
             }
             if (content->pos == content->len - 1)
                 goto done;
+
             content->pos++;
-            if (content->pos > wpos + visible_lines - 1)
+            if (content->pos == wpos + visible_lines)
                 goto new_page;
             break;
 

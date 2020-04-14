@@ -41,6 +41,9 @@ char txt_help[] =
     "a ROM file system with a collection of "
     "programs on it already.\n"
     "\n"
+    "Please check http://hugbox.org for more\n"
+    "information.\n"
+    "\n"
     "Desktop commands:\n"
     "\n"
     "N: Step to next window.\n"
@@ -52,9 +55,6 @@ char txt_help[] =
     "\n"
     "Up/down: Step to next file.\n"
     "Enter: Launch file.\n"
-    "\n"
-    "INGLE is being developed by\n"
-    "Sven Michael Klose <pixel@hugbox.org>."
     ;
 
 struct textview_content {
@@ -70,21 +70,18 @@ textview_draw_content (struct obj * w)
     struct window * win = WINDOW(w);
     struct textview_content * content = (struct textview_content *) w;
     char * ptr = content->ptr;
-    unsigned y = 0;
+    unsigned y = 1;
     char c;
 
     gfx_push_context ();
 
-    gfx_set_font (charset_4x8, 4, FONT_BANK);
+    gfx_set_font (charset_4x8, 2, FONT_BANK);
     gfx_set_font_compression (1);
     gfx_set_pattern (pattern_empty);
     gfx_draw_box (0, 0, w->rect.w, w->rect.h);
 
     gfx_set_position (1, 1);
     while (*ptr) {
-        if (y > w->rect.h)
-            break;
-
         c = *ptr++;
         if (c == 10)
             goto next;
@@ -97,11 +94,16 @@ textview_draw_content (struct obj * w)
         continue;
 
 next:
-        y += 8;
+        y += 9;
+        if (y > w->rect.h)
+            break;
+
         gfx_set_position (1, y);
+
+        while (*ptr == 32)
+            ++ptr;
     }
-/*
-*/
+
     gfx_pop_context ();
 }
 
@@ -206,9 +208,11 @@ toggle_fullscreen ()
 
     if (w->flags & W_FULLSCREEN) {
         set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+        layout_obj (focussed_window);
         draw_obj (focussed_window);
     } else {
         set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+        layout_obj (desktop);
         draw_obj (desktop);
     }
 }
@@ -277,7 +281,7 @@ void
 show_help ()
 {
     blur_windows ();
-    append_window (make_textview (txt_help, sizeof (txt_help), "Help: INGLE", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT));
+    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT));
     print_message ("Welcome to INGLE!");
 }
 

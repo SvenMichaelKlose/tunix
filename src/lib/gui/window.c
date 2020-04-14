@@ -11,8 +11,6 @@
 #include "message.h"
 #include "frame.h"
 
-extern struct obj * focussed_window;
-
 #define WINDOW_TITLE_HEIGHT     11
 
 void __fastcall__ layout_window_content_frame (struct obj *);
@@ -136,7 +134,7 @@ window_draw_title (struct window * win)
     gfx_set_pencil_mode (PENCIL_MODE_OR);
     gfx_set_font (charset_4x8, 2, FONT_BANK);
     gfx_draw_text (txy, txy, win->title);
-    if (focussed_window == (struct obj *) win)
+    if (win->flags & W_HAS_FOCUS)
         draw_title_grip (txy, yb, iw);
     gfx_pop_context ();
 }

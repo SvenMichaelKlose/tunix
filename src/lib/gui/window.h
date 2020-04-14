@@ -4,7 +4,7 @@
 extern struct obj_ops window_ops;
 
 #define W_FULLSCREEN    1
-#define WINDOW(x)       ((struct window *) x)
+#define W_HAS_FOCUS     2
 
 struct window {
     struct obj  obj;
@@ -15,6 +15,8 @@ struct window {
     gsize       user_w;
     gsize       user_h;
 };
+
+#define WINDOW(x)       ((struct window *) x)
 
 extern struct window * __fastcall__ make_window (char * title, struct obj * content, event_handler_t handler);
 extern void __fastcall__ draw_window (struct obj * _w);

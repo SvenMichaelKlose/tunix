@@ -90,17 +90,21 @@ toggle_fullscreen ()
 void
 focus_next_window ()
 {
-    struct obj * next = desktop->node.children;
-    struct obj * f = focussed_window;
+    struct obj *     next = desktop->node.children;
+    struct obj *     f = focussed_window;
 
     if (!next || !next->node.next)
         return;
+
+    WINDOW(f)->flags &= ~W_HAS_FOCUS;
 
     desktop->node.children = next->node.next;
     f->node.next = next;
     next->node.next = NULL;
     next->node.flags &= ~OBJ_NODE_INVISIBLE;
     focussed_window = next;
+
+    WINDOW(next)->flags |= W_HAS_FOCUS;
 
     if (!(f->node.flags & OBJ_NODE_INVISIBLE))
         window_draw_title (WINDOW(f));
@@ -192,6 +196,7 @@ start_desktop ()
 
     append_obj (desktop, w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
     focussed_window = append_obj (desktop, w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
+    WINDOW(focussed_window)->flags |= W_HAS_FOCUS;
 
     print_message ("Welcome to Ingle! Press 'H' for help.");
     layout_obj (desktop);

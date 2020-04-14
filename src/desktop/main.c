@@ -21,9 +21,6 @@
 #include "ultifs.h"
 #include "wrap-ultifs.h"
 
-#define DESKTOP_WIDTH  (20 * 8)
-#define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
-
 void
 init_memory ()
 {

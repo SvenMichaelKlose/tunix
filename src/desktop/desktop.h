@@ -1,6 +1,8 @@
 #ifndef DESKTOP_H
 #define DESKTOP_H
 
+#define DESKTOP_WIDTH   (20 * 8)
+#define DESKTOP_HEIGHT  (12 * 16 - MESSAGE_HEIGHT)
 #define DESKTOP_BANK    1
 
 extern struct obj * desktop;

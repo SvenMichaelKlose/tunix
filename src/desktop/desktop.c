@@ -179,12 +179,42 @@ make_textview (char * data, unsigned size, char * title, gpos x, gpos y, gpos w,
     return OBJ(win);
 }
 
+//
+// Desktop
+//
+
 struct obj * desktop;
 struct obj * focussed_window;
 char do_shutdown = 0;
 
+void
+draw_desktop (struct obj * o)
+{
+    struct obj * p = o->node.children;
+    struct obj * fs = NULL;
+
+    if (!p) {
+        draw_box (o);
+        return;
+    }
+
+    do {
+        if (WINDOW(p)->flags & W_FULLSCREEN)
+            fs = p;
+    } while (p = p->node.next);
+
+    if (!fs) {
+        draw_box (o);
+        return;
+    }
+
+    do {
+        draw_obj (fs);
+    } while (fs = fs->node.next);
+}
+
 struct obj_ops desktop_obj_ops = {
-    draw_box,
+    draw_desktop,
     layout_obj_children,
     obj_noop,
     event_handler_passthrough,

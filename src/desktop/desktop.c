@@ -174,7 +174,6 @@ make_textview (char * data, unsigned size, char * title, gpos x, gpos y, gpos w,
     content->data = data;
     content->ptr = data;
     content->size = size;
-    win->flags |= W_FULLSCREEN;
 	set_obj_position_and_size (OBJ(win), x, y, w, h);
 
     return OBJ(win);
@@ -210,10 +209,12 @@ toggle_fullscreen ()
     w->flags ^= W_FULLSCREEN;
 
     if (w->flags & W_FULLSCREEN) {
+        print_message ("fs");
         set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
         layout_obj (focussed_window);
         draw_obj (focussed_window);
     } else {
+        print_message ("tw");
         set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
         layout_obj (desktop);
         draw_obj (desktop);
@@ -271,11 +272,13 @@ hide_windows ()
 }
 
 void __fastcall__
-append_window (struct obj * win)
+append_window (struct obj * win, char is_fullscreen)
 {
     blur_windows ();
     focussed_window = append_obj (desktop, win);
-    WINDOW(focussed_window)->flags |= W_HAS_FOCUS;
+    WINDOW(focussed_window)->flags |= W_HAS_FOCUS | (is_fullscreen ? W_FULLSCREEN : 0);
+    if (is_fullscreen)
+        set_obj_position_and_size (win, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
     layout_obj (focussed_window);
     draw_obj (focussed_window);
 }
@@ -284,27 +287,28 @@ void
 show_help ()
 {
     blur_windows ();
-    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT));
+    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, DESKTOP_HEIGHT / 4, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), TRUE);
     print_message ("Welcome to INGLE!");
 }
 
-char key;
-
 void
-send_key_event ()
+send_key_event (char key)
 {
     struct event * e = malloc (sizeof (struct event));
     e->type = EVT_KEYPRESS;
     e->data_char = key;
+
     send_event (focussed_window, e);
+
     free (e);
 }
 
-int timer = -1;
-
-void
+char
 wait_for_key ()
 {
+    static int timer = -1;
+    char key;
+
     while (!(key = cbm_k_getin ())) {
         send_queued_event ();
 
@@ -315,13 +319,17 @@ wait_for_key ()
     }
 
     timer = -0x6000;
+
+    return key;
 }
 
 void
 desktop_loop ()
 {
+    char key;
+
     do {
-        wait_for_key ();
+        key = wait_for_key ();
         //sprintf (message_buffer, "Key code %U", key);
         //print_message (message_buffer);
 
@@ -351,7 +359,7 @@ desktop_loop ()
                 continue;
 
             default:
-                send_key_event ();
+                send_key_event (key);
         }
     } while (!do_shutdown);
 }
@@ -367,8 +375,8 @@ start_desktop ()
     layout_obj (desktop);
     draw_obj (desktop);
 
-    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
-    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2));
+    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), FALSE);
+    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), FALSE);
 
     desktop_loop ();
 }

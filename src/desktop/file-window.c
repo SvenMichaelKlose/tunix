@@ -30,6 +30,18 @@
 
 struct cbm_dirent dirent;
 
+void __fastcall__
+gen_exec (unsigned long ptr, unsigned start, unsigned size)
+{
+    save_desktop_state ();
+
+    // Workaround for MINIGRAFIK files.
+    if (start == 0x10f1)
+        start = 0x1201;
+
+    ingle_exec (ptr, start, size);
+}
+
 unsigned __fastcall__
 gen_launch (struct drive_ops * drive_ops, unsigned start)
 {
@@ -49,12 +61,14 @@ gen_launch (struct drive_ops * drive_ops, unsigned start)
             return -1;
         }
         size += read_bytes;
-        *ULTIMEM_BLK5RAM = *ULTIMEM_BLK5RAM + 1;
+        *ULTIMEM_BLK5RAM += + 1;
 
         sprintf (message_buffer, "%U read...", (unsigned) size);
         print_message (message_buffer);
     }
     *ULTIMEM_BLK5 = oldblk5;
+
+    gen_exec (12 * 0x2000u, start, size);
 
     return size;
 }
@@ -148,25 +162,12 @@ u_close ()
     w_bfile_close (current_file);
 }
 
-
-void __fastcall__
-gen_exec (unsigned long ptr, unsigned start, unsigned size)
-{
-    save_desktop_state ();
-
-    // Workaround for MINIGRAFIK files.
-    if (start == 0x10f1)
-        start = 0x1201;
-
-    ingle_exec (ptr, start, size);
-}
-
 unsigned __fastcall__
 ultifs_launch (struct drive_ops * drive_ops, unsigned start)
 {
     gen_exec (current_file->ptr, start, current_file->size);
 
-    return current_file-> size;
+    return current_file->size;
 }
 
 struct drive_ops ultifs_drive_ops = {
@@ -392,8 +393,6 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
     drive_ops->read (&start, 2);
     size = drive_ops->launch (drive_ops, start);
     drive_ops->close ();
-
-    gen_exec (12 * 0x2000u, start, size);
 }
 
 void __fastcall__

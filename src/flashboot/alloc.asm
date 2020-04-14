@@ -7,6 +7,7 @@ num_banks = 1024 / 8    ; TODO: Use detection for VIC-MIDI.
 ram_map:            .res 16
 last_bank_in_map:   .res 1
 free_banks:         .res 1
+tmp:                .res 1
 
 .data
 
@@ -62,8 +63,6 @@ l1: sta ram_map-1,x
 .proc alloc_bank
     txa
     pha
-    tya
-    pha
     lda $9ff4
     pha
     lda $9ff5
@@ -106,10 +105,10 @@ got_it:
     asl
     asl
     asl
-    sty $33c
+    sty tmp
     clc
-    adc $33c
-    sta $33c
+    adc tmp
+    tay
     dec free_banks
 return:
     pla
@@ -119,10 +118,8 @@ return:
     pla
     sta $9ff4
     pla
-    tay
-    pla
     tax
-    lda $33c
+    tya
     rts
 
 all_gone:

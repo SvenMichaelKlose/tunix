@@ -15,7 +15,7 @@ print_message (char * text)
     gfx_draw_box (0, 23 * 8 - 1, 160, 9);
     gfx_set_pattern (pattern_solid);
     gfx_draw_hline (0, 23 * 8 - 2, 20 * 8);
-    gfx_draw_text (0, 23 * 8, text);
+    gfx_draw_text (1, 23 * 8, text);
     gfx_pop_context ();
 }
 

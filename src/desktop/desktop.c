@@ -50,6 +50,7 @@ char txt_help[] =
     "F: Toggle full-screen window.\n"
     "D: Minimize all windows.\n"
     "R: Redraw all windows.\n"
+    "M: Show free memory.\n"
     "\n"
     "File manager commands:\n"
     "\n"

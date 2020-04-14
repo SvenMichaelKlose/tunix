@@ -209,12 +209,10 @@ toggle_fullscreen ()
     w->flags ^= W_FULLSCREEN;
 
     if (w->flags & W_FULLSCREEN) {
-        print_message ("fs");
         set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
         layout_obj (focussed_window);
         draw_obj (focussed_window);
     } else {
-        print_message ("tw");
         set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
         layout_obj (desktop);
         draw_obj (desktop);
@@ -375,8 +373,8 @@ start_desktop ()
     layout_obj (desktop);
     draw_obj (desktop);
 
-    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), FALSE);
-    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), FALSE);
+    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), FALSE);
+    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), FALSE);
 
     desktop_loop ();
 }

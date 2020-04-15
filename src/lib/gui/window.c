@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ultimem.h"
+#include <ultimem.h>
+#include <libgfx.h>
 
-#include "libgfx.h"
 #include "obj.h"
 #include "layout-ops.h"
 #include "event.h"

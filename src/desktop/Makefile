@@ -8,8 +8,7 @@ SOURCES= \
     wrap-ultifs.c
 
 ASMSOURCES= \
-    prgend.asm \
-    ../attic/core/mem/clrram.asm
+    prgend.asm
 
 PROGRAM=desktop-lib.bin
 
@@ -22,7 +21,7 @@ include ../Makefile.rules
 	$(CC) --register-space 19 -O -c $(CFLAGS) -I $(CC65_INCLUDE) -I../lib/ingle/ -I../lib/ultimem/ -I../lib/gfx/ -I../lib/gui/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/ingle/libingle.a --lib ../lib/ultimem/libultimem.a --lib ../lib/gfx/libgfx.a --lib ../lib/gui/libgui.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib
+	$(LD) -C vic20.cfg -m $@.map -Ln $@.lst -o $@ $^ --lib ../lib/gui/libgui.a --lib ../lib/gfx/libgfx.a --lib ../lib/ultimem/libultimem.a --lib ../lib/ingle/libingle.a --lib ../lib/blit/libblit.a --lib $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 	$(AS) -o charset-4x8.o charset-4x8-light.asm

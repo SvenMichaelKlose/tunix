@@ -1,4 +1,5 @@
 all:
+	$(MAKE) -C lib/blit all
 	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultifs all
@@ -7,6 +8,7 @@ all:
 	$(MAKE) -C flashboot all
 #	$(MAKE) -C tgi-demo all
 	$(MAKE) -C desktop all
+	$(MAKE) -C basic-starter all
 	$(MAKE) -C vforth all
 	$(MAKE) -C writenow all
 	$(MAKE) -C brv-play all
@@ -14,6 +16,7 @@ all:
 #	$(MAKE) -C paint all
 
 clean:
+	$(MAKE) -C lib/blit clean
 	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem clean
 	$(MAKE) -C lib/ultifs clean
@@ -22,6 +25,7 @@ clean:
 	$(MAKE) -C flashboot clean
 #	$(MAKE) -C tgi-demo clean
 	$(MAKE) -C desktop clean
+	$(MAKE) -C basic-starter clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C writenow clean
 	$(MAKE) -C brv-play clean

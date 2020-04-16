@@ -11,7 +11,6 @@ all:
 	$(MAKE) -C basic-starter all
 	$(MAKE) -C vforth all
 	$(MAKE) -C writenow all
-	$(MAKE) -C brv-play all
 	$(MAKE) -C installer all
 #	$(MAKE) -C paint all
 
@@ -28,6 +27,5 @@ clean:
 	$(MAKE) -C basic-starter clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C writenow clean
-	$(MAKE) -C brv-play clean
 	$(MAKE) -C installer clean
 #	$(MAKE) -C paint clean

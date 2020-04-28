@@ -102,6 +102,7 @@ got_it:
     adc tmp
     tay
     dec free_banks
+
 return:
     pla
     sta $9ff1

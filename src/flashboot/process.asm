@@ -88,7 +88,7 @@ return:
     pha
     lda $9ff5
     pha
-    lda $9ff1       ; RAM in BLK5
+    lda $9ff1
     pha
     jsr set_banks
 

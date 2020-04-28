@@ -27,7 +27,7 @@
     jmp $a00c
 .endproc
 
-; void __fastcall__ launch (unsigned long offset, unsigned start, unsigned size);
+; void __fastcall__ ingle_exec (unsigned long offset, unsigned start, unsigned size);
 .proc _ingle_exec
     sta $08     ; c
     stx $09

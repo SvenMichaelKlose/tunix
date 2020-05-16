@@ -40,8 +40,8 @@ Speed code to copy banks.
 
 To be replacing $a00c perhaps.
 
-Creates a new process with own RAM banks, not overwriting
-the currently running program.  Does only need to save
+Creates a new process with its own RAM banks, not overwriting
+the currently running program.  Does only need to copy to save
 unbanked RAM which is much faster.
 
 Parameters:

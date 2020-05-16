@@ -84,7 +84,7 @@ return:
 .endproc
 
 .proc ingle_exec
-    lda $9ff4       ; Save RAM.
+    lda $9ff4       ; Save RAM1,2,3.
     pha
     lda $9ff5
     pha

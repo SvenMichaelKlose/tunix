@@ -37,13 +37,12 @@
 
 char txt_help[] =
     "INGLE is graphical user interface for the "
-    "VIC with Ultimem expansion. It provides "
+    "VIC with Ultimem expansion.  It provides "
     "a ROM file system with a collection of "
     "programs on it already.\n"
     "\n"
-    "Please check \n"
+    "For more information please check \n"
     "http://sleepingelephant.com/denial/\n"
-    "for more information.\n"
     "\n"
     "Desktop commands:\n"
     "\n"

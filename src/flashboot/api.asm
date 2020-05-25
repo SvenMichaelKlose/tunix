@@ -2,13 +2,31 @@
 .export restore_banks
 .export restore_banks_and_y
 
-SAVED_ZP_SIZE = 64
-
 .data
 
-saved_zp: .res SAVED_ZP_SIZE
+; For some reasone __ZP_SIZE__ and related do not seem to be
+; constants, so we go for all of the zero page.
+saved_zp: .res 256
 
 .code
+
+.proc save_zp
+    ldx #0
+l:  lda 0,x
+    sta saved_zp,x
+    inx
+    bne l
+    rts
+.endproc
+
+.proc restore_zp
+    ldx #0
+l:  lda saved_zp,x
+    sta 0,x
+    inx
+    bne l
+    rts
+.endproc
 
 .proc set_banks
     and #%11111100

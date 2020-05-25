@@ -131,27 +131,33 @@ trampoline:
 trampoline_end:
 .endproc
 
-; Copy loaded data starting at bank 12 to RAM via BLK5.
+; Copy extended memory to RAM (below $8000).
+;
+; s: Offset
+; c: Size
+; $0124-$012d: Target banks within Ultimem register set.
 current_bank = $33c
+
 .proc copy_loaded_to_ram
     ; Setup banks.
     lda #%00111111
     sta $9ff1
     lda #%01110111
     sta $9ff2
-    ldx $0124
+    ldx $0124   ; RAM1,2,3
     ldy $0125
     stx $9ff4
     sty $9ff5
-    ldx $0126
+    ldx $0126   ; IO2,3
     ldy $0127
     stx $9ff6
     sty $9ff7
-    ldx $0128
+    ldx $0128   ; BLK1
     ldy $0129
     stx $9ff8
     sty $9ff9
 
+    ; Init source bank in BLK2.
     ldy #$0a
     sty current_bank
     ldx #s
@@ -160,21 +166,25 @@ current_bank = $33c
     ora #$40
     sta s+1
 
-    ldy #0
+    ; Increment both counter bytes to get the zero flag
+    ; where we want it on countdown.
     ldx c
     inx
     inc c+1
-    jmp l
 
-l4: inc $9ffa
-    lda #>$4000
-    sta s+1
+    ldy #0
+
+    ; Copy byte.
 l:  lda (s),y
     sta (d),y
+
+    ; Step.
     inc d
     beq d1
 l2: inc s
     beq d2
+
+    ; Count down.
 l3: dex
     bne l
     dec c+1
@@ -182,11 +192,13 @@ l3: dex
 
     rts
 
+    ; Increment destination high byte.
 d1: inc d+1
     lda d+1
     cmp #>$4000
     bne l2
 
+    ; Get new destination bank for BLK1.
     stx current_bank+1
     ldx current_bank
     lda $0120,x
@@ -201,9 +213,15 @@ d1: inc d+1
     sta d+1
     bne l2  ; (jmp)
 
+    ; Increment source high byte.
 d2: inc s+1
     lda s+1
     cmp #>$6000
-    beq l4
+    bne l
+
+    ; Step to next source bank.
+l4: inc $9ffa
+    lda #>$4000
+    sta s+1
     bne l3  ; (jmp)
 .endproc

@@ -36,7 +36,9 @@ RAM BASED
 +------------------------+
 | 0x77    XSAVE          |
 +------------------------+
-| 0x78                   |
+| 0x78    IRQNOT         |
++------------------------+
+| 0x79                   |
 |         ZPAD           |
 | 0x8F                   |
 +------------------------+
@@ -112,7 +114,6 @@ Offset  Name      Initialized
 0x04    VOC-LINK  COLD
 0x06    CSP
 0x08    HLD
-0x0A    FREEPGS   QUIT
 0x0C    INBUF     QUIT
 0x0E    >IN       QUERY
 0x10    OUT

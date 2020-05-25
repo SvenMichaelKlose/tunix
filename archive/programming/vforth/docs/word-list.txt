@@ -119,7 +119,6 @@ BASE           Required, interpreter
 BASIC          V-Forth, system
 BEGIN          Required, compiler
 BL             Controlled
-BLANK          Controlled
 BODY>          Field address
 BRANCH         System, nucleus
 C!             Required, nucleus

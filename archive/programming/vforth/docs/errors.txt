@@ -17,6 +17,8 @@ where 'n' is one of the following:
    19 - conditionals not paired
    20 - stack position mismatch during compilation
    21 - word protected
+   30 - page allocation error
+   31 - not supported with ROM image
 
 
 I/O ERRORS
@@ -53,3 +55,12 @@ where 'n' is a combination of one or more of the following:
    16 - unrecoverable read error (tape)
    32 - checksum error (tape)
   128 - device not present (serial)
+
+For RS-232 channels the values are the following:
+
+    1 - Parity error
+    2 - Framing error
+    4 - Receive buffer overrun
+   16 - CTS missing
+   64 - DSR missing
+  128 - BREAK detected

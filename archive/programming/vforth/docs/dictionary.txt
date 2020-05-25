@@ -3,32 +3,31 @@ DICTIONARY ENTRY LAYOUT
 
 Each word has the following structure:
 
-    +------------------+
-    |   Link field     |
-    +------------------+
-    |   b7 = 1         |
-    |   b6 - immediate |
-    |   b5 - smudge    |
-    | b4-0 - name      |
-    |        length    |
-    +------------------+
-    |   b7 = 0         |
-    |    Name byte     |
-    +------------------+
-    |                  |
+    +--------------------+
+    |    Link field      |
+    +--------------------+
+    |   b7 = 1           |
+    |   b6 - Immediate   |
+    |   b5 - Smudge      |
+    | b4-0 - Name length |
+    +--------------------+
+    |    b7 = 0          |
+    |     Name byte      |
+    +--------------------+
+    |                    |
 
-    |                  |
-    +------------------+
-    |   b7 = 1         |
-    |    Name byte     |
-    +------------------+
-    |      0xA0        |
-    |  Padding (opt)   |
-    +------------------+
-    |   Code field     |
-    +------------------+
-    | Parameter field  |
-    |                  |
+    |                    |
+    +--------------------+
+    |    b7 = 1          |
+    |     Name byte      |
+    +--------------------+
+    |       0xA0         |
+    |   Padding (opt)    |
+    +--------------------+
+    |    Code field      |
+    +--------------------+
+    |  Parameter field   |
+    |                    |
 
 The link field contains the name field address of the previous word,
 the link field address of the first word is 0x000.
@@ -117,7 +116,7 @@ field of the latest vocabulary. The vocabulary link field address of
     +--------+     +--------+
 
 The first word in a vocabulary points to the embedded word of the
-preceeding vocabulary.
+preceding vocabulary.
 
     +-------+     +-------+
     |  lf   |-+   |  lf   |

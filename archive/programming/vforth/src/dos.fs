@@ -119,5 +119,17 @@ variable drive#
     over  finddev  cmd-lfn  $chkout  ?ioerr  >r  ." b-p "  swap
     findsa  .  .  cr  r>  $rstout  ;
 
+( Create new relative file )
+: rel-create  ( addr count reclen  --  lfn )
+    >r  tuck  100  swap  cmove  100  over  +
+    [char] ,  over  c!  1+  [char] l  over  c!  1+
+    [char] ,  over  c!  1+  r>  swap  c!  4  +
+    100  swap  device#  @  nextsa  open-file  ?ioerr  ;
+
+( Set relative file position )
+: rel-pos  ( lfn pos  --  )
+    over  finddev  cmd-lfn  $chkout  ?ioerr  >r  [char] p  emit  swap
+    findsa  emit  100  /mod  swap  emit  emit  1  emit  cr  r>  $rstout  ;
+
 forth definitions
 decimal

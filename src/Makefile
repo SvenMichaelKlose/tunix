@@ -1,5 +1,6 @@
 all:
 	$(MAKE) -C lib/blit all
+	$(MAKE) -C lib/zp all
 	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultifs all
@@ -16,6 +17,7 @@ all:
 
 clean:
 	$(MAKE) -C lib/blit clean
+	$(MAKE) -C lib/zp clean
 	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem clean
 	$(MAKE) -C lib/ultifs clean

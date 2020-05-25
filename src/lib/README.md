@@ -1,10 +1,13 @@
 Ingle libraries
 ===============
 
+# zp
+
+Use the zero page as dword registers.
+
 # ingle
 
-This contains the common zeropage layout and wrappers to
-savely call Ingle's ROM functions in matters of banking.
+Call INGLE ROM functions without worrying about banking.
 
 # ultimem
 

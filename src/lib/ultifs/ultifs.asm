@@ -1,7 +1,6 @@
 .export ultifs_enter_root
 .export ultifs_enter
 .export ultifs_load
-.export copyd
 .exportzp name, namelen
 
 .import ultimem_read_byte
@@ -10,6 +9,11 @@
 .import ultimem_copy_rom2ram
 .importzp s, d, c
 .importzp base, ptr, size
+
+.import zpd_addb_xay
+.import zpd_mov_xy
+.import zpd_inc_x
+.import zpd_is_minus1_y
 
 .zeropage
 
@@ -53,7 +57,7 @@ n:  rts
     rts
 l:  ldx #ptr
     ldy #s
-    jsr copyd
+    jsr zpd_mov_xy
     jmp ultimem_copy_rom2ram
 .endproc
 
@@ -70,35 +74,35 @@ l:  ldx #ptr
 next_block:
     ldx #base
     ldy #ptr
-    jsr copyd
+    jsr zpd_mov_xy
     ldx #ptr
     ldy #size
     jsr ultifs_read_int
     ldy #size
-    jsr is_empty
+    jsr zpd_is_minus1_y
     beq boot_not_found
 
     lda #block_replacement
     ldx #base
     ldy #ptr
-    jsr add_ofs
+    jsr zpd_addb_xay
     ldx #ptr
     ldy #replacement
     jsr ultifs_read_int
     ldy #replacement
-    jsr is_empty
+    jsr zpd_is_minus1_y
     beq check_name
 
     ldx #replacement
     ldy #base
-    jsr copyd
+    jsr zpd_mov_xy
     jmp next_block
 
 check_name:
     lda #block_namelen
     ldx #base
     ldy #ptr
-    jsr add_ofs
+    jsr zpd_addb_xay
     ldx #ptr
     jsr ultimem_read_byte
     cmp namelen
@@ -108,17 +112,17 @@ next_block2:
     lda #block_next
     ldx #base
     ldy #ptr
-    jsr add_ofs
+    jsr zpd_addb_xay
     ldx #ptr
     ldy #next
     jsr ultifs_read_int
     ldy #next
-    jsr is_empty
+    jsr zpd_is_minus1_y
     beq boot_not_found
 
     ldx #next
     ldy #base
-    jsr copyd
+    jsr zpd_mov_xy
     jmp next_block
    
 boot_not_found:
@@ -127,12 +131,12 @@ boot_not_found:
 
 found:
     ldx #ptr
-    jsr inczpd
+    jsr zpd_inc_x
     ldy #0
 l2: jsr ultimem_read_byte
     cmp (name),y
     bne next_block2
-    jsr inczpd
+    jsr zpd_inc_x
     iny
     cpy namelen
     bne l2
@@ -141,73 +145,18 @@ l2: jsr ultimem_read_byte
     rts
 .endproc
 
-.proc copyd
-    lda 0,x
-    sta 0,y
-    lda 1,x
-    sta 1,y
-    lda 2,x
-    sta 2,y
-    lda 3,x
-    sta 3,y
-    rts
-.endproc
-
-.proc inczpd
-    inc 0,x
-    bne n
-    inc 1,x
-    bne n
-    inc 2,x
-    bne n
-    inc 3,x
-n:  rts
-.endproc
-
-.proc add_ofs
-    sta 0,y
-    lda #0
-    sta 1,y
-    sta 2,y
-    sta 3,y
-
-    lda 0,x
-    clc
-    adc 0,y
-    sta 0,y
-    lda 1,x
-    adc 1,y
-    sta 1,y
-    lda 2,x
-    adc 2,y
-    sta 2,y
-    lda 3,x
-    adc 3,y
-    sta 3,y
-    rts
-.endproc
-
 .proc ultifs_read_int
     jsr ultimem_read_byte
-    jsr inczpd
+    jsr zpd_inc_x
     sta 0,y
     jsr ultimem_read_byte
-    jsr inczpd
+    jsr zpd_inc_x
     sta 1,y
     jsr ultimem_read_byte
-    jsr inczpd
+    jsr zpd_inc_x
     sta 2,y
     jsr ultimem_read_byte
-    jsr inczpd
+    jsr zpd_inc_x
     sta 3,y
-    rts
-.endproc
-
-.proc is_empty
-    lda 0,y
-    and 1,y
-    and 2,y
-    and 3,y
-    cmp #$ff
     rts
 .endproc

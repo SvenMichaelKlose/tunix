@@ -1,6 +1,6 @@
 # Ingle Flash boot
 
-Loads the desktop and its banks from direcory "ingle" from
+Loads the desktop and its banks from direcory ".ingle" from
 the UltiFS file system on the Flash ROM starting at bank 9.
 
 ## Vectors

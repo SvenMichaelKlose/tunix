@@ -45,7 +45,7 @@ l1: sta procs,x
 
     ldx #0
 l1: lda procs,x
-    beq got_slot
+    beq allocate_banks
     inx
     cpx #NUM_PROCESSES
     bne l1
@@ -53,7 +53,7 @@ error:
     sec
     bcs return      ; (jmp)
 
-got_slot:
+allocate_banks:
     lda #1
     sta procs,x
     jsr alloc_bank

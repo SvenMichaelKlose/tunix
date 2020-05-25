@@ -2,7 +2,7 @@
 .export restore_banks
 .export restore_banks_and_y
 
-.data
+.bss
 
 ; For some reasone __ZP_SIZE__ and related do not seem to be
 ; constants, so we go for all of the zero page.

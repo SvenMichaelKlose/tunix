@@ -5,9 +5,9 @@ the UltiFS file system on the Flash ROM starting at bank 9.
 
 # API workings
 
-Just the good new right from the start: libingle does all
+Just the good news right from the start: libingle does all
 the necessary stuff to call ROM functions without having to
-worry about much, excapt that libingle should not reside
+worry about much, except that libingle should not reside
 in BLK5 ($a000-$bfff) as the ROM must be banked in before
 any functions of it can be used.
 
@@ -42,6 +42,10 @@ Copies the currently visible RAM to reserved banks.  They are
 copied back on reset and restarted at the address in
 registers X (high) and A (low).  Also the regular RAM, VIC
 and Ultimem registers are copied.
+
+This procedure serves two purposes.  First, to make a copy
+of a program to restore it on reset after a crash and second
+to save away all unbanked RAM before launching a child process.
 
 Parameters:
 ```

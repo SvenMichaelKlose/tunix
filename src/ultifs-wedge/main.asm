@@ -1,7 +1,19 @@
 .export _main
-.importzp s
+
+.forceimport __STARTUP__
+
+
+.data
+
+txt_welcome:
+    .byte $93, "ULTIFS WEDGE", 13, 0
+
 
 .code
+
+.proc _fook
+    rts
+.endproc
 
 .proc _main
     lda #<txt_welcome
@@ -10,6 +22,3 @@
 
     rts
 .endproc
-
-txt_welcome:
-    .byte $93, "ULTIFS WEDGE", 13, 0

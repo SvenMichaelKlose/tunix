@@ -8,8 +8,6 @@
 #define EVT_KEYPRESS    1
 #define EVT_CLICK       2
 
-typedef void __fastcall__ (*event_handler_t) (struct obj *, struct event *);
-
 struct event {
     char type;
     union {
@@ -17,6 +15,8 @@ struct event {
         int  data_int;
     };
 };
+
+typedef void __fastcall__ (*event_handler_t) (struct obj *, struct event *);
 
 extern void __fastcall__ event_handler_passthrough (struct obj *, struct event *);
 

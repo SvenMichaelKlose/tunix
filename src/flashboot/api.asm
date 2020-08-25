@@ -4,7 +4,7 @@
 
 .bss
 
-; For some reasone __ZP_SIZE__ and related do not seem to be
+; For some reason __ZP_SIZE__ and related do not seem to be
 ; constants, so we go for all of the zero page.
 saved_zp: .res 256
 

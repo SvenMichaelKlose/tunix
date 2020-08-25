@@ -1,6 +1,8 @@
 #ifndef EVENT_H
 #define EVENT_H
 
+#include "obj.h"
+
 #define NUM_EVENT_HANDLERS  32
 
 #define EVT_KEYPRESS    1

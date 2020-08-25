@@ -1,12 +1,13 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "obj.h"
 
 #define NUM_EVENT_HANDLERS  32
 
 #define EVT_KEYPRESS    1
 #define EVT_CLICK       2
+
+struct obj;
 
 struct event {
     char type;

@@ -806,12 +806,12 @@ main (int argc, char ** argv)
                 continue;
             case 'l':
                 if (i == argc)
-                    invalid ("Path of boot file.");
+                    invalid ("Command 'l': Path of boot file missing.");
                 load (argv[i++]);
                 continue;
             case 'i':
                 if (i == argc)
-                    invalid ("Path of directory to import missing.");
+                    invalid ("Command 'i': Path of directory to import missing.");
                 printf ("Recurisvely importing direcotry '%s'…\n", argv[i]);
                 import_directory (0, argv[i++], 0);
                 continue;
@@ -823,7 +823,7 @@ main (int argc, char ** argv)
             case 'W':
                 ultifs_mount ();
                 write_image (1);
-                printf ("Short image written.\n");
+                printf ("Short image (not filled up to 8MB Flash ROM size) written.\n");
                 continue;
             default:
                 invalid ("Unknown command.");

@@ -16,7 +16,7 @@
 2: desktop BLK2
 3: desktop BLK3
 4: desktop BLK5
-5: desktop desktop UltiFS code
+5: desktop UltiFS code
 6: desktop 4x8 charset
 7: desktop file window code
 8-120: free

@@ -5,17 +5,29 @@
  * it is written in C.
  */
 
-typedef struct _logical_file {
-    upos    dir;    // The directory the file is in.
-    upos    pos;    // Position of bfile.
-    upos    ofs;    // Current position in file.
-    char    mode;   // Read (0) or write (1).
-} logical_file;
+#pragma code-name ("ULTIFS")
 
-logical_file logical_files[256];
+#include <stddef.h>
+#include <stdlib.h>
+
+#include "ultifs.h"
+
+#define _FNLEN()    (*(char*) 0xb7)     // File name length
+#define _LFN()      (*(char*) 0xb8)     // Logical file
+#define _SA()       (*(char*) 0xb9)     // Secondary address
+#define _FA()       (*(char*) 0xba)     // Device number
+#define _FNAME()    ((char*) 0xbb)      // File name
+
+#define ERR_OUT_OF_MEMORY   1   // TODO: Figure out right code.
+#define ERR_WRONG_LFN       2   // TODO: Figure out right code.
+#define ERR_NOT_FOUND       3   // TODO: Figure out right code.
+
+extern void ultifs_kopen (void);
+
+bfile * logical_files[256];
 
 void
-kernal_init ()
+ultifs_kinit ()
 {
     char i;
 
@@ -25,10 +37,25 @@ kernal_init ()
 }
 
 void
-kernal_open ()
+set_error (char x)
 {
-    char * name = malloc (_FNLEN());
-    upos found_file;
+}
+
+void
+set_ok ()
+{
+}
+
+void
+copy_from_process (char * from, char * to, char len)
+{
+}
+
+void
+ultifs_kopen ()
+{
+    char * name = malloc (_FNLEN() + 1);
+    bfile * found_file;
 
     if (!name) {
         set_error (ERR_OUT_OF_MEMORY);
@@ -36,21 +63,19 @@ kernal_open ()
     }
 
     copy_from_process (_FNAME(), name, _FNLEN());
-    found_file = bfile_lookup_name (current_directory, name, _FNLEN());
+    name[_FNLEN()] = 0;
+
+    found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
         set_error (ERR_NOT_FOUND);
         return;
     }
 
-    lf = alloc_logical_file (_LFN());
-    if (!lf) {
+    if (logical_files[_LFN()]) {
         set_error (ERR_WRONG_LFN);
         return;
     }
 
-    lf->dir = current_directory;
-    lf->pos = found_file;
-    lf->ofs = 0;
-
+    logical_files[_LFN()] = found_file;
     set_ok ();
 }

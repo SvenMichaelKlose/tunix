@@ -7,6 +7,8 @@
 ; Most likely this will map in the rest of the UltiFS
 ; code the primary wedge did not care about.
 
+.import _ultifs_open
+
 .segment "ULTIFS"
 
 .proc uopen

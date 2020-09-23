@@ -75,7 +75,6 @@ ultifs_kopen ()
         set_error (ERR_WRONG_LFN);
         return;
     }
-
     logical_files[_LFN()] = found_file;
     set_ok ();
 }

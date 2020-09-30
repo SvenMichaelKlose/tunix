@@ -1,5 +1,5 @@
 SOURCES=wedge-tertiary.c ultifs.c
-ASMSOURCES=zeropage.asm main.asm wedge-primary.asm wedge-secondary.asm
+ASMSOURCES=zeropage.asm gap.asm main.asm wedge-primary.asm wedge-secondary.asm
 PROGRAM=ultifs-wedge
 
 include ../Makefile.rules

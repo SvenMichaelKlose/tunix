@@ -5,13 +5,14 @@
 ; vector is being called.
 ;
 ; Most likely this will map in the rest of the UltiFS
-; code the primary wedge did not care about.
+; code the primary wedge did not care about to keep it
+; small.
 ; Also the zero page has to be set up before C functions
-; are called.
+; are being called.
 
 .import _ultifs_open
 
-.segment "ULTIFS"
+.segment "SECONDARY"
 
 .proc uopen
     jmp _ultifs_open

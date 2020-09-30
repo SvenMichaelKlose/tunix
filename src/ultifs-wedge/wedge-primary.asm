@@ -13,10 +13,12 @@
 
 ; Map in secondary wedge and save registers.
 .proc map_ultimem
+    ; Save registers to zeropage.
     sta $100
     stx $101
     sty $102
 
+    ; Save Ultimem status.
     lda $9ff2
     sta $103
     lda $9ff8
@@ -24,6 +26,7 @@
     lda $9ff9
     sta $105
 
+    ; Map in UltiFS wedge.
     lda #8
     sta $9ff8
     lda #0
@@ -34,6 +37,7 @@
 
 ; Map process back in and set accu and flags.
 .proc unmap_ultimem
+    ; Restore Ultimem status.
     lda $103
     sta $9ff2
     lda $104

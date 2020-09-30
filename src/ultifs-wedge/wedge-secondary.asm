@@ -10,10 +10,35 @@
 ; Also the zero page has to be set up before C functions
 ; are being called.
 
+.export _blk2
+
 .import _ultifs_open
+.import __ZP_START__
+.import __ZP_SIZE__
 
 .segment "SECONDARY"
 
+_blk2:      .res 1
+
+_saved_zp:  .res $80
+
+.proc swap_zp
+    ldx #$20
+l:  lda __ZP_START__,x
+    pha
+    lda _saved_zp,x
+    sta __ZP_START__,x
+    pla
+    sta _saved_zp,x
+    dex
+    bpl l
+    rts
+.endproc
+
 .proc uopen
-    jmp _ultifs_open
+    lda _blk2
+    sta $9ffa
+    jsr swap_zp
+    jsr _ultifs_open
+    jmp swap_zp
 .endproc

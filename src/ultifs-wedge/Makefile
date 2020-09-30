@@ -1,4 +1,4 @@
-SOURCES=wedge-tertiary.c ultifs.c
+SOURCES=kernal-emulation.c ultifs.c
 ASMSOURCES=zeropage.asm gap.asm main.asm wedge-primary.asm wedge-secondary.asm
 PROGRAM=ultifs-wedge
 

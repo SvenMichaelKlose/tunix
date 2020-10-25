@@ -10,9 +10,12 @@
 ; Also the zero page has to be set up before C functions
 ; are being called.
 
-.export _blk2
+.export _blk3
+.export _blk4
 
 .export init_secondary_wedge
+
+.export _last_regular_device
 
 .import _ultifs_kopen
 .import _ultifs_kclose
@@ -41,9 +44,13 @@ ICLALL  = $032C     ; KERNAL vector - close all channels and files
 ILOAD   = $0330     ; KERNAL vector - load
 ISAVE   = $0332     ; KERNAL vector - save
 
-_blk2:      .res 1
-old_blk2:   .res 1
-_udevs:     .res 1
+_blk3:      .res 1
+_blk4:      .res 1
+old_blk3:   .res 1
+old_blk4:   .res 1
+
+_last_regular_device:   .res 1
+_last_ingle_device:     .res 1
 
 old_IOPEN:      .res 2
 old_ICLOSE:     .res 2
@@ -80,7 +87,9 @@ l:  lda IOPEN,x
 .proc init_secondary_wedge
     jsr init_kernal_vectors
     lda #11
-    sta _udevs
+    sta _last_regular_device
+    lda #12
+    sta _last_ingle_device
     rts
 .endproc
 
@@ -100,15 +109,69 @@ l:  lda __ZP_START__,x
 .proc is_our_device
     pha
     lda FA
-    cmp _udevs
+    cmp _last_ingle_device
     pla
+    bcs above_ours
+    pha
+    lda FA
+    cmp _last_regular_device
+    pla
+    rts
+above_ours:
+    clc
     rts
 .endproc
 
 .proc enter
-    lda _blk2
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+
+    lda $9ffa
+    sta old_blk3
+    lda $9ffc
+    sta old_blk4
+    lda _blk3
     sta $9ffa
-    jmp swap_zp
+    lda _blk4
+    sta $9ffc
+    jsr swap_zp
+
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    rts
+.endproc
+
+.proc leave
+    php
+    pha
+    txa
+    pha
+    tya
+    pha
+
+    lda old_blk3
+    sta $9ffa
+    lda old_blk4
+    sta $9ffc
+    jsr swap_zp
+
+    pla
+    tay
+    pla
+    tax
+    pla
+    plp
+
+    rts
 .endproc
 
 .proc uopen

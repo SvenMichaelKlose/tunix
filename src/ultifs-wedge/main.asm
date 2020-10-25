@@ -11,7 +11,7 @@
 
 .forceimport __STARTUP__
 
-.import init_kernal_vectors
+.import init_secondary_wedge
 
 IOPEN   = $031A     ; KERNAL vector - open a logical file
 ICLOSE  = $031C     ; KERNAL vector - close a specified logical file
@@ -39,7 +39,7 @@ txt_welcome:
     lda #<txt_welcome
     ldy #>txt_welcome
     jsr $cb1e
-    jsr init_kernal_vectors
+    jsr init_secondary_wedge
 
     rts
 .endproc

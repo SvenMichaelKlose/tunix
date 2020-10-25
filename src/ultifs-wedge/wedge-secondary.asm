@@ -12,7 +12,7 @@
 
 .export _blk2
 
-.export init_kernal_vectors
+.export init_secondary_wedge
 
 .import _ultifs_kopen
 .import _ultifs_kclose
@@ -34,12 +34,15 @@ IOPEN   = $031A     ; KERNAL vector - open a logical file
 ICLOSE  = $031C     ; KERNAL vector - close a specified logical file
 ICHKIN  = $031E     ; KERNAL vector - open channel for input
 ICKOUT  = $0320     ; KERNAL vector - open channel for output
-ICLRCN  = $0322     ; KERNAL vector - close input and output channels IBASIN  = $0324     ; KERNAL vector - input character from channel IBSOUT  = $0326     ; KERNAL vector - output character to channel
+ICLRCN  = $0322     ; KERNAL vector - close input and output channels
+IBASIN  = $0324     ; KERNAL vector - input character from channel
+IBSOUT  = $0326     ; KERNAL vector - output character to channel
 ICLALL  = $032C     ; KERNAL vector - close all channels and files
 ILOAD   = $0330     ; KERNAL vector - load
 ISAVE   = $0332     ; KERNAL vector - save
 
 _blk2:      .res 1
+old_blk2:   .res 1
 _udevs:     .res 1
 
 old_IOPEN:      .res 2
@@ -68,9 +71,16 @@ _saved_zp:  .res $80
 l:  lda IOPEN,x
     sta old_IOPEN,x
     lda _new_vectors,x
-    ;sta IOPEN,x
+    sta IOPEN,x
     dex
     bpl l
+    rts
+.endproc
+
+.proc init_secondary_wedge
+    jsr init_kernal_vectors
+    lda #11
+    sta _udevs
     rts
 .endproc
 

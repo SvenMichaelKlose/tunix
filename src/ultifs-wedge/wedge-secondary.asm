@@ -12,6 +12,8 @@
 
 .export _blk2
 
+.export init_kernal_vectors
+
 .import _ultifs_kopen
 .import _ultifs_kclose
 .import _ultifs_kchkin
@@ -49,24 +51,24 @@ old_IBASIN:     .res 2
 old_IBASOUT:    .res 2
 old_ICLALL:     .res 2
 
-new_vectors:
-    .word uopen
-    .word uclose
-    .word uchkin
-    .word uchkout
-    .word uclrcn
-    .word ubasin
-    .word ubasout
-    .word uclall
+_new_vectors:
+new_IOPEN:      .word uopen
+new_ICLOSE:     .word uclose
+new_ICHKIN:     .word uchkin
+new_ICHKOUT:    .word uchkout
+new_ICLRCN:     .word uclrcn
+new_IBASIN:     .word ubasin
+new_IBASOUT:    .word ubasout
+new_ICLALL:     .word uclall
 
 _saved_zp:  .res $80
 
-.proc _init_kernal_vectors
+.proc init_kernal_vectors
     ldx #15
 l:  lda IOPEN,x
     sta old_IOPEN,x
-    lda new_vectors,x
-    sta IOPEN,x
+    lda _new_vectors,x
+    ;sta IOPEN,x
     dex
     bpl l
     rts
@@ -99,6 +101,7 @@ l:  lda __ZP_START__,x
 .endproc
 
 .proc uopen
+    jmp (old_IOPEN)
     jsr is_our_device
     bcc n
     jsr enter
@@ -108,6 +111,7 @@ n:  jmp (old_IOPEN)
 .endproc
 
 .proc uclose
+    jmp (old_ICLOSE)
     jsr is_our_device
     bcc n
     jsr enter
@@ -117,6 +121,7 @@ n:  jmp (old_ICLOSE)
 .endproc
 
 .proc uchkin
+    jmp (old_ICHKIN)
     jsr is_our_device
     bcc n
     jsr enter
@@ -126,6 +131,7 @@ n:  jmp (old_ICHKIN)
 .endproc
 
 .proc uchkout
+    jmp (old_ICHKOUT)
     jsr is_our_device
     bcc n
     jsr enter
@@ -135,6 +141,7 @@ n:  jmp (old_ICHKOUT)
 .endproc
 
 .proc uclrcn
+    jmp (old_ICLRCN)
     jsr is_our_device
     bcc n
     jsr enter
@@ -144,6 +151,7 @@ n:  jmp (old_ICLRCN)
 .endproc
 
 .proc ubasin
+    jmp (old_IBASIN)
     jsr is_our_device
     bcc n
     jsr enter
@@ -153,6 +161,7 @@ n:  jmp (old_IBASIN)
 .endproc
 
 .proc ubasout
+    jmp (old_IBASOUT)
     jsr is_our_device
     bcc n
     jsr enter
@@ -162,6 +171,7 @@ n:  jmp (old_IBASOUT)
 .endproc
 
 .proc uclall
+    jmp (old_ICLALL)
     jsr enter
     jsr _ultifs_kclall
     jsr swap_zp

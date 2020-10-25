@@ -11,6 +11,8 @@
 
 .forceimport __STARTUP__
 
+.import init_kernal_vectors
+
 IOPEN   = $031A     ; KERNAL vector - open a logical file
 ICLOSE  = $031C     ; KERNAL vector - close a specified logical file
 ICHKIN  = $031E     ; KERNAL vector - open channel for input
@@ -37,6 +39,7 @@ txt_welcome:
     lda #<txt_welcome
     ldy #>txt_welcome
     jsr $cb1e
+    jsr init_kernal_vectors
 
     rts
 .endproc

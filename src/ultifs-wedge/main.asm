@@ -27,7 +27,7 @@ ISAVE   = $0332     ; KERNAL vector - save
 .data
 
 txt_welcome:
-    .byte $93, "ULTIFS WEDGE", 13, 0
+    .byte "ULTIFS WEDGE", 13, 0
 
 .code
 

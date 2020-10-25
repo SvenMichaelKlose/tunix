@@ -13,7 +13,7 @@
 .export _blk3
 .export _blk4
 
-.export init_secondary_wedge
+.export _init_secondary_wedge
 
 .export _last_regular_device
 
@@ -84,12 +84,13 @@ l:  lda IOPEN,x
     rts
 .endproc
 
-.proc init_secondary_wedge
+.proc _init_secondary_wedge
+    tax
+    stx _last_ingle_device
+    dex
+    stx _last_regular_device
+
     jsr init_kernal_vectors
-    lda #11
-    sta _last_regular_device
-    lda #12
-    sta _last_ingle_device
     rts
 .endproc
 

@@ -39,15 +39,15 @@
 
 ; Get offset of bank # in A to 0,X
 .proc ultimem_bank2offset
-    ldx #0
+    ldy #0
     sty 0,x
     sty 1,x
     sty 2,x
     sty 3,x
-    ldx #5
+    ldy #5
 l1: asl
     rol 2,x
-    dex
+    dey
     bne l1
     sta 1,x
     rts

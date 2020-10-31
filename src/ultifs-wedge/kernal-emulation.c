@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "ultifs.h"
+#include "../lib/ultimem/ultimem.h"
 
 #define _FNLEN()    (*(char*) 0xb7)     // File name length
 #define _LFN()      (*(char*) 0xb8)     // Logical file
@@ -59,14 +60,14 @@ set_ok ()
 void
 copy_from_process (char * from, char * to, char len)
 {
-    char blk5 = ultimem_blk5 ();
+    char blk5 = *ULTIMEM_BLK5;
 
     do {
-        ptr = ultimem_map5 (from++, 0xa000, 0xe); // Map 'from' into BLK5.
+        ptr = ultimem_map_ptr (from++, (void *) 0xa000, (int *) 0x104, ULTIMEM_BLK5);
         *to = *ptr;
     } while (len--);
 
-    ultimem_set_blk5 (blk5);
+    *ULTIMEM_BLK5 = blk5;
 }
 
 void

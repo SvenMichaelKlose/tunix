@@ -2,6 +2,7 @@
 #include <cbm.h>
 
 extern void __fastcall__ init_secondary_wedge (char rom_device);
+extern void __fastcall__ init_kernal_emulation (void);
 
 void
 list_directory (char device)
@@ -22,5 +23,6 @@ main ()
     printf ("Flash ROM device: %d\n", device);
 
     init_secondary_wedge (device);
+    init_kernal_emulation ();
     list_directory (8);
 }

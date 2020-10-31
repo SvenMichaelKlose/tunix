@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
@@ -12,7 +13,7 @@
 #define _FA()       (*(char*) 0xba)     // Device number
 #define _FNAME()    ((char*) 0xbb)      // File name
 
-#define STATUS()    ((char*) 0x90)      // Serial status byte
+#define STATUS      ((char*) 0x90)      // Serial status byte
 #define STATUS_NO_DEVICE        0x80
 #define STATUS_END_OF_FILE      0x40
 #define STATUS_CHECKSUM_ERROR   0x20
@@ -36,31 +37,23 @@ extern void ultifs_kopen (void);
 extern void ultifs_kclose (void);
 
 bfile * logical_files[256];
+char * ins[256];
+char * outs[256];
+char * outptrs[256];
 
 void
-ultifs_kinit ()
+init_kernal_emulation ()
 {
-    char i;
-
-    do {
-        logical_files[i] = NULL;
-    } while (++i);
-}
-
-void
-set_error (char x)
-{
-}
-
-void
-set_ok ()
-{
+    bzero (ins, sizeof (ins));
+    bzero (outs, sizeof (outs));
+    bzero (outptrs, sizeof (outptrs));
 }
 
 void
 copy_from_process (char * from, char * to, char len)
 {
     char blk5 = *ULTIMEM_BLK5;
+    char * ptr;
 
     do {
         ptr = ultimem_map_ptr (from++, (void *) 0xa000, (int *) 0x104, ULTIMEM_BLK5);
@@ -77,7 +70,7 @@ ultifs_kopen ()
     bfile * found_file;
 
     if (!name) {
-        set_error (ERR_OUT_OF_MEMORY);
+        *STATUS = ERR_OUT_OF_MEMORY;
         return;
     }
 
@@ -85,22 +78,18 @@ ultifs_kopen ()
     name[_FNLEN()] = 0;
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
+    free (name);
     if (!found_file) {
-        set_error (ERR_NOT_FOUND);
-        goto error;
+        *STATUS = STATUS_READ_ERROR;
+        return;
     }
 
     if (logical_files[_LFN()]) {
-        set_error (ERR_WRONG_LFN);
-        goto error;
+        *STATUS = STATUS_READ_ERROR;
+        return;
     }
     logical_files[_LFN()] = found_file;
-    set_ok ();
-
-    return;
-
-error:
-    free (name);
+    *STATUS = 0;
 }
 
 void
@@ -109,7 +98,7 @@ ultifs_kclose ()
     bfile * file = logical_files[_LFN()];
 
     if (!file) {
-        set_error (ERR_NOT_OPEN);
+        *STATUS = STATUS_READ_ERROR;
         return;
     }
 
@@ -123,7 +112,7 @@ ultifs_kchkin ()
     bfile * file = logical_files[_LFN()];
 
     if (!file) {
-        set_error (ERR_NOT_OPEN);
+        *STATUS = STATUS_READ_ERROR;
         return;
     }
 
@@ -136,7 +125,7 @@ ultifs_kchkout ()
     bfile * file = logical_files[_LFN()];
 
     if (!file) {
-        set_error (ERR_NOT_OPEN);
+        *STATUS = STATUS_READ_ERROR;
         return;
     }
 
@@ -160,7 +149,7 @@ ultifs_kbasout ()
 
     // TODO check if there's enough space left.
     if (!file) {
-        set_error (ERR_NOT_OPEN);
+        *STATUS = STATUS_READ_ERROR;
         return;
     }
 

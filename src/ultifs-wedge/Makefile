@@ -1,6 +1,6 @@
 SOURCES=kernal-emulation.c main.c ultifs.c
 ASMSOURCES=zeropage.asm gap.asm wedge-primary.asm wedge-secondary.asm
-PROGRAM=ultifs-wedge
+PROGRAM=ultifs
 
 include ../Makefile.rules
 

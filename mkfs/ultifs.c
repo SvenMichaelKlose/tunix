@@ -345,7 +345,7 @@ bfile_create (upos directory, char * name, char type)
     b->directory = directory;
     b->start = last_free;
     b->size = 0;
-    b->mode = 1;    // write mode
+    b->mode = ULTIFS_MODE_WRITE;
 
     block_set_type (last_free, type);
     block_set_name_length (last_free, name_length);
@@ -373,10 +373,26 @@ bfile_remove (bfile * b)
     (void) bfile_replace (b, 0, "", 0); /* bs */
 }
 
+char __cc65fastcall__
+bfile_read (bfile * b)
+{
+    char x;
+
+    // TODO: Check on file end.
+
+    if (b->mode != ULTIFS_MODE_READ)
+        return 0; // TODO: error!
+    x = ultimem_read_byte (b->ptr);
+    b->ptr++;
+    b->size++;
+
+    return x;
+}
+
 void __cc65fastcall__
 bfile_write (bfile * b, char byte)
 {
-    if (!b->mode)
+    if (b->mode != ULTIFS_MODE_WRITE)
         return; // TODO: error!
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
@@ -386,7 +402,7 @@ bfile_write (bfile * b, char byte)
 void __cc65fastcall__
 bfile_writem (bfile * b, char * bytes, unsigned len)
 {
-    if (!b->mode)
+    if (b->mode != ULTIFS_MODE_WRITE)
         return; // TODO: error!
     while (len--)
         bfile_write (b, *bytes++);
@@ -408,6 +424,7 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
     cc65register char v;
 
     if (b->mode)
+    if (b->mode != ULTIFS_MODE_READ)
         return -1;
 
     while (len && ptr != end) {
@@ -489,12 +506,14 @@ bfile_create_directory (upos parent, char * name)
 {
     upos d;
 
-    // Create file with empty pointer to the first file.
     bfile * b = bfile_create (parent, name, BLOCKTYPE_DIRECTORY);
+
+    // Make empty pointer to first file.
     bfile_write (b, 255);
     bfile_write (b, 255);
     bfile_write (b, 255);
     bfile_write (b, 255);
+
     d = b->start;
     bfile_close (b);
 

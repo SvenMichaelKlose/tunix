@@ -22,6 +22,9 @@ typedef struct _bfile {
     char    mode;           /* Mode at bfile_open(). */
 } bfile;
 
+#define ULTIFS_MODE_READ    0
+#define ULTIFS_MODE_WRITE   1
+
 extern upos ultifs_pwd;
 
 extern char ultifs_mount (void);
@@ -34,7 +37,10 @@ extern upos    __cc65fastcall__ bfile_create_directory (upos parent, char * name
 #ifdef __CC65__
 extern struct cbm_dirent;
 extern bfile * __cc65fastcall__ ultifs_open (upos directory, char * name, char mode);
-extern int     __cc65fastcall__ bfile_readm (bfile * b, char * bytes, unsigned len);
+extern void    __cc65fastcall__ ultifs_close (bfile *);
+extern int     __cc65fastcall__ bfile_readm (bfile *, char * bytes, unsigned len);
+extern char    __cc65fastcall__ bfile_read (bfile *);
+extern void    __cc65fastcall__ bfile_write (bfile *, char);
 
 extern char                     ultifs_opendir (void);
 extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);

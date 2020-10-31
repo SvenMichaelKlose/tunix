@@ -23,4 +23,8 @@ extern void __fastcall__ ultimem_erase_block (char);
 
 extern void __fastcall__ ultimem_copy_rom2ram (long src, long dst, unsigned size);
 
+// Map pointer into external bank configuration to another block
+// in the current configuration.
+extern void * __fastcall__ ultimem_map_ptr (void * block, int * blockreg, void * ptr, int * blockregs);
+
 #endif /* #define ULTIMEM_H */

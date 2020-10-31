@@ -384,7 +384,6 @@ bfile_read (bfile * b)
         return 0; // TODO: error!
     x = ultimem_read_byte (b->ptr);
     b->ptr++;
-    b->size++;
 
     return x;
 }

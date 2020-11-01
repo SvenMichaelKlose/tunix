@@ -122,6 +122,7 @@ done:
 .endproc
 
 .proc enter
+rts
     php
     pha
     txa
@@ -150,6 +151,7 @@ done:
 .endproc
 
 .proc leave
+rts
     php
     pha
     txa

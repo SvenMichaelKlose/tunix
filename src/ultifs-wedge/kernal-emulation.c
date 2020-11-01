@@ -66,7 +66,7 @@ typedef struct _channel {
     char *      bufptr;
 } channel;
 
-channel * channels[256];
+channel * channels[16];
 
 channel ctrl_channel = {
     NULL, NULL, NULL, NULL

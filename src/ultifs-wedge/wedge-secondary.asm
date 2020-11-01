@@ -84,6 +84,15 @@ l:  lda IOPEN,x
     rts
 .endproc
 
+.proc copy_zp
+    ldx #$20
+l:  lda __ZP_START__,x
+    sta _saved_zp,x
+    dex
+    bpl l
+    rts
+.endproc
+
 .proc _init_secondary_wedge
     tax
     stx _last_ingle_device
@@ -91,7 +100,7 @@ l:  lda IOPEN,x
     stx _last_regular_device
 
     jsr init_kernal_vectors
-    rts
+    jmp copy_zp
 .endproc
 
 .proc swap_zp
@@ -122,7 +131,6 @@ done:
 .endproc
 
 .proc enter
-rts
     php
     pha
     txa
@@ -130,14 +138,14 @@ rts
     tya
     pha
 
-    lda $9ffa
-    sta old_blk2
-    lda $9ffc
-    sta old_blk3
-    lda _blk2
-    sta $9ffa
-    lda _blk3
-    sta $9ffc
+;    lda $9ffa
+;    sta old_blk2
+;    lda $9ffc
+;    sta old_blk3
+;    lda _blk2
+;    sta $9ffa
+;    lda _blk3
+;    sta $9ffc
     jsr swap_zp
 
     pla
@@ -151,7 +159,6 @@ rts
 .endproc
 
 .proc leave
-rts
     php
     pha
     txa
@@ -159,10 +166,10 @@ rts
     tya
     pha
 
-    lda old_blk2
-    sta $9ffa
-    lda old_blk3
-    sta $9ffc
+;    lda old_blk2
+;    sta $9ffa
+;    lda old_blk3
+;    sta $9ffc
     jsr swap_zp
 
     pla
@@ -182,7 +189,7 @@ rts
     bcc n
     jsr enter
     jsr _ultifs_kopen
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_IOPEN)
 .endproc
 
@@ -191,7 +198,7 @@ n:  jmp (old_IOPEN)
     bcc n
     jsr enter
     jsr _ultifs_kclose
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_ICLOSE)
 .endproc
 
@@ -200,7 +207,7 @@ n:  jmp (old_ICLOSE)
     bcc n
     jsr enter
     jsr _ultifs_kchkin
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_ICHKIN)
 .endproc
 
@@ -209,7 +216,7 @@ n:  jmp (old_ICHKIN)
     bcc n
     jsr enter
     jsr _ultifs_kchkin
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_ICHKOUT)
 .endproc
 
@@ -218,7 +225,7 @@ n:  jmp (old_ICHKOUT)
     bcc n
     jsr enter
     jsr _ultifs_kclrcn
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_ICLRCN)
 .endproc
 
@@ -227,7 +234,7 @@ n:  jmp (old_ICLRCN)
     bcc n
     jsr enter
     jsr _ultifs_kbasin
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_IBASIN)
 .endproc
 
@@ -236,13 +243,13 @@ n:  jmp (old_IBASIN)
     bcc n
     jsr enter
     jsr _ultifs_kbasout
-    jmp swap_zp
+    jmp leave
 n:  jmp (old_IBASOUT)
 .endproc
 
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
-    jsr swap_zp
+    jsr leave
     jmp (old_ICLALL)
 .endproc

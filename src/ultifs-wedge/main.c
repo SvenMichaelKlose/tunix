@@ -23,9 +23,9 @@ dump_file (char device, char sfn, char * name)
     char * data = malloc (1024);
     unsigned len;
 
-    cbm_open (2, device, sfn, "$");
+    cbm_open (2, device, sfn, name);
     while ((len = cbm_read (2, data, 1024)) > 0)
-        printf ("%s", data);
+        printf ("%d %s", len, data);
     cbm_close (2);
 }
 
@@ -39,5 +39,5 @@ main ()
     init_secondary_wedge (device);
     init_kernal_emulation ();
     list_directory (8);
-    //dump_file (8, 8, "README");
+    dump_file (8, 8, "main.c");
 }

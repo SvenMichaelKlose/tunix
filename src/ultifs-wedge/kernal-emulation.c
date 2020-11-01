@@ -9,12 +9,12 @@
 #include "../lib/ultimem/ultimem.h"
 
 #define _FNLEN()    (*(char*) 0xb7)     // File name length
-//#define _LFN()      (*(char*) 0xb8)     // Logical file
+#define _LFN()      (*(char*) 0xb8)     // Logical file
 #define _SA()       (*(char*) 0xb9)     // Secondary address
 #define _FA()       (*(char*) 0xba)     // Device number
 #define _FNAME()    ((char*) 0xbb)      // File name
 
-#define STATUS      ((char*) 0x90)      // Serial status byte
+#define STATUS      (*(char*) 0x90)     // Serial status byte
 #define STATUS_NO_DEVICE        0x80
 #define STATUS_END_OF_FILE      0x40
 #define STATUS_CHECKSUM_ERROR   0x20
@@ -23,6 +23,11 @@
 #define STATUS_SHORT            0x04
 #define STATUS_TIMEOUT_READ     0x02
 #define STATUS_TIMEOUT_WRITE    0x01
+
+#define OSERR_FILE_NOT_OPEN         3
+#define OSERR_DEVICE_NOT_PRESENT    5
+#define OSERR_FILE_NOT_IN           6
+#define OSERR_FILE_NOT_OUT          7
 
 #define ERR_BYTE_DECODING       24
 #define ERR_WRITE               25
@@ -41,6 +46,8 @@
 #define ERR_NO_CHANNEL          70
 #define ERR_DISK_FULL           72
 
+#define FLAG_C  1
+
 #define accu        (*(char*) 0x100)
 #define xreg        (*(char*) 0x101)
 #define yreg        (*(char*) 0x102)
@@ -48,22 +55,29 @@
 
 extern void ultifs_kopen (void);
 extern void ultifs_kclose (void);
+extern void ultifs_kclall (void);
 
 typedef struct _channel {
     char *      name;
     bfile *     file;
 
     // Directory/error status.
-    char *      out;
-    char *      outptr;
+    char *      buf;
+    char *      bufptr;
 } channel;
 
 channel * channels[256];
+
+channel ctrl_channel = {
+    NULL, NULL, NULL, NULL
+};
 
 void
 init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
+
+    channels[15] = &ctrl_channel;
 }
 
 void
@@ -80,19 +94,32 @@ copy_from_process (char * from, char * to, char len)
     *ULTIMEM_BLK5 = blk5;
 }
 
-char * last_error = NULL;
+void
+set_return_error (char code)
+{
+    accu = code;
+    flags = code ? FLAG_C : 0;
+}
 
 void
 set_error (char code)
 {
-    if (last_error)
-        free (last_error);
-    last_error = malloc (64);
-    sprintf (last_error, "%d, ERROR, 0, 0", code);
+    channel * ch = channels[15];
+
+    if (ch->buf) {
+        free (ch->buf);
+        ch->buf = ch->bufptr = NULL;
+    }
+
+    if (!code)
+        return;
+
+    ch->buf = ch->bufptr = malloc (64);
+    sprintf (ch->buf, "%d, ERROR, 0, 0", code);
 }
 
 void
-open_command ()
+open_command (char * name)
 {
 }
 
@@ -116,12 +143,13 @@ ultifs_kopen ()
     name = malloc (_FNLEN() + 1);
     if (!name) {
         set_error (ERR_BYTE_DECODING);
+        return;
     }
     copy_from_process (_FNAME(), name, _FNLEN());
     name[_FNLEN()] = 0;
 
     if (_SA() == 15) {
-        open_command ();
+        open_command (name);
         return;
     }
 
@@ -140,15 +168,15 @@ ultifs_kopen ()
     lf->file = found_file;
     channels[_SA()]->file = found_file;
 
-    *STATUS = 0;
+    set_error (0);
 }
 
 void
 ultifs_kclose ()
 {
-    channel * file = channels[_SA()];
+    channel * ch = channels[_SA()];
 
-    if (!file) {
+    if (!ch) {
         set_error (ERR_FILE_NOT_OPEN);
         return;
     }
@@ -158,19 +186,38 @@ ultifs_kclose ()
         return;
     }
 
-    bfile_close (file->file);
-    free (file);
+    bfile_close (ch->file);
+    free (ch->name);
+    free (ch);
     channels[_SA()] = NULL;
 }
 
 void
 ultifs_kchkin ()
 {
+    if (!channels[_SA()]) {
+        set_return_error (OSERR_FILE_NOT_OPEN);
+        return;
+    }
+
+    set_return_error (0);
 }
 
 void
 ultifs_kchkout ()
 {
+    if (!channels[_SA()]) {
+        set_return_error (OSERR_FILE_NOT_OPEN);
+        return;
+    }
+
+    if (_SA() != 15) {
+        set_return_error (OSERR_FILE_NOT_OUT);
+        return;
+    }
+
+    // TODO: Complete Flash writes.
+    set_return_error (0);
 }
 
 void
@@ -181,20 +228,39 @@ ultifs_kclrcn ()
 void
 ultifs_kbasin ()
 {
+    channel * ch = channels[_SA()];
+
+    if (!ch) {
+        set_return_error (OSERR_FILE_NOT_OPEN);
+        return;
+    }
+
+    STATUS = 0;
+
+    if (ch->bufptr) {
+        if (!*ch->bufptr) {
+            free (ch->buf);
+            ch->buf = ch->bufptr = NULL;
+            goto end_of_file;
+        }
+        accu = *ch->bufptr++;
+        return;
+    }
+
+    if (_SA() == 15)
+        goto end_of_file;
+
+    // TODO: bfile reads.
+
+end_of_file:
+    STATUS = STATUS_END_OF_FILE;
 }
 
 void
 ultifs_kbasout ()
 {
-    channel * file = channels[_SA()];
-
-    // TODO check if there's enough space left.
-    if (!file) {
-        *STATUS = STATUS_READ_ERROR;
-        return;
-    }
-
-    //bfile_write (file, x);
+    // TODO: Implement writes.
+    STATUS = STATUS_TIMEOUT_WRITE;
 }
 
 void

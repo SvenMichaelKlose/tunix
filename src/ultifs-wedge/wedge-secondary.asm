@@ -112,14 +112,12 @@ l:  lda __ZP_START__,x
     lda FA
     cmp _last_ingle_device
     pla
-    bcs above_ours
+    bcc done
     pha
     lda FA
     cmp _last_regular_device
     pla
-    rts
-above_ours:
-    clc
+done:
     rts
 .endproc
 

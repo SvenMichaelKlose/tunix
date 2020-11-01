@@ -1,7 +1,7 @@
 #include "ultimem.h"
 
 void * __fastcall__
-ultimem_map_ptr (void * base, int * reg, void * ptr, int * blkregs)
+ultimem_map_ptr (void * base, unsigned short * reg, void * ptr, unsigned short * blkregs)
 {
     unsigned bptr = (unsigned) ptr;
     char ri;

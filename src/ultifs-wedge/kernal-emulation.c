@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <conio.h>
 
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
@@ -12,7 +13,7 @@
 #define _LFN()      (*(char*) 0xb8)     // Logical file
 #define _SA()       (*(char*) 0xb9)     // Secondary address
 #define _FA()       (*(char*) 0xba)     // Device number
-#define _FNAME()    ((char*) 0xbb)      // File name
+#define _FNAME()    (*(char**) 0xbb)    // File name pointer
 
 #define STATUS      (*(char*) 0x90)     // Serial status byte
 #define STATUS_NO_DEVICE        0x80
@@ -68,7 +69,7 @@ typedef struct _channel {
 
 channel * channels[16];
 
-channel ctrl_channel = {
+channel cmd_channel = {
     NULL, NULL, NULL, NULL
 };
 
@@ -77,7 +78,7 @@ init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
 
-    channels[15] = &ctrl_channel;
+    channels[15] = &cmd_channel;
 }
 
 void
@@ -121,6 +122,22 @@ set_error (char code)
 void
 open_command (char * name)
 {
+    channel * ch = channels[15];
+int p;
+
+    ch->buf = malloc (64);
+    ch->bufptr = ch->buf;
+    bzero (ch->buf, 64);
+    sprintf (ch->buf, "foooooo!");
+    STATUS = 0;
+//clrscr ();
+//cputs ("dump");
+//p = _heapmemavail ();
+//cputhex8 ((int) p >> 8);
+//cputhex8 ((int) p & 255);
+//cputhex8 ((int) ch->buf >> 8);
+//cputhex8 ((int) ch->buf & 255);
+while (1);
 }
 
 void
@@ -131,22 +148,24 @@ make_directory_list ()
 void
 ultifs_kopen ()
 {
-    char * name;
-    bfile * found_file;
-    channel * lf;
+    char *      name = NULL;
+    bfile *     found_file;
+    channel *   lf;
 
-    if (channels[_SA()]) {
+    if (_SA() != 15 && channels[_SA()]) {
         set_error (ERR_NO_CHANNEL);
         return;
     }
 
-    name = malloc (_FNLEN() + 1);
-    if (!name) {
-        set_error (ERR_BYTE_DECODING);
-        return;
+    if (_FNAME()) {
+        name = malloc (_FNLEN() + 1);
+        if (!name) {
+            set_error (ERR_BYTE_DECODING);
+            return;
+        }
+        copy_from_process (_FNAME(), name, _FNLEN());
+        name[_FNLEN()] = 0;
     }
-    copy_from_process (_FNAME(), name, _FNLEN());
-    name[_FNLEN()] = 0;
 
     if (_SA() == 15) {
         open_command (name);
@@ -229,6 +248,7 @@ void
 ultifs_kbasin ()
 {
     channel * ch = channels[_SA()];
+char * tmp;
 
     if (!ch) {
         set_return_error (OSERR_FILE_NOT_OPEN);

@@ -18,7 +18,7 @@ list_directory (char device)
 void
 main ()
 {
-    char device = 10;
+    char device = 12;
     printf ("UltiFS wedge\n");
     printf ("Flash ROM device: %d\n", device);
 

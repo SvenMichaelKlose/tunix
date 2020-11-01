@@ -175,6 +175,8 @@ above_ours:
     rts
 .endproc
 
+.export stop = uopen
+
 .proc uopen
     jsr is_our_device
     bcc n

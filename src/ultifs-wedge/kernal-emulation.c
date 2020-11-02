@@ -123,21 +123,11 @@ void
 open_command (char * name)
 {
     channel * ch = channels[15];
-int p;
 
-    ch->buf = malloc (64);
-    ch->bufptr = ch->buf;
+    ch->buf = ch->bufptr = malloc (64);
     bzero (ch->buf, 64);
-    sprintf (ch->buf, "foooooo!");
+    strcpy (ch->buf, "foooooo!");
     STATUS = 0;
-//clrscr ();
-//cputs ("dump");
-//p = _heapmemavail ();
-//cputhex8 ((int) p >> 8);
-//cputhex8 ((int) p & 255);
-//cputhex8 ((int) ch->buf >> 8);
-//cputhex8 ((int) ch->buf & 255);
-while (1);
 }
 
 void
@@ -248,8 +238,8 @@ void
 ultifs_kbasin ()
 {
     channel * ch = channels[_SA()];
-char * tmp;
 
+    goto end_of_file;
     if (!ch) {
         set_return_error (OSERR_FILE_NOT_OPEN);
         return;
@@ -258,12 +248,12 @@ char * tmp;
     STATUS = 0;
 
     if (ch->bufptr) {
+        accu = *ch->bufptr++;
         if (!*ch->bufptr) {
             free (ch->buf);
             ch->buf = ch->bufptr = NULL;
             goto end_of_file;
         }
-        accu = *ch->bufptr++;
         return;
     }
 

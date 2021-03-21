@@ -14,6 +14,8 @@ list_directory (char device)
 {
     static struct cbm_dirent dirent;
 
+    printf ("Directory %d:\n", device);
+
     cbm_opendir (8, device, "$");
     while (!cbm_readdir (8, &dirent))
         printf ("%s\n", dirent.name);
@@ -24,23 +26,28 @@ void
 dump_file (char device, char sfn, char * name)
 {
     char * data = malloc (1024);
-    unsigned len;
+    int len;
 
     cbm_open (8, device, sfn, name);
-    while ((len = cbm_read (8, data, 1024)) > 0)
-        printf ("%d ", len);
+    len = cbm_read (8, data, 1024);
+    printf ("%d\n", len);
     cbm_close (8);
+
+    free (data);
 }
 
 void
 main ()
 {
     char device = 12;
+
     printf ("UltiFS wedge\n");
     printf ("Flash ROM device: %d\n", device);
 
     init_secondary_wedge (device);
     init_kernal_emulation ();
+
+    printf ("\n");
     list_directory (8);
     dump_file (8, 8, "main.c");
     dump_file (12, 15, NULL);

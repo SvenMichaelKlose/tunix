@@ -142,6 +142,7 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   lf;
 
+cputs ("OPEN");
     if (_SA() != 15 && channels[_SA()]) {
         set_error (ERR_NO_CHANNEL);
         return;

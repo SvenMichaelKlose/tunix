@@ -1,8 +1,11 @@
+__VIC20__ = 1
+.include "cbm_kernal.inc"
+
 .export _main
 .import _ultimem_erase_chip
 .import _ultimem_burn_byte
 .import pushax
-.importzp s
+.importzp s, tmp
 
 .code
 
@@ -23,49 +26,70 @@
     lda #2
     ldx #8
     ldy #2
-    jsr $ffba   ; SETLF
+    jsr SETLFS
     lda #fn_data_end-fn_data
     ldx #<fn_data
     ldy #>fn_data
-    jsr $ffbd
-    jsr $ffc0
+    jsr SETNAM
+    jsr OPEN
     ldx #2
-    jsr $ffc6
+    jsr CHKIN
 
     lda #$00
     sta s
     lda #$a0
     sta s+1
 
-l:  jsr $ffcf
-    pha
-    lda $90
-    cmp #1
-    pla
-    bcc l
+l:  jsr BASIN
+    sta tmp
 
-    pha
+    jsr READST
+    cmp #$40
+    beq done
+    cmp #0
+    bne error
+
     lda s
     ldx s+1
     jsr pushax
-    pla
+    lda tmp
     jsr _ultimem_burn_byte
+    jmp l
 
-    jsr $ffcc
+done:
+    lda #<txt_done
+    ldy #>txt_done
+    jsr $cb1e
+
+exit:
+    jsr CLRCH
     lda #2
-    jsr $ffc3
+    jsr CLOSE
+
     rts
+
+error:
+    lda #<txt_error
+    ldy #>txt_error
+    jsr $cb1e
+    jmp exit
 .endproc
 
 txt_welcome:
-    .byte $93, "G INSTALLER", 13, 0
-
-txt_installing:
-    .byte $93, "INSTALLING G", 13, 0
+    .byte $93, "INGLE INSTALLER.", 13, 0
 
 txt_chip_erased:
     .byte "FLASH ROM ERASED.", 13,0
 
+txt_installing:
+    .byte "INSTALLING INGLE...", 13, 0
+
+txt_done:
+    .byte "DONE.", 13,0
+
+txt_error:
+    .byte "ERROR.", 13,0
+
 fn_data:
-    .byte "GDATA.BIN,S,R"
+    .byte "INGLE.IMG,S,R"
 fn_data_end:

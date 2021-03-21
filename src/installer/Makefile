@@ -4,7 +4,7 @@ PROGRAM=ingleinstall
 include ../Makefile.rules
 
 %.o: %.asm
-	$(AS) -o $@ $<
+	$(AS) -I /usr/local/share/cc65/asminc/ -o $@ $<
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<

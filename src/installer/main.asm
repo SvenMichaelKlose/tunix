@@ -91,5 +91,5 @@ txt_error:
     .byte "ERROR.", 13,0
 
 fn_data:
-    .byte "INGLE.IMG,S,R"
+    .byte "0:INGLE.IMG,S,R"
 fn_data_end:

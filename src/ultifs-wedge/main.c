@@ -47,8 +47,8 @@ main ()
     init_secondary_wedge (device);
     init_kernal_emulation ();
 
-    printf ("\n");
-    list_directory (8);
-    dump_file (8, 8, "main.c");
+    //list_directory (8);
+    //dump_file (8, 8, "main.c");
     dump_file (12, 15, NULL);
+    printf ("Done.\n");
 }

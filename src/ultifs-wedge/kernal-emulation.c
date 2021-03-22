@@ -123,6 +123,7 @@ void
 open_command (char * name)
 {
     channel * ch = channels[15];
+return;
 
     ch->buf = ch->bufptr = malloc (64);
     bzero (ch->buf, 64);
@@ -142,13 +143,15 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   lf;
 
-cputs ("OPEN");
+cputs ("OPEN.");
     if (_SA() != 15 && channels[_SA()]) {
+cputs ("err chn.");
         set_error (ERR_NO_CHANNEL);
         return;
     }
 
     if (_FNAME()) {
+cputs ("has name.");
         name = malloc (_FNLEN() + 1);
         if (!name) {
             set_error (ERR_BYTE_DECODING);
@@ -158,27 +161,34 @@ cputs ("OPEN");
         name[_FNLEN()] = 0;
     }
 
+cputs ("cmd.");
     if (_SA() == 15) {
+cputs ("open cmd.");
         open_command (name);
         return;
     }
 
     if (_FNLEN() == 1 && *name == '$') {
+cputs ("mkdirlist.");
         make_directory_list ();
         return;
     }
 
+cputs ("uopen.");
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
+cputs ("err not found.");
         set_error (ERR_FILE_NOT_FOUND);
         return;
     }
 
+cputs ("alloc.");
     lf = malloc (sizeof (channel));
     lf->file = found_file;
     channels[_SA()]->file = found_file;
 
     set_error (0);
+cputs ("done");
 }
 
 void
@@ -186,16 +196,20 @@ ultifs_kclose ()
 {
     channel * ch = channels[_SA()];
 
+cputs ("CLOSE.");
     if (!ch) {
+cputs ("close err.");
         set_error (ERR_FILE_NOT_OPEN);
         return;
     }
 
     if (_SA() == 15) {
+        cputs ("close all.");
         ultifs_kclall ();
         return;
     }
 
+cputs ("close bfile.");
     bfile_close (ch->file);
     free (ch->name);
     free (ch);
@@ -205,11 +219,14 @@ ultifs_kclose ()
 void
 ultifs_kchkin ()
 {
+cputs ("CHKIN.");
     if (!channels[_SA()]) {
+cputs ("chkin err.");
         set_return_error (OSERR_FILE_NOT_OPEN);
         return;
     }
 
+cputs ("chkin done.");
     set_return_error (0);
 }
 
@@ -239,6 +256,7 @@ void
 ultifs_kbasin ()
 {
     channel * ch = channels[_SA()];
+cputs ("BASIN.");
 
     goto end_of_file;
     if (!ch) {
@@ -264,6 +282,7 @@ ultifs_kbasin ()
     // TODO: bfile reads.
 
 end_of_file:
+cputs ("basin eof.");
     STATUS = STATUS_END_OF_FILE;
 }
 

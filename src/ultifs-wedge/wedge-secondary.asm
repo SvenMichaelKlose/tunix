@@ -40,6 +40,8 @@ ICKOUT  = $0320     ; KERNAL vector - open channel for output
 ICLRCN  = $0322     ; KERNAL vector - close input and output channels
 IBASIN  = $0324     ; KERNAL vector - input character from channel
 IBSOUT  = $0326     ; KERNAL vector - output character to channel
+ISTOP   = $0328     ; KERNAL vector - scan stop key
+IGETIN  = $032A     ; KERNAL vector - get character from keyboard queue
 ICLALL  = $032C     ; KERNAL vector - close all channels and files
 ILOAD   = $0330     ; KERNAL vector - load
 ISAVE   = $0332     ; KERNAL vector - save
@@ -59,6 +61,8 @@ old_ICHKOUT:    .res 2
 old_ICLRCN:     .res 2
 old_IBASIN:     .res 2
 old_IBASOUT:    .res 2
+old_ISTOP:      .res 2
+old_IGETIN:     .res 2
 old_ICLALL:     .res 2
 
 _new_vectors:
@@ -69,12 +73,14 @@ new_ICHKOUT:    .word uchkout
 new_ICLRCN:     .word uclrcn
 new_IBASIN:     .word ubasin
 new_IBASOUT:    .word ubasout
+new_ISTOP:      .word ustop
+new_IGETIN:     .word ugetin
 new_ICLALL:     .word uclall
 
 _saved_zp:  .res $80
 
 .proc init_kernal_vectors
-    ldx #15
+    ldx #19
 l:  lda IOPEN,x
     sta old_IOPEN,x
     lda _new_vectors,x
@@ -131,6 +137,7 @@ done:
 .endproc
 
 .proc enter
+rts
     php
     pha
     txa
@@ -159,6 +166,7 @@ done:
 .endproc
 
 .proc leave
+rts
     php
     pha
     txa
@@ -181,8 +189,6 @@ done:
 
     rts
 .endproc
-
-.export stop = uopen
 
 .proc uopen
     jsr is_our_device
@@ -245,6 +251,14 @@ n:  jmp (old_IBASIN)
     jsr _ultifs_kbasout
     jmp leave
 n:  jmp (old_IBASOUT)
+.endproc
+
+.proc ustop
+    jmp (old_ISTOP)
+.endproc
+
+.proc ugetin
+    jmp (old_IGETIN)
 .endproc
 
 .proc uclall

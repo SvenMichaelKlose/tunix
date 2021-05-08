@@ -4,8 +4,14 @@ __VIC20__ = 1
 .export _main
 .import _ultimem_erase_chip
 .import _ultimem_burn_byte
+.import _ultimem_is_installed
+.import ultimem_unhide_regs
 .import pushax
-.importzp s, tmp
+.importzp tmp
+
+.data
+
+ptr:    .res 2
 
 .code
 
@@ -13,6 +19,19 @@ __VIC20__ = 1
     lda #<txt_welcome
     ldy #>txt_welcome
     jsr $cb1e
+
+    jsr _ultimem_is_installed
+    beq has_ultimem
+
+    lda #<txt_no_ultimem
+    ldy #>txt_no_ultimem
+    jmp $cb1e
+
+has_ultimem:
+    jsr ultimem_unhide_regs
+
+    lda #%01000000          ; ROM in BLK5.
+    sta $9ff1
 
     jsr _ultimem_erase_chip
     lda #<txt_chip_erased
@@ -35,10 +54,14 @@ __VIC20__ = 1
     ldx #2
     jsr CHKIN
 
-    lda #$00
-    sta s
+    lda #0
+    sta $9ffe
+    sta $9fff
+
+l2: lda #$00
+    sta ptr
     lda #$a0
-    sta s+1
+    sta ptr+1
 
 l:  jsr BASIN
     sta tmp
@@ -49,12 +72,29 @@ l:  jsr BASIN
     cmp #0
     bne error
 
-    lda s
-    ldx s+1
+    inc $900f
+    lda ptr
+    ldx ptr+1
     jsr pushax
     lda tmp
     jsr _ultimem_burn_byte
-    jmp l
+
+    inc ptr
+    bne l
+
+    lda #<txt_dot
+    ldy #>txt_dot
+    jsr $cb1e
+
+    inc ptr+1
+    lda ptr+1
+    cmp #$c0
+    bne l
+
+    inc $9ffe
+    bne l2
+    inc $9fff
+    jmp l2
 
 done:
     lda #<txt_done
@@ -78,11 +118,17 @@ error:
 txt_welcome:
     .byte $93, "INGLE INSTALLER.", 13, 0
 
+txt_no_ultimem:
+    .byte "NO ULTIMEM AROUND - EXITING.", 13,0
+
 txt_chip_erased:
     .byte "FLASH ROM ERASED.", 13,0
 
 txt_installing:
     .byte "INSTALLING INGLE...", 13, 0
+
+txt_dot:
+    .byte ".", 0
 
 txt_done:
     .byte "DONE.", 13,0

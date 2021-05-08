@@ -3,6 +3,7 @@ SOURCES_asm= \
     c-copy.asm \
     commands.asm \
     copy-rom2ram.asm \
+    detect.asm \
     readwrite.asm \
     unhide.asm
 

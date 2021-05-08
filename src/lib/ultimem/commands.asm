@@ -3,7 +3,7 @@
 .export _ultimem_erase_chip
 .export _ultimem_erase_block
 
-.importzp s, d
+.importzp s, d, tmp
 .import popax
 
 .proc _ultimem_send_command
@@ -16,13 +16,13 @@
 .endproc
 
 .proc _ultimem_burn_byte
-    sta d
+    sta tmp
     jsr popax
     sta s
     stx s+1
     lda #$a0
     jsr _ultimem_send_command
-    lda d
+    lda tmp
     ldx #0
     sta (s,x)
     jmp poll
@@ -39,8 +39,9 @@
 .proc poll
 l:  lda $a000
     eor $a000
-    and #$80
-    bne l
+    and #$44
+    eor #$44
+    beq poll
     rts
 .endproc
 

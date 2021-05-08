@@ -94,9 +94,8 @@ textview_draw_content (struct obj * w)
 
 next:
         y += 10;
-        if (c == 10)
-            while (*ptr == 10)
-                ++ptr, y += 5;
+        while (*ptr == 10)
+            ++ptr, y += 5;
 
         if (y > w->rect.h)
             break;

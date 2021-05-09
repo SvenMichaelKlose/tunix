@@ -57,5 +57,5 @@ main ()
     //list_directory (8);
     //dump_file (8, 8, "main.c");
     dump_file (12, 15, NULL);
-    printf ("Done.\n");
+    cputs ("Finished.\n");
 }

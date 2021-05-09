@@ -165,12 +165,14 @@ cputs ("cmd.");
     if (_SA() == 15) {
 cputs ("open cmd.");
         open_command (name);
+cputs ("OPEN done.");
         return;
     }
 
     if (_FNLEN() == 1 && *name == '$') {
 cputs ("mkdirlist.");
         make_directory_list ();
+cputs ("OPEN done.");
         return;
     }
 
@@ -179,6 +181,7 @@ cputs ("uopen.");
     if (!found_file) {
 cputs ("err not found.");
         set_error (ERR_FILE_NOT_FOUND);
+cputs ("OPEN done.");
         return;
     }
 
@@ -188,7 +191,7 @@ cputs ("alloc.");
     channels[_SA()]->file = found_file;
 
     set_error (0);
-cputs ("done");
+cputs ("OPEN done.");
 }
 
 void

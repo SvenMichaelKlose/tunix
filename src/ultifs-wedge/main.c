@@ -1,7 +1,8 @@
+#include <cbm.h>
+#include <conio.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <cbm.h>
 
 extern void __fastcall__ init_secondary_wedge (char rom_device);
 extern void __fastcall__ init_kernal_emulation (void);
@@ -28,10 +29,16 @@ dump_file (char device, char sfn, char * name)
     char * data = malloc (1024);
     int len;
 
+    clrscr ();
+    printf ("dump %d, %d, %s\n", device, sfn, name);
+    gotoxy (0, 2);
+
     cbm_open (8, device, sfn, name);
+/*
     len = cbm_read (8, data, 1024);
     printf ("%d\n", len);
     cbm_close (8);
+*/
 
     free (data);
 }

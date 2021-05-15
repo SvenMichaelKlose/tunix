@@ -69,6 +69,10 @@ l:  jsr BASIN
     cmp #0
     bne error
 
+    ldy #0
+    lda (ptr),y
+    cmp tmp
+    beq dont_burn
     lda ptr
     ldx ptr+1
     ldy tmp
@@ -77,6 +81,7 @@ l:  jsr BASIN
     lda (ptr),y
     cmp tmp
     bne err_not_burned
+dont_burn:
 
     inc ptr
     bne l

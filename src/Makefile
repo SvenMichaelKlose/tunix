@@ -9,9 +9,10 @@ all:
 	$(MAKE) -C flashboot all
 	$(MAKE) -C desktop all
 	$(MAKE) -C basic-starter all
+	$(MAKE) -C installer all
+	$(MAKE) -C ultifs all
 	$(MAKE) -C vforth all
 	$(MAKE) -C writenow all
-	$(MAKE) -C installer all
 
 clean:
 	$(MAKE) -C lib/blit clean
@@ -24,6 +25,7 @@ clean:
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C desktop clean
 	$(MAKE) -C basic-starter clean
+	$(MAKE) -C installer clean
+	$(MAKE) -C ultifs clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C writenow clean
-	$(MAKE) -C installer clean

@@ -1,9 +1,11 @@
 SOURCES_asm= \
+    burn.asm \
     calc-bank.asm \
     c-copy.asm \
     commands.asm \
     copy-rom2ram.asm \
     detect.asm \
+    erase.asm \
     readwrite.asm \
     unhide.asm
 

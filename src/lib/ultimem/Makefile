@@ -28,4 +28,4 @@ $(LIBRARY): $(SOURCES_asm:.asm=.o) $(SOURCES:.c=.o)
 all: $(LIBRARY)
 
 clean:
-	rm -f $(SOURCES_asm:.asm=.o) $(LIBRARY)
+	rm -f $(SOURCES:.c=.o) $(SOURCES_asm:.asm=.o) $(LIBRARY)

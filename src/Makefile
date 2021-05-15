@@ -7,13 +7,11 @@ all:
 	$(MAKE) -C lib/gfx all
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
-#	$(MAKE) -C tgi-demo all
 	$(MAKE) -C desktop all
 	$(MAKE) -C basic-starter all
 	$(MAKE) -C vforth all
 	$(MAKE) -C writenow all
 	$(MAKE) -C installer all
-#	$(MAKE) -C paint all
 
 clean:
 	$(MAKE) -C lib/blit clean
@@ -24,10 +22,8 @@ clean:
 	$(MAKE) -C lib/gfx clean
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean
-#	$(MAKE) -C tgi-demo clean
 	$(MAKE) -C desktop clean
 	$(MAKE) -C basic-starter clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C writenow clean
 	$(MAKE) -C installer clean
-#	$(MAKE) -C paint clean

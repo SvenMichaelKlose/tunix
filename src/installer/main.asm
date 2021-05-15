@@ -3,15 +3,10 @@ __VIC20__ = 1
 
 .export _main
 .import _ultimem_erase_chip
-.import _ultimem_burn_byte
-.import _ultimem_is_installed
+.import ultimem_burn_byte
 .import ultimem_unhide_regs
 .import pushax
-.importzp tmp
-
-.data
-
-ptr:    .res 2
+.importzp tmp, ptr
 
 .code
 
@@ -20,7 +15,8 @@ ptr:    .res 2
     ldy #>txt_welcome
     jsr $cb1e
 
-    jsr _ultimem_is_installed
+    jsr ultimem_unhide_regs
+    cmp #$11
     beq has_ultimem
 
     lda #<txt_no_ultimem
@@ -28,11 +24,12 @@ ptr:    .res 2
     jmp $cb1e
 
 has_ultimem:
-    jsr ultimem_unhide_regs
-
     lda #%01000000          ; ROM in BLK5.
-    sta $9ff1
+    sta $9ff2
 
+    lda #<txt_erasing
+    ldy #>txt_erasing
+    jsr $cb1e
     jsr _ultimem_erase_chip
     lda #<txt_chip_erased
     ldy #>txt_chip_erased
@@ -72,19 +69,25 @@ l:  jsr BASIN
     cmp #0
     bne error
 
-    inc $900f
     lda ptr
     ldx ptr+1
-    jsr pushax
-    lda tmp
-    jsr _ultimem_burn_byte
+    ldy tmp
+    jsr ultimem_burn_byte
+    ldy #0
+    lda (ptr),y
+    cmp tmp
+    bne err_not_burned
 
     inc ptr
     bne l
 
+    lda ptr+1
+    and #%00011111
+    bne no_dot
     lda #<txt_dot
     ldy #>txt_dot
     jsr $cb1e
+no_dot:
 
     inc ptr+1
     lda ptr+1
@@ -113,6 +116,12 @@ error:
     ldy #>txt_error
     jsr $cb1e
     jmp exit
+
+err_not_burned:
+    lda #<txt_error_not_burned
+    ldy #>txt_error_not_burned
+    jsr $cb1e
+    jmp exit
 .endproc
 
 txt_welcome:
@@ -120,6 +129,10 @@ txt_welcome:
 
 txt_no_ultimem:
     .byte "NO ULTIMEM AROUND - EXITING.", 13,0
+
+txt_erasing:
+    .byte "ERASING FLASH ROM,", 13
+    .byte "PLEASE WAIT...", 13, 0
 
 txt_chip_erased:
     .byte "FLASH ROM ERASED.", 13,0
@@ -134,8 +147,11 @@ txt_done:
     .byte "DONE.", 13,0
 
 txt_error:
-    .byte "ERROR.", 13,0
+    .byte "FILE ERROR.", 13,0
+
+txt_error_not_burned:
+    .byte "ERROR: BYTE HAS NOT BEEN WRITTEN.", 13,0
 
 fn_data:
-    .byte "0:INGLE.IMG,S,R"
+    .byte "INGLE.IMG,S,R"
 fn_data_end:

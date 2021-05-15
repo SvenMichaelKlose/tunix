@@ -1,4 +1,5 @@
 .export _ultimem_send_command
+.export ultimem_burn_byte
 .export _ultimem_burn_byte
 .export _ultimem_erase_chip
 .export _ultimem_erase_block
@@ -15,17 +16,24 @@
     rts
 .endproc
 
-.proc _ultimem_burn_byte
-    sta tmp
-    jsr popax
+.proc ultimem_burn_byte
     sta s
     stx s+1
+
     lda #$a0
     jsr _ultimem_send_command
-    lda tmp
+
+    tya
     ldx #0
     sta (s,x)
     jmp poll
+.endproc
+
+.proc _ultimem_burn_byte
+    sty tmp
+    jsr popax
+    ldy tmp
+    jmp ultimem_burn_byte
 .endproc
 
 .proc _ultimem_erase_chip
@@ -39,9 +47,8 @@
 .proc poll
 l:  lda $a000
     eor $a000
-    and #$44
-    eor #$44
-    beq poll
+    and #$40
+    bne poll
     rts
 .endproc
 

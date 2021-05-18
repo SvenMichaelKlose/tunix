@@ -1,9 +1,10 @@
 .export ultimem_copy_rom2ram
 .export ultimem_copy_ram2rom
 .export ultimem_copy_ram2ram
-.importzp s, d, c, base, size, ptr
 
 .import ultimem_offset2bank
+
+.importzp s, d, c, base, size, ptr
 
 sreg = $9ff8
 dreg = $9ffa
@@ -14,6 +15,7 @@ dofs = $4000
 
 .code
 
+; Copy dword on zero page.
 .proc copyd
     lda 0,x
     sta 0,y
@@ -27,6 +29,7 @@ dofs = $4000
 .endproc
 
 .proc ultimem_copy
+    ; Save current config for BLK1 and BLK2.
     lda sreg
     pha
     lda sreg+1
@@ -36,10 +39,12 @@ dofs = $4000
     lda dreg+1
     pha
 
+    ; Copy s to base as s would be overwritten by ultimem_offset2bank().
     ldx #s
     ldy #base
     jsr copyd
 
+    ; Get first source bank.
     ldx #base
     ldy #sregidx
     jsr ultimem_offset2bank
@@ -49,6 +54,7 @@ dofs = $4000
     ora #>sofs
     sta base+1
 
+    ; Get first destination bank.
     ldx #d
     ldy #dregidx
     jsr ultimem_offset2bank
@@ -58,6 +64,8 @@ dofs = $4000
     ora #>dofs
     sta d+1
 
+    ; Make the Z flag the C flag for the countdown,
+    ; so we don't have to compare explicitly.
     inc size
     inc size+1
 
@@ -75,6 +83,7 @@ l5: dec size
     dec size+1
     bne l3
 
+    ; Restore block config.
     pla
     sta dreg+1
     pla

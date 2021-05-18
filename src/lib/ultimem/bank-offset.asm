@@ -5,7 +5,7 @@
 
 .code
 
-; Set bank register at $9ff0+Y to match offset at
+; Set bank register at $9ff0+Y to match the long offset at
 ; zero page address X.
 .proc ultimem_offset2bank
     lda 1,x
@@ -37,7 +37,7 @@
     rts
 .endproc
 
-; Get offset of bank # in A to 0,X
+; Write long offset of bank index in A to zero page address X.
 .proc ultimem_bank2offset
     ldy #0
     sty 0,x

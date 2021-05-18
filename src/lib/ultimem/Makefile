@@ -1,9 +1,9 @@
 SOURCES_asm= \
     burn.asm \
-    calc-bank.asm \
+    bank-offset.asm \
     c-copy.asm \
     commands.asm \
-    copy-rom2ram.asm \
+    copy.asm \
     detect.asm \
     erase.asm \
     readwrite.asm \

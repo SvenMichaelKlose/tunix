@@ -5,13 +5,13 @@
 #define ULTIMEM_CONFIG1     ((char *) 0x9ff1)
 #define ULTIMEM_CONFIG2     ((char *) 0x9ff2)
 #define ULTIMEM_ID          ((unsigned short *) 0x9ff3)
+
 #define ULTIMEM_RAM         ((unsigned short *) 0x9ff4)
 #define ULTIMEM_IO          ((unsigned short *) 0x9ff6)
 #define ULTIMEM_BLK1        ((unsigned short *) 0x9ff8)
 #define ULTIMEM_BLK2        ((unsigned short *) 0x9ffa)
 #define ULTIMEM_BLK3        ((unsigned short *) 0x9ffc)
 #define ULTIMEM_BLK5        ((unsigned short *) 0x9ffe)
-#define ULTIMEM_BLK5RAM     ((unsigned char *) 0x9ffe)
 
 extern char     ultimem_is_installed (void);
 extern unsigned ultimem_get_size (void);

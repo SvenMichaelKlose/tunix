@@ -61,7 +61,7 @@ gen_launch (struct drive_ops * drive_ops, unsigned start)
             return -1;
         }
         size += read_bytes;
-        *ULTIMEM_BLK5RAM += + 1;
+        *(unsigned char *) ULTIMEM_BLK5 += + 1;
 
         sprintf (message_buffer, "%U read...", (unsigned) size);
         print_message (message_buffer);

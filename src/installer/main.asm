@@ -4,7 +4,7 @@ __VIC20__ = 1
 .export _main
 .import _ultimem_erase_chip
 .import ultimem_burn_byte
-.import ultimem_unhide_regs
+.import _ultimem_unhide
 .import pushax
 .importzp tmp, ptr
 
@@ -15,7 +15,7 @@ __VIC20__ = 1
     ldy #>txt_welcome
     jsr $cb1e
 
-    jsr ultimem_unhide_regs
+    jsr _ultimem_unhide
     cmp #$11
     beq has_ultimem
 

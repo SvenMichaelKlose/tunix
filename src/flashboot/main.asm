@@ -3,7 +3,7 @@
 .importzp name, namelen
 
 .import ultifs_enter_root, ultifs_enter, ultifs_load
-.import ultimem_unhide_regs
+.import _ultimem_unhide
 .import restore_state
 .import init_alloc
 .import init_proc
@@ -32,7 +32,7 @@ screen  = $288      ; start page of text matrix
     lda #$00    ; Blank screen.
     sta $9002
 
-    jsr ultimem_unhide_regs
+    jsr _ultimem_unhide
     lda #%00000001  ; Ultimem LED on.
     sta $9ff0
 

@@ -1,9 +1,9 @@
-.export ultimem_unhide_regs
+.export _ultimem_unhide
 
 .code
 
 ; Returns ID.
-.proc ultimem_unhide_regs
+.proc _ultimem_unhide
     lda $9f55
     lda $9faa
     lda $9f01

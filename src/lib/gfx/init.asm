@@ -11,11 +11,6 @@
 .code
 
 .proc gfx_init
-    lda #<exec_script
-    sta $316
-    lda #>exec_script
-    sta $317
-
     lda #0
     ldx #1
     ldy #5
@@ -29,13 +24,16 @@
     lda #$11
     sta scrbase+1
 
-    brk
-    .byte c_setzb, pencil_mode, 1
-    .byte c_setzb, font, $00
-    .byte c_setzb, font+1, $88
-    .byte c_setzb, do_compress_font_gaps, 1
-    .byte c_setzb, font_compression, 2
-    .byte c_setzb, font_space_size, 3
-    .byte 0
+    ldy #0
+    sty font
+    iny
+    sty pencil_mode
+    sty do_compress_font_gaps
+    iny
+    sty font_compression
+    iny
+    sty font_space_size
+    ldy #88
+    sty font+1
     rts
 .endproc

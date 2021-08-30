@@ -12,7 +12,6 @@ SOURCES= \
     hline.asm init.asm \
     init-bitmap-mode.asm \
     instructions.asm \
-    interpreter.asm \
     libgfx-wrapper.asm \
     line.asm \
     masks.asm \

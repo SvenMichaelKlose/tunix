@@ -17,7 +17,6 @@ SOURCES= \
     masks.asm \
     patterns.asm \
     putchar.asm \
-    putchar-fixed-4x4.asm \
     putstring.asm \
     region-stack.asm \
     reset-region.asm \

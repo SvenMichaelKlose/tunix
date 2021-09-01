@@ -20,7 +20,6 @@
 .export _gfx_set_font_compression
 .export _gfx_draw_text
 .export _gfx_putchar = putchar
-.export _gfx_putchar_fixed = putchar_fixed
 .export _gfx_get_text_width
 .export _gfx_push_context = push_context
 .export _gfx_pop_context = pop_context
@@ -34,7 +33,7 @@
 .import gfx_init, clear_screen
 .import reset_region, push_context, pop_context
 .import line, hline, vline, frame, box
-.import putstring, get_text_width, putchar, putchar_fixed
+.import putstring, get_text_width, putchar
 .import copy_area
 
 .code

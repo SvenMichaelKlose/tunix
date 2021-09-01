@@ -1,5 +1,5 @@
 .exportzp s, d, c, tmp, base, ptr, size
-.exportzp tmp5, tmp6, scr, tmp7, tmp8
+.exportzp tmp, tmp5, tmp6, scr, tmp7, tmp8
 
 .zeropage
 

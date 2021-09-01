@@ -1,6 +1,13 @@
 .export putchar_fixed
-.importzp xpos, scr, font, tmp, tmp2
+.importzp xpos, scr, font
 .import calcscr
+
+    .zeropage
+
+tmp:    .res 1
+tmp2:   .res 1
+
+    .code
 
 .proc putchar_fixed
     ; Calculate character address.
@@ -24,13 +31,13 @@
     ldy #7
     lda xpos
     and #4
-    beq l2
+    bne l2
 
 l1: lda (tmp),y
-    lsr
-    lsr
-    lsr
-    lsr
+    asl
+    asl
+    asl
+    asl
     ora (scr),y
     sta (scr),y
     dey

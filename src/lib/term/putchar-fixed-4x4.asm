@@ -6,6 +6,7 @@
 
 tmp:    .res 1
 tmp2:   .res 1
+tmp3:   .res 1
 
     .code
 
@@ -33,28 +34,138 @@ tmp2:   .res 1
     and #4
     bne l2
 
-l1: lda (tmp),y
-    asl
-    asl
-    asl
-    asl
-    ora (scr),y
+l1:
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
     sta (scr),y
     dey
-    bpl l1
-    bmi done
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%00001111
+    sta tmp3
+    lda (tmp),y
+    and #%11110000
+    ora tmp3
+    sta (scr),y
 
-l2: lda (tmp),y
-    ora (scr),y
+    jmp done
+
+l2:
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
     sta (scr),y
     dey
-    bpl l2
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
+    dey
+    lda (scr),y
+    and #%11110000
+    sta tmp3
+    lda (tmp),y
+    and #%00001111
+    ora tmp3
+    sta (scr),y
 
 done:
-    lda xpos
-    clc
-    adc #4
-    sta xpos
-
     rts
 .endproc

@@ -20,8 +20,27 @@ p:      .res 2
 
     lda #<charset
     sta font
+    sta p
     lda #>charset
     sta font+1
+    sta p+1
+
+    ; Double each char's half.
+    ldy #0
+l2: lda (p),y
+    sta tmp
+    asl
+    asl
+    asl
+    asl
+    ora tmp
+    sta (p),y
+    iny
+    bne l2
+    inc p+1
+    lda p+1
+    cmp #>charset+8
+    bne l2
 
     lda #0
     sta xpos
@@ -33,9 +52,57 @@ p:      .res 2
     sta p+1
     jsr putstring_fixed
 
+    jsr print_charset
 l:
     jmp l
     rts
+.endproc
+
+.proc print_charset
+    ldx #0
+l3: txa
+    pha
+    jsr putchar_fixed
+    jsr cursor_step
+
+l4: pla
+    tax
+;    cmp #%1111
+;    bne l5
+;    jsr line_break
+l5: inx
+    bne l3
+    rts
+.endproc
+
+.proc cursor_step
+    lda xpos
+    clc
+    adc #4
+    sta xpos
+
+    cmp #160
+    bne n
+
+    lda #0
+    sta xpos
+    jmp cursor_down
+
+n:  rts
+.endproc
+
+.proc cursor_down
+    lda ypos
+    clc
+    adc #8
+    sta ypos
+    rts
+.endproc
+
+.proc line_break
+    lda #0
+    sta xpos
+    jmp cursor_down
 .endproc
 
 .proc putstring_fixed
@@ -45,16 +112,11 @@ l:
 
     cmp #13
     bne n
-
-    lda #0
-    sta xpos
-    lda ypos
-    clc
-    adc #8
-    sta ypos
+    jsr line_break
     jmp next
 
 n:  jsr putchar_fixed
+    jsr cursor_step
 
 next:
     inc p
@@ -72,30 +134,10 @@ r:  rts
     .data
 
 txt_welcome:
-    .byte "VI clone for INGLE", 13
-    .byte "By Sven Michael Klose", 13
-    .byte "   <pixel@hugbox.org>", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "Whatever happens this line is full.12345", 13
-    .byte "x", 13
+    .byte "VIC 40x24 char terminal", 13
+    .byte 13
+    .byte "Charset:", 13
+    .byte 13
     .byte 0
 
     .align 256

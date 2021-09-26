@@ -6,10 +6,12 @@
 
 .proc fill_colors
     ldx #0
+
 l:  sta colors,x
     sta colors+256,x
     dex
     bne l
+
     rts
 .endproc
 

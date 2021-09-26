@@ -1,10 +1,10 @@
-.export _term_init
+.export _term_init, _term_put
 
-.import gfx_init
+.import init_bitmap_mode, gfx_init
 .import clear_screen
 .import putchar_fixed
 
-.importzp s, d, c, font, xpos, ypos
+.importzp s, d, c, font, xpos, ypos, scrbase
 
     .zeropage
 
@@ -16,7 +16,14 @@ p:      .res 2
 
 .proc _term_init
     jsr clear_screen
-    jsr gfx_init
+    lda #1
+    ldx #0
+    ldy #0
+    jsr init_bitmap_mode
+    lda #$00
+    sta scrbase
+    lda #$11
+    sta scrbase+1
 
     lda #<charset
     sta font
@@ -53,6 +60,13 @@ l2: lda (p),y
     jsr putstring_fixed
 
     jsr print_charset
+
+    lda #<txt_sh
+    sta p
+    lda #>txt_sh
+    sta p+1
+    jsr putstring_fixed
+
 l:
     jmp l
     rts
@@ -131,13 +145,36 @@ done:
 r:  rts
 .endproc
 
+.proc _term_put
+    rts
+.endproc
+
     .data
 
 txt_welcome:
-    .byte "VIC 40x24 char terminal", 13
+    .byte 201
+    .res 38,205
+    .byte 187
+
+    .byte 186, "        VIC 40x24 char terminal       ", 186
+    ;.byte 186, "VIC 40x24 char terminal               ", 186
+
+    .byte 200
+    .res 38,205
+    .byte 188
+
     .byte 13
-    .byte "Charset:", 13
+    .byte "Charset: Code page 437", 13
     .byte 13
+    .byte 0
+
+txt_sh:
+    .byte 13
+    .byte 13
+    .byte "pixel@dev ~ $ cd Desktop/git/retro/vic-20/ingle/src/lib/term/", 13
+    .byte "pixel@dev ~/Desktop/git/retro/vic-20/ingle/src/lib/term $ ls", 13
+    .byte "charset-4x8.asm  init.asm  init.o  libterm.a  libterm.h  main.asm  Makefile  putchar-fixed-4x4.asm  putchar-fixed-4x4.o", 13
+    .byte "pixel@dev ~/Desktop/git/retro/vic-20/ingle/src/lib/term $ ", 219, 13
     .byte 0
 
     .align 256

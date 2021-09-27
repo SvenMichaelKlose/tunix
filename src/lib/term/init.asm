@@ -8,9 +8,11 @@
 
     .zeropage
 
-tmp:    .res 1
-tmp2:   .res 1
-p:      .res 2
+tmp:        .res 1
+tmp2:       .res 1
+p:          .res 2
+cursor_x:   .res 1
+cursor_y:   .res 1
 
     .code
 
@@ -59,32 +61,27 @@ l2: lda (p),y
     sta p+1
     jsr putstring_fixed
 
-    jsr print_charset
-
-    lda #<txt_sh
-    sta p
-    lda #>txt_sh
-    sta p+1
-    jsr putstring_fixed
-
-l:
-    jmp l
-    rts
+    jmp print_charset
 .endproc
 
 .proc print_charset
     ldx #0
+
 l3: txa
+
     pha
+    and #%11111
+    bne l5
+    jsr line_break
+l5: pla
+    pha
+
     jsr putchar_fixed
     jsr cursor_step
 
 l4: pla
     tax
-;    cmp #%1111
-;    bne l5
-;    jsr line_break
-l5: inx
+    inx
     bne l3
     rts
 .endproc
@@ -165,16 +162,6 @@ txt_welcome:
 
     .byte 13
     .byte "Charset: Code page 437", 13
-    .byte 13
-    .byte 0
-
-txt_sh:
-    .byte 13
-    .byte 13
-    .byte "pixel@dev ~ $ cd Desktop/git/retro/vic-20/ingle/src/lib/term/", 13
-    .byte "pixel@dev ~/Desktop/git/retro/vic-20/ingle/src/lib/term $ ls", 13
-    .byte "charset-4x8.asm  init.asm  init.o  libterm.a  libterm.h  main.asm  Makefile  putchar-fixed-4x4.asm  putchar-fixed-4x4.o", 13
-    .byte "pixel@dev ~/Desktop/git/retro/vic-20/ingle/src/lib/term $ ", 219, 13
     .byte 0
 
     .align 256

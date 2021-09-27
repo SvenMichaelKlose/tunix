@@ -1,6 +1,8 @@
 #include <libterm.h>
 #include <cbm.h>
 
+extern char get_key (void);
+
 int
 main ()
 {
@@ -10,7 +12,7 @@ main ()
     term_put (65);
 
     while (1) {
-        while (!(key = cbm_k_getin ()));
+        while (!(key = get_key ()));
         term_put (key);
     }
 }

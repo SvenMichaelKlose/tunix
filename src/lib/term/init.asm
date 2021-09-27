@@ -68,15 +68,7 @@ l2: lda (p),y
     sty visible_cursor
     iny
     sty has_cursor
-    jsr cursor_enable
-
-    lda #<txt_welcome
-    sta p
-    lda #>txt_welcome
-    sta p+1
-    jsr putstring_fixed
-
-    jmp print_charset
+    jmp cursor_enable
 .endproc
 
 .proc cursor_draw
@@ -201,49 +193,8 @@ done:
 r:  jmp cursor_enable
 .endproc
 
-.proc print_charset
-    jsr cursor_disable
-    ldx #0
-
-l3: txa
-
-    pha
-    and #%11111
-    bne l5
-    jsr line_break
-l5: pla
-    pha
-
-    jsr _term_put
-
-l4: pla
-    tax
-    inx
-    bne l3
-
-    jsr line_break
-    jsr line_break
-    jmp cursor_enable
-.endproc
-
 
     .data
-
-txt_welcome:
-    .byte 201
-    .res 38,205
-    .byte 187
-
-    .byte 186, "        VIC 40x24 char terminal       ", 186
-
-    .byte 200
-    .res 38,205
-    .byte 188
-
-    .byte 13
-    .byte "Charset: Code page 437", 13
-    .byte 0
-
     .align 256
 
 charset:

@@ -2,9 +2,10 @@
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
+.import box
 .import putchar_fixed
 
-.importzp s, d, c, font, xpos, ypos, scrbase
+.importzp s, d, c, font, xpos, ypos, width, height, scrbase, pencil_mode
 
     .zeropage
 
@@ -13,6 +14,8 @@ tmp2:       .res 1
 p:          .res 2
 cursor_x:   .res 1
 cursor_y:   .res 1
+has_cursor:     .res 1
+visible_cursor: .res 1
 
     .code
 
@@ -52,8 +55,8 @@ l2: lda (p),y
     bne l2
 
     lda #0
-    sta xpos
-    sta ypos
+    sta cursor_x
+    sta cursor_y
 
     lda #<txt_welcome
     sta p
@@ -76,6 +79,7 @@ l3: txa
 l5: pla
     pha
 
+    jsr set_cursor_pos
     jsr putchar_fixed
     jsr cursor_step
 
@@ -86,38 +90,95 @@ l4: pla
     rts
 .endproc
 
+.proc cursor_draw
+    lda has_cursor
+    beq r
+    lda cursor_x
+    sta xpos
+    lda cursor_y
+    sta ypos
+    lda #2
+    sta pencil_mode
+    asl
+    sta width
+    asl
+    sta height
+    jmp box
+
+r:  rts
+.endproc
+
+.proc cursor_enable
+    lda has_cursor
+    beq r
+    lda visible_cursor
+    bne r
+    inc visible_cursor
+    jmp cursor_draw
+r:  rts
+.endproc
+
+.proc cursor_disable
+    lda has_cursor
+    beq r
+    lda visible_cursor
+    beq r
+    dec visible_cursor
+    jmp cursor_draw
+r:  rts
+.endproc
+
 .proc cursor_step
-    lda xpos
+    lda cursor_x
     clc
     adc #4
-    sta xpos
+    sta cursor_x
 
     cmp #160
     bne n
 
     lda #0
-    sta xpos
+    sta cursor_x
     jmp cursor_down
 
 n:  rts
 .endproc
 
 .proc cursor_down
-    lda ypos
+    lda cursor_y
     clc
     adc #8
-    sta ypos
+    sta cursor_y
     rts
 .endproc
 
 .proc line_break
     lda #0
-    sta xpos
+    sta cursor_x
     jmp cursor_down
 .endproc
 
+.proc set_cursor_pos
+    pha
+    lda cursor_x
+    sta xpos
+    lda cursor_y
+    sta ypos
+    pla
+    rts
+.endproc
+
+.proc term_putc
+    jsr cursor_disable
+    jsr set_cursor_pos
+    jsr putchar_fixed
+    jmp cursor_enable
+.endproc
+
 .proc putstring_fixed
-    ldy #0
+;    jsr cursor_disable
+
+l:  ldy #0
     lda (p),y
     beq done
 
@@ -126,20 +187,21 @@ n:  rts
     jsr line_break
     jmp next
 
-n:  jsr putchar_fixed
+n:  jsr set_cursor_pos
+    jsr putchar_fixed
     jsr cursor_step
 
 next:
     inc p
-    bne putstring_fixed
+    bne l
     inc p+1
-    jmp putstring_fixed
+    jmp l   ; (bne)
 
 done:
     inc p
     bne r
     inc p+1
-r:  rts
+r:  rts ;jmp cursor_enable
 .endproc
 
 .proc _term_put
@@ -154,7 +216,6 @@ txt_welcome:
     .byte 187
 
     .byte 186, "        VIC 40x24 char terminal       ", 186
-    ;.byte 186, "VIC 40x24 char terminal               ", 186
 
     .byte 200
     .res 38,205

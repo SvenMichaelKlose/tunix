@@ -9,7 +9,6 @@ main ()
     char key;
 
     term_init ();
-    term_put (65);
 
     while (1) {
         while (!(key = get_key ()));

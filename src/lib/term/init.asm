@@ -4,8 +4,13 @@
 .import clear_screen
 .import box
 .import putchar_fixed
+.import _pattern_solid
+.import init_region_stack
+.import reset_region
 
-.importzp s, d, c, font, xpos, ypos, width, height, scrbase, pencil_mode
+.importzp s, d, c, scrbase
+.importzp font, pencil_mode, pattern
+.importzp xpos, ypos, width, height
 
     .zeropage
 
@@ -29,6 +34,9 @@ visible_cursor: .res 1
     sta scrbase
     lda #$11
     sta scrbase+1
+
+    jsr init_region_stack
+    jsr reset_region
 
     lda #<charset
     sta font
@@ -54,9 +62,13 @@ l2: lda (p),y
     cmp #>charset+8
     bne l2
 
-    lda #0
-    sta cursor_x
-    sta cursor_y
+    ldy #0
+    sty cursor_x
+    sty cursor_y
+    sty visible_cursor
+    iny
+    sty has_cursor
+    jsr cursor_enable
 
     lda #<txt_welcome
     sta p
@@ -67,36 +79,18 @@ l2: lda (p),y
     jmp print_charset
 .endproc
 
-.proc print_charset
-    ldx #0
-
-l3: txa
-
-    pha
-    and #%11111
-    bne l5
-    jsr line_break
-l5: pla
-    pha
-
-    jsr set_cursor_pos
-    jsr putchar_fixed
-    jsr cursor_step
-
-l4: pla
-    tax
-    inx
-    bne l3
-    rts
-.endproc
-
 .proc cursor_draw
     lda has_cursor
     beq r
+
     lda cursor_x
     sta xpos
     lda cursor_y
     sta ypos
+    lda #<_pattern_solid
+    sta pattern
+    lda #>_pattern_solid
+    sta pattern+1
     lda #2
     sta pencil_mode
     asl
@@ -109,21 +103,18 @@ r:  rts
 .endproc
 
 .proc cursor_enable
-    lda has_cursor
-    beq r
     lda visible_cursor
-    bne r
     inc visible_cursor
+    ora #0
+    bne r
     jmp cursor_draw
 r:  rts
 .endproc
 
 .proc cursor_disable
-    lda has_cursor
-    beq r
-    lda visible_cursor
-    beq r
     dec visible_cursor
+    lda visible_cursor
+    bne r
     jmp cursor_draw
 r:  rts
 .endproc
@@ -168,15 +159,21 @@ n:  rts
     rts
 .endproc
 
-.proc term_putc
+.proc _term_put
+    pha
+    pha
     jsr cursor_disable
     jsr set_cursor_pos
+    pla
     jsr putchar_fixed
-    jmp cursor_enable
+    jsr cursor_step
+    jsr cursor_enable
+    pla
+    rts
 .endproc
 
 .proc putstring_fixed
-;    jsr cursor_disable
+    jsr cursor_disable
 
 l:  ldy #0
     lda (p),y
@@ -201,12 +198,34 @@ done:
     inc p
     bne r
     inc p+1
-r:  rts ;jmp cursor_enable
+r:  jmp cursor_enable
 .endproc
 
-.proc _term_put
-    rts
+.proc print_charset
+    jsr cursor_disable
+    ldx #0
+
+l3: txa
+
+    pha
+    and #%11111
+    bne l5
+    jsr line_break
+l5: pla
+    pha
+
+    jsr _term_put
+
+l4: pla
+    tax
+    inx
+    bne l3
+
+    jsr line_break
+    jsr line_break
+    jmp cursor_enable
 .endproc
+
 
     .data
 

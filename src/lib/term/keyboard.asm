@@ -25,27 +25,27 @@ F6 = 238
 F7 = 237
 F8 = 236
 
-RETURN  = 10
+RETURN  = 13
 
     .data
 
 ; TODO: Fix this map and pass it to Simon Rowe.
-; 00 1      10 none     20 [SPACE]  30 Q
-; 01 3      11 A        21 Z        31 E
-; 02 5      12 D        22 C        32 T
-; 03 7      13 G        23 B        33 U
-; 04 9      14 J        24 M        34 O
-; 05 +      15 L        25 .        35 @
-; 06 £      16 ;        26 none     36 ^
-; 07 [DEL]  17 [CSR R]  27 [F1]     37 [F5]
-; 08 [<-]   18 [STOP]   28 none     38 2
-; 09 W      19 none     29 S        39 4
-; 0A R      1A X        2A F        3A 6
-; 0B Y      1B V        2B H        3B 8
-; 0C I      1C N        2C K        3C 0
-; 0D P      1D ,        2D :        3D -
-; 0E *      1E /        2E =        3E [HOME]
-; 0F [RET]  1F [CSR D]  2F [F3]     3F [F7]
+; 00 1           10 none     20 [SPACE]  30 Q
+; 01 3           11 A        21 Z        31 E
+; 02 5           12 D        22 C        32 T
+; 03 7           13 G        23 B        33 U
+; 04 9           14 J        24 M        34 O
+; 05 +           15 L        25 .        35 @
+; 06 £           16 ;        26 none     36 [ARR UP]
+; 07 [DEL]       17 [CSR R]  27 [F1]     37 [F5]
+; 08 [ARR LEFT]  18 [STOP]   28 none     38 2
+; 09 W           19 none     29 S        39 4
+; 0A R           1A X        2A F        3A 6
+; 0B Y           1B V        2B H        3B 8
+; 0C I           1C N        2C K        3C 0
+; 0D P           1D ,        2D :        3D -
+; 0E *           1E /        2E =        3E [HOME]
+; 0F [RET]       1F [CSR D]  2F [F3]     3F [F7]
 
 devkbd_map_normal:
     .byte "13579+£", BACKSPACE, "wryip*", RETURN
@@ -58,7 +58,7 @@ devkbd_map_shifted:
     .byte "!#%')+£", BACKSPACE, "WRYIP*", RETURN
     .byte 0, "ADGIL]", CURSOR_RIGHT, RUN_STOP, 0, "XVN./", CURSOR_DOWN
     .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
-    .byte "QETUO@^", F6, 34, "$(0-", CLR_HOME, F8
+    .byte "QETUO@^", F6, 34, "$((-", CLR_HOME, F8
     .byte 0
 
     .code

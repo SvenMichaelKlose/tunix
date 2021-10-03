@@ -1,8 +1,6 @@
-SOURCES= \
-	line.c \
-	linebuf.c \
-	main.c
-PROGRAM=vi
+ASMSOURCES= \
+	main.asm
+PROGRAM=lisp
 
 include ../Makefile.rules
 

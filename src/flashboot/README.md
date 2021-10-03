@@ -1,26 +1,25 @@
-# Ingle Flash boot
+INGLE Flash boot
+================
 
-Loads the desktop and its banks from direcory ".ingle" from
+Loads the desktop and its banks from direcory '.ingle' from
 the UltiFS file system on the Flash ROM starting at bank 9.
 
-# API workings
 
-Just the good news right from the start: libingle does all
-the necessary stuff to call ROM functions without having to
-worry about much, except that libingle should not reside
-in BLK5 ($a000-$bfff) as the ROM must be banked in before
-any functions of it can be used.
+# API
+
+* RAM allocation
+* Process switching
+* Shared I/O (virtual devices for each process)
+* Virtual device for API calls
 
 Parameters to functions are being stored at fixed locations.
-Just to say it right away: all this isn't too much of a
-good idea.
 
 ```
-$0000:  Start offset of something.
-$0004:  Destination offset of something.
-$0006:  Word size
+$0000:  start offset (4 bytes)
+$0004:  destination offset (4 bytes)
+$0006:  size (2 bytes)
 
-$0100-$0103:  Process state signature
+$0100-$0103:  process state signature
 $0104-$0105:  misc
 $0106:        save stage flag
 $0110-$011f:  VIC register set
@@ -38,14 +37,14 @@ quarantees a minimum free stack size.
 
 ### $a009 – Save state of current process.
 
+This procedure serves two purposes.  First, to make a copy
+of a program to restore it on reset after a crash and second
+to save away all unbanked RAM before launching a child process.
+
 Copies the currently visible RAM to reserved banks.  They are
 copied back on reset and restarted at the address in
 registers X (high) and A (low).  Also the regular RAM, VIC
 and Ultimem registers are copied.
-
-This procedure serves two purposes.  First, to make a copy
-of a program to restore it on reset after a crash and second
-to save away all unbanked RAM before launching a child process.
 
 Parameters:
 ```
@@ -84,8 +83,8 @@ Speed code to copy banks.
 To be replacing $a00c perhaps.
 
 Creates a new process with its own RAM banks, not overwriting
-the currently running program.  Does only need to copy to save
-unbanked RAM which is much faster.
+the currently running program.  Only needs to save unbanked
+RAM which is much faster.
 
 Parameters:
 ```
@@ -94,3 +93,13 @@ Parameters:
 * $0104 word start address
 * $0120 Ultimem register set
 ```
+
+# Future
+
+### $a00f – Allocate RAM bank.
+### $a012 – Free RAM bank.
+### $a015 – Speed copy BLK2 to BLK1.
+### $a009 – Save state of current process.
+### $a018 – Allocate new process space
+### $a018 – Launch program
+### $a018 – Copy memory block from another process.

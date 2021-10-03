@@ -2,23 +2,22 @@
 
 #include <libterm.h>
 
+#include "linebuf.h"
 #include "line.h"
 
-char        line[MAX_LINE_LENGTH];
-unsigned    line_length;
-pos_t       xpos;
 
-void
-line_clear ()
-{
-    line[0] = 0;
-    line_length = 0;
-    xpos = 0;
-}
+pos_t       xpos;
+pos_t       ypos;
+line        * first_line;
+
 
 void
 line_set_cursor (void)
 {
+    term_put (TERM_ESC);
+    term_put (TERM_SET_CURSOR);
+    term_put (xpos);
+    term_put (ypos);
 }
 
 void
@@ -27,57 +26,60 @@ line_redraw_until_end (void)
     pos_t i;
     char c;
 
-    term_put (TERM_CLEAR_TO_EOL);
-
-    for (i = xpos; i < line_length; i++) {
-        c = line[i];
-
-        if (c < 32)
+    for (i = xpos; i < linebuf_length; i++) {
+        if (!(c = linebuf[i]))
             return;
 
         term_put (c);
     }
+
+    term_put (TERM_CLEAR_TO_EOL);
 }
 
 void
 line_move_left ()
 {
-    if (!xpos)
-        return;
-
-    xpos--;
-    line_set_cursor ();
+    if (xpos)
+        xpos--;
 }
 
 void
 line_move_right ()
 {
-    if (xpos < line_length)
+    if (xpos < linebuf_length)
         xpos++;
-
-    line_set_cursor ();
 }
 
-void
-line_insert_char (char c)
+line *
+line_data (linestack * l, unsigned version)
 {
-    memmove (&line[xpos + 1], &line[xpos], line_length - xpos);
-    line[xpos] = c;
-    line_length++;
-    line_redraw_until_end ();
-    xpos++;
-    line_set_cursor ();
+    line  * m = &l->first;
+    line  * n;
+
+    if (m->version_deleted <= version || m->version > version)
+        return NULL;
+
+    while (n = m->newer) {
+        if (n->version_deleted > version || n->version > version)
+            break;
+
+        m = n;
+    }
+
+    return m;
 }
 
-void
-line_delete_char ()
+linestack *
+line_get (unsigned i, unsigned version)
 {
-    if (!line_length || !xpos)
-        return;
+    linestack       * l = first_line;
+    line   * m;
 
-    xpos--;
-    memmove (&line[xpos], &line[xpos + 1], line_length - xpos);
-    line_length--;
-    line_redraw_until_end ();
-    line_set_cursor ();
+    do {
+        m = line_data (l, version);
+        if (m && !i--)
+            return m;
+    } while (l = l->next);
+
+    return NULL;
 }

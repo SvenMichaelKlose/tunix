@@ -1,3 +1,5 @@
+.import _term_init, _term_put, _term_puts, _get_key
+
     .zeropage
 
 heap:   .res 3
@@ -8,6 +10,22 @@ a1:     .res 3
 a2:     .res 3
 
     .code
+
+.proc _main
+    jsr _term_init
+
+    lda #<txt_welcome
+    ldx #>txt_welcome
+    jsr _term_puts
+
+    jmp loop
+.endproc
+
+.proc loop
+l:  jsr _get_key
+    jsr _term_put
+    jmp l
+.endproc
 
 ; X: Size
 .proc alloc_heap
@@ -143,5 +161,34 @@ check:
     ldy #3
 .endproc
 
-.proc error_not_a_cons
+.proc err_not_a_cons
+    lda #<txt_err_not_a_cons
+    ldx #>txt_err_not_a_cons
+    jsr _term_puts
+    jmp loop
 .endproc
+
+    .data
+
+txt_welcome:
+    .byte "AttoLisp v0.1", 13
+    .byte "Copyright (c) 2021 Sven Michael Klose", 13
+    .byte 13
+    .byte "UltiMem found: 1MB RAM, 8MB ROM", 13
+    .byte "No environment image found!", 13
+    .byte "Reading 'env.lisp'...", 13
+    .byte "Dumping to 'tmp.img'...", 13
+    .byte "GCing 'tmp.img...", 13
+    .byte "  Reading image...", 13
+    .byte "  Tracing objects...", 13
+    .byte "  Relocating objects...", 13
+    .byte "  Copying objects...", 13
+    .byte "Loading image 'env.lisp'...", 13
+    .byte 13
+    .byte "Welcome!", 13
+    .byte "* "
+    .byte 0
+
+txt_err_not_a_cons:
+    .byte "Object is not a cons: ", 0
+

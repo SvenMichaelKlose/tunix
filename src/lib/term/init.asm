@@ -1,4 +1,4 @@
-.export _term_init, _term_put
+.export _term_init, _term_put, _term_puts
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
@@ -95,20 +95,24 @@ r:  rts
 .endproc
 
 .proc cursor_enable
+    pha
     lda visible_cursor
     inc visible_cursor
     ora #0
     bne r
-    jmp cursor_draw
-r:  rts
+    jsr cursor_draw
+r:  pla
+    rts
 .endproc
 
 .proc cursor_disable
+    pha
     dec visible_cursor
     lda visible_cursor
     bne r
-    jmp cursor_draw
-r:  rts
+    jsr cursor_draw
+r:  pla
+    rts
 .endproc
 
 .proc cursor_step
@@ -152,16 +156,20 @@ n:  rts
 .endproc
 
 .proc _term_put
-    pha
-    pha
     jsr cursor_disable
+    cmp #13
+    bne n
+    jsr line_break
+    jmp r
+
+n:  pha
+    pha
     jsr set_cursor_pos
     pla
     jsr putchar_fixed
     jsr cursor_step
-    jsr cursor_enable
     pla
-    rts
+r:  jmp cursor_enable
 .endproc
 
 .proc putstring_fixed
@@ -169,16 +177,9 @@ n:  rts
 
 l:  ldy #0
     lda (p),y
-    beq done
+    beq r
 
-    cmp #13
-    bne n
-    jsr line_break
-    jmp next
-
-n:  jsr set_cursor_pos
-    jsr putchar_fixed
-    jsr cursor_step
+    jsr _term_put
 
 next:
     inc p
@@ -186,13 +187,14 @@ next:
     inc p+1
     jmp l   ; (bne)
 
-done:
-    inc p
-    bne r
-    inc p+1
 r:  jmp cursor_enable
 .endproc
 
+.proc _term_puts
+    sta p
+    stx p+1
+    jmp putstring_fixed
+.endproc
 
     .data
     .align 256

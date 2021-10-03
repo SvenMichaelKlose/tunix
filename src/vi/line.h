@@ -3,14 +3,22 @@
 
 #define MAX_LINE_LENGTH     256
 
-typedef unsigned pos_t;
+typedef struct _line line;
 
-void line_clear (void);
-void line_redraw_until_end (void);
+typedef struct _line {
+    unsigned    version;
+    unsigned    version_deleted;
+    line        * newer;
+} line;
+
+typedef struct _linestack linestack;
+
+typedef struct _linestack {
+    linestack   * next;
+    line        first;
+} linestack;
 
 void line_move_left (void);
 void line_move_right (void);
-void __fastcall__ line_insert_char (char c);
-void line_delete_char (void);
 
 #endif // #ifndef LINE_H

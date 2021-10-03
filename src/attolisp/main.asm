@@ -1,9 +1,6 @@
-; AttoLisp
-
-
-.importzp s, d, c
 .import _term_init, _term_put, _term_puts, _get_key
 
+.importzp s, d, c
 
     .zeropage
 
@@ -12,6 +9,8 @@ a1:         .res 3
 a2:         .res 3
 r:          .res 3  ; Return value of built-in function.
 
+tmp:        .res 3
+tmp2:       .res 3
 
 
 ; ############
@@ -45,6 +44,9 @@ r:          .res 3  ; Return value of built-in function.
 ;    lda r+1
 ;    sta symbol_t+1
 
+    ldx #31
+    jsr alloc_heap
+
     jmp loop
 .endproc
 
@@ -55,9 +57,7 @@ txt_t:
 
 txt_welcome:
     .byte "AttoLisp v0.1 2021-10-03", 13
-    .byte "by Sven Michael Klose", 13
-    .byte "   <pixel@hugbox.org>", 13
-    .byte 13
+    .byte "by Sven Michael Klose <pixel@hugbox.org>", 13
     .byte "Welcome!", 13
     .byte "* "
     .byte 0
@@ -80,17 +80,24 @@ l:  jsr _get_key
 ; ### HEAP ###
 ; ############
 
+; Every object starts with a flag byte, a size byte and
+; the new address for relocation during garbage collection.
+;
 ; The heap is steadily growing in BLK3.  An object address
 ; also comes with its bank number, so each pointer is three
 ; bytes in size.
 ; The MSB in the first object byte distinguishes atoms and
 ; conses.  If it is set, the object is an atom and the seven
-; bits left contain its size.
+; bits left contain flags.
+; An object cannot be larger than 255 bytes.
 
-F_ATOM      = %10000000
-F_SYMBOL    = %11000000
-F_NUMBER    = %10100000
-M_SIZE      = %00011111
+F_ATOM          = %10000000
+F_SYMBOL        = %10000000
+F_NUMBER        = %10000001
+
+F_USED          = %01000000
+F_MISSING_TRACE = %00100000
+
 
     .zeropage
 
@@ -115,8 +122,9 @@ stack:      .res 3
     rts
 .endproc
 
-; X: Size
-.proc alloc_heap
+.proc alloc_heap ; X: Size
+    sta tmp2
+
     lda heap+1
     cmp #7          ; Last page of heap bank?
     beq check       ; Check low pointer...
@@ -129,9 +137,12 @@ l:  lda heap
     lda heap+2
     sta r+2
 
+    ldy #0
+    lda tmp2
+    sta (heap),y
+
     ; Step to next free space.
     txa
-    and #M_SIZE
     clc
     adc heap
     sta heap
@@ -166,15 +177,17 @@ check:
 ; ### ATOMS ###
 ; #############
 
-
     .code
 
 ; X: Flags/size
 .proc alloc_atom
+    pha
     jsr alloc_heap
 
     ; Set atom flag.
     ldy #0
+    pla
+    sta (r),y
     txa
     sta (r),y
 
@@ -186,13 +199,21 @@ check:
 ; ### CONSES ###
 ; ##############
 
+; Conses consist of a flag byte, a relocation address and two object pointer.
+
+OFS_CONS_FLAGS      = 0
+OFS_CONS_RELOC      = 1
+OFS_CONS_A          = 3
+OFS_CONS_D          = 6
+CONS_SIZE           = 9
+
     .code
 
 .proc alloc_cons
-    lda #6
+    lda #CONS_SIZE
     jsr alloc_heap
 
-    ldy #0
+    ldy #OFS_CONS_A
     lda a0
     sta (r),y
     iny
@@ -215,17 +236,15 @@ check:
 .endproc
 
 .proc car
-    lda a0+3
+    ldy #0
+    lda (a0),y
+    bmi e
+
+    lda a0+2
     sta $9ffc
 
-    ldy #0
-.endproc
-
-.proc cdx
-    lda (a0),y
+    ldy #OFS_CONS_A
     stx r
-    and #128
-    bne e
     iny
     lda (a0),y
     sta r+1
@@ -239,25 +258,36 @@ e:  jmp err_not_a_cons
 .endproc
 
 .proc cdr
-    lda a0+3
+    ldy #0
+    lda (a0),y
+    bmi e
+
+    lda a0+2
     sta $9ffc
 
-    ldy #3
-    bne cdx
+    ldy #OFS_CONS_D
+    stx r
+    iny
+    lda (a0),y
+    sta r+1
+    iny
+    lda (a0),y
+    sta r+2
+
+    rts
+
+e:  jmp err_not_a_cons
 .endproc
 
 .proc rplaca
-    lda a1+3
+    ldy #0
+    lda (a1),y
+    bmi e
+
+    lda a1+2
     sta $9ffc
 
-    ldy #0
-.endproc
-
-.proc rplacx
-    lda (a1),y
-    and #128
-    bne err_not_a_cons
-
+    ldy #OFS_CONS_A
     lda a0
     sta (a1),y
     iny
@@ -270,20 +300,45 @@ e:  jmp err_not_a_cons
     sta r+2
 
     rts
+
+e:  jmp err_not_a_cons
 .endproc
 
 .proc rplacd
-    lda a1+3
+    ldy #0
+    lda (a1),y
+    bmi e
+
+    lda a1+2
     sta $9ffc
 
-    ldy #3
-    bne rplacx      ; (jmp)
+    ldy #OFS_CONS_D
+    lda a0
+    sta (a1),y
+    iny
+    lda a0+1
+    sta (a1),y
+    sta r+1
+    iny
+    lda a0+2
+    sta (a1),y
+    sta r+2
+
+    rts
+
+e:  jmp err_not_a_cons
 .endproc
 
 
 ; ###############
 ; ### SYMBOLS ###
 ; ###############
+
+OFS_SYMBOL_FLAGS    = 0
+OFS_SYMBOL_RELOC    = 2
+OFS_SYMBOL_VALUE    = 4
+OFS_SYMBOL_NAME     = 6
+SYMBOL_SIZE         = OFS_SYMBOL_NAME
 
     .zeropage
 
@@ -309,14 +364,14 @@ symbol_name:    .res 2  ; Symbol name string
 
 .proc add_symbol
     jsr symbol_length
-    ora #F_SYMBOL
     tax
+    lda #F_SYMBOL
     jsr alloc_atom
 
     ; Copy symbol name.
     lda r
     clc
-    adc #3
+    adc #SYMBOL_SIZE
     sta d
     lda r+1
     adc #0
@@ -345,6 +400,11 @@ r:  rts
 ; ### NUMBERS ###
 ; ###############
 
+OFS_NUMBER_FLAGS    = 0
+OFS_NUMBER_RELOC    = 2
+OFS_NUMBER          = 5
+NUMBER_SIZE         = 7
+
     .zeropage
 
 number:     .res 2
@@ -353,10 +413,11 @@ number:     .res 2
     .code
 
 .proc make_number
-    ldx #F_NUMBER + 3
+    ldx #NUMBER_SIZE
+    lda #F_NUMBER
     jsr alloc_atom
 
-    ldy #0
+    ldy #OFS_NUMBER
     lda number
     sta (r),y
     iny
@@ -371,6 +432,212 @@ number:     .res 2
 ; ### READ ###
 ; ############
 
+; #############
+; ### APPLY ###
+; #############
+
+    .code
+
+.proc apply
+    lda a1
+    sta tmp
+    lda a1+1
+    sta tmp+1
+    lda a1+2
+    sta tmp+2
+
+n1: lda a1
+    ora a1+1
+    beq end_of_args
+
+    ; Map in argument.
+    lda a1+2
+    sta $9ffc
+
+    ; Push symbol.
+    ldy #0
+    lda a1
+    sta (stack),y
+    iny
+    lda a1+1
+    sta (stack),y
+    iny
+    lda a1+2
+    sta (stack),y
+
+    ; Push symbol value.
+    ldy #OFS_SYMBOL_VALUE
+    lda (a1),y
+    sta tmp
+    iny
+    lda (a1),y
+    tax
+    iny
+    lda (a1),y
+    ldy #3
+    sta (stack),y
+    dey
+    txa
+    sta (stack),y
+    dey
+    lda tmp
+    sta (stack),y
+
+    ; Advance stack pointer.
+    lda stack
+    clc
+    adc #6
+    sta stack
+    lda stack+1
+    adc #0
+    sta stack+1
+
+    ; Step to next argument.
+    ldy #0
+    lda (a1),y
+    sta tmp
+    lda (a1),y
+    tax
+    iny
+    lda (a1),y
+    sta a1+2
+    txa
+    sta a1+1
+    pla
+    sta a1
+
+    jmp n1
+
+end_of_args:
+    ; Push argument list.
+    ldy #0
+    lda tmp
+    sta (stack),y
+    iny
+    lda tmp+1
+    sta (stack),y
+    iny
+    lda tmp+2
+    sta (stack),y
+
+    ; Advance stack pointer.
+    lda stack
+    clc
+    adc #3
+    sta stack
+    lda stack+1
+    adc #0
+    sta stack+1
+
+    ; Call EVAL-BODY.
+
+    ; Undo stack pointer.
+    lda stack
+    sec
+    sbc #3
+    sta stack
+    lda stack+1
+    sbc #0
+    sta stack+1
+
+    ; Pop argument list.
+    ldy #0
+    lda tmp
+    sta (stack),y
+    iny
+    lda tmp+1
+    sta (stack),y
+    iny
+    lda tmp+2
+    sta (stack),y
+
+n2: lda tmp
+    ora tmp+1
+    beq done
+
+    ; Undo stack pointer.
+    lda stack
+    sec
+    sbc #6
+    sta stack
+    lda stack+1
+    sbc #0
+    sta stack+1
+
+    ; Map in argument.
+    lda a1+2
+    sta $9ffc
+
+    ; Pop symbol.
+    ldy #0
+    lda (stack),y
+    sta tmp
+    iny
+    lda (stack),y
+    sta tmp+1
+    iny
+    lda (stack),y
+    sta tmp+2
+
+    ; Pop symbol value.
+    iny
+    lda (stack),y
+    sta tmp2
+    iny
+    lda (stack),y
+    tax
+    iny
+    lda (stack),y
+    sta tmp2+2
+
+    ; Assign old symbol value.
+    ldy #OFS_SYMBOL_VALUE+2
+    sta (a1),y
+    dey
+    txa
+    lda (a1),y
+    dey
+    lda tmp2
+    lda (a1),y
+    ldy #3
+
+    ; Step to next argument.
+    ldy #0
+    lda (a1),y
+    sta tmp
+    lda (a1),y
+    tax
+    iny
+    lda (a1),y
+    sta a1+2
+    txa
+    sta a1+1
+    pla
+    sta a1
+
+    jmp n2
+
+done:
+    rts
+
+noargs:
+    ; Call EVAL-BODY.
+    rts
+
+builtin:
+    ; Copy arguments to zero page argument list.
+    ; Call built-in.
+
+    rts
+.endproc
+
+
+; ##########################
+; ### GARBAGE COLLECTION ###
+; ##########################
+
+.proc
+.endproc
 
 ; ##############
 ; ### ERRORS ###

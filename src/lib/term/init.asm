@@ -7,18 +7,21 @@
 .import _pattern_solid
 .import init_region_stack
 .import reset_region
+.import moveram
+.import charset, charset_size
 
 .importzp s, d, c, scrbase
 .importzp font, pencil_mode, pattern
 .importzp xpos, ypos, width, height
+.importzp screen_width, screen_height, screen_columns
 
     .zeropage
 
-tmp:        .res 1
-tmp2:       .res 1
-p:          .res 2
-cursor_x:   .res 1
-cursor_y:   .res 1
+tmp:            .res 1
+tmp2:           .res 1
+p:              .res 2
+cursor_x:       .res 1
+cursor_y:       .res 1
 has_cursor:     .res 1
 visible_cursor: .res 1
 
@@ -38,10 +41,10 @@ visible_cursor: .res 1
     jsr init_region_stack
     jsr reset_region
 
-    lda #<charset
+    lda #<our_charset
     sta font
     sta p
-    lda #>charset
+    lda #>our_charset
     sta font+1
     sta p+1
 
@@ -59,7 +62,7 @@ l2: lda (p),y
     bne l2
     inc p+1
     lda p+1
-    cmp #>charset+8
+    cmp #>our_charset + 8
     bne l2
 
     ldy #0
@@ -133,9 +136,16 @@ n:  rts
 
 .proc cursor_down
     lda cursor_y
-    clc
+    cmp #screen_height-8
+    bne n
+
+    jsr scroll_up
+    rts
+
+n:  clc
     adc #8
     sta cursor_y
+    
     rts
 .endproc
 
@@ -196,8 +206,53 @@ r:  jmp cursor_enable
     jmp putstring_fixed
 .endproc
 
+.proc scroll_up
+    lda #<charset
+    sta s
+    lda #>charset
+    sta s+1
+
+    ldx #screen_columns
+m:  ldy #7
+    lda #0
+l:  sta (s),y
+    dey
+    bpl l
+
+    lda s
+    clc
+    adc #screen_height
+    sta s
+    bcc n
+    inc s+1
+n:  dex
+    bne m
+
+    lda #<(charset + 8)
+    sta s
+    lda #<charset
+    sta d
+    lda #>charset
+    sta s+1
+    sta d+1
+    lda #<(charset_size - 8)
+    sta c
+    lda #>(charset_size - 8)
+    sta c+1
+    lda #0
+    jsr moveram
+
+    ldx #7
+    lda #0
+l2: sta charset + (screen_height * screen_columns) - 8,x
+    dex
+    bpl l2
+
+    rts
+.endproc
+
     .data
     .align 256
 
-charset:
+our_charset:
     .include "charset-4x8.asm"

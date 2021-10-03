@@ -62,9 +62,11 @@ typedef struct _channel {
     char *      name;
     bfile *     file;
 
-    // Directory/error status.
+    // Generated content.
+    unsigned    buflen;
     char *      buf;
-    char *      bufptr;
+    char *      bufwptr;
+    char *      bufrptr;
 } channel;
 
 channel * channels[16];
@@ -82,8 +84,10 @@ init_kernal_emulation ()
 }
 
 void
-copy_from_process (char * from, char * to, char len)
+copy_from_process (char * to, char * from, char len)
 {
+    memcpy (to, from, len);
+/*
     char blk5 = *ULTIMEM_BLK5;
     char * ptr;
 
@@ -93,6 +97,7 @@ copy_from_process (char * from, char * to, char len)
     }
 
     *ULTIMEM_BLK5 = blk5;
+*/
 }
 
 void
@@ -109,13 +114,13 @@ set_error (char code)
 
     if (ch->buf) {
         free (ch->buf);
-        ch->buf = ch->bufptr = NULL;
+        ch->buf = ch->bufwptr = NULL;
     }
 
     if (!code)
         return;
 
-    ch->buf = ch->bufptr = malloc (64);
+    ch->buf = ch->bufwptr = malloc (64);
     sprintf (ch->buf, "%d, ERROR, 0, 0", code);
 }
 
@@ -125,10 +130,33 @@ open_command (char * name)
     channel * ch = channels[15];
 return;
 
-    ch->buf = ch->bufptr = malloc (64);
+    ch->buf = ch->bufwptr = malloc (64);
     bzero (ch->buf, 64);
     strcpy (ch->buf, "foooooo!");
     STATUS = 0;
+}
+
+void
+add_to_buf (channel * ch, void * ptr, size_t len)
+{
+    if (!ch->buf)
+        ch->buf = malloc (1024);
+
+    ch->bufwptr = memcpy (ch->bufwptr, ptr, len);
+    ch->buflen += len;
+}
+
+char
+read_from_buf (channel * ch, void * ptr, size_t len)
+{
+    char c = *ch->bufrptr++;
+
+    if (ch->bufrptr == ch->bufwptr) {
+        free (ch->buf);
+        ch->buf = ch->bufwptr = ch->bufrptr = NULL;
+    }
+
+    return c;
 }
 
 void
@@ -143,55 +171,42 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   lf;
 
-cputs ("OPEN.");
     if (_SA() != 15 && channels[_SA()]) {
-cputs ("err chn.");
         set_error (ERR_NO_CHANNEL);
         return;
     }
 
-    if (_FNAME()) {
-cputs ("has name.");
+    if (_FNLEN()) {
         name = malloc (_FNLEN() + 1);
         if (!name) {
             set_error (ERR_BYTE_DECODING);
             return;
         }
-        copy_from_process (_FNAME(), name, _FNLEN());
+        copy_from_process (name, _FNAME(), _FNLEN());
         name[_FNLEN()] = 0;
     }
 
-cputs ("cmd.");
     if (_SA() == 15) {
-cputs ("open cmd.");
         open_command (name);
-cputs ("OPEN done.");
         return;
     }
 
     if (_FNLEN() == 1 && *name == '$') {
-cputs ("mkdirlist.");
         make_directory_list ();
-cputs ("OPEN done.");
         return;
     }
 
-cputs ("uopen.");
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
-cputs ("err not found.");
         set_error (ERR_FILE_NOT_FOUND);
-cputs ("OPEN done.");
         return;
     }
 
-cputs ("alloc.");
     lf = malloc (sizeof (channel));
     lf->file = found_file;
     channels[_SA()]->file = found_file;
 
     set_error (0);
-cputs ("OPEN done.");
 }
 
 void
@@ -199,9 +214,7 @@ ultifs_kclose ()
 {
     channel * ch = channels[_SA()];
 
-cputs ("CLOSE.");
     if (!ch) {
-cputs ("close err.");
         set_error (ERR_FILE_NOT_OPEN);
         return;
     }
@@ -212,7 +225,6 @@ cputs ("close err.");
         return;
     }
 
-cputs ("close bfile.");
     bfile_close (ch->file);
     free (ch->name);
     free (ch);
@@ -222,14 +234,11 @@ cputs ("close bfile.");
 void
 ultifs_kchkin ()
 {
-cputs ("CHKIN.");
     if (!channels[_SA()]) {
-cputs ("chkin err.");
         set_return_error (OSERR_FILE_NOT_OPEN);
         return;
     }
 
-cputs ("chkin done.");
     set_return_error (0);
 }
 
@@ -269,11 +278,11 @@ cputs ("BASIN.");
 
     STATUS = 0;
 
-    if (ch->bufptr) {
-        accu = *ch->bufptr++;
-        if (!*ch->bufptr) {
+    if (ch->bufwptr) {
+        accu = *ch->bufwptr++;
+        if (!*ch->bufwptr) {
             free (ch->buf);
-            ch->buf = ch->bufptr = NULL;
+            ch->buf = ch->bufwptr = NULL;
             goto end_of_file;
         }
         return;

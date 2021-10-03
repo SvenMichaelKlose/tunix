@@ -1,8 +1,7 @@
 ; Process-space wedge
 ;
-; To be as small as it can.  Banks in the UltiFS bank
-; and calls functions of the secondary wedge, written
-; in C.
+; Banks in the secondary wedge.
+
 
 .code
 

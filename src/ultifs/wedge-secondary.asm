@@ -1,14 +1,7 @@
-; UltiFS-space wedge
+; UltiFS wedge
 ;
-; This wraps to the UltiFS C functions.
-; If another device is being accessed, the old function
-; vector is being called.
-;
-; Most likely this will map in the rest of the UltiFS
-; code the primary wedge did not care about to keep it
-; small.
-; Also the zero page has to be set up before C functions
-; are being called.
+; Wraps the UltiFS C functions by banking in missing banks.
+; Also redirects the old vectors.
 
 .export _blk2
 .export _blk3
@@ -122,6 +115,7 @@ l:  lda __ZP_START__,x
     rts
 .endproc
 
+; Returns CC if it's not.
 .proc is_our_device
     pha
     lda FA

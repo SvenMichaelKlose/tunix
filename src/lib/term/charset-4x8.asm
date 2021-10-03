@@ -397,8 +397,8 @@ _charset_4x8:
     .byte %0000
 
 ; '
-    .byte %1000
-    .byte %1000
+    .byte %0100
+    .byte %0100
     .byte %0000
     .byte %0000
     .byte %0000
@@ -995,11 +995,11 @@ _charset_4x8:
 ; c
     .byte %0000
     .byte %0000
-    .byte %0100
+    .byte %0110
     .byte %1000
     .byte %1000
     .byte %1000
-    .byte %0100
+    .byte %0110
     .byte %0000
 
 ; d
@@ -1025,7 +1025,7 @@ _charset_4x8:
 ; f
     .byte %0010
     .byte %0100
-    .byte %0110
+    .byte %1110
     .byte %0100
     .byte %0100
     .byte %0100
@@ -1163,7 +1163,7 @@ _charset_4x8:
 ; t
     .byte %0100
     .byte %0100
-    .byte %0110
+    .byte %1110
     .byte %0100
     .byte %0100
     .byte %0100

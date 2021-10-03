@@ -6,12 +6,15 @@ all:
 	rm -fv ingle.zip
 	rm -rfv compiled
 	mkdir -pv compiled/.ingle
-	cp -r archive/* compiled
-	cp src/desktop/*.bin compiled/.ingle/
+	cp -rv archive/* compiled
+	cp -v src/desktop/*.bin compiled/.ingle/
+	mkdir -pv compiled/programming/attolisp
+	cp -v src/attolisp/lisp compiled/programming/attolisp/
+	cp -v src/attolisp/env.lisp compiled/programming/attolisp/
 	mkdir -pv compiled/office
-	cp src/writenow/writenow compiled/office/writenow/
-	cp src/vforth/vforth compiled/programming/vforth/
-#	cp src/tgi-demo/*.bin compiled/.ingle/
+	cp -v src/writenow/writenow compiled/office/writenow/
+	cp -v src/vforth/vforth compiled/programming/vforth/
+#	cp -v src/tgi-demo/*.bin compiled/.ingle/
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg

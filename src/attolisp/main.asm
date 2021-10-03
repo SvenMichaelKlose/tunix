@@ -1,4 +1,5 @@
 .import _term_init, _term_put, _term_puts, _get_key
+.import _ultimem_unhide, _ultimem_is_installed
 
 .importzp s, d, c
 
@@ -26,6 +27,16 @@ tmp2:       .res 3
     ldx #>txt_welcome
     jsr _term_puts
 
+;    jsr _ultimem_unhide
+;    jsr _ultimem_is_installed
+;    tax
+;    bne ultimem_found
+
+;    lda #<txt_no_ultimem
+;    ldx #>txt_no_ultimem
+;    jsr _term_puts
+
+ultimem_found:
     lda #$00
     sta heap
     lda #$60
@@ -59,8 +70,13 @@ txt_welcome:
     .byte "AttoLisp v0.1 2021-10-03", 13
     .byte "by Sven Michael Klose <pixel@hugbox.org>", 13
     .byte "Welcome!", 13
-    .byte "* "
-    .byte 0
+    .byte 13, 0
+
+txt_prompt:
+    .byte "* ", 0
+
+txt_no_ultimem:
+    .byte "No UltiMem expansion found. Stopped.", 0
 
 
 ; #################
@@ -70,6 +86,10 @@ txt_welcome:
     .code
 
 .proc loop
+    lda #<txt_prompt
+    ldx #>txt_prompt
+    jsr _term_puts
+
 l:  jsr _get_key
     jsr _term_put
     jmp l
@@ -159,6 +179,11 @@ check:
     adc heap
     bcc l
 
+    ; Mark end of heap for GC.
+    ldy #0
+    tya
+    sta (heap),y
+
     ; Switch to next free bank.
     inc heap+2
     lda heap+2
@@ -194,6 +219,36 @@ check:
 
     rts
 .endproc
+
+.proc atom
+    ldy #0
+    sty r+1
+    sty r+2
+
+    lda (a0),y
+    bpl n
+    ldy symbol_t
+n:  sty r
+
+    rts
+.endproc
+
+.proc not
+    lda #0
+    sta r
+    sta r+1
+    sta r+2
+
+    lda a0+2
+    bne done
+
+    lda symbol_t
+    sta r
+
+done:
+    rts
+.endproc
+
 
 
 ; ##############
@@ -232,6 +287,19 @@ CONS_SIZE           = 9
     iny
     lda a1+2
     sta (r),y
+
+    rts
+.endproc
+
+.proc consp
+    ldy #0
+    sty r+1
+    sty r+2
+
+    lda (a0),y
+    bmi n
+    iny
+n:  sty r
 
     rts
 .endproc
@@ -344,11 +412,13 @@ SYMBOL_SIZE         = OFS_SYMBOL_NAME
 
     .zeropage
 
-symbol_t:       .res 3
-sp_root:        .res 3  ; Root node of symbol name tree
 sp:             .res 2  ; Symbol name tree pointer
 symbol_name:    .res 2  ; Symbol name string
 
+    .data
+
+symbol_t:       .res 3
+sp_root:        .res 3  ; Root node of symbol name tree
 
     .code
 
@@ -407,10 +477,9 @@ OFS_NUMBER_RELOC    = 2
 OFS_NUMBER          = 5
 NUMBER_SIZE         = 7
 
-    .zeropage
+    .data
 
 number:     .res 2
-
 
     .code
 
@@ -640,8 +709,11 @@ builtin:
 
     .zeropage
 
-last_object:    .res 3
 p:              .res 3
+
+    .data
+
+last_object:    .res 3
 
     .code
 
@@ -772,6 +844,7 @@ mark_atom:
 .endproc
 
 .proc set_reloc_addr
+    ldy #1
     lda last_object
     sta (p),y
     iny
@@ -795,7 +868,7 @@ mark_atom:
     sta p+2
 
 next_bank:
-    lda #$01
+    lda #$00
     sta p
     lda #$60
     sta p+1
@@ -847,6 +920,145 @@ update:
     cmp #F_NUMBER
     beq number_done
     bne skip_symbol
+
+next_item:
+    clc
+    adc p
+    sta p
+    lda p+1
+    adc #0
+    sta p+2
+
+    jmp l
+
+done:
+    rts
+.endproc
+
+.proc get_reloc_address
+    lda tmp+2
+    sta $9ffc
+
+    ldy #1
+    lda (tmp),y
+    pha
+    iny
+    lda (tmp),y
+    tax
+    iny
+    lda (tmp),y
+    sta tmp+2
+    stx tmp+1
+    pla
+    sta tmp
+
+    rts
+.endproc
+
+.proc update_value
+    tya
+    pha
+
+    lda p+2
+    sta $9ffc
+
+    lda (p),y
+    sta tmp
+    iny
+    lda (p),y
+    sta tmp+1
+    iny
+    lda (p),y
+    sta tmp+2
+
+    jsr get_reloc_address
+
+    pla
+    tay
+
+    lda p+2
+    sta $9ffc
+
+    lda tmp
+    sta (p),y
+    iny
+    lda tmp+1
+    sta (p),y
+    iny
+    lda tmp+2
+    sta (p),y
+
+    rts
+.endproc
+
+.proc update_values
+    lda #$00
+    sta p+2
+
+next_bank:
+    lda #$00
+    sta p
+    lda #$60
+    sta p+1
+
+l:  lda p+2
+    sta $9ffc
+
+    lda p
+    cmp heap
+    bne n
+    lda p+1
+    cmp heap+1
+    beq done
+
+n:  ldy #0
+    lda (p),y
+    beq next_bank
+    and #F_MARKED
+    bne update
+
+    lda (p),y
+    bmi skip_atom
+
+    lda #CONS_SIZE
+    jmp next_item
+
+skip_atom:
+    and #M_TYPE
+    cmp #F_NUMBER
+    bne skip_symbol
+
+number_done:
+    lda #NUMBER_SIZE
+    jmp next_item
+
+skip_symbol:
+    ldy #OFS_SYMBOL_LENGTH
+    lda (p),y
+    clc
+    adc #SYMBOL_SIZE
+    jmp next_item
+
+update:
+    ldy #0
+    lda (p),y
+    bpl update_cons
+
+    and #M_TYPE
+    cmp #F_NUMBER
+    beq number_done
+
+    ldy #OFS_SYMBOL_VALUE
+    jsr update_value
+    jmp skip_symbol
+
+update_cons:
+    ldy #OFS_CONS_A
+    jsr update_value
+    ldy #OFS_CONS_D
+    jsr update_value
+
+    lda #CONS_SIZE
 
 next_item:
     clc

@@ -44,6 +44,10 @@ line_redraw ()
     pos_t i;
     char c;
 
+    term_put (TERM_ESCAPE);
+    term_put (TERM_DISABLE_ATTR);
+    term_put (TERM_ATTR_CURSOR);
+
     line_set_cursor ();
     term_put (TERM_CARRIAGE_RETURN);
 
@@ -56,6 +60,10 @@ line_redraw ()
 
     term_put (TERM_CLEAR_TO_EOL);
     line_set_cursor ();
+
+    term_put (TERM_ESCAPE);
+    term_put (TERM_ENABLE_ATTR);
+    term_put (TERM_ATTR_CURSOR);
 }
 
 void

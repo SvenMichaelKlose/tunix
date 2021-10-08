@@ -1,7 +1,7 @@
-Code page 437 terminal
-40x24 chars
+Code page 437 terminal (40x24 chars)
+====================================
 
-Supported control codes:
+# Supported control codes:
 
 01,x,y:   Cursor motion
 02:       Insert line
@@ -15,5 +15,14 @@ Supported control codes:
 0d:       CR: Carriage return
 18:       Clear to EOL
 1a:       Clear screen
+1b:       Escape sequences
 1e:       Home
 7f:       DEL: BS, ' ', BS
+
+# Escape sequences
+
+0b:     Enable attribute
+0c:     Disable attribute
+
+# Attributes
+16:     Cursor

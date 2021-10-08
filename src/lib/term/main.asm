@@ -35,6 +35,7 @@ visible_cursor: .res 1
 code:           .res 2
 code_length:    .res 1
 code_callback:  .res 2
+attributes:     .res 2
 
     .code
 
@@ -85,6 +86,8 @@ l2: lda (p),y
     ldy #$ff
     sty code_length
 
+    lda #%00010000
+    sta attributes
     jmp cursor_draw
 .endproc
 
@@ -134,7 +137,8 @@ l2: sta charset + (screen_height * screen_columns) - 8,x
 .endproc
 
 .proc cursor_draw
-    lda has_cursor
+    lda attributes
+    and #%00010000
     beq r
 
     lda cursor_x
@@ -424,6 +428,58 @@ done:
     rts
 .endproc
 
+.proc escape
+    lda #0
+    sta code_length
+    lda #<exec_escape
+    sta code_callback
+    lda #>exec_escape
+    sta code_callback+1
+    rts
+.endproc
+
+.proc enable_attribute
+    lda code
+    ora attributes
+    sta attributes
+    jmp cursor_show
+.endproc
+
+.proc disable_attribute
+    lda code
+    eor #$ff
+    and attributes
+    sta attributes
+    jmp cursor_show
+.endproc
+
+.proc exec_escape
+    lda code
+
+    cmp #$0b
+    bne n1
+    lda #0
+    sta code_length
+    lda #<enable_attribute
+    sta code_callback
+    lda #>enable_attribute
+    sta code_callback+1
+    jmp cursor_show
+n1:
+
+    cmp #$0c
+    bne n2
+    lda #0
+    sta code_length
+    lda #<disable_attribute
+    sta code_callback
+    lda #>disable_attribute
+    sta code_callback+1
+
+n2:
+    jmp cursor_show
+.endproc
+
 ; Output control codes:
 ; 1b:       Escape prefix
 
@@ -533,6 +589,13 @@ n4:
     jsr carriage_return
     jmp cursor_show
 n2:
+
+; 1b:       ESC: Escape
+    cmp #$1b
+    bne n14
+    jsr escape
+    jmp cursor_show
+n14:
 
 ; 18:       Clear to EOL
     cmp #$18

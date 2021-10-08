@@ -198,10 +198,10 @@ n:  clc
     rts
 .endproc
 
-.proc line_break
+.proc carriage_return
     lda #0
     sta cursor_x
-    jmp cursor_down
+    rts
 .endproc
 
 .proc set_cursor_pos
@@ -218,10 +218,15 @@ n:  clc
     jsr cursor_disable
     cmp #10
     bne n
-    jsr line_break
+    jsr cursor_down
     jmp r
 
-n:  pha
+n:  cmp #13
+    bne n2
+    jsr carriage_return
+    jmp r
+
+n2: pha
     pha
     jsr set_cursor_pos
     pla

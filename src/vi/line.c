@@ -21,19 +21,28 @@ line_set_cursor (void)
 }
 
 void
-line_redraw_until_end (void)
+line_clear ()
+{
+    linebuf_clear ();
+    xpos = 0;
+}
+
+void
+line_redraw ()
 {
     pos_t i;
     char c;
 
-    for (i = xpos; i < linebuf_length; i++) {
+    term_put (13);
+
+    for (i = 0; i < linebuf_length; i++) {
         if (!(c = linebuf[i]))
             return;
 
         term_put (c);
     }
 
-    term_put (TERM_CLEAR_TO_EOL);
+    //term_put (TERM_CLEAR_TO_EOL);
 }
 
 void
@@ -51,9 +60,9 @@ line_move_right ()
 }
 
 void
-line_insert_char (pos_t p, char c)
+line_insert_char (char c)
 {
-    linebuf_insert_char (p, c);
+    linebuf_insert_char (xpos, c);
     line_move_right ();
 }
 

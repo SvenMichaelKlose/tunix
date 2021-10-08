@@ -18,6 +18,9 @@ typedef struct _linestack {
     line        first;
 } linestack;
 
+void line_clear (void);
+void line_insert_char (char c);
+void line_redraw (void);
 void line_move_left (void);
 void line_move_right (void);
 

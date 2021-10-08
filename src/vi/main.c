@@ -14,12 +14,20 @@ main ()
     char key;
 
     term_init ();
-    term_puts ("UltiVI v0.1\n");
+    term_puts ("UltiVI v0.1\n\r");
 
     linebuf_clear ();
 
     while (1) {
         while (!(key = get_key ()));
-        term_put (key);
+
+        if (key == 13) {
+            term_puts ("\n\r");
+            line_clear ();
+            continue;
+        }
+
+        line_insert_char (key);
+        line_redraw ();
     }
 }

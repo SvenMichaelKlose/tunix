@@ -24,8 +24,14 @@ __VIC20__ = 1
     jmp $cb1e
 
 has_ultimem:
-    lda #%01000000          ; ROM in BLK5.
+    ; RAM in BLK5.
+    lda $9ff2
+    ;and #%00111111
+    ora #%11000000
     sta $9ff2
+    lda #0
+    sta $9ffe
+    sta $9fff
 
     lda #<txt_erasing
     ldy #>txt_erasing
@@ -81,6 +87,7 @@ l:  jsr BASIN
     lda (ptr),y
     cmp tmp
     bne err_not_burned
+    inc $900f
 dont_burn:
 
     inc ptr

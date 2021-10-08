@@ -56,7 +56,7 @@ devkbd_map_normal:
 
 devkbd_map_shifted:
     .byte "!#%')+£", BACKSPACE, "WRYIP*", RETURN
-    .byte 0, "ADGIL]", CURSOR_RIGHT, RUN_STOP, 0, "XVN./", CURSOR_DOWN
+    .byte 0, "ADGIL]", CURSOR_RIGHT, RUN_STOP, 0, "XVN.?", CURSOR_DOWN
     .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
     .byte "QETUO@^", F6, 34, "$((-", CLR_HOME, F8
     .byte 0

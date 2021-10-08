@@ -50,8 +50,15 @@ line_move_right ()
         xpos++;
 }
 
+void
+line_insert_char (pos_t p, char c)
+{
+    linebuf_insert_char (p, c);
+    line_move_right ();
+}
+
 line *
-line_data (linestack * l, unsigned version)
+line_by_version (linestack * l, unsigned version)
 {
     line  * m = &l->first;
     line  * n;
@@ -70,13 +77,13 @@ line_data (linestack * l, unsigned version)
 }
 
 linestack *
-line_get (unsigned i, unsigned version)
+linestack_get (unsigned i, unsigned version)
 {
     linestack       * l = first_line;
     line   * m;
 
     do {
-        m = line_data (l, version);
+        m = line_by_version (l, version);
         if (m && !i--)
             return m;
     } while (l = l->next);

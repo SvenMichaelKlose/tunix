@@ -1,6 +1,7 @@
 .export _ultimem_send_command
 .export _ultimem_poll
 
+; A: Command
 .proc _ultimem_send_command
     ldx #$aa
     stx $aaaa

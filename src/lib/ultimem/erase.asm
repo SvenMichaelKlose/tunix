@@ -9,8 +9,7 @@
     lda #$80
     jsr _ultimem_send_command
     lda #$10
-    jsr _ultimem_send_command
-    jmp _ultimem_poll
+    jmp _ultimem_send_command
 .endproc
 
 .proc _ultimem_erase_block

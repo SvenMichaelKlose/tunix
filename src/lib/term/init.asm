@@ -31,7 +31,7 @@ visible_cursor: .res 1
     jsr clear_screen
     lda #1
     ldx #0
-    ldy #0
+    ldy #2
     jsr init_bitmap_mode
     lda #$00
     sta scrbase
@@ -89,7 +89,9 @@ l2: lda (p),y
     lda #2
     sta pencil_mode
     asl
-    sta width
+    tax
+    dex
+    stx width
     asl
     sta height
     jmp box
@@ -167,7 +169,7 @@ n:  clc
 
 .proc _term_put
     jsr cursor_disable
-    cmp #13
+    cmp #10
     bne n
     jsr line_break
     jmp r

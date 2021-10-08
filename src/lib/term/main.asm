@@ -334,7 +334,6 @@ done:
     rts
 .endproc
 
-.export stop = insert_line
 .proc insert_line
     lda #0
     sta cursor_x
@@ -386,8 +385,66 @@ done:
     jmp clear_to_eol
 .endproc
 
+
+.proc delete_line
+    lda #0
+    sta cursor_x
+
+    lda cursor_y
+    cmp #screen_height-8
+    beq done
+
+    sta ypos
+
+    lda #screen_height-8-1
+    sec
+    sbc ypos
+    sta height
+
+    lda #0
+    sta xpos
+    lda #20
+    sta width
+
+l2: jsr calcscr
+
+    lda scr
+    clc
+    adc #8
+    sta tmp
+    lda scr+1
+    adc #0
+    sta tmp+1
+
+    ldy #0
+    ldx height
+    inx
+l:  lda (tmp),y
+    sta (scr),y
+    iny
+    dex
+    bne l
+
+    lda xpos
+    clc
+    adc #8
+    sta xpos
+
+    dec width
+    bne l2
+    
+done:
+    lda cursor_y
+    pha
+    lda #screen_height-8
+    sta cursor_y
+    jsr clear_to_eol
+    pla
+    sta cursor_y
+    rts
+.endproc
+
 ; Output control codes:
-; 03:       Delete line
 ; 1b:       Escape prefix
 
 ; Escape:
@@ -437,6 +494,13 @@ n7:
     jsr insert_line
     jmp cursor_enable
 n12:
+
+; 03:       Delete line
+    cmp #$03
+    bne n13
+    jsr delete_line
+    jmp cursor_enable
+n13:
 
 ; 07:       BEL: beep and/or flash screen
     cmp #$07

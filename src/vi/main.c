@@ -27,6 +27,7 @@ main ()
     term_put (0);
     term_put (0);
     term_put (2);
+    term_put (3);
 
     linebuf_clear ();
 

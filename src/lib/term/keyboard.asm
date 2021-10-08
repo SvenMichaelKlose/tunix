@@ -1,17 +1,28 @@
 ; Based on matrix table at http://sta.c64.org/cbm64kbdlay.html
 
-.export _get_key
+; Input control codes:
+; 03:   Page down
+; 04:   Arrow right
+; 05:   Arrow up
+; 07:   Delete
+; 17:   Home/End
+; 18:   Page up
+; 19:   Arrow left
+; 20:   Arrow down
+; 22:   Insert
+
+.export _term_get
 
 CLR_HOME = 235
 BACKSPACE = 8
 INS_DEL  = 255
-CURSOR_LEFT = 254
-CURSOR_RIGHT = 253
-CURSOR_UP = 252
-CURSOR_DOWN = 251
+CURSOR_LEFT = 19
+CURSOR_RIGHT = 4
+CURSOR_UP = 5
+CURSOR_DOWN = 20
 LEFT_SHIFT = 250
 RIGHT_SHIFT = 249
-POUND = 248
+POUND = 156
 ESCAPE = 247
 CTRL = 246
 COMMODORE = 245
@@ -24,6 +35,7 @@ F5 = 239
 F6 = 238
 F7 = 237
 F8 = 236
+ARROW_LEFT = 235
 
 RETURN  = 13
 
@@ -48,34 +60,41 @@ RETURN  = 13
 ; 0F [RET]       1F [CSR D]  2F [F3]     3F [F7]
 
 devkbd_map_normal:
-    .byte "13579+£", BACKSPACE, "wryip*", RETURN
+    .byte "13579+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
     .byte 0, "adgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
     .byte " zcbm.", 0, F1, 0, "sfhk:=", F3
     .byte "qetuo@^", F5, "24680-", CLR_HOME, F7
     .byte 0
 
 devkbd_map_shifted:
-    .byte "!#%')+£", BACKSPACE, "WRYIP*", RETURN
-    .byte 0, "ADGIL]", CURSOR_RIGHT, RUN_STOP, 0, "XVN.?", CURSOR_DOWN
+    .byte "!#%')+", POUND, BACKSPACE, ARROW_LEFT, "WRYIP*", RETURN
+    .byte 0, "ADGIL]", CURSOR_LEFT, RUN_STOP, 0, "XVN.?", CURSOR_UP
     .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
     .byte "QETUO@^", F6, 34, "$((-", CLR_HOME, F8
     .byte 0
 
     .code
 
-.proc _get_key
+.proc _term_get
+    nop
+w:
     lda $c6         ; Key in buffer?
-    beq _get_key
+    beq w
+
     lda #0          ; Reset buffer.
     sta $c6
     ldx $c5         ; Get scan code.
     cpx #$40        ; No key pressed?
-    beq _get_key
+    beq nokey
     lda $28d        ; Get CTRL/SHIFT/C= status.
     and #1          ; Shift?
     beq +n
     lda devkbd_map_shifted,x
     rts
 n:  lda devkbd_map_normal,x
+    rts
+
+nokey:
+    lda #0
     rts
 .endproc

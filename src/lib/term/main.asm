@@ -1,6 +1,6 @@
 .include "/usr/local/share/cc65/asminc/cbm_kernal.inc"
 
-.export _term_init, _term_put, _term_puts, _term_get
+.export _term_init, _term_put, _term_puts
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
@@ -594,53 +594,6 @@ r:  jmp cursor_show
     sta p
     stx p+1
     jmp putstring_fixed
-.endproc
-
-; Input control codes:
-; 03:   Page down
-; 04:   Arrow right
-; 05:   Arrow up
-; 07:   Delete
-; 17:   Home/End
-; 18:   Page up
-; 19:   Arrow left
-; 20:   Arrow down
-; 22:   Insert
-
-.proc _term_get
-    jsr GETIN
-
-    cmp #145    ; cursor up
-    bne n
-    lda #5
-    rts
-n:
-
-    cmp #17     ; down
-    bne n2
-    lda #20
-    rts
-n2:
-
-    cmp #157     ; left
-    bne n3
-    lda #19
-    rts
-n3:
-
-    cmp #29     ; right
-    bne n4
-    lda #4
-    rts
-n4:
-
-    cmp #20     ; backspace
-    bne n5
-    lda #8
-    rts
-n5:
-
-r:  rts
 .endproc
 
     .data

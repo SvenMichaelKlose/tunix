@@ -23,8 +23,11 @@
     .zeropage
 
 tmp:            .res 2
-tmp2:           .res 1
+tmp2:           .res 2
 p:              .res 2
+
+    .data
+
 cursor_x:       .res 1
 cursor_y:       .res 1
 has_cursor:     .res 1
@@ -56,7 +59,7 @@ code_callback:  .res 2
     sta font+1
     sta p+1
 
-    ; Double each char's half.
+    ; Double each chars half.
     ldy #0
 l2: lda (p),y
     sta tmp
@@ -207,9 +210,7 @@ r:  rts
     lda cursor_y
     cmp #screen_height-8
     bne n
-
-    jsr scroll_up
-    rts
+    jmp scroll_up
 
 n:  clc
     adc #8
@@ -317,6 +318,7 @@ done:
 .proc insert_line
     lda #0
     sta cursor_x
+    sta xpos
 
     lda cursor_y
     cmp #screen_height-8
@@ -329,8 +331,6 @@ done:
     sbc ypos
     sta height
 
-    lda #0
-    sta xpos
     lda #20
     sta width
 
@@ -360,7 +360,7 @@ l:  lda (scr),y
 
     dec width
     bne l2
-    
+
 done:
     jmp clear_to_eol
 .endproc

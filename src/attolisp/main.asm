@@ -1,4 +1,4 @@
-.import _term_init, _term_put, _term_puts, _get_key
+.import _term_init, _term_put, _term_puts, _term_get
 .import _ultimem_unhide, _ultimem_is_installed
 
 .importzp s, d, c
@@ -90,7 +90,7 @@ txt_no_ultimem:
     ldx #>txt_prompt
     jsr _term_puts
 
-l:  jsr _get_key
+l:  jsr _term_get
     jsr _term_put
     jmp l
 .endproc

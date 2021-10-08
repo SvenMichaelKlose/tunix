@@ -30,8 +30,7 @@ main ()
 
         switch (key) {
             case TTY_ENTER:
-                term_puts ("\n\r");
-                line_clear ();
+                line_commit ();
                 goto next;
 
             case TTY_CURSOR_LEFT:

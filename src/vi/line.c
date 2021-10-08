@@ -7,7 +7,7 @@
 
 
 pos_t       xpos;
-pos_t       ypos;
+pos_t       ypos = 0;
 line        * first_line;
 
 
@@ -21,10 +21,22 @@ line_clear ()
 void
 line_set_cursor (void)
 {
-    term_put (1);
+    term_put (TERM_SET_CURSOR);
     term_put (xpos);
     term_put (ypos);
 }
+
+void
+line_commit ()
+{
+    line_clear ();
+    if (ypos != 23)
+        ypos++;
+
+    term_put (TERM_LINE_FEED);
+    term_put (TERM_INSERT_LINE);
+}
+
 
 void
 line_redraw ()
@@ -32,7 +44,8 @@ line_redraw ()
     pos_t i;
     char c;
 
-    term_put (13);
+    line_set_cursor ();
+    term_put (TERM_CARRIAGE_RETURN);
 
     for (i = 0; i < linebuf_length; i++) {
         if (!(c = linebuf[i]))

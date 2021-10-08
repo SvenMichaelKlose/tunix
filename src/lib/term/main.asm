@@ -15,6 +15,7 @@
 .import clear_screen
 .import box
 .import putchar_fixed
+.import _pattern_empty
 .import _pattern_solid
 .import init_region_stack
 .import reset_region
@@ -237,14 +238,36 @@ l:  lda $900f
     rts
 .endproc
 
+.proc clear_to_eol
+    lda cursor_x
+    sta xpos
+    lda cursor_y
+    sta ypos
+
+    lda #<_pattern_empty
+    sta pattern
+    lda #>_pattern_empty
+    sta pattern+1
+
+    lda #1
+    sta pencil_mode
+
+    lda #160
+    sec
+    sbc cursor_x
+    sta width
+
+    lda #8
+    sta height
+
+    jmp box
+.endproc
+
 ; Output control codes:
 ; 02:       Insert line
 ; 03:       Delete line
 ; 09:       HT: Horizontal tabulation
-; 0c:       FF: Form feed, Clear screen
-; 18:       Clear to EOL
 ; 1b:       Escape prefix
-; 7f:       DEL: BS, ' ', BS
 
 ; Escape:
 ; 1b:       Quote
@@ -312,18 +335,30 @@ n2:
     cmp #$08
     bne n3
     jsr cursor_left
-    jmp r
+r:  jmp cursor_enable
 n3:
 
+; 0c:       FF: Form feed, Clear screen
 ; 1a:       Clear screen
+    cmp #$0c
+    beq form_feed
+    bne n4
     cmp #$1a
     bne n4
+form_feed:
     jsr clear_screen
     lda #0
     sta cursor_x
     sta cursor_y
     jmp r
 n4:
+
+; 18:       Clear to EOL
+    cmp #$18
+    bne n9
+    jsr clear_to_eol
+    jmp r
+n9:
 
 ; 1e:       Home
     cmp #$1e
@@ -334,6 +369,18 @@ n4:
     jmp r
 n5:
 
+; 7f:       DEL: BS, ' ', BS
+    cmp #$7f
+    bne n8
+    lda #7
+    jsr _term_puts
+    lda #32
+    jsr _term_puts
+    lda #7
+    jsr _term_puts
+    jmp r
+n8:
+
     pha
     pha
     jsr set_cursor_pos
@@ -341,7 +388,7 @@ n5:
     jsr putchar_fixed
     jsr cursor_step
     pla
-r:  jmp cursor_enable
+    jmp cursor_enable
 .endproc
 
 .proc putstring_fixed

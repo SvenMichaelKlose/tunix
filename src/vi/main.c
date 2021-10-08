@@ -18,6 +18,10 @@ main ()
     term_put (7);
     term_put (26);
     term_puts ("fnord v0.1\n\r");
+    term_puts ("1223334444");
+    term_put (8);
+    term_put (8);
+    term_put (0x18);
 
     linebuf_clear ();
 

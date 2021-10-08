@@ -268,10 +268,28 @@ l:  lda $900f
     jmp box
 .endproc
 
+; 09:       HT: Horizontal tabulation
+.proc tab
+    lda cursor_x
+    and #%11100000
+    clc
+    adc #%00100000
+    sta cursor_x
+
+    cmp #160
+    bne done
+
+    sec
+    sbc #160
+    sta cursor_x
+
+done:
+    rts
+.endproc
+
 ; Output control codes:
 ; 02:       Insert line
 ; 03:       Delete line
-; 09:       HT: Horizontal tabulation
 ; 1b:       Escape prefix
 
 ; Escape:
@@ -312,22 +330,29 @@ no_code:
     cmp #$01
     bne n7
     jsr cursor_motion
-    jmp r
+r:  jmp cursor_enable
 n7:
 
 ; 07:       BEL: beep and/or flash screen
     cmp #$07
     bne n6
     jsr beep
-    jmp r
+    jmp cursor_enable
 n6:
 
 ; 08:       BS; Backspace
     cmp #$08
     bne n3
     jsr cursor_left
-r:  jmp cursor_enable
+    jmp cursor_enable
 n3:
+
+; 09:       HT; Horizontal tab
+    cmp #$09
+    bne n10
+    jsr tab
+    jmp cursor_enable
+n10:
 
 ; 0a:       LF: Line feed
 ; 0b:       VF: Vertical tab
@@ -337,14 +362,13 @@ n3:
     bne n
 line_feed:
     jsr cursor_down
-    jmp r
+    jmp cursor_enable
 n:  
 
 ; 0c:       FF: Form feed, Clear screen
 ; 1a:       Clear screen
     cmp #$0c
     beq form_feed
-    bne n4
     cmp #$1a
     bne n4
 form_feed:
@@ -352,21 +376,21 @@ form_feed:
     lda #0
     sta cursor_x
     sta cursor_y
-    jmp r
+    jmp cursor_enable
 n4:
 
 ; 0d:       CR: Carriage return
     cmp #$0d
     bne n2
     jsr carriage_return
-    jmp r
+    jmp cursor_enable
 n2:
 
 ; 18:       Clear to EOL
     cmp #$18
     bne n9
     jsr clear_to_eol
-    jmp r
+    jmp cursor_enable
 n9:
 
 ; 1e:       Home
@@ -375,7 +399,7 @@ n9:
     lda #0
     sta cursor_x
     sta cursor_y
-    jmp r
+    jmp cursor_enable
 n5:
 
 ; 7f:       DEL: BS, ' ', BS
@@ -387,7 +411,7 @@ n5:
     jsr _term_puts
     lda #7
     jsr _term_puts
-    jmp r
+    jmp cursor_enable
 n8:
 
     pha

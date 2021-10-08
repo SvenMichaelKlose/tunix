@@ -18,6 +18,7 @@ main ()
     term_put (7);
     term_put (0x1a);
     term_puts ("fnord v0.1\n\r");
+    term_put (9);
     term_puts ("1223334444");
     term_put (8);
     term_put (8);

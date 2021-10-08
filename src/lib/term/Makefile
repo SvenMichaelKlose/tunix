@@ -1,5 +1,4 @@
 SOURCES= \
-    init.asm \
     main.asm \
     keyboard.asm \
     putchar-fixed-4x4.asm

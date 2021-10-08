@@ -20,11 +20,13 @@
 .import init_region_stack
 .import reset_region
 .import moveram
+.import copy_area
+.import calcscr
 .import charset, charset_size
 
-.importzp s, d, c, scrbase
+.importzp s, d, c, scrbase, scr
 .importzp font, pencil_mode, pattern
-.importzp xpos, ypos, width, height
+.importzp xpos, ypos, xpos2, ypos2, width, height
 .importzp screen_width, screen_height, screen_columns
 
     .zeropage
@@ -90,6 +92,51 @@ l2: lda (p),y
     sty code_length
 
     jmp cursor_enable
+.endproc
+
+.proc scroll_up
+    lda #<charset
+    sta s
+    lda #>charset
+    sta s+1
+
+    ldx #screen_columns
+m:  ldy #7
+    lda #0
+l:  sta (s),y
+    dey
+    bpl l
+
+    lda s
+    clc
+    adc #screen_height
+    sta s
+    bcc n
+    inc s+1
+n:  dex
+    bne m
+
+    lda #<(charset + 8)
+    sta s
+    lda #<charset
+    sta d
+    lda #>charset
+    sta s+1
+    sta d+1
+    lda #<(charset_size - 8)
+    sta c
+    lda #>(charset_size - 8)
+    sta c+1
+    lda #0
+    jsr moveram
+
+    ldx #7
+    lda #0
+l2: sta charset + (screen_height * screen_columns) - 8,x
+    dex
+    bpl l2
+
+    rts
 .endproc
 
 .proc cursor_draw
@@ -287,8 +334,59 @@ done:
     rts
 .endproc
 
+.export stop = insert_line
+.proc insert_line
+    lda #0
+    sta cursor_x
+
+    lda cursor_y
+    cmp #screen_height-8
+    beq done
+
+    sta ypos
+
+    lda #screen_height-8-1
+    sec
+    sbc ypos
+    sta height
+
+    lda #0
+    sta xpos
+    lda #20
+    sta width
+
+l2: jsr calcscr
+
+    lda scr
+    clc
+    adc #8
+    sta tmp
+    lda scr+1
+    adc #0
+    sta tmp+1
+
+    ldy height
+    ldx height
+    inx
+l:  lda (scr),y
+    sta (tmp),y
+    dey
+    dex
+    bne l
+
+    lda xpos
+    clc
+    adc #8
+    sta xpos
+
+    dec width
+    bne l2
+    
+done:
+    jmp clear_to_eol
+.endproc
+
 ; Output control codes:
-; 02:       Insert line
 ; 03:       Delete line
 ; 1b:       Escape prefix
 
@@ -332,6 +430,13 @@ no_code:
     jsr cursor_motion
 r:  jmp cursor_enable
 n7:
+
+; 02:       Insert line
+    cmp #$02
+    bne n12
+    jsr insert_line
+    jmp cursor_enable
+n12:
 
 ; 07:       BEL: beep and/or flash screen
     cmp #$07
@@ -446,51 +551,6 @@ r:  jmp cursor_enable
     sta p
     stx p+1
     jmp putstring_fixed
-.endproc
-
-.proc scroll_up
-    lda #<charset
-    sta s
-    lda #>charset
-    sta s+1
-
-    ldx #screen_columns
-m:  ldy #7
-    lda #0
-l:  sta (s),y
-    dey
-    bpl l
-
-    lda s
-    clc
-    adc #screen_height
-    sta s
-    bcc n
-    inc s+1
-n:  dex
-    bne m
-
-    lda #<(charset + 8)
-    sta s
-    lda #<charset
-    sta d
-    lda #>charset
-    sta s+1
-    sta d+1
-    lda #<(charset_size - 8)
-    sta c
-    lda #>(charset_size - 8)
-    sta c+1
-    lda #0
-    jsr moveram
-
-    ldx #7
-    lda #0
-l2: sta charset + (screen_height * screen_columns) - 8,x
-    dex
-    bpl l2
-
-    rts
 .endproc
 
     .data

@@ -23,6 +23,10 @@ main ()
     term_put (8);
     term_put (8);
     term_put (0x18);
+    term_put (1);
+    term_put (0);
+    term_put (0);
+    term_put (2);
 
     linebuf_clear ();
 

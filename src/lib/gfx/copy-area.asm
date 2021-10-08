@@ -12,6 +12,8 @@
 
 .code
 
+; s: Source screen base
+; d: Destination screen base
 .proc copy_area
     ; Calculate source screen address.
     lda s

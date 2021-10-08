@@ -252,8 +252,8 @@ n:  clc
     rts
 .endproc
 
-.proc beep
-    ldy #$10
+.proc bell
+    ldy #$0c
     ldx #0
 l:  lda $900f
     pha
@@ -537,10 +537,10 @@ n12:
     jmp cursor_show
 n13:
 
-; 07:       BEL: beep and/or flash screen
+; 07:       BEL: bell and/or flash screen
     cmp #$07
     bne n6
-    jsr beep
+    jsr bell
     jmp cursor_show
 n6:
 
@@ -617,11 +617,11 @@ n5:
     cmp #$7f
     bne n8
     lda #7
-    jsr _term_puts
+    jsr _term_put
     lda #32
-    jsr _term_puts
+    jsr _term_put
     lda #7
-    jsr _term_puts
+    jsr _term_put
     jmp cursor_show
 n8:
 

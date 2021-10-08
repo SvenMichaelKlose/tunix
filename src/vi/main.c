@@ -15,6 +15,8 @@ main ()
 
     term_init ();
     term_puts ("UltiVI v0.1\n\r");
+    term_put (26);
+    term_puts ("fnord v0.1\n\r");
 
     linebuf_clear ();
 

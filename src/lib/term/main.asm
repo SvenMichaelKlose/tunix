@@ -9,42 +9,6 @@
 ; 20:   Arrow down
 ; 22:   Insert
 
-; Output control codes:
-; 01,x,y:   Cursor motion
-; 02:       Insert line
-; 03:       Delete line
-; 07:       BEL: beep and/or flash screen
-; 08:       BS; Backspace
-; 09:       HT: Horizontal tabulation
-; 0a:       LF: Line feed
-; 0c:       FF: Form feed, Clear screen
-; 0d:       CR: Carriage return
-; 18:       Clear to EOL
-; 1a:       Clear screen
-; 1b:       Escape prefix
-; 1e:       Home
-; 7f:       DEL: BS, ' ', BS
-
-; Escape:
-; 1b:       Quote
-; =/Y,x,y:  Cursor motion
-; E:        Insert line
-; R:        Delete line
-; B:        Enable attribute
-; C:        Disable attribute
-; L:        Set line
-; D:        Delete line
-
-; Escape attributes:
-; 0         Reverse
-; 1         Dark
-; 2         Blink
-; 3         Underline
-; 4         Cursor
-; 5         Video
-; 6         Cursor position
-; 7         Status line
-
 .export _term_init, _term_put, _term_puts
 
 .import init_bitmap_mode, gfx_init
@@ -71,6 +35,9 @@ cursor_x:       .res 1
 cursor_y:       .res 1
 has_cursor:     .res 1
 visible_cursor: .res 1
+code:           .res 2
+code_length:    .res 1
+code_callback:  .res 2
 
     .code
 
@@ -118,6 +85,9 @@ l2: lda (p),y
     sty visible_cursor
     iny
     sty has_cursor
+    ldy #$ff
+    sty code_length
+
     jmp cursor_enable
 .endproc
 
@@ -214,19 +184,101 @@ n:  clc
     rts
 .endproc
 
+.proc exec_cursor_motion
+    lda code+1
+    sta xpos
+    lda code
+    sta ypos
+    jmp cursor_enable
+.endproc
+
+.proc cursor_motion
+    lda #1
+    sta code_length
+    lda #<exec_cursor_motion
+    sta code_callback
+    lda #>exec_cursor_motion
+    sta code_callback+1
+    rts
+.endproc
+
+; Output control codes:
+; 02:       Insert line
+; 03:       Delete line
+; 07:       BEL: beep and/or flash screen
+; 08:       BS; Backspace
+; 09:       HT: Horizontal tabulation
+; 0a:       LF: Line feed
+; 0c:       FF: Form feed, Clear screen
+; 0d:       CR: Carriage return
+; 18:       Clear to EOL
+; 1b:       Escape prefix
+; 1e:       Home
+; 7f:       DEL: BS, ' ', BS
+
+; Escape:
+; 1b:       Quote
+; =/Y,x,y:  Cursor motion
+; E:        Insert line
+; R:        Delete line
+; B:        Enable attribute
+; C:        Disable attribute
+; L:        Set line
+; D:        Delete line
+
+; Escape attributes:
+; 0         Reverse
+; 1         Dark
+; 2         Blink
+; 3         Underline
+; 4         Cursor
+; 5         Video
+; 6         Cursor position
+; 7         Status line
+
+
 .proc _term_put
     jsr cursor_disable
-    cmp #10
+
+    ldx code_length
+    bmi no_code
+
+    sta code,x
+    dec code_length
+    bpl r
+    jmp (code_callback)
+
+no_code:
+    cmp #$0a
     bne n
     jsr cursor_down
     jmp r
+n:  
 
-n:  cmp #13
+    cmp #$0d
     bne n2
     jsr carriage_return
     jmp r
+n2:
 
-n2: pha
+; 01,x,y:   Cursor motion
+    cmp #$01
+    bne n3
+    jsr cursor_motion
+    jmp r
+n3:
+
+; 1a:       Clear screen
+    cmp #$1a
+    bne n4
+    jsr clear_screen
+    lda #0
+    sta cursor_x
+    sta cursor_y
+    jmp r
+n4:
+
+    pha
     pha
     jsr set_cursor_pos
     pla

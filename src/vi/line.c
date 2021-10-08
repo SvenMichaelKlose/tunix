@@ -12,19 +12,18 @@ line        * first_line;
 
 
 void
-line_set_cursor (void)
-{
-    term_put (TERM_ESC);
-    term_put (TERM_SET_CURSOR);
-    term_put (xpos);
-    term_put (ypos);
-}
-
-void
 line_clear ()
 {
     linebuf_clear ();
     xpos = 0;
+}
+
+void
+line_set_cursor (void)
+{
+    term_put (1);
+    term_put (0);
+    term_put (0);
 }
 
 void
@@ -43,6 +42,7 @@ line_redraw ()
     }
 
     //term_put (TERM_CLEAR_TO_EOL);
+    line_set_cursor ();
 }
 
 void

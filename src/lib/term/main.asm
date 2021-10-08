@@ -199,9 +199,14 @@ n:  clc
 
 .proc exec_cursor_motion
     lda code+1
-    sta xpos
+    asl
+    asl
+    sta cursor_x
     lda code
-    sta ypos
+    asl
+    asl
+    asl
+    sta cursor_y
     jmp cursor_enable
 .endproc
 
@@ -317,26 +322,23 @@ n7:
     jmp r
 n6:
 
-; 0a:       LF: Line feed
-    cmp #$0a
-    bne n
-    jsr cursor_down
-    jmp r
-n:  
-
-; 0d:       CR: Carriage return
-    cmp #$0d
-    bne n2
-    jsr carriage_return
-    jmp r
-n2:
-
 ; 08:       BS; Backspace
     cmp #$08
     bne n3
     jsr cursor_left
 r:  jmp cursor_enable
 n3:
+
+; 0a:       LF: Line feed
+; 0b:       VF: Vertical tab
+    cmp #$0a
+    beq line_feed
+    cmp #$0b
+    bne n
+line_feed:
+    jsr cursor_down
+    jmp r
+n:  
 
 ; 0c:       FF: Form feed, Clear screen
 ; 1a:       Clear screen
@@ -352,6 +354,13 @@ form_feed:
     sta cursor_y
     jmp r
 n4:
+
+; 0d:       CR: Carriage return
+    cmp #$0d
+    bne n2
+    jsr carriage_return
+    jmp r
+n2:
 
 ; 18:       Clear to EOL
     cmp #$18

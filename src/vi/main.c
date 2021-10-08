@@ -16,7 +16,7 @@ main ()
     term_init ();
     term_puts ("UltiVI v0.1\n\r");
     term_put (7);
-    term_put (26);
+    term_put (0x1a);
     term_puts ("fnord v0.1\n\r");
     term_puts ("1223334444");
     term_put (8);

@@ -18,10 +18,11 @@ typedef struct _linestack {
     line        first;
 } linestack;
 
-void line_clear (void);
-void line_insert_char (char c);
-void line_redraw (void);
-void line_move_left (void);
-void line_move_right (void);
+void line_clear         (void);
+void line_insert_char   (char c);
+void line_delete_char   (void);
+void line_redraw        (void);
+void line_move_left     (void);
+void line_move_right    (void);
 
 #endif // #ifndef LINE_H

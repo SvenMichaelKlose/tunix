@@ -1,15 +1,6 @@
-; Input control codes:
-; 03:   Page down
-; 04:   Arrow right
-; 05:   Arrow up
-; 07:   Delete
-; 17:   Home/End
-; 18:   Page up
-; 19:   Arrow left
-; 20:   Arrow down
-; 22:   Insert
+.include "/usr/local/share/cc65/asminc/cbm_kernal.inc"
 
-.export _term_init, _term_put, _term_puts
+.export _term_init, _term_put, _term_puts, _term_get
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
@@ -31,7 +22,7 @@
 
     .zeropage
 
-tmp:            .res 1
+tmp:            .res 2
 tmp2:           .res 1
 p:              .res 2
 cursor_x:       .res 1
@@ -91,7 +82,7 @@ l2: lda (p),y
     ldy #$ff
     sty code_length
 
-    jmp cursor_enable
+    jmp cursor_draw
 .endproc
 
 .proc scroll_up
@@ -164,7 +155,7 @@ l2: sta charset + (screen_height * screen_columns) - 8,x
 r:  rts
 .endproc
 
-.proc cursor_enable
+.proc cursor_hide
     pha
     lda visible_cursor
     inc visible_cursor
@@ -175,10 +166,9 @@ r:  pla
     rts
 .endproc
 
-.proc cursor_disable
+.proc cursor_show
     pha
     dec visible_cursor
-    lda visible_cursor
     bne r
     jsr cursor_draw
 r:  pla
@@ -234,16 +224,6 @@ n:  clc
     rts
 .endproc
 
-.proc set_cursor_pos
-    pha
-    lda cursor_x
-    sta xpos
-    lda cursor_y
-    sta ypos
-    pla
-    rts
-.endproc
-
 .proc exec_cursor_motion
     lda code+1
     asl
@@ -254,10 +234,10 @@ n:  clc
     asl
     asl
     sta cursor_y
-    jmp cursor_enable
+    jmp cursor_show
 .endproc
 
-.proc cursor_motion
+.proc init_cursor_motion
     lda #1
     sta code_length
     lda #<exec_cursor_motion
@@ -467,9 +447,8 @@ done:
 ; 6         Cursor position
 ; 7         Status line
 
-
 .proc _term_put
-    jsr cursor_disable
+    jsr cursor_hide
 
     ldx code_length
     bmi no_code
@@ -484,43 +463,43 @@ no_code:
 ; 01,x,y:   Cursor motion
     cmp #$01
     bne n7
-    jsr cursor_motion
-r:  jmp cursor_enable
+    jsr init_cursor_motion
+r:  jmp cursor_show
 n7:
 
 ; 02:       Insert line
     cmp #$02
     bne n12
     jsr insert_line
-    jmp cursor_enable
+    jmp cursor_show
 n12:
 
 ; 03:       Delete line
     cmp #$03
     bne n13
     jsr delete_line
-    jmp cursor_enable
+    jmp cursor_show
 n13:
 
 ; 07:       BEL: beep and/or flash screen
     cmp #$07
     bne n6
     jsr beep
-    jmp cursor_enable
+    jmp cursor_show
 n6:
 
 ; 08:       BS; Backspace
     cmp #$08
     bne n3
     jsr cursor_left
-    jmp cursor_enable
+    jmp cursor_show
 n3:
 
 ; 09:       HT; Horizontal tab
     cmp #$09
     bne n10
     jsr tab
-    jmp cursor_enable
+    jmp cursor_show
 n10:
 
 ; 0a:       LF: Line feed
@@ -531,7 +510,7 @@ n10:
     bne n
 line_feed:
     jsr cursor_down
-    jmp cursor_enable
+    jmp cursor_show
 n:  
 
 ; 0c:       FF: Form feed, Clear screen
@@ -545,21 +524,21 @@ form_feed:
     lda #0
     sta cursor_x
     sta cursor_y
-    jmp cursor_enable
+    jmp cursor_show
 n4:
 
 ; 0d:       CR: Carriage return
     cmp #$0d
     bne n2
     jsr carriage_return
-    jmp cursor_enable
+    jmp cursor_show
 n2:
 
 ; 18:       Clear to EOL
     cmp #$18
     bne n9
     jsr clear_to_eol
-    jmp cursor_enable
+    jmp cursor_show
 n9:
 
 ; 1e:       Home
@@ -568,7 +547,7 @@ n9:
     lda #0
     sta cursor_x
     sta cursor_y
-    jmp cursor_enable
+    jmp cursor_show
 n5:
 
 ; 7f:       DEL: BS, ' ', BS
@@ -580,21 +559,22 @@ n5:
     jsr _term_puts
     lda #7
     jsr _term_puts
-    jmp cursor_enable
+    jmp cursor_show
 n8:
 
     pha
-    pha
-    jsr set_cursor_pos
+    lda cursor_x
+    sta xpos
+    lda cursor_y
+    sta ypos
     pla
     jsr putchar_fixed
     jsr cursor_step
-    pla
-    jmp cursor_enable
+    jmp cursor_show
 .endproc
 
 .proc putstring_fixed
-    jsr cursor_disable
+    jsr cursor_hide
 
 l:  ldy #0
     lda (p),y
@@ -602,13 +582,12 @@ l:  ldy #0
 
     jsr _term_put
 
-next:
     inc p
     bne l
     inc p+1
     jmp l   ; (bne)
 
-r:  jmp cursor_enable
+r:  jmp cursor_show
 .endproc
 
 .proc _term_puts
@@ -617,7 +596,55 @@ r:  jmp cursor_enable
     jmp putstring_fixed
 .endproc
 
+; Input control codes:
+; 03:   Page down
+; 04:   Arrow right
+; 05:   Arrow up
+; 07:   Delete
+; 17:   Home/End
+; 18:   Page up
+; 19:   Arrow left
+; 20:   Arrow down
+; 22:   Insert
+
+.proc _term_get
+    jsr GETIN
+
+    cmp #145    ; cursor up
+    bne n
+    lda #5
+    rts
+n:
+
+    cmp #17     ; down
+    bne n2
+    lda #20
+    rts
+n2:
+
+    cmp #157     ; left
+    bne n3
+    lda #19
+    rts
+n3:
+
+    cmp #29     ; right
+    bne n4
+    lda #4
+    rts
+n4:
+
+    cmp #20     ; backspace
+    bne n5
+    lda #8
+    rts
+n5:
+
+r:  rts
+.endproc
+
     .data
+
     .align 256
 
 our_charset:

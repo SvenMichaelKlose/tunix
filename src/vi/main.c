@@ -8,6 +8,13 @@
 
 extern char get_key (void);
 
+#define TTY_ENTER           13
+#define TTY_CURSOR_UP       5
+#define TTY_CURSOR_DOWN     20
+#define TTY_CURSOR_LEFT     19
+#define TTY_CURSOR_RIGHT    4
+#define TTY_BACKSPACE       8
+
 int
 main ()
 {
@@ -15,32 +22,34 @@ main ()
 
     term_init ();
     term_puts ("UltiVI v0.1\n\r");
-    term_put (7);
-    term_put (0x1a);
-    term_puts ("fnord v0.1\n\r");
-    term_put (9);
-    term_puts ("1223334444");
-    term_put (8);
-    term_put (8);
-    term_put (0x18);
-    term_put (1);
-    term_put (0);
-    term_put (0);
-    term_put (2);
-    term_put (3);
 
     linebuf_clear ();
 
     while (1) {
-        while (!(key = get_key ()));
+        while (!(key = term_get ()));
 
-        if (key == 13) {
-            term_puts ("\n\r");
-            line_clear ();
-            continue;
+        switch (key) {
+            case TTY_ENTER:
+                term_puts ("\n\r");
+                line_clear ();
+                goto next;
+
+            case TTY_CURSOR_LEFT:
+                line_move_left ();
+                goto next;
+
+            case TTY_CURSOR_RIGHT:
+                line_move_right ();
+                goto next;
+
+            case TTY_BACKSPACE:
+                line_delete_char ();
+                goto next;
         }
 
         line_insert_char (key);
+
+next:
         line_redraw ();
     }
 }

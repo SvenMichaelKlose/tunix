@@ -22,8 +22,8 @@ void
 line_set_cursor (void)
 {
     term_put (1);
-    term_put (0);
-    term_put (0);
+    term_put (xpos);
+    term_put (ypos);
 }
 
 void
@@ -41,7 +41,7 @@ line_redraw ()
         term_put (c);
     }
 
-    //term_put (TERM_CLEAR_TO_EOL);
+    term_put (TERM_CLEAR_TO_EOL);
     line_set_cursor ();
 }
 
@@ -64,6 +64,16 @@ line_insert_char (char c)
 {
     linebuf_insert_char (xpos, c);
     line_move_right ();
+}
+
+void
+line_delete_char ()
+{
+    if (!xpos)
+        return;
+
+    linebuf_delete_char (xpos);
+    line_move_left ();
 }
 
 line *

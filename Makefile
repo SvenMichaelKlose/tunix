@@ -8,9 +8,9 @@ all:
 	mkdir -pv compiled/.ingle
 	cp -rv archive/* compiled
 	cp -v src/desktop/*.bin compiled/.ingle/
-	mkdir -pv compiled/programming/attolisp
-	cp -v src/attolisp/lisp compiled/programming/attolisp/
-	cp -v src/attolisp/env.lisp compiled/programming/attolisp/
+#	mkdir -pv compiled/programming/attolisp
+	cp -v src/attolisp/lisp compiled/
+	cp -v src/attolisp/env.lisp compiled/
 	mkdir -pv compiled/office
 	cp -v src/writenow/writenow compiled/office/writenow/
 	cp -v src/vforth/vforth compiled/programming/vforth/

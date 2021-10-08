@@ -153,6 +153,13 @@ r:  pla
 n:  rts
 .endproc
 
+.proc cursor_left
+    lda xpos
+    beq r
+    dec xpos
+r:  rts
+.endproc
+
 .proc cursor_down
     lda cursor_y
     cmp #screen_height-8
@@ -202,18 +209,36 @@ n:  clc
     rts
 .endproc
 
+.proc beep
+    ldy #$10
+    ldx #0
+l:  lda $900f
+    pha
+    and #$f8
+    sta tmp
+    pla
+    clc
+    adc #1
+    and #$07
+    ora tmp
+    sta $900f
+    dex
+    bne l
+    dey
+    bne l
+
+    lda #$0a
+    sta $900f
+    rts
+.endproc
+
 ; Output control codes:
 ; 02:       Insert line
 ; 03:       Delete line
-; 07:       BEL: beep and/or flash screen
-; 08:       BS; Backspace
 ; 09:       HT: Horizontal tabulation
-; 0a:       LF: Line feed
 ; 0c:       FF: Form feed, Clear screen
-; 0d:       CR: Carriage return
 ; 18:       Clear to EOL
 ; 1b:       Escape prefix
-; 1e:       Home
 ; 7f:       DEL: BS, ' ', BS
 
 ; Escape:
@@ -249,22 +274,39 @@ n:  clc
     jmp (code_callback)
 
 no_code:
+
+; 01,x,y:   Cursor motion
+    cmp #$01
+    bne n7
+    jsr cursor_motion
+    jmp r
+n7:
+
+; 07:       BEL: beep and/or flash screen
+    cmp #$07
+    bne n6
+    jsr beep
+    jmp r
+n6:
+
+; 0a:       LF: Line feed
     cmp #$0a
     bne n
     jsr cursor_down
     jmp r
 n:  
 
+; 0d:       CR: Carriage return
     cmp #$0d
     bne n2
     jsr carriage_return
     jmp r
 n2:
 
-; 01,x,y:   Cursor motion
-    cmp #$01
+; 08:       BS; Backspace
+    cmp #$08
     bne n3
-    jsr cursor_motion
+    jsr cursor_left
     jmp r
 n3:
 
@@ -277,6 +319,15 @@ n3:
     sta cursor_y
     jmp r
 n4:
+
+; 1e:       Home
+    cmp #$1e
+    bne n5
+    lda #0
+    sta cursor_x
+    sta cursor_y
+    jmp r
+n5:
 
     pha
     pha

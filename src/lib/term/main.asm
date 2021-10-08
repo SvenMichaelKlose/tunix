@@ -630,6 +630,16 @@ n8:
     sta xpos
     lda cursor_y
     sta ypos
+    lda attributes
+    lsr
+    bcs reverse
+    lda #0
+    sta pencil_mode
+    jmp do_char
+reverse:
+    lda #2
+    sta pencil_mode
+do_char:
     pla
     jsr putchar_fixed
     jsr cursor_step

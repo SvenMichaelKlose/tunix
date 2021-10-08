@@ -14,6 +14,7 @@ all:
 	mkdir -pv compiled/office
 	cp -v src/writenow/writenow compiled/office/writenow/
 	cp -v src/vforth/vforth compiled/programming/vforth/
+	cp -v src/vi/vi compiled/
 #	cp -v src/tgi-demo/*.bin compiled/.ingle/
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W

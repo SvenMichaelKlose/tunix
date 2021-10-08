@@ -9,9 +9,9 @@ all:
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C desktop all
-	$(MAKE) -C attolisp all
 	$(MAKE) -C basic-starter all
 	$(MAKE) -C installer all
+	$(MAKE) -C lisp all
 	$(MAKE) -C ultifs all
 	$(MAKE) -C vforth all
 	$(MAKE) -C vi all
@@ -28,9 +28,9 @@ clean:
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C desktop clean
-	$(MAKE) -C attolisp clean
 	$(MAKE) -C basic-starter clean
 	$(MAKE) -C installer clean
+	$(MAKE) -C lisp clean
 	$(MAKE) -C ultifs clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C vi clean

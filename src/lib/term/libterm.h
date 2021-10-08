@@ -12,6 +12,7 @@
 #define TERM_DISABLE_ATTR       0x0c
 
 #define TERM_ATTR_REVERSE       0x01
+#define TERM_ATTR_UNDERLINE     0x08
 #define TERM_ATTR_CURSOR        0x10
 
 extern void term_init (void);

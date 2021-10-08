@@ -642,6 +642,23 @@ reverse:
 do_char:
     pla
     jsr putchar_fixed
+
+    lda attributes
+    and #8
+    beq no_underline
+    lda xpos
+    and #4
+    bne underline_right
+    lda #$f0
+    bne underline
+underline_right:
+    lda #$0f
+underline:
+    ldy #7
+    eor (scr),y
+    sta (scr),y
+no_underline:
+
     jsr cursor_step
     jmp cursor_show
 .endproc

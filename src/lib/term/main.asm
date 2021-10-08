@@ -154,9 +154,14 @@ n:  rts
 .endproc
 
 .proc cursor_left
-    lda xpos
+    lda cursor_x
     beq r
-    dec xpos
+
+    lda cursor_x
+    sec
+    sbc #4
+    sta cursor_x
+
 r:  rts
 .endproc
 

@@ -137,14 +137,29 @@ l2: sta charset + (screen_height * screen_columns) - 8,x
 .endproc
 
 .proc cursor_draw
-    lda attributes
-    and #%00010000
-    beq r
-
     lda cursor_x
     sta xpos
     lda cursor_y
     sta ypos
+
+    lda attributes
+    and #%00010000
+    beq r
+
+    lda xpos
+    cmp #screen_width
+    bcc n
+    lda ypos
+    clc
+    adc #8
+    sta ypos
+    lda #0
+    sta xpos
+n:
+    lda ypos
+    cmp #screen_height
+    bcs r
+
     lda #<_pattern_solid
     sta pattern
     lda #>_pattern_solid

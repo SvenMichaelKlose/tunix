@@ -8,7 +8,8 @@
 
 pos_t       xpos;
 pos_t       ypos = 0;
-line        * first_line;
+line        * first_line = NULL;
+line        * current_line = NULL;
 
 
 void
@@ -39,31 +40,36 @@ line_commit ()
 
 
 void
-line_redraw ()
+disable_cursor ()
 {
-    pos_t i;
-    char c;
-
     term_put (TERM_ESCAPE);
     term_put (TERM_DISABLE_ATTR);
     term_put (TERM_ATTR_CURSOR);
+}
 
-    line_set_cursor ();
-    term_put (TERM_CARRIAGE_RETURN);
-
-    for (i = 0; i < linebuf_length; i++) {
-        if (!(c = linebuf[i]))
-            return;
-
-        term_put (c);
-    }
-
-    term_put (TERM_CLEAR_TO_EOL);
-    line_set_cursor ();
-
+void
+enable_cursor ()
+{
     term_put (TERM_ESCAPE);
     term_put (TERM_ENABLE_ATTR);
     term_put (TERM_ATTR_CURSOR);
+}
+
+void
+line_redraw ()
+{
+    pos_t i;
+
+    disable_cursor ();
+    line_set_cursor ();
+    term_put (TERM_CARRIAGE_RETURN);
+
+    linebuf[linebuf_length] = 0;
+    term_puts (linebuf);
+
+    term_put (TERM_CLEAR_TO_EOL);
+    line_set_cursor ();
+    enable_cursor ();
 }
 
 void

@@ -18,7 +18,7 @@ proc_blk2:      .res NUM_PROCESSES
 proc_blk3:      .res NUM_PROCESSES
 proc_blk5:      .res NUM_PROCESSES
 
-current_proc:   .res 0
+current_proc:   .res 1
 
 .code
 

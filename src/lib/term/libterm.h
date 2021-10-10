@@ -5,8 +5,10 @@
 #define TERM_INSERT_LINE        0x02
 #define TERM_BELL               0x07
 #define TERM_LINE_FEED          0x0a
+#define TERM_CLEAR_SCREEN       0x0c
 #define TERM_CARRIAGE_RETURN    0x0d
 #define TERM_CLEAR_TO_EOL       0x18
+
 #define TERM_ESCAPE             0x1b
 #define TERM_ENABLE_ATTR        0x0b
 #define TERM_DISABLE_ATTR       0x0c

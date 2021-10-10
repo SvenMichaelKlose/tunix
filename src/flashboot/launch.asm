@@ -49,7 +49,7 @@ tmp2:   .res 1
     lda #>$1e00     ; screen
     ldx #>$1000     ; BASIC
     ldy #>$1e00     ; BASIC end
-    bne l6
+    bne l6          ; (jmp)
 
 l7: bcs l5
 
@@ -57,7 +57,7 @@ l7: bcs l5
     lda #>$1e00     ; screen
     ldx #>$0400     ; BASIC
     ldy #>$1e00     ; BASIC end
-    bne l6
+    bne l6          ; (jmp)
 
     ; +24/32/35
 l5: lda #$80

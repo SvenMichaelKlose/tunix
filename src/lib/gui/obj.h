@@ -21,11 +21,11 @@ struct rect {
 
 // Node of tree of doubly–linked lists.
 struct node {
-    char          flags;
-    struct obj *  prev;
-    struct obj *  next;
-    struct obj *  parent;
-    struct obj *  children;  // Head node of list.
+    char        flags;
+    struct obj  * prev;
+    struct obj  * next;
+    struct obj  * parent;
+    struct obj  * children;  // Head node of list.
 };
 
 typedef void __fastcall__ (*func_draw_t) (struct obj *);
@@ -47,19 +47,19 @@ extern void __fastcall__ obj_noop (struct obj *);
 
 // The object. This must be the first element in derived objects.
 struct obj {
-    struct node       node;
-    struct rect       rect;
-    struct obj_ops *  ops;
+    struct node     node;
+    struct rect     rect;
+    struct obj_ops  * ops;
 };
 
 // Derived objects need to be cast. Therefore this convenience macro.
 #define OBJ(x)  ((struct obj *) x)
 
-extern void * __fastcall__ alloc_obj (size_t size, struct obj_ops *);
-extern void __fastcall__ free_obj (struct obj *);
-extern void __fastcall__ set_obj_size (struct obj *, gsize w, gsize h);
-extern void __fastcall__ set_obj_position (struct obj *, gpos x, gpos y);
-extern void __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
+extern void * __fastcall__ alloc_obj                 (size_t size, struct obj_ops *);
+extern void   __fastcall__ free_obj                  (struct obj *);
+extern void   __fastcall__ set_obj_size              (struct obj *, gsize w, gsize h);
+extern void   __fastcall__ set_obj_position          (struct obj *, gpos x, gpos y);
+extern void   __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
 
 // Append new object to list of children.
 extern struct obj * __fastcall__ append_obj (struct obj * parent, struct obj *);
@@ -74,10 +74,10 @@ extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * s
 // Assign new obj_ops structure to object.
 extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
 
-extern void __fastcall__ draw_obj (struct obj *);
+extern void __fastcall__ draw_obj          (struct obj *);
 extern void __fastcall__ draw_obj_children (struct obj *);
 
-extern void __fastcall__ layout_obj (struct obj *);
+extern void __fastcall__ layout_obj          (struct obj *);
 extern void __fastcall__ layout_obj_children (struct obj *);
 
 // Set libgfx clipping and offset region to area of object.

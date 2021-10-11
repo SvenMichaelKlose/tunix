@@ -21,18 +21,18 @@ main ()
     char key;
 
     term_init ();
-    linestack_init ();
+    line_init ();
     screen_redraw ();
-    linestack_test ();
+    line_test ();
 
     while (1) {
         while (!(key = term_get ()));
 
         switch (key) {
             case TTY_ENTER:
-                linestack_delete ();
-                linestack_insert ();
-                linestack_open ();
+                line_delete ();
+                line_insert ();
+                line_open ();
                 goto next;
 
             case TTY_CURSOR_LEFT:

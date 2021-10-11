@@ -12,8 +12,8 @@
 
 pos_t       xpos;
 pos_t       ypos = 0;
-linestack   * first_line = NULL;
-linestack   * current_line = NULL;
+line   * first_line = NULL;
+line   * current_line = NULL;
 unsigned    linenr = 0;
 unsigned    num_lines = 0;
 
@@ -49,10 +49,10 @@ enable_cursor ()
     term_put (TERM_ATTR_CURSOR);
 }
 
-linestack *
-linestack_alloc ()
+line *
+line_alloc ()
 {
-    linestack * ls = malloc (sizeof (linestack) + strlen (linebuf));
+    line * ls = malloc (sizeof (line) + strlen (linebuf));
 
     if (!ls) {
         term_puts ("Out of memory.");
@@ -68,10 +68,10 @@ linestack_alloc ()
 }
 
 void
-linestack_insert ()
+line_insert ()
 {
-    linestack * new = linestack_alloc ();
-    linestack * prev;
+    line * new = line_alloc ();
+    line * prev;
 
     num_lines++;
 
@@ -96,9 +96,9 @@ linestack_insert ()
 }
 
 void
-linestack_append ()
+line_append ()
 {
-    linestack * new = linestack_alloc ();
+    line * new = line_alloc ();
 
     num_lines++;
 
@@ -119,9 +119,9 @@ linestack_append ()
 }
 
 void
-linestack_delete ()
+line_delete ()
 {
-    linestack * next;
+    line * next;
 
     if (!current_line)
         return;
@@ -143,16 +143,16 @@ linestack_delete ()
 }
 
 void
-linestack_init ()
+line_init ()
 {
     line_clear ();
-    linestack_insert ();
+    line_insert ();
 }
 
-linestack *
-linestack_get (unsigned i)
+line *
+line_get (unsigned i)
 {
-    linestack  * l = first_line;
+    line  * l = first_line;
 
     while (l && i--)
         l = l->next;
@@ -163,7 +163,7 @@ linestack_get (unsigned i)
 void
 set_current_line (unsigned n)
 {
-    current_line = linestack_get (n);
+    current_line = line_get (n);
     if (!current_line) {
         term_puts ("No line at #.");
         while (1);
@@ -174,7 +174,7 @@ set_current_line (unsigned n)
 }
 
 char
-line_down ()
+line_move_down ()
 {
     if (linenr == num_lines - 1)
         return FALSE;
@@ -190,15 +190,15 @@ line_down ()
 }
 
 void
-linestack_open ()
+line_open ()
 {
     line_clear ();
 
-    if (line_down ())
-        linestack_insert ();
+    if (line_move_down ())
+        line_insert ();
     else {
-        linestack_append ();
-        line_down ();
+        line_append ();
+        line_move_down ();
     }
 
     term_put (TERM_INSERT_LINE);
@@ -228,7 +228,7 @@ line_redraw ()
 void
 screen_redraw ()
 {
-    linestack * ls;
+    line * ls;
     char y;
 
     disable_cursor ();
@@ -238,7 +238,7 @@ screen_redraw ()
         if (0) //y == linenr)
             print_linebuf ();
         else {
-            if (ls = linestack_get ((unsigned) y))
+            if (ls = line_get ((unsigned) y))
                 term_puts (&ls->data);
             else
                 term_put (0x7e);
@@ -287,7 +287,7 @@ line_delete_char ()
 
 /*
 line *
-line_by_version (linestack * l, unsigned version)
+line_by_version (line * l, unsigned version)
 {
     line  * m = &l->first;
     line  * n;
@@ -305,10 +305,10 @@ line_by_version (linestack * l, unsigned version)
     return m;
 }
 
-linestack *
-linestack_get (unsigned i, unsigned version)
+line *
+line_get (unsigned i, unsigned version)
 {
-    linestack  * l = first_line;
+    line  * l = first_line;
     line       * m;
 
     do {
@@ -332,16 +332,16 @@ error (char * txt)
 }
 
 void
-linestack_test ()
+line_test ()
 {
-    linestack * l;
-    linestack * l2;
-    linestack * l3;
+    line * l;
+    line * l2;
+    line * l3;
 
     if (current_line != first_line)
         error ("Test 1");
 
-    linestack_delete ();
+    line_delete ();
     screen_redraw ();
     if (current_line)
         error ("Test 2");
@@ -350,7 +350,7 @@ linestack_test ()
 
     strcpy (linebuf, "foo");
     linebuf_length = strlen ("foo");
-    linestack_insert ();
+    line_insert ();
     screen_redraw ();
     if (current_line != first_line)
         error ("Test 4");
@@ -364,7 +364,7 @@ linestack_test ()
 
     strcpy (linebuf, "bar");
     linebuf_length = strlen ("bar");
-    linestack_append ();
+    line_append ();
     screen_redraw ();
     if (first_line != l)
         error ("Test 8");
@@ -376,7 +376,7 @@ linestack_test ()
 
     strcpy (linebuf, "baz");
     linebuf_length = strlen ("baz");
-    linestack_append ();
+    line_append ();
     screen_redraw ();
     if (first_line != l)
         error ("Test 11");
@@ -388,7 +388,7 @@ linestack_test ()
         error ("Test 14");
     l3 = current_line;
 
-    linestack_delete ();
+    line_delete ();
     screen_redraw ();
     if (first_line != l)
         error ("Test 15");
@@ -397,7 +397,7 @@ linestack_test ()
 
     strcpy (linebuf, "bla");
     linebuf_length = strlen ("bla");
-    linestack_append ();
+    line_append ();
     screen_redraw ();
     if (first_line != l)
         error ("Test 17");

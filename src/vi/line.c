@@ -1,15 +1,21 @@
 #include <string.h>
+#include <stdlib.h>
 
+#include <cc65-charmap.h>
 #include <libterm.h>
 
 #include "linebuf.h"
 #include "line.h"
 
+#define FALSE   0
+#define TRUE    1
 
 pos_t       xpos;
 pos_t       ypos = 0;
-line        * first_line = NULL;
-line        * current_line = NULL;
+linestack   * first_line = NULL;
+linestack   * current_line = NULL;
+unsigned    linenr = 0;
+unsigned    num_lines = 0;
 
 
 void
@@ -20,24 +26,12 @@ line_clear ()
 }
 
 void
-line_set_cursor (void)
+set_cursor (void)
 {
     term_put (TERM_SET_CURSOR);
     term_put (xpos);
     term_put (ypos);
 }
-
-void
-line_commit ()
-{
-    line_clear ();
-    if (ypos != 23)
-        ypos++;
-
-    term_put (TERM_LINE_FEED);
-    term_put (TERM_INSERT_LINE);
-}
-
 
 void
 disable_cursor ()
@@ -55,20 +49,208 @@ enable_cursor ()
     term_put (TERM_ATTR_CURSOR);
 }
 
+linestack *
+linestack_alloc ()
+{
+    linestack * ls = malloc (sizeof (linestack) + strlen (linebuf));
+
+    if (!ls) {
+        term_puts ("Out of memory.");
+        while (1);
+    }
+
+    ls->prev = ls->next = NULL;
+
+    linebuf[linebuf_length] = 0;
+    strcpy (&ls->data, linebuf);
+
+    return ls;
+}
+
+void
+linestack_insert ()
+{
+    linestack * new = linestack_alloc ();
+    linestack * prev;
+
+    num_lines++;
+
+    if (!first_line) {
+        first_line = current_line = new;
+        return;
+    }
+    if (!current_line) {
+        current_line = first_line;
+        prev = NULL;
+    } else
+        prev = current_line->prev;
+
+    if (current_line == first_line)
+        first_line = new;
+    else
+        prev->next = new;
+
+    new->prev = prev;
+    new->next = current_line;
+    current_line = new;
+}
+
+void
+linestack_append ()
+{
+    linestack * new = linestack_alloc ();
+
+    num_lines++;
+
+    if (!current_line) {
+        current_line = first_line;
+
+        while (current_line && current_line->next)
+            current_line = current_line->next;
+    } else if (current_line->next) {
+        term_puts ("Cannot append before next.");
+        term_puts (&current_line->next->data);
+        while (1);
+    }
+
+    current_line->next = new;
+    new->prev = current_line;
+    current_line = new;
+}
+
+void
+linestack_delete ()
+{
+    linestack * next;
+
+    if (!current_line)
+        return;
+
+    num_lines--;
+
+    next = current_line->next;
+
+    if (first_line == current_line)
+        first_line = next;
+    else
+        current_line->prev->next = next;
+
+    if (next)
+        next->prev = current_line->prev;
+
+    free (current_line);
+    current_line = next;
+}
+
+void
+linestack_init ()
+{
+    line_clear ();
+    linestack_insert ();
+}
+
+linestack *
+linestack_get (unsigned i)
+{
+    linestack  * l = first_line;
+
+    while (l && i--)
+        l = l->next;
+
+    return l;
+}
+
+void
+set_current_line (unsigned n)
+{
+    current_line = linestack_get (n);
+    if (!current_line) {
+        term_puts ("No line at #.");
+        while (1);
+    }
+
+    linebuf_length = strlen (&current_line->data);
+    strcpy (linebuf, &current_line->data);
+}
+
+char
+line_down ()
+{
+    if (linenr == num_lines - 1)
+        return FALSE;
+
+    set_current_line (++linenr);
+
+    if (ypos != 23) {
+        ypos++;
+        term_put (TERM_LINE_FEED);
+    }
+
+    return TRUE;
+}
+
+void
+linestack_open ()
+{
+    line_clear ();
+
+    if (line_down ())
+        linestack_insert ();
+    else {
+        linestack_append ();
+        line_down ();
+    }
+
+    term_put (TERM_INSERT_LINE);
+}
+
+void
+print_linebuf ()
+{
+    linebuf[linebuf_length] = 0;
+    term_puts (linebuf);
+}
+
 void
 line_redraw ()
 {
-    pos_t i;
-
     disable_cursor ();
-    line_set_cursor ();
+    set_cursor ();
     term_put (TERM_CARRIAGE_RETURN);
 
-    linebuf[linebuf_length] = 0;
-    term_puts (linebuf);
+    print_linebuf ();
 
     term_put (TERM_CLEAR_TO_EOL);
-    line_set_cursor ();
+    set_cursor ();
+    enable_cursor ();
+}
+
+void
+screen_redraw ()
+{
+    linestack * ls;
+    char y;
+
+    disable_cursor ();
+
+    term_put (TERM_CLEAR_SCREEN);
+    for (y = 0; y < 24; y++) {
+        if (0) //y == linenr)
+            print_linebuf ();
+        else {
+            if (ls = linestack_get ((unsigned) y))
+                term_puts (&ls->data);
+            else
+                term_put (0x7e);
+        }
+
+        if (y < 23) {
+            term_put (TERM_CARRIAGE_RETURN);
+            term_put (TERM_LINE_FEED);
+        }
+    }
+
+    set_cursor ();
     enable_cursor ();
 }
 
@@ -103,6 +285,7 @@ line_delete_char ()
     line_move_left ();
 }
 
+/*
 line *
 line_by_version (linestack * l, unsigned version)
 {
@@ -125,8 +308,8 @@ line_by_version (linestack * l, unsigned version)
 linestack *
 linestack_get (unsigned i, unsigned version)
 {
-    linestack       * l = first_line;
-    line   * m;
+    linestack  * l = first_line;
+    line       * m;
 
     do {
         m = line_by_version (l, version);
@@ -135,4 +318,93 @@ linestack_get (unsigned i, unsigned version)
     } while (l = l->next);
 
     return NULL;
+}
+*/
+
+void
+error (char * txt)
+{
+    term_put (TERM_SET_CURSOR);
+    term_put (0);
+    term_put (23);
+    term_puts (txt);
+    while (1);
+}
+
+void
+linestack_test ()
+{
+    linestack * l;
+    linestack * l2;
+    linestack * l3;
+
+    if (current_line != first_line)
+        error ("Test 1");
+
+    linestack_delete ();
+    screen_redraw ();
+    if (current_line)
+        error ("Test 2");
+    if (first_line)
+        error ("Test 3");
+
+    strcpy (linebuf, "foo");
+    linebuf_length = strlen ("foo");
+    linestack_insert ();
+    screen_redraw ();
+    if (current_line != first_line)
+        error ("Test 4");
+    if (!current_line)
+        error ("Test 5");
+    if (!first_line)
+        error ("Test 6");
+    if (num_lines != 1)
+        error ("Test 7");
+    l = current_line;
+
+    strcpy (linebuf, "bar");
+    linebuf_length = strlen ("bar");
+    linestack_append ();
+    screen_redraw ();
+    if (first_line != l)
+        error ("Test 8");
+    if (!current_line)
+        error ("Test 9");
+    if (current_line == l)
+        error ("Test 10");
+    l2 = current_line;
+
+    strcpy (linebuf, "baz");
+    linebuf_length = strlen ("baz");
+    linestack_append ();
+    screen_redraw ();
+    if (first_line != l)
+        error ("Test 11");
+    if (!current_line)
+        error ("Test 12");
+    if (current_line == l)
+        error ("Test 13");
+    if (current_line == l2)
+        error ("Test 14");
+    l3 = current_line;
+
+    linestack_delete ();
+    screen_redraw ();
+    if (first_line != l)
+        error ("Test 15");
+    if (current_line)
+        error ("Test 16");
+
+    strcpy (linebuf, "bla");
+    linebuf_length = strlen ("bla");
+    linestack_append ();
+    screen_redraw ();
+    if (first_line != l)
+        error ("Test 17");
+    if (!current_line)
+        error ("Test 18");
+    if (current_line == l)
+        error ("Test 19");
+    if (current_line == l2)
+        error ("Test 20");
 }

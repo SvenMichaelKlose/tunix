@@ -21,22 +21,18 @@ main ()
     char key;
 
     term_init ();
-    term_put (TERM_ESCAPE);
-    term_put (TERM_ENABLE_ATTR);
-    term_put (TERM_ATTR_UNDERLINE);
-    term_puts ("UltiVI v0.1\n\r");
-    term_put (TERM_ESCAPE);
-    term_put (TERM_DISABLE_ATTR);
-    term_put (TERM_ATTR_UNDERLINE);
-
-    linebuf_clear ();
+    linestack_init ();
+    screen_redraw ();
+    linestack_test ();
 
     while (1) {
         while (!(key = term_get ()));
 
         switch (key) {
             case TTY_ENTER:
-                line_commit ();
+                linestack_delete ();
+                linestack_insert ();
+                linestack_open ();
                 goto next;
 
             case TTY_CURSOR_LEFT:

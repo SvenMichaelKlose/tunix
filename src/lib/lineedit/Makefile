@@ -1,0 +1,21 @@
+SOURCES= \
+    linebuf.c \
+    main.c
+
+LIBRARY=liblineedit.a
+
+include ../../Makefile.rules
+
+%.o: %.asm
+	$(AS) -g -o $@ $<
+
+%.o: %.c
+	$(CC) -O -c $(CFLAGS) -I../term/ -I../ingle/ -o $@ $<
+
+$(LIBRARY): $(SOURCES:.c=.o)
+	$(AR) a $@ $^
+
+all: $(LIBRARY)
+
+clean:
+	rm -f $(SOURCES:.c=.o) $(LIBRARY)

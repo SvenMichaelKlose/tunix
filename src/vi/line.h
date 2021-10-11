@@ -3,6 +3,7 @@
 
 #define MAX_LINE_LENGTH     256
 
+/*
 typedef struct _linedata linedata;
 
 typedef struct _linedata {
@@ -10,6 +11,7 @@ typedef struct _linedata {
     unsigned    version_deleted;
     linedata    * newer;
 } linedata;
+*/
 
 typedef struct _line line;
 
@@ -19,24 +21,13 @@ typedef struct _line {
     char        data;
 } line;
 
-void line_init     (void);
-
-void line_clear         (void);
-void line_redraw        (void);
-void line_commit        (void);
-void line_delete        (void);
-void line_insert        (void);
-void line_open          (void);
-
-void line_insert_char   (char c);
-void line_delete_char   (void);
-
-void line_move_left     (void);
-void line_move_right    (void);
-char line_move_down     (void);
-
-void line_test          (void);
-
-void screen_redraw      (void);
+extern void line_init       (void);
+extern void line_commit     (void);
+extern void line_delete     (void);
+extern void line_insert     (void);
+extern void line_open       (void);
+extern char line_move_down  (void);
+extern void line_test       (void);
+extern void screen_redraw   (void);
 
 #endif // #ifndef LINE_H

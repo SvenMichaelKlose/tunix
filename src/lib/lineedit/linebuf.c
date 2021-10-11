@@ -5,7 +5,7 @@
 #include "linebuf.h"
 
 
-char        linebuf[MAX_LINEBUF_LENGTH];
+char        linebuf[MAX_LINE_LENGTH + 1];
 unsigned    linebuf_length;
 
 
@@ -19,7 +19,7 @@ linebuf_clear ()
 void
 linebuf_insert_char (pos_t p, char c)
 {
-    if (linebuf_length >= MAX_LINEBUF_LENGTH)
+    if (linebuf_length >= MAX_LINE_LENGTH)
         return;
 
     memmove (&linebuf[p + 1], &linebuf[p], linebuf_length - p);

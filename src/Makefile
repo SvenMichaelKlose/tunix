@@ -3,9 +3,11 @@ all:
 	$(MAKE) -C lib/zp all
 	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem all
+	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultifs all
 	$(MAKE) -C lib/gfx all
 	$(MAKE) -C lib/term all
+	$(MAKE) -C lib/lineedit all
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C desktop all
@@ -25,6 +27,7 @@ clean:
 	$(MAKE) -C lib/ultifs clean
 	$(MAKE) -C lib/gfx clean
 	$(MAKE) -C lib/term clean
+	$(MAKE) -C lib/lineedit clean
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C desktop clean

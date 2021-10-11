@@ -3,68 +3,29 @@
 
 #include <cc65-charmap.h>
 #include <libterm.h>
+#include <liblineedit.h>
 
-#include "linebuf.h"
 #include "line.h"
+
+typedef unsigned pos_t;
 
 #define FALSE   0
 #define TRUE    1
 
-pos_t       xpos;
-pos_t       ypos = 0;
 line        * first_line = NULL;
 line        * current_line = NULL;
 unsigned    linenr = 0;
 unsigned    num_lines = 0;
 
 
-//////////////
-// TERMINAL //
-//////////////
-
 void
-set_cursor (void)
+our_error (char * txt)
 {
     term_put (TERM_SET_CURSOR);
-    term_put (xpos);
-    term_put (ypos);
-}
-
-void
-disable_cursor ()
-{
-    term_put (TERM_ESCAPE);
-    term_put (TERM_DISABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-}
-
-void
-enable_cursor ()
-{
-    term_put (TERM_ESCAPE);
-    term_put (TERM_ENABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-}
-
-void
-print_linebuf ()
-{
-    linebuf[linebuf_length] = 0;
-    term_puts (linebuf);
-}
-
-void
-line_redraw ()
-{
-    disable_cursor ();
-    set_cursor ();
-    term_put (TERM_CARRIAGE_RETURN);
-
-    print_linebuf ();
-
-    term_put (TERM_CLEAR_TO_EOL);
-    set_cursor ();
-    enable_cursor ();
+    term_put (0);
+    term_put (23);
+    term_puts (txt);
+    while (1);
 }
 
 
@@ -77,10 +38,8 @@ line_alloc ()
 {
     line  * ls = malloc (sizeof (line) + strlen (linebuf));
 
-    if (!ls) {
-        term_puts ("Out of memory.");
-        while (1);
-    }
+    if (!ls)
+        our_error ("Out of memory.");
 
     ls->prev = ls->next = NULL;
 
@@ -137,14 +96,16 @@ line_append ()
     if (!current_line)
         line_last ();
     else if (current_line->next) {
-        term_puts ("Cannot append before next.");
+        term_puts ("!!! ");
         term_puts (&current_line->next->data);
-        while (1);
+        our_error (": Cannot append before.");
     }
 
     current_line->next = new;
     new->prev = current_line;
     current_line = new;
+
+    line_move_down ();
 }
 
 void
@@ -153,7 +114,7 @@ line_delete ()
     line  * next;
 
     if (!current_line)
-        return;
+        our_error ("Can't delete nothing.");
 
     num_lines--;
 
@@ -200,20 +161,6 @@ set_current_line (unsigned n)
 // MOTION //
 ////////////
 
-void
-line_move_left ()
-{
-    if (xpos)
-        xpos--;
-}
-
-void
-line_move_right ()
-{
-    if (xpos < linebuf_length)
-        xpos++;
-}
-
 char
 line_move_down ()
 {
@@ -231,35 +178,6 @@ line_move_down ()
 }
 
 
-//////////////////
-// LINE EDITING //
-//////////////////
-
-void
-line_clear ()
-{
-    linebuf_clear ();
-    xpos = 0;
-}
-
-void
-line_insert_char (char c)
-{
-    linebuf_insert_char (xpos, c);
-    line_move_right ();
-}
-
-void
-line_delete_char ()
-{
-    if (!xpos)
-        return;
-
-    linebuf_delete_char (xpos);
-    line_move_left ();
-}
-
-
 ///////////////////
 // SCREEN REDRAW //
 ///////////////////
@@ -274,7 +192,7 @@ screen_redraw ()
 
     term_put (TERM_CLEAR_SCREEN);
     for (y = 0; y < 24; y++) {
-        if (0) //y == linenr)
+        if (y == linenr)
             print_linebuf ();
         else {
             if (ls = line_get ((unsigned) y))
@@ -326,16 +244,6 @@ line_init ()
 ///////////
 
 void
-error (char * txt)
-{
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (23);
-    term_puts (txt);
-    while (1);
-}
-
-void
 line_test ()
 {
     line  * l;
@@ -343,27 +251,27 @@ line_test ()
     line  * l3;
 
     if (current_line != first_line)
-        error ("Test 1");
+        our_error ("Test 1");
 
     line_delete ();
     screen_redraw ();
     if (current_line)
-        error ("Test 2");
+        our_error ("Test 2");
     if (first_line)
-        error ("Test 3");
+        our_error ("Test 3");
 
     strcpy (linebuf, "foo");
     linebuf_length = strlen ("foo");
     line_insert ();
     screen_redraw ();
     if (current_line != first_line)
-        error ("Test 4");
+        our_error ("Test 4");
     if (!current_line)
-        error ("Test 5");
+        our_error ("Test 5");
     if (!first_line)
-        error ("Test 6");
+        our_error ("Test 6");
     if (num_lines != 1)
-        error ("Test 7");
+        our_error ("Test 7");
     l = current_line;
 
     strcpy (linebuf, "bar");
@@ -371,11 +279,11 @@ line_test ()
     line_append ();
     screen_redraw ();
     if (first_line != l)
-        error ("Test 8");
+        our_error ("Test 8");
     if (!current_line)
-        error ("Test 9");
+        our_error ("Test 9");
     if (current_line == l)
-        error ("Test 10");
+        our_error ("Test 10");
     l2 = current_line;
 
     strcpy (linebuf, "baz");
@@ -383,32 +291,32 @@ line_test ()
     line_append ();
     screen_redraw ();
     if (first_line != l)
-        error ("Test 11");
+        our_error ("Test 11");
     if (!current_line)
-        error ("Test 12");
+        our_error ("Test 12");
     if (current_line == l)
-        error ("Test 13");
+        our_error ("Test 13");
     if (current_line == l2)
-        error ("Test 14");
+        our_error ("Test 14");
     l3 = current_line;
 
     line_delete ();
     screen_redraw ();
     if (first_line != l)
-        error ("Test 15");
+        our_error ("Test 15");
     if (current_line)
-        error ("Test 16");
+        our_error ("Test 16");
 
     strcpy (linebuf, "bla");
     linebuf_length = strlen ("bla");
     line_append ();
     screen_redraw ();
     if (first_line != l)
-        error ("Test 17");
+        our_error ("Test 17");
     if (!current_line)
-        error ("Test 18");
+        our_error ("Test 18");
     if (current_line == l)
-        error ("Test 19");
+        our_error ("Test 19");
     if (current_line == l2)
-        error ("Test 20");
+        our_error ("Test 20");
 }

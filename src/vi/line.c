@@ -12,18 +12,15 @@
 
 pos_t       xpos;
 pos_t       ypos = 0;
-line   * first_line = NULL;
-line   * current_line = NULL;
+line        * first_line = NULL;
+line        * current_line = NULL;
 unsigned    linenr = 0;
 unsigned    num_lines = 0;
 
 
-void
-line_clear ()
-{
-    linebuf_clear ();
-    xpos = 0;
-}
+//////////////
+// TERMINAL //
+//////////////
 
 void
 set_cursor (void)
@@ -49,10 +46,36 @@ enable_cursor ()
     term_put (TERM_ATTR_CURSOR);
 }
 
+void
+print_linebuf ()
+{
+    linebuf[linebuf_length] = 0;
+    term_puts (linebuf);
+}
+
+void
+line_redraw ()
+{
+    disable_cursor ();
+    set_cursor ();
+    term_put (TERM_CARRIAGE_RETURN);
+
+    print_linebuf ();
+
+    term_put (TERM_CLEAR_TO_EOL);
+    set_cursor ();
+    enable_cursor ();
+}
+
+
+///////////////
+// LINE LIST //
+///////////////
+
 line *
 line_alloc ()
 {
-    line * ls = malloc (sizeof (line) + strlen (linebuf));
+    line  * ls = malloc (sizeof (line) + strlen (linebuf));
 
     if (!ls) {
         term_puts ("Out of memory.");
@@ -70,8 +93,8 @@ line_alloc ()
 void
 line_insert ()
 {
-    line * new = line_alloc ();
-    line * prev;
+    line  * new = line_alloc ();
+    line  * prev;
 
     num_lines++;
 
@@ -96,18 +119,24 @@ line_insert ()
 }
 
 void
+line_last ()
+{
+    current_line = first_line;
+
+    while (current_line && current_line->next)
+        current_line = current_line->next;
+}
+
+void
 line_append ()
 {
-    line * new = line_alloc ();
+    line  * new = line_alloc ();
 
     num_lines++;
 
-    if (!current_line) {
-        current_line = first_line;
-
-        while (current_line && current_line->next)
-            current_line = current_line->next;
-    } else if (current_line->next) {
+    if (!current_line)
+        line_last ();
+    else if (current_line->next) {
         term_puts ("Cannot append before next.");
         term_puts (&current_line->next->data);
         while (1);
@@ -121,7 +150,7 @@ line_append ()
 void
 line_delete ()
 {
-    line * next;
+    line  * next;
 
     if (!current_line)
         return;
@@ -140,13 +169,6 @@ line_delete ()
 
     free (current_line);
     current_line = next;
-}
-
-void
-line_init ()
-{
-    line_clear ();
-    line_insert ();
 }
 
 line *
@@ -173,6 +195,25 @@ set_current_line (unsigned n)
     strcpy (linebuf, &current_line->data);
 }
 
+
+////////////
+// MOTION //
+////////////
+
+void
+line_move_left ()
+{
+    if (xpos)
+        xpos--;
+}
+
+void
+line_move_right ()
+{
+    if (xpos < linebuf_length)
+        xpos++;
+}
+
 char
 line_move_down ()
 {
@@ -189,47 +230,45 @@ line_move_down ()
     return TRUE;
 }
 
+
+//////////////////
+// LINE EDITING //
+//////////////////
+
 void
-line_open ()
+line_clear ()
 {
-    line_clear ();
-
-    if (line_move_down ())
-        line_insert ();
-    else {
-        line_append ();
-        line_move_down ();
-    }
-
-    term_put (TERM_INSERT_LINE);
+    linebuf_clear ();
+    xpos = 0;
 }
 
 void
-print_linebuf ()
+line_insert_char (char c)
 {
-    linebuf[linebuf_length] = 0;
-    term_puts (linebuf);
+    linebuf_insert_char (xpos, c);
+    line_move_right ();
 }
 
 void
-line_redraw ()
+line_delete_char ()
 {
-    disable_cursor ();
-    set_cursor ();
-    term_put (TERM_CARRIAGE_RETURN);
+    if (!xpos)
+        return;
 
-    print_linebuf ();
-
-    term_put (TERM_CLEAR_TO_EOL);
-    set_cursor ();
-    enable_cursor ();
+    linebuf_delete_char (xpos);
+    line_move_left ();
 }
+
+
+///////////////////
+// SCREEN REDRAW //
+///////////////////
 
 void
 screen_redraw ()
 {
-    line * ls;
-    char y;
+    line  * ls;
+    char  y;
 
     disable_cursor ();
 
@@ -254,72 +293,37 @@ screen_redraw ()
     enable_cursor ();
 }
 
-void
-line_move_left ()
-{
-    if (xpos)
-        xpos--;
-}
+
+//////////////
+// COMMANDS //
+//////////////
 
 void
-line_move_right ()
+line_open ()
 {
-    if (xpos < linebuf_length)
-        xpos++;
-}
+    line_clear ();
 
-void
-line_insert_char (char c)
-{
-    linebuf_insert_char (xpos, c);
-    line_move_right ();
-}
-
-void
-line_delete_char ()
-{
-    if (!xpos)
-        return;
-
-    linebuf_delete_char (xpos);
-    line_move_left ();
-}
-
-/*
-line *
-line_by_version (line * l, unsigned version)
-{
-    line  * m = &l->first;
-    line  * n;
-
-    if (m->version_deleted <= version || m->version > version)
-        return NULL;
-
-    while (n = m->newer) {
-        if (n->version_deleted > version || n->version > version)
-            break;
-
-        m = n;
+    if (line_move_down ())
+        line_insert ();
+    else {
+        line_append ();
+        line_move_down ();
     }
 
-    return m;
+    term_put (TERM_INSERT_LINE);
 }
 
-line *
-line_get (unsigned i, unsigned version)
+void
+line_init ()
 {
-    line  * l = first_line;
-    line       * m;
-
-    do {
-        m = line_by_version (l, version);
-        if (m && !i--)
-            return m;
-    } while (l = l->next);
-
-    return NULL;
+    line_clear ();
+    line_insert ();
 }
-*/
+
+
+///////////
+// TESTS //
+///////////
 
 void
 error (char * txt)
@@ -334,9 +338,9 @@ error (char * txt)
 void
 line_test ()
 {
-    line * l;
-    line * l2;
-    line * l3;
+    line  * l;
+    line  * l2;
+    line  * l3;
 
     if (current_line != first_line)
         error ("Test 1");

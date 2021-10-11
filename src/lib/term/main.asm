@@ -26,7 +26,7 @@ tmp:            .res 2
 tmp2:           .res 2
 p:              .res 2
 
-    .data
+    .bss
 
 cursor_x:       .res 1
 cursor_y:       .res 1
@@ -36,6 +36,11 @@ code:           .res 2
 code_length:    .res 1
 code_callback:  .res 2
 attributes:     .res 2
+
+    .data
+
+our_charset:
+    .include "charset-4x8.asm"
 
     .code
 
@@ -700,10 +705,3 @@ r:  jmp cursor_show
     stx p+1
     jmp putstring_fixed
 .endproc
-
-    .data
-
-    .align 256
-
-our_charset:
-    .include "charset-4x8.asm"

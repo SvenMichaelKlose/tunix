@@ -22,6 +22,6 @@ extern void line_insert_char   (char c);
 extern void line_delete_char   (void);
 extern void line_move_left     (void);
 extern void line_move_right    (void);
-extern void line_edit          (void);
+extern void line_edit          (char key);
 
 #endif // #ifndef LIBLINEEDIT_H

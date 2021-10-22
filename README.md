@@ -25,25 +25,3 @@ on the Ultimem), a regular boot will be performed.
 * F: Toggle full-screen mode of current window.
 * M: Show available memory and largest available block size.
 * D: Hide windows.
-
-# What's planned
-
-INGLE is intended to provide a multi-processing GUI to all VIC programmers
-no matter what language by adding a RAM and ROM disk and virtual devices
-to the CBM KERNAL.
-
-# Programming for the desktop
-
-The desktop can be controlled via device #31.
-
-## Opening a window
-
-```basic
-OPEN 31, "C" + CHR(30) + ":Window title", 31
-GET# 31, ERROR
-CLOSE 31
-IF ERROR THEN SYS 49872
-OPEN 30, "", 30
-PRINT# 30, "
-```
-

@@ -169,10 +169,10 @@ line_move_down ()
 
     set_current_line (++linenr);
 
-    if (ypos != 23) {
+    if (ypos != 23)
         ypos++;
-        term_put (TERM_LINE_FEED);
-    }
+
+    term_put (TERM_LINE_FEED);
 
     return TRUE;
 }
@@ -217,7 +217,7 @@ screen_redraw ()
 //////////////
 
 void
-line_open ()
+line_open_below ()
 {
     line_clear ();
 
@@ -236,87 +236,4 @@ line_init ()
 {
     line_clear ();
     line_insert ();
-}
-
-
-///////////
-// TESTS //
-///////////
-
-void
-line_test ()
-{
-    line  * l;
-    line  * l2;
-    line  * l3;
-
-    if (current_line != first_line)
-        our_error ("Test 1");
-
-    line_delete ();
-    screen_redraw ();
-    if (current_line)
-        our_error ("Test 2");
-    if (first_line)
-        our_error ("Test 3");
-
-    strcpy (linebuf, "foo");
-    linebuf_length = strlen ("foo");
-    line_insert ();
-    screen_redraw ();
-    if (current_line != first_line)
-        our_error ("Test 4");
-    if (!current_line)
-        our_error ("Test 5");
-    if (!first_line)
-        our_error ("Test 6");
-    if (num_lines != 1)
-        our_error ("Test 7");
-    l = current_line;
-
-    strcpy (linebuf, "bar");
-    linebuf_length = strlen ("bar");
-    line_append ();
-    screen_redraw ();
-    if (first_line != l)
-        our_error ("Test 8");
-    if (!current_line)
-        our_error ("Test 9");
-    if (current_line == l)
-        our_error ("Test 10");
-    l2 = current_line;
-
-    strcpy (linebuf, "baz");
-    linebuf_length = strlen ("baz");
-    line_append ();
-    screen_redraw ();
-    if (first_line != l)
-        our_error ("Test 11");
-    if (!current_line)
-        our_error ("Test 12");
-    if (current_line == l)
-        our_error ("Test 13");
-    if (current_line == l2)
-        our_error ("Test 14");
-    l3 = current_line;
-
-    line_delete ();
-    screen_redraw ();
-    if (first_line != l)
-        our_error ("Test 15");
-    if (current_line)
-        our_error ("Test 16");
-
-    strcpy (linebuf, "bla");
-    linebuf_length = strlen ("bla");
-    line_append ();
-    screen_redraw ();
-    if (first_line != l)
-        our_error ("Test 17");
-    if (!current_line)
-        our_error ("Test 18");
-    if (current_line == l)
-        our_error ("Test 19");
-    if (current_line == l2)
-        our_error ("Test 20");
 }

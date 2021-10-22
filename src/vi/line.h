@@ -25,9 +25,8 @@ extern void line_init       (void);
 extern void line_commit     (void);
 extern void line_delete     (void);
 extern void line_insert     (void);
-extern void line_open       (void);
+extern void line_open_below (void);
 extern char line_move_down  (void);
-extern void line_test       (void);
 extern void screen_redraw   (void);
 
 #endif // #ifndef LINE_H

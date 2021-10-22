@@ -67,10 +67,10 @@ txt_t:
     .byte "t",0
 
 txt_welcome:
-    .byte "AttoLisp v0.1 2021-10-03", 10
-    .byte "By Sven Michael Klose <pixel@hugbox.org>", 10
-    .byte "Welcome!", 10
-    .byte 10, 0
+    .byte "AttoLisp v0.1 2021-10-03", 10, 13
+    .byte "by Sven Michael Klose <pixel@hugbox.org>", 10, 13
+    .byte "Welcome!", 10, 13
+    .byte 10, 13, 0
 
 txt_prompt:
     .byte "* ", 0

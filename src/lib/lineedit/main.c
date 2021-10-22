@@ -131,35 +131,24 @@ line_delete_char ()
 }
 
 void
-line_edit ()
+line_edit (char key)
 {
-    char key;
+    switch (key) {
+        case TTY_CURSOR_LEFT:
+            line_move_left ();
+            goto next;
 
-    line_redraw ();
+        case TTY_CURSOR_RIGHT:
+            line_move_right ();
+            goto next;
 
-    while (1) {
-        while (!(key = term_get ()));
+        case TTY_BACKSPACE:
+            line_delete_char ();
+            goto next;
+    }
 
-        switch (key) {
-            case TTY_ENTER:
-                return;
-
-            case TTY_CURSOR_LEFT:
-                line_move_left ();
-                goto next;
-
-            case TTY_CURSOR_RIGHT:
-                line_move_right ();
-                goto next;
-
-            case TTY_BACKSPACE:
-                line_delete_char ();
-                goto next;
-        }
-
-        line_insert_char (key);
+    line_insert_char (key);
 
 next:
-        line_redraw ();
-    }
+    line_redraw ();
 }

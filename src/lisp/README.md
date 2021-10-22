@@ -1,22 +1,28 @@
 AttoLisp
 ========
 
-This is a Lisp interpreter without garbage collection mainly to
-perform macro expansions.  With the Ultimem expansion AttoLisp
-provides up to two million list cells or half a million atoms.
-
-Garbage collection can be performed on dumped images.
+A Lisp interpreter.
 
 # Built-in functions
 
 * READ
+* PRINT
+* GC
 * .
 * CAR
 * CDR
 * LIST
-* FN
 * =
 * ?
+* PROGN
 * BLOCK, GO
 * DUMP
 * APPLY
+* &
+* |
+* NOT
+* SYS
+* PEEKB, PEEKW
+* POKEB, POKEW
+* ==, <, >
+* +. -. *. /, %

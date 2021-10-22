@@ -6,7 +6,7 @@
 
 #include "line.h"
 
-#define TTY_ENTER           13
+#define TTY_ENTER           10
 #define TTY_CURSOR_UP       5
 #define TTY_CURSOR_DOWN     20
 #define TTY_CURSOR_LEFT     19
@@ -21,10 +21,16 @@ main ()
     term_init ();
     line_init ();
     screen_redraw ();
-    line_test ();
 
     while (1) {
-        screen_redraw ();
-        line_edit ();
+        while (!(key = term_get ()));
+        switch (key) {
+            case TTY_ENTER:
+                line_open_below ();
+                continue;
+
+            default:
+                line_edit (key);
+        }
     }
 }

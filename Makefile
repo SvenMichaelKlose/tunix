@@ -18,7 +18,7 @@ all:
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg
-	cp src/installer/ingleinstall .
+	cp src/installer/ingle .
 
 clean:
 	$(MAKE) -C src clean

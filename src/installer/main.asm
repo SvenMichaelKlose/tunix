@@ -165,5 +165,5 @@ txt_error_not_burned:
     .byte "ERROR: BYTE HAS NOT BEEN WRITTEN.", 13,0
 
 fn_data:
-    .byte "INGLE.IMG,S,R"
+    .byte "INGLEDATA.BIN,S,R"
 fn_data_end:

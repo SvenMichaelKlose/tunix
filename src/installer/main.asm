@@ -24,10 +24,9 @@ __VIC20__ = 1
     jmp $cb1e
 
 has_ultimem:
-    ; ROM in BLK5.
     lda $9ff2
-    ;and #%00111111
-    ora #%01000000
+    and #%00111111
+    ora #%01000000  ; ROM in BLK5.
     sta $9ff2
     lda #0
     sta $9ffe
@@ -61,6 +60,11 @@ has_ultimem:
     sta $9ffe
     sta $9fff
 
+wait4chip:
+    lda $a000
+    cmp #$ff
+    bne wait4chip
+
 l2: lda #$00
     sta ptr
     lda #$a0
@@ -79,14 +83,17 @@ l:  jsr BASIN
     lda (ptr),y
     cmp tmp
     beq dont_burn
+
     lda ptr
     ldx ptr+1
     ldy tmp
     jsr ultimem_burn_byte
+
     ldy #0
     lda (ptr),y
     cmp tmp
     bne err_not_burned
+
     inc $900f
 dont_burn:
 

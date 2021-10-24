@@ -73,12 +73,6 @@ l2: lda #$00
 l:  jsr BASIN
     sta tmp
 
-    jsr READST
-    cmp #$40
-    beq done
-    cmp #0
-    bne error
-
     ldy #0
     lda (ptr),y
     cmp tmp
@@ -95,7 +89,13 @@ l:  jsr BASIN
     bne err_not_burned
 
     inc $900f
+
 dont_burn:
+    jsr READST
+    cmp #$40
+    beq done
+    cmp #0
+    bne error
 
     inc ptr
     bne l

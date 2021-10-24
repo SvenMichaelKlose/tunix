@@ -19,14 +19,16 @@
     sty $102
 
     ; Save Ultimem status.
-    lda $9ff2
-    sta $103
     lda $9ff8
     sta $104
     lda $9ff9
     sta $105
+    lda $9ff2
+    sta $106
 
-    ; Map in UltiFS wedge.
+    ; Bank in secondary wedge on BLK1.
+    ora #%11000000  ; (RAM)
+    sta $9ff2
     lda #8
     sta $9ff8
     lda #0
@@ -37,17 +39,16 @@
 
 ; Map process back in and set accu and flags.
 .proc unmap_ultimem
-    ; Restore Ultimem status.
-    lda $103
-    sta $9ff2
     lda $104
     sta $9ff8
     lda $105
     sta $9ff9
-
     lda $106
+    sta $9ff2
+
+    lda $103
     pha
-    lda $107
+    lda $100
     plp
     rts
 .endproc

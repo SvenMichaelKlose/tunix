@@ -65,7 +65,7 @@ l:  ldy #0
     clc
     adc #1
     and #7
-    ora #8
+    ora #$18
     sta $900f
 
     inc ptr
@@ -74,9 +74,13 @@ l:  ldy #0
     lda ptr+1
     and #%00011111
     bne no_dot
+    ldx #0
+    jsr CHKOUT
     lda #<txt_dot
     ldy #>txt_dot
     jsr $cb1e
+    ldx #2
+    jsr CHKOUT
 no_dot:
 
     inc ptr+1
@@ -92,6 +96,8 @@ no_dot:
     bne l2
 
 done:
+    ldx #0
+    jsr CHKOUT
     lda #<txt_done
     ldy #>txt_done
     jsr $cb1e
@@ -111,13 +117,13 @@ error:
 .endproc
 
 txt_welcome:
-    .byte $93, "ULTIMEM ROM DUMP.", 13, 0
+    .byte "ULTIMEM ROM DUMP.", 13, 0
 
 txt_no_ultimem:
     .byte "NO ULTIMEM AROUND - EXITING.", 13,0
 
 txt_dumping:
-    .byte "DUMPING ROM...", 13, 0
+    .byte "DUMPING TO 'DUMP.IMG'...", 0
 
 txt_dot:
     .byte ".", 0

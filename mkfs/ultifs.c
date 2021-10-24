@@ -795,10 +795,7 @@ void
 write_image (char make_truncated)
 {
     FILE * img = fopen (image_name, "w");
-    if (make_truncated)
-        fwrite (&store[65535], last_free - 65536, 1, img);
-    else
-        fwrite (store, STORE_SIZE, 1, img);
+    fwrite (store, make_truncated ? last_free : STORE_SIZE, 1, img);
     fclose (img);
 }
 

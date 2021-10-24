@@ -12,8 +12,8 @@ all:
 	$(MAKE) -C flashboot all
 	$(MAKE) -C desktop all
 	$(MAKE) -C basic-starter all
-	$(MAKE) -C installer all
 	$(MAKE) -C lisp all
+	$(MAKE) -C ultiburn all
 	$(MAKE) -C ultidump all
 	$(MAKE) -C ultifs all
 	$(MAKE) -C vforth all
@@ -33,8 +33,8 @@ clean:
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C desktop clean
 	$(MAKE) -C basic-starter clean
-	$(MAKE) -C installer clean
 	$(MAKE) -C lisp clean
+	$(MAKE) -C ultiburn clean
 	$(MAKE) -C ultidump clean
 	$(MAKE) -C ultifs clean
 	$(MAKE) -C vforth clean

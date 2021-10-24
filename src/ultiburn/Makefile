@@ -1,5 +1,5 @@
 ASMSOURCES=zeropage.asm main.asm
-PROGRAM=ingle
+PROGRAM=ultiburn
 
 include ../Makefile.rules
 

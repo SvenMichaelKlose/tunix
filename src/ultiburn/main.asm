@@ -36,6 +36,12 @@ has_ultimem:
     ldy #>txt_erasing
     jsr $cb1e
     jsr _ultimem_erase_chip
+
+wait4chip:
+    lda $a000
+    cmp #$ff
+    bne wait4chip
+
     lda #<txt_chip_erased
     ldy #>txt_chip_erased
     jsr $cb1e
@@ -59,11 +65,6 @@ has_ultimem:
     lda #0
     sta $9ffe
     sta $9fff
-
-wait4chip:
-    lda $a000
-    cmp #$ff
-    bne wait4chip
 
 l2: lda #$00
     sta ptr
@@ -92,7 +93,7 @@ l:  jsr BASIN
     clc
     adc #1
     and #7
-    ora #8
+    ora #$18
     sta $900f
 
 dont_burn:
@@ -149,20 +150,19 @@ err_not_burned:
 .endproc
 
 txt_welcome:
-    .byte $93, "INGLE INSTALLER.", 13, 0
+    .byte "ULTIBURN", 13, 0
 
 txt_no_ultimem:
     .byte "NO ULTIMEM AROUND - EXITING.", 13,0
 
 txt_erasing:
-    .byte "ERASING FLASH ROM,", 13
-    .byte "PLEASE WAIT...", 13, 0
+    .byte "ERASING ROM...", 0
 
 txt_chip_erased:
-    .byte "FLASH ROM ERASED.", 13,0
+    .byte "OK.", 13,0
 
 txt_installing:
-    .byte "INSTALLING INGLE...", 13, 0
+    .byte "BURNING", 0
 
 txt_dot:
     .byte ".", 0
@@ -177,5 +177,5 @@ txt_error_not_burned:
     .byte "ERROR: BYTE HAS NOT BEEN WRITTEN.", 13,0
 
 fn_data:
-    .byte "INGLEDATA.BIN,S,R"
+    .byte "IMAGE,S,R"
 fn_data_end:

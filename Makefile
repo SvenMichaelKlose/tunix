@@ -9,16 +9,15 @@ all:
 	cp -rv archive/* compiled
 	cp -v src/desktop/*.bin compiled/.ingle/
 #	mkdir -pv compiled/programming/attolisp
-	cp -v src/lisp/lisp compiled/
 	mkdir -pv compiled/office
 	cp -v src/writenow/writenow compiled/office/writenow/
 	cp -v src/vforth/vforth compiled/programming/vforth/
-	cp -v src/vi/vi compiled/
 #	cp -v src/tgi-demo/*.bin compiled/.ingle/
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
-	./mkfs/mkfs.ultifs ingledata.bin n l src/flashboot/flashboot.bin i compiled W
+	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg
-	cp src/installer/ingle .
+	cp src/ultiburn/ultiburn .
+	cp src/ultidump/ultidump .
 
 clean:
 	$(MAKE) -C src clean

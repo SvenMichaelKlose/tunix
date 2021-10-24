@@ -2,7 +2,6 @@
 .export _ultimem_burn_byte
 
 .import _ultimem_send_command
-.import _ultimem_poll
 
 .importzp s, d, tmp
 .import popax
@@ -23,5 +22,6 @@
     tya
     ldx #0
     sta (s,x)
-    jmp _ultimem_poll
+
+    rts
 .endproc

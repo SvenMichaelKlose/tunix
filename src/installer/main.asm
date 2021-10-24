@@ -83,10 +83,10 @@ l:  jsr BASIN
     ldy tmp
     jsr ultimem_burn_byte
 
-    ldy #0
-    lda (ptr),y
-    cmp tmp
-    bne err_not_burned
+;    ldy #0
+;    lda (ptr),y
+;    cmp tmp
+;    bne err_not_burned
 
     lda $900f
     clc

@@ -24,10 +24,10 @@ __VIC20__ = 1
     jmp $cb1e
 
 has_ultimem:
-    ; RAM in BLK5.
+    ; ROM in BLK5.
     lda $9ff2
     ;and #%00111111
-    ora #%11000000
+    ora #%01000000
     sta $9ff2
     lda #0
     sta $9ffe

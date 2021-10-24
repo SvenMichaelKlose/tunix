@@ -63,7 +63,6 @@ typedef struct _channel {
     bfile *     file;
 
     // Generated content.
-    unsigned    buflen;
     char *      buf;
     char *      bufwptr;
     char *      bufrptr;
@@ -125,38 +124,37 @@ set_error (char code)
 }
 
 void
-open_command (char * name)
-{
-    channel * ch = channels[15];
-return;
-
-    ch->buf = ch->bufwptr = malloc (64);
-    bzero (ch->buf, 64);
-    strcpy (ch->buf, "foooooo!");
-    STATUS = 0;
-}
-
-void
 add_to_buf (channel * ch, void * ptr, size_t len)
 {
     if (!ch->buf)
-        ch->buf = malloc (1024);
+        ch->buf = ch->bufrptr = ch->bufwptr = malloc (1024);
 
-    ch->bufwptr = memcpy (ch->bufwptr, ptr, len);
-    ch->buflen += len;
+    memcpy (ch->bufwptr, ptr, len);
+    ch->bufwptr += len;
 }
 
 char
-read_from_buf (channel * ch, void * ptr, size_t len)
+read_from_buf (channel * ch)
 {
     char c = *ch->bufrptr++;
 
     if (ch->bufrptr == ch->bufwptr) {
         free (ch->buf);
-        ch->buf = ch->bufwptr = ch->bufrptr = NULL;
+        ch->buf = NULL;
     }
 
     return c;
+}
+
+void
+open_command (char * name)
+{
+    channel * ch = channels[15];
+    char * msg = "fooooo!!";
+
+    add_to_buf (ch, msg, strlen (msg));
+
+    STATUS = 0;
 }
 
 void
@@ -220,7 +218,6 @@ ultifs_kclose ()
     }
 
     if (_SA() == 15) {
-        cputs ("close all.");
         ultifs_kclall ();
         return;
     }
@@ -268,9 +265,7 @@ void
 ultifs_kbasin ()
 {
     channel * ch = channels[_SA()];
-cputs ("BASIN.");
 
-    goto end_of_file;
     if (!ch) {
         set_return_error (OSERR_FILE_NOT_OPEN);
         return;
@@ -278,23 +273,19 @@ cputs ("BASIN.");
 
     STATUS = 0;
 
-    if (ch->bufwptr) {
-        accu = *ch->bufwptr++;
-        if (!*ch->bufwptr) {
-            free (ch->buf);
-            ch->buf = ch->bufwptr = NULL;
+    if (ch->buf) {
+        accu = read_from_buf (ch);
+        if (!ch->buf)
             goto end_of_file;
-        }
         return;
     }
 
-    if (_SA() == 15)
-        goto end_of_file;
+    //if (_SA() == 15)
+        //return;
 
     // TODO: bfile reads.
 
 end_of_file:
-cputs ("basin eof.");
     STATUS = STATUS_END_OF_FILE;
 }
 

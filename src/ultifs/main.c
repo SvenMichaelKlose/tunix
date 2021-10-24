@@ -27,18 +27,15 @@ void
 dump_file (char device, char sfn, char * name)
 {
     char * data = malloc (1024);
-    int len;
 
     clrscr ();
     printf ("dump %d, %d, %s\n", device, sfn, name);
     gotoxy (0, 2);
 
     cbm_open (8, device, sfn, name);
-/*
-    len = cbm_read (8, data, 1024);
-    printf ("%d\n", len);
+    cbm_read (8, data, 1024);
     cbm_close (8);
-*/
+cputs (data);
 
     free (data);
 }
@@ -56,6 +53,6 @@ main ()
 
     //list_directory (8);
     //dump_file (8, 8, "main.c");
-    dump_file (12, 15, NULL);
+    dump_file (12, 15, "AB");
     cputs ("Finished.\n");
 }

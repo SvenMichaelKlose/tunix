@@ -160,25 +160,17 @@ rts
 .endproc
 
 .proc leave
-rts
-    php
-    pha
-    txa
-    pha
-    tya
-    pha
-
 ;    lda old_blk2
 ;    sta $9ffa
 ;    lda old_blk3
 ;    sta $9ffc
-    jsr swap_zp
+;    jsr swap_zp
 
-    pla
-    tay
-    pla
-    tax
-    pla
+    lda $103
+    pha
+    lda $100
+    ldx $101
+    ldy $102
     plp
 
     rts
@@ -215,7 +207,7 @@ n:  jmp (old_ICHKIN)
     jsr is_our_device
     bcc n
     jsr enter
-    jsr _ultifs_kchkin
+    jsr _ultifs_kchkout
     jmp leave
 n:  jmp (old_ICHKOUT)
 .endproc

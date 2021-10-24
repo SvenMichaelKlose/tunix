@@ -88,7 +88,12 @@ l:  jsr BASIN
     cmp tmp
     bne err_not_burned
 
-    inc $900f
+    lda $900f
+    clc
+    adc #1
+    and #7
+    ora #8
+    sta $900f
 
 dont_burn:
     jsr READST

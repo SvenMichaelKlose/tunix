@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <conio.h>
+#include <dirent.h>
 
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
@@ -62,7 +63,6 @@ typedef struct _channel {
     char *      name;
     bfile *     file;
 
-    // Generated content.
     char *      buf;
     char *      bufwptr;
     char *      bufrptr;
@@ -80,6 +80,13 @@ init_kernal_emulation ()
     bzero (channels, sizeof (channels));
 
     channels[15] = &cmd_channel;
+
+    if (ultimem_unhide () != ULTIMEM_UNHIDE_ID_ULTIMEM) {
+        printf ("No UltiMem found - exiting.\n");
+        exit (0);
+    }
+
+    ultifs_mount ();
 }
 
 void
@@ -126,8 +133,10 @@ set_error (char code)
 void
 add_to_buf (channel * ch, void * ptr, size_t len)
 {
-    if (!ch->buf)
+    if (!ch->buf) {
         ch->buf = ch->bufrptr = ch->bufwptr = malloc (1024);
+        memset (ch->buf, 0xaa, 1024);
+    }
 
     memcpy (ch->bufwptr, ptr, len);
     ch->bufwptr += len;
@@ -157,9 +166,45 @@ open_command (char * name)
     STATUS = 0;
 }
 
+typedef struct _basic_dirent {
+    unsigned    next;
+    unsigned    linenr;
+    char        name[16];
+    char        type[3];
+} basic_dirent;
+
 void
 make_directory_list ()
 {
+    channel * ch = channels[_SA()];
+    unsigned addr = 0x1201;
+    struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
+    basic_dirent * b = malloc (sizeof (basic_dirent));
+
+    ultifs_opendir ();
+
+    while (!ultifs_readdir (dirent)) {
+        memset (b, ' ', sizeof (basic_dirent));
+
+        b->next = addr + sizeof (basic_dirent);
+        b->linenr = dirent->size;
+
+        b->name[0] = '"';
+        b->name[15] = '"';
+        strncpy (&b->name[1], dirent->name, 14);
+
+        b->type[0] = 'P';
+        b->type[1] = 'R';
+        b->type[2] = 'G';
+
+        add_to_buf (ch, b, sizeof (basic_dirent));
+
+        addr += sizeof (basic_dirent);
+    }
+
+    ultifs_closedir ();
+    free (dirent);
+    free (b);
 }
 
 void

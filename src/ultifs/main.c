@@ -55,5 +55,4 @@ main ()
     //dump_file (8, 8, "main.c");
     //dump_file (12, 15, "AB");
     cputs ("Finished.\n");
-    exit (0);
 }

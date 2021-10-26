@@ -19,7 +19,7 @@ list_directory (char device)
 
     cbm_opendir (8, device, "$");
     while (!cbm_readdir (8, &dirent))
-        printf ("%s\n", dirent.name);
+        cputs (dirent.name);
     cbm_closedir (8);
 }
 
@@ -55,4 +55,5 @@ main ()
     //dump_file (8, 8, "main.c");
     //dump_file (12, 15, "AB");
     cputs ("Finished.\n");
+    exit (0);
 }

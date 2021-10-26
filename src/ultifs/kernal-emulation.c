@@ -1,5 +1,6 @@
 #pragma code-name ("ULTIFS")
 
+#include <cc65-charmap.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -71,7 +72,7 @@ typedef struct _channel {
 channel * channels[16];
 
 channel cmd_channel = {
-    NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL
 };
 
 void
@@ -79,7 +80,7 @@ init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
 
-    channels[15] = &cmd_channel;
+    channels[12] = &cmd_channel;
 
     if (ultimem_unhide () != ULTIMEM_UNHIDE_ID_ULTIMEM) {
         printf ("No UltiMem found - exiting.\n");
@@ -133,10 +134,8 @@ set_error (char code)
 void
 add_to_buf (channel * ch, void * ptr, size_t len)
 {
-    if (!ch->buf) {
+    if (!ch->buf)
         ch->buf = ch->bufrptr = ch->bufwptr = malloc (1024);
-        memset (ch->buf, 0xaa, 1024);
-    }
 
     memcpy (ch->bufwptr, ptr, len);
     ch->bufwptr += len;
@@ -169,14 +168,25 @@ open_command (char * name)
 typedef struct _basic_dirent {
     unsigned    next;
     unsigned    linenr;
-    char        name[16];
+    char        name[19];
     char        type[3];
+    char        lineend;
 } basic_dirent;
 
-void
-make_directory_list ()
+unsigned
+strnlen (char * s, size_t maxlen)
 {
-    channel * ch = channels[_SA()];
+    size_t l = 0;
+
+    while (*s++ && maxlen--)
+        l++;
+
+    return l;
+}
+
+void
+make_directory_list (channel * ch)
+{
     unsigned addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
     basic_dirent * b = malloc (sizeof (basic_dirent));
@@ -189,13 +199,13 @@ make_directory_list ()
         b->next = addr + sizeof (basic_dirent);
         b->linenr = dirent->size;
 
-        b->name[0] = '"';
-        b->name[15] = '"';
-        strncpy (&b->name[1], dirent->name, 14);
+        b->name[0] = b->name[18] = '"';
+        strncpy (&b->name[1], dirent->name, strnlen (dirent->name, 17));
 
         b->type[0] = 'P';
         b->type[1] = 'R';
         b->type[2] = 'G';
+        b->lineend = 0;
 
         add_to_buf (ch, b, sizeof (basic_dirent));
 
@@ -212,7 +222,7 @@ ultifs_kopen ()
 {
     char *      name = NULL;
     bfile *     found_file;
-    channel *   lf;
+    channel *   ch;
 
     if (_SA() != 15 && channels[_SA()]) {
         set_error (ERR_NO_CHANNEL);
@@ -229,13 +239,17 @@ ultifs_kopen ()
         name[_FNLEN()] = 0;
     }
 
+    ch = malloc (sizeof (channel));
+    ch->buf = NULL;
+    channels[_SA()] = ch;
+
     if (_SA() == 15) {
         open_command (name);
         return;
     }
 
     if (_FNLEN() == 1 && *name == '$') {
-        make_directory_list ();
+        make_directory_list (ch);
         return;
     }
 
@@ -245,8 +259,7 @@ ultifs_kopen ()
         return;
     }
 
-    lf = malloc (sizeof (channel));
-    lf->file = found_file;
+    ch->file = found_file;
     channels[_SA()]->file = found_file;
 
     set_error (0);

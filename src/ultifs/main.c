@@ -57,5 +57,5 @@ main ()
     //dump_file (8, 8, "main.c");
     //dump_file (12, 15, "AB");
     cputs ("Finished.\n");
-    ((voidfun*) 0xfd32) ();
+    ((voidfun*) 0xc474) ();     // READY.
 }

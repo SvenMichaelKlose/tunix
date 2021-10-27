@@ -292,9 +292,7 @@ file_window_draw_list (struct obj * w)
     gfx_draw_box (0, 0, w->rect.w, w->rect.h);
 
     while (1) {
-        if (rpos >= content->len)
-            break;
-        if (y >= w->rect.h)
+        if (rpos >= content->len || y >= w->rect.h)
             break;
         if (!d || !d->name[0])
             goto next;
@@ -328,14 +326,14 @@ file_window_draw_list (struct obj * w)
                 t = 'O';
         }
         gfx_putchar (t);
-        gfx_putchar (32);
+        gfx_putchar (' ');
 
         /* Print file size. */
         if (d->type != CBM_T_DIR) {
             gfx_set_position (xofs + 6, y);
-            memset (size, 32, sizeof (size));
+            memset (size, ' ', sizeof (size));
             sprintf (size, "%U", (unsigned int) d->size);
-            size[strlen (size)] = 32;
+            size[strlen (size)] = ' ';
             for (i = 0; i < 5; i++)
                 gfx_putchar (size[i]);
         }
@@ -390,6 +388,7 @@ file_window_launch_program (struct file_window_content * content, struct dirent 
         print_message ("Can't open file.");
         return;
     }
+
     drive_ops->read (&start, 2);
     size = drive_ops->launch (drive_ops, start);
     drive_ops->close ();
@@ -401,7 +400,7 @@ file_window_enter_directory (struct file_window_content * content, struct dirent
     content->drive_ops->enterdir (d->name);
     content->pos = 0;
     file_window_read_directory (content);
-    file_window_draw_content ((struct obj *) content);
+    file_window_draw_content (OBJ(content));
     file_window_invert_position (content);
 }
 

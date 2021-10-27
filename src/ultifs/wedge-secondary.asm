@@ -7,6 +7,7 @@
 .export _blk3
 
 .export _init_secondary_wedge
+.export uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall
 
 .export _last_regular_device
 
@@ -26,18 +27,18 @@
 
 FA      = $ba   ; Device number
 
-IOPEN   = $031A     ; KERNAL vector - open a logical file
-ICLOSE  = $031C     ; KERNAL vector - close a specified logical file
-ICHKIN  = $031E     ; KERNAL vector - open channel for input
-ICKOUT  = $0320     ; KERNAL vector - open channel for output
-ICLRCN  = $0322     ; KERNAL vector - close input and output channels
-IBASIN  = $0324     ; KERNAL vector - input character from channel
-IBSOUT  = $0326     ; KERNAL vector - output character to channel
-ISTOP   = $0328     ; KERNAL vector - scan stop key
-IGETIN  = $032A     ; KERNAL vector - get character from keyboard queue
-ICLALL  = $032C     ; KERNAL vector - close all channels and files
-ILOAD   = $0330     ; KERNAL vector - load
-ISAVE   = $0332     ; KERNAL vector - save
+IOPEN   = $031A
+ICLOSE  = $031C
+ICHKIN  = $031E
+ICKOUT  = $0320
+ICLRCN  = $0322
+IBASIN  = $0324
+IBSOUT  = $0326
+ISTOP   = $0328
+IGETIN  = $032A
+ICLALL  = $032C
+ILOAD   = $0330
+ISAVE   = $0332
 
 _blk2:      .res 1
 _blk3:      .res 1
@@ -62,10 +63,10 @@ _new_vectors:
 new_IOPEN:      .word uopen
 new_ICLOSE:     .word uclose
 new_ICHKIN:     .word uchkin
-new_ICHKOUT:    .word uchkout
+new_ICHKOUT:    .word uckout
 new_ICLRCN:     .word uclrcn
 new_IBASIN:     .word ubasin
-new_IBASOUT:    .word ubasout
+new_IBASOUT:    .word ubsout
 new_ISTOP:      .word ustop
 new_IGETIN:     .word ugetin
 new_ICLALL:     .word uclall
@@ -203,7 +204,7 @@ n:  jmp (old_ICLOSE)
 n:  jmp (old_ICHKIN)
 .endproc
 
-.proc uchkout
+.proc uckout
     jsr is_our_device
     bcc n
     jsr enter
@@ -230,7 +231,7 @@ n:  jmp (old_ICLRCN)
 n:  jmp (old_IBASIN)
 .endproc
 
-.proc ubasout
+.proc ubsout
     jsr is_our_device
     bcc n
     jsr enter

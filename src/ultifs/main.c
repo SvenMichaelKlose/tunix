@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern void __fastcall__ init_primary_wedge (void);
 extern void __fastcall__ init_secondary_wedge (char rom_device);
 extern void __fastcall__ init_kernal_emulation (void);
 
@@ -50,6 +51,7 @@ main ()
     printf ("UltiFS wedge\n");
     printf ("Flash ROM device: %d\n", device);
 
+    init_primary_wedge ();
     init_secondary_wedge (device);
     init_kernal_emulation ();
 

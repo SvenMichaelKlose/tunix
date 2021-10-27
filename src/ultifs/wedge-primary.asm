@@ -70,7 +70,7 @@ l2: lda secondary_vectors,x
     jsr out
 
     ; JSR <secondary wedge>
-    lda #$20
+    lda #$4c
     jsr out
     lda secondary_vectors,x
     jsr out
@@ -79,13 +79,6 @@ l2: lda secondary_vectors,x
     jsr out
     inx
 
-    ; JMP unmap_ultimem
-    lda #$4c
-    jsr out
-    lda unmap
-    jsr out
-    lda unmap+1
-    jsr out
     jmp l2
 
 done:

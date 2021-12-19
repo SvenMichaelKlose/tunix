@@ -7,19 +7,13 @@
 #include "linebuf.h"
 #include "liblineedit.h"
 
+
 #define FALSE   0
 #define TRUE    1
 
-#define TTY_ENTER           13
-#define TTY_CURSOR_UP       5
-#define TTY_CURSOR_DOWN     20
-#define TTY_CURSOR_LEFT     19
-#define TTY_CURSOR_RIGHT    4
-#define TTY_BACKSPACE       8
 
-
-pos_t       xpos;
-pos_t       ypos = 0;
+pos_t xpos;
+pos_t ypos = 0;
 
 
 void

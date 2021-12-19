@@ -6,12 +6,6 @@
 
 #include "line.h"
 
-#define TTY_ENTER           10
-#define TTY_CURSOR_UP       5
-#define TTY_CURSOR_DOWN     20
-#define TTY_CURSOR_LEFT     19
-#define TTY_CURSOR_RIGHT    4
-#define TTY_BACKSPACE       8
 
 int
 main ()

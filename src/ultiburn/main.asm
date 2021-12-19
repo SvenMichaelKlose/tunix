@@ -74,10 +74,10 @@ l2: lda #$00
 l:  jsr BASIN
     sta tmp
 
-    ldy #0
-    lda (ptr),y
-    cmp tmp
-    beq dont_burn
+;    ldy #0
+;    lda (ptr),y
+;    cmp tmp
+;    beq dont_burn
 
     lda ptr
     ldx ptr+1
@@ -89,12 +89,12 @@ l:  jsr BASIN
 ;    cmp tmp
 ;    bne err_not_burned
 
-    lda $900f
-    clc
-    adc #1
-    and #7
-    ora #$18
-    sta $900f
+;    lda $900f
+;    clc
+;    adc #1
+;    and #7
+;    ora #$18
+;    sta $900f
 
 dont_burn:
     jsr READST

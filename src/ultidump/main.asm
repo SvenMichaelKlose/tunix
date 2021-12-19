@@ -63,12 +63,12 @@ l:  ldy #0
     lda (ptr),y
     jsr BSOUT
 
-    lda $900f
-    clc
-    adc #1
-    and #7
-    ora #$18
-    sta $900f
+;    lda $900f
+;    clc
+;    adc #1
+;    and #7
+;    ora #$18
+;    sta $900f
 
     inc ptr
     bne l

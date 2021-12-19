@@ -37,7 +37,7 @@ F7 = 237
 F8 = 236
 ARROW_LEFT = 235
 
-RETURN  = 10
+RETURN  = 13
 
     .data
 

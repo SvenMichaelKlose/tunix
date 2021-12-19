@@ -6,7 +6,7 @@ __VIC20__ = 1
 .import ultimem_burn_byte
 .import _ultimem_unhide
 .import pushax
-.importzp tmp, ptr
+.importzp tmp, ptr, cnt
 
 .code
 
@@ -31,6 +31,8 @@ has_ultimem:
     lda #0
     sta $9ffe
     sta $9fff
+    sta cnt
+    sta cnt+1
 
     lda #<txt_dumping
     ldy #>txt_dumping
@@ -71,10 +73,18 @@ l:  ldy #0
     inc ptr
     bne l
 
-    lda ptr+1
-    and #%00011111
+    inc cnt
+    bne l3
+    inc cnt+1
+l3: lda cnt
+    cmp #<1489
+    bne no_dot
+    lda cnt+1
+    cmp #>1489
     bne no_dot
     ldx #0
+    stx cnt
+    stx cnt+1
     jsr CHKOUT
     lda #<txt_dot
     ldy #>txt_dot
@@ -123,7 +133,7 @@ txt_no_ultimem:
     .byte "NO ULTIMEM AROUND - EXITING.", 13,0
 
 txt_dumping:
-    .byte "DUMPING TO 'DUMP.IMG'...", 0
+    .byte $93, "DUMPING TO 'DUMP.IMG':", 13, 0
 
 txt_dot:
     .byte ".", 0

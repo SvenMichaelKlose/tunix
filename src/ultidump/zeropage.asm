@@ -1,11 +1,11 @@
-.exportzp s, d, c, tmp, ptr
+.exportzp s, d, c, tmp, ptr, cnt
 
 .zeropage
 
-s = 0
-d = 4
-c = 6
-ptr = 10
+s:      .res 4
+d:      .res 4
+c:      .res 4
+ptr:    .res 2
+cnt:    .res 2
 
-; Temporaries.
-tmp = 6
+tmp:    .res 2

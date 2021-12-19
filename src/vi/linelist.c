@@ -5,12 +5,7 @@
 #include <libterm.h>
 #include <liblineedit.h>
 
-#include "line.h"
-
-typedef unsigned pos_t;
-
-#define FALSE   0
-#define TRUE    1
+#include "linelist.h"
 
 line        * first_line = NULL;
 line        * current_line = NULL;
@@ -29,10 +24,6 @@ our_error (char * txt)
 }
 
 
-///////////////
-// LINE LIST //
-///////////////
-
 line *
 line_alloc ()
 {
@@ -50,7 +41,7 @@ line_alloc ()
 }
 
 void
-line_insert ()
+linelist_insert ()
 {
     line  * new = line_alloc ();
     line  * prev;
@@ -61,6 +52,7 @@ line_insert ()
         first_line = current_line = new;
         return;
     }
+
     if (!current_line) {
         current_line = first_line;
         prev = NULL;
@@ -87,7 +79,7 @@ line_last ()
 }
 
 void
-line_append ()
+linelist_append ()
 {
     line  * new = line_alloc ();
 
@@ -104,12 +96,10 @@ line_append ()
     current_line->next = new;
     new->prev = current_line;
     current_line = new;
-
-    line_move_down ();
 }
 
 void
-line_delete ()
+linelist_delete ()
 {
     line  * next;
 
@@ -133,7 +123,7 @@ line_delete ()
 }
 
 line *
-line_get (unsigned i)
+linelist_get (unsigned i)
 {
     line  * l = first_line;
 
@@ -144,9 +134,9 @@ line_get (unsigned i)
 }
 
 void
-set_current_line (unsigned n)
+linelist_goto (unsigned n)
 {
-    current_line = line_get (n);
+    current_line = linelist_get (n);
     if (!current_line) {
         term_puts ("No line at #.");
         while (1);
@@ -156,84 +146,10 @@ set_current_line (unsigned n)
     strcpy (linebuf, &current_line->data);
 }
 
-
-////////////
-// MOTION //
-////////////
-
-char
-line_move_down ()
-{
-    if (linenr == num_lines - 1)
-        return FALSE;
-
-    set_current_line (++linenr);
-
-    if (ypos != 23)
-        ypos++;
-
-    term_put (TERM_LINE_FEED);
-
-    return TRUE;
-}
-
-
-///////////////////
-// SCREEN REDRAW //
-///////////////////
-
 void
-screen_redraw ()
-{
-    line  * ls;
-    char  y;
-
-    disable_cursor ();
-
-    term_put (TERM_CLEAR_SCREEN);
-    for (y = 0; y < 24; y++) {
-        if (y == linenr)
-            print_linebuf ();
-        else {
-            if (ls = line_get ((unsigned) y))
-                term_puts (&ls->data);
-            else
-                term_put (0x7e);
-        }
-
-        if (y < 23) {
-            term_put (TERM_CARRIAGE_RETURN);
-            term_put (TERM_LINE_FEED);
-        }
-    }
-
-    set_cursor ();
-    enable_cursor ();
-}
-
-
-//////////////
-// COMMANDS //
-//////////////
-
-void
-line_open_below ()
+linelist_init ()
 {
     line_clear ();
-
-    if (line_move_down ())
-        line_insert ();
-    else {
-        line_append ();
-        line_move_down ();
-    }
-
-    term_put (TERM_INSERT_LINE);
-}
-
-void
-line_init ()
-{
-    line_clear ();
-    line_insert ();
+    linelist_insert ();
+    ypos = 0;
 }

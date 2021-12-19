@@ -4,7 +4,9 @@
 #include <libterm.h>
 #include <liblineedit.h>
 
-#include "line.h"
+#include "commands.h"
+#include "linelist.h"
+#include "screen.h"
 
 
 int
@@ -13,7 +15,7 @@ main ()
     char key;
 
     term_init ();
-    line_init ();
+    linelist_init ();
     screen_redraw ();
 
     while (1) {

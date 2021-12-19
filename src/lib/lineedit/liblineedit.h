@@ -5,6 +5,9 @@
 
 typedef unsigned pos_t;
 
+#define FALSE   0
+#define TRUE    1
+
 extern pos_t xpos;
 extern pos_t ypos;
 

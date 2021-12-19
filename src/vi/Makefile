@@ -1,6 +1,9 @@
 SOURCES= \
-	line.c \
-	main.c
+	commands.c \
+	linelist.c \
+	main.c \
+	motion.c \
+	screen.c
 PROGRAM=vi
 
 include ../Makefile.rules

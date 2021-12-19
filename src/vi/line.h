@@ -18,7 +18,7 @@ typedef struct _line line;
 typedef struct _line {
     line   * prev;
     line   * next;
-    char        data;
+    char   data;
 } line;
 
 extern void line_init       (void);

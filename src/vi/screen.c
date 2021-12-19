@@ -8,24 +8,29 @@
 #include "linelist.h"
 #include "screen.h"
 
+unsigned ystart;
 
 void
 screen_redraw ()
 {
-    line  * ls;
-    char  y;
+    line *    ls;
+    unsigned  nr;
+    unsigned  y;
 
     disable_cursor ();
 
     term_put (TERM_CLEAR_SCREEN);
+
     for (y = 0; y < 24; y++) {
-        if (y == linenr)
+        nr = ystart + y;
+
+        if (nr == linenr)
             print_linebuf ();
         else {
-            if (ls = linelist_get ((unsigned) y))
+            if (ls = linelist_get (nr))
                 term_puts (&ls->data);
             else
-                term_put (0x7e);
+                term_put ('~');
         }
 
         if (y < 23) {
@@ -36,4 +41,10 @@ screen_redraw ()
 
     set_cursor ();
     enable_cursor ();
+}
+
+void
+screen_init ()
+{
+    ystart = 0;
 }

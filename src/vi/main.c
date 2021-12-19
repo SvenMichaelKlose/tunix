@@ -16,6 +16,7 @@ main ()
 
     term_init ();
     linelist_init ();
+    screen_init ();
     screen_redraw ();
 
     while (1) {

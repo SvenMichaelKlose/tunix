@@ -1,4 +1,4 @@
-ASMSOURCES=zeropage.asm main.asm
+ASMSOURCES=main.asm
 PROGRAM=ultidump
 
 include ../Makefile.rules

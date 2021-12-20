@@ -74,7 +74,7 @@ l2: lda #$00
 
 l:  ldy #0
     lda (ptr),y
-    ;jsr BSOUT
+    jsr BSOUT
 
     inc ptr
     bne l

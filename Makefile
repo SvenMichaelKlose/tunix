@@ -16,8 +16,6 @@ all:
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg
-	cp src/ultiburn/ultiburn .
-	cp src/ultidump/ultidump .
 
 clean:
 	$(MAKE) -C src clean

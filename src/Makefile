@@ -1,6 +1,7 @@
 all:
 	$(MAKE) -C lib/blit all
 	$(MAKE) -C lib/zp all
+	$(MAKE) -C lib/kernal all
 	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultimem all

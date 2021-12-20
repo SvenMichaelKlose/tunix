@@ -7,6 +7,7 @@
 
 #include "linelist.h"
 #include "motion.h"
+#include "screen.h"
 
 
 void
@@ -21,5 +22,5 @@ line_open_below ()
         move_down ();
     }
 
-    term_put (TERM_INSERT_LINE);
+    screen_redraw (); //term_put (TERM_INSERT_LINE);
 }

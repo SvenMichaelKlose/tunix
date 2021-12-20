@@ -244,14 +244,30 @@ get_user_input:
     .data
 
 txt_welcome:
-    .byte $93, "ULTIDUMP", 13, 0
+    .byte $93
+    .byte "ULTIMEM ROM DUMP", 13
+    .byte "BY PIXEL@HUGBOX.ORG", 13
+    .byte 13
+    .byte "FOR MORE INFO PLEASE", 13
+    .byte "VISIT VIC DENIAL AND", 13
+    .byte "RETRO INNOVATIONS.", 13
+    .byte 0
 
 txt_no_ultimem:
     .byte "NO ULTIMEM FOUND", 13
-    .byte "EXITING.", 13,0
+    .byte "EXITING.", 13
+    .byte 0
 
 txt_enter_filename:
-    .byte "PLEASE ENTER DUMP FILENAME: ", 13, 0
+    .byte 13, 13
+    .byte "NO FILENAME PASSED IN", 13
+    .byte "REM AFTER RUN, LIKE", 13
+    .byte 13
+    .byte " RUN:REM EXAMPLE.IMG",13
+    .byte 13
+    .byte "PLEASE ENTER A FILE", 13
+    .byte "NAME NOW: "
+    .byte 0
 
 txt_dumping1:
     .byte "DUMPING TO '", 0

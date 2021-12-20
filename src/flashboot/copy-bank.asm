@@ -72,8 +72,10 @@ return:
     sta d
     lda #$20
     sta d+1
-    inc $9ff8
     lda $9ff8
+    clc
+    adc #1
+    sta $9FF8
     jmp lock_bank
     
 l2: inc d+1
@@ -97,7 +99,10 @@ l3: rts
 
     ldx #6
 l1: jsr $6000
-    inc $9ffc
+    lda $9ffc
+    clc
+    adc #1
+    sta $9ffc
     dex
     bne l1
 

@@ -220,7 +220,10 @@ d2: inc s+1
     bne l
 
     ; Step to next source bank.
-l4: inc $9ffa
+l4: lda $9ffa
+    clc
+    adc #1
+    sta $9ffa
     lda #>$4000
     sta s+1
     bne l3  ; (jmp)

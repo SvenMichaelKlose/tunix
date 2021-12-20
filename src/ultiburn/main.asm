@@ -9,7 +9,7 @@ __VIC20__ = 1
 .import ultimem_burn_byte
 .import _ultimem_unhide
 .import pushax
-.importzp tmp, ptr, printptr, bnk
+.importzp tmp, ptr, printptr
 
 
 GETLIN = $c560
@@ -83,17 +83,13 @@ wait4chip:
     jsr CHKIN
 
     lda #0
-    sta bnk
-    sta bnk+1
+    sta $9ffe
+    sta $9fff
 
 l2: lda #$00
     sta ptr
     lda #$a0
     sta ptr+1
-    lda bnk
-    sta $9ffe
-    lda bnk+1
-    sta $9fff
 
 l:  jsr BASIN
     sta tmp
@@ -135,9 +131,14 @@ no_dot:
     cmp #$c0
     bne l
 
-    inc bnk
-    bne l2
-    inc bnk+1
+    lda $9ffe
+    clc
+    adc #1
+    sta $9ffe
+    lda $9fff
+    adc #0
+    sta $9fff
+
     jmp l2
 
 done:
@@ -254,6 +255,7 @@ txt_welcome:
     .byte "FOR MORE INFO PLEASE", 13
     .byte "VISIT VIC DENIAL AND", 13
     .byte "RETRO INNOVATIONS.", 13
+    .byte 13
     .byte 0
 
 txt_no_ultimem:

@@ -16,7 +16,6 @@ GETLIN = $c560
 
 ptr:        .res 2
 cnt:        .res 2
-bnk:        .res 2
 printptr:   .res 2
 
 
@@ -81,8 +80,8 @@ has_ultimem:
     jsr OPEN
 
     lda #0
-    sta bnk
-    sta bnk+1
+    sta $9ffe
+    sta $9fff
     sta cnt
     sta cnt+1
 
@@ -93,11 +92,6 @@ l2: lda #$00
     sta ptr
     lda #$a0
     sta ptr+1
-
-    lda bnk
-    sta $9ffe
-    lda bnk+1
-    sta $9fff
 
 l:  ldy #0
     lda (ptr),y
@@ -133,10 +127,13 @@ no_dot:
     cmp #$c0
     bne l
 
-    inc bnk
-    bne l2
-    inc bnk+1
-    lda bnk+1
+    lda $9ffe
+    clc
+    adc #1
+    sta $9ffe
+    lda $9fff
+    adc #0
+    sta $9fff
     cmp #4
     bne l2
 

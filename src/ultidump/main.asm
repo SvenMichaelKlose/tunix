@@ -248,6 +248,8 @@ txt_welcome:
     .byte "FOR MORE INFO PLEASE", 13
     .byte "VISIT VIC DENIAL AND", 13
     .byte "RETRO INNOVATIONS.", 13
+    .byte 13
+    .byte 13
     .byte 0
 
 txt_no_ultimem:
@@ -256,7 +258,6 @@ txt_no_ultimem:
     .byte 0
 
 txt_enter_filename:
-    .byte 13, 13
     .byte "NO FILENAME PASSED IN", 13
     .byte "REM AFTER RUN, LIKE", 13
     .byte 13

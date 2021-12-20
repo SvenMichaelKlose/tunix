@@ -1,3 +1,6 @@
+; UltiMem ROM dump utility
+; Written by Sven Michael Klose <pixel@hugbox.org>
+
 __VIC20__ = 1
 .include "cbm_kernal.inc"
 
@@ -7,6 +10,7 @@ __VIC20__ = 1
 .import ultimem_burn_byte
 .import _ultimem_unhide
 
+GETLIN = $c560
 
 .zeropage
 
@@ -37,17 +41,42 @@ has_ultimem:
     ora #%01000000  ; ROM in BLK5.
     sta $9ff2
 
-    lda #<txt_dumping
-    ldy #>txt_dumping
-    jsr printstr
+    jsr get_argument
 
+    pha
+    lda #<txt_dumping1
+    ldy #>txt_dumping1
+    jsr printstr
+    lda #<argument
+    ldy #>argument
+    jsr printstr
+    lda #<txt_dumping2
+    ldy #>txt_dumping2
+    jsr printstr
+    pla
+    tay
+
+    lda #','
+    sta argument,y
+    iny
+    lda #'S'
+    sta argument,y
+    iny
+    lda #','
+    sta argument,y
+    iny
+    lda #'W'
+    sta argument,y
+    iny
+    tya
+    pha
     lda #2
     ldx #8
     ldy #2
     jsr SETLFS
-    lda #fn_data_end-fn_data
-    ldx #<fn_data
-    ldy #>fn_data
+    pla
+    ldx #<argument
+    ldy #>argument
     jsr SETNAM
     jsr OPEN
 
@@ -149,6 +178,69 @@ done:
     rts
 .endproc
 
+.proc get_argument
+    lda #<argument
+    sta ptr
+    lda #>argument
+    sta ptr+1
+
+    ; Check on REM argument after RUN.
+    lda $0200
+    cmp #$8a
+    bne get_user_input
+    lda $0201
+    cmp #$3a
+    bne get_user_input
+    lda $0202
+    cmp #$8f
+    bne get_user_input
+
+    ; Skip optional spaces after REM.
+    ldy #3
+l:  lda $200,y
+    iny
+    cmp #$20
+    beq l
+    dey
+
+    ; Copy argument.
+copy:
+    lda $200,y
+    tax
+    tya
+    pha
+    ldy #0
+    txa
+    sta (ptr),y
+    inc ptr
+    bne n2
+    inc ptr+1
+n2: pla
+    tay
+    iny
+    cpx #0
+    bne copy
+
+    ldy #0
+l2: lda argument,y
+    beq got_len 
+    iny
+    jmp l2
+
+got_len:
+    tya
+    rts
+
+get_user_input:
+    lda #<txt_enter_filename
+    ldy #>txt_enter_filename
+    jsr printstr
+    jsr GETLIN
+    ldy #0
+    jmp copy
+.endproc
+
+
     .data
 
 txt_welcome:
@@ -158,11 +250,14 @@ txt_no_ultimem:
     .byte "NO ULTIMEM FOUND", 13
     .byte "EXITING.", 13,0
 
-txt_dumping:
-    .byte "DUMPING TO 'DUMP.IMG':", 13, 0
+txt_enter_filename:
+    .byte "PLEASE ENTER DUMP FILENAME: ", 13, 0
 
-txt_dot:
-    .byte ".", 0
+txt_dumping1:
+    .byte "DUMPING TO '", 0
+
+txt_dumping2:
+    .byte "':", 13, 0
 
 txt_done:
     .byte "DONE.", 13,0
@@ -170,6 +265,7 @@ txt_done:
 txt_error:
     .byte "FILE ERROR.", 13,0
 
-fn_data:
-    .byte "DUMP.IMG,S,W"
-fn_data_end:
+
+    .bss
+
+argument:   .res 64

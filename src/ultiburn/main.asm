@@ -4,12 +4,16 @@
 __VIC20__ = 1
 .include "cbm_kernal.inc"
 
-.export _main
+.export _main, argument
 .import _ultimem_erase_chip
 .import ultimem_burn_byte
 .import _ultimem_unhide
 .import pushax
 .importzp tmp, ptr, printptr, bnk
+
+
+GETLIN = $c560
+
 
 .code
 
@@ -32,6 +36,22 @@ has_ultimem:
     ora #%01000000  ; ROM in BLK5.
     sta $9ff2
 
+    jsr get_argument
+    lda #','
+    sta argument,y
+    iny
+    lda #'S'
+    sta argument,y
+    iny
+    lda #','
+    sta argument,y
+    iny
+    lda #'R'
+    sta argument,y
+    iny
+    tya
+    pha
+
     lda #<txt_erasing
     ldy #>txt_erasing
     jsr printstr
@@ -46,17 +66,17 @@ wait4chip:
     ldy #>txt_chip_erased
     jsr printstr
 
-    lda #<txt_installing
-    ldy #>txt_installing
+    lda #<txt_burning
+    ldy #>txt_burning
     jsr printstr
 
     lda #2
     ldx #8
     ldy #2
     jsr SETLFS
-    lda #fn_data_end-fn_data
-    ldx #<fn_data
-    ldy #>fn_data
+    pla
+    ldx #<argument
+    ldy #>argument
     jsr SETNAM
     jsr OPEN
     ldx #2
@@ -160,11 +180,100 @@ done:
     rts
 .endproc
 
+.proc get_argument
+    lda #<argument
+    sta ptr
+    lda #>argument
+    sta ptr+1
+
+    ; Check on REM argument after RUN.
+    lda $0200
+    cmp #$8a
+    bne get_user_input
+    lda $0201
+    cmp #$3a
+    bne get_user_input
+    lda $0202
+    cmp #$8f
+    bne get_user_input
+
+    ; Skip optional spaces after REM.
+    ldy #3
+l:  lda $200,y
+    iny
+    cmp #$20
+    beq l
+    dey
+
+    ; Copy argument.
+copy:
+    lda $200,y
+    tax
+    tya
+    pha
+    ldy #0
+    txa
+    sta (ptr),y
+    inc ptr
+    bne n2
+    inc ptr+1
+n2: pla
+    tay
+    iny
+    cpx #0
+    bne copy
+
+    ldy #0
+l2: lda argument,y
+    beq got_len 
+    iny
+    jmp l2
+
+got_len:
+    rts
+
+get_user_input:
+    lda #<txt_enter_filename
+    ldy #>txt_enter_filename
+    jsr printstr
+    lda #0
+    sta $200
+    jsr GETLIN
+    ldy #0
+    jmp copy
+.endproc
+
+
+    .data
+
 txt_welcome:
-    .byte "ULTIBURN", 13, 0
+    .byte $93
+    .byte "ULTIMEM ROM BURNER", 13
+    .byte "BY PIXEL@HUGBOX.ORG", 13
+    .byte 13
+    .byte "FOR MORE INFO PLEASE", 13
+    .byte "VISIT VIC DENIAL AND", 13
+    .byte "RETRO INNOVATIONS.", 13
+    .byte 0
 
 txt_no_ultimem:
-    .byte "NO ULTIMEM AROUND - EXITING.", 13,0
+    .byte "NO ULTIMEM FOUND", 13
+    .byte "EXITING.", 13
+    .byte 0
+
+txt_enter_filename:
+    .byte 13, 13
+    .byte "NO FILENAME PASSED IN", 13
+    .byte "REM AFTER RUN, LIKE", 13
+    .byte 13
+    .byte " RUN:REM EXAMPLE.IMG",13
+    .byte 13
+    .byte "PLEASE ENTER THE DUMP", 13
+    .byte "FILE NAME NOW - THIS", 13
+    .byte "WILL DESTROY ALL DATA", 13
+    .byte "ON THE FLASH ROM RIGHT" ;, 13
+    .byte "AWAY!: ", 13
+    .byte 0
 
 txt_erasing:
     .byte "ERASING ROM...", 0
@@ -172,8 +281,8 @@ txt_erasing:
 txt_chip_erased:
     .byte "OK.", 13,0
 
-txt_installing:
-    .byte "BURNING", 0
+txt_burning:
+    .byte "BURNING...", 13, 0
 
 txt_done:
     .byte "DONE.", 13,0
@@ -184,6 +293,6 @@ txt_error:
 txt_error_not_burned:
     .byte "ERROR: BYTE HAS NOT BEEN WRITTEN.", 13,0
 
-fn_data:
-    .byte "IMAGE,S,R"
-fn_data_end:
+    .bss
+
+argument:   .res 64

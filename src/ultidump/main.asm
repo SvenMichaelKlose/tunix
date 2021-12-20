@@ -2,6 +2,7 @@ __VIC20__ = 1
 .include "cbm_kernal.inc"
 
 .export _main
+
 .import _ultimem_erase_chip
 .import ultimem_burn_byte
 .import _ultimem_unhide
@@ -35,9 +36,6 @@ has_ultimem:
     and #%00111111
     ora #%01000000  ; ROM in BLK5.
     sta $9ff2
-    lda #0
-    sta $9ffe
-    sta $9fff
 
     lda #<txt_dumping
     ldy #>txt_dumping
@@ -121,6 +119,8 @@ done:
     jsr printstr
 
 exit:
+    ldx #2
+    jsr CHKOUT
     jsr CLRCH
     lda #2
     jmp CLOSE

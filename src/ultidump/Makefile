@@ -10,7 +10,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -t vic20 -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/kernal/libkernal.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -t vic20 -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

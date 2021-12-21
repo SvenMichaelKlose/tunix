@@ -27,56 +27,6 @@ error (char * txt)
 }
 
 
-//////////////
-// TERMINAL //
-//////////////
-
-void
-set_cursor (void)
-{
-    term_put (TERM_SET_CURSOR);
-    term_put (xpos);
-    term_put (ypos);
-}
-
-void
-disable_cursor ()
-{
-    term_put (TERM_ESCAPE);
-    term_put (TERM_DISABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-}
-
-void
-enable_cursor ()
-{
-    term_put (TERM_ESCAPE);
-    term_put (TERM_ENABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-}
-
-void
-print_linebuf ()
-{
-    linebuf[linebuf_length] = 0;
-    term_puts (linebuf);
-}
-
-void
-line_redraw ()
-{
-    disable_cursor ();
-    set_cursor ();
-    term_put (TERM_CARRIAGE_RETURN);
-
-    print_linebuf ();
-
-    term_put (TERM_CLEAR_TO_EOL);
-    set_cursor ();
-    enable_cursor ();
-}
-
-
 ////////////
 // MOTION //
 ////////////
@@ -130,19 +80,19 @@ line_edit (char key)
     switch (key) {
         case TTY_CURSOR_LEFT:
             line_move_left ();
-            goto next;
+            goto done;
 
         case TTY_CURSOR_RIGHT:
             line_move_right ();
-            goto next;
+            goto done;
 
         case TTY_BACKSPACE:
             line_delete_char ();
-            goto next;
+            goto done;
     }
 
     line_insert_char (key);
 
-next:
+done:
     line_redraw ();
 }

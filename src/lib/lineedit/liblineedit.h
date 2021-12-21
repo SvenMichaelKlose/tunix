@@ -18,13 +18,14 @@ extern void set_cursor         (void);
 extern void enable_cursor      (void);
 extern void disable_cursor     (void);
 
-extern void print_linebuf      (void);
 extern void line_clear         (void);
-extern void line_redraw        (void);
 extern void line_insert_char   (char c);
 extern void line_delete_char   (void);
 extern void line_move_left     (void);
 extern void line_move_right    (void);
 extern void line_edit          (char key);
+
+// To be provided externally.
+extern void line_redraw        (void);
 
 #endif // #ifndef LIBLINEEDIT_H

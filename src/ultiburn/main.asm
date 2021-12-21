@@ -22,15 +22,31 @@ GETLIN = $c560
     ldy #>txt_welcome
     jsr printstr
 
+    lda #0
+    sta card_type
     jsr _ultimem_unhide
     cmp #$11
     beq has_ultimem
+    cmp #$12
+    beq has_vicmidi
 
     lda #<txt_no_ultimem
     ldy #>txt_no_ultimem
     jmp printstr
 
 has_ultimem:
+    inc card_type
+    lda #<txt_found_ultimem
+    ldy #>txt_found_ultimem
+    jsr printstr
+    jmp start
+
+has_vicmidi:
+    lda #<txt_found_vicmidi
+    ldy #>txt_found_vicmidi
+    jsr printstr
+
+start:
     lda $9ff2
     and #%00111111
     ora #%01000000  ; ROM in BLK5.
@@ -245,7 +261,7 @@ get_user_input:
 .endproc
 
 
-    .data
+    .rodata
 
 txt_welcome:
     .byte $93
@@ -256,25 +272,31 @@ txt_welcome:
     .byte "VISIT VIC DENIAL AND", 13
     .byte "RETRO INNOVATIONS.", 13
     .byte 13
+    .byte 13
+    .byte 0
+
+txt_found_ultimem:
+    .byte "FOUND ULTIMEM.", 13
+    .byte 13
+    .byte 0
+
+txt_found_vicmidi:
+    .byte "FOUND VIC-MIDI.", 13
+    .byte 13
     .byte 0
 
 txt_no_ultimem:
-    .byte "NO ULTIMEM FOUND", 13
-    .byte "EXITING.", 13
+    .byte "NO ULTIMEM OR VIC-MIDIFOUND.", 13
     .byte 0
 
 txt_enter_filename:
-    .byte 13, 13
     .byte "NO FILENAME PASSED IN", 13
     .byte "REM AFTER RUN, LIKE", 13
     .byte 13
     .byte " RUN:REM EXAMPLE.IMG",13
     .byte 13
-    .byte "PLEASE ENTER THE DUMP", 13
-    .byte "FILE NAME NOW - THIS", 13
-    .byte "WILL DESTROY ALL DATA", 13
-    .byte "ON THE FLASH ROM RIGHT" ;, 13
-    .byte "AWAY!: ", 13
+    .byte "PLEASE ENTER THE IMAGE"
+    .byte "FILE NAME:", 13
     .byte 0
 
 txt_erasing:
@@ -295,6 +317,8 @@ txt_error:
 txt_error_not_burned:
     .byte "ERROR: BYTE HAS NOT BEEN WRITTEN.", 13,0
 
+
     .bss
 
+card_type:  .res 1
 argument:   .res 64

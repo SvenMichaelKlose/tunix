@@ -8,18 +8,17 @@
 #include "linelist.h"
 #include "motion.h"
 
-char
+void
 move_down ()
 {
-    if (linenr == num_lines - 1)
-        return FALSE;
+    linenr++;
+    if (linenr >= num_lines)
+        linenr = num_lines - 1;
+}
 
-    linelist_goto (++linenr);
-
-    if (ypos != 23)
-        ypos++;
-
-    term_put (TERM_LINE_FEED);
-
-    return TRUE;
+void
+move_up ()
+{
+    if (linenr)
+        linenr--;
 }

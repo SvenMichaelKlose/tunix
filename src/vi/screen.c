@@ -8,7 +8,54 @@
 #include "linelist.h"
 #include "screen.h"
 
+
 unsigned ystart;
+
+
+void
+set_cursor (void)
+{
+    term_put (TERM_SET_CURSOR);
+    term_put (xpos);
+    term_put (linenr - ystart);
+}
+
+void
+disable_cursor ()
+{
+    term_put (TERM_ESCAPE);
+    term_put (TERM_DISABLE_ATTR);
+    term_put (TERM_ATTR_CURSOR);
+}
+
+void
+enable_cursor ()
+{
+    term_put (TERM_ESCAPE);
+    term_put (TERM_ENABLE_ATTR);
+    term_put (TERM_ATTR_CURSOR);
+}
+
+void
+print_linebuf ()
+{
+    linebuf[linebuf_length] = 0;
+    term_puts (linebuf);
+}
+
+void
+line_redraw ()
+{
+    disable_cursor ();
+    set_cursor ();
+    term_put (TERM_CARRIAGE_RETURN);
+
+    print_linebuf ();
+
+    term_put (TERM_CLEAR_TO_EOL);
+    set_cursor ();
+    enable_cursor ();
+}
 
 void
 screen_redraw ()

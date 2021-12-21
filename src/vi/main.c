@@ -9,25 +9,45 @@
 #include "screen.h"
 
 
-int
-main ()
+void
+edit_mode ()
 {
     char key;
-
-    term_init ();
-    linelist_init ();
-    screen_init ();
-    screen_redraw ();
 
     while (1) {
         while (!(key = term_get ()));
         switch (key) {
             case TTY_ENTER:
-                line_open_below ();
+                cmd_open_below ();
                 continue;
 
             default:
-                line_edit (key);
+                lineedit (key);
         }
     }
+}
+
+void
+command_mode ()
+{
+    char key;
+
+    while (1) {
+        while (!(key = term_get ()));
+        switch (key) {
+            case 'i':
+                edit_mode ();
+                continue;
+        }
+    }
+}
+
+
+int
+main ()
+{
+    term_init ();
+    screen_init ();
+    screen_redraw ();
+    command_mode ();
 }

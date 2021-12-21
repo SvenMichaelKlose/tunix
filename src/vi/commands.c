@@ -11,16 +11,8 @@
 
 
 void
-line_open_below ()
+cmd_open_below ()
 {
-    line_clear ();
-
-    if (move_down ())
-        linelist_insert ();
-    else {
-        linelist_append ();
-        move_down ();
-    }
-
-    screen_redraw (); //term_put (TERM_INSERT_LINE);
+    linelist_insert_after ();
+    move_down ();
 }

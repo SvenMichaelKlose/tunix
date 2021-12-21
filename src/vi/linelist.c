@@ -7,9 +7,10 @@
 
 #include "linelist.h"
 
+
 line        * first_line = NULL;
 line        * current_line = NULL;
-unsigned    linenr = 0;
+int         linenr = 0;
 unsigned    num_lines = 0;
 
 
@@ -41,61 +42,27 @@ line_alloc ()
 }
 
 void
-linelist_insert ()
+linelist_insert_before ()
 {
-    line  * new = line_alloc ();
-    line  * prev;
+    line * new = line_alloc ();
 
     num_lines++;
 
-    if (!first_line) {
-        first_line = current_line = new;
-        return;
-    }
-
-    if (!current_line) {
-        current_line = first_line;
-        prev = NULL;
-    } else
-        prev = current_line->prev;
-
-    if (current_line == first_line)
-        first_line = new;
-    else
-        prev->next = new;
-
-    new->prev = prev;
+    new->prev = current_line->prev;
     new->next = current_line;
-    current_line = new;
+    current_line->prev = new;
 }
 
 void
-line_last ()
+linelist_insert_after ()
 {
-    current_line = first_line;
-
-    while (current_line && current_line->next)
-        current_line = current_line->next;
-}
-
-void
-linelist_append ()
-{
-    line  * new = line_alloc ();
+    line * new = line_alloc ();
 
     num_lines++;
 
-    if (!current_line)
-        line_last ();
-    else if (current_line->next) {
-        term_puts ("!!! ");
-        term_puts (&current_line->next->data);
-        our_error (": Cannot append before.");
-    }
-
-    current_line->next = new;
     new->prev = current_line;
-    current_line = new;
+    new->next = current_line->next;
+    current_line->next = new;
 }
 
 void
@@ -144,12 +111,4 @@ linelist_goto (unsigned n)
 
     linebuf_length = strlen (&current_line->data);
     strcpy (linebuf, &current_line->data);
-}
-
-void
-linelist_init ()
-{
-    line_clear ();
-    linelist_insert ();
-    ypos = 0;
 }

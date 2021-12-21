@@ -11,7 +11,7 @@ typedef struct _linedata {
 } linedata;
 */
 
-extern unsigned linenr;
+extern int linenr;
 extern unsigned num_lines;
 
 typedef struct _line line;
@@ -22,11 +22,12 @@ typedef struct _line {
     char   data;
 } line;
 
-extern void    linelist_init       (void);
-extern line *  linelist_get        (unsigned);
-extern void    linelist_goto       (unsigned);
-extern void    linelist_append     (void);
-extern void    linelist_delete     (void);
-extern void    linelist_insert     (void);
+extern void    linelist_init           (void);
+extern line *  linelist_get            (unsigned);
+extern void    linelist_goto           (unsigned);
+extern void    linelist_append         (void);
+extern void    linelist_delete         (void);
+extern void    linelist_insert_before  (void);
+extern void    linelist_insert_after   (void);
 
 #endif // #ifndef LINELIST_H

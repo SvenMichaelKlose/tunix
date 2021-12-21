@@ -14,9 +14,10 @@ GETLIN = $c560
 
 .zeropage
 
-ptr:        .res 2
-cnt:        .res 2
-printptr:   .res 2
+ptr:            .res 2
+cnt:            .res 2
+printptr:       .res 2
+last_bank:      .res 2
 
 
 .code
@@ -26,20 +27,46 @@ printptr:   .res 2
     ldy #>txt_welcome
     jsr printstr
 
+    lda #0
+    sta card_type
     jsr _ultimem_unhide
     cmp #$11
     beq has_ultimem
+    cmp #$12
+    beq has_vicmidi
 
     lda #<txt_no_ultimem
     ldy #>txt_no_ultimem
     jmp printstr
-has_ultimem:
 
+has_ultimem:
+    inc card_type
+    lda #<txt_found_ultimem
+    ldy #>txt_found_ultimem
+    jsr printstr
+    jmp start
+
+has_vicmidi:
+    lda #<txt_found_vicmidi
+    ldy #>txt_found_vicmidi
+    jsr printstr
+
+start:
     lda $9ff2
     and #%00111111
     ora #%01000000  ; ROM in BLK5.
     sta $9ff2
 
+    lda #<txt_scan_for_end
+    ldy #>txt_scan_for_end
+    jsr printstr
+    jsr scan_for_end
+    bcc has_data
+    lda #<txt_nothing_to_do
+    ldy #>txt_nothing_to_do
+    jmp printstr
+
+has_data:
     jsr get_argument
 
     pha
@@ -127,6 +154,15 @@ no_dot:
     cmp #$c0
     bne l
 
+    lda $9ffe
+    cmp last_bank
+    bne next_bank
+
+    lda $9fff
+    cmp last_bank+1
+    beq done
+
+next_bank:
     lda $9ffe
     clc
     adc #1
@@ -237,8 +273,67 @@ get_user_input:
     jmp copy
 .endproc
 
+.proc scan_for_end
+    ; Last VIC-MIDI block.
+    lda #63
+    sta $9ffe
+    lda #0
+    sta $9fff
 
-    .data
+    lda card_type
+    beq is_vicmidi
+
+    ; Last Ultimem block.
+    lda #255
+    sta $9ffe
+    lda #3
+    sta $9fff
+
+is_vicmidi:
+    lda #$ff
+    sta ptr
+    lda #$bf
+    sta ptr+1
+
+    ldy #0
+l:  lda (ptr),y
+    cmp #$ff
+    bne end_found
+
+    dec ptr
+    lda ptr
+    cmp #$ff
+    bne l
+    dec ptr+1
+    cmp #$9f
+    bne l
+
+    lda $9ffe
+    sec
+    sbc #1
+    sta $9ffe
+    lda $9fff
+    sbc #0
+    sta $9fff
+    and $9fff
+    cmp #$ff
+    beq nothing_to_do
+    jmp is_vicmidi
+
+end_found:
+    lda $9ffe
+    sta last_bank
+    lda $9fff
+    sta last_bank+1
+    clc
+    rts
+
+nothing_to_do:
+    sec
+    rts
+.endproc
+
+    .rodata
 
 txt_welcome:
     .byte $93
@@ -252,8 +347,25 @@ txt_welcome:
     .byte 13
     .byte 0
 
+txt_found_ultimem:
+    .byte "FOUND ULTIMEM.", 13
+    .byte 0
+
+txt_found_vicmidi:
+    .byte "FOUND VIC-MIDI.", 13
+    .byte 0
+
 txt_no_ultimem:
-    .byte "NO ULTIMEM FOUND", 13
+    .byte "NO ULTIMEM OR VIC-MIDI FOUND", 13
+    .byte "EXITING.", 13
+    .byte 0
+
+txt_scan_for_end:
+    .byte "SCANNING FOR END OF DATA.", 13
+    .byte 0
+
+txt_nothing_to_do:
+    .byte "FLASH ROM IS EMPTY.", 13
     .byte "EXITING.", 13
     .byte 0
 
@@ -282,4 +394,5 @@ txt_error:
 
     .bss
 
+card_type:  .res 1  ; 0: VIC MIDI, 1: UltiMem
 argument:   .res 64

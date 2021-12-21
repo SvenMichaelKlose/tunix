@@ -17,7 +17,7 @@ linebuf_clear ()
 }
 
 void
-linebuf_insert_char (pos_t p, char c)
+linebuf_insert_char (unsigned p, char c)
 {
     if (linebuf_length >= MAX_LINE_LENGTH)
         return;
@@ -28,7 +28,7 @@ linebuf_insert_char (pos_t p, char c)
 }
 
 void
-linebuf_delete_char (pos_t p)
+linebuf_delete_char (unsigned p)
 {
     if (!linebuf_length || !p)
         return;

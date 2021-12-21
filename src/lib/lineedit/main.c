@@ -12,19 +12,7 @@
 #define TRUE    1
 
 
-pos_t xpos;
-pos_t ypos = 0;
-
-
-void
-error (char * txt)
-{
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (23);
-    term_puts (txt);
-    while (1);
-}
+unsigned xpos;
 
 
 ////////////
@@ -46,16 +34,9 @@ line_move_right ()
 }
 
 
-//////////////////
-// LINE EDITING //
-//////////////////
-
-void
-line_clear ()
-{
-    linebuf_clear ();
-    xpos = 0;
-}
+/////////////
+// EDITING //
+/////////////
 
 void
 line_insert_char (char c)
@@ -74,8 +55,13 @@ line_delete_char ()
     line_move_left ();
 }
 
+
+///////////////
+// TOP LEVEL //
+///////////////
+
 void
-line_edit (char key)
+lineedit (char key)
 {
     switch (key) {
         case TTY_CURSOR_LEFT:
@@ -95,4 +81,11 @@ line_edit (char key)
 
 done:
     line_redraw ();
+}
+
+void
+lineedit_init ()
+{
+    linebuf_clear ();
+    xpos = 0;
 }

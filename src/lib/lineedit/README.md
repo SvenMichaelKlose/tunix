@@ -1,4 +1,5 @@
 Line editing library
 ====================
 
-For whenver users need to edit an input line.
+To edit a single line of text.  Processes keyboard input and
+calls the application to display the line.

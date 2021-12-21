@@ -157,7 +157,6 @@ no_dot:
     lda $9ffe
     cmp last_bank
     bne next_bank
-
     lda $9fff
     cmp last_bank+1
     beq done
@@ -170,8 +169,7 @@ next_bank:
     lda $9fff
     adc #0
     sta $9fff
-    cmp #4
-    bne l2
+    jmp l2
 
 done:
     ldx #0
@@ -288,8 +286,9 @@ get_user_input:
     sta $9ffe
     lda #3
     sta $9fff
-
 is_vicmidi:
+
+next_bank:
     lda #$ff
     sta ptr
     lda #$bf
@@ -305,6 +304,7 @@ l:  lda (ptr),y
     cmp #$ff
     bne l
     dec ptr+1
+    lda ptr+1
     cmp #$9f
     bne l
 
@@ -314,11 +314,9 @@ l:  lda (ptr),y
     sta $9ffe
     lda $9fff
     sbc #0
+    bcc nothing_to_do
     sta $9fff
-    and $9fff
-    cmp #$ff
-    beq nothing_to_do
-    jmp is_vicmidi
+    jmp next_bank
 
 end_found:
     lda $9ffe
@@ -349,24 +347,26 @@ txt_welcome:
 
 txt_found_ultimem:
     .byte "FOUND ULTIMEM.", 13
+    .byte 13
     .byte 0
 
 txt_found_vicmidi:
     .byte "FOUND VIC-MIDI.", 13
+    .byte 13
     .byte 0
 
 txt_no_ultimem:
-    .byte "NO ULTIMEM OR VIC-MIDI FOUND", 13
-    .byte "EXITING.", 13
+    .byte "NO ULTIMEM OR VIC-MIDIFOUND.", 13
     .byte 0
 
 txt_scan_for_end:
-    .byte "SCANNING FOR END OF DATA.", 13
+    .byte "SCANNING FOR END OF", 13
+    .byte "ROM DATA. PLEASE WAIT.", 13
+    .byte 13
     .byte 0
 
 txt_nothing_to_do:
     .byte "FLASH ROM IS EMPTY.", 13
-    .byte "EXITING.", 13
     .byte 0
 
 txt_enter_filename:
@@ -383,7 +383,7 @@ txt_dumping1:
     .byte "DUMPING TO '", 0
 
 txt_dumping2:
-    .byte "':", 13, 0
+    .byte "'.", 13, 0
 
 txt_done:
     .byte "DONE.", 13,0

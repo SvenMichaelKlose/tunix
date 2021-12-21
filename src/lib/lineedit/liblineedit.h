@@ -10,8 +10,8 @@ extern unsigned  xpos;
 extern char      linebuf[MAX_LINE_LENGTH + 1];
 extern unsigned  linebuf_length;
 
-extern void line_edit   (char key);
-extern void line_clear  (void);
+extern void lineedit       (char key);
+extern void lineedit_init  (void);
 
 
 // To be provided externally.

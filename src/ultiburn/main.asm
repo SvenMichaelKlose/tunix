@@ -68,24 +68,6 @@ start:
     tya
     pha
 
-    lda #<txt_erasing
-    ldy #>txt_erasing
-    jsr printstr
-    jsr _ultimem_erase_chip
-
-wait4chip:
-    lda $a000
-    cmp #$ff
-    bne wait4chip
-
-    lda #<txt_chip_erased
-    ldy #>txt_chip_erased
-    jsr printstr
-
-    lda #<txt_burning
-    ldy #>txt_burning
-    jsr printstr
-
     lda #2
     ldx #8
     ldy #2
@@ -102,6 +84,23 @@ wait4chip:
     sta $9ffe
     sta $9fff
 
+    ; Read first byte and check for errors before erasing the chip.
+    lda #$00
+    sta ptr
+    lda #$a0
+    sta ptr+1
+    jsr BASIN
+    sta tmp
+    jsr READST
+    cmp #0
+    bne error
+    jsr erase_chip
+
+    lda #<txt_burning
+    ldy #>txt_burning
+    jsr printstr
+    jmp burn_first_byte
+
 l2: lda #$00
     sta ptr
     lda #$a0
@@ -115,6 +114,7 @@ l:  jsr BASIN
 ;    cmp tmp
 ;    beq dont_burn
 
+burn_first_byte:
     lda ptr
     ldx ptr+1
     ldy tmp
@@ -260,6 +260,22 @@ get_user_input:
     jmp copy
 .endproc
 
+.proc erase_chip
+    lda #<txt_erasing
+    ldy #>txt_erasing
+    jsr printstr
+    jsr _ultimem_erase_chip
+
+wait4chip:
+    lda $a000
+    cmp #$ff
+    bne wait4chip
+
+    lda #<txt_chip_erased
+    ldy #>txt_chip_erased
+    jmp printstr
+.endproc
+
 
     .rodata
 
@@ -300,10 +316,11 @@ txt_enter_filename:
     .byte 0
 
 txt_erasing:
-    .byte "ERASING ROM...", 0
+    .byte "IMAGE FOUND. ERASING", 13
+    .byte "ROM. PLEASE WAIT.", 0
 
 txt_chip_erased:
-    .byte "OK.", 13,0
+    .byte 13, "OK. ", 0
 
 txt_burning:
     .byte "BURNING...", 13, 0

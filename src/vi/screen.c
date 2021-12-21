@@ -91,6 +91,19 @@ screen_redraw ()
 }
 
 void
+print_status (char * msg)
+{
+    disable_cursor ();
+    term_put (TERM_SET_CURSOR);
+    term_put (0);
+    term_put (23);
+    term_puts (msg);
+    term_put (TERM_CLEAR_TO_EOL);
+    set_cursor ();
+    enable_cursor ();
+}
+
+void
 screen_init ()
 {
     ystart = 0;

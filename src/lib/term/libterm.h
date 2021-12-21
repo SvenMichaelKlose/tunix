@@ -26,6 +26,7 @@
 ///////////////
 
 #define TTY_ENTER           13
+#define TTY_ESCAPE          0xf4
 #define TTY_CURSOR_UP       5
 #define TTY_CURSOR_DOWN     20
 #define TTY_CURSOR_LEFT     19
@@ -33,7 +34,7 @@
 #define TTY_BACKSPACE       8
 
 extern void term_init (void);
-extern void term_put (char);
+extern void __fastcall__ term_put (char);
 extern void __fastcall__ term_puts (char *);
 extern char term_get (void);
 

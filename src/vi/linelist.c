@@ -8,35 +8,17 @@
 #include "linelist.h"
 
 
-line        * first_line = NULL;
-line        * current_line = NULL;
-int         linenr = 0;
-unsigned    num_lines = 0;
-
-
-void
-our_error (char * txt)
-{
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (23);
-    term_puts (txt);
-    while (1);
-}
+line      * first_line;
+line      * current_line;
+int       linenr;
+unsigned  num_lines;
 
 
 line *
 line_alloc ()
 {
-    line  * ls = malloc (sizeof (line) + strlen (linebuf));
-
-    if (!ls)
-        our_error ("Out of memory.");
-
+    line * ls = malloc (sizeof (line));
     ls->prev = ls->next = NULL;
-
-    linebuf[linebuf_length] = 0;
-    strcpy (&ls->data, linebuf);
 
     return ls;
 }
@@ -70,9 +52,6 @@ linelist_delete ()
 {
     line  * next;
 
-    if (!current_line)
-        our_error ("Can't delete nothing.");
-
     num_lines--;
 
     next = current_line->next;
@@ -101,14 +80,35 @@ linelist_get (unsigned i)
 }
 
 void
+copy_linebuf_to_current_line ()
+{
+    char * data;
+
+    free (current_line->data);
+    data = malloc (linebuf_length);
+    current_line->data = data;
+    memcpy (linebuf, data, linebuf_length);
+}
+
+void
+copy_currnet_line_to_linebuf ()
+{
+    linebuf_length = strlen (current_line->data);
+    memcpy (linebuf, current_line->data, linebuf_length);
+}
+
+void
 linelist_goto (unsigned n)
 {
+    copy_linebuf_to_current_line ();
     current_line = linelist_get (n);
-    if (!current_line) {
-        term_puts ("No line at #.");
-        while (1);
-    }
+    copy_currnet_line_to_linebuf ();
+}
 
-    linebuf_length = strlen (&current_line->data);
-    strcpy (linebuf, &current_line->data);
+void
+linelist_init ()
+{
+    first_line = current_line = line_alloc ();
+    linenr = 0;
+    num_lines = 1;
 }

@@ -80,7 +80,7 @@ lineedit (char key)
     line_insert_char (key);
 
 done:
-    line_redraw ();
+    linebuf_redraw ();
 }
 
 void

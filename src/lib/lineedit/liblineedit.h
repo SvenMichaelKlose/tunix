@@ -15,6 +15,6 @@ extern void lineedit_init  (void);
 
 
 // To be provided externally.
-extern void line_redraw        (void);
+extern void linebuf_redraw (void);
 
 #endif // #ifndef LIBLINEEDIT_H

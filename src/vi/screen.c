@@ -43,11 +43,14 @@ print_linebuf ()
     term_puts (linebuf);
 }
 
+// Called by liblineedit.
 void
-line_redraw ()
+linebuf_redraw ()
 {
     disable_cursor ();
-    set_cursor ();
+    term_put (TERM_SET_CURSOR);
+    term_put (0);
+    term_put (linenr - ystart);
     term_put (TERM_CARRIAGE_RETURN);
 
     print_linebuf ();
@@ -58,27 +61,30 @@ line_redraw ()
 }
 
 void
+line_redraw (line * l)
+{
+    char  * data = l->data;
+    char    len  = l->length;
+
+    while (l--)
+        term_put (*data++);
+}
+
+void
 screen_redraw ()
 {
-    line *    ls;
-    unsigned  nr;
-    unsigned  y;
+    line      * l = linelist_get (ystart + linenr);
+    unsigned    y;
 
     disable_cursor ();
-
     term_put (TERM_CLEAR_SCREEN);
 
     for (y = 0; y < 24; y++) {
-        nr = ystart + y;
-
-        if (nr == linenr)
-            print_linebuf ();
-        else {
-            if (ls = linelist_get (nr))
-                term_puts (&ls->data);
-            else
-                term_put ('~');
-        }
+        if (l) {
+            line_redraw (l);
+            l = l->next;
+        } else
+            term_put ('~');
 
         if (y < 23) {
             term_put (TERM_CARRIAGE_RETURN);

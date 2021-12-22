@@ -11,6 +11,13 @@
 
 
 void
+cmd_open_above ()
+{
+    linelist_insert_before ();
+    move_line_start ();
+}
+
+void
 cmd_open_below ()
 {
     linelist_insert_after ();

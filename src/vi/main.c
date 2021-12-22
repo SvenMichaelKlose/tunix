@@ -57,6 +57,11 @@ command_mode ()
                 edit_mode ();
                 continue;
 
+            case 'O':
+                cmd_open_above ();
+                edit_mode ();
+                continue;
+
             case 'o':
                 cmd_open_below ();
                 edit_mode ();

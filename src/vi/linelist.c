@@ -35,6 +35,8 @@ linelist_insert_before ()
     new->prev = current_line->prev;
     new->next = current_line;
     current_line->prev = new;
+    if (current_line == first_line)
+        first_line = new;
 }
 
 void

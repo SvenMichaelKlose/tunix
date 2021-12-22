@@ -3,6 +3,8 @@
 
 extern void move_down        (void);
 extern void move_up          (void);
+extern void move_left        (void);
+extern void move_right       (void);
 extern void move_line_start  (void);
 
 #endif // #ifndef MOTION_H

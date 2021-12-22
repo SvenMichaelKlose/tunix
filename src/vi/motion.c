@@ -24,6 +24,20 @@ move_up ()
 }
 
 void
+move_left ()
+{
+    if (xpos)
+        xpos--;
+}
+
+void
+move_right ()
+{
+    if (xpos < linebuf_length)
+        xpos++;
+}
+
+void
 move_line_start ()
 {
     xpos = 0;

@@ -6,6 +6,7 @@
 
 #include "commands.h"
 #include "linelist.h"
+#include "motion.h"
 #include "screen.h"
 
 char
@@ -54,7 +55,25 @@ command_mode ()
             case 'i':
                 edit_mode ();
                 continue;
+
+            case 'h':
+                move_left ();
+                break;
+
+            case 'k':
+                move_up ();
+                break;
+
+            case 'j':
+                move_down ();
+                break;
+
+            case 'l':
+                move_right ();
+                break;
         }
+
+        screen_redraw ();
     }
 }
 

@@ -90,7 +90,7 @@ linelist_buf_to_line ()
     data = malloc (linebuf_length);
     current_line->length = linebuf_length;
     current_line->data = data;
-    memcpy (linebuf, data, linebuf_length);
+    memcpy (data, linebuf, linebuf_length);
 }
 
 void

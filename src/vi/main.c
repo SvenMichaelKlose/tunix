@@ -8,6 +8,16 @@
 #include "linelist.h"
 #include "screen.h"
 
+char
+wait_for_key ()
+{
+    char key;
+
+    while (!(key = term_get ()));
+
+    return key;
+}
+
 void
 edit_mode ()
 {
@@ -17,14 +27,12 @@ edit_mode ()
     print_status ("-- INSERT --");
 
     while (1) {
-        while (!(key = term_get ()));
-
-        switch (key) {
+        switch (key = wait_for_key ()) {
             case TTY_ENTER:
                 linelist_buf_to_line ();
                 cmd_open_below ();
-                screen_redraw ();
                 linelist_line_to_buf ();
+                screen_redraw ();
                 continue;
 
             case TTY_ESCAPE:
@@ -41,12 +49,8 @@ edit_mode ()
 void
 command_mode ()
 {
-    char key;
-
     while (1) {
-        while (!(key = term_get ()));
-
-        switch (key) {
+        switch (wait_for_key ()) {
             case 'i':
                 edit_mode ();
                 continue;

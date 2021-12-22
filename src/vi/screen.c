@@ -8,17 +8,25 @@
 #include "linelist.h"
 #include "screen.h"
 
+char columns = 40;
+char rows = 24;
 
 unsigned ystart;
 char * status = "";
 
 
 void
-set_cursor (void)
+gotoxy (char x, char y)
 {
     term_put (TERM_SET_CURSOR);
-    term_put (xpos);
-    term_put (linenr - ystart);
+    term_put (x);
+    term_put (y);
+}
+
+void
+set_cursor (void)
+{
+    gotoxy (xpos, linenr - ystart);
 }
 
 void
@@ -49,9 +57,7 @@ void
 linebuf_redraw ()
 {
     disable_cursor ();
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (linenr - ystart);
+    gotoxy (0, linenr - ystart);
     term_put (TERM_CARRIAGE_RETURN);
 
     print_linebuf ();
@@ -67,6 +73,9 @@ line_redraw (line * l)
     char  * data = l->data;
     char    len  = l->length;
 
+    if (len > columns)
+        len = columns;
+
     while (len--)
         term_put (*data++);
 }
@@ -75,9 +84,7 @@ void
 print_status ()
 {
     disable_cursor ();
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (23);
+    gotoxy (0, rows - 1);
     term_puts (status);
     term_put (TERM_CLEAR_TO_EOL);
     set_cursor ();
@@ -98,16 +105,19 @@ screen_redraw ()
     unsigned    y;
 
     disable_cursor ();
-    term_put (TERM_CLEAR_SCREEN);
 
-    for (y = 0; y < 24; y++) {
+    for (y = 0; y < rows - 1; y++) {
+        gotoxy (0, y);
+
         if (l) {
             line_redraw (l);
             l = l->next;
         } else
             term_put ('~');
 
-        if (y < 23) {
+        term_put (TERM_CLEAR_TO_EOL);
+
+        if (y < rows - 1) {
             term_put (TERM_CARRIAGE_RETURN);
             term_put (TERM_LINE_FEED);
         }

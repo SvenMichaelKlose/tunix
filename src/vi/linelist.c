@@ -18,7 +18,9 @@ line *
 line_alloc ()
 {
     line * ls = malloc (sizeof (line));
-    ls->prev = ls->next = NULL;
+
+    ls->prev = ls->next = ls->data = NULL;
+    ls->length = 0;
 
     return ls;
 }
@@ -71,7 +73,7 @@ linelist_delete ()
 line *
 linelist_get (unsigned i)
 {
-    line  * l = first_line;
+    line * l = first_line;
 
     while (l && i--)
         l = l->next;
@@ -80,29 +82,29 @@ linelist_get (unsigned i)
 }
 
 void
-copy_linebuf_to_current_line ()
+linelist_buf_to_line ()
 {
     char * data;
 
     free (current_line->data);
     data = malloc (linebuf_length);
+    current_line->length = linebuf_length;
     current_line->data = data;
     memcpy (linebuf, data, linebuf_length);
 }
 
 void
-copy_currnet_line_to_linebuf ()
+linelist_goto (unsigned n)
 {
-    linebuf_length = strlen (current_line->data);
+    current_line = linelist_get (n);
+    linebuf_length = current_line->length;
     memcpy (linebuf, current_line->data, linebuf_length);
 }
 
 void
-linelist_goto (unsigned n)
+linelist_line_to_buf ()
 {
-    copy_linebuf_to_current_line ();
-    current_line = linelist_get (n);
-    copy_currnet_line_to_linebuf ();
+    linelist_goto (linenr);
 }
 
 void

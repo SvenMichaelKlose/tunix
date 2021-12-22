@@ -13,6 +13,7 @@ edit_mode ()
 {
     char key;
 
+    linelist_line_to_buf ();
     print_status ("-- INSERT --");
 
     while (1) {
@@ -20,10 +21,14 @@ edit_mode ()
 
         switch (key) {
             case TTY_ENTER:
+                linelist_buf_to_line ();
                 cmd_open_below ();
+                screen_redraw ();
+                linelist_line_to_buf ();
                 continue;
 
             case TTY_ESCAPE:
+                linelist_buf_to_line ();
                 print_status ("");
                 return;
 
@@ -54,8 +59,8 @@ int
 main ()
 {
     term_init ();
-    screen_init ();
     linelist_init ();
+    screen_init ();
     screen_redraw ();
     command_mode ();
 }

@@ -17,13 +17,16 @@ extern unsigned num_lines;
 typedef struct _line line;
 
 typedef struct _line {
-    line   * prev;
-    line   * next;
-    char   * data;
+    line      * prev;
+    line      * next;
+    unsigned  length;
+    char      * data;
 } line;
 
 extern void    linelist_init           (void);
 extern line *  linelist_get            (unsigned);
+extern void    linelist_buf_to_line    (void);
+extern void    linelist_line_to_buf    (void);
 extern void    linelist_goto           (unsigned);
 extern void    linelist_append         (void);
 extern void    linelist_delete         (void);

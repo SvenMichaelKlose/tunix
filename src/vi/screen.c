@@ -66,7 +66,7 @@ line_redraw (line * l)
     char  * data = l->data;
     char    len  = l->length;
 
-    while (l--)
+    while (len--)
         term_put (*data++);
 }
 

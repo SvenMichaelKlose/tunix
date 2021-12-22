@@ -26,6 +26,7 @@ edit_mode ()
 
     linelist_line_to_buf ();
     screen_set_status ("-- INSERT --");
+    screen_redraw ();
 
     while (1) {
         switch (key = wait_for_key ()) {
@@ -53,6 +54,11 @@ command_mode ()
     while (1) {
         switch (wait_for_key ()) {
             case 'i':
+                edit_mode ();
+                continue;
+
+            case 'o':
+                cmd_open_below ();
                 edit_mode ();
                 continue;
 

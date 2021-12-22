@@ -112,6 +112,22 @@ linelist_line_to_buf ()
 }
 
 void
+linelist_split ()
+{
+    line *   new;
+
+    if (xpos == current_line->length)
+        return;
+
+    linelist_insert_after ();
+    new = current_line->next;
+    new->length = current_line->length - xpos;
+    new->data = malloc (new->length);
+    memcpy (new->data, &current_line->data[xpos], new->length);
+    current_line->length = xpos;
+}
+
+void
 linelist_init ()
 {
     first_line = current_line = line_alloc ();

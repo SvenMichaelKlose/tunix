@@ -32,7 +32,12 @@ edit_mode ()
         switch (key = wait_for_key ()) {
             case TTY_ENTER:
                 linelist_buf_to_line ();
-                cmd_open_below ();
+                if (xpos == linebuf_length)
+                    linelist_insert_after ();
+                else
+                    linelist_split ();
+                move_down ();
+                move_line_start ();
                 linelist_line_to_buf ();
                 screen_redraw ();
                 continue;

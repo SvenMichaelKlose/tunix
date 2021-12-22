@@ -31,14 +31,7 @@ edit_mode ()
     while (1) {
         switch (key = wait_for_key ()) {
             case TTY_ENTER:
-                linelist_buf_to_line ();
-                if (xpos == linebuf_length)
-                    linelist_insert_after ();
-                else
-                    linelist_split ();
-                move_down ();
-                move_line_start ();
-                linelist_line_to_buf ();
+                cmd_enter ();
                 screen_redraw ();
                 continue;
 

@@ -22,3 +22,9 @@ move_up ()
     if (linenr)
         linenr--;
 }
+
+void
+move_line_start ()
+{
+    xpos = 0;
+}

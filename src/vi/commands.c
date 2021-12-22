@@ -15,4 +15,5 @@ cmd_open_below ()
 {
     linelist_insert_after ();
     move_down ();
+    move_line_start ();
 }

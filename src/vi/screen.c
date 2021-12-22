@@ -10,6 +10,7 @@
 
 
 unsigned ystart;
+char * status = "";
 
 
 void
@@ -71,9 +72,29 @@ line_redraw (line * l)
 }
 
 void
+print_status ()
+{
+    disable_cursor ();
+    term_put (TERM_SET_CURSOR);
+    term_put (0);
+    term_put (23);
+    term_puts (status);
+    term_put (TERM_CLEAR_TO_EOL);
+    set_cursor ();
+    enable_cursor ();
+}
+
+void
+screen_set_status (char * msg)
+{
+    status = msg;
+    print_status ();
+}
+
+void
 screen_redraw ()
 {
-    line      * l = linelist_get (ystart + linenr);
+    line      * l = linelist_get (0); //ystart + linenr);
     unsigned    y;
 
     disable_cursor ();
@@ -92,19 +113,7 @@ screen_redraw ()
         }
     }
 
-    set_cursor ();
-    enable_cursor ();
-}
-
-void
-print_status (char * msg)
-{
-    disable_cursor ();
-    term_put (TERM_SET_CURSOR);
-    term_put (0);
-    term_put (23);
-    term_puts (msg);
-    term_put (TERM_CLEAR_TO_EOL);
+    print_status ();
     set_cursor ();
     enable_cursor ();
 }

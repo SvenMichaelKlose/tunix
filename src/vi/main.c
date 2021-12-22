@@ -24,7 +24,7 @@ edit_mode ()
     char key;
 
     linelist_line_to_buf ();
-    print_status ("-- INSERT --");
+    screen_set_status ("-- INSERT --");
 
     while (1) {
         switch (key = wait_for_key ()) {
@@ -37,7 +37,7 @@ edit_mode ()
 
             case TTY_ESCAPE:
                 linelist_buf_to_line ();
-                print_status ("");
+                screen_set_status ("");
                 return;
 
             default:

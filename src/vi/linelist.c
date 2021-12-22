@@ -17,12 +17,12 @@ unsigned  num_lines;
 line *
 line_alloc ()
 {
-    line * ls = malloc (sizeof (line));
+    line * l = malloc (sizeof (line));
 
-    ls->prev = ls->next = ls->data = NULL;
-    ls->length = 0;
+    l->prev = l->next = l->data = NULL;
+    l->length = 0;
 
-    return ls;
+    return l;
 }
 
 void
@@ -52,11 +52,9 @@ linelist_insert_after ()
 void
 linelist_delete ()
 {
-    line  * next;
+    line  * next = current_line->next;
 
     num_lines--;
-
-    next = current_line->next;
 
     if (first_line == current_line)
         first_line = next;
@@ -87,9 +85,12 @@ linelist_buf_to_line ()
     char * data;
 
     free (current_line->data);
+
     data = malloc (linebuf_length);
+
     current_line->length = linebuf_length;
     current_line->data = data;
+
     memcpy (data, linebuf, linebuf_length);
 }
 
@@ -98,6 +99,7 @@ linelist_goto (unsigned n)
 {
     current_line = linelist_get (n);
     linebuf_length = current_line->length;
+
     memcpy (linebuf, current_line->data, linebuf_length);
 }
 

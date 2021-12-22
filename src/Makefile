@@ -24,6 +24,7 @@ all:
 clean:
 	$(MAKE) -C lib/blit clean
 	$(MAKE) -C lib/zp clean
+	$(MAKE) -C lib/kernal clean
 	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem clean
 	$(MAKE) -C lib/ultifs clean

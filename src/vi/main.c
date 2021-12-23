@@ -71,7 +71,7 @@ void
 command_mode ()
 {
     while (1) {
-        linelist_get (linenr);
+        linelist_goto (linenr);
 
         switch (wait_for_key ()) {
             case 'i':

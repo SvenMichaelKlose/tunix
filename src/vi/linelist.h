@@ -19,8 +19,8 @@ typedef struct _line line;
 typedef struct _line {
     line      * prev;
     line      * next;
-    unsigned  length;
     char      * data;
+    unsigned  length;
 } line;
 
 extern line * current_line;

@@ -19,7 +19,8 @@ line_alloc ()
 {
     line * l = malloc (sizeof (line));
 
-    l->prev = l->next = l->data = NULL;
+    l->prev = l->next = NULL;
+    l->data = NULL;
     l->length = 0;
 
     return l;
@@ -58,8 +59,8 @@ linelist_delete ()
 
     num_lines--;
 
-    if (first_line == current_line)
-        first_line = next;
+    if (current_line == first_line)
+        current_line = next;
     else
         current_line->prev->next = next;
 
@@ -86,7 +87,8 @@ linelist_buf_to_line ()
 {
     char * data;
 
-    free (current_line->data);
+    if (current_line->data);
+        free (current_line->data);
 
     data = malloc (linebuf_length);
 
@@ -96,6 +98,7 @@ linelist_buf_to_line ()
     memcpy (data, linebuf, linebuf_length);
 }
 
+void
 linelist_goto (unsigned n)
 {
     current_line = linelist_get (n);
@@ -105,7 +108,7 @@ void
 linelist_line_to_buf ()
 {
     linelist_goto (linenr);
-    memcpy (linebuf, current_line->data, linebuf_length);
+    memcpy (linebuf, current_line->data, current_line->length);
 }
 
 void

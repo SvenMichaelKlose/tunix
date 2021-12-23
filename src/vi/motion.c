@@ -14,13 +14,15 @@ move_down ()
     linenr++;
     if (linenr >= num_lines)
         linenr = num_lines - 1;
+
+    linelist_goto (linenr);
 }
 
 void
 move_up ()
 {
     if (linenr)
-        linenr--;
+        linelist_goto (--linenr);
 }
 
 void

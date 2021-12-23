@@ -76,17 +76,17 @@ command_mode ()
         switch (wait_for_key ()) {
             case 'i':
                 edit_mode ();
-                continue;
+                break;
 
             case 'O':
                 cmd_open_above ();
                 edit_mode ();
-                continue;
+                break;
 
             case 'o':
                 cmd_open_below ();
                 edit_mode ();
-                continue;
+                break;
 
             case 'h':
                 move_left ();

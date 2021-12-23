@@ -23,6 +23,9 @@ typedef struct _line {
     char      * data;
 } line;
 
+extern line * current_line;
+
+
 extern void                 linelist_init           (void);
 extern line *               linelist_get            (unsigned);
 extern void                 linelist_buf_to_line    (void);

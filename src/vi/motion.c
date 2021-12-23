@@ -33,7 +33,7 @@ move_left ()
 void
 move_right ()
 {
-    if (xpos < linebuf_length)
+    if (xpos < current_line->length)
         xpos++;
 }
 

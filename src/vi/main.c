@@ -19,37 +19,60 @@ wait_for_key ()
     return key;
 }
 
-void
-edit_mode ()
+char
+lineedit_mode ()
 {
     char key;
 
     linelist_line_to_buf ();
-    screen_set_status ("-- INSERT --");
-    screen_redraw ();
 
     while (1) {
         switch (key = wait_for_key ()) {
             case TTY_ENTER:
-                cmd_enter ();
-                screen_redraw ();
-                continue;
-
             case TTY_ESCAPE:
-                linelist_buf_to_line ();
-                screen_set_status ("");
-                return;
+                goto done;
 
             default:
                 lineedit (key);
         }
     }
+
+done:
+    linelist_buf_to_line ();
+
+    return key;
+}
+
+void
+edit_mode ()
+{
+    char key;
+
+    screen_set_status ("-- INSERT --");
+
+    while (1) {
+        screen_redraw ();
+
+        switch (key = lineedit_mode ()) {
+            case TTY_ENTER:
+                cmd_enter ();
+                continue;
+
+            case TTY_ESCAPE:
+                goto done;
+        }
+    }
+
+done:
+    screen_set_status ("");
 }
 
 void
 command_mode ()
 {
     while (1) {
+        linelist_get (linenr);
+
         switch (wait_for_key ()) {
             case 'i':
                 edit_mode ();

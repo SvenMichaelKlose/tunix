@@ -67,6 +67,7 @@ linelist_delete ()
     if (next)
         next->prev = current_line->prev;
 
+    free (current_line->data);
     free (current_line);
     current_line = next;
 }
@@ -87,14 +88,10 @@ linelist_buf_to_line ()
 {
     char * data;
 
-    if (current_line->data);
-        free (current_line->data);
-
+    free (current_line->data);
     data = malloc (linebuf_length);
-
     current_line->length = linebuf_length;
     current_line->data = data;
-
     memcpy (data, linebuf, linebuf_length);
 }
 
@@ -114,7 +111,8 @@ linelist_line_to_buf ()
 void
 linelist_split ()
 {
-    line *   new;
+    line *  new;
+    char *  upper_data;
 
     if (xpos == current_line->length)
         return;
@@ -124,7 +122,18 @@ linelist_split ()
     new->length = current_line->length - xpos;
     new->data = malloc (new->length);
     memcpy (new->data, &current_line->data[xpos], new->length);
-    current_line->length = xpos;
+
+    if (xpos) {
+        upper_data = malloc (xpos);
+        memcpy (upper_data, current_line->data, xpos);
+        free (current_line->data);
+        current_line->data = upper_data;
+        current_line->length = xpos;
+    } else {
+        free (current_line->data);
+        current_line->data = NULL;
+        current_line->length = 0;
+    }
 }
 
 void

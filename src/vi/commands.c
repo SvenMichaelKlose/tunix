@@ -28,12 +28,10 @@ cmd_open_below ()
 void
 cmd_enter ()
 {
-    linelist_buf_to_line ();
-    if (xpos == linebuf_length)
+    if (xpos == current_line->length)
         linelist_insert_after ();
     else
         linelist_split ();
     move_down ();
     move_line_start ();
-    linelist_line_to_buf ();
 }

@@ -96,19 +96,16 @@ linelist_buf_to_line ()
     memcpy (data, linebuf, linebuf_length);
 }
 
-void
 linelist_goto (unsigned n)
 {
     current_line = linelist_get (n);
-    linebuf_length = current_line->length;
-
-    memcpy (linebuf, current_line->data, linebuf_length);
 }
 
 void
 linelist_line_to_buf ()
 {
     linelist_goto (linenr);
+    memcpy (linebuf, current_line->data, linebuf_length);
 }
 
 void

@@ -104,8 +104,8 @@ linelist_goto (unsigned n)
 void
 linelist_line_to_buf ()
 {
-    linelist_goto (linenr);
     memcpy (linebuf, current_line->data, current_line->length);
+    linebuf_length = current_line->length;
 }
 
 void

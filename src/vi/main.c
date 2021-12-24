@@ -90,18 +90,22 @@ command_mode ()
                 break;
 
             case 'h':
+            case TTY_CURSOR_LEFT:
                 move_left ();
                 break;
 
             case 'k':
+            case TTY_CURSOR_UP:
                 move_up ();
                 break;
 
             case 'j':
+            case TTY_CURSOR_DOWN:
                 move_down ();
                 break;
 
             case 'l':
+            case TTY_CURSOR_RIGHT:
                 move_right ();
                 break;
         }

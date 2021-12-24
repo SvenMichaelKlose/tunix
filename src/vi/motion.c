@@ -9,19 +9,11 @@
 #include "motion.h"
 
 void
-update_current_line (void)
-{
-    linelist_goto (linenr);
-}
-
-void
 move_down ()
 {
     linenr++;
     if (linenr >= num_lines)
         linenr = num_lines - 1;
-
-    update_current_line ();
 }
 
 void
@@ -29,8 +21,6 @@ move_up ()
 {
     if (linenr)
         --linenr;
-
-    update_current_line ();
 }
 
 void

@@ -24,6 +24,7 @@ lineedit_mode ()
 {
     char key;
 
+    linelist_goto (linenr);
     linelist_line_to_buf ();
 
     while (1) {
@@ -108,7 +109,6 @@ command_mode ()
         screen_redraw ();
     }
 }
-
 
 int
 main ()

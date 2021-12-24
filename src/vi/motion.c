@@ -9,11 +9,14 @@
 #include "motion.h"
 
 void
-move_down ()
+adjust_xpos_to_line_length ()
 {
-    linenr++;
-    if (linenr >= num_lines)
-        linenr = num_lines - 1;
+    linelist_goto (linenr);
+
+    if (xpos > current_line->length)
+        xpos = current_line->length ?
+            current_line->length - 1 :
+            0;
 }
 
 void
@@ -21,6 +24,18 @@ move_up ()
 {
     if (linenr)
         --linenr;
+
+    adjust_xpos_to_line_length ();
+}
+
+void
+move_down ()
+{
+    linenr++;
+    if (linenr >= num_lines)
+        linenr = num_lines - 1;
+
+    adjust_xpos_to_line_length ();
 }
 
 void

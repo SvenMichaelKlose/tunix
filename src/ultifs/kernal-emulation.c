@@ -18,6 +18,8 @@
 #define _FNAME()    (*(char**) 0xbb)    // File name pointer
 
 #define STATUS      (*(char*) 0x90)     // Serial status byte
+
+/* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
 #define STATUS_END_OF_FILE      0x40
 #define STATUS_CHECKSUM_ERROR   0x20
@@ -27,11 +29,13 @@
 #define STATUS_TIMEOUT_READ     0x02
 #define STATUS_TIMEOUT_WRITE    0x01
 
+/* KERNAL error codes */
 #define OSERR_FILE_NOT_OPEN         3
 #define OSERR_DEVICE_NOT_PRESENT    5
 #define OSERR_FILE_NOT_IN           6
 #define OSERR_FILE_NOT_OUT          7
 
+/* Device error codes */
 #define ERR_BYTE_DECODING       24
 #define ERR_WRITE               25
 #define ERR_WRITE_PROTECT_ON    26
@@ -49,12 +53,19 @@
 #define ERR_NO_CHANNEL          70
 #define ERR_DISK_FULL           72
 
-#define FLAG_C  1
-
 #define accu        (*(char*) 0x100)
 #define xreg        (*(char*) 0x101)
 #define yreg        (*(char*) 0x102)
 #define flags       (*(char*) 0x103)
+
+#define FLAG_C          1
+#define FLAG_Z          2
+#define FLAG_I          4
+#define FLAG_D          8
+#define FLAG_B          16
+#define FLAG_UNUSED     32
+#define FLAG_V          64
+#define FLAG_N          128
 
 extern void ultifs_kopen (void);
 extern void ultifs_kclose (void);
@@ -187,7 +198,7 @@ strnlen (char * s, size_t maxlen)
 void
 make_directory_list (channel * ch)
 {
-    unsigned addr = 0x1201;
+    unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
     basic_dirent * b = malloc (sizeof (basic_dirent));
 
@@ -196,7 +207,7 @@ make_directory_list (channel * ch)
     while (!ultifs_readdir (dirent)) {
         memset (b, ' ', sizeof (basic_dirent));
 
-        b->next = addr + sizeof (basic_dirent);
+        b->next = line_addr + sizeof (basic_dirent);
         b->linenr = dirent->size;
 
         b->name[0] = b->name[18] = '"';
@@ -209,12 +220,14 @@ make_directory_list (channel * ch)
 
         add_to_buf (ch, b, sizeof (basic_dirent));
 
-        addr += sizeof (basic_dirent);
+        line_addr += sizeof (basic_dirent);
     }
 
     ultifs_closedir ();
     free (dirent);
     free (b);
+
+    flags = 0;
 }
 
 void

@@ -3,6 +3,7 @@
 ; Banks in the secondary wedge.
 
 .export _init_primary_wedge
+.exportzp unmap
 
 .import uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall
 
@@ -17,8 +18,10 @@ unmap:  .res 2
 
 .data
 
-secondary_vectors:
-    .word uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall, 0
+secondary_vectors_l:
+    .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn, <ubasin, <ubsout, <uclall, 0
+secondary_vectors_h:
+    .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn, >ubasin, >ubsout, >uclall, 0
 
 
 .code
@@ -57,8 +60,8 @@ l1: lda map_ultimem,y
     ; Create trampolines.
     ldx #0
     ldy #map_size
-l2: lda secondary_vectors,x
-    ora secondary_vectors+1,x
+l2: lda secondary_vectors_l,x
+    ora secondary_vectors_h,x
     beq done
 
     ; JSR map_ultimem
@@ -69,21 +72,16 @@ l2: lda secondary_vectors,x
     lda #>wedge_start
     jsr out
 
-    ; JSR <secondary wedge>
+    ; JMP <secondary wedge>
     lda #$4c
     jsr out
-    lda secondary_vectors,x
+    lda secondary_vectors_l,x
     jsr out
-    lda secondary_vectors,x
+    lda secondary_vectors_h,x
     jsr out
 
-    ; Set real vector to primary wedge.
-    lda secondary_vectors,x
+    ; TODO: Set vector in lowmem.
     inx
-    jsr outv
-    lda secondary_vectors,x
-    inx
-    jsr outv
     jmp l2
 
 done:

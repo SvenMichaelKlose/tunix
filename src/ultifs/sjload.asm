@@ -14,8 +14,6 @@
 ; - Removed unused routines to reduce program size (few bytes) 
 ; - Added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
 
-
-
 ;START_ADR  = $B000
 ;START_ADR  = $0400
 
@@ -194,7 +192,6 @@ lEE1C:
   BPL l6E2B
   SEC
   ROR $A3
-_relo0361 = . +1
   JSR lfc41                             ;NEW BYTE OUT
   LSR $94
   LSR $A3
@@ -270,7 +267,6 @@ l6E89:
   ORA #$02
   PHP
   PHA
-_relo0350 = . +1
   JSR lF96E
   PLA
   PLP
@@ -381,7 +377,6 @@ l7be5:
   LDA $911F
   STX $912C
   STA $9C
-_relo0351 = . +1
   JSR lEC4E                             ;BYTE AUS 2 NIBBLES
 
   STA $A4
@@ -406,7 +401,6 @@ _relo0351 = . +1
   BNE lEEF2
 lEEED:
   PHA
-_relo0352 = . +1
   JSR NEW_IECOUT
   PLA
 lEEF2:
@@ -423,7 +417,6 @@ lfc41:                                  ;NEW BYTE OUT
   LDA $A3
   CMP #$A0
   BCS lfc59
-_relo0353 = . +1
   JMP OLD_IECOUT
   ;JMP $EE49                             ;ORIG BYTE OUT
 
@@ -449,14 +442,12 @@ lfc59:                                  ;JIFFY BYTE OUT
   LSR
   LSR
   TAX
-_relo0354 = . +1
   LDA lFCCE,X
   PHA
   TXA
   LSR
   LSR
   TAX
-_relo0355 = . +1
   LDA lFCCE,X
   STA $B3
   LDA $95
@@ -486,12 +477,10 @@ l7C76:
   ORA $9C
   ORA $9C
   STA $912C
-_relo0356 = . +1
   LDA lFBBA,X
   ORA $9C
   NOP
   STA $912C
-_relo0357 = . +1
   LDA lF39E,X
   ORA $9C
   NOP
@@ -543,7 +532,6 @@ lEEF6:
   .byte $2c
 JIF_UNLISTEN
   LDA #$3F
-_relo0358 = . +1
   JSR lEE1C                             ;PART OF LISTEN
   JSR $EEC5
   TXA
@@ -562,7 +550,6 @@ lEF0F:
 ;--------------JIFFY TALK SA
 .proc JIF_TALKSA
   STA $95
-_relo0359 = . +1
   JSR lEE40
   jmp $eed3
 .endproc
@@ -572,7 +559,6 @@ _relo0359 = . +1
 ;--------------JIFFY LISTEN SA
 .proc JIF_LISTENSA
   STA $95
-_relo0360 = . +1
   JSR lEE40
   jmp $eec5
 .endproc
@@ -646,9 +632,7 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 #endif
 
   lda #$f0                              ; channel
-_relo0080 = . +1
   jsr DISK_LISTEN
-_relo0081 = . +1
   jsr IECNAMOUT
   bcc .00a
 ;MYLO_ERR2
@@ -663,10 +647,8 @@ _relo0081 = . +1
 
 .00b
   lda #$60
-_relo0082 = . +1
   jsr DISK_TALK
 
-_relo0084 = . +1
   jsr IECIN                             ; load address lo
   sta LOADEND
 
@@ -677,7 +659,6 @@ _relo0084 = . +1
   jmp $f787
 
 .00c  ;@@@
-_relo0300 = . +1
   jsr IECIN                             ; load address hi
   sta LOADEND +1
 
@@ -699,7 +680,6 @@ _relo0300 = . +1
 .00                                     ; SA=0: LOAD PROGRAM AT $c3
 #if LOADPARAMS == 1 
 
-_relo0085 = . +1
   jsr FRMWORD2                          ; GET WORD VALUE
 #endif
 
@@ -720,7 +700,6 @@ _relo0085 = . +1
 
 .01
 #if PRINTADDRESS == 1
-_relo0086 = . +1
   jsr PRINT_ATADR
 #else
 #if PRINTMESSAGE == 1
@@ -739,22 +718,18 @@ _relo0086 = . +1
   ;STORE FIRST TWO BYTES
   ldy #0
   pla
-_relo0097 = . +1
   jsr STOREBYTE
   pla
-_relo0098 = . +1
   jsr STOREBYTE
 
 .3
 #endif
 .endproc
 
-;_relo0087 = . +1
 ;  jsr MY_IECIN
 ;  bcc MYLO_6
 
 ;MYLO_ERR
-;_relo0302 = . +1
 ;  jsr DISK_CLOSE_LO
 ;  jmp $f787
 
@@ -768,22 +743,18 @@ _relo0098 = . +1
 .err2
   bcs .err
 
-;_relo0090 = . +1
 ;  jsr DISK_CLOSE_LO
 
 .MYLO_E
 #if PRINTADDRESS == 1
-_relo0091 = . +1
   jsr PRINT_TOADR
 #endif
 
-_relo0090 = . +1
   jsr DISK_CLOSE_LO
 
   ;PRINT DISKERR ON ERROR
  ; lda SY_STATUS
  ; pha                                   ;SAVE IECSTAT FOR VERIFY!!!
-_relo0412 = . +1
 ;  jsr PRINT_DISK_ERR
 ;  pla
 ;  sta SY_STATUS
@@ -796,10 +767,8 @@ _relo0412 = . +1
 
 ;--------------JIFFY FASTLOAD INIT
 .proc .FB1F
-_relo0087 = . +1
   JSR UNTALK                            ;UNTALK
   lda #$61
-_relo0088 = . +1
   jsr DISK_TALK
 ;--------------JIFFY FASTLOAD START
   SEI
@@ -881,9 +850,7 @@ _relo0088 = . +1
   ROL
   STA $C0
 
-;_relo0430 = . +1
 ;  JSR lEC4E                            ;Byte zusammenbauen aus 2 Nibble
-;_relo0089 = . +1
 ;  jsr STOREBYTE
 ;  CLV
 ;  BVC .FB6E
@@ -892,7 +859,6 @@ _relo0088 = . +1
   pha
   lda #<(.FB6E -1)
   pha
-_relo0430 = . +1
   JSR lEC4E                             ;Byte zusammenbauen aus 2 Nibble
 .endproc
 
@@ -938,14 +904,12 @@ _relo0430 = . +1
 .proc MY_IECSAVE
 
 #if SAVEPARAMS == 1 
-_relo0420 = . +1
   jsr FRMWORD2                          ; GET WORD VALUE
   bcs MYSA_0
 
   sty LOADSTART
   sta LOADSTART +1
 
-_relo0421 = . +1
   jsr FRMWORD2                          ; GET WORD VALUE
   bcs MYSA_0
 
@@ -960,23 +924,18 @@ _relo0421 = . +1
 
 MYSA_0
   lda #$f1                              ; channel
-_relo0400 = . +1
   jsr DISK_LISTEN
-_relo0401 = . +1
   jsr IECNAMOUT
   bcs MYSA_ERR
 
   lda #$61
-_relo0402 = . +1
   jsr DISK_LISTEN
 
   jsr $fbd2                             ; $C1/$C2 --> $ac/$ad
 
   lda LOADSTART
-_relo0403 = . +1
   jsr IECOUT
   lda LOADSTART +1
-_relo0404 = . +1
   jsr IECOUT
 
 #if PRINTADDRESS == 1
@@ -993,15 +952,12 @@ MYSA_00
   jsr $fd11                             ;END ADDRESS?
   bcs MYSA_E0                           ;YES -->
   lda (LOADSTART),y
-_relo0405 = . +1
   jsr IECOUT
 
   jsr CHKSTOP
   bne MYSA_02
 
-_relo0406 = . +1
   jsr UNLISTEN
-_relo0407 = . +1
   jsr DISK_CLOSE_SA
   jmp $f6ce
 
@@ -1010,18 +966,14 @@ MYSA_02
   bne MYSA_00
 
 MYSA_E0
-_relo0408 = . +1
   jsr UNLISTEN
-_relo0409 = . +1
   jsr DISK_CLOSE_SA
 
 #if PRINTADDRESS == 1
-_relo0410 = . +1
   lda #LOADSTART
   jsr PRINT_TOADR_2
 #endif
 
-_relo0411 = . +1
 ;  jsr PRINT_DISK_ERR
   clc
 MYSA_ERR
@@ -1035,10 +987,8 @@ MYSA_ERR
   lda IECSTAT
   bmi DICM_ERR1
 
-_relo0363 = . +1
   jsr IECNAMOUT_2
 DICM_OK2
-_relo0306 = . +1
   jsr UNLISTEN
 DICM_OK
   clc
@@ -1051,7 +1001,6 @@ IECNAMOUT_2
   ldy #0
 DICM_2
   lda (PTR_FNAM),y
-_relo0305 = . +1
   jsr IECOUT
   iny
   dex
@@ -1066,7 +1015,6 @@ _relo0305 = . +1
 
   ;CHECK 'DEVICE NOT PRESENT'
 ;CHKDNP
-;_relo0106 = . +1
 ;  jsr DISK_LISTEN_6F
 ;  bcc DICM_OK2
 DICM_ERR1
@@ -1085,10 +1033,8 @@ DISK_LISTEN_2
   pha
 DILI_2
   lda SY_DN                             ; device#
-_relo0307 = . +1
   jsr LISTEN
   pla
-_relo0308 = . +1
   jsr LISTENSA
 DITA_5
   lda IECSTAT
@@ -1103,10 +1049,8 @@ DITA_5
   sta IECSTAT
 
   lda SY_DN                             ; device#
-_relo0309 = . +1
   jsr TALK
   pla
-_relo0310 = . +1
   jmp TALKSA
 .endproc
 
@@ -1116,20 +1060,16 @@ _relo0310 = . +1
 .endproc
 
 .proc DISK_CLOSE_LO
-_relo0303 = . +1
   jsr UNTALK
   lda #$e0
 DICL_1
-_relo0101 = . +1
   jsr DISK_LISTEN_2
-_relo0311 = . +1
   jmp UNLISTEN
 .endproc
 
 #if LOADPARAMS == 1 | SAVEPARAMS == 1
 ; GET WORD VALUE IN Y/A AND (PT3)
 .proc FRMWORD2
-_relo0160 = . +1
   jsr CHKCOM
   bcs FRWO_3
 FRMWORD
@@ -1165,10 +1105,8 @@ PRINT_ATADR_2
 
 .1
   pha
-_relo5090 = . +1
   lda #<MSG_LOADAT
   ldy #>MSG_LOADAT
-;_relo0096 = . +1
   jsr SY_STROUT
   pla
 .3
@@ -1179,7 +1117,6 @@ HEXOUT_ZP
   lda 0,x
   tax
   pla
-_relo0095 = . +1
   jmp HEXOUT
 
   ; PRINT LOAD AT ADDRESS
@@ -1190,14 +1127,11 @@ PRINT_TOADR_2
   bpl .rts
 
   pha
-_relo5091 = . +1
   lda #<MSG_LOADTO
   ldy #>MSG_LOADTO
   jsr SY_STROUT
   pla
-_relo0093 = . +1
   jsr .3
-_relo0094 = . +1
 ;  jmp CROUT
 
 CROUT
@@ -1212,7 +1146,6 @@ CROUT
   jsr BSOUT
   pla
   beq HEX0
-_relo0200 = . +1
   jsr HEX2
 HEX0
   txa
@@ -1222,7 +1155,6 @@ HEX2
   lsr
   lsr
   lsr
-_relo0201 = . +1
   jsr HEX1
   pla
   and #15

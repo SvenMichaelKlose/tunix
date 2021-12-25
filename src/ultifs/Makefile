@@ -1,5 +1,5 @@
 SOURCES=kernal-emulation.c main.c ultifs.c
-ASMSOURCES=zeropage.asm wedge-primary.asm wedge-secondary.asm
+ASMSOURCES=zeropage.asm wedge-primary.asm wedge-secondary.asm sjload.asm
 PROGRAM=ultifs
 
 include ../Makefile.rules

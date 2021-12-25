@@ -14,8 +14,7 @@
 ; - Removed unused routines to reduce program size (few bytes) 
 ; - Added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
 
-;START_ADR  = $B000
-;START_ADR  = $0400
+START_ADR  = $9400
 
 
 SJSAVE = 1                              ; 0 = Don't compile SJsave routines   (LOAD only)
@@ -505,8 +504,6 @@ lEC4E:
 .endproc
 ;--------------JIFFY BYTE IN
 
-
-
 ;--------------JIFFY UNTALK/UNLISTEN
 .proc JIF_UNTALK
 lEEF6:
@@ -516,6 +513,9 @@ lEEF6:
   JSR $EF8D
   LDA #$5F
   .byte $2c
+.endproc
+
+.proc
 JIF_UNLISTEN
   LDA #$3F
   JSR lEE1C                             ;PART OF LISTEN
@@ -566,11 +566,8 @@ lF39E:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
 FRMNUM   = $cd8a	                ; GET NUMERIC VALUE
 FRMBYTE  = $d79e	                ; GET BYTE VALUE TO X
 CNVWORD  = $d7f7	                ; CONVERT TO WORD VALUE INTO Y/A; $14 (PT3)
-
 SETSTAT  = $fe6a	                ; set status
-
 CHKSTOP  = $ffe1                        ; check stop key
-
 
 UNLISTEN = JIF_UNLISTEN	                ; send UNLISTEN command
 UNTALK   = JIF_UNTALK	                ; send UNTALK command
@@ -579,23 +576,19 @@ TALK     = JIF_TALK	                ; send TALK command
 IECIN    = JIF_IECIN	                ; get char from IEC
 IECOUT   = JIF_IECOUT	                ; send char to IEC
 
-
 LISTENSA = JIF_LISTENSA                 ; send SA for LISTEN command
 TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 
-
     .code
 
-; LOAD VECTOR                         :: "fnam",PA,SA[,loadadr]
+; :: "fnam",PA,SA[,loadadr]
 .proc MY_LOAD
   ldx SY_DN                             ; PA (device#)
   cpx #4
-  bcs .0
+  bcs l0
   jmp $f549                             ; OLD LOAD PROC
-.endproc
 
-.proc MY_IECLOAD_0
-.0
+l0:
   sta SY_VERIFY
   lda #0
   sta SY_FN                             ; file# - flag for first byte
@@ -607,18 +600,17 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   lda #$f0                              ; channel
   jsr DISK_LISTEN
   jsr IECNAMOUT
-  bcc .00a
-;MYLO_ERR2
+  bcc l00a
   rts
 
-.00a
+l00a:
   LDY #$00
   LDA ($BB),Y                           ;Filename
   CMP #$24                              ;"$"
-  BNE .00b                              ;Directory? -->
+  BNE l00b                              ;Directory? -->
   jmp $f56d                             ;normal LOAD
 
-.00b
+l00b:
   lda #$60
   jsr DISK_TALK
 
@@ -628,50 +620,48 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   lda SY_STATUS
   lsr
   lsr
-  bcc .00c
+  bcc l00c
   jmp $f787
 
-.00c  ;@@@
+l00c:
   jsr IECIN                             ; load address hi
-  sta LOADEND +1
+  sta LOADEND + 1
 
   ldx SY_SA                             ; SA
 #if LOADPARAMS == 1
-  beq .00                               ; SA=0 -->
+  beq l00                               ; SA=0 -->
   dex
   dex
 #endif
-  bne .01                               ; SA=1 -->
+  bne l01                               ; SA=1 -->
 
 #if LOADPARAMS == 1 
-.02                                     ; SA=2: LOAD CARTRIDGE AT $c3
+l02:                                    ; SA=2: LOAD CARTRIDGE AT $c3
   pha
   lda LOADEND
   pha                                   ; FIRST TWO BYTES ...
 #endif
 
-.00                                     ; SA=0: LOAD PROGRAM AT $c3
+l00:                                     ; SA=0: LOAD PROGRAM AT $c3
 #if LOADPARAMS == 1 
-
   jsr FRMWORD2                          ; GET WORD VALUE
 #endif
 
   lda LOADPTR +1
   ldx LOADPTR
 #if LOADPARAMS == 1 
-
-  bcs .2
+  bcs l2
 
   lda PT3 +1
   ldx PT3
 
-.2
+l2
 #endif
 
   sta LOADEND +1
   stx LOADEND
 
-.01
+l01:
 #if PRINTADDRESS == 1
   jsr PRINT_ATADR
 #else
@@ -686,7 +676,7 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 
   dex
   dex
-  bne .3                                ; SA!=2 -->
+  bne l3                                ; SA!=2 -->
 
   ;STORE FIRST TWO BYTES
   ldy #0
@@ -695,21 +685,20 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   pla
   jsr STOREBYTE
 
-.3
+l3:
 #endif
 .endproc
 
 ;--------------JIFFY FASTLOAD INIT
 .proc .FASTLOAD
   BIT $A3
-;  BVC .F253                             ;no Jiffy -->
-  BVS .FB1F                             ;Jiffy -->
-.F253
+  BVS lFB1F                             ;Jiffy -->
+lF253
   JSR $F58A                             ;normales LOAD
-.err2
-  bcs .err
+lerr2
+  bcs lerr
 
-.MYLO_E
+MYLO_E:
 #if PRINTADDRESS == 1
   jsr PRINT_TOADR
 #endif
@@ -732,10 +721,10 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   LDA $B2
   PHA
   LDY #$00
-.FB25
+lFB25:
   JSR $F755                             ;STOP Taste abfragen
   CMP #$FE
-  BEQ .FB5B
+  BEQ lFB5B
   LDA $912C
   AND #$DD
   TAX
@@ -744,41 +733,41 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   STX $912C
   LDA #$80
   STA $9C
-.FB3D
+lFB3D:
   LDA $911F
   LSR
   BCC .FB3D
   AND #$01
   BEQ .FB67
   LDX #$6D
-.FB49
+lFB49:
   BIT $911F
   BEQ .FB54
   DEX
   BNE .FB49
   LDA #$42
   .byte $2c                             ;BIT ABS
-.FB54
+lFB54:
   LDA #$40
   JSR $FE6A                             ;SET STATUS
   CLC
   .byte $24                             ;BIT ZP
-.FB5B                                   ;STOP!
+lFB5B:                                  ;STOP!
   SEC
   PLA
   STA $B2
   bcc .MYLO_E
-.err
+lerr
   JMP $F6CB                             ;UNLISTEN, CLOSE, BREAK
 ; JMP $F5BF                             ;UNLISTEN, CLOSE
 .endproc
 
 .proc .FB67
   LDA #$02
-.FB69
+lFB69
   BIT $911F
-  BEQ .FB69
-.FB6E
+  BEQ lFB69
+lFB6E
   PHA
   PLA
   NOP
@@ -816,21 +805,21 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 
 .proc STOREBYTE
   CPY $93
-  BNE .FBB0
+  BNE lFBB0
   STA ($AE),Y
-.FBA7
+lFBA7:
   INC $AE
-  BNE .FB6E
+  BNE lFB6E
   INC $AF
-.FB6E
+lFB6E:
   rts
 
-.FBB0                                   ;VERIFY
+lFBB0:                                  ;VERIFY
   CMP ($AE),Y
-  BEQ .FBA7
+  BEQ lFBA7
   LDA #$10                              ;VERIFY ERROR
   STA $90
-  BNE .FBA7         ; (jmp)
+  BNE lFBA7         ; (jmp)
 .endproc
 ;--------------JIFFY FASTLOAD END
 
@@ -900,7 +889,7 @@ MYSA_0
 #endif
 
   ldy #0
-MYSA_00
+MYSA_00:
   jsr $fd11                             ;END ADDRESS?
   bcs MYSA_E0                           ;YES -->
   lda (LOADSTART),y
@@ -913,11 +902,11 @@ MYSA_00
   jsr DISK_CLOSE_SA
   jmp $f6ce
 
-MYSA_02
+MYSA_02:
   jsr $fd1b                             ;INCR ADDR
   bne MYSA_00
 
-MYSA_E0
+MYSA_E0:
   jsr UNLISTEN
   jsr DISK_CLOSE_SA
 
@@ -928,7 +917,7 @@ MYSA_E0
 
 ;  jsr PRINT_DISK_ERR
   clc
-MYSA_ERR
+MYSA_ERR:
   rts
 
 #endif
@@ -940,18 +929,18 @@ MYSA_ERR
   bmi DICM_ERR1
 
   jsr IECNAMOUT_2
-DICM_OK2
+DICM_OK2:
   jsr UNLISTEN
-DICM_OK
+DICM_OK:
   clc
   rts
 
 ;PUT NAME TO IEC
-IECNAMOUT_2
+IECNAMOUT_2:
   ldx LEN_FNAM
   beq DICM_OK2
   ldy #0
-DICM_2
+DICM_2:
   lda (PTR_FNAM),y
   jsr IECOUT
   iny
@@ -959,7 +948,7 @@ DICM_2
   bne DICM_2
   rts
 
-DICM_ERR1
+DICM_ERR1:
   jmp $f78a                             ;ERR 'DEVICE NOT PRESENT'    CF=1
 .endproc
 
@@ -969,14 +958,14 @@ DICM_ERR1
   sta IECSTAT
   beq DILI_2
 
-DISK_LISTEN_2
+DISK_LISTEN_2:
   pha
-DILI_2
+DILI_2:
   lda SY_DN                             ; device#
   jsr LISTEN
   pla
   jsr LISTENSA
-DITA_5
+DITA_5:
   lda IECSTAT
   bpl DICM_OK
   sec
@@ -997,12 +986,11 @@ DITA_5
 .proc DISK_CLOSE_SA
   lda #$e1
   bne DICL_1
-.endproc
 
-.proc DISK_CLOSE_LO
+DISK_CLOSE_LO:
   jsr UNTALK
   lda #$e0
-DICL_1
+DICL_1:
   jsr DISK_LISTEN_2
   jmp UNLISTEN
 .endproc
@@ -1012,11 +1000,11 @@ DICL_1
 .proc FRMWORD2
   jsr CHKCOM
   bcs FRWO_3
-FRMWORD
+FRMWORD:
   jsr FRMNUM
   jsr CNVWORD
   clc
-FRWO_3
+FRWO_3:
   rts
 .endproc
 #endif
@@ -1028,7 +1016,7 @@ FRWO_3
   bne CHCO_3
   jsr CHRGET
   clc
-CHCO_3
+CHCO_3:
   rts
 .endproc
 
@@ -1037,21 +1025,21 @@ CHCO_3
   ; PRINT LOAD AT ADDRESS
 .proc PRINT_ATADR subroutine
   lda #LOADEND
-PRINT_ATADR_2
+PRINT_ATADR_2:
   ldx DIRECT_MODE
-  bmi .1
-.rts
+  bmi l1
+lrts:
   rts
 
-.1
+l1:
   pha
   lda #<MSG_LOADAT
   ldy #>MSG_LOADAT
   jsr SY_STROUT
   pla
-.3
+l3:
   tax
-HEXOUT_ZP
+HEXOUT_ZP:
   lda 1,x
   pha
   lda 0,x
@@ -1060,20 +1048,20 @@ HEXOUT_ZP
   jmp HEXOUT
 
 ; PRINT LOAD ADDRESS
-PRINT_TOADR
+PRINT_TOADR:
   lda #LOADEND
 PRINT_TOADR_2
   ldx DIRECT_MODE
-  bpl .rts
+  bpl lrts
 
   pha
   lda #<MSG_LOADTO
   ldy #>MSG_LOADTO
   jsr SY_STROUT
   pla
-  jsr .3
+  jsr l3
 
-CROUT
+CROUT:
   lda #13
   jmp BSOUT
 .endproc
@@ -1086,9 +1074,9 @@ CROUT
   pla
   beq HEX0
   jsr HEX2
-HEX0
+HEX0:
   txa
-HEX2
+HEX2:
   pha
   lsr
   lsr
@@ -1097,12 +1085,12 @@ HEX2
   jsr HEX1
   pla
   and #15
-HEX1
+HEX1:
   clc
   adc #246
   bcc HEX1_2
   adc #6
-HEX1_2
+HEX1_2:
   adc #58
   jmp BSOUT
 .endproc
@@ -1111,10 +1099,8 @@ HEX1_2
 ; MESSAGE TEXTE
 ; ==============================================================
 
-MSG_LOADAT
-  dc.b " FROM ",0
-MSG_LOADTO
-  dc.b " TO ",0
+MSG_LOADAT: .byte " FROM ",0
+MSG_LOADTO: .byte " TO ",0
 
 #endif
 
@@ -1129,24 +1115,24 @@ MSG_LOADTO
 ;
 .proc JChkIn
   jsr $f3cf                             ;search logical file#
-  beq .1	                        ;file not open error
+  beq l1	                        ;file not open error
   jmp $f784                             ;err "file not open"
 
-.1
+l1:
   jsr $f3df                             ;set file param
   lda SY_DN                             ;device#
   cmp #8
-  bcs .2
+  bcs l2
   jmp $f2d2                             ;std. ChkIn
 
-.2
+l2:
   tax
   jsr TALK
   lda SY_SA
-  bpl .3
+  bpl l3
   jmp $f2f8
 
-.3
+l3:
   jsr TALKSA
   jmp $f301
 .endproc
@@ -1156,24 +1142,24 @@ MSG_LOADTO
 ;
 .proc JChkOut
   jsr $f3cf                             ;search logical file#
-  beq .1	                        ;file not open error
+  beq l1	                        ;file not open error
   jmp $f784                             ;err "file not open"
 
-.1
+l1:
   jsr $f3df                             ;set file param
   lda SY_DN                             ;device#
   cmp #8
-  bcs .2
+  bcs l2
   jmp $f314                             ;std. ChkOut
 
-.2
+l2:
   tax
   jsr LISTEN
   lda SY_SA
-  bpl .3
+  bpl l3
   jmp $f33a
 
-.3
+l3:
   jsr LISTENSA
   jmp $f342
 .endproc
@@ -1194,29 +1180,29 @@ MSG_LOADTO
 .proc JBasIn
   lda $99                               ;device#
   cmp #8
-  bcs .2
+  bcs l2
   jmp $f20e                             ;std. BasIn
 
-.2
+l2:
   lda SY_STATUS
-  beq .3
+  beq l3
   jmp $f268                             ;std. IECIN
 
-.3
+l3:
   jmp JIF_IECIN
 .endproc
 
 ;
 ; JIFFY BASOUT    ($0326 vector)
 ;
-JBasOut subroutine
+.proc JBasOut
   pha
   lda $9a                               ;device#
   cmp #8
-  bcs .2
+  bcs l2
   jmp $f27b                             ;std. BasOut
 
-.2
+l2:
   pla
   jmp JIF_IECOUT
 .endproc
@@ -1224,20 +1210,20 @@ JBasOut subroutine
 ;
 ; JIFFY CLRCH / CLRALL    ($0322 / $032c vector)
 ;
-JClrAll subroutine
+.proc JClrAll
   lda #0
   sta $98
 
-JClrCh
+JClrCh:
   ldx #3
   cpx $9a                               ;device# out
-  bcs .1
+  bcs l1
   jsr JIF_UNLISTEN
-.1
+l1:
   cpx $99                               ;device# in
-  bcs .2
+  bcs l2
   jsr JIF_UNTALK
-.2
+l2:
   jmp $f403                             ;std. ClrAll
 .endproc
 

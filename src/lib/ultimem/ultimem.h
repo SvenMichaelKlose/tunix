@@ -13,8 +13,8 @@
 #define ULTIMEM_CTRL_RESET      64      /* Soft-reset. Keep registers. */
 #define ULTIMEM_CTRL_HIDE       128     /* Hide registers. */
 
-#define ULTIMEM_CONFIG1     ((char *) 0x9ff1)   /* RAM123 (bits 0/1), IO2 (bits 2/3), IO3 (...) */
-#define ULTIMEM_CONFIG2     ((char *) 0x9ff2)   /* BLK1, BLK2, BLK3, BLK5 */
+#define ULTIMEM_CONFIG1     ((char *) 0x9ff1)   /* RAM123 (bits 0/1), IO2 (bits 2/3), IO3, unused */
+#define ULTIMEM_CONFIG2     ((char *) 0x9ff2)   /* BLK1 (bits 0/1), BLK2 (bits 2/3), BLK3 (bits 4/5), BLK5 (bits 6/7) */
 #define ULTIMEM_CFG_ROM     1
 #define ULTIMEM_CFG_RO_RAM  2
 #define ULTIMEM_CFG_RW_RAM  3
@@ -22,10 +22,11 @@
 #define ULTIMEM_ID          ((unsigned short *) 0x9ff3) /* Bits 0-3: ID, 4-7: Manufacturer */
 #define ULTIMEM_ID_ULTIMEM  1
 #define ULTIMEM_ID_VICMIDI  2
+#define ULTIMEM_ID_RETRO_INNOVATIONS    16
 
 /* Bank numbers. */
-#define ULTIMEM_RAM         ((unsigned short *) 0x9ff4)
-#define ULTIMEM_IO          ((unsigned short *) 0x9ff6) /* IO2 and IO3. */
+#define ULTIMEM_RAM123      ((unsigned short *) 0x9ff4)
+#define ULTIMEM_IO23        ((unsigned short *) 0x9ff6) /* IO2 and IO3. */
 #define ULTIMEM_BLK1        ((unsigned short *) 0x9ff8)
 #define ULTIMEM_BLK2        ((unsigned short *) 0x9ffa)
 #define ULTIMEM_BLK3        ((unsigned short *) 0x9ffc)

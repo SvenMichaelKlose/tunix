@@ -216,7 +216,6 @@ lEE40:
   JSR $EF8D                             ;PCR BIT 1 LÖSCHEN
   JSR $E4A0
   JSR $EF96
-  ;jmp $ee49                            ;ORIG BYTE OUT
 .endproc
 
 .proc OLD_IECOUT
@@ -276,19 +275,6 @@ l6E89:
   PLA
   TAX
   jmp $EEA0
-;  NOP
-;lEEA5
-;  LDA #$04
-;  STA $9129
-;l6EA5
-;  LDA $912D
-;  AND #$20
-;  BNE l6EB7
-;  JSR $E4B2
-;  LSR
-;  BCS l6EA5
-;  CLI
-;  RTS
 
 l6EB4:
   jmp $eeb4                             ;err DEV NOT PRES
@@ -581,14 +567,6 @@ FRMNUM   = $cd8a	                ; GET NUMERIC VALUE
 FRMBYTE  = $d79e	                ; GET BYTE VALUE TO X
 CNVWORD  = $d7f7	                ; CONVERT TO WORD VALUE INTO Y/A; $14 (PT3)
 
-;UNLISTEN = $ffae	                ; send UNLISTEN command
-;LISTEN	 = $ffb1	                ; send LISTEN command
-;LISTENSA = $ff93	                ; send SA for LISTEN command
-;TALK     = $ffb4	                ; send TALK command
-;UNTALK   = $ffab	                ; send UNTALK command
-;TALKSA   = $ff96	                ; send SA for TALK command
-;IECIN    = $ffa5	                ; get char from IEC
-;IECOUT   = $ffa8	                ; send char to IEC
 SETSTAT  = $fe6a	                ; set status
 
 CHKSTOP  = $ffe1                        ; check stop key
@@ -615,11 +593,6 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   bcs .0
   jmp $f549                             ; OLD LOAD PROC
 .endproc
-
-
-;MY_IECVERIFY
-;  lda #1
-;  bne MYLO_0
 
 .proc MY_IECLOAD_0
 .0
@@ -726,13 +699,6 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 #endif
 .endproc
 
-;  jsr MY_IECIN
-;  bcc MYLO_6
-
-;MYLO_ERR
-;  jsr DISK_CLOSE_LO
-;  jmp $f787
-
 ;--------------JIFFY FASTLOAD INIT
 .proc .FASTLOAD
   BIT $A3
@@ -743,21 +709,12 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
 .err2
   bcs .err
 
-;  jsr DISK_CLOSE_LO
-
 .MYLO_E
 #if PRINTADDRESS == 1
   jsr PRINT_TOADR
 #endif
 
   jsr DISK_CLOSE_LO
-
-  ;PRINT DISKERR ON ERROR
- ; lda SY_STATUS
- ; pha                                   ;SAVE IECSTAT FOR VERIFY!!!
-;  jsr PRINT_DISK_ERR
-;  pla
-;  sta SY_STATUS
 
   clc
   ldx LOADEND
@@ -849,11 +806,6 @@ TALKSA   = JIF_TALKSA	                ; send SA for TALK command
   ROL
   ROL
   STA $C0
-
-;  JSR lEC4E                            ;Byte zusammenbauen aus 2 Nibble
-;  jsr STOREBYTE
-;  CLV
-;  BVC .FB6E
 
   lda #>(.FB6E -1)                      ;Rücksprungadresse auf Stack
   pha
@@ -1006,23 +958,11 @@ DICM_2
   dex
   bne DICM_2
   rts
-.endproc
 
-
-;************************************
-; CHKDNP NOT USED, SEEMS NOT REQUIRED
-;************************************
-
-  ;CHECK 'DEVICE NOT PRESENT'
-;CHKDNP
-;  jsr DISK_LISTEN_6F
-;  bcc DICM_OK2
 DICM_ERR1
   jmp $f78a                             ;ERR 'DEVICE NOT PRESENT'    CF=1
+.endproc
 
-
-;DISK_LISTEN_6F
-;  lda #$6f                              ; channel
 .proc DISK_LISTEN
   pha
   lda #0
@@ -1119,7 +1059,7 @@ HEXOUT_ZP
   pla
   jmp HEXOUT
 
-  ; PRINT LOAD AT ADDRESS
+; PRINT LOAD ADDRESS
 PRINT_TOADR
   lda #LOADEND
 PRINT_TOADR_2
@@ -1132,7 +1072,6 @@ PRINT_TOADR_2
   jsr SY_STROUT
   pla
   jsr .3
-;  jmp CROUT
 
 CROUT
   lda #13

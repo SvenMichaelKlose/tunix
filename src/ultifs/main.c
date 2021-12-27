@@ -20,6 +20,7 @@ list_directory (char device)
 
     cbm_opendir (8, device, "$");
     while (!cbm_readdir (8, &dirent))
+        //printf ("%s\n", dirent.name);
         cputs (dirent.name);
     cbm_closedir (8);
 }
@@ -48,16 +49,20 @@ main ()
 {
     char device = 12;
 
-    printf ("UltiFS wedge\n");
-    printf ("Flash ROM device: %d\n", device);
+    printf ("UltiMem ROM file system\n");
+    printf ("by Sven Michael Klose\n");
+    printf ("   <pixel@hugbox.org>\n");
+    printf ("   27 DEC 2021\n");
 
     init_primary_wedge ();
     init_secondary_wedge (device);
     init_kernal_emulation ();
 
+    printf ("Flash ROM mounted on device %d.\n", device);
+    ((voidfun*) 0xc474) ();     // READY.
+
     list_directory (12);
     //dump_file (8, 8, "main.c");
     //dump_file (12, 15, "AB");
     cputs ("Finished.\n");
-    ((voidfun*) 0xc474) ();     // READY.
 }

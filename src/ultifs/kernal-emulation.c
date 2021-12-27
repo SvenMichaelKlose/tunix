@@ -119,7 +119,7 @@ copy_from_process (char * to, char * from, char len)
 }
 
 void
-set_return_error (char code)
+set_oserr (char code)
 {
     accu = code;
     flags = code ? FLAG_C : 0;
@@ -227,7 +227,7 @@ make_directory_list (channel * ch)
     free (dirent);
     free (b);
 
-    flags = 0;
+    set_oserr (0);
 }
 
 void
@@ -302,29 +302,24 @@ ultifs_kclose ()
 void
 ultifs_kchkin ()
 {
-    if (!channels[_SA()]) {
-        set_return_error (OSERR_FILE_NOT_OPEN);
-        return;
-    }
-
-    set_return_error (0);
+    set_oserr (channels[_SA()] ? 0 : OSERR_FILE_NOT_OPEN);
 }
 
 void
 ultifs_kchkout ()
 {
     if (!channels[_SA()]) {
-        set_return_error (OSERR_FILE_NOT_OPEN);
+        set_oserr (OSERR_FILE_NOT_OPEN);
         return;
     }
 
     if (_SA() != 15) {
-        set_return_error (OSERR_FILE_NOT_OUT);
+        set_oserr (OSERR_FILE_NOT_OUT);
         return;
     }
 
     // TODO: Complete Flash writes.
-    set_return_error (0);
+    set_oserr (0);
 }
 
 void
@@ -338,7 +333,7 @@ ultifs_kbasin ()
     channel * ch = channels[_SA()];
 
     if (!ch) {
-        set_return_error (OSERR_FILE_NOT_OPEN);
+        set_oserr (OSERR_FILE_NOT_OPEN);
         return;
     }
 

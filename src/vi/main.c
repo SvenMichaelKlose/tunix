@@ -65,6 +65,7 @@ edit_mode ()
     }
 
 done:
+    move_left ();
     screen_set_status ("");
 }
 

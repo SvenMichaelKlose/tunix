@@ -67,7 +67,10 @@
 #define FLAG_V          64
 #define FLAG_N          128
 
-extern void ultifs_kopen  (void);
+#define FALSE   0
+#define TRUE    -1
+
+extern char ultifs_kopen  (void);
 extern void ultifs_kclose (void);
 extern void ultifs_kclall (void);
 extern void ultifs_kload  (void);
@@ -232,7 +235,7 @@ make_directory_list (channel * ch)
     set_oserr (0);
 }
 
-void
+char
 ultifs_kopen ()
 {
     char *      name = NULL;
@@ -241,14 +244,14 @@ ultifs_kopen ()
 
     if (_SA() != 15 && channels[_SA()]) {
         set_error (ERR_NO_CHANNEL);
-        return;
+        return FALSE;
     }
 
     if (_FNLEN()) {
         name = malloc (_FNLEN() + 1);
         if (!name) {
             set_error (ERR_BYTE_DECODING);
-            return;
+            return FALSE;
         }
         copy_from_process (name, _FNAME(), _FNLEN());
         name[_FNLEN()] = 0;
@@ -260,24 +263,25 @@ ultifs_kopen ()
 
     if (_SA() == 15) {
         open_command (name);
-        return;
+        return TRUE;
     }
 
     if (_FNLEN() == 1 && *name == '$') {
         make_directory_list (ch);
-        return;
+        return TRUE;
     }
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
         set_error (ERR_FILE_NOT_FOUND);
-        return;
+        return FALSE;
     }
 
     ch->file = found_file;
     channels[_SA()]->file = found_file;
 
     set_error (0);
+    return TRUE;
 }
 
 void
@@ -329,14 +333,14 @@ ultifs_kclrcn ()
 {
 }
 
-void
+char
 ultifs_kbasin ()
 {
     channel * ch = channels[_SA()];
 
     if (!ch) {
         set_oserr (OSERR_FILE_NOT_OPEN);
-        return;
+        return 0;
     }
 
     STATUS = 0;
@@ -345,7 +349,7 @@ ultifs_kbasin ()
         accu = read_from_buf (ch);
         if (!ch->buf)
             goto end_of_file;
-        return;
+        return 0;
     }
 
     //if (_SA() == 15)
@@ -355,10 +359,12 @@ ultifs_kbasin ()
 
 end_of_file:
     STATUS = STATUS_END_OF_FILE;
+
+    return accu;
 }
 
 void
-ultifs_kbasout ()
+ultifs_kbsout ()
 {
     // TODO: Implement writes.
     STATUS = STATUS_TIMEOUT_WRITE;
@@ -372,9 +378,62 @@ ultifs_kclall ()
 void
 ultifs_kload ()
 {
+    char do_verify = accu;
+    char * addr;
+    char addr_l;
+    char addr_h;
+    
+    if (!ultifs_kopen ())
+        return;
+
+    addr_l = ultifs_kbasin ();
+    addr_h = ultifs_kbasin ();
+    if (!_SA()) {
+        addr_l = xreg;
+        addr_h = yreg;
+    } else if (_SA() > 2) {
+        // Issue some error?
+    }
+    addr = (char *) (addr_h << 8 | addr_l);
+
+    while (1) {
+        *addr++ = ultifs_kbasin ();
+
+        if (STATUS & STATUS_END_OF_FILE)
+            break;
+        if (STATUS) {
+            flags = FLAG_C; // Does this really happen?
+            return;
+        }
+    }
+
+    addr--;
+    xreg = (unsigned) addr & 255;  // Or is it another register pair?
+    yreg = (unsigned) addr >> 8;
+    flags = 0;
+
+    ultifs_kclose ();
 }
 
 void
 ultifs_ksave ()
 {
+    char * ptr = *(char **) accu;
+    char * end = (char*) (yreg << 8 + xreg);
+
+    if (!ultifs_kopen ())
+        return;
+
+    while (1) {
+        accu = *ptr++;
+        ultifs_kbsout ();
+
+        if (STATUS)
+            return;
+
+        if (end == ptr)
+            break;
+    }
+
+    ultifs_kclose ();
 }

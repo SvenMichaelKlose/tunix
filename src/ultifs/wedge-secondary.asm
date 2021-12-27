@@ -17,7 +17,7 @@
 .import _ultifs_kchkout
 .import _ultifs_kclrcn
 .import _ultifs_kbasin
-.import _ultifs_kbasout
+.import _ultifs_kbsout
 .import _ultifs_kclall
 .import _ultifs_kload
 .import _ultifs_ksave
@@ -244,7 +244,7 @@ n:  jmp (old_IBASIN)
     jsr is_our_device
     bcc n
     jsr enter
-    jsr _ultifs_kbasout
+    jsr _ultifs_kbsout
     jmp leave
 n:  jmp (old_IBASOUT)
 .endproc

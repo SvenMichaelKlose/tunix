@@ -49,7 +49,7 @@ main ()
 {
     char device = 12;
 
-    printf ("UltiMem ROM file system\n");
+    printf ("UltiMem ROM disk\n");
     printf ("by Sven Michael Klose\n");
     printf ("   <pixel@hugbox.org>\n");
     printf ("   27 DEC 2021\n");

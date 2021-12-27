@@ -11,11 +11,11 @@
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
 
+#define _FNAME()    (*(char**) 0xbb)    // File name pointer
 #define _FNLEN()    (*(char*) 0xb7)     // File name length
 #define _LFN()      (*(char*) 0xb8)     // Logical file
 #define _SA()       (*(char*) 0xb9)     // Secondary address
 #define _FA()       (*(char*) 0xba)     // Device number
-#define _FNAME()    (*(char**) 0xbb)    // File name pointer
 
 #define STATUS      (*(char*) 0x90)     // Serial status byte
 
@@ -106,6 +106,7 @@ init_kernal_emulation ()
     ultifs_mount ();
 }
 
+// TODO: This'll map the calling process' memory to BLK5.
 void
 copy_from_process (char * to, char * from, char len)
 {
@@ -392,7 +393,7 @@ ultifs_kload ()
         addr_l = xreg;
         addr_h = yreg;
     } else if (_SA() > 2) {
-        // Issue some error?
+        // TODO: Issue some error?
     }
     addr = (char *) (addr_h << 8 | addr_l);
 
@@ -402,13 +403,13 @@ ultifs_kload ()
         if (STATUS & STATUS_END_OF_FILE)
             break;
         if (STATUS) {
-            flags = FLAG_C; // Does this really happen?
+            flags = FLAG_C; // TODO: Does this really happen?
             return;
         }
     }
 
     addr--;
-    xreg = (unsigned) addr & 255;  // Or is it another register pair?
+    xreg = (unsigned) addr & 255;  // TODO: Or is it another register pair?
     yreg = (unsigned) addr >> 8;
     flags = 0;
 

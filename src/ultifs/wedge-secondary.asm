@@ -60,16 +60,16 @@ old_IGETIN:     .res 2
 old_ICLALL:     .res 2
 
 _new_vectors:
-new_IOPEN:      .word uopen
-new_ICLOSE:     .word uclose
-new_ICHKIN:     .word uchkin
-new_ICHKOUT:    .word uckout
-new_ICLRCN:     .word uclrcn
-new_IBASIN:     .word ubasin
-new_IBASOUT:    .word ubsout
-new_ISTOP:      .word ustop
-new_IGETIN:     .word ugetin
-new_ICLALL:     .word uclall
+    .word uopen
+    .word uclose
+    .word uchkin
+    .word uckout
+    .word uclrcn
+    .word ubasin
+    .word ubsout
+    .word ustop
+    .word ugetin
+    .word uclall
 
 _saved_zp:  .res $80
 

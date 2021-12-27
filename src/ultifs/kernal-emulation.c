@@ -67,9 +67,11 @@
 #define FLAG_V          64
 #define FLAG_N          128
 
-extern void ultifs_kopen (void);
+extern void ultifs_kopen  (void);
 extern void ultifs_kclose (void);
 extern void ultifs_kclall (void);
+extern void ultifs_kload  (void);
+extern void ultifs_ksave  (void);
 
 typedef struct _channel {
     char *      name;
@@ -364,5 +366,15 @@ ultifs_kbasout ()
 
 void
 ultifs_kclall ()
+{
+}
+
+void
+ultifs_kload ()
+{
+}
+
+void
+ultifs_ksave ()
 {
 }

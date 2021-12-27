@@ -19,6 +19,8 @@
 .import _ultifs_kbasin
 .import _ultifs_kbasout
 .import _ultifs_kclall
+.import _ultifs_kload
+.import _ultifs_ksave
 
 .import __ZP_START__
 .import __ZP_SIZE__
@@ -37,6 +39,7 @@ IBSOUT  = $0326
 ISTOP   = $0328
 IGETIN  = $032A
 ICLALL  = $032C
+IUSRCMD = $032E
 ILOAD   = $0330
 ISAVE   = $0332
 
@@ -58,6 +61,9 @@ old_IBASOUT:    .res 2
 old_ISTOP:      .res 2
 old_IGETIN:     .res 2
 old_ICLALL:     .res 2
+old_IUSRCMD:    .res 2  ; TODO: Make it point to a BRK.
+old_ILOAD:      .res 2
+old_ISAVE:      .res 2
 
 _new_vectors:
     .word uopen
@@ -70,6 +76,9 @@ _new_vectors:
     .word ustop
     .word ugetin
     .word uclall
+    .word 0         ; TODO: Point to a BRK.
+    .word uload
+    .word usave
 
 _saved_zp:  .res $80
 
@@ -253,4 +262,22 @@ n:  jmp (old_IBASOUT)
     jsr _ultifs_kclall
     jsr leave
     jmp (old_ICLALL)
+.endproc
+
+.proc uload
+    jsr is_our_device
+    bcc n
+    jsr enter
+    jsr _ultifs_kload
+    jmp leave
+n:  jmp (old_ICLALL)
+.endproc
+
+.proc usave
+    jsr is_our_device
+    bcc n
+    jsr enter
+    jsr _ultifs_ksave
+    jmp leave
+n:  jmp (old_ICLALL)
 .endproc

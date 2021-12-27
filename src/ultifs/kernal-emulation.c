@@ -11,13 +11,12 @@
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
 
-#define _FNAME()    (*(char**) 0xbb)    // File name pointer
-#define _FNLEN()    (*(char*) 0xb7)     // File name length
-#define _LFN()      (*(char*) 0xb8)     // Logical file
-#define _SA()       (*(char*) 0xb9)     // Secondary address
-#define _FA()       (*(char*) 0xba)     // Device number
-
-#define STATUS      (*(char*) 0x90)     // Serial status byte
+#define FNAME   (*(char**) 0xbb)    // File name pointer
+#define FNLEN   (*(char*) 0xb7)     // File name length
+#define LFN     (*(char*) 0xb8)     // Logical file
+#define SA      (*(char*) 0xb9)     // Secondary address
+#define FA      (*(char*) 0xba)     // Device number
+#define STATUS  (*(char*) 0x90)     // Serial line status byte
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
@@ -243,31 +242,31 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   ch;
 
-    if (_SA() != 15 && channels[_SA()]) {
+    if (SA != 15 && channels[SA]) {
         set_error (ERR_NO_CHANNEL);
         return FALSE;
     }
 
-    if (_FNLEN()) {
-        name = malloc (_FNLEN() + 1);
+    if (FNLEN) {
+        name = malloc (FNLEN + 1);
         if (!name) {
             set_error (ERR_BYTE_DECODING);
             return FALSE;
         }
-        copy_from_process (name, _FNAME(), _FNLEN());
-        name[_FNLEN()] = 0;
+        copy_from_process (name, FNAME, FNLEN);
+        name[FNLEN] = 0;
     }
 
     ch = malloc (sizeof (channel));
     ch->buf = NULL;
-    channels[_SA()] = ch;
+    channels[SA] = ch;
 
-    if (_SA() == 15) {
+    if (SA == 15) {
         open_command (name);
         return TRUE;
     }
 
-    if (_FNLEN() == 1 && *name == '$') {
+    if (FNLEN == 1 && *name == '$') {
         make_directory_list (ch);
         return TRUE;
     }
@@ -279,7 +278,7 @@ ultifs_kopen ()
     }
 
     ch->file = found_file;
-    channels[_SA()]->file = found_file;
+    channels[SA]->file = found_file;
 
     set_error (0);
     return TRUE;
@@ -288,14 +287,14 @@ ultifs_kopen ()
 void
 ultifs_kclose ()
 {
-    channel * ch = channels[_SA()];
+    channel * ch = channels[SA];
 
     if (!ch) {
         set_error (ERR_FILE_NOT_OPEN);
         return;
     }
 
-    if (_SA() == 15) {
+    if (SA == 15) {
         ultifs_kclall ();
         return;
     }
@@ -303,24 +302,24 @@ ultifs_kclose ()
     bfile_close (ch->file);
     free (ch->name);
     free (ch);
-    channels[_SA()] = NULL;
+    channels[SA] = NULL;
 }
 
 void
 ultifs_kchkin ()
 {
-    set_oserr (channels[_SA()] ? 0 : OSERR_FILE_NOT_OPEN);
+    set_oserr (channels[SA] ? 0 : OSERR_FILE_NOT_OPEN);
 }
 
 void
 ultifs_kchkout ()
 {
-    if (!channels[_SA()]) {
+    if (!channels[SA]) {
         set_oserr (OSERR_FILE_NOT_OPEN);
         return;
     }
 
-    if (_SA() != 15) {
+    if (SA != 15) {
         set_oserr (OSERR_FILE_NOT_OUT);
         return;
     }
@@ -337,7 +336,7 @@ ultifs_kclrcn ()
 char
 ultifs_kbasin ()
 {
-    channel * ch = channels[_SA()];
+    channel * ch = channels[SA];
 
     if (!ch) {
         set_oserr (OSERR_FILE_NOT_OPEN);
@@ -353,7 +352,7 @@ ultifs_kbasin ()
         return 0;
     }
 
-    //if (_SA() == 15)
+    //if (SA == 15)
         //return;
 
     // TODO: bfile reads.
@@ -389,10 +388,10 @@ ultifs_kload ()
 
     addr_l = ultifs_kbasin ();
     addr_h = ultifs_kbasin ();
-    if (!_SA()) {
+    if (!SA) {
         addr_l = xreg;
         addr_h = yreg;
-    } else if (_SA() > 2) {
+    } else if (SA > 2) {
         // TODO: Issue some error?
     }
     addr = (char *) (addr_h << 8 | addr_l);

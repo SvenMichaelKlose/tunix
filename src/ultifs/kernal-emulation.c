@@ -83,7 +83,11 @@ typedef struct _channel {
     char *      bufrptr;
 } channel;
 
-channel * channels[16];
+#define MAX_USER_LFN  31    // TODO: Find out the official maximum.
+#define LOADSAVE_LFN  (MAX_USER_LFN + 1)
+
+// Channels keyed by logical file naumber.
+channel * channels[LOADSAVE_LFN + 1];
 
 channel cmd_channel = {
     NULL, NULL, 0, NULL, NULL, NULL
@@ -402,7 +406,9 @@ ultifs_kload ()
     char * addr;
     char addr_l;
     char addr_h;
-    
+
+    LFN = LOADSAVE_LFN;
+
     if (!ultifs_kopen ())
         return;
 
@@ -440,6 +446,8 @@ ultifs_ksave ()
 {
     char * ptr = *(char **) accu;
     char * end = (char*) (yreg << 8 + xreg);
+
+    LFN = LOADSAVE_LFN;
 
     if (!ultifs_kopen ())
         return;

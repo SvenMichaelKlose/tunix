@@ -11,12 +11,32 @@
 #include "ultifs.h"
 #include "../lib/ultimem/ultimem.h"
 
+#define FALSE   0
+#define TRUE    -1
+
+// Callee registers
+#define accu        (*(char*) 0x100)
+#define xreg        (*(char*) 0x101)
+#define yreg        (*(char*) 0x102)
+#define flags       (*(char*) 0x103)
+
+// CPU flags
+#define FLAG_C          1
+#define FLAG_Z          2
+#define FLAG_I          4
+#define FLAG_D          8
+#define FLAG_B          16
+#define FLAG_UNUSED     32
+#define FLAG_V          64
+#define FLAG_N          128
+
+/* KERNAL zero page data */
+#define FNLEN   (*(char*)  0xb7)    // File name length
+#define LFN     (*(char*)  0xb8)    // Logical file number
+#define SA      (*(char*)  0xb9)    // Secondary address
+#define FA      (*(char*)  0xba)    // Device number
 #define FNAME   (*(char**) 0xbb)    // File name pointer
-#define FNLEN   (*(char*) 0xb7)     // File name length
-#define LFN     (*(char*) 0xb8)     // Logical file
-#define SA      (*(char*) 0xb9)     // Secondary address
-#define FA      (*(char*) 0xba)     // Device number
-#define STATUS  (*(char*) 0x90)     // Serial line status byte
+#define STATUS  (*(char*)  0x90)    // Serial line status byte
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
@@ -34,7 +54,7 @@
 #define OSERR_FILE_NOT_IN           6
 #define OSERR_FILE_NOT_OUT          7
 
-/* Device error codes */
+/* Device error codes (sent as message) */
 #define ERR_BYTE_DECODING       24
 #define ERR_WRITE               25
 #define ERR_WRITE_PROTECT_ON    26
@@ -52,32 +72,11 @@
 #define ERR_NO_CHANNEL          70
 #define ERR_DISK_FULL           72
 
-#define accu        (*(char*) 0x100)
-#define xreg        (*(char*) 0x101)
-#define yreg        (*(char*) 0x102)
-#define flags       (*(char*) 0x103)
-
-#define FLAG_C          1
-#define FLAG_Z          2
-#define FLAG_I          4
-#define FLAG_D          8
-#define FLAG_B          16
-#define FLAG_UNUSED     32
-#define FLAG_V          64
-#define FLAG_N          128
-
-#define FALSE   0
-#define TRUE    -1
-
-extern char ultifs_kopen  (void);
-extern void ultifs_kclose (void);
-extern void ultifs_kclall (void);
-extern void ultifs_kload  (void);
-extern void ultifs_ksave  (void);
 
 typedef struct _channel {
     char *      name;
     bfile *     file;
+    char        sa;
 
     char *      buf;
     char *      bufwptr;
@@ -87,8 +86,16 @@ typedef struct _channel {
 channel * channels[16];
 
 channel cmd_channel = {
-    NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, 0, NULL, NULL, NULL
 };
+
+
+extern char ultifs_kopen  (void);
+extern void ultifs_kclose (void);
+extern void ultifs_kclall (void);
+extern void ultifs_kload  (void);
+extern void ultifs_ksave  (void);
+
 
 void
 init_kernal_emulation ()
@@ -235,6 +242,17 @@ make_directory_list (channel * ch)
     set_oserr (0);
 }
 
+void
+free_channel ()
+{
+    channel * ch = channels[LFN];
+
+    free (ch->name);
+    free (ch);
+
+    channels[LFN] = NULL;
+}
+
 char
 ultifs_kopen ()
 {
@@ -242,7 +260,7 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   ch;
 
-    if (SA != 15 && channels[SA]) {
+    if (SA != 15 && channels[LFN]) {
         set_error (ERR_NO_CHANNEL);
         return FALSE;
     }
@@ -259,7 +277,7 @@ ultifs_kopen ()
 
     ch = malloc (sizeof (channel));
     ch->buf = NULL;
-    channels[SA] = ch;
+    channels[LFN] = ch;
 
     if (SA == 15) {
         open_command (name);
@@ -274,20 +292,24 @@ ultifs_kopen ()
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
         set_error (ERR_FILE_NOT_FOUND);
-        return FALSE;
+        goto error;
     }
 
     ch->file = found_file;
-    channels[SA]->file = found_file;
 
     set_error (0);
     return TRUE;
+
+error:
+    free_channel ();
+
+    return FALSE;
 }
 
 void
 ultifs_kclose ()
 {
-    channel * ch = channels[SA];
+    channel * ch = channels[LFN];
 
     if (!ch) {
         set_error (ERR_FILE_NOT_OPEN);
@@ -300,9 +322,7 @@ ultifs_kclose ()
     }
 
     bfile_close (ch->file);
-    free (ch->name);
-    free (ch);
-    channels[SA] = NULL;
+    free_channel ();
 }
 
 void

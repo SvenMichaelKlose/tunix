@@ -7,7 +7,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic20.cfg -Ln $(PROGRAM).lbl -o $@ $^
+	$(LD) -C ld.cfg -Ln $(PROGRAM).lbl -o $@ $^
 
 all: $(PROGRAM)
 

@@ -209,7 +209,7 @@ RESLST:
     .byte   '-'+$80         ; -
     .byte   '*'+$80         ; *
     .byte   '/'+$80         ; /
-    .byte   '^^'+$80        ; ^
+    .byte   '^'+$80        ; ^
     .byte   "AN",'D'+$80        ; AND
 
     .byte   "O",'R'+$80     ; OR
@@ -2139,8 +2139,8 @@ LAB_CAA2:
 LAB_CACA:
     LDA #$00        ; clear .A
     STA BUF,X       ; clear first byte of input buffer
-    LDX #<BUF-1     ; BUF - 1 low byte
-    LDY #>BUF-1     ; BUF - 1 high byte
+    LDX #<(BUF-1)   ; BUF - 1 low byte
+    LDY #>(BUF-1)   ; BUF - 1 high byte
     LDA CHANNL      ; get current I/O channel
     BNE LAB_CAE7    ; exit if not default channel
 
@@ -2482,8 +2482,8 @@ LAB_CC15:
                     ; else was GET
     JSR LAB_E121    ; get character from input device with error check
     STA BUF         ; save to buffer
-    LDX #<BUF-1     ; set BUF-1 pointer low byte
-    LDY #>BUF-1     ; set BUF-1 pointer high byte
+    LDX #<(BUF-1)   ; set BUF-1 pointer low byte
+    LDY #>(BUF-1)   ; set BUF-1 pointer high byte
     BNE LAB_CC4D    ; go interpret single character
 
 LAB_CC41:
@@ -5654,7 +5654,7 @@ LAB_D9BA:
 FPC1:
     .byte   $81,$00,$00,$00,$00 ; 1
 
-LOGCON
+LOGCON:
     .byte   $03         ; series counter
     .byte   $7F,$5E,$56,$CB,$79
     .byte   $80,$13,$9B,$0B,$64
@@ -12443,7 +12443,7 @@ CSTEL:
                     ; cassette switch was open
     LDY #KM_PRPLY-KMSGTBL
                     ; index to "PRESS PLAY ON TAPE"
-LAB_F89B
+LAB_F89B:
     JSR KMSGSHOW        ; display KERNAL I/O message
 LAB_F89E:
     JSR TSTOP           ; scan stop key and flag abort if pressed

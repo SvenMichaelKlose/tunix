@@ -406,6 +406,7 @@ ultifs_kload ()
     char * addr;
     char addr_l;
     char addr_h;
+    char status;
 
     LFN = LOADSAVE_LFN;
 
@@ -428,13 +429,16 @@ ultifs_kload ()
         if (STATUS & STATUS_END_OF_FILE)
             break;
         if (STATUS) {
-            flags = FLAG_C; // TODO: Does this really happen?
+            status = STATUS;
+            ultifs_kclose ();
+            STATUS = status;
+            flags = FLAG_C;         // TODO: Does this really happen?
             return;
         }
     }
 
     addr--;
-    xreg = (unsigned) addr & 255;  // TODO: Or is it another register pair?
+    xreg = (unsigned) addr & 255;   // TODO: Or is it another register pair?
     yreg = (unsigned) addr >> 8;
     flags = 0;
 
@@ -446,6 +450,7 @@ ultifs_ksave ()
 {
     char * ptr = *(char **) accu;
     char * end = (char*) (yreg << 8 + xreg);
+    char status;
 
     LFN = LOADSAVE_LFN;
 
@@ -456,8 +461,13 @@ ultifs_ksave ()
         accu = *ptr++;
         ultifs_kbsout ();
 
-        if (STATUS)
+        if (STATUS) {
+            status = STATUS;
+            ultifs_kclose ();
+            STATUS = status;
+            flags = FLAG_C;     // TODO: Does this really happen?
             return;
+        }
 
         if (end == ptr)
             break;

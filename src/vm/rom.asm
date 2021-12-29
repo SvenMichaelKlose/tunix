@@ -7873,8 +7873,12 @@ WARMBAS:
 ; checksum byte, not referenced
 
 ;LAB_E475
-    .byte   $E8         ; [PAL]
-;   .byte   $41         ; [NTSC]
+.ifdef PAL
+    .byte   $E8
+.endif
+.ifdef NTSC
+    .byte   $41
+.endif
 
 
 ;***********************************************************************************;
@@ -9746,15 +9750,23 @@ CTRLKEYS:
 ; initial values for VIC registers
 
 VICINIT:
-    .byte   $0C         ; interlace and horizontal origin [PAL]
-;   .byte   $05         ; interlace and horizontal origin [NTSC]
+.ifdef PAL
+    .byte   $0C     ; interlace and horizontal origin [PAL]
+.endif
+.ifdef NTSC
+    .byte   $05     ; interlace and horizontal origin [NTSC]
+.endif
                     ; bit   function
                     ; ---   --------
                     ;  7    interlace / non interlace
                     ; 6-0   horizontal origin
-    .byte   $26         ; vertical origin [PAL]
-;   .byte   $19         ; vertical origin [NTSC]
-    .byte   $16         ; video address and columns, $9400 for colour RAM
+.ifdef PAL
+    .byte   $26     ; vertical origin [PAL]
+.endif
+.ifdef NTSC
+    .byte   $19     ; vertical origin [NTSC]
+.endif
+    .byte   $16     ; video address and columns, $9400 for colour RAM
                     ; bit   function
                     ; ---   --------
                     ;  7    video memory address va9
@@ -13786,11 +13798,19 @@ INITVIA:
 LAB_FE39:
     LDA #$C0            ; enable T1 interrupt
     STA VIA2IER         ; set VIA 2 IER
+.ifdef PAL
     LDA #$26            ; set timer constant low byte [PAL]
-;   LDA #$89            ; set timer constant low byte [NTSC]
+.endif
+.ifdef NTSC
+    LDA #$89            ; set timer constant low byte [NTSC]
+.endif
     STA VIA2T1CL        ; set VIA 2 T1C_l
+.ifdef PAL
     LDA #$48            ; set timer constant high byte [PAL]
-;   LDA #$42            ; set timer constant high byte [NTSC]
+.endif
+.ifdef NTSC
+    LDA #$42            ; set timer constant high byte [NTSC]
+.endif
     STA VIA2T1CH        ; set VIA 2 T1C_h
     RTS
 
@@ -14160,6 +14180,7 @@ _RTI:
 ; baud rate tables for PAL VIC 20
 
 BAUDTBL:
+.ifdef PAL
     .word   $2AE6           ;   50   baud
     .word   $1C78           ;   75   baud
     .word   $1349           ;  110   baud
@@ -14171,20 +14192,23 @@ BAUDTBL:
     .word   $00D0           ; 1800   baud
     .word   $0083           ; 2400   baud
     .word   $0036           ; 3600   baud
+.endif
 
 ; baud rate tables for NTSC VIC 20
 
-;   .word   $2792           ;   50   baud
-;   .word   $1A40           ;   75   baud
-;   .word   $11C6           ;  110   baud
-;   .word   $0E74           ;  134.5 baud
-;   .word   $0CEE           ;  150   baud
-;   .word   $0645           ;  300   baud
-;   .word   $02F1           ;  600   baud
-;   .word   $0146           ; 1200   baud
-;   .word   $00B8           ; 1800   baud
-;   .word   $0071           ; 2400   baud
-;   .word   $002A           ; 3600   baud
+.ifdef NTSC
+    .word   $2792           ;   50   baud
+    .word   $1A40           ;   75   baud
+    .word   $11C6           ;  110   baud
+    .word   $0E74           ;  134.5 baud
+    .word   $0CEE           ;  150   baud
+    .word   $0645           ;  300   baud
+    .word   $02F1           ;  600   baud
+    .word   $0146           ; 1200   baud
+    .word   $00B8           ; 1800   baud
+    .word   $0071           ; 2400   baud
+    .word   $002A           ; 3600   baud
+.endif
 
 
 ;***********************************************************************************;

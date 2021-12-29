@@ -162,7 +162,7 @@ void
 add_to_buf (channel * ch, void * ptr, size_t len)
 {
     if (!ch->buf)
-        ch->buf = ch->bufrptr = ch->bufwptr = malloc (1024);
+        ch->buf = ch->bufrptr = ch->bufwptr = malloc (2048);
 
     memcpy (ch->bufwptr, ptr, len);
     ch->bufwptr += len;
@@ -217,9 +217,16 @@ make_directory_list (channel * ch)
     unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
     basic_dirent * b = malloc (sizeof (basic_dirent));
+    char flen[2];
+
+    // Emit start address.
+    flen[0] = line_addr & 255;
+    flen[1] = line_addr >> 8;
+    add_to_buf (ch, flen, sizeof (flen));
 
     ultifs_opendir ();
 
+    // Emit directory entries as BASIC lines.
     while (!ultifs_readdir (dirent)) {
         memset (b, ' ', sizeof (basic_dirent));
 
@@ -239,6 +246,10 @@ make_directory_list (channel * ch)
         line_addr += sizeof (basic_dirent);
     }
 
+    // Emit end-of-program marker.
+    flen[0] = flen[1] = 0;
+    add_to_buf (ch, flen, sizeof (flen));
+
     ultifs_closedir ();
     free (dirent);
     free (b);
@@ -252,6 +263,7 @@ free_channel ()
     channel * ch = channels[LFN];
 
     free (ch->name);
+    free (ch->buf);
     free (ch);
 
     channels[LFN] = NULL;
@@ -332,13 +344,13 @@ ultifs_kclose ()
 void
 ultifs_kchkin ()
 {
-    set_oserr (channels[SA] ? 0 : OSERR_FILE_NOT_OPEN);
+    set_oserr (channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN);
 }
 
 void
 ultifs_kchkout ()
 {
-    if (!channels[SA]) {
+    if (!channels[LFN]) {
         set_oserr (OSERR_FILE_NOT_OPEN);
         return;
     }
@@ -360,7 +372,7 @@ ultifs_kclrcn ()
 char
 ultifs_kbasin ()
 {
-    channel * ch = channels[SA];
+    channel * ch = channels[LFN];
 
     if (!ch) {
         set_oserr (OSERR_FILE_NOT_OPEN);
@@ -373,7 +385,7 @@ ultifs_kbasin ()
         accu = read_from_buf (ch);
         if (!ch->buf)
             goto end_of_file;
-        return 0;
+        return accu;
     }
 
     //if (SA == 15)
@@ -404,8 +416,8 @@ ultifs_kload ()
 {
     char do_verify = accu;
     char * addr;
-    char addr_l;
-    char addr_h;
+    unsigned addr_l;
+    unsigned addr_h;
     char status;
 
     LFN = LOADSAVE_LFN;
@@ -413,14 +425,18 @@ ultifs_kload ()
     if (!ultifs_kopen ())
         return;
 
+    // Read destination address.
     addr_l = ultifs_kbasin ();
     addr_h = ultifs_kbasin ();
+/*
+    // Override by YX pair when SA == 0.
     if (!SA) {
         addr_l = xreg;
         addr_h = yreg;
     } else if (SA > 2) {
         // TODO: Issue some error?
     }
+*/
     addr = (char *) (addr_h << 8 | addr_l);
 
     while (1) {
@@ -438,7 +454,7 @@ ultifs_kload ()
     }
 
     addr--;
-    xreg = (unsigned) addr & 255;   // TODO: Or is it another register pair?
+    xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
     flags = 0;
 

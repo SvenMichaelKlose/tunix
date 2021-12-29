@@ -7,7 +7,7 @@
 .export _blk3
 
 .export _init_secondary_wedge
-.export uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall
+.export uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall, uload, usave
 
 .export _last_regular_device
 
@@ -79,11 +79,12 @@ _new_vectors:
     .word 0         ; TODO: Point to a BRK.
     .word uload
     .word usave
+_new_vectors_end:
 
 _saved_zp:  .res $80
 
 .proc init_kernal_vectors
-    ldx #19
+    ldx #_new_vectors_end - _new_vectors - 1
 l:  lda IOPEN,x
     sta old_IOPEN,x
     lda _new_vectors,x
@@ -109,7 +110,7 @@ l:  lda __ZP_START__,x
     stx _last_regular_device
 
     jsr init_kernal_vectors
-    jmp copy_zp
+    rts ;jmp copy_zp
 .endproc
 
 .proc swap_zp

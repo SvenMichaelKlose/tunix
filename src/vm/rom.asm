@@ -2346,8 +2346,8 @@ GET:
     STX CHANNL      ; set current I/O channel
     JSR LAB_E11B    ; open channel for input with error check
 LAB_CB92:
-    LDX #<BUF+1     ; set BUF+1 pointer low byte
-    LDY #>BUF+1     ; set BUF+1 pointer high byte
+    LDX #<(BUF+1)   ; set BUF+1 pointer low byte
+    LDY #>(BUF+1)   ; set BUF+1 pointer high byte
     LDA #$00        ; clear .A
     STA BUF+1       ; ensure null terminator
     LDA #$40        ; input mode = GET
@@ -7245,9 +7245,9 @@ SYSTEM:
     JSR TYPCHK          ; evaluate expression and check is numeric, else do
                     ; type mismatch
     JSR MAKADR          ; convert FAC1 to integer in temporary integer
-    LDA #>LAB_E144-1        ; get return address high byte
+    LDA #>(LAB_E144-1)        ; get return address high byte
     PHA             ; push as return address
-    LDA #<LAB_E144-1        ; get return address low byte
+    LDA #<(LAB_E144-1)        ; get return address low byte
     PHA             ; push as return address
     LDA SPREG           ; get saved status register
     PHA             ; put on stack

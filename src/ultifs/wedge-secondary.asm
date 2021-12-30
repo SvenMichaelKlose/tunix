@@ -81,7 +81,7 @@ _new_vectors:
     .word usave
 _new_vectors_end:
 
-_saved_zp:  .res $80
+_saved_zp:  .res 256
 
 .proc init_kernal_vectors
     ldx #_new_vectors_end - _new_vectors - 1
@@ -95,20 +95,20 @@ l:  lda IOPEN,x
 .endproc
 
 .proc save_zp
-    ldx #$2a
-l:  lda __ZP_START__,x
+    ldx #0
+l:  lda 0,x
     sta _saved_zp,x
     dex
-    bpl l
+    bne l
     rts
 .endproc
 
 .proc restore_zp
-    ldx #$2a
+    ldx #0
 l:  lda _saved_zp,x
-    sta __ZP_START__,x
+    sta 0,x
     dex
-    bpl l
+    bne l
     rts
 .endproc
 
@@ -138,12 +138,11 @@ done:
 .endproc
 
 .proc enter
-rts
     php
     pha
     txa
     pha
-    tya
+    tya     ; TODO: Remove if unused.
     pha
 
 ;    lda $9ffa

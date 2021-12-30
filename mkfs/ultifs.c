@@ -412,15 +412,15 @@ bfile_writem (bfile * b, char * bytes, unsigned len)
 int __cc65fastcall__
 bfile_readm (bfile * b, char * bytes, unsigned len)
 {
-    cc65register unsigned oldbank = *ULTIMEM_BLK5;
-    cc65register char     oldcfg = *ULTIMEM_CONFIG2;
-    cc65register char     newcfg = oldcfg & 0x3f | 0x40;
-    cc65register char *   addr = b->addr;
-    cc65register upos     ptr = b->ptr;
-    cc65register unsigned bank = b->bank;
-    cc65register int size = 0;
-    cc65register upos end = file_data (b->start) + b->size;
-    cc65register char v;
+    cc65register unsigned  oldbank = *ULTIMEM_BLK5;
+    cc65register char      oldcfg = *ULTIMEM_CONFIG2;
+    cc65register char      newcfg = oldcfg & 0x3f | 0x40;
+    cc65register char *    addr = b->addr;
+    cc65register upos      ptr = b->ptr;
+    cc65register unsigned  bank = b->bank;
+    cc65register int       size = 0;
+    cc65register upos      end = file_data (b->start) + b->size;
+    cc65register char      v;
 
     if (b->mode)
     if (b->mode != ULTIFS_MODE_READ)
@@ -438,8 +438,8 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
         *bytes++ = v;
         ++ptr;
 
-        if (addr == (void *) 0xc000u) {
-            addr = (void *) 0xa000u;
+        if (addr == (char *) 0xc000u) {
+            addr = (char *) 0xa000u;
             ++bank;
         }
         ++size;

@@ -249,6 +249,7 @@ make_directory_list (channel * ch)
     // Emit end-of-program marker.
     flen[0] = flen[1] = 0;
     add_to_buf (ch, flen, sizeof (flen));
+    add_to_buf (ch, flen, 1);
 
     ultifs_closedir ();
     free (dirent);

@@ -1,5 +1,7 @@
 #include <string.h>
 
+#include <libterm.h>
+
 #include "linebuf.h"
 
 

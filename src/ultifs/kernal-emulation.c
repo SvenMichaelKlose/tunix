@@ -429,7 +429,7 @@ ultifs_kload ()
     // Read destination address.
     addr_l = ultifs_kbasin ();
     addr_h = ultifs_kbasin ();
-/*
+
     // Override by YX pair when SA == 0.
     if (!SA) {
         addr_l = xreg;
@@ -437,7 +437,6 @@ ultifs_kload ()
     } else if (SA > 2) {
         // TODO: Issue some error?
     }
-*/
     addr = (char *) (addr_h << 8 | addr_l);
 
     while (1) {

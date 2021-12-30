@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include <cc65-charmap.h>
-#include <libterm.h>
 #include <liblineedit.h>
 
 #include "linelist.h"

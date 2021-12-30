@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <cc65-charmap.h>
-#include <libterm.h>
+#include <lib/ingle/cc65-charmap.h>
+#include <lib/term/libterm.h>
 
 #include "linebuf.h"
 #include "liblineedit.h"

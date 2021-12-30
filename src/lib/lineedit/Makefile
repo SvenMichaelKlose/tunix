@@ -10,7 +10,7 @@ include ../../Makefile.rules
 	$(AS) -g -o $@ $<
 
 %.o: %.c
-	$(CC) -O -c $(CFLAGS) -I../term/ -I../ingle/ -o $@ $<
+	$(CC) -O -c $(CFLAGS) -I../../ -o $@ $<
 
 $(LIBRARY): $(SOURCES:.c=.o)
 	$(AR) a $@ $^

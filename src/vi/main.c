@@ -1,12 +1,12 @@
 #include <cbm.h>
 
-#include <cc65-charmap.h>
-#include <libterm.h>
-#include <liblineedit.h>
+#include <lib/ingle/cc65-charmap.h>
+#include <lib/term/libterm.h>
+#include <lib/lineedit/liblineedit.h>
+#include <lib/text/linelist.h>
+#include <lib/text/motion.h>
 
 #include "commands.h"
-#include "linelist.h"
-#include "motion.h"
 #include "screen.h"
 
 char

@@ -1,10 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <cc65-charmap.h>
-#include <liblineedit.h>
-
-#include "linelist.h"
+#include <lib/ingle/cc65-charmap.h>
+#include <lib/lineedit/liblineedit.h>
+#include <lib/text/linelist.h>
 
 
 line      * first_line;

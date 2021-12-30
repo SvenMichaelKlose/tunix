@@ -44,6 +44,9 @@ cputs (data);
 
 typedef void voidfun (void);
 
+#define MEMHIGH     (*(unsigned *) 0x0283)
+#define FA      (*(char*)  0xba)
+
 void
 main ()
 {
@@ -59,6 +62,7 @@ main ()
     init_kernal_emulation ();
 
     printf ("Flash ROM mounted on device %d.\n", device);
+    MEMHIGH = 0x1fff;
     ((voidfun*) 0xc474) ();     // READY.
 
     list_directory (12);

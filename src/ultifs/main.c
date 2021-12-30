@@ -63,7 +63,8 @@ main ()
 
     printf ("Flash ROM mounted on device %d.\n", device);
     MEMHIGH = 0x1fff;
-    ((voidfun*) 0xc474) ();     // READY.
+
+    ((voidfun*) 0xe378) ();
 
     list_directory (12);
     //dump_file (8, 8, "main.c");

@@ -303,6 +303,7 @@ FACOV   = $70   ; FAC1 rounding
 FBUFPT  = $71   ; temp BASIC execute/array pointer low byte/index
 ;         $72   ; temp BASIC execute/array pointer high byte
 
+; Code!: CHRGET and CHRGOT are subroutines, not vectors!
 CHRGET  = $73   ; increment and scan memory, BASIC byte get
 CHRGOT  = $79   ; scan memory, BASIC byte get
 ;         $7A   ; BASIC execute pointer low byte

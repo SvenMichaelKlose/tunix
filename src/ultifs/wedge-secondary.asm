@@ -94,10 +94,19 @@ l:  lda IOPEN,x
     rts
 .endproc
 
-.proc copy_zp
-    ldx #$20
+.proc save_zp
+    ldx #$2a
 l:  lda __ZP_START__,x
     sta _saved_zp,x
+    dex
+    bpl l
+    rts
+.endproc
+
+.proc restore_zp
+    ldx #$2a
+l:  lda _saved_zp,x
+    sta __ZP_START__,x
     dex
     bpl l
     rts
@@ -110,19 +119,6 @@ l:  lda __ZP_START__,x
     stx _last_regular_device
 
     jsr init_kernal_vectors
-    rts ;jmp copy_zp
-.endproc
-
-.proc swap_zp
-    ldx #$20
-l:  lda __ZP_START__,x
-    pha
-    lda _saved_zp,x
-    sta __ZP_START__,x
-    pla
-    sta _saved_zp,x
-    dex
-    bpl l
     rts
 .endproc
 
@@ -158,7 +154,7 @@ rts
 ;    sta $9ffa
 ;    lda _blk3
 ;    sta $9ffc
-    jsr swap_zp
+    jsr save_zp
 
     pla
     tay
@@ -175,7 +171,7 @@ rts
 ;    sta $9ffa
 ;    lda old_blk3
 ;    sta $9ffc
-;    jsr swap_zp
+    jsr restore_zp
 
     lda $103
     pha
@@ -271,7 +267,7 @@ n:  jmp (old_IBASOUT)
     jsr enter
     jsr _ultifs_kload
     jmp leave
-n:  jmp (old_ICLALL)
+n:  jmp (old_ILOAD)
 .endproc
 
 .proc usave
@@ -280,5 +276,5 @@ n:  jmp (old_ICLALL)
     jsr enter
     jsr _ultifs_ksave
     jmp leave
-n:  jmp (old_ICLALL)
+n:  jmp (old_ISAVE)
 .endproc

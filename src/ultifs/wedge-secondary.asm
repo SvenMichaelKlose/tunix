@@ -94,24 +94,6 @@ l:  lda IOPEN,x
     rts
 .endproc
 
-.proc save_zp
-    ldx #0
-l:  lda 0,x
-    sta _saved_zp,x
-    dex
-    bne l
-    rts
-.endproc
-
-.proc restore_zp
-    ldx #0
-l:  lda _saved_zp,x
-    sta 0,x
-    dex
-    bne l
-    rts
-.endproc
-
 .proc _init_secondary_wedge
     tax
     stx _last_ingle_device
@@ -138,12 +120,12 @@ done:
 .endproc
 
 .proc enter
+    sta $100
+    stx $101
+    sty $102
     php
-    pha
-    txa
-    pha
-    tya     ; TODO: Remove if unused.
-    pha
+    pla
+    sta $103
 
 ;    lda $9ffa
 ;    sta old_blk2
@@ -153,24 +135,29 @@ done:
 ;    sta $9ffa
 ;    lda _blk3
 ;    sta $9ffc
-    jsr save_zp
 
-    pla
-    tay
-    pla
-    tax
-    pla
-    plp
+    ; Save zeropage.
+    ldx #0
+l:  lda 0,x
+    sta _saved_zp,x
+    dex
+    bne l
 
     rts
 .endproc
 
 .proc leave
+    ; Restore zeropage.
+    ldx #0
+l:  lda _saved_zp,x
+    sta 0,x
+    dex
+    bne l
+
 ;    lda old_blk2
 ;    sta $9ffa
 ;    lda old_blk3
 ;    sta $9ffc
-    jsr restore_zp
 
     lda $103
     pha

@@ -7221,6 +7221,8 @@ LAB_E144:
 
 BSAVE:
     jsr PARSL       ; get parameters for LOAD/SAVE
+                    ; NOTE: VICE monitor will not stop on return here if parametres
+                    ; are missing.
     ldx VARTAB      ; get start of variables low byte
     ldy VARTAB+1    ; get start of variables high byte
     lda #TXTTAB     ; index to start of program memory
@@ -7248,6 +7250,8 @@ BLOAD:
     lda #$00        ; flag load
     sta VERCHK      ; set load/verify flag
     jsr PARSL       ; get parameters for LOAD/SAVE
+                    ; NOTE: VICE monitor will not stop on return here if parametres
+                    ; are missing.
     lda VERCHK      ; get load/verify flag
     ldx TXTTAB      ; get start of memory low byte
     ldy TXTTAB+1    ; get start of memory high byte
@@ -7340,11 +7344,13 @@ LAB_E1CE:
 ; get parameters for LOAD/SAVE
 
 PARSL:
+    ; Set default params for LOAD from cassette without name.
     lda #$00        ; clear file name length
     jsr SETNAM      ; clear filename
     ldx #$01        ; set default device number, cassette
     ldy #$00        ; set default command
     jsr SETLFS      ; set logical, first and second addresses
+
     jsr IFCHRG      ; exit function if [EOT] or ":"
     jsr LAB_E254    ; set filename
     jsr IFCHRG      ; exit function if [EOT] or ":"

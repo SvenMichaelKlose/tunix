@@ -11620,8 +11620,8 @@ LAB_F53C:
 ; Before this routine can be called, the SETLFS and SETNAM routines must be called.
 
 FLOAD:
-    stx MEMUSS      ; set KERNAL setup pointer low byte
-    sty MEMUSS+1    ; set KERNAL setup pointer high byte
+    stx MEMUSS      ; Save desired start address.
+    sty MEMUSS+1    ; Ignored if secondary address is not 0.
     jmp (ILOAD)     ; do LOAD vector, usually points to FLOAD2
 
 
@@ -11670,7 +11670,7 @@ LAB_F563:
 
     jsr FACPTR      ; input a byte from the serial bus
     sta EAL+1       ; save program start address high byte
-    jsr PATCH2      ; set LOAD address if secondary address = 0
+    jsr PATCH2      ; Override LOAD address in EAL if secondary address is 0.
 LAB_F58A:
     lda #$FD        ; mask xxxx xx0x, clear time out read bit
     and STATUS      ; mask serial status byte
@@ -14604,14 +14604,14 @@ CHROUT:
 ; load RAM from a device
 
 ; This routine will load data bytes from any input device directly into the memory
-; of the computer. It can also be used for a verify operation comparing data from a
+; of the computer.  It can also be used for a verify operation comparing data from a
 ; device with the data already in memory, leaving the data stored in RAM unchanged.
 
-; The accumulator must be set to 0 for a load operation or 1 for a verify. If the
+; The accumulator must be set to 0 for a load operation or 1 for a verify.  If the
 ; input device was OPENed with a secondary address of 0 the header information from
-; device will be ignored. In this case .X.Y must contain the starting address for the
-; load. If the device was addressed with a secondary address of 1 or 2 the data will
-; load into memory starting at the location specified by the header. This routine
+; device will be ignored.  In this case .X.Y must contain the starting address for the
+; load. If the device was addressed with a secondary address other than 0 the data will
+; load into memory starting at the location specified by the header.  This routine
 ; returns the address of the highest RAM location which was loaded.
 
 ; Before this routine can be called, the SETLFS and SETNAM routines must be called.

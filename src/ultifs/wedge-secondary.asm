@@ -21,6 +21,9 @@
 .import _ultifs_kclall
 .import _ultifs_kload
 .import _ultifs_ksave
+.import unmap_ofs
+
+unmap = $9800 + unmap_ofs
 
 .import __ZP_START__
 .import __ZP_SIZE__
@@ -57,7 +60,7 @@ old_ICHKIN:     .res 2
 old_ICHKOUT:    .res 2
 old_ICLRCN:     .res 2
 old_IBASIN:     .res 2
-old_IBASOUT:    .res 2
+old_IBSOUT:     .res 2
 old_ISTOP:      .res 2
 old_IGETIN:     .res 2
 old_ICLALL:     .res 2
@@ -127,14 +130,21 @@ done:
     pla
     sta $103
 
-;    lda $9ffa
-;    sta old_blk2
-;    lda $9ffc
-;    sta old_blk3
-;    lda _blk2
-;    sta $9ffa
-;    lda _blk3
-;    sta $9ffc
+    lda $9ffa
+    sta $107
+    lda $9ffb
+    sta $108
+    lda $9ffc
+    sta $109
+    lda $9ffd
+    sta $10a
+    lda #118
+    sta $9ffa
+    lda #119
+    sta $9ffc
+    lda #0
+    sta $9ffb
+    sta $9ffd
 
     ; Save zeropage.
     ldx #<__ZP_SIZE__
@@ -154,19 +164,18 @@ l:  lda _saved_zp,x
     dex
     bne l
 
-;    lda old_blk2
-;    sta $9ffa
-;    lda old_blk3
-;    sta $9ffc
+    lda $107
+    sta $9ffa
+    lda $108
+    sta $9ffb
+    lda $109
+    sta $9ffc
+    lda $10a
+    sta $9ffd
 
-    lda $103
-    pha
-    lda $100
     ldx $101
     ldy $102
-    plp
-
-    rts
+    jmp unmap ; Accum flags and BLK1 will be restored there.
 .endproc
 
 .proc uopen
@@ -175,7 +184,12 @@ l:  lda _saved_zp,x
     jsr enter
     jsr _ultifs_kopen
     jmp leave
-n:  jmp (old_IOPEN)
+
+n:  lda old_IOPEN
+    pha
+    lda old_IOPEN + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc uclose
@@ -184,7 +198,12 @@ n:  jmp (old_IOPEN)
     jsr enter
     jsr _ultifs_kclose
     jmp leave
-n:  jmp (old_ICLOSE)
+
+n:  lda old_ICLOSE
+    pha
+    lda old_ICLOSE + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc uchkin
@@ -193,7 +212,12 @@ n:  jmp (old_ICLOSE)
     jsr enter
     jsr _ultifs_kchkin
     jmp leave
-n:  jmp (old_ICHKIN)
+
+n:  lda old_ICHKIN
+    pha
+    lda old_ICHKIN + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc uckout
@@ -202,7 +226,12 @@ n:  jmp (old_ICHKIN)
     jsr enter
     jsr _ultifs_kchkout
     jmp leave
-n:  jmp (old_ICHKOUT)
+
+n:  lda old_ICHKOUT
+    pha
+    lda old_ICHKOUT + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc uclrcn
@@ -211,7 +240,12 @@ n:  jmp (old_ICHKOUT)
     jsr enter
     jsr _ultifs_kclrcn
     jmp leave
-n:  jmp (old_ICLRCN)
+
+n:  lda old_ICLRCN
+    pha
+    lda old_ICLRCN + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc ubasin
@@ -220,7 +254,12 @@ n:  jmp (old_ICLRCN)
     jsr enter
     jsr _ultifs_kbasin
     jmp leave
-n:  jmp (old_IBASIN)
+
+n:  lda old_IBASIN
+    pha
+    lda old_IBASIN + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc ubsout
@@ -229,22 +268,38 @@ n:  jmp (old_IBASIN)
     jsr enter
     jsr _ultifs_kbsout
     jmp leave
-n:  jmp (old_IBASOUT)
+
+n:  lda old_IBSOUT
+    pha
+    lda old_IBSOUT + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc ustop
-    jmp (old_ISTOP)
+n:  lda old_ISTOP
+    pha
+    lda old_ISTOP + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc ugetin
-    jmp (old_IGETIN)
+n:  lda old_IGETIN
+    pha
+    lda old_IGETIN + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
-    jsr leave
-    jmp (old_ICLALL)
+    lda old_ICLALL
+    pha
+    lda old_ICLALL + 1
+    pha
+    jmp leave
 .endproc
 
 .proc uload
@@ -253,7 +308,12 @@ n:  jmp (old_IBASOUT)
     jsr enter
     jsr _ultifs_kload
     jmp leave
-n:  jmp (old_ILOAD)
+
+n:  lda old_ILOAD
+    pha
+    lda old_ILOAD + 1
+    pha
+    jmp unmap
 .endproc
 
 .proc usave
@@ -262,5 +322,10 @@ n:  jmp (old_ILOAD)
     jsr enter
     jsr _ultifs_ksave
     jmp leave
-n:  jmp (old_ISAVE)
+
+n:  lda old_ISAVE
+    pha
+    lda old_ISAVE + 1
+    pha
+    jmp unmap
 .endproc

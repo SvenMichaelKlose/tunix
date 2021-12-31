@@ -2,7 +2,7 @@
 ;
 ; Banks in the secondary wedge.
 
-.export _init_primary_wedge, _unmap_ofs
+.export _init_primary_wedge, unmap_ofs
 
 .import uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall
 
@@ -26,7 +26,7 @@ secondary_vectors_h:
 
 kernal_vectors  = $031a
 wedge_start     = $9800
-_unmap_ofs  = unmap_ultimem - map_ultimem
+unmap_ofs       = unmap_ultimem - map_ultimem
 
 ; A: Wedge start low byte.
 ; X: Wedge start high byte.
@@ -113,7 +113,7 @@ r:  rts
     ; Bank in secondary wedge on BLK1.
     ora #%11000000  ; (RAM)
     sta $9ff2
-    lda #8
+    lda #117
     sta $9ff8
     lda #0
     sta $9ff9

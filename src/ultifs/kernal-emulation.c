@@ -196,24 +196,18 @@ open_command (char * name)
     STATUS = 0;
 }
 
-typedef struct _basic_dirent {
-    unsigned    next;
-    unsigned    linenr;
-    char        name[19];
-    char        type[3];
-    char        lineend;
-} basic_dirent;
-
 void
 make_directory_list (channel * ch)
 {
     unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
-    basic_dirent * b = malloc (sizeof (basic_dirent));
+    char * line = malloc (256);
     char flen[2];
     unsigned char i;
     unsigned char l;
     char c;
+    char * p;
+    size_t len;
 
     // Emit start address.
     flen[0] = line_addr & 255;
@@ -224,29 +218,30 @@ make_directory_list (channel * ch)
 
     // Emit directory entries as BASIC lines.
     while (!ultifs_readdir (dirent)) {
-        memset (b, ' ', sizeof (basic_dirent));
+        p = line + 2;
 
-        b->next = line_addr + sizeof (basic_dirent);
-        b->linenr = dirent->size;
-
-        b->name[0] = '"';
-        memset (&b->name[1], ' ', 17);
+        *p++ = dirent->size & 255;
+        *p++ = dirent->size >> 8;
+        *p++ = ' ';
+        *p++ = '"';
         l = strnlen (dirent->name, 17);
         for (i = 0; i < l; i++) {
             c = toupper (dirent->name[i]);
-            b->name[i + 1] = c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c;
+            *p++ = c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c;
         }
-        b->name[i + 1] = '"';
-        //strncpy (&b->name[1], dirent->name, strnlen (dirent->name, 17));
+        *p++ = '"';
+        *p++ = ' ';
+        *p++ = 'P';
+        *p++ = 'R';
+        *p++ = 'G';
+        *p++ = 0;
 
-        b->type[0] = 'P';
-        b->type[1] = 'R';
-        b->type[2] = 'G';
-        b->lineend = 0;
+        len = p - line;
+        line_addr += len;
+        line[0] = line_addr & 255;
+        line[1] = line_addr >> 8;
 
-        add_to_buf (ch, b, sizeof (basic_dirent));
-
-        line_addr += sizeof (basic_dirent);
+        add_to_buf (ch, line, len);
     }
 
     // Emit end-of-program marker.
@@ -255,8 +250,9 @@ make_directory_list (channel * ch)
     add_to_buf (ch, flen, 1);
 
     ultifs_closedir ();
+
     free (dirent);
-    free (b);
+    free (line);
 
     set_oserr (0);
 }

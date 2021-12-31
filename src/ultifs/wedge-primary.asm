@@ -2,8 +2,7 @@
 ;
 ; Banks in the secondary wedge.
 
-.export _init_primary_wedge
-.exportzp unmap
+.export _init_primary_wedge, _unmap_ofs
 
 .import uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall
 
@@ -13,7 +12,6 @@
 s:      .res 2
 v:      .res 2
 d:      .res 2
-unmap:  .res 2
 
 
 .data
@@ -28,43 +26,46 @@ secondary_vectors_h:
 
 kernal_vectors  = $031a
 wedge_start     = $9800
+_unmap_ofs  = unmap_ultimem - map_ultimem
 
+; A: Wedge start low byte.
+; X: Wedge start high byte.
 .proc _init_primary_wedge
-
-map_size        = unmap_ultimem_end - map_ultimem
-map_ofs         = 0
-unmap_ofs       = unmap_ultimem - map_ultimem
-
     ; Pointer to start of wedge.
-    lda #<wedge_start
     sta d
-    lda #>wedge_start
-    sta d+1
+    stx d+1
 
     ; Copy wedge's subroutines.
-    ldy #map_size
+    ldy #unmap_ultimem_end - map_ultimem
 l1: lda map_ultimem,y
     sta (d),y
     dey
     bpl l1
 
-    ; Calculate address of unmap_ultimem.
-    lda #<wedge_start
+    lda #unmap_ultimem_end - map_ultimem
     clc
-    adc #<unmap_ofs
-    sta unmap
-    lda #>kernal_vectors
-    adc #>wedge_start
-    sta unmap+1
+    adc d
+    sta d
+    lda d+1
+    adc #0
+    sta d+1
 
-    ; Create trampolines.
+    ;;; Create trampolines.
     ldx #0
-    ldy #map_size
 l2: lda secondary_vectors_l,x
     ora secondary_vectors_h,x
     beq done
 
-    ; JSR map_ultimem
+    ; Point vector to the code we're about to generate.
+    txa
+    asl
+    tay
+    lda d
+    sta kernal_vectors,y
+    lda d+1
+    sta kernal_vectors+1,y
+
+    ; Generate "JSR map_ultimem".
     lda #$20
     jsr out
     lda #<wedge_start
@@ -72,7 +73,7 @@ l2: lda secondary_vectors_l,x
     lda #>wedge_start
     jsr out
 
-    ; JMP <secondary wedge>
+    ; Generate "JMP <secondary wedge>".
     lda #$4c
     jsr out
     lda secondary_vectors_l,x
@@ -80,31 +81,22 @@ l2: lda secondary_vectors_l,x
     lda secondary_vectors_h,x
     jsr out
 
-    ; TODO: Set vector in lowmem.
     inx
     jmp l2
 
 done:
     rts
 
-out:sta (d),y
-    iny
-    rts
-
-outv:
-    tya
-    pha
-    ldy #0
-    sta (v),y
-    inc v
-    bne n
-    inc v+1
-n:  pla
-    tay
-    rts
+out:ldy #0
+    sta (d),y
+    inc d
+    bne r
+    inc d+1
+r:  rts
+.endproc
 
 ; Map in secondary wedge and save registers.
-map_ultimem:
+.proc map_ultimem
     ; Save registers to stack page.
     sta $100
     stx $101
@@ -128,9 +120,10 @@ map_ultimem:
 
     rts
 map_ultimem_end:
+.endproc
 
 ; Map process back in and set accu and flags.
-unmap_ultimem:
+.proc unmap_ultimem
     lda $104
     sta $9ff8
     lda $105
@@ -143,5 +136,8 @@ unmap_ultimem:
     lda $100
     plp
     rts
-unmap_ultimem_end:
+.endproc
+
+.proc unmap_ultimem_end
+    nop
 .endproc

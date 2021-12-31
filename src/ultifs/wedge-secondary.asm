@@ -100,7 +100,7 @@ l:  lda IOPEN,x
     dex
     stx _last_regular_device
 
-    jsr init_kernal_vectors
+;    jsr init_kernal_vectors
     rts
 .endproc
 
@@ -137,8 +137,8 @@ done:
 ;    sta $9ffc
 
     ; Save zeropage.
-    ldx #0
-l:  lda 0,x
+    ldx #<__ZP_SIZE__
+l:  lda __ZP_START__,x
     sta _saved_zp,x
     dex
     bne l
@@ -148,9 +148,9 @@ l:  lda 0,x
 
 .proc leave
     ; Restore zeropage.
-    ldx #0
+    ldx #<__ZP_SIZE__
 l:  lda _saved_zp,x
-    sta 0,x
+    sta __ZP_START__,x
     dex
     bne l
 

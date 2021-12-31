@@ -19,6 +19,7 @@
 .import _ultifs_kbasin
 .import _ultifs_kbsout
 .import _ultifs_kclall
+.import _ultifs_kusrcmd
 .import _ultifs_kload
 .import _ultifs_ksave
 .import unmap_ofs

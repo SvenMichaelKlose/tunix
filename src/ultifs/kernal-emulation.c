@@ -207,6 +207,7 @@ make_directory_list (channel * ch)
     char c;
     char * p;
     size_t len;
+    char * type;
 
     // Emit start address.
     line[0] = line_addr & 255;
@@ -217,10 +218,14 @@ make_directory_list (channel * ch)
 
     // Emit directory entries as BASIC lines.
     while (!ultifs_readdir (dirent)) {
+        // Skip pointer to next line. (Updated later.)
         p = line + 2;
 
+        // Write file size to line number.
         *p++ = dirent->size & 255;
         *p++ = dirent->size >> 8;
+
+        // Write file name in quotes.
         *p++ = '"';
         l = strnlen (dirent->name, 17);
         for (i = 0; i < l; i++) {
@@ -228,29 +233,59 @@ make_directory_list (channel * ch)
             *p++ = c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c;
         }
         *p++ = '"';
+
         *p++ = ' ';
-        *p++ = 'P';
-        *p++ = 'R';
-        *p++ = 'G';
+
+        // Write file type.
+        switch (dirent->type) {
+            case CBM_T_DEL:
+                type = "DEL"; break;
+            case CBM_T_SEQ:
+                type = "SEQ"; break;
+            case CBM_T_PRG:
+                type = "PRG"; break;
+            case CBM_T_USR:
+                type = "USR"; break;
+            case CBM_T_REL:
+                type = "REL"; break;
+            case CBM_T_CBM:
+                type = "CBM"; break;
+            case CBM_T_DIR:
+                type = "DIR"; break;
+            case CBM_T_LNK:
+                type = "LNK"; break;
+            case CBM_T_VRP:
+                type = "VRP"; break;
+            case CBM_T_HEADER:
+                type = "HDR"; break;
+            case CBM_T_OTHER:
+            default:
+                type = "???"; break;
+        }
+        *p++ = *type++;
+        *p++ = *type++;
+        *p++ = *type;
+
         *p++ = 0;
 
+        // Update pointer to next line.
         len = p - line;
         line_addr += len;
         line[0] = line_addr & 255;
         line[1] = line_addr >> 8;
 
+        //  Output line.
         add_to_buf (ch, line, len);
     }
 
-    // Emit EOT (high byte of next line set to 0).
+    // Emit EOT (high byte of pointer to next line is 0).
     line[0] = line[1] = 0;
     add_to_buf (ch, line, 2);
-
-    ultifs_closedir ();
 
     free (dirent);
     free (line);
 
+    ultifs_closedir ();
     set_oserr (0);
 }
 

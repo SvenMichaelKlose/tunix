@@ -24,7 +24,7 @@
 #else
     #pragma code-name ("ULTIFS")
     #include <cbm.h>
-    #include <ultimem.h>
+    #include <lib/ultimem/ultimem.h>
     unsigned char * store = (void *) 0xa000u;
     #define cc65register    register
 #endif

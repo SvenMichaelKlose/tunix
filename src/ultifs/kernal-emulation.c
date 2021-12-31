@@ -482,8 +482,7 @@ ultifs_kload ()
         }
     }
 
-    // Return last loaded address.
-    addr--;
+    // Return next free address.
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
 

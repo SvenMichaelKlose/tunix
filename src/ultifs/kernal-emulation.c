@@ -202,7 +202,6 @@ make_directory_list (channel * ch)
     unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
     char * line = malloc (256);
-    char flen[2];
     unsigned char i;
     unsigned char l;
     char c;
@@ -210,9 +209,9 @@ make_directory_list (channel * ch)
     size_t len;
 
     // Emit start address.
-    flen[0] = line_addr & 255;
-    flen[1] = line_addr >> 8;
-    add_to_buf (ch, flen, sizeof (flen));
+    line[0] = line_addr & 255;
+    line[1] = line_addr >> 8;
+    add_to_buf (ch, line, 2);
 
     ultifs_opendir ();
 
@@ -222,7 +221,6 @@ make_directory_list (channel * ch)
 
         *p++ = dirent->size & 255;
         *p++ = dirent->size >> 8;
-        *p++ = ' ';
         *p++ = '"';
         l = strnlen (dirent->name, 17);
         for (i = 0; i < l; i++) {
@@ -244,10 +242,9 @@ make_directory_list (channel * ch)
         add_to_buf (ch, line, len);
     }
 
-    // Emit end-of-program marker.
-    flen[0] = flen[1] = 0;
-    add_to_buf (ch, flen, sizeof (flen));
-    add_to_buf (ch, flen, 1);
+    // Emit EOT (high byte of next line set to 0).
+    line[0] = line[1] = 0;
+    add_to_buf (ch, line, 2);
 
     ultifs_closedir ();
 

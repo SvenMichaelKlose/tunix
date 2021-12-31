@@ -3,71 +3,52 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-extern void __fastcall__ init_primary_wedge (void);
+#include <lib/ultimem/ultimem.h>
+
+extern void __fastcall__ init_primary_wedge (void * start);
 extern void __fastcall__ init_secondary_wedge (char rom_device);
 extern void __fastcall__ init_kernal_emulation (void);
-
-extern char blk2;
-extern char blk3;
-
-void
-list_directory (char device)
-{
-    static struct cbm_dirent dirent;
-
-    printf ("Directory %d:\n", device);
-
-    cbm_opendir (8, device, "$");
-    while (!cbm_readdir (8, &dirent))
-        //printf ("%s\n", dirent.name);
-        cputs (dirent.name);
-    cbm_closedir (8);
-}
-
-void
-dump_file (char device, char sfn, char * name)
-{
-    char * data = malloc (1024);
-
-    clrscr ();
-    printf ("dump %d, %d, %s\n", device, sfn, name);
-    gotoxy (0, 2);
-
-    cbm_open (8, device, sfn, name);
-    cbm_read (8, data, 1024);
-    cbm_close (8);
-cputs (data);
-
-    free (data);
-}
 
 typedef void voidfun (void);
 
 #define MEMHIGH     (*(unsigned *) 0x0283)
-#define FA      (*(char*)  0xba)
+
+// Get us out of the standard banks where the next app will
+// be running.  The primary wedge will bank in BLK1 for the
+// secondary wedge and that one will bank in BLK2 and BLK3.
+void
+copy_program_to_resident_banks (unsigned first_bank)
+{
+    // Save BLK5 config.
+    char  old_cfg2 = *ULTIMEM_CONFIG2;
+    int   old_blk5 = *ULTIMEM_BLK5;
+
+    // r/w RAM on BLK5.
+    *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | (ULTIMEM_CFG_RW_RAM << 6);
+
+    *ULTIMEM_BLK5 = first_bank++;
+    memcpy (0xa000, 0x2000, 0x2000);
+    *ULTIMEM_BLK5 = first_bank++;
+    memcpy (0xa000, 0x4000, 0x2000);
+    *ULTIMEM_BLK5 = first_bank;
+    memcpy (0xa000, 0x6000, 0x2000);
+
+    // Restore BLK5 config.
+    *ULTIMEM_CONFIG2 = old_cfg2;
+    *ULTIMEM_BLK5    = old_blk5;
+}
 
 void
-main ()
+main (void)
 {
     char device = 12;
 
-    printf ("UltiMem ROM disk\n");
-    printf ("by Sven Michael Klose\n");
-    printf ("   <pixel@hugbox.org>\n");
-    printf ("   27 DEC 2021\n");
-
-    init_primary_wedge ();
+    init_primary_wedge (0x9800);
     init_secondary_wedge (device);
     init_kernal_emulation ();
+    copy_program_to_resident_banks (117); // TODO: Use bank allocator!
 
-    printf ("Flash ROM mounted on device %d.\n", device);
-    MEMHIGH = 0x1fff;
-
-    ((voidfun*) 0xe378) ();
-
-    list_directory (12);
-    //dump_file (8, 8, "main.c");
-    //dump_file (12, 15, "AB");
-    cputs ("Finished.\n");
+    ((voidfun*) 0xe378) (); // BASIC cold start
 }

@@ -52,6 +52,10 @@ l1: dec c
     bne next
     dec c+1
     bne next
+
+    ; Restore BLK2.
+    lda #3
+    sta $9ff8
     rts
 
 out:sta (d),y

@@ -238,7 +238,7 @@ l6: lda $2000,x
     rts
 .endproc
 
-; Saves program state to $080000 in Ultimem RAM.
+; Restores program state starting at RAM bank $40 in Ultimem RAM.
 .proc restore_state
     ; Map first bank of state to $2000.
     lda #%01111111
@@ -261,7 +261,11 @@ l6: lda $2000,x
     lda $2103
     cmp #'E'
     beq l
-r:  rts
+
+    ; Restore BLK2 and return.
+r:  lda #3
+    sta $9ff8
+    rts
 l:
 
     lda #$00    ; Blank, yellow screen.

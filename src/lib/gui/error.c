@@ -1,5 +1,5 @@
-#include "message.h"
-#include "error.h"
+#include <lib/gui/message.h>
+#include <lib/gui/error.h>
 
 void __fastcall__
 print_error (char * text)

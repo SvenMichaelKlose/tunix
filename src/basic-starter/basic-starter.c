@@ -1,14 +1,15 @@
 #include <stdlib.h>
 
-#include "obj.h"
-#include "button.h"
-#include "layout-ops.h"
-#include "list.h"
-#include "table.h"
-#include "window.h"
-#include "desktop.h"
+#include <lib/gui/obj.h>
+#include <lib/gui/button.h>
+#include <lib/gui/error.h>
+#include <lib/gui/layout-ops.h>
+#include <lib/gui/list.h>
+#include <lib/gui/table.h>
+#include <lib/gui/window.h>
+#include <desktop/desktop.h>
+
 #include "basic-starter.h"
-#include "error.h"
 
 void
 make_table_button (struct obj * table, char * cmd, char * descr)

@@ -1,6 +1,7 @@
 #pragma code-name ("ULTIFS")
 
-#include <cc65-charmap.h>
+#include <lib/ingle/cc65-charmap.h>
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,8 +9,10 @@
 #include <conio.h>
 #include <dirent.h>
 
+#include <lib/ultimem/ultimem.h>
+#include <lib/posix/string.h>
+
 #include "ultifs.h"
-#include "../lib/ultimem/ultimem.h"
 
 #define FALSE   0
 #define TRUE    -1
@@ -199,17 +202,6 @@ typedef struct _basic_dirent {
     char        type[3];
     char        lineend;
 } basic_dirent;
-
-unsigned
-strnlen (char * s, size_t maxlen)
-{
-    size_t l = 0;
-
-    while (*s++ && maxlen--)
-        l++;
-
-    return l;
-}
 
 void
 make_directory_list (channel * ch)

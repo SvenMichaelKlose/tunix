@@ -2,15 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "libgfx.h"
-#include "obj.h"
-#include "event.h"
-#include "layout-ops.h"
-#include "list.h"
-#include "table.h"
-
-#include "message.h"
-#include "error.h"
+#include <lib/gfx/libgfx.h>
+#include <lib/gui/obj.h>
+#include <lib/gui/event.h>
+#include <lib/gui/layout-ops.h>
+#include <lib/gui/list.h>
+#include <lib/gui/table.h>
+#include <lib/gui/message.h>
+#include <lib/gui/error.h>
 
 void __fastcall__ layout_table (struct obj *);
 void __fastcall__ layout_table_center (struct obj *);

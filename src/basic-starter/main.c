@@ -1,4 +1,4 @@
-#include "cc65-charmap.h"
+#include <lib/ingle/cc65-charmap.h>
 
 #include <cbm.h>
 #include <string.h>
@@ -6,22 +6,22 @@
 #include <stdio.h>
 #include <conio.h>
 
-#include <ultimem.h>
-#include <ingle.h>
-#include <libgfx.h>
+#include <lib/ultimem/ultimem.h>
+#include <lib/ingle/ingle.h>
+#include <lib/gfx/libgfx.h>
 
-#include "obj.h"
-#include "event.h"
-#include "box.h"
-#include "button.h"
-#include "error.h"
-#include "frame.h"
-#include "inputline.h"
-#include "layout-ops.h"
-#include "list.h"
-#include "message.h"
-#include "table.h"
-#include "window.h"
+#include <lib/gui/obj.h>
+#include <lib/gui/event.h>
+#include <lib/gui/box.h>
+#include <lib/gui/button.h>
+#include <lib/gui/error.h>
+#include <lib/gui/frame.h>
+#include <lib/gui/inputline.h>
+#include <lib/gui/layout-ops.h>
+#include <lib/gui/list.h>
+#include <lib/gui/message.h>
+#include <lib/gui/table.h>
+#include <lib/gui/window.h>
 
 //#include "basic-starter.h"
 //#include "desktop.h"

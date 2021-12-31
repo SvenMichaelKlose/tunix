@@ -6,20 +6,20 @@
 
 #include <cbm.h>
 
-#include <ingle.h>
-#include <ultimem.h>
+#include <lib/ingle/cc65-charmap.h>
+#include <lib/ingle/ingle.h>
+#include <lib/ultimem/ultimem.h>
+#include <lib/gui/obj.h>
+#include <lib/gui/button.h>
+#include <lib/gui/inputline.h>
+#include <lib/gui/layout-ops.h>
+#include <lib/gui/list.h>
+#include <lib/gui/table.h>
+#include <lib/gui/window.h>
+#include <lib/gui/message.h>
 
-#include "cc65-charmap.h"
 #include "ultifs.h"
 #include "wrap-ultifs.h"
-#include "obj.h"
-#include "button.h"
-#include "inputline.h"
-#include "layout-ops.h"
-#include "list.h"
-#include "table.h"
-#include "window.h"
-#include "message.h"
 #include "file-window.h"
 #include "desktop.h"
 

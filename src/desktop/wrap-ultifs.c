@@ -1,6 +1,7 @@
 #include <cbm.h>
 
-#include <ultimem.h>
+#include <lib/ultimem/ultimem.h>
+
 #include "ultifs.h"
 #include "wrap-ultifs.h"
 

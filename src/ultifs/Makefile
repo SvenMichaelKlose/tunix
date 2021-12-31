@@ -8,10 +8,10 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ -I../lib/ultimem/ -I../lib/ingle/ $<
+	$(CC) -c $(CFLAGS) -o $@ -I../ $<
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C vic.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

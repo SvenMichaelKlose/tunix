@@ -1,8 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include "libgfx.h"
-#include "event.h"
+#include <lib/gfx/libgfx.h>
+#include <lib/gui/event.h>
 
 #define FALSE   0
 #define TRUE    1

@@ -1,8 +1,8 @@
 #include <cbm.h>
 
-#include <ultimem.h>
+#include <lib/ultimem/ultimem.h>
+#include <lib/gui/obj.h>
 
-#include "obj.h"
 #include "ultifs.h"
 #include "file-window.h"
 

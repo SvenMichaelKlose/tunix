@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "libgfx.h"
-#include "obj.h"
-#include "message.h"
+#include <lib/gfx/libgfx.h>
+#include <lib/gui/obj.h>
+#include <lib/gui/message.h>
 
 void __fastcall__
 print_message (char * text)

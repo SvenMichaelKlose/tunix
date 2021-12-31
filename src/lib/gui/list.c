@@ -1,12 +1,11 @@
 #include <stdlib.h>
 
-#include "libgfx.h"
-
-#include "event.h"
-#include "obj.h"
-#include "message.h"
-#include "list.h"
-#include "layout-ops.h"
+#include <lib/gfx/libgfx.h>
+#include <lib/gui/event.h>
+#include <lib/gui/obj.h>
+#include <lib/gui/message.h>
+#include <lib/gui/list.h>
+#include <lib/gui/layout-ops.h>
 
 void __fastcall__ layout_list (struct obj *);
 

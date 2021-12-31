@@ -426,35 +426,35 @@ ultifs_kload ()
     addr_l = ultifs_kbasin ();
     addr_h = ultifs_kbasin ();
 
-    // Override by YX pair when SA == 0.
+    // When SA=0 pverride with address to YX.
     if (!SA) {
         addr_l = xreg;
         addr_h = yreg;
-    } else if (SA > 2) {
-        // TODO: Issue some error?
     }
-    addr = (char *) (addr_h << 8 | addr_l);
 
+    // Read all bytes.
+    addr = (char *) (addr_h << 8 | addr_l);
     while (1) {
         *addr++ = ultifs_kbasin ();
 
         if (STATUS & STATUS_END_OF_FILE)
             break;
+
         if (STATUS) {
-            status = STATUS;
             ultifs_kclose ();
-            STATUS = status;
-            flags = FLAG_C;         // TODO: Does this really happen?
+            flags = FLAG_C;
             return;
         }
     }
 
+    // Return last loaded address.
     addr--;
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
-    flags = 0;
 
     ultifs_kclose ();
+
+    set_error (0);
 }
 
 void

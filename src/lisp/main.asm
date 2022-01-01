@@ -14,86 +14,23 @@ tmp:        .res 3
 tmp2:       .res 3
 
 
-; ############
-; ### INIT ###
-; ############
+; ##############
+; ### ERRORS ###
+; ##############
 
     .code
 
-.proc _main
-    jsr _term_init
-
-    lda #<txt_welcome
-    ldx #>txt_welcome
+.proc err_not_a_cons
+    lda #<txt_err_not_a_cons
+    ldx #>txt_err_not_a_cons
     jsr _term_puts
-
-;    jsr _ultimem_unhide
-;    jsr _ultimem_is_installed
-;    tax
-;    bne ultimem_found
-
-;    lda #<txt_no_ultimem
-;    ldx #>txt_no_ultimem
-;    jsr _term_puts
-
-ultimem_found:
-    lda #$00
-    sta heap
-    lda #$60
-    sta heap+1
-
-    lda #$00
-    sta stack
-    lda #$40
-    sta stack+1
-
-;    lda #<txt_t
-;    ldx #>txt_t
-;    jsr make_symbol
-;    lda r
-;    sta symbol_t
-;    lda r+1
-;    sta symbol_t+1
-
-    ldx #31
-    jsr alloc_heap
-
     jmp loop
 .endproc
 
-    .data
+    .rodata
 
-txt_t:
-    .byte "t",0
-
-txt_welcome:
-    .byte "AttoLisp v0.1 2021-10-03", 10, 13
-    .byte "by Sven Michael Klose <pixel@hugbox.org>", 10, 13
-    .byte "Welcome!", 10, 13
-    .byte 10, 13, 0
-
-txt_prompt:
-    .byte "* ", 0
-
-txt_no_ultimem:
-    .byte "No UltiMem expansion found. Stopped.", 0
-
-
-; #################
-; ### TOP-LEVEL ###
-; #################
-
-    .code
-
-.proc loop
-    lda #<txt_prompt
-    ldx #>txt_prompt
-    jsr _term_puts
-
-l:  jsr _term_get
-    jsr _term_put
-    jmp l
-.endproc
+txt_err_not_a_cons:
+    .byte "Object is not a cons: ", 0
 
 
 ; #####################
@@ -429,7 +366,7 @@ OFS_NUMBER_RELOC    = 2
 OFS_NUMBER          = 5
 NUMBER_SIZE         = 7
 
-    .data
+    .bss
 
 number:     .res 2
 
@@ -467,7 +404,7 @@ SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
 sp:             .res 2  ; Symbol name tree pointer
 symbol_name:    .res 2  ; Symbol name string
 
-    .data
+    .bss
 
 symbol_t:       .res 3
 sp_root:        .res 3  ; Root node of symbol name tree
@@ -816,7 +753,7 @@ builtin:
 
 p:  .res 3
 
-    .data
+    .bss
 
 last_object:    .res 3
 
@@ -1179,20 +1116,85 @@ done:
 .endproc
 
 
-; ##############
-; ### ERRORS ###
-; ##############
+; #################
+; ### TOP-LEVEL ###
+; #################
 
     .code
 
-.proc err_not_a_cons
-    lda #<txt_err_not_a_cons
-    ldx #>txt_err_not_a_cons
+.proc loop
+    lda #<txt_prompt
+    ldx #>txt_prompt
     jsr _term_puts
+
+l:  jsr _term_get
+    jsr _term_put
+    jmp l
+.endproc
+
+    .rodata
+
+txt_prompt:
+    .byte "* ", 0
+
+
+; ############
+; ### INIT ###
+; ############
+
+    .code
+
+.proc _main
+    jsr _term_init
+
+    lda #<txt_welcome
+    ldx #>txt_welcome
+    jsr _term_puts
+
+;    jsr _ultimem_unhide
+;    jsr _ultimem_is_installed
+;    tax
+;    bne ultimem_found
+
+;    lda #<txt_no_ultimem
+;    ldx #>txt_no_ultimem
+;    jsr _term_puts
+
+ultimem_found:
+    lda #$00
+    sta heap
+    lda #$60
+    sta heap+1
+
+    lda #$00
+    sta stack
+    lda #$40
+    sta stack+1
+
+;    lda #<txt_t
+;    ldx #>txt_t
+;    jsr make_symbol
+;    lda r
+;    sta symbol_t
+;    lda r+1
+;    sta symbol_t+1
+
+    ldx #31
+    jsr alloc_heap
+
     jmp loop
 .endproc
 
-    .data
+    .rodata
 
-txt_err_not_a_cons:
-    .byte "Object is not a cons: ", 0
+txt_t:
+    .byte "t",0
+
+txt_welcome:
+    .byte "AttoLisp", 10, 13
+    .byte "by Sven Michael Klose <pixel@hugbox.org>", 10, 13
+    .byte "Welcome!", 10, 13
+    .byte 10, 13, 0
+
+txt_no_ultimem:
+    .byte "No UltiMem expansion found. Stopped.", 0

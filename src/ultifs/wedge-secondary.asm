@@ -3,9 +3,6 @@
 ; Wraps the UltiFS C functions by banking in missing banks.
 ; Also redirects the old vectors.
 
-.export _blk2
-.export _blk3
-
 .export _init_secondary_wedge
 .export uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall, uload, usave
 
@@ -23,6 +20,8 @@
 .import _ultifs_kload
 .import _ultifs_ksave
 .import unmap_ofs
+
+stack_size = $2a    ; Keep greater or equal to what linker config file says.
 
 unmap = $9800 + unmap_ofs
 
@@ -47,11 +46,6 @@ IUSRCMD = $032E
 ILOAD   = $0330
 ISAVE   = $0332
 
-_blk2:      .res 1
-_blk3:      .res 1
-old_blk2:   .res 1
-old_blk3:   .res 1
-
 _last_regular_device:   .res 1
 _last_ingle_device:     .res 1
 
@@ -69,32 +63,24 @@ old_IUSRCMD:    .res 2  ; TODO: Make it point to a BRK.
 old_ILOAD:      .res 2
 old_ISAVE:      .res 2
 
-_new_vectors:
-    .word uopen
-    .word uclose
-    .word uchkin
-    .word uckout
-    .word uclrcn
-    .word ubasin
-    .word ubsout
-    .word ustop
-    .word ugetin
-    .word uclall
-    .word 0         ; TODO: Point to a BRK.
-    .word uload
-    .word usave
-_new_vectors_end:
+_saved_zp:  .res stack_size
 
-_saved_zp:  .res 256
-
-.proc init_kernal_vectors
-    ldx #_new_vectors_end - _new_vectors - 1
+; Save KERNAL vectors with 1 off so they can serve as
+; return addresses on the stack.
+.proc save_old_kernal_vectors
+    ldx #0
+    ldy #13
 l:  lda IOPEN,x
+    sec
+    sbc #1
     sta old_IOPEN,x
-    lda _new_vectors,x
-    sta IOPEN,x
-    dex
-    bpl l
+    lda IOPEN+1,x
+    sbc #0
+    sta old_IOPEN+1,x
+    inx
+    inx
+    dey
+    bne l
     rts
 .endproc
 
@@ -104,7 +90,7 @@ l:  lda IOPEN,x
     dex
     stx _last_regular_device
 
-;    jsr init_kernal_vectors
+    jsr save_old_kernal_vectors
     rts
 .endproc
 
@@ -186,9 +172,9 @@ l:  lda _saved_zp,x
     jsr _ultifs_kopen
     jmp leave
 
-n:  lda old_IOPEN
+n:  lda old_IOPEN + 1
     pha
-    lda old_IOPEN + 1
+    lda old_IOPEN
     pha
     jmp unmap
 .endproc
@@ -200,9 +186,9 @@ n:  lda old_IOPEN
     jsr _ultifs_kclose
     jmp leave
 
-n:  lda old_ICLOSE
+n:  lda old_ICLOSE + 1
     pha
-    lda old_ICLOSE + 1
+    lda old_ICLOSE
     pha
     jmp unmap
 .endproc
@@ -214,9 +200,9 @@ n:  lda old_ICLOSE
     jsr _ultifs_kchkin
     jmp leave
 
-n:  lda old_ICHKIN
+n:  lda old_ICHKIN + 1
     pha
-    lda old_ICHKIN + 1
+    lda old_ICHKIN
     pha
     jmp unmap
 .endproc
@@ -228,9 +214,9 @@ n:  lda old_ICHKIN
     jsr _ultifs_kchkout
     jmp leave
 
-n:  lda old_ICHKOUT
+n:  lda old_ICHKOUT + 1
     pha
-    lda old_ICHKOUT + 1
+    lda old_ICHKOUT
     pha
     jmp unmap
 .endproc
@@ -242,9 +228,9 @@ n:  lda old_ICHKOUT
     jsr _ultifs_kclrcn
     jmp leave
 
-n:  lda old_ICLRCN
+n:  lda old_ICLRCN + 1
     pha
-    lda old_ICLRCN + 1
+    lda old_ICLRCN
     pha
     jmp unmap
 .endproc
@@ -256,9 +242,9 @@ n:  lda old_ICLRCN
     jsr _ultifs_kbasin
     jmp leave
 
-n:  lda old_IBASIN
+n:  lda old_IBASIN + 1
     pha
-    lda old_IBASIN + 1
+    lda old_IBASIN
     pha
     jmp unmap
 .endproc
@@ -270,25 +256,25 @@ n:  lda old_IBASIN
     jsr _ultifs_kbsout
     jmp leave
 
-n:  lda old_IBSOUT
+n:  lda old_IBSOUT + 1
     pha
-    lda old_IBSOUT + 1
+    lda old_IBSOUT
     pha
     jmp unmap
 .endproc
 
 .proc ustop
-n:  lda old_ISTOP
+n:  lda old_ISTOP + 1
     pha
-    lda old_ISTOP + 1
+    lda old_ISTOP
     pha
     jmp unmap
 .endproc
 
 .proc ugetin
-n:  lda old_IGETIN
+n:  lda old_IGETIN + 1
     pha
-    lda old_IGETIN + 1
+    lda old_IGETIN
     pha
     jmp unmap
 .endproc
@@ -296,9 +282,9 @@ n:  lda old_IGETIN
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
-    lda old_ICLALL
-    pha
     lda old_ICLALL + 1
+    pha
+    lda old_ICLALL
     pha
     jmp leave
 .endproc
@@ -310,9 +296,9 @@ n:  lda old_IGETIN
     jsr _ultifs_kload
     jmp leave
 
-n:  lda old_ILOAD
+n:  lda old_ILOAD + 1
     pha
-    lda old_ILOAD + 1
+    lda old_ILOAD
     pha
     jmp unmap
 .endproc
@@ -324,9 +310,9 @@ n:  lda old_ILOAD
     jsr _ultifs_ksave
     jmp leave
 
-n:  lda old_ISAVE
+n:  lda old_ISAVE + 1
     pha
-    lda old_ISAVE + 1
+    lda old_ISAVE
     pha
     jmp unmap
 .endproc

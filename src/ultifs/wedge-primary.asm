@@ -101,8 +101,11 @@ r:  rts
     sta $100
     stx $101
     sty $102
+    php
+    pla
+    sta $103
 
-    ; Save Ultimem status.
+    ; Save Ultimem status and BLK1.
     lda $9ff8
     sta $104
     lda $9ff9
@@ -111,7 +114,7 @@ r:  rts
     sta $106
 
     ; Bank in secondary wedge on BLK1.
-    ora #%11000000  ; (RAM)
+    ora #%11000000  ; (R/W RAM)
     sta $9ff2
     lda #117
     sta $9ff8
@@ -124,6 +127,7 @@ map_ultimem_end:
 
 ; Map process back in and set accu and flags.
 .proc unmap_ultimem
+    ; Restore Ultimem status and BLK1.
     lda $104
     sta $9ff8
     lda $105
@@ -131,6 +135,8 @@ map_ultimem_end:
     lda $106
     sta $9ff2
 
+    ; Get back accu and flags.  X and Y register have
+    ; been restored by the secondary wedge already.
     lda $103
     pha
     lda $100

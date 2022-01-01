@@ -633,15 +633,6 @@ l2:
     lda argsym+2
     sta (stack),y
 
-    ; Advance stack pointer.
-    lda stack
-    clc
-    adc #6
-    sta stack
-    lda stack+1
-    adc #0
-    sta stack+1
-
     ; Push symbol value onto stack.
     ldy #OFS_SYMBOL_VALUE
     lda (argsym),y
@@ -651,7 +642,7 @@ l2:
     tax
     iny
     lda (argsym),y
-    ldy #3
+    ldy #6
     sta (stack),y
     dey
     txa
@@ -663,7 +654,7 @@ l2:
     ; Advance stack pointer.
     lda stack
     clc
-    adc #6
+    adc #12
     sta stack
     lda stack+1
     adc #0
@@ -823,7 +814,7 @@ builtin:
 
     .zeropage
 
-p:              .res 3
+p:  .res 3
 
     .data
 

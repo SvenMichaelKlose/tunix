@@ -45,8 +45,8 @@ main (void)
 {
     char device = 12;
 
-    init_primary_wedge (0x9800);
     init_secondary_wedge (device);
+    init_primary_wedge (0x9800);
     init_kernal_emulation ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
 

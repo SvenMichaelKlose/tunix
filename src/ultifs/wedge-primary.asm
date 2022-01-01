@@ -2,9 +2,11 @@
 ;
 ; Banks in the secondary wedge.
 
+
 .export _init_primary_wedge, unmap_ofs
 
-.import uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall, uload, usave
+.import uopen, uclose, uchkin, uckout, uclrcn
+.import ubasin, ubsout, uclall, uload, usave
 
 
 .zeropage
@@ -17,9 +19,11 @@ d:      .res 2
 .data
 
 secondary_vectors_l:
-    .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn, <ubasin, <ubsout, <uclall, $d2, <uload, <usave, 0
+    .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn
+    .byte <ubasin, <ubsout, <uclall, $d2, <uload, <usave, 0
 secondary_vectors_h:
-    .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn, >ubasin, >ubsout, >uclall, $fe, >uload, >usave, 0
+    .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
+    .byte >ubasin, >ubsout, >uclall, $fe, >uload, >usave, 0
 
 
 .code

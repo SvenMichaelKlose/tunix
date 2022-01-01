@@ -4,22 +4,13 @@
 ; Also redirects the old vectors.
 
 .export _init_secondary_wedge
-.export uopen, uclose, uchkin, uckout, uclrcn, ubasin, ubsout, uclall, uload, usave
-
 .export _last_regular_device
+.export uopen, uclose, uchkin, uckout, uclrcn
+.export ubasin, ubsout, uclall, uload, usave
 
-.import _ultifs_kopen
-.import _ultifs_kclose
-.import _ultifs_kchkin
-.import _ultifs_kchkout
-.import _ultifs_kclrcn
-.import _ultifs_kbasin
-.import _ultifs_kbsout
-.import _ultifs_kclall
-.import _ultifs_kusrcmd
-.import _ultifs_kload
-.import _ultifs_ksave
-.import unmap_ofs
+.import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kchkout, _ultifs_kclrcn
+.import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall, _ultifs_kusrcmd
+.import _ultifs_kload, _ultifs_ksave, unmap_ofs
 
 stack_size = $2a    ; Keep greater or equal to what linker config file says.
 

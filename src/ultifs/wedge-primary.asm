@@ -109,6 +109,8 @@ r:  rts
     pla
     sta $103
 
+    sei
+
     ; Save Ultimem status and BLK1.
     lda $9ff8
     sta $104
@@ -145,6 +147,7 @@ map_ultimem_end:
     pha
     lda $100
     plp
+
     rts
 .endproc
 

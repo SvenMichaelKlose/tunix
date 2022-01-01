@@ -20,6 +20,7 @@ A Lisp interpreter.
 * APPLY
 * &
 * |
+* EQ
 * NOT
 * SYS
 * PEEKB, PEEKW

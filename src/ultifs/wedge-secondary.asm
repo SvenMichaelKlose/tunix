@@ -56,9 +56,14 @@ old_ISAVE:      .res 2
 
 _saved_zp:  .res stack_size
 
-; Save KERNAL vectors with 1 off so they can serve as
-; return addresses on the stack.
-.proc save_old_kernal_vectors
+.proc _init_secondary_wedge
+    tax
+    stx _last_ingle_device
+    dex
+    stx _last_regular_device
+
+    ; Save KERNAL vectors with 1 off so they can serve as
+    ; return addresses on the stack.
     ldx #0
     ldy #13
 l:  lda IOPEN,x
@@ -72,16 +77,7 @@ l:  lda IOPEN,x
     inx
     dey
     bne l
-    rts
-.endproc
 
-.proc _init_secondary_wedge
-    tax
-    stx _last_ingle_device
-    dex
-    stx _last_regular_device
-
-    jsr save_old_kernal_vectors
     rts
 .endproc
 
@@ -92,10 +88,12 @@ l:  lda IOPEN,x
     cmp _last_ingle_device
     pla
     bcc done
+
     pha
     lda FA
     cmp _last_regular_device
     pla
+
 done:
     rts
 .endproc

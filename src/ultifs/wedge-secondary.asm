@@ -99,6 +99,7 @@ done:
 .endproc
 
 .proc enter
+    ; Save registers and flags.
     sta $100
     stx $101
     sty $102
@@ -106,6 +107,7 @@ done:
     pla
     sta $103
 
+    ; Save banks of BLK2 and BLK3.
     lda $9ffa
     sta $107
     lda $9ffb
@@ -114,6 +116,8 @@ done:
     sta $109
     lda $9ffd
     sta $10a
+
+    ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #118
     sta $9ffa
     lda #119
@@ -140,6 +144,7 @@ l:  lda _saved_zp,x
     dex
     bne l
 
+    ; Restore BLK2 and BLK3.
     lda $107
     sta $9ffa
     lda $108
@@ -149,9 +154,11 @@ l:  lda _saved_zp,x
     lda $10a
     sta $9ffd
 
+    ; Restore X and Y register.  Accu, flags and BLK1
+    ; will be restored by unmap().
     ldx $101
     ldy $102
-    jmp unmap ; Accum flags and BLK1 will be restored there.
+    jmp unmap
 .endproc
 
 .proc uopen

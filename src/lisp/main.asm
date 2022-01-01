@@ -150,6 +150,34 @@ check:
 .endproc
 
 
+; ###############
+; ### OBJECTS ###
+; ###############
+; Pointers point into BLK3, ranging from $6000 to $7fff
+; and are followed by the bank number BLK3 should contain.
+; A bank number of 0 means symbol NIL whereas a negative
+; block number represents T.
+
+; Built-in (EQ a b)
+.proc eq
+    lda #0
+    sta r+2
+
+    lda a0
+    cmp a1
+    bne n
+    lda a0+1
+    cmp a1+1
+    bne n
+    lda a0+2
+    cmp a1+2
+    bne n
+    rts
+
+n:  dec r+2
+    rts
+.endproc
+
 ; #############
 ; ### ATOMS ###
 ; #############
@@ -174,32 +202,23 @@ check:
 ; Built-in (ATOM x)
 .proc atom
     ldy #0
-    sty r+1
     sty r+2
 
     lda (a0),y
     bpl n
-    ldy symbol_t
-n:  sty r
-
-    rts
+    dec r+2
+n:  rts
 .endproc
 
 ; Built-in (NOT x)
 .proc not
     lda #0
-    sta r
-    sta r+1
     sta r+2
 
     lda a0+2
-    bne done
-
-    lda symbol_t
-    sta r
-
-done:
-    rts
+    bne n
+    dec r+2
+n:  rts
 .endproc
 
 
@@ -247,15 +266,12 @@ CONS_SIZE           = 9
 ; Built-in (CONSP x)
 .proc consp
     ldy #0
-    sty r+1
     sty r+2
 
     lda (a0),y
     bmi n
-    iny
-n:  sty r
-
-    rts
+    dec r+2
+n:  rts
 .endproc
 
 ; Built-in (CAR x)

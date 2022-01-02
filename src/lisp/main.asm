@@ -27,6 +27,12 @@ tmp2:       .res 3
     jmp loop
 .endproc
 
+.proc err_fun_expected
+.endproc
+
+.proc err_too_many_args
+.endproc
+
     .rodata
 
 txt_err_not_a_cons:
@@ -41,11 +47,13 @@ txt_err_not_a_cons:
 ; $0090-$99ff: KERNAL zero page
 ; $0100-$01ff: CPU stack
 ; $0200-$03ff: Lisp & KERNAL memory
-; $0400-$0fff:
+; $0400-$0fff: Standard C lirary heap
 ; $1000-$1fff: Screen
 ; $2000-$3fff: BLK1: Lisp interpreter
 ; $4000-$5fff: BLK2: Lisp interpreter
-; $6000-$7fff: BLK3: Heap window
+; $6000-$7fff: BLK3: Lisp heap/stack window
+; $9800-$9fff: Kept free for KERNAL extensions
+; $a000-$bfff: Standard C lirary heap
 ;
 ; The heap is growing without gaps and accessed through
 ; BLK3.  An object address also comes with its bank
@@ -55,8 +63,7 @@ txt_err_not_a_cons:
 ; address which is only used for garbage collection.
 ;
 ; The MSB of the type byte distinguishes atoms (set to 1)
-; and conses (unset).  An object cannot be larger than
-; 255 bytes.
+; and conses (unset).
 
 F_ATOM          = %10000000
 F_SYMBOL        = %10000000
@@ -65,7 +72,6 @@ M_TYPE          = %00000001
 
 F_MARKED        = %01000000
 F_MISSING_TRACE = %00100000
-
 
     .zeropage
 
@@ -95,7 +101,7 @@ stack:      .res 3
 ; A: Type info
 ; X: Size
 .proc alloc_heap
-    sta tmp2
+    sta tmp2        ; Save type.
 
     lda heap+1
     cmp #7          ; Last page of heap bank?
@@ -153,10 +159,11 @@ check:
 ; ###############
 ; ### OBJECTS ###
 ; ###############
-; Pointers point into BLK3, ranging from $6000 to $7fff
-; and are followed by the bank number BLK3 should contain.
-; A bank number of 0 means symbol NIL whereas a negative
-; block number represents T.
+;
+; Pointers point into BLK3 and are followed by the number
+; of the bank BLK3 should contain.   A bank number of 0
+; represents symbol NIL whereas a negative block number
+; represents T.
 
 ; Built-in (EQ a b)
 .proc eq
@@ -177,6 +184,7 @@ check:
 n:  dec r+2
     rts
 .endproc
+
 
 ; #############
 ; ### ATOMS ###
@@ -332,6 +340,7 @@ e:  jmp err_not_a_cons
     ldy #OFS_CONS_A
     lda a0
     sta (a1),y
+    sta r
     iny
     lda a0+1
     sta (a1),y
@@ -358,6 +367,7 @@ e:  jmp err_not_a_cons
     ldy #OFS_CONS_D
     lda a0
     sta (a1),y
+    sta r
     iny
     lda a0+1
     sta (a1),y
@@ -479,6 +489,7 @@ r:  rts
 ; ### READ ###
 ; ############
 
+
 ; #############
 ; ### APPLY ###
 ; #############
@@ -492,18 +503,12 @@ body:   .res 3
 
     .code
 
-.proc err_fun_expected
-.endproc
-
-.proc err_too_many_args
-.endproc
-
 .proc apply
     ; Check if function argument is a list.
     ldy #0
     lda (a0),y
     cmp #F_SYMBOL
-    bne err_fun_expected
+    bne e1
 
     ; Push body onto stack.
     ldy #0
@@ -559,11 +564,13 @@ body:   .res 3
 n1: lda a1+2
     bne l2
     jmp end_of_args
+e1: jmp err_fun_expected
+e2: jmp err_too_many_args
 l2:
 
     ; Get symbol from argument definition.
     lda argdef+2
-    beq err_too_many_args
+    beq e2
     sta $9ffc
     ldy #OFS_CONS_A
     lda (argdef),y

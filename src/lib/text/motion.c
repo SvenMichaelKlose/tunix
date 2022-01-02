@@ -47,7 +47,9 @@ move_left ()
 void
 move_right ()
 {
-    if (xpos < current_line->length)
+    unsigned l = current_line->length;
+
+    if (l && xpos < l - 1)
         xpos++;
 }
 

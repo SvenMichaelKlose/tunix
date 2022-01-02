@@ -5,6 +5,7 @@
 
 .export _init_secondary_wedge
 .export _last_regular_device
+.export _saved_zp
 .export uopen, uclose, uchkin, uckout, uclrcn
 .export ubasin, ubsout, uclall, uload, usave
 

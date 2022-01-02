@@ -166,7 +166,7 @@ set_oserr (char code)
 void
 set_error (char code)
 {
-    channel * ch = channels[15];
+    channel * ch = channels[15];  // Bullshit. LFN is key here.
 
     if (ch->buf) {
         free (ch->buf);
@@ -203,6 +203,14 @@ read_from_buf (channel * ch)
     return c;
 }
 
+extern char * saved_zp;
+
+void
+set_status (char x)
+{
+    saved_zp[0x90] = STATUS = x;
+}
+
 void
 open_command (char * name)
 {
@@ -211,7 +219,7 @@ open_command (char * name)
 
     add_to_buf (ch, msg, strlen (msg));
 
-    STATUS = 0;
+    set_status (0);
 }
 
 void
@@ -431,7 +439,7 @@ ultifs_kbasin ()
         return 0;
     }
 
-    STATUS = 0;
+    set_status (0);
 
     if (ch->buf) {
         accu = read_from_buf (ch);
@@ -450,7 +458,7 @@ ultifs_kbasin ()
     return bfile_read (file);
 
 end_of_file:
-    STATUS = STATUS_END_OF_FILE;
+    set_status (STATUS_END_OF_FILE);
 
     return accu;
 }
@@ -459,7 +467,7 @@ void
 ultifs_kbsout ()
 {
     // TODO: Implement writes.
-    STATUS = STATUS_TIMEOUT_WRITE;
+    set_status (STATUS_TIMEOUT_WRITE);
 }
 
 void
@@ -512,6 +520,7 @@ ultifs_kload ()
     yreg = (unsigned) addr >> 8;
 
     set_error (0);
+    set_status (0);
 }
 
 void
@@ -533,7 +542,7 @@ ultifs_ksave ()
         if (STATUS) {
             status = STATUS;
             ultifs_kclose ();
-            STATUS = status;
+            set_status (status);
             flags = FLAG_C;     // TODO: Does this really happen?
             return;
         }

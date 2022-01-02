@@ -12,9 +12,9 @@
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall, _ultifs_kusrcmd
 .import _ultifs_kload, _ultifs_ksave, unmap_ofs
 
-stack_size = $2a    ; Keep greater or equal to what linker config file says.
-
-unmap = $9800 + unmap_ofs
+stack_size  = $2a    ; Keep greater or equal to what linker config file says.
+cpu_state   = $9c00
+unmap       = $9800 + unmap_ofs
 
 .import __ZP_START__
 .import __ZP_SIZE__
@@ -100,22 +100,27 @@ done:
 
 .proc enter
     ; Save registers and flags.
-    sta $100
-    stx $101
-    sty $102
+    sta cpu_state
+    stx cpu_state+1
+    sty cpu_state+2
     php
     pla
     sta $103
+    sta cpu_state+3
 
     ; Save banks of BLK2 and BLK3.
     lda $9ffa
     sta $107
+    sta cpu_state+7
     lda $9ffb
     sta $108
+    sta cpu_state+8
     lda $9ffc
     sta $109
+    sta cpu_state+9
     lda $9ffd
     sta $10a
+    sta cpu_state+$0a
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #118
@@ -145,19 +150,19 @@ l:  lda _saved_zp,x
     bne l
 
     ; Restore BLK2 and BLK3.
-    lda $107
+    lda cpu_state+7
     sta $9ffa
-    lda $108
+    lda cpu_state+8
     sta $9ffb
-    lda $109
+    lda cpu_state+9
     sta $9ffc
-    lda $10a
+    lda cpu_state+$0a
     sta $9ffd
 
     ; Restore X and Y register.  Accu, flags and BLK1
     ; will be restored by unmap().
-    ldx $101
-    ldy $102
+    ldx cpu_state+1
+    ldy cpu_state+2
     jmp unmap
 .endproc
 

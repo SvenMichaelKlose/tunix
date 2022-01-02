@@ -25,6 +25,7 @@ secondary_vectors_h:
 
     .code
 
+cpu_state       = $9c00
 kernal_vectors  = $031a
 wedge_start     = $9800
 unmap_ofs       = unmap_ultimem - map_ultimem
@@ -99,22 +100,22 @@ r:  rts
 ; Map in secondary wedge and save registers.
 .proc map_ultimem
     ; Save registers and flags.
-    sta $100
-    stx $101
-    sty $102
+    sta cpu_state
+    stx cpu_state+1
+    sty cpu_state+2
     php
     pla
-    sta $103
+    sta cpu_state+3
 
     sei
 
     ; Save Ultimem status and BLK1.
     lda $9ff8
-    sta $104
+    sta cpu_state+4
     lda $9ff9
-    sta $105
+    sta cpu_state+5
     lda $9ff2
-    sta $106
+    sta cpu_state+6
 
     ; Bank in secondary wedge on BLK1.
     ora #%11000000  ; (R/W RAM)
@@ -131,18 +132,18 @@ map_ultimem_end:
 ; Map process back in and set accu and flags.
 .proc unmap_ultimem
     ; Restore Ultimem status and BLK1.
-    lda $104
+    lda cpu_state+4
     sta $9ff8
-    lda $105
+    lda cpu_state+5
     sta $9ff9
-    lda $106
+    lda cpu_state+6
     sta $9ff2
 
     ; Get back accu and flags.  X and Y register have
     ; been restored by the secondary wedge already.
-    lda $103
+    lda cpu_state+3
     pha
-    lda $100
+    lda cpu_state
     plp
 
     rts

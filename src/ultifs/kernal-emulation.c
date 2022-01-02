@@ -387,7 +387,8 @@ ultifs_kclose ()
         return;
     }
 
-    bfile_close (ch->file);
+    if (ch->file)
+        bfile_close (ch->file);
     free_channel ();
 }
 
@@ -422,7 +423,8 @@ ultifs_kclrcn ()
 char
 ultifs_kbasin ()
 {
-    channel * ch = channels[LFN];
+    channel *  ch = channels[LFN];
+    bfile *    file;
 
     if (!ch) {
         set_oserr (OSERR_FILE_NOT_OPEN);
@@ -441,7 +443,11 @@ ultifs_kbasin ()
     //if (SA == 15)
         //return;
 
-    // TODO: bfile reads.
+    file = ch->file;
+    if (!file || file->ptr >= file->size)
+        goto end_of_file;
+
+    return bfile_read (file);
 
 end_of_file:
     STATUS = STATUS_END_OF_FILE;

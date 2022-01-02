@@ -123,19 +123,19 @@ init_kernal_emulation ()
 char
 peek_from_process (char * from)
 {
-    if (from < 0x2000 || from > 0x7fff)
+    if (from < (char *) 0x2000 || from > (char *) 0x7fff)
         return *from;
-    if (from < 0x4000) {
+    if (from < (char *) 0x4000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
-        return *(from - 0x2000 + 0xa000);
+        return *(from - (char *) 0x2000 + (char *) 0xa000);
     }
-    if (from < 0x6000) {
+    if (from < (char *) 0x6000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
-        return *(from - 0x4000 + 0xa000);
+        return *(from - (char *) 0x4000 + (char *) 0xa000);
     }
-    if (from < 0x8000) {
+    if (from < (char *) 0x8000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
-        return *(from - 0x6000 + 0xa000);
+        return *(from - (char *) 0x6000 + (char *) 0xa000);
     }
 
     return *from;
@@ -474,7 +474,6 @@ ultifs_kload ()
     char * addr;
     unsigned addr_l;
     unsigned addr_h;
-    char status;
 
     LFN = LOADSAVE_LFN;
 

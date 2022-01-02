@@ -56,3 +56,9 @@ move_line_start ()
 {
     xpos = 0;
 }
+
+void
+move_line_end ()
+{
+    xpos = current_line->length;
+}

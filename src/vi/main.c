@@ -90,6 +90,11 @@ command_mode ()
                 edit_mode ();
                 break;
 
+            case 'A':
+                move_line_end ();
+                edit_mode ();
+                break;
+
             case 'h':
             case TTY_CURSOR_LEFT:
                 move_left ();

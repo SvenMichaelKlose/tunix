@@ -256,22 +256,6 @@ n:  lda old_IBSOUT+1
     jmp unmap
 .endproc
 
-.proc ustop
-n:  lda old_ISTOP+1
-    pha
-    lda old_ISTOP
-    pha
-    jmp unmap
-.endproc
-
-.proc ugetin
-n:  lda old_IGETIN+1
-    pha
-    lda old_IGETIN
-    pha
-    jmp unmap
-.endproc
-
 .proc uclall
     jsr enter
     jsr _ultifs_kclall

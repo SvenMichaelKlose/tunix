@@ -500,11 +500,11 @@ ultifs_kload ()
         }
     }
 
+    ultifs_kclose ();
+
     // Return next free address.
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
-
-    ultifs_kclose ();
 
     set_error (0);
 }

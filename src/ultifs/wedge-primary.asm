@@ -114,11 +114,11 @@ r:  rts
 
     ; Save Ultimem status and BLK1.
     lda $9ff8
-    sta cpu_state+4
-    lda $9ff9
     sta cpu_state+5
-    lda $9ff2
+    lda $9ff9
     sta cpu_state+6
+    lda $9ff2
+    sta cpu_state+4
 
     ; Bank in secondary wedge on BLK1.
     ora #%11000000  ; (R/W RAM)
@@ -136,11 +136,11 @@ map_ultimem_end:
 .proc unmap_ultimem
     ; Restore Ultimem status and BLK1.
     lda cpu_state+4
-    sta $9ff8
-    lda cpu_state+5
-    sta $9ff9
-    lda cpu_state+6
     sta $9ff2
+    lda cpu_state+5
+    sta $9ff8
+    lda cpu_state+6
+    sta $9ff9
 
     ; Get back accu and flags.  X and Y register have
     ; been restored by the secondary wedge already.

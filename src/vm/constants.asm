@@ -899,10 +899,12 @@ IBSOUT  = $0326 ; KERNAL vector - output character to channel
 ISTOP   = $0328 ; KERNAL vector - scan stop key
 IGETIN  = $032A ; KERNAL vector - get character from keyboard queue
 ICLALL  = $032C ; KERNAL vector - close all channels and files
-USRCMD  = $032E ; User vector
+IUSRCMD = $032E ; User vector
 
 ILOAD   = $0330 ; KERNAL vector - load
 ISAVE   = $0332 ; KERNAL vector - save
+
+; $0334 to $033B - unused ???
 
 TBUFFR  = $033C ; to $03FB - cassette buffer
 

@@ -137,9 +137,10 @@ peek_from_process (char * from)
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
         return *(from - 0x6000 + 0xa000);
     }
+
+    return *from;
 }
 
-// TODO: This'll map the calling process' memory to BLK5.
 void
 copy_from_process (char * to, char * from, char len)
 {

@@ -119,6 +119,10 @@ command_mode ()
             case TTY_CURSOR_RIGHT:
                 move_right ();
                 break;
+
+            case '$':
+                move_line_last_char ();
+                break;
         }
 
         screen_redraw ();

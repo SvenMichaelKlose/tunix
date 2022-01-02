@@ -62,3 +62,10 @@ move_line_end ()
 {
     xpos = current_line->length;
 }
+
+void
+move_line_last_char ()
+{
+    if (current_line->length)
+        xpos = current_line->length - 1;
+}

@@ -50,5 +50,6 @@ main (void)
     init_kernal_emulation ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
 
+    ((voidfun*) 0xe5c3) (); // INITVIC
     ((voidfun*) 0xe378) (); // BASIC cold start
 }

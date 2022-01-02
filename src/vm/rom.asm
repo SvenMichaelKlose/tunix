@@ -1,5 +1,4 @@
 ;***********************************************************************************;
-;***********************************************************************************;
 ;
 ; The almost completely commented VIC 20 ROM disassembly. V1.01 Lee Davison 2005-2012.
 ; With enhancements by Simon Rowe <srowe@mose.org.uk>.
@@ -15,7 +14,1263 @@
 ; Guide", "The Complete Commodore Inner Space Anthology", "VIC Revealed" and various
 ; text files, pictures and other documents.
 
-    .include "constants.asm"
+.exportzp USRPPOK, ADDPRC, ADRAY1, ADRAY2, CHARAC, ENDCHR, TRMPOS, VERCHK, COUNT , DIMFLG, VALTYP, INTFLG, GARBFL, SUBFLG, INPFLG, TANSGN, CHANNL, LINNUM, TEMPPT, LASTPT, TEMPST, INDEX, RESHO, TXTTAB, VARTAB, ARYTAB, STREND, FRETOP, FRESPC, MEMSIZ, CURLIN, OLDLIN, OLDTXT, DATLIN, DATPTR, INPPTR, VARNAM, VARPNT, FORPNT, OPPTR, OPMASK, DEFPNT, DSCPTN, FOUR6, JMPER, TEMPF3, GENPTR, GEN2PTR, EXPCNT, TMPPTR, FAC1, SGNFLG, BITS, FAC2, ARISGN, FACOV, FBUFPT, CHRGET, CHRGOT, CHRSPC, RNDX, STATUS, STKEY, SVXT, VERCK, C3PO, BSOUR, SYNO, XSAV, LDTND, DFLTN, DFLTO, PRTY, DPSW, MSGFLG, PTR1, PTR2, TIME, PCNTR, FIRT, CNTDN, BUFPNT, INBIT, BITCI, RINONE, RIDATA, RIPRTY, SAL, EAL, CMP0, TAPE1, BITTS, NXTBIT, RODATA, FNLEN, LA, SA, FA, FNADR, ROPRTY, FSBLK, MYCH, CAS1, STAL, MEMUSS, LSTX, NDX, RVS, INDX, LXSP, SFDX, BLNSW, BLNCT, CDBLN, BLNON, CRSW, PNT, PNTR, QTSW, LNMX, TBLX, ASCII, INSRT, LDTB1, LLNKSV, USER, KEYTAB, RIBUF, ROBUF, BASZPT
+.export STACK, CHNLNK, PREVLN, BUF, LAT, FAT, SAT, KEYD, MEMSTR, MEMHIGH, TIMOUT, COLOR, GDCOL, HIBASE, XMAX, RPTFLG, KOUNT, DELAY, SHFLAG, LSTSHF, KEYLOG, MODE, AUTODN, M51CTR, M51CDR, RSSTAT, BITNUM, BAUDOF, RIDBE, RIDBS, RODBS, RODBE, IRQTMP, IERROR, IMAIN, ICRNCH, IQPLOP, IGONE, IEVAL, SAREG, SXREG, SYREG, SPREG, CINV, CBINV, NMINV, IOPEN, ICLOSE, ICHKIN, ICKOUT, ICLRCN, IBASIN, IBSOUT, ISTOP, IGETIN, ICLALL, USRCMD, ILOAD, ISAVE, TBUFFR
+.export VICCR0, VICCR1, VICCR2, VICCR3, VICCR4, VICCR5, VICCR6, VICCR7, VICCR8, VICCR9, VICCRA, VICCRB, VICCRC, VICCRD, VICCRE, VICCRF
+.export VIA1PB, VIA1PA1, VIA1DDRB, VIA1DDRA, VIA1T1CL, VIA1T1CH, VIA1T2CL, VIA1T2CH, VIA1ACR, VIA1PCR, VIA1IFR, VIA1IER, VIA1PA2
+.export VIA2PB, VIA2PA1, VIA2DDRB, VIA2DDRA, VIA2T1CL, VIA2T1CH, VIA2T2CL, VIA2T2CH, VIA2ACR, VIA2PCR, VIA2IFR, VIA2IER, VIA2PA2
+.export XROMCOLD, XROMWARM, XROMID
+
+;***********************************************************************************;
+;***********************************************************************************;
+;
+; BASIC zero page
+
+; These locations contain the JMP instruction target address of the USR command. They
+; are initialised so that if you try to execute a USR call without changing them you
+; will receive an ILLEGAL QUANTITY error message.
+
+USRPPOK = $00   ; USR() JMP instruction
+ADDPRC  = $01   ; USR() vector
+
+; This vector points to the address of the BASIC routine which converts a floating point
+; number to an integer, however BASIC does not use this vector. It may be of assistance
+; to the programmer who wishes to use data that is stored in floating point format. The
+; parameter passed by the USR command is available only in that format for example.
+
+ADRAY1  = $03   ; float to fixed vector
+
+; This vector points to the address of the BASIC routine which converts an integer to a
+; floating point number, however BASIC does not use this vector. It may be used by the
+; programmer who needs to make such a conversion for a machine language program that
+; interacts with BASIC. To return an integer value with the USR command for example.
+
+ADRAY2  = $05   ; fixed to float vector
+
+; The cursor column position prior to the TAB or SPC is moved here from PNTR, and is used
+; to calculate where the cursor ends up after one of these functions is invoked.
+
+; Note that the value contained here shows the position of the cursor on a logical line.
+; Since one logical line can be up to four physical lines long, the value stored here
+; can range from 0 to 87.
+
+CHARAC  = $07   ; search character
+ENDCHR  = $08   ; scan quotes flag
+TRMPOS  = $09   ; TAB column save
+
+; The routine that converts the text in the input buffer into lines of executable program
+; tokens, and the routines that link these program lines together, use this location as an
+; index into the input buffer area. After the job of converting text to tokens is done,
+; the value in this location is equal to the length of the tokenised line.
+
+; The routines which build an array or locate an element in an array use this location to
+; calculate the number of DIMensions called for and the amount of storage required for a
+; newly created array, or the number of subscripts when referencing an array element.
+
+VERCHK  = $0A   ; load/verify flag, 0 = load, 1 = verify
+COUNT   = $0B   ; temporary byte, line crunch/array access/logic operators
+
+; This is used as a flag by the routines that build an array or reference an existing
+; array. It is used to determine whether a variable is in an array, whether the array
+; has already been DIMensioned, and whether a new array should assume the default size.
+
+DIMFLG  = $0C   ; DIM flag
+
+; This flag is used to indicate whether data being operated upon is string or numeric. A
+; value of $FF in this location indicates string data while a $00 indicates numeric data.
+
+VALTYP  = $0D   ; data type flag, $FF = string, $00 = numeric
+
+; If the above flag indicates numeric then a $80 in this location identifies the number
+; as an integer, and a $00 indicates a floating point number.
+
+INTFLG  = $0E   ; data type flag, $80 = integer, $00 = floating point
+
+; The garbage collection routine uses this location as a flag to indicate that garbage
+; collection has already been tried before adding a new string. If there is still not
+; enough memory, an OUT OF MEMORY error message will result.
+
+; LIST uses this byte as a flag to let it know when it has come to a character string in
+; quotes. It will then print the string, rather than search it for BASIC keyword tokens.
+
+; This location is also used during the process of converting a line of text in the BASIC
+; input buffer into a linked program line of BASIC keyword tokens to flag a DATA line is
+; being processed.
+
+GARBFL  = $0F   ; garbage collected/open quote/DATA flag
+
+; If an opening parenthesis is found, this flag is set to indicate that the variable in
+; question is either an array variable or a user-defined function.
+
+SUBFLG  = $10   ; subscript/FNx flag
+
+; This location is used to determine whether the sign of the value returned by the
+; functions SIN, COS, ATN or TAN is positive or negative.
+
+; Also the comparison routines use this location to indicate the outcome of the compare.
+; For A <=> B the value here will be $01 if A > B, $02 if A = B, and $04 if A < B. If
+; more than one comparison operator was used to compare the two variables then the value
+; here will be a combination of the above values.
+
+INPFLG  = $11   ; input mode flag, $00 = INPUT, $40 = GET, $98 = READ
+TANSGN  = $12   ; ATN sign/comparison evaluation flag
+
+; When the default input or output device is used the value here will be a zero, and the
+; format of prompting and output will be the standard screen output format. The location
+; $B8 is used to decide what device actually to put input from or output to.
+
+CHANNL  = $13   ; current I/O channel
+
+; Used whenever a 16 bit integer is used e.g. the target line number for GOTO, LIST, ON,
+; and GOSUB also the number of a BASIC line that is to be added or replaced. Additionally
+; PEEK, POKE, WAIT, and SYS use this location as a pointer to the address which is the
+; subject of the command.
+
+LINNUM  = $14   ; temporary integer low byte
+;         $15   ; temporary integer high byte
+
+; This location points to the next available slot in the temporary string descriptor
+; stack located at TEMPST.
+
+TEMPPT  = $16   ; descriptor stack pointer, next free
+
+; This contains information about temporary strings which have not yet been assigned to
+; a string variable.
+
+LASTPT  = $17   ; current descriptor stack item pointer low byte
+;         $18   ; current descriptor stack item pointer high byte
+TEMPST  = $19   ; to $21, descriptor stack
+
+; These locations are used by BASIC multiplication and division routines. They are also
+; used by the routines which compute the size of the area required to store an array
+; which is being created.
+
+INDEX   = $22   ; misc temp byte
+;         $23   ; misc temp byte
+;         $24   ; misc temp byte
+;         $25   ; misc temp byte
+
+RESHO   = $26   ; temp mantissa 1
+;         $27   ; temp mantissa 2
+;         $28   ; temp mantissa 3
+;         $29   ; temp mantissa 4
+
+; Word pointer to where the BASIC program text is stored.
+
+TXTTAB  = $2B   ; start of memory low byte
+;         $2C   ; start of memory high byte
+
+; Word pointer to the start of the BASIC variable storage area.
+
+VARTAB  = $2D   ; start of variables low byte
+;         $2E   ; start of variables high byte
+
+; Word pointer to the start of the BASIC array storage area.
+
+ARYTAB  = $2F   ; end of variables low byte
+;         $30   ; end of variables high byte
+
+; Word pointer to end of the start of free RAM.
+
+STREND  = $31   ; end of arrays low byte
+;         $32   ; end of arrays high byte
+
+; Word pointer to the bottom of the string text storage area.
+
+FRETOP  = $33   ; bottom of string space low byte
+;         $34   ; bottom of string space high byte
+
+; Used as a temporary pointer to the most current string added by the routines which
+; build strings or move them in memory.
+
+FRESPC  = $35   ; string utility ptr low byte
+;         $36   ; string utility ptr high byte
+
+; Word pointer to the highest address used by BASIC +1.
+
+MEMSIZ  = $37   ; end of memory low byte
+;         $38   ; end of memory high byte
+
+; These locations contain the line number of the BASIC statement which is currently being
+; executed. A value of $FF in location $3A means that BASIC is in immediate mode.
+
+CURLIN  = $39   ; current line number low byte
+;         $3A   ; current line number high byte
+
+; When program execution ends or stops the last line number executed is stored here.
+
+OLDLIN  = $3B   ; break line number low byte
+;         $3C   ; break line number high byte
+
+; These locations contain the address of the start of the text of the BASIC statement
+; that is being executed. The value of the pointer to the address of the BASIC text
+; character currently being scanned is stored here each time a new BASIC statement begins
+; execution.
+
+OLDTXT  = $3D   ; continue pointer low byte
+;         $3E   ; continue pointer high byte
+
+; These locations hold the line number of the current DATA statement being READ. If an
+; error concerning the DATA occurs this number will be moved to CURLIN so that the error
+; message will show the line that contains the DATA statement rather than in the line that
+; contains the READ statement.
+
+DATLIN  = $3F   ; current DATA line number low byte
+;         $40   ; current DATA line number high byte
+
+; These locations point to the address where the next DATA will be READ from. RESTORE
+; sets this pointer back to the address indicated by the start of BASIC pointer.
+
+DATPTR  = $41   ; DATA pointer low byte
+;         $42   ; DATA pointer high byte
+
+; READ, INPUT and GET all use this as a pointer to the address of the source of incoming
+; data, such as DATA statements, or the text input buffer.
+
+INPPTR  = $43   ; READ pointer low byte
+;         $44   ; READ pointer high byte
+
+VARNAM  = $45   ; current variable name first byte
+;         $46   ; current variable name second byte
+
+; These locations point to the value of the current BASIC variable. Specifically they
+; point to the byte just after the two-character variable name.
+
+VARPNT  = $47   ; current variable address low byte
+;         $48   ; current variable address high byte
+
+; The address of the BASIC variable which is the subject of a FOR/NEXT loop is first
+; stored here before being pushed onto the stack.
+
+FORPNT  = $49   ; FOR/NEXT variable pointer low byte
+;         $4A   ; FOR/NEXT variable pointer high byte
+
+; The expression evaluation routine creates this to let it know whether the current
+; comparison operation is a < $01, = $02 or > $04 comparison or combination.
+
+OPPTR   = $4B   ; BASIC execute pointer temporary low byte/precedence flag
+;         $4C   ; BASIC execute pointer temporary high byte
+OPMASK  = $4D   ; comparison evaluation flag
+
+; These locations are used as a pointer to the function that is created during function
+; definition. During function execution it points to where the evaluation results should
+; be saved.
+
+DEFPNT  = $4E   ; FAC temp store/function/variable/garbage pointer low byte
+;         $4F   ; FAC temp store/function/variable/garbage pointer high byte
+
+; Temporary pointer to the current string descriptor.
+
+DSCPTN  = $50   ; FAC temp store/descriptor pointer low byte
+;         $51   ; FAC temp store/descriptor pointer high byte
+
+FOUR6   = $53   ; garbage collection step size
+
+; The first byte is the 6502 JMP instruction $4C, followed by the address of the required
+; function taken from the table at FUNDSP.
+
+JMPER   = $54   ; JMP opcode for functions
+;         $55   ; functions jump vector
+
+TEMPF3  = $57   ; FAC temp store
+GENPTR  = $58   ; FAC temp store
+;         $59   ; FAC temp store
+GEN2PTR = $5A   ; FAC temp store
+;         $5B   ; block end high byte
+LAB_5C  = $5C   ; FAC temp store
+LAB_5D  = $5D   ; FAC temp store
+EXPCNT  = $5E   ; exponent count byte
+;         $5F   ; FAC temp store
+TMPPTR  = $5F
+;         $60   ; block start high byte
+FAC1    = $61   ; FAC1 exponent
+;         $62   ; FAC1 mantissa 1
+;         $63   ; FAC1 mantissa 2
+;         $64   ; FAC1 mantissa 3
+;         $65   ; FAC1 mantissa 4
+;         $66   ; FAC1 sign
+SGNFLG  = $67   ; constant count/-ve flag
+BITS    = $68   ; FAC1 overflow
+FAC2    = $69   ; FAC2 exponent
+;         $6A   ; FAC2 mantissa 1
+;         $6B   ; FAC2 mantissa 2
+;         $6C   ; FAC2 mantissa 3
+;         $6D   ; FAC2 mantissa 4
+;         $6E   ; FAC2 sign
+ARISGN  = $6F   ; FAC sign comparison
+FACOV   = $70   ; FAC1 rounding
+FBUFPT  = $71   ; temp BASIC execute/array pointer low byte/index
+;         $72   ; temp BASIC execute/array pointer high byte
+
+; Code!: CHRGET and CHRGOT are subroutines, not vectors!
+CHRGET  = $73   ; increment and scan memory, BASIC byte get
+CHRGOT  = $79   ; scan memory, BASIC byte get
+;         $7A   ; BASIC execute pointer low byte
+;         $7B   ; BASIC execute pointer high byte
+CHRSPC  = $80   ; numeric test entry
+
+RNDX    = $8B   ; RND() seed, five bytes
+
+
+; KERNAL zero page
+
+STATUS  = $90   ; serial status byte
+                ;   function
+                ; bit   cassette        serial bus
+                ; ---   --------        ----------
+                ;  7    end of tape     device not present
+                ;  6    end of file     EOI
+                ;  5    checksum error
+                ;  4    read error
+                ;  3    long block
+                ;  2    short block
+                ;  1                time out read
+                ;  0                time out write
+STKEY   = $91   ; keyboard row, bx = 0 = key down
+                ; bit   key
+                ; ---   ------
+                ;  7    [DOWN]
+                ;  6    /
+                ;  5    ,
+                ;  4    N
+                ;  3    V
+                ;  2    X
+                ;  1    [L SHIFT]
+                ;  0    [STOP]
+SVXT    = $92   ; timing constant for tape read
+VERCK   = $93   ; load/verify flag, load = $00, verify = $01
+C3PO    = $94   ; serial output: deferred character flag
+                ; $00 = no character waiting, $xx = character waiting
+BSOUR   = $95   ; serial output: deferred character
+                ; $FF = no character waiting, $xx = waiting character
+SYNO    = $96   ; cassette block synchronisation number
+XSAV    = $97   ; register save
+
+; The number of currently open I/O files is stored here. The maximum number that can be
+; open at one time is ten. The number stored here is used as the index to the end of the
+; tables that hold the file numbers, device numbers, and secondary addresses.
+
+LDTND   = $98   ; open file count
+
+; The default value of this location is 0.
+
+DFLTN   = $99   ; input device number
+
+; The default value of this location is 3.
+
+DFLTO   = $9A   ; output device number
+                ;
+                ; number    device
+                ; ------    ------
+                ;  0        keyboard
+                ;  1        cassette
+                ;  2        RS-232
+                ;  3        screen
+                ;  4-31     serial bus
+
+PRTY    = $9B   ; tape character parity
+DPSW    = $9C   ; byte received flag
+MSGFLG  = $9D   ; message mode flag,
+                ; $C0 = both control and KERNAL messages,
+                ; $80 = control messages only,
+                ; $40 = KERNAL messages only,
+                ; $00 = neither control nor KERNAL messages
+PTR1    = $9E   ; tape pass 1 error log/character buffer
+PTR2    = $9F   ; tape pass 2 error log corrected
+
+; These three locations form a counter which is updated 60 times a second, and serves as
+; a software clock which counts the number of jiffies that have elapsed since the computer
+; was turned on. After 24 hours and one jiffy these locations are set back to $000000.
+
+TIME    = $A0   ; jiffy clock high byte
+;         $A1   ; jiffy clock mid byte
+;         $A2   ; jiffy clock low byte
+
+PCNTR   = $A3   ; EOI flag byte/tape bit count
+
+; b0 of this location reflects the current phase of the tape output cycle.
+
+FIRT    = $A4   ; tape bit cycle phase
+CNTDN   = $A5   ; cassette synchronisation byte count/serial bus bit count
+BUFPNT  = $A6   ; tape buffer index
+INBIT   = $A7   ; receiver input bit temp storage
+BITCI   = $A8   ; receiver bit count in
+RINONE  = $A9   ; receiver start bit check flag, $90 = no start bit
+                ; received, $00 = start bit received
+RIDATA  = $AA   ; receiver byte buffer/assembly location
+RIPRTY  = $AB   ; receiver parity bit storage
+SAL     = $AC   ; tape buffer start pointer low byte
+                ; scroll screen ?? byte
+;         $AD   ; tape buffer start pointer high byte
+                ; scroll screen ?? byte
+EAL     = $AE   ; tape buffer end pointer low byte
+                ; scroll screen ?? byte
+;         $AF   ; tape buffer end pointer high byte
+                ; scroll screen ?? byte
+CMP0    = $B0   ; tape timing constant min byte
+;         $B1   ; tape timing constant max byte
+
+; These two locations point to the address of the cassette buffer. This pointer must
+; be greater than or equal to $0200 or an ILLEGAL DEVICE NUMBER error will be sent
+; when tape I/O is tried. This pointer must also be less that $8000 or the routine
+; will terminate early.
+
+TAPE1   = $B2   ; tape buffer start pointer low byte
+;         $B3   ; tape buffer start pointer high byte
+
+; RS-232 routines use this to count the number of bits transmitted and for parity and
+; stop bit manipulation. Tape load routines use this location to flag when they are
+; ready to receive data bytes.
+
+BITTS   = $B4   ; transmitter bit count out
+
+; This location is used by the RS-232 routines to hold the next bit to be sent and by the
+; tape routines to indicate what part of a block the read routine is currently reading.
+
+NXTBIT  = $B5   ; transmitter next bit to be sent
+
+; RS-232 routines use this area to disassemble each byte to be sent from the transmission
+; buffer pointed to by ROBUF.
+
+RODATA  = $B6   ; transmitter byte buffer/disassembly location
+
+; Disk filenames may be up to 16 characters in length while tape filenames may be up to
+; 187 characters in length.
+
+; If a tape name is longer than 16 characters the excess will be truncated by the
+; SEARCHING and FOUND messages, but will still be present on the tape.
+
+; A disk file is always referred to by a name. This location will always be greater than
+; zero if the current file is a disk file.
+
+; An RS-232 OPEN command may specify a filename of up to four characters. These characters
+; are copied to M51CTR to M51CTR+3 and determine baud rate, word length, and parity, or
+; they would do if the feature was fully implemented.
+
+FNLEN   = $B7   ; file name length
+
+LA      = $B8   ; logical file
+SA      = $B9   ; secondary address
+FA      = $BA   ; current device number
+                ; number    device
+                ; ------    ------
+                ;  0        keyboard
+                ;  1        cassette
+                ;  2        RS-232
+                ;  3        screen
+                ;  4-31     serial bus
+FNADR   = $BB   ; file name pointer low byte
+;         $BC   ; file name pointer high byte
+ROPRTY  = $BD   ; tape write byte/RS-232 parity byte
+
+; Used by the tape routines to count the number of copies of a data block remaining to
+; be read or written.
+
+FSBLK   = $BE   ; tape copies count
+MYCH    = $BF   ; parity count ??
+CAS1    = $C0   ; tape motor interlock
+STAL    = $C1   ; I/O start addresses low byte
+;         $C2   ; I/O start addresses high byte
+MEMUSS  = $C3   ; KERNAL setup pointer low byte
+;         $C4   ; KERNAL setup pointer high byte
+LSTX    = $C5   ; current key pressed
+                ;
+                ;  # key     # key       # key       # key
+                ; -- ---    -- ---      -- ---      -- ---
+                ; 00 1      10 none     20 [SPACE]  30 Q
+                ; 01 3      11 A        21 Z        31 E
+                ; 02 5      12 D        22 C        32 T
+                ; 03 7      13 G        23 B        33 U
+                ; 04 9      14 J        24 M        34 O
+                ; 05 +      15 L        25 .        35 @
+                ; 06 £         16 ;        26 none     36 ^
+                ; 07 [DEL]  17 [CSR R]  27 [F1]     37 [F5]
+                ; 08 [<-]   18 [STOP]   28 none     38 2
+                ; 09 W      19 none     29 S        39 4
+                ; 0A R      1A X        2A F        3A 6
+                ; 0B Y      1B V        2B H        3B 8
+                ; 0C I      1C N        2C K        3C 0
+                ; 0D P      1D ,        2D :        3D -
+                ; 0E *      1E /        2E =        3E [HOME]
+                ; 0F [RET]  1F [CSR D]  2F [F3]     3F [F7]
+
+NDX     = $C6   ; keyboard buffer length/index
+
+; When the [CTRL][RVS-ON] characters are printed this flag is set to $12, and the print
+; routines will add $80 to the screen code of each character which is printed, so that
+; the character will appear on the screen with its colours reversed.
+
+; Note that the contents of this location are cleared not only upon entry of a
+; [CTRL][RVS-OFF] character but also at every carriage return.
+
+RVS     = $C7   ; reverse flag $12 = reverse, $00 = normal
+
+; This pointer indicates the column number of the last nonblank character on the logical
+; line that is to be input. Since a logical line can be up to 88 characters long this
+; number can range from 0-87.
+
+INDX    = $C8   ; input [EOL] pointer
+
+; These locations keep track of the logical line that the cursor is on and its column
+; position on that logical line.
+
+; Each logical line may contain up to four 22 column physical lines. So there may be as
+; many as 23 logical lines, or as few as 6 at any one time. Therefore, the logical line
+; number might be anywhere from 1-23. Depending on the length of the logical line, the
+; cursor column may be from 1-22, 1-44, 1-66 or 1-88.
+
+; For a more on logical lines, see the description of the screen line link table, $D9.
+
+LXSP    = $C9   ; input cursor row
+;         $CA   ; input cursor column
+
+; The keyscan interrupt routine uses this location to indicate which key is currently
+; being pressed. The value here is then used as an index into the appropriate keyboard
+; table to determine which character to print when a key is struck.
+
+; The correspondence between the key pressed and the number stored here is as follows:
+
+; $00   1   $10 not used    $20 [SPACE]     $30 Q   $40 [NO KEY]
+; $01   3   $11 A       $21 Z       $31 E   $xx invalid
+; $02   5   $12 D       $22 C       $32 T
+; $03   7   $13 G       $23 B       $33 U
+; $04   9   $14 J       $24 M       $34 O
+; $05   +   $15 L       $25 .       $35 @
+; $06   £  $16 ;       $26 not used    $36 ^
+; $07   [DEL]   $17 [CRSR R]    $27 [F1]        $37 [F5]
+; $08   [<-]    $18 [STOP]      $28 not used    $38 2
+; $09   W   $19 not used    $29 S       $39 4
+; $0A   R   $1A X       $2A F       $3A 6
+; $0B   Y   $1B V       $2B H       $3B 8
+; $0C   I   $1C N       $2C K       $3C 0
+; $0D   P   $1D ,       $2D :       $3D -
+; $0E   *   $1E /       $2E =       $3E [HOME]
+; $0F   [RET]   $1F [CRSR D]    $2F [F3]        $3F [F7]
+
+SFDX    = $CB   ; which key
+
+; When this flag is set to a nonzero value, it indicates to the routine that normally
+; flashes the cursor not to do so. The cursor blink is turned off when there are
+; characters in the keyboard buffer, or when the program is running.
+
+BLNSW   = $CC   ; cursor enable, $00 = flash cursor
+
+; The routine that blinks the cursor uses this location to tell when it's time for a
+; blink. The number 20 is put here and decremented every jiffy until it reaches zero.
+; Then the cursor state is changed, the number 20 is put back here, and the cycle starts
+; all over again.
+
+BLNCT   = $CD   ; cursor timing countdown
+
+; The cursor is formed by printing the inverse of the character that occupies the cursor
+; position. If that characters is the letter A, for example, the flashing cursor merely
+; alternates between printing an A and a reverse-A. This location keeps track of the
+; normal screen code of the character that is located at the cursor position, so that it
+; may be restored when the cursor moves on.
+
+CDBLN   = $CE   ; character under cursor
+
+; This location keeps track of whether, during the current cursor blink, the character
+; under the cursor was reversed, or was restored to normal. This location will contain
+; $00 if the character is reversed, and $01 if the character is not reversed.
+
+BLNON   = $CF   ; cursor blink phase
+
+CRSW    = $D0   ; input from keyboard or screen, $xx = input is available
+                ; from the screen, $00 = input should be obtained from the
+                ; keyboard
+
+; These locations point to the address in screen RAM of the first column of the logical
+; line upon which the cursor is currently positioned.
+
+PNT     = $D1   ; current screen line pointer low byte
+;         $D2   ; current screen line pointer high byte
+
+; This holds the cursor column position within the logical line pointed to by PNT.
+; Since a logical line can comprise up to four physical lines, this value may be from
+; 0 to 87.
+
+PNTR    = $D3   ; cursor column
+
+; A nonzero value in this location indicates that the editor is in quote mode. Quote
+; mode is toggled every time that you type in a quotation mark on a given line, the
+; first quote mark turns it on, the second turns it off, the third turns it on, etc.
+
+; If the editor is in this mode when a cursor control character or other nonprinting
+; character is entered, a printed equivalent will appear on the screen instead of the
+; cursor movement or other control operation taking place. Instead, that action is
+; deferred until the string is sent to the string by a PRINT statement, at which time
+; the cursor movement or other control operation will take place.
+
+; The exception to this rule is the DELETE key, which will function normally within
+; quote mode. The only way to print a character which is equivalent to the DELETE key
+; is by entering insert mode. Quote mode may be exited by printing a closing quote or
+; by hitting the RETURN or SHIFT-RETURN keys.
+
+QTSW    = $D4   ; cursor quote flag
+
+; The line editor uses this location when the end of a line has been reached to determine
+; whether another physical line can be added to the current logical line or if a new
+; logical line must be started.
+
+LNMX    = $D5   ; current screen line length
+
+; This location contains the current physical screen line position of the cursor, 0 to 22.
+
+TBLX    = $D6   ; cursor row
+
+; The ASCII value of the last character printed to the screen is held here temporarily.
+
+ASCII   = $D7   ; checksum byte/temporary last character
+
+; When the INST key is pressed, the screen editor shifts the line to the right, allocates
+; another physical line to the logical line if necessary (and possible), updates the
+; screen line length in LNMX, and adjusts the screen line link table at LDTB1. This location
+; is used to keep track of the number of spaces that has been opened up in this way.
+
+; Until the spaces that have been opened up are filled, the editor acts as if in quote
+; mode. See location QTSW, the quote mode flag. This means that cursor control characters
+; that are normally nonprinting will leave a printed equivalent on the screen when
+; entered, instead of having their normal effect on cursor movement, etc. The only
+; difference between insert and quote mode is that the DELETE key will leave a printed
+; equivalent in insert mode, while the INSERT key will insert spaces as normal.
+
+INSRT   = $D8   ; insert count
+
+; This table contains 23 entries, one for each row of the screen display. Each entry has
+; two functions. Bits 0-3 indicate on which of the four pages of screen memory the first
+; byte of memory for that row is located. This is used in calculating the pointer to the
+; starting address of a screen line at PNT.
+;
+; The high byte is calculated by adding the value of the starting page of screen memory
+; held in HIBASE to the displacement page held here.
+;
+; The other function of this table is to establish the makeup of logical lines on the
+; screen. While each screen line is only 22 characters long, BASIC allows the entry of
+; program lines that contain up to 88 characters. Therefore, some method must be used
+; to determine which physical lines are linked into a longer logical line, so that this
+; longer logical line may be edited as a unit.
+;
+; The high bit of each byte here is used as a flag by the screen editor. That bit is set
+; when a line is the first or only physical line in a logical line. The high bit is reset
+; to 0 only when a line is an extension to this logical line.
+
+LDTB1   = $D9   ; to LDTB1 + $18 inclusive, screen line link table
+
+; This pointer is synchronised with the pointer to the address of the first byte of
+; screen RAM for the current line kept in PNT. It holds the address of the first byte
+; of colour RAM for the corresponding screen line.
+
+LLNKSV  = $F2   ; screen row marker
+USER    = $F3   ; colour RAM pointer low byte
+;         $F4   ; colour RAM pointer high byte
+
+; This pointer points to the address of the keyboard matrix lookup table currently being
+; used. Although there are only 64 keys on the keyboard matrix, each key can be used to
+; print up to four different characters, depending on whether it is struck by itself or
+; in combination with the SHIFT, CTRL, or C= keys.
+
+; These tables hold the ASCII value of each of the 64 keys for one of these possible
+; combinations of keypresses. When it comes time to print the character, the table that
+; is used determines which character is printed.
+
+; The addresses of the tables are:
+
+;   NORMKEYS            ; unshifted
+;   SHFTKEYS            ; shifted
+;   LOGOKEYS            ; commodore
+;   CTRLKEYS            ; control
+
+KEYTAB  = $F5   ; keyboard pointer low byte
+;         $F6   ; keyboard pointer high byte
+
+; When device the RS-232 channel is opened two buffers of 256 bytes each are created at
+; the top of memory. These locations point to the address of the one which is used to
+; store characters as they are received.
+
+RIBUF   = $F7   ; RS-232 Rx pointer low byte
+;         $F8   ; RS-232 Rx pointer high byte
+
+; These locations point to the address of the 256 byte output buffer that is used for
+; transmitting data to RS-232 devices.
+
+ROBUF   = $F9   ; RS-232 Tx pointer low byte
+;         $FA   ; RS-232 Tx pointer high byte
+
+; $FB to $FE - unused
+
+BASZPT  = $FF   ; FAC1 to string output base
+
+STACK   = $0100 ; bottom of the stack page
+
+CHNLNK  = $01FC ; chain link pointer high byte
+;         $01FD ; chain link pointer low byte
+
+PREVLN  = $01FE ; line number low byte before crunched line
+;         $01FF ; line number high byte before crunched line
+
+BUF     = $0200 ; input buffer, for some routines the byte before the input
+                ; buffer needs to be set to a specific value for the routine
+                ; to work correctly
+
+LAT     = $0259 ; .. to $0262 logical file table
+FAT     = $0263 ; .. to $026C device number table
+SAT     = $026D ; .. to $0276 secondary address table
+KEYD    = $0277 ; .. to $0280 keyboard buffer
+MEMSTR  = $0281 ; OS start of memory low byte
+;         $0282 ; OS start of memory high byte
+MEMHIGH = $0283 ; OS top of memory low byte
+;         $0284 ; OS top of memory high byte
+TIMOUT  = $0285 ; IEEE-488 bus timeout flag ( unused )
+COLOR   = $0286 ; current colour code
+GDCOL   = $0287 ; colour under cursor
+HIBASE  = $0288 ; screen memory page
+XMAX    = $0289 ; maximum keyboard buffer size
+RPTFLG  = $028A ; key repeat. $80 = repeat all, $40 = repeat none,
+                ; $00 = repeat cursor movement keys, insert/delete
+                ; key and the space bar
+KOUNT   = $028B ; repeat speed counter
+DELAY   = $028C ; repeat delay counter
+
+; This flag signals which of the SHIFT, CTRL, or C= keys are currently being pressed.
+
+; A value of $01 signifies that one of the SHIFT keys is being pressed, a $02 shows that
+; the C= key is down, and $04 means that the CTRL key is being pressed. If more than one
+; key is held down, these values will be added e.g. $03 indicates that SHIFT and C= are
+; both held down.
+
+; Pressing the SHIFT and C= keys at the same time will toggle the character set that is
+; presently being used between the uppercase/graphics set, and the lowercase/uppercase
+; set.
+
+; While this changes the appearance of all of the characters on the screen at once it
+; has nothing whatever to do with the keyboard shift tables and should not be confused
+; with the printing of SHIFTed characters, which affects only one character at a time.
+
+SHFLAG  = $028D ; keyboard shift/control flag
+                ; bit   key(s) 1 = down
+                ; ---   ---------------
+                ; 7-3   unused
+                ;  2    CTRL
+                ;  1    C=
+                ;  0    SHIFT
+
+; This location, in combination with the one above, is used to debounce the special
+; SHIFT keys. This will keep the SHIFT/C= combination from changing character sets
+; back and forth during a single pressing of both keys.
+
+LSTSHF  = $028E ; SHIFT/CTRL/C= keypress last pattern
+
+; This location points to the address of the Operating System routine which actually
+; determines which keyboard matrix lookup table will be used.
+
+; The routine looks at the value of the SHIFT flag at SHFLAG, and based on what value
+; it finds there, stores the address of the correct table to use at location KEYTAB.
+
+KEYLOG  = $028F ; keyboard decode logic pointer low byte
+;         $0290 ; keyboard decode logic pointer high byte
+
+; This flag is used to enable or disable the feature which lets you switch between the
+; uppercase/graphics and upper/lowercase character sets by pressing the SHIFT and
+; Commodore logo keys simultaneously.
+
+MODE    = $0291 ; shift mode switch, $00 = enabled, $80 = locked
+
+; This location is used to determine whether moving the cursor past the ??xx column of
+; a logical line will cause another physical line to be added to the logical line.
+
+; A value of 0 enables the screen to scroll the following lines down in order to add
+; that line; any nonzero value will disable the scroll.
+
+; This flag is set to disable the scroll temporarily when there are characters waiting
+; in the keyboard buffer, these may include cursor movement characters that would
+; eliminate the need for a scroll.
+
+AUTODN  = $0292 ; screen scrolling flag, $00 = enabled
+
+M51CTR  = $0293 ; pseudo 6551 control register. the first character of
+                ; the OPEN RS-232 filename will be stored here
+                ; bit   function
+                ; ---   --------
+                ;  7    2 stop bits/1 stop bit
+                ; 65    word length
+                ; ---   -----------
+                ; 00    8 bits
+                ; 01    7 bits
+                ; 10    6 bits
+                ; 11    5 bits
+                ;  4    unused
+                ; 3210  baud rate
+                ; ----  ---------
+                ; 0000  user rate *
+                ; 0001     50
+                ; 0010     75
+                ; 0011    110
+                ; 0100    134.5
+                ; 0101    150
+                ; 0110    300
+                ; 0111    600
+                ; 1000   1200
+                ; 1001   1800
+                ; 1010   2400
+                ; 1011   3600
+                ; 1100   4800 *
+                ; 1101   7200 *
+                ; 1110   9600 *
+                ; 1111  19200 * * = not implemented
+M51CDR  = $0294 ; pseudo 6551 command register. the second character of
+                ; the OPEN RS-232 filename will be stored here
+                ; bit   function
+                ; ---   --------
+                ; 765   parity
+                ; ---   ------
+                ; xx0   disabled
+                ; 001   odd
+                ; 011   even
+                ; 101   mark
+                ; 111   space
+                ;  4    duplex half/full
+                ;  3    unused
+                ;  2    unused
+                ;  1    unused
+                ;  0    handshake - X line/3 line
+;LAB_0295   = $0295     ; Nonstandard Bit Timing low byte. the third character
+                    ; of the OPEN RS-232 filename will be stored here
+;LAB_0296   = $0296     ; Nonstandard Bit Timing high byte. the fourth character
+                    ; of the OPEN RS-232 filename will be stored here
+RSSTAT  = $0297 ; RS-232 status register
+                ; bit   function
+                ; ---   --------
+                ;  7    break
+                ;  6    no DSR detected
+                ;  5    unused
+                ;  4    no CTS detected
+                ;  3    unused
+                ;  2    Rx buffer overrun
+                ;  1    framing error
+                ;  0    parity error
+BITNUM  = $0298 ; number of bits to be sent/received
+BAUDOF  = $0299 ; time of one bit cell low byte
+;         $029A ; time of one bit cell high byte
+RIDBE   = $029B ; index to Rx buffer end
+RIDBS   = $029C ; index to Rx buffer start
+RODBS   = $029D ; index to Tx buffer start
+RODBE   = $029E ; index to Tx buffer end
+IRQTMP  = $029F ; saved IRQ low byte
+;         $02A0 ; saved IRQ high byte
+
+; $02A1 to $02FF - unused
+
+IERROR  = $0300 ; BASIC vector - print error message
+IMAIN   = $0302 ; BASIC vector - main command processor
+ICRNCH  = $0304 ; BASIC vector - tokenise keywords
+IQPLOP  = $0306 ; BASIC vector - list program
+IGONE   = $0308 ; BASIC vector - execute next command
+IEVAL   = $030A ; BASIC vector - get value from line
+
+; Before every SYS command each of the registers is loaded with the value found in the
+; corresponding storage address. Upon returning to BASIC with an RTS instruction, the new
+; value of each register is stored in the appropriate storage address.
+
+; This feature allows you to place the necessary values into the registers from BASIC
+; before you SYS to a KERNAL or BASIC ML routine. It also enables you to examine the
+; resulting effect of the routine on the registers, and to preserve the condition of the
+; registers on exit for subsequent SYS calls.
+
+SAREG   = $030C ; .A for SYS command
+SXREG   = $030D ; .X for SYS command
+SYREG   = $030E ; .Y for SYS command
+SPREG   = $030F ; .P for SYS command
+
+; $0311 to $0313 - unused
+
+CINV    = $0314 ; IRQ vector
+CBINV   = $0316 ; BRK vector
+NMINV   = $0318 ; NMI vector
+
+IOPEN   = $031A ; KERNAL vector - open a logical file
+ICLOSE  = $031C ; KERNAL vector - close a specified logical file
+ICHKIN  = $031E ; KERNAL vector - open channel for input
+ICKOUT  = $0320 ; KERNAL vector - open channel for output
+ICLRCN  = $0322 ; KERNAL vector - close input and output channels
+IBASIN  = $0324 ; KERNAL vector - input character from channel
+IBSOUT  = $0326 ; KERNAL vector - output character to channel
+ISTOP   = $0328 ; KERNAL vector - scan stop key
+IGETIN  = $032A ; KERNAL vector - get character from keyboard queue
+ICLALL  = $032C ; KERNAL vector - close all channels and files
+IUSRCMD = $032E ; User vector
+
+ILOAD   = $0330 ; KERNAL vector - load
+ISAVE   = $0332 ; KERNAL vector - save
+
+; $0334 to $033B - unused ???
+
+TBUFFR  = $033C ; to $03FB - cassette buffer
+
+; $03FC to $03FF - unused
+
+
+;***********************************************************************************;
+;
+; hardware equates
+
+VICCR0  = $9000 ; screen origin - horizontal
+                ; bit   function
+                ; ---   --------
+                ;  7    interlace mode (NTSC only)
+                ; 6-0   horizontal origin
+VICCR1  = $9001 ; screen origin - vertical
+VICCR2  = $9002 ; video address and screen columns
+                ; bit   function
+                ; ---   --------
+                ;  7    video memory address va9
+                ;   colour memory address va9
+                ; 6-0   number of columns
+VICCR3  = $9003 ; screen rows and character height
+                ; bit   function
+                ; ---   --------
+                ;  7    raster line b0
+                ; 6-1   number of rows
+                ;  0    character height (8/16 bits)
+VICCR4  = $9004 ; raster line b8-b1
+VICCR5  = $9005 ; video and character memory addresses
+                ; bit   function
+                ; ---   --------
+                ; 7-4   video memory address va13-va10
+                ; 3-0   character memory address va13-va10
+
+                ; 0000 ROM  $8000   set 1
+                ; 0001  "   $8400
+                ; 0010  "   $8800   set 2
+                ; 0011  "   $8C00
+                ; 1100 RAM  $1000
+                ; 1101  "   $1400
+                ; 1110  "   $1800
+                ; 1111  "   $1C00
+VICCR6  = $9006 ; light pen horizontal position
+VICCR7  = $9007 ; light pen vertical position
+VICCR8  = $9008 ; paddle X
+VICCR9  = $9009 ; paddle Y
+VICCRA  = $900A ; oscillator 1
+                ; bit   function
+                ; ---   --------
+                ;  7    enable
+                ; 6-0   frequency
+VICCRB  = $900B ; oscillator 2
+                ; bit   function
+                ; ---   --------
+                ;  7    enable
+                ; 6-0   frequency
+VICCRC  = $900C ; oscillator 3
+                ; bit   function
+                ; ---   --------
+                ;  7    enable
+                ; 6-0   frequency
+VICCRD  = $900D ; white noise
+                ; bit   function
+                ; ---   --------
+                ;  7    enable
+                ; 6-0   frequency
+VICCRE  = $900E ; auxiliary colour and volume
+                ; bit   function
+                ; ---   --------
+                ; 7-4   auxiliary colour
+                ; 3-0   volume
+VICCRF  = $900F ; background and border colour
+                ; bit   function
+                ; ---   --------
+                ; 7-4   background colour
+                ;  3    reverse video
+                ; 2-0   border colour
+
+VIA1PB  = $9110     ; VIA 1 DRB
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    DSR in
+                    ;  6    CTS in
+                    ;  5    unused
+                    ;  4    DCD in
+                    ;  3    RI in
+                    ;  2    DTR out
+                    ;  1    RTS out
+                    ;  0    data in
+VIA1PA1 = $9111     ; VIA 1 DRA
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    serial ATN out
+                    ;  6    cassette switch
+                    ;  5    light pen
+                    ;  4    joy 2
+                    ;  3    joy 1
+                    ;  2    joy 0
+                    ;  1    serial DATA in
+                    ;  0    serial CLK in
+VIA1DDRB = $9112    ; VIA 1 DDRB
+VIA1DDRA = $9113    ; VIA 1 DDRA
+VIA1T1CL = $9114    ; VIA 1 T1C_l
+VIA1T1CH = $9115    ; VIA 1 T1C_h
+VIA1T2CL = $9118    ; VIA 1 T2C_l
+VIA1T2CH = $9119    ; VIA 1 T2C_h
+VIA1ACR  = $911B    ; VIA 1 ACR
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    T1 PB7 enabled/disabled
+                    ;  6    T1 free run/one shot
+                    ;  5    T2 clock PB6/ø2
+                    ; 432   function
+                    ; ---   --------
+                    ; 000   shift register disabled
+                    ; 001   shift in, rate controlled by T2
+                    ; 010   shift in, rate controlled by ø2
+                    ; 011   shift in, rate controlled by external clock
+                    ; 100   shift out, rate controlled by T2, free run mode
+                    ; 101   shift out, rate controlled by T2
+                    ; 110   shift out, rate controlled by ø2
+                    ; 111   shift out, rate controlled by external clock
+                    ;  1    PB latch enabled/disabled
+                    ;  0    PA latch enabled/disabled
+VIA1PCR = $911C     ; VIA 1 PCR
+                    ; bit   function
+                    ; ---   --------
+                    ; 765   CB2 control
+                    ; ---   -----------
+                    ; 000   Interrupt Input Mode
+                    ; 001   Independent Interrupt Input Mode
+                    ; 010   Input Mode
+                    ; 011   Independent Input Mode
+                    ; 100   Handshake Output Mode
+                    ; 101   Pulse Output Mode
+                    ; 110   Manual Output Mode, CB2 low
+                    ; 111   Manual Output Mode, CB2 high
+                    ;  4    CB1 edge positive/negative
+                    ; 321   CA2 control
+                    ; ---   -----------
+                    ; 000   Interrupt Input Mode
+                    ; 001   Independent Interrupt Input Mode
+                    ; 010   Input Mode
+                    ; 011   Independent Input Mode
+                    ; 100   Handshake Output Mode
+                    ; 101   Pulse Output Mode
+                    ; 110   Manual Output Mode, CA2 low
+                    ; 111   Manual Output Mode, CA2 high
+                    ;  0    CA1 edge positive/negative
+
+; The status bit is a not normal flag. It goes high if both an interrupt flag in the IFR
+; and the corresponding enable bit in the IER are set. It can be cleared only by clearing
+; all the active flags in the IFR or disabling all active interrupts in the IER.
+
+VIA1IFR     = $911D ; VIA 1 IFR
+                    ; bit   function        cleared by
+                    ; ---   --------        ----------
+                    ;  7    interrupt status    clearing all enabled interrupts
+                    ;  6    T1 interrupt        read T1C_l, write T1C_h
+                    ;  5    T2 interrupt        read T2C_l, write T2C_h
+                    ;  4    CB1 transition      read or write port B
+                    ;  3    CB2 transition      read or write port B
+                    ;  2    8 shifts done       read or write the shift register
+                    ;  1    CA1 transition      read or write port A
+                    ;  0    CA2 transition      read or write port A
+
+; If enable/disable bit is a zero during a write to this register, each 1 in bits 0-6
+; clears the corresponding bit in the IER. If this bit is a one during a write to this
+; register, each 1 in bits 0-6 will set the corresponding IER bit.
+
+VIA1IER     = $911E ; VIA 1 IER
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    enable/disable
+                    ;  6    T1 interrupt
+                    ;  5    T2 interrupt
+                    ;  4    CB1 transition
+                    ;  3    CB2 transition
+                    ;  2    8 shifts done
+                    ;  1    CA1 transition
+                    ;  0    CA2 transition
+
+VIA1PA2     = $911F ; VIA 1 DRA, no handshake
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    ATN out
+                    ;  6    cassette switch
+                    ;  5    joystick fire, light pen
+                    ;  4    joystick left
+                    ;  3    joystick down
+                    ;  2    joystick up
+                    ;  1    serial dat in
+                    ;  0    serial clk in
+
+VIA2PB      = $9120 ; VIA 2 DRB, keyboard column drive
+VIA2PA1     = $9121 ; VIA 2 DRA, keyboard row port
+                    ; VIC 20 keyboard matrix layout
+                    ;   c7  c6  c5  c4  c3  c2  c1  c0
+                    ;   +----------------------------------------------------------------
+                    ; r7|   [F7]    [F5]    [F3]    [F1]    [DWN]   [RGT]   [RET]   [DEL]
+                    ; r6|   [HOME]  [UP]    =   [RSH]   /   ;   *   £
+                    ; r5|   -   @   :   .   ,   L   P   +
+                    ; r4|   0   O   K   M   N   J   I   9
+                    ; r3|   8   U   H   B   V   G   Y   7
+                    ; r2|   6   T   F   C   X   D   R   5
+                    ; r1|   4   E   S   Z   [LSH]   A   W   3
+                    ; r0|   2   Q   [C=]    [SP]    [RUN]   [CTL]   [<-]    1
+
+VIA2DDRB    = $9122 ; VIA 2 DDRB
+VIA2DDRA    = $9123 ; VIA 2 DDRA
+VIA2T1CL    = $9124 ; VIA 2 T1C_l
+VIA2T1CH    = $9125 ; VIA 2 T1C_h
+VIA2T2CL    = $9128 ; VIA 2 T2C_l
+VIA2T2CH    = $9129 ; VIA 2 T2C_h
+VIA2ACR     = $912B ; VIA 2 ACR
+VIA2PCR     = $912C ; VIA 2 PCR
+
+; The status bit is a not normal flag. it goes high if both an interrupt flag in the IFR
+; and the corresponding enable bit in the IER are set. It can be cleared only by clearing
+; all the active flags in the IFR or disabling all active interrupts in the IER.
+
+VIA2IFR     = $912D ; VIA 2 IFR
+                    ; bit   function        cleared by
+                    ; ---   --------        ----------
+                    ;  7    interrupt status    clearing all enabled interrupts
+                    ;  6    T1 interrupt        read T1C_l, write T1C_h
+                    ;  5    T2 interrupt        read T2C_l, write T2C_h
+                    ;  4    CB1 transition      read or write port B
+                    ;  3    CB2 transition      read or write port B
+                    ;  2    8 shifts done       read or write the shift register
+                    ;  1    CA1 transition      read or write port A
+                    ;  0    CA2 transition      read or write port A
+
+; If enable/disable bit is a zero during a write to this register, each 1 in bits 0-6
+; clears the corresponding bit in the IER. If this bit is a one during a write to this
+; register, each 1 in bits 0-6 will set the corresponding IER bit.
+
+VIA2IER     = $912E ; VIA 2 IER
+                    ; bit   function
+                    ; ---   --------
+                    ;  7    enable/disable
+                    ;  6    T1 interrupt
+                    ;  5    T2 interrupt
+                    ;  4    CB1 transition
+                    ;  3    CB2 transition
+                    ;  2    8 shifts done
+                    ;  1    CA1 transition
+                    ;  0    CA2 transition
+
+VIA2PA2     = $912F ; VIA 2 DRA, keyboard row, no handshake
+
+XROMCOLD    = $A000 ; autostart ROM initial entry vector
+XROMWARM    = $A002 ; autostart ROM break entry vector
+XROMID      = $A004 ; autostart ROM identifier string start
+
+
+;***********************************************************************************;
+;
+; BASIC keyword token values. Tokens not used in the source are included for
+; completeness.
+
+; command tokens
+
+TK_END      = $80   ; END token
+TK_FOR      = $81   ; FOR token
+TK_NEXT     = $82   ; NEXT token
+TK_DATA     = $83   ; DATA token
+TK_INFL     = $84   ; INPUT# token
+TK_INPUT    = $85   ; INPUT token
+TK_DIM      = $86   ; DIM token
+TK_READ     = $87   ; READ token
+
+TK_LET      = $88   ; LET token
+TK_GOTO     = $89   ; GOTO token
+TK_RUN      = $8A   ; RUN token
+TK_IF       = $8B   ; IF token
+TK_RESTORE  = $8C   ; RESTORE token
+TK_GOSUB    = $8D   ; GOSUB token
+TK_RETURN   = $8E   ; RETURN token
+TK_REM      = $8F   ; REM token
+
+TK_STOP     = $90   ; STOP token
+TK_ON       = $91   ; ON token
+TK_WAIT     = $92   ; WAIT token
+TK_LOAD     = $93   ; LOAD token
+TK_SAVE     = $94   ; SAVE token
+TK_VERIFY   = $95   ; VERIFY token
+TK_DEF      = $96   ; DEF token
+TK_POKE     = $97   ; POKE token
+
+TK_PRINFL   = $98   ; PRINT# token
+TK_PRINT    = $99   ; PRINT token
+TK_CONT     = $9A   ; CONT token
+TK_LIST     = $9B   ; LIST token
+TK_CLR      = $9C   ; CLR token
+TK_CMD      = $9D   ; CMD token
+TK_SYS      = $9E   ; SYS token
+TK_OPEN     = $9F   ; OPEN token
+
+TK_CLOSE    = $A0   ; CLOSE token
+TK_GET      = $A1   ; GET token
+TK_NEW      = $A2   ; NEW token
+
+; secondary keyword tokens
+
+TK_TAB      = $A3   ; TAB( token
+TK_TO       = $A4   ; TO token
+TK_FN       = $A5   ; FN token
+TK_SPC      = $A6   ; SPC( token
+TK_THEN     = $A7   ; THEN token
+TK_NOT      = $A8   ; NOT token
+TK_STEP     = $A9   ; STEP token
+
+; operator tokens
+
+TK_PLUS     = $AA   ; + token
+TK_MINUS    = $AB   ; - token
+TK_MUL      = $AC   ; * token
+TK_DIV      = $AD   ; / token
+TK_POWER    = $AE   ; ^ token
+TK_AND      = $AF   ; AND token
+
+TK_OR       = $B0   ; OR token
+TK_GT       = $B1   ; > token
+TK_EQUAL    = $B2   ; = token
+TK_LT       = $B3   ; < token
+
+; function tokens
+
+TK_SGN      = $B4   ; SGN token
+TK_INT      = $B5   ; INT token
+TK_ABS      = $B6   ; ABS token
+TK_USR      = $B7   ; USR token
+
+TK_FRE      = $B8   ; FRE token
+TK_POS      = $B9   ; POS token
+TK_SQR      = $BA   ; SQR token
+TK_RND      = $BB   ; RND token
+TK_LOG      = $BC   ; LOG token
+TK_EXP      = $BD   ; EXP token
+TK_COS      = $BE   ; COS token
+TK_SIN      = $BF   ; SIN token
+
+TK_TAN      = $C0   ; TAN token
+TK_ATN      = $C1   ; ATN token
+TK_PEEK     = $C2   ; PEEK token
+TK_LEN      = $C3   ; LEN token
+TK_STRS     = $C4   ; STR$ token
+TK_VAL      = $C5   ; VAL token
+TK_ASC      = $C6   ; ASC token
+TK_CHRS     = $C7   ; CHR$ token
+
+TK_LEFTS    = $C8   ; LEFT$ token
+TK_RIGHTS   = $C9   ; RIGHT$ token
+TK_MIDS     = $CA   ; MID$ token
+TK_GO       = $CB   ; GO token
+
+TK_PI       = $FF   ; PI token
+
+;***********************************************************************************;
+;
+; floating point accumulator offsets
+
+FAC_EXPT    = $00
+FAC_MANT    = $01
+FAC_SIGN    = $05
 
 .export COLDST, WARMST, STMDSP, FUNDSP, OPTAB, LAB_C09B, RESLST, ERRSTR01, ERRSTR02, ERRSTR03, ERRSTR04, ERRSTR05, ERRSTR06, ERRSTR07, ERRSTR08, ERRSTR09, ERRSTR0A, ERRSTR0B, ERRSTR0C, ERRSTR0D, ERRSTR0E, ERRSTR0F, ERRSTR10, ERRSTR11, ERRSTR12, ERRSTR13, ERRSTR14, ERRSTR15, ERRSTR16, ERRSTR17, ERRSTR18, ERRSTR19, ERRSTR1A, ERRSTR1B, ERRSTR1C, ERRSTR1D, BMSGS, OKSTR, ERRORSTR, INSTR, READYSTR, CRLFBRK, BREAKSTR, SCNSTK, LAB_C38F, LAB_C3A4, LAB_C3B0, LAB_C3B7, MAKSPC, MOVEBL, LAB_C3DC, LAB_C3E8, LAB_C3EC, LAB_C3F3, STKSPC, RAMSPC, LAB_C412, LAB_C416, LAB_C421, LAB_C434, MEMERR, ERROR, ERROR2, LAB_C456, PRDY, READY, MAIN, MAIN2, NEWLIN, LAB_C4D7, LAB_C4DF, LAB_C4ED, LAB_C508, LAB_C522, LAB_C52A, LNKPRG, LAB_C53C, LAB_C544, LAB_C55F, GETLIN, LAB_C562, LAB_C576, CRNCH, CRNCH2, LAB_C582, LAB_C58E, LAB_C5A4, LAB_C5AC, LAB_C5B6, LAB_C5B8, LAB_C5C7, LAB_C5C9, LAB_C5DC, LAB_C5DE, LAB_C5E5, LAB_C5EE, LAB_C5F5, LAB_C5F9, LAB_C609, FINLIN, LAB_C617, LAB_C62E, LAB_C637, LAB_C640, LAB_C641, NEW, LAB_C644, LAB_C659, CLR, LAB_C660, LAB_C663, LAB_C677, LAB_C67A, LAB_C68D, STXTPT, LIST, LAB_C6A4, LAB_C6BB, LAB_C6C9, LAB_C6E6, LAB_C6E8, LAB_C6EF, LAB_C6F3, LAB_C700, LAB_C714, LAB_C717, QPLOP, LAB_C72C, LAB_C72F, LAB_C737, FOR, LAB_C753, LAB_C78B, LAB_C79F, NEWSTT, LAB_C7BE, LAB_C7CE, LAB_C7E1, GONE, LAB_C7ED, LAB_C7EF, LAB_C804, LAB_C807, LAB_C80B, LAB_C80E, RESTORE, LAB_C827, LAB_C82B, TSTSTOP, BSTOP, END, LAB_C832, LAB_C849, LAB_C84B, LAB_C854, CONT, LAB_C862, LAB_C870, RUN, LAB_C87D, GOSUB, LAB_C897, GOTO, LAB_C8BC, LAB_C8C0, LAB_C8D1, RETURN, LAB_C8E3, LAB_C8E8, LAB_C8EB, SKIPST, BUMPTP, LAB_C905, FIND2, LAB_C909, LAB_C911, LAB_C919, IF, LAB_C937, REM, LAB_C940, LAB_C948, ON, LAB_C953, LAB_C957, LAB_C95F, LAB_C96A, DECBIN, LAB_C971, LAB_C99F, LET, LET2, LAB_C9D6, LAB_C9D9, LET5, LAB_C9ED, LAB_CA07, LAB_CA1D, LAB_CA24, LAB_CA27, LET9, LAB_CA3D, LAB_CA4B, LAB_CA52, LAB_CA68, PRINTN, CMD, LAB_CA90, PRT1, LAB_CA9D, PRINT, LAB_CAA2, LAB_CACA, LAB_CAD7, LAB_CAE5, LAB_CAE7, PRT6, LAB_CAEE, PRT7, LAB_CB0E, LAB_CB0F, LAB_CB10, LAB_CB13, LAB_CB19, PRTSTR, LAB_CB21, LAB_CB28, PRTOS, LAB_CB42, LAB_CB45, LAB_CB47, IGRERR, LAB_CB57, LAB_CB5B, LAB_CB5F, LAB_CB62, LAB_CB6B, GET, LAB_CB92, INPUTN, LAB_CBB5, LAB_CBB7, INPUT, LAB_CBCE, LAB_CBD6, LAB_CBEA, LAB_CBF9, LAB_CC03, READ, LAB_CC0D, LAB_CC0F, LAB_CC15, LAB_CC41, LAB_CC4A, LAB_CC4D, LAB_CC51, LAB_CC65, LAB_CC71, LAB_CC72, LAB_CC7D, LAB_CC89, LAB_CC91, LAB_CC9D, LAB_CCB8, LAB_CCD1, LAB_CCDF, LAB_CCEA, LAB_CCFB, EXTRA, LAB_CD0C, NEXT, LAB_CD24, LAB_CD27, LAB_CD32, LAB_CD35, LAB_CD75, LAB_CD78, TYPCHK, LAB_CD8D, LAB_CD8F, LAB_CD90, LAB_CD96, LAB_CD97, LAB_CD99, FRMEVL, LAB_CDA4, LAB_CDA9, LAB_CDB8, LAB_CDBB, LAB_CDD7, LAB_CDE8, LAB_CDF0, LAB_CDF9, LAB_CDFA, LAB_CE07, LAB_CE11, LAB_CE19, LAB_CE20, LAB_CE30, LAB_CE33, LAB_CE38, LAB_CE43, LAB_CE58, LAB_CE5B, LAB_CE5D, LAB_CE64, LAB_CE66, LAB_CE80, EVAL, FEVAL, LAB_CE8A, LAB_CE8F, LAB_CE92, LAB_CE9A, PIVAL, LAB_CEAD, LAB_CEBD, LAB_CEC6, LAB_CECC, EQUAL, LAB_CEE3, LAB_CEEA, PAREXP, RPACHK, LPACHK, COMCHK, SYNCHR, LAB_CF08, FACT10, LAB_CF0F, VARRANGE, LAB_CF27, FACT12, LAB_CF5C, LAB_CF5D, LAB_CF6E, LAB_CF84, LAB_CF92, LAB_CFA0, FACT17, LAB_CFD1, LAB_CFD6, ORR, ANDD, COMPAR, CMPST, LAB_D056, LAB_D05B, LAB_D061, LAB_D066, LAB_D072, LAB_D07B, LAB_D07E, DIM, EVLVAR, LAB_D090, LAB_D092, LAB_D09C, LAB_D09F, LAB_D0AF, LAB_D0B0, LAB_D0BA, LAB_D0C4, LAB_D0D4, LAB_D0DB, FNDVAR, LAB_D0EF, LAB_D0F1, LAB_D0FB, LAB_D109, CHRTST, LAB_D11C, MAKVAR, LAB_D123, LAB_D128, LAB_D138, LAB_D13B, LAB_D143, LAB_D159, RETVP, LAB_D18F, ARYHED, LAB_D1A0, MAXINT, INTIDX, GETSUB, LAB_D1B8, MAKINT, LAB_D1CC, LAB_D1CE, ARY, LAB_D1DB, LAB_D21C, LAB_D228, LAB_D237, BADSUB, ILQUAN, LAB_D24A, ARY2, ARY6, LAB_D274, LAB_D27D, LAB_D286, LAB_D296, LAB_D2B9, LAB_D2C8, LAB_D2CD, ARY14, LAB_D2F2, LAB_D308, LAB_D30B, LAB_D30E, LAB_D30F, LAB_D320, LAB_D331, LAB_D337, LAB_D34B, M16, LAB_D355, LAB_D35F, LAB_D378, FRE, LAB_D384, MAKFP, POS, LAB_D3A2, NODIRM, UNDEF, DEF, FN, EVALFN, LAB_D418, LAB_D449, EVFN3, STR, LAB_D46F, ALC1, LAB_D47D, MAKSTR, LAB_D48D, LAB_D497, LAB_D4A4, LAB_D4A8, LAB_D4A9, LAB_D4B5, LAB_D4BF, LAB_D4CA, LAB_D4D2, LAB_D4D5, ALCSPAC, LAB_D4F6, LAB_D501, LAB_D50B, LAB_D516, GRBCOL, LAB_D52A, LAB_D544, LAB_D54D, LAB_D559, LAB_D561, LAB_D566, LAB_D56E, LAB_D572, LAB_D57D, LAB_D5AE, LAB_D5B0, LAB_D5B8, GCOL13, LAB_D5C7, LAB_D5DC, LAB_D5E6, LAB_D5F6, LAB_D601, COLLECT, ADDSTR, LAB_D65D, XFERSTR, LAB_D688, LAB_D68C, LAB_D690, LAB_D699, LAB_D6A2, DELST, LAB_D6A6, LAB_D6AA, LAB_D6D5, LAB_D6D6, DELTSD, LAB_D6EB, CHR, LEFT, LAB_D706, LAB_D70C, LAB_D70D, LAB_D70E, LAB_D725, RIGHT, MID, LAB_D748, FINLMR, LEN, GSINFO, ASC, LAB_D798, GETBYT, LAB_D79E, LAB_D7A1, VAL, LAB_D7B5, LAB_D7CD, LAB_D7E2, GETAD, LAB_D7F1, MAKADR, PEEK, POKE, WAIT, LAB_D83C, LAB_D840, LAB_D848, ADD05, LAMIN, SUB, PLUS1, LAPLUS, PLUS, LAB_D86F, LAB_D877, LAB_D893, LAB_D897, LAB_D8A3, LAB_D8AF, LAB_D8D2, LAB_D8D7, LAB_D8DB, ZERFAC, LAB_D8F9, LAB_D8FB, NORMLZ, LAB_D91D, LAB_D929, LAB_D936, LAB_D938, LAB_D946, COMFAC, LAB_D94D, LAB_D96F, LAB_D97D, OVERFL, ASRRES, LAB_D985, LAB_D999, LAB_D9A6, LAB_D9AC, LAB_D9B0, LAB_D9BA, FPC1, LOGCON, LAB_D9D6, LAB_D9DB, LAB_D9E0, LAB_D9E5, LOG, LAB_D9F1, LAB_D9F4, TIMES, MULT, LAB_DA30, TIMES3, LAB_DA5E, LAB_DA61, LAB_DA7D, LAB_DA8B, LODARG, MULDIV, LAB_DAB9, LAB_DAC4, LAB_DACF, LAB_DAD4, LAB_DADA, LAB_DADF, MULTEN, LAB_DAED, LAB_DAF8, FPCTEN, DIVTEN, LAB_DB07, LADIV, DIVIDE, LAB_DB29, LAB_DB3F, LAB_DB4C, LAB_DB4F, LAB_DB5D, LAB_DB7A, LAB_DB7E, LAB_DB8A, LAB_DB8F, LODFAC, FACTF2, FACTF1, FACTFP, STORFAC, ATOF, LAB_DBFE, LAB_DC02, RFTOA, FTOA, LAB_DC11, LAB_DC1A, ROUND, LAB_DC23, SGNFAC, LAB_DC2F, LAB_DC31, LAB_DC38, SGN, INTFP, INTFP1, LAB_DC49, LAB_DC4F, ABS, CMPFAC, LAB_DC5D, LAB_DC92, LAB_DC98, FPINT, LAB_DCAF, LAB_DCBA, LAB_DCBB, INT, FILFAC, LAB_DCF2, ASCFLT, LAB_DCF7, LAB_DD06, LAB_DD0A, LAB_DD0D, LAB_DD0F, LAB_DD2E, LAB_DD30, LAB_DD33, LAB_DD35, LAB_DD41, LAB_DD47, LAB_DD49, LAB_DD52, LAB_DD5B, LAB_DD62, LAB_DD67, LAB_DD6A, LAB_DD71, ASCI8, LAB_DD91, LAB_DDA0, LAB_DDAE, FPC12, LAB_DDB8, LAB_DDBD, PRTIN, PRTFIX, LAB_DDDA, FLTASC, LAB_DDDF, LAB_DDE7, LAB_DDF8, LAB_DE00, LAB_DE09, LAB_DE0B, LAB_DE16, LAB_DE21, LAB_DE28, LAB_DE2F, LAB_DE32, LAB_DE47, LAB_DE48, LAB_DE53, LAB_DE64, LAB_DE66, LAB_DE68, LAB_DE6A, LAB_DE8E, LAB_DE90, LAB_DE97, LAB_DEB2, LAB_DEC4, LAB_DEC6, LAB_DED3, LAB_DEE3, LAB_DEEF, LAB_DF04, LAB_DF07, LAB_DF0C, FLP05, NULLVAR, FLTCON, HMSCON, LAB_DF52, SQR, EXPONT, LAB_DF84, LAB_DF9E, NEGFAC, LAB_DFBE, EXPCON, LAB_DFC4, EXP, LAB_DFFD, LAB_E008, LAB_E00B, LAB_E01B, SEREVL, SER2, LAB_E05A, LAB_E069, LAB_E06D, LAB_E07A, RNDC1, LAB_E08F, RND, LAB_E0BB, LAB_E0D0, LAB_E0E0, LAB_E0F3, PATCHBAS, LAB_E101, LAB_E106, LAB_E109, LAB_E10F, LAB_E115, LAB_E11B, LAB_E121, SYSTEM, LAB_E144, BSAVE, BVERIF, BLOAD, LAB_E187, LAB_E194, LAB_E195, LAB_E1A1, LAB_E1B5, BOPEN, BCLOSE, LAB_E1CE, PARSL, LAB_E1FD, IFCHRG, LAB_E20A, SKPCOM, CHRERR, PAROC, LAB_E23C, LAB_E254, COS, SIN, LAB_E29A, LAB_E29D, LAB_E2AA, TAN, LAB_E2D9, FPC20, LAB_E2E2, LAB_E2E7, LAB_E2EC, ATN, LAB_E313, LAB_E321, LAB_E334, LAB_E33A, ATNCON, COLDBA, CGIMAG, LAB_E38D, LAB_E39E, INITBA, LAB_E3C4, LAB_E403, FREMSG, BFREMSG, BASMSG, BASVCTRS, INITVCTRS, LAB_E45D, WARMBAS, PATCHER, SEROUT1, SEROUT0, SERGET, PATCH1, PATCH2, LAB_E4CC, PATCH3, LAB_E4D7, FIOBASE, FSCREEN, FPLOT, LAB_E513, INITSK, LAB_E536, CLSR, LAB_E568, LAB_E570, LAB_E57B, HOME, SETSLINK, LAB_E58B, LAB_E597, LAB_E5A8, LAB_E5B2, SETIODEF, INITVIC, LAB_E5C5, LP2, LAB_E5D4, GETQUE, LAB_E5E8, LAB_E602, LAB_E60E, GET2RTN, LAB_E621, LAB_E62A, GETSCRN, LAB_E657, LAB_E67E, LAB_E684, LAB_E688, LAB_E691, LAB_E6A3, LAB_E6A6, LAB_E6A8, LAB_E6B6, QUOTECK, LAB_E6C4, SETCHAR, LAB_E6C7, LAB_E6CB, LAB_E6CD, LAB_E6D3, LAB_E6DC, LAB_E6E4, SCROLL, LAB_E701, LAB_E70E, LAB_E715, LAB_E719, LAB_E720, LAB_E723, LAB_E72C, RETREAT, LAB_E737, SCRNOUT, LAB_E756, LAB_E75D, LAB_E769, LAB_E76B, LAB_E771, LAB_E778, LAB_E785, LAB_E78E, LAB_E79F, LAB_E7AA, LAB_E7B1, LAB_E7B7, LAB_E7BE, LAB_E7D4, LAB_E7D6, LAB_E7D9, LAB_E7EC, LAB_E7F4, LAB_E7F7, LAB_E7FA, LAB_E800, LAB_E81D, LAB_E82A, LAB_E831, LAB_E845, LAB_E84C, LAB_E851, LAB_E86D, LAB_E870, LAB_E874, LAB_E879, LAB_E88E, LAB_E893, LAB_E89B, LAB_E8AB, LAB_E8B1, LAB_E8B8, LAB_E8BB, NXTLINE, LAB_E8C7, LAB_E8CF, RTRN, BACKUP, LAB_E8EC, LAB_E8F7, FORWARD, LAB_E8FE, LAB_E909, LAB_E911, COLORSET, LAB_E914, LAB_E91D, COLORTBL, LAB_E928, SCRL, LAB_E981, LAB_E989, LAB_E99D, LAB_E9A2, LAB_E9AC, LAB_E9D6, LAB_E9DF, OPENLIN, LAB_E9F0, LAB_EA08, LAB_EA16, LAB_EA2C, LAB_EA31, LAB_EA3F, LAB_EA44, MOVLIN, LAB_EA60, LAB_EA62, SETADDR, LINPTR, CLRALINE, LAB_EA95, SYNPRT, PUTSCRN, COLORSYN, IRQ, LAB_EAEA, LAB_EAEF, LAB_EB01, LAB_EB0A, LAB_EB12, FSCNKEY, LAB_EB40, LAB_EB4A, LAB_EB60, LAB_EB62, LAB_EB63, LAB_EB71, LAB_EB74, LAB_EB84, LAB_EB8F, LAB_EBA1, LAB_EBAB, LAB_EBBA, LAB_EBD6, SETKEYS, LAB_EC0F, LAB_EC18, LAB_EC43, KEYVCTRS, NORMKEYS, SHFTKEYS, LOGOKEYS, CHARSET, GRAPHMODE, LAB_ED3C, LAB_ED3F, LAB_ED4D, WRAPLINE, WHATKEYS, CTRLKEYS, VICINIT, RUNTB, LDTB2, FTALK, FLISTEN, LIST1, LAB_EE2B, LAB_EE38, LAB_EE40, SRSEND, LAB_EE5A, LAB_EE60, LAB_EE66, LAB_EE73, LAB_EE88, LAB_EE8B, LAB_EEA5, SRBAD, LAB_EEB7, LAB_EEB9, FSECOND, SCATN, FTKSA, LAB_EED3, LAB_EEDD, FCIOUT, LAB_EEED, LAB_EEF2, FUNTLK, FUNLSN, LAB_EF09, LAB_EF0C, LAB_EF0F, FACPTR, LAB_EF21, LAB_EF29, LAB_EF2E, LAB_EF3C, LAB_EF45, LAB_EF54, LAB_EF58, LAB_EF66, LAB_EF7F, SRCLKHI, SRCLKLO, WAITABIT, LAB_EF9B, RSNXTBIT, LAB_EFB0, LAB_EFB9, RSPRTY, LAB_EFCE, LAB_EFCF, LAB_EFDA, LAB_EFDE, LAB_EFE4, RSSTOPS, RSNXTBYT, LAB_EFFB, RSMISSNG, LAB_F019, LAB_F021, RSCPTBIT, LAB_F031, LAB_F035, RSINBIT, LAB_F04A, RSSTPBIT, LAB_F04D, RSPREPIN, RSSTRBIT, RSINBYTE, LAB_F081, LAB_F089, RSPRTYER, RSOVERUN, RSBREAK, RSFRAMER, LAB_F0B3, RSDVCERR, RSOPNOUT, LAB_F0CD, LAB_F0D4, LAB_F0E1, LAB_F0E8, LAB_F0EB, RSOUTSAV, RSPREPOT, RSOPNIN, LAB_F12B, LAB_F138, LAB_F13F, LAB_F144, LAB_F146, RSNXTIN, LAB_F15D, RSPAUSE, LAB_F166, LAB_F172, KMSGTBL, KM_IOERR, KM_SRCHG, KM_FOR, KM_PRPLY, KM_REcpy, KM_LODNG, KM_SAVNG, KM_VFYNG, KM_FOUND, KM_OK, SPMSG, KMSGSHOW, LAB_F1F3, FGETIN, LAB_F201, LAB_F205, FCHRIN, LAB_F21D, LAB_F22A, LAB_F244, LAB_F24A, LAB_F24D, CHRINTP2, LAB_F260, CHRINSR, LAB_F26A, LAB_F26B, LAB_F26C, CHRINRS, LAB_F279, FCHROUT, LAB_F285, LAB_F28B, CHROUTTP, LAB_F2AA, LAB_F2AF, LAB_F2B8, LAB_F2B9, FCHKIN, LAB_F2CF, LAB_F2E3, LAB_F2EC, LAB_F2F0, LAB_F2FE, LAB_F301, FCHKOUT, LAB_F311, LAB_F318, LAB_F31B, LAB_F328, LAB_F32E, LAB_F332, LAB_F33F, LAB_F342, FCLOSE, LAB_F351, LAB_F37F, LAB_F384, LAB_F38D, LAB_F39E, LAB_F3AE, LAB_F3B1, LAB_F3B2, LAB_F3CD, LAB_F3CE, FNDFLNO, LAB_F3D4, LAB_F3D6, SETFLCH, LAB_F3EE, FCLALL, FCLRCHN, LAB_F3FC, LAB_F403, FOPEN, LAB_F411, LAB_F419, LAB_F422, LAB_F444, LAB_F44B, LAB_F453, LAB_F46C, LAB_F46F, LAB_F478, LAB_F482, LAB_F491, LAB_F493, LAB_F494, SERNAME, LAB_F4B2, LAB_F4B8, LAB_F4C2, LAB_F4C5, OPENRS, LAB_F4D9, LAB_F4E7, LAB_F4F4, LAB_F51B, LAB_F533, LAB_F53C, FLOAD, FLOAD2, LAB_F553, LAB_F556, LAB_F563, LAB_F58A, LAB_F598, LAB_F5B3, LAB_F5B5, LAB_F5BB, LAB_F5C7, LAB_F5CA, LOADTP, LAB_F5D9, LAB_F5E1, LAB_F5EE, LAB_F5F5, LAB_F604, LAB_F611, LAB_F615, LAB_F641, LAB_F646, SRCHING, FILENAME, LAB_F65F, LAB_F669, LDVRMSG, LAB_F672, FSAVE, FSAVE2, LAB_F689, LAB_F68C, LAB_F69D, LAB_F6BC, LAB_F6CB, LAB_F6D2, LAB_F6D7, LAB_F6DA, LAB_F6EF, SAVETP, LAB_F6F8, LAB_F70F, LAB_F726, LAB_F727, SAVING, FUDTIM, LAB_F740, LAB_F755, FRDTIM, FSETTIM, FSTOP, LAB_F77D, FE_2MNYF, FE_ALOPN, FE_NTOPN, FE_NTFND, FE_DVNTP, FE_NTINP, FE_NTOUT, FE_MISFN, FE_ILDEV, LAB_F7AC, FAH, LAB_F7CE, LAB_F7DA, LAB_F7E4, LAB_F7E6, TAPEH, LAB_F7FE, LAB_F822, LAB_F834, LAB_F84C, TPBUFA, LDAD1, FNDHDR, LAB_F874, LAB_F888, LAB_F889, JTP20, CSTEL, LAB_F89B, LAB_F89E, CS10, LAB_F8B5, CSTE2, RDTPBLKS, RBLK, WBLK, LAB_F8E6, LAB_F8EA, LAB_F8ED, TAPE, LAB_F923, LAB_F925, LAB_F92F, TSTOP, LAB_F957, LAB_F95C, STT1, LAB_F972, LAB_F979, READT, LAB_F9C3, LAB_F9E2, LAB_F9E5, LAB_F9ED, LAB_F9F1, LAB_F9F3, LAB_FA06, LAB_FA19, LAB_FA22, LAB_FA25, LAB_FA2E, LAB_FA30, LAB_FA47, LAB_FA60, LAB_FA68, LAB_FA6C, LAB_FA91, LAB_FAA0, LAB_FAAA, TPSTORE, LAB_FABD, LAB_FAD3, LAB_FAD7, LAB_FADA, LAB_FAF0, LAB_FAF6, LAB_FB07, LAB_FB0D, LAB_FB1B, LAB_FB23, LAB_FB38, LAB_FB55, LAB_FB7C, LAB_FB80, LAB_FB87, LAB_FB90, LAB_FB95, LAB_FB97, LAB_FBA0, LAB_FBAC, LAB_FBB6, LAB_FBCF, RD300, NEWCH, TPTOGLE, LAB_FBF1, LAB_FBF3, LAB_FBF5, BLKEND, WRITE, LAB_FC21, LAB_FC2E, LAB_FC47, LAB_FC4A, LAB_FC54, LAB_FC6A, LAB_FC6E, LAB_FC7D, LAB_FC8C, LAB_FC92, WRTN1, LAB_FC9C, WRTZ, TNIF, LAB_FCF4, BSIV, LAB_FCFB, TNOFF, VPRTY, WRT62, LAB_FD21, START, LAB_FD2F, CHKAUTO, LAB_FD41, LAB_FD4C, A0CBM, FRESTOR, FVECTOR, LAB_FD5D, LAB_FD64, VECTORS, INITMEM, LAB_FD90, LAB_FDAF, LAB_FDB5, LAB_FDCF, LAB_FDD2, LAB_FDDE, LAB_FDEB, IRQVCTRS, INITVIA, LAB_FE39, FSETNAM, FSETLFS, FREADST, FSETMSG, READIOST, ORIOST, FSETTMO, FMEMTOP, LAB_FE75, LAB_FE7B, FMEMBOT, LAB_FE8A, TSTMEM, LAB_FEA4, NMI, NMI2, LAB_FEC7, BREAK, RSNMI, LAB_FEFF, LAB_FF02, LAB_FF2C, LAB_FF38, _RTI, BAUDTBL, IRQROUT, LAB_FF82, RESTOR, VECTOR, SETMSG, SECOND, TKSA, MEMTOP, MEMBOT, SCNKEY, SETTMO, ACPTR, CIOUT, UNTLK, UNLSN, LISTEN, TALK, READST, SETLFS, SETNAM, OPEN, CLOSE, CHKIN, CHKOUT, CLRCHN, CHRIN, CHROUT, LOAD, SAVE, SETTIM, RDTIM, STOP, GETIN, CLALL, UDTIM, SCREEN, PLOT, IOBASE
 
@@ -14771,3 +16026,4 @@ IOBASE:
     .word NMI       ; NMI vector
     .word START     ; RESET vector
     .word IRQROUT   ; IRQ vector
+;***********************************************************************************;

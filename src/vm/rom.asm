@@ -14618,7 +14618,7 @@ CHROUT:
 ; device will be ignored.  In this case .X.Y must contain the starting address for the
 ; load. If the device was addressed with a secondary address other than 0 the data will
 ; load into memory starting at the location specified by the header.  This routine
-; returns the address of the highest RAM location which was loaded.
+; returns the address after the last byte loaded.
 
 ; Before this routine can be called, the SETLFS and SETNAM routines must be called.
 

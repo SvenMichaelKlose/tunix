@@ -95,6 +95,11 @@ command_mode ()
                 edit_mode ();
                 break;
 
+            case 'a':
+                move_right ();
+                edit_mode ();
+                break;
+
             case 'h':
             case TTY_CURSOR_LEFT:
                 move_left ();

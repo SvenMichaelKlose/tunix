@@ -120,22 +120,39 @@ init_kernal_emulation ()
     ultifs_mount ();
 }
 
+char
+peek_from_process (char * from)
+{
+    if (from < 0x2000 || from > 0x7fff)
+        return *from;
+    if (from < 0x4000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
+        return *(from - 0x2000 + 0xa000);
+    }
+    if (from < 0x6000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
+        return *(from - 0x4000 + 0xa000);
+    }
+    if (from < 0x8000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
+        return *(from - 0x6000 + 0xa000);
+    }
+}
+
 // TODO: This'll map the calling process' memory to BLK5.
 void
 copy_from_process (char * to, char * from, char len)
 {
-    memcpy (to, from, len);
-/*
-    char blk5 = *ULTIMEM_BLK5;
-    char * ptr;
+    char old_cfg2 = *ULTIMEM_CONFIG2;
+    unsigned old_blk5 = *ULTIMEM_BLK5;
 
-    while (len--) {
-        ptr = ultimem_map_ptr (from++, (void *) 0xa000, (int *) 0x104, ULTIMEM_BLK5);
-        *to = *ptr;
-    }
+    *ULTIMEM_CONFIG2 |= 0xc0;
 
-    *ULTIMEM_BLK5 = blk5;
-*/
+    while (len--)
+        *to++ = peek_from_process (from++);
+
+    *ULTIMEM_BLK5 = old_blk5;
+    *ULTIMEM_CONFIG2 = old_cfg2;
 }
 
 void

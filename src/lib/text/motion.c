@@ -64,6 +64,17 @@ move_line_end ()
 }
 
 void
+move_line_begin ()
+{
+    if (!current_line->length)
+        return;
+
+    xpos = 0;
+    while (current_line->data[xpos] == ' ' && xpos != current_line->length - 1)
+        move_right ();
+}
+
+void
 move_line_last_char ()
 {
     if (current_line->length)

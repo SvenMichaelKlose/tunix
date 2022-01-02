@@ -76,6 +76,11 @@ command_mode ()
         linelist_goto (linenr);
 
         switch (wait_for_key ()) {
+            case 'I':
+                move_line_begin ();
+                edit_mode ();
+                break;
+
             case 'i':
                 edit_mode ();
                 break;

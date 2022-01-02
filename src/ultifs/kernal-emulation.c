@@ -19,10 +19,10 @@
 #define TRUE    -1
 
 // Callee registers
-#define accu        (*(char*) 0x100)
-#define xreg        (*(char*) 0x101)
-#define yreg        (*(char*) 0x102)
-#define flags       (*(char*) 0x103)
+#define accu        (*(char*) 0x9c00)
+#define xreg        (*(char*) 0x9c01)
+#define yreg        (*(char*) 0x9c02)
+#define flags       (*(char*) 0x9c03)
 
 // CPU flags
 #define FLAG_C          1

@@ -147,7 +147,7 @@ map_ultimem_end:
     lda cpu_state+3
     pha
     lda cpu_state
-    plp
+    plp     ; (Will also restore the interrupt flag.)
 
     rts
 .endproc

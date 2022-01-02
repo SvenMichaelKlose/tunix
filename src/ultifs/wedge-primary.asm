@@ -16,12 +16,16 @@ d:      .res 2
 
     .data
 
+FSTOP   = $f770
+FGETIN  = $f1f5
+BREAK   = $fed2
+
 secondary_vectors_l:
     .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn
-    .byte <ubasin, <ubsout, <uclall, $d2, <uload, <usave, 0
+    .byte <ubasin, <ubsout, <FSTOP, <FGETIN, <uclall, <BREAK, <uload, <usave, 0
 secondary_vectors_h:
     .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
-    .byte >ubasin, >ubsout, >uclall, $fe, >uload, >usave, 0
+    .byte >ubasin, >ubsout, >FSTOP, >FGETIN, >uclall, >BREAK, >uload, >usave, 0
 
     .code
 
@@ -44,6 +48,7 @@ l1: lda map_ultimem,y
     dey
     bpl l1
 
+    ; Bump pointer past subroutines.
     lda #unmap_ultimem_end - map_ultimem
     clc
     adc d
@@ -101,8 +106,6 @@ r:  rts
 .proc map_ultimem
     ; Save registers and flags.
     sta cpu_state
-    stx cpu_state+1
-    sty cpu_state+2
     php
     pla
     sta cpu_state+3

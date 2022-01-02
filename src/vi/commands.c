@@ -35,3 +35,11 @@ cmd_enter ()
     move_down ();
     move_line_start ();
 }
+
+void
+command_delete_till_line_end ()
+{
+    current_line->length = xpos;
+    if (xpos)
+        xpos--;
+}

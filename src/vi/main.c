@@ -105,6 +105,10 @@ command_mode ()
                 edit_mode ();
                 break;
 
+            case 'D':
+                command_delete_till_line_end ();
+                break;
+
             case 'h':
             case TTY_CURSOR_LEFT:
                 move_left ();

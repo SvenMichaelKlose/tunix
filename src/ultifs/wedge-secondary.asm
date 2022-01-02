@@ -168,7 +168,7 @@ l:  lda _saved_zp,x
     jsr _ultifs_kopen
     jmp leave
 
-n:  lda old_IOPEN + 1
+n:  lda old_IOPEN+1
     pha
     lda old_IOPEN
     pha
@@ -182,7 +182,7 @@ n:  lda old_IOPEN + 1
     jsr _ultifs_kclose
     jmp leave
 
-n:  lda old_ICLOSE + 1
+n:  lda old_ICLOSE+1
     pha
     lda old_ICLOSE
     pha
@@ -196,7 +196,7 @@ n:  lda old_ICLOSE + 1
     jsr _ultifs_kchkin
     jmp leave
 
-n:  lda old_ICHKIN + 1
+n:  lda old_ICHKIN+1
     pha
     lda old_ICHKIN
     pha
@@ -210,7 +210,7 @@ n:  lda old_ICHKIN + 1
     jsr _ultifs_kchkout
     jmp leave
 
-n:  lda old_ICHKOUT + 1
+n:  lda old_ICHKOUT+1
     pha
     lda old_ICHKOUT
     pha
@@ -224,7 +224,7 @@ n:  lda old_ICHKOUT + 1
     jsr _ultifs_kclrcn
     jmp leave
 
-n:  lda old_ICLRCN + 1
+n:  lda old_ICLRCN+1
     pha
     lda old_ICLRCN
     pha
@@ -238,7 +238,7 @@ n:  lda old_ICLRCN + 1
     jsr _ultifs_kbasin
     jmp leave
 
-n:  lda old_IBASIN + 1
+n:  lda old_IBASIN+1
     pha
     lda old_IBASIN
     pha
@@ -252,7 +252,7 @@ n:  lda old_IBASIN + 1
     jsr _ultifs_kbsout
     jmp leave
 
-n:  lda old_IBSOUT + 1
+n:  lda old_IBSOUT+1
     pha
     lda old_IBSOUT
     pha
@@ -260,7 +260,7 @@ n:  lda old_IBSOUT + 1
 .endproc
 
 .proc ustop
-n:  lda old_ISTOP + 1
+n:  lda old_ISTOP+1
     pha
     lda old_ISTOP
     pha
@@ -268,7 +268,7 @@ n:  lda old_ISTOP + 1
 .endproc
 
 .proc ugetin
-n:  lda old_IGETIN + 1
+n:  lda old_IGETIN+1
     pha
     lda old_IGETIN
     pha
@@ -278,7 +278,7 @@ n:  lda old_IGETIN + 1
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
-    lda old_ICLALL + 1
+    lda old_ICLALL+1
     pha
     lda old_ICLALL
     pha
@@ -292,7 +292,7 @@ n:  lda old_IGETIN + 1
     jsr _ultifs_kload
     jmp leave
 
-n:  lda old_ILOAD + 1
+n:  lda old_ILOAD+1
     pha
     lda old_ILOAD
     pha
@@ -306,7 +306,7 @@ n:  lda old_ILOAD + 1
     jsr _ultifs_ksave
     jmp leave
 
-n:  lda old_ISAVE + 1
+n:  lda old_ISAVE+1
     pha
     lda old_ISAVE
     pha

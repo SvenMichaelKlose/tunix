@@ -8,15 +8,13 @@
 .import uopen, uclose, uchkin, uckout, uclrcn
 .import ubasin, ubsout, uclall, uload, usave
 
-
-.zeropage
+    .zeropage
 
 s:      .res 2
 v:      .res 2
 d:      .res 2
 
-
-.data
+    .data
 
 secondary_vectors_l:
     .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn
@@ -25,8 +23,7 @@ secondary_vectors_h:
     .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
     .byte >ubasin, >ubsout, >uclall, $fe, >uload, >usave, 0
 
-
-.code
+    .code
 
 kernal_vectors  = $031a
 wedge_start     = $9800
@@ -101,7 +98,7 @@ r:  rts
 
 ; Map in secondary wedge and save registers.
 .proc map_ultimem
-    ; Save registers to stack page.
+    ; Save registers and flags.
     sta $100
     stx $101
     sty $102

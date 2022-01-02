@@ -2608,7 +2608,7 @@ NEWSTT:
     jsr TSTSTOP         ; do STOP check vector
     lda CHRGOT+1        ; get BASIC execute pointer low byte
     ldy CHRGOT+2        ; get BASIC execute pointer high byte
-    cpy #$02            ; compare with $02xx
+    cpy #>BUF           ; compare with $02xx
     NOP                 ; unused byte                           ##
     beq LAB_C7BE        ; if immediate mode skip the continue pointer save
 
@@ -5637,7 +5637,7 @@ LAB_D47D:
 ; print " terminated string to utility pointer
 
 MAKSTR:
-    ldx #$22        ; set terminator to "
+    ldx #'"'
     stx CHARAC      ; set search character, terminator 1
     stx ENDCHR      ; set terminator 2
 
@@ -5662,7 +5662,7 @@ LAB_D497:
     bne LAB_D497    ; loop if not terminator 2
 
 LAB_D4A4:
-    cmp #$22        ; compare with "
+    cmp #'"'
     beq LAB_D4A9    ; branch if " (carry set if = !)
 
 LAB_D4A8:
@@ -5681,7 +5681,7 @@ LAB_D4B5:
     lda FACOV       ; get string start high byte
     beq LAB_D4BF    ; branch if in utility area
 
-    cmp #$02        ; compare with input buffer memory high byte
+    cmp #>BUF
     bne LAB_D4CA    ; branch if not in input buffer memory
 
                     ; string in input buffer or utility area, move to string
@@ -8544,7 +8544,7 @@ LAB_E194:
 
 LAB_E195:
     jsr READST      ; read I/O status word
-    and #$BF        ; mask x0xx xxxx, clear read error
+    and #$BF        ; Mask x0xx xxxx, ignore end-of-file.
     beq LAB_E1A1    ; branch if no errors
 
     ldx #ER_LOAD    ; error $1D, load error
@@ -8552,7 +8552,7 @@ LAB_E195:
 
 LAB_E1A1:
     lda CHRGOT+2    ; get BASIC execute pointer high byte
-    cmp #$02        ; compare with $02xx
+    cmp #>BUF       ; Executing input buffer?
     bne LAB_E1B5    ; branch if not immediate mode
 
     stx VARTAB      ; set start of variables low byte
@@ -9037,10 +9037,10 @@ BASMSG:
 BASVCTRS:
     .word   ERROR2  ; error message             IERROR
     .word   MAIN2   ; BASIC warm start          IMAIN
-    .word   CRNCH2  ; crunch BASIC tokens           ICRNCH
-    .word   QPLOP   ; uncrunch BASIC tokens         IQPLOP
-    .word   GONE    ; start new BASIC code          IGONE
-    .word   FEVAL   ; get arithmetic element        IEVAL
+    .word   CRNCH2  ; crunch BASIC tokens       ICRNCH
+    .word   QPLOP   ; uncrunch BASIC tokens     IQPLOP
+    .word   GONE    ; start new BASIC code      IGONE
+    .word   FEVAL   ; get arithmetic element    IEVAL
 
 
 ;***********************************************************************************;
@@ -13571,7 +13571,7 @@ LAB_F84C:
 TPBUFA:
     ldx TAPE1       ; get tape buffer start pointer low byte
     ldy TAPE1+1     ; get tape buffer start pointer high byte
-    cpy #$02        ; compare high byte with $02xx
+    cpy #>BUF       ; compare high byte with $02xx
     rts
 
 

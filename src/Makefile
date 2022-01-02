@@ -7,6 +7,7 @@ all:
 	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultimem all
 	$(MAKE) -C lib/ultifs all
+	$(MAKE) -C lib/btree all
 	$(MAKE) -C lib/gfx all
 	$(MAKE) -C lib/term all
 	$(MAKE) -C lib/lineedit all
@@ -31,6 +32,7 @@ clean:
 	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem clean
 	$(MAKE) -C lib/ultifs clean
+	$(MAKE) -C lib/btree clean
 	$(MAKE) -C lib/gfx clean
 	$(MAKE) -C lib/term clean
 	$(MAKE) -C lib/lineedit clean

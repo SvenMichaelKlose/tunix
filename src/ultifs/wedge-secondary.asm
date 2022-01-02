@@ -47,10 +47,10 @@ old_ICHKOUT:    .res 2
 old_ICLRCN:     .res 2
 old_IBASIN:     .res 2
 old_IBSOUT:     .res 2
-old_ISTOP:      .res 2
-old_IGETIN:     .res 2
+old_ISTOP:      .res 2  ; unchanged
+old_IGETIN:     .res 2  ; unchanged
 old_ICLALL:     .res 2
-old_IUSRCMD:    .res 2  ; TODO: Make it point to a BRK.
+old_IUSRCMD:    .res 2  ; unchanged
 old_ILOAD:      .res 2
 old_ISAVE:      .res 2
 
@@ -72,8 +72,8 @@ l:  lda IOPEN,x
     sta old_IOPEN,x
     lda IOPEN+1,x
     sbc #0
-    sta old_IOPEN+1,x
     inx
+    sta old_IOPEN,x
     inx
     dey
     bne l
@@ -99,27 +99,19 @@ done:
 .endproc
 
 .proc enter
-    ; Save registers and flags.
-    sta cpu_state
+    ; Save X and Y registers.  Accu and flags have
+    ; already been saved by the primary wedge.
     stx cpu_state+1
     sty cpu_state+2
-    php
-    pla
-    sta $103
-    sta cpu_state+3
 
     ; Save banks of BLK2 and BLK3.
     lda $9ffa
-    sta $107
     sta cpu_state+7
     lda $9ffb
-    sta $108
     sta cpu_state+8
     lda $9ffc
-    sta $109
     sta cpu_state+9
     lda $9ffd
-    sta $10a
     sta cpu_state+$0a
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.

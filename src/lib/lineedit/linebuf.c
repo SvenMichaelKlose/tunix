@@ -28,9 +28,9 @@ linebuf_insert_char (unsigned p, char c)
 void
 linebuf_delete_char (unsigned p)
 {
-    if (!linebuf_length || !p)
+    if (!linebuf_length)
         return;
 
-    memmove (&linebuf[p - 1], &linebuf[p], linebuf_length - p);
+    memmove (&linebuf[p], &linebuf[p + 1], linebuf_length - p - 1);
     linebuf_length--;
 }

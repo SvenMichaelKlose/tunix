@@ -12,7 +12,7 @@ adjust_xpos_to_line_length ()
 {
     linelist_goto (linenr);
 
-    if (xpos > current_line->length)
+    if (xpos >= current_line->length)
         xpos = current_line->length ?
             current_line->length - 1 :
             0;

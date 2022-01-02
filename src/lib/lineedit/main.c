@@ -51,7 +51,7 @@ line_delete_char ()
     if (!xpos)
         return;
 
-    linebuf_delete_char (xpos);
+    linebuf_delete_char (xpos - 1);
     line_move_left ();
 }
 

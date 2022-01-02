@@ -105,6 +105,10 @@ command_mode ()
                 edit_mode ();
                 break;
 
+            case 'x':
+                command_delete_char ();
+                break;
+
             case 'D':
                 command_delete_till_line_end ();
                 break;

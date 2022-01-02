@@ -1,6 +1,7 @@
 #ifndef MOTION_H
 #define MOTION_H
 
+extern void adjust_xpos_to_line_length (void);
 extern void move_down            (void);
 extern void move_up              (void);
 extern void move_left            (void);

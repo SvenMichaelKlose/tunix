@@ -19,6 +19,7 @@ d:      .res 2
 FSTOP   = $f770
 FGETIN  = $f1f5
 BREAK   = $fed2
+FCHROUT = $f27a
 
 secondary_vectors_l:
     .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn

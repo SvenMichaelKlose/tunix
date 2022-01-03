@@ -110,6 +110,7 @@ command motion_commands[] = {
     { 'k', move_up },
     { 'j', move_down },
     { 'l', move_right },
+    { '0', move_line_start },
     { '$', move_line_last_char },
     { 0, NULL }
 };

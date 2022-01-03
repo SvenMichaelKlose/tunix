@@ -157,7 +157,7 @@ copy_from_process (char * to, char * from, char len)
 }
 
 void
-set_oserr (char code)
+set_oserror (char code)
 {
     accu = code;
     flags = code ? FLAG_C : 0;
@@ -312,7 +312,7 @@ make_directory_list (channel * ch)
     free (line);
 
     ultifs_closedir ();
-    set_oserr (0);
+    set_oserror (0);
 }
 
 void
@@ -333,6 +333,10 @@ ultifs_kopen ()
     char *      name = NULL;
     bfile *     found_file;
     channel *   ch;
+
+    set_oserror (0);
+    set_error (0);
+    flags = 0;
 
     if (SA != 15 && channels[LFN]) {
         set_error (ERR_NO_CHANNEL);
@@ -371,7 +375,6 @@ ultifs_kopen ()
 
     ch->file = found_file;
 
-    set_error (0);
     return TRUE;
 
 error:
@@ -403,24 +406,24 @@ ultifs_kclose ()
 void
 ultifs_kchkin ()
 {
-    set_oserr (channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN);
+    set_oserror (channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN);
 }
 
 void
 ultifs_kchkout ()
 {
     if (!channels[LFN]) {
-        set_oserr (OSERR_FILE_NOT_OPEN);
+        set_oserror (OSERR_FILE_NOT_OPEN);
         return;
     }
 
     if (SA != 15) {
-        set_oserr (OSERR_FILE_NOT_OUT);
+        set_oserror (OSERR_FILE_NOT_OUT);
         return;
     }
 
     // TODO: Complete Flash writes.
-    set_oserr (0);
+    set_oserror (0);
 }
 
 void
@@ -434,8 +437,12 @@ ultifs_kbasin ()
     channel *  ch = channels[LFN];
     bfile *    file;
 
+    set_oserror (0);
+    set_error (0);
+    flags = 0;
+
     if (!ch) {
-        set_oserr (OSERR_FILE_NOT_OPEN);
+        set_oserror (OSERR_FILE_NOT_OPEN);
         return 0;
     }
 

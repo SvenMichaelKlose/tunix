@@ -69,79 +69,76 @@ done:
     screen_set_status ("");
 }
 
+typedef void (*voidfun) ();
+
+typedef struct _command {
+    char        key;
+    voidfun     fun;
+} command;
+
+voidfun
+get_command_fun (command * cmds, char key)
+{
+    while (cmds->key) {
+        if (cmds->key == key)
+            return cmds->fun;
+        cmds++;
+    }
+
+    return NULL;
+}
+
+void do_nothing (void) {}
+
+command edit_commands[] = {
+    { 'i', do_nothing },
+    { 'I', move_line_begin },
+    { 'o', cmd_open_below },
+    { 'O', cmd_open_above },
+    { 'a', move_right },
+    { 'A', move_line_end },
+    { 's', command_delete_char },
+    { 0, NULL }
+};
+
+command motion_commands[] = {
+    { TTY_CURSOR_LEFT,  move_left },
+    { TTY_CURSOR_UP,    move_up },
+    { TTY_CURSOR_DOWN,  move_down },
+    { TTY_CURSOR_RIGHT, move_right },
+    { 'h', move_left },
+    { 'k', move_up },
+    { 'j', move_down },
+    { 'l', move_right },
+    { '$', move_line_last_char },
+    { 0, NULL }
+};
+
+command modify_commands[] = {
+    { 'D', command_delete_till_line_end },
+    { 'x', command_delete_char },
+    { 0, NULL }
+};
+
 void
 command_mode ()
 {
+    char    key;
+    voidfun fun;
+
     while (1) {
         linelist_goto (linenr);
 
-        switch (wait_for_key ()) {
-            case 'I':
-                move_line_begin ();
-                edit_mode ();
-                break;
-
-            case 'i':
-                edit_mode ();
-                break;
-
-            case 'O':
-                cmd_open_above ();
-                edit_mode ();
-                break;
-
-            case 'o':
-                cmd_open_below ();
-                edit_mode ();
-                break;
-
-            case 'A':
-                move_line_end ();
-                edit_mode ();
-                break;
-
-            case 'a':
-                move_right ();
-                edit_mode ();
-                break;
-
-            case 'x':
-                command_delete_char ();
-                break;
-
-            case 's':
-                command_delete_char ();
-                edit_mode ();
-                break;
-
-            case 'D':
-                command_delete_till_line_end ();
-                break;
-
-            case 'h':
-            case TTY_CURSOR_LEFT:
-                move_left ();
-                break;
-
-            case 'k':
-            case TTY_CURSOR_UP:
-                move_up ();
-                break;
-
-            case 'j':
-            case TTY_CURSOR_DOWN:
-                move_down ();
-                break;
-
-            case 'l':
-            case TTY_CURSOR_RIGHT:
-                move_right ();
-                break;
-
-            case '$':
-                move_line_last_char ();
-                break;
-        }
+        key = wait_for_key ();
+        if (fun = get_command_fun (edit_commands, key)) {
+            fun ();
+            edit_mode ();
+        } else if (fun = get_command_fun (motion_commands, key))
+            fun ();
+        else if (fun = get_command_fun (modify_commands, key))
+            fun ();
+        else
+            term_put (TERM_BELL);
 
         screen_redraw ();
     }

@@ -145,7 +145,7 @@ command_mode ()
 }
 
 int
-main ()
+main (void)
 {
     term_init ();
     linelist_init ();

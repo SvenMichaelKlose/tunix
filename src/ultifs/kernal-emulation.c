@@ -521,6 +521,7 @@ ultifs_kload ()
 
     set_error (0);
     set_status (0);
+    flags = 0;
 }
 
 void

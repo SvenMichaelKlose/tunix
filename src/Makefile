@@ -22,6 +22,7 @@ all:
 	$(MAKE) -C ultifs all
 	$(MAKE) -C vforth all
 	$(MAKE) -C vi all
+	$(MAKE) -C vm all TV=PAL
 	$(MAKE) -C writenow all
 
 clean:
@@ -47,4 +48,5 @@ clean:
 	$(MAKE) -C ultifs clean
 	$(MAKE) -C vforth clean
 	$(MAKE) -C vi clean
+	$(MAKE) -C vm clean TV=PAL
 	$(MAKE) -C writenow clean

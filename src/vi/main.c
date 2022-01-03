@@ -10,7 +10,7 @@
 #include "screen.h"
 
 char
-wait_for_key ()
+wait_for_key (void)
 {
     char key;
 
@@ -20,7 +20,7 @@ wait_for_key ()
 }
 
 char
-lineedit_mode ()
+lineedit_mode (void)
 {
     char key;
 
@@ -45,7 +45,7 @@ done:
 }
 
 void
-edit_mode ()
+edit_mode (void)
 {
     char key;
 
@@ -122,7 +122,7 @@ command modify_commands[] = {
 };
 
 void
-command_mode ()
+command_mode (void)
 {
     char    key;
     voidfun fun;

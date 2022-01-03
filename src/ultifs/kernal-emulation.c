@@ -157,14 +157,7 @@ copy_from_process (char * to, char * from, char len)
 }
 
 void
-set_oserror (char code)
-{
-    accu = code;
-    flags = code ? FLAG_C : 0;
-}
-
-void
-set_error (char code)
+set_device_error (char code)
 {
     channel * ch = channels[15];  // Bullshit. LFN is key here.
 
@@ -312,7 +305,7 @@ make_directory_list (channel * ch)
     free (line);
 
     ultifs_closedir ();
-    set_oserror (0);
+    accu = flags = 0;
 }
 
 void
@@ -334,19 +327,18 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   ch;
 
-    set_oserror (0);
-    set_error (0);
-    flags = 0;
+    accu = flags = 0;
+    set_device_error (0);
 
     if (SA != 15 && channels[LFN]) {
-        set_error (ERR_NO_CHANNEL);
+        set_device_error (ERR_NO_CHANNEL);
         return FALSE;
     }
 
     if (FNLEN) {
         name = malloc (FNLEN + 1);
         if (!name) {
-            set_error (ERR_BYTE_DECODING);
+            set_device_error (ERR_BYTE_DECODING);
             return FALSE;
         }
         copy_from_process (name, FNAME, FNLEN);
@@ -369,7 +361,7 @@ ultifs_kopen ()
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
-        set_error (ERR_FILE_NOT_FOUND);
+        set_device_error (ERR_FILE_NOT_FOUND);
         goto error;
     }
 
@@ -389,7 +381,7 @@ ultifs_kclose ()
     channel * ch = channels[LFN];
 
     if (!ch) {
-        set_error (ERR_FILE_NOT_OPEN);
+        set_device_error (ERR_FILE_NOT_OPEN);
         return;
     }
 
@@ -406,24 +398,29 @@ ultifs_kclose ()
 void
 ultifs_kchkin ()
 {
-    set_oserror (channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN);
+    flags = 0;
+    if (accu = channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN)
+        flags = FLAG_C;
 }
 
 void
 ultifs_kchkout ()
 {
     if (!channels[LFN]) {
-        set_oserror (OSERR_FILE_NOT_OPEN);
+        accu = OSERR_FILE_NOT_OPEN;
+        flags = FLAG_C;
         return;
     }
 
     if (SA != 15) {
-        set_oserror (OSERR_FILE_NOT_OUT);
+        accu = OSERR_FILE_NOT_OUT;
+        flags = FLAG_C;
         return;
     }
 
-    // TODO: Complete Flash writes.
-    set_oserror (0);
+    // TODO: Flash writes.
+
+    accu = flags = 0;
 }
 
 void
@@ -437,12 +434,12 @@ ultifs_kbasin ()
     channel *  ch = channels[LFN];
     bfile *    file;
 
-    set_oserror (0);
-    set_error (0);
-    flags = 0;
+    accu = flags = 0;
+    set_device_error (0);
 
     if (!ch) {
-        set_oserror (OSERR_FILE_NOT_OPEN);
+        accu = OSERR_FILE_NOT_OPEN;
+        flags = FLAG_C;
         return 0;
     }
 
@@ -526,7 +523,7 @@ ultifs_kload ()
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
 
-    set_error (0);
+    set_device_error (0);
     set_status (0);
     flags = 0;
 }

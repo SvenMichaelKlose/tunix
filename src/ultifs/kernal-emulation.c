@@ -41,6 +41,8 @@
 #define FA      (*(char*)  0xba)    // Device number
 #define FNAME   (*(char**) 0xbb)    // File name pointer
 #define STATUS  (*(char*)  0x90)    // Serial line status byte
+#define DFLTN   (*(char*)  0x99)
+#define DFLTO   (*(char*)  0x9A)
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
@@ -393,6 +395,9 @@ ultifs_kclose ()
     if (ch->file)
         bfile_close (ch->file);
     free_channel ();
+
+    set_status (0);
+    accu = flags = 0;
 }
 
 void

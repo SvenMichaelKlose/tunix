@@ -220,15 +220,15 @@ data to a serial device since data will be sent to all
 open output channels on the bus.  Unless this is
 desired, all open output channels on the serial bus
 other than the actually intended destination channel
-must be closed by a call to CLOSE.
+must be closed by a call to CLOSE before.
 
 ## LOAD - load RAM from a device
 
-This routine will load data bytes from any input
-device directly into the memory of the computer.  It
-can also be used for a verify operation comparing
-data from a device with the data already in memory,
-leaving the data stored in RAM unchanged.
+This routine will load data bytes from any input device
+directly into the memory of the computer.  It can also
+be used for a verify operation comparing data from a
+device with the data already in memory, leaving the
+data stored in RAM unchanged.
 
 The accumulator must be set to 0 for a load operation
 or 1 for a verify.  If the input device was OPENed with
@@ -238,19 +238,19 @@ the starting address for the load.  If the device was
 addressed with a secondary address other than 0 the
 data will load into memory starting at the location
 specified by the header.  This routine returns the
-address after the last byte loaded.
+address after the last byte loaded in YX.
 
-Before this routine can be called, the SETLFS and
-SETNAM routines must be called.
+This routine requires SETLFS and SETNAM to be used
+before.
 
 ## SAVE - save RAM to a device
 
 This routine saves a section of memory.  Memory is
 saved from an indirect address on page 0 (specified by
 the accumulater) to the address stored in YX to a
-logical file.  The SETLFS and SETNAM routines must be
-used before calling this routine.  However, a file name
-is not required to SAVE to device 1, the cassette.  Any
+logical file.  The SETLFS and SETNAM must be used
+before calling this routine.  However, a file name is
+not required to SAVE to device 1, the cassette.  Any
 attempt to save to other devices without using a file
 name results in an error.
 

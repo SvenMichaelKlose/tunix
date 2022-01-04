@@ -126,8 +126,8 @@ done:
 
     ; Save zeropage.
     ldx #<__ZP_SIZE__
-l:  lda __ZP_START__,x
-    sta _saved_zp,x
+l:  lda __ZP_START__-1,x
+    sta _saved_zp-1,x
     dex
     bne l
 
@@ -137,8 +137,8 @@ l:  lda __ZP_START__,x
 .proc leave
     ; Restore zeropage.
     ldx #<__ZP_SIZE__
-l:  lda _saved_zp,x
-    sta __ZP_START__,x
+l:  lda _saved_zp-1,x
+    sta __ZP_START__-1,x
     dex
     bne l
 

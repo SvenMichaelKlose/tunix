@@ -73,6 +73,7 @@ Device addresses can range from 0 to 30.  The following
 codes are used by the computer to stand for the
 following devices:
 
+~~~
 ADDRESS   DEVICE
 =======   ======
 0        Keyboard
@@ -81,6 +82,7 @@ ADDRESS   DEVICE
 3        CRT display
 4        Serial bus printer
 8        Serial bus disk drive
+~~~
 
 Device numbers of four or greater automatically refer
 to devices on the serial bus unless they refer to
@@ -122,7 +124,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Possible errors are:
+Possible errors:
 
   3 : file not open
   5 : device not present
@@ -146,7 +148,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Possible errors are:
+Possible errors:
 
   3 : file not open
   5 : device not present
@@ -193,25 +195,32 @@ carriage return is returned the entire line has been
 processed and the next time this routine is called the
 whole process begins again.
 
+## GETIN - Input character from channel
+
+In practice this routine operates identically to the
+CHRIN routine for all devices except for the keyboard.
+If the keyboard is the current input device this
+routine will get one character from the keyboard
+buffer.  It depends on the IRQ routine to ; read the
+keyboard and put characters into the buffer.
+
+If the keyboard buffer is empty the value returned in
+the accumulator will be 0.
+
 ## CHROUT - output a character to channel
 
-This routine will output a character to an already
-opened channel.  Use OPEN and CHKOUT to set up the
-output channel before calling this routine.  If these
-calls are omitted, data will be sent to the default
-output device, device 3, the screen.  The data byte to
-be output is loaded into the accumulator, and this
-routine is called.  The data is then sent to the
-specified output device.  The channel is left open
-after the call.
+This routine will output the byte in the accumulator
+to an already opened channel.  Use OPEN and CHKOUT to
+set up the output channel before calling this routine.
+If these calls are omitted, data will be sent to the
+default output device 3, the screen. 
 
 NOTE: Care must be taken when using routine to send
 data to a serial device since data will be sent to all
 open output channels on the bus.  Unless this is
 desired, all open output channels on the serial bus
 other than the actually intended destination channel
-must be closed by a call to the KERNAL close channel
-routine.
+must be closed by a call to CLOSE.
 
 ## LOAD - load RAM from a device
 

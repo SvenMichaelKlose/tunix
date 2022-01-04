@@ -338,16 +338,13 @@ ultifs_kopen ()
     set_device_error (0);
 
     if (SA != 15 && channels[LFN]) {
-        set_device_error (ERR_NO_CHANNEL);
+        accu = OSERR_FILE_ALREADY_OPEN;
+        flags = FLAG_C;
         return FALSE;
     }
 
     if (FNLEN) {
         name = malloc (FNLEN + 1);
-        if (!name) {
-            set_device_error (ERR_BYTE_DECODING);
-            return FALSE;
-        }
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
     }
@@ -368,7 +365,7 @@ ultifs_kopen ()
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
-        set_device_error (ERR_FILE_NOT_FOUND);
+        accu = OSERR_FILE_NOT_FOUND;
         goto error;
     }
 
@@ -378,6 +375,7 @@ ultifs_kopen ()
 
 error:
     free_channel ();
+    flags = FLAG_C;
 
     return FALSE;
 }
@@ -387,8 +385,11 @@ ultifs_kclose ()
 {
     channel * ch = channels[LFN];
 
+    accu = flags = 0;
+
     if (!ch) {
-        set_device_error (ERR_FILE_NOT_OPEN);
+        accu = OSERR_FILE_NOT_OPEN;
+        flags = FLAG_C;
         return;
     }
 
@@ -402,7 +403,6 @@ ultifs_kclose ()
     free_channel ();
 
     set_status (0);
-    accu = flags = 0;
 }
 
 void
@@ -445,6 +445,7 @@ ultifs_kbasin ()
     bfile *    file;
 
     accu = flags = 0;
+    set_status (0);
     set_device_error (0);
 
     if (!ch) {
@@ -452,8 +453,6 @@ ultifs_kbasin ()
         flags = FLAG_C;
         return 0;
     }
-
-    set_status (0);
 
     if (ch->buf) {
         accu = read_from_buf (ch);
@@ -482,11 +481,13 @@ ultifs_kbsout ()
 {
     // TODO: Implement writes.
     set_status (STATUS_TIMEOUT_WRITE);
+    flags = FLAG_C;
 }
 
 void
 ultifs_kclall ()
 {
+    accu = flags = 0;
 }
 
 void

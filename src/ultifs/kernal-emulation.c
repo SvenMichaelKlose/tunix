@@ -55,10 +55,15 @@
 #define STATUS_TIMEOUT_WRITE    0x01
 
 /* KERNAL error codes */
+#define OSERR_TOO_MANY_FILES        1
+#define OSERR_FILE_ALREADY_OPEN     2
 #define OSERR_FILE_NOT_OPEN         3
+#define OSERR_FILE_NOT_FOUND        4
 #define OSERR_DEVICE_NOT_PRESENT    5
 #define OSERR_FILE_NOT_IN           6
 #define OSERR_FILE_NOT_OUT          7
+#define OSERR_MISSING_FILE_NAME     8
+#define OSERR_ILLEGAL_DEVICE_NUMBER 9
 
 /* Device error codes (sent as message) */
 #define ERR_BYTE_DECODING       24

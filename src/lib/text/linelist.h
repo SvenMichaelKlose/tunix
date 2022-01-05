@@ -35,5 +35,6 @@ extern void                 linelist_delete         (void);
 extern void                 linelist_insert_before  (void);
 extern void                 linelist_insert_after   (void);
 extern void                 linelist_split          (void);
+extern void                 linelist_join           (void);
 
 #endif // #ifndef LINELIST_H

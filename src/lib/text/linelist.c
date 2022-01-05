@@ -135,6 +135,27 @@ linelist_split ()
 }
 
 void
+linelist_join ()
+{
+    line *    next = current_line->next;
+    unsigned  len = current_line->length;
+    char *    new_data;
+
+    if (!next)
+        return;
+
+    len += next->length;
+    new_data = malloc (len); // TODO: Barf on low memory.
+
+    memcpy (new_data, current_line->data, current_line->length);
+    memcpy (&new_data[current_line->length], next->data, next->length);
+
+    free (current_line->data);
+    current_line->data = new_data;
+    current_line->length = len;
+}
+
+void
 linelist_init ()
 {
     first_line = current_line = line_alloc ();

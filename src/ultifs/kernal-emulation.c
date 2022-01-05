@@ -335,7 +335,6 @@ ultifs_kopen ()
     channel *   ch;
 
     accu = flags = 0;
-    set_device_error (0);
 
     if (SA != 15 && channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
@@ -446,7 +445,6 @@ ultifs_kbasin ()
 
     accu = flags = 0;
     set_status (0);
-    set_device_error (0);
 
     if (!ch) {
         accu = OSERR_FILE_NOT_OPEN;
@@ -534,7 +532,6 @@ ultifs_kload ()
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
 
-    set_device_error (0);
     set_status (0);
     flags = 0;
 }

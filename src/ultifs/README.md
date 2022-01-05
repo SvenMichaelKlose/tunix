@@ -50,6 +50,17 @@ No arguments need to be set up to use this routine, but
 both the SETLFS and SETNAM KERNAL routines must be
 called before using this routine.
 
+Possible errors:
+
+    1: Too many files.
+    2: File already open.
+    4: File not found.
+    6: Device not present.
+    6: Not an input file.
+       Returned if logical file number is 0.
+    9: Illegal device number.
+       Returned if tape buffer is below $0200.
+
 ### SETNAM - Set file name.
 
 This routine is used to set up the file name for the

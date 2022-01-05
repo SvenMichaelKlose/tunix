@@ -27,7 +27,11 @@ s: Delete char and insert.
 
 ## Modifying commands
 
+These modify the text but do not enter
+the edit mode.
+
 D: Delete till line end.
+J: Join current and next line.
 x: Delete character.
 
 # For developers

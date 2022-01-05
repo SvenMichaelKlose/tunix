@@ -97,7 +97,7 @@ command edit_commands[] = {
     { 'O', cmd_open_above },
     { 'a', move_right },
     { 'A', move_line_end },
-    { 's', command_delete_char },
+    { 's', cmd_delete_char },
     { 0, NULL }
 };
 
@@ -116,8 +116,9 @@ command motion_commands[] = {
 };
 
 command modify_commands[] = {
-    { 'D', command_delete_till_line_end },
-    { 'x', command_delete_char },
+    { 'D', cmd_delete_till_line_end },
+    { 'x', cmd_delete_char },
+    { 'J', cmd_join },
     { 0, NULL }
 };
 

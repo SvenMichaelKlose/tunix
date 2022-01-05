@@ -8,6 +8,7 @@
 #include <lib/text/linelist.h>
 #include <lib/text/motion.h>
 
+#include "commands.h"
 #include "screen.h"
 
 
@@ -38,7 +39,7 @@ cmd_enter ()
 }
 
 void
-command_delete_till_line_end ()
+cmd_delete_till_line_end ()
 {
     current_line->length = xpos;
     if (xpos)
@@ -46,11 +47,30 @@ command_delete_till_line_end ()
 }
 
 void
-command_delete_char ()
+cmd_delete_char ()
 {
     linelist_goto (linenr);
     linelist_line_to_buf ();
     linebuf_delete_char (xpos);
     linelist_buf_to_line ();
     adjust_xpos_to_line_length ();
+}
+
+void
+cmd_join ()
+{
+    unsigned len;
+
+    if (!current_line->next)
+        return;
+
+    len = current_line->length;
+
+    linelist_join ();
+    move_down ();
+    linelist_delete ();
+    linelist_get (linenr);
+    move_up ();
+
+    xpos = len;
 }

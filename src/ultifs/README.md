@@ -115,6 +115,8 @@ routine is called after the accumulator is loaded with
 the logical file number to be closed, the same number
 used when the file was opened using the OPEN routine.
 
+CLOSE does not return with an error if the file is
+not open.  It never returns with an error.
 
 ## CHKIN - Open channel for input
 
@@ -184,6 +186,8 @@ time.  One way to take advantage of this would be to
 command the printer to LISTEN and the disk to TALK.
 This would allow direct printing of a disk file.
 
+This routine never returns with an error.
+
 ## CHRIN - Input character from channel
 
 This routine will get a byte of data from the channel
@@ -205,6 +209,9 @@ this routine once for each character.  When the
 carriage return is returned the entire line has been
 processed and the next time this routine is called the
 whole process begins again.
+
+On error this routine returns with the carry flag set
+and further information about it in STATUS.
 
 ## GETIN - Input character from channel
 
@@ -233,6 +240,9 @@ desired, all open output channels on the serial bus
 other than the actually intended destination channel
 must be closed by a call to CLOSE before.
 
+On error this routine returns with the carry flag set
+and further information about it in STATUS.
+
 ## LOAD - load RAM from a device
 
 This routine will load data bytes from any input device
@@ -254,6 +264,17 @@ address after the last byte loaded in YX.
 This routine requires SETLFS and SETNAM to be used
 before.
 
+Possible errors:
+
+    1: Too many files.
+    2: File already open.
+    4: File not found.
+    6: Device not present.
+    6: Not an input file.
+       Returned if logical file number is 0.
+    9: Illegal device number.
+       Returned if tape buffer is below $0200.
+
 ## SAVE - save RAM to a device
 
 This routine saves a section of memory.  Memory is
@@ -269,9 +290,22 @@ NOTE: device 0, the keyboard, and device 3, the screen,
 cannot be SAVEd to.  If the attempt is made, an error
 will occur, and the SAVE stopped.
 
-## CLACLL - close all channels and files
+Possible errors:
+
+    1: Too many files.
+    2: File already open.
+    4: File not found.
+    6: Device not present.
+    6: Not an input file.
+       Returned if logical file number is 0.
+    9: Illegal device number.
+       Returned if tape buffer is below $0200.
+
+## CLALL - close all channels and files
 
 This routine closes all open files.  When this routine
 is called, the pointers into the open file table are
 reset, closing all files.  Also the routine
 automatically resets the I/O channels.
+
+This routine never returns with an error.

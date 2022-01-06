@@ -10,16 +10,48 @@
 
 #include "commands.h"
 #include "screen.h"
+#include "keyboard.h"
 
-char
-wait_for_key (void)
-{
-    char key;
+typedef void (*voidfun) ();
 
-    while (!(key = term_get ()));
+void do_nothing (void) {}
 
-    return key;
-}
+typedef struct _command {
+    char        key;
+    voidfun     fun;
+} command;
+
+command edit_commands[] = {
+    { 'i', do_nothing },
+    { 'I', move_line_begin },
+    { 'o', cmd_open_below },
+    { 'O', cmd_open_above },
+    { 'a', move_right },
+    { 'A', move_line_end },
+    { 's', cmd_delete_char },
+    { 0, NULL }
+};
+
+command motion_commands[] = {
+    { TTY_CURSOR_LEFT,  move_left },
+    { TTY_CURSOR_UP,    move_up },
+    { TTY_CURSOR_DOWN,  move_down },
+    { TTY_CURSOR_RIGHT, move_right },
+    { 'h', move_left },
+    { 'k', move_up },
+    { 'j', move_down },
+    { 'l', move_right },
+    { '0', move_line_start },
+    { '$', move_line_last_char },
+    { 0, NULL }
+};
+
+command modify_commands[] = {
+    { 'D', cmd_delete_till_line_end },
+    { 'x', cmd_delete_char },
+    { 'J', cmd_join },
+    { 0, NULL }
+};
 
 char
 lineedit_mode (void)
@@ -30,7 +62,7 @@ lineedit_mode (void)
     linelist_line_to_buf ();
 
     while (1) {
-        switch (key = wait_for_key ()) {
+        switch (key = get_key ()) {
             case TTY_ENTER:
             case TTY_ESCAPE:
                 goto done;
@@ -71,18 +103,11 @@ done:
     screen_set_status ("");
 }
 
-typedef void (*voidfun) ();
-
-typedef struct _command {
-    char        key;
-    voidfun     fun;
-} command;
-
 voidfun
-get_command_fun (command * cmds, char key)
+get_command_fun (command * cmds, char c)
 {
     while (cmds->key) {
-        if (cmds->key == key)
+        if (cmds->key == c)
             return cmds->fun;
         cmds++;
     }
@@ -90,110 +115,99 @@ get_command_fun (command * cmds, char key)
     return NULL;
 }
 
-void do_nothing (void) {}
-
-command edit_commands[] = {
-    { 'i', do_nothing },
-    { 'I', move_line_begin },
-    { 'o', cmd_open_below },
-    { 'O', cmd_open_above },
-    { 'a', move_right },
-    { 'A', move_line_end },
-    { 's', cmd_delete_char },
-    { 0, NULL }
-};
-
-command motion_commands[] = {
-    { TTY_CURSOR_LEFT,  move_left },
-    { TTY_CURSOR_UP,    move_up },
-    { TTY_CURSOR_DOWN,  move_down },
-    { TTY_CURSOR_RIGHT, move_right },
-    { 'h', move_left },
-    { 'k', move_up },
-    { 'j', move_down },
-    { 'l', move_right },
-    { '0', move_line_start },
-    { '$', move_line_last_char },
-    { 0, NULL }
-};
-
-command modify_commands[] = {
-    { 'D', cmd_delete_till_line_end },
-    { 'x', cmd_delete_char },
-    { 'J', cmd_join },
-    { 0, NULL }
-};
-
 char
-exec_single_command (char key)
+exec_single_command ()
 {
-    voidfun fun;
+    char     c = get_key ();
+    voidfun  fun;
 
-    if (fun = get_command_fun (edit_commands, key)) {
+    if (fun = get_command_fun (edit_commands, c)) {
         fun ();
         edit_mode ();
-    } else if (fun = get_command_fun (motion_commands, key))
+    } else if (fun = get_command_fun (motion_commands, c))
         fun ();
-    else if (fun = get_command_fun (modify_commands, key))
+    else if (fun = get_command_fun (modify_commands, c))
         fun ();
     else
-        return key;
+        return c;
 
     return 0;
 }
 
 void
-handle_prefixed (char key)
+playback (void)
 {
-    unsigned n = 0;
+    is_playback = TRUE;
+    exec_single_command ();
+    is_playback = FALSE;
+}
+
+unsigned
+get_prefix (void)
+{
+    char      c;
+    unsigned  n = 0;
 
     while (1) {
-        if (n > (65535 / 10)) {
+        if (n > 6553) {
             term_put (TERM_BELL);
-            return;
+            return 0;
         }
 
+        c = peek_key ();
+
+        if (c == TTY_ESCAPE) {
+            get_key ();
+            keyboard_init ();
+            return 0;
+        }
+
+        if (!isdigit (c))
+            return n;
+
+        get_key ();
         n *= 10;
-        n += key - '0';
-
-        key = wait_for_key ();
-        if (isdigit (key))
-            continue;
-
-        while (n--)
-            exec_single_command (key);
-        return;
-
-        // TODO to make this work with multi-key
-        // commands:
-        //
-        // Clear key log.
-        // Enter command mode.
-        // Break if key log empty.
-        // Copy key log.
-        // Play key log back n-1 times.
+        n += c - '0';
     }
 }
 
 void
 command_mode (void)
 {
-    char    key;
+    char      key;
+    unsigned  n;
 
     while (1) {
+        n = 0;
+
         linelist_goto (linenr);
 
-        key = exec_single_command (wait_for_key ());
-        if (key) {
-            if (isdigit (key))
-                handle_prefixed (key);
-            else {
-                term_put (TERM_BELL);
-                continue;
-            }
+        key = peek_key ();
+
+        if (key == '.') {
+            get_key ();
+            unlog_key ();
+            playback ();
+            goto next;
         }
 
+        if (isdigit (key)) {
+            n = get_prefix ();
+            if (!n)
+                continue;
+        }
+
+        if (key = exec_single_command ()) {
+            term_put (TERM_BELL);
+            keyboard_init ();
+            continue;
+        }
+
+next:
         screen_redraw ();
+
+        while (n--)
+            playback ();
     }
 }
 
@@ -203,6 +217,7 @@ main (void)
     term_init ();
     linelist_init ();
     screen_init ();
+    keyboard_init ();
     screen_redraw ();
     command_mode ();
 }

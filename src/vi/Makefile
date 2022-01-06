@@ -1,6 +1,7 @@
 SOURCES= \
 	commands.c \
 	main.c \
+	keyboard.c \
 	screen.c
 PROGRAM=vi
 

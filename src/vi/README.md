@@ -37,6 +37,10 @@ D: Delete till line end.
 J: Join current and next line.
 x: Delete character.
 
+## History commands
+
+.: Repeat last action.
+
 # For developers
 
 This is a VI front end for libtext and

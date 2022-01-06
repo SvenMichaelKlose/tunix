@@ -137,13 +137,13 @@ exec_single_command ()
 void
 playback (void)
 {
-    is_playback = TRUE;
+    start_playback ();
     exec_single_command ();
-    is_playback = FALSE;
+    stop_playback ();
 }
 
 unsigned
-get_prefix (void)
+get_repetitions (void)
 {
     char      c;
     unsigned  n = 0;
@@ -174,7 +174,7 @@ get_prefix (void)
 void
 command_mode (void)
 {
-    char      key;
+    char      c;
     unsigned  n;
 
     while (1) {
@@ -182,22 +182,22 @@ command_mode (void)
 
         linelist_goto (linenr);
 
-        key = peek_key ();
+        c = peek_key ();
 
-        if (key == '.') {
+        if (c == '.') {
             get_key ();
             unlog_key ();
             playback ();
             goto next;
         }
 
-        if (isdigit (key)) {
-            n = get_prefix ();
+        if (isdigit (c)) {
+            n = get_repetitions ();
             if (!n)
                 continue;
         }
 
-        if (key = exec_single_command ()) {
+        if (c = exec_single_command ()) {
             term_put (TERM_BELL);
             keyboard_init ();
             continue;

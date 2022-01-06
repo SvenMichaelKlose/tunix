@@ -28,7 +28,7 @@ wait_for_key (void)
 }
 
 void
-put_key (char c)
+log_key (char c)
 {
     keylog[keylog_index++] = c;
 }
@@ -69,7 +69,7 @@ get_key ()
         return c;
     }
 
-    put_key (c);
+    log_key (c);
     return c;
 }
 
@@ -80,6 +80,19 @@ peek_key ()
         return peeked_char;
 
     return peeked_char = get_key ();
+}
+
+void
+start_playback ()
+{
+    is_playback = TRUE;
+    playback_index = 0;
+}
+
+void
+stop_playback ()
+{
+    is_playback = FALSE;
 }
 
 void

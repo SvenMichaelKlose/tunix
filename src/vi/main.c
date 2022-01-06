@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include <cbm.h>
 
 #include <lib/ingle/cc65-charmap.h>
@@ -122,25 +124,74 @@ command modify_commands[] = {
     { 0, NULL }
 };
 
+char
+exec_single_command (char key)
+{
+    voidfun fun;
+
+    if (fun = get_command_fun (edit_commands, key)) {
+        fun ();
+        edit_mode ();
+    } else if (fun = get_command_fun (motion_commands, key))
+        fun ();
+    else if (fun = get_command_fun (modify_commands, key))
+        fun ();
+    else
+        return key;
+
+    return 0;
+}
+
+void
+handle_prefixed (char key)
+{
+    unsigned n = 0;
+
+    while (1) {
+        if (n > (65535 / 10)) {
+            term_put (TERM_BELL);
+            return;
+        }
+
+        n *= 10;
+        n += key - '0';
+
+        key = wait_for_key ();
+        if (isdigit (key))
+            continue;
+
+        while (n--)
+            exec_single_command (key);
+        return;
+
+        // TODO to make this work with multi-key
+        // commands:
+        //
+        // Clear key log.
+        // Enter command mode.
+        // Break if key log empty.
+        // Copy key log.
+        // Play key log back n-1 times.
+    }
+}
+
 void
 command_mode (void)
 {
     char    key;
-    voidfun fun;
 
     while (1) {
         linelist_goto (linenr);
 
-        key = wait_for_key ();
-        if (fun = get_command_fun (edit_commands, key)) {
-            fun ();
-            edit_mode ();
-        } else if (fun = get_command_fun (motion_commands, key))
-            fun ();
-        else if (fun = get_command_fun (modify_commands, key))
-            fun ();
-        else
-            term_put (TERM_BELL);
+        key = exec_single_command (wait_for_key ());
+        if (key) {
+            if (isdigit (key))
+                handle_prefixed (key);
+            else {
+                term_put (TERM_BELL);
+                continue;
+            }
+        }
 
         screen_redraw ();
     }

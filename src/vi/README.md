@@ -3,6 +3,11 @@ VIC-20 VI
 
 # Commands
 
+Most commands can be prefixed with a
+positive integer to repeat them. '10j'
+for example will (try to) move the
+cursor down ten times.
+
 ## Motion
 
 Cursor keys do what you would expect.
@@ -14,8 +19,6 @@ $: To last column of line.
 
 These commands enter the edit mode which
 can be exited by pressing ESC.
-They cannot be repeated automatically by
-prefixing them with numbers.
 
 i: Insert.
 I: Insert before first non-space.

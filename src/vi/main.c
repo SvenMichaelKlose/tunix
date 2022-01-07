@@ -69,6 +69,8 @@ lineedit_mode (void)
                 goto done;
 
             default:
+                if (key == TTY_BACKSPACE && !xpos)
+                    goto done;
                 lineedit (key);
         }
     }
@@ -94,6 +96,13 @@ edit_mode (void)
 
             case TTY_ESCAPE:
                 goto done;
+
+            case TTY_BACKSPACE:
+                if (linenr) {
+                    move_up ();
+                    cmd_join ();
+                }
+                continue;
         }
     }
 

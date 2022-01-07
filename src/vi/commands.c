@@ -10,6 +10,7 @@
 
 #include "commands.h"
 #include "screen.h"
+#include "keyboard.h"
 
 
 void
@@ -54,6 +55,23 @@ cmd_delete_char ()
     linebuf_delete_char (xpos);
     linelist_buf_to_line ();
     adjust_xpos_to_line_length ();
+}
+
+void
+cmd_replace_char ()
+{
+    char c = get_key ();
+
+    if (c < 32) {
+        term_put (TERM_BELL);
+        keyboard_init ();
+        return;
+    }
+
+    linelist_goto (linenr);
+    linelist_line_to_buf ();
+    linebuf_replace_char (xpos, c);
+    linelist_buf_to_line ();
 }
 
 void

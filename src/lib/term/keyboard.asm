@@ -1,17 +1,6 @@
-; Based on matrix table at http://sta.c64.org/cbm64kbdlay.html
-
-; Input control codes:
-; 03:   Page down
-; 04:   Arrow right
-; 05:   Arrow up
-; 07:   Delete
-; 17:   Home/End
-; 18:   Page up
-; 19:   Arrow left
-; 20:   Arrow down
-; 22:   Insert
-
 .export _term_get
+
+.importzp tmp
 
 CLR_HOME = 235
 BACKSPACE = 8
@@ -36,12 +25,14 @@ F6 = 238
 F7 = 237
 F8 = 236
 ARROW_LEFT = 235
-
 RETURN  = 13
 
     .data
 
-; TODO: Fix this map and pass it to Simon Rowe.
+; Scan codes
+;
+; TODO: Pass to Simon Rowe to update his ROM disassembly..
+;
 ; 00 1           10 none     20 [SPACE]  30 Q
 ; 01 3           11 A        21 Z        31 E
 ; 02 5           12 D        22 C        32 T
@@ -59,39 +50,63 @@ RETURN  = 13
 ; 0E *           1E /        2E =        3E [HOME]
 ; 0F [RET]       1F [CSR D]  2F [F3]     3F [F7]
 
-devkbd_map_normal:
+; SHOFT/C=/CTRL flags at $020d.
+FLAG_SHIFT      = 1
+FLAG_COMMODORE  = 2
+FLAG_CTRL       = 4
+
+map_normal:
+map_shift_commodore:
+map_ctrl:
+map_shift_ctrl:
+map_commodore_ctrl:
+map_shift_commodore_ctrl:
     .byte "13579+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
     .byte 0, "adgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
     .byte " zcbm.", 0, F1, 0, "sfhk:=", F3
     .byte "qetuo@^", F5, "24680-", CLR_HOME, F7
     .byte 0
 
-devkbd_map_shifted:
+; +, -, POUND, = and RETURN cannot be SHIFTed.
+map_shift:
     .byte "!#%')+", POUND, BACKSPACE, ARROW_LEFT, "WRYIP*", RETURN
     .byte 0, "ADGJL]", CURSOR_LEFT, RUN_STOP, 0, "XVN.?", CURSOR_UP
     .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
     .byte "QETUO@^", F6, 34, "$((-", CLR_HOME, F8
     .byte 0
 
+map_commodore:
+    .byte "13579+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
+    .byte 0, "ädgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
+    .byte " zcbm.", 0, F1, 0, "sfhk:=", F3
+    .byte "qetüö@^", F5, "24680-", CLR_HOME, F7
+    .byte 0
+
+maps_l:
+    .byte <map_normal, <map_shift, <map_commodore, <map_shift_commodore
+    .byte <map_ctrl, <map_shift_ctrl, <map_commodore_ctrl, <map_shift_commodore_ctrl
+ 
+maps_h:
+    .byte >map_normal, >map_shift, >map_commodore, >map_shift_commodore
+    .byte >map_ctrl, >map_shift_ctrl, >map_commodore_ctrl, >map_shift_commodore_ctrl
+
     .code
 
 .proc _term_get
-    nop
-w:
     lda $c6         ; Key in buffer?
-    beq w
+    beq _term_get
 
     lda #0          ; Reset buffer.
     sta $c6
-    ldx $c5         ; Get scan code.
-    cpx #$40        ; No key pressed?
+    ldy $c5         ; Get scan code.
+    cpy #$40        ; No key pressed?
     beq nokey
-    lda $28d        ; Get CTRL/SHIFT/C= status.
-    and #1          ; Shift?
-    beq +n
-    lda devkbd_map_shifted,x
-    rts
-n:  lda devkbd_map_normal,x
+    ldx $28d        ; Get CTRL/SHIFT/C= status.
+    lda maps_l
+    sta tmp
+    lda maps_h
+    sta tmp+1
+    lda (tmp),y
     rts
 
 nokey:

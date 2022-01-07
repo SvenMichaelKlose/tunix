@@ -11,5 +11,6 @@ extern unsigned linebuf_length;
 extern void linebuf_clear (void);
 extern void __fastcall__ linebuf_insert_char (pos_t, char);
 extern void linebuf_delete_char (pos_t);
+extern void linebuf_replace_char (pos_t, char);
 
 #endif // #ifndef LINEBUF_H

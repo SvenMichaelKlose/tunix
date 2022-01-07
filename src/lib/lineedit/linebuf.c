@@ -15,7 +15,7 @@ linebuf_clear ()
 }
 
 void
-linebuf_insert_char (unsigned p, char c)
+linebuf_insert_char (pos_t p, char c)
 {
     if (linebuf_length >= MAX_LINE_LENGTH)
         return;
@@ -26,11 +26,20 @@ linebuf_insert_char (unsigned p, char c)
 }
 
 void
-linebuf_delete_char (unsigned p)
+linebuf_delete_char (pos_t p)
 {
     if (!linebuf_length)
         return;
 
     memmove (&linebuf[p], &linebuf[p + 1], linebuf_length - p - 1);
     linebuf_length--;
+}
+
+void
+linebuf_replace_char (pos_t p, char c)
+{
+    if (linebuf_length)
+        linebuf[p] = c;
+    else
+        linebuf_insert_char (p, c);
 }

@@ -55,6 +55,7 @@ get_key ()
     if (peeked_char) {
         c = peeked_char;
         peeked_char = 0;
+        return c;
     } else
         c = wait_for_key ();
 

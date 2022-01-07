@@ -81,14 +81,12 @@ done:
 void
 edit_mode (void)
 {
-    char key;
-
     screen_set_status ("-- INSERT --");
 
     while (1) {
         screen_redraw ();
 
-        switch (key = lineedit_mode ()) {
+        switch (lineedit_mode ()) {
             case TTY_ENTER:
                 cmd_enter ();
                 continue;
@@ -118,8 +116,10 @@ get_command_fun (command * cmds, char c)
 char
 exec_single_command ()
 {
-    char     c = get_key ();
+    char     c;
     voidfun  fun;
+
+    c = get_key ();
 
     if (fun = get_command_fun (edit_commands, c)) {
         fun ();

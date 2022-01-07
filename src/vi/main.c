@@ -201,7 +201,7 @@ command_mode (void)
             goto next;
         }
 
-        if (isdigit (c)) {
+        if (c != '0' && isdigit (c)) {
             n = get_repetitions ();
             if (!n)
                 continue;

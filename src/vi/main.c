@@ -167,6 +167,7 @@ get_repetitions (void)
         }
 
         get_key ();
+        unlog_key ();
         n *= 10;
         n += c - '0';
     }
@@ -196,8 +197,12 @@ exec_action ()
     if (exec_single_command ())
         goto cancel;
 
-    while (repetitions--)
-        playback ();
+    if (repetitions) {
+        repetitions--;      // Not very happy about
+                            // this somehow. (pixel)
+        while (repetitions--)
+            playback ();
+    }
 
     return 0;
 

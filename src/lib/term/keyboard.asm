@@ -102,9 +102,9 @@ maps_h:
     cpy #$40        ; No key pressed?
     beq nokey
     ldx $28d        ; Get CTRL/SHIFT/C= status.
-    lda maps_l
+    lda maps_l,x
     sta tmp
-    lda maps_h
+    lda maps_h,x
     sta tmp+1
     lda (tmp),y
     rts

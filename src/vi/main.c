@@ -17,8 +17,8 @@ typedef void (*voidfun) ();
 void do_nothing (void) {}
 
 typedef struct _command {
-    char        key;
-    voidfun     fun;
+    char     key;
+    voidfun  fun;
 } command;
 
 command edit_commands[] = {
@@ -144,14 +144,6 @@ exec_single_command ()
     return 0;
 }
 
-void
-playback (void)
-{
-    start_playback ();
-    exec_single_command ();
-    stop_playback ();
-}
-
 unsigned
 get_repetitions (void)
 {
@@ -168,7 +160,6 @@ get_repetitions (void)
 
         if (c == TTY_ESCAPE) {
             get_key ();
-            keyboard_init ();
             return 0;
         }
 
@@ -181,43 +172,64 @@ get_repetitions (void)
     }
 }
 
+char exec_action (void);
+
 void
-command_mode (void)
+playback (void)
+{
+    start_playback ();
+    exec_action ();
+    stop_playback ();
+}
+
+// Do an action with optional number of repitions prefixed.
+char
+exec_action ()
 {
     char      c;
-    unsigned  n;
+    unsigned  repetitions;
+
+    linelist_goto (linenr);
+
+    repetitions = 0;
+    c = peek_key ();
+
+    if (c > '0' && c <= '9')
+        if (!(repetitions = get_repetitions ()))
+            goto cancel;
+
+    if (exec_single_command ())
+        goto cancel;
+
+    while (repetitions--)
+        playback ();
+
+    return 0;
+
+cancel:
+    term_put (TERM_BELL);
+    return -1;
+}
+
+// Top level controlling keyboard logging
+// and triggering playback.
+void
+toplevel (void)
+{
+    char c;
 
     while (1) {
-        n = 0;
-
-        linelist_goto (linenr);
-
         c = peek_key ();
 
-        if (c == '.') {
+        if (has_logged_keys () && c == '.') {
             get_key ();
             unlog_key ();
             playback ();
-            goto next;
-        }
+        } else
+            if (exec_action ())
+                keyboard_init ();
 
-        if (c != '0' && isdigit (c)) {
-            n = get_repetitions ();
-            if (!n)
-                continue;
-        }
-
-        if (c = exec_single_command ()) {
-            term_put (TERM_BELL);
-            keyboard_init ();
-            continue;
-        }
-
-next:
         screen_redraw ();
-
-        while (n--)
-            playback ();
     }
 }
 
@@ -229,5 +241,5 @@ main (void)
     screen_init ();
     keyboard_init ();
     screen_redraw ();
-    command_mode ();
+    toplevel ();
 }

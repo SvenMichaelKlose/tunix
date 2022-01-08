@@ -96,10 +96,23 @@ stop_playback ()
     is_playback = FALSE;
 }
 
+char
+has_logged_keys ()
+{
+    return !!keylog_index;
+}
+
+void
+reset_log ()
+{
+    keylog_index = 0;
+}
+
 void
 keyboard_init ()
 {
-    keylog_index = playback_index = peeked_char = 0;
+    reset_log ();
+    playback_index = peeked_char = 0;
     is_playback = FALSE;
     is_keylog = TRUE;
 }

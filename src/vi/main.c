@@ -12,6 +12,9 @@
 #include "screen.h"
 #include "keyboard.h"
 
+#define CANCELLED   -1
+#define OK          0
+
 typedef void (*voidfun) ();
 
 void do_nothing (void) {}
@@ -141,7 +144,7 @@ exec_single_command ()
     else
         return c;
 
-    return 0;
+    return OK;
 }
 
 unsigned
@@ -204,11 +207,11 @@ exec_action ()
             playback ();
     }
 
-    return 0;
+    return OK;
 
 cancel:
     term_put (TERM_BELL);
-    return -1;
+    return CANCELLED;
 }
 
 // Top level controlling keyboard logging

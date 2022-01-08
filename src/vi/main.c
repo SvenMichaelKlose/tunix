@@ -151,11 +151,6 @@ get_repetitions (void)
     unsigned  n = 0;
 
     while (1) {
-        if (n > 6553) {
-            term_put (TERM_BELL);
-            return 0;
-        }
-
         c = peek_key ();
 
         if (c == TTY_ESCAPE) {
@@ -165,6 +160,11 @@ get_repetitions (void)
 
         if (!isdigit (c))
             return n;
+
+        if (n > 6553) {
+            term_put (TERM_BELL);
+            return 0;
+        }
 
         get_key ();
         n *= 10;
@@ -191,12 +191,7 @@ exec_action ()
 
     linelist_goto (linenr);
 
-    repetitions = 0;
-    c = peek_key ();
-
-    if (c > '0' && c <= '9')
-        if (!(repetitions = get_repetitions ()))
-            goto cancel;
+    repetitions = get_repetitions ();
 
     if (exec_single_command ())
         goto cancel;

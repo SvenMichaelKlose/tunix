@@ -14,13 +14,20 @@ char       keylog[256];
 unsigned   keylog_index;
 unsigned   playback_index;
 char       peeked_char;
-char       is_keylog;
-char       is_playback;
+char       does_log_keys;
+char       does_play_back;
 
 char
 wait_for_key (void)
 {
     char c;
+
+    if (does_play_back) {
+        if (playback_index == keylog_index)
+            playback_index = 0;
+
+        return keylog[playback_index++];
+    }
 
     while (!(c = term_get ()));
 
@@ -30,13 +37,14 @@ wait_for_key (void)
 void
 log_key (char c)
 {
-    keylog[keylog_index++] = c;
+    if (does_log_keys)
+        keylog[keylog_index++] = c;
 }
 
 void
 unlog_key ()
 {
-    if (keylog_index)
+    if (does_log_keys && keylog_index)
         keylog_index--;
 }
 
@@ -45,31 +53,25 @@ get_key ()
 {
     char c;
 
-    if (is_playback) {
-        if (playback_index == keylog_index)
-            playback_index = 0;
-
-        return keylog[playback_index++];
-    }
-
-    if (peeked_char) {
+    if (peeked_char)
         c = peeked_char;
-        peeked_char = 0;
-    } else
+    else
         c = wait_for_key ();
 
-    if (!is_keylog)
-        return c;
+    if (!peeked_char && does_log_keys && !does_play_back) {
+        if (keylog_index == sizeof (keylog)) {
+            // TODO: Tell in status line that
+            // command cannot be repeated.
+            term_put (TERM_BELL);
+            keyboard_init ();
+            does_log_keys = FALSE;
+            return c;
+        }
 
-    if (keylog_index == sizeof (keylog)) {
-        term_put (TERM_BELL);
-        // TODO: Tell that command cannot be repeated.
-        keyboard_init ();
-        is_keylog = FALSE;
-        return c;
+        log_key (c);
     }
 
-    log_key (c);
+    peeked_char = 0;
     return c;
 }
 
@@ -84,14 +86,14 @@ peek_key ()
 void
 start_playback ()
 {
-    is_playback = TRUE;
+    does_play_back = TRUE;
     playback_index = 0;
 }
 
 void
 stop_playback ()
 {
-    is_playback = FALSE;
+    does_play_back = FALSE;
 }
 
 char
@@ -111,6 +113,6 @@ keyboard_init ()
 {
     reset_log ();
     playback_index = peeked_char = 0;
-    is_playback = FALSE;
-    is_keylog = TRUE;
+    does_play_back = FALSE;
+    does_log_keys = TRUE;
 }

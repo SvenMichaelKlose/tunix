@@ -69,8 +69,11 @@ ptr_clrall  = $032c
 ptr_load    = $0330
 ptr_save    = $0332
 
-sy_strout   = $cb1e  ;string in ac/yr ausgeben
+PRTSTR      = $cb1e ;string in ac/yr ausgeben
 BSOUT       = $ffd2
+TYPCHK      = $cd8a ; get numeric value
+MAKADR     = $d7f7 ; convert to word value into y/a; $14 (ptr)
+STOP     = $ffe1 ; check stop key
 
 sjload_init:
     lda #<jload
@@ -495,12 +498,6 @@ lf39e:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
 ; sys procs
 ; ==============================================================
 
-frmnum   = $cd8a    ; get numeric value
-frmbyte  = $d79e    ; get byte value to x
-cnvword  = $d7f7    ; convert to word value into y/a; $14 (ptr)
-setstat  = $fe6a    ; set status
-chkstop  = $ffe1    ; check stop key
-
     .code
 
 ; :: "fnam",pa,sa[,loadadr]
@@ -733,8 +730,7 @@ lfba7:
     inc $ae
     bne @n
     inc $af
-@n:
-    rts
+@n: rts
 
 lfbb0:              ;verify
     cmp ($ae),y
@@ -806,7 +802,7 @@ mysa_00:
     lda (SAL),y
     jsr jiecout
 
-    jsr chkstop
+    jsr STOP
     bne mysa_02
 
     jsr junlisten
@@ -839,10 +835,8 @@ iecnamout:
 
     jsr iecnamout_2
 
-
 dicm_ok2:
     jsr junlisten
-
 
 dicm_ok:
     clc
@@ -921,8 +915,8 @@ frmword2:
     jsr chkcom
     bcs frwo_3
 frmword:
-    jsr frmnum
-    jsr cnvword
+    jsr TYPCHK
+    jsr MAKADR
     clc
 frwo_3:
     rts
@@ -951,11 +945,10 @@ print_atadr_2:
 lrts:
     rts
 
-l1:
-    pha
+l1: pha
     lda #<txt_from
     ldy #>txt_from
-    jsr sy_strout
+    jsr PRTSTR
     pla
 
 hexoutl3:
@@ -979,7 +972,7 @@ print_toadr_2:
     pha
     lda #<txt_to
     ldy #>txt_to
-    jsr sy_strout
+    jsr PRTSTR
     pla
     jsr hexoutl3
 

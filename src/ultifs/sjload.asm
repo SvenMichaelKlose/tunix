@@ -39,45 +39,12 @@ PRINTMESSAGE    = 0 ; When PRINTADDRESS == 0: Print saving/loading message like 
 
 .endif
 
-my_wedge_lo = $0500
-
-f_io     = 1000     ;io flag
-f_we     = 1001     ;wedge flag
-f_curdev = 1002     ;wedge flag
-
-flgcom  = $08
-
-chrptr  = $7a       ;char pointer
-pt1     = $22       ;pointer
-pt2     = $24       ;pointer
 pt3     = $14       ;pointer
-
-fac     = $61
-
-c_line  = $d1       ;pointer current line char ram
-c_colp  = $f3       ;pointer current line color ram
-
-c_ctrl  = $d4       ;control mode
-
-c_row   = $d6       ;cursor row
-c_col   = $d3       ;cursor column
-c_chr   = $d7       ;cuurent char
-
-
-basstrt = $2b       ;basic start
-basvar  = $2d       ;basic vars
-basarr  = $2f       ;basic arrays
-basaend = $31       ;basic arrays end
-basstr  = $33       ;basic strings
-strptr  = $35       ;string pointer
-basend  = $37       ;basic end
 
 savestart = $c1
 loadptr   = $c3
 loadstart = $ac
 loadend   = $ae
-
-keyanz  = $c6
 
 iecstat  = $90
 
@@ -95,26 +62,18 @@ direct_mode = $9d   ;direct=$80/run=0
 chrget  = $0073     ;get next char
 chrgot  = $0079     ;get last char
 
-bip     = $0200     ;basic input buffer 88 bytes
-cas_buf = 828       ;kassetten buffer
-
 sy_strout  = $cb1e  ;string in ac/yr ausgeben
 BSOUT      = $ffd2
-getin      = $ffe4
-
-ptr_error_out   = $0300
-ptr_input_loop  = $0302
-ptr_frmelem     = $030a
-ptr_load        = $0330
-ptr_save        = $0332
 
 ptr_chkin       = $031e
 ptr_chkout      = $0320
-ptr_basin       = $0324
 ptr_clrch       = $0322
+ptr_basin       = $0324
 ptr_basout      = $0326
 ptr_getin       = $032a
 ptr_clrall      = $032c
+ptr_load        = $0330
+ptr_save        = $0332
 
 sjload_init:
     lda #<jload
@@ -1115,7 +1074,7 @@ jchkout:
     jmp $f342
 
 ;
-; jiffy getin    ($032a vector)
+; jiffy GETIN    ($032a vector)
 ;
 jgetin:
     lda $99         ;device#

@@ -19,13 +19,13 @@
 
 .export sjload_init
 
-SJLOAD_START  = $9400
+SJLOAD_START  = $9800
 
-STANDALONE      = 0 ; Make LOADable stand-alone binary.
+STANDALONE      = 1 ; Make LOADable stand-alone binary.
 SJLOAD          = 1 ; Extend LOAD.
-LOADPARAMS      = 1 ; Support additional load parameters.
+LOADPARAMS      = 1 ; Support additional BASIC LOAD parameters (destination address).
 SJSAVE          = 1 ; Extend SAVE.
-SAVEPARAMS      = 1 ; Support additional SAVE parameters.
+SAVEPARAMS      = 1 ; Support additional BASIC SAVE parameters (source address, length).
 FULLKERNAL      = 1 ; Extend all other KERNAL I/O functions.
 PRINTADDRESS    = 1 ; LOAD/SAVE: Print start/end address
 PRINTMESSAGE    = 0 ; When PRINTADDRESS == 0: Print saving/loading message like standard kernal routines.
@@ -120,7 +120,7 @@ FCHKOUT_2       = $f314
 FCHKOUT_3       = $f33a
 FCHKOUT_4       = $f342
 CHRINSR_2       = $f268
-FCLRCHR_2       = $f403
+FCLRCHN_2       = $f403
 
 sjload_init:
     lda #<jload

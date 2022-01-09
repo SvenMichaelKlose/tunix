@@ -1018,8 +1018,8 @@ hex1_2:
 
     .rodata
 
-txt_from:   .byte " from ",0
-txt_to:     .byte " to ",0
+txt_from:   .byte " FROM ",0
+txt_to:     .byte " TO ",0
 
 .endif
 

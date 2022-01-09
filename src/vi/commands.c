@@ -77,18 +77,11 @@ cmd_replace_char ()
 void
 cmd_join ()
 {
-    unsigned len;
+    unsigned len = current_line->length;
 
     if (!current_line->next)
         return;
 
-    len = current_line->length;
-
     linelist_join ();
-    move_down ();
-    linelist_delete ();
-    linelist_get (linenr);
-    move_up ();
-
     xpos = len;
 }

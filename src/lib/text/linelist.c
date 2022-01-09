@@ -137,6 +137,7 @@ linelist_split ()
 void
 linelist_join ()
 {
+    line *    this = current_line;
     line *    next = current_line->next;
     unsigned  len = current_line->length;
     char *    new_data;
@@ -153,6 +154,10 @@ linelist_join ()
     free (current_line->data);
     current_line->data = new_data;
     current_line->length = len;
+
+    if (current_line = current_line->next)
+        linelist_delete ();
+    current_line = this;
 }
 
 void

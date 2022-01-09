@@ -1,48 +1,43 @@
-; sjload/sjsave 07  --== mod version ==--
-; ----------------
+; SJLOAD/SJSAVE 07 - VIC-20 Version
 ;
-; c64 floppy speeder and disk utility based on vdos by edward carroll 1986
-; modified for jiffy compatibility by 1570 in 2008
-; modified for vc-20 and for jiffy save by diddl in 2009
-; modified for vc-20 and for basic io by diddl in 2010
-; v07 version for vic-20 by nbla000 in 2010
+; VIC-20 floppy speeder and disk utility based on VDOS for the
+; Commodore C64 by Edward Carroll in 1986.
 ;
-; new features by nbla000:
-; - enabled saving/loading kernal messages when PRINTADDRESS = 0 (if PRINTMESSAGE = 1)
-; - bug fix, vic hangs when a drive not present was used
-; - bug fix, drive not closed when load is finished
-; - removed unused routines to reduce program size (few bytes) 
-; - added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
+; Modifications:
+;
+;   Jiffy compatibility added by 1570 in 2008.
+;   VIC-20 compatibility and support for  Jiffy save by diddl in 2009.
+;   KERNAL wedge added by diddl in 2010.
+;   v07 version for vic-20 by nbla000 in 2010:
+;       - enabled saving/loading kernal messages when PRINTADDRESS = 0 (if PRINTMESSAGE = 1)
+;       - bug fix, vic hangs when a drive not present was used
+;       - bug fix, drive not closed when load is finished
+;       - removed unused routines to reduce program size (few bytes) 
+;       - added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
+;
+;   ca65 version and reformatting by Sven Michael Klose <pixel@hugbox.org>
 
 .export sjload_init
 
-start_adr  = $9400
+SJLOAD_START  = $9400
 
-
-SJSAVE = 1          ; 0 = don't compile sjsave routines   (load only)
-                    ; 1 = compile sjsave routines
-
-BASIO = 1           ; 0 = don't compile basic io routines (load/save only)
-                    ; 1 = compile basic io routines
-
-PRINTADDRESS = 1    ; 0 = don't print start/end address
-                    ; 1 = print start/end address
-
-PRINTMESSAGE = 0    ; this option works if PRINTADDRESS = 0 only
-                    ; 0 = don't print saving/loading message
-                    ; 1 = print saving/loading message like standard kernal routines
-
-LOADPARAMS = 1      ; 0 = don't compile with additional load parameters
-                    ; 1 = compile with additional load parameters
-
-SAVEPARAMS = 1      ; 0 = don't compile with additional save parameters (if SJSAVE == 1 )
-                    ; 1 = compile with additional save parameters (if SJSAVE == 1 )
+STANDALONE      = 0 ; Make LOADable stand-alone binary.
+SJLOAD          = 1 ; Extend LOAD.
+LOADPARAMS      = 1 ; Support additional load parameters.
+SJSAVE          = 1 ; Extend SAVE.
+SAVEPARAMS      = 1 ; Support additional SAVE parameters.
+FULLKERNAL      = 1 ; Extend all other KERNAL I/O functions.
+PRINTADDRESS    = 1 ; LOAD/SAVE: Print start/end address
+PRINTMESSAGE    = 0 ; When PRINTADDRESS == 0: Print saving/loading message like standard kernal routines.
 
     .code
 
-;  org start_adr - 2
+.ifdef STANDALONE
 
-;  .byte <(start_adr),>(start_adr)
+    .org SJLOAD_START - 2
+    .byte <SJLOAD_START, >SJLOAD_START
+
+.endif
 
 my_wedge_lo = $0500
 
@@ -135,7 +130,7 @@ sjload_init:
     stx ptr_save + 1
 .endif
 
-.ifdef BASIO
+.ifdef FULLKERNAL
     lda #<jchkin
     ldx #>jchkin
     sta ptr_chkin
@@ -1082,16 +1077,20 @@ hex1_2:
 ; message texte
 ; ==============================================================
 
+    .rodata
+
 msg_loadat: .byte " from ",0
 msg_loadto: .byte " to ",0
 
 .endif
 
-.ifdef BASIO
+.ifdef FULLKERNAL
 
 ; ==============================================================
 ; jiffy io code (chkin, chkout, basin, bsout)   from sjload-128
 ; ==============================================================
+
+    .code
 
 ;
 ; jiffy chkin    ($031e vector)

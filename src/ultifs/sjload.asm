@@ -540,21 +540,21 @@ lf39e:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
 ; sys procs
 ; ==============================================================
 
-frmnum   = $cd8a	; get numeric value
-frmbyte  = $d79e	; get byte value to x
-cnvword  = $d7f7	; convert to word value into y/a; $14 (pt3)
-setstat  = $fe6a	; set status
+frmnum   = $cd8a    ; get numeric value
+frmbyte  = $d79e    ; get byte value to x
+cnvword  = $d7f7    ; convert to word value into y/a; $14 (pt3)
+setstat  = $fe6a    ; set status
 chkstop  = $ffe1    ; check stop key
 
 unlisten = jif_unlisten     ; send unlisten command
-untalk   = jif_untalk	    ; send untalk command
-listen	 = jif_listen       ; send listen command
-talk     = jif_talk	        ; send talk command
-iecin    = jif_iecin	    ; get char from iec
-iecout   = jif_iecout	    ; send char to iec
+untalk   = jif_untalk       ; send untalk command
+listen   = jif_listen       ; send listen command
+talk     = jif_talk         ; send talk command
+iecin    = jif_iecin        ; get char from iec
+iecout   = jif_iecout       ; send char to iec
 
 listensa = jif_listensa     ; send sa for listen command
-talksa   = jif_talksa	    ; send sa for talk command
+talksa   = jif_talksa       ; send sa for talk command
 
     .code
 
@@ -1097,7 +1097,7 @@ msg_loadto: .byte " to ",0
 ;
 jchkin:
     jsr $f3cf       ;search logical file#
-    beq @l1	        ;file not open error
+    beq @l1         ;file not open error
     jmp $f784       ;err "file not open"
 
 @l1:jsr $f3df       ;set file param
@@ -1120,7 +1120,7 @@ jchkin:
 ;
 jchkout:
     jsr $f3cf       ;search logical file#
-    beq @l1	        ;file not open error
+    beq @l1         ;file not open error
     jmp $f784       ;err "file not open"
 
 @l1:jsr $f3df       ;set file param

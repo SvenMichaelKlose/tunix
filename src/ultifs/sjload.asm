@@ -1,1214 +1,1201 @@
-; SJLOAD/SJSAVE 07  --== MOD VERSION ==--
+; sjload/sjsave 07  --== mod version ==--
 ; ----------------
 ;
-; C64 floppy speeder and disk utility based on VDOS by Edward Carroll 1986
-; modified for Jiffy compatibility by 1570 in 2008
-; modified for VC-20 and for Jiffy Save by Diddl in 2009
-; modified for VC-20 and for basic IO by Diddl in 2010
-; v07 version for Vic-20 by nbla000 in 2010
+; c64 floppy speeder and disk utility based on vdos by edward carroll 1986
+; modified for jiffy compatibility by 1570 in 2008
+; modified for vc-20 and for jiffy save by diddl in 2009
+; modified for vc-20 and for basic io by diddl in 2010
+; v07 version for vic-20 by nbla000 in 2010
 ;
 ; new features by nbla000:
-; - Enabled SAVING/LOADING kernal messages when PRINTADDRESS = 0 (IF PRINTMESSAGE = 1)
-; - Bug fix, Vic hangs when a drive not present was used
-; - Bug fix, Drive not closed when load is finished
-; - Removed unused routines to reduce program size (few bytes) 
-; - Added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
+; - enabled saving/loading kernal messages when PRINTADDRESS = 0 (if PRINTMESSAGE = 1)
+; - bug fix, vic hangs when a drive not present was used
+; - bug fix, drive not closed when load is finished
+; - removed unused routines to reduce program size (few bytes) 
+; - added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
 
 .export sjload_init
 
-START_ADR  = $9400
+start_adr  = $9400
 
 
-SJSAVE = 1          ; 0 = Don't compile SJsave routines   (LOAD only)
-                    ; 1 = compile SJsave routines
+SJSAVE = 1          ; 0 = don't compile sjsave routines   (load only)
+                    ; 1 = compile sjsave routines
 
-BASIO = 1           ; 0 = Don't compile basic IO routines (LOAD/SAVE only)
-                    ; 1 = compile basic IO routines
+BASIO = 1           ; 0 = don't compile basic io routines (load/save only)
+                    ; 1 = compile basic io routines
 
-PRINTADDRESS = 1    ; 0 = Don't print start/end address
+PRINTADDRESS = 1    ; 0 = don't print start/end address
                     ; 1 = print start/end address
 
-LOADPARAMS = 1      ; 0 = Don't compile with additional LOAD parameters
-                    ; 1 = compile with additional LOAD parameters
+PRINTMESSAGE = 0    ; this option works if PRINTADDRESS = 0 only
+                    ; 0 = don't print saving/loading message
+                    ; 1 = print saving/loading message like standard kernal routines
 
-SAVEPARAMS = 1      ; 0 = Don't compile with additional SAVE parameters (if SJSAVE == 1 )
-                    ; 1 = compile with additional SAVE parameters (if SJSAVE == 1 )
+LOADPARAMS = 1      ; 0 = don't compile with additional load parameters
+                    ; 1 = compile with additional load parameters
 
-; This option works if PRINTADDRESS = 0 ONLY
-
-PRINTMESSAGE = 0    ; 0 = Don't print SAVING/LOADING Message
-                    ; 1 = print SAVING/LOADING Message like standard kernal routines
+SAVEPARAMS = 1      ; 0 = don't compile with additional save parameters (if SJSAVE == 1 )
+                    ; 1 = compile with additional save parameters (if SJSAVE == 1 )
 
     .code
 
-;  org START_ADR - 2
+;  org start_adr - 2
 
-;  .byte <(START_ADR),>(START_ADR)
+;  .byte <(start_adr),>(start_adr)
 
-MY_WEDGE_LO = $0500
+my_wedge_lo = $0500
 
-F_IO     = 1000     ;IO FLAG
-F_WE     = 1001     ;WEDGE FLAG
-F_CURDEV = 1002     ;WEDGE FLAG
+f_io     = 1000     ;io flag
+f_we     = 1001     ;wedge flag
+f_curdev = 1002     ;wedge flag
 
-FLGCOM  = $08
+flgcom  = $08
 
-CHRPTR  = $7a       ;Char Pointer
-PT1     = $22       ;Pointer
-PT2     = $24       ;Pointer
-PT3     = $14       ;Pointer
+chrptr  = $7a       ;char pointer
+pt1     = $22       ;pointer
+pt2     = $24       ;pointer
+pt3     = $14       ;pointer
 
-FAC     = $61
+fac     = $61
 
-C_LINE  = $d1       ;pointer current line char RAM
-C_COLP  = $f3       ;pointer current line color RAM
+c_line  = $d1       ;pointer current line char ram
+c_colp  = $f3       ;pointer current line color ram
 
-C_CTRL  = $d4       ;control mode
+c_ctrl  = $d4       ;control mode
 
-C_ROW   = $d6       ;cursor row
-C_COL   = $d3       ;cursor column
-C_CHR   = $d7       ;cuurent char
+c_row   = $d6       ;cursor row
+c_col   = $d3       ;cursor column
+c_chr   = $d7       ;cuurent char
 
 
-BASSTRT = $2B       ;BASIC START
-BASVAR  = $2d       ;BASIC VARS
-BASARR  = $2f       ;BASIC ARRAYS
-BASAEND = $31       ;BASIC ARRAYS END
-BASSTR  = $33       ;BASIC STRINGS
-STRPTR  = $35       ;STRING POINTER
-BASEND  = $37       ;BASIC END
+basstrt = $2b       ;basic start
+basvar  = $2d       ;basic vars
+basarr  = $2f       ;basic arrays
+basaend = $31       ;basic arrays end
+basstr  = $33       ;basic strings
+strptr  = $35       ;string pointer
+basend  = $37       ;basic end
 
-SAVESTART = $c1
-LOADPTR   = $c3
-LOADSTART = $ac
-LOADEND   = $ae
+savestart = $c1
+loadptr   = $c3
+loadstart = $ac
+loadend   = $ae
 
-KEYANZ  = $c6
+keyanz  = $c6
 
-IECSTAT  = $90
+iecstat  = $90
 
-LEN_FNAM = $b7
-PTR_FNAM = $bb
+len_fnam = $b7
+ptr_fnam = $bb
 
-SY_VERIFY   = $93
-SY_STATUS   = $90
-SY_SA       = $b9
-SY_DN       = $ba
-SY_FN       = $b8
+sy_verify   = $93
+sy_status   = $90
+sy_sa       = $b9
+sy_dn       = $ba
+sy_fn       = $b8
 
-DIRECT_MODE = $9d   ;Direct=$80/RUN=0
+direct_mode = $9d   ;direct=$80/run=0
 
-CHRGET  = $0073     ;GET NEXT CHAR
-CHRGOT  = $0079     ;GET LAST CHAR
+chrget  = $0073     ;get next char
+chrgot  = $0079     ;get last char
 
-BIP     = $0200     ;BASIC Input Buffer 88 Bytes
-CAS_BUF = 828       ;Kassetten Buffer
+bip     = $0200     ;basic input buffer 88 bytes
+cas_buf = 828       ;kassetten buffer
 
-SY_STROUT  = $cb1e  ;String in AC/YR ausgeben
-BSOUT      = $ffd2
-GETIN      = $ffe4
+sy_strout  = $cb1e  ;string in ac/yr ausgeben
+bsout      = $ffd2
+getin      = $ffe4
 
-PTR_ERROR_OUT   = $0300
-PTR_INPUT_LOOP  = $0302
-PTR_FRMELEM     = $030a
-PTR_LOAD        = $0330
-PTR_SAVE        = $0332
+ptr_error_out   = $0300
+ptr_input_loop  = $0302
+ptr_frmelem     = $030a
+ptr_load        = $0330
+ptr_save        = $0332
 
-PTR_CHKIN       = $031e
-PTR_CHKOUT      = $0320
-PTR_BASIN       = $0324
-PTR_CLRCH       = $0322
-PTR_BASOUT      = $0326
-PTR_GETIN       = $032a
-PTR_CLRALL      = $032c
+ptr_chkin       = $031e
+ptr_chkout      = $0320
+ptr_basin       = $0324
+ptr_clrch       = $0322
+ptr_basout      = $0326
+ptr_getin       = $032a
+ptr_clrall      = $032c
 
-;-------------------- WEDGE INIT
+;-------------------- wedge init
 sjload_init:
-    lda #<MY_LOAD
-    ldx #>MY_LOAD
-    sta PTR_LOAD
-    stx PTR_LOAD + 1
+    lda #<my_load
+    ldx #>my_load
+    sta ptr_load
+    stx ptr_load + 1
 
 .ifdef SJSAVE
-    lda #<MY_SAVE
-    ldx #>MY_SAVE
-    sta PTR_SAVE
-    stx PTR_SAVE + 1
+    lda #<my_save
+    ldx #>my_save
+    sta ptr_save
+    stx ptr_save + 1
 .endif
 
 .ifdef BASIO
-    lda #<JChkIn
-    ldx #>JChkIn
-    sta PTR_CHKIN
-    stx PTR_CHKIN + 1
-    lda #<JChkOut
-    ldx #>JChkOut
-    sta PTR_CHKOUT
-    stx PTR_CHKOUT + 1
-    lda #<JBasIn
-    ldx #>JBasIn
-    sta PTR_BASIN
-    stx PTR_BASIN + 1
-    lda #<JBasOut
-    ldx #>JBasOut
-    sta PTR_BASOUT
-    stx PTR_BASOUT + 1
-    lda #<JGetIn
-    ldx #>JGetIn
-    sta PTR_GETIN
-    stx PTR_GETIN + 1
-    lda #<JClrCh
-    ldx #>JClrCh
-    sta PTR_CLRCH
-    stx PTR_CLRCH + 1
-    lda #<JClrAll
-    ldx #>JClrAll
-    sta PTR_CLRALL
-    stx PTR_CLRALL + 1
+    lda #<jchkin
+    ldx #>jchkin
+    sta ptr_chkin
+    stx ptr_chkin + 1
+    lda #<jchkout
+    ldx #>jchkout
+    sta ptr_chkout
+    stx ptr_chkout + 1
+    lda #<jbasin
+    ldx #>jbasin
+    sta ptr_basin
+    stx ptr_basin + 1
+    lda #<jbasout
+    ldx #>jbasout
+    sta ptr_basout
+    stx ptr_basout + 1
+    lda #<jgetin
+    ldx #>jgetin
+    sta ptr_getin
+    stx ptr_getin + 1
+    lda #<jclrch
+    ldx #>jclrch
+    sta ptr_clrch
+    stx ptr_clrch + 1
+    lda #<jclrall
+    ldx #>jclrall
+    sta ptr_clrall
+    stx ptr_clrall + 1
 .endif
 
   rts
 
 ; ==============================================================
-; JIFFY PROCS
+; jiffy procs
 ; ==============================================================
 
-;--------------JIFFY LISTEN
-JIF_TALK:
-    ORA #$40
+;--------------jiffy listen
+jif_talk:
+    ora #$40
     .byte $2c
 
-JIF_LISTEN:
-    ORA #$20
-    JSR $F160       ;SET TIMER
+jif_listen:
+    ora #$20
+    jsr $f160       ;set timer
 
-lEE1C:
-    PHA
-    BIT $94
-    BPL l6E2B
-    SEC
-    ROR $A3
-    JSR NEW_IECOUT  ;NEW BYTE OUT
-    LSR $94
-    LSR $A3
-l6E2B:
-    PLA
-    STA $95
+lee1c:
+    pha
+    bit $94
+    bpl l6e2b
+    sec
+    ror $a3
+    jsr new_iecout  ;new byte out
+    lsr $94
+    lsr $a3
+l6e2b:
+    pla
+    sta $95
 
-    SEI
-    LDA #$00
-    STA $A3
-    JSR $E4A0       ;DAV hi
+    sei
+    lda #$00
+    sta $a3
+    jsr $e4a0       ;dav hi
 
-    CMP #$3F
-    BNE l6E38
-    JSR $EF84       ;NDAC lo
-l6E38:
-    LDA $911F
-    ORA #$80
-    STA $911F
+    cmp #$3f
+    bne l6e38
+    jsr $ef84       ;ndac lo
+l6e38:
+    lda $911f
+    ora #$80
+    sta $911f
 
-lEE40:
-    JSR $EF8D       ;PCR BIT 1 LÖSCHEN
-    JSR $E4A0
-    JSR $EF96
+lee40:
+    jsr $ef8d       ;pcr bit 1 lÖschen
+    jsr $e4a0
+    jsr $ef96
 
-OLD_IECOUT:
-    SEI
-    JSR $E4A0       ;DAV lo
-    JSR $E4B2       ;NRFD hi
-    LSR
-    BCS l6EB4       ;err DEV NOT PRES
+old_iecout:
+    sei
+    jsr $e4a0       ;dav lo
+    jsr $e4b2       ;nrfd hi
+    lsr
+    bcs l6eb4       ;err dev not pres
 
-    JSR $EF84       ;NDAC lo
-    BIT $A3
-    BPL l6E66
-l6E5A:
-    JSR $E4B2       ;NRFD hi
-    LSR
-    BCC l6E5A
-l6E60:
-    JSR $E4B2       ;NRFD hi
-    LSR
-    BCS l6E60
-l6E66:
-    JSR $E4B2       ;NRFD hi
-    LSR
-    BCC l6E66
-    JSR $EF8D       ;PCR BIT 1 LÖSCHEN
+    jsr $ef84       ;ndac lo
+    bit $a3
+    bpl l6e66
+l6e5a:
+    jsr $e4b2       ;nrfd hi
+    lsr
+    bcc l6e5a
+l6e60:
+    jsr $e4b2       ;nrfd hi
+    lsr
+    bcs l6e60
+l6e66:
+    jsr $e4b2       ;nrfd hi
+    lsr
+    bcc l6e66
+    jsr $ef8d       ;pcr bit 1 lÖschen
 
-    TXA
-    PHA
-    LDX #$08        ;8 BIT
+    txa
+    pha
+    ldx #$08        ;8 bit
 
-l6E73:
-    LDA $911F
-    AND #$02
-    BNE l6E7F
-    PLA
-    TAX
-    JMP $EEB7       ;ERR TIMEOUT
+l6e73:
+    lda $911f
+    and #$02
+    bne l6e7f
+    pla
+    tax
+    jmp $eeb7       ;err timeout
 
-l6E7F:
-    JSR $E4A0       ;DAV hi
-    ROR $95
-    BCS l6E89
-    JSR $E4A9       ;DAV lo
-l6E89:
-    JSR $EF84       ;NDAC lo
-    LDA $912C
-    AND #$DD
-    ORA #$02
-    PHP
-    PHA
-    JSR lF96E
-    PLA
-    PLP
-    DEX
-    BNE l6E73
+l6e7f:
+    jsr $e4a0       ;dav hi
+    ror $95
+    bcs l6e89
+    jsr $e4a9       ;dav lo
+l6e89:
+    jsr $ef84       ;ndac lo
+    lda $912c
+    and #$dd
+    ora #$02
+    php
+    pha
+    jsr lf96e
+    pla
+    plp
+    dex
+    bne l6e73
 
-    PLA
-    TAX
-    jmp $EEA0
+    pla
+    tax
+    jmp $eea0
 
-l6EB4:
-    jmp $eeb4       ;err DEV NOT PRES
+l6eb4:
+    jmp $eeb4       ;err dev not pres
 
-l6EB7:
-    jmp $eeb7       ;err TIME OUT
+l6eb7:
+    jmp $eeb7       ;err time out
 
-lF96E:
-    STA $912C
-    BIT $911F
-    BPL lF997
-    CPX #$02
-    BNE lF997
-    LDA #$02
-    LDX #$20
-lF97E:
-    BIT $911F
-    BEQ lF988
-    DEX
-    BNE lF97E
-    BEQ lF995
-lF988:
-    BIT $911F
-    BEQ lF988
-    LDA $95
-    ROR
-    ROR
-    ORA #$40
-    STA $A3
-lF995:
-    LDX #$02
-lF997:
+lf96e:
+    sta $912c
+    bit $911f
+    bpl lf997
+    cpx #$02
+    bne lf997
+    lda #$02
+    ldx #$20
+lf97e:
+    bit $911f
+    beq lf988
+    dex
+    bne lf97e
+    beq lf995
+lf988:
+    bit $911f
+    beq lf988
+    lda $95
+    ror
+    ror
+    ora #$40
+    sta $a3
+lf995:
+    ldx #$02
+lf997:
     rts
 
-;--------------JIFFY BYTE IN
-JIF_IECIN:
-lfbe0:              ;NEW BYTE IN??
+;--------------jiffy byte in
+jif_iecin:
+lfbe0:              ;new byte in??
     sei
     bit $a3
-    bvs JIFFY_IN
-    LDA #$00
-    JMP $EF1C       ;ORIG BYTE IN
+    bvs jiffy_in
+    lda #$00
+    jmp $ef1c       ;orig byte in
 
-JIFFY_IN:
-    LDA $911F
-    AND #$03
-    BEQ JIFFY_IN
-    LDA #$80
-    STA $9C
-    TXA
-    PHA
-    PHA
-    PLA
-    PHA
-    PLA
-    LDA $912C
-    AND #$DD
-    STA $912C
-    ORA #$20
-    TAX
-    BIT $9C
-    BIT $9C
-    BIT $9C
-    LDA $911F
-    ROR
-    ROR
-    NOP
-    AND #$80
-    ORA $911F
-    ROL
-    ROL
-    STA $B3
-    LDA $911F
-    ROR
-    ROR
-    AND #$80
-    NOP
-    ORA $911F
-    ROL
-    ROL
-    STA $C0
-    LDA $911F
-    STX $912C
-    STA $9C
-    JSR lEC4E       ;BYTE AUS 2 NIBBLES
+jiffy_in:
+    lda $911f
+    and #$03
+    beq jiffy_in
+    lda #$80
+    sta $9c
+    txa
+    pha
+    pha
+    pla
+    pha
+    pla
+    lda $912c
+    and #$dd
+    sta $912c
+    ora #$20
+    tax
+    bit $9c
+    bit $9c
+    bit $9c
+    lda $911f
+    ror
+    ror
+    nop
+    and #$80
+    ora $911f
+    rol
+    rol
+    sta $b3
+    lda $911f
+    ror
+    ror
+    and #$80
+    nop
+    ora $911f
+    rol
+    rol
+    sta $c0
+    lda $911f
+    stx $912c
+    sta $9c
+    jsr lec4e       ;byte aus 2 nibbles
 
-    STA $A4
-    PLA
-    TAX
-    LDA $9C
-    ROR
-    ROR
-    BPL l7C54
-    BCC lfC4f
-    LDA #$42
-    JMP $EEB9       ;ERR STATUS, UNLISTEN
+    sta $a4
+    pla
+    tax
+    lda $9c
+    ror
+    ror
+    bpl l7c54
+    bcc lfc4f
+    lda #$42
+    jmp $eeb9       ;err status, unlisten
 
-;--------------JIFFY BYTE IN
+;--------------jiffy byte in
 
-;--------------JIFFY BYTE OUT
-JIF_IECOUT:
-    BIT $94
-    BMI lEEED
-    SEC
-    ROR $94
-    BNE lEEF2
-lEEED:
-    PHA
-    JSR NEW_IECOUT
-    PLA
-lEEF2:
-    STA $95
-    CLC
-    RTS
+;--------------jiffy byte out
+jif_iecout:
+    bit $94
+    bmi leeed
+    sec
+    ror $94
+    bne leef2
+leeed:
+    pha
+    jsr new_iecout
+    pla
+leef2:
+    sta $95
+    clc
+    rts
 
-NEW_IECOUT:
+new_iecout:
     sei
     bit $a3
-    bvs JIFFY_OUT
-    LDA $A3
-    CMP #$A0
-    BCS JIFFY_OUT
-    JMP OLD_IECOUT
+    bvs jiffy_out
+    lda $a3
+    cmp #$a0
+    bcs jiffy_out
+    jmp old_iecout
 
-lfC4f:
-    LDA #$40
-    JSR $FE6A       ;SET STATUS
+lfc4f:
+    lda #$40
+    jsr $fe6a       ;set status
 
-l7C54:
-    LDA $A4
+l7c54:
+    lda $a4
 
-l7C56:
-    CLI
-    CLC
-    RTS
+l7c56:
+    cli
+    clc
+    rts
 
-JIFFY_OUT:
-    TXA
-    PHA
-    LDA $95
-    LSR
-    LSR
-    LSR
-    LSR
-    TAX
-    LDA lFCCE,X
-    PHA
-    TXA
-    LSR
-    LSR
-    TAX
-    LDA lFCCE,X
-    STA $B3
-    LDA $95
-    AND #$0F
-    TAX
-    LDA #$02
-l7C76:
-    BIT $911F
-    BEQ l7C76
+jiffy_out:
+    txa
+    pha
+    lda $95
+    lsr
+    lsr
+    lsr
+    lsr
+    tax
+    lda lfcce,x
+    pha
+    txa
+    lsr
+    lsr
+    tax
+    lda lfcce,x
+    sta $b3
+    lda $95
+    and #$0f
+    tax
+    lda #$02
+l7c76:
+    bit $911f
+    beq l7c76
 
-    LDA $912C
-    AND #$DD
-    STA $9C
-    PHA
-    PLA
-    PHA
-    PLA
-    NOP
-    NOP
-    NOP
-    STA $912C
-    PLA
-    ORA $9C
-    NOP
-    STA $912C
-    LDA $B3
-    ORA $9C
-    ORA $9C
-    STA $912C
-    LDA lFBBA,X
-    ORA $9C
-    NOP
-    STA $912C
-    LDA lF39E,X
-    ORA $9C
-    NOP
-    STA $912C
-    NOP
-    AND #$DD
-    BIT $A3
-    BMI l7CB7
-    ORA #$02
-l7CB7:
-    STA $912C
-    PLA
-    TAX
-    NOP
-    LDA $9C
-    ORA #$02
-    STA $912C
-    LDA $911F
-    AND #$02
-    BEQ l7C56
-    JMP $EEB7       ; err TIME OUT
+    lda $912c
+    and #$dd
+    sta $9c
+    pha
+    pla
+    pha
+    pla
+    nop
+    nop
+    nop
+    sta $912c
+    pla
+    ora $9c
+    nop
+    sta $912c
+    lda $b3
+    ora $9c
+    ora $9c
+    sta $912c
+    lda lfbba,x
+    ora $9c
+    nop
+    sta $912c
+    lda lf39e,x
+    ora $9c
+    nop
+    sta $912c
+    nop
+    and #$dd
+    bit $a3
+    bmi l7cb7
+    ora #$02
+l7cb7:
+    sta $912c
+    pla
+    tax
+    nop
+    lda $9c
+    ora #$02
+    sta $912c
+    lda $911f
+    and #$02
+    beq l7c56
+    jmp $eeb7       ; err time out
 
-;--------------JIFFY BYTE OUT
+;--------------jiffy byte out
 
-;--------------BAUT EIN BYTE AUS 2 NIBBLES ZUSAMMEN
-lEC4E:
-    LDA $B3
-    AND #$0F
-    STA $B3
-    LDA $C0
-    ASL
-    ASL
-    ASL
-    ASL
-    ORA $B3
-    RTS
+;--------------baut ein byte aus 2 nibbles zusammen
+lec4e:
+    lda $b3
+    and #$0f
+    sta $b3
+    lda $c0
+    asl
+    asl
+    asl
+    asl
+    ora $b3
+    rts
 
-;--------------JIFFY BYTE IN
+;--------------jiffy byte in
 
-;--------------JIFFY UNTALK/UNLISTEN
-JIF_UNTALK:
-lEEF6:
-    LDA $911F
-    ORA #$80        ;ATN ausgeben
-    STA $911F
-    JSR $EF8D
-    LDA #$5F
+;--------------jiffy untalk/unlisten
+jif_untalk:
+leef6:
+    lda $911f
+    ora #$80        ;atn ausgeben
+    sta $911f
+    jsr $ef8d
+    lda #$5f
     .byte $2c
 
 
-JIF_UNLISTEN:
-    LDA #$3F
-    JSR lEE1C       ;PART OF LISTEN
-    JSR $EEC5
-    TXA
-    LDX #$0B
-lEF0F:
-    DEX
-    BNE lEF0F
-    TAX
-    JSR $EF84
-    JMP $E4A0
+jif_unlisten:
+    lda #$3f
+    jsr lee1c       ;part of listen
+    jsr $eec5
+    txa
+    ldx #$0b
+lef0f:
+    dex
+    bne lef0f
+    tax
+    jsr $ef84
+    jmp $e4a0
 
-;--------------JIFFY UNTALK/UNLISTEN
+;--------------jiffy untalk/unlisten
 
-;--------------JIFFY TALK SA
-JIF_TALKSA:
-    STA $95
-    JSR lEE40
+;--------------jiffy talk sa
+jif_talksa:
+    sta $95
+    jsr lee40
     jmp $eed3
 
-;--------------JIFFY TALK SA
+;--------------jiffy talk sa
 
-;--------------JIFFY LISTEN SA
-JIF_LISTENSA:
-    STA $95
-    JSR lEE40
+;--------------jiffy listen sa
+jif_listensa:
+    sta $95
+    jsr lee40
     jmp $eec5
 
-;--------------JIFFY LISTEN SA
+;--------------jiffy listen sa
 
     .rodata
 
-;--------------JIFFY DATA TABLE
-lFCCE:  .byte $00,$02,$20,$22,$00,$02,$20,$22,$00,$02,$20,$22,$00,$02,$20,$22
-lFBBA:  .byte $00,$00,$20,$20,$00,$00,$20,$20,$02,$02,$22,$22,$02,$02,$22,$22
-lF39E:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
+;--------------jiffy data table
+lfcce:  .byte $00,$02,$20,$22,$00,$02,$20,$22,$00,$02,$20,$22,$00,$02,$20,$22
+lfbba:  .byte $00,$00,$20,$20,$00,$00,$20,$20,$02,$02,$22,$22,$02,$02,$22,$22
+lf39e:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
 
 ; ==============================================================
-; SYS PROCS
+; sys procs
 ; ==============================================================
 
-FRMNUM   = $cd8a	; GET NUMERIC VALUE
-FRMBYTE  = $d79e	; GET BYTE VALUE TO X
-CNVWORD  = $d7f7	; CONVERT TO WORD VALUE INTO Y/A; $14 (PT3)
-SETSTAT  = $fe6a	; set status
-CHKSTOP  = $ffe1    ; check stop key
+frmnum   = $cd8a	; get numeric value
+frmbyte  = $d79e	; get byte value to x
+cnvword  = $d7f7	; convert to word value into y/a; $14 (pt3)
+setstat  = $fe6a	; set status
+chkstop  = $ffe1    ; check stop key
 
-UNLISTEN = JIF_UNLISTEN     ; send UNLISTEN command
-UNTALK   = JIF_UNTALK	    ; send UNTALK command
-LISTEN	 = JIF_LISTEN       ; send LISTEN command
-TALK     = JIF_TALK	        ; send TALK command
-IECIN    = JIF_IECIN	    ; get char from IEC
-IECOUT   = JIF_IECOUT	    ; send char to IEC
+unlisten = jif_unlisten     ; send unlisten command
+untalk   = jif_untalk	    ; send untalk command
+listen	 = jif_listen       ; send listen command
+talk     = jif_talk	        ; send talk command
+iecin    = jif_iecin	    ; get char from iec
+iecout   = jif_iecout	    ; send char to iec
 
-LISTENSA = JIF_LISTENSA     ; send SA for LISTEN command
-TALKSA   = JIF_TALKSA	    ; send SA for TALK command
+listensa = jif_listensa     ; send sa for listen command
+talksa   = jif_talksa	    ; send sa for talk command
 
     .code
 
-; :: "fnam",PA,SA[,loadadr]
-MY_LOAD:
-    ldx SY_DN       ; PA (device#)
+; :: "fnam",pa,sa[,loadadr]
+my_load:
+    ldx sy_dn       ; pa (device#)
     cpx #4
     bcs l0
-    jmp $f549       ; OLD LOAD PROC
+    jmp $f549       ; old load proc
 
-l0: sta SY_VERIFY
+l0: sta sy_verify
     lda #0
-    sta SY_FN       ; file# - flag for first byte
+    sta sy_fn       ; file# - flag for first byte
 
 .ifndef PRINTADDRESS 
 .ifdef PRINTMESSAGE
-    jsr $f647 ;Print "SEARCHING" 
+    jsr $f647 ;print "searching" 
 .endif
 .endif
 
     lda #$f0        ; channel
-    jsr DISK_LISTEN
-    jsr IECNAMOUT
+    jsr disk_listen
+    jsr iecnamout
     bcc l00a
     rts
 
 l00a:
-    LDY #$00
-    LDA ($BB),Y     ;Filename
-    CMP #'$'
-    BNE l00b        ;Directory? -->
-    jmp $f56d       ;normal LOAD
+    ldy #$00
+    lda ($bb),y     ;filename
+    cmp #'$'
+    bne l00b        ;directory? -->
+    jmp $f56d       ;normal load
 
 l00b:
     lda #$60
-    jsr DISK_TALK
+    jsr disk_talk
 
-    jsr IECIN       ; load address lo
-    sta LOADEND
+    jsr iecin       ; load address lo
+    sta loadend
 
-    lda SY_STATUS
+    lda sy_status
     lsr
     lsr
     bcc l00c
     jmp $f787
 
 l00c:
-    jsr IECIN       ; load address hi
-    sta LOADEND + 1
+    jsr iecin       ; load address hi
+    sta loadend + 1
 
-    ldx SY_SA       ; SA
+    ldx sy_sa       ; sa
 .ifdef LOADPARAMS
-    beq l00         ; SA=0 -->
+    beq l00         ; sa=0 -->
     dex
     dex
 .endif
-    bne l01         ; SA=1 -->
+    bne l01         ; sa=1 -->
 
 .ifdef LOADPARAMS
-l02:                ; SA=2: LOAD CARTRIDGE AT $c3
+l02:                ; sa=2: load cartridge at $c3
     pha
-    lda LOADEND
-    pha             ; FIRST TWO BYTES ...
+    lda loadend
+    pha             ; first two bytes ...
 .endif
 
-l00:                ; SA=0: LOAD PROGRAM AT $c3
+l00:                ; sa=0: load program at $c3
 .ifdef LOADPARAMS
-    jsr FRMWORD2    ; GET WORD VALUE
+    jsr frmword2    ; get word value
 .endif
 
-    lda LOADPTR + 1
-    ldx LOADPTR
+    lda loadptr + 1
+    ldx loadptr
 .ifdef LOADPARAMS
     bcs l2
 
-    lda PT3 + 1
-    ldx PT3
+    lda pt3 + 1
+    ldx pt3
 
 l2:
 .endif
 
-    sta LOADEND + 1
-    stx LOADEND
+    sta loadend + 1
+    stx loadend
 
 l01:
 .ifdef PRINTADDRESS
-    jsr PRINT_ATADR
+    jsr print_atadr
 .else
 .ifdef PRINTMESSAGE
-    jsr $f66a       ;Print "LOADING / VERIFYING"  
+    jsr $f66a       ;print "loading / verifying"  
 .endif
 .endif
 
-    ldx SY_SA      ; SA
+    ldx sy_sa      ; sa
 
 .ifdef LOADPARAMS
 
     dex
     dex
-    bne l3         ; SA!=2 -->
+    bne l3         ; sa!=2 -->
 
-    ;STORE FIRST TWO BYTES
+    ;store first two bytes
     ldy #0
     pla
-    jsr STOREBYTE
+    jsr storebyte
     pla
-    jsr STOREBYTE
+    jsr storebyte
 
 l3:
 .endif
 
-;--------------JIFFY FASTLOAD INIT
-FASTLOAD:
-    BIT $A3
-    BVS lFB1F      ;Jiffy -->
-lF253:
-    JSR $F58A      ;normales LOAD
+;--------------jiffy fastload init
+fastload:
+    bit $a3
+    bvs lfb1f      ;jiffy -->
+lf253:
+    jsr $f58a      ;normales load
 lerr2:
     bcc n
-    JMP $F6CB      ;UNLISTEN, CLOSE, BREAK
+    jmp $f6cb      ;unlisten, close, break
 n:
 
-MYLO_E:
+mylo_e:
 .ifdef PRINTADDRESS
-    jsr PRINT_TOADR
+    jsr print_toadr
 .endif
 
-    jsr DISK_CLOSE_LO
+    jsr disk_close_lo
 
     clc
-    ldx LOADEND
-    ldy LOADEND + 1
+    ldx loadend
+    ldy loadend + 1
     rts
 
-;--------------JIFFY FASTLOAD INIT
-lFB1F:
-    JSR UNTALK     ;UNTALK
+;--------------jiffy fastload init
+lfb1f:
+    jsr untalk     ;untalk
     lda #$61
-    jsr DISK_TALK
-;--------------JIFFY FASTLOAD START
-    SEI
-    LDA $B2
-    PHA
-    LDY #$00
+    jsr disk_talk
+;--------------jiffy fastload start
+    sei
+    lda $b2
+    pha
+    ldy #$00
 
-lFB25:
-    JSR $F755      ;STOP Taste abfragen
-    CMP #$FE
-    BEQ lFB5B
-    LDA $912C
-    AND #$DD
-    TAX
-    ORA #$20
-    STA $B2
-    STX $912C
-    LDA #$80
-    STA $9C
-lFB3D:
-    LDA $911F
-    LSR
-    BCC lFB3D
-    AND #$01
-    BEQ lFB67
-    LDX #$6D
-lFB49:
-    BIT $911F
-    BEQ lFB54
-    DEX
-    BNE lFB49
-    LDA #$42
-    .byte $2c      ;BIT ABS
-lFB54:
-    LDA #$40
-    JSR $FE6A      ;SET STATUS
-    CLC
-    .byte $24      ;BIT ZP
-lFB5B:             ;STOP!
-    SEC
-    PLA
-    STA $B2
-    bcc MYLO_E
+lfb25:
+    jsr $f755      ;stop taste abfragen
+    cmp #$fe
+    beq lfb5b
+    lda $912c
+    and #$dd
+    tax
+    ora #$20
+    sta $b2
+    stx $912c
+    lda #$80
+    sta $9c
+lfb3d:
+    lda $911f
+    lsr
+    bcc lfb3d
+    and #$01
+    beq lfb67
+    ldx #$6d
+lfb49:
+    bit $911f
+    beq lfb54
+    dex
+    bne lfb49
+    lda #$42
+    .byte $2c      ;bit abs
+lfb54:
+    lda #$40
+    jsr $fe6a      ;set status
+    clc
+    .byte $24      ;bit zp
+lfb5b:             ;stop!
+    sec
+    pla
+    sta $b2
+    bcc mylo_e
 lerr:
-    JMP $F6CB      ;UNLISTEN, CLOSE, BREAK
+    jmp $f6cb      ;unlisten, close, break
 
-lFB67:
-    LDA #$02
-lFB69:
-    BIT $911F
-    BEQ lFB69
-lFB6E:
-    PHA
-    PLA
-    NOP
-    LDA $B2
-    STA $912C
-    LDA #$01
-    BIT $911F
-    BEQ lFB25
-    STX $912C
-    LDA $911F
-    ROR
-    ROR
-    NOP
-    AND #$80
-    ORA $911F
-    ROL
-    ROL
-    NOP
-    STA $B3
-    LDA $911F
-    ROR
-    ROR
-    AND $9C
-    ORA $911F
-    ROL
-    ROL
-    STA $C0
-
-    lda #>(lFB6E -1)    ;Rücksprungadresse auf Stack
+lfb67:
+    lda #$02
+lfb69:
+    bit $911f
+    beq lfb69
+lfb6e:
     pha
-    lda #<(lFB6E -1)
-    pha
-    JSR lEC4E           ;Byte zusammenbauen aus 2 Nibble
+    pla
+    nop
+    lda $b2
+    sta $912c
+    lda #$01
+    bit $911f
+    beq lfb25
+    stx $912c
+    lda $911f
+    ror
+    ror
+    nop
+    and #$80
+    ora $911f
+    rol
+    rol
+    nop
+    sta $b3
+    lda $911f
+    ror
+    ror
+    and $9c
+    ora $911f
+    rol
+    rol
+    sta $c0
 
-STOREBYTE:
-    CPY $93
-    BNE lFBB0
-    STA ($AE),Y
-lFBA7:
-    INC $AE
-    BNE lFB6E
-    INC $AF
-lFB6E:
+    lda #>(lfb6e -1)    ;rücksprungadresse auf stack
+    pha
+    lda #<(lfb6e -1)
+    pha
+    jsr lec4e           ;byte zusammenbauen aus 2 nibble
+
+storebyte:
+    cpy $93
+    bne lfbb0
+    sta ($ae),y
+lfba7:
+    inc $ae
+    bne @n
+    inc $af
+@n:
     rts
 
-lFBB0:              ;VERIFY
-    CMP ($AE),Y
-    BEQ lFBA7
-    LDA #$10        ;VERIFY ERROR
-    STA $90
-    BNE lFBA7       ; (jmp)
+lfbb0:              ;verify
+    cmp ($ae),y
+    beq lfba7
+    lda #$10        ;verify error
+    sta $90
+    bne lfba7       ; (jmp)
 
-;--------------JIFFY FASTLOAD END
+;--------------jiffy fastload end
 
 .ifdef SJSAVE
 
 ; ========================================================================
-; MY SAVE                   ENDADDR   = ($AE/$AF)    STARTADDR = ($C1/$C2)
+; my save                   endaddr   = ($ae/$af)    startaddr = ($c1/$c2)
 ;
-; SAVESTART = $c1
-; LOADPTR   = $c3
-; LOADSTART = $ac
-; LOADEND   = $ae
+; savestart = $c1
+; loadptr   = $c3
+; loadstart = $ac
+; loadend   = $ae
 ; ========================================================================
 
-  ; SAVE VECTOR     :: "fnam",PA,SA[,fromadr,toaddr]
-MY_SAVE:
-    ldx SY_DN       ; PA (device#)
+  ; save vector     :: "fnam",pa,sa[,fromadr,toaddr]
+my_save:
+    ldx sy_dn       ; pa (device#)
     cpx #4
-    bcs MY_IECSAVE
-    jmp $f685       ; OLD LOAD PROC
+    bcs my_iecsave
+    jmp $f685       ; old load proc
 
-MY_IECSAVE:
+my_iecsave:
 
 .ifdef SAVEPARAMS
-    jsr FRMWORD2    ; GET WORD VALUE
-    bcs MYSA_0
+    jsr frmword2    ; get word value
+    bcs mysa_0
 
-    sty LOADSTART
-    sta LOADSTART + 1
+    sty loadstart
+    sta loadstart + 1
 
-    jsr FRMWORD2    ; GET WORD VALUE
-    bcs MYSA_0
+    jsr frmword2    ; get word value
+    bcs mysa_0
 
-    sty LOADEND
-    sta LOADEND + 1
+    sty loadend
+    sta loadend + 1
 
-    ldy LOADSTART
-    lda LOADSTART + 1
-    sty SAVESTART
-    sta SAVESTART + 1
+    ldy loadstart
+    lda loadstart + 1
+    sty savestart
+    sta savestart + 1
 .endif
 
-MYSA_0:
+mysa_0:
     lda #$f1        ; channel
-    jsr DISK_LISTEN
-    jsr IECNAMOUT
-    bcs MYSA_ERR
+    jsr disk_listen
+    jsr iecnamout
+    bcs mysa_err
 
     lda #$61
-    jsr DISK_LISTEN
+    jsr disk_listen
 
-    jsr $fbd2       ; $C1/$C2 --> $ac/$ad
+    jsr $fbd2       ; $c1/$c2 --> $ac/$ad
 
-    lda LOADSTART
-    jsr IECOUT
-    lda LOADSTART + 1
-    jsr IECOUT
+    lda loadstart
+    jsr iecout
+    lda loadstart + 1
+    jsr iecout
 
 .ifdef PRINTADDRESS
-    lda #LOADSTART
-    jsr PRINT_ATADR_2
+    lda #loadstart
+    jsr print_atadr_2
 .else
 .ifdef PRINTMESSAGE
-    jsr $f728       ; Print "SAVING" 
+    jsr $f728       ; print "saving" 
 .endif
 .endif
 
     ldy #0
-MYSA_00:
-    jsr $fd11       ;END ADDRESS?
-    bcs MYSA_E0     ;YES -->
-    lda (LOADSTART),y
-    jsr IECOUT
+mysa_00:
+    jsr $fd11       ;end address?
+    bcs mysa_e0     ;yes -->
+    lda (loadstart),y
+    jsr iecout
 
-    jsr CHKSTOP
-    bne MYSA_02
+    jsr chkstop
+    bne mysa_02
 
-    jsr UNLISTEN
-    jsr DISK_CLOSE_SA
+    jsr unlisten
+    jsr disk_close_sa
     jmp $f6ce
 
-MYSA_02:
-    jsr $fd1b       ;INCR ADDR
-    bne MYSA_00
+mysa_02:
+    jsr $fd1b       ;incr addr
+    bne mysa_00
 
-MYSA_E0:
-    jsr UNLISTEN
-    jsr DISK_CLOSE_SA
+mysa_e0:
+    jsr unlisten
+    jsr disk_close_sa
 
 .ifdef PRINTADDRESS
-    lda #LOADSTART
-    jsr PRINT_TOADR_2
+    lda #loadstart
+    jsr print_toadr_2
 .endif
 
     clc
-MYSA_ERR:
+mysa_err:
     rts
 
 .endif
 
-;PUT NAME TO IEC AND UNLISTEN
-IECNAMOUT:
-    lda IECSTAT
-    bmi DICM_ERR1
+;put name to iec and unlisten
+iecnamout:
+    lda iecstat
+    bmi dicm_err1
 
-    jsr IECNAMOUT_2
-
-
-DICM_OK2:
-    jsr UNLISTEN
+    jsr iecnamout_2
 
 
-DICM_OK:
+dicm_ok2:
+    jsr unlisten
+
+
+dicm_ok:
     clc
     rts
 
-;PUT NAME TO IEC
-IECNAMOUT_2:
-    ldx LEN_FNAM
-    beq DICM_OK2
+;put name to iec
+iecnamout_2:
+    ldx len_fnam
+    beq dicm_ok2
     ldy #0
-DICM_2:
-    lda (PTR_FNAM),y
-    jsr IECOUT
+dicm_2:
+    lda (ptr_fnam),y
+    jsr iecout
     iny
     dex
-    bne DICM_2
+    bne dicm_2
     rts
 
-DICM_ERR1:
-    jmp $f78a       ;ERR 'DEVICE NOT PRESENT'    CF=1
+dicm_err1:
+    jmp $f78a       ;err 'device not present'    cf=1
 
-DISK_LISTEN:
+disk_listen:
     pha
     lda #0
-    sta IECSTAT
-    beq DILI_2
+    sta iecstat
+    beq dili_2
 
-DISK_LISTEN_2:
+disk_listen_2:
     pha
 
-DILI_2:
-    lda SY_DN       ; device#
-    jsr LISTEN
+dili_2:
+    lda sy_dn       ; device#
+    jsr listen
     pla
-    jsr LISTENSA
-DITA_5:
-    lda IECSTAT
-    bpl DICM_OK
+    jsr listensa
+dita_5:
+    lda iecstat
+    bpl dicm_ok
     sec
     rts
 
-DISK_TALK:
+disk_talk:
     pha
     lda #0
-    sta IECSTAT
+    sta iecstat
 
-    lda SY_DN       ; device#
-    jsr TALK
+    lda sy_dn       ; device#
+    jsr talk
     pla
-    jmp TALKSA
+    jmp talksa
 
-DISK_CLOSE_SA:
+disk_close_sa:
     lda #$e1
-    bne DICL_1
+    bne dicl_1
 
-DISK_CLOSE_LO:
-    jsr UNTALK
+disk_close_lo:
+    jsr untalk
     lda #$e0
 
-DICL_1:
-    jsr DISK_LISTEN_2
-    jmp UNLISTEN
+dicl_1:
+    jsr disk_listen_2
+    jmp unlisten
 
 .ifdef LOADPARAMS ; | SAVEPARAMS == 1
-; GET WORD VALUE IN Y/A AND (PT3)
-FRMWORD2:
-    jsr CHKCOM
-    bcs FRWO_3
-FRMWORD:
-    jsr FRMNUM
-    jsr CNVWORD
+; get word value in y/a and (pt3)
+frmword2:
+    jsr chkcom
+    bcs frwo_3
+frmword:
+    jsr frmnum
+    jsr cnvword
     clc
-FRWO_3:
+frwo_3:
     rts
 
 .endif
 
-CHKCOM:
-    jsr CHRGOT
+chkcom:
+    jsr chrgot
     cmp #','
     sec
-    bne CHCO_3
-    jsr CHRGET
+    bne chco_3
+    jsr chrget
     clc
-CHCO_3:
+chco_3:
     rts
 
 .ifdef PRINTADDRESS
 
-  ; PRINT LOAD AT ADDRESS
-PRINT_ATADR:
-    lda #LOADEND
+  ; print load at address
+print_atadr:
+    lda #loadend
 
-PRINT_ATADR_2:
-    ldx DIRECT_MODE
+print_atadr_2:
+    ldx direct_mode
     bmi l1
 lrts:
     rts
 
 l1:
     pha
-    lda #<MSG_LOADAT
-    ldy #>MSG_LOADAT
-    jsr SY_STROUT
+    lda #<msg_loadat
+    ldy #>msg_loadat
+    jsr sy_strout
     pla
 
 hexoutl3:
     tax
-HEXOUT_ZP:
+hexout_zp:
     lda 1,x
     pha
     lda 0,x
     tax
     pla
-    jmp HEXOUT
+    jmp hexout
 
-; PRINT LOAD ADDRESS
-PRINT_TOADR:
-    lda #LOADEND
+; print load address
+print_toadr:
+    lda #loadend
 
-PRINT_TOADR_2:
-    ldx DIRECT_MODE
-    bpl lrts
+print_toadr_2:
+    ldx direct_mode
+    bpl lrts2
 
     pha
-    lda #<MSG_LOADTO
-    ldy #>MSG_LOADTO
-    jsr SY_STROUT
+    lda #<msg_loadto
+    ldy #>msg_loadto
+    jsr sy_strout
     pla
     jsr hexoutl3
 
-CROUT:
+crout:
     lda #13
-    jmp BSOUT
+    jmp bsout
 
-lrts:
+lrts2:
     rts
 
-;------------ PRINT HEX VALUE IN  X/A
-HEXOUT:
+;------------ print hex value in  x/a
+hexout:
     pha
     lda #'$'
-    jsr BSOUT
+    jsr bsout
     pla
-    beq HEX0
-    jsr HEX2
-HEX0:
+    beq hex0
+    jsr hex2
+hex0:
     txa
-HEX2:
+hex2:
     pha
     lsr
     lsr
     lsr
     lsr
-    jsr HEX1
+    jsr hex1
     pla
     and #15
-HEX1:
+hex1:
     clc
     adc #246
-    bcc HEX1_2
+    bcc hex1_2
     adc #6
-HEX1_2:
+hex1_2:
     adc #58
-    jmp BSOUT
+    jmp bsout
 
 ; ==============================================================
-; MESSAGE TEXTE
+; message texte
 ; ==============================================================
 
-MSG_LOADAT: .byte " FROM ",0
-MSG_LOADTO: .byte " TO ",0
+msg_loadat: .byte " from ",0
+msg_loadto: .byte " to ",0
 
 .endif
 
 .ifdef BASIO
 
 ; ==============================================================
-; JIFFY IO CODE (CHKIN, CHKOUT, BASIN, BSOUT)   from SJLOAD-128
+; jiffy io code (chkin, chkout, basin, bsout)   from sjload-128
 ; ==============================================================
 
 ;
-; JIFFY CHKIN    ($031e vector)
+; jiffy chkin    ($031e vector)
 ;
-JChkIn:
+jchkin:
     jsr $f3cf       ;search logical file#
-    beq l1	        ;file not open error
+    beq @l1	        ;file not open error
     jmp $f784       ;err "file not open"
 
-l1:
-    jsr $f3df       ;set file param
-    lda SY_DN       ;device#
+@l1:jsr $f3df       ;set file param
+    lda sy_dn       ;device#
     cmp #8
-    bcs l2
-    jmp $f2d2       ;std. ChkIn
+    bcs @l2
+    jmp $f2d2       ;std. chkin
 
-l2:
-    tax
-    jsr TALK
-    lda SY_SA
-    bpl l3
+@l2:tax
+    jsr talk
+    lda sy_sa
+    bpl @l3
     jmp $f2f8
 
-l3:
-    jsr TALKSA
+@l3:jsr talksa
     jmp $f301
 
 ;
-; JIFFY CHKOUT    ($0320 vector)
+; jiffy chkout    ($0320 vector)
 ;
-JChkOut:
+jchkout:
     jsr $f3cf       ;search logical file#
-    beq l1	        ;file not open error
+    beq @l1	        ;file not open error
     jmp $f784       ;err "file not open"
 
-l1:
-    jsr $f3df       ;set file param
-    lda SY_DN       ;device#
+@l1:jsr $f3df       ;set file param
+    lda sy_dn       ;device#
     cmp #8
-    bcs l2
-    jmp $f314       ;std. ChkOut
+    bcs @l2
+    jmp $f314       ;std. chkout
 
-l2:
-    tax
-    jsr LISTEN
-    lda SY_SA
-    bpl l3
+@l2:tax
+    jsr listen
+    lda sy_sa
+    bpl @l3
     jmp $f33a
 
-l3:
-    jsr LISTENSA
+@l3:jsr listensa
     jmp $f342
 
 ;
-; JIFFY GETIN    ($032a vector)
+; jiffy getin    ($032a vector)
 ;
-JGetIn:
+jgetin:
     lda $99         ;device#
     cmp #8
-    bcs l2
-    jmp $f1f5       ;std. GetIn
+    bcs @l2
+    jmp $f1f5       ;std. getin
 
-l2:                 ; TODO: Double with jbasin ¿ forgot the workaround.
-    lda SY_STATUS
-    beq l3
-    jmp $f268       ;std. IECIN
-l3:
-    jmp JIF_IECIN
+    ; TODO: double with jbasin ¿ forgot the workaround.
+@l2:lda sy_status
+    beq @l3
+    jmp $f268       ;std. iecin
+@l3:jmp jif_iecin
 
 ;
-; JIFFY BASIN    ($0324 vector)
+; jiffy basin    ($0324 vector)
 ;
-JBasIn:
+jbasin:
     lda $99         ;device#
     cmp #8
-    bcs l2
-    jmp $f20e       ;std. BasIn
+    bcs @l2
+    jmp $f20e       ;std. basin
 
-l2:
-    lda SY_STATUS
-    beq l3
-    jmp $f268       ;std. IECIN
+@l2:lda sy_status
+    beq @l3
+    jmp $f268       ;std. iecin
 
-l3:
-    jmp JIF_IECIN
+@l3:jmp jif_iecin
 
 ;
-; JIFFY BASOUT    ($0326 vector)
+; jiffy basout    ($0326 vector)
 ;
-JBasOut:
+jbasout:
     pha
     lda $9a         ;device#
     cmp #8
-    bcs l2
-  jmp $f27b         ;std. BasOut
+    bcs @l2
+    jmp $f27b         ;std. basout
 
-l2:
-    pla
-    jmp JIF_IECOUT
+@l2:pla
+    jmp jif_iecout
 
 ;
-; JIFFY CLRCH / CLRALL    ($0322 / $032c vector)
+; jiffy clrch / clrall    ($0322 / $032c vector)
 ;
-JClrAll:
+jclrall:
     lda #0
     sta $98
 
-JClrCh:
+jclrch:
     ldx #3
     cpx $9a         ;device# out
-    bcs l1
-    jsr JIF_UNLISTEN
-l1:
-    cpx $99         ;device# in
-    bcs l2
-    jsr JIF_UNTALK
-l2:
-    jmp $f403       ;std. ClrAll
+    bcs @l1
+    jsr jif_unlisten
+@l1:cpx $99         ;device# in
+    bcs @l2
+    jsr jif_untalk
+@l2:jmp $f403       ;std. clrall
 .endif

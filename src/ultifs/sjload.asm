@@ -15,7 +15,7 @@
 ;       - removed unused routines to reduce program size (few bytes) 
 ;       - added PRINTMESSAGE, LOADPARAMS and SAVEPARAMS compilation parameters
 ;
-;   ca65 version and reformatting by Sven Michael Klose <pixel@hugbox.org>
+;   Cleaned up ca65 version by Sven Michael Klose <pixel@hugbox.org> in 2022.
 
 .export sjload_init
 
@@ -99,7 +99,7 @@ bip     = $0200     ;basic input buffer 88 bytes
 cas_buf = 828       ;kassetten buffer
 
 sy_strout  = $cb1e  ;string in ac/yr ausgeben
-bsout      = $ffd2
+BSOUT      = $ffd2
 getin      = $ffe4
 
 ptr_error_out   = $0300
@@ -167,11 +167,11 @@ sjload_init:
 ; ==============================================================
 
 ;--------------jiffy listen
-jif_talk:
+jtalk:
     ora #$40
     .byte $2c
 
-jif_listen:
+jlisten:
     ora #$20
     jsr $f160       ;set timer
 
@@ -298,7 +298,7 @@ lf997:
     rts
 
 ;--------------jiffy byte in
-jif_iecin:
+jiecin:
 lfbe0:              ;new byte in??
     sei
     bit $a3
@@ -363,7 +363,7 @@ jiffy_in:
 ;--------------jiffy byte in
 
 ;--------------jiffy byte out
-jif_iecout:
+jiecout:
     bit $94
     bmi leeed
     sec
@@ -487,7 +487,7 @@ lec4e:
 ;--------------jiffy byte in
 
 ;--------------jiffy untalk/unlisten
-jif_untalk:
+juntalk:
 leef6:
     lda $911f
     ora #$80        ;atn ausgeben
@@ -497,7 +497,7 @@ leef6:
     .byte $2c
 
 
-jif_unlisten:
+junlisten:
     lda #$3f
     jsr lee1c       ;part of listen
     jsr $eec5
@@ -513,7 +513,7 @@ lef0f:
 ;--------------jiffy untalk/unlisten
 
 ;--------------jiffy talk sa
-jif_talksa:
+jtalksa:
     sta $95
     jsr lee40
     jmp $eed3
@@ -521,7 +521,7 @@ jif_talksa:
 ;--------------jiffy talk sa
 
 ;--------------jiffy listen sa
-jif_listensa:
+jlistensa:
     sta $95
     jsr lee40
     jmp $eec5
@@ -544,16 +544,6 @@ frmbyte  = $d79e    ; get byte value to x
 cnvword  = $d7f7    ; convert to word value into y/a; $14 (pt3)
 setstat  = $fe6a    ; set status
 chkstop  = $ffe1    ; check stop key
-
-unlisten = jif_unlisten     ; send unlisten command
-untalk   = jif_untalk       ; send untalk command
-listen   = jif_listen       ; send listen command
-talk     = jif_talk         ; send talk command
-iecin    = jif_iecin        ; get char from iec
-iecout   = jif_iecout       ; send char to iec
-
-listensa = jif_listensa     ; send sa for listen command
-talksa   = jif_talksa       ; send sa for talk command
 
     .code
 
@@ -591,7 +581,7 @@ l00b:
     lda #$60
     jsr disk_talk
 
-    jsr iecin       ; load address lo
+    jsr jiecin      ; load address lo
     sta loadend
 
     lda sy_status
@@ -601,7 +591,7 @@ l00b:
     jmp $f787
 
 l00c:
-    jsr iecin       ; load address hi
+    jsr jiecin      ; load address hi
     sta loadend + 1
 
     ldx sy_sa       ; sa
@@ -690,7 +680,7 @@ mylo_e:
 
 ;--------------jiffy fastload init
 lfb1f:
-    jsr untalk     ;untalk
+    jsr juntalk     ;untalk
     lda #$61
     jsr disk_talk
 ;--------------jiffy fastload start
@@ -839,9 +829,9 @@ mysa_0:
     jsr $fbd2       ; $c1/$c2 --> $ac/$ad
 
     lda loadstart
-    jsr iecout
+    jsr jiecout
     lda loadstart + 1
-    jsr iecout
+    jsr jiecout
 
 .ifdef PRINTADDRESS
     lda #loadstart
@@ -857,12 +847,12 @@ mysa_00:
     jsr $fd11       ;end address?
     bcs mysa_e0     ;yes -->
     lda (loadstart),y
-    jsr iecout
+    jsr jiecout
 
     jsr chkstop
     bne mysa_02
 
-    jsr unlisten
+    jsr junlisten
     jsr disk_close_sa
     jmp $f6ce
 
@@ -871,7 +861,7 @@ mysa_02:
     bne mysa_00
 
 mysa_e0:
-    jsr unlisten
+    jsr junlisten
     jsr disk_close_sa
 
 .ifdef PRINTADDRESS
@@ -894,7 +884,7 @@ iecnamout:
 
 
 dicm_ok2:
-    jsr unlisten
+    jsr junlisten
 
 
 dicm_ok:
@@ -908,7 +898,7 @@ iecnamout_2:
     ldy #0
 dicm_2:
     lda (ptr_fnam),y
-    jsr iecout
+    jsr jiecout
     iny
     dex
     bne dicm_2
@@ -928,9 +918,9 @@ disk_listen_2:
 
 dili_2:
     lda sy_dn       ; device#
-    jsr listen
+    jsr jlisten
     pla
-    jsr listensa
+    jsr jlistensa
 dita_5:
     lda iecstat
     bpl dicm_ok
@@ -943,21 +933,21 @@ disk_talk:
     sta iecstat
 
     lda sy_dn       ; device#
-    jsr talk
+    jsr jtalk
     pla
-    jmp talksa
+    jmp jtalksa
 
 disk_close_sa:
     lda #$e1
     bne dicl_1
 
 disk_close_lo:
-    jsr untalk
+    jsr juntalk
     lda #$e0
 
 dicl_1:
     jsr disk_listen_2
-    jmp unlisten
+    jmp junlisten
 
 .ifdef LOADPARAMS ; | SAVEPARAMS == 1
 ; get word value in y/a and (pt3)
@@ -998,8 +988,8 @@ lrts:
 
 l1:
     pha
-    lda #<msg_loadat
-    ldy #>msg_loadat
+    lda #<txt_from
+    ldy #>txt_from
     jsr sy_strout
     pla
 
@@ -1022,24 +1012,24 @@ print_toadr_2:
     bpl lrts2
 
     pha
-    lda #<msg_loadto
-    ldy #>msg_loadto
+    lda #<txt_to
+    ldy #>txt_to
     jsr sy_strout
     pla
     jsr hexoutl3
 
 crout:
     lda #13
-    jmp bsout
+    jmp BSOUT
 
 lrts2:
     rts
 
-;------------ print hex value in  x/a
+;;; Print AX in hexadecimal notation.
 hexout:
     pha
     lda #'$'
-    jsr bsout
+    jsr BSOUT
     pla
     beq hex0
     jsr hex2
@@ -1061,23 +1051,19 @@ hex1:
     adc #6
 hex1_2:
     adc #58
-    jmp bsout
-
-; ==============================================================
-; message texte
-; ==============================================================
+    jmp BSOUT
 
     .rodata
 
-msg_loadat: .byte " from ",0
-msg_loadto: .byte " to ",0
+txt_from:   .byte " from ",0
+txt_to:     .byte " to ",0
 
 .endif
 
 .ifdef FULLKERNAL
 
 ; ==============================================================
-; jiffy io code (chkin, chkout, basin, bsout)   from sjload-128
+; jiffy io code (chkin, chkout, basin, BSOUT)   from sjload-128
 ; ==============================================================
 
     .code
@@ -1097,12 +1083,12 @@ jchkin:
     jmp $f2d2       ;std. chkin
 
 @l2:tax
-    jsr talk
+    jsr jtalk
     lda sy_sa
     bpl @l3
     jmp $f2f8
 
-@l3:jsr talksa
+@l3:jsr jtalksa
     jmp $f301
 
 ;
@@ -1120,12 +1106,12 @@ jchkout:
     jmp $f314       ;std. chkout
 
 @l2:tax
-    jsr listen
+    jsr jlisten
     lda sy_sa
     bpl @l3
     jmp $f33a
 
-@l3:jsr listensa
+@l3:jsr jlistensa
     jmp $f342
 
 ;
@@ -1141,7 +1127,7 @@ jgetin:
 @l2:lda sy_status
     beq @l3
     jmp $f268       ;std. iecin
-@l3:jmp jif_iecin
+@l3:jmp jiecin
 
 ;
 ; jiffy basin    ($0324 vector)
@@ -1156,7 +1142,7 @@ jbasin:
     beq @l3
     jmp $f268       ;std. iecin
 
-@l3:jmp jif_iecin
+@l3:jmp jiecin
 
 ;
 ; jiffy basout    ($0326 vector)
@@ -1169,7 +1155,7 @@ jbasout:
     jmp $f27b         ;std. basout
 
 @l2:pla
-    jmp jif_iecout
+    jmp jiecout
 
 ;
 ; jiffy clrch / clrall    ($0322 / $032c vector)
@@ -1182,9 +1168,9 @@ jclrch:
     ldx #3
     cpx $9a         ;device# out
     bcs @l1
-    jsr jif_unlisten
+    jsr junlisten
 @l1:cpx $99         ;device# in
     bcs @l2
-    jsr jif_untalk
+    jsr juntalk
 @l2:jmp $f403       ;std. clrall
 .endif

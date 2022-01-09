@@ -190,7 +190,6 @@ playback (void)
 char
 exec_action ()
 {
-    char      c;
     unsigned  repetitions;
 
     linelist_goto (linenr);
@@ -201,8 +200,7 @@ exec_action ()
         goto cancel;
 
     if (repetitions) {
-        repetitions--;      // Not very happy about
-                            // this somehow. (pixel)
+        repetitions--;  // Not very happy about this somehow. (pixel)
         while (repetitions--)
             playback ();
     }

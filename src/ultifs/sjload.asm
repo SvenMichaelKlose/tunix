@@ -116,16 +116,15 @@ ptr_basout      = $0326
 ptr_getin       = $032a
 ptr_clrall      = $032c
 
-;-------------------- wedge init
 sjload_init:
-    lda #<my_load
-    ldx #>my_load
+    lda #<jload
+    ldx #>jload
     sta ptr_load
     stx ptr_load + 1
 
 .ifdef SJSAVE
-    lda #<my_save
-    ldx #>my_save
+    lda #<jsave
+    ldx #>jsave
     sta ptr_save
     stx ptr_save + 1
 .endif
@@ -559,7 +558,7 @@ talksa   = jif_talksa       ; send sa for talk command
     .code
 
 ; :: "fnam",pa,sa[,loadadr]
-my_load:
+jload:
     ldx sy_dn       ; pa (device#)
     cpx #4
     bcs l0
@@ -801,23 +800,13 @@ lfbb0:              ;verify
 
 .ifdef SJSAVE
 
-; ========================================================================
-; my save                   endaddr   = ($ae/$af)    startaddr = ($c1/$c2)
-;
-; savestart = $c1
-; loadptr   = $c3
-; loadstart = $ac
-; loadend   = $ae
-; ========================================================================
-
-  ; save vector     :: "fnam",pa,sa[,fromadr,toaddr]
-my_save:
+; save vector     :: "fnam",pa,sa[,fromadr,toaddr]
+jsave:
     ldx sy_dn       ; pa (device#)
     cpx #4
-    bcs my_iecsave
+    bcs @n
     jmp $f685       ; old load proc
-
-my_iecsave:
+@n:
 
 .ifdef SAVEPARAMS
     jsr frmword2    ; get word value
@@ -984,6 +973,7 @@ frwo_3:
 
 .endif
 
+; TODO: Move up into .ifdef.
 chkcom:
     jsr chrgot
     cmp #','

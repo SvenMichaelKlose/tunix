@@ -39,41 +39,38 @@ PRINTMESSAGE    = 0 ; When PRINTADDRESS == 0: Print saving/loading message like 
 
 .endif
 
-pt3     = $14       ;pointer
+ptr         = $14
 
-savestart = $c1
-loadptr   = $c3
-loadstart = $ac
-loadend   = $ae
+CHRGET      = $73     ;get next char
+CHRGOT      = $79     ;get last char
 
-iecstat  = $90
+STATUS      = $90
+VERCK       = $93
+MSGFLG      = $9d    ; Use to check if RUNning a program.
+                     ; TODO: Test if input line is at $0200.
+SAL         = $ac
+EAL         = $ae
+LFN         = $b7
+LA          = $b8
+SA          = $b9
+FA          = $ba
+FNADR       = $bb
 
-len_fnam = $b7
-ptr_fnam = $bb
+STAL        = $c1
+MEMUSS      = $c3
 
-sy_verify   = $93
-sy_status   = $90
-sy_sa       = $b9
-sy_dn       = $ba
-sy_fn       = $b8
+ptr_chkin   = $031e
+ptr_chkout  = $0320
+ptr_clrch   = $0322
+ptr_basin   = $0324
+ptr_basout  = $0326
+ptr_getin   = $032a
+ptr_clrall  = $032c
+ptr_load    = $0330
+ptr_save    = $0332
 
-direct_mode = $9d   ;direct=$80/run=0
-
-chrget  = $0073     ;get next char
-chrgot  = $0079     ;get last char
-
-sy_strout  = $cb1e  ;string in ac/yr ausgeben
-BSOUT      = $ffd2
-
-ptr_chkin       = $031e
-ptr_chkout      = $0320
-ptr_clrch       = $0322
-ptr_basin       = $0324
-ptr_basout      = $0326
-ptr_getin       = $032a
-ptr_clrall      = $032c
-ptr_load        = $0330
-ptr_save        = $0332
+sy_strout   = $cb1e  ;string in ac/yr ausgeben
+BSOUT       = $ffd2
 
 sjload_init:
     lda #<jload
@@ -500,7 +497,7 @@ lf39e:  .byte $00,$20,$00,$20,$02,$22,$02,$22,$00,$20,$00,$20,$02,$22,$02,$22
 
 frmnum   = $cd8a    ; get numeric value
 frmbyte  = $d79e    ; get byte value to x
-cnvword  = $d7f7    ; convert to word value into y/a; $14 (pt3)
+cnvword  = $d7f7    ; convert to word value into y/a; $14 (ptr)
 setstat  = $fe6a    ; set status
 chkstop  = $ffe1    ; check stop key
 
@@ -508,14 +505,15 @@ chkstop  = $ffe1    ; check stop key
 
 ; :: "fnam",pa,sa[,loadadr]
 jload:
-    ldx sy_dn       ; pa (device#)
+    ldx FA       ; pa (device#)
     cpx #4
-    bcs l0
+    bcs @dont_verify
     jmp $f549       ; old load proc
 
-l0: sta sy_verify
+@dont_verify:
+    sta VERCK
     lda #0
-    sta sy_fn       ; file# - flag for first byte
+    sta LA       ; file# - flag for first byte
 
 .ifndef PRINTADDRESS 
 .ifdef PRINTMESSAGE
@@ -541,9 +539,9 @@ l00b:
     jsr disk_talk
 
     jsr jiecin      ; load address lo
-    sta loadend
+    sta EAL
 
-    lda sy_status
+    lda STATUS
     lsr
     lsr
     bcc l00c
@@ -551,9 +549,9 @@ l00b:
 
 l00c:
     jsr jiecin      ; load address hi
-    sta loadend + 1
+    sta EAL + 1
 
-    ldx sy_sa       ; sa
+    ldx SA       ; sa
 .ifdef LOADPARAMS
     beq l00         ; sa=0 -->
     dex
@@ -564,7 +562,7 @@ l00c:
 .ifdef LOADPARAMS
 l02:                ; sa=2: load cartridge at $c3
     pha
-    lda loadend
+    lda EAL
     pha             ; first two bytes ...
 .endif
 
@@ -573,19 +571,19 @@ l00:                ; sa=0: load program at $c3
     jsr frmword2    ; get word value
 .endif
 
-    lda loadptr + 1
-    ldx loadptr
+    lda MEMUSS + 1
+    ldx MEMUSS
 .ifdef LOADPARAMS
     bcs l2
 
-    lda pt3 + 1
-    ldx pt3
+    lda ptr + 1
+    ldx ptr
 
 l2:
 .endif
 
-    sta loadend + 1
-    stx loadend
+    sta EAL + 1
+    stx EAL
 
 l01:
 .ifdef PRINTADDRESS
@@ -596,7 +594,7 @@ l01:
 .endif
 .endif
 
-    ldx sy_sa      ; sa
+    ldx SA      ; sa
 
 .ifdef LOADPARAMS
 
@@ -633,8 +631,8 @@ mylo_e:
     jsr disk_close_lo
 
     clc
-    ldx loadend
-    ldy loadend + 1
+    ldx EAL
+    ldy EAL + 1
     rts
 
 ;--------------jiffy fastload init
@@ -751,7 +749,7 @@ lfbb0:              ;verify
 
 ; save vector     :: "fnam",pa,sa[,fromadr,toaddr]
 jsave:
-    ldx sy_dn       ; pa (device#)
+    ldx FA       ; pa (device#)
     cpx #4
     bcs @n
     jmp $f685       ; old load proc
@@ -761,19 +759,19 @@ jsave:
     jsr frmword2    ; get word value
     bcs mysa_0
 
-    sty loadstart
-    sta loadstart + 1
+    sty SAL
+    sta SAL + 1
 
     jsr frmword2    ; get word value
     bcs mysa_0
 
-    sty loadend
-    sta loadend + 1
+    sty EAL
+    sta EAL + 1
 
-    ldy loadstart
-    lda loadstart + 1
-    sty savestart
-    sta savestart + 1
+    ldy SAL
+    lda SAL + 1
+    sty STAL
+    sta STAL + 1
 .endif
 
 mysa_0:
@@ -787,13 +785,13 @@ mysa_0:
 
     jsr $fbd2       ; $c1/$c2 --> $ac/$ad
 
-    lda loadstart
+    lda SAL
     jsr jiecout
-    lda loadstart + 1
+    lda SAL + 1
     jsr jiecout
 
 .ifdef PRINTADDRESS
-    lda #loadstart
+    lda #SAL
     jsr print_atadr_2
 .else
 .ifdef PRINTMESSAGE
@@ -805,7 +803,7 @@ mysa_0:
 mysa_00:
     jsr $fd11       ;end address?
     bcs mysa_e0     ;yes -->
-    lda (loadstart),y
+    lda (SAL),y
     jsr jiecout
 
     jsr chkstop
@@ -824,7 +822,7 @@ mysa_e0:
     jsr disk_close_sa
 
 .ifdef PRINTADDRESS
-    lda #loadstart
+    lda #SAL
     jsr print_toadr_2
 .endif
 
@@ -836,7 +834,7 @@ mysa_err:
 
 ;put name to iec and unlisten
 iecnamout:
-    lda iecstat
+    lda STATUS
     bmi dicm_err1
 
     jsr iecnamout_2
@@ -852,11 +850,11 @@ dicm_ok:
 
 ;put name to iec
 iecnamout_2:
-    ldx len_fnam
+    ldx LFN
     beq dicm_ok2
     ldy #0
 dicm_2:
-    lda (ptr_fnam),y
+    lda (FNADR),y
     jsr jiecout
     iny
     dex
@@ -869,19 +867,19 @@ dicm_err1:
 disk_listen:
     pha
     lda #0
-    sta iecstat
+    sta STATUS
     beq dili_2
 
 disk_listen_2:
     pha
 
 dili_2:
-    lda sy_dn       ; device#
+    lda FA       ; device#
     jsr jlisten
     pla
     jsr jlistensa
 dita_5:
-    lda iecstat
+    lda STATUS
     bpl dicm_ok
     sec
     rts
@@ -889,9 +887,9 @@ dita_5:
 disk_talk:
     pha
     lda #0
-    sta iecstat
+    sta STATUS
 
-    lda sy_dn       ; device#
+    lda FA       ; device#
     jsr jtalk
     pla
     jmp jtalksa
@@ -908,8 +906,17 @@ dicl_1:
     jsr disk_listen_2
     jmp junlisten
 
-.ifdef LOADPARAMS ; | SAVEPARAMS == 1
-; get word value in y/a and (pt3)
+.ifdef LOADPARAMS
+LSPARAMS = 1
+.endif
+.ifdef SAVEPARAMS
+.ifndef LSPARAMS
+LSPARAMS = 1
+.endif
+.endif
+
+.ifdef LSPARAMS
+; get word value in y/a and (ptr)
 frmword2:
     jsr chkcom
     bcs frwo_3
@@ -919,16 +926,15 @@ frmword:
     clc
 frwo_3:
     rts
-
 .endif
 
-; TODO: Move up into .ifdef.
+; TODO: Inline.
 chkcom:
-    jsr chrgot
+    jsr CHRGOT
     cmp #','
     sec
     bne chco_3
-    jsr chrget
+    jsr CHRGET
     clc
 chco_3:
     rts
@@ -937,10 +943,10 @@ chco_3:
 
   ; print load at address
 print_atadr:
-    lda #loadend
+    lda #EAL
 
 print_atadr_2:
-    ldx direct_mode
+    ldx MSGFLG
     bmi l1
 lrts:
     rts
@@ -964,10 +970,10 @@ hexout_zp:
 
 ; print load address
 print_toadr:
-    lda #loadend
+    lda #EAL
 
 print_toadr_2:
-    ldx direct_mode
+    ldx MSGFLG
     bpl lrts2
 
     pha
@@ -1036,14 +1042,14 @@ jchkin:
     jmp $f784       ;err "file not open"
 
 @l1:jsr $f3df       ;set file param
-    lda sy_dn       ;device#
+    lda FA       ;device#
     cmp #8
     bcs @l2
     jmp $f2d2       ;std. chkin
 
 @l2:tax
     jsr jtalk
-    lda sy_sa
+    lda SA
     bpl @l3
     jmp $f2f8
 
@@ -1059,14 +1065,14 @@ jchkout:
     jmp $f784       ;err "file not open"
 
 @l1:jsr $f3df       ;set file param
-    lda sy_dn       ;device#
+    lda FA       ;device#
     cmp #8
     bcs @l2
     jmp $f314       ;std. chkout
 
 @l2:tax
     jsr jlisten
-    lda sy_sa
+    lda SA
     bpl @l3
     jmp $f33a
 
@@ -1083,7 +1089,7 @@ jgetin:
     jmp $f1f5       ;std. getin
 
     ; TODO: double with jbasin ¿ forgot the workaround.
-@l2:lda sy_status
+@l2:lda STATUS
     beq @l3
     jmp $f268       ;std. iecin
 @l3:jmp jiecin
@@ -1097,7 +1103,7 @@ jbasin:
     bcs @l2
     jmp $f20e       ;std. basin
 
-@l2:lda sy_status
+@l2:lda STATUS
     beq @l3
     jmp $f268       ;std. iecin
 

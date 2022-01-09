@@ -50,7 +50,6 @@ cmd_delete_till_line_end ()
 void
 cmd_delete_char ()
 {
-    linelist_goto (linenr);
     linelist_line_to_buf ();
     linebuf_delete_char (xpos);
     linelist_buf_to_line ();
@@ -68,7 +67,6 @@ cmd_replace_char ()
         return;
     }
 
-    linelist_goto (linenr);
     linelist_line_to_buf ();
     linebuf_replace_char (xpos, c);
     linelist_buf_to_line ();

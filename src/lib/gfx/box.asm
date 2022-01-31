@@ -14,7 +14,14 @@ tmp:    .byte 0
 ; In: xpos, ypos, width, height
 
 .proc box
-    dec width
+    lda width
+    beq exit
+    lda height
+    bne l3
+exit:
+    rts
+
+l3: dec width
 
     jsr add_region_position
     lda xpos
@@ -89,7 +96,6 @@ done:
     sta width
     pla
     sta xpos
-rts
     jmp sub_region_position
 
 single_column:

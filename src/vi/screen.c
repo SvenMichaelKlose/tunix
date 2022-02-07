@@ -100,12 +100,23 @@ screen_set_status (char * msg)
 }
 
 void
+update_screen_offset ()
+{
+    if (ystart > linenr)
+        ystart = linenr;
+    else if ((ystart + rows - 2) < linenr)
+        ystart = linenr - rows + 2;
+}
+
+void
 screen_redraw ()
 {
-    line      * l = linelist_get (0); //ystart + linenr);
+    line      * l;
     unsigned    y;
 
+    update_screen_offset ();
     disable_cursor ();
+    l = linelist_get (ystart);
 
     for (y = 0; y < rows - 1; y++) {
         gotoxy (0, y);

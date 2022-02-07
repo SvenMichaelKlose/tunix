@@ -173,7 +173,6 @@ n:
     sta pencil_mode
     asl
     tax
-    dex
     stx width
     asl
     sta height

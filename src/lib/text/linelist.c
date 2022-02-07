@@ -82,7 +82,7 @@ linelist_get (unsigned i)
 }
 
 void
-linelist_buf_to_line ()
+buf_to_linelist ()
 {
     char * data;
 

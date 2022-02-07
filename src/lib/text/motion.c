@@ -3,6 +3,7 @@
 
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/lineedit/liblineedit.h>
+#include <lib/term/libterm.h>
 
 #include "linelist.h"
 #include "motion.h"

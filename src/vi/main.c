@@ -190,11 +190,12 @@ playback (void)
 char
 exec_action ()
 {
-    unsigned  repetitions;
+    unsigned  repetitions = 0;
 
     linelist_goto (linenr);
 
-    repetitions = get_repetitions ();
+    if (peek_key () != '0')
+        repetitions = get_repetitions ();
 
     if (exec_single_command ())
         goto cancel;

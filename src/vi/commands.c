@@ -52,7 +52,7 @@ cmd_delete_char ()
 {
     linelist_line_to_buf ();
     linebuf_delete_char (xpos);
-    linelist_buf_to_line ();
+    buf_to_linelist ();
     adjust_xpos_to_line_length ();
 }
 
@@ -69,7 +69,7 @@ cmd_replace_char ()
 
     linelist_line_to_buf ();
     linebuf_replace_char (xpos, c);
-    linelist_buf_to_line ();
+    buf_to_linelist ();
 }
 
 void

@@ -79,7 +79,7 @@ lineedit_mode (void)
     }
 
 done:
-    linelist_buf_to_line ();
+    buf_to_linelist ();
 
     return key;
 }

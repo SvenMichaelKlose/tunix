@@ -28,7 +28,7 @@ extern line * current_line;
 
 extern void                 linelist_init           (void);
 extern line *               linelist_get            (unsigned);
-extern void                 linelist_buf_to_line    (void);
+extern void                 buf_to_linelist    (void);
 extern void                 linelist_line_to_buf    (void);
 extern void    __fastcall__ linelist_goto           (unsigned);
 extern void                 linelist_delete         (void);

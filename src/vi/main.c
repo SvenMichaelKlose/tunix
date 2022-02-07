@@ -226,9 +226,8 @@ toplevel (void)
             get_key ();
             unlog_key ();
             playback ();
-        } else
-            if (exec_action ())
-                keyboard_init ();
+        } else if (exec_action ())
+            keyboard_init ();
 
         screen_redraw ();
     }

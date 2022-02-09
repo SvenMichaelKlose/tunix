@@ -24,6 +24,7 @@ typedef struct _command {
     voidfun  fun;
 } command;
 
+// After these edit_mode() is called.
 command edit_commands[] = {
     { 'i', do_nothing },
     { 'I', move_line_begin },

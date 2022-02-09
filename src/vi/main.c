@@ -60,12 +60,9 @@ command modify_commands[] = {
 };
 
 char
-lineedit_mode (void)
+input (void)
 {
     char key;
-
-    linelist_goto (linenr);
-    linelist_line_to_buf ();
 
     while (1) {
         switch (key = get_key ()) {
@@ -81,20 +78,24 @@ lineedit_mode (void)
     }
 
 done:
-    buf_to_linelist ();
-
     return key;
 }
 
 void
 edit_mode (void)
 {
+    char c;
     screen_set_status ("-- INSERT --");
 
     while (1) {
         screen_redraw ();
 
-        switch (lineedit_mode ()) {
+        linelist_goto (linenr);
+        linelist_line_to_buf ();
+        c = input ();
+        buf_to_linelist ();
+
+        switch (c) {
             case TTY_ENTER:
                 cmd_enter ();
                 continue;
@@ -215,6 +216,13 @@ cancel:
     return CANCELLED;
 }
 
+
+void
+exec_complex (void)
+{
+
+}
+
 // Top level controlling keyboard logging
 // and triggering playback.
 void
@@ -225,7 +233,9 @@ toplevel (void)
     while (1) {
         c = peek_key ();
 
-        if (has_logged_keys () && c == '.') {
+        if (c == ':')
+            exec_complex ();
+        else if (has_logged_keys () && c == '.') {
             get_key ();
             unlog_key ();
             playback ();

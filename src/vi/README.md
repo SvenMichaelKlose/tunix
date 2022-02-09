@@ -26,6 +26,7 @@ o: Open line below.
 O: Open line above.
 a: Insert past current character.
 A: Append to line.
+C: Change till end of line.
 s: Delete char and insert.
 
 ## Modifying commands

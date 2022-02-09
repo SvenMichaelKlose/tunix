@@ -31,6 +31,7 @@ command edit_commands[] = {
     { 'O', cmd_open_above },
     { 'a', move_right },
     { 'A', move_line_end },
+    { 'C', cmd_change_till_line_end },
     { 's', cmd_delete_char },
     { 0, NULL }
 };

@@ -40,6 +40,13 @@ cmd_enter ()
 }
 
 void
+cmd_change_till_line_end ()
+{
+    cmd_delete_till_line_end ();
+    move_line_end ();
+}
+
+void
 cmd_delete_till_line_end ()
 {
     current_line->length = xpos;

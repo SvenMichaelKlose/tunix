@@ -59,6 +59,11 @@ command modify_commands[] = {
     { 0, NULL }
 };
 
+command complex_commands[] = {
+    { 'w', cmd_write_file },
+    { 0, NULL }
+};
+
 char
 input (void)
 {
@@ -220,11 +225,19 @@ cancel:
 void
 exec_complex (void)
 {
-    unsigned oldx = xpos;
+    unsigned  oldx = xpos;
+    char      c;
+    voidfun   f;
 
     lineedit_init ();
     ypos = 23;  // TODO: Fetch dynamic height.
-    input ();
+    c = input ();
+
+    if (c == TTY_ENTER) {
+        f = get_command_fun (complex_commands, linebuf[1]);
+        if (f)
+            f ();
+    }
 
     xpos = oldx;
 }

@@ -90,3 +90,9 @@ cmd_join ()
     linelist_join ();
     xpos = len;
 }
+
+void
+cmd_write_file ()
+{
+    term_puts ("WRITE FILE");
+}

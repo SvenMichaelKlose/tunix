@@ -12,6 +12,8 @@
 char columns = 40;
 char rows = 24;
 
+unsigned char ypos = 0;
+
 unsigned ystart;
 char * status = "";
 
@@ -27,7 +29,7 @@ gotoxy (char x, char y)
 void
 set_cursor (void)
 {
-    gotoxy (xpos, linenr - ystart);
+    gotoxy (xpos, ypos);
 }
 
 void
@@ -58,7 +60,7 @@ void
 linebuf_redraw ()
 {
     disable_cursor ();
-    gotoxy (0, linenr - ystart);
+    gotoxy (0, ypos);
     term_put (TERM_CARRIAGE_RETURN);
 
     print_linebuf ();
@@ -136,6 +138,7 @@ screen_redraw ()
     }
 
     print_status ();
+    ypos = linenr - ystart;
     set_cursor ();
     enable_cursor ();
 }

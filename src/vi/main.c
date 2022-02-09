@@ -220,7 +220,13 @@ cancel:
 void
 exec_complex (void)
 {
+    unsigned oldx = xpos;
 
+    lineedit_init ();
+    ypos = 23;  // TODO: Fetch dynamic height.
+    input ();
+
+    xpos = oldx;
 }
 
 // Top level controlling keyboard logging
@@ -246,7 +252,7 @@ toplevel (void)
     }
 }
 
-int
+void
 main (void)
 {
     term_init ();

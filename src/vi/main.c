@@ -233,7 +233,7 @@ exec_complex (void)
     voidfun   f;
 
     lineedit_init ();
-    ypos = 23;  // TODO: Fetch dynamic height.
+    ypos = rows - 1;
     c = input ();
 
     if (c == TTY_ENTER) {

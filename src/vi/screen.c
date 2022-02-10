@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/term/libterm.h>
@@ -94,11 +95,16 @@ print_status ()
     enable_cursor ();
 }
 
+char txt_memleft[16];
+
 void
 screen_set_status (char * msg)
 {
     status = msg;
     print_status ();
+    sprintf (txt_memleft, "%D", _heapmemavail ());
+    gotoxy (35, rows - 2);
+    term_puts (txt_memleft);
 }
 
 void
@@ -106,8 +112,8 @@ update_screen_offset ()
 {
     if (ystart > linenr)
         ystart = linenr;
-    else if ((ystart + rows - 2) < linenr)
-        ystart = linenr - rows + 2;
+    else if ((ystart + rows - 3) < linenr)
+        ystart = linenr - rows + 3;
 }
 
 void
@@ -120,7 +126,7 @@ screen_redraw ()
     disable_cursor ();
     l = linelist_get (ystart);
 
-    for (y = 0; y < rows - 1; y++) {
+    for (y = 0; y < rows - 2; y++) {
         gotoxy (0, y);
 
         if (l) {
@@ -131,7 +137,7 @@ screen_redraw ()
 
         term_put (TERM_CLEAR_TO_EOL);
 
-        if (y < rows - 1) {
+        if (y < rows - 2) {
             term_put (TERM_CARRIAGE_RETURN);
             term_put (TERM_LINE_FEED);
         }

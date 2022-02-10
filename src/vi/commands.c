@@ -16,6 +16,8 @@
 #include "keyboard.h"
 
 
+char * filename = NULL;
+
 char * passphrase = NULL;
 unsigned char passphrase_length;
 unsigned char passphrase_index;
@@ -146,7 +148,14 @@ cmd_write_file ()
     line * l = first_line;
     char err;
     unsigned i;
+    char * fn;
 
+    if (linebuf_length == 2 && !filename) {
+        gotoxy (0, 23);
+        term_puts ("File name missing.");
+        wait4user ();
+        return;
+    }
     linebuf[linebuf_length] = 0;
     passphrase_index = 0;
 

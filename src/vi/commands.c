@@ -133,8 +133,6 @@ cmd_write_file ()
     wait4user ();
 }
 
-char msg[256];
-
 void
 cmd_read_file ()
 {
@@ -168,18 +166,8 @@ cmd_read_file ()
 
         while (1) {
             c = cbm_k_basin ();
-            if (cbm_k_readst ()) {
-                sprintf (msg, "%D %D", (int) c, cbm_k_readst ());
-                screen_set_status (msg);
+            if (cbm_k_readst ())
                 goto all_read;
-            }
-/*
-            if (len == -1) {
-                screen_set_status ("Read error");
-                wait4user ();
-                goto done;
-            }
-*/
             if (c == 10)
                 break;
             if (c == 13)

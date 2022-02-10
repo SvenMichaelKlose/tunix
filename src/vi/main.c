@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <cbm.h>
 
@@ -197,6 +198,8 @@ playback (void)
     stop_playback ();
 }
 
+char msg[256]; // TODO: Remove.
+
 // Do an action with optional number of repitions prefixed.
 char
 exec_action ()
@@ -212,6 +215,9 @@ exec_action ()
         goto cancel;
 
     if (repetitions) {
+        sprintf (msg, "%D reps", repetitions);
+        gotoxy (0, rows - 2);
+        term_puts (msg);
         repetitions--;  // Not very happy about this somehow. (pixel)
         while (repetitions--)
             playback ();

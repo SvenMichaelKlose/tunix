@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdlib.h>
 
 #include <cbm.h>
 
@@ -270,6 +271,11 @@ toplevel (void)
 void
 main (void)
 {
+    // TODO: Check if memory expansion is there.
+    _heapadd ((void *) 0x400, 0xc00);   /* +3K */
+    _heapadd ((void *) 0x9800, 0x800);  /* IO2,3 */
+    _heapadd ((void *) 0xa000, 0x2000); /* BANK5 */
+
     term_init ();
     linelist_init ();
     screen_init ();

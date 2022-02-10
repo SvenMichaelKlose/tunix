@@ -125,6 +125,7 @@ cmd_set_passphrase ()
     passphrase = malloc (passphrase_length);
     memcpy (passphrase, &linebuf[2], linebuf_length);
     term_puts ("Passphrase set.");
+    term_put (TERM_CLEAR_TO_EOL);
     wait4user ();
 }
 

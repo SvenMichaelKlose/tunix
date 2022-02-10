@@ -44,6 +44,8 @@ x: Delete character.
 
 ## File commands
 
+These commands cannot be repeated.
+
 :wNAME Write file.
 :rNAME Read file.
 :kPASSPHRASE Set passphrase for reading/writing files.

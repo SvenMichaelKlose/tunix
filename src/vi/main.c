@@ -61,6 +61,7 @@ command modify_commands[] = {
 
 command complex_commands[] = {
     { 'w', cmd_write_file },
+    { 'r', cmd_read_file },
     { 0, NULL }
 };
 

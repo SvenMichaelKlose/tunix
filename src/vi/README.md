@@ -45,6 +45,7 @@ x: Delete character.
 ## File commands
 
 :wNAME Write file.
+:rNAME Read file.
 
 # For developers
 

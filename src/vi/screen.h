@@ -3,9 +3,9 @@
 
 extern unsigned char ypos;
 
-extern void gotoxy (char x, char y);
-extern void screen_init     (void);
-extern void screen_redraw   (void);
+extern void              gotoxy (char x, char y);
+extern void              screen_init     (void);
+extern void              screen_redraw   (void);
 extern void __fastcall__ screen_set_status  (char * msg);
 
 #endif // #ifndef SCREEN_H

@@ -113,8 +113,7 @@ cmd_write_file ()
         gotoxy (0, 23);
         term_puts ("Cannot open file '");
         term_puts (&linebuf[2]);
-        term_puts ("':\n\r");
-        term_puts (strerror (errno));
+        term_puts ("'.\n\r");
         wait4user ();
         return;
     }
@@ -132,4 +131,88 @@ cmd_write_file ()
     term_puts (&linebuf[2]);
     term_puts ("'.");
     wait4user ();
+}
+
+char msg[256];
+
+void
+cmd_read_file ()
+{
+    char *    data = malloc (1024);
+    char *    p;
+    line *    l;
+    int       len;
+    char      c;
+    char      err;
+
+    linebuf[linebuf_length] = 0;
+
+    gotoxy (0, 23);
+    if (err = cbm_open (2, 8, 2, &linebuf[2])) {
+        term_puts ("Cannot open file '");
+        term_puts (&linebuf[2]);
+        term_puts ("'.\n\r");
+        wait4user ();
+        goto done;
+    }
+
+    linelist_clear ();
+    free (first_line);
+    current_line = first_line = NULL;
+    num_lines = 0;
+
+    screen_set_status ("Reading...");
+    cbm_k_chkin (2);
+    while (1) {
+        p = data;
+
+        while (1) {
+            c = cbm_k_basin ();
+            if (cbm_k_readst ()) {
+                sprintf (msg, "%D %D", (int) c, cbm_k_readst ());
+                screen_set_status (msg);
+                goto all_read;
+            }
+/*
+            if (len == -1) {
+                screen_set_status ("Read error");
+                wait4user ();
+                goto done;
+            }
+*/
+            if (c == 10)
+                break;
+            if (c == 13)
+                continue;
+
+            *p++ = c;
+        }
+
+        len = p - data;
+
+        l = line_alloc ();
+
+        if (!first_line)
+            first_line = l;
+
+        l->data = malloc (len);
+        l->length = len;
+        memcpy (l->data, data, len);
+
+        if (current_line) {
+            current_line->next = l;
+            l->prev = current_line;
+        }
+        current_line = l;
+
+        num_lines++;
+    }
+
+all_read:
+    current_line = first_line;
+
+done:
+    cbm_close (2);
+    free (data);
+    screen_set_status ("");
 }

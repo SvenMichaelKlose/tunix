@@ -17,8 +17,7 @@ line_alloc ()
 {
     line * l = malloc (sizeof (line));
 
-    l->prev = l->next = NULL;
-    l->data = NULL;
+    l->prev = l->next = l->data = NULL;
     l->length = 0;
 
     return l;
@@ -166,4 +165,18 @@ linelist_init ()
     first_line = current_line = line_alloc ();
     linenr = 0;
     num_lines = 1;
+}
+
+void
+linelist_clear ()
+{
+    line * l = first_line;
+
+    while (l) {
+        free (l->data);
+        free (l);
+        l = l->next;
+    }
+
+    linelist_init ();
 }

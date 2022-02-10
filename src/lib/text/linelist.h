@@ -23,12 +23,15 @@ typedef struct _line {
     unsigned  length;
 } line;
 
+extern line * first_line;
 extern line * current_line;
 
 
+extern line *               line_alloc (void);
+
 extern void                 linelist_init           (void);
 extern line *               linelist_get            (unsigned);
-extern void                 buf_to_linelist    (void);
+extern void                 buf_to_linelist         (void);
 extern void                 linelist_line_to_buf    (void);
 extern void    __fastcall__ linelist_goto           (unsigned);
 extern void                 linelist_delete         (void);
@@ -36,5 +39,6 @@ extern void                 linelist_insert_before  (void);
 extern void                 linelist_insert_after   (void);
 extern void                 linelist_split          (void);
 extern void                 linelist_join           (void);
+extern void                 linelist_clear          (void);
 
 #endif // #ifndef LINELIST_H

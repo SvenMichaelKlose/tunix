@@ -10,5 +10,6 @@ extern void cmd_delete_char   (void);
 extern void cmd_replace_char  (void);
 extern void cmd_join          (void);
 extern void cmd_write_file    (void);
+extern void cmd_read_file     (void);
 
 #endif // #ifndef COMMANDS_H

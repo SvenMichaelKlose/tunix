@@ -161,14 +161,12 @@ cmd_read_file ()
 
     screen_set_status ("Reading...");
     cbm_k_chkin (2);
-    while (1) {
+    while (!cbm_k_readst ()) {
         p = data;
 
         while (1) {
             c = cbm_k_basin ();
-            if (cbm_k_readst ())
-                goto all_read;
-            if (c == 10)
+            if (cbm_k_readst () || c == 10)
                 break;
             if (c == 13)
                 continue;
@@ -196,7 +194,6 @@ cmd_read_file ()
         num_lines++;
     }
 
-all_read:
     current_line = first_line;
 
 done:

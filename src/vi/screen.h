@@ -2,6 +2,8 @@
 #define SCREEN_H
 
 extern unsigned char ypos;
+extern char columns;
+extern char rows;
 
 extern void              gotoxy (char x, char y);
 extern void              screen_init     (void);

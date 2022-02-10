@@ -46,6 +46,7 @@ x: Delete character.
 
 :wNAME Write file.
 :rNAME Read file.
+:kPASSPHRASE Set passphrase for reading/writing files.
 
 # For developers
 

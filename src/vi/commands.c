@@ -16,6 +16,10 @@
 #include "keyboard.h"
 
 
+char * passphrase = NULL;
+unsigned char passphrase_length;
+unsigned char passphrase_index;
+
 void
 wait4user (void)
 {
@@ -102,12 +106,48 @@ cmd_join ()
 }
 
 void
+cmd_set_passphrase ()
+{
+    gotoxy (0, 23);
+
+    if (passphrase) {
+        free (passphrase);
+        passphrase = NULL;
+    }
+
+    if (linebuf_length == 2) {
+        term_puts ("Passphrase deleted.");
+        wait4user ();
+        return;
+    }
+
+    passphrase_length = linebuf_length - 2;
+    passphrase = malloc (passphrase_length);
+    memcpy (passphrase, &linebuf[2], linebuf_length);
+    term_puts ("Passphrase set.");
+    wait4user ();
+}
+
+char
+encrypt (char c)
+{
+    if (passphrase) {
+        c ^= passphrase[passphrase_index++];
+        passphrase_index %= passphrase_length;
+    }
+
+    return c;
+}
+
+void
 cmd_write_file ()
 {
     line * l = first_line;
     char err;
+    unsigned i;
 
     linebuf[linebuf_length] = 0;
+    passphrase_index = 0;
 
     if (err = cbm_open (1, 8, 1, &linebuf[2])) {
         gotoxy (0, 23);
@@ -118,16 +158,22 @@ cmd_write_file ()
         return;
     }
 
+    cbm_k_ckout (1);
     while (l) {
-        cbm_write (1, l->data, l->length);
-        cbm_write (1, "\n", 1);
+        for (i = 0; i < l->length; i++)
+            cbm_k_bsout (encrypt (l->data[i]));
+
+        cbm_k_bsout (encrypt (10));
         l = l->next;
     }
 
     cbm_close (1);
 
     gotoxy (0, 23);
-    term_puts ("Wrote file '");
+    term_puts ("Wrote ");
+    if (passphrase)
+        term_puts ("ENCRYPTED ");
+    term_puts ("file '");
     term_puts (&linebuf[2]);
     term_puts ("'.");
     wait4user ();
@@ -144,6 +190,7 @@ cmd_read_file ()
     char      err;
 
     linebuf[linebuf_length] = 0;
+    passphrase_index = 0;
 
     gotoxy (0, 23);
     if (err = cbm_open (2, 8, 2, &linebuf[2])) {
@@ -165,7 +212,7 @@ cmd_read_file ()
         p = data;
 
         while (1) {
-            c = cbm_k_basin ();
+            c = encrypt (cbm_k_basin ());
             if (cbm_k_readst () || c == 10)
                 break;
             if (c == 13)

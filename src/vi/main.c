@@ -62,6 +62,7 @@ command modify_commands[] = {
 command complex_commands[] = {
     { 'w', cmd_write_file },
     { 'r', cmd_read_file },
+    { 'k', cmd_set_passphrase },
     { 0, NULL }
 };
 

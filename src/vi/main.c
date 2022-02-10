@@ -194,18 +194,22 @@ void
 playback (void)
 {
     start_playback ();
-    exec_action ();
+    exec_single_command ();
     stop_playback ();
 }
 
 char msg[256]; // TODO: Remove.
 
+unsigned repetitions = 0;
+
 // Do an action with optional number of repitions prefixed.
 char
 exec_action ()
 {
-    unsigned  repetitions = 0;
+    unsigned i;
 
+    reset_log ();
+    repetitions = 0;
     linelist_goto (linenr);
 
     if (peek_key () != '0')
@@ -215,11 +219,10 @@ exec_action ()
         goto cancel;
 
     if (repetitions) {
-        sprintf (msg, "%D reps", repetitions);
+        sprintf (msg, "%D reps, %D log", repetitions, keylog_index);
         gotoxy (0, rows - 2);
         term_puts (msg);
-        repetitions--;  // Not very happy about this somehow. (pixel)
-        while (repetitions--)
+        for (i = 1; i < repetitions; i++)
             playback ();
     }
 
@@ -241,6 +244,7 @@ exec_complex (void)
     lineedit_init ();
     ypos = rows - 1;
     c = input ();
+    reset_log ();
 
     if (c == TTY_ENTER) {
         f = get_command_fun (complex_commands, linebuf[1]);

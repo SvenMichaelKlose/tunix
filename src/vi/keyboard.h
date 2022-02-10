@@ -1,6 +1,10 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
+// TODO: Remove
+extern char       keylog[256];
+extern unsigned   keylog_index;
+
 extern char peek_key         (void);
 extern char get_key          (void);
 extern void unlog_key        (void);

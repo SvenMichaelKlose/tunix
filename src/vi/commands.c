@@ -1,5 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <cbm.h>
 
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/term/libterm.h>
@@ -12,6 +15,13 @@
 #include "screen.h"
 #include "keyboard.h"
 
+
+void
+wait4user (void)
+{
+    term_puts ("\n\rPress any key to continue...");
+    get_key ();
+}
 
 void
 cmd_open_above ()
@@ -94,5 +104,32 @@ cmd_join ()
 void
 cmd_write_file ()
 {
-    term_puts ("WRITE FILE");
+    line * l = first_line;
+    char err;
+
+    linebuf[linebuf_length] = 0;
+
+    if (err = cbm_open (1, 8, 1, &linebuf[2])) {
+        gotoxy (0, 23);
+        term_puts ("Cannot open file '");
+        term_puts (&linebuf[2]);
+        term_puts ("':\n\r");
+        term_puts (strerror (errno));
+        wait4user ();
+        return;
+    }
+
+    while (l) {
+        cbm_write (1, l->data, l->length);
+        cbm_write (1, "\n", 1);
+        l = l->next;
+    }
+
+    cbm_close (1);
+
+    gotoxy (0, 23);
+    term_puts ("Wrote file '");
+    term_puts (&linebuf[2]);
+    term_puts ("'.");
+    wait4user ();
 }

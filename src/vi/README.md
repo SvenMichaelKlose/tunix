@@ -42,6 +42,10 @@ x: Delete character.
 
 .: Repeat last action.
 
+## File commands
+
+:wNAME Write file.
+
 # For developers
 
 This is a VI front end for libtext and

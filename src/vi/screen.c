@@ -103,6 +103,8 @@ screen_set_status (char * msg)
     status = msg;
     print_status ();
     sprintf (txt_memleft, "%D", _heapmemavail ());
+    gotoxy (0, rows - 2);
+    term_put (TERM_CLEAR_TO_EOL);
     gotoxy (35, rows - 2);
     term_puts (txt_memleft);
 }

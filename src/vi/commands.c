@@ -148,21 +148,26 @@ cmd_write_file ()
     line * l = first_line;
     char err;
     unsigned i;
-    char * fn;
+
+    linebuf[linebuf_length] = 0;
+    passphrase_index = 0;
 
     if (linebuf_length == 2 && !filename) {
         gotoxy (0, 23);
         term_puts ("File name missing.");
         wait4user ();
         return;
+    } else if (linebuf_length > 2) {
+        if (filename)
+            free (filename);
+        filename = malloc (linebuf_length - 1);
+        strcpy (filename, &linebuf[2]);
     }
-    linebuf[linebuf_length] = 0;
-    passphrase_index = 0;
 
-    if (err = cbm_open (1, 8, 1, &linebuf[2])) {
+    if (err = cbm_open (1, 8, 1, filename)) {
         gotoxy (0, 23);
         term_puts ("Cannot open file '");
-        term_puts (&linebuf[2]);
+        term_puts (filename);
         term_puts ("'.\n\r");
         wait4user ();
         return;
@@ -184,7 +189,7 @@ cmd_write_file ()
     if (passphrase)
         term_puts ("ENCRYPTED ");
     term_puts ("file '");
-    term_puts (&linebuf[2]);
+    term_puts (filename);
     term_puts ("'.");
     wait4user ();
 }
@@ -209,6 +214,11 @@ cmd_read_file ()
         term_puts ("'.\n\r");
         wait4user ();
         goto done;
+    }
+
+    if (filename) {
+        free (filename);
+        filename = NULL;
     }
 
     linelist_clear ();

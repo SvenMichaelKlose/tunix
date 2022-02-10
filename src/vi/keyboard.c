@@ -51,12 +51,9 @@ unlog_key ()
 char
 get_key ()
 {
-    char c;
-
-    if (peeked_char)
-        c = peeked_char;
-    else
-        c = wait_for_key ();
+    char c = peeked_char ?
+        peeked_char :
+        wait_for_key ();
 
     if (!peeked_char && does_log_keys && !does_play_back) {
         if (keylog_index == sizeof (keylog)) {

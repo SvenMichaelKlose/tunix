@@ -45,6 +45,8 @@ our_charset:
     .code
 
 .proc _term_init
+    lda #$80
+    sta $291    ; Block character set switch with Shift+C=.
     jsr clear_screen
     lda #1
     ldx #0

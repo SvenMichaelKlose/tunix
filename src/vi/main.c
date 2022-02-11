@@ -56,6 +56,7 @@ command motion_commands[] = {
 
 command modify_commands[] = {
     { 'D', cmd_delete_till_line_end },
+    { 'd', cmd_delete_line },
     { 'x', cmd_delete_char },
     { 'r', cmd_replace_char },
     { 'J', cmd_join },

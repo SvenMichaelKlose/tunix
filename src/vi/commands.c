@@ -66,7 +66,16 @@ cmd_enter ()
 
     changes_first = linenr - 1;
     changes_last = 32000;
+}
 
+void
+cmd_delete_line ()
+{
+    linelist_delete ();
+    linelist_goto (linenr);
+
+    changes_first = linenr;
+    changes_last = 32000;
 }
 
 void

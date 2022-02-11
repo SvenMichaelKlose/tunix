@@ -38,6 +38,7 @@ the edit mode.
 D: Delete till line end.
 J: Join current and next line.
 x: Delete character.
+d: Delete line.
 
 ## History commands
 

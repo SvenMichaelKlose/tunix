@@ -53,15 +53,15 @@ linelist_insert_after ()
 void
 linelist_delete ()
 {
-    line  * prev = current_line->prev;
-    line  * next = current_line->next;
+    line * prev = current_line->prev;
+    line * next = current_line->next;
 
     num_lines--;
 
-    if (current_line == first_line)
-        first_line = next;
-    else
+    if (prev)
         prev->next = next;
+    else
+        first_line = next;
 
     free (current_line->data);
     free (current_line);
@@ -139,28 +139,27 @@ linelist_split ()
 void
 linelist_join ()
 {
-    line *    next = current_line->next;
+    line *    this = current_line;
+    line *    next = this->next;
     unsigned  new_len;
     char *    new_data;
 
     if (!next)
         return;
 
-    new_len = current_line->length + next->length;
+    new_len = this->length + next->length;
     new_data = malloc (new_len); // TODO: Barf on low memory.
 
-    memcpy (new_data, current_line->data, current_line->length);
-    memcpy (&new_data[current_line->length], next->data, next->length);
+    memcpy (new_data, this->data, this->length);
+    memcpy (&new_data[this->length], next->data, next->length);
 
-    free (current_line->data);
-    current_line->data = new_data;
-    current_line->length = new_len;
+    free (this->data);
+    this->data = new_data;
+    this->length = new_len;
 
-    linenr++;
-    linelist_goto (linenr);
+    current_line = next;
     linelist_delete ();
-    linenr--;
-    linelist_goto (linenr);
+    current_line = this;
 }
 
 void

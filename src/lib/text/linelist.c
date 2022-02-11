@@ -4,6 +4,7 @@
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/lineedit/liblineedit.h>
 #include <lib/text/linelist.h>
+#include <lib/text/motion.h>
 
 
 line      * first_line;
@@ -147,6 +148,14 @@ linelist_join ()
     if (!next)
         return;
 
+    // TODO: Why does this mess up with empty lines?
+    if (!this->length) {
+        linelist_delete ();
+        return;
+    }
+    if (!next->length)
+        goto delete_next;
+
     new_len = this->length + next->length;
     new_data = malloc (new_len); // TODO: Barf on low memory.
 
@@ -157,9 +166,10 @@ linelist_join ()
     this->data = new_data;
     this->length = new_len;
 
-    current_line = next;
+delete_next:
+    move_down ();
     linelist_delete ();
-    current_line = this;
+    move_up ();
 }
 
 void

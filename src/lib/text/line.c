@@ -115,26 +115,17 @@ line_split ()
     line *  new;
     char *  upper_data;
 
-    if (xpos == current_line->length)   // TODO: Remove.
-        return;
-
     line_insert_after ();
     new = current_line->next;
     new->length = current_line->length - xpos;
     new->data = malloc (new->length);
     memcpy (new->data, &current_line->data[xpos], new->length);
 
-    if (xpos) {
-        upper_data = malloc (xpos);
-        memcpy (upper_data, current_line->data, xpos);
-        free (current_line->data);
-        current_line->data = upper_data;
-        current_line->length = xpos;
-    } else {
-        free (current_line->data);
-        current_line->data = NULL;
-        current_line->length = 0;
-    }
+    upper_data = malloc (xpos);
+    memcpy (upper_data, current_line->data, xpos);
+    free (current_line->data);
+    current_line->data = upper_data;
+    current_line->length = xpos;
 }
 
 void
@@ -148,14 +139,6 @@ line_join ()
     if (!next)
         return;
 
-    // TODO: Why does this mess up with empty lines? Remove!
-    if (!this->length) {
-        line_delete ();
-        return;
-    }
-    if (!next->length)
-        goto delete_next;
-
     new_len = this->length + next->length;
     new_data = malloc (new_len); // TODO: Barf on low memory.
 
@@ -166,7 +149,6 @@ line_join ()
     this->data = new_data;
     this->length = new_len;
 
-delete_next:
     move_down ();
     line_delete ();
     move_up ();

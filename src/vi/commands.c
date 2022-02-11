@@ -30,6 +30,7 @@ wait4user (void)
     gotoxy (0, rows - 2);
     term_put (TERM_CLEAR_TO_EOL);
     screen_set_status ("");
+    screen_redraw ();
 }
 
 void
@@ -37,8 +38,9 @@ cmd_open_above ()
 {
     linelist_insert_before ();
     move_line_start ();
+
     changes_first = linenr;
-    changes_last = 99999;
+    changes_last = 32000;
 }
 
 void
@@ -47,8 +49,9 @@ cmd_open_below ()
     linelist_insert_after ();
     move_down ();
     move_line_start ();
-    changes_first = linenr + 1;
-    changes_last = 99999;
+
+    changes_first = linenr;
+    changes_last = 32000;
 }
 
 void
@@ -62,7 +65,7 @@ cmd_enter ()
     move_line_start ();
 
     changes_first = linenr - 1;
-    changes_last = 99999;
+    changes_last = 32000;
 
 }
 
@@ -130,7 +133,7 @@ cmd_join ()
     xpos = len;
 
     changes_first = linenr;
-    changes_last = 99999;
+    changes_last = 32000;
 }
 
 void

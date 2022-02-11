@@ -50,6 +50,7 @@ command motion_commands[] = {
     { 'l', move_right },
     { '0', move_line_start },
     { '$', move_line_last_char },
+    { 'G', move_last_line },
     { 0, NULL }
 };
 

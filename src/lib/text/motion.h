@@ -10,5 +10,6 @@ extern void move_line_start      (void);
 extern void move_line_end        (void);
 extern void move_line_begin      (void);
 extern void move_line_last_char  (void);
+extern void move_last_line       (void);
 
 #endif // #ifndef MOTION_H

@@ -83,3 +83,10 @@ move_line_last_char ()
     if (current_line->length)
         xpos = current_line->length - 1;
 }
+
+void
+move_last_line ()
+{
+    linenr = num_lines - 1;
+    linelist_goto (linenr);
+}

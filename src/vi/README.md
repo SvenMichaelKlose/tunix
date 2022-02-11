@@ -14,6 +14,7 @@ Cursor keys do what you would expect.
 h, j, k, l: Left, down, up, right.
 0: To first column of line.
 $: To last column of line.
+G: To last line.
 
 ## Edit commands
 

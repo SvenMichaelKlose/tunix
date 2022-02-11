@@ -1,5 +1,5 @@
 SOURCES= \
-    linelist.c \
+    line.c \
     motion.c
 
 LIBRARY=libtext.a

@@ -3,7 +3,7 @@
 
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/lineedit/liblineedit.h>
-#include <lib/text/linelist.h>
+#include <lib/text/line.h>
 #include <lib/text/motion.h>
 
 
@@ -25,7 +25,7 @@ line_alloc ()
 }
 
 void
-linelist_insert_before ()
+line_insert_before ()
 {
     line * new = line_alloc ();
 
@@ -40,7 +40,7 @@ linelist_insert_before ()
 }
 
 void
-linelist_insert_after ()
+line_insert_after ()
 {
     line * new = line_alloc ();
 
@@ -52,7 +52,7 @@ linelist_insert_after ()
 }
 
 void
-linelist_delete ()
+line_delete ()
 {
     line * prev = current_line->prev;
     line * next = current_line->next;
@@ -74,7 +74,7 @@ linelist_delete ()
 }
 
 line *
-linelist_get (unsigned i)
+line_get (unsigned i)
 {
     line * l = first_line;
 
@@ -85,7 +85,7 @@ linelist_get (unsigned i)
 }
 
 void
-buf_to_linelist ()
+buf_to_line ()
 {
     char * data;
 
@@ -97,20 +97,20 @@ buf_to_linelist ()
 }
 
 void
-linelist_goto (unsigned n)
+line_goto (unsigned n)
 {
-    current_line = linelist_get (n);
+    current_line = line_get (n);
 }
 
 void
-linelist_line_to_buf ()
+line_line_to_buf ()
 {
     memcpy (linebuf, current_line->data, current_line->length);
     linebuf_length = current_line->length;
 }
 
 void
-linelist_split ()
+line_split ()
 {
     line *  new;
     char *  upper_data;
@@ -118,7 +118,7 @@ linelist_split ()
     if (xpos == current_line->length)
         return;
 
-    linelist_insert_after ();
+    line_insert_after ();
     new = current_line->next;
     new->length = current_line->length - xpos;
     new->data = malloc (new->length);
@@ -138,7 +138,7 @@ linelist_split ()
 }
 
 void
-linelist_join ()
+line_join ()
 {
     line *    this = current_line;
     line *    next = this->next;
@@ -150,7 +150,7 @@ linelist_join ()
 
     // TODO: Why does this mess up with empty lines?
     if (!this->length) {
-        linelist_delete ();
+        line_delete ();
         return;
     }
     if (!next->length)
@@ -168,12 +168,12 @@ linelist_join ()
 
 delete_next:
     move_down ();
-    linelist_delete ();
+    line_delete ();
     move_up ();
 }
 
 void
-linelist_init ()
+line_init ()
 {
     first_line = current_line = line_alloc ();
     linenr = 0;
@@ -181,7 +181,7 @@ linelist_init ()
 }
 
 void
-linelist_clear ()
+line_clear ()
 {
     line * l = first_line;
 
@@ -191,5 +191,5 @@ linelist_clear ()
         l = l->next;
     }
 
-    linelist_init ();
+    line_init ();
 }

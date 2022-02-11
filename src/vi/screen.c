@@ -5,7 +5,7 @@
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/term/libterm.h>
 #include <lib/lineedit/liblineedit.h>
-#include <lib/text/linelist.h>
+#include <lib/text/line.h>
 
 #include "screen.h"
 
@@ -134,7 +134,7 @@ screen_redraw ()
 
     update_screen_offset ();
     disable_cursor ();
-    l = linelist_get (ystart);
+    l = line_get (ystart);
 
     for (y = 0; y < rows - 2; y++) {
         if (changes_first > -1) { 

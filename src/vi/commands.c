@@ -8,7 +8,7 @@
 #include <lib/term/libterm.h>
 #include <lib/lineedit/liblineedit.h>
 #include <lib/lineedit/linebuf.h>
-#include <lib/text/linelist.h>
+#include <lib/text/line.h>
 #include <lib/text/motion.h>
 
 #include "commands.h"
@@ -36,7 +36,7 @@ wait4user (void)
 void
 cmd_open_above ()
 {
-    linelist_insert_before ();
+    line_insert_before ();
     move_line_start ();
 
     changes_first = linenr;
@@ -46,7 +46,7 @@ cmd_open_above ()
 void
 cmd_open_below ()
 {
-    linelist_insert_after ();
+    line_insert_after ();
     move_down ();
     move_line_start ();
 
@@ -58,9 +58,9 @@ void
 cmd_enter ()
 {
     if (xpos == current_line->length)
-        linelist_insert_after ();       // TODO: Remove?
+        line_insert_after ();       // TODO: Remove?
     else
-        linelist_split ();
+        line_split ();
     move_down ();
     move_line_start ();
 
@@ -71,8 +71,8 @@ cmd_enter ()
 void
 cmd_delete_line ()
 {
-    linelist_delete ();
-    linelist_goto (linenr);
+    line_delete ();
+    line_goto (linenr);
 
     changes_first = linenr;
     changes_last = 32000;
@@ -102,9 +102,9 @@ cmd_delete_till_line_end ()
 void
 cmd_delete_char ()
 {
-    linelist_line_to_buf ();
+    line_line_to_buf ();
     linebuf_delete_char (xpos);
-    buf_to_linelist ();
+    buf_to_line ();
     adjust_xpos_to_line_length ();
 
     changes_first = linenr;
@@ -122,9 +122,9 @@ cmd_replace_char ()
         return;
     }
 
-    linelist_line_to_buf ();
+    line_line_to_buf ();
     linebuf_replace_char (xpos, c);
-    buf_to_linelist ();
+    buf_to_line ();
 
     changes_first = linenr;
     changes_last = linenr;
@@ -138,7 +138,7 @@ cmd_join ()
     if (!current_line->next)
         return;
 
-    linelist_join ();
+    line_join ();
     xpos = len;
 
     changes_first = linenr;
@@ -260,7 +260,7 @@ cmd_read_file ()
         filename = NULL;
     }
 
-    linelist_clear ();
+    line_clear ();
     free (first_line);
     current_line = first_line = NULL;
     num_lines = 0;

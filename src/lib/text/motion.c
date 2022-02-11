@@ -5,13 +5,13 @@
 #include <lib/lineedit/liblineedit.h>
 #include <lib/term/libterm.h>
 
-#include "linelist.h"
+#include "line.h"
 #include "motion.h"
 
 void
 adjust_xpos_to_line_length ()
 {
-    linelist_goto (linenr);
+    line_goto (linenr);
 
     if (xpos >= current_line->length)
         xpos = current_line->length ?
@@ -88,5 +88,5 @@ void
 move_last_line ()
 {
     linenr = num_lines - 1;
-    linelist_goto (linenr);
+    line_goto (linenr);
 }

@@ -7,7 +7,7 @@
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/term/libterm.h>
 #include <lib/lineedit/liblineedit.h>
-#include <lib/text/linelist.h>
+#include <lib/text/line.h>
 #include <lib/text/motion.h>
 
 #include "commands.h"
@@ -100,10 +100,10 @@ edit_mode (void)
 
     while (1) {
         screen_update ();
-        linelist_goto (linenr);
-        linelist_line_to_buf ();
+        line_goto (linenr);
+        line_line_to_buf ();
         c = input ();
-        buf_to_linelist ();
+        buf_to_line ();
 
         switch (c) {
             case TTY_ENTER:
@@ -211,7 +211,7 @@ exec_action ()
 
     reset_log ();
     repetitions = 0;
-    linelist_goto (linenr);
+    line_goto (linenr);
 
     if (peek_key () != '0')
         repetitions = get_repetitions ();
@@ -288,7 +288,7 @@ main (void)
     _heapadd ((void *) 0xa000, 0x2000); /* BANK5 */
 
     term_init ();
-    linelist_init ();
+    line_init ();
     screen_init ();
     keyboard_init ();
     screen_redraw ();

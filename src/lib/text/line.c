@@ -115,7 +115,7 @@ line_split ()
     line *  new;
     char *  upper_data;
 
-    if (xpos == current_line->length)
+    if (xpos == current_line->length)   // TODO: Remove.
         return;
 
     line_insert_after ();
@@ -148,7 +148,7 @@ line_join ()
     if (!next)
         return;
 
-    // TODO: Why does this mess up with empty lines?
+    // TODO: Why does this mess up with empty lines? Remove!
     if (!this->length) {
         line_delete ();
         return;

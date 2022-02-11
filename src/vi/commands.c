@@ -58,7 +58,7 @@ void
 cmd_enter ()
 {
     if (xpos == current_line->length)
-        linelist_insert_after ();
+        linelist_insert_after ();       // TODO: Remove?
     else
         linelist_split ();
     move_down ();

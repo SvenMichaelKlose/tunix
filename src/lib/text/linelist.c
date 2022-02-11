@@ -33,6 +33,7 @@ linelist_insert_before ()
     new->prev = current_line->prev;
     new->next = current_line;
     current_line->prev = new;
+
     if (current_line == first_line)
         first_line = new;
 }
@@ -52,21 +53,23 @@ linelist_insert_after ()
 void
 linelist_delete ()
 {
+    line  * prev = current_line->prev;
     line  * next = current_line->next;
 
     num_lines--;
 
     if (current_line == first_line)
-        current_line = next;
+        first_line = next;
     else
-        current_line->prev->next = next;
-
-    if (next)
-        next->prev = current_line->prev;
+        prev->next = next;
 
     free (current_line->data);
     free (current_line);
-    current_line = next;
+
+    if (next) {
+        next->prev = prev;
+        current_line = next;
+    }
 }
 
 line *
@@ -137,7 +140,6 @@ void
 linelist_join ()
 {
     line *    next = current_line->next;
-    line *    this;
     unsigned  new_len;
     char *    new_data;
 
@@ -154,10 +156,11 @@ linelist_join ()
     current_line->data = new_data;
     current_line->length = new_len;
 
-    this = current_line;
-    current_line = next;
+    linenr++;
+    linelist_goto (linenr);
     linelist_delete ();
-    current_line = this;
+    linenr--;
+    linelist_goto (linenr);
 }
 
 void

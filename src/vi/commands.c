@@ -27,6 +27,9 @@ wait4user (void)
 {
     term_puts ("\n\rPress any key to continue...");
     get_key ();
+    gotoxy (0, rows - 2);
+    term_put (TERM_CLEAR_TO_EOL);
+    screen_set_status ("");
 }
 
 void
@@ -173,6 +176,7 @@ cmd_write_file ()
         return;
     }
 
+    screen_set_status ("Writing...");
     cbm_k_ckout (1);
     while (l) {
         for (i = 0; i < l->length; i++)

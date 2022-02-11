@@ -37,6 +37,8 @@ line_insert_before ()
 
     if (current_line == first_line)
         first_line = new;
+
+    line_goto (linenr);
 }
 
 void

@@ -14,7 +14,10 @@ char columns = 40;
 char rows = 24;
 
 unsigned char ypos = 0;
+int changes_first;
+int changes_last;
 
+unsigned old_ystart = 0;
 unsigned ystart;
 char * status = "";
 
@@ -127,36 +130,58 @@ screen_redraw ()
 {
     line      * l;
     unsigned    y;
+    unsigned    n;
 
     update_screen_offset ();
     disable_cursor ();
     l = linelist_get (ystart);
 
     for (y = 0; y < rows - 2; y++) {
-        gotoxy (0, y);
-
-        if (l) {
-            line_redraw (l);
-            l = l->next;
-        } else
-            term_put ('~');
-
-        term_put (TERM_CLEAR_TO_EOL);
-
-        if (y < rows - 2) {
-            term_put (TERM_CARRIAGE_RETURN);
-            term_put (TERM_LINE_FEED);
+        if (changes_first > -1) { 
+            n = ystart + y;
+            if (n < changes_first || n > changes_last)
+                goto next;
         }
+
+        gotoxy (0, y);
+        if (l)
+            line_redraw (l);
+        else
+            term_put ('~');
+        term_put (TERM_CLEAR_TO_EOL);
+        term_put (TERM_CARRIAGE_RETURN);
+        term_put (TERM_LINE_FEED);
+
+next:
+        if (l)
+            l = l->next;
     }
 
     print_status ();
+
     ypos = linenr - ystart;
     set_cursor ();
     enable_cursor ();
+
+    changes_first = changes_last = -1;
+}
+
+void
+screen_update ()
+{
+    update_screen_offset ();
+
+    if (old_ystart != ystart || changes_first >= 0)
+        screen_redraw ();
+    old_ystart = ystart;
+
+    ypos = linenr - ystart;
+    set_cursor ();
 }
 
 void
 screen_init ()
 {
     ystart = 0;
+    changes_first = changes_last = -1;
 }

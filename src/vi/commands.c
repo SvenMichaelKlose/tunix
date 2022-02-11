@@ -37,6 +37,8 @@ cmd_open_above ()
 {
     linelist_insert_before ();
     move_line_start ();
+    changes_first = linenr;
+    changes_last = 99999;
 }
 
 void
@@ -45,6 +47,8 @@ cmd_open_below ()
     linelist_insert_after ();
     move_down ();
     move_line_start ();
+    changes_first = linenr + 1;
+    changes_last = 99999;
 }
 
 void
@@ -56,6 +60,10 @@ cmd_enter ()
         linelist_split ();
     move_down ();
     move_line_start ();
+
+    changes_first = linenr - 1;
+    changes_last = 99999;
+
 }
 
 void
@@ -63,6 +71,9 @@ cmd_change_till_line_end ()
 {
     cmd_delete_till_line_end ();
     move_line_end ();
+
+    changes_first = linenr;
+    changes_last = linenr;
 }
 
 void
@@ -71,6 +82,9 @@ cmd_delete_till_line_end ()
     current_line->length = xpos;
     if (xpos)
         xpos--;
+
+    changes_first = linenr;
+    changes_last = linenr;
 }
 
 void
@@ -80,6 +94,9 @@ cmd_delete_char ()
     linebuf_delete_char (xpos);
     buf_to_linelist ();
     adjust_xpos_to_line_length ();
+
+    changes_first = linenr;
+    changes_last = linenr;
 }
 
 void
@@ -96,6 +113,9 @@ cmd_replace_char ()
     linelist_line_to_buf ();
     linebuf_replace_char (xpos, c);
     buf_to_linelist ();
+
+    changes_first = linenr;
+    changes_last = linenr;
 }
 
 void
@@ -108,6 +128,9 @@ cmd_join ()
 
     linelist_join ();
     xpos = len;
+
+    changes_first = linenr;
+    changes_last = 99999;
 }
 
 void
@@ -271,4 +294,5 @@ done:
     cbm_close (2);
     free (data);
     screen_set_status ("");
+    screen_redraw ();
 }

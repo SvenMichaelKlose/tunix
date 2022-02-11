@@ -98,8 +98,7 @@ edit_mode (void)
     screen_set_status ("-- INSERT --");
 
     while (1) {
-        screen_redraw ();
-
+        screen_update ();
         linelist_goto (linenr);
         linelist_line_to_buf ();
         c = input ();
@@ -275,7 +274,7 @@ toplevel (void)
         } else if (exec_action ())
             keyboard_init ();
 
-        screen_redraw ();
+        screen_update ();
     }
 }
 

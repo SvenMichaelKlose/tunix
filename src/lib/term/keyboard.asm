@@ -50,14 +50,13 @@ RETURN  = 13
 ; 0E *           1E /        2E =        3E [HOME]
 ; 0F [RET]       1F [CSR D]  2F [F3]     3F [F7]
 
-; SHOFT/C=/CTRL flags at $020d.
+; SHOFT/C=/CTRL flags at $028d.
 FLAG_SHIFT      = 1
 FLAG_COMMODORE  = 2
 FLAG_CTRL       = 4
 
 map_normal:
 map_shift_commodore:
-map_ctrl:
 map_shift_ctrl:
 map_commodore_ctrl:
 map_shift_commodore_ctrl:
@@ -73,6 +72,13 @@ map_shift:
     .byte 0, "ADGJL]", CURSOR_LEFT, RUN_STOP, 0, "XVN.?", CURSOR_UP
     .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
     .byte "QETUO@^", F6, 34, "$((-", CLR_HOME, F8
+    .byte 0
+
+map_ctrl:
+    .byte "1357}+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
+    .byte 0, "ädgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
+    .byte " zcbm.", 0, F1, 0, "ßfhk:=", F3
+    .byte "q€tüö@^", F5, "246{0-", CLR_HOME, F7
     .byte 0
 
 map_commodore:

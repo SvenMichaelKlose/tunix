@@ -171,8 +171,10 @@ screen_update ()
 {
     update_screen_offset ();
 
-    if (old_ystart != ystart || changes_first >= 0)
+    if (old_ystart != ystart || changes_first >= 0) {
+        changes_first = changes_last = -1;
         screen_redraw ();
+    }
     old_ystart = ystart;
 
     ypos = linenr - ystart;

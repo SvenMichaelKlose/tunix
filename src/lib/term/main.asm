@@ -590,10 +590,10 @@ line_feed:
     jmp cursor_show
 n:  
 
-; 0c:       FF: Form feed, Clear screen
+; 0c:       FF: Form feed,
 ; 1a:       Clear screen
     cmp #$0c
-    beq form_feed
+    beq line_feed   ; (could also be clear_screen)
     cmp #$1a
     bne n4
 form_feed:

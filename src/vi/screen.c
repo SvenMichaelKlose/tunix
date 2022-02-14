@@ -55,8 +55,14 @@ enable_cursor ()
 void
 print_linebuf ()
 {
-    linebuf[linebuf_length] = 0;
-    term_puts (linebuf);
+    char *  data = &linebuf;
+    int     len = linebuf_length;
+
+    if (len > columns)
+        len = columns;
+
+    while (len--)
+        term_put (*data++);
 }
 
 // Called by liblineedit.
@@ -77,7 +83,7 @@ linebuf_redraw ()
 void
 line_redraw (line * l)
 {
-    char  * data = l->data;
+    char *  data = l->data;
     char    len  = l->length;
 
     if (len > columns)

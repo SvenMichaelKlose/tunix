@@ -124,7 +124,7 @@ r:  rts
     ; Bank in secondary wedge on BLK1.
     ora #%11000000  ; (R/W RAM)
     sta $9ff2
-    lda #117
+    lda #117        ; TODO: Should be configurable.
     sta $9ff8
     lda #0
     sta $9ff9

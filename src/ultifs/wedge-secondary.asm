@@ -9,9 +9,10 @@
 .export uopen, uclose, uchkin, uckout, uclrcn
 .export ubasin, ubsout, uclall, uload, usave
 
-.import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kchkout, _ultifs_kclrcn
-.import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall, _ultifs_kusrcmd
-.import _ultifs_kload, _ultifs_ksave, unmap_ofs
+.import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kchkout
+.import _ultifs_kclrcn, _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
+.import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
+.import unmap_ofs
 
 stack_size  = $2a    ; Keep greater or equal to what linker config file says.
 cpu_state   = $9c00
@@ -113,7 +114,7 @@ done:
     lda $9ffc
     sta cpu_state+9
     lda $9ffd
-    sta cpu_state+$0a
+    sta cpu_state+10
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #118

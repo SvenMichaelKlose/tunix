@@ -105,7 +105,7 @@ r:  rts
 
 ; Map in secondary wedge and save registers.
 .proc map_ultimem
-    ; Save registers and flags.
+    ; Save accu and flags.
     sta cpu_state
     php
     pla

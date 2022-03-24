@@ -284,7 +284,7 @@ main (void)
 {
     // TODO: Check if memory expansion is there.
     _heapadd ((void *) 0x400, 0xc00);   /* +3K */
-    //_heapadd ((void *) 0x9800, 0x800);  /* IO2,3 */
+    //_heapadd ((void *) 0x9800, 0x7f0);  /* IO2,3 */
     _heapadd ((void *) 0xa000, 0x2000); /* BANK5 */
 
     term_init ();

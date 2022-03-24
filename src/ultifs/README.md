@@ -15,7 +15,7 @@ wedge in to BLK1.  It checks if the device number is
 bank the old BLK1 back in and to continue with
 whatever procedure the former KERNAL vector pointed to.
 Otherwise BLK2 and BLK3 of the UltiFS is banked in, the
-zeropage is saved and the UltiFS procedure in question
+zeropage is saved and the UltiFS procedure in demand
 (OPEN, CLOSE, BSIN, etc.) is invoked.  When it has
 finished, the saved (and probably modified zeropage) is
 copied back over the original, BLK1 to BLK3 are being

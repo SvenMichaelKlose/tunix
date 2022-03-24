@@ -63,7 +63,7 @@ no_restore:
     jsr $fdf9   ; Init VIAs.
     jsr $e518   ; Init VIC.
 
-    jmp $e378   ; BASIC cold start
+;    jmp $e378   ; BASIC cold start
 
 
     lda #$7f    ; Yellow screen.

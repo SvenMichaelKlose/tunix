@@ -5,12 +5,31 @@
 #include <lib/lineedit/liblineedit.h>
 #include <lib/text/line.h>
 #include <lib/text/motion.h>
+#include <lib/term/libterm.h>
 
 
 line      * first_line;
 line      * current_line;
 int       linenr;
 unsigned  num_lines;
+
+void
+line_test (char * msg)
+{
+    line * l = first_line;
+    line * prev = NULL;
+
+    while (l) {
+        if (l->prev != prev) {
+            term_puts (msg);
+            term_puts (": Broken link to prev.");
+            while (1);
+        }
+
+        prev = l;
+        l = l->next;
+    }
+}
 
 
 line *
@@ -48,9 +67,11 @@ line_insert_after ()
 
     num_lines++;
 
+line_test ("!!1!!");
     new->prev = current_line;
     new->next = current_line->next;
     current_line->next = new;
+line_test ("!!2!!");
 }
 
 void
@@ -69,10 +90,10 @@ line_delete ()
     free (current_line->data);
     free (current_line);
 
-    if (next) {
+    if (next)
         next->prev = prev;
-        current_line = next;
-    }
+
+    line_goto (linenr);
 }
 
 line *
@@ -135,14 +156,14 @@ line_join ()
 {
     line *    this = current_line;
     line *    next = this->next;
-    unsigned  new_len;
     char *    new_data;
+    unsigned  new_len;
 
     if (!next)
         return;
 
     new_len = this->length + next->length;
-    new_data = malloc (new_len); // TODO: Barf on low memory.
+    new_data = malloc (new_len);
 
     memcpy (new_data, this->data, this->length);
     memcpy (&new_data[this->length], next->data, next->length);

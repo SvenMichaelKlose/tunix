@@ -236,7 +236,7 @@ cmd_write_file ()
 void
 cmd_read_file ()
 {
-    char *    data = malloc (1024);
+    char *    data = malloc (256);
     char *    p;
     line *    l;
     int       len;

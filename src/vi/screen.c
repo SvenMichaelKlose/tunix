@@ -74,8 +74,9 @@ linebuf_redraw ()
     term_put (TERM_CARRIAGE_RETURN);
 
     print_linebuf ();
+    if (linebuf_length < columns)
+        term_put (TERM_CLEAR_TO_EOL);
 
-    term_put (TERM_CLEAR_TO_EOL);
     set_cursor ();
     enable_cursor ();
 }
@@ -154,8 +155,11 @@ screen_redraw ()
             line_redraw (l);
         else
             term_put ('~');
-        term_put (TERM_CLEAR_TO_EOL);
-        term_put (TERM_CARRIAGE_RETURN);
+
+        if (l->length < columns) {
+            term_put (TERM_CLEAR_TO_EOL);
+            term_put (TERM_CARRIAGE_RETURN);
+        }
         term_put (TERM_LINE_FEED);
 
 next:

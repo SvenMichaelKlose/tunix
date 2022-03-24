@@ -26,9 +26,9 @@ typedef struct _line {
 extern line * first_line;
 extern line * current_line;
 
+extern void                 line_test           (void);
 
-extern line *               line_alloc (void);
-
+extern line *               line_alloc          (void); // TODO: Shouldn't be public.
 extern void                 line_init           (void);
 extern line *               line_get            (unsigned);
 extern void                 buf_to_line         (void);

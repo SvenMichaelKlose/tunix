@@ -78,7 +78,7 @@ map_ctrl:
     .byte "1357}+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
     .byte 0, "ädgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
     .byte " zcbm.", 0, F1, 0, "ßfhk:=", F3
-    .byte "q€tüö@^", F5, "246{0-", CLR_HOME, F7
+    .byte "q€tüö{^", F5, "246X0-", CLR_HOME, F7
     .byte 0
 
 map_commodore:

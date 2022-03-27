@@ -128,24 +128,45 @@ init_kernal_emulation ()
 }
 
 char
-peek_from_process (char * from)
+peek_from_process (char * p)
 {
-    if (from < (char *) 0x2000 || from > (char *) 0x7fff)
-        return *from;
-    if (from < (char *) 0x4000) {
+    if (p < (char *) 0x2000 || p > (char *) 0x7fff)
+        return *p;
+    if (p < (char *) 0x4000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
-        return *(from - (char *) 0x2000 + (char *) 0xa000);
+        return *(p - (char *) 0x2000 + (char *) 0xa000);
     }
-    if (from < (char *) 0x6000) {
+    if (p < (char *) 0x6000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
-        return *(from - (char *) 0x4000 + (char *) 0xa000);
+        return *(p - (char *) 0x4000 + (char *) 0xa000);
     }
-    if (from < (char *) 0x8000) {
+    if (p < (char *) 0x8000) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
-        return *(from - (char *) 0x6000 + (char *) 0xa000);
+        return *(p - (char *) 0x6000 + (char *) 0xa000);
     }
 
-    return *from;
+    return *p;
+}
+
+char
+poke_to_process (char * p, char v)
+{
+    if (p < (char *) 0x2000 || p > (char *) 0x7fff)
+        return *p = v;
+    if (p < (char *) 0x4000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
+        return *(p - (char *) 0x2000 + (char *) 0xa000) = v;
+    }
+    if (p < (char *) 0x6000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
+        return *(p - (char *) 0x4000 + (char *) 0xa000) = v;
+    }
+    if (p < (char *) 0x8000) {
+        *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
+        return *(p - (char *) 0x6000 + (char *) 0xa000) = v;
+    }
+
+    return *p = v;
 }
 
 void
@@ -223,7 +244,7 @@ open_command (char * name)
 }
 
 void
-make_directory_list (channel * ch)
+make_directory_listing (channel * ch)
 {
     unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
@@ -358,7 +379,7 @@ ultifs_kopen ()
     }
 
     if (FNLEN == 1 && *name == '$') {
-        make_directory_list (ch);
+        make_directory_listing (ch);
         return TRUE;
     }
 
@@ -514,7 +535,7 @@ ultifs_kload ()
     // Read all bytes.
     addr = (char *) (addr_h << 8 | addr_l);
     while (1) {
-        *addr++ = ultifs_kbasin ();
+        poke_to_process (addr++, ultifs_kbasin ());
 
         if (STATUS & STATUS_END_OF_FILE)
             break;
@@ -549,7 +570,7 @@ ultifs_ksave ()
         return;
 
     while (1) {
-        accu = *ptr++;
+        accu = peek_from_process (ptr++);
         ultifs_kbsout ();
 
         if (STATUS) {

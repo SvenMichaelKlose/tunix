@@ -550,6 +550,7 @@ bfile * __cc65fastcall__
 ultifs_open (upos directory, char * name, char mode)
 {
     upos file = bfile_lookup_name (directory, name, strlen (name));
+
     if (!file)
         return NULL;
     return bfile_open (directory, file, mode);

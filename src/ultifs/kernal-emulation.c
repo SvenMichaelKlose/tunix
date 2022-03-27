@@ -169,6 +169,14 @@ poke_to_process (char * p, char v)
     return *p = v;
 }
 
+char
+downcase (char c)
+{
+    if (c >= 'A' && c <= 'Z')
+        return c - 'A' + 'a';
+    return c;
+}
+
 void
 copy_from_process (char * to, char * from, char len)
 {
@@ -178,7 +186,7 @@ copy_from_process (char * to, char * from, char len)
     *ULTIMEM_CONFIG2 |= 0xc0;
 
     while (len--)
-        *to++ = peek_from_process (from++);
+        *to++ = downcase (peek_from_process (from++));
 
     *ULTIMEM_BLK5 = old_blk5;
     *ULTIMEM_CONFIG2 = old_cfg2;

@@ -12,8 +12,9 @@ typedef unsigned long usize;
 #endif
 
 typedef struct _bfile {
-    upos    start;          /* Start of file data. */
-    upos    ptr;            /* Current position in file data. */
+    upos    start;          /* Start of file block. */
+    upos    ptr;            /* File data position. */
+    upos    pos;            /* Position in file data. */
     unsigned  bank;
     char    * addr;
     usize   size;           /* Current size (grows on writes). */

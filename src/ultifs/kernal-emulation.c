@@ -475,11 +475,8 @@ ultifs_kbasin ()
     accu = flags = 0;
     set_status (0);
 
-    if (!ch) {
-        accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-        return 0;
-    }
+    if (!ch)
+        goto file_not_open;
 
     if (ch->buf) {
         accu = read_from_buf (ch);
@@ -488,11 +485,10 @@ ultifs_kbasin ()
         return accu;
     }
 
-    //if (SA == 15)
-        //return;
-
     file = ch->file;
-    if (!file || file->ptr >= file->size)
+    if (!file)
+        goto file_not_open;
+    if (file->pos >= file->size)
         goto end_of_file;
 
     return bfile_read (file);
@@ -501,6 +497,11 @@ end_of_file:
     set_status (STATUS_END_OF_FILE);
 
     return accu;
+
+file_not_open:
+    accu = OSERR_FILE_NOT_OPEN;
+    flags = FLAG_C;
+    return 0;
 }
 
 void

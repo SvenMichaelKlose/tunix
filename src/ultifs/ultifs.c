@@ -325,6 +325,7 @@ bfile_open (upos directory, upos p, char mode)
     p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
+    b->pos = 0;
     b->bank = b->ptr >> 13;
     b->addr = (void *) ((((unsigned) b->ptr) & 0x1fff) | 0xa000u);
     b->directory = directory;
@@ -378,12 +379,15 @@ bfile_read (bfile * b)
 {
     char x;
 
-    // TODO: Check on file end.
+    // TODO: Signal error somehow.
+    if (b->pos >= b->size)
+        return 0;
 
     if (b->mode != ULTIFS_MODE_READ)
         return 0; // TODO: error!
     x = ultimem_read_byte (b->ptr);
     b->ptr++;
+    b->pos++;
 
     return x;
 }
@@ -395,6 +399,7 @@ bfile_write (bfile * b, char byte)
         return; // TODO: error!
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
+    b->pos++;
     b->size++;
 }
 

@@ -1,6 +1,6 @@
 ; UltiFS wedge
 ;
-; Wraps the UltiFS C functions by banking in missing banks.
+; Wraps the UltiFS C functions by banking BLK2 and BLK3.
 ; Also redirects the old vectors.
 
 .export _init_secondary_wedge
@@ -24,6 +24,8 @@ unmap       = $9800 + unmap_ofs
 .segment "SECONDARY"
 
 FA      = $ba   ; Device number
+DFLTN   = $99
+DFLTO   = $9a
 
 IOPEN   = $031A
 ICLOSE  = $031C
@@ -100,6 +102,40 @@ done:
     rts
 .endproc
 
+; Returns CC if it's not.
+.proc is_our_input
+    pha
+    lda DFLTN
+    cmp _last_ingle_device
+    pla
+    bcc done
+
+    pha
+    lda DFLTN
+    cmp _last_regular_device
+    pla
+
+done:
+    rts
+.endproc
+
+; Returns CC if it's not.
+.proc is_our_output
+    pha
+    lda DFLTO
+    cmp _last_ingle_device
+    pla
+    bcc done
+
+    pha
+    lda DFLTO
+    cmp _last_regular_device
+    pla
+
+done:
+    rts
+.endproc
+
 .proc enter
     ; Save X and Y registers.  Accu and flags have
     ; already been saved by the primary wedge.
@@ -150,7 +186,7 @@ l:  lda _saved_zp-1,x
     sta $9ffb
     lda cpu_state+9
     sta $9ffc
-    lda cpu_state+$0a
+    lda cpu_state+10
     sta $9ffd
 
     ; Restore X and Y register.  Accu, flags and BLK1
@@ -189,7 +225,7 @@ n:  lda old_ICLOSE+1
 .endproc
 
 .proc uchkin
-    jsr is_our_device
+    jsr is_our_input
     bcc n
     jsr enter
     jsr _ultifs_kchkin
@@ -203,7 +239,7 @@ n:  lda old_ICHKIN+1
 .endproc
 
 .proc uckout
-    jsr is_our_device
+    jsr is_our_output
     bcc n
     jsr enter
     jsr _ultifs_kchkout
@@ -231,7 +267,7 @@ n:  lda old_ICLRCN+1
 .endproc
 
 .proc ubasin
-    jsr is_our_device
+    jsr is_our_input
     bcc n
     jsr enter
     jsr _ultifs_kbasin
@@ -245,7 +281,7 @@ n:  lda old_IBASIN+1
 .endproc
 
 .proc ubsout
-    jsr is_our_device
+    jsr is_our_output
     bcc n
     jsr enter
     jsr _ultifs_kbsout

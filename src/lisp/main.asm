@@ -5,13 +5,13 @@
 
     .zeropage
 
-a0:         .res 3  ; Arguments for built-in functions.
-a1:         .res 3
-a2:         .res 3
-r:          .res 3  ; Return value of built-in function.
+a0:    .res 3  ; Arguments for built-in functions.
+a1:    .res 3
+a2:    .res 3
+r:     .res 3  ; Return value of built-in function.
 
-tmp:        .res 3
-tmp2:       .res 3
+tmp:   .res 3
+tmp2:  .res 3
 
 
 ; ##############
@@ -121,7 +121,7 @@ l:  lda heap
     lda tmp2
     sta (heap),y
 
-    ; Step to next free byte of next allocation.
+    ; Step to next free byte for next allocation.
     txa
     clc
     adc heap
@@ -138,10 +138,12 @@ check:
     adc heap
     bcc l
 
+.ifdef GC
     ; Mark end of heap for GC.
     ldy #0
     tya
     sta (heap),y
+.endif
 
     ; Switch to next free bank.
     lda #$00
@@ -237,10 +239,16 @@ n:  rts
 ; Conses consist of a flag byte, a relocation address
 ; and two object pointers.
 
-OFS_CONS_RELOC      = 1
-OFS_CONS_A          = 3
-OFS_CONS_D          = 6
-CONS_SIZE           = 9
+.ifdef GC
+    OFS_CONS_RELOC      = 1
+    OFS_CONS_A          = 3
+    OFS_CONS_D          = 6
+    CONS_SIZE           = 9
+.else
+    OFS_CONS_A          = 1
+    OFS_CONS_D          = 4
+    CONS_SIZE           = 7
+.endif
 
     .code
 
@@ -387,10 +395,16 @@ e:  jmp err_not_a_cons
 ; ### NUMBERS ###
 ; ###############
 
-OFS_NUMBER_FLAGS    = 0
-OFS_NUMBER_RELOC    = 2
-OFS_NUMBER          = 5
-NUMBER_SIZE         = 7
+.ifdef GC
+    OFS_NUMBER_FLAGS    = 0
+    OFS_NUMBER_RELOC    = 2
+    OFS_NUMBER          = 5
+    NUMBER_SIZE         = 7
+.else
+    OFS_NUMBER_FLAGS    = 0
+    OFS_NUMBER          = 2
+    NUMBER_SIZE         = 4
+.endif
 
     .bss
 
@@ -418,12 +432,20 @@ number:     .res 2
 ; ### SYMBOLS ###
 ; ###############
 
-OFS_SYMBOL_FLAGS    = 0
-OFS_SYMBOL_RELOC    = 2
-OFS_SYMBOL_VALUE    = 4
-OFS_SYMBOL_LENGTH   = 7
-OFS_SYMBOL_NAME     = 8
-SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
+.ifdef GC
+    OFS_SYMBOL_FLAGS    = 0
+    OFS_SYMBOL_RELOC    = 2
+    OFS_SYMBOL_VALUE    = 4
+    OFS_SYMBOL_LENGTH   = 7
+    OFS_SYMBOL_NAME     = 8
+    SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
+.else
+    OFS_SYMBOL_FLAGS    = 0
+    OFS_SYMBOL_VALUE    = 2
+    OFS_SYMBOL_LENGTH   = 5
+    OFS_SYMBOL_NAME     = 6
+    SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
+.endif
 
     .zeropage
 
@@ -564,12 +586,12 @@ body:   .res 3
 n1: lda a1+2
     bne l2
     jmp end_of_args
+
 e1: jmp err_fun_expected
 e2: jmp err_too_many_args
-l2:
 
     ; Get symbol from argument definition.
-    lda argdef+2
+l2: lda argdef+2
     beq e2
     sta $9ffc
     ldy #OFS_CONS_A
@@ -671,14 +693,14 @@ end_of_args:
     lda argdef+2
     beq l3
     jmp err_too_few_args
-l3:
 
     ; Call EVAL-BODY.
+l3:
 
     ; Undo stack pointer.
 n2: lda stack
     sec
-    sbc #6
+    sbc #3
     sta stack
     lda stack+1
     sbc #0
@@ -701,7 +723,7 @@ n2: lda stack
     ; Undo stack pointer.
     lda stack
     sec
-    sbc #6
+    sbc #3
     sta stack
     lda stack+1
     sbc #0
@@ -733,7 +755,7 @@ done:
     ; Undo stack pointer.
     lda stack
     sec
-    sbc #6
+    sbc #3
     sta stack
     lda stack+1
     sbc #0
@@ -772,6 +794,7 @@ builtin:
 ; ### GARBAGE COLLECTION ###
 ; ##########################
 
+.ifdef GC
     .zeropage
 
 p:  .res 3
@@ -1138,6 +1161,7 @@ done:
     rts
 .endproc
 
+.endif ; .ifdef GC
 
 ; #################
 ; ### TOP-LEVEL ###

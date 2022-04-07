@@ -479,22 +479,21 @@ ultifs_kbasin ()
         goto file_not_open;
 
     if (ch->buf) {
-        accu = read_from_buf (ch);
         if (!ch->buf)
             goto end_of_file;
-        return accu;
+        return accu = read_from_buf (ch);
     }
 
     file = ch->file;
     if (file->pos >= file->size)
         goto end_of_file;
 
-    return bfile_read (file);
+    return accu = bfile_read (file);
 
 end_of_file:
     set_status (STATUS_END_OF_FILE);
 
-    return accu;
+    return 0;
 
 file_not_open:
     accu = OSERR_FILE_NOT_OPEN;

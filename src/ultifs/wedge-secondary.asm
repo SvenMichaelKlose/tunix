@@ -142,7 +142,7 @@ done:
     stx cpu_state+1
     sty cpu_state+2
 
-    ; Save banks of BLK2 and BLK3.
+    ; Save banks.
     lda $9ffa
     sta cpu_state+7
     lda $9ffb
@@ -151,6 +151,10 @@ done:
     sta cpu_state+9
     lda $9ffd
     sta cpu_state+10
+    lda $9ffe
+    sta cpu_state+11
+    lda $9fff
+    sta cpu_state+12
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #118
@@ -179,7 +183,7 @@ l:  lda _saved_zp-1,x
     dex
     bne l
 
-    ; Restore BLK2 and BLK3.
+    ; Restore banks.
     lda cpu_state+7
     sta $9ffa
     lda cpu_state+8
@@ -188,6 +192,10 @@ l:  lda _saved_zp-1,x
     sta $9ffc
     lda cpu_state+10
     sta $9ffd
+    lda cpu_state+11
+    sta $9ffe
+    lda cpu_state+12
+    sta $9fff
 
     ; Restore X and Y register.  Accu, flags and BLK1
     ; will be restored by unmap().

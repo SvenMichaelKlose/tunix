@@ -486,8 +486,6 @@ ultifs_kbasin ()
     }
 
     file = ch->file;
-    if (!file)
-        goto file_not_open;
     if (file->pos >= file->size)
         goto end_of_file;
 

@@ -218,20 +218,6 @@ n:  lda old_IOPEN+1
     jmp unmap
 .endproc
 
-.proc uclose
-    jsr is_our_device
-    bcc n
-    jsr enter
-    jsr _ultifs_kclose
-    jmp leave
-
-n:  lda old_ICLOSE+1
-    pha
-    lda old_ICLOSE
-    pha
-    jmp unmap
-.endproc
-
 .proc uchkin
     jsr is_our_input
     bcc n
@@ -260,20 +246,6 @@ n:  lda old_ICHKOUT+1
     jmp unmap
 .endproc
 
-.proc uclrcn
-;    jsr is_our_device
-;    bcc n
-;    jsr enter
-;    jsr _ultifs_kclrcn
-;    jmp leave
-
-n:  lda old_ICLRCN+1
-    pha
-    lda old_ICLRCN
-    pha
-    jmp unmap
-.endproc
-
 .proc ubasin
     jsr is_our_input
     bcc n
@@ -298,6 +270,34 @@ n:  lda old_IBASIN+1
 n:  lda old_IBSOUT+1
     pha
     lda old_IBSOUT
+    pha
+    jmp unmap
+.endproc
+
+.proc uclrcn
+;    jsr is_our_device
+;    bcc n
+;    jsr enter
+;    jsr _ultifs_kclrcn
+;    jmp leave
+
+n:  lda old_ICLRCN+1
+    pha
+    lda old_ICLRCN
+    pha
+    jmp unmap
+.endproc
+
+.proc uclose
+    jsr is_our_device
+    bcc n
+    jsr enter
+    jsr _ultifs_kclose
+    jmp leave
+
+n:  lda old_ICLOSE+1
+    pha
+    lda old_ICLOSE
     pha
     jmp unmap
 .endproc

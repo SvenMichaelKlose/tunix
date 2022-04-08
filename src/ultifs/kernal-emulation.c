@@ -18,7 +18,7 @@
 #define FALSE   0
 #define TRUE    -1
 
-// Call registers
+// Client registers
 #define accu        (*(char*) 0x9c00)
 #define xreg        (*(char*) 0x9c01)
 #define yreg        (*(char*) 0x9c02)
@@ -96,7 +96,6 @@ typedef struct _channel {
 
 #define NUM_LFN  32    // May not be the official limit. (pixel)
 
-// Channels keyed by logical file naumber.
 channel * channels[NUM_LFN];
 
 channel cmd_channel = {
@@ -118,6 +117,11 @@ init_kernal_emulation ()
 
     ultifs_mount ();
 }
+
+
+//
+// Read/write client memory
+//
 
 char
 peek_from_process (char * p)
@@ -186,27 +190,16 @@ copy_from_process (char * to, char * from, char len)
         *to++ = downcase (peek_from_process (from++));
 }
 
-void
-set_status (char x)
-{
-    *(char *) 0x90 = STATUS = x;
-}
+
+//
+// Channel buffers
+//
 
 void
-set_device_error (char code)
+clear_buf (channel * ch)
 {
-    channel * ch = channels[15];  // Bullshit. LFN is key here.
-
-    if (ch->buf) {
-        free (ch->buf);
-        ch->buf = ch->bufwptr = NULL;
-    }
-
-    if (!code)
-        return;
-
-    ch->buf = ch->bufwptr = malloc (64);
-    sprintf (ch->buf, "%d, ERROR, 0, 0", code);
+    free (ch->buf);
+    ch->buf = NULL;
 }
 
 void
@@ -224,37 +217,68 @@ read_from_buf (channel * ch)
 {
     char c = *ch->bufrptr++;
 
-    if (ch->bufrptr == ch->bufwptr) {
-        free (ch->buf);
-        ch->buf = NULL;
-    }
+    if (ch->bufrptr == ch->bufwptr)
+        clear_buf (ch);
 
     return c;
 }
 
 void
+set_status (char x)
+{
+    *(char *) 0x90 = STATUS = x;
+}
+
+
+//
+// Control channel #15
+//
+
+void
+set_device_error (char code)
+{
+    channel *  ch = channels[LFN];
+    char *     response;
+
+    clear_buf (ch);
+
+    if (!code)
+        return;
+
+    response = malloc (64);
+    sprintf (response, "%d, ERROR, 0, 0", code);
+    add_to_buf (ch, response, strlen (response));
+    free (response);
+}
+
+void
 open_command (char * name)
 {
-    channel * ch = channels[15];
-    char * msg = "fooooo!!";
+    channel *  ch = channels[15];
+    char *     msg = "fooooo!!";
 
     add_to_buf (ch, msg, strlen (msg));
 
     set_status (0);
 }
 
+
+//
+// Directory
+//
+
 void
 make_directory_list (channel * ch)
 {
-    unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
-    char * line = malloc (256);
-    unsigned char i;
-    unsigned char l;
-    char c;
-    char * p;
-    size_t len;
-    char * type;
+    char *         line = malloc (256);
+    unsigned       line_addr = 0x1201;
+    unsigned char  i;
+    unsigned char  l;
+    char           c;
+    char *         p;
+    size_t         len;
+    char *         type;
 
     // Emit start address.
     line[0] = line_addr & 255;
@@ -336,6 +360,11 @@ make_directory_list (channel * ch)
     accu = flags = 0;
 }
 
+
+//
+// KERNAL emulation
+//
+
 void
 free_channel ()
 {
@@ -351,9 +380,9 @@ free_channel ()
 char
 ultifs_kopen ()
 {
-    char *      name = NULL;
-    bfile *     found_file;
-    channel *   ch;
+    char *     name = NULL;
+    bfile *    found_file;
+    channel *  ch;
 
     if (!LFN) {
         accu = OSERR_FILE_NOT_IN;
@@ -510,10 +539,10 @@ ultifs_kclall ()
 void
 ultifs_kload ()
 {
-    char do_verify = accu;
-    char * addr;
-    unsigned char addr_l;
-    unsigned char addr_h;
+    char           do_verify = accu;
+    char *         addr;
+    unsigned char  addr_l;
+    unsigned char  addr_h;
 
     set_status (0);
     flags = 0;
@@ -551,9 +580,9 @@ ultifs_kload ()
 void
 ultifs_ksave ()
 {
-    char * ptr = *(char **) accu;
-    char * end = (char*) (yreg << 8 + xreg);
-    char status;
+    char *  ptr = *(char **) accu;
+    char *  end = (char*) (yreg << 8 + xreg);
+    char    status;
 
     LFN = NUM_LFN - 1;
 

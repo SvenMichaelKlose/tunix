@@ -363,13 +363,19 @@ ultifs_kopen ()
     bfile *     found_file;
     channel *   ch;
 
-    accu = flags = 0;
+    if (!LFN) {
+        accu = OSERR_FILE_NOT_IN;
+        flags = FLAG_C;
+        return FALSE;
+    }
 
     if (SA != 15 && channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
         flags = FLAG_C;
         return FALSE;
     }
+
+    accu = flags = 0;
 
     if (FNLEN) {
         name = malloc (FNLEN + 1);

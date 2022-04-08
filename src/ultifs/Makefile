@@ -11,9 +11,9 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ -I../ $<
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) $(LDFLAGS) -C vic.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst $(PROGRAM).map

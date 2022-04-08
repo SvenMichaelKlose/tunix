@@ -14,4 +14,4 @@ all:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
-	rm -frv ingle.img ingle.zip compiled image ingledata.bin ingleinstall ingle.img.zip
+	rm -fr ingle.img ingle.zip compiled image ingledata.bin ingleinstall ingle.img.zip

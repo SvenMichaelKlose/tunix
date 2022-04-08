@@ -43,23 +43,24 @@ respectively.
 
 Once the logical file is set up it can be used for
 input/output operations.  Most of the I/O KERNAL
-routines call on this routine to create the logical
+routines call this routine to create the logical
 files to operate on.
 
 No arguments need to be set up to use this routine, but
 both the SETLFS and SETNAM KERNAL routines must be
 called before using this routine.
 
-Possible errors:
+Possible errors returned in the accumulator with the
+carry flag set:
 
-    1: Too many files.
-    2: File already open.
-    4: File not found.
-    6: Device not present.
-    6: Not an input file.
-       Returned if logical file number is 0.
-    9: Illegal device number.
-       Returned if tape buffer is below $0200.
+| Code | Reason              |
+| ---- | ------------------- |
+| 1    | Too many files.     |
+| 2    | File already open.  |
+| 4    | File not found.     |
+| 5    | Device not present. |
+| 6    | Not an input file.  Also if logical file number is 0. |
+| 9    | Illegal device number.  Also if tape buffer is below $0200. |
 
 ### SETNAM - Set file name.
 

@@ -157,27 +157,6 @@ Possible errors:
   5 : device not present
   7 : file is not an output file
 
-## CLRCHN - Close input and output channels
-
-This routine is called to clear all open channels and
-restore the I/O channels to their original default
-values.  It is usually called after opening other I/O
-channels and using them for input/output operations.
-The default input device is 0, the keyboard.  The
-default output device is 3, the screen.
-
-If one of the channels to be closed is to the serial
-bus, an UNTALK signal is sent first to clear the input
-channel or an UNLISTEN is sent to clear the output
-channel.  By not calling this routine and leaving
-listener(s) active on the serial bus, several devices
-can receive the same data from the VIC at the same
-time.  One way to take advantage of this would be to
-command the printer to LISTEN and the disk to TALK.
-This would allow direct printing of a disk file.
-
-This routine never returns with an error.
-
 ## BASIN - Input character from channel
 
 This routine will get a byte of data from the channel
@@ -227,6 +206,26 @@ must be closed by a call to CLOSE before.
 On error this routine returns with the carry flag set
 and further information about it in STATUS.
 
+## CLRCN - Close default input and output files
+
+This routine closes and restores the default screen
+and keyboard channels.  It is usually called after
+opening other I/O channels and using them for I/O
+operations.  The default input device is 0, the
+keyboard.  The default output device is 3, the screen.
+
+If one of the channels to be closed is to the serial
+bus, an UNTALK signal is sent first to clear the input
+channel or an UNLISTEN is sent to clear the output
+channel.  By not calling this routine and leaving
+listener(s) active on the serial bus, several devices
+can receive the same data from the VIC at the same
+time.  One way to take advantage of this would be to
+command the printer to LISTEN and the disk to TALK.
+This would allow direct printing of a disk file.
+
+This routine never returns with an error.
+
 ## CLOSE - Close logical file
 
 This routine is used to close a logical file after all
@@ -236,6 +235,15 @@ the logical file number to be closed, the same number
 used when the file was opened using the OPEN routine.
 
 CLOSE never returns with an error.
+
+## CLALL - close all channels and files
+
+This routine closes all open files.  When this routine
+is called, the pointers into the open file table are
+reset, closing all files.  Also the routine
+automatically resets the I/O channels.
+
+This routine never returns with an error.
 
 ## LOAD - load RAM from a device
 
@@ -281,12 +289,3 @@ SAVE may return the same error codes as OPEN plus
 error code 7 (not an output file).
 
 UltiFS does not care about the logical file number.
-
-## CLALL - close all channels and files
-
-This routine closes all open files.  When this routine
-is called, the pointers into the open file table are
-reset, closing all files.  Also the routine
-automatically resets the I/O channels.
-
-This routine never returns with an error.

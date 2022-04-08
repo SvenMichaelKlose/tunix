@@ -84,15 +84,6 @@
 #define ERR_DISK_FULL           72
 
 
-extern char * saved_zp;
-
-extern char ultifs_kopen  (void);
-extern void ultifs_kclose (void);
-extern void ultifs_kclall (void);
-extern void ultifs_kload  (void);
-extern void ultifs_ksave  (void);
-
-
 typedef struct _channel {
     char *      name;
     bfile *     file;
@@ -198,7 +189,7 @@ copy_from_process (char * to, char * from, char len)
 void
 set_status (char x)
 {
-    saved_zp[0x90] = STATUS = x;
+    *(char *) 0x90 = STATUS = x;
 }
 
 void
@@ -483,11 +474,6 @@ ultifs_kbsout ()
     accu = OSERR_DEVICE_NOT_PRESENT;
     set_status (STATUS_TIMEOUT_WRITE);
     flags = FLAG_C;
-}
-
-void
-ultifs_kclrcn ()
-{
 }
 
 void

@@ -4,13 +4,11 @@
 ; Also redirects the old vectors.
 
 .export _init_secondary_wedge
-.export _last_regular_device
-.export _saved_zp
 .export uopen, uclose, uchkin, uckout, uclrcn
 .export ubasin, ubsout, uclall, uload, usave
 
 .import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kchkout
-.import _ultifs_kclrcn, _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
+.import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap_ofs
 
@@ -85,8 +83,8 @@ l:  lda IOPEN,x
     rts
 .endproc
 
-; Returns CC if it's not.
 .proc is_our_device
+; Returns CC if it's not.
     pha
     lda FA
     cmp _last_ingle_device
@@ -102,8 +100,8 @@ done:
     rts
 .endproc
 
-; Returns CC if it's not.
 .proc is_our_input
+; Returns CC if it's not.
     pha
     lda DFLTN
     cmp _last_ingle_device
@@ -119,8 +117,8 @@ done:
     rts
 .endproc
 
-; Returns CC if it's not.
 .proc is_our_output
+; Returns CC if it's not.
     pha
     lda DFLTO
     cmp _last_ingle_device
@@ -275,13 +273,7 @@ n:  lda old_IBSOUT+1
 .endproc
 
 .proc uclrcn
-;    jsr is_our_device
-;    bcc n
-;    jsr enter
-;    jsr _ultifs_kclrcn
-;    jmp leave
-
-n:  lda old_ICLRCN+1
+    lda old_ICLRCN+1
     pha
     lda old_ICLRCN
     pha

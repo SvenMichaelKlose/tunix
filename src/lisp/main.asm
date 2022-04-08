@@ -13,6 +13,9 @@ r:     .res 3  ; Return value of built-in function.
 tmp:   .res 3
 tmp2:  .res 3
 
+    .code
+
+    jmp _main
 
 ; ##############
 ; ### ERRORS ###

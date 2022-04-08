@@ -39,29 +39,6 @@ Pointers passed in Y and X registers have the low byte
 in the X register and the high byte in the Y register
 respectively.
 
-## OPEN - Open logical file.
-
-Once the logical file is set up it can be used for
-input/output operations.  Most of the I/O KERNAL
-routines call this routine to create the logical
-files to operate on.
-
-No arguments need to be set up to use this routine, but
-both the SETLFS and SETNAM KERNAL routines must be
-called before using this routine.
-
-Possible errors returned in the accumulator with the
-carry flag set:
-
-| Code | Reason              |
-| ---- | ------------------- |
-| 1    | Too many files.     |
-| 2    | File already open.  |
-| 4    | File not found.     |
-| 5    | Device not present. |
-| 6    | Not an input file.  Also if logical file number is 0. |
-| 9    | Illegal device number.  Also if tape buffer is below $0200. |
-
 ### SETNAM - Set file name.
 
 This routine is used to set up the file name for the
@@ -108,16 +85,28 @@ $FF.
 
 SETLFS never returns with an error.
 
-## CLOSE - Close logical file
+## OPEN - Open logical file.
 
-This routine is used to close a logical file after all
-I/O operations have been completed on that file.  This
-routine is called after the accumulator is loaded with
-the logical file number to be closed, the same number
-used when the file was opened using the OPEN routine.
+Once the logical file is set up it can be used for
+input/output operations.  Most of the I/O KERNAL
+routines call this routine to create the logical
+files to operate on.
 
-CLOSE does not return with an error if the file is
-not open.  It never returns with an error.
+No arguments need to be set up to use this routine, but
+both the SETLFS and SETNAM KERNAL routines must be
+called before using this routine.
+
+Possible errors returned in the accumulator with the
+carry flag set:
+
+| Code | Reason              |
+| ---- | ------------------- |
+| 1    | Too many files.     |
+| 2    | File already open.  |
+| 4    | File not found.     |
+| 5    | Device not present. |
+| 6    | Not an input file.  Also if logical file number is 0. |
+| 9    | Illegal device number.  Also if tape buffer is below $0200. |
 
 ## CHKIN - Open channel for input
 
@@ -189,7 +178,7 @@ This would allow direct printing of a disk file.
 
 This routine never returns with an error.
 
-## CHRIN - Input character from channel
+## BASIN - Input character from channel
 
 This routine will get a byte of data from the channel
 already set up as the input channel by the CHKIN
@@ -217,16 +206,10 @@ and further information about it in STATUS.
 ## GETIN - Input character from channel
 
 In practice this routine operates identically to the
-CHRIN routine for all devices except for the keyboard.
-If the keyboard is the current input device this
-routine will get one character from the keyboard
-buffer.  It depends on the IRQ routine to ; read the
-keyboard and put characters into the buffer.
+BASIN routine for all devices except that it does not
+wait for keyboard input but return 0.
 
-If the keyboard buffer is empty the value returned in
-the accumulator will be 0.
-
-## CHROUT - output a character to channel
+## BSOUT - output a character to channel
 
 This routine will output the byte in the accumulator
 to an already opened channel.  Use OPEN and CHKOUT to
@@ -243,6 +226,16 @@ must be closed by a call to CLOSE before.
 
 On error this routine returns with the carry flag set
 and further information about it in STATUS.
+
+## CLOSE - Close logical file
+
+This routine is used to close a logical file after all
+I/O operations have been completed on that file.  This
+routine is called after the accumulator is loaded with
+the logical file number to be closed, the same number
+used when the file was opened using the OPEN routine.
+
+CLOSE never returns with an error.
 
 ## LOAD - load RAM from a device
 
@@ -265,16 +258,7 @@ address after the last byte loaded in YX.
 This routine requires SETLFS and SETNAM to be used
 before.
 
-Possible errors:
-
-    1: Too many files.
-    2: File already open.
-    4: File not found.
-    6: Device not present.
-    6: Not an input file.
-       Returned if logical file number is 0.
-    9: Illegal device number.
-       Returned if tape buffer is below $0200.
+LOAD may return the same error codes as OPEN.
 
 ## SAVE - save RAM to a device
 
@@ -291,16 +275,8 @@ NOTE: device 0, the keyboard, and device 3, the screen,
 cannot be SAVEd to.  If the attempt is made, an error
 will occur, and the SAVE stopped.
 
-Possible errors:
-
-    1: Too many files.
-    2: File already open.
-    4: File not found.
-    6: Device not present.
-    6: Not an input file.
-       Returned if logical file number is 0.
-    9: Illegal device number.
-       Returned if tape buffer is below $0200.
+SAVE may return the same error codes as OPEN plus
+error code 7 (not an output file).
 
 ## CLALL - close all channels and files
 

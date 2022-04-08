@@ -133,6 +133,9 @@ peek_from_process (char * p)
 
     if (ph < 0x20 || ph > 0x7f)
         return *p;
+
+    *ULTIMEM_CONFIG2 |= 0xc0;
+
     if (ph < 0x40) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
         return *(p - (char *) 0x2000 + (char *) 0xa000);
@@ -156,6 +159,9 @@ poke_to_process (char * p, char v)
 
     if (ph < 0x20 || ph > 0x7f)
         return *p = v;
+
+    *ULTIMEM_CONFIG2 |= 0xc0;
+
     if (ph < 0x40) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
         return *(p - (char *) 0x2000 + (char *) 0xa000) = v;
@@ -183,16 +189,8 @@ downcase (char c)
 void
 copy_from_process (char * to, char * from, char len)
 {
-    char old_cfg2 = *ULTIMEM_CONFIG2;
-    unsigned old_blk5 = *ULTIMEM_BLK5;
-
-    *ULTIMEM_CONFIG2 |= 0xc0;
-
     while (len--)
         *to++ = downcase (peek_from_process (from++));
-
-    *ULTIMEM_BLK5 = old_blk5;
-    *ULTIMEM_CONFIG2 = old_cfg2;
 }
 
 void
@@ -368,14 +366,12 @@ ultifs_kopen ()
 
     if (!LFN) {
         accu = OSERR_FILE_NOT_IN;
-        flags = FLAG_C;
-        return FALSE;
+        goto error2;
     }
 
     if (SA != 15 && channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
-        flags = FLAG_C;
-        return FALSE;
+        goto error2;
     }
 
     accu = flags = 0;
@@ -412,6 +408,7 @@ ultifs_kopen ()
 
 error:
     free_channel ();
+error2:
     flags = FLAG_C;
 
     return FALSE;

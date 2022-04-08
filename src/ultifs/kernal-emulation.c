@@ -94,11 +94,10 @@ typedef struct _channel {
     char *      bufrptr;
 } channel;
 
-#define MAX_USER_LFN  31    // TODO: Find out the official maximum.
-#define LOADSAVE_LFN  (MAX_USER_LFN + 1)
+#define NUM_LFN  32    // May not be the official limit. (pixel)
 
 // Channels keyed by logical file naumber.
-channel * channels[LOADSAVE_LFN + 1];
+channel * channels[NUM_LFN];
 
 channel cmd_channel = {
     NULL, NULL, 0, NULL, NULL, NULL
@@ -130,17 +129,19 @@ init_kernal_emulation ()
 char
 peek_from_process (char * p)
 {
-    if (p < (char *) 0x2000 || p > (char *) 0x7fff)
+    unsigned char ph = (unsigned) p >> 8;
+
+    if (ph < 0x20 || ph > 0x7f)
         return *p;
-    if (p < (char *) 0x4000) {
+    if (ph < 0x40) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
         return *(p - (char *) 0x2000 + (char *) 0xa000);
     }
-    if (p < (char *) 0x6000) {
+    if (ph < 0x60) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
         return *(p - (char *) 0x4000 + (char *) 0xa000);
     }
-    if (p < (char *) 0x8000) {
+    if (ph < 0x80) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
         return *(p - (char *) 0x6000 + (char *) 0xa000);
     }
@@ -151,17 +152,19 @@ peek_from_process (char * p)
 char
 poke_to_process (char * p, char v)
 {
-    if (p < (char *) 0x2000 || p > (char *) 0x7fff)
+    unsigned char ph = (unsigned) p >> 8;
+
+    if (ph < 0x20 || ph > 0x7f)
         return *p = v;
-    if (p < (char *) 0x4000) {
+    if (ph < 0x40) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
         return *(p - (char *) 0x2000 + (char *) 0xa000) = v;
     }
-    if (p < (char *) 0x6000) {
+    if (ph < 0x60) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
         return *(p - (char *) 0x4000 + (char *) 0xa000) = v;
     }
-    if (p < (char *) 0x8000) {
+    if (ph < 0x80) {
         *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
         return *(p - (char *) 0x6000 + (char *) 0xa000) = v;
     }
@@ -510,7 +513,7 @@ file_not_open:
 void
 ultifs_kbsout ()
 {
-    // TODO: Implement writes.
+    accu = OSERR_DEVICE_NOT_PRESENT;
     set_status (STATUS_TIMEOUT_WRITE);
     flags = FLAG_C;
 }
@@ -526,10 +529,12 @@ ultifs_kload ()
 {
     char do_verify = accu;
     char * addr;
-    unsigned addr_l;
-    unsigned addr_h;
+    unsigned char addr_l;
+    unsigned char addr_h;
 
-    LFN = LOADSAVE_LFN;
+    set_status (0);
+    flags = 0;
+    LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())
         return;
@@ -546,17 +551,11 @@ ultifs_kload ()
 
     // Read all bytes.
     addr = (char *) (addr_h << 8 | addr_l);
-    while (1) {
-        poke_to_process (addr++, ultifs_kbasin ());
-
+    while (!STATUS) {
+        ultifs_kbasin ();
         if (STATUS & STATUS_END_OF_FILE)
             break;
-
-        if (STATUS) {
-            ultifs_kclose ();
-            flags = FLAG_C;
-            return;
-        }
+        poke_to_process (addr++, accu);
     }
 
     ultifs_kclose ();
@@ -564,9 +563,6 @@ ultifs_kload ()
     // Return next free address.
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
-
-    set_status (0);
-    flags = 0;
 }
 
 void
@@ -576,23 +572,14 @@ ultifs_ksave ()
     char * end = (char*) (yreg << 8 + xreg);
     char status;
 
-    LFN = LOADSAVE_LFN;
+    LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())
         return;
 
-    while (1) {
-        accu = peek_from_process (ptr++);
+    while (!STATUS) {
+        peek_from_process (ptr++);
         ultifs_kbsout ();
-
-        if (STATUS) {
-            status = STATUS;
-            ultifs_kclose ();
-            set_status (status);
-            flags = FLAG_C;     // TODO: Does this really happen?
-            return;
-        }
-
         if (end == ptr)
             break;
     }

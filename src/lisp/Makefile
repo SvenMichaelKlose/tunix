@@ -11,9 +11,9 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -I../lib/term/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lst -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl

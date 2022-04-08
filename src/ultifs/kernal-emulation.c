@@ -368,7 +368,6 @@ ultifs_kopen ()
         accu = OSERR_FILE_NOT_IN;
         goto error2;
     }
-
     if (SA != 15 && channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
         goto error2;
@@ -383,6 +382,7 @@ ultifs_kopen ()
     }
 
     ch = malloc (sizeof (channel));
+    ch->sa = SA;
     ch->buf = NULL;
     channels[LFN] = ch;
 
@@ -415,31 +415,6 @@ error2:
 }
 
 void
-ultifs_kclose ()
-{
-    channel * ch = channels[LFN];
-
-    accu = flags = 0;
-
-    if (!ch) {
-        accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-        return;
-    }
-
-    if (SA == 15) {
-        ultifs_kclall ();
-        return;
-    }
-
-    if (ch->file)
-        bfile_close (ch->file);
-    free_channel ();
-
-    set_status (0);
-}
-
-void
 ultifs_kchkin ()
 {
     flags = 0;
@@ -452,24 +427,19 @@ ultifs_kchkout ()
 {
     if (!channels[LFN]) {
         accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-        return;
+        goto error;
     }
-
     if (SA != 15) {
         accu = OSERR_FILE_NOT_OUT;
-        flags = FLAG_C;
-        return;
+        goto error;
     }
 
-    // TODO: Flash writes.
-
     accu = flags = 0;
-}
+    accu = OSERR_FILE_NOT_OUT;
+    return;
 
-void
-ultifs_kclrcn ()
-{
+error:
+    flags = FLAG_C;
 }
 
 char
@@ -516,9 +486,39 @@ ultifs_kbsout ()
 }
 
 void
+ultifs_kclrcn ()
+{
+}
+
+void
+ultifs_kclose ()
+{
+    channel * ch = channels[LFN];
+
+    // TODO: Find out what this is about.
+    /*
+    if (SA == 15) {
+        ultifs_kclall ();
+        return;
+    }
+    */
+
+    if (!ch)
+        return;
+    if (ch->file)
+        bfile_close (ch->file);
+
+    free_channel ();
+}
+
+
+void
 ultifs_kclall ()
 {
-    accu = flags = 0;
+    for (LFN = 0; LFN < NUM_LFN; LFN++)
+        if (channels[LFN])
+            ultifs_kclose ();
+
 }
 
 void

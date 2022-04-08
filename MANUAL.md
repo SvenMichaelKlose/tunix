@@ -61,7 +61,7 @@ CBM KERNAL already.
 
 This is the heart of the core.  It is
 redirecting the KERNAL vectors to itself
-and calls registered drivers or the
+and calls registered drivers and/or the
 original KERNAL functions.
 
 This is also where multi-tasking has to
@@ -101,30 +101,22 @@ parent.  Standards streams (keyboard,
 screen) can be replaced before running
 execute().
 
-Under the hood execute() got a little
-complicated because it has to
-differentiate between regular programs
-and those programs made for INGLE.
-
 ## System boot
 
-The core is stored in and
-automatically started from bank 0
-of the Flash ROM along with INGLE and
-most wanted applications on the ROM
-file system.
+The core is loaded from the ROM file
+system by the boot ROM on bank 0.
 
 The core boots by loading and running
 the init batch script 'init' on the ROM
 file system.  It contains a list of
 drivers and programs to run one after
 another.  One can reduce the list by
-drivers that are of no use for example.
-This can save a lot of time.
+drivers that are not used.  This can
+save a lot of time.
 
-Usually the last item of the init
-script is the 'desktop'.  (It can be
-started on the command-line as well.)
+Usually the last item of the init script
+is the 'desktop'.  (It can be started on
+the command-line as well.)
 
 # Console
 
@@ -152,9 +144,9 @@ pointer input is supported, too.
 
 The desktop provides a windowed version
 of the terminal embedded into a window
-manager with app menu and a file
-selector box that can be launched by
-programs via their terminals.
+manager with app menu, A built-in file
+selector box can be launched by programs
+via their terminals.
 
 ## Apps
 

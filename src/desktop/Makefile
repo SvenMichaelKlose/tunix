@@ -25,7 +25,7 @@ $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 
 all: $(PROGRAM)
 	$(AS) -o charset-4x8.o charset-4x8-light.asm
-	$(LD) -C ../attic/core/dev/con/charset.cfg -o charset-4x8.bin charset-4x8.o
+	$(LD) -C charset.cfg -o charset-4x8.bin charset-4x8.o
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lst $(PROGRAM).map desktop.bin desktop-ultifs.bin charset-4x8.o charset-4x8.bin desktop-file-window.bin

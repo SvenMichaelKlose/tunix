@@ -261,11 +261,11 @@ n:  lda old_ICHKOUT+1
 .endproc
 
 .proc uclrcn
-    jsr is_our_device
-    bcc n
-    jsr enter
-    jsr _ultifs_kclrcn
-    jmp leave
+;    jsr is_our_device
+;    bcc n
+;    jsr enter
+;    jsr _ultifs_kclrcn
+;    jmp leave
 
 n:  lda old_ICLRCN+1
     pha

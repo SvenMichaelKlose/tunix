@@ -260,6 +260,8 @@ before.
 
 LOAD may return the same error codes as OPEN.
 
+UltiFS does not care about the logical file number.
+
 ## SAVE - save RAM to a device
 
 This routine saves a section of memory.  Memory is
@@ -277,6 +279,8 @@ will occur, and the SAVE stopped.
 
 SAVE may return the same error codes as OPEN plus
 error code 7 (not an output file).
+
+UltiFS does not care about the logical file number.
 
 ## CLALL - close all channels and files
 

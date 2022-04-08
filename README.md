@@ -1,7 +1,7 @@
 INGLE – The cozy GUI for your Commodore VIC-20 with UltiMem expansion
 =====================================================================
 
-So far just a public coding experiment.
+This is outdated INGLE-0.2.  Another architecture is in development.
 
 # File manager
 

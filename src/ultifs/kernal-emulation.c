@@ -18,7 +18,7 @@
 #define FALSE   0
 #define TRUE    -1
 
-// Callee registers
+// Call registers
 #define accu        (*(char*) 0x9c00)
 #define xreg        (*(char*) 0x9c01)
 #define yreg        (*(char*) 0x9c02)
@@ -65,7 +65,7 @@
 #define OSERR_MISSING_FILE_NAME     8
 #define OSERR_ILLEGAL_DEVICE_NUMBER 9
 
-/* Device error codes (sent as message) */
+/* Device error codes (read from command channel #15) */
 #define ERR_BYTE_DECODING       24
 #define ERR_WRITE               25
 #define ERR_WRITE_PROTECT_ON    26
@@ -82,6 +82,15 @@
 #define ERR_FILE_TYPE_MISMATCH  64
 #define ERR_NO_CHANNEL          70
 #define ERR_DISK_FULL           72
+
+
+extern char * saved_zp;
+
+extern char ultifs_kopen  (void);
+extern void ultifs_kclose (void);
+extern void ultifs_kclall (void);
+extern void ultifs_kload  (void);
+extern void ultifs_ksave  (void);
 
 
 typedef struct _channel {
@@ -102,13 +111,6 @@ channel * channels[NUM_LFN];
 channel cmd_channel = {
     NULL, NULL, 0, NULL, NULL, NULL
 };
-
-
-extern char ultifs_kopen  (void);
-extern void ultifs_kclose (void);
-extern void ultifs_kclall (void);
-extern void ultifs_kload  (void);
-extern void ultifs_ksave  (void);
 
 
 void
@@ -194,6 +196,12 @@ copy_from_process (char * to, char * from, char len)
 }
 
 void
+set_status (char x)
+{
+    saved_zp[0x90] = STATUS = x;
+}
+
+void
 set_device_error (char code)
 {
     channel * ch = channels[15];  // Bullshit. LFN is key here.
@@ -233,14 +241,6 @@ read_from_buf (channel * ch)
     return c;
 }
 
-extern char * saved_zp;
-
-void
-set_status (char x)
-{
-    saved_zp[0x90] = STATUS = x;
-}
-
 void
 open_command (char * name)
 {
@@ -253,7 +253,7 @@ open_command (char * name)
 }
 
 void
-make_directory_listing (channel * ch)
+make_directory_list (channel * ch)
 {
     unsigned line_addr = 0x1201;
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
@@ -392,7 +392,7 @@ ultifs_kopen ()
     }
 
     if (FNLEN == 1 && *name == '$') {
-        make_directory_listing (ch);
+        make_directory_list (ch);
         return TRUE;
     }
 

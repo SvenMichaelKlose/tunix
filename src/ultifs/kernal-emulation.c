@@ -19,10 +19,15 @@
 #define TRUE    -1
 
 // Client registers
-#define accu        (*(char*) 0x9c00)
-#define xreg        (*(char*) 0x9c01)
-#define yreg        (*(char*) 0x9c02)
-#define flags       (*(char*) 0x9c03)
+#define accu          (*(char*) 0x9c00)
+#define xreg          (*(char*) 0x9c01)
+#define yreg          (*(char*) 0x9c02)
+#define flags         (*(char*) 0x9c03)
+#define proc_ustatus  (*(char*) 0x9c04)
+#define proc_blk1     (*(int*) 0x9c05)
+#define proc_blk2     (*(int*) 0x9c07)
+#define proc_blk3     (*(int*) 0x9c09)
+#define proc_blk5     (*(int*) 0x9c0b)
 
 // CPU flags
 #define FLAG_C          1
@@ -134,15 +139,15 @@ peek_from_process (char * p)
     *ULTIMEM_CONFIG2 |= 0xc0;
 
     if (ph < 0x40) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
+        *ULTIMEM_BLK5 = proc_blk1;
         return *(p - (char *) 0x2000 + (char *) 0xa000);
     }
     if (ph < 0x60) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
+        *ULTIMEM_BLK5 = proc_blk2;
         return *(p - (char *) 0x4000 + (char *) 0xa000);
     }
     if (ph < 0x80) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
+        *ULTIMEM_BLK5 = proc_blk3;
         return *(p - (char *) 0x6000 + (char *) 0xa000);
     }
 
@@ -160,15 +165,15 @@ poke_to_process (char * p, char v)
     *ULTIMEM_CONFIG2 |= 0xc0;
 
     if (ph < 0x40) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c05;
+        *ULTIMEM_BLK5 = proc_blk1;
         return *(p - (char *) 0x2000 + (char *) 0xa000) = v;
     }
     if (ph < 0x60) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c07;
+        *ULTIMEM_BLK5 = proc_blk2;
         return *(p - (char *) 0x4000 + (char *) 0xa000) = v;
     }
     if (ph < 0x80) {
-        *ULTIMEM_BLK5 = *(unsigned *) 0x9c09;
+        *ULTIMEM_BLK5 = proc_blk3;
         return *(p - (char *) 0x6000 + (char *) 0xa000) = v;
     }
 

@@ -510,14 +510,6 @@ ultifs_kclose ()
 {
     channel * ch = channels[LFN];
 
-    // TODO: Find out what this is about.
-    /*
-    if (SA == 15) {
-        ultifs_kclall ();
-        return;
-    }
-    */
-
     if (!ch)
         return;
     if (ch->file)
@@ -590,7 +582,7 @@ ultifs_ksave ()
         return;
 
     while (!STATUS) {
-        peek_from_process (ptr++);
+        accu = peek_from_process (ptr++);
         ultifs_kbsout ();
         if (end == ptr)
             break;

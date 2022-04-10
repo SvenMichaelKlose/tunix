@@ -228,12 +228,6 @@ read_from_buf (channel * ch)
     return c;
 }
 
-void
-set_status (char x)
-{
-    *(char *) 0x90 = STATUS = x;
-}
-
 
 //
 // Control channel #15
@@ -264,7 +258,7 @@ open_command (char * name)
 
     add_to_buf (ch, msg, strlen (msg));
 
-    set_status (0);
+    STATUS = 0;
 }
 
 
@@ -474,7 +468,7 @@ ultifs_kbasin ()
     bfile *    file;
 
     accu = flags = 0;
-    set_status (0);
+    STATUS = 0;
 
     if (!ch)
         goto file_not_open;
@@ -492,7 +486,7 @@ ultifs_kbasin ()
     return accu = bfile_read (file);
 
 end_of_file:
-    set_status (STATUS_END_OF_FILE);
+    STATUS = STATUS_END_OF_FILE;
 
     return 0;
 
@@ -506,7 +500,7 @@ void
 ultifs_kbsout ()
 {
     accu = OSERR_DEVICE_NOT_PRESENT;
-    set_status (STATUS_TIMEOUT_WRITE);
+    STATUS = STATUS_TIMEOUT_WRITE;
     flags = FLAG_C;
 }
 
@@ -541,7 +535,7 @@ ultifs_kload ()
     unsigned char  addr_l;
     unsigned char  addr_h;
 
-    set_status (0);
+    STATUS = 0;
     flags = 0;
     LFN = NUM_LFN - 1;
 

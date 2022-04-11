@@ -1,6 +1,7 @@
-/*
- * Ultimem file system
- */
+// UltiFS
+//
+// Author: Sven Michael Klose <pixel@hugbox.org>
+
 
 //#define COMPRESS_FILE_DATA_WITH_EXOMIZER
 

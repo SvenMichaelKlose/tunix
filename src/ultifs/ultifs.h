@@ -1,3 +1,7 @@
+// UltiFS
+//
+// Author: Sven Michael Klose <pixel@hugbox.org>
+
 #ifndef ULTIFS_H
 #define ULTIFS_H
 
@@ -12,15 +16,15 @@ typedef unsigned long usize;
 #endif
 
 typedef struct _bfile {
-    upos    start;          /* Start of file block. */
-    upos    ptr;            /* File data position. */
-    upos    pos;            /* Position in file data. */
-    unsigned  bank;
-    char    * addr;
-    usize   size;           /* Current size (grows on writes). */
-    upos    directory;      /* The directory this file is in. */
-    upos    replaced;       /* Position of block this one replaced. */
-    char    mode;           /* Mode at bfile_open(). */
+    upos       start;      /* Start of file block. */
+    upos       ptr;        /* File data position. */
+    upos       pos;        /* Position in file data. */
+    unsigned   bank;
+    char *     addr;
+    usize      size;       /* Current size (grows on writes). */
+    upos       directory;  /* The directory this file is in. */
+    upos       replaced;   /* Position of block this one replaced. */
+    char       mode;       /* Mode at bfile_open(). */
 } bfile;
 
 #define ULTIFS_MODE_READ    0

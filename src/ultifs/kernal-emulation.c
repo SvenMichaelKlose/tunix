@@ -1,3 +1,12 @@
+// UltiFS
+//
+// KERNAL emulation
+//
+// This is the interface between the UltiFS API and
+// regular apps.
+//
+// Author: Sven Michael Klose <pixel@hugbox.org>
+
 #pragma code-name ("ULTIFS")
 
 #include <lib/ingle/cc65-charmap.h>
@@ -516,7 +525,6 @@ ultifs_kclose ()
 
     free_channel ();
 }
-
 
 void
 ultifs_kclall ()

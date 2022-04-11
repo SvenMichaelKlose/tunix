@@ -1,7 +1,10 @@
-; UltiFS wedge
+; UltiFS secondary wedge
 ;
-; Wraps the UltiFS C functions by banking BLK2 and BLK3.
-; Also redirects the old vectors.
+; Banks in BLK2 and BLK3 and calls the kernal emulation
+; or returns for calling regular KERNAL functions.
+;
+; Author: Sven Michael Klose <pixel@hugbox.org>
+
 
 .export _init_secondary_wedge
 .export uopen, uclose, uchkin, uckout, uclrcn
@@ -11,19 +14,19 @@
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap_ofs
+.import __ZP_START__
+.import __ZP_SIZE__
+
 
 stack_size  = $2a    ; Keep greater or equal to what linker config file says.
 cpu_state   = $9c00
 unmap       = $9800 + unmap_ofs
 
-.import __ZP_START__
-.import __ZP_SIZE__
-
 .segment "SECONDARY"
 
 FA      = $ba   ; Device number
-DFLTN   = $99
-DFLTO   = $9a
+DFLTN   = $99   ; Current input device number.
+DFLTO   = $9a   ; Current output device number.
 
 IOPEN   = $031A
 ICLOSE  = $031C
@@ -39,9 +42,6 @@ IUSRCMD = $032E
 ILOAD   = $0330
 ISAVE   = $0332
 
-_last_regular_device:   .res 1
-_last_ingle_device:     .res 1
-
 old_IOPEN:      .res 2
 old_ICLOSE:     .res 2
 old_ICHKIN:     .res 2
@@ -56,7 +56,11 @@ old_IUSRCMD:    .res 2  ; unchanged
 old_ILOAD:      .res 2
 old_ISAVE:      .res 2
 
+_last_regular_device:   .res 1
+_last_ingle_device:     .res 1
+
 _saved_zp:  .res stack_size
+
 
 .proc _init_secondary_wedge
     tax

@@ -1,6 +1,8 @@
-; Process-space wedge
+; UltiFS process-space wedge
 ;
 ; Banks in the secondary wedge.
+;
+; Author: Sven Michael Klose <pixel@hugbox.org>
 
 
 .export _init_primary_wedge, unmap_ofs
@@ -8,11 +10,13 @@
 .import uopen, uclose, uchkin, uckout, uclrcn
 .import ubasin, ubsout, uclall, uload, usave
 
+
     .zeropage
 
 s:      .res 2
 v:      .res 2
 d:      .res 2
+
 
     .data
 
@@ -27,6 +31,7 @@ secondary_vectors_l:
 secondary_vectors_h:
     .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
     .byte >ubasin, >ubsout, >FSTOP, >FGETIN, >uclall, >BREAK, >uload, >usave, 0
+
 
     .code
 

@@ -547,7 +547,7 @@ ultifs_kload ()
     LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())
-        return;
+        goto end;
 
     // Read destination address.
     addr_l = ultifs_kbasin ();
@@ -573,6 +573,8 @@ ultifs_kload ()
     // Return next free address.
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
+
+end:
     LFN = old_LFN;
 }
 

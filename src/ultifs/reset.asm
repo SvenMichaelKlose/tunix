@@ -8,8 +8,25 @@ l:  lda start,x
     sta $9c00,x
     dex
     bpl l
+    jmp $9c00
 
 start:
+    lda #$ff
+    sta $9ff2
+    ldx #3
+    lda #0
+    stx $9ff8
+    sta $9ff9
+    inx
+    stx $9ffa
+    sta $9ffb
+    inx
+    stx $9ffc
+    sta $9ffd
+    inx
+    stx $9ffe
+    sta $9fff
+
     cld
     jsr $e518   ; Init VIC & clear screen
     jsr $e45b   ; Set BASIC vectors

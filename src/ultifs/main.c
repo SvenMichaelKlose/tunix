@@ -26,7 +26,6 @@ extern void __fastcall__ init_kernal_emulation (void);
 void
 copy_program_to_resident_banks (unsigned first_bank)
 {
-    // Save BLK5 config.
     char      old_cfg2 = *ULTIMEM_CONFIG2;
     unsigned  old_blk5 = *ULTIMEM_BLK5;
 
@@ -40,7 +39,6 @@ copy_program_to_resident_banks (unsigned first_bank)
     *ULTIMEM_BLK5 = first_bank;
     memcpy ((void *) 0xa000, (void *) 0x6000, 0x2000);
 
-    // Restore BLK5 config.
     *ULTIMEM_CONFIG2 = old_cfg2;
     *ULTIMEM_BLK5    = old_blk5;
 }

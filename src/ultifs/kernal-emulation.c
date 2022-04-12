@@ -541,8 +541,7 @@ ultifs_kload ()
     unsigned char  addr_l;
     unsigned char  addr_h;
 
-    STATUS = 0;
-    flags = 0;
+    STATUS = flags = 0;
     LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())
@@ -583,8 +582,8 @@ ultifs_ksave ()
     char    old_LFN = LFN;
     char *  ptr = *(char **) accu;
     char *  end = (char*) (yreg << 8 + xreg);
-    char    status;
 
+    STATUS = flags = 0;
     LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())

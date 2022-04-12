@@ -476,8 +476,7 @@ ultifs_kbasin ()
     channel *  ch = channels[LFN];
     bfile *    file;
 
-    accu = flags = 0;
-    STATUS = 0;
+    accu = flags = STATUS = 0;
 
     if (!ch)
         goto file_not_open;
@@ -538,6 +537,7 @@ void
 ultifs_kload ()
 {
     char           do_verify = accu;
+    char           old_LFN = LFN;
     char *         addr;
     unsigned char  addr_l;
     unsigned char  addr_h;
@@ -573,6 +573,7 @@ ultifs_kload ()
     // Return next free address.
     xreg = (unsigned) addr & 255;
     yreg = (unsigned) addr >> 8;
+    LFN = old_LFN;
 }
 
 void

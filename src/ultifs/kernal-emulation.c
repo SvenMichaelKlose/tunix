@@ -516,12 +516,11 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[LFN];
-
     if (!ch)
         return;
+
     if (ch->file)
         bfile_close (ch->file);
-
     free_channel ();
 }
 
@@ -560,7 +559,7 @@ ultifs_kload ()
     }
 
     // Read all bytes.
-    addr = (char *) (addr_h << 8 | addr_l);
+    addr = (char *) ((unsigned) addr_h << 8 | (unsigned) addr_l);
     while (!STATUS) {
         ultifs_kbasin ();
         if (STATUS & STATUS_END_OF_FILE)
@@ -581,6 +580,7 @@ end:
 void
 ultifs_ksave ()
 {
+    char    old_LFN = LFN;
     char *  ptr = *(char **) accu;
     char *  end = (char*) (yreg << 8 + xreg);
     char    status;
@@ -588,7 +588,7 @@ ultifs_ksave ()
     LFN = NUM_LFN - 1;
 
     if (!ultifs_kopen ())
-        return;
+        goto end;
 
     while (!STATUS) {
         accu = peek_from_process (ptr++);
@@ -598,4 +598,7 @@ ultifs_ksave ()
     }
 
     ultifs_kclose ();
+
+end:
+    LFN = old_LFN;
 }

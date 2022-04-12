@@ -166,6 +166,8 @@ done:
     sta cpu_state+12
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
+    lda #$ff
+    sta $9ff2
     lda #118
     sta $9ffa
     lda #119

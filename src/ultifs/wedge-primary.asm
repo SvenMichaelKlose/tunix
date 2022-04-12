@@ -119,15 +119,15 @@ r:  rts
     sei
 
     ; Save Ultimem status and BLK1.
-    lda $9ff2
-    sta cpu_state+4
     lda $9ff8
     sta cpu_state+5
     lda $9ff9
     sta cpu_state+6
+    lda $9ff2
+    sta cpu_state+4
 
     ; Bank in secondary wedge on BLK1.
-    lda #%11111111  ; (R/W RAM for BLK1-3)
+    ora #%00000011  ; (R/W RAM for BLK1)
     sta $9ff2
     lda #117        ; TODO: Should be configurable.
     sta $9ff8

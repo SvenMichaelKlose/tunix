@@ -27,8 +27,8 @@ void
 copy_program_to_resident_banks (unsigned first_bank)
 {
     // Save BLK5 config.
-    char  old_cfg2 = *ULTIMEM_CONFIG2;
-    int   old_blk5 = *ULTIMEM_BLK5;
+    char      old_cfg2 = *ULTIMEM_CONFIG2;
+    unsigned  old_blk5 = *ULTIMEM_BLK5;
 
     // r/w RAM on BLK5.
     *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | (ULTIMEM_CFG_RW_RAM << 6);

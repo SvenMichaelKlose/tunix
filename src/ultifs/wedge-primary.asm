@@ -127,7 +127,7 @@ r:  rts
     sta cpu_state+6
 
     ; Bank in secondary wedge on BLK1.
-    ora #%11111100  ; (R/W RAM for BLK1-3)
+    lda #%11111111  ; (R/W RAM for BLK1-3)
     sta $9ff2
     lda #117        ; TODO: Should be configurable.
     sta $9ff8

@@ -5,10 +5,10 @@
 .proc _reset
     ldx #end - start
 l:  lda start,x
-    sta $9c00,x
+    sta $9d00,x
     dex
     bpl l
-    jmp $9c00
+    jmp $9d00
 
 start:
     lda #$ff

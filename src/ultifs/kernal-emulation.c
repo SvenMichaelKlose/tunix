@@ -532,7 +532,6 @@ ultifs_kclall ()
     for (LFN = 0; LFN < NUM_LFN; LFN++)
         if (channels[LFN])
             ultifs_kclose ();
-
 }
 
 void

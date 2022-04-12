@@ -18,7 +18,7 @@
 .import __ZP_SIZE__
 
 
-stack_size  = $2a    ; Keep greater or equal to what linker config file says.
+stack_size  = $20    ; Keep greater or equal to what linker config file says.
 cpu_state   = $9c00
 unmap       = $9800 + unmap_ofs
 
@@ -84,6 +84,13 @@ l:  lda IOPEN,x
     dey
     bne l
 
+    ; Save zeropage.
+    ldx #<__ZP_SIZE__
+l2: lda __ZP_START__-1,x
+    sta _saved_zp-1,x
+    dex
+    bne l2
+
     rts
 .endproc
 
@@ -144,7 +151,7 @@ done:
     stx cpu_state+1
     sty cpu_state+2
 
-    ; Save banks.
+    ; Save BLK2, BLL3 and BLK5.
     lda $9ffa
     sta cpu_state+7
     lda $9ffb
@@ -167,10 +174,13 @@ done:
     sta $9ffb
     sta $9ffd
 
-    ; Save zeropage.
+    ; Swap zeropage.
     ldx #<__ZP_SIZE__
 l:  lda __ZP_START__-1,x
+    ldy _saved_zp-1,x
     sta _saved_zp-1,x
+    tya
+    sta __ZP_START__-1,x
     dex
     bne l
 
@@ -178,14 +188,17 @@ l:  lda __ZP_START__-1,x
 .endproc
 
 .proc leave
-    ; Restore zeropage.
+    ; Swap zeropage.
     ldx #<__ZP_SIZE__
-l:  lda _saved_zp-1,x
+l:  lda __ZP_START__-1,x
+    ldy _saved_zp-1,x
+    sta _saved_zp-1,x
+    tya
     sta __ZP_START__-1,x
     dex
     bne l
 
-    ; Restore banks.
+    ; Restore BLK2, BLK3 and BLK5.
     lda cpu_state+7
     sta $9ffa
     lda cpu_state+8

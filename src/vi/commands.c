@@ -57,6 +57,8 @@ cmd_open_below ()
 void
 cmd_enter ()
 {
+    line * current_line = line_get (linenr);
+
     if (xpos == current_line->length)
         line_insert_after ();       // TODO: Remove?
     else
@@ -72,7 +74,6 @@ void
 cmd_delete_line ()
 {
     line_delete ();
-    line_goto (linenr);
 
     changes_first = linenr;
     changes_last = 32000;
@@ -91,6 +92,8 @@ cmd_change_till_line_end ()
 void
 cmd_delete_till_line_end ()
 {
+    line * current_line = line_get (linenr);
+
     current_line->length = xpos;
     if (xpos)
         xpos--;
@@ -133,6 +136,7 @@ cmd_replace_char ()
 void
 cmd_join ()
 {
+    line * current_line = line_get (linenr);
     unsigned len = current_line->length;
 
     if (!current_line->next)
@@ -238,6 +242,7 @@ cmd_read_file ()
 {
     char *    data = malloc (256);
     char *    p;
+    line *    current_line;
     line *    l;
     int       len;
     char      c;
@@ -299,8 +304,6 @@ cmd_read_file ()
 
         num_lines++;
     }
-
-    current_line = first_line;
 
 done:
     cbm_close (2);

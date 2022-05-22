@@ -55,7 +55,7 @@ enable_cursor ()
 void
 print_linebuf ()
 {
-    char *  data = &linebuf;
+    char *  data = (char *) &linebuf;
     int     len = linebuf_length;
 
     if (len > columns)

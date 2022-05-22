@@ -100,7 +100,6 @@ edit_mode (void)
 
     while (1) {
         screen_update ();
-        line_goto (linenr);
         line_line_to_buf ();
         c = input ();
         buf_to_line ();
@@ -211,7 +210,6 @@ exec_action ()
 
     reset_log ();
     repetitions = 0;
-    line_goto (linenr);
 
     if (peek_key () != '0')
         repetitions = get_repetitions ();

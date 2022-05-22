@@ -1,6 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/lineedit/liblineedit.h>
 #include <lib/text/line.h>
@@ -8,21 +10,25 @@
 #include <lib/term/libterm.h>
 
 
-line      * first_line;
-line      * current_line;
+line *    first_line;
 int       linenr;
 unsigned  num_lines;
+
+char str[128];
 
 void
 line_test (char * msg)
 {
     line * l = first_line;
     line * prev = NULL;
+    int linenr = 0;
 
     while (l) {
+        linenr++;
         if (l->prev != prev) {
             term_puts (msg);
-            term_puts (": Broken link to prev.");
+            sprintf (str, "Broken link to prev on line %d.", linenr);
+            term_puts (str);
             while (1);
         }
 
@@ -31,13 +37,13 @@ line_test (char * msg)
     }
 }
 
-
 line *
 line_alloc ()
 {
     line * l = malloc (sizeof (line));
 
-    l->prev = l->next = l->data = NULL;
+    l->data = NULL;
+    l->prev = l->next = NULL;
     l->length = 0;
 
     return l;
@@ -46,6 +52,7 @@ line_alloc ()
 void
 line_insert_before ()
 {
+    line * current_line = line_get (linenr);
     line * new = line_alloc ();
 
     num_lines++;
@@ -56,27 +63,28 @@ line_insert_before ()
 
     if (current_line == first_line)
         first_line = new;
-
-    line_goto (linenr);
 }
 
 void
 line_insert_after ()
 {
+    line * current_line = line_get (linenr);
     line * new = line_alloc ();
 
     num_lines++;
 
-line_test ("!!1!!");
     new->prev = current_line;
     new->next = current_line->next;
+    current_line->next->prev = new;
     current_line->next = new;
-line_test ("!!2!!");
+
+    line_test ("line insert_after");
 }
 
 void
 line_delete ()
 {
+    line * current_line = line_get (linenr);
     line * prev = current_line->prev;
     line * next = current_line->next;
 
@@ -92,8 +100,6 @@ line_delete ()
 
     if (next)
         next->prev = prev;
-
-    line_goto (linenr);
 }
 
 line *
@@ -110,6 +116,7 @@ line_get (unsigned i)
 void
 buf_to_line ()
 {
+    line * current_line = line_get (linenr);
     char * data;
 
     free (current_line->data);
@@ -120,14 +127,10 @@ buf_to_line ()
 }
 
 void
-line_goto (unsigned n)
-{
-    current_line = line_get (n);
-}
-
-void
 line_line_to_buf ()
 {
+    line * current_line = line_get (linenr);
+
     memcpy (linebuf, current_line->data, current_line->length);
     linebuf_length = current_line->length;
 }
@@ -135,6 +138,7 @@ line_line_to_buf ()
 void
 line_split ()
 {
+    line * current_line = line_get (linenr);
     line *  new;
     char *  upper_data;
 
@@ -154,6 +158,7 @@ line_split ()
 void
 line_join ()
 {
+    line *    current_line = line_get (linenr);
     line *    this = current_line;
     line *    next = this->next;
     char *    new_data;
@@ -180,7 +185,7 @@ line_join ()
 void
 line_init ()
 {
-    first_line = current_line = line_alloc ();
+    first_line = line_alloc ();
     linenr = 0;
     num_lines = 1;
 }

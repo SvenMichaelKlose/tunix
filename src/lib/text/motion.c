@@ -11,7 +11,7 @@
 void
 adjust_xpos_to_line_length ()
 {
-    line_goto (linenr);
+    line * current_line = line_get (linenr);
 
     if (xpos >= current_line->length)
         xpos = current_line->length ?
@@ -48,6 +48,7 @@ move_left ()
 void
 move_right ()
 {
+    line * current_line = line_get (linenr);
     unsigned l = current_line->length;
 
     if (l && xpos < l - 1)
@@ -63,12 +64,16 @@ move_line_start ()
 void
 move_line_end ()
 {
+    line * current_line = line_get (linenr);
+
     xpos = current_line->length;
 }
 
 void
 move_line_begin ()
 {
+    line * current_line = line_get (linenr);
+
     if (!current_line->length)
         return;
 
@@ -80,6 +85,8 @@ move_line_begin ()
 void
 move_line_last_char ()
 {
+    line * current_line = line_get (linenr);
+
     if (current_line->length)
         xpos = current_line->length - 1;
 }
@@ -88,5 +95,4 @@ void
 move_last_line ()
 {
     linenr = num_lines - 1;
-    line_goto (linenr);
 }

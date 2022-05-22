@@ -24,7 +24,6 @@ typedef struct _line {
 } line;
 
 extern line * first_line;
-extern line * current_line;
 
 extern void                 line_test           (char *);
 
@@ -33,7 +32,6 @@ extern void                 line_init           (void);
 extern line *               line_get            (unsigned);
 extern void                 buf_to_line         (void);
 extern void                 line_line_to_buf    (void);
-extern void    __fastcall__ line_goto           (unsigned);
 extern void                 line_delete         (void);
 extern void                 line_insert_before  (void);
 extern void                 line_insert_after   (void);

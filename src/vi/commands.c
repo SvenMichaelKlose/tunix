@@ -74,6 +74,7 @@ void
 cmd_delete_line ()
 {
     line_delete ();
+    move_line_start ();
 
     changes_first = linenr;
     changes_last = 32000;

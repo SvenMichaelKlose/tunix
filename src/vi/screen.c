@@ -151,15 +151,17 @@ screen_redraw ()
         }
 
         gotoxy (0, y);
-        if (l)
+        if (l) {
             line_redraw (l);
-        else
+            if (l->length < columns) {
+                term_put (TERM_CLEAR_TO_EOL);
+                term_put (TERM_CARRIAGE_RETURN);
+            }
+        } else {
             term_put ('~');
-
-        if (l->length < columns) {
             term_put (TERM_CLEAR_TO_EOL);
-            term_put (TERM_CARRIAGE_RETURN);
         }
+
         term_put (TERM_LINE_FEED);
 
 next:

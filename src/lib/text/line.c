@@ -17,6 +17,14 @@ unsigned  num_lines;
 char str[128];
 
 void
+line_init ()
+{
+    first_line = line_alloc ();
+    linenr = 0;
+    num_lines = 1;
+}
+
+void
 line_test (char * msg)
 {
     line * l = first_line;
@@ -100,6 +108,12 @@ line_delete ()
 
     if (next)
         next->prev = prev;
+
+    if (linenr >= num_lines)
+        linenr = num_lines - 1;
+
+    if (!num_lines)
+        line_init ();
 }
 
 line *
@@ -180,14 +194,6 @@ line_join ()
     move_down ();
     line_delete ();
     move_up ();
-}
-
-void
-line_init ()
-{
-    first_line = line_alloc ();
-    linenr = 0;
-    num_lines = 1;
 }
 
 void

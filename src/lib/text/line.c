@@ -83,7 +83,8 @@ line_insert_after ()
 
     new->prev = current_line;
     new->next = current_line->next;
-    current_line->next->prev = new;
+    if (current_line->next)
+        current_line->next->prev = new;
     current_line->next = new;
 
     line_test ("line insert_after");

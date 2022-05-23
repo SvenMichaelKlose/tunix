@@ -18,7 +18,6 @@
 .import __ZP_SIZE__
 
 
-stack_size  = $20    ; Keep greater or equal to what linker config file says.
 cpu_state   = $9c00
 unmap       = $9800 + unmap_ofs
 
@@ -59,7 +58,7 @@ old_ISAVE:      .res 2
 _last_regular_device:   .res 1
 _last_ingle_device:     .res 1
 
-_saved_zp:  .res stack_size
+_saved_zp:  .res 256
 
 
 .proc _init_secondary_wedge
@@ -85,9 +84,9 @@ l:  lda IOPEN,x
     bne l
 
     ; Save zeropage.
-    ldx #<__ZP_SIZE__
-l2: lda __ZP_START__-1,x
-    sta _saved_zp-1,x
+    ldx #0 ;<__ZP_SIZE__
+l2: lda 0,x ;__ZP_START__-1,x
+    sta _saved_zp,x
     dex
     bne l2
 
@@ -177,12 +176,12 @@ done:
     sta $9ffd
 
     ; Swap zeropage.
-    ldx #<__ZP_SIZE__
-l:  lda __ZP_START__-1,x
-    ldy _saved_zp-1,x
-    sta _saved_zp-1,x
+    ldx 0 ;#<__ZP_SIZE__
+l:  lda 0,x ;__ZP_START__-1,x
+    ldy _saved_zp,x
+    sta _saved_zp,x
     tya
-    sta __ZP_START__-1,x
+    sta 0,x ;__ZP_START__-1,x
     dex
     bne l
 
@@ -191,12 +190,12 @@ l:  lda __ZP_START__-1,x
 
 .proc leave
     ; Swap zeropage.
-    ldx #<__ZP_SIZE__
-l:  lda __ZP_START__-1,x
-    ldy _saved_zp-1,x
-    sta _saved_zp-1,x
+    ldx 0 ;#<__ZP_SIZE__
+l:  lda 0,x ;__ZP_START__-1,x
+    ldy _saved_zp,x
+    sta _saved_zp,x
     tya
-    sta __ZP_START__-1,x
+    sta 0,x ;__ZP_START__-1,x
     dex
     bne l
 

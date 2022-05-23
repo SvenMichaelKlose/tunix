@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <conio.h>
 #include <dirent.h>
+#include <cbm.h>
 
 #include <lib/ultimem/ultimem.h>
 #include <lib/posix/string.h>
@@ -55,8 +55,8 @@
 #define FA      (*(char*)  0xba)    // Device number
 #define FNAME   (*(char**) 0xbb)    // File name pointer
 #define STATUS  (*(char*)  0x90)    // Serial line status byte
-#define DFLTN   (*(char*)  0x99)
-#define DFLTO   (*(char*)  0x9A)
+#define DFLTN   (*(char*)  0x99)    // Logical input file number
+#define DFLTO   (*(char*)  0x9A)    // Logical output file number
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
@@ -378,8 +378,8 @@ free_channel ()
 {
     channel * ch = channels[LFN];
 
+    clear_buf (ch);
     free (ch->name);
-    free (ch->buf);
     free (ch);
 
     channels[LFN] = NULL;
@@ -481,11 +481,8 @@ ultifs_kbasin ()
     if (!ch)
         goto file_not_open;
 
-    if (ch->buf) {
-        if (!ch->buf)
-            goto end_of_file;
+    if (ch->buf)
         return accu = read_from_buf (ch);
-    }
 
     file = ch->file;
     if (file->pos >= file->size)
@@ -527,9 +524,13 @@ ultifs_kclose ()
 void
 ultifs_kclall ()
 {
+    char  old_LFN = LFN;
+
     for (LFN = 0; LFN < NUM_LFN; LFN++)
         if (channels[LFN])
             ultifs_kclose ();
+
+    LFN = old_LFN;
 }
 
 void

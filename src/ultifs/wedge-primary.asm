@@ -78,7 +78,7 @@ l2: lda secondary_vectors_l,x
     lda d+1
     sta kernal_vectors+1,y
 
-    ; Generate "JSR map_ultimem".
+    ; Write "JSR map_ultimem".
     lda #$20
     jsr out
     lda #<wedge_start
@@ -86,7 +86,7 @@ l2: lda secondary_vectors_l,x
     lda #>wedge_start
     jsr out
 
-    ; Generate "JMP <secondary wedge>".
+    ; Write "JMP <secondary wedge>".
     lda #$4c
     jsr out
     lda secondary_vectors_l,x

@@ -194,7 +194,8 @@ line_join ()
 
     move_down ();
     line_delete ();
-    move_up ();
+    if (this->next)
+        move_up ();
 }
 
 void

@@ -1,6 +1,8 @@
 VIC-20 VI
 =========
 
+Wants a VIC with +32K RAM.
+
 # Commands
 
 Most commands can be prefixed with a
@@ -50,7 +52,7 @@ These commands cannot be repeated.
 
 :wNAME Write file.
 :rNAME Read file.
-:kPASSPHRASE Set passphrase for reading/writing files.
+:kPASSPHRASE Set/clear passphrase for reading/writing files.
 
 # For developers
 

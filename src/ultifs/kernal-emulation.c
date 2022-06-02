@@ -412,6 +412,7 @@ ultifs_kopen ()
     ch = malloc (sizeof (channel));
     ch->sa = SA;
     ch->buf = NULL;
+    ch->name = name;
     channels[LFN] = ch;
 
     if (SA == 15) {

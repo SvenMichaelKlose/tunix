@@ -412,6 +412,7 @@ ultifs_kopen ()
     ch = malloc (sizeof (channel));
     ch->sa = SA;
     ch->buf = NULL;
+    ch->file = NULL;
     ch->name = name;
     channels[LFN] = ch;
 
@@ -486,7 +487,7 @@ ultifs_kbasin ()
         return accu = read_from_buf (ch);
 
     file = ch->file;
-    if (file->pos >= file->size)
+    if (!file || file->pos >= file->size)
         goto end_of_file;
 
     return accu = bfile_read (file);

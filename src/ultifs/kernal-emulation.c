@@ -438,6 +438,7 @@ ultifs_kopen ()
 
 error:
     free_channel ();
+
 error2:
     flags = FLAG_C;
 
@@ -478,10 +479,10 @@ ultifs_kbasin ()
     channel *  ch = channels[LFN];
     bfile *    file;
 
-    accu = flags = STATUS = 0;
-
     if (!ch)
         goto file_not_open;
+
+    accu = flags = STATUS = 0;
 
     if (ch->buf)
         return accu = read_from_buf (ch);
@@ -494,7 +495,6 @@ ultifs_kbasin ()
 
 end_of_file:
     STATUS = STATUS_END_OF_FILE;
-
     return 0;
 
 file_not_open:

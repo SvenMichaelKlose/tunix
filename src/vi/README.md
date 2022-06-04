@@ -21,7 +21,7 @@ G: To last line.
 ## Edit commands
 
 These commands enter the edit mode which
-can be exited by pressing ESC.
+can be exited by pressing RUN/STOP.
 
 i: Insert.
 I: Insert before first non-space.

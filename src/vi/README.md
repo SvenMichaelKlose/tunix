@@ -1,7 +1,7 @@
 VIC-20 VI
 =========
 
-Wants a VIC with +32K RAM.
+Wants a VIC with +35K RAM.
 
 # Commands
 

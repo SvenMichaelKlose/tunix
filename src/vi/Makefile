@@ -1,3 +1,4 @@
+EXOMIZER?=exomizer-2.0.10
 SOURCES= \
 	commands.c \
 	main.c \
@@ -14,6 +15,9 @@ $(PROGRAM): $(SOURCES:.c=.o)
 	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/text/libtext.a ../lib/lineedit/liblineedit.a ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
+	$(EXOMIZER) sfx basic -t 55 vi
+	mv a.out vi
+	zip vi.zip README.md vi
 
 clean:
-	rm -f $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl
+	rm -f $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl vi.zip

@@ -10,8 +10,10 @@ all:
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg
+	mkdir native-pkgs
+	cp src/vi/vi.zip native-pkgs/
 
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
-	rm -fr ingle.img ingle.zip compiled image ingledata.bin ingleinstall ingle.img.zip
+	rm -fr ingle.img ingle.zip compiled image ingledata.bin ingleinstall ingle.img.zip native-pkgs

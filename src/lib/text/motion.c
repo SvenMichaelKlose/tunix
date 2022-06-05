@@ -35,6 +35,12 @@ is_last_line ()
 }
 
 bool
+is_line_start ()
+{
+    return !xpos;
+}
+
+bool
 is_line_end ()
 {
     line * current_line = line_get (linenr);
@@ -115,8 +121,15 @@ move_last_line ()
 void
 move_next_line_begin (void)
 {
-    move_line_begin ();
     move_down ();
+    move_line_begin ();
+}
+
+void
+move_prev_line_end (void)
+{
+    move_up ();
+    move_line_end ();
 }
 
 bool
@@ -148,5 +161,24 @@ move_word ()
             return;
         }
         move_right ();
+    } while (current_char () == ' ');
+}
+
+void
+move_word_back ()
+{
+    do {
+        if (is_line_start ()) {
+            move_prev_line_end ();
+            return;
+        }
+        move_left ();
+    } while (current_char () != ' ');
+    do {
+        if (is_line_start ()) {
+            move_prev_line_end ();
+            return;
+        }
+        move_left ();
     } while (current_char () == ' ');
 }

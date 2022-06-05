@@ -53,6 +53,7 @@ command motion_commands[] = {
     { '$', move_line_last_char },
     { 'G', move_last_line },
     { 'w', move_word },
+    { 'b', move_word_back },
     { 0, NULL }
 };
 

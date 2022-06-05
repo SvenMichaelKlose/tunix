@@ -24,8 +24,8 @@
 
 #include "ultifs.h"
 
-#define FALSE   0
-#define TRUE    -1
+#define FALSE  0
+#define TRUE   -1
 
 typedef unsigned char uchar;
 
@@ -41,73 +41,73 @@ typedef unsigned char uchar;
 #define proc_blk5     (*(unsigned*) 0x9c0b)
 
 // CPU flags
-#define FLAG_C          1
-#define FLAG_Z          2
-#define FLAG_I          4
-#define FLAG_D          8
-#define FLAG_B          16
-#define FLAG_UNUSED     32
-#define FLAG_V          64
-#define FLAG_N          128
+#define FLAG_C       1
+#define FLAG_Z       2
+#define FLAG_I       4
+#define FLAG_D       8
+#define FLAG_B       16
+#define FLAG_UNUSED  32
+#define FLAG_V       64
+#define FLAG_N       128
 
 /* KERNAL zero page data */
-#define FNLEN   (*(uchar*)  0xb7)    // File name length
-#define LFN     (*(uchar*)  0xb8)    // Logical file number
-#define SA      (*(uchar*)  0xb9)    // Secondary address
-#define FA      (*(uchar*)  0xba)    // Device number
-#define FNAME   (*(char**) 0xbb)    // File name pointer
-#define STATUS  (*(uchar*)  0x90)    // Serial line status byte
-#define DFLTN   (*(uchar*)  0x99)    // Logical input file number
-#define DFLTO   (*(uchar*)  0x9A)    // Logical output file number
+#define FNLEN   (*(uchar*)  0xb7)  // File name length
+#define LFN     (*(uchar*)  0xb8)  // Logical file number
+#define SA      (*(uchar*)  0xb9)  // Secondary address
+#define FA      (*(uchar*)  0xba)  // Device number
+#define FNAME   (*(char**)  0xbb)  // File name pointer
+#define STATUS  (*(uchar*)  0x90)  // Serial line status byte
+#define DFLTN   (*(uchar*)  0x99)  // Logical input file number
+#define DFLTO   (*(uchar*)  0x9A)  // Logical output file number
 
 /* Serial line error codes */
-#define STATUS_NO_DEVICE        0x80
-#define STATUS_END_OF_FILE      0x40
-#define STATUS_CHECKSUM_ERROR   0x20
-#define STATUS_READ_ERROR       0x10
-#define STATUS_LONG             0x08
-#define STATUS_SHORT            0x04
-#define STATUS_TIMEOUT_READ     0x02
-#define STATUS_TIMEOUT_WRITE    0x01
+#define STATUS_NO_DEVICE       0x80
+#define STATUS_END_OF_FILE     0x40
+#define STATUS_CHECKSUM_ERROR  0x20
+#define STATUS_READ_ERROR      0x10
+#define STATUS_LONG            0x08
+#define STATUS_SHORT           0x04
+#define STATUS_TIMEOUT_READ    0x02
+#define STATUS_TIMEOUT_WRITE   0x01
 
 /* KERNAL error codes */
-#define OSERR_TOO_MANY_FILES        1
-#define OSERR_FILE_ALREADY_OPEN     2
-#define OSERR_FILE_NOT_OPEN         3
-#define OSERR_FILE_NOT_FOUND        4
-#define OSERR_DEVICE_NOT_PRESENT    5
-#define OSERR_FILE_NOT_IN           6
-#define OSERR_FILE_NOT_OUT          7
-#define OSERR_MISSING_FILE_NAME     8
-#define OSERR_ILLEGAL_DEVICE_NUMBER 9
+#define OSERR_TOO_MANY_FILES         1
+#define OSERR_FILE_ALREADY_OPEN      2
+#define OSERR_FILE_NOT_OPEN          3
+#define OSERR_FILE_NOT_FOUND         4
+#define OSERR_DEVICE_NOT_PRESENT     5
+#define OSERR_FILE_NOT_IN            6
+#define OSERR_FILE_NOT_OUT           7
+#define OSERR_MISSING_FILE_NAME      8
+#define OSERR_ILLEGAL_DEVICE_NUMBER  9
 
 /* Device error codes (read from command channel #15) */
-#define ERR_BYTE_DECODING       24
-#define ERR_WRITE               25
-#define ERR_WRITE_PROTECT_ON    26
-#define ERR_SYNTAX              30
-#define ERR_INVALID_COMMAND     31
-#define ERR_LONG_LINE           32
-#define ERR_INVALID_FILE_NAME   33
-#define ERR_NO_FILE_GIVEN       34
-#define ERR_FILE_TOO_LARGE      52
-#define ERR_FILE_OPEN_FOR_WRITE 60
-#define ERR_FILE_NOT_OPEN       61
-#define ERR_FILE_NOT_FOUND      62
-#define ERR_FILE_EXISTS         63
-#define ERR_FILE_TYPE_MISMATCH  64
-#define ERR_NO_CHANNEL          70
-#define ERR_DISK_FULL           72
+#define ERR_BYTE_DECODING        24
+#define ERR_WRITE                25
+#define ERR_WRITE_PROTECT_ON     26
+#define ERR_SYNTAX               30
+#define ERR_INVALID_COMMAND      31
+#define ERR_LONG_LINE            32
+#define ERR_INVALID_FILE_NAME    33
+#define ERR_NO_FILE_GIVEN        34
+#define ERR_FILE_TOO_LARGE       52
+#define ERR_FILE_OPEN_FOR_WRITE  60
+#define ERR_FILE_NOT_OPEN        61
+#define ERR_FILE_NOT_FOUND       62
+#define ERR_FILE_EXISTS          63
+#define ERR_FILE_TYPE_MISMATCH   64
+#define ERR_NO_CHANNEL           70
+#define ERR_DISK_FULL            72
 
 
 typedef struct _channel {
-    char *      name;
-    bfile *     file;
-    char        sa;
+    char *   name;
+    bfile *  file;
+    char     sa;
 
-    char *      buf;
-    char *      bufwptr;
-    char *      bufrptr;
+    char *   buf;
+    char *   bufwptr;
+    char *   bufrptr;
 } channel;
 
 #define NUM_LFN  32    // May not be the official limit. (pixel)

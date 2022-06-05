@@ -1,7 +1,8 @@
+#include <errno.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 #include <cbm.h>
 
 #include <lib/ingle/cc65-charmap.h>

@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -51,6 +52,7 @@ command motion_commands[] = {
     { '0', move_line_start },
     { '$', move_line_last_char },
     { 'G', move_last_line },
+    { 'w', move_word },
     { 0, NULL }
 };
 
@@ -253,8 +255,8 @@ exec_complex (void)
     xpos = oldx;
 }
 
-// Top level controlling keyboard logging
-// and triggering playback.
+// Top level controlling repetitions (keyboard
+// logging and triggering playback.
 void
 toplevel (void)
 {

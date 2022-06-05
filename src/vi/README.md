@@ -19,6 +19,7 @@ h, j, k, l: Left, down, up, right.
 0: To first column of line.
 $: To last column of line.
 G: To last line.
+w: Move to next char after whitespace.
 
 ## Editing
 

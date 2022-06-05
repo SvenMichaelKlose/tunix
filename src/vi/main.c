@@ -294,7 +294,6 @@ void
 main (void)
 {
     our_heapadd (0x400, 0xc00);   /* +3K */
-    our_heapadd (0x9800, 0x7f0);  /* IO2,3 */
     our_heapadd (0xa000, 0x2000); /* BANK5 */
 
     term_init ();

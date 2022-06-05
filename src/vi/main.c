@@ -100,7 +100,7 @@ edit_mode (void)
 
     while (1) {
         screen_update ();
-        line_line_to_buf ();
+        line_to_buf ();
         c = input ();
         buf_to_line ();
 

@@ -142,7 +142,7 @@ buf_to_line ()
 }
 
 void
-line_line_to_buf ()
+line_to_buf ()
 {
     line * current_line = line_get (linenr);
 

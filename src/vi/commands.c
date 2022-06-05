@@ -106,7 +106,7 @@ cmd_delete_till_line_end ()
 void
 cmd_delete_char ()
 {
-    line_line_to_buf ();
+    line_to_buf ();
     linebuf_delete_char (xpos);
     buf_to_line ();
     adjust_xpos_to_line_length ();
@@ -126,7 +126,7 @@ cmd_replace_char ()
         return;
     }
 
-    line_line_to_buf ();
+    line_to_buf ();
     linebuf_replace_char (xpos, c);
     buf_to_line ();
 

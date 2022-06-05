@@ -31,7 +31,7 @@ extern line *               line_alloc          (void); // TODO: Shouldn't be pu
 extern void                 line_init           (void);
 extern line *               line_get            (unsigned);
 extern void                 buf_to_line         (void);
-extern void                 line_line_to_buf    (void);
+extern void                 line_to_buf    (void);
 extern void                 line_delete         (void);
 extern void                 line_insert_before  (void);
 extern void                 line_insert_after   (void);

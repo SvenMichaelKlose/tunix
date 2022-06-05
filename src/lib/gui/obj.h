@@ -4,9 +4,6 @@
 #include <lib/gfx/libgfx.h>
 #include <lib/gui/event.h>
 
-#define FALSE   0
-#define TRUE    1
-
 typedef unsigned char uchar;
 
 // Position and size of an object.

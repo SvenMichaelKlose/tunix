@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 
 #include <cbm.h>
 
@@ -6,9 +7,6 @@
 #include <lib/term/libterm.h>
 
 #include "keyboard.h"
-
-#define FALSE   0
-#define TRUE    1
 
 char       keylog[256];
 unsigned   keylog_index;
@@ -61,7 +59,7 @@ get_key ()
             // command cannot be repeated.
             term_put (TERM_BELL);
             keyboard_init ();
-            does_log_keys = FALSE;
+            does_log_keys = false;
             return c;
         }
 
@@ -83,14 +81,14 @@ peek_key ()
 void
 start_playback ()
 {
-    does_play_back = TRUE;
+    does_play_back = true;
     playback_index = 0;
 }
 
 void
 stop_playback ()
 {
-    does_play_back = FALSE;
+    does_play_back = false;
 }
 
 char
@@ -110,6 +108,6 @@ keyboard_init ()
 {
     reset_log ();
     playback_index = peeked_char = 0;
-    does_play_back = FALSE;
-    does_log_keys = TRUE;
+    does_play_back = false;
+    does_log_keys = true;
 }

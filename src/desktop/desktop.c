@@ -4,6 +4,7 @@
 
 #include <cbm.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <conio.h>
@@ -313,7 +314,7 @@ void
 show_help ()
 {
     blur_windows ();
-    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, DESKTOP_HEIGHT / 4, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), TRUE);
+    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, DESKTOP_HEIGHT / 4, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), true);
     print_message ("Welcome to INGLE!");
 }
 
@@ -401,8 +402,8 @@ start_desktop ()
     layout_obj (desktop);
     draw_obj (desktop);
 
-    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), FALSE);
-    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), FALSE);
+    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), false);
+    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), false);
 
     desktop_loop ();
 }

@@ -1,16 +1,8 @@
-// UltiFS
-//
-// KERNAL emulation
-//
-// This is the interface between the UltiFS API and
-// regular apps.
-//
-// Author: Sven Michael Klose <pixel@hugbox.org>
-
 #pragma code-name ("ULTIFS")
 
 #include <lib/ingle/cc65-charmap.h>
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,9 +15,6 @@
 #include <lib/posix/string.h>
 
 #include "ultifs.h"
-
-#define FALSE  0
-#define TRUE   -1
 
 typedef unsigned char uchar;
 
@@ -420,12 +409,12 @@ ultifs_kopen ()
 
     if (SA == 15) {
         open_command (name);
-        return TRUE;
+        return true;
     }
 
     if (FNLEN == 1 && *name == '$') {
         make_directory_list (ch);
-        return TRUE;
+        return true;
     }
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
@@ -436,7 +425,7 @@ ultifs_kopen ()
 
     ch->file = found_file;
 
-    return TRUE;
+    return true;
 
 error:
     free_channel ();
@@ -444,7 +433,7 @@ error:
 error2:
     flags = FLAG_C;
 
-    return FALSE;
+    return false;
 }
 
 void

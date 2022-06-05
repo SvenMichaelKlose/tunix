@@ -8,10 +8,6 @@
 #include "liblineedit.h"
 
 
-#define FALSE   0
-#define TRUE    1
-
-
 unsigned xpos;
 
 

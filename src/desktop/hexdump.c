@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -131,7 +132,7 @@ hexdump_event_handler (struct obj * o, struct event * e)
     hexdump_draw ((struct obj *) content);
 
 done:
-    return FALSE;
+    return false;
 }
 
 struct obj_ops obj_ops_hexdump_content = {

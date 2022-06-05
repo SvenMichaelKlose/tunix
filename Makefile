@@ -10,7 +10,7 @@ all:
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 	rm -fv tmp.prg
-	mkdir native-pkgs
+	mkdir -p native-pkgs
 	cp src/vi/vi.zip native-pkgs/
 
 clean:

@@ -87,13 +87,6 @@ move_right ()
 }
 
 void
-move_right_raw ()
-{
-    if (!is_beyond_line_end ())
-        xpos++;
-}
-
-void
 move_line_start ()
 {
     xpos = 0;
@@ -150,10 +143,8 @@ move_prev_line_end (void)
 bool
 step_char_forwards (void)
 {
-    move_right_raw ();
-    if (is_line_end ())
-        return 13;
-    if (is_beyond_line_end ())
+    move_right ();
+    if (is_line_end ()) {
         if (is_last_line ())
             return false;
         move_next_line_begin ();
@@ -166,13 +157,19 @@ void
 move_word ()
 {
     do {
-        if (!step_char_forwards ())
+        if (is_line_end ()) {
+            move_next_line_begin ();
             return;
+        }
+        move_right ();
     } while (!isspace (current_char ()));
 
     do {
-        if (!step_char_forwards ())
+        if (is_line_end ()) {
+            move_next_line_begin ();
             return;
+        }
+        move_right ();
     } while (isspace (current_char ()));
 }
 
@@ -186,7 +183,6 @@ move_word_back ()
         }
         move_left ();
     } while (current_char () != ' ');
-
     do {
         if (is_line_start ()) {
             move_prev_line_end ();

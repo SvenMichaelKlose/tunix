@@ -15,7 +15,7 @@ $(PROGRAM): $(SOURCES:.c=.o)
 	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/text/libtext.a ../lib/lineedit/liblineedit.a ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a /usr/local/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
-	$(EXOMIZER) sfx basic -t 55 vi
+	$(EXOMIZER) sfx basic -t 52 vi
 	mv a.out vi
 	zip vi.zip README.md vi
 

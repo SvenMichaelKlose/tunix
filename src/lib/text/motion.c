@@ -45,7 +45,15 @@ is_line_end ()
 {
     line * current_line = line_get (linenr);
     unsigned l = current_line->length;
-    return xpos == l;
+    return xpos >= l;
+}
+
+bool
+is_beyond_line_end ()
+{
+    line * current_line = line_get (linenr);
+    unsigned l = current_line->length;
+    return xpos > l;
 }
 
 void
@@ -154,14 +162,15 @@ move_word ()
             return;
         }
         move_right ();
-    } while (current_char () != ' ');
+    } while (!isspace (current_char ()));
+
     do {
         if (is_line_end ()) {
             move_next_line_begin ();
             return;
         }
         move_right ();
-    } while (current_char () == ' ');
+    } while (isspace (current_char ()));
 }
 
 void

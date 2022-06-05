@@ -277,12 +277,22 @@ toplevel (void)
 }
 
 void
+our_heapadd (unsigned start, size_t size)
+{
+    char *  p = (char *) start;
+    char    v = *p + 1;
+
+    *p = v;
+    if (*p == v)
+        _heapadd (p, size);
+}
+
+void
 main (void)
 {
-    // TODO: Check if memory expansion is there.
-    _heapadd ((void *) 0x400, 0xc00);   /* +3K */
-    //_heapadd ((void *) 0x9800, 0x7f0);  /* IO2,3 */
-    _heapadd ((void *) 0xa000, 0x2000); /* BANK5 */
+    our_heapadd (0x400, 0xc00);   /* +3K */
+    our_heapadd (0x9800, 0x7f0);  /* IO2,3 */
+    our_heapadd (0xa000, 0x2000); /* BANK5 */
 
     term_init ();
     line_init ();

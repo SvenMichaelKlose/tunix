@@ -1,7 +1,9 @@
 VIC-20 VI
 =========
 
-Wants a VIC with +35K RAM.
+This is a VI clone with 40x24 char
+terminal (code page 437 charset).
+It wants a VIC with at least +32K RAM.
 
 # Commands
 
@@ -18,7 +20,7 @@ h, j, k, l: Left, down, up, right.
 $: To last column of line.
 G: To last line.
 
-## Edit commands
+## Editing
 
 These commands enter the edit mode which
 can be exited by pressing RUN/STOP.
@@ -32,7 +34,7 @@ A: Append to line.
 C: Change till end of line.
 s: Delete char and insert.
 
-## Modifying commands
+## Modifying lines
 
 These modify the text but do not enter
 the edit mode.
@@ -42,20 +44,15 @@ J: Join current and next line.
 x: Delete character.
 d: Delete line.
 
-## History commands
+## History
 
 .: Repeat last action.
 
-## File commands
+## Files
 
 These commands cannot be repeated.
 
 :wNAME Write file.
 :rNAME Read file.
-:kPASSPHRASE Set/clear passphrase for reading/writing files.
-
-# For developers
-
-This is a VI front end for libtext and
-liblineedit.  It utilizes a 40x24
-character display via libterm.
+:kPASSPHRASE Set/clear passphrase for
+reading/writing files.

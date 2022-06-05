@@ -232,7 +232,6 @@ cancel:
     return CANCELLED;
 }
 
-
 void
 exec_complex (void)
 {
@@ -266,7 +265,7 @@ toplevel (void)
 
         if (c == ':')
             exec_complex ();
-        else if (has_logged_keys () && c == '.') {
+        else if (c == '.' && has_logged_keys ()) {
             get_key ();
             unlog_key ();
             playback ();

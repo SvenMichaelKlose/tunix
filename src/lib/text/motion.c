@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include <lib/ingle/cc65-charmap.h>
@@ -45,13 +46,19 @@ move_left ()
         xpos--;
 }
 
-void
-move_right ()
+bool
+is_line_end ()
 {
     line * current_line = line_get (linenr);
     unsigned l = current_line->length;
 
-    if (l && xpos < l - 1)
+    return xpos == l - 1;
+}
+
+void
+move_right ()
+{
+    if (!is_line_end ())
         xpos++;
 }
 

@@ -1,8 +1,3 @@
-// UltiFS
-//
-// Author: Sven Michael Klose <pixel@hugbox.org>
-
-
 //#define COMPRESS_FILE_DATA_WITH_EXOMIZER
 
 #include <stddef.h>
@@ -15,22 +10,24 @@
 #define ULTIFS_START    0x10000
 #define EMPTY_PTR       ((upos) -1)
 
+typedef unsigned char uchar;
+
 #ifndef __CC65__
     #include <sys/types.h>
     #include <unistd.h>
     #include <wait.h>
     #define STORE_SIZE      (8 * 1024 * 1024)
-    unsigned char store[STORE_SIZE];
+    uchar store[STORE_SIZE];
     #define cc65register
 #else
     #pragma code-name ("ULTIFS")
     #include <cbm.h>
     #include <lib/ultimem/ultimem.h>
-    unsigned char * store = (void *) 0xa000u;
+    uchar * store = (void *) 0xa000u;
     #define cc65register    register
 #endif
 
-unsigned char current_parent = 0;
+uchar current_parent = 0;
 upos parents[8];
 
 /*
@@ -59,7 +56,7 @@ split_pathname (char * pathname)
 {
     char * pn = strdup (pathname);
     char ** arr = malloc (sizeof (char *) * 8);
-    unsigned char n = 0;
+    uchar n = 0;
 
     bzero (arr, sizeof (char *) * 8);
     while ((arr[n++] = strdup (strsep (&pn, ","))));
@@ -71,7 +68,7 @@ split_pathname (char * pathname)
 void __cc65fastcall__
 free_pathname (char ** arr)
 {
-    unsigned char n = 0;
+    uchar n = 0;
 
     while (arr[n])
         free (arr[n++]);
@@ -109,14 +106,14 @@ typedef struct _block {
 
 #ifndef __CC65__
 
-unsigned char
+uchar
 ultimem_read_byte (upos p)
 {
     return store[p];
 }
 
 void
-ultimem_write_byte (upos p, unsigned char v)
+ultimem_write_byte (upos p, uchar v)
 {
     if (p > sizeof (store)) {
         printf ("ERROR: Image full.\n");
@@ -127,13 +124,13 @@ ultimem_write_byte (upos p, unsigned char v)
 
 #else
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 ultimem_read_byte (upos p)
 {
-    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
+    uchar * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
     unsigned        oldbank = *ULTIMEM_BLK5;
-    unsigned char   oldcfg = *ULTIMEM_CONFIG2;
-    unsigned char   v;
+    uchar   oldcfg = *ULTIMEM_CONFIG2;
+    uchar   v;
 
     *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
     *ULTIMEM_BLK5 = p >> 13;
@@ -145,9 +142,9 @@ ultimem_read_byte (upos p)
 }
 
 void __cc65fastcall__
-ultimem_write_byte (upos p, unsigned char v)
+ultimem_write_byte (upos p, uchar v)
 {
-    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
+    uchar * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
     unsigned        oldbank = *ULTIMEM_BLK5;
 
     *ULTIMEM_BLK5 = p >> 13;
@@ -187,20 +184,20 @@ ultimem_readm (char * dest, char len, upos p)
  * BLOCK FUNCTIONS
  */
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 block_get_type (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, type));
 }
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 block_get_name_length (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, name_length));
 }
 
-unsigned char __cc65fastcall__
-block_get_name (upos p, unsigned char i)
+uchar __cc65fastcall__
+block_get_name (upos p, uchar i)
 {
     return ultimem_read_byte (p + offsetof (block, name_length) + 1 + i);
 }
@@ -676,7 +673,7 @@ bfile_lookup_pathname (char * name)
 {
     char ** arr = split_pathname (name);
     upos p = 0;
-    unsigned char i = 0;
+    uchar i = 0;
     char l;
     char * n;
 
@@ -826,27 +823,32 @@ main (int argc, char ** argv)
             case 'n':
                 mkfs ();
                 continue;
+
             case 'l':
                 if (i == argc)
                     invalid ("Command 'l': Path of boot file missing.");
                 load (argv[i++]);
                 continue;
+
             case 'i':
                 if (i == argc)
                     invalid ("Command 'i': Path of directory to import missing.");
                 printf ("Recurisvely importing direcotry '%s'…\n", argv[i]);
                 import_directory (0, argv[i++], 0);
                 continue;
+
             case 'w':
                 ultifs_mount ();
                 write_image (0);
                 printf ("Image written.\n");
                 continue;
+
             case 'W':
                 ultifs_mount ();
                 write_image (1);
                 printf ("Short image (not filled up to 8MB Flash ROM size) written.\n");
                 continue;
+
             default:
                 invalid ("Unknown command.");
         }

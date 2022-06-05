@@ -27,16 +27,18 @@
 #define FALSE   0
 #define TRUE    -1
 
+typedef unsigned char uchar;
+
 // Client registers
-#define accu          (*(char*) 0x9c00)
-#define xreg          (*(char*) 0x9c01)
-#define yreg          (*(char*) 0x9c02)
-#define flags         (*(char*) 0x9c03)
-#define proc_ustatus  (*(char*) 0x9c04)
-#define proc_blk1     (*(int*) 0x9c05)
-#define proc_blk2     (*(int*) 0x9c07)
-#define proc_blk3     (*(int*) 0x9c09)
-#define proc_blk5     (*(int*) 0x9c0b)
+#define accu          (*(uchar*) 0x9c00)
+#define xreg          (*(uchar*) 0x9c01)
+#define yreg          (*(uchar*) 0x9c02)
+#define flags         (*(uchar*) 0x9c03)
+#define proc_ustatus  (*(uchar*) 0x9c04)
+#define proc_blk1     (*(unsigned*) 0x9c05)
+#define proc_blk2     (*(unsigned*) 0x9c07)
+#define proc_blk3     (*(unsigned*) 0x9c09)
+#define proc_blk5     (*(unsigned*) 0x9c0b)
 
 // CPU flags
 #define FLAG_C          1
@@ -49,14 +51,14 @@
 #define FLAG_N          128
 
 /* KERNAL zero page data */
-#define FNLEN   (*(char*)  0xb7)    // File name length
-#define LFN     (*(char*)  0xb8)    // Logical file number
-#define SA      (*(char*)  0xb9)    // Secondary address
-#define FA      (*(char*)  0xba)    // Device number
+#define FNLEN   (*(uchar*)  0xb7)    // File name length
+#define LFN     (*(uchar*)  0xb8)    // Logical file number
+#define SA      (*(uchar*)  0xb9)    // Secondary address
+#define FA      (*(uchar*)  0xba)    // Device number
 #define FNAME   (*(char**) 0xbb)    // File name pointer
-#define STATUS  (*(char*)  0x90)    // Serial line status byte
-#define DFLTN   (*(char*)  0x99)    // Logical input file number
-#define DFLTO   (*(char*)  0x9A)    // Logical output file number
+#define STATUS  (*(uchar*)  0x90)    // Serial line status byte
+#define DFLTN   (*(uchar*)  0x99)    // Logical input file number
+#define DFLTO   (*(uchar*)  0x9A)    // Logical output file number
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE        0x80
@@ -140,7 +142,7 @@ init_kernal_emulation ()
 char
 peek_from_process (char * p)
 {
-    unsigned char ph = (unsigned) p >> 8;
+    uchar ph = (unsigned) p >> 8;
 
     if (ph < 0x20 || ph > 0x7f)
         return *p;
@@ -166,7 +168,7 @@ peek_from_process (char * p)
 char
 poke_to_process (char * p, char v)
 {
-    unsigned char ph = (unsigned) p >> 8;
+    uchar ph = (unsigned) p >> 8;
 
     if (ph < 0x20 || ph > 0x7f)
         return *p = v;
@@ -279,14 +281,14 @@ void
 make_directory_list (channel * ch)
 {
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
-    char *         line = malloc (256);
-    unsigned       line_addr = 0x1201;
-    unsigned char  i;
-    unsigned char  l;
-    char           c;
-    char *         p;
-    size_t         len;
-    char *         type;
+    char *    line = malloc (256);
+    unsigned  line_addr = 0x1201;
+    uchar     i;
+    uchar     l;
+    char      c;
+    char *    p;
+    size_t    len;
+    char *    type;
 
     // Emit start address.
     line[0] = line_addr & 255;
@@ -538,11 +540,11 @@ ultifs_kclall ()
 void
 ultifs_kload ()
 {
-    char           do_verify = accu;
-    char           old_LFN = LFN;
-    char *         addr;
-    unsigned char  addr_l;
-    unsigned char  addr_h;
+    char    do_verify = accu;
+    char    old_LFN = LFN;
+    char *  addr;
+    uchar   addr_l;
+    uchar   addr_h;
 
     STATUS = flags = 0;
     LFN = NUM_LFN - 1;

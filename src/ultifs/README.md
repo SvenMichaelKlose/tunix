@@ -116,7 +116,7 @@ routine.  The device on the channel must be an input
 device or an error will occur and the routine will
 abort.
 
-If you are getting data from anywhere other than the
+If you are getting data from anywhere else than the
 keyboard, this routine must be called before using
 either the CHRIN routine or the GETIN routine.  If you
 are getting data from the keyboard and no other input

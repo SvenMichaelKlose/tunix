@@ -61,9 +61,7 @@ l7: bcs l5
     bne l6          ; (jmp)
 
     ; +8/16/24/32
-l5: lda #$80
-    sta $c2         ; I/O start addresses high byte.
-    lda #>$1000     ; screen
+l5: lda #>$1000     ; screen
     ldx #>$1200     ; BASIC
     ldy #>$8000     ; BASIC end
 

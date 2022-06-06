@@ -66,18 +66,20 @@ no_restore:
     lda #%01000000
     sta $9ff2
 
-    lda #>$1e00     ; screen
-    sta $288        ; start page of text matrix
-    ldx #>$1000     ; BASIC
-    sta $282        ; start page of BASIC RAM
-    ldy #>$1e00     ; BASIC end
-    sta $284        ; end page of BASIC RAM
-
+    lda #$1e
+    sta $288        ; Screen start
+    lda #$10
+    sta $282        ; BASIC start
+    lda #$1e
+    sta $284        ; BASIC end
     jsr $ff8a       ; KERNAL jump vectors.
-    jsr $fdf9       ; Init VIAs.
-    cli
+    jsr $fdf9       ; VIAs.
+    jsr $e518       ; VIC.
+    jsr $e45b       ; BASIC jump vectors.
+    jsr $e3a4       ; BASIC zero page.
+    ;cli
 
-;jmp $e378   ; BASIC cold start
+jmp $e378   ; BASIC cold start
 
     ; Activate all RAM below $8000.
     lda #0

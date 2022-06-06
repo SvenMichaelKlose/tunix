@@ -46,6 +46,7 @@ tmp2:   .res 1
     cmp #>$1000
     bne l7
 
+    ; unexpanded
     lda #>$1e00     ; screen
     ldx #>$1000     ; BASIC
     ldy #>$1e00     ; BASIC end
@@ -59,7 +60,7 @@ l7: bcs l5
     ldy #>$1e00     ; BASIC end
     bne l6          ; (jmp)
 
-    ; +24/32/35
+    ; +8/16/24/32
 l5: lda #$80
     sta $c2         ; I/O start addresses high byte.
     lda #>$1000     ; screen

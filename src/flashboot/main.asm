@@ -11,13 +11,13 @@
 .import _ultimem_unhide
 .import restore_state
 .import init_alloc
-.import init_proc
 .import init_copy_bank
 .import init_ultifs_dev
 .import gfx_init
 .import clear_screen
 .import putstring
 .import moveram
+.import _term_init, _term_puts
 
 .zeropage
 
@@ -53,7 +53,7 @@ screen  = $288      ; start page of text matrix
     lda $9ff0
     and #%00000100  ; switch1
     beq no_restore
-    jsr restore_state
+    ;jsr restore_state
 no_restore:
 
 ;    jsr init_alloc      ; RAM bank allocator.
@@ -78,55 +78,6 @@ no_restore:
 
 ;jmp $e378   ; BASIC cold start
 
-    jsr init_ram_banks
-
-    ; Move from ROM to RAM.
-    lda #$a0
-    sta s+1
-    lda #$60
-    sta d+1
-    lda #$20
-    sta c+1
-    lda #0
-    sta $9ffc
-    sta $9ffd
-    sta s
-    sta d
-    sta c
-    jsr moveram
-    lda #%11111111
-    sta $9ff2
-
-    ; Init screen.
-    jsr clear_screen
-    lda #0
-    ldx #1
-    ldy #2
-    jsr gfx_init
-    lda #0
-    sta xpos
-    sta ypos
-    sta font_bank
-    lda #1
-    sta pencil_mode
-
-    ; Prepare font.
-    lda #<charset_4x8
-    sta font
-    lda #>charset_4x8
-    sta font+1
-    jsr shift_font
-
-    lda #<txt_welcome
-    sta p
-    lda #>txt_welcome
-    sta p+1
-    jsr putstring
-
-w:  jmp w
-.endproc
-
-.proc init_ram_banks
     ; Activate all RAM below $8000.
     lda #%00111111
     sta $9ff1
@@ -147,7 +98,56 @@ w:  jmp w
     inx
     stx $9ffc
     sta $9ffd
-    rts
+
+    ; Move from ROM to RAM.
+    lda #$a0
+    sta s+1
+    lda #$60
+    sta d+1
+    lda #$20
+    sta c+1
+    lda #0
+    sta $9ffc
+    sta $9ffd
+    sta s
+    sta d
+    sta c
+    jsr moveram
+    lda #%11111111
+    sta $9ff2
+
+    ; Init screen.
+;    jsr clear_screen
+;    lda #0
+;    ldx #1
+;    ldy #2
+;    jsr gfx_init
+;    lda #0
+;    sta xpos
+;    sta ypos
+;    sta font_bank
+    lda #1
+    sta pencil_mode
+
+    ; Prepare font.
+;    lda #<charset_4x8
+;    sta font
+;    lda #>charset_4x8
+;    sta font+1
+;    jsr shift_font
+
+;    lda #<txt_welcome
+;    sta p
+;    lda #>txt_welcome
+;    sta p+1
+;    jsr putstring
+
+    jsr _term_init
+    lda #<txt_welcome
+    ldx #>txt_welcome
+    jsr _term_puts
+
+w:  jmp w
 .endproc
 
 .proc shift_font
@@ -180,4 +180,4 @@ n:  dex
 txt_welcome:
     .byte "Ultimate Ultiboot", 0
 
-    .include "../lib/term/charset-4x8.asm"
+;    .include "../lib/term/charset-4x8.asm"

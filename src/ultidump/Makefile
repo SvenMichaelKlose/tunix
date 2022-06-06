@@ -1,5 +1,5 @@
-ASMSOURCES=main.asm
 PROGRAM=ultidump
+ASMSOURCES=main.asm
 
 include ../Makefile.rules
 

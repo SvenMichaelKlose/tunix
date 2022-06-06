@@ -1,6 +1,6 @@
+PROGRAM=ultifs
 SOURCES=kernal-emulation.c main.c ultifs.c
 ASMSOURCES=reset.asm wedge-primary.asm wedge-secondary.asm #sjload.asm
-PROGRAM=ultifs
 
 include ../Makefile.rules
 

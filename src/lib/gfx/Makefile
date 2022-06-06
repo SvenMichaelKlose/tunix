@@ -1,3 +1,4 @@
+LIBRARY=libgfx.a
 SOURCES= \
     box.asm \
     _bytecodes.asm \
@@ -25,8 +26,6 @@ SOURCES= \
     vline.asm \
     vic-settings.inc.asm \
     zeropage.asm
-
-LIBRARY=libgfx.a
 
 include ../../Makefile.rules
 

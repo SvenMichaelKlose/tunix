@@ -1,10 +1,11 @@
-EXOMIZER?=exomizer-2.0.10
+PROGRAM=vi
 SOURCES= \
 	commands.c \
 	main.c \
 	keyboard.c \
 	screen.c
-PROGRAM=vi
+
+EXOMIZER?=exomizer-2.0.10
 
 include ../Makefile.rules
 

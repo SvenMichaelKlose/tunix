@@ -1,8 +1,7 @@
+LIBRARY=liblineedit.a
 SOURCES= \
     linebuf.c \
     main.c
-
-LIBRARY=liblineedit.a
 
 include ../../Makefile.rules
 

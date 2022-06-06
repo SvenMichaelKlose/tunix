@@ -1,9 +1,9 @@
+PROGRAM=rom
+ASMSOURCES= rom.asm
+
 ifndef TV
 $(error Please set TV=PAL or TV=NTSC)
 endif
-
-ASMSOURCES= rom.asm
-PROGRAM=rom
 
 include ../Makefile.rules
 

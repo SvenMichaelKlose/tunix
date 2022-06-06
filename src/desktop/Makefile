@@ -1,3 +1,4 @@
+PROGRAM=desktop-lib.bin
 SOURCES= \
     desktop.c \
     file-window.c \
@@ -6,11 +7,8 @@ SOURCES= \
     ultifs.c \
     wrap-file-window.c \
     wrap-ultifs.c
-
 ASMSOURCES= \
     prgend.asm
-
-PROGRAM=desktop-lib.bin
 
 include ../Makefile.rules
 

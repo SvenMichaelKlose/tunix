@@ -1,7 +1,6 @@
+LIBRARY=libzp.a
 SOURCES= \
     dword.asm
-
-LIBRARY=libzp.a
 
 include ../../Makefile.rules
 

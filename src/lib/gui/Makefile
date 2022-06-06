@@ -1,3 +1,4 @@
+LIBRARY=libgui.a
 SOURCES= \
     box.c \
     button.c \
@@ -11,8 +12,6 @@ SOURCES= \
     message.c \
     obj.c \
     window.c
-
-LIBRARY=libgui.a
 
 include ../../Makefile.rules
 

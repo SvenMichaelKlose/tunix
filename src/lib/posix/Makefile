@@ -1,9 +1,7 @@
+LIBRARY=libposix.a
 SOURCES=
-
 ASMSOURCES= \
     strnlen.asm
-
-LIBRARY=libposix.a
 
 include ../../Makefile.rules
 

@@ -1,7 +1,6 @@
+LIBRARY=libbtree.a
 SOURCES= \
     main.asm
-
-LIBRARY=libbtree.a
 
 include ../../Makefile.rules
 

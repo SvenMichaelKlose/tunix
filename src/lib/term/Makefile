@@ -1,9 +1,8 @@
+LIBRARY=libterm.a
 SOURCES= \
     main.asm \
     keyboard.asm \
     putchar-fixed-4x4.asm
-
-LIBRARY=libterm.a
 
 include ../../Makefile.rules
 

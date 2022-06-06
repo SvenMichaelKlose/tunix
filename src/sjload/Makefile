@@ -1,5 +1,5 @@
-ASMSOURCES=main.asm
 PROGRAM=sjload
+ASMSOURCES=main.asm
 
 include ../Makefile.rules
 

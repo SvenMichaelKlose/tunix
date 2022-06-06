@@ -1,10 +1,8 @@
+LIBRARY=libultifs.a
 SOURCES= \
     ultifs.c
-
 ASMSOURCES= \
     ultifs.asm
-
-LIBRARY=libultifs.a
 
 include ../../Makefile.rules
 

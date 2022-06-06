@@ -1,3 +1,4 @@
+LIBRARY=libultimem.a
 SOURCES_asm= \
     burn.asm \
     bank-offset.asm \
@@ -8,10 +9,7 @@ SOURCES_asm= \
     erase.asm \
     readwrite.asm \
     unhide.asm
-
 SOURCES=
-
-LIBRARY=libultimem.a
 
 include ../../Makefile.rules
 

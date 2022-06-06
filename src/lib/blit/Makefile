@@ -1,8 +1,7 @@
+LIBRARY=libblit.a
 SOURCES= \
     clrram.asm \
     moveram.asm
-
-LIBRARY=libblit.a
 
 include ../../Makefile.rules
 

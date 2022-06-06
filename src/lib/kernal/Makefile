@@ -1,7 +1,6 @@
+LIBRARY=libkernal.a
 SOURCES= \
     printstr.asm
-
-LIBRARY=libkernal.a
 
 include ../../Makefile.rules
 

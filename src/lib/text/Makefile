@@ -1,8 +1,7 @@
+LIBRARY=libtext.a
 SOURCES= \
     line.c \
     motion.c
-
-LIBRARY=libtext.a
 
 include ../../Makefile.rules
 

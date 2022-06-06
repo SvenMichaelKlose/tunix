@@ -1,6 +1,6 @@
+PROGRAM=lisp
 ASMSOURCES= \
 	main.asm
-PROGRAM=lisp
 
 include ../Makefile.rules
 

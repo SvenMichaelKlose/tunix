@@ -17,7 +17,7 @@
 .import clear_screen
 .import putstring
 .import moveram
-.import _term_init, _term_puts, _term_put, _term_get
+.import term_init, _term_puts, _term_put, _term_get
 
 .include "../lib/term/libterm.inc"
 
@@ -109,7 +109,10 @@ no_restore:
     lda #%11111111
     sta $9ff2
 
-    jsr _term_init
+    lda #1
+    ldx #0
+    ldy #0
+    jsr term_init
     lda #8
     sta $900f
 

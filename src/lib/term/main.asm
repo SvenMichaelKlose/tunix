@@ -1,6 +1,7 @@
 .include "cbm_kernal.inc"
 
 .export _term_init, _term_put, _term_puts
+.export term_init
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
@@ -45,13 +46,16 @@ our_charset:
     .code
 
 .proc _term_init
-    lda #$80
-    sta $291    ; Block character set switch with Shift+C=.
-    jsr clear_screen
     lda #1
     ldx #0
     ldy #2
+.endproc
+
+.proc term_init
     jsr init_bitmap_mode
+    lda #$80
+    sta $291    ; Block character set switch with Shift+C=.
+    jsr clear_screen
     lda #$00
     sta scrbase
     lda #$11

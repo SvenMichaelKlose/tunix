@@ -166,20 +166,20 @@ n:  rts
     jsr add_region_position
     pla
     sta tmp
-    lda $9ff2
-    pha
-    and #%00111111
-    ora #%11000000
-    sta $9ff2
-    lda $9ffe
-    pha
-    lda $9fff
-    pha
-    lda font_bank
-    sta $9ffe
-    lda #0
-    sta $9fff
-    lda tmp
+;    lda $9ff2
+;    pha
+;    and #%00111111
+;    ora #%11000000
+;    sta $9ff2
+;    lda $9ffe
+;    pha
+;    lda $9fff
+;    pha
+;    lda font_bank
+;    sta $9ffe
+;    lda #0
+;    sta $9fff
+;    lda tmp
 
     ; Get character address.
     asl
@@ -302,11 +302,11 @@ n4: lda xpos
     adc font_space_size
     sta xpos
 j:  
-    pla
-    sta $9fff
-    pla
-    sta $9ffe
-    pla
-    sta $9ff2
+;    pla
+;    sta $9fff
+;    pla
+;    sta $9ffe
+;    pla
+;    sta $9ff2
     jmp sub_region_position
 .endproc

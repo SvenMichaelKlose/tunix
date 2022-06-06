@@ -111,10 +111,8 @@ no_restore:
 
     lda #1
     ldx #0
-    ldy #0
+    ldy #2
     jsr term_init
-    lda #8
-    sta $900f
 
 w:  lda #<txt_welcome
     ldx #>txt_welcome
@@ -157,25 +155,15 @@ txt_welcome:
     .byte TERM_ESCAPE, TERM_DISABLE_ATTR, TERM_ATTR_CURSOR
     .byte TERM_SET_CURSOR, 11, 1
     .byte TERM_ESCAPE, TERM_ENABLE_ATTR, TERM_ATTR_REVERSE
-    .byte "Ultimate Ultiboot", 10, 13
+    .byte "ULTIMATE ULTIBOOT", 10, 13
     .byte TERM_ESCAPE, TERM_DISABLE_ATTR, TERM_ATTR_REVERSE
     .byte 10,13
-    .byte "A:  Auto-detect", 10, 13
-    .byte "0:  unexpanded", 10, 13
-    .byte "1:  BLK1", 10, 13
-    .byte "2:  BLK2", 10, 13
-    .byte "3:  BLK3", 10, 13
-    .byte "4:  IO2,3", 10, 13
-    .byte "5:  BLK5", 10, 13
-    .byte "6:  RAM1,2,3", 10, 13
-    .byte "7:  +35K", 10, 13
-    .byte "8:  +37K", 10, 13
+    .byte "M: Memorize  B: BASIC  R: ROM  D:Device", 10, 13
     .byte 10,13
-    .byte "B:  BASIC", 10, 13
-    .byte "F2: VFORTH", 10, 13
-    .byte "A:  Autostart from device.", 10, 13
-    .byte "D:  device.", 10, 13
-    .byte "M:  Memorize selection for boot.", 10, 13
+    .byte "A: Auto-detect  0: Unexpanded  1: BLK1", 10, 13
+    .byte "2: BLK2  3: BLK3  4: IO2,3  5: BLK5", 10, 13
+    .byte "6: RAM1,2,3  7: +35K  8: +37K", 10, 13
+    .byte 10,13
     .byte 0
 
 ;    .include "../lib/term/charset-4x8.asm"

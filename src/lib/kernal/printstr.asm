@@ -1,4 +1,5 @@
 __VIC20__ = 1
+
 .include "cbm_kernal.inc"
 
 .export printstr
@@ -6,7 +7,7 @@ __VIC20__ = 1
 .importzp printptr
 
 
-.code
+    .code
 
 .proc printstr
     sta printptr

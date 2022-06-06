@@ -17,7 +17,7 @@
 .import clear_screen
 .import putstring
 .import moveram
-.import _term_init, _term_puts
+.import _term_init, _term_puts, _term_put, _term_get
 
 .include "../lib/term/libterm.inc"
 
@@ -32,12 +32,10 @@ memtop  = $284      ; end page of BASIC RAM
 screen  = $288      ; start page of text matrix
 
 .proc main
-    ; Don't get interrupted.
     sei
     lda #$7f
     sta $911d
     sta $911e
-
     cld
     ldx #$ff
     txs
@@ -68,23 +66,20 @@ no_restore:
     lda #%01000000
     sta $9ff2
 
+    lda #>$1e00     ; screen
+    sta $288        ; start page of text matrix
+    ldx #>$1000     ; BASIC
+    sta $282        ; start page of BASIC RAM
+    ldy #>$1e00     ; BASIC end
+    sta $284        ; end page of BASIC RAM
 
-;lda #%00111111
-;sta $9ff1
-;lda #%01111111
-;sta $9ff2
-    jsr $fd8d   ; Init memory.
-    jsr $fd52   ; Init KERNAL.
-    jsr $fdf9   ; Init VIAs.
-;    jsr $e518   ; Init VIC.
+    jsr $ff8a       ; KERNAL jump vectors.
+    jsr $fdf9       ; Init VIAs.
+    cli
 
 ;jmp $e378   ; BASIC cold start
 
     ; Activate all RAM below $8000.
-    lda #%00111111
-    sta $9ff1
-    lda #%01111111
-    sta $9ff2
     lda #0
     tax
     stx $9ff4
@@ -100,6 +95,10 @@ no_restore:
     inx
     stx $9ffc
     sta $9ffd
+    lda #%00111111
+    sta $9ff1
+    lda #%01111111
+    sta $9ff2
 
     ; Move from ROM to RAM.
     lda #$a0
@@ -118,38 +117,18 @@ no_restore:
     lda #%11111111
     sta $9ff2
 
-    ; Init screen.
-;    jsr clear_screen
-;    lda #0
-;    ldx #1
-;    ldy #2
-;    jsr gfx_init
-;    lda #0
-;    sta xpos
-;    sta ypos
-;    sta font_bank
-    lda #1
-    sta pencil_mode
-
-    ; Prepare font.
-;    lda #<charset_4x8
-;    sta font
-;    lda #>charset_4x8
-;    sta font+1
-;    jsr shift_font
-
-;    lda #<txt_welcome
-;    sta p
-;    lda #>txt_welcome
-;    sta p+1
-;    jsr putstring
-
     jsr _term_init
-    lda #<txt_welcome
+    lda #8
+    sta $900f
+
+w:  lda #<txt_welcome
     ldx #>txt_welcome
     jsr _term_puts
 
-w:  jmp w
+    jsr _term_get
+    lda #TERM_CLEAR_SCREEN
+    jsr _term_put
+    jmp w
 .endproc
 
 .proc shift_font
@@ -181,6 +160,27 @@ n:  dex
 
 txt_welcome:
     .byte TERM_ESCAPE, TERM_DISABLE_ATTR, TERM_ATTR_CURSOR
-    .byte "Ultimate Ultiboot", 0
+    .byte TERM_SET_CURSOR, 11, 1
+    .byte TERM_ESCAPE, TERM_ENABLE_ATTR, TERM_ATTR_REVERSE
+    .byte "Ultimate Ultiboot", 10, 13
+    .byte TERM_ESCAPE, TERM_DISABLE_ATTR, TERM_ATTR_REVERSE
+    .byte 10,13
+    .byte "A:  Auto-detect", 10, 13
+    .byte "0:  unexpanded", 10, 13
+    .byte "1:  BLK1", 10, 13
+    .byte "2:  BLK2", 10, 13
+    .byte "3:  BLK3", 10, 13
+    .byte "4:  IO2,3", 10, 13
+    .byte "5:  BLK5", 10, 13
+    .byte "6:  RAM1,2,3", 10, 13
+    .byte "7:  +35K", 10, 13
+    .byte "8:  +37K", 10, 13
+    .byte 10,13
+    .byte "B:  BASIC", 10, 13
+    .byte "F2: VFORTH", 10, 13
+    .byte "A:  Autostart from device.", 10, 13
+    .byte "D:  device.", 10, 13
+    .byte "M:  Memorize selection for boot.", 10, 13
+    .byte 0
 
 ;    .include "../lib/term/charset-4x8.asm"

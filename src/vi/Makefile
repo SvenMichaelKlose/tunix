@@ -12,7 +12,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -I.. -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/text/libtext.a ../lib/lineedit/liblineedit.a ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/text/libtext.a ../lib/lineedit/liblineedit.a ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 	cp vi vi.prg

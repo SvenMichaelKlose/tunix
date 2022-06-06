@@ -8,7 +8,7 @@ LIBRARY=libterm.a
 include ../../Makefile.rules
 
 %.o: %.asm
-	$(AS) -g -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
 $(LIBRARY): $(SOURCES:.asm=.o)
 	$(AR) a $@ $^

@@ -4,13 +4,13 @@ PROGRAM=ultidump
 include ../Makefile.rules
 
 %.o: %.asm
-	$(AS) -I /usr/local/share/cc65/asminc/ -o $@ $<
+	$(AS) -I $(CC65_HOME)/share/cc65/asminc/ -o $@ $<
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -t vic20 -Ln $(PROGRAM).lbl -o $@ $^ ../lib/ultimem/libultimem.a /usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C $(CC65_HOME)/share/cc65/cfg/vic20.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
 

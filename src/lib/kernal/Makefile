@@ -6,7 +6,7 @@ LIBRARY=libkernal.a
 include ../../Makefile.rules
 
 %.o: %.asm
-	$(AS) -g -I/usr/local/share/cc65/asminc/ -o $@ $<
+	$(AS) $(ASFLAGS) -o $@ $<
 
 $(LIBRARY): $(SOURCES:.asm=.o)
 	$(AR) a $@ $^

@@ -1,4 +1,4 @@
-.include "/usr/local/share/cc65/asminc/cbm_kernal.inc"
+.include "cbm_kernal.inc"
 
 .export _term_init, _term_put, _term_puts
 

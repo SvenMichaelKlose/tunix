@@ -7,7 +7,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
-	$(LD) -t none -Ln $(PROGRAM).lbl -o $@ $^ #/usr/local/share/cc65/lib/vic20.lib
+	$(LD) -C $(CC65_HOME)/share/cc65/cfg/none.cfg -Ln $(PROGRAM).lbl -o $@ $^
 
 all: $(PROGRAM)
 

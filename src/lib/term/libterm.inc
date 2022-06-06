@@ -1,0 +1,27 @@
+; CONTROL CODES
+
+TERM_SET_CURSOR         = $01
+TERM_INSERT_LINE        = $02
+TERM_BELL               = $07
+TERM_LINE_FEED          = $0a
+TERM_CLEAR_SCREEN       = $0c
+TERM_CARRIAGE_RETURN    = $0d
+TERM_CLEAR_TO_EOL       = $18
+
+TERM_ESCAPE             = $1b
+TERM_ENABLE_ATTR        = $0b
+TERM_DISABLE_ATTR       = $0c
+
+TERM_ATTR_REVERSE       = $01
+TERM_ATTR_UNDERLINE     = $08
+TERM_ATTR_CURSOR        = $10
+
+; KEY CODES
+
+TTY_ENTER           = 13
+TTY_ESCAPE          = $f4
+TTY_CURSOR_UP       = 5
+TTY_CURSOR_DOWN     = 20
+TTY_CURSOR_LEFT     = 19
+TTY_CURSOR_RIGHT    = 4
+TTY_BACKSPACE       = 8

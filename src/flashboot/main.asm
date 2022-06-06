@@ -19,6 +19,8 @@
 .import moveram
 .import _term_init, _term_puts
 
+.include "../lib/term/libterm.inc"
+
 .zeropage
 
 tmp3:   .res 1
@@ -178,6 +180,7 @@ n:  dex
 .rodata
 
 txt_welcome:
+    .byte TERM_ESCAPE, TERM_DISABLE_ATTR, TERM_ATTR_CURSOR
     .byte "Ultimate Ultiboot", 0
 
 ;    .include "../lib/term/charset-4x8.asm"

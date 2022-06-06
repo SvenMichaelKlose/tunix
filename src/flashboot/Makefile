@@ -1,5 +1,5 @@
-ASMSOURCES=alloc.asm api.asm copy-bank.asm ealloc.asm launch.asm main.asm process.asm save-state.asm rom-info.asm prgend.asm ultifs-dev.asm
 PROGRAM=flashboot.bin
+ASMSOURCES=alloc.asm api.asm copy-bank.asm launch.asm main.asm process.asm save-state.asm rom-info.asm prgend.asm ultifs-dev.asm
 
 include ../Makefile.rules
 
@@ -10,7 +10,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) --config rom.cfg -m $(PROGRAM).map -Ln $(PROGRAM).lbl -o $@ $^ ../lib/ingle/libingle.a ../lib/ultifs/libultifs.a ../lib/ultimem/libultimem.a ../lib/blit/libblit.a ../lib/zp/libzp.a
+	$(LD) --config rom.cfg -m $(PROGRAM).map -Ln $(PROGRAM).lbl -o $@ $^ ../lib/gfx/libgfx.a ../lib/ingle/libingle.a ../lib/ultifs/libultifs.a ../lib/ultimem/libultimem.a ../lib/blit/libblit.a ../lib/zp/libzp.a
 
 all: $(PROGRAM)
 

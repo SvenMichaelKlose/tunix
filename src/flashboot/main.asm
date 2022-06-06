@@ -40,11 +40,6 @@ screen  = $288      ; start page of text matrix
     ldx #$ff
     txs
 
-    lda #$22    ; Red screen.
-    sta $900f
-    lda #$00    ; Blank screen.
-    sta $9002
-
     jsr _ultimem_unhide
     lda #%00000001  ; Ultimem LED on.
     sta $9ff0
@@ -74,35 +69,15 @@ no_restore:
     sta $284        ; BASIC end
     jsr $ff8a       ; KERNAL jump vectors.
     jsr $fdf9       ; VIAs.
-    jsr $e518       ; VIC.
-    jsr $e45b       ; BASIC jump vectors.
-    jsr $e3a4       ; BASIC zero page.
-    ;cli
-
-jmp $e378   ; BASIC cold start
-
-    ; Activate all RAM below $8000.
-    lda #0
-    tax
-    stx $9ff4
-    sta $9ff5
-    stx $9ff6
-    sta $9ff7
-    inx
-    stx $9ff8
-    sta $9ff9
-    inx
-    stx $9ffa
-    sta $9ffb
-    inx
-    stx $9ffc
-    sta $9ffd
-    lda #%00111111
-    sta $9ff1
-    lda #%01111111
-    sta $9ff2
+    ;jsr $e518       ; VIC.
+    ;jsr $e45b       ; BASIC jump vectors.
+    ;jsr $e3a4       ; BASIC zero page.
+    cli
+    ;jmp $e378   ; BASIC cold start
 
     ; Move from ROM to RAM.
+    lda #%01110000
+    sta $9ff2
     lda #$a0
     sta s+1
     lda #$60
@@ -111,11 +86,26 @@ jmp $e378   ; BASIC cold start
     sta c+1
     lda #0
     sta $9ffc
-    sta $9ffd
     sta s
     sta d
     sta c
     jsr moveram
+    lda #%11111111
+    sta $9ff2
+
+    ; Activate all RAM below $8000.
+    ldx #1
+    stx $9ff4
+    inx
+    stx $9ff6
+    inx
+    stx $9ff8
+    inx
+    stx $9ffa
+    inx
+    stx $9ffc
+    lda #%00111111
+    sta $9ff1
     lda #%11111111
     sta $9ff2
 

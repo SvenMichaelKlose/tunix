@@ -47,7 +47,4 @@ extern void __fastcall__ ultimem_erase_block (char);
 
 extern void __fastcall__ ultimem_copy_rom2ram (long src, long dst, unsigned size);
 
-// Map in memory bank a pointer is pointing to in another block config.
-extern void * __fastcall__ ultimem_map_ptr (void * destbase, unsigned short * destreg, void * ptr, unsigned short * blockregs);
-
 #endif /* #define ULTIMEM_H */

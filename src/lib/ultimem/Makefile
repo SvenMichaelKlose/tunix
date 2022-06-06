@@ -9,8 +9,7 @@ SOURCES_asm= \
     readwrite.asm \
     unhide.asm
 
-SOURCES= \
-    map.c
+SOURCES=
 
 LIBRARY=libultimem.a
 

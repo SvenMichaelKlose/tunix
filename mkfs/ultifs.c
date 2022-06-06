@@ -325,8 +325,10 @@ bfile_open (upos directory, upos p, char mode)
     p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
+#ifdef __CC65__
     b->bank = b->ptr >> 13;
     b->addr = (void *) ((((unsigned) b->ptr) & 0x1fff) | 0xa000u);
+#endif
     b->directory = directory;
     if (!mode)
         b->size = block_get_size (p);

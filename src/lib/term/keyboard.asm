@@ -70,15 +70,15 @@ map_shift_commodore_ctrl:
 map_shift:
     .byte "!#%')+", POUND, BACKSPACE, ARROW_LEFT, "WRYIP*", RETURN
     .byte 0, "ADGJL]", CURSOR_LEFT, RUN_STOP, 0, "XVN<?", CURSOR_UP
-    .byte " ZCBM>", 0, F2, 0, "SFHK[=", F4
+    .byte " ZCBM>", 0, F2, 0, "SFHK[_", F4
     .byte "QETUO@^", F6, 34, "$&(-", CLR_HOME, F8
     .byte 0
 
 map_ctrl:
-    .byte "1357}+", POUND, BACKSPACE, ARROW_LEFT, "wryip*", RETURN
-    .byte 0, "ädgjl;", CURSOR_RIGHT, RUN_STOP, 0, "xvn,/", CURSOR_DOWN
-    .byte " zcbm.", 0, F1, 0, "ßfhk:=", F3
-    .byte "q€tüö{^", F5, "246X0-", CLR_HOME, F7
+    .byte "1357", 29, "+", POUND, BACKSPACE, ARROW_LEFT, 23, 18, 25, 9, 16, "*", RETURN
+    .byte 0, 1, 4, 7, 10, 12, ";", CURSOR_RIGHT, RUN_STOP, 0, 24, 22, 14, ",", 29, CURSOR_DOWN
+    .byte " ", 26, 3, 2, 13, ".", 0, F1, 0, 19, 6, 8, 11, ":=", F3
+    .byte 17, 5, 20, 21, 15, 27, 30, F5, "246X0-", CLR_HOME, F7
     .byte 0
 
 map_commodore:

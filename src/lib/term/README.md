@@ -4,6 +4,13 @@ Terminal emulation
 40x24 characters monochrome. Charset
 is Code Page 437 (think IBM PC).
 
+# Keyboard
+
+[ARROW UP]: '^'
+[SHIFT-=]:  '_'
+
+CTRL-A_:   Control codes 1-31.
+
 # Output
 
 ## Control codes:

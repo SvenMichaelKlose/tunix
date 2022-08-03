@@ -55,20 +55,32 @@ txt_err_not_a_cons:
 ; $0400-$0fff: Standard C lirary heap
 ; $1000-$1fff: Screen
 ; $2000-$3fff: BLK1: Lisp interpreter
-; $4000-$5fff: BLK2: Lisp interpreter
-; $6000-$7fff: BLK3: Lisp heap/stack window
+; $4000-$5fff: BLK2: Heap window
+; $6000-$7fff: BLK3: Stack window
 ; $9800-$9fff: Kept free for KERNAL extensions
 ; $a000-$bfff: Standard C lirary heap
+
+
+; #######################
+; ### OBJECT POINTERS ###
+; #######################
 ;
-; The heap is growing without gaps and accessed through
-; BLK3.  An object address also comes with its bank
-; number, so each pointer is three bytes in size.
+; All objects are stored in a growing heap without
+; garbage collection via extended memory window BLK2.
+; The argument stack is accessed through BLK3.
 ;
-; Every object starts with a type byte and a relocation
-; address which is only used for garbage collection.
+; An object pointer contains the real address of its
+; data plus a bank number, so each pointer is three
+; bytes in size.  NIL is denoted by a bank number of 0.
+; T is represented by a negative block number.
+
+
+; ####################
+; ### OBJECT TYPES ###
+; ####################
 ;
-; The MSB of the type byte distinguishes atoms (set to 1)
-; and conses (unset).
+; Every object starts with a type byte.   The MSB of the
+; type byte distinguishes atoms (set to 1) and conses (unset).
 
 F_ATOM          = %10000000
 F_SYMBOL        = %10000000
@@ -82,32 +94,12 @@ stack:      .res 3
 
     .code
 
-.proc swap_stack_and_heap
-    lda stack
-    ldx heap
-    sta heap
-    stx stack
-    lda stack+1
-    ldx heap+1
-    sta heap+1
-    stx stack+1
-    lda stack+2
-    ldx heap+2
-    sta heap+2
-    stx stack+2
-    rts
-.endproc
-
 ; Allocate chunk of heap.
 ;
 ; A: Type info
 ; X: Size
 .proc alloc_heap
     sta tmp2        ; Save type.
-
-    lda heap+1
-    cmp #7          ; Last page of heap bank?
-    beq check       ; Check low pointer…
 
     ; Save pointer to object which this function
     ; returns.
@@ -128,28 +120,27 @@ l:  lda heap
     clc
     adc heap
     sta heap
-    lda heap+1
-    adc #0
-    sta heap+1
-
+    bcs next_page
     rts
 
-check:
-    txa
-    clc
-    adc heap
-    bcc l
+    ; Step to next heap page.
+next_page:
+    inc heap+1
+    lda heap+1
+    cmp #$60
+    bne done
 
-    ; Switch to next free bank.
+    ; Step to next heap bank.
+    inc $9ffa
     lda #$00
     sta heap
-    lda #$60
+    lda #$40
     sta heap+1
-    inc heap+2
-    lda heap+2
-    sta $9ffc
 
-    bne l       ; (jmp)
+    bne l       ; (jmp) Try again.
+
+done:
+    rts
 .endproc
 
 
@@ -198,6 +189,7 @@ n:  dec r+2
     ldy #0
     pla
     sta (r),y
+    iny
     txa
     sta (r),y
 
@@ -272,14 +264,15 @@ CONS_SIZE           = 7
     sty r+2
 
     lda (a0),y
-    bmi n
-    dec r+2
-n:  rts
+    asl
+    ror r+2
+    rts
 .endproc
 
 ; Built-in (CAR x)
 .proc car
     ldy #0
+    sty r+2
     lda (a0),y
     bmi e
 

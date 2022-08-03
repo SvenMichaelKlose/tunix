@@ -75,9 +75,6 @@ F_SYMBOL        = %10000000
 F_NUMBER        = %10000001
 M_TYPE          = %00000001
 
-F_MARKED        = %01000000
-F_MISSING_TRACE = %00100000
-
     .zeropage
 
 heap:       .res 3
@@ -142,13 +139,6 @@ check:
     clc
     adc heap
     bcc l
-
-.ifdef GC
-    ; Mark end of heap for GC.
-    ldy #0
-    tya
-    sta (heap),y
-.endif
 
     ; Switch to next free bank.
     lda #$00
@@ -243,17 +233,9 @@ n:  rts
 
 ; Conses consist of a flag byte, a relocation address
 ; and two object pointers.
-
-.ifdef GC
-    OFS_CONS_RELOC      = 1
-    OFS_CONS_A          = 3
-    OFS_CONS_D          = 6
-    CONS_SIZE           = 9
-.else
-    OFS_CONS_A          = 1
-    OFS_CONS_D          = 4
-    CONS_SIZE           = 7
-.endif
+OFS_CONS_A          = 1
+OFS_CONS_D          = 4
+CONS_SIZE           = 7
 
     .code
 
@@ -302,10 +284,12 @@ n:  rts
     bmi e
 
     lda a0+2
+    beq done
     sta $9ffc
 
     ldy #OFS_CONS_A
-    stx r
+    lda (a0),y
+    sta r
     iny
     lda (a0),y
     sta r+1
@@ -313,6 +297,7 @@ n:  rts
     lda (a0),y
     sta r+2
 
+done:
     rts
 
 e:  jmp err_not_a_cons
@@ -321,14 +306,17 @@ e:  jmp err_not_a_cons
 ; Built-in (CDR x)
 .proc cdr
     ldy #0
+    sty r+2
     lda (a0),y
     bmi e
 
     lda a0+2
+    beq done
     sta $9ffc
 
     ldy #OFS_CONS_D
-    stx r
+    lda (a0),y
+    sta r
     iny
     lda (a0),y
     sta r+1
@@ -336,6 +324,7 @@ e:  jmp err_not_a_cons
     lda (a0),y
     sta r+2
 
+done:
     rts
 
 e:  jmp err_not_a_cons
@@ -344,10 +333,12 @@ e:  jmp err_not_a_cons
 ; Built-in (RPLACA v x)
 .proc rplaca
     ldy #0
+    sty r+2
     lda (a1),y
     bmi e
 
     lda a1+2
+    beq done
     sta $9ffc
 
     ldy #OFS_CONS_A
@@ -363,6 +354,7 @@ e:  jmp err_not_a_cons
     sta (a1),y
     sta r+2
 
+done:
     rts
 
 e:  jmp err_not_a_cons
@@ -371,10 +363,12 @@ e:  jmp err_not_a_cons
 ; Built-in (RPLACD v x)
 .proc rplacd
     ldy #0
+    sty r+2
     lda (a1),y
     bmi e
 
     lda a1+2
+    beq done
     sta $9ffc
 
     ldy #OFS_CONS_D
@@ -390,6 +384,7 @@ e:  jmp err_not_a_cons
     sta (a1),y
     sta r+2
 
+done:
     rts
 
 e:  jmp err_not_a_cons
@@ -400,16 +395,9 @@ e:  jmp err_not_a_cons
 ; ### NUMBERS ###
 ; ###############
 
-.ifdef GC
-    OFS_NUMBER_FLAGS    = 0
-    OFS_NUMBER_RELOC    = 2
-    OFS_NUMBER          = 5
-    NUMBER_SIZE         = 7
-.else
-    OFS_NUMBER_FLAGS    = 0
-    OFS_NUMBER          = 2
-    NUMBER_SIZE         = 4
-.endif
+OFS_NUMBER_FLAGS    = 0
+OFS_NUMBER          = 2
+NUMBER_SIZE         = 4
 
     .bss
 
@@ -437,20 +425,11 @@ number:     .res 2
 ; ### SYMBOLS ###
 ; ###############
 
-.ifdef GC
-    OFS_SYMBOL_FLAGS    = 0
-    OFS_SYMBOL_RELOC    = 2
-    OFS_SYMBOL_VALUE    = 4
-    OFS_SYMBOL_LENGTH   = 7
-    OFS_SYMBOL_NAME     = 8
-    SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
-.else
-    OFS_SYMBOL_FLAGS    = 0
-    OFS_SYMBOL_VALUE    = 2
-    OFS_SYMBOL_LENGTH   = 5
-    OFS_SYMBOL_NAME     = 6
-    SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
-.endif
+OFS_SYMBOL_FLAGS    = 0
+OFS_SYMBOL_VALUE    = 2
+OFS_SYMBOL_LENGTH   = 5
+OFS_SYMBOL_NAME     = 6
+SYMBOL_SIZE         = OFS_SYMBOL_NAME + 1
 
     .zeropage
 
@@ -547,20 +526,18 @@ body:   .res 3
     iny
     lda body+2
     sta (stack),y
+    iny
 
     ; Push NIL onto stack.
+    iny
+    iny
     lda #0
-    iny
-    sta (stack),y
-    iny
-    sta (stack),y
-    iny
     sta (stack),y
 
     ; Advance stack pointer.
     lda stack
     clc
-    adc #12
+    adc #5
     sta stack
     lda stack+1
     adc #0
@@ -659,9 +636,9 @@ l2: lda argdef+2
     iny
     lda (a1),y
     sta tmp+2
+    iny
 
     ; Fetch pointer to next argument.
-    iny
     lda (a1),y
     sta tmp2
     iny

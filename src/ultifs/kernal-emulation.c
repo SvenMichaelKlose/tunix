@@ -19,15 +19,15 @@
 typedef unsigned char uchar;
 
 // Client registers
-#define accu          (*(uchar*) 0x9c00)
-#define xreg          (*(uchar*) 0x9c01)
-#define yreg          (*(uchar*) 0x9c02)
-#define flags         (*(uchar*) 0x9c03)
-#define proc_ustatus  (*(uchar*) 0x9c04)
-#define proc_blk1     (*(unsigned*) 0x9c05)
-#define proc_blk2     (*(unsigned*) 0x9c07)
-#define proc_blk3     (*(unsigned*) 0x9c09)
-#define proc_blk5     (*(unsigned*) 0x9c0b)
+#define accu          (*(uchar *) 0x9c00)
+#define xreg          (*(uchar *) 0x9c01)
+#define yreg          (*(uchar *) 0x9c02)
+#define flags         (*(uchar *) 0x9c03)
+#define proc_ustatus  (*(uchar *) 0x9c04)
+#define proc_blk1     (*(unsigned *) 0x9c05)
+#define proc_blk2     (*(unsigned *) 0x9c07)
+#define proc_blk3     (*(unsigned *) 0x9c09)
+#define proc_blk5     (*(unsigned *) 0x9c0b)
 
 // CPU flags
 #define FLAG_C       1
@@ -37,17 +37,29 @@ typedef unsigned char uchar;
 #define FLAG_B       16
 #define FLAG_UNUSED  32
 #define FLAG_V       64
-#define FLAG_N       128
+#define FLAG_N       12
 
 /* KERNAL zero page data */
-#define FNLEN   (*(uchar*)  0xb7)  // File name length
-#define LFN     (*(uchar*)  0xb8)  // Logical file number
-#define SA      (*(uchar*)  0xb9)  // Secondary address
-#define FA      (*(uchar*)  0xba)  // Device number
-#define FNAME   (*(char**)  0xbb)  // File name pointer
-#define STATUS  (*(uchar*)  0x90)  // Serial line status byte
-#define DFLTN   (*(uchar*)  0x99)  // Logical input file number
-#define DFLTO   (*(uchar*)  0x9A)  // Logical output file number
+#define FNLEN   (*(uchar *) 0xb7)    // File name length
+#define LFN     (*(uchar *) 0xb8)    // Logical file number
+#define SA      (*(uchar *) 0xb9)    // Secondary address
+#define FA      (*(uchar *) 0xba)    // Device number
+#define FNAME   (*(char **) 0xbb)    // File name pointer
+#define STATUS  (*(uchar *) 0x90)    // Serial line status byte
+#define LDTND   (*(uchar *) 0x98)    // Number of open files
+#define DFLTN   (*(uchar *) 0x99)    // Logical input file number
+#define DFLTO   (*(uchar *) 0x9a)    // Logical output file number
+
+#define SAP     (*(char **) 0xac)    // Load/save current address
+#define SAL     (*(uchar *) 0xac)
+#define SAH     (*(uchar *) 0xad)
+#define EAP     (*(char **) 0xae)    // Load/save end address
+#define EAL     (*(uchar *) 0xae)
+#define EAH     (*(uchar *) 0xaf)
+
+#define LAT     (*(uchar *) 0x0259)  // File number table
+#define FAT     (*(uchar *) 0x0263)  // Device number table
+#define SAT     (*(uchar *) 0x026d)  // Secondary address table
 
 /* Serial line error codes */
 #define STATUS_NO_DEVICE       0x80
@@ -529,12 +541,8 @@ ultifs_kclall ()
 void
 ultifs_kload ()
 {
-    char    do_verify = accu;
-    char    old_LFN = LFN;
-    char *  addr;
-    uchar   addr_l;
-    uchar   addr_h;
-
+    char   do_verify = accu;
+    char   old_LFN = LFN;
     STATUS = flags = 0;
     LFN = NUM_LFN - 1;
 
@@ -542,29 +550,28 @@ ultifs_kload ()
         goto end;
 
     // Read destination address.
-    addr_l = ultifs_kbasin ();
-    addr_h = ultifs_kbasin ();
+    EAL = ultifs_kbasin ();
+    EAH = ultifs_kbasin ();
 
     // When SA=0 pverride with address to YX.
     if (!SA) {
-        addr_l = xreg;
-        addr_h = yreg;
+        EAL = xreg;
+        EAH = yreg;
     }
 
     // Read all bytes.
-    addr = (char *) ((unsigned) addr_h << 8 | (unsigned) addr_l);
     while (!STATUS) {
         ultifs_kbasin ();
         if (STATUS & STATUS_END_OF_FILE)
             break;
-        poke_to_process (addr++, accu);
+        poke_to_process (EAP++, accu);
     }
 
     ultifs_kclose ();
 
     // Return next free address.
-    xreg = (unsigned) addr & 255;
-    yreg = (unsigned) addr >> 8;
+    xreg = EAL;
+    yreg = EAH;
 
 end:
     LFN = old_LFN;
@@ -573,10 +580,9 @@ end:
 void
 ultifs_ksave ()
 {
-    char    old_LFN = LFN;
-    char *  ptr = *(char **) accu;
-    char *  end = (char*) (yreg << 8 + xreg);
-
+    char   old_LFN = LFN;
+    SAP = *(char **) accu;
+    EAP = yreg << 8 + xreg;
     STATUS = flags = 0;
     LFN = NUM_LFN - 1;
 
@@ -584,9 +590,9 @@ ultifs_ksave ()
         goto end;
 
     while (!STATUS) {
-        accu = peek_from_process (ptr++);
+        accu = peek_from_process (SAP++);
         ultifs_kbsout ();
-        if (end == ptr)
+        if (EAP == SAP)
             break;
     }
 

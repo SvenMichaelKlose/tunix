@@ -175,7 +175,9 @@ done:
     lda #0
     sta $9ffb
     sta $9ffd
+.endproc
 
+.proc swap_zp
     ; Swap zeropage.
     ldx #<__ZP_SIZE__
 l:  lda __ZP_START__-1,x
@@ -190,15 +192,7 @@ l:  lda __ZP_START__-1,x
 .endproc
 
 .proc leave
-    ; Swap zeropage.
-    ldx #<__ZP_SIZE__
-l:  lda __ZP_START__-1,x
-    ldy _saved_zp-1,x
-    sta _saved_zp-1,x
-    tya
-    sta __ZP_START__-1,x
-    dex
-    bne l
+    jsr swap_zp
 
     ; Restore BLK2, BLK3 and BLK5.
     lda cpu_state+7

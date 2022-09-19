@@ -1,4 +1,4 @@
-.export main
+.export main, _reset
 .exportzp tmp3
 
 .importzp s, d, c, p, tmp
@@ -51,63 +51,25 @@ screen  = $288      ; start page of text matrix
     ;jsr restore_state
 no_restore:
 
-;    jsr init_alloc      ; RAM bank allocator.
-;    jsr init_proc       ; Process manager.
-;    jsr init_copy_bank  ; Fast bank copy from $4000 to $2000.
-
-    ; No expanded RAM.
-    lda #%00000000
-    sta $9ff1
-    lda #%01000000
-    sta $9ff2
-
-    lda #$1e
-    sta $288        ; Screen start
-    lda #$10
-    sta $282        ; BASIC start
-    lda #$1e
-    sta $284        ; BASIC end
-    jsr $ff8a       ; KERNAL jump vectors.
-    jsr $fdf9       ; VIAs.
-    ;jsr $e518       ; VIC.
-    ;jsr $e45b       ; BASIC jump vectors.
-    ;jsr $e3a4       ; BASIC zero page.
-    cli
-    ;jmp $e378   ; BASIC cold start
-
     ; Move from ROM to RAM.
-    lda #%01110000
-    sta $9ff2
-    lda #$a0
-    sta s+1
-    lda #$60
-    sta d+1
-    lda #$20
-    sta c+1
-    lda #0
-    sta $9ffc
-    sta s
-    sta d
-    sta c
-    jsr moveram
-    lda #%11111111
-    sta $9ff2
+;    lda #%01110000
+;    sta $9ff2
+;    lda #$a0
+;    sta s+1
+;    lda #$60
+;    sta d+1
+;    lda #$20
+;    sta c+1
+;    lda #0
+;    sta $9ffc
+;    sta s
+;    sta d
+;    sta c
+;    jsr moveram
+;    lda #%11111111
+;    sta $9ff2
 
-    ; Activate all RAM below $8000.
-    ldx #1
-    stx $9ff4
-    inx
-    stx $9ff6
-    inx
-    stx $9ff8
-    inx
-    stx $9ffa
-    inx
-    stx $9ffc
-    lda #%00111111
-    sta $9ff1
-    lda #%11111111
-    sta $9ff2
+    jmp _reset
 
     lda #1
     ldx #0
@@ -166,4 +128,67 @@ txt_welcome:
     .byte 10,13
     .byte 0
 
+txt_roms:       .byte "ROMs", 0
+txt_devs:       .byte "Devices", 0
+
 ;    .include "../lib/term/charset-4x8.asm"
+
+.proc _reset
+    ; Configure RAM blocks.
+    lda #%00111111
+    sta $9ff1
+    ldx #2
+    lda #0
+    stx $9ff4
+    sta $9ff5
+    inx
+    stx $9ff6
+    sta $9ff7
+    inx
+    stx $9ff8
+    sta $9ff9
+    inx
+    stx $9ffa
+    sta $9ffb
+    inx
+    stx $9ffc
+    sta $9ffd
+    inx
+
+    ; Copy rest of init code to IO2,3.
+    ldy #end - start
+l:  lda start,y
+    sta $9d00,y
+    dey
+    bpl l
+    jmp $9d00
+
+start:
+    lda #0
+    stx $9ffe
+    sta $9fff
+    lda #%11111111
+    sta $9ff2
+
+READY     := $C474
+PRNTCRLF  := $CAD7
+PTRSTR    := $CB1E
+INITBA    := $E3A4
+INITVCTRS := $E45B
+FREMSG    := $E404
+INITSK    := $E518
+INITMEM   := $FD8D
+FRESTOR   := $FD52
+INITVIA   := $FDF9
+
+    cld
+    jsr INITMEM     ; Init memory
+    jsr FRESTOR     ; I/O vectors
+    jsr INITVIA     ; VIAs
+    jsr INITSK      ; VIC & clear screen
+    jsr INITVCTRS   ; BASIC vectors
+    jsr INITBA      ; BASIC zero page
+    jsr FREMSG      ; Print welcome message
+    jmp READY       ;jmp $e381       ; BASIC cold start
+end:
+.endproc

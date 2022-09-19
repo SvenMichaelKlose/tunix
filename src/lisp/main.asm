@@ -530,7 +530,7 @@ body:   .res 3
     ; Advance stack pointer.
     lda stack
     clc
-    adc #5
+    adc #6
     sta stack
     lda stack+1
     adc #0

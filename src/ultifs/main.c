@@ -54,6 +54,5 @@ main (void)
     init_primary_wedge ((void *) 0x9800);
     init_kernal_emulation ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
-
     reset ();
 }

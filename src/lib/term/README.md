@@ -6,8 +6,13 @@ is Code Page 437 (think IBM PC).
 
 # Keyboard
 
-[ARROW UP]: '^'
-[SHIFT-=]:  '_'
+ARROW LEFT:     '~'
+ARROW UP:       '^'
+SHIFT+-:        '_'
+SHIFT+8:        '['
+SHIFT+9:        ']'
+CTRL+SHIFT+8:   '['
+SHIFT+9:        ']'
 
 CTRL-A_:   Control codes 1-31.
 

@@ -27,10 +27,10 @@ FCHROUT = $f27a
 
 secondary_vectors_l:
     .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn
-    .byte <ubasin, <ubsout, <FSTOP, <FGETIN, <uclall, <BREAK, <uload, <usave, 0
+    .byte <ubasin, <ubsout, $ff, $ff, <uclall, $ff, <uload, <usave, 0
 secondary_vectors_h:
     .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
-    .byte >ubasin, >ubsout, >FSTOP, >FGETIN, >uclall, >BREAK, >uload, >usave, 0
+    .byte >ubasin, >ubsout, $ff, $ff, >uclall, $ff, >uload, >usave, 0
 
 
     .code
@@ -68,6 +68,8 @@ l1: lda map_ultimem,y
 l2: lda secondary_vectors_l,x
     ora secondary_vectors_h,x
     beq done
+    cmp #$ff
+    beq next
 
     ; Point vector to the code we're about to generate.
     txa
@@ -94,6 +96,7 @@ l2: lda secondary_vectors_l,x
     lda secondary_vectors_h,x
     jsr out
 
+next:
     inx
     jmp l2
 

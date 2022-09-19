@@ -13,7 +13,7 @@
 #define ULTIMEM_CTRL_RESET      64      /* Soft-reset. Keep registers. */
 #define ULTIMEM_CTRL_HIDE       128     /* Hide registers. */
 
-#define ULTIMEM_CONFIG1     ((char *) 0x9ff1)   /* RAM123 (bits 0/1), IO2 (bits 2/3), IO3, unused */
+#define ULTIMEM_CONFIG1     ((char *) 0x9ff1)   /* RAM123 (bits 0/1), IO2 (bits 2/3), IO3 (bits 4/5), unused */
 #define ULTIMEM_CONFIG2     ((char *) 0x9ff2)   /* BLK1 (bits 0/1), BLK2 (bits 2/3), BLK3 (bits 4/5), BLK5 (bits 6/7) */
 #define ULTIMEM_CFG_ROM     1
 #define ULTIMEM_CFG_RO_RAM  2

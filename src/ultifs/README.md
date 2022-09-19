@@ -65,12 +65,12 @@ following devices:
 ~~~
 ADDRESS   DEVICE
 =======   ======
-0        Keyboard
-1        Cassette
-2        RS-232
-3        CRT display
-4        Serial bus printer
-8        Serial bus disk drive
+0         Keyboard
+1         Cassette
+2         RS-232
+3         CRT display
+4         Serial bus printer
+8         Serial bus disk drive
 ~~~
 
 Device numbers of four or greater automatically refer

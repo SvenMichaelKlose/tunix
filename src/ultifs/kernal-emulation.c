@@ -29,6 +29,8 @@ typedef unsigned char uchar;
 #define proc_blk3     (*(unsigned *) 0x9c09)
 #define proc_blk5     (*(unsigned *) 0x9c0b)
 
+#define BORDER     (*(uchar *) 0x900f)
+
 // CPU flags
 #define FLAG_C       1
 #define FLAG_Z       2
@@ -166,29 +168,26 @@ peek_from_process (char * p)
     return *p;
 }
 
-char
-poke_to_process (char * p, char v)
+char __fastcall__
+poke_to_process (char * ptr, char v)
 {
-    uchar ph = (unsigned) p >> 8;
+    register char * p = ptr;
+    register uchar ph = (unsigned) p >> 8;
 
     if (ph < 0x20 || ph > 0x7f)
         return *p = v;
 
     *ULTIMEM_CONFIG2 |= 0xc0;
 
-    if (ph < 0x40) {
+    if (ph < 0x40)
         *ULTIMEM_BLK5 = proc_blk1;
-        return *(p - (char *) 0x2000 + (char *) 0xa000) = v;
-    }
-    if (ph < 0x60) {
+    else if (ph < 0x60)
         *ULTIMEM_BLK5 = proc_blk2;
-        return *(p - (char *) 0x4000 + (char *) 0xa000) = v;
-    }
-    if (ph < 0x80) {
+    else if (ph < 0x80)
         *ULTIMEM_BLK5 = proc_blk3;
-        return *(p - (char *) 0x6000 + (char *) 0xa000) = v;
-    }
 
+    p &= 0x1fff;
+    p += 0xa000;
     return *p = v;
 }
 
@@ -479,8 +478,8 @@ error:
 char
 ultifs_kbasin ()
 {
-    channel *  ch = channels[LFN];
-    bfile *    file;
+    register channel *  ch = channels[LFN];
+    register bfile *    file;
 
     if (!ch)
         goto file_not_open;
@@ -561,6 +560,7 @@ ultifs_kload ()
 
     // Read all bytes.
     while (!STATUS) {
+        BORDER++;
         ultifs_kbasin ();
         if (STATUS & STATUS_END_OF_FILE)
             break;

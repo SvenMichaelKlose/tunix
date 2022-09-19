@@ -13,7 +13,7 @@ l:  lda start,x
 start:
     lda #$ff
     sta $9ff2
-    ldx #3
+    ldx #4
     lda #0
     stx $9ff8
     sta $9ff9

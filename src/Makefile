@@ -21,6 +21,7 @@ all:
 	$(MAKE) -C ultiburn all
 	$(MAKE) -C ultidump all
 	$(MAKE) -C ultifs all
+	$(MAKE) -C ultitest all
 	$(MAKE) -C vi all
 	$(MAKE) -C vm all TV=PAL
 
@@ -46,5 +47,6 @@ clean:
 	$(MAKE) -C ultiburn clean
 	$(MAKE) -C ultidump clean
 	$(MAKE) -C ultifs clean
+	$(MAKE) -C ultitest clean
 	$(MAKE) -C vi clean
 	$(MAKE) -C vm clean TV=PAL

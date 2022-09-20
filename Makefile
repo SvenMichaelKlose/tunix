@@ -20,6 +20,7 @@ all:
 	cp src/ultiburn/ultiburn bin/
 	cp src/ultidump/ultidump bin/
 	cp src/ultifs/ultifs bin/
+	cp src/ultitest/ultitest bin/
 #	cp src/ultitest/ultitest bin/
 	cp src/vi/README.md bin/vi.md
 	cp src/vi/vi bin/

@@ -14,6 +14,7 @@ all:
 	$(MAKE) -C lib/text all
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
+	$(MAKE) -C fstest all
 	$(MAKE) -C desktop all
 	$(MAKE) -C lisp all
 	$(MAKE) -C sjload all
@@ -38,6 +39,7 @@ clean:
 	$(MAKE) -C lib/text clean
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean
+	$(MAKE) -C fstest clean
 	$(MAKE) -C desktop clean
 	$(MAKE) -C lisp clean
 	$(MAKE) -C sjload clean

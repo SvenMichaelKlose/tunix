@@ -25,6 +25,12 @@ char * os_errors[] = {
 char oserr;
 char err;
 
+void
+init_error ()
+{
+    cbm_open (15, device, 15, NULL);
+}
+
 int
 read_error ()
 {
@@ -44,7 +50,6 @@ read_error ()
         }
         *p++ = c;
     }
-    cbm_k_clrch ();
 
     return err = (last_error[0] - '0') * 10 + last_error[1] - '0';
 }
@@ -52,9 +57,11 @@ read_error ()
 void
 print_error ()
 {
+    cbm_k_close (15);
     if (oserr)
         printf ("! %s\n", os_errors[oserr]);
-    printf ("%s\n", last_error);
+    if (last_error[0])
+        printf ("%s\n", last_error);
 }
 
 void
@@ -83,16 +90,28 @@ test_create_seq ()
 {
     char i;
 
-    oserr = cbm_open (8, device, 8, "test,s,w");
-    if (!oserr) {
+    init_error ();
+    oserr = cbm_open (8, device, 8, "0:test,s,w");
+    read_error ();
+    if (!oserr && !err) {
         cbm_k_ckout (8);
         for (i = 1; i < 255; i++)
             cbm_k_bsout (i);
-    } else
-        read_error ();
-    //cbm_k_clrch ();
+    }
     cbm_close (8);
     print_error ();
+}
+
+void
+test_create_seq_again ()
+{
+    test_create_seq ();
+    if (oserr | err) {
+        err = 0;
+        return;
+    }
+    err = 99;
+    printf ("!!! error expected\n");
 }
 
 void
@@ -101,6 +120,7 @@ test_read_seq ()
     char i;
     char v;
 
+    init_error ();
     oserr = cbm_open (8, device, 8, "test,s,r");
     if (!oserr) {
         cbm_k_chkin (8);
@@ -111,9 +131,8 @@ test_read_seq ()
                 break;
             }
         }
-    } else
-        read_error ();
-    //cbm_k_clrch ();
+    }
+    read_error ();
     cbm_close (8);
     print_error ();
 }
@@ -126,10 +145,11 @@ typedef struct _test {
 } test;
 
 test tests[] = {
-    {"Initialize",  test_initialize},
+    {"Initialize",        test_initialize},
     //{"New disk",    test_new_disk},
-    {"Create SEQ",  test_create_seq},
-    {"Read SEQ",    test_read_seq}
+    {"Create SEQ",        test_create_seq},
+    {"Create SEQ again",  test_create_seq_again},
+    {"Read SEQ",          test_read_seq}
 };
 
 void
@@ -143,7 +163,8 @@ main (void)
 
     for (i = 0; i < num_tests; i++) {
         p = &tests[i];
-        printf ("Test %d: %s\n", i + 1, p->description);
+        printf ("%d: %s\n", i + 1, p->description);
+        oserr = err = last_error[0] = 0;
         p->fun ();
     }
 }

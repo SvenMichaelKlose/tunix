@@ -22,11 +22,17 @@ char * os_errors[] = {
     "Illegal device number."
 };
 
+char oserr;
+char err;
+
 int
 read_error ()
 {
     char c;
     char * p = last_error;
+
+    if (oserr)
+        return 0;
 
     *p = 0;
     cbm_k_chkin (15);
@@ -39,20 +45,37 @@ read_error ()
         *p++ = c;
     }
     cbm_k_clrch ();
+
+    return err = (last_error[0] - '0') * 10 + last_error[1] - '0';
+}
+
+void
+print_error ()
+{
+    if (oserr)
+        printf ("! %s\n", os_errors[oserr]);
+    printf ("%s\n", last_error);
+}
+
+void
+send_command (char * cmd)
+{
+    oserr = cbm_open (15, device, 15, cmd);
+    read_error ();
+    cbm_close (15);
+    print_error ();
+}
+
+void
+test_initialize ()
+{
+    send_command ("i0");
 }
 
 void
 test_new_disk ()
 {
-    char err;
-
-    err = cbm_open (15, device, 15, "N0:TESTDISK,01");
-    if (!err)
-        read_error ();
-    cbm_close (15);
-
-    if (err)
-        printf ("! %s\n", os_errors[err]);
+    send_command ("n0:TESTDISK,01");
 }
 
 typedef void (*voidfun) ();
@@ -63,6 +86,7 @@ typedef struct _test {
 } test;
 
 test tests[] = {
+    {"Initialize", test_initialize},
     {"New disk", test_new_disk}
 };
 
@@ -73,7 +97,7 @@ main (void)
     int i;
     int num_tests = sizeof (tests) / sizeof (test);
 
-    printf ("Filesystem tests: %d\n", num_tests);
+    printf ("%d filesystem tests on #%d\n", num_tests, device);
 
     for (i = 0; i < num_tests; i++) {
         p = &tests[i];

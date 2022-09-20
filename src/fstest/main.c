@@ -90,7 +90,7 @@ test_create_seq ()
             cbm_k_bsout (i);
     } else
         read_error ();
-    cbm_k_clrch ();
+    //cbm_k_clrch ();
     cbm_close (8);
     print_error ();
 }
@@ -113,7 +113,7 @@ test_read_seq ()
         }
     } else
         read_error ();
-    cbm_k_clrch ();
+    //cbm_k_clrch ();
     cbm_close (8);
     print_error ();
 }

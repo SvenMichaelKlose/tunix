@@ -78,6 +78,46 @@ test_new_disk ()
     send_command ("n0:TESTDISK,01");
 }
 
+void
+test_create_seq ()
+{
+    char i;
+
+    oserr = cbm_open (8, device, 8, "test,s,w");
+    if (!oserr) {
+        cbm_k_ckout (8);
+        for (i = 1; i < 255; i++)
+            cbm_k_bsout (i);
+    } else
+        read_error ();
+    cbm_k_clrch ();
+    cbm_close (8);
+    print_error ();
+}
+
+void
+test_read_seq ()
+{
+    char i;
+    char v;
+
+    oserr = cbm_open (8, device, 8, "test,s,r");
+    if (!oserr) {
+        cbm_k_chkin (8);
+        for (i = 1; i < 255; i++) {
+            v = cbm_k_basin ();
+            if (v != i) {
+                strcpy (last_error, "99 read error");
+                break;
+            }
+        }
+    } else
+        read_error ();
+    cbm_k_clrch ();
+    cbm_close (8);
+    print_error ();
+}
+
 typedef void (*voidfun) ();
 
 typedef struct _test {
@@ -86,8 +126,10 @@ typedef struct _test {
 } test;
 
 test tests[] = {
-    {"Initialize", test_initialize},
-    {"New disk", test_new_disk}
+    {"Initialize",  test_initialize},
+    //{"New disk",    test_new_disk},
+    {"Create SEQ",  test_create_seq},
+    {"Read SEQ",    test_read_seq}
 };
 
 void

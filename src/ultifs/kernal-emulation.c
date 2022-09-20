@@ -29,8 +29,6 @@ typedef unsigned char uchar;
 #define proc_blk3     (*(unsigned *) 0x9c09)
 #define proc_blk5     (*(unsigned *) 0x9c0b)
 
-#define BORDER     (*(uchar *) 0x900f)
-
 // CPU flags
 #define FLAG_C       1
 #define FLAG_Z       2
@@ -560,7 +558,6 @@ ultifs_kload ()
 
     // Read all bytes.
     while (!STATUS) {
-        BORDER++;
         ultifs_kbasin ();
         if (STATUS & STATUS_END_OF_FILE)
             break;

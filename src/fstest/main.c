@@ -147,7 +147,7 @@ test_read_seq ()
     char v;
 
     init_error ();
-    oserr = cbm_open (8, device, 8, "test,s,r");
+    oserr = cbm_open (8, device, 8, "0:test,s,r");
     if (!oserr) {
         cbm_k_chkin (8);
         for (i = 1; i < 255; i++) {

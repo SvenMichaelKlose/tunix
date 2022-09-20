@@ -153,11 +153,18 @@ test tests[] = {
 };
 
 void
-main (void)
+main (int argc, char ** argv)
 {
     test * p;
     int i;
     int num_tests = sizeof (tests) / sizeof (test);
+
+    putchar (0x93);
+    if (argc < 2) {
+        printf ("Need device number as argument.\n");
+        exit (-1);
+    }
+    device = atoi (argv[1]);
 
     printf ("%d filesystem tests on #%d\n", num_tests, device);
 

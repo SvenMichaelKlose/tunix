@@ -158,6 +158,7 @@ main (int argc, char ** argv)
     test * p;
     int i;
     int num_tests = sizeof (tests) / sizeof (test);
+    int num_errors = 0;
 
     putchar (0x93);
     if (argc < 2) {
@@ -166,12 +167,19 @@ main (int argc, char ** argv)
     }
     device = atoi (argv[1]);
 
-    printf ("%d filesystem tests on #%d\n", num_tests, device);
+    printf ("FSTEST\n");
+    printf ("Checking device #%d.\n", device);
 
     for (i = 0; i < num_tests; i++) {
         p = &tests[i];
         printf ("%d: %s\n", i + 1, p->description);
         oserr = err = last_error[0] = 0;
         p->fun ();
+        if (oserr || err) {
+            printf ("!!! Test failed.\n");
+            num_errors++;
+        }
     }
+
+    printf ("Done. Found errors: %d\n", num_errors);
 }

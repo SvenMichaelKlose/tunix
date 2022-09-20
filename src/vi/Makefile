@@ -5,8 +5,6 @@ SOURCES= \
 	keyboard.c \
 	screen.c
 
-EXOMIZER?=exomizer-2.0.10
-
 include ../Makefile.rules
 
 %.o: %.c

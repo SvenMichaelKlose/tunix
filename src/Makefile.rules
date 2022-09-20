@@ -7,3 +7,5 @@ LD      = $(CC65_HOME)/bin/ld65
 ASFLAGS = -I/usr/local/share/cc65/asminc/
 CFLAGS  = -O -r -Or -I/usr/local/share/cc65/include/ -Wa -I/usr/local/share/cc65/asminc/
 LDFLAGS = -m $(PROGRAM).map
+
+EXOMIZER ?= exomizer-2.0.10

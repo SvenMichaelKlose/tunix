@@ -1,4 +1,4 @@
-PROGRAM=ultifs
+PROGRAM=ultifs.prg
 SOURCES=kernal-emulation.c main.c ultifs.c
 ASMSOURCES=reset.asm wedge-primary.asm wedge-secondary.asm #sjload.asm
 
@@ -14,6 +14,7 @@ $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
+	$(EXOMIZER) sfx basic -t 52 ultifs.prg -o ultifs
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map ultifs

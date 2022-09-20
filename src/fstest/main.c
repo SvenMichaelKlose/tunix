@@ -5,12 +5,54 @@
 #include <stdlib.h>
 #include <string.h>
 
-char device = 12;
+char device = 8;
+
+char last_error[256];
+
+char * os_errors[] = {
+    "No error.",
+    "Too many open files.",
+    "File already open.",
+    "File not open.",
+    "File not found.",
+    "Device not present.",
+    "File not in.",
+    "File not out.",
+    "Missing file name.",
+    "Illegal device number."
+};
+
+int
+read_error ()
+{
+    char c;
+    char * p = last_error;
+
+    *p = 0;
+    cbm_k_chkin (15);
+    while (1) {
+        c = cbm_k_basin ();
+        if (c == 0x0d) {
+            *p++ = 0;
+            break;
+        }
+        *p++ = c;
+    }
+    cbm_k_clrch ();
+}
 
 void
 test_new_disk ()
 {
-    cbm_open (15, device, 15, "N0:TESTDISK,01");
+    char err;
+
+    err = cbm_open (15, device, 15, "N0:TESTDISK,01");
+    if (!err)
+        read_error ();
+    cbm_close (15);
+
+    if (err)
+        printf ("! %s\n", os_errors[err]);
 }
 
 typedef void (*voidfun) ();

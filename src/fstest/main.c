@@ -86,6 +86,28 @@ test_new_disk ()
 }
 
 void
+test_open_missing ()
+{
+    char i;
+
+    init_error ();
+    oserr = cbm_open (8, device, 8, "0:test,s,r");
+    read_error ();
+    print_error ();
+    cbm_close (8);
+    if (oserr | err) {
+        if (err != 62) {
+            printf ("!!! Error code 62 expected.");
+            return;
+        }
+        err = 0;
+        return;
+    }
+    err = 99;
+    printf ("!!! error expected\n");
+}
+
+void
 test_create_seq ()
 {
     char i;
@@ -107,6 +129,10 @@ test_create_seq_again ()
 {
     test_create_seq ();
     if (oserr | err) {
+        if (err != 63) {
+            printf ("!!! Error code 63 expected.");
+            return;
+        }
         err = 0;
         return;
     }
@@ -147,6 +173,7 @@ typedef struct _test {
 test tests[] = {
     {"Initialize",        test_initialize},
     //{"New disk",    test_new_disk},
+    {"Open missing",      test_open_missing},
     {"Create SEQ",        test_create_seq},
     {"Create SEQ again",  test_create_seq_again},
     {"Read SEQ",          test_read_seq}

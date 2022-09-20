@@ -59,9 +59,9 @@ print_error ()
 {
     cbm_k_close (15);
     if (oserr)
-        printf ("! %s\n", os_errors[oserr]);
+        printf ("  !!! %s\n", os_errors[oserr]);
     if (last_error[0])
-        printf ("%s\n", last_error);
+        printf ("  %s\n", last_error);
 }
 
 void
@@ -194,8 +194,7 @@ main (int argc, char ** argv)
     }
     device = atoi (argv[1]);
 
-    printf ("FSTEST\n");
-    printf ("Checking device #%d.\n", device);
+    printf ("FSTEST on device #%d.\n\n", device);
 
     for (i = 0; i < num_tests; i++) {
         p = &tests[i];
@@ -208,5 +207,5 @@ main (int argc, char ** argv)
         }
     }
 
-    printf ("Done. Found errors: %d\n", num_errors);
+    printf ("\nDone.\nFound errors: %d\n", num_errors);
 }

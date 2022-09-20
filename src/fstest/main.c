@@ -58,8 +58,11 @@ void
 print_error ()
 {
     cbm_k_close (15);
-    if (oserr)
+    if (oserr) {
         printf ("  !!! %s\n", os_errors[oserr]);
+        if (oserr == 5)
+            exit (-1);
+    }
     if (last_error[0])
         printf ("  %s\n", last_error);
 }

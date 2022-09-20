@@ -1,4 +1,4 @@
-PROGRAM=fstest
+PROGRAM=fstest.prg
 SOURCES=main.c
 ASMSOURCES=
 
@@ -14,6 +14,7 @@ $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/posix/libposix.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 all: $(PROGRAM)
+	$(EXOMIZER) sfx basic -t 52 fstest.prg -o fstest
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map fstest

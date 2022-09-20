@@ -15,6 +15,7 @@ $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
 
 all: $(PROGRAM)
 	$(EXOMIZER) sfx basic -t 52 fstest.prg -o fstest
+	c1541 -format "fstest,01" d64 test.d64 -write fstest
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map fstest

@@ -506,8 +506,23 @@ file_not_open:
 void
 ultifs_kbsout ()
 {
-    accu = OSERR_DEVICE_NOT_PRESENT;
-    STATUS = STATUS_TIMEOUT_WRITE;
+    register channel *  ch = channels[LFN];
+    register bfile *    file;
+
+    if (!ch)
+        goto file_not_open;
+
+    accu = flags = STATUS = 0;
+
+/* TODO: Write to buffer.
+    if (ch->buf)
+        return accu = read_from_buf (ch);
+*/
+
+    return bfile_write (file, accu);
+
+file_not_open:
+    accu = OSERR_FILE_NOT_OPEN;
     flags = FLAG_C;
 }
 

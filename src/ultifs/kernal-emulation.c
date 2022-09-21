@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -120,6 +121,18 @@ channel cmd_channel = {
 };
 
 char ctrl_channel;
+
+char * log_ptr = 0x400;
+
+void
+log_message (char * format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    log_ptr = sprintf (log_ptr, format, args);
+    va_end(args);
+}
 
 void
 init_kernal_emulation ()

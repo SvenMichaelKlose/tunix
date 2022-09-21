@@ -243,30 +243,50 @@ read_from_buf (channel * ch)
 //
 
 void
-set_device_error (char code)
+respond (char code, char * message)
 {
     channel *  ch = channels[LFN];
     char *     response;
 
     clear_buf (ch);
 
-    if (!code)
-        return;
-
     response = malloc (64);
-    sprintf (response, "%d, ERROR, 0, 0", code);
+    sprintf (response, "%2d, %s, 00, 00", code, message);
     add_to_buf (ch, response, strlen (response));
     free (response);
+}
+
+void
+respond_ok ()
+{
+    respond (0, "ok");
+}
+
+void
+respond_err_syntax ()
+{
+    respond (ERR_SYNTAX, "syntax error");
+}
+
+void
+cmd_initialize ()
+{
+    init_kernal_emulation ();
+    respond_ok ();
 }
 
 void
 open_command (char * name)
 {
     channel *  ch = channels[15];
-    char *     msg = "fooooo!!";
 
-    add_to_buf (ch, msg, strlen (msg));
+    switch (name[0]) {
+        case 'I':
+            cmd_initialize ();
+            return;
+    }
 
+    respond_err_syntax ();
     STATUS = 0;
 }
 
@@ -394,11 +414,11 @@ ultifs_kopen ()
 
     if (!LFN) {
         accu = OSERR_FILE_NOT_IN;
-        goto error2;
+        goto error;
     }
     if (SA != 15 && channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
-        goto error2;
+        goto error;
     }
 
     accu = flags = 0;
@@ -428,8 +448,8 @@ ultifs_kopen ()
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
-        accu = OSERR_FILE_NOT_FOUND;
-        goto error;
+        respond (62, "file not found");
+        return false;
     }
 
     ch->file = found_file;
@@ -437,9 +457,6 @@ ultifs_kopen ()
     return true;
 
 error:
-    free_channel ();
-
-error2:
     flags = FLAG_C;
 
     return false;
@@ -466,7 +483,6 @@ ultifs_kchkout ()
     }
 
     accu = flags = 0;
-    accu = OSERR_FILE_NOT_OUT;
     return;
 
 error:
@@ -519,7 +535,8 @@ ultifs_kbsout ()
         return accu = read_from_buf (ch);
 */
 
-    return bfile_write (file, accu);
+    bfile_write (file, accu);
+    return;
 
 file_not_open:
     accu = OSERR_FILE_NOT_OPEN;

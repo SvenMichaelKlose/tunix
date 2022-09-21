@@ -119,11 +119,13 @@ channel cmd_channel = {
     NULL, NULL, 0, NULL, NULL, NULL
 };
 
+char ctrl_channel;
 
 void
 init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
+    ctrl_channel = -1;
 
     channels[12] = &cmd_channel;
 
@@ -245,11 +247,16 @@ read_from_buf (channel * ch)
 void
 respond (char code, char * message)
 {
-    channel *  ch = channels[LFN];
+    channel *  ch;
     char *     response;
 
-    clear_buf (ch);
+    if (ctrl_channel == -1)
+        return;
+    ch = channels[ctrl_channel];
+    if (!ch)
+        return;
 
+    clear_buf (ch);
     response = malloc (64);
     sprintf (response, "%2d, %s, 00, 00", code, message);
     add_to_buf (ch, response, strlen (response));
@@ -278,7 +285,7 @@ cmd_initialize ()
 void
 open_command (char * name)
 {
-    channel *  ch = channels[15];
+    channel *  ch = channels[LFN];
 
     switch (name[0]) {
         case 'I':
@@ -437,6 +444,7 @@ ultifs_kopen ()
     channels[LFN] = ch;
 
     if (SA == 15) {
+        ctrl_channel = LFN;
         open_command (name);
         return true;
     }
@@ -549,6 +557,9 @@ ultifs_kclose ()
     channel * ch = channels[LFN];
     if (!ch)
         return;
+
+    if (LFN == ctrl_channel)
+        ctrl_channel = LFN;
 
     if (ch->file)
         bfile_close (ch->file);

@@ -99,12 +99,12 @@ called before using this routine.
 Possible errors returned in the accumulator with the
 carry flag set:
 
-| Code | Reason              |
-| ---- | ------------------- |
-| 1    | Too many files.     |
-| 2    | File already open.  |
-| 4    | File not found.     |
-| 5    | Device not present. |
+| Code | Reason                            |
+| ---- | --------------------------------- |
+| 1    | Too many files.                   |
+| 2    | File already open.                |
+| 4    | File not found. Tape device only. |
+| 5    | Device not present.               |
 | 6    | Not an input file.  Also if logical file number is 0. |
 | 9    | Illegal device number.  Also if tape buffer is below $0200. |
 

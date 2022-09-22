@@ -122,15 +122,16 @@ channel cmd_channel = {
 
 char ctrl_channel;
 
-char * log_ptr = 0x400;
+char * log_ptr = (char *) 0x400;
 
 void
 log_message (char * format, ...)
 {
     va_list args;
+return;
 
     va_start(args, format);
-    log_ptr = sprintf (log_ptr, format, args);
+    sprintf (log_ptr, format, args);
     va_end(args);
 }
 
@@ -138,7 +139,7 @@ void
 init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
-    ctrl_channel = -1;
+    ctrl_channel = 0xff;
 
     channels[12] = &cmd_channel;
 
@@ -263,7 +264,7 @@ respond (char code, char * message)
     channel *  ch;
     char *     response;
 
-    if (ctrl_channel == -1)
+    if (ctrl_channel == 0xff)
         return;
     ch = channels[ctrl_channel];
     if (!ch)
@@ -448,6 +449,7 @@ ultifs_kopen ()
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
     }
+    //sprintf (log_ptr, "OPEN%d,%d,%s\n", (int) LFN, (int) SA, name);
 
     ch = malloc (sizeof (channel));
     ch->sa = SA;
@@ -486,6 +488,7 @@ error:
 void
 ultifs_kchkin ()
 {
+    log_message ("CHKIN%d\n", LFN);
     flags = 0;
     if (accu = channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN)
         flags = FLAG_C;
@@ -494,6 +497,7 @@ ultifs_kchkin ()
 void
 ultifs_kchkout ()
 {
+    log_message ("CHKOUT%d\n", LFN);
     if (!channels[LFN]) {
         accu = OSERR_FILE_NOT_OPEN;
         goto error;
@@ -515,6 +519,7 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[LFN];
     register bfile *    file;
+    log_message ("BASIN%d,%s\n", LFN, SA);
 
     if (!ch)
         goto file_not_open;
@@ -635,7 +640,7 @@ ultifs_ksave ()
 {
     char   old_LFN = LFN;
     SAP = *(char **) accu;
-    EAP = yreg << 8 + xreg;
+    EAP = (void *) (yreg << 8 + xreg);
     STATUS = flags = 0;
     LFN = NUM_LFN - 1;
 

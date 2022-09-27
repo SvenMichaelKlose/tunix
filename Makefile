@@ -11,6 +11,7 @@ all:
 	cp src/vi/vi.zip native-pkgs/
 	mkdir -p bin
 	cp src/fstest/fstest bin/
+	cp src/fstest/test.d64 bin/
 	cp src/sjload/sjload bin/
 	cp src/ultiburn/ultiburn bin/
 	cp src/ultidump/ultidump bin/

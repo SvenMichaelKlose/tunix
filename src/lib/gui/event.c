@@ -16,6 +16,8 @@ struct queued_event * first_event = NULL;
 void __fastcall__
 event_handler_passthrough (struct obj * obj, struct event * event)
 {
+    (void) obj;
+    (void) event;
 }
 
 void __fastcall__

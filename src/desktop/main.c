@@ -54,6 +54,9 @@ init_console ()
 int
 main (int argc, char ** argv)
 {
+    (void) argc;
+    (void) argv;
+
     init_memory ();
     init_console ();
     w_ultifs_mount ();

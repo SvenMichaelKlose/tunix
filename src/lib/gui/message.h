@@ -5,6 +5,7 @@
 
 extern char message_buffer[64];
 
+struct obj;
 extern void __fastcall__ print_message (char *);
 extern void __fastcall__ print_obj (struct obj *);
 

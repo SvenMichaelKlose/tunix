@@ -165,6 +165,8 @@ u_close ()
 unsigned __fastcall__
 ultifs_launch (struct drive_ops * drive_ops, unsigned start)
 {
+    (void) drive_ops;
+
     gen_exec (current_file->ptr, start, current_file->size);
 
     return current_file->size;

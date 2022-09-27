@@ -91,8 +91,6 @@ test_new_disk ()
 void
 test_open_missing ()
 {
-    char i;
-
     init_error ();
     oserr = cbm_open (8, device, 8, "0:test,s,r");
     read_error ();

@@ -15,7 +15,7 @@ all:
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C fstest all
-#	$(MAKE) -C desktop all
+	$(MAKE) -C desktop all
 	$(MAKE) -C lisp all
 	$(MAKE) -C sjload all
 	$(MAKE) -C ultiburn all
@@ -41,7 +41,7 @@ clean:
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C fstest clean
-#	$(MAKE) -C desktop clean
+	$(MAKE) -C desktop clean
 	$(MAKE) -C lisp clean
 	$(MAKE) -C sjload clean
 	$(MAKE) -C ultiburn clean

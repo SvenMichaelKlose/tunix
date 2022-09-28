@@ -62,7 +62,7 @@ typedef unsigned char uchar;
 #define FAT     (*(uchar *) 0x0263)  // Device number table
 #define SAT     (*(uchar *) 0x026d)  // Secondary address table
 
-/* Serial line error codes */
+/* STATUS: Serial line error codes */
 #define STATUS_NO_DEVICE       0x80
 #define STATUS_END_OF_FILE     0x40
 #define STATUS_CHECKSUM_ERROR  0x20
@@ -112,7 +112,7 @@ typedef struct _channel {
     char *   bufrptr;
 } channel;
 
-#define NUM_LFN  32    // May not be the official limit. (pixel)
+#define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
 channel * channels[NUM_LFN];
 
@@ -471,7 +471,7 @@ ultifs_kopen ()
 
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
-        respond (62, "file not found");
+        respond (ERR_FILE_NOT_FOUND, "file not found");
         return false;
     }
 

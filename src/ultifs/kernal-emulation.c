@@ -266,8 +266,7 @@ respond (char code, char * message)
 
     if (ctrl_channel == 0xff)
         return;
-    ch = channels[ctrl_channel];
-    if (!ch)
+    if (!(ch = channels[ctrl_channel]))
         return;
 
     clear_buf (ch);
@@ -498,10 +497,6 @@ ultifs_kchkout ()
     log_message ("CHKOUT%d\n", LFN);
     if (!channels[LFN]) {
         accu = OSERR_FILE_NOT_OPEN;
-        goto error;
-    }
-    if (SA != 15) {
-        accu = OSERR_FILE_NOT_OUT;
         goto error;
     }
 

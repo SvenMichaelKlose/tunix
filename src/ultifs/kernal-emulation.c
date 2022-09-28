@@ -476,12 +476,10 @@ ultifs_kopen ()
     }
 
     ch->file = found_file;
-
     return true;
 
 error:
     flags = FLAG_C;
-
     return false;
 }
 

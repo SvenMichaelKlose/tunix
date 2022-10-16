@@ -14,6 +14,7 @@
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap_ofs
+.import _channels
 .import __ZP_START__
 .import __ZP_SIZE__
 
@@ -24,6 +25,7 @@ unmap       = $9800 + unmap_ofs
 
 .segment "SECONDARY"
 
+LFN     = $b8   ; Logical file number.
 FA      = $ba   ; Device number
 DFLTN   = $99   ; Current input device number.
 DFLTO   = $9a   ; Current output device number.
@@ -111,37 +113,24 @@ done:
     rts
 .endproc
 
-.proc is_our_input
-; Returns CC if it's not.
+.proc is_our_lfn
     pha
-    lda DFLTN
-    cmp _last_ingle_device
-    pla
-    bcc done
-
+    txa
     pha
-    lda DFLTN
-    cmp _last_regular_device
+    lda LFN
+    asl
+    lda _channels,x
+    ora _channels+1,x
+    beq n
     pla
-
-done:
+    tax
+    pla
+    sec
     rts
-.endproc
-
-.proc is_our_output
-; Returns CC if it's not.
-    pha
-    lda DFLTO
-    cmp _last_ingle_device
+n:  pla
+    tax
     pla
-    bcc done
-
-    pha
-    lda DFLTO
-    cmp _last_regular_device
-    pla
-
-done:
+    clc
     rts
 .endproc
 
@@ -230,7 +219,7 @@ n:  lda old_IOPEN+1
 .endproc
 
 .proc uchkin
-    jsr is_our_input
+    jsr is_our_lfn
     bcc n
     jsr enter
     jsr _ultifs_kchkin
@@ -244,7 +233,7 @@ n:  lda old_ICHKIN+1
 .endproc
 
 .proc uckout
-    jsr is_our_output
+    jsr is_our_lfn
     bcc n
     jsr enter
     jsr _ultifs_kchkout
@@ -258,7 +247,7 @@ n:  lda old_ICHKOUT+1
 .endproc
 
 .proc ubasin
-    jsr is_our_input
+    jsr is_our_lfn
     bcc n
     jsr enter
     jsr _ultifs_kbasin
@@ -272,7 +261,7 @@ n:  lda old_IBASIN+1
 .endproc
 
 .proc ubsout
-    jsr is_our_output
+    jsr is_our_lfn
     bcc n
     jsr enter
     jsr _ultifs_kbsout
@@ -294,7 +283,7 @@ n:  lda old_IBSOUT+1
 .endproc
 
 .proc uclose
-    jsr is_our_device
+    jsr is_our_lfn
     bcc n
     jsr enter
     jsr _ultifs_kclose

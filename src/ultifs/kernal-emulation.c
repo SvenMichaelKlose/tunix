@@ -106,6 +106,7 @@ typedef struct _channel {
     char *   name;
     bfile *  file;
     char     sa;
+    char     is_buffered;
 
     char *   buf;
     char *   bufwptr;
@@ -115,10 +116,6 @@ typedef struct _channel {
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
 channel * channels[NUM_LFN];
-
-channel cmd_channel = {
-    NULL, NULL, 0, NULL, NULL, NULL
-};
 
 char ctrl_channel;
 
@@ -140,8 +137,6 @@ init_kernal_emulation ()
 {
     bzero (channels, sizeof (channels));
     ctrl_channel = 0xff;
-
-    //channels[12] = &cmd_channel;
 
     if (ultimem_unhide () != ULTIMEM_UNHIDE_ID_ULTIMEM) {
         printf ("No UltiMem found - exiting.\n");
@@ -293,7 +288,6 @@ void
 cmd_initialize ()
 {
     log_message ("INIT");
-    init_kernal_emulation ();
     respond_ok ();
 }
 
@@ -455,6 +449,7 @@ ultifs_kopen ()
 
     ch = malloc (sizeof (channel));
     ch->sa = SA;
+    ch->is_buffered = false;
     ch->buf = NULL;
     ch->file = NULL;
     ch->name = name;
@@ -462,6 +457,7 @@ ultifs_kopen ()
 
     if (SA == 15) {
         log_message ("OPENCMD");
+        ch->is_buffered = true;
         ctrl_channel = LFN;
         open_command (name);
         log_message ("DONEOPEN");
@@ -527,8 +523,11 @@ ultifs_kbasin ()
 
     accu = flags = STATUS = 0;
 
-    if (ch->buf)
+    if (ch->is_buffered) {
+        if (!ch->buf)
+            goto end_of_file;
         return accu = read_from_buf (ch);
+    }
 
     file = ch->file;
     if (!file || file->pos >= file->size)

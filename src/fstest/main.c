@@ -37,6 +37,7 @@ read_error ()
     char c;
     char * p = last_error;
 
+    last_error[0] = 0;
     if (oserr)
         return 0;
 
@@ -57,7 +58,6 @@ read_error ()
 void
 print_error ()
 {
-    cbm_k_close (15);
     if (oserr) {
         printf ("  !!! %s\n", os_errors[oserr]);
         if (oserr == 5)

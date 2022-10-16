@@ -116,9 +116,7 @@ typedef struct _channel {
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
 channel * channels[NUM_LFN];
-
-char ctrl_channel;
-
+char * response;
 char * log_ptr = (char *) 0x400;
 
 void
@@ -135,13 +133,13 @@ log_message (char * format, ...)
 void
 init_kernal_emulation ()
 {
-    bzero (channels, sizeof (channels));
-    ctrl_channel = 0xff;
-
     if (ultimem_unhide () != ULTIMEM_UNHIDE_ID_ULTIMEM) {
         printf ("No UltiMem found - exiting.\n");
         exit (0);
     }
+
+    bzero (channels, sizeof (channels));
+    response = NULL;
 
     ultifs_mount ();
 }
@@ -256,20 +254,10 @@ read_from_buf (channel * ch)
 void
 respond (char code, char * message)
 {
-    channel *  ch;
-    char *     response;
-
-    if (ctrl_channel == 0xff)
-        return;
-    if (!(ch = channels[ctrl_channel]))
-        return;
-
-    clear_buf (ch);
+    free (response);
     response = malloc (64);
     sprintf (response, "%2D, %S, 00, 00\n", code, message);
     log_message ("R: %2D, %S, 00, 00\n", code, message);
-    add_to_buf (ch, response, strlen (response));
-    free (response);
 }
 
 void
@@ -458,7 +446,6 @@ ultifs_kopen ()
     if (SA == 15) {
         log_message ("OPENCMD");
         ch->is_buffered = true;
-        ctrl_channel = LFN;
         open_command (name);
         log_message ("CMDDONE");
         return true;
@@ -525,8 +512,16 @@ ultifs_kbasin ()
     accu = flags = STATUS = 0;
 
     if (ch->is_buffered) {
-        if (!ch->buf)
-            goto end_of_file;
+        if (!ch->buf) {
+            if (ch->sa != 15)
+                goto end_of_file;
+
+            if (!response)
+                goto end_of_file;
+            add_to_buf (ch, response, strlen (response));
+            free (response);
+            response = NULL;
+        }
         return accu = read_from_buf (ch);
     }
 
@@ -579,8 +574,6 @@ ultifs_kclose ()
 
     if (!ch)
         return;
-    if (LFN == ctrl_channel)
-        ctrl_channel = 0xff;
     if (ch->file)
         bfile_close (ch->file);
     free_channel ();

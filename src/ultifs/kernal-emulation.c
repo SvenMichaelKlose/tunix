@@ -128,10 +128,10 @@ void
 log_message (char * format, ...)
 {
     va_list args;
-return;
 
     va_start(args, format);
-    sprintf (log_ptr, format, args);
+    vsprintf (log_ptr, format, args);
+    log_ptr += strlen (log_ptr) + 1;
     va_end(args);
 }
 
@@ -141,7 +141,7 @@ init_kernal_emulation ()
     bzero (channels, sizeof (channels));
     ctrl_channel = 0xff;
 
-    channels[12] = &cmd_channel;
+    //channels[12] = &cmd_channel;
 
     if (ultimem_unhide () != ULTIMEM_UNHIDE_ID_ULTIMEM) {
         printf ("No UltiMem found - exiting.\n");
@@ -271,7 +271,8 @@ respond (char code, char * message)
 
     clear_buf (ch);
     response = malloc (64);
-    sprintf (response, "%2d, %s, 00, 00", code, message);
+    sprintf (response, "%2D, %S, 00, 00\n", code, message);
+    log_message ("R: %2D, %S, 00, 00\n", code, message);
     add_to_buf (ch, response, strlen (response));
     free (response);
 }
@@ -291,6 +292,7 @@ respond_err_syntax ()
 void
 cmd_initialize ()
 {
+    log_message ("INIT");
     init_kernal_emulation ();
     respond_ok ();
 }
@@ -301,7 +303,7 @@ open_command (char * name)
     channel *  ch = channels[LFN];
 
     switch (name[0]) {
-        case 'I':
+        case 'i':
             cmd_initialize ();
             return;
     }
@@ -432,6 +434,7 @@ ultifs_kopen ()
     bfile *    found_file;
     channel *  ch;
 
+    log_message ("OPEN%D,%D", (int) LFN, (int) SA);
     if (!LFN) {
         accu = OSERR_FILE_NOT_IN;
         goto error;
@@ -447,8 +450,8 @@ ultifs_kopen ()
         name = malloc (FNLEN + 1);
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
+        log_message ("OPEN%S", name);
     }
-    //sprintf (log_ptr, "OPEN%d,%d,%s\n", (int) LFN, (int) SA, name);
 
     ch = malloc (sizeof (channel));
     ch->sa = SA;
@@ -458,13 +461,17 @@ ultifs_kopen ()
     channels[LFN] = ch;
 
     if (SA == 15) {
+        log_message ("OPENCMD");
         ctrl_channel = LFN;
         open_command (name);
+        log_message ("DONEOPEN");
         return true;
     }
 
     if (FNLEN == 1 && *name == '$') {
+        log_message ("OPENLIST");
         make_directory_list (ch);
+        log_message ("DONEOPEN");
         return true;
     }
 
@@ -475,6 +482,7 @@ ultifs_kopen ()
     }
 
     ch->file = found_file;
+    log_message ("DONEOPEN");
     return true;
 
 error:
@@ -485,7 +493,7 @@ error:
 void
 ultifs_kchkin ()
 {
-    log_message ("CHKIN%d\n", LFN);
+    log_message ("CHKIN%D", (int) LFN);
     flags = 0;
     if (accu = channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN)
         flags = FLAG_C;
@@ -494,7 +502,7 @@ ultifs_kchkin ()
 void
 ultifs_kchkout ()
 {
-    log_message ("CHKOUT%d\n", LFN);
+    log_message ("CKOUT%D", (int) LFN);
     if (!channels[LFN]) {
         accu = OSERR_FILE_NOT_OPEN;
         goto error;
@@ -512,7 +520,7 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[LFN];
     register bfile *    file;
-    log_message ("BASIN%d,%s\n", LFN, SA);
+    log_message ("BASIN%D", (int) LFN);
 
     if (!ch)
         goto file_not_open;
@@ -543,6 +551,7 @@ ultifs_kbsout ()
 {
     register channel *  ch = channels[LFN];
     register bfile *    file;
+    log_message ("BSOUT%D", (int) LFN);
 
     if (!ch)
         goto file_not_open;
@@ -566,12 +575,12 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[LFN];
+
+    log_message ("CLOSE%D", (int) LFN);
     if (!ch)
         return;
-
     if (LFN == ctrl_channel)
-        ctrl_channel = LFN;
-
+        ctrl_channel = 0xff;
     if (ch->file)
         bfile_close (ch->file);
     free_channel ();

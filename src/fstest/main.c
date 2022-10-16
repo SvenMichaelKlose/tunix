@@ -43,7 +43,7 @@ read_error ()
 
     *p = 0;
     cbm_k_chkin (15);
-    while (1) {
+    while (!(cbm_k_readst () & 0x40)) {
         c = cbm_k_basin ();
         if (c == 0x0d) {
             *p++ = 0;

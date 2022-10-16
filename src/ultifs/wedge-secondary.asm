@@ -2,8 +2,6 @@
 ;
 ; Banks in BLK2 and BLK3 and calls the kernal emulation
 ; or returns for calling regular KERNAL functions.
-;
-; Author: Sven Michael Klose <pixel@hugbox.org>
 
 
 .export _init_secondary_wedge
@@ -14,7 +12,6 @@
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap_ofs
-.import _channels
 .import __ZP_START__
 .import __ZP_SIZE__
 
@@ -63,6 +60,8 @@ _last_ingle_device:     .res 1
 
 _saved_zp:  .res stack_size
 
+.export _channels
+_channels: .res 512
 
 .proc _init_secondary_wedge
     tax

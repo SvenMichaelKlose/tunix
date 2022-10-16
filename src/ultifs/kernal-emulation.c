@@ -115,10 +115,11 @@ typedef struct _channel {
 
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
-channel * channels[NUM_LFN];
+extern channel * channels[NUM_LFN];
 char * response;
 char * log_ptr = (char *) 0x400;
 
+#if 0
 void
 log_message (char * format, ...)
 {
@@ -129,6 +130,13 @@ log_message (char * format, ...)
     log_ptr += strlen (log_ptr) + 1;
     va_end(args);
 }
+#else
+void
+log_message (char * format, ...)
+{
+    (void) format;
+}
+#endif
 
 void
 init_kernal_emulation ()
@@ -293,11 +301,6 @@ open_command (char * name)
     respond_err_syntax ();
     STATUS = 0;
 }
-
-
-//
-// Directory
-//
 
 void
 make_directory_list (channel * ch)
@@ -515,7 +518,6 @@ ultifs_kbasin ()
         if (!ch->buf) {
             if (ch->sa != 15)
                 goto end_of_file;
-
             if (!response)
                 goto end_of_file;
             add_to_buf (ch, response, strlen (response));

@@ -466,6 +466,7 @@ ultifs_kopen ()
 
     if (FNLEN == 1 && *name == '$') {
         log_message ("OPENLIST");
+        ch->is_buffered = true;
         make_directory_list (ch);
         log_message ("LISTDONE");
         return true;

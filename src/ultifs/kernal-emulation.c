@@ -460,14 +460,14 @@ ultifs_kopen ()
         ch->is_buffered = true;
         ctrl_channel = LFN;
         open_command (name);
-        log_message ("DONEOPEN");
+        log_message ("CMDDONE");
         return true;
     }
 
     if (FNLEN == 1 && *name == '$') {
         log_message ("OPENLIST");
         make_directory_list (ch);
-        log_message ("DONEOPEN");
+        log_message ("LISTDONE");
         return true;
     }
 
@@ -478,7 +478,7 @@ ultifs_kopen ()
     }
 
     ch->file = found_file;
-    log_message ("DONEOPEN");
+    log_message ("FILEOPEN");
     return true;
 
 error:
@@ -574,8 +574,8 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[LFN];
-
     log_message ("CLOSE%D", (int) LFN);
+
     if (!ch)
         return;
     if (LFN == ctrl_channel)
@@ -589,11 +589,11 @@ void
 ultifs_kclall ()
 {
     char  old_LFN = LFN;
+    log_message ("CLALL");
 
     for (LFN = 0; LFN < NUM_LFN; LFN++)
         if (channels[LFN])
             ultifs_kclose ();
-
     LFN = old_LFN;
 }
 

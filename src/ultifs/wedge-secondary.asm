@@ -96,7 +96,7 @@ l2: lda __ZP_START__-1,x
 .endproc
 
 .proc is_our_device
-; Returns CC if it's not.
+    ; Returns CC if it's not.
     pha
     lda FA
     cmp _last_ingle_device
@@ -116,7 +116,7 @@ done:
     pha
     txa
     pha
-    lda LFN
+    tya
     asl
     lda _channels,x
     ora _channels+1,x
@@ -126,6 +126,7 @@ done:
     pla
     sec
     rts
+
 n:  pla
     tax
     pla
@@ -218,6 +219,8 @@ n:  lda old_IOPEN+1
 .endproc
 
 .proc uchkin
+    sty cpu_state+2
+    tay
     jsr is_our_lfn
     bcc n
     jsr enter
@@ -228,10 +231,13 @@ n:  lda old_ICHKIN+1
     pha
     lda old_ICHKIN
     pha
+    ldy cpu_state+2
     jmp unmap
 .endproc
 
 .proc uckout
+    sty cpu_state+2
+    tay
     jsr is_our_lfn
     bcc n
     jsr enter
@@ -242,10 +248,13 @@ n:  lda old_ICHKOUT+1
     pha
     lda old_ICHKOUT
     pha
+    ldy cpu_state+2
     jmp unmap
 .endproc
 
 .proc ubasin
+    sty cpu_state+2
+    ldy DFLTN
     jsr is_our_lfn
     bcc n
     jsr enter
@@ -256,10 +265,13 @@ n:  lda old_IBASIN+1
     pha
     lda old_IBASIN
     pha
+    ldy cpu_state+2
     jmp unmap
 .endproc
 
 .proc ubsout
+    sty cpu_state+2
+    ldy DFLTO
     jsr is_our_lfn
     bcc n
     jsr enter
@@ -270,6 +282,7 @@ n:  lda old_IBSOUT+1
     pha
     lda old_IBSOUT
     pha
+    ldy cpu_state+2
     jmp unmap
 .endproc
 
@@ -282,6 +295,8 @@ n:  lda old_IBSOUT+1
 .endproc
 
 .proc uclose
+    sty cpu_state+2
+    tay
     jsr is_our_lfn
     bcc n
     jsr enter
@@ -292,12 +307,14 @@ n:  lda old_ICLOSE+1
     pha
     lda old_ICLOSE
     pha
+    ldy cpu_state+2
     jmp unmap
 .endproc
 
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
+
     lda old_ICLALL+1
     pha
     lda old_ICLALL

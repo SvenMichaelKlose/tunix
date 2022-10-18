@@ -119,11 +119,12 @@ extern channel * channels[NUM_LFN];
 char * response;
 char * log_ptr = (char *) 0x400;
 
-#if 0
+#if 1
 void
 log_message (char * format, ...)
 {
     va_list args;
+return;
 
     va_start(args, format);
     vsprintf (log_ptr, format, args);
@@ -480,17 +481,19 @@ error:
 void
 ultifs_kchkin ()
 {
-    log_message ("CHKIN%D", (int) LFN);
+    log_message ("CHKIN%D", (int) accu);
     flags = 0;
-    if (accu = channels[LFN] ? 0 : OSERR_FILE_NOT_OPEN)
+    DFLTN = accu;
+    if (accu = channels[accu] ? 0 : OSERR_FILE_NOT_OPEN)
         flags = FLAG_C;
 }
 
 void
 ultifs_kchkout ()
 {
-    log_message ("CKOUT%D", (int) LFN);
-    if (!channels[LFN]) {
+    log_message ("CKOUT%D", (int) accu);
+    DFLTO = accu;
+    if (!channels[accu]) {
         accu = OSERR_FILE_NOT_OPEN;
         goto error;
     }
@@ -505,9 +508,9 @@ error:
 char
 ultifs_kbasin ()
 {
-    register channel *  ch = channels[LFN];
+    register channel *  ch = channels[DFLTN];
     register bfile *    file;
-    log_message ("BASIN%D", (int) LFN);
+    log_message ("BASIN%D", (int) DFLTN);
 
     if (!ch)
         goto file_not_open;
@@ -546,51 +549,44 @@ file_not_open:
 void
 ultifs_kbsout ()
 {
-    register channel *  ch = channels[LFN];
+    register channel *  ch = channels[DFLTO];
     register bfile *    file;
-    log_message ("BSOUT%D", (int) LFN);
+    log_message ("BSOUT%D", (int) DFLTO);
 
-    if (!ch)
-        goto file_not_open;
-
-    accu = flags = STATUS = 0;
-
-/* TODO: Write to buffer.
-    if (ch->buf)
-        return accu = read_from_buf (ch);
-*/
-
-    bfile_write (file, accu);
-    return;
-
-file_not_open:
-    accu = OSERR_FILE_NOT_OPEN;
-    flags = FLAG_C;
+    if (ch) {
+        accu = flags = STATUS = 0;
+        bfile_write (file, accu);
+    } else {
+        accu = OSERR_FILE_NOT_OPEN;
+        flags = FLAG_C;
+    }
 }
 
 void
 ultifs_kclose ()
 {
-    channel * ch = channels[LFN];
-    log_message ("CLOSE%D", (int) LFN);
+    channel * ch = channels[accu];
+    log_message ("CLOSE%D", (int) accu);
 
-    if (!ch)
-        return;
-    if (ch->file)
-        bfile_close (ch->file);
-    free_channel ();
+    if (ch) {
+        if (ch->file)
+            bfile_close (ch->file);
+        free_channel ();
+    }
 }
 
 void
 ultifs_kclall ()
 {
-    char  old_LFN = LFN;
+    int  i;
     log_message ("CLALL");
 
-    for (LFN = 0; LFN < NUM_LFN; LFN++)
-        if (channels[LFN])
-            ultifs_kclose ();
-    LFN = old_LFN;
+    for (i = 0; i < NUM_LFN; i++) {
+        if (!channels[LFN])
+            continue;
+        accu = i;
+        ultifs_kclose ();
+    }
 }
 
 void

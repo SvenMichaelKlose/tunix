@@ -600,6 +600,10 @@ ultifs_kload ()
     if (!ultifs_kopen ())
         goto end;
 
+    // Prepare reads.
+    accu = LFN;
+    ultifs_kchkin ();
+
     // Read destination address.
     EAL = ultifs_kbasin ();
     EAH = ultifs_kbasin ();
@@ -618,6 +622,7 @@ ultifs_kload ()
         poke_to_process (EAP++, accu);
     }
 
+    accu = LFN;
     ultifs_kclose ();
 
     // Return next free address.
@@ -640,6 +645,10 @@ ultifs_ksave ()
     if (!ultifs_kopen ())
         goto end;
 
+    // Prepare writes.
+    accu = LFN;
+    ultifs_kchkout ();
+
     while (!STATUS) {
         accu = peek_from_process (SAP++);
         ultifs_kbsout ();
@@ -647,6 +656,7 @@ ultifs_ksave ()
             break;
     }
 
+    accu = LFN;
     ultifs_kclose ();
 
 end:

@@ -124,7 +124,6 @@ void
 log_message (char * format, ...)
 {
     va_list args;
-return;
 
     va_start(args, format);
     vsprintf (log_ptr, format, args);
@@ -425,7 +424,7 @@ ultifs_kopen ()
         accu = OSERR_FILE_NOT_IN;
         goto error;
     }
-    if (SA != 15 && channels[LFN]) {
+    if (channels[LFN]) {
         accu = OSERR_FILE_ALREADY_OPEN;
         goto error;
     }
@@ -493,16 +492,12 @@ ultifs_kchkout ()
 {
     log_message ("CKOUT%D", (int) accu);
     DFLTO = accu;
-    if (!channels[accu]) {
+    if (channels[accu])
+        accu = flags = 0;
+    else {
         accu = OSERR_FILE_NOT_OPEN;
-        goto error;
+        flags = FLAG_C;
     }
-
-    accu = flags = 0;
-    return;
-
-error:
-    flags = FLAG_C;
 }
 
 char
@@ -512,8 +507,11 @@ ultifs_kbasin ()
     register bfile *    file;
     log_message ("BASIN%D", (int) DFLTN);
 
-    if (!ch)
-        goto file_not_open;
+    if (!ch) {
+        accu = OSERR_FILE_NOT_OPEN;
+        flags = FLAG_C;
+        return 0;
+    }
 
     accu = flags = STATUS = 0;
 
@@ -531,18 +529,11 @@ ultifs_kbasin ()
     }
 
     file = ch->file;
-    if (!file || file->pos >= file->size)
-        goto end_of_file;
-
-    return accu = bfile_read (file);
+    if (file->pos < file->size)
+        return accu = bfile_read (file);
 
 end_of_file:
     STATUS = STATUS_END_OF_FILE;
-    return 0;
-
-file_not_open:
-    accu = OSERR_FILE_NOT_OPEN;
-    flags = FLAG_C;
     return 0;
 }
 

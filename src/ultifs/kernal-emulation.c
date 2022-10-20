@@ -221,6 +221,42 @@ copy_from_process (char * to, char * from, char len)
         *to++ = downcase (peek_from_process (from++));
 }
 
+char prefix;
+char filename[32];
+char param1;
+char param2;
+
+bool
+parse_name (char * i)
+{
+    char * o = filename;
+    char c;
+
+    filename[0] = param1 = param2 = 0;
+    if (!FNLEN)
+        return false;
+    if (FNLEN > 2 && i[1] == ':') {
+        prefix = i[0];
+        i += 2;
+    }
+
+    while (c = *i++) {
+        if (!c || c == ',')
+            break;
+        *o++ = c;
+    }
+
+    if (!c)
+        return true;
+    param1 = *i++;
+    c = *i++;
+    if (!c)
+        return true;
+    if (c != ',')
+        return false;
+    param2 = *i++;
+    return !*i++;
+}
 
 //
 // Channel buffers
@@ -435,7 +471,9 @@ ultifs_kopen ()
         name = malloc (FNLEN + 1);
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
-        log_message ("OPEN%S", name);
+        parse_name (name);
+        strcpy (name, filename);
+        log_message ("OPEN'%S'", name);
     }
 
     ch = malloc (sizeof (channel));

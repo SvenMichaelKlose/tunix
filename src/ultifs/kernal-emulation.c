@@ -515,20 +515,13 @@ ultifs_kchkin ()
 {
     flags = 0;
     DFLTN = accu;
-    if (accu = channels[accu] ? 0 : OSERR_FILE_NOT_OPEN)
-        flags = FLAG_C;
 }
 
 void
 ultifs_kchkout ()
 {
     DFLTO = accu;
-    if (channels[accu])
-        accu = flags = 0;
-    else {
-        accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-    }
+    accu = flags = 0;
 }
 
 char
@@ -538,12 +531,6 @@ ultifs_kbasin ()
     register bfile *    file;
 
     accu = flags = STATUS = 0;
-
-    if (!ch) {
-        accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-        return 0;
-    }
 
     if (ch->is_buffered) {
         if (!ch->buf) {
@@ -573,13 +560,8 @@ ultifs_kbsout ()
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
 
-    if (ch) {
-        accu = flags = STATUS = 0;
-        bfile_write (file, accu);
-    } else {
-        accu = OSERR_FILE_NOT_OPEN;
-        flags = FLAG_C;
-    }
+    accu = flags = STATUS = 0;
+    bfile_write (file, accu);
 }
 
 void
@@ -587,11 +569,9 @@ ultifs_kclose ()
 {
     channel * ch = channels[accu];
 
-    if (ch) {
-        if (ch->file)
-            bfile_close (ch->file);
-        free_channel (accu);
-    }
+    if (ch->file)
+        bfile_close (ch->file);
+    free_channel (accu);
 }
 
 void

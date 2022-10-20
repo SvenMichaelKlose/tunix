@@ -401,15 +401,15 @@ make_directory_list (channel * ch)
 //
 
 void
-free_channel ()
+free_channel (char lfn)
 {
-    channel * ch = channels[LFN];
+    channel * ch = channels[lfn];
 
     clear_buf (ch);
     free (ch->name);
     free (ch);
 
-    channels[LFN] = NULL;
+    channels[lfn] = NULL;
 }
 
 char
@@ -465,6 +465,7 @@ ultifs_kopen ()
     found_file = ultifs_open (ultifs_pwd, name, 0);
     if (!found_file) {
         respond (ERR_FILE_NOT_FOUND, "file not found");
+        free_channel (LFN);
         return false;
     }
 
@@ -507,13 +508,13 @@ ultifs_kbasin ()
     register bfile *    file;
     log_message ("BASIN%D", (int) DFLTN);
 
+    accu = flags = STATUS = 0;
+
     if (!ch) {
         accu = OSERR_FILE_NOT_OPEN;
         flags = FLAG_C;
         return 0;
     }
-
-    accu = flags = STATUS = 0;
 
     if (ch->is_buffered) {
         if (!ch->buf) {
@@ -562,7 +563,7 @@ ultifs_kclose ()
     if (ch) {
         if (ch->file)
             bfile_close (ch->file);
-        free_channel ();
+        free_channel (accu);
     }
 }
 

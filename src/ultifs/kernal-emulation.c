@@ -534,9 +534,7 @@ ultifs_kbasin ()
 
     if (ch->is_buffered) {
         if (!ch->buf) {
-            if (ch->sa != 15)
-                goto end_of_file;
-            if (!response)
+            if (ch->sa != 15 || !response)
                 goto end_of_file;
             add_to_buf (ch, response, strlen (response));
             free (response);
@@ -568,7 +566,6 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[accu];
-
     if (ch->file)
         bfile_close (ch->file);
     free_channel (accu);
@@ -592,11 +589,11 @@ ultifs_kload ()
 {
     char   do_verify = accu;
     char   old_LFN = LFN;
-    STATUS = flags = 0;
     LFN = NUM_LFN - 1;
-
     if (!ultifs_kopen ())
         goto end;
+
+    STATUS = flags = 0;
 
     // Prepare reads.
     accu = LFN;
@@ -635,13 +632,13 @@ void
 ultifs_ksave ()
 {
     char   old_LFN = LFN;
+    LFN = NUM_LFN - 1;
+    if (!ultifs_kopen ())
+        goto end;
+
     SAP = *(char **) accu;
     EAP = (void *) (yreg << 8 + xreg);
     STATUS = flags = 0;
-    LFN = NUM_LFN - 1;
-
-    if (!ultifs_kopen ())
-        goto end;
 
     // Prepare writes.
     accu = LFN;

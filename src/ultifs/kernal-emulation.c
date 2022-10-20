@@ -301,7 +301,7 @@ respond (char code, char * message)
     free (response);
     response = malloc (64);
     sprintf (response, "%2D, %S, 00, 00\n", code, message);
-    log_message ("R: %2D, %S, 00, 00\n", code, message);
+    //log_message ("R: %2D, %S, 00, 00\n", code, message);
 }
 
 void
@@ -319,7 +319,6 @@ respond_err_syntax ()
 void
 cmd_initialize ()
 {
-    log_message ("INIT");
     respond_ok ();
 }
 
@@ -455,7 +454,6 @@ ultifs_kopen ()
     bfile *    found_file;
     channel *  ch;
 
-    log_message ("OPEN%D,%D", (int) LFN, (int) SA);
     if (!LFN) {
         accu = OSERR_FILE_NOT_IN;
         goto error;
@@ -473,7 +471,6 @@ ultifs_kopen ()
         name[FNLEN] = 0;
         parse_name (name);
         strcpy (name, filename);
-        log_message ("OPEN'%S'", name);
     }
 
     ch = malloc (sizeof (channel));
@@ -485,18 +482,14 @@ ultifs_kopen ()
     channels[LFN] = ch;
 
     if (SA == 15) {
-        log_message ("OPENCMD");
         ch->is_buffered = true;
         open_command (name);
-        log_message ("CMDDONE");
         return true;
     }
 
     if (FNLEN == 1 && *name == '$') {
-        log_message ("OPENLIST");
         ch->is_buffered = true;
         make_directory_list (ch);
-        log_message ("LISTDONE");
         return true;
     }
 
@@ -508,7 +501,6 @@ ultifs_kopen ()
     }
 
     ch->file = found_file;
-    log_message ("FILEOPEN");
     return true;
 
 error:
@@ -519,7 +511,6 @@ error:
 void
 ultifs_kchkin ()
 {
-    log_message ("CHKIN%D", (int) accu);
     flags = 0;
     DFLTN = accu;
     if (accu = channels[accu] ? 0 : OSERR_FILE_NOT_OPEN)
@@ -529,7 +520,6 @@ ultifs_kchkin ()
 void
 ultifs_kchkout ()
 {
-    log_message ("CKOUT%D", (int) accu);
     DFLTO = accu;
     if (channels[accu])
         accu = flags = 0;
@@ -544,7 +534,6 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
-    log_message ("BASIN%D", (int) DFLTN);
 
     accu = flags = STATUS = 0;
 
@@ -581,7 +570,6 @@ ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
-    log_message ("BSOUT%D", (int) DFLTO);
 
     if (ch) {
         accu = flags = STATUS = 0;
@@ -596,7 +584,6 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[accu];
-    log_message ("CLOSE%D", (int) accu);
 
     if (ch) {
         if (ch->file)
@@ -609,10 +596,9 @@ void
 ultifs_kclall ()
 {
     int  i;
-    log_message ("CLALL");
 
     for (i = 0; i < NUM_LFN; i++) {
-        if (!channels[LFN])
+        if (!channels[i])
             continue;
         accu = i;
         ultifs_kclose ();

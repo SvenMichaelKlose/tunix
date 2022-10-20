@@ -493,15 +493,17 @@ ultifs_kopen ()
         return true;
     }
 
-    found_file = ultifs_open (ultifs_pwd, name, 0);
-    if (!found_file) {
-        respond (ERR_FILE_NOT_FOUND, "file not found");
-        free_channel (LFN);
-        return false;
-    }
+    if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
+        found_file = ultifs_open (ultifs_pwd, name, 0);
+        if (!found_file) {
+            respond (ERR_FILE_NOT_FOUND, "file not found");
+            free_channel (LFN);
+            return false;
+        }
 
-    ch->file = found_file;
-    return true;
+        ch->file = found_file;
+        return true;
+    }
 
 error:
     flags = FLAG_C;

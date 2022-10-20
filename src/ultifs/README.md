@@ -127,7 +127,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Possible errors:
+Expects the LFN in the accumulator.  Possible errors:
 
   3 : file not open
   5 : device not present
@@ -151,7 +151,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Possible errors:
+Expects the LFN in the accumulator.  Possible errors:
 
   3 : file not open
   5 : device not present
@@ -234,7 +234,8 @@ routine is called after the accumulator is loaded with
 the logical file number to be closed, the same number
 used when the file was opened using the OPEN routine.
 
-CLOSE never returns with an error.
+CLOSE expects the LFN in the accumulator and never
+returns with an error.
 
 ## CLALL - close all channels and files
 

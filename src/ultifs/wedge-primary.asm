@@ -27,10 +27,10 @@ FCHROUT = $f27a
 
 secondary_vectors_l:
     .byte <uopen, <uclose, <uchkin, <uckout, <uclrcn
-    .byte <ubasin, <ubsout, $ff, $ff, <uclall, $ff, <uload, <usave, 0
+    .byte <ubasin, <ubsout, $ff, <ubasin, <uclall, $ff, <uload, <usave, 0
 secondary_vectors_h:
     .byte >uopen, >uclose, >uchkin, >uckout, >uclrcn
-    .byte >ubasin, >ubsout, $ff, $ff, >uclall, $ff, >uload, >usave, 0
+    .byte >ubasin, >ubsout, $ff, >ubasin, >uclall, $ff, >uload, >usave, 0
 
 
     .code

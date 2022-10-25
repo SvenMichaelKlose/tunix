@@ -517,14 +517,14 @@ void
 ultifs_kchkin ()
 {
     DFLTN = xreg;
-    accu = flags = 0;
+    flags = 0;
 }
 
 void
 ultifs_kchkout ()
 {
     DFLTO = xreg;
-    accu = flags = 0;
+    flags = 0;
 }
 
 char

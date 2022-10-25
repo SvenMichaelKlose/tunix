@@ -516,14 +516,14 @@ error:
 void
 ultifs_kchkin ()
 {
-    flags = 0;
-    DFLTN = accu;
+    DFLTN = xreg;
+    accu = flags = 0;
 }
 
 void
 ultifs_kchkout ()
 {
-    DFLTO = accu;
+    DFLTO = xreg;
     accu = flags = 0;
 }
 

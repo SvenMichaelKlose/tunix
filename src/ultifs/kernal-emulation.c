@@ -58,9 +58,11 @@ typedef unsigned char uchar;
 #define EAL     (*(uchar *) 0xae)
 #define EAH     (*(uchar *) 0xaf)
 
+/*
 #define LAT     (*(uchar *) 0x0259)  // File number table
 #define FAT     (*(uchar *) 0x0263)  // Device number table
 #define SAT     (*(uchar *) 0x026d)  // Secondary address table
+*/
 
 /* STATUS: Serial line error codes */
 #define STATUS_NO_DEVICE       0x80
@@ -103,20 +105,21 @@ typedef unsigned char uchar;
 
 
 typedef struct _channel {
-    char *   name;
-    bfile *  file;
-    char     sa;
-    char     is_buffered;
+    char *   name;          // File name
+    bfile *  file;          // UltiFS file
+    char     sa;            // Secondary address
+    char     is_buffered;   // As of now: reads from buffer with
+                            // generated content (e.g. directory listing).
 
     char *   buf;
-    char *   bufwptr;
-    char *   bufrptr;
+    char *   bufwptr;       // Fill pointer
+    char *   bufrptr;       // Read pointer
 } channel;
 
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
-extern channel * channels[NUM_LFN];
-char * response;
+extern channel * channels[NUM_LFN];;
+char * response;                        // Error code of last operation.
 char * log_ptr = (char *) 0x400;
 
 #if 1

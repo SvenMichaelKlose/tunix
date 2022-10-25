@@ -219,7 +219,9 @@ n:  lda old_IOPEN+1
 .endproc
 
 .proc uchkin
+    stx cpu_state+1
     sty cpu_state+2
+    txa
     tay
     jsr is_our_lfn
     bcc n
@@ -231,12 +233,15 @@ n:  lda old_ICHKIN+1
     pha
     lda old_ICHKIN
     pha
+    ldx cpu_state+1
     ldy cpu_state+2
     jmp unmap
 .endproc
 
 .proc uckout
+    stx cpu_state+1
     sty cpu_state+2
+    txa
     tay
     jsr is_our_lfn
     bcc n
@@ -248,6 +253,7 @@ n:  lda old_ICHKOUT+1
     pha
     lda old_ICHKOUT
     pha
+    ldx cpu_state+1
     ldy cpu_state+2
     jmp unmap
 .endproc

@@ -127,7 +127,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Expects the LFN in the accumulator.  Possible errors:
+Expects the LFN in register X.  Possible errors:
 
   3 : file not open
   5 : device not present
@@ -151,7 +151,7 @@ When used with a device on the serial bus this routine
 will automatically send the listen address specified by
 the OPEN routine and any secondary address.
 
-Expects the LFN in the accumulator.  Possible errors:
+Expects the LFN in register X.  Possible errors:
 
   3 : file not open
   5 : device not present

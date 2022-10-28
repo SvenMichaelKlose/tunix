@@ -189,9 +189,10 @@ encrypt (char c)
 void
 cmd_write_file ()
 {
-    line * l = first_line;
-    char err;
-    unsigned i;
+    line *    l = first_line;
+    char *    fn;
+    char      err;
+    unsigned  i;
 
     linebuf[linebuf_length] = 0;
     passphrase_index = 0;
@@ -204,11 +205,15 @@ cmd_write_file ()
     } else if (linebuf_length > 2) {
         if (filename)
             free (filename);
-        filename = malloc (linebuf_length - 1);
+        filename = malloc (linebuf_length - 1 + 5);
         strcpy (filename, &linebuf[2]);
     }
 
-    if (err = cbm_open (1, 8, 1, filename)) {
+    fn = malloc (strlen (filename) + 7);
+    sprintf (fn, "@:%S,S,W", &linebuf[2]);
+    err = cbm_open (1, 8, 1, fn);
+    free (fn);
+    if (err) {
         gotoxy (0, 23);
         term_puts ("Cannot open file '");
         term_puts (filename);
@@ -222,14 +227,14 @@ cmd_write_file ()
     while (l) {
         for (i = 0; i < l->length; i++)
             cbm_k_bsout (encrypt (l->data[i]));
-
         cbm_k_bsout (encrypt (10));
+
         l = l->next;
     }
 
     cbm_close (1);
 
-    gotoxy (0, 23);
+    gotoxy (0, 22);
     term_puts ("Wrote ");
     if (passphrase)
         term_puts ("ENCRYPTED ");

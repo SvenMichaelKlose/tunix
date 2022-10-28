@@ -133,7 +133,7 @@ Expects the LFN in register X.  Possible errors:
   5 : device not present
   6 : file is not an input file
 
-## CHROUT - Open channel for output
+## CKOUT - Open channel for output
 
 Any logical file that has already been opened by the
 OPEN routine can be defined as an output channel by

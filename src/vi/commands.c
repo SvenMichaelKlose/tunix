@@ -24,7 +24,7 @@ unsigned char passphrase_length;
 unsigned char passphrase_index;
 
 void
-wait4user (void)
+wait_keypress (void)
 {
     term_puts ("\n\rPress any key to continue...");
     get_key ();
@@ -163,7 +163,7 @@ cmd_set_passphrase ()
 
     if (linebuf_length == 2) {
         term_puts ("Passphrase deleted.");
-        wait4user ();
+        wait_keypress ();
         return;
     }
 
@@ -172,7 +172,7 @@ cmd_set_passphrase ()
     memcpy (passphrase, &linebuf[2], linebuf_length);
     term_puts ("Passphrase set.");
     term_put (TERM_CLEAR_TO_EOL);
-    wait4user ();
+    wait_keypress ();
 }
 
 char
@@ -184,6 +184,15 @@ encrypt (char c)
     }
 
     return c;
+}
+
+void
+set_filename (char * s, int len)
+{
+    if (filename)
+        free (filename);
+    filename = malloc (len + 1);
+    strcpy (filename, s);
 }
 
 void
@@ -200,17 +209,13 @@ cmd_write_file ()
     if (linebuf_length == 2 && !filename) {
         gotoxy (0, 23);
         term_puts ("File name missing.");
-        wait4user ();
+        wait_keypress ();
         return;
-    } else if (linebuf_length > 2) {
-        if (filename)
-            free (filename);
-        filename = malloc (linebuf_length - 1 + 5);
-        strcpy (filename, &linebuf[2]);
-    }
+    } else if (linebuf_length > 2)
+        set_filename (&linebuf[2], linebuf_length);
 
     fn = malloc (strlen (filename) + 7);
-    sprintf (fn, "@:%S,S,W", &linebuf[2]);
+    sprintf (fn, "%S,S,W", &linebuf[2]);
     err = cbm_open (1, 8, 1, fn);
     free (fn);
     if (err) {
@@ -218,7 +223,7 @@ cmd_write_file ()
         term_puts ("Cannot open file '");
         term_puts (filename);
         term_puts ("'.\n\r");
-        wait4user ();
+        wait_keypress ();
         return;
     }
 
@@ -241,19 +246,19 @@ cmd_write_file ()
     term_puts ("file '");
     term_puts (filename);
     term_puts ("'.");
-    wait4user ();
+    wait_keypress ();
 }
 
 void
 cmd_read_file ()
 {
-    char *    data = malloc (256);
-    char *    p;
-    line *    current_line;
-    line *    l;
-    int       len;
-    char      c;
-    char      err;
+    char *  data = malloc (256);
+    char *  p;
+    line *  current_line;
+    line *  l;
+    int     len;
+    char    c;
+    char    err;
 
     linebuf[linebuf_length] = 0;
     passphrase_index = 0;
@@ -263,14 +268,10 @@ cmd_read_file ()
         term_puts ("Cannot open file '");
         term_puts (&linebuf[2]);
         term_puts ("'.\n\r");
-        wait4user ();
+        wait_keypress ();
         goto done;
     }
-
-    if (filename) {
-        free (filename);
-        filename = NULL;
-    }
+    set_filename (&linebuf[2], linebuf_length);
 
     line_clear ();
     free (first_line);
@@ -281,7 +282,6 @@ cmd_read_file ()
     cbm_k_chkin (2);
     while (!cbm_k_readst ()) {
         p = data;
-
         while (1) {
             c = encrypt (cbm_k_basin ());
             if (cbm_k_readst () || c == 10)
@@ -291,14 +291,11 @@ cmd_read_file ()
 
             *p++ = c;
         }
-
         len = p - data;
 
         l = line_alloc ();
-
         if (!first_line)
             first_line = l;
-
         l->data = malloc (len);
         l->length = len;
         memcpy (l->data, data, len);
@@ -308,7 +305,6 @@ cmd_read_file ()
             l->prev = current_line;
         }
         current_line = l;
-
         num_lines++;
     }
 

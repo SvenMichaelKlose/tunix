@@ -82,16 +82,6 @@ cmd_delete_line ()
 }
 
 void
-cmd_change_till_line_end ()
-{
-    cmd_delete_till_line_end ();
-    move_line_end ();
-
-    changes_first = linenr;
-    changes_last = linenr;
-}
-
-void
 cmd_delete_till_line_end ()
 {
     line * current_line = line_get (linenr);
@@ -99,6 +89,16 @@ cmd_delete_till_line_end ()
     current_line->length = xpos;
     if (xpos)
         xpos--;
+
+    changes_first = linenr;
+    changes_last = linenr;
+}
+
+void
+cmd_change_till_line_end ()
+{
+    cmd_delete_till_line_end ();
+    move_line_end ();
 
     changes_first = linenr;
     changes_last = linenr;

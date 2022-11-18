@@ -430,7 +430,7 @@ make_directory_list (channel * ch)
     free (line);
 
     ultifs_closedir ();
-    accu = flags = 0;
+    flags &= ~FLAG_C;
 }
 
 
@@ -466,7 +466,7 @@ ultifs_kopen ()
         goto error;
     }
 
-    accu = flags = 0;
+    flags &= ~FLAG_C;
 
     if (FNLEN) {
         name = malloc (FNLEN + 1);
@@ -509,7 +509,7 @@ ultifs_kopen ()
     }
 
 error:
-    flags = FLAG_C;
+    flags |= FLAG_C;
     return false;
 }
 
@@ -517,14 +517,14 @@ void
 ultifs_kchkin ()
 {
     DFLTN = xreg;
-    flags = 0;
+    flags &= ~FLAG_C;
 }
 
 void
 ultifs_kchkout ()
 {
     DFLTO = xreg;
-    flags = 0;
+    flags &= ~FLAG_C;
 }
 
 char
@@ -533,7 +533,8 @@ ultifs_kbasin ()
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
 
-    accu = flags = STATUS = 0;
+    STATUS = 0;
+    flags &= ~FLAG_C;
 
     if (ch->is_buffered) {
         if (!ch->buf) {
@@ -561,7 +562,8 @@ ultifs_kbsout ()
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
 
-    accu = flags = STATUS = 0;
+    STATUS = 0;
+    flags &= ~FLAG_C;
     bfile_write (file, accu);
 }
 
@@ -596,7 +598,8 @@ ultifs_kload ()
     if (!ultifs_kopen ())
         goto end;
 
-    STATUS = flags = 0;
+    STATUS = 0;
+    flags &= ~FLAG_C;
 
     // Prepare reads.
     accu = LFN;
@@ -641,7 +644,8 @@ ultifs_ksave ()
 
     SAP = *(char **) accu;
     EAP = (void *) (yreg << 8 + xreg);
-    STATUS = flags = 0;
+    STATUS = 0;
+    flags &= ~FLAG_C;
 
     // Prepare writes.
     accu = LFN;

@@ -517,7 +517,7 @@ ultifs_kopen ()
         }
 
         ch->file = bfile_create (ultifs_pwd, name, 0);
-        return false;
+        return true;
     }
 
 
@@ -541,6 +541,11 @@ ultifs_kchkin ()
         accu = OSERR_FILE_NOT_OPEN;
         return;
     }
+    if (channels[xreg]->file->mode != ULTIFS_MODE_READ) {
+        flags |= FLAG_C;
+        accu = OSERR_FILE_NOT_IN;
+        return;
+    }
     DFLTN = xreg;
     flags &= ~FLAG_C;
 }
@@ -551,6 +556,11 @@ ultifs_kchkout ()
     if (!channels[xreg]) {
         flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
+        return;
+    }
+    if (channels[xreg]->file->mode != ULTIFS_MODE_WRITE) {
+        flags |= FLAG_C;
+        accu = OSERR_FILE_NOT_OUT;
         return;
     }
     DFLTO = xreg;

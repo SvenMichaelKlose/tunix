@@ -27,6 +27,7 @@ typedef unsigned char uchar;
     #define cc65register    register
 #endif
 
+char ultifs_error = 0;
 uchar current_parent = 0;
 upos parents[8];
 
@@ -377,12 +378,16 @@ bfile_read (bfile * b)
 {
     char x;
 
-    // TODO: Signal error somehow.
-    if (b->pos >= b->size)
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->pos >= b->size) {
+        ultifs_error = ULTIFS_ERR_END_OF_FILE;
         return 0;
+    }
+    if (b->mode != ULTIFS_MODE_READ) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_IN;
+        return 0;
+    }
 
-    if (b->mode != ULTIFS_MODE_READ)
-        return 0; // TODO: error!
     x = ultimem_read_byte (b->ptr);
     b->ptr++;
     b->pos++;
@@ -393,8 +398,11 @@ bfile_read (bfile * b)
 void __cc65fastcall__
 bfile_write (bfile * b, char byte)
 {
-    if (b->mode != ULTIFS_MODE_WRITE)
-        return; // TODO: error!
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_WRITE) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_OUT;
+        return;
+    }
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
     b->pos++;
@@ -404,8 +412,11 @@ bfile_write (bfile * b, char byte)
 void __cc65fastcall__
 bfile_writem (bfile * b, char * bytes, unsigned len)
 {
-    if (b->mode != ULTIFS_MODE_WRITE)
-        return; // TODO: error!
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_WRITE) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_OUT;
+        return;
+    }
     while (len--)
         bfile_write (b, *bytes++);
 }
@@ -425,9 +436,11 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
     cc65register upos      end = file_data (b->start) + b->size;
     cc65register char      v;
 
-    if (b->mode)
-    if (b->mode != ULTIFS_MODE_READ)
-        return -1;
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_READ) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_IN;
+        return 0;
+    }
 
     while (len && ptr != end) {
         --len;

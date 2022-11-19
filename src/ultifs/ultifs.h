@@ -15,6 +15,14 @@ typedef unsigned long usize;
 #define __cc65fastcall__    __fastcall__
 #endif
 
+extern enum ultifs_error_e {
+    ULTIFS_ERR_OK,
+    ULTIFS_ERR_END_OF_FILE,
+    ULTIFS_ERR_FILE_NOT_IN,
+    ULTIFS_ERR_FILE_NOT_OUT
+};
+extern char ultifs_error;
+
 typedef struct _bfile {
     upos       start;      /* Start of file block. */
     upos       ptr;        /* File data position. */

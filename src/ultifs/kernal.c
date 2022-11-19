@@ -667,13 +667,11 @@ ultifs_kload ()
     EAL = ultifs_kbasin ();
     EAH = ultifs_kbasin ();
 
-    log_message ("%X - ", EAP);
     // When SA=0 override with address to YX.
     if (!SA) {
         EAL = xreg;
         EAH = yreg;
     }
-    log_message ("%X", EAP);
 
     // Read all bytes.
     while (!STATUS) {
@@ -709,6 +707,13 @@ ultifs_ksave ()
     // Prepare writes.
     DFLTO = LFN;
 
+    // Save address.
+    accu = SAL;
+    ultifs_kbsout ();
+    accu = SAH;
+    ultifs_kbsout ();
+
+    // Write all bytes.
     while (!STATUS) {
         accu = peek_from_process (SAP++);
         ultifs_kbsout ();

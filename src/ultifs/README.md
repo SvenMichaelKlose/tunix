@@ -290,5 +290,3 @@ will occur, and the SAVE stopped.
 
 SAVE may return the same error codes as OPEN plus
 error code 7 (not an output file).
-
-UltiFS does not care about the logical file number.

@@ -598,7 +598,6 @@ ultifs_kload ()
     if (!ultifs_kopen ())
         goto end;
 
-    STATUS = 0;
     flags &= ~FLAG_C;
 
     // Prepare reads.

@@ -509,6 +509,12 @@ ultifs_kopen ()
         ch->file = found_file;
         return true;
     }
+    if (param1 == 'w') {
+        respond (ERR_WRITE_PROTECT_ON, "write protected");
+        free_channel (LFN);
+        accu = OSERR_FILE_NOT_OUT;
+        return false;
+    }
 
 error:
     flags |= FLAG_C;

@@ -12237,7 +12237,7 @@ CHROUTTP:
     lda #$02        ; set data block file type
     ldy #$00        ; clear index
     sta (TAPE1),Y   ; save file type to tape buffer
-    INY             ; increment index
+    iny             ; increment index
     sty BUFPNT      ; save tape buffer index
 LAB_F2AA:
     lda PTR1        ; restore character from character buffer

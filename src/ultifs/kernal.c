@@ -303,7 +303,7 @@ respond (char code, char * message)
 {
     free (response);
     response = malloc (64);
-    sprintf (response, "%2D, %S, 00, 00\n", code, message);
+    sprintf (response, "%#02D, %S, 00, 00\n", code, message);
     //log_message ("R: %2D, %S, 00, 00\n", code, message);
 }
 
@@ -624,18 +624,19 @@ ultifs_kload ()
     flags &= ~FLAG_C;
 
     // Prepare reads.
-    xreg = LFN;
-    ultifs_kchkin ();
+    DFLTN = LFN;
 
     // Read destination address.
     EAL = ultifs_kbasin ();
     EAH = ultifs_kbasin ();
 
-    // When SA=0 pverride with address to YX.
+    log_message ("%X - ", EAP);
+    // When SA=0 override with address to YX.
     if (!SA) {
         EAL = xreg;
         EAH = yreg;
     }
+    log_message ("%X", EAP);
 
     // Read all bytes.
     while (!STATUS) {
@@ -669,8 +670,7 @@ ultifs_ksave ()
     flags &= ~FLAG_C;
 
     // Prepare writes.
-    xreg = LFN;
-    ultifs_kchkout ();
+    DFLTO = LFN;
 
     while (!STATUS) {
         accu = peek_from_process (SAP++);

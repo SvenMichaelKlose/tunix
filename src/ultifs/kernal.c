@@ -497,13 +497,6 @@ ultifs_kopen ()
         return true;
     }
 
-    if (param1 && param2 == 'w') {
-        respond (ERR_WRITE_PROTECT_ON, "write protected");
-        free_channel (LFN);
-        accu = OSERR_FILE_NOT_OUT;
-        return false;
-    }
-
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (!found_file) {
@@ -515,6 +508,25 @@ ultifs_kopen ()
 
         ch->file = found_file;
         return true;
+    }
+
+    if (param2 == 'w') {
+        found_file = ultifs_open (ultifs_pwd, name, 0);
+        if (found_file) {
+            ultifs_close (found_file);
+            respond (ERR_FILE_EXISTS, "file exists");
+            return false;
+        }
+
+        ch->file = bfile_create (ultifs_pwd, name, 0);
+        return false;
+    }
+
+
+    if (param2 == 'a') {
+        respond (ERR_WRITE_PROTECT_ON, "write protect on");
+        free_channel (LFN);
+        return false;
     }
 
     respond (ERR_INVALID_FILE_NAME, "invalid file name");

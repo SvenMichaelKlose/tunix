@@ -304,7 +304,6 @@ respond (char code, char * message)
     free (response);
     response = malloc (64);
     sprintf (response, "%#02D, %S, 00, 00\n", code, message);
-    //log_message ("R: %2D, %S, 00, 00\n", code, message);
 }
 
 void
@@ -584,8 +583,13 @@ ultifs_kbasin ()
     }
 
     file = ch->file;
-    if (file->pos < file->size)
-        return accu = bfile_read (file);
+    if (file->mode != ULTIFS_MODE_READ) {
+        flags |= FLAG_C;
+        return OSERR_FILE_NOT_IN;
+    }
+    accu = bfile_read (file);
+    if (ultifs_error == ULTIFS_ERR_OK)
+        return accu;
 
 end_of_file:
     STATUS = STATUS_END_OF_FILE;
@@ -606,6 +610,10 @@ ultifs_kbsout ()
 
     STATUS = 0;
     flags &= ~FLAG_C;
+    if (file->mode != ULTIFS_MODE_WRITE) {
+        flags |= FLAG_C;
+        return;
+    }
     bfile_write (file, accu);
 }
 

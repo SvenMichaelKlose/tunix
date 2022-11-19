@@ -118,6 +118,7 @@ done:
     pha
     tya
     asl
+    tax
     lda _channels,x
     ora _channels+1,x
     beq n
@@ -134,12 +135,14 @@ n:  pla
     rts
 .endproc
 
-.proc enter
+enter:
     ; Save X and Y registers.  Accu and flags have
     ; already been saved by the primary wedge.
-    stx cpu_state+1
     sty cpu_state+2
+enter_x:
+    stx cpu_state+1
 
+enter2:
     ; Save BLK2, BLL3 and BLK5.
     lda $9ffa
     sta cpu_state+7
@@ -164,7 +167,6 @@ n:  pla
     lda #0
     sta $9ffb
     sta $9ffd
-.endproc
 
 .proc swap_zp
     ; Swap zeropage.
@@ -225,7 +227,7 @@ n:  lda old_IOPEN+1
     tay
     jsr is_our_lfn
     bcc n
-    jsr enter
+    jsr enter2
     jsr _ultifs_kchkin
     jmp leave
 
@@ -245,7 +247,7 @@ n:  lda old_ICHKIN+1
     tay
     jsr is_our_lfn
     bcc n
-    jsr enter
+    jsr enter2
     jsr _ultifs_kchkout
     jmp leave
 
@@ -263,7 +265,7 @@ n:  lda old_ICHKOUT+1
     ldy DFLTN
     jsr is_our_lfn
     bcc n
-    jsr enter
+    jsr enter_x
     jsr _ultifs_kbasin
     jmp leave
 
@@ -280,7 +282,7 @@ n:  lda old_IBASIN+1
     ldy DFLTO
     jsr is_our_lfn
     bcc n
-    jsr enter
+    jsr enter_x
     jsr _ultifs_kbsout
     jmp leave
 
@@ -305,7 +307,7 @@ n:  lda old_IBSOUT+1
     tay
     jsr is_our_lfn
     bcc n
-    jsr enter
+    jsr enter_x
     jsr _ultifs_kclose
     jmp leave
 

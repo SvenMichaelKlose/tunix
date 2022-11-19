@@ -466,6 +466,7 @@ ultifs_kopen ()
         goto error;
     }
 
+    STATUS = 0;
     flags &= ~FLAG_C;
 
     if (FNLEN) {
@@ -499,6 +500,7 @@ ultifs_kopen ()
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (!found_file) {
+            STATUS = STATUS_FILE_NOT_FOUND;
             respond (ERR_FILE_NOT_FOUND, "file not found");
             free_channel (LFN);
             return false;
@@ -516,6 +518,11 @@ error:
 void
 ultifs_kchkin ()
 {
+    if (!channels[xreg]) {
+        flags |= FLAG_C;
+        accu = OSERR_FILE_NOT_OPEN;
+        return;
+    }
     DFLTN = xreg;
     flags &= ~FLAG_C;
 }
@@ -523,6 +530,11 @@ ultifs_kchkin ()
 void
 ultifs_kchkout ()
 {
+    if (!channels[xreg]) {
+        flags |= FLAG_C;
+        accu = OSERR_FILE_NOT_OPEN;
+        return;
+    }
     DFLTO = xreg;
     flags &= ~FLAG_C;
 }
@@ -643,7 +655,6 @@ ultifs_ksave ()
 
     SAP = *(char **) accu;
     EAP = (void *) (yreg << 8 + xreg);
-    STATUS = 0;
     flags &= ~FLAG_C;
 
     // Prepare writes.

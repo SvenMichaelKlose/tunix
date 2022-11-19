@@ -108,6 +108,8 @@ carry flag set:
 | 6    | Not an input file.  Also if logical file number is 0. |
 | 9    | Illegal device number.  Also if tape buffer is below $0200. |
 
+OPEN clears the STATUS byte.
+
 ## CHKIN - Open channel for input
 
 Any logical file that has already been opened by the

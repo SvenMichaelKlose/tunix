@@ -502,7 +502,6 @@ ultifs_kopen ()
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");
             free_channel (LFN);
-            accu = OSERR_FILE_NOT_FOUND;
             return false;
         }
 
@@ -513,7 +512,7 @@ ultifs_kopen ()
     if (param2 == 'w') {
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (found_file) {
-            ultifs_close (found_file);
+            bfile_close (found_file);
             respond (ERR_FILE_EXISTS, "file exists");
             return false;
         }

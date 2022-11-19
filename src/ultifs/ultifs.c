@@ -87,7 +87,7 @@ free_pathname (char ** arr)
 
 typedef struct _block {
     usize   size;           /* Size of file data. */
-    upos    replacement;    /* Replacement if this file or EMPTY_PTR. */
+    upos    replacement;    /* Replacement or EMPTY_PTR. */
     upos    next;           /* Next file in directory or EMPTY_PTR. Not valid if replaced. */
     char    type;
     char    name_length;
@@ -489,7 +489,7 @@ void __cc65fastcall__
 bfile_close (bfile * b)
 {
     if (!b->mode)
-        return;
+        goto read_mode;
 
     block_set_size (b->start, b->size);
     last_free = b->ptr;
@@ -500,6 +500,7 @@ bfile_close (bfile * b)
     else
         bfile_append_to_directory (b);
 
+read_mode:
     free (b);
 }
 

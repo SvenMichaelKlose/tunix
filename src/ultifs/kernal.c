@@ -500,9 +500,9 @@ ultifs_kopen ()
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (!found_file) {
-            STATUS = STATUS_FILE_NOT_FOUND;
             respond (ERR_FILE_NOT_FOUND, "file not found");
             free_channel (LFN);
+            accu = OSERR_FILE_NOT_FOUND;
             return false;
         }
 
@@ -545,6 +545,11 @@ ultifs_kbasin ()
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
 
+    if (!ch) {
+        flags |= FLAG_C;
+        return accu = 0;
+    }
+
     STATUS = 0;
     flags &= ~FLAG_C;
 
@@ -573,6 +578,12 @@ ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
+
+    if (!ch) {
+        flags |= FLAG_C;
+        accu = 0;
+        return;
+    }
 
     STATUS = 0;
     flags &= ~FLAG_C;
@@ -613,7 +624,7 @@ ultifs_kload ()
     flags &= ~FLAG_C;
 
     // Prepare reads.
-    accu = LFN;
+    xreg = LFN;
     ultifs_kchkin ();
 
     // Read destination address.
@@ -658,7 +669,7 @@ ultifs_ksave ()
     flags &= ~FLAG_C;
 
     // Prepare writes.
-    accu = LFN;
+    xreg = LFN;
     ultifs_kchkout ();
 
     while (!STATUS) {

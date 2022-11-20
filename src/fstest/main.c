@@ -63,7 +63,7 @@ print_error ()
         exit (-1);
     }
     if (last_error[0])
-        printf ("%s\n", last_error);
+        printf ("> %s\n", last_error);
 }
 
 void

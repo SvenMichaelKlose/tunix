@@ -8,7 +8,7 @@
 .export uopen, uclose, uchkin, uckout, uclrcn
 .export ubasin, ubsout, uclall, uload, usave
 
-.import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kchkout
+.import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kckout
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap_ofs
@@ -248,7 +248,7 @@ n:  lda old_ICHKIN+1
     jsr is_our_lfn
     bcc n
     jsr enter2
-    jsr _ultifs_kchkout
+    jsr _ultifs_kckout
     jmp leave
 
 n:  lda old_ICHKOUT+1

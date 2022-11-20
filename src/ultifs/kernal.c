@@ -556,7 +556,7 @@ ultifs_kchkin ()
 }
 
 void
-ultifs_kchkout ()
+ultifs_kckout ()
 {
     if (!channels[xreg]) {
         flags |= FLAG_C;

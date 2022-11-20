@@ -63,10 +63,10 @@ STAL        = $c1
 MEMUSS      = $c3
 
 ptr_chkin   = $031e
-ptr_chkout  = $0320
+ptr_ckout   = $0320
 ptr_clrch   = $0322
 ptr_basin   = $0324
-ptr_basout  = $0326
+ptr_bsout  = $0326
 ptr_getin   = $032a
 ptr_clrall  = $032c
 ptr_load    = $0330
@@ -143,18 +143,18 @@ sjload_init:
     ldx #>jchkin
     sta ptr_chkin
     stx ptr_chkin + 1
-    lda #<jchkout
-    ldx #>jchkout
-    sta ptr_chkout
-    stx ptr_chkout + 1
+    lda #<jckout
+    ldx #>jckout
+    sta ptr_ckout
+    stx ptr_ckout + 1
     lda #<jbasin
     ldx #>jbasin
     sta ptr_basin
     stx ptr_basin + 1
-    lda #<jbasout
-    ldx #>jbasout
-    sta ptr_basout
-    stx ptr_basout + 1
+    lda #<jbsout
+    ldx #>jbsout
+    sta ptr_bsout
+    stx ptr_bsout + 1
     lda #<jgetin
     ldx #>jgetin
     sta ptr_getin
@@ -1047,7 +1047,7 @@ jchkin:
 @l3:jsr jtalksa
     jmp FCHKIN_4
 
-jchkout:
+jckout:
     jsr FNDFLNO     ; Search logical file number.
     beq @l1
     jmp FE_NTOPN    ; Error FILE NOT OPEN.
@@ -1091,7 +1091,7 @@ jbasin:
 
 @l3:jmp jiecin
 
-jbasout:
+jbsout:
     pha
     lda DFLTO
     cmp #8

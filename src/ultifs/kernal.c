@@ -505,10 +505,15 @@ ultifs_kopen ()
         }
 
         ch->file = found_file;
+        respond_ok ();
         return true;
     }
 
     if (param2 == 'w') {
+        if (param1 != 's' && param2 != 'p') {
+            respond_err_syntax ();
+            return false;
+        }
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (found_file) {
             bfile_close (found_file);
@@ -517,9 +522,9 @@ ultifs_kopen ()
         }
 
         ch->file = bfile_create (ultifs_pwd, name, 0);
+        respond_ok ();
         return true;
     }
-
 
     if (param2 == 'a') {
         respond (ERR_WRITE_PROTECT_ON, "write protect on");

@@ -19,16 +19,21 @@
 
 typedef unsigned char uchar;
 
-// Client registers
-#define accu          (*(uchar *) 0x9c00)
-#define xreg          (*(uchar *) 0x9c01)
-#define yreg          (*(uchar *) 0x9c02)
-#define flags         (*(uchar *) 0x9c03)
-#define proc_ustatus  (*(uchar *) 0x9c04)
-#define proc_blk1     (*(unsigned *) 0x9c05)
-#define proc_blk2     (*(unsigned *) 0x9c07)
-#define proc_blk3     (*(unsigned *) 0x9c09)
-#define proc_blk5     (*(unsigned *) 0x9c0b)
+extern uchar accu;
+extern uchar xreg;
+extern uchar yreg;
+extern uchar flags;
+extern uchar cfg;
+extern uchar blk1;
+extern uchar blk2;
+extern uchar blk3;
+extern uchar blk5;
+
+#define proc_ustatus  cfg
+#define proc_blk1     blk1
+#define proc_blk2     blk2
+#define proc_blk3     blk3
+#define proc_blk5     blk5
 
 // CPU flags
 #define FLAG_C       1

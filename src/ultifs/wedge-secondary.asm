@@ -72,9 +72,6 @@ l2: lda __ZP_START__-1,x
 .endproc
 
 enter:
-    sty _yreg
-    stx _xreg
-
     ; Save BLK2, BLL3 and BLK5.
     lda $9ffa
     sta _blk2

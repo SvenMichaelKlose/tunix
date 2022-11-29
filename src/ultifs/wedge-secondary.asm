@@ -18,28 +18,10 @@
 
 
 stack_size  = $22    ; Keep greater or equal to what linker config file says.
-cpu_state   = $9c00
 
 .segment "SECONDARY"
 
-LFN     = $b8   ; Logical file number.
-FA      = $ba   ; Device number
-DFLTN   = $99   ; Current input device number.
-DFLTO   = $9a   ; Current output device number.
-
 IOPEN   = $031A
-ICLOSE  = $031C
-ICHKIN  = $031E
-ICKOUT  = $0320
-ICLRCN  = $0322
-IBASIN  = $0324
-IBSOUT  = $0326
-ISTOP   = $0328
-IGETIN  = $032A
-ICLALL  = $032C
-IUSRCMD = $032E
-ILOAD   = $0330
-ISAVE   = $0332
 
 jmp to_cc65_startup
 
@@ -79,27 +61,6 @@ _last_ingle_device:     .res 1
 _saved_zp:  .res stack_size
 
 .proc _init_secondary_wedge
-    tax
-    stx _last_ingle_device
-    dex
-    stx _last_regular_device
-
-    ; Save KERNAL vectors with 1 off so they can serve as
-    ; return addresses on the stack.
-    ldx #0
-    ldy #13
-l:  lda IOPEN,x
-    sec
-    sbc #1
-    sta old_IOPEN,x
-    lda IOPEN+1,x
-    sbc #0
-    inx
-    sta old_IOPEN,x
-    inx
-    dey
-    bne l
-
     ; Save zeropage.
     ldx #<__ZP_SIZE__
 l2: lda __ZP_START__-1,x

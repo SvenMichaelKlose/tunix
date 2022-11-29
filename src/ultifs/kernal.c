@@ -119,7 +119,7 @@ typedef struct _channel {
 
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
-channel * channels[NUM_LFN];;
+channel * channels[256];
 char * response;                        // Error code of last operation.
 char * log_ptr = (char *) 0x400;
 
@@ -652,10 +652,10 @@ ultifs_kclall ()
     int  i;
 
     for (i = 0; i < NUM_LFN; i++) {
-        if (!channels[i])
-            continue;
-        accu = i;
-        ultifs_kclose ();
+        if (channels[i]) {
+            accu = i;
+            ultifs_kclose ();
+        }
     }
 }
 

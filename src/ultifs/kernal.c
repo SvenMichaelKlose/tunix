@@ -649,14 +649,14 @@ ultifs_kclose ()
 void
 ultifs_kclall ()
 {
-    int  i;
-
-    for (i = 0; i < NUM_LFN; i++) {
+    uchar  i;
+return;
+    do {
         if (channels[i]) {
             accu = i;
             ultifs_kclose ();
         }
-    }
+    } while (++i);
 }
 
 void

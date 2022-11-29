@@ -123,9 +123,9 @@ call_driver:
 unmap:
     ; Restore memory config.
     lda _blk1
-    sta $9ff6
+    sta $9ff8
     lda _blk1+1
-    sta $9ff7
+    sta $9ff9
     lda _cfg
     sta $9ff2
 
@@ -200,6 +200,7 @@ not_us:
 
 .proc h_bsout
     sta _accu
+    sty _yreg
     ldy DFLTO
     lda _global_lfns,y
     bmi not_us
@@ -207,6 +208,7 @@ not_us:
     jmp call_driver
 not_us:
     lda _accu
+    ldy _yreg       ; Fun fact: needs to be restored. (pixel)
     jmp (old_bsout)
 .endproc
 

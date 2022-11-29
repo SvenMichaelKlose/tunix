@@ -118,7 +118,7 @@ call_driver:
     lda tmp
     asl
     sta j+1
-j:  jsr $2000
+    jsr j
 
 unmap:
     ; Restore memory config.
@@ -137,6 +137,8 @@ unmap:
     lda _accu
     plp
     rts
+
+j:  jmp ($2000)
 
 .proc h_open
     ldy FA

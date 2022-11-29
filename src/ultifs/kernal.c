@@ -650,7 +650,7 @@ void
 ultifs_kclall ()
 {
     uchar  i;
-return;
+
     do {
         if (channels[i]) {
             accu = i;

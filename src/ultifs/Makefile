@@ -1,6 +1,6 @@
 PROGRAM=ultifs.prg
 SOURCES=kernal.c main.c ultifs.c
-ASMSOURCES=reset.asm wedge-primary.asm wedge-secondary.asm #sjload.asm
+ASMSOURCES=reset.asm hooks.asm zeropage.asm wedge-secondary.asm
 
 include ../Makefile.rules
 

@@ -11,14 +11,14 @@
 .import _ultifs_kopen, _ultifs_kclose, _ultifs_kchkin, _ultifs_kckout
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
-.import unmap_ofs
+.import unmap
+.import _accu, _xreg, _yreg, _cfg, _blk2, _blk3, _blk5
 .import __ZP_START__
 .import __ZP_SIZE__
 
 
-stack_size  = $20    ; Keep greater or equal to what linker config file says.
+stack_size  = $22    ; Keep greater or equal to what linker config file says.
 cpu_state   = $9c00
-unmap       = $9800 + unmap_ofs
 
 .segment "SECONDARY"
 
@@ -41,6 +41,22 @@ IUSRCMD = $032E
 ILOAD   = $0330
 ISAVE   = $0332
 
+.export drv_ultifs_vectors
+drv_ultifs_vectors:
+    .word uopen
+    .word uclose
+    .word uchkin
+    .word uckout
+    .word uclrcn
+    .word ubasin
+    .word ubsout
+    .word 0         ;ustop
+    .word 0         ;ugetin
+    .word uclall
+    .word 0         ;uusr
+    .word uload
+    .word usave
+
 old_IOPEN:      .res 2
 old_ICLOSE:     .res 2
 old_ICHKIN:     .res 2
@@ -59,9 +75,6 @@ _last_regular_device:   .res 1
 _last_ingle_device:     .res 1
 
 _saved_zp:  .res stack_size
-
-.export _channels
-_channels: .res 512
 
 .proc _init_secondary_wedge
     tax
@@ -95,78 +108,34 @@ l2: lda __ZP_START__-1,x
     rts
 .endproc
 
-.proc is_our_device
-    ; Returns CC if it's not.
-    pha
-    lda FA
-    cmp _last_ingle_device
-    pla
-    bcc done
-
-    pha
-    lda FA
-    cmp _last_regular_device
-    pla
-
-done:
-    rts
-.endproc
-
-.proc is_our_lfn
-    pha
-    txa
-    pha
-    tya
-    asl
-    tax
-    lda _channels,x
-    ora _channels+1,x
-    beq n
-    pla
-    tax
-    pla
-    sec
-    rts
-
-n:  pla
-    tax
-    pla
-    clc
-    rts
-.endproc
-
 enter:
-    ; Save X and Y registers.  Accu and flags have
-    ; already been saved by the primary wedge.
-    sty cpu_state+2
-enter_x:
-    stx cpu_state+1
+    sty _yreg
+    stx _xreg
 
-enter2:
     ; Save BLK2, BLL3 and BLK5.
     lda $9ffa
-    sta cpu_state+7
+    sta _blk2
     lda $9ffb
-    sta cpu_state+8
+    sta _blk2+1
     lda $9ffc
-    sta cpu_state+9
+    sta _blk3
     lda $9ffd
-    sta cpu_state+10
+    sta _blk3+1
     lda $9ffe
-    sta cpu_state+11
+    sta _blk5
     lda $9fff
-    sta cpu_state+12
+    sta _blk5+1
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #$ff
-    sta $9ff2
+    sta _cfg
     lda #118
-    sta $9ffa
+    sta _blk2
     lda #119
-    sta $9ffc
+    sta _blk3
     lda #0
-    sta $9ffb
-    sta $9ffd
+    sta _blk2+1
+    sta _blk3+1
 
 .proc swap_zp
     ; Swap zeropage.
@@ -186,174 +155,80 @@ l:  lda __ZP_START__-1,x
     jsr swap_zp
 
     ; Restore BLK2, BLK3 and BLK5.
-    lda cpu_state+7
+    lda _blk2
     sta $9ffa
-    lda cpu_state+8
+    lda _blk2+1
     sta $9ffb
-    lda cpu_state+9
+    lda _blk3
     sta $9ffc
-    lda cpu_state+10
+    lda _blk3+1
     sta $9ffd
-    lda cpu_state+11
+    lda _blk5
     sta $9ffe
-    lda cpu_state+12
+    lda _blk5+1
     sta $9fff
 
     ; Restore X and Y register.  Accu, flags and BLK1
     ; will be restored by unmap().
-    ldx cpu_state+1
-    ldy cpu_state+2
+    ldx _xreg
+    ldy _yreg
     jmp unmap
 .endproc
 
 .proc uopen
-    jsr is_our_device
-    bcc n
     jsr enter
     jsr _ultifs_kopen
     jmp leave
-
-n:  lda old_IOPEN+1
-    pha
-    lda old_IOPEN
-    pha
-    jmp unmap
 .endproc
 
 .proc uchkin
-    stx cpu_state+1
-    sty cpu_state+2
-    txa
-    tay
-    jsr is_our_lfn
-    bcc n
-    jsr enter2
+    jsr enter
     jsr _ultifs_kchkin
     jmp leave
-
-n:  lda old_ICHKIN+1
-    pha
-    lda old_ICHKIN
-    pha
-    ldx cpu_state+1
-    ldy cpu_state+2
-    jmp unmap
 .endproc
 
 .proc uckout
-    stx cpu_state+1
-    sty cpu_state+2
-    txa
-    tay
-    jsr is_our_lfn
-    bcc n
-    jsr enter2
+    jsr enter
     jsr _ultifs_kckout
     jmp leave
-
-n:  lda old_ICHKOUT+1
-    pha
-    lda old_ICHKOUT
-    pha
-    ldx cpu_state+1
-    ldy cpu_state+2
-    jmp unmap
 .endproc
 
 .proc ubasin
-    sty cpu_state+2
-    ldy DFLTN
-    jsr is_our_lfn
-    bcc n
-    jsr enter_x
+    jsr enter
     jsr _ultifs_kbasin
     jmp leave
-
-n:  lda old_IBASIN+1
-    pha
-    lda old_IBASIN
-    pha
-    ldy cpu_state+2
-    jmp unmap
 .endproc
 
 .proc ubsout
-    sty cpu_state+2
-    ldy DFLTO
-    jsr is_our_lfn
-    bcc n
-    jsr enter_x
+    jsr enter
     jsr _ultifs_kbsout
     jmp leave
-
-n:  lda old_IBSOUT+1
-    pha
-    lda old_IBSOUT
-    pha
-    ldy cpu_state+2
-    jmp unmap
 .endproc
 
 .proc uclrcn
-    lda old_ICLRCN+1
-    pha
-    lda old_ICLRCN
-    pha
-    jmp unmap
+    rts
 .endproc
 
 .proc uclose
-    sty cpu_state+2
-    tay
-    jsr is_our_lfn
-    bcc n
-    jsr enter_x
+    jsr enter
     jsr _ultifs_kclose
     jmp leave
-
-n:  lda old_ICLOSE+1
-    pha
-    lda old_ICLOSE
-    pha
-    ldy cpu_state+2
-    jmp unmap
 .endproc
 
 .proc uclall
     jsr enter
     jsr _ultifs_kclall
-
-    lda old_ICLALL+1
-    pha
-    lda old_ICLALL
-    pha
     jmp leave
 .endproc
 
 .proc uload
-    jsr is_our_device
-    bcc n
     jsr enter
     jsr _ultifs_kload
     jmp leave
-
-n:  lda old_ILOAD+1
-    pha
-    lda old_ILOAD
-    pha
-    jmp unmap
 .endproc
 
 .proc usave
-    jsr is_our_device
-    bcc n
     jsr enter
     jsr _ultifs_ksave
     jmp leave
-
-n:  lda old_ISAVE+1
-    pha
-    lda old_ISAVE
-    pha
-    jmp unmap
 .endproc

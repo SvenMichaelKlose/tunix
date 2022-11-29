@@ -6,6 +6,7 @@
 
 
 .export _init_primary_wedge, unmap_ofs
+.exportzp s,tmp
 
 .import uopen, uclose, uchkin, uckout, uclrcn
 .import ubasin, ubsout, uclall, uload, usave
@@ -16,6 +17,7 @@
 s:      .res 2
 v:      .res 2
 d:      .res 2
+tmp:    .res 2
 
 
     .data

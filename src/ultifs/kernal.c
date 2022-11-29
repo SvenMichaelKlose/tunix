@@ -103,6 +103,7 @@ typedef unsigned char uchar;
 #define ERR_NO_CHANNEL           70
 #define ERR_DISK_FULL            72
 
+extern uchar global_lfns[256];
 
 typedef struct _channel {
     char *   name;          // File name
@@ -118,7 +119,7 @@ typedef struct _channel {
 
 #define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
-extern channel * channels[NUM_LFN];;
+channel * channels[NUM_LFN];;
 char * response;                        // Error code of last operation.
 char * log_ptr = (char *) 0x400;
 
@@ -487,13 +488,13 @@ ultifs_kopen ()
     if (SA == 15) {
         ch->is_buffered = true;
         open_command (name);
-        return true;
+        goto success;
     }
 
     if (FNLEN == 1 && *name == '$') {
         ch->is_buffered = true;
         make_directory_list (ch);
-        return true;
+        goto success;
     }
 
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
@@ -506,7 +507,7 @@ ultifs_kopen ()
 
         ch->file = found_file;
         respond_ok ();
-        return true;
+        goto success;
     }
 
     if (param2 == 'w') {
@@ -523,7 +524,7 @@ ultifs_kopen ()
 
         ch->file = bfile_create (ultifs_pwd, name, 0);
         respond_ok ();
-        return true;
+        goto success;
     }
 
     if (param2 == 'a') {
@@ -536,6 +537,10 @@ ultifs_kopen ()
 error:
     flags |= FLAG_C;
     return false;
+
+success:
+    global_lfns[LFN] = LFN;
+    return true;
 }
 
 void

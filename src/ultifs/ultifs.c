@@ -120,7 +120,7 @@ ultimem_write_byte (upos p, uchar v)
         printf ("ERROR: Image full.\n");
         exit (-1);
     }
-    store[p] = v & 0xff;
+    store[p] = v;
 }
 
 #else
@@ -134,10 +134,10 @@ ultimem_read_byte (upos p)
     uchar   v;
 
     *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
-    *ULTIMEM_BLK5 = p >> 13;
+    *ULTIMEM_BLK5    = p >> 13;
     v = *addr;
-    *ULTIMEM_CONFIG2 = oldcfg;
-    *ULTIMEM_BLK5 = oldbank;
+    //*ULTIMEM_CONFIG2 = oldcfg;
+    //*ULTIMEM_BLK5    = oldbank;
 
     return v;
 }
@@ -145,12 +145,15 @@ ultimem_read_byte (upos p)
 void __cc65fastcall__
 ultimem_write_byte (upos p, uchar v)
 {
-    uchar * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
-    unsigned        oldbank = *ULTIMEM_BLK5;
+    uchar *   addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
+    unsigned  oldbank = *ULTIMEM_BLK5;
+    uchar     oldcfg = *ULTIMEM_CONFIG2;
 
-    *ULTIMEM_BLK5 = p >> 13;
-    *addr = v;
-    *ULTIMEM_BLK5 = oldbank;
+    *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
+    *ULTIMEM_BLK5    = p >> 13;
+    ultimem_burn_byte ((unsigned short) addr, v);
+    //*ULTIMEM_CONFIG2 = oldcfg;
+    //*ULTIMEM_BLK5    = oldbank;
 }
 
 #endif

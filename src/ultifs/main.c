@@ -14,9 +14,9 @@
 
 #include <lib/ultimem/ultimem.h>
 
-
-extern void __fastcall__ init_primary_wedge (void * start);
-extern void __fastcall__ init_secondary_wedge (char rom_device);
+//extern void __fastcall__ init_primary_wedge (void * start);
+//extern void __fastcall__ init_secondary_wedge (char rom_device);
+extern void __fastcall__ init_hooks (void);
 extern void __fastcall__ init_kernal_emulation (void);
 
 
@@ -45,14 +45,17 @@ copy_program_to_resident_banks (unsigned first_bank)
 
 void reset (void);
 
+extern char driver_banks[32];
+
 void
 main (void)
 {
-    char device = 12;
-
-    init_secondary_wedge (device);
-    init_primary_wedge ((void *) 0x9800);
+    //char device = 12;
+    //init_secondary_wedge (device);
+    //init_primary_wedge ((void *) 0x9800);
     init_kernal_emulation ();
+    init_hooks ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
+    driver_banks[12] = 117;
     reset ();
 }

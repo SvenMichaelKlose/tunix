@@ -116,7 +116,12 @@ test_create_seq ()
     oserr = cbm_open (8, device, 8, "0:test,s,w");
     read_error ();
     if (!oserr && !err) {
-        cbm_k_ckout (8);
+        oserr = cbm_k_ckout (8);
+        if (oserr) {
+            cbm_close (8);
+            print_error ();
+            exit (-1);
+        }
         for (i = 1; i < 255; i++)
             cbm_k_bsout (i);
     }

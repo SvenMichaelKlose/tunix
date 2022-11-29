@@ -26,7 +26,7 @@
 
 /* Bank numbers. */
 #define ULTIMEM_RAM123      ((unsigned short *) 0x9ff4)
-#define ULTIMEM_IO23        ((unsigned short *) 0x9ff6) /* IO2 and IO3. */
+#define ULTIMEM_IO23        ((unsigned short *) 0x9ff6)
 #define ULTIMEM_BLK1        ((unsigned short *) 0x9ff8)
 #define ULTIMEM_BLK2        ((unsigned short *) 0x9ffa)
 #define ULTIMEM_BLK3        ((unsigned short *) 0x9ffc)

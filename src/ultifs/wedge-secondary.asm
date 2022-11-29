@@ -41,6 +41,8 @@ IUSRCMD = $032E
 ILOAD   = $0330
 ISAVE   = $0332
 
+jmp to_cc65_startup
+
 .export drv_ultifs_vectors
 drv_ultifs_vectors:
     .word uopen
@@ -232,3 +234,5 @@ l:  lda __ZP_START__-1,x
     jsr _ultifs_ksave
     jmp leave
 .endproc
+
+to_cc65_startup:

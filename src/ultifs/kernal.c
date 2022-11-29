@@ -649,6 +649,7 @@ ultifs_kclose ()
     if (ch->file)
         bfile_close (ch->file);
     free_channel (accu);
+    global_lfns[accu] = 0xff;
 }
 
 void

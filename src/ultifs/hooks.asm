@@ -1,5 +1,5 @@
 .export _init_hooks
-.export _global_lfns, _driver_banks
+.export _global_lfns
 .export _accu, _xreg, _yreg, _flags
 .export _cfg, _blk1, _blk2, _blk3, _blk5
 .export unmap
@@ -48,7 +48,6 @@ DFLTO   = $9a   ; Current output device number.
     .org $9800
 
 _global_lfns:   .res 256
-_driver_banks:  .res 32
 _accu:          .res 1
 _xreg:          .res 1
 _yreg:          .res 1
@@ -96,7 +95,6 @@ old_save:   .res 2
 call_driver:
     sta tmp
 
-    ; Save memory config.
     lda $9ff2
     sta _cfg
     lda $9ff8
@@ -104,17 +102,13 @@ call_driver:
     lda $9ff9
     sta _blk1+1
 
-    ; Bank in BLK1 of driver.
-    lda _driver_banks,y
+    lda #117
     sta $9ff8
     lda #0
     sta $9ff9
-    lda $9ff2
-    and #$3f
-    ora #$40
+    lda #$ff
     sta $9ff2
 
-    ; Call driver.
     lda tmp
     asl
     sta j+1
@@ -139,37 +133,41 @@ unmap:
     rts
 
 .proc h_open
-    ldy FA
-    lda _driver_banks,y
-    beq not_us
+    lda FA
+    cmp #12
+    bne not_us
     lda #IDX_OPEN
-    ldy FA
     jmp call_driver
 not_us:
     jmp (old_open)
 .endproc
 
 .proc h_clrcn
+    stx _xreg
     lda #IDX_CLRCN
-    jmp call_driver
+    jsr call_driver
+    ldx _xreg
     jmp (old_clrcn)
 .endproc
 
 .proc h_close
     sta _accu
+    stx _xreg
+    sty _yreg
     tay
     lda _global_lfns,y
     bmi not_us
-    tay
     lda #IDX_CLOSE
     jmp call_driver
 not_us:
     lda _accu
+    ldy _yreg
     jmp (old_close)
 .endproc
 
 .proc h_chkin
     stx _xreg
+    sty _yreg
     lda _global_lfns,x
     bmi not_us
     lda #IDX_CHKIN
@@ -180,6 +178,7 @@ not_us:
 
 .proc h_ckout
     stx _xreg
+    sty _yreg
     lda _global_lfns,x
     bmi not_us
     lda #IDX_CKOUT
@@ -226,37 +225,34 @@ not_us:
 
 .proc h_clall
     lda #IDX_CLALL
-    ldy #12
     jsr call_driver
     jmp (old_clall)
 .endproc
 
 .proc h_load
     sta _accu
-    sty _yreg
-    ldy FA
-    lda _driver_banks,y
-    beq not_us
+    lda FA
+    cmp #12
+    bne not_us
     stx _xreg
+    sty _yreg
     lda #IDX_LOAD
     jmp call_driver
 not_us:
     lda _accu
-    ldy _yreg
     jmp (old_load)
 .endproc
 
 .proc h_save
     sta _accu
-    sty _yreg
-    ldy FA
-    lda _driver_banks,y
-    beq not_us
+    lda FA
+    cmp #12
+    bne not_us
     stx _xreg
+    sty _yreg
     lda #IDX_SAVE
     jmp call_driver
 not_us:
     lda _accu
-    ldy _yreg
     jmp (old_save)
 .endproc

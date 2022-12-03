@@ -44,7 +44,6 @@ copy_program_to_resident_banks (unsigned first_bank)
 }
 
 void reset (void);
-extern char driver_banks[32];
 extern void init_secondary_wedge (void);
 
 void
@@ -54,6 +53,5 @@ main (void)
     init_kernal_emulation ();
     init_hooks ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
-    driver_banks[12] = 117;
     reset ();
 }

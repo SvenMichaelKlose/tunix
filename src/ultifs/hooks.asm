@@ -188,12 +188,14 @@ not_us:
 .endproc
 
 .proc h_basin
+    sty _yreg
     ldy DFLTN
     lda _global_lfns,y
     bmi not_us
     lda #IDX_BASIN
     jmp call_driver
 not_us:
+    ldy _yreg
     jmp (old_basin)
 .endproc
 

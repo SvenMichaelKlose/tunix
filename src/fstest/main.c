@@ -115,6 +115,7 @@ void
 test_create_seq ()
 {
     char i;
+    char s;
 
     init_error ();
     oserr = cbm_open (8, device, 8, "0:test,s,w");
@@ -126,8 +127,14 @@ test_create_seq ()
             print_error ();
             exit (-1);
         }
-        for (i = 1; i < 255; i++)
+        for (i = 1; i < 255; i++) {
             cbm_k_bsout (i);
+            if (s = cbm_k_readst ()) {
+                cbm_k_clrch ();
+                printf ("Error status %d", s);
+                exit (-1);
+            }
+        }
     }
     cbm_close (8);
     print_error ();

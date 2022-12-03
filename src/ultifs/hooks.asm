@@ -94,6 +94,9 @@ old_save:   .res 2
 ; Y: Device number
 call_driver:
     sta tmp
+    php
+    pla
+    sta _flags
 
     lda $9ff2
     sta _cfg

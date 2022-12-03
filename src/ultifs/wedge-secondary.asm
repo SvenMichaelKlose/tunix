@@ -90,13 +90,13 @@ enter:
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #$ff
     sta $9ff2
-    lda #118
-    sta $9ffa
-    lda #119
-    sta $9ffc
-    lda #0
-    sta $9ffb
-    sta $9ffd
+    ldy #118
+    ldx #0
+    sty $9ffa
+    stx $9ffb
+    iny
+    sty $9ffc
+    stx $9ffd
 
 .proc swap_zp
     ; Swap zeropage.

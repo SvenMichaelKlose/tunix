@@ -25,6 +25,7 @@ IOPEN   = $031A
 
 jmp to_cc65_startup
 
+; .org $2000
 .export drv_ultifs_vectors
 drv_ultifs_vectors:
     .word uopen

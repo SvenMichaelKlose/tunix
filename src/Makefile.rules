@@ -5,8 +5,8 @@ CC      = $(CC65_HOME)/bin/cl65
 AR      = $(CC65_HOME)/bin/ar65
 LD      = $(CC65_HOME)/bin/ld65
 ASFLAGS = -I/usr/local/share/cc65/asminc/
-#CFLAGS  = -O -Or -Os -Oi -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
-CFLAGS  = -r -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
+CFLAGS  = -O -Or -Os -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
+#CFLAGS  = -r -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
 LDFLAGS = -m $(PROGRAM).map
 
 EXOMIZER ?= exomizer-2.0.10

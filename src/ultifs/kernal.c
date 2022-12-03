@@ -126,7 +126,7 @@ typedef struct _channel {
 
 channel * channels[256];
 char * response;                        // Error code of last operation.
-char * log_ptr = (char *) 0x400;
+char * log_ptr = (char *) 0xa000;
 
 #if 0
 void
@@ -642,22 +642,22 @@ void
 ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
-    register bfile *    file;
     log_message ("bsout '%D'. ", DFLTO);
 
     if (!ch) {
         flags |= FLAG_C;
-        accu = 0;
+        STATUS |= STATUS_TIMEOUT_WRITE;
+        return;
+    }
+    if (ch->file->mode != ULTIFS_MODE_WRITE) {
+        flags |= FLAG_C;
+        STATUS |= STATUS_TIMEOUT_WRITE;
         return;
     }
 
+    bfile_write (ch->file, accu);
     STATUS = 0;
     flags &= ~FLAG_C;
-    if (file->mode != ULTIFS_MODE_WRITE) {
-        flags |= FLAG_C;
-        return;
-    }
-    bfile_write (file, accu);
 }
 
 void

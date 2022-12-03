@@ -42,7 +42,11 @@ read_error ()
         return 0;
 
     *p = 0;
-    cbm_k_chkin (15);
+    if (oserr = cbm_k_chkin (15)) {
+        cbm_k_clrch ();
+        printf ("During response read: CHKIN #15: %s\n", os_errors[oserr]);
+        exit (-1);
+    }
     while (!(cbm_k_readst () & 0x40)) {
         c = cbm_k_basin ();
         if (c == 0x0d) {

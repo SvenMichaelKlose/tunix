@@ -56,9 +56,6 @@ old_IUSRCMD:    .res 2  ; unchanged
 old_ILOAD:      .res 2
 old_ISAVE:      .res 2
 
-_last_regular_device:   .res 1
-_last_ingle_device:     .res 1
-
 _saved_zp:  .res stack_size
 
 .proc _init_secondary_wedge
@@ -129,10 +126,6 @@ l:  lda __ZP_START__-1,x
     lda _blk5+1
     sta $9fff
 
-    ; Restore X and Y register.  Accu, flags and BLK1
-    ; will be restored by unmap().
-    ldx _xreg
-    ldy _yreg
     jmp unmap
 .endproc
 

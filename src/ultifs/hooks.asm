@@ -150,8 +150,8 @@ not_us:
 .endproc
 
 .proc h_clrcn
-    ;lda #IDX_CLRCN
-    ;jmp call_driver
+    lda #IDX_CLRCN
+    jmp call_driver
     jmp (old_clrcn)
 .endproc
 

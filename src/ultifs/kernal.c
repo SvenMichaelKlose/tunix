@@ -309,7 +309,8 @@ respond (char code, char * message)
 {
     free (response);
     response = malloc (64);
-    sprintf (response, "%#02D, %S, 00, 00\n", code, message);
+    sprintf (response, "%#02D, %S, 00, 00\r", code, message);
+    log_message ("R: '%S'.", response);
 }
 
 void
@@ -489,6 +490,7 @@ ultifs_kopen ()
     ch->file = NULL;
     ch->name = name;
     channels[LFN] = ch;
+log_message ("open %D, %D, %D, '%S'.", LFN, FA, SA, name);
 
     if (SA == 15) {
         ch->is_buffered = true;
@@ -544,13 +546,21 @@ error:
     return false;
 
 success:
+log_message ("<open %D.", LFN);
     global_lfns[LFN] = LFN;
     return true;
 }
 
 void
+ultifs_kclrcn ()
+{
+    log_message ("clrcn");
+}
+
+void
 ultifs_kchkin ()
 {
+log_message ("chkin '%D'.", xreg);
     if (!channels[xreg]) {
         flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
@@ -568,6 +578,7 @@ ultifs_kchkin ()
 void
 ultifs_kckout ()
 {
+log_message ("ckout '%D'.", xreg);
     if (!channels[xreg]) {
         flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
@@ -587,6 +598,7 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
+log_message ("basin '%D'. ", DFLTN);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -626,6 +638,7 @@ ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
+log_message ("bsout '%D'. ", DFLTO);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -646,6 +659,7 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[accu];
+log_message ("close '%D'. ", accu);
     if (ch->file)
         bfile_close (ch->file);
     free_channel (accu);
@@ -656,6 +670,7 @@ void
 ultifs_kclall ()
 {
     uchar  i;
+log_message ("clall");
 
     do {
         if (channels[i]) {

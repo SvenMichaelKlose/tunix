@@ -95,7 +95,7 @@ test_open_missing ()
     read_error ();
     print_error ();
     cbm_close (8);
-    if (oserr | err) {
+    if (oserr || err) {
         if (err != 62) {
             printf ("!!! Error code 62 expected.");
             return;
@@ -133,7 +133,7 @@ void
 test_create_seq_again ()
 {
     test_create_seq ();
-    if (oserr | err) {
+    if (oserr || err) {
         if (err != 63) {
             printf ("!!! Error code 63 expected.");
             return;

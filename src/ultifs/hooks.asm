@@ -9,11 +9,11 @@
     .code
 
 new_vectors:
-    .word h_open, h_close, h_clrcn, h_chkin, h_ckout
+    .word h_open, h_close,h_chkin, h_ckout, h_clrcn
     .word h_basin, h_bsout, h_stop, h_getin, h_clall
     .word h_user, h_load, h_save
 
-    .export h_open, h_close, h_clrcn, h_chkin, h_ckout
+    .export h_open, h_close, h_chkin, h_ckout, h_clrcn
     .export h_basin, h_bsout, h_stop, h_getin, h_clall
     .export h_user, h_load, h_save
 
@@ -63,9 +63,9 @@ tmp:            .res 2
 .enum
     IDX_OPEN = 0
     IDX_CLOSE
-    IDX_CLRCN
     IDX_CHKIN
     IDX_CKOUT
+    IDX_CLRCN
     IDX_BASIN
     IDX_BSOUT
     IDX_STOP
@@ -78,9 +78,9 @@ tmp:            .res 2
 
 old_open:   .res 2
 old_close:  .res 2
-old_clrcn:  .res 2
 old_chkin:  .res 2
 old_ckout:  .res 2
+old_clrcn:  .res 2
 old_basin:  .res 2
 old_bsout:  .res 2
 old_stop:   .res 2

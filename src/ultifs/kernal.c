@@ -128,7 +128,7 @@ channel * channels[256];
 char * response;                        // Error code of last operation.
 char * log_ptr = (char *) 0x400;
 
-#if 1
+#if 0
 void
 log_message (char * format, ...)
 {
@@ -448,6 +448,7 @@ void
 free_channel (char lfn)
 {
     channel * ch = channels[lfn];
+    log_message ("free channel %D.", lfn);
 
     clear_buf (ch);
     free (ch->name);
@@ -490,7 +491,7 @@ ultifs_kopen ()
     ch->file = NULL;
     ch->name = name;
     channels[LFN] = ch;
-log_message ("open %D, %D, %D, '%S'.", LFN, FA, SA, name);
+    log_message ("open %D, %D, %D, '%S'.", LFN, FA, SA, name);
 
     if (SA == 15) {
         ch->is_buffered = true;
@@ -546,7 +547,7 @@ error:
     return false;
 
 success:
-log_message ("<open %D.", LFN);
+    log_message ("<open %D.", LFN);
     global_lfns[LFN] = LFN;
     return true;
 }
@@ -560,25 +561,28 @@ ultifs_kclrcn ()
 void
 ultifs_kchkin ()
 {
-log_message ("chkin '%D'.", xreg);
+    log_message ("chkin '%D'.", xreg);
     if (!channels[xreg]) {
-        flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
-        return;
+        goto error;
     }
     if (channels[xreg]->file->mode != ULTIFS_MODE_READ) {
-        flags |= FLAG_C;
         accu = OSERR_FILE_NOT_IN;
-        return;
+        goto error;
     }
     DFLTN = xreg;
+    accu = 0;
     flags &= ~FLAG_C;
+    return;
+
+error:
+    flags |= FLAG_C;
 }
 
 void
 ultifs_kckout ()
 {
-log_message ("ckout '%D'.", xreg);
+    log_message ("ckout '%D'.", xreg);
     if (!channels[xreg]) {
         flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
@@ -591,6 +595,7 @@ log_message ("ckout '%D'.", xreg);
     }
     DFLTO = xreg;
     flags &= ~FLAG_C;
+    accu = 0;
 }
 
 char
@@ -598,7 +603,7 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
-log_message ("basin '%D'. ", DFLTN);
+    log_message ("basin '%D'. ", DFLTN);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -638,7 +643,7 @@ ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
     register bfile *    file;
-log_message ("bsout '%D'. ", DFLTO);
+    log_message ("bsout '%D'. ", DFLTO);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -659,7 +664,7 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[accu];
-log_message ("close '%D'. ", accu);
+    log_message ("close '%D'. ", accu);
     if (ch->file)
         bfile_close (ch->file);
     free_channel (accu);
@@ -670,7 +675,7 @@ void
 ultifs_kclall ()
 {
     uchar  i;
-log_message ("clall");
+    log_message ("clall");
 
     do {
         if (channels[i]) {

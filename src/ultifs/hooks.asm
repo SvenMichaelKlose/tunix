@@ -104,7 +104,7 @@ call_driver:
     lda $9ff9
     sta _blk1+1
 
-    ; Get driver bank.
+    ; Bank in BLK1 of driver.
     lda _driver_banks,y
     sta $9ff8
     lda #0
@@ -169,6 +169,7 @@ not_us:
 .endproc
 
 .proc h_chkin
+    stx _xreg
     lda _global_lfns,x
     bmi not_us
     lda #IDX_CHKIN
@@ -178,6 +179,7 @@ not_us:
 .endproc
 
 .proc h_ckout
+    stx _xreg
     lda _global_lfns,x
     bmi not_us
     lda #IDX_CKOUT

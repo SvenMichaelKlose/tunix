@@ -641,27 +641,6 @@ ultifs_closedir ()
 {
 }
 
-char __cc65fastcall__
-ultifs_enterdir (char * name)
-{
-    bfile * b = ultifs_open (ultifs_pwd, name, 0);
-    if (!b)
-        return -1;
-    parents[current_parent++] = ultifs_pwd;
-    bfile_readm (b, (void *) &ultifs_pwd, 4);
-    bfile_close (b);
-
-    return 0;
-}
-
-void
-ultifs_leavedir ()
-{
-    if (!current_parent)
-        return;
-
-    ultifs_pwd = parents[--current_parent];
-}
 #endif
 
 void

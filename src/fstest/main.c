@@ -112,29 +112,50 @@ test_open_missing ()
 }
 
 void
+chkin (char la)
+{
+    if (oserr = cbm_k_chkin (la)) {
+        cbm_k_clrch ();
+        print_error ();
+        exit (-1);
+    }
+}
+
+void
+ckout (char la)
+{
+    if (oserr = cbm_k_ckout (la)) {
+        cbm_k_clrch ();
+        print_error ();
+        exit (-1);
+    }
+}
+
+void
+bsout (char c)
+{
+    char s;
+
+    cbm_k_bsout (c);
+    if (s = cbm_k_readst ()) {
+        cbm_k_clrch ();
+        printf ("Error status %d", s);
+        exit (-1);
+    }
+}
+
+void
 test_create_seq ()
 {
     char i;
-    char s;
 
     init_error ();
     oserr = cbm_open (8, device, 8, "0:test,s,w");
     read_error ();
     if (!oserr && !err) {
-        oserr = cbm_k_ckout (8);
-        if (oserr) {
-            cbm_close (8);
-            print_error ();
-            exit (-1);
-        }
-        for (i = 1; i < 255; i++) {
-            cbm_k_bsout (i);
-            if (s = cbm_k_readst ()) {
-                cbm_k_clrch ();
-                printf ("Error status %d", s);
-                exit (-1);
-            }
-        }
+        ckout (8);
+        for (i = 1; i < 255; i++)
+            bsout (i);
     }
     cbm_close (8);
     print_error ();
@@ -165,7 +186,7 @@ test_read_seq ()
     init_error ();
     oserr = cbm_open (8, device, 8, "0:test,s,r");
     if (!oserr) {
-        cbm_k_chkin (8);
+        chkin (8);
         for (i = 1; i < 255; i++) {
             v = cbm_k_basin ();
             if (v != i) {

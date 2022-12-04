@@ -490,8 +490,7 @@ ultifs_kopen ()
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");
-            free_channel (LFN);
-            return false;
+            goto deverror;
         }
 
         ch->file = found_file;
@@ -502,13 +501,13 @@ ultifs_kopen ()
     if (param2 == 'w') {
         if (param1 != 's' && param2 != 'p') {
             respond_err_syntax ();
-            return false;
+            goto deverror;
         }
         found_file = ultifs_open (ultifs_pwd, name, 0);
         if (found_file) {
             bfile_close (found_file);
             respond (ERR_FILE_EXISTS, "file exists");
-            return false;
+            goto deverror;
         }
 
         ch->file = ultifs_create (ultifs_pwd, name);
@@ -518,8 +517,7 @@ ultifs_kopen ()
 
     if (param2 == 'a') {
         respond (ERR_WRITE_PROTECT_ON, "write protect on");
-        free_channel (LFN);
-        return false;
+        goto deverror;
     }
 
     respond (ERR_INVALID_FILE_NAME, "invalid file name");
@@ -531,6 +529,10 @@ success:
     log_message ("<open %D.", LFN);
     global_lfns[LFN] = LFN;
     return true;
+
+deverror:
+    free_channel (LFN);
+    return false;
 }
 
 void

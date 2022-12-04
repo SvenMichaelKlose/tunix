@@ -605,6 +605,8 @@ ultifs_readdir (struct cbm_dirent * dirent)
     char type = 0;
     char name_length;
     char i;
+    usize size;
+    unsigned short blocks;
 
     if (current_directory == EMPTY_PTR)
         return 1;
@@ -625,7 +627,13 @@ ultifs_readdir (struct cbm_dirent * dirent)
         dirent->name[i] = block_get_name (current_directory, i);
     dirent->name[i] = 0;
 
-    dirent->size = block_get_size (current_directory) >> 8;
+    size = block_get_size (current_directory);
+    blocks = size / 254;
+    if (size % 254)
+        blocks++;
+    if (!blocks)
+        blocks = 1;
+    dirent->size = blocks;
 
     current_directory = block_get_next (current_directory);
     return 0;

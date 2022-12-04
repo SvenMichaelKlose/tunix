@@ -560,7 +560,7 @@ ultifs_kopen ()
             goto deverror;
         }
 
-        ch->file = ultifs_create (ultifs_pwd, name);
+        ch->file = ultifs_create (ultifs_pwd, name, param1 == 's' ? CBM_T_SEQ : CBM_T_PRG);
         respond_ok ();
         goto success;
     }

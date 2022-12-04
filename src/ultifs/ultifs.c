@@ -83,9 +83,6 @@ free_pathname (char ** arr)
  * The one and only data structure keeping the file system together.
  */
 
-#define BLOCKTYPE_FILE       0xfe
-#define BLOCKTYPE_DIRECTORY  0xfd
-
 typedef struct _block {
     usize   size;           /* Size of file data. */
     upos    replacement;    /* Replacement or EMPTY_PTR. */
@@ -106,6 +103,19 @@ typedef struct _block {
  */
 
 #ifndef __CC65__
+
+#define CBM_T_REG      0x10
+#define CBM_T_SEQ      0x10
+#define CBM_T_PRG      0x11
+#define CBM_T_USR      0x12
+#define CBM_T_REL      0x13
+#define CBM_T_VRP      0x14
+#define CBM_T_DEL      0x00
+#define CBM_T_CBM      0x01
+#define CBM_T_DIR      0x02
+#define CBM_T_LNK      0x03
+#define CBM_T_OTHER    0x04
+#define CBM_T_HEADER   0x05
 
 uchar
 ultimem_read_byte (upos p)
@@ -328,8 +338,6 @@ bfile_open (upos directory, upos p, char mode)
     b->start = p;
     b->ptr = file_data (p);
     b->pos = 0;
-    b->bank = b->ptr >> 13;
-    b->addr = (void *) ((((unsigned) b->ptr) & 0x1fff) | 0xa000u);
     b->directory = directory;
     if (!mode)
         b->size = block_get_size (p);
@@ -525,7 +533,7 @@ bfile_create_directory (upos parent, char * name)
 {
     upos d;
 
-    bfile * b = bfile_create (parent, name, BLOCKTYPE_DIRECTORY);
+    bfile * b = bfile_create (parent, name, CBM_T_DIR);
 
     // Make empty pointer to first file.
     bfile_write (b, 255);
@@ -577,11 +585,11 @@ ultifs_open (upos directory, char * name, char mode)
 }
 
 bfile * __cc65fastcall__
-ultifs_create (upos directory, char * name)
+ultifs_create (upos directory, char * name, char type)
 {
     if (bfile_lookup_name (directory, name, strlen (name)))
         return NULL;
-    return bfile_create (directory, name, BLOCKTYPE_FILE);
+    return bfile_create (directory, name, type);
 }
 
 #endif
@@ -611,16 +619,7 @@ ultifs_readdir (struct cbm_dirent * dirent)
     if (current_directory == EMPTY_PTR)
         return 1;
 
-    switch (block_get_type (current_directory)) {
-        case BLOCKTYPE_FILE:
-            type = CBM_T_PRG;
-            break;
-
-        case BLOCKTYPE_DIRECTORY:
-            type = CBM_T_DIR;
-            break;
-    }
-    dirent->type = type;
+    dirent->type = block_get_type (current_directory);
 
     name_length = block_get_name_length (current_directory);
     for (i = 0; i < name_length; i++)
@@ -675,7 +674,7 @@ ultifs_mount_traverse (upos dir)
 
     while (1) {
         dir = block_get_latest_version (dir);
-        if (block_get_type (dir) == BLOCKTYPE_DIRECTORY)
+        if (block_get_type (dir) == CBM_T_DIR)
             ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
         n = block_get_next (dir);
         if (n != EMPTY_PTR) {
@@ -752,7 +751,7 @@ load_file (upos dir, char * name, char * pathname)
     f = fopen (pathname, "rb");
     fseek (f, 0, SEEK_END);
     size = ftell (f);
-    b = bfile_create (dir, name, BLOCKTYPE_FILE);
+    b = bfile_create (dir, name, CBM_T_PRG);
     if (!(data = malloc (size)))
         printf ("ERROR: Cannot allocate memory of size %d.\n", size);
     fseek (f, 0, 0);

@@ -1,7 +1,3 @@
-/*
- * Ultimem file system
- */
-
 //#define COMPRESS_FILE_DATA_WITH_EXOMIZER
 
 #include <stddef.h>
@@ -14,22 +10,25 @@
 #define ULTIFS_START    0x10000
 #define EMPTY_PTR       ((upos) -1)
 
+typedef unsigned char uchar;
+
 #ifndef __CC65__
     #include <sys/types.h>
     #include <unistd.h>
     #include <wait.h>
     #define STORE_SIZE      (8 * 1024 * 1024)
-    unsigned char store[STORE_SIZE];
+    uchar store[STORE_SIZE];
     #define cc65register
 #else
     #pragma code-name ("ULTIFS")
     #include <cbm.h>
     #include <lib/ultimem/ultimem.h>
-    unsigned char * store = (void *) 0xa000u;
+    uchar * store = (void *) 0xa000u;
     #define cc65register    register
 #endif
 
-unsigned char current_parent = 0;
+char ultifs_error = 0;
+uchar current_parent = 0;
 upos parents[8];
 
 /*
@@ -58,7 +57,7 @@ split_pathname (char * pathname)
 {
     char * pn = strdup (pathname);
     char ** arr = malloc (sizeof (char *) * 8);
-    unsigned char n = 0;
+    uchar n = 0;
 
     bzero (arr, sizeof (char *) * 8);
     while ((arr[n++] = strdup (strsep (&pn, ","))));
@@ -70,7 +69,7 @@ split_pathname (char * pathname)
 void __cc65fastcall__
 free_pathname (char ** arr)
 {
-    unsigned char n = 0;
+    uchar n = 0;
 
     while (arr[n])
         free (arr[n++]);
@@ -84,12 +83,9 @@ free_pathname (char ** arr)
  * The one and only data structure keeping the file system together.
  */
 
-#define BLOCKTYPE_FILE       0xfe
-#define BLOCKTYPE_DIRECTORY  0xfd
-
 typedef struct _block {
     usize   size;           /* Size of file data. */
-    upos    replacement;    /* Replacement if this file or EMPTY_PTR. */
+    upos    replacement;    /* Replacement or EMPTY_PTR. */
     upos    next;           /* Next file in directory or EMPTY_PTR. Not valid if replaced. */
     char    type;
     char    name_length;
@@ -108,50 +104,66 @@ typedef struct _block {
 
 #ifndef __CC65__
 
-unsigned char
+#define CBM_T_REG      0x10
+#define CBM_T_SEQ      0x10
+#define CBM_T_PRG      0x11
+#define CBM_T_USR      0x12
+#define CBM_T_REL      0x13
+#define CBM_T_VRP      0x14
+#define CBM_T_DEL      0x00
+#define CBM_T_CBM      0x01
+#define CBM_T_DIR      0x02
+#define CBM_T_LNK      0x03
+#define CBM_T_OTHER    0x04
+#define CBM_T_HEADER   0x05
+
+uchar
 ultimem_read_byte (upos p)
 {
     return store[p];
 }
 
 void
-ultimem_write_byte (upos p, unsigned char v)
+ultimem_write_byte (upos p, uchar v)
 {
     if (p > sizeof (store)) {
         printf ("ERROR: Image full.\n");
         exit (-1);
     }
-    store[p] = v & 0xff;
+    store[p] = v;
 }
 
 #else
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 ultimem_read_byte (upos p)
 {
-    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
+    uchar * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
     unsigned        oldbank = *ULTIMEM_BLK5;
-    unsigned char   oldcfg = *ULTIMEM_CONFIG2;
-    unsigned char   v;
+    uchar   oldcfg = *ULTIMEM_CONFIG2;
+    uchar   v;
 
     *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
-    *ULTIMEM_BLK5 = p >> 13;
+    *ULTIMEM_BLK5    = p >> 13;
     v = *addr;
-    *ULTIMEM_CONFIG2 = oldcfg;
-    *ULTIMEM_BLK5 = oldbank;
+    //*ULTIMEM_CONFIG2 = oldcfg;
+    //*ULTIMEM_BLK5    = oldbank;
 
     return v;
 }
 
 void __cc65fastcall__
-ultimem_write_byte (upos p, unsigned char v)
+ultimem_write_byte (upos p, uchar v)
 {
-    unsigned char * addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
-    unsigned        oldbank = *ULTIMEM_BLK5;
+    uchar *   addr = (void *) ((((unsigned) p) & 0x1fff) | 0xa000u);
+    unsigned  oldbank = *ULTIMEM_BLK5;
+    uchar     oldcfg = *ULTIMEM_CONFIG2;
 
-    *ULTIMEM_BLK5 = p >> 13;
-    *addr = v;
-    *ULTIMEM_BLK5 = oldbank;
+    *ULTIMEM_CONFIG2 = *ULTIMEM_CONFIG2 & 0x3f | 0x40;
+    *ULTIMEM_BLK5    = p >> 13;
+    ultimem_burn_byte ((unsigned short) addr, v);
+    //*ULTIMEM_CONFIG2 = oldcfg;
+    //*ULTIMEM_BLK5    = oldbank;
 }
 
 #endif
@@ -186,20 +198,20 @@ ultimem_readm (char * dest, char len, upos p)
  * BLOCK FUNCTIONS
  */
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 block_get_type (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, type));
 }
 
-unsigned char __cc65fastcall__
+uchar __cc65fastcall__
 block_get_name_length (upos p)
 {
     return ultimem_read_byte (p + offsetof (block, name_length));
 }
 
-unsigned char __cc65fastcall__
-block_get_name (upos p, unsigned char i)
+uchar __cc65fastcall__
+block_get_name (upos p, uchar i)
 {
     return ultimem_read_byte (p + offsetof (block, name_length) + 1 + i);
 }
@@ -325,10 +337,7 @@ bfile_open (upos directory, upos p, char mode)
     p = block_get_latest_version (p);
     b->start = p;
     b->ptr = file_data (p);
-#ifdef __CC65__
-    b->bank = b->ptr >> 13;
-    b->addr = (void *) ((((unsigned) b->ptr) & 0x1fff) | 0xa000u);
-#endif
+    b->pos = 0;
     b->directory = directory;
     if (!mode)
         b->size = block_get_size (p);
@@ -380,12 +389,19 @@ bfile_read (bfile * b)
 {
     char x;
 
-    // TODO: Check on file end.
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->pos >= b->size) {
+        ultifs_error = ULTIFS_ERR_END_OF_FILE;
+        return 0;
+    }
+    if (b->mode != ULTIFS_MODE_READ) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_IN;
+        return 0;
+    }
 
-    if (b->mode != ULTIFS_MODE_READ)
-        return 0; // TODO: error!
     x = ultimem_read_byte (b->ptr);
     b->ptr++;
+    b->pos++;
 
     return x;
 }
@@ -393,18 +409,25 @@ bfile_read (bfile * b)
 void __cc65fastcall__
 bfile_write (bfile * b, char byte)
 {
-    if (b->mode != ULTIFS_MODE_WRITE)
-        return; // TODO: error!
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_WRITE) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_OUT;
+        return;
+    }
     ultimem_write_byte (b->ptr, byte);
     b->ptr++;
+    b->pos++;
     b->size++;
 }
 
 void __cc65fastcall__
 bfile_writem (bfile * b, char * bytes, unsigned len)
 {
-    if (b->mode != ULTIFS_MODE_WRITE)
-        return; // TODO: error!
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_WRITE) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_OUT;
+        return;
+    }
     while (len--)
         bfile_write (b, *bytes++);
 }
@@ -424,9 +447,11 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
     cc65register upos      end = file_data (b->start) + b->size;
     cc65register char      v;
 
-    if (b->mode)
-    if (b->mode != ULTIFS_MODE_READ)
-        return -1;
+    ultifs_error = ULTIFS_ERR_OK;
+    if (b->mode != ULTIFS_MODE_READ) {
+        ultifs_error = ULTIFS_ERR_FILE_NOT_IN;
+        return 0;
+    }
 
     while (len && ptr != end) {
         --len;
@@ -470,10 +495,10 @@ bfile_append_to_directory (bfile * b)
 {
     upos p = ULTIFS_START;
 
-    if (b->directory) {
+    if (b->directory != p) {
         p = block_directory_get_first (b->directory);
         if (p == EMPTY_PTR) {
-            /* Create pointer to first file of directory. */
+            // Create pointer to first file of directory.
             ultimem_write_int (file_data (b->directory), b->start);
             return;
         }
@@ -488,7 +513,7 @@ void __cc65fastcall__
 bfile_close (bfile * b)
 {
     if (!b->mode)
-        return;
+        goto read_mode;
 
     block_set_size (b->start, b->size);
     last_free = b->ptr;
@@ -499,6 +524,7 @@ bfile_close (bfile * b)
     else
         bfile_append_to_directory (b);
 
+read_mode:
     free (b);
 }
 
@@ -507,7 +533,7 @@ bfile_create_directory (upos parent, char * name)
 {
     upos d;
 
-    bfile * b = bfile_create (parent, name, BLOCKTYPE_DIRECTORY);
+    bfile * b = bfile_create (parent, name, CBM_T_DIR);
 
     // Make empty pointer to first file.
     bfile_write (b, 255);
@@ -552,9 +578,18 @@ bfile * __cc65fastcall__
 ultifs_open (upos directory, char * name, char mode)
 {
     upos file = bfile_lookup_name (directory, name, strlen (name));
+
     if (!file)
         return NULL;
     return bfile_open (directory, file, mode);
+}
+
+bfile * __cc65fastcall__
+ultifs_create (upos directory, char * name, char type)
+{
+    if (bfile_lookup_name (directory, name, strlen (name)))
+        return NULL;
+    return bfile_create (directory, name, type);
 }
 
 #endif
@@ -578,27 +613,26 @@ ultifs_readdir (struct cbm_dirent * dirent)
     char type = 0;
     char name_length;
     char i;
+    usize size;
+    unsigned short blocks;
 
     if (current_directory == EMPTY_PTR)
         return 1;
 
-    switch (block_get_type (current_directory)) {
-        case BLOCKTYPE_FILE:
-            type = CBM_T_PRG;
-            break;
-
-        case BLOCKTYPE_DIRECTORY:
-            type = CBM_T_DIR;
-            break;
-    }
-    dirent->type = type;
+    dirent->type = block_get_type (current_directory);
 
     name_length = block_get_name_length (current_directory);
     for (i = 0; i < name_length; i++)
         dirent->name[i] = block_get_name (current_directory, i);
     dirent->name[i] = 0;
 
-    dirent->size = block_get_size (current_directory) >> 8;
+    size = block_get_size (current_directory);
+    blocks = size / 254;
+    if (size % 254)
+        blocks++;
+    if (!blocks)
+        blocks = 1;
+    dirent->size = blocks;
 
     current_directory = block_get_next (current_directory);
     return 0;
@@ -640,7 +674,7 @@ ultifs_mount_traverse (upos dir)
 
     while (1) {
         dir = block_get_latest_version (dir);
-        if (block_get_type (dir) == BLOCKTYPE_DIRECTORY)
+        if (block_get_type (dir) == CBM_T_DIR)
             ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
         n = block_get_next (dir);
         if (n != EMPTY_PTR) {
@@ -671,7 +705,7 @@ bfile_lookup_pathname (char * name)
 {
     char ** arr = split_pathname (name);
     upos p = 0;
-    unsigned char i = 0;
+    uchar i = 0;
     char l;
     char * n;
 
@@ -717,7 +751,7 @@ load_file (upos dir, char * name, char * pathname)
     f = fopen (pathname, "rb");
     fseek (f, 0, SEEK_END);
     size = ftell (f);
-    b = bfile_create (dir, name, BLOCKTYPE_FILE);
+    b = bfile_create (dir, name, CBM_T_PRG);
     if (!(data = malloc (size)))
         printf ("ERROR: Cannot allocate memory of size %d.\n", size);
     fseek (f, 0, 0);
@@ -821,27 +855,32 @@ main (int argc, char ** argv)
             case 'n':
                 mkfs ();
                 continue;
+
             case 'l':
                 if (i == argc)
                     invalid ("Command 'l': Path of boot file missing.");
                 load (argv[i++]);
                 continue;
+
             case 'i':
                 if (i == argc)
                     invalid ("Command 'i': Path of directory to import missing.");
                 printf ("Recurisvely importing direcotry '%s'…\n", argv[i]);
                 import_directory (0, argv[i++], 0);
                 continue;
+
             case 'w':
                 ultifs_mount ();
                 write_image (0);
                 printf ("Image written.\n");
                 continue;
+
             case 'W':
                 ultifs_mount ();
                 write_image (1);
                 printf ("Short image (not filled up to 8MB Flash ROM size) written.\n");
                 continue;
+
             default:
                 invalid ("Unknown command.");
         }

@@ -537,7 +537,7 @@ ultifs_kopen ()
     }
 
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
-        found_file = ultifs_open (ultifs_pwd, name, 0);
+        found_file = ultifs_open (ultifs_pwd, name, ULTIFS_MODE_READ);
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");
             goto deverror;
@@ -553,7 +553,7 @@ ultifs_kopen ()
             respond_sytax_error ();
             goto deverror;
         }
-        found_file = ultifs_open (ultifs_pwd, name, 0);
+        found_file = ultifs_open (ultifs_pwd, name, ULTIFS_MODE_READ);
         if (found_file) {
             bfile_close (found_file);
             respond (ERR_FILE_EXISTS, "file exists");
@@ -594,12 +594,13 @@ ultifs_kclrcn ()
 void
 ultifs_kchkin ()
 {
+    channel * ch = channels[xreg];
     log_message ("chkin '%D'.", xreg);
-    if (!channels[xreg]) {
+    if (!ch) {
         accu = OSERR_FILE_NOT_OPEN;
         goto error;
     }
-    if (channels[xreg]->file->mode != ULTIFS_MODE_READ) {
+    if (ch->file && ch->file->mode != ULTIFS_MODE_READ) {
         accu = OSERR_FILE_NOT_IN;
         goto error;
     }

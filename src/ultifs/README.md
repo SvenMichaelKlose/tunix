@@ -1,26 +1,12 @@
-UltiFS KERNAL extension
-=======================
+UltiFS ROM file system
+======================
 
-Start with BLK1, BLK2, BLK3 and IO123 enabled.
+This is a file system for the Flash ROM of the
+UltiMem expansion for the Commodore VIC-20.
 
-# Anatomy
-
-UltiFS has been written in C mostly.
-On launch it copies itself to RAM banks 117 (BLK1) to
-119 (BLK3), modifies the KERNALs I/O vectors to point
-at a wedge at $9800 and does a BASIC cold start.  The
-primary wedge is responsible for banking the secondary
-wedge in to BLK1.  It checks if the device number is
-12.  If it's not, it returns to the primary wedge to
-get the old BLK1 back in and to continue with whatever
-procedure the former KERNAL vector pointed to.
-Otherwise BLK2 and BLK3 of the UltiFS are banked in, the
-zeropage is saved and the UltiFS procedure in demand
-(OPEN, CLOSE, BSIN, etc.) is invoked.  When it has
-finished, the saved (and probably modified zeropage) is
-copied back over the original, BLK1 to BLK3 are being
-restored and the registers and flags are set before
-returning to the caller.
+Start with full RAM enabled.  UltiFS will occupy the
+IO area ranging from $9800 to $9fff and is available
+via device number 12.
 
 # KERNAL I/O functions
 
@@ -208,6 +194,8 @@ must be closed by a call to CLOSE before.
 On error this routine returns with the carry flag set
 and further information about it in STATUS.
 
+The Y register is not destroyed.
+
 ## CLRCN - Close default input and output files
 
 This routine closes and restores the default screen
@@ -290,3 +278,19 @@ will occur, and the SAVE stopped.
 
 SAVE may return the same error codes as OPEN plus
 error code 7 (not an output file).
+
+# Supported DOS commands
+
+At this moment long command names are not supported.
+
+## INITIALIZE (I)
+
+Always responds with "OK".
+
+## POSITION (P) – Seek in file.
+
+Can be used with any file type.
+
+~~~
+P{channel}{24 bit position}
+~~~

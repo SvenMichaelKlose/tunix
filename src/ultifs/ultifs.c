@@ -487,10 +487,10 @@ bfile_append_to_directory (bfile * b)
 {
     upos p = ULTIFS_START;
 
-    if (b->directory) {
+    if (b->directory != p) {
         p = block_directory_get_first (b->directory);
         if (p == EMPTY_PTR) {
-            /* Create pointer to first file of directory. */
+            // Create pointer to first file of directory.
             ultimem_write_int (file_data (b->directory), b->start);
             return;
         }

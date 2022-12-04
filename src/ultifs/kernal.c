@@ -15,6 +15,7 @@
 #include <lib/ultimem/ultimem.h>
 #include <lib/posix/string.h>
 
+#include "log.h"
 #include "ultifs.h"
 
 typedef unsigned char uchar;
@@ -126,26 +127,6 @@ typedef struct _channel {
 
 channel * channels[256];
 char * response;                        // Error code of last operation.
-char * log_ptr = (char *) 0xa000;
-
-#if 0
-void
-log_message (char * format, ...)
-{
-    va_list args;
-
-    va_start(args, format);
-    vsprintf (log_ptr, format, args);
-    log_ptr += strlen (log_ptr) + 1;
-    va_end(args);
-}
-#else
-void
-log_message (char * format, ...)
-{
-    (void) format;
-}
-#endif
 
 void
 init_kernal_emulation ()

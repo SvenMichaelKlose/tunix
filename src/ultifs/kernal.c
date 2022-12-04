@@ -511,7 +511,7 @@ ultifs_kopen ()
             return false;
         }
 
-        ch->file = bfile_create (ultifs_pwd, name, 0);
+        ch->file = ultifs_create (ultifs_pwd, name);
         respond_ok ();
         goto success;
     }

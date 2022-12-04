@@ -154,7 +154,7 @@ test_create_seq ()
     read_error ();
     if (!oserr && !err) {
         ckout (8);
-        for (i = 1; i < 255; i++)
+        for (i = 0; i < 16; i++)
             bsout (i);
     }
     cbm_close (8);
@@ -187,7 +187,7 @@ test_read_seq ()
     oserr = cbm_open (8, device, 8, "0:test,s,r");
     if (!oserr) {
         chkin (8);
-        for (i = 1; i < 255; i++) {
+        for (i = 0; i < 16; i++) {
             v = cbm_k_basin ();
             if (v != i) {
                 strcpy (last_error, "99 read error");

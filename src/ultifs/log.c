@@ -10,6 +10,7 @@ void
 log_message (char * format, ...)
 {
     va_list args;
+return;
 
     va_start(args, format);
     vsprintf (log_ptr, format, args);

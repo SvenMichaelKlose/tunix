@@ -576,6 +576,14 @@ ultifs_open (upos directory, char * name, char mode)
     return bfile_open (directory, file, mode);
 }
 
+bfile * __cc65fastcall__
+ultifs_create (upos directory, char * name)
+{
+    if (bfile_lookup_name (directory, name, strlen (name)))
+        return NULL;
+    return bfile_create (directory, name, BLOCKTYPE_FILE);
+}
+
 #endif
 
 upos current_directory;

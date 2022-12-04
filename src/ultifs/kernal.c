@@ -92,22 +92,40 @@ extern uchar blk5;
 #define OSERR_ILLEGAL_DEVICE_NUMBER  9
 
 /* Device error codes (read from command channel #15) */
-#define ERR_BYTE_DECODING        24
-#define ERR_WRITE                25
+#define ERR_OK                   0
+#define ERR_FILES_SCRATCHED      1  // Not an error when < 20.
+#define ERR_BLOCK_HEADER_NOT_FOUND 20 // Block header not found.
+#define ERR_NO_SYNC_CHAR           21 // No sync character.
+#define ERR_DATA_BLOCK_NOT_PRESENT 22 // Data block not present.
+#define ERR_BLOCK_CHECKSUM       23 // Checksum error in data block.
+#define ERR_BYTE_DECODING        24 // Byte decoding error.
+#define ERR_WRITE_ERROR          25 // Write-verify error.
 #define ERR_WRITE_PROTECT_ON     26
-#define ERR_SYNTAX               30
-#define ERR_INVALID_COMMAND      31
-#define ERR_LONG_LINE            32
-#define ERR_INVALID_FILE_NAME    33
+#define ERR_HEADER_CHECKSUM      27 // Checksum error in header.
+#define ERR_LONG_DATA            28 // Long data block.
+#define ERR_DISK_ID_MISMATCH     29
+#define ERR_SYNTAX               30 // General syntax.
+#define ERR_INVALID_COMMAND      31 // Invalid command.
+#define ERR_LONG_COMMAND         32 // Command is longer than 58 chars.
+#define ERR_INVALID_FILE_NAME    33 // Invalid file name.
 #define ERR_NO_FILE_GIVEN        34
+#define ERR_INVALID_CTRL_COMMAND 39 // Invalid command on control channel #15.
+#define ERR_RECORD_NOT_PRESENT   50
+#define ERR_OVERFLOW_IN_RECORD   51
 #define ERR_FILE_TOO_LARGE       52
 #define ERR_FILE_OPEN_FOR_WRITE  60
 #define ERR_FILE_NOT_OPEN        61
 #define ERR_FILE_NOT_FOUND       62
 #define ERR_FILE_EXISTS          63
 #define ERR_FILE_TYPE_MISMATCH   64
+#define ERR_NO_BLOCK             65
+#define ERR_ILLEGAL_POSITION        66 // Illegal track and sector.
+#define ERR_ILLEGAL_SYSTEM_POSITION 67 // Illegal system track and sector.
 #define ERR_NO_CHANNEL           70
+#define ERR_DIRECTORY_ERROR      71
 #define ERR_DISK_FULL            72
+#define ERR_DOS_MISMATCH         73
+#define ERR_DRIVE_NOT_READY      74
 
 extern uchar global_lfns[256];
 
@@ -301,14 +319,43 @@ respond_ok ()
 }
 
 void
-respond_err_syntax ()
+respond_sytax_error ()
 {
     respond (ERR_SYNTAX, "syntax error");
 }
 
 void
+respond_file_not_open ()
+{
+    respond (ERR_FILE_NOT_OPEN, "file not open");
+}
+
+void
 cmd_initialize ()
 {
+    respond_ok ();
+}
+
+void
+cmd_position (char * name)
+{
+    channel *  ch;
+    upos       p;
+
+    if (FNLEN != 5) {
+        respond (ERR_INVALID_COMMAND, "invalid command");
+        return;
+    }
+    if (!(ch = channels[name[1]])) {
+        respond_file_not_open ();
+        return;
+    }
+    p = (upos) name[2] | (upos) name[3] << 8 | (upos) name[4] << 16;
+    if (p >= ch->file->size) {
+        respond (ERR_ILLEGAL_POSITION, "illegal position");
+        return;
+    }
+    ch->file->pos = p;
     respond_ok ();
 }
 
@@ -321,9 +368,12 @@ open_command (char * name)
         case 'i':
             cmd_initialize ();
             return;
+        case 'p':
+            cmd_position (name);
+            return;
     }
 
-    respond_err_syntax ();
+    respond_sytax_error ();
     STATUS = 0;
 }
 
@@ -500,7 +550,7 @@ ultifs_kopen ()
 
     if (param2 == 'w') {
         if (param1 != 's' && param2 != 'p') {
-            respond_err_syntax ();
+            respond_sytax_error ();
             goto deverror;
         }
         found_file = ultifs_open (ultifs_pwd, name, 0);

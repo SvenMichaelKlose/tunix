@@ -3,7 +3,6 @@
 #include <lib/ultimem/ultimem.h>
 #include <lib/gui/obj.h>
 
-#include "ultifs.h"
 #include "file-window.h"
 
 struct obj * __fastcall__ w_make_file_window (struct drive_ops * ops, char * title, gpos x, gpos y, gsize w, gsize h)

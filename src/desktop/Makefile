@@ -4,9 +4,7 @@ SOURCES= \
     file-window.c \
     main.c \
     save-state.c \
-    ultifs.c \
-    wrap-file-window.c \
-    wrap-ultifs.c
+    wrap-file-window.c
 ASMSOURCES= \
     prgend.asm
 

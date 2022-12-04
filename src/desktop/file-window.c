@@ -18,8 +18,6 @@
 #include <lib/gui/window.h>
 #include <lib/gui/message.h>
 
-#include "ultifs.h"
-#include "wrap-ultifs.h"
 #include "file-window.h"
 #include "desktop.h"
 
@@ -137,51 +135,6 @@ struct drive_ops cbm_drive_ops = {
     gcbm_read,
     gcbm_close,
     gen_launch
-};
-
-bfile * current_file;
-
-char __fastcall__
-u_open (char * name, char mode)
-{
-    current_file = w_ultifs_open (ultifs_pwd, name, mode);
-    if (!current_file)
-        return -1;
-    return 0;
-}
-
-int __fastcall__
-u_read (void * data, unsigned size)
-{
-    return w_bfile_readm (current_file, data, size);
-}
-
-void
-u_close ()
-{
-    w_bfile_close (current_file);
-}
-
-unsigned __fastcall__
-ultifs_launch (struct drive_ops * drive_ops, unsigned start)
-{
-    (void) drive_ops;
-
-    gen_exec (current_file->ptr, start, current_file->size);
-
-    return current_file->size;
-}
-
-struct drive_ops ultifs_drive_ops = {
-    w_ultifs_opendir,
-    w_ultifs_readdir,
-    w_ultifs_closedir,
-    w_ultifs_enterdir,
-    w_ultifs_leavedir,
-    u_open,
-    u_read,
-    u_close,
-    ultifs_launch
 };
 
 void __fastcall__

@@ -403,7 +403,6 @@ start_desktop ()
     draw_obj (desktop);
 
     append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), false);
-    append_window (w_make_file_window (&ultifs_drive_ops, "Ultimem ROM", 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), false);
 
     desktop_loop ();
 }

@@ -17,8 +17,6 @@
 #include <lib/gui/window.h>
 
 #include "desktop.h"
-#include "ultifs.h"
-#include "wrap-ultifs.h"
 
 void
 init_memory ()
@@ -59,7 +57,6 @@ main (int argc, char ** argv)
 
     init_memory ();
     init_console ();
-    w_ultifs_mount ();
     start_desktop ();
 
     return 0;

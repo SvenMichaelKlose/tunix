@@ -8,6 +8,7 @@
 #include "ultifs.h"
 
 #define ULTIFS_START    0x10000
+#define STORE_SIZE      0x800000u
 #define EMPTY_PTR       ((upos) -1)
 
 typedef unsigned char uchar;
@@ -16,7 +17,6 @@ typedef unsigned char uchar;
     #include <sys/types.h>
     #include <unistd.h>
     #include <wait.h>
-    #define STORE_SIZE      (8 * 1024 * 1024)
     uchar store[STORE_SIZE];
     #define cc65register
 #else
@@ -593,7 +593,7 @@ ultifs_create (upos directory, char * name, char type)
 #endif
 
 upos current_directory;
-upos ultifs_pwd = ULTIFS_START;
+upos ultifs_pwd;
 
 char
 ultifs_opendir ()
@@ -689,8 +689,9 @@ ultifs_mount_traverse (upos dir)
 char
 ultifs_mount ()
 {
-    last_free = 0;
-    ultifs_mount_traverse (ULTIFS_START);
+    ultifs_pwd = last_free = ULTIFS_START;
+    if (ultimem_read_int (ULTIFS_START) != EMPTY_PTR)
+        ultifs_mount_traverse (ULTIFS_START);
 
     return ultimem_read_int (file_data (last_free)) != EMPTY_PTR;
 }
@@ -724,8 +725,7 @@ void
 mkfs ()
 {
     memset (store, 0xff, STORE_SIZE);
-    last_free = ULTIFS_START;
-    printf ("Created new image.\n");
+    ultifs_pwd = last_free = ULTIFS_START;
 }
 
 void
@@ -773,7 +773,7 @@ void import_directory (upos bparent, char * name, int indent)
     if (!(dir = opendir (name)))
         return;
 
-    while ((entry = readdir (dir))) {
+    while (entry = readdir (dir)) {
         char path[1024];
         if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, ".."))
             continue;
@@ -844,6 +844,7 @@ main (int argc, char ** argv)
         invalid ("Invalid number of arguments.");
     image_name = argv[1];
     printf ("Image file: %s\n", image_name);
+    mkfs ();
     i = 2;
     do {
         char * command = argv[i++];
@@ -852,6 +853,7 @@ main (int argc, char ** argv)
         switch (*command) {
             case 'n':
                 mkfs ();
+                printf ("Created new image.\n");
                 continue;
 
             case 'l':
@@ -863,8 +865,9 @@ main (int argc, char ** argv)
             case 'i':
                 if (i == argc)
                     invalid ("Command 'i': Path of directory to import missing.");
-                printf ("Recurisvely importing direcotry '%s'…\n", argv[i]);
-                import_directory (0, argv[i++], 0);
+                ultifs_mount ();
+                printf ("Recurisvely importing directory '%s'…\n", argv[i]);
+                import_directory (ULTIFS_START, argv[i++], 0);
                 continue;
 
             case 'w':

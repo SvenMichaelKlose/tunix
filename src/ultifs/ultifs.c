@@ -865,19 +865,16 @@ main (int argc, char ** argv)
             case 'i':
                 if (i == argc)
                     invalid ("Command 'i': Path of directory to import missing.");
-                ultifs_mount ();
                 printf ("Recurisvely importing directory '%s'…\n", argv[i]);
                 import_directory (ULTIFS_START, argv[i++], 0);
                 continue;
 
             case 'w':
-                ultifs_mount ();
                 write_image (0);
                 printf ("Image written.\n");
                 continue;
 
             case 'W':
-                ultifs_mount ();
                 write_image (1);
                 printf ("Short image (not filled up to 8MB Flash ROM size) written.\n");
                 continue;

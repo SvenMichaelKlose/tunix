@@ -4,7 +4,7 @@ all:
 	$(MAKE) -C mkfs all
 	mkdir -pv compiled/.ingle
 	cp -r archive/* compiled
-	cp src/desktop/*.bin compiled/.ingle/
+#	cp src/desktop/*.bin compiled/.ingle/
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin i compiled w
 	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 	mkdir -p native-pkgs

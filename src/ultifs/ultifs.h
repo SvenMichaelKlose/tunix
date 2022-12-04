@@ -57,7 +57,7 @@ extern void    __cc65fastcall__ bfile_write (bfile *, char);
 extern char                     ultifs_opendir (void);
 extern char    __cc65fastcall__ ultifs_readdir (struct cbm_dirent *);
 extern void                     ultifs_closedir (void);
-extern char    __cc65fastcall__ ultifs_enterdir (char * name);
+extern upos    __cc65fastcall__ ultifs_enterdir (upos parent, char * name);
 extern void                     ultifs_leavedir (void);
 #endif
 

@@ -5,6 +5,7 @@
 .export unmap
 
 .import __IO_LOAD__
+.importzp s, d, c
 
     .code
 
@@ -21,20 +22,42 @@ new_vectors:
     ldx #0
 l:  lda #$ff
     sta $9800,x
-    lda __IO_LOAD__+$100,x
-    sta $9900,x
-    lda __IO_LOAD__+$200,x
-    sta $9a00,x
     inx
     bne l
 
+    lda #$00
+    sta d
+    lda #$99
+    sta d+1
+    lda #<(__IO_LOAD__+$100)
+    sta s
+    lda #>(__IO_LOAD__+$100)
+    sta s+1
+    ldx #<(end_of_hooks-hooks)
+    inx
+    ldy #>(end_of_hooks-hooks)
+    iny
+    sty c+1
+
+    ldy #0
+l2: lda (s),y
+    sta (d),y
+    iny
+    bne n
+    inc s+1
+    inc d+1
+n:  dex
+    bne l2
+    dec c+1
+    bne l2
+
     ldx #25
-l2: lda $031a,x
+l3: lda $031a,x
     sta old_open,x
     lda new_vectors,x
     sta $031a,x
     dex
-    bpl l2
+    bpl l3
 
     rts
 .endproc
@@ -48,6 +71,7 @@ DFLTO   = $9a   ; Current output device number.
     .org $9800
 
 _global_lfns:   .res 256
+hooks:
 _accu:          .res 1
 _xreg:          .res 1
 _yreg:          .res 1
@@ -261,3 +285,5 @@ not_us:
     lda _accu
     jmp (old_save)
 .endproc
+
+end_of_hooks:

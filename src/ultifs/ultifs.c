@@ -440,9 +440,9 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
     cc65register unsigned  oldbank = *ULTIMEM_BLK5;
     cc65register char      oldcfg = *ULTIMEM_CONFIG2;
     cc65register char      newcfg = oldcfg & 0x3f | 0x40;
-    cc65register char *    addr = b->addr;
     cc65register upos      ptr = b->ptr;
-    cc65register unsigned  bank = b->bank;
+    cc65register char *    addr = (char *) ((unsigned short) ptr & 0x1fff | 0xa000);
+    cc65register unsigned  bank = ptr >> 13;
     cc65register int       size = 0;
     cc65register upos      end = file_data (b->start) + b->size;
     cc65register char      v;
@@ -472,8 +472,6 @@ bfile_readm (bfile * b, char * bytes, unsigned len)
         ++size;
     }
 
-    b->addr = addr;
-    b->bank = bank;
     b->ptr = ptr;
     return size;
 }

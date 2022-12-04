@@ -7,7 +7,7 @@
 .import popax
 
 .proc _ultimem_burn_byte
-    sty tmp
+    sta tmp
     jsr popax
     ldy tmp
 .endproc

@@ -214,7 +214,7 @@ exec_action ()
     reset_log ();
     repetitions = 0;
 
-    if (peek_key () != '0')
+    if (isdigit (peek_key ()))
         repetitions = get_repetitions ();
 
     if (exec_single_command ())

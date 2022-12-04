@@ -63,7 +63,7 @@ void
 print_error ()
 {
     if (oserr) {
-        printf ("  !!! %s\n", os_errors[oserr]);
+        printf ("!!! %s\n", os_errors[oserr]);
         exit (-1);
     }
     if (last_error[0])
@@ -244,5 +244,5 @@ main (int argc, char ** argv)
         }
     }
 
-    printf ("\nDone.\nFound errors: %d\n", num_errors);
+    printf ("Found %d error%s.\n", num_errors, num_errors == 1 ? "" : "s");
 }

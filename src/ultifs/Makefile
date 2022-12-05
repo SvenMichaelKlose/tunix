@@ -1,5 +1,5 @@
 PROGRAM=ultifs.prg
-SOURCES=alloc.c kernal.c log.c main.c ultifs.c
+SOURCES=alloc.c ipc.c kernal.c log.c main.c ultifs.c
 ASMSOURCES=reset.asm hooks.asm zeropage.asm wedge-secondary.asm
 
 include ../Makefile.rules

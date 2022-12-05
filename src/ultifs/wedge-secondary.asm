@@ -12,7 +12,7 @@
 .import _ultifs_kbasin, _ultifs_kbsout, _ultifs_kclall
 .import _ultifs_kusrcmd, _ultifs_kload, _ultifs_ksave
 .import unmap
-.import _accu, _xreg, _yreg, _cfg, _blk2, _blk3, _blk5
+.import _accu, _xreg, _yreg, _cfg, _proc_blk2, _proc_blk3, _proc_blk5
 .import __ZP_START__
 .import __ZP_SIZE__
 
@@ -72,17 +72,17 @@ l2: lda __ZP_START__-1,x
 enter:
     ; Save BLK2, BLL3 and BLK5.
     lda $9ffa
-    sta _blk2
+    sta _proc_blk2
     lda $9ffb
-    sta _blk2+1
+    sta _proc_blk2+1
     lda $9ffc
-    sta _blk3
+    sta _proc_blk3
     lda $9ffd
-    sta _blk3+1
+    sta _proc_blk3+1
     lda $9ffe
-    sta _blk5
+    sta _proc_blk5
     lda $9fff
-    sta _blk5+1
+    sta _proc_blk5+1
 
     ; Bank in rest of UltiFS at BLK2 and BLK3.
     lda #$ff
@@ -113,17 +113,17 @@ l:  lda __ZP_START__-1,x
     jsr swap_zp
 
     ; Restore BLK2, BLK3 and BLK5.
-    lda _blk2
+    lda _proc_blk2
     sta $9ffa
-    lda _blk2+1
+    lda _proc_blk2+1
     sta $9ffb
-    lda _blk3
+    lda _proc_blk3
     sta $9ffc
-    lda _blk3+1
+    lda _proc_blk3+1
     sta $9ffd
-    lda _blk5
+    lda _proc_blk5
     sta $9ffe
-    lda _blk5+1
+    lda _proc_blk5+1
     sta $9fff
 
     jmp unmap

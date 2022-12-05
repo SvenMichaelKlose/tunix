@@ -1,7 +1,7 @@
 .export _init_hooks
 .export _global_lfns
 .export _accu, _xreg, _yreg, _flags
-.export _cfg, _blk1, _blk2, _blk3, _blk5
+.export _cfg, _proc_blk1, _proc_blk2, _proc_blk3, _proc_blk5
 .export unmap
 
 .import __IO_LOAD__
@@ -77,10 +77,10 @@ _xreg:          .res 1
 _yreg:          .res 1
 _flags:         .res 1
 _cfg:           .res 1
-_blk1:          .res 2
-_blk2:          .res 2
-_blk3:          .res 2
-_blk5:          .res 2
+_proc_blk1:          .res 2
+_proc_blk2:          .res 2
+_proc_blk3:          .res 2
+_proc_blk5:          .res 2
 
 tmp:            .res 2
 
@@ -125,9 +125,9 @@ call_driver:
     lda $9ff2
     sta _cfg
     lda $9ff8
-    sta _blk1
+    sta _proc_blk1
     lda $9ff9
-    sta _blk1+1
+    sta _proc_blk1+1
 
     lda #117
     sta $9ff8
@@ -143,9 +143,9 @@ j:  jmp ($2000)
 
 unmap:
     ; Restore memory config.
-    lda _blk1
+    lda _proc_blk1
     sta $9ff8
-    lda _blk1+1
+    lda _proc_blk1+1
     sta $9ff9
     lda _cfg
     sta $9ff2

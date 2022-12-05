@@ -229,26 +229,86 @@ copy_from_process (char * to, char * from, char len)
         *to++ = downcase (peek_from_process (from++));
 }
 
-char prefix;
-char filename[32];
+//
+// Command parser
+//
+
+char prefix[64];
+char postfix[64];
+char filename[64];
+char lastname[64];
+char has_prefix;
+upos pwd;
+char partition;
+bfile * file;
 char param1;
 char param2;
 
+char * path;
+upos subdir;
+char c;
+extern char i;
+char j;
+
+void
+split_prefix_filename (char * name)
+{
+    has_prefix = false;
+    for (i = 0; i < FNLEN; i++) {
+        if (name[i] == ':') {
+            prefix[i++] = 0;
+            has_prefix = !!i;
+            break;
+        }
+        prefix[i] = name[i];
+    }
+    if (!has_prefix) {
+        memcpy (postfix, prefix, FNLEN + 1);
+        prefix[0] = 0;
+        return;
+    }
+    for (j = 0; i < FNLEN; i++)
+         postfix[j++] = name[i];
+    postfix[j] = 0;
+}
+
 bool
-parse_name (char * i)
+parse_pathname (char * name)
+{
+    file = NULL;
+
+    while (1) {
+        if (!*name)
+            return true;
+
+        if (name[0] == name[1] == '/') {
+            pwd = 0x100000;
+            name += 2;
+            continue;
+        }
+        if (name[0] == '/')
+            name++;
+        path = strtok (name, "/");
+        while (path) {
+            subdir = ultifs_enterdir (pwd, path);
+            if (!subdir) {
+                strcpy (lastname, path);
+                if (!file)
+                    return false;
+            }
+            pwd = subdir;
+            path = strtok (NULL, "/");
+        }
+    }
+    return false;
+}
+
+bool
+parse_name (char * name)
 {
     char * o = filename;
-    char c;
 
-    filename[0] = param1 = param2 = 0;
-    if (!FNLEN)
-        return false;
-    if (FNLEN > 2 && i[1] == ':') {
-        prefix = i[0];
-        i += 2;
-    }
-
-    while (c = *i++) {
+    while (c = *name++) {
         if (!c || c == ',')
             break;
         *o++ = c;
@@ -256,14 +316,24 @@ parse_name (char * i)
 
     if (!c)
         return true;
-    param1 = *i++;
-    c = *i++;
+    param1 = *name++;
+    c = *name++;
     if (!c)
         return true;
     if (c != ',')
         return false;
-    param2 = *i++;
-    return !*i++;
+    param2 = *name++;
+    return !*name++;
+}
+
+bool
+parse_prefix (char * name)
+{
+    split_prefix_filename (name);
+    pwd = ultifs_pwd;
+    if (has_prefix)
+        parse_pathname (prefix);
+    return false;
 }
 
 //
@@ -331,6 +401,12 @@ respond_file_not_open ()
 }
 
 void
+respond_invalid_command ()
+{
+    respond (ERR_INVALID_COMMAND, "invalid command");
+}
+
+void
 cmd_initialize ()
 {
     respond_ok ();
@@ -343,7 +419,7 @@ cmd_position (char * name)
     upos       p;
 
     if (FNLEN != 5) {
-        respond (ERR_INVALID_COMMAND, "invalid command");
+        respond_invalid_command ();
         return;
     }
     if (!(ch = channels[name[1]])) {
@@ -357,6 +433,33 @@ cmd_position (char * name)
     }
     ch->file->pos = p;
     respond_ok ();
+}
+
+void
+change_directory (char * name)
+{
+    parse_prefix (name);
+    if (file)
+        goto invalid;
+    if (!parse_pathname (postfix))
+        goto invalid;
+    ultifs_pwd = pwd;
+    respond_ok ();
+    return;
+
+invalid:
+    respond_invalid_command ();
+}
+
+void
+commands_c (char * name)
+{
+    switch (name[1]) {
+        case 'd':
+            change_directory (&name[2]);
+            return;
+    }
+    respond_sytax_error ();
 }
 
 void

@@ -17,7 +17,7 @@
 .import __ZP_SIZE__
 
 
-stack_size  = $22    ; Keep greater or equal to what linker config file says.
+stack_size  = $28    ; Keep greater or equal to what linker config file says.
 
 .segment "SECONDARY"
 

@@ -8,7 +8,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ -I../ $<
+	$(CC) -c $(CFLAGS) -Oi -o $@ -I../ $<
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a $(CC65_HOME)/share/cc65/lib/vic20.lib

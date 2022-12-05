@@ -17,7 +17,7 @@ typedef struct _bank {
     char  num;
 } bank;
 
-#pragma bss-name (push, "EXTZP")
+#pragma bss-name (push, "ZEROPAGE")
 bank * free_banks;
 bank * allocated_banks;
 bank * b;

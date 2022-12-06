@@ -38,7 +38,7 @@ init_kernal_emulation ()
 }
 
 
-char
+char __fastcall__
 downcase (char c)
 {
     if (c >= 'A' && c <= 'Z')
@@ -46,7 +46,7 @@ downcase (char c)
     return c;
 }
 
-void
+void __fastcall__
 copy_from_process (char * to, char * from, char len)
 {
     while (len--)
@@ -61,20 +61,33 @@ char prefix[64];
 char postfix[64];
 char filename[64];
 char lastname[64];
+
+#pragma bss-name (push, "ZEROPAGE")
 char has_prefix;
 upos pwd;
 char partition;
 bfile * file;
 char param1;
 char param2;
-
 char * path;
 upos subdir;
 char c;
-extern char i;
 char j;
+#pragma zpsym ("has_prefix")
+#pragma zpsym ("pwd")
+#pragma zpsym ("partition")
+#pragma zpsym ("file")
+#pragma zpsym ("param1")
+#pragma zpsym ("param2")
+#pragma zpsym ("path")
+#pragma zpsym ("subdir")
+#pragma zpsym ("c")
+#pragma zpsym ("j")
+#pragma bss-name (pop)
 
-void
+extern char i;
+
+void __fastcall__
 split_prefix_filename (char * name)
 {
     has_prefix = false;
@@ -96,16 +109,17 @@ split_prefix_filename (char * name)
     postfix[j] = 0;
 }
 
-bool
+bool __fastcall__
 parse_pathname (char * name)
 {
     file = NULL;
+    lastname[0] = 0;
 
     while (1) {
         if (!*name)
             return true;
 
-        if (name[0] == name[1] == '/') {
+        if (name[0] == '/' && name[1] == '/') {
             pwd = 0x100000;
             name += 2;
             continue;
@@ -117,8 +131,7 @@ parse_pathname (char * name)
             subdir = ultifs_enterdir (pwd, path);
             if (!subdir) {
                 strcpy (lastname, path);
-                if (!file)
-                    return false;
+                return true;
             }
             pwd = subdir;
             path = strtok (NULL, "/");
@@ -127,7 +140,7 @@ parse_pathname (char * name)
     return false;
 }
 
-bool
+bool __fastcall__
 parse_name (char * name)
 {
     char * o = filename;
@@ -150,28 +163,29 @@ parse_name (char * name)
     return !*name++;
 }
 
-bool
+bool __fastcall__
 parse_prefix (char * name)
 {
     split_prefix_filename (name);
     pwd = ultifs_pwd;
     if (has_prefix)
-        parse_pathname (prefix);
-    return false;
+        if (!parse_pathname (prefix))
+            return false;
+    return true;
 }
 
 //
 // Channel buffers
 //
 
-void
+void __fastcall__
 clear_buf (channel * ch)
 {
     free (ch->buf);
     ch->buf = NULL;
 }
 
-void
+void __fastcall__
 add_to_buf (channel * ch, void * ptr, size_t len)
 {
     if (!ch->buf)
@@ -181,7 +195,7 @@ add_to_buf (channel * ch, void * ptr, size_t len)
     ch->bufwptr += len;
 }
 
-char
+char __fastcall__
 read_from_buf (channel * ch)
 {
     char c = *ch->bufrptr++;
@@ -197,13 +211,12 @@ read_from_buf (channel * ch)
 // Control channel #15
 //
 
-void
+void __fastcall__
 respond (char code, char * message)
 {
     free (response);
     response = malloc (64);
     sprintf (response, "%#02D, %S, 00, 00\r", code, message);
-    log_message ("R: '%S'.", response);
 }
 
 void
@@ -236,7 +249,7 @@ cmd_initialize ()
     respond_ok ();
 }
 
-void
+void __fastcall__
 cmd_position (char * name)
 {
     channel *  ch;
@@ -259,7 +272,7 @@ cmd_position (char * name)
     respond_ok ();
 }
 
-void
+void __fastcall__
 change_directory (char * name)
 {
     parse_prefix (name);
@@ -275,7 +288,7 @@ invalid:
     respond_invalid_command ();
 }
 
-void
+void __fastcall__
 commands_c (char * name)
 {
     switch (name[1]) {
@@ -286,12 +299,15 @@ commands_c (char * name)
     respond_sytax_error ();
 }
 
-void
+void __fastcall__
 open_command (char * name)
 {
     channel *  ch = channels[LFN];
 
     switch (name[0]) {
+        case 'c':
+            commands_c (name);
+            return;
         case 'i':
             cmd_initialize ();
             return;
@@ -304,7 +320,7 @@ open_command (char * name)
     STATUS = 0;
 }
 
-void
+void __fastcall__
 make_directory_list (channel * ch)
 {
     struct cbm_dirent * dirent = malloc (sizeof (struct cbm_dirent));
@@ -402,11 +418,23 @@ make_directory_list (channel * ch)
 // KERNAL emulation
 //
 
-void
+channel * __fastcall__
+alloc_channel (char * name)
+{
+    channel * ch = malloc (sizeof (channel));
+    ch->sa = SA;
+    ch->is_buffered = false;
+    ch->buf = NULL;
+    ch->file = NULL;
+    ch->name = name;
+    channels[LFN] = ch;
+    return ch;
+}
+
+void __fastcall__
 free_channel (char lfn)
 {
     channel * ch = channels[lfn];
-    log_message ("free channel %D.", lfn);
 
     clear_buf (ch);
     free (ch->name);
@@ -431,9 +459,6 @@ ultifs_kopen ()
         goto error;
     }
 
-    STATUS = 0;
-    flags &= ~FLAG_C;
-
     if (FNLEN) {
         name = malloc (FNLEN + 1);
         copy_from_process (name, FNAME, FNLEN);
@@ -442,14 +467,9 @@ ultifs_kopen ()
         strcpy (name, filename);
     }
 
-    ch = malloc (sizeof (channel));
-    ch->sa = SA;
-    ch->is_buffered = false;
-    ch->buf = NULL;
-    ch->file = NULL;
-    ch->name = name;
-    channels[LFN] = ch;
-    log_message ("open %D, %D, %D, '%S'.", LFN, FA, SA, name);
+    STATUS = 0;
+    flags &= ~FLAG_C;
+    ch = alloc_channel (name);
 
     if (SA == 15) {
         ch->is_buffered = true;
@@ -503,7 +523,6 @@ error:
     return false;
 
 success:
-    log_message ("<open %D.", LFN);
     global_lfns[LFN] = LFN;
     return true;
 
@@ -515,14 +534,13 @@ deverror:
 void
 ultifs_kclrcn ()
 {
-    log_message ("clrcn");
 }
 
 void
 ultifs_kchkin ()
 {
     channel * ch = channels[xreg];
-    log_message ("chkin '%D'.", xreg);
+
     if (!ch) {
         accu = OSERR_FILE_NOT_OPEN;
         goto error;
@@ -543,7 +561,6 @@ error:
 void
 ultifs_kckout ()
 {
-    log_message ("ckout '%D'.", xreg);
     if (!channels[xreg]) {
         flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
@@ -564,7 +581,6 @@ ultifs_kbasin ()
 {
     register channel *  ch = channels[DFLTN];
     register bfile *    file;
-    log_message ("basin '%D'. ", DFLTN);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -603,7 +619,6 @@ void
 ultifs_kbsout ()
 {
     register channel *  ch = channels[DFLTO];
-    log_message ("bsout '%D'. ", DFLTO);
 
     if (!ch) {
         flags |= FLAG_C;
@@ -625,7 +640,7 @@ void
 ultifs_kclose ()
 {
     channel * ch = channels[accu];
-    log_message ("close '%D'. ", accu);
+
     if (ch->file)
         bfile_close (ch->file);
     free_channel (accu);
@@ -636,7 +651,6 @@ void
 ultifs_kclall ()
 {
     uchar  i;
-    log_message ("clall");
 
     do {
         if (channels[i]) {

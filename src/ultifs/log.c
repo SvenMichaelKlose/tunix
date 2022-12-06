@@ -4,13 +4,12 @@
 
 #include "log.h"
 
-char * log_ptr = (char *) 0xa000u;
+char * log_ptr = (char *) 0x400;
 
 void
 log_message (char * format, ...)
 {
     va_list args;
-return;
 
     va_start(args, format);
     vsprintf (log_ptr, format, args);

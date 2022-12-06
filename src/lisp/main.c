@@ -173,6 +173,7 @@ read_list ()
         }
         if (in () == ')')
             return start;
+        putback ();
 
         c = make_cons (read (), NULL);
         if (last)

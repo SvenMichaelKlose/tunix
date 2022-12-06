@@ -130,7 +130,6 @@ in ()
         return c;
     }
     c = cbm_k_basin ();
-    term_put (c);
     return c;
 }
 
@@ -175,7 +174,7 @@ read_list ()
             return start;
         putback ();
 
-        c = make_cons (read (), NULL);
+        c = make_cons (read (), nil);
         if (last)
             last->cdr = c;
         else
@@ -200,8 +199,7 @@ read_number ()
 bool __fastcall__
 our_isalpha (char c)
 {
-    return c >= 'A' && c <= 'Z' ||
-           c >= 'a' && c <= 'z';
+    return !isspace (c) && (c < '0' || c > '9') && c != '(' && c != ')';
 }
 
 ptr
@@ -219,10 +217,9 @@ read_symbol ()
 ptr
 read ()
 {
+    skip_spaces ();
     if (eof ())
         return NULL;
-
-    skip_spaces ();
     c = in ();
     putback ();
     if (c == '(')
@@ -230,6 +227,79 @@ read ()
     if (isdigit (c))
         return read_number ();
     return read_symbol ();
+}
+
+void
+out (char c)
+{
+    term_put (c);
+}
+
+void
+out_number (int n)
+{
+    int a;
+
+    if (n > 9) {
+        a = n / 10;
+        n -= 10 * a;
+        out_number (a);
+    }
+    out ('0' + n);
+}
+
+void print (ptr x);
+
+void
+print_list (cons * c)
+{
+    bool first = true;
+
+    out ('(');
+    while (c != nil) {
+        if (!first)
+            out (' ');
+        else
+            first = false;
+        print (c->car);
+        c = c->cdr;
+    }
+    out (')');
+}
+
+void
+print_number (number * n)
+{
+    out_number (n->value);
+}
+
+void
+print_symbol (symbol * s)
+{
+    char * p = (char *) &s->len + 1;
+    uchar len = s->len;
+    uchar i;
+
+    for (i = 0; i < len; i++)
+        out (*p++);
+}
+
+void
+print (ptr x)
+{
+    switch (((char *) x)[1]) {
+        case TYPE_CONS:
+            print_list ((cons *) x);
+            return;
+        case TYPE_NUMBER:
+            print_number ((number *) x);
+            return;
+        case TYPE_SYMBOL:
+            print_symbol ((symbol *) x);
+            return;
+    }
+    term_puts ("Unknown object type.");
+    while (1);
 }
 
 struct builtin {
@@ -243,6 +313,8 @@ struct builtin {
 int
 main (int argc, char * argv[])
 {
+    ptr env;
+
     (void) argc;
     (void) argv;
 
@@ -256,10 +328,13 @@ main (int argc, char * argv[])
     do_putback = false;
     cbm_open (3, 8, 3, "ENV.LISP");
     cbm_k_chkin (3);
-    read ();
+    while (env = read ()) {
+        print (env);
+        term_puts ("\n\r");
+    }
     cbm_k_close (3);
 
-    term_puts ("Bye!\n\r");
+    term_puts ("\n\rBye!\n\r");
     while (1);
     return 0;
 }

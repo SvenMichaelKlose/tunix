@@ -1,6 +1,8 @@
 PROGRAM=lisp
-ASMSOURCES= \
-	main.asm
+#ASMSOURCES= \
+#	main.asm
+SOURCES= \
+	main.c
 
 include ../Makefile.rules
 
@@ -8,7 +10,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -I../lib/term/ -o $@ $<
+	$(CC) -c $(CFLAGS) -I../lib/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib

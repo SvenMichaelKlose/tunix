@@ -237,7 +237,7 @@ r:  rts
 
 .proc cursor_down
     lda cursor_y
-    cmp #screen_height
+    cmp #screen_height - 8
     bne n
     jmp scroll_up
 

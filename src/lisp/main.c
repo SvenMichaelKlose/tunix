@@ -43,6 +43,7 @@ typedef struct _symbol {
     uchar  size;
     uchar  type;
     ptr    value;
+    ptr    bind;
     uchar  len;
 } symbol;
 
@@ -95,7 +96,7 @@ lookup_symbol (char * str, uchar len)
     char * h = (char *) HEAP_START;
 
     while (*h) {
-        if (h[1] == TYPE_SYMBOL && h[4] == len && !memcmp (&h[5], str, len))
+        if (h[1] == TYPE_SYMBOL && h[6] == len && !memcmp (&h[7], str, len))
             return h;
         h += *h;
     }
@@ -111,6 +112,8 @@ make_symbol (char * str, uchar len)
         return s;
 
     s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
+    s->value = s;
+    s->bind = nil;
     s->len = len;
     memcpy (&s->len + 1, str, len);
     return s;
@@ -192,14 +195,13 @@ read_number ()
         *p++ = c;
     *p = 0;
     putback ();
-
     return make_number (atoi (token));
 }
 
 bool __fastcall__
 our_isalpha (char c)
 {
-    return !isspace (c) && (c < '0' || c > '9') && c != '(' && c != ')';
+    return !isspace (c) && c != '(' && c != ')';
 }
 
 ptr
@@ -210,7 +212,6 @@ read_symbol ()
     while (!eof () && our_isalpha (in ()))
         *p++ = c;
     putback ();
-
     return make_symbol (token, p - token);
 }
 
@@ -298,7 +299,7 @@ print (ptr x)
             print_symbol ((symbol *) x);
             return;
     }
-    term_puts ("Unknown object type.");
+    term_puts (": Unknown object type.");
     while (1);
 }
 

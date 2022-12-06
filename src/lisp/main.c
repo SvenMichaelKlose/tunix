@@ -1,24 +1,65 @@
 // Atto Lisp interpreter
 
+#ifndef __CBM__
+#define __CBM__
+#endif
+
 #define HEAP_START  0x4000
 
 #include <ingle/cc65-charmap.h>
 
 #include <ctype.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
+
+#include <cbm.h>
 
 #include <term/libterm.h>
 
 typedef void * ptr;
 typedef unsigned char uchar;
 
-char * heap;
-
 #define TYPE_CONS     1
 #define TYPE_NUMBER   2
 #define TYPE_SYMBOL   4
 #define TYPE_BUILTIN  8
+
+typedef struct _cons {
+    uchar  size;
+    uchar  type;
+    ptr    car;
+    ptr    cdr;
+} cons;
+
+typedef struct _number {
+    uchar  size;
+    uchar  type;
+    int    value;
+} number;
+
+typedef struct _symbol {
+    uchar  size;
+    uchar  type;
+    ptr    value;
+    uchar  len;
+} symbol;
+
+#pragma bss-name (push, "ZEROPAGE")
+char *    heap;
+symbol *  s;
+char      c;
+char      do_putback;
+ptr       nil;
+#pragma zpsym ("heap");
+#pragma zpsym ("s");
+#pragma zpsym ("c")
+#pragma zpsym ("do_putback")
+#pragma zpsym ("nil")
+#pragma bss-name (pop)
+
+char token[256];
 
 ptr __fastcall__
 alloc (uchar size, uchar type)
@@ -31,13 +72,6 @@ alloc (uchar size, uchar type)
     return r;
 }
 
-typedef struct _cons {
-    uchar  size;
-    uchar  type;
-    ptr    car;
-    ptr    cdr;
-} cons;
-
 ptr __fastcall__
 make_cons (ptr car, ptr cdr)
 {
@@ -47,12 +81,6 @@ make_cons (ptr car, ptr cdr)
     return c;
 }
 
-typedef struct _number {
-    uchar  size;
-    uchar  type;
-    int    value;
-} number;
-
 ptr __fastcall__
 make_number (int x)
 {
@@ -60,13 +88,6 @@ make_number (int x)
     n->value = x;
     return n;
 }
-
-typedef struct _symbol {
-    uchar  size;
-    uchar  type;
-    ptr    value;
-    uchar  len;
-} symbol;
 
 void * __fastcall__
 lookup_symbol (char * str, uchar len)
@@ -82,11 +103,6 @@ lookup_symbol (char * str, uchar len)
     return NULL;
 }
 
-#pragma bss-name (push, "ZEROPAGE")
-symbol * s;
-#pragma zpsym ("s");
-#pragma bss-name (pop);
-
 ptr __fastcall__
 make_symbol (char * str, uchar len)
 {
@@ -100,23 +116,28 @@ make_symbol (char * str, uchar len)
     return s;
 }
 
-char c;
-
 char
 eof ()
 {
-    return 0;
+    return cbm_k_readst () & 0x40;
 }
 
 char
 in ()
 {
-    return 0;
+    if (do_putback) {
+        do_putback = false;
+        return c;
+    }
+    c = cbm_k_basin ();
+    term_put (c);
+    return c;
 }
 
 void
 putback ()
 {
+    do_putback = true;
 }
 
 void
@@ -130,22 +151,68 @@ skip_spaces ()
     }
 }
 
+ptr read (void);
+
 ptr
 read_list ()
 {
-    return NULL;
+    cons * c;
+    cons * start;
+    cons * last = NULL;
+
+    if (in () != '(') {
+        term_puts ("ERROR: List expected.\n\r");
+        while (1);
+    }
+
+    while (1) {
+        skip_spaces ();
+        if (eof ()) {
+            term_puts ("ERROR: Missing closing bracket.\n\r");
+            while (1);
+        }
+        if (in () == ')')
+            return start;
+
+        c = make_cons (read (), NULL);
+        if (last)
+            last->cdr = c;
+        else
+            start = c;
+        last = c;
+    }
 }
 
 ptr
 read_number ()
 {
-    return NULL;
+    char * p = token;
+
+    while (!eof () && isdigit (in ()))
+        *p++ = c;
+    *p = 0;
+    putback ();
+
+    return make_number (atoi (token));
+}
+
+bool __fastcall__
+our_isalpha (char c)
+{
+    return c >= 'A' && c <= 'Z' ||
+           c >= 'a' && c <= 'z';
 }
 
 ptr
 read_symbol ()
 {
-    return NULL;
+    char * p = token;
+
+    while (!eof () && our_isalpha (in ()))
+        *p++ = c;
+    putback ();
+
+    return make_symbol (token, p - token);
 }
 
 ptr
@@ -156,9 +223,9 @@ read ()
 
     skip_spaces ();
     c = in ();
+    putback ();
     if (c == '(')
         return read_list ();
-    putback ();
     if (isdigit (c))
         return read_number ();
     return read_symbol ();
@@ -168,33 +235,30 @@ struct builtin {
     char * name;
     void * func;
 } builtins[] = {
-    { "CAR", NULL },
-    { "CDR", NULL }
+    { "car", NULL },
+    { "cdr", NULL }
 };
 
 int
 main (int argc, char * argv[])
 {
-    symbol * s1;
-    symbol * s2;
-
     (void) argc;
     (void) argv;
 
     term_init ();
-    term_puts ("AttoLisp\n\r");
+    term_puts ("AttoLisp - loading environment...\n\r");
 
     heap = (void *) HEAP_START;
     heap[0] = 0;
-    make_cons ((ptr) 0xaa, (ptr) 0xdd);
-    make_number (0x1234);
-    make_symbol ("foo", 3);
+    nil = make_symbol ("nil", 3);
 
-    s1 = make_symbol ("lisp", 4);
-    s2 = make_symbol ("lisp", 4);
-    if (s1 != s2) {
-        term_puts ("Error: double symbol.");
-    }
+    do_putback = false;
+    cbm_open (3, 8, 3, "ENV.LISP");
+    cbm_k_chkin (3);
+    read ();
+    cbm_k_close (3);
 
+    term_puts ("Bye!\n\r");
+    while (1);
     return 0;
 }

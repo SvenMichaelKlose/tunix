@@ -1,5 +1,6 @@
 .export main, _reset
 .exportzp tmp3
+.export popax
 
 .importzp s, d, c, p, tmp
 .importzp name, namelen
@@ -30,6 +31,9 @@ tmp3:   .res 1
 membot  = $282      ; start page of BASIC RAM
 memtop  = $284      ; end page of BASIC RAM
 screen  = $288      ; start page of text matrix
+
+.proc popax
+.endproc
 
 .proc main
     sei

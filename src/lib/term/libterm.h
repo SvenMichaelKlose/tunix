@@ -36,6 +36,7 @@
 extern void term_init (void);
 extern void __fastcall__ term_put (char);
 extern void __fastcall__ term_puts (char *);
+extern void __fastcall__ term_putsn (char *, unsigned char len);
 extern char term_get (void);
 
 #endif /* #ifndef LIBTERM_H */

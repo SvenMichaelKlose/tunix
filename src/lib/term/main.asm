@@ -1,6 +1,6 @@
 .include "cbm_kernal.inc"
 
-.export _term_init, _term_put, _term_puts
+.export _term_init, _term_put, _term_puts, _term_putsn
 .export term_init
 
 .import init_bitmap_mode, gfx_init
@@ -15,6 +15,7 @@
 .import copy_area
 .import calcscr
 .import charset, charset_size
+.import popax
 
 .importzp s, d, c, scrbase, scr
 .importzp font, pencil_mode, pattern
@@ -103,18 +104,17 @@ l2: lda (p),y
 .endproc
 
 .proc scroll_up
-    lda #<charset
+    ; Clear top row (except first char).
+    lda #<(charset + 8)
     sta s
-    lda #>charset
+    lda #>(charset + 8)
     sta s+1
-
-    ldx #screen_columns
+    ldx #screen_columns-1
 m:  ldy #7
     lda #0
 l:  sta (s),y
     dey
     bpl l
-
     lda s
     clc
     adc #screen_height
@@ -124,6 +124,8 @@ l:  sta (s),y
 n:  dex
     bne m
 
+    ; Move all of the screen by one char.
+    ; Cleared top row is now at the bottom.
     lda #<(charset + 8)
     sta s
     lda #<charset
@@ -138,6 +140,7 @@ n:  dex
     lda #0
     jsr moveram
 
+    ; Clear char in the bottom right corner.
     ldx #7
     lda #0
 l2: sta charset + (screen_height * screen_columns) - 8,x
@@ -305,23 +308,18 @@ l:  lda $900f
     sta xpos
     lda cursor_y
     sta ypos
-
     lda #<_pattern_empty
     sta pattern
     lda #>_pattern_empty
     sta pattern+1
-
     lda #1
     sta pencil_mode
-
     lda #160
     sec
     sbc cursor_x
     sta width
-
     lda #8
     sta height
-
     jmp box
 .endproc
 
@@ -332,14 +330,11 @@ l:  lda $900f
     clc
     adc #%00100000
     sta cursor_x
-
     cmp #160
     bne done
-
     sec
     sbc #160
     sta cursor_x
-
 done:
     rts
 .endproc
@@ -348,23 +343,19 @@ done:
     lda #0
     sta cursor_x
     sta xpos
-
     lda cursor_y
     cmp #screen_height-8
     beq done
-
     sta ypos
 
+    ; Move down columns.
     lda #screen_height-8-1
     sec
     sbc ypos
-    sta height
-
+    sta height  ; -1 for Y indexing.
     lda #20
     sta width
-
 l2: jsr calcscr
-
     lda scr
     clc
     adc #8
@@ -372,7 +363,6 @@ l2: jsr calcscr
     lda scr+1
     adc #0
     sta tmp+1
-
     ldy height
     ldx height
     inx
@@ -386,14 +376,12 @@ l:  lda (scr),y
     clc
     adc #8
     sta xpos
-
     dec width
     bne l2
 
 done:
     jmp clear_to_eol
 .endproc
-
 
 .proc delete_line
     lda #0
@@ -709,4 +697,27 @@ r:  jmp cursor_show
     sta p
     stx p+1
     jmp putstring_fixed
+.endproc
+
+.proc _term_putsn
+    sta tmp2
+    jsr popax
+    sta p
+    stx p+1
+
+    jsr cursor_hide
+
+l:  ldy #0
+    lda (p),y
+
+    jsr _term_put
+
+    dec tmp2
+    beq r
+    inc p
+    bne l
+    inc p+1
+    jmp l   ; (bne)
+
+r:  jmp cursor_show
 .endproc

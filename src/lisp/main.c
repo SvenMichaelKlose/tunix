@@ -26,7 +26,8 @@ typedef unsigned char uchar;
 #define TYPE_SYMBOL   4
 #define TYPE_BUILTIN  8
 
-#define CONSP(x)  (((char *) x)[1] & TYPE_CONS)
+#define PTRTYPE(x)  (((char *) x)[1])
+#define CONSP(x)    (PTRTYPE(x) & TYPE_CONS)
 
 typedef struct _cons {
     uchar  size;
@@ -70,9 +71,9 @@ ptr       arg2;
 #pragma zpsym ("arg2")
 #pragma bss-name (pop)
 
-char token[256];
-
 #define NOTP(x)     (x == nil)
+
+char token[256];
 
 ptr __fastcall__
 alloc (uchar size, uchar type)
@@ -295,28 +296,24 @@ print_number (number * n)
 void
 print_symbol (symbol * s)
 {
-    char * p = (char *) &s->len + 1;
-    uchar len = s->len;
-
-    term_putsn (p, len);
+    term_putsn ((char *) &s->len + 1, s->len);
 }
 
 void
 print (ptr x)
 {
-    switch (((char *) x)[1]) {
-        case TYPE_CONS:
-            print_list ((cons *) x);
-            return;
-        case TYPE_NUMBER:
-            print_number ((number *) x);
-            return;
-        case TYPE_SYMBOL:
-            print_symbol ((symbol *) x);
-            return;
+    uchar type = PTRTYPE(x);
+
+    if (type & TYPE_CONS)
+        print_list ((cons *) x);
+    else if (type & TYPE_NUMBER)
+        print_number ((number *) x);
+    else if (type & TYPE_SYMBOL)
+        print_symbol ((symbol *) x);
+    else {
+        term_puts (": Unknown object type.");
+        while (1);
     }
-    term_puts (": Unknown object type.");
-    while (1);
 }
 
 void

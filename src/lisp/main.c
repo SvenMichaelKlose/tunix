@@ -4,7 +4,7 @@
 #define __CBM__
 #endif
 
-#define HEAP_START  0x4000
+#define HEAP_START  0x5000
 
 #include <ingle/cc65-charmap.h>
 
@@ -25,6 +25,8 @@ typedef unsigned char uchar;
 #define TYPE_NUMBER   2
 #define TYPE_SYMBOL   4
 #define TYPE_BUILTIN  8
+
+#define CONSP(x)  (((char *) x)[1] & TYPE_CONS)
 
 typedef struct _cons {
     uchar  size;
@@ -53,14 +55,24 @@ symbol *  s;
 char      c;
 char      do_putback;
 ptr       nil;
+ptr       t;
+ptr       args;
+ptr       arg1;
+ptr       arg2;
 #pragma zpsym ("heap");
 #pragma zpsym ("s");
 #pragma zpsym ("c")
 #pragma zpsym ("do_putback")
 #pragma zpsym ("nil")
+#pragma zpsym ("t")
+#pragma zpsym ("args")
+#pragma zpsym ("arg1")
+#pragma zpsym ("arg2")
 #pragma bss-name (pop)
 
 char token[256];
+
+#define NOTP(x)     (x == nil)
 
 ptr __fastcall__
 alloc (uchar size, uchar type)
@@ -249,6 +261,12 @@ out_number (int n)
     out ('0' + n);
 }
 
+void
+outsn (char * s, char len)
+{
+    term_putsn (s, len);
+}
+
 void print (ptr x);
 
 void
@@ -279,10 +297,8 @@ print_symbol (symbol * s)
 {
     char * p = (char *) &s->len + 1;
     uchar len = s->len;
-    uchar i;
 
-    for (i = 0; i < len; i++)
-        out (*p++);
+    term_putsn (p, len);
 }
 
 void
@@ -303,18 +319,74 @@ print (ptr x)
     while (1);
 }
 
+void
+error (char * str)
+{
+    term_puts ("ERROR: ");
+    term_puts (str);
+    while (1);
+}
+
+cons *
+get_list_arg ()
+{
+    if (NOTP(args))
+        error ("arguments missing");
+    arg1 = ((cons *) args)->car;
+    if (NOTP(arg1))
+        return nil;
+    if (!CONSP(arg1))
+        error ("list expected");
+    return arg1;
+}
+
+ptr
+builtin_car ()
+{
+    return get_list_arg ()->car;
+}
+
+ptr
+builtin_cdr ()
+{
+    return get_list_arg ()->cdr;
+}
+
 struct builtin {
     char * name;
     void * func;
 } builtins[] = {
-    { "car", NULL },
-    { "cdr", NULL }
+    { "?", NULL },
+    { "block", NULL },
+    { ".", NULL },
+    { "car", builtin_car },
+    { "cdr", NULL },
+    { "rplaca", NULL },
+    { "rplacd", NULL },
+    { "=", NULL },
+    { "read", NULL },
+    { "print", NULL },
+    { "apply", NULL },
+    { "+", NULL },
+    { "-", NULL },
+    { "*", NULL },
+    { "/", NULL },
+    { "quote", NULL },
+    { "quasiquote", NULL },
+    { "quasiquote-splice", NULL },
+    { "backquote", NULL },
+    { "peek", NULL },
+    { "poke", NULL },
+    { "sys", NULL },
+    { NULL, NULL }
 };
 
 int
 main (int argc, char * argv[])
 {
     ptr env;
+    struct builtin * b = builtins;
+    symbol * s;
 
     (void) argc;
     (void) argv;
@@ -325,6 +397,13 @@ main (int argc, char * argv[])
     heap = (void *) HEAP_START;
     heap[0] = 0;
     nil = make_symbol ("nil", 3);
+    t = make_symbol ("t", 3);
+    while (b->name) {
+        s = make_symbol (b->name, strlen (b->name));
+        s->type |= TYPE_BUILTIN;
+        s->value = b->func;
+        b++;
+    }
 
     do_putback = false;
     cbm_open (3, 8, 3, "ENV.LISP");

@@ -132,6 +132,14 @@ make_symbol (char * str, uchar len)
     return s;
 }
 
+void
+error (char * str)
+{
+    term_puts ("ERROR: ");
+    term_puts (str);
+    while (1);
+}
+
 char
 eof ()
 {
@@ -175,17 +183,13 @@ read_list ()
     cons * start;
     cons * last = NULL;
 
-    if (in () != '(') {
-        term_puts ("ERROR: List expected.\n\r");
-        while (1);
-    }
+    if (in () != '(')
+        error ("List expected.");
 
     while (1) {
         skip_spaces ();
-        if (eof ()) {
-            term_puts ("ERROR: Missing closing bracket.\n\r");
-            while (1);
-        }
+        if (eof ())
+            error ("Missing closing bracket.");
         if (in () == ')')
             return start;
         putback ();
@@ -310,30 +314,20 @@ print (ptr x)
         print_number ((number *) x);
     else if (type & TYPE_SYMBOL)
         print_symbol ((symbol *) x);
-    else {
-        term_puts (": Unknown object type.");
-        while (1);
-    }
-}
-
-void
-error (char * str)
-{
-    term_puts ("ERROR: ");
-    term_puts (str);
-    while (1);
+    else
+        error ("Unknown object type.");
 }
 
 cons *
 get_list_arg ()
 {
     if (NOTP(args))
-        error ("arguments missing");
+        error ("Arguments missing.");
     arg1 = ((cons *) args)->car;
     if (NOTP(arg1))
         return nil;
     if (!CONSP(arg1))
-        error ("list expected");
+        error ("List expected.");
     return arg1;
 }
 

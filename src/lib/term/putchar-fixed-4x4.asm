@@ -343,5 +343,4 @@ l3: lda (scr),y
     sta (scr),y
 
     jmp done
-
 .endproc

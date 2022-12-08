@@ -167,7 +167,13 @@ void
 skip_spaces ()
 {
     while (!eof ()) {
-        if (!isspace (in ())) {
+        if (in () == ';') {
+            while (!eof () && in () >= ' ');
+            while (!eof () && in () < ' ');
+            putback ();
+            continue;
+        }
+        if (!isspace (c)) {
             putback ();
             return;
         }
@@ -194,7 +200,15 @@ read_list ()
             return start;
         putback ();
 
-        c = make_cons (read (), nil);
+        skip_spaces ();
+        if (eof ())
+            error ("Missing closing bracket.");
+        if (in () == '.')
+            c = read ();
+        else {
+            putback ();
+            c = make_cons (read (), nil);
+        }
         if (last)
             last->cdr = c;
         else
@@ -267,6 +281,12 @@ out_number (int n)
 }
 
 void
+outs (char * s)
+{
+    term_puts (s);
+}
+
+void
 outsn (char * s, char len)
 {
     term_putsn (s, len);
@@ -286,6 +306,11 @@ print_list (cons * c)
         else
             first = false;
         print (c->car);
+        if (c->cdr != nil && !CONSP(c->cdr)) {
+            outs (" . ");
+            print (c->cdr);
+            break;
+        }
         c = c->cdr;
     }
     out (')');

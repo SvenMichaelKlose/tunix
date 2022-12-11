@@ -50,7 +50,7 @@ typedef struct _symbol {
     uchar  len;
 } symbol;
 
-#pragma bss-name (push, "ZEROPAGE")
+//#pragma bss-name (push, "ZEROPAGE")
 char *    heap;
 symbol *  s;
 char      c;
@@ -60,16 +60,16 @@ ptr       t;
 ptr       args;
 ptr       arg1;
 ptr       arg2;
-#pragma zpsym ("heap");
-#pragma zpsym ("s");
-#pragma zpsym ("c")
-#pragma zpsym ("do_putback")
-#pragma zpsym ("nil")
-#pragma zpsym ("t")
-#pragma zpsym ("args")
-#pragma zpsym ("arg1")
-#pragma zpsym ("arg2")
-#pragma bss-name (pop)
+//#pragma zpsym ("heap");
+//#pragma zpsym ("s");
+//#pragma zpsym ("c")
+//#pragma zpsym ("do_putback")
+//#pragma zpsym ("nil")
+//#pragma zpsym ("t")
+//#pragma zpsym ("args")
+//#pragma zpsym ("arg1")
+//#pragma zpsym ("arg2")
+//#pragma bss-name (pop)
 
 #define NOTP(x)     (x == nil)
 
@@ -78,7 +78,7 @@ char token[256];
 ptr __fastcall__
 alloc (uchar size, uchar type)
 {
-    register char * r = heap;
+    char * r = heap;
     heap[0] = size;
     heap[1] = type;
     heap += size;
@@ -89,7 +89,7 @@ alloc (uchar size, uchar type)
 ptr __fastcall__
 make_cons (ptr car, ptr cdr)
 {
-    register cons * c = alloc (sizeof (cons), TYPE_CONS);
+    cons * c = alloc (sizeof (cons), TYPE_CONS);
     c->car = car;
     c->cdr = cdr;
     return c;
@@ -403,12 +403,12 @@ main (int argc, char * argv[])
     ptr env;
     struct builtin * b = builtins;
     symbol * s;
+//    int i;
 
     (void) argc;
     (void) argv;
 
     term_init ();
-    term_puts ("AttoLisp - loading environment...\n\r");
 
     heap = (void *) HEAP_START;
     heap[0] = 0;

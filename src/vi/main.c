@@ -257,7 +257,7 @@ exec_complex (void)
 }
 
 // Top level controlling repetitions (keyboard
-// logging and triggering playback.
+// logging and triggering playback).
 void
 toplevel (void)
 {

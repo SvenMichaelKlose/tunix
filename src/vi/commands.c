@@ -192,7 +192,7 @@ set_filename (char * s, int len)
     if (filename)
         free (filename);
     filename = malloc (len + 1);
-    strcpy (filename, s);
+    memcpy (filename, s, len);
 }
 
 void
@@ -215,20 +215,26 @@ cmd_write_file ()
         set_filename (&linebuf[2], linebuf_length);
 
     fn = malloc (strlen (filename) + 7);
-    sprintf (fn, "%S,S,W", &linebuf[2]);
-    err = cbm_open (1, 8, 1, fn);
+    sprintf (fn, "%S,S,W", filename);
+    err = cbm_open (3, 8, 3, fn);
     free (fn);
     if (err) {
-        gotoxy (0, 23);
-        term_puts ("Cannot open file '");
-        term_puts (filename);
-        term_puts ("'.\n\r");
-        wait_keypress ();
-        return;
+        fn = malloc (strlen (filename) + 9);
+        sprintf (fn, "@:%S,S,W", filename);
+        err = cbm_open (3, 8, 3, fn);
+        free (fn);
+        if (err) {
+            gotoxy (0, 23);
+            term_puts ("Cannot write file '");
+            term_puts (fn);
+            term_puts ("'.\n\r");
+            wait_keypress ();
+            return;
+        }
     }
 
     screen_set_status ("Writing...");
-    cbm_k_ckout (1);
+    cbm_k_ckout (3);
     while (l) {
         for (i = 0; i < l->length; i++)
             cbm_k_bsout (encrypt (l->data[i]));
@@ -237,7 +243,7 @@ cmd_write_file ()
         l = l->next;
     }
 
-    cbm_close (1);
+    cbm_close (3);
 
     gotoxy (0, 22);
     term_puts ("Wrote ");
@@ -313,4 +319,44 @@ done:
     free (data);
     screen_set_status ("");
     screen_redraw ();
+}
+
+//
+// unfinished
+//
+
+void cmd_delete ()
+{
+}
+
+void cmd_change ()
+{
+}
+
+void cmd_yank ()
+{
+}
+
+void cmd_paste ()
+{
+}
+
+void cmd_follow ()
+{
+}
+
+void cmd_paste_above ()
+{
+}
+
+void cmd_paste_below ()
+{
+}
+
+void cmd_toggle_visual_mode ()
+{
+}
+
+void cmd_quit ()
+{
 }

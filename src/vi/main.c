@@ -57,12 +57,24 @@ command motion_commands[] = {
     { 0, NULL }
 };
 
+command track_commands[] = {
+    { 'd', cmd_delete },
+    { 'c', cmd_change },
+    { 'c', cmd_yank },
+    { 'c', cmd_paste },
+    { 'c', cmd_follow },
+    { 0, NULL }
+};
+
 command modify_commands[] = {
     { 'D', cmd_delete_till_line_end },
     { 'd', cmd_delete_line },
     { 'x', cmd_delete_char },
     { 'r', cmd_replace_char },
     { 'J', cmd_join },
+    { 'p', cmd_paste_below },
+    { 'P', cmd_paste_above },
+    { 'v', cmd_toggle_visual_mode },
     { 0, NULL }
 };
 
@@ -70,6 +82,7 @@ command complex_commands[] = {
     { 'w', cmd_write_file },
     { 'r', cmd_read_file },
     { 'k', cmd_set_passphrase },
+    { 'q', cmd_quit },
     { 0, NULL }
 };
 

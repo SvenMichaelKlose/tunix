@@ -85,7 +85,48 @@ char j;
 #pragma zpsym ("j")
 #pragma bss-name (pop)
 
-extern char i;
+extern char i;  // TODO: Find the definition of 'i' and remove it. (pixel)
+
+//
+// Control channel responses
+//
+
+void __fastcall__
+respond (char code, char * message)
+{
+    free (response);
+    response = malloc (64);
+    sprintf (response, "%#02D, %S, 00, 00\r", code, message);
+}
+
+void
+respond_ok ()
+{
+    respond (0, "ok");
+}
+
+void
+respond_syntax_error ()
+{
+    respond (ERR_SYNTAX, "syntax error");
+}
+
+void
+respond_file_not_open ()
+{
+    respond (ERR_FILE_NOT_OPEN, "file not open");
+}
+
+void
+respond_invalid_command ()
+{
+    respond (ERR_INVALID_COMMAND, "invalid command");
+}
+
+
+//
+// File name parsing
+//
 
 void __fastcall__
 split_prefix_filename (char * name)
@@ -166,11 +207,19 @@ parse_name (char * name)
 bool __fastcall__
 parse_prefix (char * name)
 {
+    char * p = prefix;
+
     split_prefix_filename (name);
     pwd = ultifs_pwd;
-    if (has_prefix)
-        if (!parse_pathname (prefix))
+    partition = 0;
+    if (has_prefix) {
+        if (isdigit (prefix[0])) {
+            partition = prefix[0] - '0';
+            p++;
+        }
+        if (!parse_pathname (p))
             return false;
+    }
     return true;
 }
 
@@ -206,42 +255,9 @@ read_from_buf (channel * ch)
     return c;
 }
 
-
 //
-// Control channel #15
+// Control channel commands
 //
-
-void __fastcall__
-respond (char code, char * message)
-{
-    free (response);
-    response = malloc (64);
-    sprintf (response, "%#02D, %S, 00, 00\r", code, message);
-}
-
-void
-respond_ok ()
-{
-    respond (0, "ok");
-}
-
-void
-respond_sytax_error ()
-{
-    respond (ERR_SYNTAX, "syntax error");
-}
-
-void
-respond_file_not_open ()
-{
-    respond (ERR_FILE_NOT_OPEN, "file not open");
-}
-
-void
-respond_invalid_command ()
-{
-    respond (ERR_INVALID_COMMAND, "invalid command");
-}
 
 void
 cmd_initialize ()
@@ -275,7 +291,10 @@ cmd_position (char * name)
 void __fastcall__
 change_directory (char * name)
 {
-    parse_prefix (name);
+    if (!parse_prefix (name)) {
+        respond_syntax_error ();
+        return;
+    }
     if (file)
         goto invalid;
     if (!parse_pathname (postfix))
@@ -296,7 +315,7 @@ commands_c (char * name)
             change_directory (&name[2]);
             return;
     }
-    respond_sytax_error ();
+    respond_syntax_error ();
 }
 
 void __fastcall__
@@ -316,7 +335,7 @@ open_command (char * name)
             return;
     }
 
-    respond_sytax_error ();
+    respond_syntax_error ();
     STATUS = 0;
 }
 
@@ -415,7 +434,7 @@ make_directory_list (channel * ch)
 
 
 //
-// KERNAL emulation
+// Channel allocation
 //
 
 channel * __fastcall__
@@ -443,6 +462,16 @@ free_channel (char lfn)
     channels[lfn] = NULL;
 }
 
+void
+debug (void)
+{
+}
+
+
+//
+// KERNAL emulation
+//
+
 char
 ultifs_kopen ()
 {
@@ -460,10 +489,9 @@ ultifs_kopen ()
     }
 
     if (FNLEN) {
-        name = malloc (FNLEN + 1);
+        name = malloc (FNLEN + 1); // TODO: Free! (pixel)
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
-        parse_name (name);
         strcpy (name, filename);
     }
 
@@ -473,9 +501,19 @@ ultifs_kopen ()
 
     if (SA == 15) {
         ch->is_buffered = true;
+        parse_name (name);
         open_command (name);
         goto success;
     }
+
+    if (!parse_prefix (name)) {
+        free (name);
+        respond_syntax_error ();
+        goto deverror;
+    }
+    parse_name (postfix);
+    log_message ("PRE: %s, POST: %s. ", prefix, postfix);
+    debug ();
 
     if (FNLEN == 1 && *name == '$') {
         ch->is_buffered = true;
@@ -497,7 +535,7 @@ ultifs_kopen ()
 
     if (param2 == 'w') {
         if (param1 != 's' && param2 != 'p') {
-            respond_sytax_error ();
+            respond_syntax_error ();
             goto deverror;
         }
         found_file = ultifs_open (ultifs_pwd, name, ULTIFS_MODE_READ);

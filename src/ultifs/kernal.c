@@ -72,6 +72,7 @@ char param2;
 char * path;
 upos subdir;
 char c;
+char i;
 char j;
 #pragma zpsym ("has_prefix")
 #pragma zpsym ("pwd")

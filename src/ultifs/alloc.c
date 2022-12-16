@@ -14,7 +14,6 @@ char banks[NUM_BANKS];
 char free_banks;
 char allocated_banks;
 char b;
-char i;
 #pragma zpsym("free_banks")
 #pragma zpsym("allocated_banks")
 #pragma zpsym("b")
@@ -23,6 +22,8 @@ char i;
 void
 init_alloc ()
 {
+    char i;
+
     allocated_banks = 0;
     free_banks = FIRST_BANK;
 

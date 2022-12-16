@@ -143,7 +143,7 @@ n:  dex
     ; Clear char in the bottom right corner.
     ldx #7
     lda #0
-l2: sta charset + (screen_height * screen_columns) - 8,x
+l2: sta charset + charset_size - 8,x
     dex
     bpl l2
 

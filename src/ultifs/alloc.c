@@ -1,5 +1,3 @@
-// Memory bank allocator
-
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -11,12 +9,6 @@ char banks[NUM_BANKS];
 
 #define PUSH(l, x) banks[x] = l; l = x;
 #define POP(to, l) to = l; l = banks[l];
-
-typedef struct _bank {
-    struct _bank *  next;
-    char  num;
-} bank;
-
 
 #pragma bss-name (push, "ZEROPAGE")
 char free_banks;
@@ -34,7 +26,7 @@ init_alloc ()
     allocated_banks = 0;
     free_banks = FIRST_BANK;
 
-    for (i = FIRST_BANK; i <= LAST_BANK - 1; i++)
+    for (i = FIRST_BANK; i < LAST_BANK - 1; i++)
         banks[i] = i + 1;
 }
 

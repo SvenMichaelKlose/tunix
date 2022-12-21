@@ -158,7 +158,7 @@ parse_pathname (char * name)
     lastname[0] = 0;
 
     while (1) {
-        if (!*name)
+        if (!*name || *name == ':')
             return true;
 
         if (name[0] == '/' && name[1] == '/') {
@@ -183,7 +183,7 @@ parse_pathname (char * name)
 }
 
 bool __fastcall__
-parse_name (char * name)
+parse_name_and_params (char * name)
 {
     char * o = filename;
 
@@ -319,7 +319,7 @@ make_directory (char * name)
         goto invalid;
     if (parse_pathname (postfix))
         goto invalid;
-    bfile_create_directory (ultifs_pwd, name);
+    bfile_create_directory (ultifs_pwd, lastname);
     respond_ok ();
     return;
 
@@ -342,7 +342,7 @@ void __fastcall__
 commands_m (char * name)
 {
     switch (name[1]) {
-        case 'm':
+        case 'd':
             make_directory (&name[2]);
             return;
     }
@@ -534,7 +534,6 @@ ultifs_kopen ()
 
     if (SA == 15) {
         ch->is_buffered = true;
-        parse_name (name);
         open_command (name);
         goto success;
     }
@@ -544,13 +543,14 @@ ultifs_kopen ()
         respond_syntax_error ();
         goto deverror;
     }
-    parse_name (postfix);
 
     if (FNLEN == 1 && *name == '$') {
         ch->is_buffered = true;
         make_directory_list (ch);
         goto success;
     }
+
+    parse_name_and_params (postfix);
 
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);

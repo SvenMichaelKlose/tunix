@@ -195,7 +195,6 @@ test_read_seq ()
                 break;
             }
         }
-        read_error ();
     }
     cbm_close (8);
     print_error ();

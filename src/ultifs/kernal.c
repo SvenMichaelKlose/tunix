@@ -493,7 +493,6 @@ ultifs_kopen ()
         name = malloc (FNLEN + 1); // TODO: Free! (pixel)
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
-        strcpy (name, filename);
     }
 
     STATUS = 0;

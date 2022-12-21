@@ -200,6 +200,16 @@ test_read_seq ()
     print_error ();
 }
 
+void
+test_create_dir ()
+{
+    init_error ();
+    oserr = cbm_open (8, device, 8, "md:testdir");
+    read_error ();
+    cbm_close (8);
+    print_error ();
+}
+
 typedef void (*voidfun) ();
 
 typedef struct _test {
@@ -213,7 +223,8 @@ test tests[] = {
     {"Open missing",      test_open_missing},
     {"Create SEQ",        test_create_seq},
     {"Create SEQ again",  test_create_seq_again},
-    {"Read SEQ",          test_read_seq}
+    {"Read SEQ",          test_read_seq},
+    {"Create directory",  test_create_dir}
 };
 
 void

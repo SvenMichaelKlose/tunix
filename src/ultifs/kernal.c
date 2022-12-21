@@ -309,11 +309,41 @@ invalid:
 }
 
 void __fastcall__
+make_directory (char * name)
+{
+    if (!parse_prefix (name)) {
+        respond_syntax_error ();
+        return;
+    }
+    if (file)
+        goto invalid;
+    if (parse_pathname (postfix))
+        goto invalid;
+    bfile_create_directory (ultifs_pwd, name);
+    respond_ok ();
+    return;
+
+invalid:
+    respond_invalid_command ();
+}
+
+void __fastcall__
 commands_c (char * name)
 {
     switch (name[1]) {
         case 'd':
             change_directory (&name[2]);
+            return;
+    }
+    respond_syntax_error ();
+}
+
+void __fastcall__
+commands_m (char * name)
+{
+    switch (name[1]) {
+        case 'm':
+            make_directory (&name[2]);
             return;
     }
     respond_syntax_error ();
@@ -330,6 +360,9 @@ open_command (char * name)
             return;
         case 'i':
             cmd_initialize ();
+            return;
+        case 'm':
+            commands_m (name);
             return;
         case 'p':
             cmd_position (name);

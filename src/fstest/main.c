@@ -185,7 +185,8 @@ test_read_seq ()
 
     init_error ();
     oserr = cbm_open (8, device, 8, "0:test,s,r");
-    if (!oserr) {
+    read_error ();
+    if (!oserr && !err) {
         chkin (8);
         for (i = 0; i < 16; i++) {
             v = cbm_k_basin ();
@@ -194,8 +195,8 @@ test_read_seq ()
                 break;
             }
         }
+        read_error ();
     }
-    read_error ();
     cbm_close (8);
     print_error ();
 }

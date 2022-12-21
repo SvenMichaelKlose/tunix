@@ -490,7 +490,7 @@ ultifs_kopen ()
     }
 
     if (FNLEN) {
-        name = malloc (FNLEN + 1); // TODO: Free! (pixel)
+        name = malloc (FNLEN + 1);
         copy_from_process (name, FNAME, FNLEN);
         name[FNLEN] = 0;
     }
@@ -512,8 +512,6 @@ ultifs_kopen ()
         goto deverror;
     }
     parse_name (postfix);
-    log_message ("PRE: %s, POST: %s. ", prefix, postfix);
-    debug ();
 
     if (FNLEN == 1 && *name == '$') {
         ch->is_buffered = true;
@@ -522,7 +520,7 @@ ultifs_kopen ()
     }
 
     if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
-        found_file = ultifs_open (ultifs_pwd, name, ULTIFS_MODE_READ);
+        found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");
             goto deverror;
@@ -538,14 +536,14 @@ ultifs_kopen ()
             respond_syntax_error ();
             goto deverror;
         }
-        found_file = ultifs_open (ultifs_pwd, name, ULTIFS_MODE_READ);
+        found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (found_file) {
             bfile_close (found_file);
             respond (ERR_FILE_EXISTS, "file exists");
             goto deverror;
         }
 
-        ch->file = ultifs_create (ultifs_pwd, name, param1 == 's' ? CBM_T_SEQ : CBM_T_PRG);
+        ch->file = ultifs_create (ultifs_pwd, filename, param1 == 's' ? CBM_T_SEQ : CBM_T_PRG);
         respond_ok ();
         goto success;
     }

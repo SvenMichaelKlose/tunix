@@ -521,12 +521,10 @@ n2:
 
     ldx code_length
     bmi no_code
-
     sta code,x
     dec code_length
     bpl r
     jmp (code_callback)
-
 no_code:
 
 ; 01,x,y:   Cursor motion
@@ -573,16 +571,18 @@ n10:
 
 ; 0a:       LF: Line feed
 ; 0b:       VF: Vertical tab
+; 0c:       FF: Form feed,
     cmp #$0a
     beq line_feed
     cmp #$0b
+    beq line_feed
+    cmp #$0c
     bne n
 line_feed:
     jsr cursor_down
     jmp cursor_show
 n:  
 
-; 0c:       FF: Form feed,
 ; 1a:       Clear screen
     cmp #$0c
     beq line_feed   ; (could also be clear_screen)

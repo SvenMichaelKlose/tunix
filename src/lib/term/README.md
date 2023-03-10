@@ -1,8 +1,7 @@
 Terminal emulation
 ==================
 
-40x24 characters monochrome. Charset
-is Code Page 437 (think IBM PC).
+40x24 characters monochrome. Charset is Code Page 437 (think IBM PC).
 
 # Keyboard
 
@@ -11,10 +10,10 @@ ARROW UP:       '^'
 SHIFT+-:        '_'
 SHIFT+8:        '['
 SHIFT+9:        ']'
-CTRL+SHIFT+8:   '['
-SHIFT+9:        ']'
+CTRL+SHIFT+8:   '{'
+SHIFT+9:        '}'
 
-CTRL-A_:   Control codes 1-31.
+CTRL-A:   Control codes 1-31.
 
 # Output
 
@@ -28,9 +27,10 @@ CTRL-A_:   Control codes 1-31.
 ### $08:       BS; Backspace
 ### $09:       HT; Horizontal tab
 ### $0a:       LF: Line feed
-### $0b:       VF: Vertical tab (same as line feed)
 
-### $0c:       FF: Form feed (line feed)
+Same for:
+$0b:       VF: Vertical tab (same as line feed)
+$0c:       FF: Form feed (line feed)
 
 Some terminals clear the screen here.
 
@@ -91,8 +91,11 @@ F8 = 236
 ARROW_LEFT = 235
 RETURN = 13
 ```
-; 09:       HT: Horizontal tabulation
-; 1b:       Escape prefix
+
+# Wishlist
+
+0x9b    CSI: ESC [
+
 
 ; Escape:
 ; 1b:       Quote
@@ -115,17 +118,3 @@ RETURN = 13
 ; 7         Status line
 
 ; 01,x,y:   Cursor motion
-; 02:       Insert line
-; 03:       Delete line
-; 07:       BEL: bell and/or flash screen
-; 08:       BS; Backspace
-; 09:       HT; Horizontal tab
-; 0a:       LF: Line feed
-; 0b:       VF: Vertical tab (same as line feed)
-; 0c:       FF: Form feed, Clear screen
-; 1a:       Clear screen
-; 0d:       CR: Carriage return
-; 1b:       ESC: Escape
-; 18:       Clear to EOL
-; 1e:       Home
-; 7f:       DEL: BS, ' ', BS

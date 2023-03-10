@@ -9,7 +9,6 @@
 #include <lib/ultimem/ultimem.h>
 #include <lib/ingle/ingle.h>
 #include <lib/gfx/libgfx.h>
-
 #include <lib/gui/obj.h>
 #include <lib/gui/event.h>
 #include <lib/gui/box.h>
@@ -22,23 +21,20 @@
 #include <lib/gui/message.h>
 #include <lib/gui/table.h>
 #include <lib/gui/window.h>
+#include <desktop.h>
 
-//#include "basic-starter.h"
-//#include "desktop.h"
+#include "basic-starter.h"
 
 int
 main (void)
 {
- //   struct obj * win = make_basic_starter ();
-    print_message ("BASIC starter");
+    struct obj * win = make_basic_starter ();
 
-    //set_obj_position_and_size (win, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
-    //focussed_window = append_obj (desktop, win);
-
-    //print_message ("Basic starter Press 'H' for help.");
-    //draw_obj (desktop);
+    set_obj_position_and_size (win, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+    focussed_window = append_obj (desktop, win);
+    draw_obj (desktop);
+    print_message ("Basic starter Press 'H' for help.");
 
     while (1); //desktop_loop ();
-
     return 0;
 }

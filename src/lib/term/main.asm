@@ -110,11 +110,11 @@ l2: lda (p),y
     lda #>(charset + 8)
     sta s+1
     ldx #screen_columns-1
-m:  ldy #7
+m:  ldy #8
     lda #0
 l:  sta (s),y
     dey
-    bpl l
+    bne l
     lda s
     clc
     adc #screen_height

@@ -100,19 +100,18 @@ maps_h:
 
 .proc _term_get
     lda $c6         ; Key in buffer?
-    beq _term_get
-
+    beq _term_out
     lda #0          ; Reset buffer.
     sta $c6
     ldy $c5         ; Get scan code.
     cpy #$40        ; No key pressed?
     beq nokey
     ldx $28d        ; Get CTRL/SHIFT/C= status.
-    lda maps_l,x
+    lda maps_l,x    ; Get scan code map.
     sta tmp
     lda maps_h,x
     sta tmp+1
-    lda (tmp),y
+    lda (tmp),y     ; Fetch the code.
     rts
 
 nokey:

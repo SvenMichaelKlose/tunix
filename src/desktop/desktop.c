@@ -201,7 +201,6 @@ draw_desktop (struct obj * o)
         if (WINDOW(p)->flags & W_FULLSCREEN)
             fs = p;
     } while (p = p->node.next);
-
     if (!fs) {
         draw_box (o);
         return;
@@ -281,7 +280,6 @@ focus_next_window ()
     focussed_window = next;
 
     WINDOW(next)->flags |= W_HAS_FOCUS;
-
     draw_obj (focussed_window);
 }
 
@@ -294,7 +292,6 @@ hide_windows ()
         i->node.flags |= OBJ_NODE_INVISIBLE;
         i = i->node.next;
     }
-
     draw_obj (desktop);
 }
 
@@ -322,11 +319,10 @@ void
 send_key_event (char key)
 {
     struct event * e = malloc (sizeof (struct event));
+
     e->type = EVT_KEYPRESS;
     e->data_char = key;
-
     send_event (focussed_window, e);
-
     free (e);
 }
 
@@ -338,15 +334,12 @@ wait_for_key ()
 
     while (!(key = cbm_k_getin ())) {
         send_queued_event ();
-
         if (++timer)
             continue;
-
         save_desktop_state ();
     }
 
     timer = -0x6000;
-
     return key;
 }
 

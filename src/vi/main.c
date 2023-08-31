@@ -57,12 +57,13 @@ command motion_commands[] = {
     { 0, NULL }
 };
 
+// not used yet
 command track_commands[] = {
     { 'd', cmd_delete },
     { 'c', cmd_change },
-    { 'c', cmd_yank },
-    { 'c', cmd_paste },
-    { 'c', cmd_follow },
+    { 'y', cmd_yank },
+    { 'p', cmd_paste },
+    { 'f', cmd_follow },
     { 0, NULL }
 };
 
@@ -292,6 +293,7 @@ toplevel (void)
     }
 }
 
+// Add memory to heap if there is any in the given area.
 void
 our_heapadd (unsigned start, size_t size)
 {

@@ -25,18 +25,19 @@ typedef struct _line {
 
 extern line * first_line;
 
-extern void                 line_test           (char *);
+extern void   line_test     (char *);
 
-extern line *               line_alloc          (void); // TODO: Shouldn't be public.
-extern void                 line_init           (void);
-extern line *               line_get            (unsigned);
-extern void                 buf_to_line         (void);
-extern void                 line_to_buf    (void);
-extern void                 line_delete         (void);
-extern void                 line_insert_before  (void);
-extern void                 line_insert_after   (void);
-extern void                 line_split          (void);
-extern void                 line_join           (void);
-extern void                 line_clear          (void);
+// TODO: line_alloc() houldn't be public. (pixel)
+extern line * line_alloc    (void);
+extern void   line_init     (void);
+extern line * line_get      (unsigned);
+extern void   buf_to_line   (void);
+extern void   line_to_buf   (void);
+extern void   line_delete   (void);
+extern void   line_insert_before  (void);
+extern void   line_insert_after   (void);
+extern void   line_split    (void);
+extern void   line_join     (void);
+extern void   line_clear    (void);
 
 #endif // #ifndef LINELIST_H

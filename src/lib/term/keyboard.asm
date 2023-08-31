@@ -100,7 +100,7 @@ maps_h:
 
 .proc _term_get
     lda $c6         ; Key in buffer?
-    beq _term_out
+    beq _term_get
     lda #0          ; Reset buffer.
     sta $c6
     ldy $c5         ; Get scan code.

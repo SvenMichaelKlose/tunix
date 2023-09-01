@@ -516,7 +516,7 @@ ultifs_kopen ()
 
     analyse_pathname ();
     split_pathname ();
-    if (!params[0] || ((*param_list[0] == 's' || *param_list[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
+    if (!params[0] || ((params[0] == 's' || params[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");

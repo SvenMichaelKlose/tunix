@@ -7,7 +7,6 @@
 
 #include "ultifs.h"
 
-#define ULTIFS_START    0x10000
 #define STORE_SIZE      0x800000u
 #define EMPTY_PTR       ((upos) -1)
 

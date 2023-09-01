@@ -37,7 +37,6 @@ init_kernal_emulation ()
     ultifs_mount ();
 }
 
-
 char __fastcall__
 downcase (char c)
 {
@@ -57,36 +56,29 @@ copy_from_process (char * to, char * from, char len)
 // Command parser
 //
 
-char prefix[64];
-char postfix[64];
-char filename[64];
-char lastname[64];
+bool has_prefix;
+bool has_params;
+uchar num_params;
 
-#pragma bss-name (push, "ZEROPAGE")
-char has_prefix;
-upos pwd;
-char partition;
-bfile * file;
-char param1;
-char param2;
-char * path;
+char fullname[64];
+char prefix[64];
+char pathname[64];
+char params[64];
+char * param_list[8];
+char filename[64];
+
+upos directory;
 upos subdir;
-char c;
+
 char i;
+#pragma bss-name (push, "ZEROPAGE")
+char c;
 char j;
-#pragma zpsym ("has_prefix")
-#pragma zpsym ("pwd")
-#pragma zpsym ("partition")
-#pragma zpsym ("file")
-#pragma zpsym ("param1")
-#pragma zpsym ("param2")
-#pragma zpsym ("path")
-#pragma zpsym ("subdir")
 #pragma zpsym ("c")
 #pragma zpsym ("j")
 #pragma bss-name (pop)
 
-extern char i;  // TODO: Find the definition of 'i' and remove it. (pixel)
+//extern char i;  // TODO: Find the definition of 'i' and remove it. (pixel)
 
 //
 // Control channel responses
@@ -129,99 +121,81 @@ respond_invalid_command ()
 // File name parsing
 //
 
-void __fastcall__
-split_prefix_filename (char * name)
+void
+analyse_pathname ()
 {
-    has_prefix = false;
-    for (i = 0; i < FNLEN; i++) {
-        if (name[i] == ':') {
-            prefix[i++] = 0;
-            has_prefix = !!i;
+    has_prefix = has_params = false;
+    fullname[FNLEN] = 0;
+
+    for (i = 0; i < FNLEN; i++)
+        if (fullname[i] == ':')
+            has_prefix = true;
+        else if (fullname[i] == ',') {
+            has_params = true;
             break;
         }
-        prefix[i] = name[i];
-    }
-    if (!has_prefix) {
-        memcpy (postfix, prefix, FNLEN + 1);
-        prefix[0] = 0;
-        return;
-    }
-    for (j = 0; i < FNLEN; i++)
-         postfix[j++] = name[i];
-    postfix[j] = 0;
 }
 
-bool __fastcall__
-parse_pathname (char * name)
+void
+split_pathname ()
 {
-    file = NULL;
-    lastname[0] = 0;
+    char * name = fullname;
+    char * dest;
+    char * params;
+    char ** param_listp;
+
+    if (has_prefix) {
+        dest = prefix;
+        while (*name != ':')
+            *dest = *name++;
+        name++;
+    }
+    *dest++ = 0;
+
+    dest = pathname;
+    while (*name && *name != ',')
+        *dest++ = *name++;
+    *dest++ = 0;
+
+    if (has_params) {
+        dest = params;
+        num_params = 0;
+        while (*name) {
+            *param_listp++ = dest;
+            num_params++;
+            while (*name && *name != ',')
+                *dest++ = *name++;
+            *dest++ = 0;
+        }
+    }
+}
+
+void
+traverse_pathname ()
+{
+    char * name = pathname;
+    char * path;
+    filename[0] = 0;
+
+    // Get directory to start with.
+    directory = ultifs_pwd;
+    if (name[0] == '/' && name[1] == '/') {
+        directory = ULTIFS_ROOT_DIR;
+        name += 2;
+    }
 
     while (1) {
-        if (!*name || *name == ':')
-            return true;
-
-        if (name[0] == '/' && name[1] == '/') {
-            pwd = 0x100000;
-            name += 2;
-            continue;
-        }
-        if (name[0] == '/')
-            name++;
         path = strtok (name, "/");
         while (path) {
-            subdir = ultifs_enterdir (pwd, path);
+            subdir = ultifs_enterdir (directory, path);
             if (!subdir) {
-                strcpy (lastname, path);
-                return true;
+                strcpy (filename, path);
+                return;
             }
-            pwd = subdir;
+            directory = subdir;
             path = strtok (NULL, "/");
         }
     }
-    return false;
-}
-
-bool __fastcall__
-parse_name_and_params (char * name)
-{
-    char * o = filename;
-
-    while (c = *name++) {
-        if (!c || c == ',')
-            break;
-        *o++ = c;
-    }
-
-    if (!c)
-        return true;
-    param1 = *name++;
-    c = *name++;
-    if (!c)
-        return true;
-    if (c != ',')
-        return false;
-    param2 = *name++;
-    return !*name++;
-}
-
-bool __fastcall__
-parse_prefix (char * name)
-{
-    char * p = prefix;
-
-    split_prefix_filename (name);
-    pwd = ultifs_pwd;
-    partition = 0;
-    if (has_prefix) {
-        if (isdigit (prefix[0])) {
-            partition = prefix[0] - '0';
-            p++;
-        }
-        if (!parse_pathname (p))
-            return false;
-    }
-    return true;
 }
 
 //
@@ -267,10 +241,11 @@ cmd_initialize ()
 }
 
 void __fastcall__
-cmd_position (char * name)
+cmd_position ()
 {
     channel *  ch;
     upos       p;
+    char *     name = fullname;
 
     if (FNLEN != 5) {
         respond_invalid_command ();
@@ -290,17 +265,14 @@ cmd_position (char * name)
 }
 
 void __fastcall__
-change_directory (char * name)
+change_directory ()
 {
-    if (!parse_prefix (name)) {
-        respond_syntax_error ();
-        return;
-    }
-    if (file)
-        goto invalid;
-    if (!parse_pathname (postfix))
-        goto invalid;
-    ultifs_pwd = pwd;
+    analyse_pathname ();
+    split_pathname ();
+    traverse_pathname ();
+    if (filename[0])
+        goto invalid;   // Other error: directory does not exist.
+    ultifs_pwd = directory;
     respond_ok ();
     return;
 
@@ -309,17 +281,14 @@ invalid:
 }
 
 void __fastcall__
-make_directory (char * name)
+make_directory ()
 {
-    if (!parse_prefix (name)) {
-        respond_syntax_error ();
-        return;
-    }
-    if (file)
-        goto invalid;
-    if (parse_pathname (postfix))
-        goto invalid;
-    bfile_create_directory (ultifs_pwd, lastname);
+    analyse_pathname ();
+    split_pathname ();
+    traverse_pathname ();
+    if (!filename[0])
+        goto invalid;   // Other error: directory already exists.
+    bfile_create_directory (directory, filename);
     respond_ok ();
     return;
 
@@ -328,44 +297,44 @@ invalid:
 }
 
 void __fastcall__
-commands_c (char * name)
+commands_c ()
 {
-    switch (name[1]) {
+    switch (fullname[1]) {
         case 'd':
-            change_directory (&name[2]);
+            change_directory ();
             return;
     }
     respond_syntax_error ();
 }
 
 void __fastcall__
-commands_m (char * name)
+commands_m ()
 {
-    switch (name[1]) {
+    switch (fullname[1]) {
         case 'd':
-            make_directory (&name[2]);
+            make_directory ();
             return;
     }
     respond_syntax_error ();
 }
 
 void __fastcall__
-open_command (char * name)
+open_command ()
 {
     channel *  ch = channels[LFN];
 
-    switch (name[0]) {
+    switch (fullname[0]) {
         case 'c':
-            commands_c (name);
+            commands_c ();
             return;
         case 'i':
             cmd_initialize ();
             return;
         case 'm':
-            commands_m (name);
+            commands_m ();
             return;
         case 'p':
-            cmd_position (name);
+            cmd_position ();
             return;
     }
 
@@ -523,25 +492,20 @@ ultifs_kopen ()
     }
 
     if (FNLEN) {
-        name = malloc (FNLEN + 1);
-        copy_from_process (name, FNAME, FNLEN);
-        name[FNLEN] = 0;
+        copy_from_process (fullname, FNAME, FNLEN);
+        fullname[FNLEN] = 0;
     }
 
     STATUS = 0;
     flags &= ~FLAG_C;
+    name = malloc (FNLEN + 1);
+    memcpy (name, fullname, FNLEN + 1);
     ch = alloc_channel (name);
 
     if (SA == 15) {
         ch->is_buffered = true;
-        open_command (name);
+        open_command ();
         goto success;
-    }
-
-    if (!parse_prefix (name)) {
-        free (name);
-        respond_syntax_error ();
-        goto deverror;
     }
 
     if (FNLEN == 1 && *name == '$') {
@@ -550,9 +514,9 @@ ultifs_kopen ()
         goto success;
     }
 
-    parse_name_and_params (postfix);
-
-    if (!param1 || ((param1 == 's' || param1 == 'p') && (!param2 || param2 == 'r'))) {
+    analyse_pathname ();
+    split_pathname ();
+    if (!params[0] || ((*param_list[0] == 's' || *param_list[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {
             respond (ERR_FILE_NOT_FOUND, "file not found");
@@ -563,9 +527,8 @@ ultifs_kopen ()
         respond_ok ();
         goto success;
     }
-
-    if (param2 == 'w') {
-        if (param1 != 's' && param2 != 'p') {
+    if (*param_list[1] == 'w') {
+        if (*param_list[0] != 's' && *param_list[1] != 'p') {
             respond_syntax_error ();
             goto deverror;
         }
@@ -576,17 +539,16 @@ ultifs_kopen ()
             goto deverror;
         }
 
-        ch->file = ultifs_create (ultifs_pwd, filename, param1 == 's' ? CBM_T_SEQ : CBM_T_PRG);
+        ch->file = ultifs_create (ultifs_pwd, filename, *param_list[0] == 's' ? CBM_T_SEQ : CBM_T_PRG);
         respond_ok ();
         goto success;
     }
-
-    if (param2 == 'a') {
+    if (*param_list[1] == 'a') {
         respond (ERR_WRITE_PROTECT_ON, "write protect on");
         goto deverror;
     }
-
     respond (ERR_INVALID_FILE_NAME, "invalid file name");
+
 error:
     flags |= FLAG_C;
     return false;

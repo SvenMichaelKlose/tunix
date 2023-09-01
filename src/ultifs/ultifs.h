@@ -23,6 +23,11 @@ enum ultifs_error_e {
 };
 extern char ultifs_error;
 
+#define ULTIFS_START    0x10000
+
+#define ULTIFS_MODE_READ    0
+#define ULTIFS_MODE_WRITE   1
+
 typedef struct _bfile {
     upos       start;      /* Start of file block. */
     upos       ptr;        /* File data position. */
@@ -33,8 +38,7 @@ typedef struct _bfile {
     char       mode;       /* Mode at bfile_open(). */
 } bfile;
 
-#define ULTIFS_MODE_READ    0
-#define ULTIFS_MODE_WRITE   1
+#define ULTIFS_ROOT_DIR     0x10000
 
 extern upos ultifs_pwd;
 

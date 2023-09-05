@@ -125,7 +125,6 @@ void
 analyse_pathname ()
 {
     has_prefix = has_params = false;
-    fullname[FNLEN] = 0;
 
     for (i = 0; i < FNLEN; i++)
         if (fullname[i] == ':')
@@ -139,32 +138,51 @@ analyse_pathname ()
 void
 split_pathname ()
 {
-    char * name = fullname;
-    char * dest;
-    char * params;
+    char *  dest;
+    char *  params;
     char ** param_listp;
+    char    c;
 
+    i = 0;
     if (has_prefix) {
         dest = prefix;
-        while (*name != ':')
-            *dest = *name++;
-        name++;
+        for (; i < FNLEN; i++) {
+            c = fullname[i];
+            if (c == ':') {
+                i++;
+                break;
+            }
+            *dest = c;
+        }
     }
     *dest++ = 0;
 
     dest = pathname;
-    while (*name && *name != ',')
-        *dest++ = *name++;
+    for (; i < FNLEN; i++) {
+        c = fullname[i];
+        if (c == ',') {
+            i++;
+            break;
+        }
+        *dest++ = c;
+    }
     *dest++ = 0;
 
     if (has_params) {
-        dest = params;
         num_params = 0;
-        while (*name) {
+        param_listp = param_list;
+        dest = params;
+        for (; i < FNLEN; i++) {
             *param_listp++ = dest;
             num_params++;
-            while (*name && *name != ',')
-                *dest++ = *name++;
+            for (; i < FNLEN; i++) {
+                c = fullname[i];
+                if (c == ',') {
+                    i++;
+                    break;
+                }
+                *dest++ = c;
+            }
             *dest++ = 0;
         }
     }
@@ -516,6 +534,7 @@ ultifs_kopen ()
 
     analyse_pathname ();
     split_pathname ();
+while (1);
     if (!params[0] || ((params[0] == 's' || params[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {
@@ -528,7 +547,7 @@ ultifs_kopen ()
         goto success;
     }
     if (*param_list[1] == 'w') {
-        if (*param_list[0] != 's' && *param_list[1] != 'p') {
+        if (*param_list[0] != 's' && *param_list[0] != 'p') {
             respond_syntax_error ();
             goto deverror;
         }

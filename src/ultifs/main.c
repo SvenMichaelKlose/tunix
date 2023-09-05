@@ -1,10 +1,3 @@
-// UltiFS
-//
-// Top-level
-//
-// Author: Sven Michael Klose <pixel@hugbox.org>
-
-
 #include <cbm.h>
 #include <conio.h>
 
@@ -13,6 +6,10 @@
 #include <string.h>
 
 #include <lib/ultimem/ultimem.h>
+
+#ifdef TEST
+#include "test.h"
+#endif
 
 //extern void __fastcall__ init_primary_wedge (void * start);
 //extern void __fastcall__ init_secondary_wedge (char rom_device);
@@ -49,6 +46,9 @@ extern void init_secondary_wedge (void);
 void
 main (void)
 {
+#ifdef TEST
+    test ();
+#endif
     init_secondary_wedge ();
     init_kernal_emulation ();
     init_hooks ();

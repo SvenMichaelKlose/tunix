@@ -120,4 +120,20 @@ typedef struct _channel {
     char *   bufrptr;       // Read pointer
 } channel;
 
+#ifdef TEST
+extern bool has_prefix;
+extern bool has_params;
+extern uchar num_params;
+
+extern char fullname[64];
+extern char prefix[64];
+extern char pathname[64];
+extern char params[64];
+extern char * param_list[8];
+extern char filename[64];
+
+extern void analyse_pathname (void);
+extern void split_pathname (void);
+#endif
+
 #endif // #ifndef KERNAL_H

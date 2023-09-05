@@ -1,5 +1,7 @@
 #pragma code-name ("ULTIFS")
 
+#include <stdbool.h>
+
 #include <lib/ingle/cc65-charmap.h>
 #include <lib/ultimem/ultimem.h>
 

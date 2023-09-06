@@ -20,8 +20,8 @@ new_vectors:
 
 .proc _init_hooks
     ldx #0
-l:  lda #$ff
-    sta $9800,x
+    lda #$ff
+l:  sta $9800,x
     inx
     bne l
 

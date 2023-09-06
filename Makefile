@@ -11,15 +11,14 @@ all:
 	cp src/vi/vi.zip native-pkgs/
 	mkdir -p bin
 	cp src/fstest/fstest bin/
-	cp src/fstest/test.d64 bin/
 	cp src/sjload/sjload bin/
 	cp src/ultiburn/ultiburn bin/
 	cp src/ultidump/ultidump bin/
 	cp src/ultifs/ultifs bin/
 	cp src/ultitest/ultitest bin/
-#	cp src/ultitest/ultitest bin/
 	cp src/vi/README.md bin/vi.md
 	cp src/vi/vi bin/
+	c1541 -format "fstest,01" d64 test.d64 -write src/ultifs/ultifs -write src/fstest/fstest
 
 clean:
 	$(MAKE) -C src clean

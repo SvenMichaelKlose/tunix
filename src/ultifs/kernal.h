@@ -1,7 +1,9 @@
 #ifndef KERNAL_H
 #define KERNAL_H
 
-#define NUM_LFN  255    // No limit. LFNs 128>= should add extra line feeds. (pixel)
+#define MAX_FNLEN   32      // Maximum file name length (not including zero termination).
+#define MAX_FPARAMS 8       // Maximum # of parameters per command.
+#define NUM_LFN     255     // No limit. LFNs 128>= should add extra line feeds. (pixel)
 
 typedef unsigned char uchar;
 
@@ -125,15 +127,14 @@ extern bool has_prefix;
 extern bool has_params;
 extern uchar num_params;
 
-extern char fullname[64];
-extern char prefix[64];
-extern char pathname[64];
-extern char params[64];
-extern char * param_list[8];
-extern char filename[64];
+extern char fullname[MAX_FNLEN];
+extern char prefix[MAX_FNLEN];
+extern char pathname[MAX_FNLEN];
+extern char params[MAX_FNLEN];
+extern char * param_list[MAX_FPARAMS];
+extern char filename[MAX_FNLEN];
 
-extern void analyse_pathname (void);
-extern void split_pathname (void);
+extern void parse_pathname (void);
 #endif
 
 #endif // #ifndef KERNAL_H

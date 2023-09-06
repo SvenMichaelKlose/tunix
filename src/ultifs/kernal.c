@@ -60,12 +60,12 @@ bool has_prefix;
 bool has_params;
 uchar num_params;
 
-char fullname[64];
-char prefix[64];
-char pathname[64];
-char params[64];
-char * param_list[8];
-char filename[64];
+char fullname[MAX_FNLEN];
+char prefix[MAX_FNLEN];
+char pathname[MAX_FNLEN];
+char params[MAX_FNLEN];
+char * param_list[MAX_FPARAMS];
+char filename[MAX_FNLEN];
 
 upos directory;
 upos subdir;
@@ -182,6 +182,13 @@ split_pathname ()
 }
 
 void
+parse_pathname ()
+{
+    analyse_pathname ();
+    split_pathname ();
+}
+
+void
 traverse_pathname ()
 {
     char * name = pathname;
@@ -278,8 +285,7 @@ cmd_position ()
 void __fastcall__
 change_directory ()
 {
-    analyse_pathname ();
-    split_pathname ();
+    parse_pathname ();
     traverse_pathname ();
     if (filename[0])
         goto invalid;   // Other error: directory does not exist.
@@ -294,8 +300,7 @@ invalid:
 void __fastcall__
 make_directory ()
 {
-    analyse_pathname ();
-    split_pathname ();
+    parse_pathname ();
     traverse_pathname ();
     if (!filename[0])
         goto invalid;   // Other error: directory already exists.
@@ -525,8 +530,7 @@ ultifs_kopen ()
         goto success;
     }
 
-    analyse_pathname ();
-    split_pathname ();
+    parse_pathname ();
 while (1);
     if (!params[0] || ((params[0] == 's' || params[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);

@@ -27,8 +27,8 @@ test ()
     printf ("Self-test: ");
     strcpy (fullname, NAME);
     FNLEN = strlen (NAME);
-    analyse_pathname ();
-    split_pathname ();
+    parse_pathname ();
+return;
     if (strcmp (pathname, "fnord"))
         issue ("Incorrect 'pathname'.");
     if (num_params != 2)

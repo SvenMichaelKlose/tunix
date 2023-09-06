@@ -236,11 +236,16 @@ main (int argc, char ** argv)
     int num_errors = 0;
 
     putchar (0x93);
+    /*
     if (argc < 2) {
         printf ("Need device number as argument.\n");
         exit (-1);
     }
     device = atoi (argv[1]);
+    */
+(void) argc;
+(void) argv;
+device = 12;
 
     printf ("FSTEST on device #%d.\n\n", device);
 

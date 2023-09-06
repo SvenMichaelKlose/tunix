@@ -70,16 +70,6 @@ char filename[64];
 upos directory;
 upos subdir;
 
-char i;
-#pragma bss-name (push, "ZEROPAGE")
-char c;
-char j;
-#pragma zpsym ("c")
-#pragma zpsym ("j")
-#pragma bss-name (pop)
-
-//extern char i;  // TODO: Find the definition of 'i' and remove it. (pixel)
-
 //
 // Control channel responses
 //
@@ -124,6 +114,8 @@ respond_invalid_command ()
 void
 analyse_pathname ()
 {
+    uchar i;
+
     has_prefix = has_params = false;
 
     for (i = 0; i < FNLEN; i++)
@@ -141,7 +133,8 @@ split_pathname ()
     char *  dest;
     char *  params;
     char ** param_listp;
-    char    c;
+    uchar   c;
+    uchar   i;
 
     i = 0;
     if (has_prefix) {

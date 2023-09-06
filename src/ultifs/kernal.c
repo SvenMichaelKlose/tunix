@@ -134,7 +134,6 @@ void
 split_pathname ()
 {
     char *  dest;
-    char *  params;
     char ** p;
     uchar   c;
     uchar   i;

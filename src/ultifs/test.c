@@ -28,12 +28,11 @@ test ()
     strcpy (fullname, NAME);
     FNLEN = strlen (NAME);
     parse_pathname ();
-return;
     if (strcmp (pathname, "fnord"))
         issue ("Incorrect 'pathname'.");
     if (num_params != 2)
         issue ("'num_params' is not 2.");
     if (strcmp (params, "foo"))
         issue ("1st param is not 'foo'.");
-    printf ("OK.");
+    printf ("OK.\n");
 }

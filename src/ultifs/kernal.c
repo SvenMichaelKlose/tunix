@@ -115,16 +115,19 @@ void
 analyse_pathname ()
 {
     uchar i;
+    uchar c;
 
     has_prefix = has_params = false;
 
-    for (i = 0; i < FNLEN; i++)
-        if (fullname[i] == ':')
+    for (i = 0; i < FNLEN; i++) {
+        c = fullname[i];
+        if (c == ':')
             has_prefix = true;
-        else if (fullname[i] == ',') {
+        else if (c == ',') {
             has_params = true;
             break;
         }
+    }
 }
 
 void
@@ -132,7 +135,7 @@ split_pathname ()
 {
     char *  dest;
     char *  params;
-    char ** param_listp;
+    char ** p;
     uchar   c;
     uchar   i;
 
@@ -163,10 +166,10 @@ split_pathname ()
 
     if (has_params) {
         num_params = 0;
-        param_listp = param_list;
+        p = param_list;
         dest = params;
         for (; i < FNLEN; i++) {
-            *param_listp++ = dest;
+            *p++ = dest;
             num_params++;
             for (; i < FNLEN; i++) {
                 c = fullname[i];

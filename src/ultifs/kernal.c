@@ -12,10 +12,10 @@
 #include <dirent.h>
 #include <cbm.h>
 
+#include <lib/log/liblog.h>
 #include <lib/ultimem/ultimem.h>
 #include <lib/posix/string.h>
 
-#include "log.h"
 #include "ultifs.h"
 #include "kernal.h"
 #include "ipc.h"

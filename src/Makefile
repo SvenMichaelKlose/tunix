@@ -13,6 +13,7 @@ all:
 	$(MAKE) -C lib/term all
 	$(MAKE) -C lib/keyboard all
 	$(MAKE) -C lib/lineedit all
+	$(MAKE) -C lib/log all
 	$(MAKE) -C lib/text all
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C flashboot all
@@ -41,6 +42,7 @@ clean:
 	$(MAKE) -C lib/term clean
 	$(MAKE) -C lib/keyboard clean
 	$(MAKE) -C lib/lineedit clean
+	$(MAKE) -C lib/log clean
 	$(MAKE) -C lib/text clean
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C flashboot clean

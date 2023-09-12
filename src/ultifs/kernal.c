@@ -68,7 +68,6 @@ char * param_list[MAX_FPARAMS];
 char filename[MAX_FNLEN];
 
 upos directory;
-upos subdir;
 
 //
 // Control channel responses
@@ -195,12 +194,14 @@ parse_pathname ()
 
 // Enter directories along 'pathname'.  If the
 // last component is not a directory, the rest
-// of the string goes to 'lastname'.
+// of the string goes to 'filename', no matter
+// if it exists or not.
 void
 traverse_pathname ()
 {
     char * name = pathname;
     char * path;
+    upos subdir;
     filename[0] = 0;
 
     // Get directory to start with.
@@ -539,6 +540,7 @@ ultifs_kopen ()
     }
 
     parse_pathname ();
+    traverse_pathname ();
     if (!params[0] || ((params[0] == 's' || params[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {

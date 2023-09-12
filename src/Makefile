@@ -11,6 +11,7 @@ all:
 	$(MAKE) -C lib/btree all
 	$(MAKE) -C lib/gfx all
 	$(MAKE) -C lib/term all
+	$(MAKE) -C lib/keyboard all
 	$(MAKE) -C lib/lineedit all
 	$(MAKE) -C lib/text all
 	$(MAKE) -C lib/gui all
@@ -38,6 +39,7 @@ clean:
 	$(MAKE) -C lib/btree clean
 	$(MAKE) -C lib/gfx clean
 	$(MAKE) -C lib/term clean
+	$(MAKE) -C lib/keyboard clean
 	$(MAKE) -C lib/lineedit clean
 	$(MAKE) -C lib/text clean
 	$(MAKE) -C lib/gui clean

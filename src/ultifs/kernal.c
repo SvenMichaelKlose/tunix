@@ -111,6 +111,7 @@ respond_invalid_command ()
 // File name parsing
 //
 
+// Check if command 'has_prefix' or 'has_params'.
 void
 analyse_pathname ()
 {
@@ -130,6 +131,8 @@ analyse_pathname ()
     }
 }
 
+// Copy from 'fullname' to 'prefix', 'pathname' and 'params_list',
+// depending on analyse_pathname().
 void
 split_pathname ()
 {
@@ -190,6 +193,9 @@ parse_pathname ()
     split_pathname ();
 }
 
+// Enter directories along 'pathname'.  If the
+// last component is not a directory, the rest
+// of the string goes to 'lastname'.
 void
 traverse_pathname ()
 {

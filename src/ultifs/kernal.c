@@ -533,7 +533,6 @@ ultifs_kopen ()
     }
 
     parse_pathname ();
-while (1);
     if (!params[0] || ((params[0] == 's' || params[0] == 'p') && (!*param_list[1] || *param_list[1] == 'r'))) {
         found_file = ultifs_open (ultifs_pwd, filename, ULTIFS_MODE_READ);
         if (!found_file) {

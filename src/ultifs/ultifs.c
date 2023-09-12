@@ -8,7 +8,7 @@
 #include "ultifs.h"
 
 #define STORE_SIZE      0x800000u
-#define EMPTY_PTR       ((upos) -1)
+#define ULTIFS_UNUSED       ((upos) -1)
 
 typedef unsigned char uchar;
 
@@ -84,8 +84,8 @@ free_pathname (char ** arr)
 
 typedef struct _block {
     usize   size;           /* Size of file data. */
-    upos    replacement;    /* Replacement or EMPTY_PTR. */
-    upos    next;           /* Next file in directory or EMPTY_PTR. Not valid if replaced. */
+    upos    replacement;    /* Replacement or ULTIFS_UNUSED. */
+    upos    next;           /* Next file in directory or ULTIFS_UNUSED. Not valid if replaced. */
     char    type;
     char    name_length;
     /* name */
@@ -282,12 +282,12 @@ block_get_latest_version (upos p)
     upos r;
 return p;
 
-    if (p == EMPTY_PTR)
+    if (p == ULTIFS_UNUSED)
         return p;
 
     while (1) {
         r = block_get_replacement (p);
-        if (r == EMPTY_PTR)
+        if (r == ULTIFS_UNUSED)
             break;
         p = r;
     }
@@ -300,7 +300,7 @@ block_directory_get_first (upos parent)
 {
     upos d = ultimem_read_int (file_data (parent));
 
-    if (d == EMPTY_PTR)
+    if (d == ULTIFS_UNUSED)
         return d;
     return block_get_latest_version (d);
 }
@@ -313,7 +313,7 @@ block_get_last (upos p)
     while (1) {
         p = block_get_latest_version (p);
         n = block_get_next (p);
-        if (n == EMPTY_PTR)
+        if (n == ULTIFS_UNUSED)
             break;
         p = n;
     }
@@ -494,7 +494,7 @@ bfile_append_to_directory (bfile * b)
 
     if (b->directory != p) {
         p = block_directory_get_first (b->directory);
-        if (p == EMPTY_PTR) {
+        if (p == ULTIFS_UNUSED) {
             // Create pointer to first file of directory.
             ultimem_write_int (file_data (b->directory), b->start);
             return;
@@ -562,11 +562,11 @@ bfile_lookup_name (upos p, char * name, char namelen)
         ultimem_readm (buf, namelen, p + offsetof (block, name_length) + 1);
         if (!memcmp (buf, name, namelen))
             break;
-    } while (EMPTY_PTR != (p = block_get_next (p)));
+    } while (ULTIFS_UNUSED != (p = block_get_next (p)));
 
     free (buf);
 
-    if (p == EMPTY_PTR)
+    if (p == ULTIFS_UNUSED)
         return 0;
     return block_get_latest_version (p);
 }
@@ -613,7 +613,7 @@ ultifs_readdir (struct cbm_dirent * dirent)
     usize size;
     unsigned short blocks;
 
-    if (current_directory == EMPTY_PTR)
+    if (current_directory == ULTIFS_UNUSED)
         return 1;
 
     dirent->type = block_get_type (current_directory);
@@ -677,7 +677,7 @@ ultifs_mount_traverse (upos dir)
         if (block_get_type (dir) == CBM_T_DIR)
             ultifs_mount_traverse (ultimem_read_int (file_data (dir)));
         n = block_get_next (dir);
-        if (n != EMPTY_PTR) {
+        if (n != ULTIFS_UNUSED) {
             dir = n;
             continue;
         }
@@ -692,10 +692,10 @@ char
 ultifs_mount ()
 {
     ultifs_pwd = last_free = ULTIFS_START;
-    if (ultimem_read_int (ULTIFS_START) != EMPTY_PTR)
+    if (ultimem_read_int (ULTIFS_START) != ULTIFS_UNUSED)
         ultifs_mount_traverse (ULTIFS_START);
 
-    return ultimem_read_int (file_data (last_free)) != EMPTY_PTR;
+    return ultimem_read_int (file_data (last_free)) != ULTIFS_UNUSED;
 }
 
 #ifndef __CC65__

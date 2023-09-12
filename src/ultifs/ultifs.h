@@ -5,6 +5,9 @@
 #ifndef ULTIFS_H
 #define ULTIFS_H
 
+// 8 unused bytes in Flash ROM.  Replaces dword NULL.
+#define ULTIFS_UNUSED   ((upos) -1)
+
 #ifndef __CC65__
 typedef unsigned int upos;
 typedef unsigned int usize;

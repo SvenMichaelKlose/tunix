@@ -21,7 +21,23 @@
 #include "ipc.h"
 
 channel * channels[256];
-char * response;                        // Error code of last operation.
+
+char * response;                    // Error code of last operation.
+
+char    fullname[MAX_FNLEN];        // Complete command string.
+
+// Parsed: 'fullname':
+bool    has_prefix;
+bool    has_params;
+uchar   num_params;
+char    prefix[MAX_FNLEN];       // Everything up to the colon (':').
+char    pathname[MAX_FNLEN];     // From colon till params (starting with ',').
+char    params[MAX_FNLEN];       // All params queued.
+char *  param_list[MAX_FPARAMS]; // Pointers to each param in 'params'.
+char    filename[MAX_FNLEN];     // Last path component(s) that does not exist.
+
+upos directory;
+
 
 void
 init_kernal_emulation ()
@@ -51,23 +67,6 @@ copy_from_process (char * to, char * from, char len)
     while (len--)
         *to++ = downcase (peek_from_process (from++));
 }
-
-//
-// Command parser
-//
-
-bool has_prefix;
-bool has_params;
-uchar num_params;
-
-char fullname[MAX_FNLEN];
-char prefix[MAX_FNLEN];
-char pathname[MAX_FNLEN];
-char params[MAX_FNLEN];
-char * param_list[MAX_FPARAMS];
-char filename[MAX_FNLEN];
-
-upos directory;
 
 //
 // Control channel responses
@@ -136,7 +135,7 @@ void
 split_pathname ()
 {
     char *  dest;
-    char ** p;
+    char ** pl;
     uchar   c;
     uchar   i;
 
@@ -167,17 +166,15 @@ split_pathname ()
 
     if (has_params) {
         num_params = 0;
-        p = param_list;
         dest = params;
+        pl = param_list;
         for (; i < FNLEN; i++) {
-            *p++ = dest;
+            *pl++ = dest;
             num_params++;
             for (; i < FNLEN; i++) {
                 c = fullname[i];
-                if (c == ',') {
-                    i++;
+                if (c == ',')
                     break;
-                }
                 *dest++ = c;
             }
             *dest++ = 0;
@@ -215,7 +212,7 @@ traverse_pathname ()
         path = strtok (name, "/");
         while (path) {
             subdir = ultifs_enterdir (directory, path);
-            if (!subdir) {
+            if (subdir == ULTIFS_UNUSED) {
                 strcpy (filename, path);
                 return;
             }
@@ -241,7 +238,6 @@ add_to_buf (channel * ch, void * ptr, size_t len)
 {
     if (!ch->buf)
         ch->buf = ch->bufrptr = ch->bufwptr = malloc (2048);
-
     memcpy (ch->bufwptr, ptr, len);
     ch->bufwptr += len;
 }
@@ -253,7 +249,6 @@ read_from_buf (channel * ch)
 
     if (ch->bufrptr == ch->bufwptr)
         clear_buf (ch);
-
     return c;
 }
 

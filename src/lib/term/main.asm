@@ -17,6 +17,8 @@
 .import charset, charset_size
 .import popax
 
+.import box
+
 .importzp s, d, c, scrbase, scr
 .importzp font, pencil_mode, pattern
 .importzp xpos, ypos, xpos2, ypos2, width, height
@@ -43,6 +45,39 @@ attributes:     .res 2
 
 our_charset:
     .include "charset-4x8.asm"
+
+code_handlers:
+    .word do_nothing
+    .word init_cursor_motion   ; 01,x,y:   Cursor motion
+    .word insert_line          ; 02:       Insert line
+    .word delete_line          ; 03:       Delete line
+    .word do_nothing           ; 04
+    .word do_nothing           ; 05
+    .word do_nothing           ; 06
+    .word bell                 ; 07:       BEL: bell and/or flash screen
+    .word cursor_left          ; 08:       BS; Backspace
+    .word tab                  ; 09:       HT; Horizontal tab
+    .word cursor_down          ; 0a:       LF: Line feed
+    .word cursor_down          ; 0b:       VF: Vertical tab
+    .word form_feed            ; 0c:       FF: Form feed,
+    .word carriage_return      ; 0d:       CR: Carriage return
+    .word do_nothing           ; 0e
+    .word do_nothing           ; 0f
+    .word do_nothing           ; 10
+    .word do_nothing           ; 11
+    .word do_nothing           ; 12
+    .word do_nothing           ; 13
+    .word do_nothing           ; 14
+    .word do_nothing           ; 15
+    .word do_nothing           ; 16
+    .word do_nothing           ; 17
+    .word clear_to_eol         ; 18:       Clear to EOL
+    .word do_nothing           ; 19
+    .word form_feed            ; 1a:       Clear screen
+    .word escape               ; 1b:       ESC: Escape
+    .word do_nothing           ; 1c
+    .word do_nothing           ; 1d
+    .word home                 ; 1e:       Home
 
     .code
 
@@ -89,6 +124,7 @@ l2: lda (p),y
     cmp #>our_charset + 8
     bne l2
 
+    ; Init terminal state.
     ldy #0
     sty cursor_x
     sty cursor_y
@@ -97,7 +133,6 @@ l2: lda (p),y
     sty has_cursor
     ldy #$ff
     sty code_length
-
     lda #%00010000
     sta attributes
     jmp cursor_draw
@@ -105,24 +140,20 @@ l2: lda (p),y
 
 .proc scroll_up
     ; Clear top row (except first char).
-    lda #<(charset + 8)
-    sta s
-    lda #>(charset + 8)
-    sta s+1
-    ldx #screen_columns-1
-m:  ldy #8
+    lda #8
+    sta xpos
+    sta height
     lda #0
-l:  sta (s),y
-    dey
-    bne l
-    lda s
-    clc
-    adc #screen_height
-    sta s
-    bcc n
-    inc s+1
-n:  dex
-    bne m
+    sta ypos
+    lda #screen_width-8
+    sta width
+    lda #1
+    sta pencil_mode
+    lda #<_pattern_empty
+    sta pattern
+    lda #>_pattern_empty
+    sta pattern+1
+    jsr box
 
     ; Move all of the screen by one char.
     ; Cleared top row is now at the bottom.
@@ -215,26 +246,21 @@ r:  pla
     clc
     adc #4
     sta cursor_x
-
     cmp #160
     bne n
-
     lda #0
     sta cursor_x
     jmp cursor_down
-
 n:  rts
 .endproc
 
 .proc cursor_left
     lda cursor_x
     beq r
-
     lda cursor_x
     sec
     sbc #4
     sta cursor_x
-
 r:  rts
 .endproc
 
@@ -243,11 +269,9 @@ r:  rts
     cmp #screen_height - 8
     bne n
     jmp scroll_up
-
 n:  clc
     adc #8
     sta cursor_y
-    
     rts
 .endproc
 
@@ -297,7 +321,6 @@ l:  lda $900f
     bne l
     dey
     bne l
-
     lda #$0a
     sta $900f
     rts
@@ -340,6 +363,7 @@ done:
 .endproc
 
 .proc insert_line
+    ; Move to line start.
     lda #0
     sta cursor_x
     sta xpos
@@ -384,6 +408,7 @@ done:
 .endproc
 
 .proc delete_line
+    ; Move to start of line.
     lda #0
     sta cursor_x
 
@@ -391,20 +416,17 @@ done:
     cmp #screen_height-8
     beq done
 
+    ; Move up lines below.
     sta ypos
-
     lda #screen_height-8-1
     sec
     sbc ypos
     sta height
-
     lda #0
     sta xpos
     lda #20
     sta width
-
 l2: jsr calcscr
-
     lda scr
     clc
     adc #8
@@ -431,6 +453,7 @@ l:  lda (tmp),y
     bne l2
     
 done:
+    ; Clear last line.
     lda cursor_y
     pha
     lda #screen_height-8
@@ -439,6 +462,29 @@ done:
     pla
     sta cursor_y
     rts
+.endproc
+
+.proc form_feed
+    jsr clear_screen
+    jmp home
+.endproc
+
+.proc home
+    lda #0
+    sta cursor_x
+    sta cursor_y
+    rts
+.endproc
+
+; 7f:       DEL: BS, ' ', BS
+.proc delete
+    lda #7
+    jsr _term_put
+    lda #32
+    jsr _term_put
+    lda #7
+    jsr _term_put
+    jmp cursor_show
 .endproc
 
 .proc escape
@@ -469,6 +515,7 @@ done:
 .proc exec_escape
     lda code
 
+    ; Enable attribute.
     cmp #$0b
     bne n1
     lda #0
@@ -480,6 +527,7 @@ done:
     jmp cursor_show
 n1:
 
+    ; Disable attribute.
     cmp #$0c
     bne n2
     lda #0
@@ -491,6 +539,10 @@ n1:
 
 n2:
     jmp cursor_show
+.endproc
+
+.proc do_nothing
+    rts
 .endproc
 
 ; Output control codes:
@@ -521,128 +573,45 @@ n2:
 
     ldx code_length
     bmi no_code
+    ; Collect code
     sta code,x
     dec code_length
     bpl r
+    ; Code complete. Call handler.
     jmp (code_callback)
-no_code:
 
-; 01,x,y:   Cursor motion
-    cmp #$01
-    bne n7
-    jsr init_cursor_motion
 r:  jmp cursor_show
-n7:
 
-; 02:       Insert line
-    cmp #$02
-    bne n12
-    jsr insert_line
+no_code:
+    cmp #$1f
+    bcs no_ctrl
+    asl
+    clc
+    adc #<code_handlers
+    sta j+1
+    lda #>code_handlers
+    adc #0
+    sta j+2
+    jsr j
     jmp cursor_show
-n12:
 
-; 03:       Delete line
-    cmp #$03
-    bne n13
-    jsr delete_line
-    jmp cursor_show
-n13:
+j:  jmp ($ffff)
 
-; 07:       BEL: bell and/or flash screen
-    cmp #$07
-    bne n6
-    jsr bell
-    jmp cursor_show
-n6:
-
-; 08:       BS; Backspace
-    cmp #$08
-    bne n3
-    jsr cursor_left
-    jmp cursor_show
-n3:
-
-; 09:       HT; Horizontal tab
-    cmp #$09
-    bne n10
-    jsr tab
-    jmp cursor_show
-n10:
-
-; 0a:       LF: Line feed
-; 0b:       VF: Vertical tab
-; 0c:       FF: Form feed,
-    cmp #$0a
-    beq line_feed
-    cmp #$0b
-    beq line_feed
-    cmp #$0c
-    bne n
-line_feed:
-    jsr cursor_down
-    jmp cursor_show
-n:  
-
-; 1a:       Clear screen
-    cmp #$0c
-    beq line_feed   ; (could also be clear_screen)
-    cmp #$1a
-    bne n4
-form_feed:
-    jsr clear_screen
-    lda #0
-    sta cursor_x
-    sta cursor_y
-    jmp cursor_show
-n4:
-
-; 0d:       CR: Carriage return
-    cmp #$0d
-    bne n2
-    jsr carriage_return
-    jmp cursor_show
-n2:
-
-; 1b:       ESC: Escape
-    cmp #$1b
-    bne n14
-    jsr escape
-    jmp cursor_show
-n14:
-
-; 18:       Clear to EOL
-    cmp #$18
-    bne n9
-    jsr clear_to_eol
-    jmp cursor_show
-n9:
-
-; 1e:       Home
-    cmp #$1e
-    bne n5
-    lda #0
-    sta cursor_x
-    sta cursor_y
-    jmp cursor_show
-n5:
-
-; 7f:       DEL: BS, ' ', BS
+no_ctrl:
     cmp #$7f
-    bne n8
-    lda #7
-    jsr _term_put
-    lda #32
-    jsr _term_put
-    lda #7
-    jsr _term_put
-    jmp cursor_show
-n8:
+    bne print_char
+    jmp delete
 
+print_char:
     pha
+
+    ; Save cursor position
     lda cursor_x
     sta xpos
     lda cursor_y
     sta ypos
+
+    ; Handle attribute 'reverse'.
     lda attributes
     lsr
     bcs reverse
@@ -652,10 +621,12 @@ n8:
 reverse:
     lda #2
     sta pencil_mode
+
 do_char:
     pla
     jsr putchar_fixed
 
+    ; Handle attribute 'underline'.
     lda attributes
     and #8
     beq no_underline
@@ -663,7 +634,7 @@ do_char:
     and #4
     bne underline_right
     lda #$f0
-    bne underline
+    bne underline ; (jmp)
 underline_right:
     lda #$0f
 underline:
@@ -672,6 +643,7 @@ underline:
     sta (scr),y
 no_underline:
 
+    ; Move on.
     jsr cursor_step
     jmp cursor_show
 .endproc

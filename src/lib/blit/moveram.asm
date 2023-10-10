@@ -7,20 +7,21 @@
 .proc moveram
     ldy #0
     ldx c
-    inc c+1
     cmp #0
     bne copy_backwards
 
+copy_forwards:
 l:  lda (s),y
     sta (d),y
     iny
     beq k
-copy_forwards:
 q:  dex
     bne l
+    lda c+1
+    beq r
     dec c+1
     bne l
-    rts
+r:  rts
 k:  inc s+1
     inc d+1
     jmp q
@@ -33,6 +34,8 @@ l2: lda (s),y
     beq m2
 q2: dex
     bne l2
+    lda c+1
+    beq r
     dec c+1
     bne l2
     rts

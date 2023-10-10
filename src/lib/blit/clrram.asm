@@ -4,12 +4,10 @@
 
 .proc clrram
     ldx c
-    inx
-    inc c+1
     ldy d
     lda #0
     sta d
-    beq n
+    inc c+1
 l:  sta (d),y
     iny
     beq m
@@ -18,7 +16,6 @@ n:  dex
     dec c+1
     bne l
     rts
-
 m:  inc d+1
     jmp n
 .endproc

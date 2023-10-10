@@ -1,7 +1,7 @@
 .include "cbm_kernal.inc"
 
 .export _term_init, _term_put, _term_puts, _term_putsn
-.export term_init
+.export term_init, term_puts
 
 .import init_bitmap_mode, gfx_init
 .import clear_screen
@@ -12,7 +12,6 @@
 .import init_region_stack
 .import reset_region
 .import moveram
-.import copy_area
 .import calcscr
 .import charset, charset_size
 .import popax
@@ -648,7 +647,7 @@ no_underline:
     jmp cursor_show
 .endproc
 
-.proc putstring_fixed
+.proc term_puts
     jsr cursor_hide
 
 l:  ldy #0
@@ -668,7 +667,7 @@ r:  jmp cursor_show
 .proc _term_puts
     sta p
     stx p+1
-    jmp putstring_fixed
+    jmp term_puts
 .endproc
 
 .proc _term_putsn

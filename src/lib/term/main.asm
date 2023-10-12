@@ -21,12 +21,12 @@
 .importzp s, d, c, scrbase, scr
 .importzp font, pencil_mode, pattern
 .importzp xpos, ypos, xpos2, ypos2, width, height
-.importzp screen_width, screen_height, screen_columns
+.importzp screen_width, screen_height, screen_columns, screen_rows
 
     .zeropage
 
 tmp:            .res 2
-tmp2:           .res 2
+tmp2:           .res 1
 p:              .res 2
 
     .bss
@@ -137,6 +137,7 @@ l2: lda (p),y
     jmp cursor_draw
 .endproc
 
+.export scroll_up
 .proc scroll_up
     ; Clear top row (except first char).
     lda #8
@@ -282,15 +283,19 @@ n:  clc
 
 .proc exec_cursor_motion
     lda code+1
+    cmp #screen_columns
+    bcs r
     asl
     asl
     sta cursor_x
     lda code
+    cmp #screen_rows
+    bcs r
     asl
     asl
     asl
     sta cursor_y
-    jmp cursor_show
+r:  jmp cursor_show
 .endproc
 
 .proc init_cursor_motion
@@ -604,12 +609,6 @@ no_ctrl:
 print_char:
     pha
 
-    ; Save cursor position
-    lda cursor_x
-    sta xpos
-    lda cursor_y
-    sta ypos
-
     ; Handle attribute 'reverse'.
     lda attributes
     lsr
@@ -622,6 +621,11 @@ reverse:
     sta pencil_mode
 
 do_char:
+    ; Print char.
+    lda cursor_x
+    sta xpos
+    lda cursor_y
+    sta ypos
     pla
     jsr putchar_fixed
 
@@ -659,7 +663,7 @@ l:  ldy #0
     inc p
     bne l
     inc p+1
-    jmp l   ; (bne)
+    jmp l
 
 r:  jmp cursor_show
 .endproc
@@ -680,15 +684,13 @@ r:  jmp cursor_show
 
 l:  ldy #0
     lda (p),y
-
     jsr _term_put
-
     dec tmp2
     beq r
     inc p
     bne l
     inc p+1
-    jmp l   ; (bne)
+    jmp l
 
 r:  jmp cursor_show
 .endproc

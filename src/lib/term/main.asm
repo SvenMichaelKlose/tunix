@@ -491,6 +491,26 @@ done:
     jmp cursor_show
 .endproc
 
+; Escape (1b):
+; 1b:       Quote
+; =/Y,x,y:  Cursor motion
+; E:        Insert line
+; R:        Delete line
+; B:        Enable attribute
+; C:        Disable attribute
+; L:        Set line
+; D:        Delete line
+
+; Escape attributes:
+; 0         Reverse
+; 1         Dark
+; 2         Blink
+; 3         Underline
+; 4         Cursor
+; 5         Video
+; 6         Cursor position
+; 7         Status line
+
 .proc escape
     lda #0
     sta code_length
@@ -549,34 +569,13 @@ n2:
     rts
 .endproc
 
-; Output control codes:
-; 1b:       Escape prefix
-
-; Escape:
-; 1b:       Quote
-; =/Y,x,y:  Cursor motion
-; E:        Insert line
-; R:        Delete line
-; B:        Enable attribute
-; C:        Disable attribute
-; L:        Set line
-; D:        Delete line
-
-; Escape attributes:
-; 0         Reverse
-; 1         Dark
-; 2         Blink
-; 3         Underline
-; 4         Cursor
-; 5         Video
-; 6         Cursor position
-; 7         Status line
-
+;;; Print char or process control colde.
 .proc _term_put
     jsr cursor_hide
 
+    ;; Handle control codes parameters.
     ldx code_length
-    bmi no_code
+    bmi no_code     ; No code to process…
     ; Collect code
     sta code,x
     dec code_length
@@ -586,6 +585,7 @@ n2:
 
 r:  jmp cursor_show
 
+    ;; Handle control codes.
 no_code:
     cmp #$1f
     bcs no_ctrl
@@ -598,17 +598,15 @@ no_code:
     sta j+2
     jsr j
     jmp cursor_show
-
-j:  jmp ($ffff)
-
+j:  jmp ($f000)
 no_ctrl:
     cmp #$7f
     bne print_char
     jmp delete
 
+    ;; Print character.
 print_char:
     pha
-
     ; Handle attribute 'reverse'.
     lda attributes
     lsr
@@ -621,7 +619,7 @@ reverse:
     sta pencil_mode
 
 do_char:
-    ; Print char.
+    ; Draw char.
     lda cursor_x
     sta xpos
     lda cursor_y
@@ -646,11 +644,12 @@ underline:
     sta (scr),y
 no_underline:
 
-    ; Move on.
+    ;; Move on.
     jsr cursor_step
     jmp cursor_show
 .endproc
 
+;;; Print string.
 .proc term_puts
     jsr cursor_hide
 
@@ -674,6 +673,7 @@ r:  jmp cursor_show
     jmp term_puts
 .endproc
 
+;;; Print string of fixed length.
 .proc _term_putsn
     sta tmp2
     jsr popax

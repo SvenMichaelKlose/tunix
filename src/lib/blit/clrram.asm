@@ -4,20 +4,20 @@
 
 .proc clrram
     ldx c
+    inx
+    inc c+1
     ldy d
     lda #0
     sta d
-l:  lda #0
-l2: sta (d),y
+    bne +n ; (jmp)
+l:  sta (d),y
     iny
     beq m
 n:  dex
-    bne l2
-    lda c+1
-    beq r
+    bne l
     dec c+1
-    bne l ; (jmp)
-r:  rts
+    bne l
+    rts
 m:  inc d+1
     jmp n
 .endproc

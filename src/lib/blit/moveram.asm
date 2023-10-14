@@ -7,15 +7,17 @@
 .proc moveram
     ldy #0
     ldx c
+    inx
     inc c+1
     cmp #0
+    beq copy_forwards
     bne copy_backwards
 
-copy_forwards:
 l:  lda (s),y
     sta (d),y
     iny
     beq k
+copy_forwards:
 q:  dex
     bne l
     dec c+1
@@ -25,12 +27,12 @@ k:  inc s+1
     inc d+1
     jmp q
 
-copy_backwards:
 l2: lda (s),y
     sta (d),y
     dey
     cpy #$ff
     beq m2
+copy_backwards:
 q2: dex
     bne l2
     dec c+1

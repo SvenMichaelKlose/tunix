@@ -20,7 +20,6 @@ all:
 	$(MAKE) -C fstest all
 	$(MAKE) -C desktop all
 	$(MAKE) -C lisp all
-	$(MAKE) -C sjload all
 	$(MAKE) -C ultiburn all
 	$(MAKE) -C ultidump all
 	$(MAKE) -C ultifs all
@@ -49,7 +48,6 @@ clean:
 	$(MAKE) -C fstest clean
 	$(MAKE) -C desktop clean
 	$(MAKE) -C lisp clean
-	$(MAKE) -C sjload clean
 	$(MAKE) -C ultiburn clean
 	$(MAKE) -C ultidump clean
 	$(MAKE) -C ultifs clean

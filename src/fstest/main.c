@@ -11,6 +11,7 @@ char last_error[256];
 
 char * os_errors[] = {
     "No error.",
+    "Invalid command.",
     "Too many open files.",
     "File already open.",
     "File not open.",
@@ -63,7 +64,7 @@ void
 print_error ()
 {
     if (oserr) {
-        printf ("!!! %s\n", os_errors[oserr]);
+        printf ("OS error: %s\n", os_errors[oserr]);
         exit (-1);
     }
     if (last_error[0])
@@ -83,32 +84,6 @@ void
 test_initialize ()
 {
     send_command ("i0");
-}
-
-void
-test_new_disk ()
-{
-    send_command ("n0:TESTDISK,01");
-}
-
-void
-test_open_missing ()
-{
-    init_error ();
-    oserr = cbm_open (8, device, 8, "0:test,s,r");
-    read_error ();
-    print_error ();
-    cbm_close (8);
-    if (oserr || err) {
-        if (err != 62) {
-            printf ("!!! Error code 62 expected.");
-            return;
-        }
-        err = 0;
-        return;
-    }
-    err = 99;
-    printf ("!!! error expected\n");
 }
 
 void
@@ -145,6 +120,55 @@ bsout (char c)
 }
 
 void
+test_new_disk ()
+{
+    send_command ("n0:TESTDISK,01");
+}
+
+void
+test_invalid_command ()
+{
+    init_error ();
+    oserr = cbm_open (8, device, 8, "0:test,x,r");
+    read_error ();
+    print_error ();
+    if (oserr) {
+        printf ("! Unexpected OS error %D.", oserr);
+        return;
+    }
+    if (err) {
+        if (err != 31) {
+            printf ("! Error code 31 expected.");
+            return;
+        }
+        err = 0;
+        return;
+    }
+    err = 99;
+    printf ("! error expected\n");
+}
+
+void
+test_open_missing ()
+{
+    init_error ();
+    oserr = cbm_open (8, device, 8, "0:test,s,r");
+    read_error ();
+    print_error ();
+    cbm_close (8);
+    if (oserr || err) {
+        if (err != 62) {
+            printf ("! Error code 62 expected.");
+            return;
+        }
+        err = 0;
+        return;
+    }
+    err = 99;
+    printf ("! error expected\n");
+}
+
+void
 test_create_seq ()
 {
     char i;
@@ -167,14 +191,14 @@ test_create_seq_again ()
     test_create_seq ();
     if (oserr || err) {
         if (err != 63) {
-            printf ("!!! Error code 63 expected.");
+            printf ("! Error code 63 expected.");
             return;
         }
         err = 0;
         return;
     }
     err = 99;
-    printf ("!!! error expected\n");
+    printf ("! error expected\n");
 }
 
 void
@@ -220,6 +244,7 @@ typedef struct _test {
 test tests[] = {
     {"Initialize",        test_initialize},
     //{"New disk",    test_new_disk},
+    {"Invalid command ",  test_invalid_command},
     {"Open missing",      test_open_missing},
     {"Create SEQ",        test_create_seq},
     {"Create SEQ again",  test_create_seq_again},
@@ -255,7 +280,7 @@ device = 12;
         oserr = err = last_error[0] = 0;
         p->fun ();
         if (oserr || err) {
-            printf ("!!! Test failed.\n");
+            printf ("! Test failed.\n");
             num_errors++;
         }
     }

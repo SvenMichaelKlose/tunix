@@ -29,12 +29,12 @@ l:  sta $9800,x
     sta d
     lda #$99
     sta d+1
-    lda #<(__IO_LOAD__+$100)
+    lda #<(__IO_LOAD__ + $100)
     sta s
-    lda #>(__IO_LOAD__+$100)
+    lda #>(__IO_LOAD__ + $100)
     sta s+1
     ldx #<(end_of_hooks-hooks)
-    inx
+    inx ; TODO: Put into expressin above.
     ldy #>(end_of_hooks-hooks)
     iny
     sty c+1
@@ -77,10 +77,10 @@ _xreg:          .res 1
 _yreg:          .res 1
 _flags:         .res 1
 _cfg:           .res 1
-_proc_blk1:          .res 2
-_proc_blk2:          .res 2
-_proc_blk3:          .res 2
-_proc_blk5:          .res 2
+_proc_blk1:     .res 2
+_proc_blk2:     .res 2
+_proc_blk3:     .res 2
+_proc_blk5:     .res 2
 
 tmp:            .res 2
 

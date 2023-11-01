@@ -464,6 +464,8 @@ channel * __fastcall__
 alloc_channel (char * name)
 {
     channel * ch = malloc (sizeof (channel));
+    if (!ch)
+        return NULL;
     ch->sa = SA;
     ch->is_buffered = false;
     ch->buf = NULL;
@@ -477,11 +479,11 @@ void __fastcall__
 free_channel (char lfn)
 {
     channel * ch = channels[lfn];
-
+    if (!ch)
+        return;
     clear_buf (ch);
     free (ch->name);
     free (ch);
-
     channels[lfn] = NULL;
 }
 
@@ -567,7 +569,7 @@ ultifs_kopen ()
         respond (ERR_WRITE_PROTECT_ON, "write protect on");
         goto deverror;
     }
-    respond (ERR_INVALID_FILE_NAME, "invalid file name");
+    respond (ERR_INVALID_COMMAND, "invalid command");
 
 error:
     flags |= FLAG_C;

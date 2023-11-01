@@ -518,7 +518,7 @@ ultifs_kopen ()
         fullname[FNLEN] = 0;
     }
 
-    STATUS = 0;
+    accu = STATUS = 0;
     flags &= ~FLAG_C;
     name = malloc (FNLEN + 1);
     memcpy (name, fullname, FNLEN + 1);

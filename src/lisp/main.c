@@ -403,7 +403,6 @@ main (int argc, char * argv[])
     ptr env;
     struct builtin * b = builtins;
     symbol * s;
-//    int i;
 
     (void) argc;
     (void) argv;

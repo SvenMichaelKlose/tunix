@@ -1,39 +1,13 @@
 AttoLisp
 ========
 
-A Lisp interpreter for the Commodore
-VIC-20 (with UltiMem expansion).
+This is the beginning of library "lispheap" to read, access
+and print data in Lisp format to simplify C code having to
+deal with documents, configurations and the like.
 
-# Overview
+The GUI could for example read documents and traverse them
+to create widgets – very much as a replacement for HTML.
 
-This Lisp interpreter knows conses,
-symbols/strings and integer numbers.
-Garbage collection is not supported
-(yet).  It's there mostly for macro
-expansions to make human-readable
-files machine-readable.
+# Current status
 
-# Built-in functions
-
-* READ
-* PRINT
-* GC
-* .
-* CAR
-* CDR
-* LIST
-* =
-* ?
-* PROGN
-* BLOCK, GO
-* DUMP
-* APPLY
-* &
-* |
-* EQ
-* NOT
-* SYS
-* PEEKB, PEEKW
-* POKEB, POKEW
-* ==, <, >
-* +. -. *. /, %
+Garbage chars outputted where newlines should be happening.

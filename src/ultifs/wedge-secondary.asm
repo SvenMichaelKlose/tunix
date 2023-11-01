@@ -17,7 +17,7 @@
 .import __ZP_SIZE__
 
 
-stack_size  = $38    ; Keep greater or equal to what linker config file says.
+zp_size  = $38    ; Keep greater or equal to what linker config file says.
 
 .segment "SECONDARY"
 
@@ -56,7 +56,7 @@ old_IUSRCMD:    .res 2  ; unchanged
 old_ILOAD:      .res 2
 old_ISAVE:      .res 2
 
-_saved_zp:  .res stack_size
+_saved_zp:  .res zp_size
 
 .proc _init_secondary_wedge
     ; Save zeropage.

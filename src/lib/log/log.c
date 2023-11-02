@@ -27,10 +27,10 @@ log_message (char * format, ...)
     //*ULTIMEM_BLK5 = log_bank;
 
     va_start(args, format);
-    log_ptr = *(char **) 0x0400;
+    log_ptr = *(char **) LOG_START;
     vsprintf (log_ptr, format, args);
     log_ptr += strlen (log_ptr) + 1;
-    *(char **) 0x0400 = log_ptr;
+    *(char **) LOG_START = log_ptr;
     va_end(args);
 
     //*ULTIMEM_BLK5 = oldbank;

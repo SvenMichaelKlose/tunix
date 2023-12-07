@@ -573,7 +573,7 @@ n2:
 .proc _term_put
     jsr cursor_hide
 
-    ;; Handle control codes parameters.
+    ;; Handle control code parameters.
     ldx code_length
     bmi no_code     ; No code to process…
     ; Collect code

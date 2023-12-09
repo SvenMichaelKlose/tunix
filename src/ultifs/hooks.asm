@@ -122,6 +122,7 @@ call_driver:
     pla
     sta _flags
 
+    ; Save config and BLK1 of caller.
     lda $9ff2
     sta _cfg
     lda $9ff8
@@ -129,6 +130,7 @@ call_driver:
     lda $9ff9
     sta _proc_blk1+1
 
+    ; Map in BLK1 of driver.
     lda #117
     sta $9ff8
     lda #0
@@ -142,7 +144,7 @@ call_driver:
 j:  jmp ($2000)
 
 unmap:
-    ; Restore memory config.
+    ; Restore config and BLK1 of caller.
     lda _proc_blk1
     sta $9ff8
     lda _proc_blk1+1

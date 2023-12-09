@@ -70,7 +70,7 @@ l2: lda __ZP_START__-1,x
 .endproc
 
 enter:
-    ; Save BLK2, BLL3 and BLK5.
+    ; Save BLK2, BLK3 and BLK5.
     lda $9ffa
     sta _proc_blk2
     lda $9ffb

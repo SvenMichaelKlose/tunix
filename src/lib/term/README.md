@@ -5,53 +5,62 @@ Terminal emulation
 
 # Keyboard
 
-ARROW LEFT:     '~'
-ARROW UP:       '^'
-SHIFT+-:        '_'
-SHIFT+8:        '['
-SHIFT+9:        ']'
-CTRL+SHIFT+8:   '{'
-SHIFT+9:        '}'
+ARROW LEFT:     "~"
+ARROW UP:       "^"
+SHIFT+-:        "_"
+SHIFT+8:        "["
+SHIFT+9:        "]"
+CTRL+SHIFT+8:   "{"
+SHIFT+9:        "}"
 
 CTRL-A:   Control codes 1-31.
 
 # Output
 
-## Control codes:
+## ASCII control codes
 
-### $01,x,y:   Cursor motion (CP/M)
-### $02:       Insert line (CP/M)
-### $03:       Delete line (CP/M)
-### $05:       ENQ: Transmit answerback message (vt52, N/A)
+These control codes are supported in all modes, except for the
+CBM mode.
+
 ### $07:       BEL: flash screen
 ### $08:       BS; Backspace
 ### $09:       HT; Horizontal tab
 ### $0a:       LF: Line feed
+### $0d:       CR: Carriage return
+### $1b:       ESC: Start escape sequence
+### $1e:       Home
 
+## CP/M mode control codes
+
+These control code have probably been found in some
+CP/M emulator.
+
+### $01,x,y:   Cursor motion (CP/M)
+### $02:       Insert line (CP/M)
+### $03:       Delete line (CP/M)
+### $18:       Clear to EOL
+### $1a:       Clear screen (CP/M)
+### $7f:       DEL: BS, Space, BS
+
+## Unused control codes
+
+### $05:       ENQ: Transmit answerback message (vt52, N/A)
 Same for:
 $0b:       VF: Vertical tab (same as line feed)
 $0c:       FF: Form feed (line feed)
-
-Some terminals clear the screen here.
-
-### $0d:       CR: Carriage return
 ### $0e:       CR: Carriage return
-
-### $18:       Clear to EOL
-
-With vt100 it's CAN (quit control or escape sequence).
-
 ### $19:       unused
 
-### $1a:       Clear screen (CP/M)
+With vt100 it is CAN (quit control or escape sequence).
 
-With vt100 it's CAN (quit control or escape sequence).
-
-### $1b:       Escape sequences
-### $1e:       Home
-### $7f:       DEL: BS, ' ', BS
 
 ## Escape sequences
+
+----------------------------
+| ESC c   | Reset terminal |
+----------------------------
+
+## ANSI escape sequences
 
 ### Attributes
 
@@ -63,6 +72,9 @@ $0c:     Disable attribute
 $01:     Reverse
 $10:     Cursor
 
+## ANSI escape sequences
+
+These sequences start with 
 # Input
 
 ```

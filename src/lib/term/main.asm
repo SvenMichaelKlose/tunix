@@ -39,6 +39,7 @@ code:           .res 2
 code_length:    .res 1
 code_callback:  .res 2
 attributes:     .res 2
+last_in:        .res 1
 
     .data
 
@@ -128,6 +129,7 @@ l2: lda (p),y
     sty cursor_x
     sty cursor_y
     sty visible_cursor
+    sty code_callback+1
     iny
     sty has_cursor
     ldy #$ff
@@ -137,7 +139,6 @@ l2: lda (p),y
     jmp cursor_draw
 .endproc
 
-.export scroll_up
 .proc scroll_up
     ; Clear top row (except first char).
     lda #8
@@ -223,21 +224,37 @@ r:  rts
 
 .proc cursor_hide
     pha
+    txa
+    pha
+    tya
+    pha
     lda visible_cursor
     inc visible_cursor
     ora #0
     bne r
     jsr cursor_draw
 r:  pla
+    tay
+    pla
+    tax
+    pla
     rts
 .endproc
 
 .proc cursor_show
     pha
+    txa
+    pha
+    tya
+    pha
     dec visible_cursor
     bne r
     jsr cursor_draw
 r:  pla
+    tay
+    pla
+    tax
+    pla
     rts
 .endproc
 
@@ -282,28 +299,43 @@ n:  clc
 .endproc
 
 .proc exec_cursor_motion
-    lda code+1
-    cmp #screen_columns
+    tay
+    dey
+    cpy #screen_rows
     bcs r
+    ldx code
+    dex
+    cpx #screen_columns
+    bcs r
+    jsr cursor_hide
+    txa
     asl
     asl
     sta cursor_x
-    lda code
-    cmp #screen_rows
-    bcs r
+    txa
     asl
     asl
     asl
     sta cursor_y
-r:  jmp cursor_show
+    jsr cursor_show
+r:  lda #0
+    sta code_callback+1
+    rts
 .endproc
 
-.proc init_cursor_motion
-    lda #1
-    sta code_length
+.proc read_cursor_motion
+    sta code
     lda #<exec_cursor_motion
     sta code_callback
     lda #>exec_cursor_motion
+    sta code_callback+1
+    rts
+.endproc
+
+.proc init_cursor_motion
+    lda #<read_cursor_motion
+    sta code_callback
+    lda #>read_cursor_motion
     sta code_callback+1
     rts
 .endproc
@@ -491,9 +523,96 @@ done:
     jmp cursor_show
 .endproc
 
+.proc ansi_home
+    lda code
+    cmp #screen_columns
+    bcs r
+    lda code+1
+    cmp #screen_rows
+    bcs r
+    asl
+    asl
+    asl
+    sta cursor_y
+    lda code
+    asl
+    asl
+    sta cursor_x
+r:  rts
+.endproc
+
+ansi_codes:
+    .byte "H"
+    .byte 0
+ansi_codes_hl:
+    .byte <ansi_home
+ansi_codes_hh:
+    .byte >ansi_home
+
+.proc exec_ansi_escape
+    lda code_length
+    cmp #3
+    beq invalid
+    cmp #';'
+    bne n
+    inc code_length
+    bne r   ; (jmp)
+    
+invalid:
+    lda #0
+    sta code_callback+1
+    rts
+
+n:  cmp #'0'
+    bcc call
+    cmp #'9'+1
+    bcs call
+    ldx code_length
+    lda code,x
+    asl
+    sta tmp
+    asl
+    asl
+    adc tmp
+    adc last_in
+    sec
+    sbc #'0'
+    sta code,x
+r:  rts
+
+call:
+    ldx #0
+l:  lda ansi_codes,x
+    beq invalid
+    cmp last_in
+    beq found
+    inx
+    jmp l
+
+found:
+    lda ansi_codes_hl,x
+    pha
+    lda ansi_codes_hh,x
+    pha
+    rts
+.endproc
+
+.proc ansi_escape
+    lda #0
+    sta code_length
+    sta code
+    sta code+1
+    sta code+2
+    lda #<exec_ansi_escape
+    sta code_callback
+    lda #>exec_ansi_escape
+    sta code_callback+1
+    rts
+.endproc
+
 ; Escape (1b):
 ; 1b:       Quote
-; =/Y,x,y:  Cursor motion
+; x;yH      Cursor motion
 ; E:        Insert line
 ; R:        Delete line
 ; B:        Enable attribute
@@ -536,6 +655,15 @@ done:
     jmp cursor_show
 .endproc
 
+ec_chars:
+    .byte "c", "["
+ec_hl:
+    .byte <term_init
+    .byte <ansi_escape
+ec_hh:
+    .byte >term_init
+    .byte >ansi_escape
+
 .proc exec_escape
     lda code
 
@@ -571,22 +699,15 @@ n2:
 
 ;;; Print char or process control colde.
 .proc _term_put
+    sta last_in
+
+    ldx code_callback+1
+    beq no_callback
+    jmp (code_callback)
+no_callback:
     jsr cursor_hide
 
-    ;; Handle control code parameters.
-    ldx code_length
-    bmi no_code     ; No code to process…
-    ; Collect code
-    sta code,x
-    dec code_length
-    bpl r
-    ; Code complete. Call handler.
-    jmp (code_callback)
-
-r:  jmp cursor_show
-
     ;; Handle control codes.
-no_code:
     cmp #$1f
     bcs no_ctrl
     asl
@@ -599,6 +720,7 @@ no_code:
     jsr j
     jmp cursor_show
 j:  jmp ($f000)
+
 no_ctrl:
     cmp #$7f
     bne print_char

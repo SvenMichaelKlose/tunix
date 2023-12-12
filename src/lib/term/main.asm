@@ -123,7 +123,9 @@ l2: lda (p),y
     lda p+1
     cmp #>our_charset + 8
     bne l2
+.endproc
 
+.proc term_reset
     ; Init terminal state.
     ldy #0
     sty cursor_x
@@ -524,17 +526,20 @@ done:
 .endproc
 
 .proc ansi_home
-    lda code
-    cmp #screen_columns
+    ldx code
+    dex
+    cpx #screen_columns
     bcs r
-    lda code+1
-    cmp #screen_rows
+    ldy code+1
+    dey
+    cpy #screen_rows
     bcs r
+    tya
     asl
     asl
     asl
     sta cursor_y
-    lda code
+    txa
     asl
     asl
     sta cursor_x
@@ -549,9 +554,9 @@ ansi_codes_hl:
 ansi_codes_hh:
     .byte >ansi_home
 
-.proc exec_ansi_escape
-    lda code_length
-    cmp #3
+.proc exec_ansi
+    ldx code_length
+    cpx #3
     beq invalid
     cmp #';'
     bne n
@@ -559,6 +564,8 @@ ansi_codes_hh:
     bne r   ; (jmp)
     
 invalid:
+    jsr bell
+reset_callback:
     lda #0
     sta code_callback+1
     rts
@@ -590,11 +597,12 @@ l:  lda ansi_codes,x
     jmp l
 
 found:
+    jsr reset_callback
     lda ansi_codes_hl,x
-    pha
+    sta tmp
     lda ansi_codes_hh,x
-    pha
-    rts
+    sta tmp+1
+    jmp (tmp)
 .endproc
 
 .proc ansi_escape
@@ -603,39 +611,9 @@ found:
     sta code
     sta code+1
     sta code+2
-    lda #<exec_ansi_escape
+    lda #<exec_ansi
     sta code_callback
-    lda #>exec_ansi_escape
-    sta code_callback+1
-    rts
-.endproc
-
-; Escape (1b):
-; 1b:       Quote
-; x;yH      Cursor motion
-; E:        Insert line
-; R:        Delete line
-; B:        Enable attribute
-; C:        Disable attribute
-; L:        Set line
-; D:        Delete line
-
-; Escape attributes:
-; 0         Reverse
-; 1         Dark
-; 2         Blink
-; 3         Underline
-; 4         Cursor
-; 5         Video
-; 6         Cursor position
-; 7         Status line
-
-.proc escape
-    lda #0
-    sta code_length
-    lda #<exec_escape
-    sta code_callback
-    lda #>exec_escape
+    lda #>exec_ansi
     sta code_callback+1
     rts
 .endproc
@@ -655,42 +633,50 @@ found:
     jmp cursor_show
 .endproc
 
-ec_chars:
-    .byte "c", "["
+.proc esc_reset
+    jsr clear_screen
+    jmp term_reset
+.endproc
+
+ec_codes:
+    .byte "c", "[", 0
 ec_hl:
-    .byte <term_init
+    .byte <esc_reset
     .byte <ansi_escape
 ec_hh:
-    .byte >term_init
+    .byte >esc_reset
     .byte >ansi_escape
 
 .proc exec_escape
-    lda code
+    ldx #0
+l:  lda ec_codes,x
+    beq invalid
+    cmp last_in
+    beq found
+    inx
+    jmp l
 
-    ; Enable attribute.
-    cmp #$0b
-    bne n1
-    lda #0
-    sta code_length
-    lda #<enable_attribute
-    sta code_callback
-    lda #>enable_attribute
+invalid:
+    lda #0  ; TODO: Reset in _term_put(). (pixel)
     sta code_callback+1
-    jmp cursor_show
-n1:
+    jmp bell
 
-    ; Disable attribute.
-    cmp #$0c
-    bne n2
+found:
     lda #0
-    sta code_length
-    lda #<disable_attribute
-    sta code_callback
-    lda #>disable_attribute
     sta code_callback+1
+    lda ec_hl,x
+    sta tmp
+    lda ec_hh,x
+    sta tmp+1
+    jmp (tmp)
+.endproc
 
-n2:
-    jmp cursor_show
+.proc escape
+    lda #<exec_escape
+    sta code_callback
+    lda #>exec_escape
+    sta code_callback+1
+    rts
 .endproc
 
 .proc do_nothing
@@ -705,9 +691,9 @@ n2:
     beq no_callback
     jmp (code_callback)
 no_callback:
-    jsr cursor_hide
 
     ;; Handle control codes.
+    jsr cursor_hide
     cmp #$1f
     bcs no_ctrl
     asl
@@ -729,6 +715,7 @@ no_ctrl:
     ;; Print character.
 print_char:
     pha
+
     ; Handle attribute 'reverse'.
     lda attributes
     lsr

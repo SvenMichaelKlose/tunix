@@ -45,9 +45,11 @@ CP/M emulator.
 ## Unused control codes
 
 ### $05:       ENQ: Transmit answerback message (vt52, N/A)
+
 Same for:
 $0b:       VF: Vertical tab (same as line feed)
 $0c:       FF: Form feed (line feed)
+
 ### $0e:       CR: Carriage return
 ### $19:       unused
 
@@ -56,25 +58,17 @@ With vt100 it is CAN (quit control or escape sequence).
 
 ## Escape sequences
 
-----------------------------
-| ESC c   | Reset terminal |
-----------------------------
+------------------------------
+| ESC c     | Reset terminal |
+------------------------------
 
 ## ANSI escape sequences
 
-### Attributes
+----------------------------------------
+| ESC col;rowH   | Set cursor position |
+----------------------------------------
 
-$0b:     Enable attribute
-$0c:     Disable attribute
 
-#### Supported attributes
-
-$01:     Reverse
-$10:     Cursor
-
-## ANSI escape sequences
-
-These sequences start with 
 # Input
 
 ```
@@ -103,30 +97,3 @@ F8 = 236
 ARROW_LEFT = 235
 RETURN = 13
 ```
-
-# Wishlist
-
-0x9b    CSI: ESC [
-
-
-; Escape:
-; 1b:       Quote
-; =/Y,x,y:  Cursor motion
-; E:        Insert line
-; R:        Delete line
-; B:        Enable attribute
-; C:        Disable attribute
-; L:        Set line
-; D:        Delete line
-
-; Escape attributes:
-; 0         Reverse
-; 1         Dark
-; 2         Blink
-; 3         Underline
-; 4         Cursor
-; 5         Video
-; 6         Cursor position
-; 7         Status line
-
-; 01,x,y:   Cursor motion

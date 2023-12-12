@@ -24,6 +24,15 @@ test01 (void)
 void
 test02 (void)
 {
+    term_puts ("Attempting reset...");
+    term_puts ("\x1b" "c ");
+    term_puts ("Resetted.");
+    (void) term_get ();
+}
+
+void
+test03 (void)
+{
     term_put (TERM_CLEAR_SCREEN);
     term_put (TERM_SET_CURSOR);
     term_put (2);
@@ -33,9 +42,20 @@ test02 (void)
 }
 
 void
+test04 (void)
+{
+    term_put (TERM_CLEAR_SCREEN);
+    term_puts ("\x1b[3;10H");
+    term_puts ("Text at 3:10.");
+    (void) term_get ();
+}
+
+void
 main (void)
 {
     term_init ();
     test01 ();
     test02 ();
+    test03 ();
+    test04 ();
 }

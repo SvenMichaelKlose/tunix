@@ -25,7 +25,7 @@ void
 test02 (void)
 {
     term_puts ("Attempting reset...");
-    term_puts ("\x1b" "c ");
+    term_puts ("\x1b" "c");
     term_puts ("Resetted.");
     (void) term_get ();
 }
@@ -51,6 +51,23 @@ test04 (void)
 }
 
 void
+test05 (void)
+{
+    term_put (TERM_CLEAR_SCREEN);
+    term_puts ("\x1b" "D");
+    term_puts ("\x1b" "D");
+    term_puts ("\x1b" "D");
+    term_puts ("\x1b" "D");
+    term_puts ("\x1b" "D");
+    term_puts ("Text 5 lines down.");
+    term_puts ("\x1b" "M");
+    term_puts ("\x1b" "M");
+    term_puts ("\x1b" "E");
+    term_puts ("Text 3 lines down.");
+    (void) term_get ();
+}
+
+void
 main (void)
 {
     term_init ();
@@ -58,4 +75,5 @@ main (void)
     test02 ();
     test03 ();
     test04 ();
+    test05 ();
 }

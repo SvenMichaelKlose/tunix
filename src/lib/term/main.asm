@@ -184,6 +184,10 @@ l2: sta charset + charset_size - 8,x
     rts
 .endproc
 
+.proc scroll_down
+    rts
+.endproc
+
 .proc cursor_draw
     lda cursor_x
     sta xpos
@@ -290,6 +294,16 @@ r:  rts
     jmp scroll_up
 n:  clc
     adc #8
+    sta cursor_y
+    rts
+.endproc
+
+.proc cursor_up
+    lda cursor_y
+    bne n
+    jmp scroll_down
+n:  sec
+    sbc #8
     sta cursor_y
     rts
 .endproc
@@ -639,13 +653,24 @@ found:
 .endproc
 
 ec_codes:
-    .byte "c", "[", 0
+    .byte "["   ; Control sequence initator (CSI)
+    .byte "D"   ; Linefeed
+    .byte "E"   ; Newline
+    .byte "M"   ; Reverse linefeed
+    .byte "c"   ; Reset
+    .byte 0
 ec_hl:
-    .byte <esc_reset
     .byte <ansi_escape
+    .byte <cursor_down
+    .byte <carriage_return
+    .byte <cursor_up
+    .byte <esc_reset
 ec_hh:
-    .byte >esc_reset
     .byte >ansi_escape
+    .byte >cursor_down
+    .byte >carriage_return
+    .byte >cursor_up
+    .byte >esc_reset
 
 .proc exec_escape
     ldx #0

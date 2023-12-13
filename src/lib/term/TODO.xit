@@ -1,0 +1,26 @@
+General
+[@] !!! Gravitate towards vt100-compatibility.
+
+Core
+[ ] !!! Operate on cursor text position not pixel position.
+
+ESC sequences:
+[ ] ... ESC Z     DECID     DEC private identification.
+[ ] !!! ESC 7     DECSC     Save current state.
+[ ] !!! ESC 8     DECRC     Restore state most recently saved by ESC 7.
+[ ] ... ESC # 8   DECALN    DEC screen alignment test - fill screen with E's.
+[ ] !!. ESC ( x             Ignore.
+[ ] !!. ESC ) x             Ignore.
+[ ] !.. ESC ]     OSC       Linux: set color.  Ingnore P and following 7 chars.
+[ ] ... ESC H     HTS       Set tab stop at current column.
+
+ANSI sequences (ESC [):
+
+Linux private sequences:
+[ ] ... ESC [ 9 ; n ]       Set screen blank timeout to n minutes.
+[ ] ... ESC [ 10 ; n ]      Set bell frequency in Hz.
+[ ] ... ESC [ 11 ; n ]      Set bell duration in msec.
+[ ] ... ESC [ 12 ; n ]      Bring specified console to the front.
+[ ] ... ESC [ 13 ]          Unblank the screen.
+[ ] ... ESC [ 15 ]          Bring the previous console to the front.
+[ ] ... ESC [ 16 ; n ]      Set the cursor blink interval in milliseconds.

@@ -105,7 +105,7 @@ n:
     ora tmp3
     sta (scr),y
 
-    jmp done
+    rts
 
 l1:
     lda (scr),y
@@ -172,7 +172,6 @@ l1:
     ora tmp3
     sta (scr),y
 
-done:
     rts
 
 l2: jmp l3
@@ -261,7 +260,7 @@ reverse:
     ora tmp3
     sta (scr),y
 
-    jmp done
+    rts
 
 l3: lda (scr),y
     and #%11110000
@@ -342,5 +341,5 @@ l3: lda (scr),y
     ora tmp3
     sta (scr),y
 
-    jmp done
+    rts
 .endproc

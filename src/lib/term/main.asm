@@ -647,6 +647,21 @@ found:
     jmp cursor_show
 .endproc
 
+.proc esc_linefeed
+    jsr cursor_down
+    jmp cursor_show
+.endproc
+
+.proc esc_reverse_linefeed
+    jsr cursor_up
+    jmp cursor_show
+.endproc
+
+.proc esc_carriage_return
+    jsr carriage_return
+    jmp cursor_show
+.endproc
+
 .proc esc_reset
     jsr clear_screen
     jmp term_reset
@@ -661,15 +676,15 @@ ec_codes:
     .byte 0
 ec_hl:
     .byte <ansi_escape
-    .byte <cursor_down
-    .byte <carriage_return
-    .byte <cursor_up
+    .byte <esc_linefeed
+    .byte <esc_carriage_return
+    .byte <esc_reverse_linefeed
     .byte <esc_reset
 ec_hh:
     .byte >ansi_escape
-    .byte >cursor_down
-    .byte >carriage_return
-    .byte >cursor_up
+    .byte >esc_linefeed
+    .byte >esc_carriage_return
+    .byte >esc_reverse_linefeed
     .byte >esc_reset
 
 .proc exec_escape

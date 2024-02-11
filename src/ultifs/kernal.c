@@ -570,6 +570,7 @@ ultifs_kopen ()
         goto deverror;
     }
     respond (ERR_INVALID_COMMAND, "invalid command");
+    free_channel (LFN);
 
 error:
     flags |= FLAG_C;

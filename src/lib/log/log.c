@@ -15,7 +15,7 @@ char log_bank = 116;
 void
 init_log_message ()
 {
-    *((char **) LOG_START) = *((char **) LOG_START) + sizeof (char *);
+    *((char **) LOG_START) = (char *) LOG_START + sizeof (char *);
 }
 
 void

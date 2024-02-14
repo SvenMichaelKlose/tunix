@@ -83,13 +83,14 @@ free_pathname (char ** arr)
  */
 
 typedef struct _block {
-    usize   size;           /* Size of file data. */
-    upos    replacement;    /* Replacement or ULTIFS_UNUSED. */
-    upos    next;           /* Next file in directory or ULTIFS_UNUSED. Not valid if replaced. */
-    char    type;
-    char    name_length;
+    usize  size;         // Size of file data.
+    upos   replacement;  // Replacement or ULTIFS_UNUSED.
+    upos   next;         // Next file in directory or ULTIFS_UNUSED.
+                         // Unused if there is a 'replacement'.
+    char   type;         // CBM file type.
+    char   name_length;  // (No terminating 0.)
     /* name */
-    /* file data */
+    /* data */
 }
 #ifndef __CC65__
     __attribute__((packed))

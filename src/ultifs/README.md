@@ -9,13 +9,14 @@ $9800 to $9fff and is available via device number 12.
 
 # File-system design
 
-The file-system contains a tree list of blocks, each block either contains a
-file or directory, has a name and a pointer to the next block in the directory.
-Directories just contain the positions of their first file.
+UltiFS holds a tree list of blocks, each block containing either a file or a
+directory.  Both types have the same layout: a name and a pointer to the next
+block in the directory, followed by file data or the position of the first file
+of the directory.
 
-The ROM is filled with blocks from start to end until space runs out.  Blocks
-may be replaced in whole but without the space of the deleted block becoming
-available until the ROM is rewritten.
+The ROM is filled with blocks from start to end until it runs out of space.
+Blocks may be replaced in whole but without the space of the deleted block
+being reclaimed.
 
 # KERNAL I/O functions
 

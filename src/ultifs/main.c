@@ -8,19 +8,15 @@
 #include <lib/ultimem/ultimem.h>
 #include <lib/log/liblog.h>
 
+#include "ultifs.h"
+
 #ifdef TEST
 #include "test.h"
 #endif
 
-//extern void __fastcall__ init_primary_wedge (void * start);
-//extern void __fastcall__ init_secondary_wedge (char rom_device);
 extern void __fastcall__ init_hooks (void);
 extern void __fastcall__ init_kernal_emulation (void);
 
-
-// Get us out of the standard banks where the next app will
-// be running.  The primary wedge will bank in BLK1 for the
-// secondary wedge and that one will bank in BLK2 and BLK3.
 void
 copy_program_to_resident_banks (unsigned first_bank)
 {
@@ -51,6 +47,7 @@ main (void)
     test ();
 #endif
     init_log_message ();
+    ultifs_mount ();
     init_secondary_wedge ();
     init_kernal_emulation ();
     init_hooks ();

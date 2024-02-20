@@ -561,7 +561,13 @@ ultifs_kopen ()
             goto deverror;
         }
 
-        ch->file = ultifs_create (ultifs_pwd, filename, *param_list[0] == 's' ? CBM_T_SEQ : CBM_T_PRG);
+        ch->file = ultifs_create (ultifs_pwd, filename, *param_list[0] == 's' ?
+                                                            CBM_T_SEQ :
+                                                            CBM_T_PRG);
+        if (!ch->file) {
+            respond (ERR_INVALID_COMMAND, "cannot create file");
+            return false;
+        }
         respond_ok ();
         goto success;
     }
@@ -570,7 +576,7 @@ ultifs_kopen ()
         goto deverror;
     }
     respond (ERR_INVALID_COMMAND, "invalid command");
-    free_channel (LFN);
+    goto deverror;
 
 error:
     flags |= FLAG_C;

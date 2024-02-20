@@ -25,6 +25,7 @@ l:  sta $9800,x
     inx
     bne l
 
+    ;; Copy code to IO area.
     lda #$00
     sta d
     lda #$99
@@ -33,24 +34,20 @@ l:  sta $9800,x
     sta s
     lda #>(__IO_LOAD__ + $100)
     sta s+1
-    ldx #<(end_of_hooks-hooks)
-    inx ; TODO: Put into expressin above.
-    ldy #>(end_of_hooks-hooks)
-    iny
+    ldx #<(end_of_hooks-hooks) + 1
+    ldy #>(end_of_hooks-hooks) + 1
     sty c+1
-
     ldy #0
 l2: lda (s),y
     sta (d),y
     iny
-    bne n
-    inc s+1
-    inc d+1
+    beq i
 n:  dex
     bne l2
     dec c+1
     bne l2
 
+    ; Save old vectors and set new ones.
     ldx #25
 l3: lda $031a,x
     sta old_open,x
@@ -60,6 +57,10 @@ l3: lda $031a,x
     bpl l3
 
     rts
+
+i:  inc s+1
+    inc d+1
+    bne n   ; (jmp)
 .endproc
 
 LFN     = $b8   ; Logical file number.
@@ -117,8 +118,9 @@ old_save:   .res 2
 ; A: Vector index
 ; Y: Device number
 call_driver:
-    sta tmp
     php
+    asl
+    sta j+1
     pla
     sta _flags
 
@@ -138,9 +140,6 @@ call_driver:
     lda #$ff
     sta $9ff2
 
-    lda tmp
-    asl
-    sta j+1
 j:  jmp ($2000)
 
 unmap:

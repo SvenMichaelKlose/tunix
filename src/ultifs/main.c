@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include <lib/ultimem/ultimem.h>
+#include <lib/log/liblog.h>
 
 #ifdef TEST
 #include "test.h"
@@ -49,6 +50,7 @@ main (void)
 #ifdef TEST
     test ();
 #endif
+    init_log_message ();
     init_secondary_wedge ();
     init_kernal_emulation ();
     init_hooks ();

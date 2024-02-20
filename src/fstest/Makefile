@@ -18,4 +18,4 @@ all: $(PROGRAM)
 	c1541 -format "fstest,01" d64 test.d64 -write fstest
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map fstest
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).dbg $(PROGRAM).lbl $(PROGRAM).map fstest

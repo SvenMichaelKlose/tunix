@@ -8,7 +8,7 @@ SOURCES= \
 	ultifs.c
 ASMSOURCES= \
 	reset.asm \
-	hooks.asm \
+	dispatcher.asm \
 	zeropage.asm \
 	wedge-secondary.asm
 
@@ -27,4 +27,4 @@ all: $(PROGRAM)
 	$(EXOMIZER) sfx basic -t 52 ultifs.prg -o ultifs
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map ultifs
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map $(PROGRAM).dbg ultifs

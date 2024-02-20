@@ -14,7 +14,7 @@
 #include "test.h"
 #endif
 
-extern void __fastcall__ init_hooks (void);
+extern void __fastcall__ init_dispatcher (void);
 extern void __fastcall__ init_kernal_emulation (void);
 
 void
@@ -50,7 +50,7 @@ main (void)
     ultifs_mount ();
     init_secondary_wedge ();
     init_kernal_emulation ();
-    init_hooks ();
+    init_dispatcher ();
     copy_program_to_resident_banks (117); // TODO: Use bank allocator!
     reset ();
 }

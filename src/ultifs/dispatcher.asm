@@ -1,4 +1,4 @@
-.export _init_hooks
+.export _init_dispatcher
 .export _global_lfns
 .export _accu, _xreg, _yreg, _flags
 .export _cfg, _proc_blk1, _proc_blk2, _proc_blk3, _proc_blk5
@@ -18,7 +18,7 @@ new_vectors:
     .export h_basin, h_bsout, h_stop, h_getin, h_clall
     .export h_user, h_load, h_save
 
-.proc _init_hooks
+.proc _init_dispatcher
     ldx #0
     lda #$ff
 l:  sta $9800,x
@@ -34,8 +34,8 @@ l:  sta $9800,x
     sta s
     lda #>(__IO_LOAD__ + $100)
     sta s+1
-    ldx #<(end_of_hooks-hooks) + 1
-    ldy #>(end_of_hooks-hooks) + 1
+    ldx #<(end_of_dispatcher-dispatcher) + 1
+    ldy #>(end_of_dispatcher-dispatcher) + 1
     sty c+1
     ldy #0
 l2: lda (s),y
@@ -72,7 +72,7 @@ DFLTO   = $9a   ; Current output device number.
     .org $9800
 
 _global_lfns:   .res 256
-hooks:
+dispatcher:
 _accu:          .res 1
 _xreg:          .res 1
 _yreg:          .res 1
@@ -287,4 +287,4 @@ not_us:
     jmp (old_save)
 .endproc
 
-end_of_hooks:
+end_of_dispatcher:

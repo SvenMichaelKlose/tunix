@@ -701,29 +701,6 @@ ultifs_mount ()
 
 #ifndef __CC65__
 
-/*
-upos
-bfile_lookup_pathname (char * name)
-{
-    char ** arr = split_pathname (name);
-    upos p = 0;
-    uchar i = 0;
-    char l;
-    char * n;
-
-    while ((n = arr[i])) {
-        l = strlen (name);
-        p = bfile_lookup_name (p, n, l);
-        if (!p || !arr[i + 1])
-            break;
-        i++;
-    }
-
-    free_pathname (arr);
-    return p;
-}
-*/
-
 void
 mkfs ()
 {

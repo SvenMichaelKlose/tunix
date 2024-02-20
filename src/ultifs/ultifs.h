@@ -1,7 +1,3 @@
-// UltiFS
-//
-// Author: Sven Michael Klose <pixel@hugbox.org>
-
 #ifndef ULTIFS_H
 #define ULTIFS_H
 

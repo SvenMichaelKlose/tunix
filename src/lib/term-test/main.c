@@ -11,7 +11,7 @@
 char teststr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/";
 
 void
-test00 (void)
+test_two_lines (void)
 {
     term_puts ("Line 1.\n\r");
     term_puts ("Line 2.\n\r");
@@ -31,7 +31,7 @@ test01 (void)
 }
 
 void
-test01b (void)
+test_goto_all_lines (void)
 {
     int y;
 
@@ -46,7 +46,18 @@ test01b (void)
 }
 
 void
-test02 (void)
+test_scroll_down (void)
+{
+    int y;
+
+    term_put (TERM_CLEAR_SCREEN);
+    for (y = 0; y < 48; y++)
+        term_puts ("This is supposed to scroll flawlessly.\n\r");
+    (void) term_get ();
+}
+
+void
+test_reset (void)
 {
     term_puts ("Attempting reset...");
     term_puts ("\x1b" "c");
@@ -55,7 +66,7 @@ test02 (void)
 }
 
 void
-test03 (void)
+test_moved_cursor (void)
 {
     term_put (TERM_CLEAR_SCREEN);
     term_put (TERM_SET_CURSOR);
@@ -66,7 +77,7 @@ test03 (void)
 }
 
 void
-test04 (void)
+test_ansi_cursor_motion (void)
 {
     term_put (TERM_CLEAR_SCREEN);
     term_puts ("\x1b[3;10H");
@@ -75,7 +86,7 @@ test04 (void)
 }
 
 void
-test05 (void)
+test_ansi_vertical_moves (void)
 {
     term_put (TERM_CLEAR_SCREEN);
     term_puts ("\x1b" "D");
@@ -101,11 +112,12 @@ main (void)
 {
     term_init ();
     doof ();
-    test00 ();
+    test_two_lines ();
     test01 ();
-    test01b ();
-    test02 ();
-    test03 ();
-    test04 ();
-    test05 ();
+    test_goto_all_lines ();
+    test_scroll_down ();
+    test_reset ();
+    test_moved_cursor ();
+    test_ansi_cursor_motion ();
+    test_ansi_vertical_moves ();
 }

@@ -42,7 +42,6 @@ extern upos ultifs_pwd;
 
 extern char ultifs_mount (void);
 
-//extern bfile * __cc65fastcall__ bfile_create (upos directory, char * name, char type);
 extern void    __cc65fastcall__ bfile_remove (bfile *);
 extern void    __cc65fastcall__ bfile_close (bfile *);
 extern upos    __cc65fastcall__ bfile_create_directory (upos parent, char * name);

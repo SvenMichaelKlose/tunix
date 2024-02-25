@@ -35,6 +35,7 @@ ATTR_CURSOR     = 32
 tmp:            .res 2
 tmp2:           .res 1
 p:              .res 2
+ps:             .res 2
 
     .bss
 
@@ -130,9 +131,7 @@ l2: lda (p),y
     lda p+1
     cmp #>our_charset + 8
     bne l2
-.endproc
 
-.proc term_reset
     ; Init terminal state.
     ldy #0
     sty cursor_x
@@ -573,6 +572,9 @@ r:  rts
     rts
 .endproc
 
+ansi_attr_bits:
+    .byte 0, ATTR_BOLD, ATTR_HALFBRIGHT, 0, ATTR_UNDERLINE, ATTR_BLINK, 0, ATTR_REVERSE
+
 .proc ansi_attr
     ldx code
     beq aa_reset
@@ -581,7 +583,7 @@ r:  rts
     lda ansi_attr_bits,x
     ora attributes
     sta attributes
-r:  rts
+    rts
 
 n:  cpx #27
     bcc r
@@ -594,16 +596,11 @@ n:  cpx #27
     eor #$ff
     and attributes
     sta attributes
-    rts
+r:  rts
 .endproc
 
-ansi_attr_bits:
-    .byte 0, ATTR_BOLD, ATTR_HALFBRIGHT, 0, ATTR_UNDERLINE, ATTR_BLINK, 0, ATTR_REVERSE
-
 ansi_codes:
-    .byte "H"
-    .byte "m"
-    .byte 0
+    .byte "H", "m", 0
 ansi_codes_hl:
     .byte <ansi_home, <ansi_attr
 ansi_codes_hh:
@@ -688,19 +685,6 @@ found:
     jmp cursor_show
 .endproc
 
-.proc esc_reset
-    lda p
-    pha
-    lda p+1
-    pha
-    jsr _term_init
-    pla
-    sta p+1
-    pla
-    sta p
-    jmp term_reset
-.endproc
-
 ec_codes:
     .byte "["   ; Control sequence initator (CSI)
     .byte "D"   ; Linefeed
@@ -713,13 +697,13 @@ ec_hl:
     .byte <esc_linefeed
     .byte <esc_carriage_return
     .byte <esc_reverse_linefeed
-    .byte <esc_reset
+    .byte <_term_init
 ec_hh:
     .byte >ansi_escape
     .byte >esc_linefeed
     .byte >esc_carriage_return
     .byte >esc_reverse_linefeed
-    .byte >esc_reset
+    .byte >_term_init
 
 .proc exec_escape
     ldx #0
@@ -830,47 +814,46 @@ no_underline:
     jmp cursor_show
 .endproc
 
+.proc _term_puts
+    sta ps
+    stx ps+1
+.endproc
+
 ;;; Print string.
 .proc term_puts
     jsr cursor_hide
 
 l:  ldy #0
-    lda (p),y
+    lda (ps),y
     beq r
 
     jsr _term_put
 
-    inc p
+    inc ps
     bne l
-    inc p+1
+    inc ps+1
     jmp l
 
 r:  jmp cursor_show
-.endproc
-
-.proc _term_puts
-    sta p
-    stx p+1
-    jmp term_puts
 .endproc
 
 ;;; Print string of fixed length.
 .proc _term_putsn
     sta tmp2
     jsr popax
-    sta p
-    stx p+1
+    sta ps
+    stx ps+1
 
     jsr cursor_hide
 
 l:  ldy #0
-    lda (p),y
+    lda (ps),y
     jsr _term_put
     dec tmp2
     beq r
-    inc p
+    inc ps
     bne l
-    inc p+1
+    inc ps+1
     jmp l
 
 r:  jmp cursor_show

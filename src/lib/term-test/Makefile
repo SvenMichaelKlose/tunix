@@ -1,5 +1,5 @@
 PROGRAM_xvic=term-test
-PROGRAM_sim=term-test-sim
+#PROGRAM_sim=term-test-sim
 SOURCES= \
 	main.c
 

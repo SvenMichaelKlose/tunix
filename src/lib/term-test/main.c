@@ -92,9 +92,15 @@ test05 (void)
 }
 
 void
+doof (void)
+{
+}
+
+void
 main (void)
 {
     term_init ();
+    doof ();
     test00 ();
     test01 ();
     test01b ();

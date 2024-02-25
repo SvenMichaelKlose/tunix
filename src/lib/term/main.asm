@@ -328,7 +328,7 @@ n:  sec
     asl
     asl
     sta cursor_x
-    txa
+    tya
     asl
     asl
     asl

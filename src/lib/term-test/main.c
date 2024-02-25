@@ -23,9 +23,25 @@ test01 (void)
 {
     int i, j;
 
+    term_put (TERM_CLEAR_SCREEN);
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
             term_put (teststr[(i + j) % 40]);
+    (void) term_get ();
+}
+
+void
+test01b (void)
+{
+    int y;
+
+    term_put (TERM_CLEAR_SCREEN);
+    for (y = 0; y < 24; y++) {
+        term_put (TERM_SET_CURSOR);
+        term_put (1);
+        term_put (y + 1);
+        term_puts ("Cursor motion to all lines.");
+    }
     (void) term_get ();
 }
 
@@ -81,6 +97,7 @@ main (void)
     term_init ();
     test00 ();
     test01 ();
+    test01b ();
     test02 ();
     test03 ();
     test04 ();

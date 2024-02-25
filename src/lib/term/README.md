@@ -22,33 +22,33 @@ CTRL-A:   Control codes 1-31.
 These control codes are supported in all modes, except for the
 CBM mode.
 
-### $07:       BEL: flash screen
-### $08:       BS; Backspace
-### $09:       HT; Horizontal tab
-### $0a:       LF: Line feed
-### $0d:       CR: Carriage return
-### $1b:       ESC: Start escape sequence
-### $1e:       Home
+* $07: BEL: flash screen
+* $08: BS; Backspace
+* $09: HT: Horizontal tab
+* $0a: LF: Line feed
+* $0c: FF: Form feed (clear screen and home)
+* $0d: CR: Carriage return
+* $1b: ESC: Start escape sequence
+* $1e: Home: Move cursor to 1,1.
 
 ## CP/M mode control codes
 
 These control code have probably been found in some
 CP/M emulator.
 
-### $01,x,y:   Cursor motion (CP/M)
-### $02:       Insert line (CP/M)
-### $03:       Delete line (CP/M)
-### $18:       Clear to EOL
-### $1a:       Clear screen (CP/M)
-### $7f:       DEL: BS, Space, BS
+* $01,x,y:   Cursor motion (CP/M)
+* $02:       Insert line (CP/M)
+* $03:       Delete line (CP/M)
+* $18:       Clear to EOL
+* $1a:       Clear screen (CP/M)
+* $7f:       DEL: BS, Space, BS
 
 ## Unused control codes
 
-### $05:       ENQ: Transmit answerback message (vt52, N/A)
+* $05:       ENQ: Transmit answerback message (vt52, N/A)
 
 Same for:
 $0b:       VF: Vertical tab (same as line feed)
-$0c:       FF: Form feed (line feed)
 
 ### $0e:       CR: Carriage return
 ### $19:       unused
@@ -64,9 +64,7 @@ With vt100 it is CAN (quit control or escape sequence).
 
 ## ANSI escape sequences
 
-----------------------------------------
-| ESC col;rowH   | Set cursor position |
-----------------------------------------
+* x;yH   Set cursor position
 
 
 # Input

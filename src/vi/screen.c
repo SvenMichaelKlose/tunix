@@ -26,8 +26,8 @@ void
 gotoxy (char x, char y)
 {
     term_put (TERM_SET_CURSOR);
-    term_put (x);
-    term_put (y);
+    term_put (x + 1);
+    term_put (y + 1);
 }
 
 void
@@ -39,17 +39,21 @@ set_cursor (void)
 void
 disable_cursor ()
 {
+/*
     term_put (TERM_ESCAPE);
     term_put (TERM_DISABLE_ATTR);
     term_put (TERM_ATTR_CURSOR);
+*/
 }
 
 void
 enable_cursor ()
 {
+/*
     term_put (TERM_ESCAPE);
     term_put (TERM_ENABLE_ATTR);
     term_put (TERM_ATTR_CURSOR);
+*/
 }
 
 void
@@ -71,7 +75,6 @@ linebuf_redraw ()
 {
     disable_cursor ();
     gotoxy (0, ypos);
-    term_put (TERM_CARRIAGE_RETURN);
 
     print_linebuf ();
     if (linebuf_length < columns)
@@ -135,9 +138,9 @@ update_screen_offset ()
 void
 screen_redraw ()
 {
-    line      * l;
-    unsigned    y;
-    unsigned    n;
+    line *   l;
+    unsigned y;
+    unsigned n;
 
     update_screen_offset ();
     disable_cursor ();
@@ -153,16 +156,12 @@ screen_redraw ()
         gotoxy (0, y);
         if (l) {
             line_redraw (l);
-            if (l->length < columns) {
+            if (l->length < columns)
                 term_put (TERM_CLEAR_TO_EOL);
-                term_put (TERM_CARRIAGE_RETURN);
-            }
         } else {
             term_put ('~');
             term_put (TERM_CLEAR_TO_EOL);
         }
-
-        term_put (TERM_LINE_FEED);
 
 next:
         if (l)

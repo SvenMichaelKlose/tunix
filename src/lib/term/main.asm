@@ -41,12 +41,13 @@ ps:             .res 2
 
 cursor_x:       .res 1
 cursor_y:       .res 1
-has_cursor:     .res 1
+attributes:     .res 2
 visible_cursor: .res 1
+
 code:           .res 3
 code_length:    .res 1
 code_callback:  .res 2
-attributes:     .res 2
+
 last_in:        .res 1
 
     .data
@@ -138,8 +139,6 @@ l2: lda (p),y
     sty cursor_y
     sty visible_cursor
     sty code_callback+1
-    iny
-    sty has_cursor
     ldy #$ff
     sty code_length
     lda #ATTR_CURSOR
@@ -222,7 +221,7 @@ n:
     sta pattern
     lda #>_pattern_solid
     sta pattern+1
-    lda #2
+    lda #2  ; TODO: Named constant.
     sta pencil_mode
     asl
     tax
@@ -413,8 +412,7 @@ l:  lda $900f
     sta cursor_x
     cmp #160
     bne done
-    sec
-    sbc #160
+    lda #0
     sta cursor_x
 done:
     rts

@@ -46,7 +46,7 @@ test_goto_all_lines (void)
 }
 
 void
-test_scroll_down (void)
+test_scroll_up (void)
 {
     int y;
 
@@ -115,7 +115,7 @@ main (void)
     test_two_lines ();
     test01 ();
     test_goto_all_lines ();
-    test_scroll_down ();
+    test_scroll_up ();
     test_reset ();
     test_moved_cursor ();
     test_ansi_cursor_motion ();

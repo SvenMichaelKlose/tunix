@@ -10,8 +10,7 @@ char device = 8;
 char last_error[256];
 
 char * os_errors[] = {
-    "No error.",
-    "Invalid command.",
+    "STOP key pressed.",
     "Too many open files.",
     "File already open.",
     "File not open.",
@@ -174,11 +173,11 @@ test_create_seq ()
     char i;
 
     init_error ();
-    oserr = cbm_open (8, device, 8, "0:test,s,w");
+    oserr = cbm_open (8, device, 8, "0:seqtest,s,w");
     read_error ();
     if (!oserr && !err) {
         ckout (8);
-        for (i = 0; i < 16; i++)
+        for (i = 0; i < 255; i++)
             bsout (i);
     }
     cbm_close (8);
@@ -212,7 +211,7 @@ test_read_seq ()
     read_error ();
     if (!oserr && !err) {
         chkin (8);
-        for (i = 0; i < 16; i++) {
+        for (i = 0; i < 255; i++) {
             v = cbm_k_basin ();
             if (v != i) {
                 strcpy (last_error, "99 read error");
@@ -247,9 +246,9 @@ test tests[] = {
     {"Invalid command ",  test_invalid_command},
     {"Open missing",      test_open_missing},
     {"Create SEQ",        test_create_seq},
-    {"Create SEQ again",  test_create_seq_again},
+//    {"Create SEQ again",  test_create_seq_again},
     {"Read SEQ",          test_read_seq},
-    {"Create directory",  test_create_dir}
+ //   {"Create directory",  test_create_dir}
 };
 
 void

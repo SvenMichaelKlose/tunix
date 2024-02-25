@@ -1,13 +1,9 @@
 UltiFS ROM file system
 ======================
 
-This is a file system for the Flash ROM of the UltiMem expansion for the
-Commodore VIC-20.
+This is a Flash ROM file system for UltiMem expansion under consutruction.
 
-Start with full RAM enabled.  UltiFS will occupy the IO area ranging from
-$9800 to $9fff and is available via device number 12.
-
-# File-system design
+# Architecture
 
 UltiFS holds a tree list of blocks, each block containing either a file or a
 directory.  Both types have the same layout: a name and a pointer to the next

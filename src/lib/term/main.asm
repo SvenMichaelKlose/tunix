@@ -35,7 +35,7 @@ cursor_x:       .res 1
 cursor_y:       .res 1
 has_cursor:     .res 1
 visible_cursor: .res 1
-code:           .res 2
+code:           .res 3
 code_length:    .res 1
 code_callback:  .res 2
 attributes:     .res 2
@@ -317,7 +317,7 @@ n:  sec
 .proc exec_cursor_motion
     tay
     dey
-    cpy #screen_rows
+    cpy #screen_rows * 2
     bcs r
     ldx code
     dex
@@ -754,8 +754,6 @@ no_ctrl:
 
     ;; Print character.
 print_char:
-    pha
-
     ; Handle attribute 'reverse'.
     lda attributes
     lsr
@@ -773,7 +771,7 @@ do_char:
     sta xpos
     lda cursor_y
     sta ypos
-    pla
+    lda last_in
     jsr putchar_fixed
 
     ; Handle attribute 'underline'.

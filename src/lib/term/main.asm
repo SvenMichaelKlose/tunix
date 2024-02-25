@@ -23,6 +23,13 @@
 .importzp xpos, ypos, xpos2, ypos2, width, height
 .importzp screen_width, screen_height, screen_columns, screen_rows
 
+ATTR_BOLD       = 1
+ATTR_HALFBRIGHT = 2
+ATTR_UNDERLINE  = 4
+ATTR_BLINK      = 8
+ATTR_REVERSE    = 16
+ATTR_CURSOR     = 32
+
     .zeropage
 
 tmp:            .res 2
@@ -136,7 +143,7 @@ l2: lda (p),y
     sty has_cursor
     ldy #$ff
     sty code_length
-    lda #%00010000
+    lda #ATTR_CURSOR
     sta attributes
     jmp cursor_draw
 .endproc
@@ -195,7 +202,7 @@ l2: sta charset + charset_size - 8,x
     sta ypos
 
     lda attributes
-    and #%00010000
+    and #ATTR_CURSOR
     beq r
 
     lda xpos
@@ -560,13 +567,62 @@ done:
 r:  rts
 .endproc
 
+.proc enable_attribute
+    lda code
+    ora attributes
+    sta attributes
+    jmp cursor_show
+.endproc
+
+.proc disable_attribute
+    lda code
+    eor #$ff
+    and attributes
+    sta attributes
+    jmp cursor_show
+.endproc
+
+.proc aa_reset
+    lda #0
+    sta attributes
+    rts
+.endproc
+
+.proc ansi_attr
+    ldx code
+    beq aa_reset
+    cpx #8
+    bcs n
+    lda ansi_attr_bits,x
+    ora attributes
+    sta attributes
+r:  rts
+
+n:  cpx #27
+    bcc r
+    txa
+    sec
+    sbc #21
+    bcc r
+    tax
+    lda ansi_attr_bits,x
+    eor #$ff
+    and attributes
+    sta attributes
+    rts
+.endproc
+
+ansi_attr_bits:
+    .byte 0, ATTR_BOLD, ATTR_HALFBRIGHT, 0, ATTR_UNDERLINE, ATTR_BLINK, 0, ATTR_REVERSE
+
 ansi_codes:
     .byte "H"
+    .byte "m"
     .byte 0
 ansi_codes_hl:
-    .byte <ansi_home
+    .byte <ansi_home, <ansi_attr
 ansi_codes_hh:
-    .byte >ansi_home
+    .byte >ansi_home, >ansi_attr
 
 .proc exec_ansi
     ldx code_length
@@ -630,21 +686,6 @@ found:
     lda #>exec_ansi
     sta code_callback+1
     rts
-.endproc
-
-.proc enable_attribute
-    lda code
-    ora attributes
-    sta attributes
-    jmp cursor_show
-.endproc
-
-.proc disable_attribute
-    lda code
-    eor #$ff
-    and attributes
-    sta attributes
-    jmp cursor_show
 .endproc
 
 .proc esc_linefeed
@@ -756,8 +797,8 @@ no_ctrl:
 print_char:
     ; Handle attribute 'reverse'.
     lda attributes
-    lsr
-    bcs reverse
+    and #ATTR_REVERSE
+    bne reverse
     lda #0
     sta pencil_mode
     jmp do_char
@@ -776,7 +817,7 @@ do_char:
 
     ; Handle attribute 'underline'.
     lda attributes
-    and #8
+    and #ATTR_UNDERLINE
     beq no_underline
     lda xpos
     and #4

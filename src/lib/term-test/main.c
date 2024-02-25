@@ -11,6 +11,14 @@
 char teststr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/";
 
 void
+test00 (void)
+{
+    term_puts ("Line 1.\n\r");
+    term_puts ("Line 2.\n\r");
+    (void) term_get ();
+}
+
+void
 test01 (void)
 {
     int i, j;
@@ -71,6 +79,7 @@ void
 main (void)
 {
     term_init ();
+    test00 ();
     test01 ();
     test02 ();
     test03 ();

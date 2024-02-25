@@ -567,21 +567,6 @@ done:
 r:  rts
 .endproc
 
-.proc enable_attribute
-    lda code
-    ora attributes
-    sta attributes
-    jmp cursor_show
-.endproc
-
-.proc disable_attribute
-    lda code
-    eor #$ff
-    and attributes
-    sta attributes
-    jmp cursor_show
-.endproc
-
 .proc aa_reset
     lda #0
     sta attributes

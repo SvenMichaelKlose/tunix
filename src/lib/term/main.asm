@@ -689,7 +689,15 @@ found:
 .endproc
 
 .proc esc_reset
-    jsr clear_screen
+    lda p
+    pha
+    lda p+1
+    pha
+    jsr _term_init
+    pla
+    sta p+1
+    pla
+    sta p
     jmp term_reset
 .endproc
 

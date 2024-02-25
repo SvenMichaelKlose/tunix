@@ -120,4 +120,8 @@ main (void)
     test_moved_cursor ();
     test_ansi_cursor_motion ();
     test_ansi_vertical_moves ();
+
+    term_put (TERM_CLEAR_SCREEN);
+    term_puts ("Tests done.");
+    while (1);
 }

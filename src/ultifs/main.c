@@ -47,10 +47,12 @@ main (void)
     test ();
 #endif
     init_log_message ();
-    ultifs_mount ();
-    init_secondary_wedge ();
-    init_kernal_emulation ();
-    init_dispatcher ();
-    copy_program_to_resident_banks (117); // TODO: Use bank allocator!
-    reset ();
+    if (!ultifs_mount ()) {
+        init_secondary_wedge ();
+        init_kernal_emulation ();
+        init_dispatcher ();
+        copy_program_to_resident_banks (117); // TODO: Use bank allocator!
+        reset ();
+    } else
+        printf ("Cannot mount.\n");
 }

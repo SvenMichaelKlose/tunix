@@ -19,11 +19,14 @@ test_two_lines (void)
 }
 
 void
-test01 (void)
+test_fill_with_chars (void)
 {
     int i, j;
 
     term_put (TERM_CLEAR_SCREEN);
+    for (i = 0; i < 24; i++)
+        for (j = 0; j < 40; j++)
+            term_put (teststr[(i + j) % 40]);
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
             term_put (teststr[(i + j) % 40]);
@@ -113,7 +116,7 @@ main (void)
     term_init ();
     doof ();
     test_two_lines ();
-    test01 ();
+    test_fill_with_chars ();
     test_goto_all_lines ();
     test_scroll_up ();
     test_reset ();

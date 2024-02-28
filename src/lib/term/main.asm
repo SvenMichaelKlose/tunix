@@ -326,7 +326,7 @@ n:  sec
     bcs r
     ldx code
     dex
-    cpx #screen_columns
+    cpx #screen_columns * 2
     bcs r
     jsr cursor_hide
     txa

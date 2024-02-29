@@ -58,14 +58,30 @@ With vt100 it is CAN (quit control or escape sequence).
 
 ## Escape sequences
 
-------------------------------
-| ESC c     | Reset terminal |
-------------------------------
+* "ESC c": Reset
+* "ESC D": Linefeed
+* "ESC E": Newline
+* "ESC M": Reverse Linefeed
+
+## ANSI sequences
 
 ## ANSI escape sequences
 
-* x;yH   Set cursor position
+ANSI sequences begin with "ESC [" followed by:
 
+* "<x>;<y>H"   Set cursor position where <x> and <y> are ASCII decimals,
+  starting with 1.
+* "<c>m"   Set cursor position where x and y are ASCII decimals, starting
+  set: 0: bold, 1: halfbright (defunct), 3: underline, 4: blink, 6: reverse;
+  clear: 21: bold, 22: halfbright (defunct), 24: underline, 25: blink,
+         27: reverse
+
+## DECCOM sequences
+
+DECCOM sequences begin with "ESC [ ?" followed by:
+
+* "25h": Show cursor.
+* "25l": Hide cursor.
 
 # Input
 

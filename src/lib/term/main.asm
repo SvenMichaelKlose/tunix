@@ -580,13 +580,13 @@ ansi_attr_bits:
     ldx code
     beq aa_reset
     cpx #8
-    bcs n
+    bcs :+
     lda ansi_attr_bits,x
     ora attributes
     sta attributes
     rts
 
-n:  cpx #27
+:   cpx #27
     bcc r
     txa
     sec
@@ -610,10 +610,10 @@ ansi_codes_hh:
 ;;; Read past "ESC [".
 .proc exec_ansi
     ldx code_length
-    bne +n
+    bne :+
     cmp #'?'
     beq init_deccom
-    cpx #3          ; No handler needs more than three arguments.
+:   cpx #3          ; No handler needs more than three arguments.
     beq invalid
     cmp #';'
     bne n
@@ -625,7 +625,6 @@ ansi_codes_hh:
     ;; DECCOM init "ESC [ ?".
 init_deccom:
     inc is_deccom
-stop:
     rts
 
     ;; Add digit to current code in sequence.
@@ -652,16 +651,16 @@ r:  rts
 
 call:
     lda is_deccom
-    beq exec_deccom
+    bne exec_deccom
 
     ;; Call ANSI sequence handler.
     ldx #0
-l:  lda ansi_codes,x
+:   lda ansi_codes,x
     beq invalid
     cmp last_in
     beq found
     inx
-    bne l   ; (jmp)
+    bne :-   ; (jmp)
 
 found:
     jsr reset_callback
@@ -685,20 +684,22 @@ found:
 .proc exec_deccom
     lda #0
     sta is_deccom
-    lda last_in
     ldx code
+    lda last_in
     cmp #'h'
     beq set_mode
     cmp #'l'
     bne invalid
-set_mode:
-    cpx #25
-    bne invalid
-    jmp cursor_show
 reset_mode:
     cpx #25
     bne invalid
-    jmp cursor_hide
+    jsr cursor_hide
+    jmp reset_callback
+set_mode:
+    cpx #25
+    bne invalid
+    jsr cursor_show
+    jmp reset_callback
 .endproc
 
 .proc ansi_escape
@@ -728,7 +729,7 @@ reset_mode:
 .endproc
 
 ec_codes:
-    .byte "["   ; Control sequence initator (CSI)
+    .byte "["   ; ANSI Control sequence initator (CSI)
     .byte "D"   ; Linefeed
     .byte "E"   ; Newline
     .byte "M"   ; Reverse linefeed

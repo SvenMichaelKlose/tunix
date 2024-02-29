@@ -26,10 +26,10 @@ test_fill_with_chars (void)
     term_put (TERM_CLEAR_SCREEN);
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
-            term_put (teststr[(i + j) % 40]);
+            term_put (teststr[j]);
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
-            term_put (teststr[(i + j) % 40]);
+            term_put (teststr[j]);
     (void) term_get ();
 }
 

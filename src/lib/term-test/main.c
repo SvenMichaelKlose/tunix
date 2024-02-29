@@ -24,12 +24,14 @@ test_fill_with_chars (void)
     int i, j;
 
     term_put (TERM_CLEAR_SCREEN);
+    term_puts ("\x1b[?25l");
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
             term_put (teststr[j]);
     for (i = 0; i < 24; i++)
         for (j = 0; j < 40; j++)
             term_put (teststr[j]);
+    term_puts ("\x1b[?25h");
     (void) term_get ();
 }
 

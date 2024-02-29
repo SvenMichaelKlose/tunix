@@ -18,9 +18,7 @@ cursor (bool do_enable)
 {
     bool tmp = cursor_enabled;
 
-    term_put (TERM_ESCAPE);
-    term_put (do_enable ? TERM_ENABLE_ATTR : TERM_DISABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
+    term_puts (do_enable ? "\x1b[?25h" : "\x1b[?25l");
 
     cursor_enabled = do_enable;
     return tmp;

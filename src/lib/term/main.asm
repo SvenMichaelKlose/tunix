@@ -37,6 +37,8 @@ tmp2:           .res 1
 p:              .res 2
 ps:             .res 2
 
+is_deccom:      .res 1
+
     .bss
 
 cursor_x:       .res 1
@@ -346,19 +348,20 @@ r:  lda #0
 
 .proc read_cursor_motion
     sta code
-    lda #<exec_cursor_motion
-    sta code_callback
-    lda #>exec_cursor_motion
-    sta code_callback+1
+    ldx #<exec_cursor_motion
+    ldy #>exec_cursor_motion
+.endproc
+
+.proc set_callback
+    stx code_callback
+    sty code_callback+1
     rts
 .endproc
 
 .proc init_cursor_motion
-    lda #<read_cursor_motion
-    sta code_callback
-    lda #>read_cursor_motion
-    sta code_callback+1
-    rts
+    ldx #<read_cursor_motion
+    ldy #>read_cursor_motion
+    jmp set_callback
 .endproc
 
 .proc bell
@@ -604,26 +607,34 @@ ansi_codes_hl:
 ansi_codes_hh:
     .byte >ansi_home, >ansi_attr
 
+;;; Read past "ESC [".
 .proc exec_ansi
     ldx code_length
-    cpx #3
+    bne +n
+    cmp #'?'
+    beq init_deccom
+    cpx #3          ; No handler needs more than three arguments.
     beq invalid
     cmp #';'
     bne n
+
+    ;; Steop to next code in sequence.
     inc code_length
     bne r   ; (jmp)
-    
-invalid:
-    jsr bell
-reset_callback:
-    lda #0
-    sta code_callback+1
+
+    ;; DECCOM init "ESC [ ?".
+init_deccom:
+    inc is_deccom
+stop:
     rts
 
+    ;; Add digit to current code in sequence.
 n:  cmp #'0'
-    bcc call
+    bcc call        ; Not a digit or semicolon.  End of code.
     cmp #'9'+1
-    bcs call
+    bcs call        ; "
+
+    ; Multiply value by 10.
     ldx code_length
     lda code,x
     asl
@@ -631,6 +642,8 @@ n:  cmp #'0'
     asl
     asl
     adc tmp
+
+    ; Add digit value.
     adc last_in
     sec
     sbc #'0'
@@ -638,13 +651,17 @@ n:  cmp #'0'
 r:  rts
 
 call:
+    lda is_deccom
+    beq exec_deccom
+
+    ;; Call ANSI sequence handler.
     ldx #0
 l:  lda ansi_codes,x
     beq invalid
     cmp last_in
     beq found
     inx
-    jmp l
+    bne l   ; (jmp)
 
 found:
     jsr reset_callback
@@ -655,17 +672,44 @@ found:
     jmp (tmp)
 .endproc
 
+.proc invalid
+    jsr bell
+.endproc
+
+.proc reset_callback
+    lda #0
+    sta code_callback+1
+    rts
+.endproc
+
+.proc exec_deccom
+    lda #0
+    sta is_deccom
+    lda last_in
+    ldx code
+    cmp #'h'
+    beq set_mode
+    cmp #'l'
+    bne invalid
+set_mode:
+    cpx #25
+    bne invalid
+    jmp cursor_show
+reset_mode:
+    cpx #25
+    bne invalid
+    jmp cursor_hide
+.endproc
+
 .proc ansi_escape
     lda #0
     sta code_length
     sta code
     sta code+1
     sta code+2
-    lda #<exec_ansi
-    sta code_callback
-    lda #>exec_ansi
-    sta code_callback+1
-    rts
+    ldx #<exec_ansi
+    ldy #>exec_ansi
+    jmp set_callback
 .endproc
 
 .proc esc_linefeed
@@ -728,11 +772,9 @@ found:
 .endproc
 
 .proc escape
-    lda #<exec_escape
-    sta code_callback
-    lda #>exec_escape
-    sta code_callback+1
-    rts
+    ldx #<exec_escape
+    ldy #>exec_escape
+    jmp set_callback
 .endproc
 
 .proc do_nothing

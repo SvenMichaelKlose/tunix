@@ -39,21 +39,13 @@ set_cursor (void)
 void
 disable_cursor ()
 {
-/*
-    term_put (TERM_ESCAPE);
-    term_put (TERM_DISABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-*/
+    term_puts ("\x1b[?25l");
 }
 
 void
 enable_cursor ()
 {
-/*
-    term_put (TERM_ESCAPE);
-    term_put (TERM_ENABLE_ATTR);
-    term_put (TERM_ATTR_CURSOR);
-*/
+    term_puts ("\x1b[?25h");
 }
 
 void

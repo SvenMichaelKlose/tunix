@@ -108,14 +108,11 @@ screen_set_status (char * msg)
     status = msg;
     print_status ();
     gotoxy (0, rows - 2);
-    //term_put (TERM_ENABLE_ATTR); // TODO: Fix.
-    //term_put (TERM_ATTR_REVERSE);
-    term_put (TERM_CLEAR_TO_EOL);
+    term_puts ("\x1b[6m");
     gotoxy (35, rows - 2);
     sprintf (txt_memleft, "%D", _heapmemavail ());
     term_puts (txt_memleft);
-    //term_put (TERM_DISABLE_ATTR);
-    //term_put (TERM_ATTR_REVERSE);
+    term_puts ("\x1b[27m");
 }
 
 void

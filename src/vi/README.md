@@ -3,7 +3,7 @@ VIC-20 VI
 
 This is a VI clone with 40x24 char
 terminal (code page 437 charset).
-It wants a VIC with at least +32K RAM.
+It wants a VIC with at least +24K RAM.
 
 # Commands
 
@@ -14,7 +14,8 @@ cursor down ten times.
 
 ## Motion
 
-Cursor keys do what you would expect.
+Cursor keys do what you would expect:
+
 h, j, k, l: Left, down, up, right.
 0: To first column of line.
 $: To last column of line.

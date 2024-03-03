@@ -542,8 +542,7 @@ done:
     lda #32
     jsr _term_put
     lda #7
-    jsr _term_put
-    jmp cursor_show
+    jmp _term_put
 .endproc
 
 .proc ansi_home
@@ -713,21 +712,6 @@ set_mode:
     jmp set_callback
 .endproc
 
-.proc esc_linefeed
-    jsr cursor_down
-    jmp cursor_show
-.endproc
-
-.proc esc_reverse_linefeed
-    jsr cursor_up
-    jmp cursor_show
-.endproc
-
-.proc esc_carriage_return
-    jsr carriage_return
-    jmp cursor_show
-.endproc
-
 ec_codes:
     .byte "["   ; ANSI Control sequence initator (CSI)
     .byte "D"   ; Linefeed
@@ -737,15 +721,15 @@ ec_codes:
     .byte 0
 ec_hl:
     .byte <ansi_escape
-    .byte <esc_linefeed
-    .byte <esc_carriage_return
-    .byte <esc_reverse_linefeed
+    .byte <cursor_down
+    .byte <carriage_return
+    .byte <cursor_up
     .byte <_term_init
 ec_hh:
     .byte >ansi_escape
-    .byte >esc_linefeed
-    .byte >esc_carriage_return
-    .byte >esc_reverse_linefeed
+    .byte >cursor_down
+    .byte >carriage_return
+    .byte >cursor_up
     .byte >_term_init
 
 .proc exec_escape

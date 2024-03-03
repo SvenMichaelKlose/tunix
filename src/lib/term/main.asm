@@ -59,36 +59,37 @@ our_charset:
 
 code_handlers:
     .word do_nothing
-    .word init_cursor_motion   ; 01,x,y:   Cursor motion
-    .word insert_line          ; 02:       Insert line
-    .word delete_line          ; 03:       Delete line
-    .word do_nothing           ; 04
-    .word do_nothing           ; 05
-    .word do_nothing           ; 06
-    .word bell                 ; 07:       BEL: bell and/or flash screen
-    .word cursor_left          ; 08:       BS; Backspace
-    .word tab                  ; 09:       HT; Horizontal tab
-    .word cursor_down          ; 0a:       LF: Line feed
-    .word cursor_down          ; 0b:       VF: Vertical tab
-    .word form_feed            ; 0c:       FF: Form feed,
-    .word carriage_return      ; 0d:       CR: Carriage return
-    .word do_nothing           ; 0e
-    .word do_nothing           ; 0f
-    .word do_nothing           ; 10
-    .word do_nothing           ; 11
-    .word do_nothing           ; 12
-    .word do_nothing           ; 13
-    .word do_nothing           ; 14
-    .word do_nothing           ; 15
-    .word do_nothing           ; 16
-    .word do_nothing           ; 17
-    .word clear_to_eol         ; 18:       Clear to EOL
-    .word do_nothing           ; 19
-    .word form_feed            ; 1a:       Clear screen
-    .word escape               ; 1b:       ESC: Escape
-    .word do_nothing           ; 1c
-    .word do_nothing           ; 1d
-    .word home                 ; 1e:       Home
+    .word init_cursor_motion ; 01: Cursor motion
+    .word insert_line        ; 02: Insert line
+    .word delete_line        ; 03: Delete line
+    .word do_nothing         ; 04
+    .word do_nothing         ; 05
+    .word do_nothing         ; 06
+    .word bell               ; 07: BEL: bell and/or flash screen
+    .word cursor_left        ; 08: BS; Backspace
+    .word tab                ; 09: HT; Horizontal tab
+    .word cursor_down        ; 0a: LF: Line feed
+    .word cursor_down        ; 0b: VF: Vertical tab
+    .word form_feed          ; 0c: FF: Form feed,
+    .word carriage_return    ; 0d: CR: Carriage return
+    .word do_nothing         ; 0e
+    .word do_nothing         ; 0f
+    .word do_nothing         ; 10
+    .word do_nothing         ; 11
+    .word do_nothing         ; 12
+    .word do_nothing         ; 13
+    .word do_nothing         ; 14
+    .word do_nothing         ; 15
+    .word do_nothing         ; 16
+    .word do_nothing         ; 17
+    .word clear_to_eol       ; 18: Clear to EOL
+    .word do_nothing         ; 19
+    .word form_feed          ; 1a: Clear screen
+    .word escape             ; 1b: ESC: Escape
+    .word do_nothing         ; 1c
+    .word do_nothing         ; 1d
+    .word home               ; 1e: Home
+    .word do_nothing         ; 1f
 
     .code
 
@@ -155,7 +156,7 @@ l2: lda (p),y
     sta height
     lda #0
     sta ypos
-    lda #screen_width-8
+    lda #screen_width - 8
     sta width
     lda #1
     sta pencil_mode
@@ -535,16 +536,6 @@ done:
     rts
 .endproc
 
-; 7f:       DEL: BS, ' ', BS
-.proc delete
-    lda #7
-    jsr _term_put
-    lda #32
-    jsr _term_put
-    lda #7
-    jmp _term_put
-.endproc
-
 .proc ansi_home
     ldx code
     dex
@@ -766,18 +757,29 @@ found:
     rts
 .endproc
 
+.proc call_callback
+    jmp (code_callback)
+.endproc
+
+; 7f:       DEL: BS, ' ', BS
+.proc delete
+    lda #7
+    jsr _term_put
+    lda #32
+    jsr _term_put
+    lda #7
+    jmp _term_put
+.endproc
+
 ;;; Print char or process control colde.
 .proc _term_put
     sta last_in
 
     ldx code_callback+1
-    beq no_callback
-    jmp (code_callback)
-no_callback:
+    bne call_callback
 
     ;; Handle control codes.
-    jsr cursor_hide
-    cmp #$1f
+    cmp #$20
     bcs no_ctrl
     asl
     clc
@@ -786,14 +788,16 @@ no_callback:
     lda #>code_handlers
     adc #0
     sta j+2
+    jsr cursor_hide
     jsr j
     jmp cursor_show
 j:  jmp ($f000)
 
 no_ctrl:
     cmp #$7f
-    bne print_char
-    jmp delete
+    beq delete
+
+    jsr cursor_hide
 
     ;; Print character.
 print_char:

@@ -20,6 +20,7 @@ all:
 	$(MAKE) -C flashboot all
 	$(MAKE) -C fstest all
 	$(MAKE) -C desktop all
+	$(MAKE) -C tunix all
 	$(MAKE) -C lisp all
 	$(MAKE) -C ultiburn all
 	$(MAKE) -C ultidump all
@@ -49,6 +50,7 @@ clean:
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C fstest clean
 	$(MAKE) -C desktop clean
+	$(MAKE) -C tunix clean
 	$(MAKE) -C lisp clean
 	$(MAKE) -C ultiburn clean
 	$(MAKE) -C ultidump clean

@@ -1,9 +1,9 @@
 PROGRAM=tunix
-#ASMSOURCES= \
-#	main.asm
-SOURCES= \
-	syscalls.c \
-	main.c
+ASMSOURCES= \
+	main.asm
+#SOURCES= \
+#	syscalls.c \
+#	main.c
 
 include ../Makefile.rules
 

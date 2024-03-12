@@ -1,16 +1,17 @@
-Ingle libraries
-===============
+Libraries
+=========
 
-* zp:       Use the zero page as dword registers.
+Also for use in native VIC apps.
+
 * blit:     Fast memory move and copy.
 * btree:    Stackless sorted binary trees.
 * gfx:      Graphics primitives with clipping.
-* gui:      Event-driven graphical user interface with auto-layout.
-* ingle:    Call INGLE ROM functions without worrying about banking.
-* kernal:   KERNAL utilities.
+* gui:      User interface with auto-layout.
+* ingle:    Calling INGLE functions.
 * lineedit: Single line editing.
 * posix:    POSIX C functions missing in cc65.
 * term:     Terminal emulation 40x24 chars.
 * text:     Text editing based on lineedit.
-* ultimem:  Functions that deal with the Ultimem.
-* ultifs:   The journaling Ultimem Flash ROM file system.
+* ultimem:  Ultimem access.
+* ultifs:   Fast UltiFS read access.
+* zp:       Zero page utilities.

@@ -20,6 +20,9 @@
 #include "kernal.h"
 #include "ipc.h"
 
+#define SEC()   (flags |= FLAG_C)
+#define CLC()   (flags &= ~FLAG_C)
+
 channel * channels[256];
 
 char * response;                    // Error code of last operation.
@@ -452,7 +455,7 @@ make_directory_list (channel * ch)
     free (line);
 
     ultifs_closedir ();
-    flags &= ~FLAG_C;
+    CLC();
 }
 
 
@@ -519,7 +522,7 @@ ultifs_kopen ()
     }
 
     accu = STATUS = 0;
-    flags &= ~FLAG_C;
+    CLC();
     name = malloc (FNLEN + 1);
     memcpy (name, fullname, FNLEN + 1);
     ch = alloc_channel (name);
@@ -579,7 +582,7 @@ ultifs_kopen ()
     goto deverror;
 
 error:
-    flags |= FLAG_C;
+    SEC();
     return false;
 
 success:
@@ -611,29 +614,29 @@ ultifs_kchkin ()
     }
     DFLTN = xreg;
     accu = 0;
-    flags &= ~FLAG_C;
+    CLC();
     return;
 
 error:
-    flags |= FLAG_C;
+    SEC();
 }
 
 void
 ultifs_kckout ()
 {
     if (!channels[xreg]) {
-        flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OPEN;
+        SEC();
         return;
     }
     if (channels[xreg]->file->mode != ULTIFS_MODE_WRITE) {
-        flags |= FLAG_C;
         accu = OSERR_FILE_NOT_OUT;
+        SEC();
         return;
     }
     DFLTO = xreg;
-    flags &= ~FLAG_C;
     accu = 0;
+    CLC();
 }
 
 char
@@ -643,12 +646,12 @@ ultifs_kbasin ()
     register bfile *    file;
 
     if (!ch) {
-        flags |= FLAG_C;
+        SEC();
         return accu = 0;
     }
 
     STATUS = 0;
-    flags &= ~FLAG_C;
+    CLC();
 
     if (ch->is_buffered) {
         if (!ch->buf) {
@@ -663,7 +666,7 @@ ultifs_kbasin ()
 
     file = ch->file;
     if (file->mode != ULTIFS_MODE_READ) {
-        flags |= FLAG_C;
+        SEC();
         return OSERR_FILE_NOT_IN;
     }
     accu = bfile_read (file);
@@ -681,19 +684,19 @@ ultifs_kbsout ()
     register channel *  ch = channels[DFLTO];
 
     if (!ch) {
-        flags |= FLAG_C;
+        SEC();
         STATUS |= STATUS_TIMEOUT_WRITE;
         return;
     }
     if (ch->file->mode != ULTIFS_MODE_WRITE) {
-        flags |= FLAG_C;
+        SEC();
         STATUS |= STATUS_TIMEOUT_WRITE;
         return;
     }
 
     bfile_write (ch->file, accu);
     STATUS = 0;
-    flags &= ~FLAG_C;
+    CLC();
 }
 
 void
@@ -729,7 +732,7 @@ ultifs_kload ()
     if (!ultifs_kopen ())
         goto end;
 
-    flags &= ~FLAG_C;
+    CLC();
 
     // Prepare reads.
     DFLTN = LFN;
@@ -773,7 +776,7 @@ ultifs_ksave ()
 
     SAP = *(char **) accu;
     EAP = (void *) (yreg << 8 + xreg);
-    flags &= ~FLAG_C;
+    CLC();
 
     // Prepare writes.
     DFLTO = LFN;

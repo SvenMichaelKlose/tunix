@@ -2,7 +2,6 @@ all:
 	$(MAKE) -C lib/blit all
 	$(MAKE) -C lib/conio all
 	$(MAKE) -C lib/zp all
-	$(MAKE) -C lib/kernal all
 	$(MAKE) -C lib/posix all
 	$(MAKE) -C lib/ingle all
 	$(MAKE) -C lib/ultimem all
@@ -33,7 +32,6 @@ clean:
 	$(MAKE) -C lib/blit clean
 	$(MAKE) -C lib/conio clean
 	$(MAKE) -C lib/zp clean
-	$(MAKE) -C lib/kernal clean
 	$(MAKE) -C lib/posix clean
 	$(MAKE) -C lib/ingle clean
 	$(MAKE) -C lib/ultimem clean

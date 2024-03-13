@@ -63,6 +63,7 @@ bank_ref:       .res MAX_BANKS
 
 glfns:          .res MAX_LFNS
 glfn_drv:       .res MAX_LFNS
+glfn_sa:        .res MAX_LFNS
 
 procs:          .res MAX_PROCS
 running:        .res MAX_PROCS
@@ -613,16 +614,14 @@ m:  inc d+1
     ldy glfn_drv,x
     clc
     adc drv_vl,y
-    sta ptr1
+    sta j+1
     lda drv_vh,y
     adc #0
-    sta ptr1+1
-
-    ;; Push banks.
-    lda blk1
-    pha
+    sta j+2
 
     ;; Bank in driver.
+    lda blk1
+    pha
     ldx drv_pid,y
     lda proc_blk1,x
     sta blk1
@@ -631,31 +630,45 @@ m:  inc d+1
     lda reg_a
     ldx reg_x
     ldy reg_y
-    jsr +j
+j:  jsr $fffe
 
-    ;; Pop banks.
+    ;; Restore bank.
     pla
     sta blk1
 
     rts
-
-j:  jmp (ptr1)
 .endproc
 
 .proc open
     ;; Get GLFN.
     ldx LFN
+    txa
+    pha
     jsr xlat_lfn_glfn
+    stx LFN
 
     ;; Assign driver to GLFN.
     ldy DEV
     lda dev_drv,y
     sta glfn_drv,x
+    pha
+    lda SA
+    sta glfn_sa,x
+    pla
 
     ;; Call.
     tax
     lda #0
-    jmp call_driver
+    jsr call_driver
+    sta reg_a
+
+    ;; Restore LFN.
+    pla
+    sta LFN
+    php
+    lda reg_a
+    plp
+    rts
 .endproc
 
 .proc chkin
@@ -677,37 +690,49 @@ j:  jmp (ptr1)
 itmp:   .res 1
 
 .proc basin
+    ;; Push input LFN.
     lda DFLTN
     pha
+
     tax
     jsr xlat_lfn_glfn
     stx DFLTN
+
     lda #6
     jsr call_driver
     sta itmp
+
+    ;; Pop input LFN.
     pla
     sta DFLTN
     php
     lda itmp
     plp
+
     rts
 .endproc
 
 .proc bsout
     sta reg_a
+
     lda DFLTO
     pha
+
     tax
     jsr xlat_lfn_glfn
     stx DFLTO
+
     lda #8
     jsr call_driver
     sta itmp
+
+    ;; Pop output LFN.
     pla
     sta DFLTO
     php
     lda itmp
     plp
+
     rts
 .endproc
 
@@ -715,9 +740,11 @@ itmp:   .res 1
     tax
     jsr xlat_lfn_glfn
     stx reg_a
+
     ldy glfn_drv,x
     lda #0
     sta glfn_drv,x
+
     tya
     tax
     lda #10

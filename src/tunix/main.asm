@@ -9,6 +9,8 @@ OP_RTS      = $60
 ;;; KERNAL
 
 LFN         = $b8   ; Logical File Number
+SA          = $b9
+DEV         = $ba
 
 ;;; BASIC
 
@@ -55,7 +57,10 @@ ch:     .res 1
 
 banks:          .res MAX_BANKS
 bank_ref:       .res MAX_BANKS
+
 glfns:          .res MAX_LFNS
+glfn_drv:       .res MAX_LFNS
+
 procs:          .res MAX_PROCS
 running:        .res MAX_PROCS
 proc_lowmem:    .res MAX_PROCS
@@ -65,10 +70,13 @@ proc_blk2:      .res MAX_PROCS
 proc_blk3:      .res MAX_PROCS
 proc_io23:      .res MAX_PROCS
 proc_blk5:      .res MAX_PROCS
+
 drvs:           .res MAX_DRVS
 drv_pid:        .res MAX_DRVS
 drv_vl:         .res MAX_DRVS
 drv_vh:         .res MAX_DRVS
+
+dev_drv:        .res MAX_DEVS
 
 free_bank:      .res 1
 copy_bank:      .res 1
@@ -396,11 +404,14 @@ set_io23:   .word $9800, $b800, $0800
     ;; Save stack reg.
     ;; Save bank config.
     ;; Save lowmem.
+    ;; Save VIC.
     ;; Save screen.
     ;; Load lowmem.
+    ;; Load VIC.
     ;; Load screen.
     ;; Load bank config.
     ;; Load stack reg.
+    rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -455,23 +466,6 @@ error:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;;; Translate local to global LFN.
-.proc xlat_lfn_glfn
-    ldx LFN
-    lda lfn_glfn,x
-    bne :+
-    list_pop lfns, free_lfn
-    list_push lfns, first_lfn
-    beq :+
-    lda LFN
-    sta lfn_id,x
-    list_popy glfns, free_glfn
-    tya
-    sta lfn_glfn,x
-:   sta glfn
-    rts
-.endproc
 
 .proc free_lfns
     ldx first_lfn
@@ -581,6 +575,131 @@ m:  inc d+1
     jmp n
 .endproc
 
+;;;;;;;;;;;;;;;;;
+;;; DISPATCH ;;;;
+;;;;;;;;;;;;;;;;;
+
+.byte "DISPATCH"
+
+;;; Translate local to global LFN.
+.proc xlat_lfn_glfn
+    ldx LFN
+    lda lfn_glfn,x
+    bne :+
+    list_pop lfns, free_lfn
+    list_push lfns, first_lfn
+    beq :+
+    lda LFN
+    sta lfn_id,x
+    list_popy glfns, free_glfn
+    tya
+    sta lfn_glfn,x
+:   sta glfn
+    rts
+.endproc
+
+; X: GLFN
+; A: vector offset
+.proc call_driver
+    ;; Get vector (base + A).
+    ldy glfn_drv,x
+    clc
+    adc drv_vl,y
+    sta ptr1
+    lda drv_vh,y
+    adc #0
+    sta ptr1+1
+
+    ;; Push banks.
+    lda blk1
+    pha
+
+    ;; Bank in driver.
+    ldx drv_pid,y
+    lda proc_blk1,x
+    sta blk1
+
+    ;; Call with registers.
+    lda reg_a
+    ldx reg_x
+    ldy reg_y
+    jsr +j
+    sta reg_a
+    stx reg_x
+    sty reg_y
+    php
+    pla
+    sta flags
+
+    ;; Pop banks.
+    pla
+    sta blk1
+
+    rts
+
+j:  jmp (ptr1)
+.endproc
+
+.proc open
+    ;; Get GLFN.
+    lda LFN
+    jsr xlat_lfn_glfn
+
+    ;; Assign driver to GLFN.
+    ldy DEV
+    lda dev_drv,y
+    sta glfn_drv,x
+
+    ;; Call.
+    tax
+    lda #0
+    jmp call_driver
+.endproc
+
+.proc chkin
+    jsr xlat_lfn_glfn
+    stx reg_a
+    lda #2
+    jmp call_driver
+.endproc
+
+.proc ckout
+    jsr xlat_lfn_glfn
+    stx reg_a
+    lda #4
+    jmp call_driver
+.endproc
+
+.proc basin
+    lda LFN
+    jsr xlat_lfn_glfn
+    stx reg_a
+    lda #6
+    jmp call_driver
+.endproc
+
+.proc bsout
+    lda LFN
+    jsr xlat_lfn_glfn
+    stx reg_a
+    lda #8
+    jmp call_driver
+.endproc
+
+.proc close
+    jsr xlat_lfn_glfn
+    stx reg_a
+
+    ;; Take driver off GLFN.
+    lda #0
+    sta glfn_drv,x
+
+    ;; Call.
+    tax
+    lda #10
+    jmp call_driver
+.endproc
+
     .data
 
 txt_welcome:    .byte "TUNIX", 13, 0
@@ -592,12 +711,19 @@ txt_welcome:    .byte "TUNIX", 13, 0
     .bss
     .org $9800
 
+glfn:       .res 1
+pid:        .res 1
+
+free_lfn:   .res 1
+first_lfn:  .res 1
+
+reg_a:      .res 1
+reg_x:      .res 1
+reg_y:      .res 1
+reg_s:      .res 1
+flags:      .res 1
+
 lbanks:     .res MAX_BANKS
 lfns:       .res MAX_LFNS
 lfn_id:     .res MAX_LFNS
 lfn_glfn:   .res MAX_LFNS
-
-free_lfn:   .res 1
-first_lfn:  .res 1
-pid:        .res 1
-glfn:       .res 1

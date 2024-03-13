@@ -162,7 +162,18 @@ free_glfn:      .res 1
 
     jsr gen_copycode
 
-    ;; Make process 0 (which is never running).
+    lda ram123
+    sta proc_lowmem
+    lda io23
+    sta proc_io23
+    lda blk1
+    sta proc_blk1
+    lda blk2
+    sta proc_blk2
+    lda blk3
+    sta proc_blk3
+    lda blk5
+    sta proc_blk5
     jsr fork_raw
 
     lda #<txt_welcome
@@ -296,51 +307,61 @@ set_io23:   .word $9800, $b800, $0800
     lda #<set_lowmem
     ldx #>set_lowmem
     jsr smemcpy
+
     jsr balloc
     sta proc_screen,y
     sta blk5
     lda #<set_screen
     ldx #>set_screen
     jsr smemcpy
+
     jsr balloc
     sta proc_blk1,y
     sta blk5
     lda #<set_blk1
     ldx #>set_blk1
     jsr smemcpy
+
     jsr balloc
     sta proc_blk2,y
     sta blk5
     lda #<set_blk2
     ldx #>set_blk2
     jsr smemcpy
+
     jsr balloc
     sta proc_blk3,y
     sta blk5
     lda #<set_blk3
     ldx #>set_blk3
     jsr smemcpy
+
     jsr balloc
     sta proc_io23,y
     sta blk5
     lda #<set_io23
     ldx #>set_io23
     jsr smemcpy
-
-    sty pid+$2000
+    sty pid
 
     lda blk5
     sta blk3
     jsr balloc
     sta proc_blk5,y
     sta blk5
-
     lda #<set_blk3
     ldx #>set_blk3
     jsr smemcpy
 
-    ;; Un-inherit parent's address space.
     ldx pid
+
+    ;; Restore banks.
+    lda proc_blk3,x
+    sta blk3
+    lda proc_blk5,x
+    sta blk5
+
+    ;; Un-inherit parent's address space.
     lda #0
     ldy proc_lowmem,x
     sta lbanks,y
@@ -356,6 +377,7 @@ set_io23:   .word $9800, $b800, $0800
     sta lbanks,y
     ldy proc_blk5,x
     sta lbanks,y
+
     rts
 .endproc
 

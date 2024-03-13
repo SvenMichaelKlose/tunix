@@ -67,23 +67,8 @@ proc_io23:      .res MAX_PROCS
 proc_blk5:      .res MAX_PROCS
 drvs:           .res MAX_DRVS
 drv_pid:        .res MAX_DRVS
-drv_open:       .res MAX_DRVS
-drv_close:      .res MAX_DRVS
-drv_chkin:      .res MAX_DRVS
-drv_ckout:      .res MAX_DRVS
-drv_clrcn:      .res MAX_DRVS
-drv_basin:      .res MAX_DRVS
-drv_bsout:      .res MAX_DRVS
-drv_stop:       .res MAX_DRVS
-drv_getin:      .res MAX_DRVS
-drv_clall:      .res MAX_DRVS
-drv_usrcmd:     .res MAX_DRVS
-drv_load:       .res MAX_DRVS
-drv_save:       .res MAX_DRVS
-drv_fnord1:     .res MAX_DRVS
-drv_fnord2:     .res MAX_DRVS
-drv_fnord3:     .res MAX_DRVS
-dev_driver:     .res MAX_DEVS
+drv_vl:         .res MAX_DRVS
+drv_vh:         .res MAX_DRVS
 
 free_bank:      .res 1
 copy_bank:      .res 1
@@ -407,6 +392,17 @@ set_io23:   .word $9800, $b800, $0800
     rts
 .endproc
 
+.proc taskswitch
+    ;; Save stack reg.
+    ;; Save bank config.
+    ;; Save lowmem.
+    ;; Save screen.
+    ;; Load lowmem.
+    ;; Load screen.
+    ;; Load bank config.
+    ;; Load stack reg.
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -493,6 +489,7 @@ done:
 ;;; DRIVERS ;;;
 ;;;;;;;;;;;;;;;
 
+;;; Returns: X: driver ID
 .proc register_driver
     sta ptr1
     stx ptr1+1
@@ -500,41 +497,16 @@ done:
     ;; Get slot.
     list_pop drvs, free_drv
     beq error
-    stx tmp1
+
+    ;; Populate slot.
     lda pid
     sta drv_pid,x
-
-    ;; Copy vectors to arrays.
-    lda #<drv_open
-    sta ptr2
-    lda #>drv_open
-    sta ptr2+1
-    ldy #0
-:   lda (ptr1),y
-    sta (ptr2),y
-    iny
-    lda (ptr1),y
-    sta (ptr2),y
-    iny
-    cpy #32
-    beq done
-    lda ptr2
-    clc
-    adc #MAX_DRVS
-    sta ptr2
-    bcc :-
-    inc ptr2
-    bcc :-  ; (jmp)
-
-done:
-    clc
-    rts
+    lda ptr1
+    sta drv_vl,x
+    lda ptr1+1
+    sta drv_vh,x
 error:
-    sec
     rts
-.endproc
-
-.proc assign_driver
 .endproc
 
 ;;;;;;;;;;;;;

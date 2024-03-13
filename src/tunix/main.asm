@@ -14,8 +14,10 @@ LFN         = $b8   ; Logical File Number
 
 PRTSTR      = $cb1e ; Print ASCIIZ string,
 
-MAX_PROCS   = 64
 MAX_LFNS    = 256   ; Has to be.
+MAX_PROCS   = 64
+MAX_DRVS    = 16
+MAX_DEVS    = 32
 
 ;;; UltiMem
 
@@ -63,12 +65,32 @@ proc_blk2:      .res MAX_PROCS
 proc_blk3:      .res MAX_PROCS
 proc_io23:      .res MAX_PROCS
 proc_blk5:      .res MAX_PROCS
+drvs:           .res MAX_DRVS
+drv_pid:        .res MAX_DRVS
+drv_open:       .res MAX_DRVS
+drv_close:      .res MAX_DRVS
+drv_chkin:      .res MAX_DRVS
+drv_ckout:      .res MAX_DRVS
+drv_clrcn:      .res MAX_DRVS
+drv_basin:      .res MAX_DRVS
+drv_bsout:      .res MAX_DRVS
+drv_stop:       .res MAX_DRVS
+drv_getin:      .res MAX_DRVS
+drv_clall:      .res MAX_DRVS
+drv_usrcmd:     .res MAX_DRVS
+drv_load:       .res MAX_DRVS
+drv_save:       .res MAX_DRVS
+drv_fnord1:     .res MAX_DRVS
+drv_fnord2:     .res MAX_DRVS
+drv_fnord3:     .res MAX_DRVS
+dev_driver:     .res MAX_DEVS
 
 free_bank:      .res 1
 copy_bank:      .res 1
 free_proc:      .res 1
 first_running:  .res 1
 free_glfn:      .res 1
+free_drv:       .res 1
 
     .code
 
@@ -465,6 +487,54 @@ error:
     bne :-
 done:
     rts
+.endproc
+
+;;;;;;;;;;;;;;;
+;;; DRIVERS ;;;
+;;;;;;;;;;;;;;;
+
+.proc register_driver
+    sta ptr1
+    stx ptr1+1
+
+    ;; Get slot.
+    list_pop drvs, free_drv
+    beq error
+    stx tmp1
+    lda pid
+    sta drv_pid,x
+
+    ;; Copy vectors to arrays.
+    lda #<drv_open
+    sta ptr2
+    lda #>drv_open
+    sta ptr2+1
+    ldy #0
+:   lda (ptr1),y
+    sta (ptr2),y
+    iny
+    lda (ptr1),y
+    sta (ptr2),y
+    iny
+    cpy #32
+    beq done
+    lda ptr2
+    clc
+    adc #MAX_DRVS
+    sta ptr2
+    bcc :-
+    inc ptr2
+    bcc :-  ; (jmp)
+
+done:
+    clc
+    rts
+error:
+    sec
+    rts
+.endproc
+
+.proc assign_driver
 .endproc
 
 ;;;;;;;;;;;;;

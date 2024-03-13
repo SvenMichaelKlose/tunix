@@ -8,9 +8,12 @@ OP_RTS      = $60
 
 ;;; KERNAL
 
+DFLTN       = $99
+DFLTO       = $9a
 LFN         = $b8   ; Logical File Number
 SA          = $b9
 DEV         = $ba
+IOPEN       = $031a
 
 ;;; BASIC
 
@@ -190,6 +193,12 @@ free_drv:       .res 1
     sta proc_blk3
     lda blk5
     sta proc_blk5
+
+    ;; Point devices to KERNAL.
+    lda #$1a
+    sta drv_vl
+    lda #$03
+    sta drv_vh
 
     ;; Escape into a parallel universe.
     jsr gen_copycode
@@ -483,7 +492,8 @@ done:
 ;;; DRIVERS ;;;
 ;;;;;;;;;;;;;;;
 
-;;; Returns: X: driver ID
+;;; XA: vectors
+;;; Returns: X: driver ID. 0 on error.
 .proc register_driver
     sta ptr1
     stx ptr1+1
@@ -539,7 +549,6 @@ p:  lda $ff00,x
 
 l:  lda (s),y
     sta (d),y
-inc $900f
     iny
     beq k
 copy_forwards:
@@ -581,9 +590,8 @@ m:  inc d+1
 
 .byte "DISPATCH"
 
-;;; Translate local to global LFN.
+;;; Permanently ranslate local to global LFN.
 .proc xlat_lfn_glfn
-    ldx LFN
     lda lfn_glfn,x
     bne :+
     list_pop lfns, free_lfn
@@ -624,12 +632,6 @@ m:  inc d+1
     ldx reg_x
     ldy reg_y
     jsr +j
-    sta reg_a
-    stx reg_x
-    sty reg_y
-    php
-    pla
-    sta flags
 
     ;; Pop banks.
     pla
@@ -642,7 +644,7 @@ j:  jmp (ptr1)
 
 .proc open
     ;; Get GLFN.
-    lda LFN
+    ldx LFN
     jsr xlat_lfn_glfn
 
     ;; Assign driver to GLFN.
@@ -657,6 +659,7 @@ j:  jmp (ptr1)
 .endproc
 
 .proc chkin
+    tax
     jsr xlat_lfn_glfn
     stx reg_a
     lda #2
@@ -664,40 +667,75 @@ j:  jmp (ptr1)
 .endproc
 
 .proc ckout
+    tax
     jsr xlat_lfn_glfn
     stx reg_a
     lda #4
     jmp call_driver
 .endproc
 
+itmp:   .res 1
+
 .proc basin
-    lda LFN
+    lda DFLTN
+    pha
+    tax
     jsr xlat_lfn_glfn
-    stx reg_a
+    stx DFLTN
     lda #6
-    jmp call_driver
+    jsr call_driver
+    sta itmp
+    pla
+    sta DFLTN
+    php
+    lda itmp
+    plp
+    rts
 .endproc
 
 .proc bsout
-    lda LFN
+    sta reg_a
+    lda DFLTO
+    pha
+    tax
     jsr xlat_lfn_glfn
-    stx reg_a
+    stx DFLTO
     lda #8
-    jmp call_driver
+    jsr call_driver
+    sta itmp
+    pla
+    sta DFLTO
+    php
+    lda itmp
+    plp
+    rts
 .endproc
 
 .proc close
+    tax
     jsr xlat_lfn_glfn
     stx reg_a
-
-    ;; Take driver off GLFN.
+    ldy glfn_drv,x
     lda #0
     sta glfn_drv,x
-
-    ;; Call.
+    tya
     tax
     lda #10
     jmp call_driver
+.endproc
+
+.proc clall
+    ldx first_lfn
+    beq r
+:   txa
+    pha
+    jsr close
+    pla
+    tax
+    lda lfns,x
+    tax
+    bne :-
+r:  rts
 .endproc
 
     .data

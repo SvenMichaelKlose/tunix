@@ -352,7 +352,26 @@ start:
     sta dh
     lda #$20
     sta ch
-    ;jmp memcpy
+    jsr memcpy
+
+    ;; Un-inherit parent's address space.
+    ldx pid
+    lda #0
+    ldy proc_lowmem,x
+    sta lbanks,y
+    ldy proc_screen,x
+    sta lbanks,y
+    ldy proc_blk1,x
+    sta lbanks,y
+    ldy proc_blk2,x
+    sta lbanks,y
+    ldy proc_blk3,x
+    sta lbanks,y
+    ldy proc_io23,x
+    sta lbanks,y
+    ldy proc_blk5,x
+    sta lbanks,y
+    rts
 .endproc
 
 ;;; Copy memory.

@@ -1,3 +1,13 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                                :::
+;;; ###### ##  ## ####   ## ##  ## ;;;
+;;;   ##   ##  ## ##  ## ##   ##   ;;;
+;;;   ##   ###### ##  ## ## ##  ## ;;;
+;;;                                :::
+;;; Multi-tasking KERNAL extension ;;;
+;;;  (Commodore VIC-20 + UltiMem)  :::
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; CPU
 
 OP_LDA_IMM  = $a9
@@ -10,14 +20,16 @@ OP_RTS      = $60
 
 DFLTN       = $99
 DFLTO       = $9a
-LFN         = $b8   ; Logical File Number
+FNLEN       = $b8
+LFN         = $b8
 SA          = $b9
 DEV         = $ba
+FNADR       = $bb
 IOPEN       = $031a
 
 ;;; BASIC
 
-PRTSTR      = $cb1e ; Print ASCIIZ string,
+PRTSTR      = $cb1e
 
 MAX_LFNS    = 256   ; Has to be.
 MAX_PROCS   = 64
@@ -26,7 +38,7 @@ MAX_DEVS    = 32
 
 ;;; UltiMem
 
-MAX_BANKS   = 128   ; UltiMem RAM banks.
+MAX_BANKS   = 128
 FIRST_BANK  = 6
 ram123      = $9ff4
 io23        = $9ff6
@@ -66,7 +78,7 @@ glfn_drv:       .res MAX_LFNS
 glfn_sa:        .res MAX_LFNS
 
 procs:          .res MAX_PROCS
-running:        .res MAX_PROCS
+proc_flags:     .res MAX_PROCS
 proc_lowmem:    .res MAX_PROCS
 proc_screen:    .res MAX_PROCS
 proc_blk1:      .res MAX_PROCS
@@ -80,12 +92,14 @@ drv_pid:        .res MAX_DRVS
 drv_vl:         .res MAX_DRVS
 drv_vh:         .res MAX_DRVS
 
+devs:           .res MAX_DEVS
 dev_drv:        .res MAX_DEVS
 
 free_bank:      .res 1
 copy_bank:      .res 1
 free_proc:      .res 1
-first_running:  .res 1
+running:        .res 1
+sleeping:       .res 1
 free_glfn:      .res 1
 free_drv:       .res 1
 
@@ -175,11 +189,20 @@ free_drv:       .res 1
     cpx #MAX_PROCS
     bcc :+
     sta procs,x
+:   cpx #MAX_DRVS
+    bcc :+
+    sta drvs,x
+:   cpx #MAX_DEVS
+    bcc :+
+    sta devs,x
 :   inx
-    bne :--
+    bne :----
 
     lda #FIRST_BANK
     sta free_bank
+    lda #1
+    sta free_glfn
+    sta free_lfn
 
     ;; Save initial set of banks.
     lda ram123
@@ -203,6 +226,7 @@ free_drv:       .res 1
 
     ;; Escape into a parallel universe.
     jsr gen_copycode
+    ldy #0
     jsr fork_raw
 
     lda #<txt_welcome
@@ -317,32 +341,47 @@ done:
     sta running,y
     tya
     sta running,x
-    jmp fork_raw
-:   rts
+    pha
+    jsr fork_raw
+    pla
+    clc
+    rts
+:   sec
+    rts
 .endproc
 
-set_lowmem: .word $0000, $a000, $1000
+; fork() copy vectors
+set_lowmem: .word $0000, $b000, $0400
 set_screen: .word $1000, $a000, $1000
+set_color:  .word $9400, $b400, $0400
+set_vic:    .word $9000, $b800, $0400
 set_blk1:   .word $2000, $a000, $2000
 set_blk2:   .word $4000, $a000, $2000
 set_blk3:   .word $6000, $a000, $2000
-set_io23:   .word $9800, $b800, $0800
+set_io23:   .word $9800, $b810, $07f0
 
-;; Copy process to newly allocated banks.
+; Copy process to new banks.
 .proc fork_raw
+    lda #0
+    sta proc_flags,y
+
     jsr balloc
     sta proc_lowmem,y
+    sta proc_io23,y
     sta blk5
     lda #<set_lowmem
     ldx #>set_lowmem
     jsr smemcpy
-
-    jsr balloc
-    sta proc_screen,y
-    sta blk5
     lda #<set_screen
     ldx #>set_screen
     jsr smemcpy
+    lda #<set_color
+    ldx #>set_color
+    jsr smemcpy
+    lda #<set_io23
+    ldx #>set_io23
+    jsr smemcpy
+    sty pid
 
     jsr balloc
     sta proc_blk1,y
@@ -365,14 +404,6 @@ set_io23:   .word $9800, $b800, $0800
     ldx #>set_blk3
     jsr smemcpy
 
-    jsr balloc
-    sta proc_io23,y
-    sta blk5
-    lda #<set_io23
-    ldx #>set_io23
-    jsr smemcpy
-    sty pid
-
     lda blk5
     sta blk3
     jsr balloc
@@ -384,17 +415,9 @@ set_io23:   .word $9800, $b800, $0800
 
     ldx pid
 
-    ;; Restore banks.
-    lda proc_blk3,x
-    sta blk3
-    lda proc_blk5,x
-    sta blk5
-
-    ;; Un-inherit parent's address space.
+    ;; Release parent's banks.
     lda #0
     ldy proc_lowmem,x
-    sta lbanks,y
-    ldy proc_screen,x
     sta lbanks,y
     ldy proc_blk1,x
     sta lbanks,y
@@ -407,20 +430,147 @@ set_io23:   .word $9800, $b800, $0800
     ldy proc_blk5,x
     sta lbanks,y
 
+    ;; Restore banks.
+    lda proc_blk3,x
+    sta blk3
+    lda proc_blk5,x
+    sta blk5
+
     rts
 .endproc
 
-.proc taskswitch
-    ;; Save stack reg.
-    ;; Save bank config.
-    ;; Save lowmem.
-    ;; Save VIC.
-    ;; Save screen.
-    ;; Load lowmem.
-    ;; Load VIC.
-    ;; Load screen.
-    ;; Load bank config.
-    ;; Load stack reg.
+; A: Process ID.
+.proc kill
+    pha
+
+    ;; Close resources.
+    ; Switch to context.
+    ldx pid
+    lda io23
+    pha
+    lda proc_io23,x
+    sta io23
+    ; Free.
+    jsr clall
+    jsr bprocfree
+    ; Restore context.
+    pla
+    sta io23
+
+    pla
+
+    ;; Free process
+    ; Take off list.
+    tax
+    lda proc_flags,x
+    bmi :+
+    list_rm procs, running
+    beq error
+    jmp :++
+:   list_rm procs, sleeping
+    beq error
+:
+    ; Add to free.
+    list_push procs, free_proc
+    clc
+    rts
+error:
+    sec
+    rts
+.endproc
+
+; Saving state
+set_lowmem_to_blk3:
+    .word $0000, $7000, $0400
+set_vic_to_blk3:
+    .word $9000, saved_vic-$2000, $0010
+set_screen_to_blk3:
+    .word $1000, $6000, $1000
+set_color_to_blk3:
+    .word $9400, $7400, $0400
+
+; Loading state
+set_blk3_to_lowmem:
+    .word $7000, $0000, $0400
+set_blk3_to_vic:
+    .word saved_vic-$2000, $9000, $0010
+set_blk3_to_screen:
+    .word $6000, $1000, $1000
+set_blk3_to_color:
+    .word $7400, $9400, $0400
+
+.proc switch_to
+    pha
+    ldx pid
+
+    ;;; Save state.
+    ;; Banks
+    lda io23
+    sta proc_io23,x
+    lda blk1
+    sta proc_blk1,x
+    lda blk2
+    sta proc_blk2,x
+    lda blk3
+    sta proc_blk3,x
+    lda blk5
+    sta proc_blk5,x
+    ;; Low memory
+    ; Zero page, stack, KERNAL
+    lda proc_lowmem,x
+    sta blk3
+    lda #<set_lowmem_to_blk3
+    ldx #>set_lowmem_to_blk3
+    jsr smemcpy
+    ; VIC
+    lda #<set_vic_to_blk3
+    ldx #>set_vic_to_blk3
+    jsr smemcpy
+    ; Color
+    lda #<set_color_to_blk3
+    ldx #>set_color_to_blk3
+    jsr smemcpy
+    ; Internal 4K
+    lda #<set_screen_to_blk3
+    ldx #>set_screen_to_blk3
+    jsr smemcpy
+    tsx
+    inx
+    stx stack-$2000
+
+    pla
+    sta pid
+    tax
+
+    ;; Load state.
+    lda proc_lowmem,x
+    sta blk3
+    ldx stack-$2000
+    txs
+    lda #<set_blk3_to_lowmem
+    ldx #>set_blk3_to_lowmem
+    jsr smemcpy
+    lda #<set_blk3_to_vic
+    ldx #>set_blk3_to_vic
+    jmp smemcpy
+    lda #<set_blk3_to_color
+    ldx #>set_blk3_to_color
+    jmp smemcpy
+    lda #<set_blk3_to_screen
+    ldx #>set_blk3_to_screen
+    jsr smemcpy
+    lda proc_lowmem,x
+    sta ram123
+    lda proc_io23,x
+    sta io23
+    lda proc_blk1,x
+    sta blk1
+    lda proc_blk2,x
+    sta blk2
+    lda proc_blk3,x
+    sta blk3
+    lda proc_blk5,x
+    sta blk5
     rts
 .endproc
 
@@ -428,11 +578,11 @@ set_io23:   .word $9800, $b800, $0800
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Allocate bank
-;;;
-;;; Returns:
-;;;  Z: Out of memory.
-;;;  X: Bank #
+; Allocate bank
+;
+; Returns:
+;  Z: Out of memory.
+;  X: Bank #
 .proc balloc
     ;; Draw from global pool.
     list_pop banks, free_bank
@@ -444,9 +594,9 @@ set_io23:   .word $9800, $b800, $0800
     rts
 .endproc
 
-;;; Free bank
-;;;
-;;; X: Bank #
+; Free bank
+;
+; X: Bank #
 .proc bfree
     dec lbanks,x
     bmi error
@@ -461,7 +611,7 @@ error:
     rts
 .endproc
 
-;;; Free all banks of current process.
+; Free all banks of current process.
 .proc bprocfree
     ldx #FIRST_BANK
 :   lda lbanks,x
@@ -493,8 +643,8 @@ done:
 ;;; DRIVERS ;;;
 ;;;;;;;;;;;;;;;
 
-;;; XA: vectors
-;;; Returns: X: driver ID. 0 on error.
+; XA: vectors
+; Returns: X: driver ID. 0 on error.
 .proc register_driver
     sta ptr1
     stx ptr1+1
@@ -518,7 +668,7 @@ error:
 ;;; ZPLIB ;;;
 ;;;;;;;;;;;;;
 
-;;; Init s, d and c with values at XA.
+; Init s, d and c with values at XA.
 .proc sset
     sta p+1
     stx p+2
@@ -534,11 +684,12 @@ p:  lda $ff00,x
 ;;; STDLIB ;;;
 ;;;;;;;;;;;;;;
 
+; Copy range at XA.
 .proc smemcpy
     jsr sset
 .endproc
 
-;;; Copy memory.
+; Copy memory.
 .proc memcpy
     tya
     pha
@@ -565,6 +716,7 @@ k:  inc sh
     jmp q
 .endproc
 
+; Clear memory.
 .proc bzero
     ldx c
     inx
@@ -591,7 +743,7 @@ m:  inc d+1
 
 .byte "DISPATCH"
 
-;;; Permanently ranslate local to global LFN.
+; Translate local to global LFN.
 .proc xlat_lfn_glfn
     lda lfn_glfn,x
     bne :+
@@ -640,12 +792,29 @@ j:  jsr $fffe
 .endproc
 
 .proc open
-    ;; Get GLFN.
+    lda FNADR
+    pha
+    lda FNADR+1
+    pha
     ldx LFN
     txa
     pha
+
+    ;; Get GLFN.
     jsr xlat_lfn_glfn
     stx LFN
+
+    ;; Copy file name.
+    ldy FNLEN
+:   beq :+
+    lda (FNADR),y
+    sta filename,y
+    dey
+    jmp :-
+:   lda #<filename
+    sta FNADR
+    lda #>filename
+    sta FNADR+1
 
     ;; Assign driver to GLFN.
     ldy DEV
@@ -665,6 +834,10 @@ j:  jsr $fffe
     ;; Restore LFN.
     pla
     sta LFN
+    pla
+    sta FNADR+1
+    pla
+    sta FNADR
     php
     lda reg_a
     plp
@@ -776,6 +949,12 @@ txt_welcome:    .byte "TUNIX", 13, 0
     .bss
     .org $9800
 
+lbanks:     .res MAX_BANKS
+lfns:       .res MAX_LFNS
+lfn_id:     .res MAX_LFNS
+lfn_glfn:   .res MAX_LFNS
+filename:   .res 256
+
 glfn:       .res 1
 pid:        .res 1
 
@@ -785,10 +964,6 @@ first_lfn:  .res 1
 reg_a:      .res 1
 reg_x:      .res 1
 reg_y:      .res 1
-reg_s:      .res 1
+stack:      .res 1
 flags:      .res 1
-
-lbanks:     .res MAX_BANKS
-lfns:       .res MAX_LFNS
-lfn_id:     .res MAX_LFNS
-lfn_glfn:   .res MAX_LFNS
+saved_vic:  .res 16

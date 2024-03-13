@@ -80,7 +80,6 @@ glfn_sa:        .res MAX_LFNS
 procs:          .res MAX_PROCS
 proc_flags:     .res MAX_PROCS
 proc_lowmem:    .res MAX_PROCS
-proc_screen:    .res MAX_PROCS
 proc_blk1:      .res MAX_PROCS
 proc_blk2:      .res MAX_PROCS
 proc_blk3:      .res MAX_PROCS
@@ -202,7 +201,6 @@ free_drv:       .res 1
     sta free_bank
     lda #1
     sta free_glfn
-    sta free_lfn
 
     ;; Save initial set of banks.
     lda ram123
@@ -341,8 +339,13 @@ done:
     sta running,y
     tya
     sta running,x
+
     pha
+
     jsr fork_raw
+    ;; Increment GLFNS.
+    ;; Increment banks.
+
     pla
     clc
     rts
@@ -452,6 +455,7 @@ set_io23:   .word $9800, $b810, $07f0
     sta io23
     ; Free.
     jsr clall
+    jsr free_lfns
     jsr bprocfree
     ; Restore context.
     pla
@@ -630,11 +634,13 @@ error:
 .proc free_lfns
     ldx first_lfn
     beq done
-:   ldy lfn_glfn,x
+:   dec lfn_glfn,x
+    bne :+
+    ldy lfn_glfn,x
     list_pushy glfns, free_glfn
-    lda lfns,x
+:   lda lfns,x
     tax
-    bne :-
+    bne :--
 done:
     rts
 .endproc
@@ -745,16 +751,19 @@ m:  inc d+1
 
 ; Translate local to global LFN.
 .proc xlat_lfn_glfn
+    ;; Use existing.
     lda lfn_glfn,x
     bne :+
-    list_pop lfns, free_lfn
+
+    ;; Add LFN .
     list_push lfns, first_lfn
     beq :+
-    lda LFN
-    sta lfn_id,x
+
+    ;; Allocate GLFN.
     list_popy glfns, free_glfn
     tya
     sta lfn_glfn,x
+
 :   sta glfn
     rts
 .endproc
@@ -806,8 +815,8 @@ j:  jsr $fffe
 
     ;; Copy file name.
     ldy FNLEN
-:   beq :+
-    lda (FNADR),y
+    beq :++
+:   lda (FNADR),y
     sta filename,y
     dey
     jmp :-
@@ -820,6 +829,8 @@ j:  jsr $fffe
     ldy DEV
     lda dev_drv,y
     sta glfn_drv,x
+
+    ;; Assign secondary address to GLFN.
     pha
     lda SA
     sta glfn_sa,x
@@ -951,14 +962,12 @@ txt_welcome:    .byte "TUNIX", 13, 0
 
 lbanks:     .res MAX_BANKS
 lfns:       .res MAX_LFNS
-lfn_id:     .res MAX_LFNS
 lfn_glfn:   .res MAX_LFNS
 filename:   .res 256
 
 glfn:       .res 1
 pid:        .res 1
 
-free_lfn:   .res 1
 first_lfn:  .res 1
 
 reg_a:      .res 1

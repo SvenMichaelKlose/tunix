@@ -1,8 +1,20 @@
-PRTSTR      = $cb1e
+;;; KERNAL
 
-FIRST_BANK  = 6
-MAX_BANKS   = 128
+LFN         = $b8   ; Logical File Number
+
+;;; BASIC
+
+PRTSTR      = $cb1e ; Print ASCIIZ string,
+
 MAX_PROCS   = 64
+MAX_LFNS    = 256   ; Has to be.
+
+;;; UltiMem
+
+MAX_BANKS   = 128   ; UltiMem RAM banks.
+FIRST_BANK  = 6
+
+;; Registers
 
 ram123      = $9ff4
 io23        = $9ff6
@@ -32,36 +44,37 @@ ch:     .res 1
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-;; Memory banks
+banks:          .res MAX_BANKS
+bank_ref:       .res MAX_BANKS
+glfns:          .res MAX_LFNS
+procs:          .res MAX_PROCS
+running:        .res MAX_PROCS
+proc_lowmem:    .res MAX_PROCS
+proc_screen:    .res MAX_PROCS
+proc_blk1:      .res MAX_PROCS
+proc_blk2:      .res MAX_PROCS
+proc_blk3:      .res MAX_PROCS
+proc_io23:      .res MAX_PROCS
+proc_blk5:      .res MAX_PROCS
 
-banks:      .res MAX_BANKS
-bank_ref:   .res MAX_BANKS
-free_bank:  .res 1
-
-copy_bank:  .res 1
-
-;; Processes
-
-procs:        .res MAX_PROCS
-running:      .res MAX_PROCS
-proc_lowmem:  .res MAX_PROCS
-proc_screen:  .res MAX_PROCS
-proc_blk1:    .res MAX_PROCS
-proc_blk2:    .res MAX_PROCS
-proc_blk3:    .res MAX_PROCS
-proc_io23:    .res MAX_PROCS
-proc_blk5:    .res MAX_PROCS
-
+free_bank:      .res 1
+copy_bank:      .res 1
 free_proc:      .res 1
 first_running:  .res 1
+free_glfn:      .res 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOCAL (per process) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-lbanks: .res MAX_BANKS
+lbanks:         .res MAX_BANKS
+lfns:           .res MAX_LFNS
+lfn_id:         .res MAX_LFNS
+lfn_glfn:       .res MAX_LFNS
 
-pid:    .res 1
+free_lfn:       .res 1
+pid:            .res 1
+glfn:           .res 1
 
     .code
 
@@ -188,7 +201,8 @@ next_bank:
     sta dh
     jmp start
 
-:   lda #OP_LDA_ABS
+next_move:
+    lda #OP_LDA_ABS
     jsr out
     lda ptr1
     jsr out
@@ -210,12 +224,13 @@ start:
     dec tmp1
     bne :+
     dec tmp2
-    beq :++
+    beq done
 :   dec tmp3
-    bne :--
+    bne next_move
     dec tmp4
-    bne :--
+    bne next_move
 
+    ;; Make switch to next bank.
     lda #OP_LDA_IMM
     jsr out
     jsr balloc
@@ -231,8 +246,8 @@ start:
     sta blk5
     jmp next_bank
 
-    ;; Make switch to next bank
-:   lda #OP_RTS
+done:
+    lda #OP_RTS
     jmp out
     sta blk5
 .endproc
@@ -439,6 +454,22 @@ error:
 :   inx
     cpx #MAX_BANKS
     bne :--
+    rts
+.endproc
+
+;;; Translate local to global LFN.
+.proc xlat_lfn_glfn
+    ldx LFN
+    lda lfn_glfn,x
+    bne :+
+    list_pop lfns, free_lfn
+    beq :+
+    lda LFN
+    sta lfn_id,x
+    list_popy glfns, free_glfn
+    tya
+    sta lfn_glfn,x
+:   sta glfn
     rts
 .endproc
 

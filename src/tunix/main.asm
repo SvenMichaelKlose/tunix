@@ -33,6 +33,8 @@ blk5        = $9ffe
 .importzp tmp1, tmp2, tmp3, tmp4
 .importzp ptr1, ptr2, ptr3, ptr4
 
+;;; Registers
+
 s:
 sl:     .res 1
 sh:     .res 1
@@ -160,8 +162,7 @@ free_glfn:      .res 1
     lda #FIRST_BANK
     sta free_bank
 
-    jsr gen_copycode
-
+    ;; Save initial set of banks.
     lda ram123
     sta proc_lowmem
     lda io23
@@ -174,6 +175,9 @@ free_glfn:      .res 1
     sta proc_blk3
     lda blk5
     sta proc_blk5
+
+    ;; Escape into a parallel universe.
+    jsr gen_copycode
     jsr fork_raw
 
     lda #<txt_welcome
@@ -408,8 +412,9 @@ set_io23:   .word $9800, $b800, $0800
     dec lbanks,x
     bmi error
     dec bank_ref,x
+    bne :+
     list_push banks, free_bank
-    clc
+:   clc
     rts
 error:
     inc lbanks,x
@@ -439,6 +444,7 @@ error:
     lda lfn_glfn,x
     bne :+
     list_pop lfns, free_lfn
+    list_push lfns, first_lfn
     beq :+
     lda LFN
     sta lfn_id,x
@@ -449,10 +455,23 @@ error:
     rts
 .endproc
 
-;;;;;;;;;;;
-;;; LIB ;;;
-;;;;;;;;;;;
+.proc free_lfns
+    ldx first_lfn
+    beq done
+:   ldy lfn_glfn,x
+    list_pushy glfns, free_glfn
+    lda lfns,x
+    tax
+    bne :-
+done:
+    rts
+.endproc
 
+;;;;;;;;;;;;;
+;;; ZPLIB ;;;
+;;;;;;;;;;;;;
+
+;;; Init s, d and c with values at XA.
 .proc sset
     sta p+1
     stx p+2
@@ -464,15 +483,13 @@ p:  lda $ff00,x
     rts
 .endproc
 
-.proc smemcpy
-    jsr sset
-    jsr memcpy
-    rts
-.endproc
-
 ;;;;;;;;;;;;;;
 ;;; STDLIB ;;;
 ;;;;;;;;;;;;;;
+
+.proc smemcpy
+    jsr sset
+.endproc
 
 ;;; Copy memory.
 .proc memcpy
@@ -539,5 +556,6 @@ lfn_id:     .res MAX_LFNS
 lfn_glfn:   .res MAX_LFNS
 
 free_lfn:   .res 1
+first_lfn:  .res 1
 pid:        .res 1
 glfn:       .res 1

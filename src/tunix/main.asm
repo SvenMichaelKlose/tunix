@@ -1,3 +1,11 @@
+;;; CPU
+
+OP_LDA_IMM  = $a9
+OP_LDA_ABS  = $ad
+OP_STA_ABS  = $8d
+OP_JMP_ABS  = $4c
+OP_RTS      = $60
+
 ;;; KERNAL
 
 LFN         = $b8   ; Logical File Number
@@ -13,9 +21,6 @@ MAX_LFNS    = 256   ; Has to be.
 
 MAX_BANKS   = 128   ; UltiMem RAM banks.
 FIRST_BANK  = 6
-
-;; Registers
-
 ram123      = $9ff4
 io23        = $9ff6
 blk1        = $9ff8
@@ -65,6 +70,10 @@ free_glfn:      .res 1
 
     .code
 
+;;;;;;;;;;;;;;;;;;;
+;;; LIST MACROS ;;;
+;;;;;;;;;;;;;;;;;;;
+
 .macro list_pop list, free
     ldx free
     lda list,x
@@ -112,29 +121,16 @@ free_glfn:      .res 1
 :
 .endmacro
 
+;;;;;;;;;;;;
+;;; INIT ;;;
+;;;;;;;;;;;;
+
 .proc main
-    ;; All banks are R/W RAM.  Default order expected.
+    ;; All banks are R/W RAM.
+    ;; Default order expected.
     lda #%11111111
     sta $9ff1
     sta $9ff2
-
-    ;; Set up lists and tables.
-    ldx #0
-:   txa
-    clc
-    adc #1
-    sta banks,x
-    sta glfns,x
-    cpx #MAX_PROCS
-    bcc :+
-    sta procs,x
-:   inx
-    bne :--
-
-    lda #FIRST_BANK
-    sta free_bank
-
-    jsr gen_copycode
 
     ;; Clear per-process data.
     lda #$00
@@ -147,6 +143,25 @@ free_glfn:      .res 1
     sta ch
     jsr bzero
 
+    ;; Set up lists and tables.
+    ldx #0
+:   txa
+    clc
+    adc #1
+    sta banks,x
+    sta glfns,x
+    sta lfns,x
+    cpx #MAX_PROCS
+    bcc :+
+    sta procs,x
+:   inx
+    bne :--
+
+    lda #FIRST_BANK
+    sta free_bank
+
+    jsr gen_copycode
+
     ;; Make process 0 (which is never running).
     jsr fork_raw
 
@@ -155,11 +170,9 @@ free_glfn:      .res 1
     jmp PRTSTR
 .endproc
 
-OP_LDA_IMM  = 0
-OP_LDA_ABS  = 0
-OP_STA_ABS  = 0
-OP_JMP_ABS  = 0
-OP_RTS      = 0
+;;;;;;;;;;;;;;;;;;
+;;; SPEED COPY ;;;
+;;;;;;;;;;;;;;;;;;
 
 .proc out
     ldy #0
@@ -251,6 +264,10 @@ done:
     jmp $a000
 .endproc
 
+;;;;;;;;;;;;;;;;;
+;;; PROCESSES ;;;
+;;;;;;;;;;;;;;;;;
+
 .proc fork
     list_popy procs, free_proc
     beq :+
@@ -264,104 +281,63 @@ done:
 :   rts
 .endproc
 
+set_lowmem: .word $0000, $a000, $1000
+set_screen: .word $1000, $a000, $1000
+set_blk1:   .word $2000, $a000, $2000
+set_blk2:   .word $4000, $a000, $2000
+set_blk3:   .word $6000, $a000, $2000
+set_io23:   .word $9800, $b800, $0800
+
 ;; Copy process to newly allocated banks.
 .proc fork_raw
     jsr balloc
     sta proc_lowmem,y
     sta blk5
-    lda #0
-    sta sl
-    sta sh
-    sta dl
-    sta cl
-    lda #$a0
-    sta dh
-    lda #$20
-    sta ch
-    jsr memcpy
+    lda #<set_lowmem
+    ldx #>set_lowmem
+    jsr smemcpy
     jsr balloc
     sta proc_screen,y
     sta blk5
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$10
-    sta sh
-    sta ch
-    lda #$a0
-    sta dh
-    jsr memcpy
+    lda #<set_screen
+    ldx #>set_screen
+    jsr smemcpy
     jsr balloc
     sta proc_blk1,y
     sta blk5
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$20
-    sta sh
-    sta ch
-    lda #$a0
-    sta dh
-    jsr memcpy
+    lda #<set_blk1
+    ldx #>set_blk1
+    jsr smemcpy
     jsr balloc
     sta proc_blk2,y
     sta blk5
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$40
-    sta sh
-    lda #$a0
-    sta dh
-    lda #$20
-    sta ch
-    jsr memcpy
+    lda #<set_blk2
+    ldx #>set_blk2
+    jsr smemcpy
     jsr balloc
     sta proc_blk3,y
     sta blk5
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$60
-    sta sh
-    lda #$a0
-    sta dh
-    lda #$20
-    sta ch
-    jsr memcpy
+    lda #<set_blk3
+    ldx #>set_blk3
+    jsr smemcpy
     jsr balloc
     sta proc_io23,y
     sta blk5
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$98
-    sta sh
-    lda #$b8
-    sta dh
-    lda #$08
-    sta ch
-    jsr memcpy
+    lda #<set_io23
+    ldx #>set_io23
+    jsr smemcpy
+
     sty pid+$2000
+
+    lda blk5
+    sta blk3
     jsr balloc
     sta proc_blk5,y
-    sta blk3
-    lda #0
-    sta sl
-    sta dl
-    sta cl
-    lda #$a0
-    sta sh
-    lda #$60
-    sta dh
-    lda #$20
-    sta ch
-    jsr memcpy
+    sta blk5
+
+    lda #<set_blk3
+    ldx #>set_blk3
+    jsr smemcpy
 
     ;; Un-inherit parent's address space.
     ldx pid
@@ -383,49 +359,9 @@ done:
     rts
 .endproc
 
-;;; Copy memory.
-.proc memcpy
-    ldy #0
-    ldx cl
-    inx
-    inc ch
-    bne copy_forwards   ; (jmp)
-
-l:  lda (s),y
-    sta (d),y
-inc $900f
-    iny
-    beq k
-copy_forwards:
-q:  dex
-    bne l
-    dec ch
-    bne l
-r:  rts
-k:  inc sh
-    inc dh
-    jmp q
-.endproc
-
-.proc bzero
-    ldx c
-    inx
-    inc c+1
-    ldy d
-    lda #0
-    sta d
-    bne +n ; (jmp)
-l:  sta (d),y
-    iny
-    beq m
-n:  dex
-    bne l
-    dec c+1
-    bne l
-    rts
-m:  inc d+1
-    jmp n
-.endproc
+;;;;;;;;;;;;;;;;;;;;;;;
+;;; EXTENDED MEMORY ;;;
+;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Allocate bank
 ;;;
@@ -471,6 +407,10 @@ error:
     rts
 .endproc
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOGICAL FILE NUMBERS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;; Translate local to global LFN.
 .proc xlat_lfn_glfn
     ldx LFN
@@ -487,6 +427,79 @@ error:
     rts
 .endproc
 
+;;;;;;;;;;;
+;;; LIB ;;;
+;;;;;;;;;;;
+
+.proc sset
+    sta p+1
+    stx p+2
+    ldx #5
+p:  lda $ff00,x
+    sta 0,x
+    dex
+    bpl p
+    rts
+.endproc
+
+.proc smemcpy
+    jsr sset
+    jsr memcpy
+    rts
+.endproc
+
+;;;;;;;;;;;;;;
+;;; STDLIB ;;;
+;;;;;;;;;;;;;;
+
+;;; Copy memory.
+.proc memcpy
+    tya
+    pha
+    ldy #0
+    ldx cl
+    inx
+    inc ch
+    bne copy_forwards   ; (jmp)
+
+l:  lda (s),y
+    sta (d),y
+inc $900f
+    iny
+    beq k
+copy_forwards:
+q:  dex
+    bne l
+    dec ch
+    bne l
+r:  pla
+    tay
+    rts
+k:  inc sh
+    inc dh
+    jmp q
+.endproc
+
+.proc bzero
+    ldx c
+    inx
+    inc c+1
+    ldy d
+    lda #0
+    sta d
+    bne +n ; (jmp)
+l:  sta (d),y
+    iny
+    beq m
+n:  dex
+    bne l
+    dec c+1
+    bne l
+    rts
+m:  inc d+1
+    jmp n
+.endproc
+
     .data
 
 txt_welcome:    .byte "TUNIX", 13, 0
@@ -498,11 +511,11 @@ txt_welcome:    .byte "TUNIX", 13, 0
     .bss
     .org $9800
 
-lbanks:         .res MAX_BANKS
-lfns:           .res MAX_LFNS
-lfn_id:         .res MAX_LFNS
-lfn_glfn:       .res MAX_LFNS
+lbanks:     .res MAX_BANKS
+lfns:       .res MAX_LFNS
+lfn_id:     .res MAX_LFNS
+lfn_glfn:   .res MAX_LFNS
 
-free_lfn:       .res 1
-pid:            .res 1
-glfn:           .res 1
+free_lfn:   .res 1
+pid:        .res 1
+glfn:       .res 1

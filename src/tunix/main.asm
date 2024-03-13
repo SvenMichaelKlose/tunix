@@ -38,7 +38,7 @@ c:
 cl:     .res 1
 ch:     .res 1
 
-    .bss
+    .data
 
 ;;;;;;;;;;;;;;
 ;;; GLOBAL ;;;
@@ -62,19 +62,6 @@ copy_bank:      .res 1
 free_proc:      .res 1
 first_running:  .res 1
 free_glfn:      .res 1
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOCAL (per process) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-lbanks:         .res MAX_BANKS
-lfns:           .res MAX_LFNS
-lfn_id:         .res MAX_LFNS
-lfn_glfn:       .res MAX_LFNS
-
-free_lfn:       .res 1
-pid:            .res 1
-glfn:           .res 1
 
     .code
 
@@ -125,8 +112,8 @@ glfn:           .res 1
 :
 .endmacro
 
-.proc init
-    ;; All banks are R/W RAM.
+.proc main
+    ;; All banks are R/W RAM.  Default order expected.
     lda #%11111111
     sta $9ff1
     sta $9ff2
@@ -137,21 +124,28 @@ glfn:           .res 1
     clc
     adc #1
     sta banks,x
+    sta glfns,x
     cpx #MAX_PROCS
     bcc :+
     sta procs,x
-:   lda #0
-    sta bank_ref,x
-    sta lbanks,x
-    inx
+:   inx
     bne :--
 
     lda #FIRST_BANK
     sta free_bank
-    lda #0
-    sta free_proc
 
     jsr gen_copycode
+
+    ;; Clear per-process data.
+    lda #$00
+    sta dl
+    lda #$98
+    sta dh
+    lda #$f0
+    sta cl
+    lda #$07
+    sta ch
+    jsr bzero
 
     ;; Make process 0 (which is never running).
     jsr fork_raw
@@ -413,6 +407,26 @@ k:  inc sh
     jmp q
 .endproc
 
+.proc bzero
+    ldx c
+    inx
+    inc c+1
+    ldy d
+    lda #0
+    sta d
+    bne +n ; (jmp)
+l:  sta (d),y
+    iny
+    beq m
+n:  dex
+    bne l
+    dec c+1
+    bne l
+    rts
+m:  inc d+1
+    jmp n
+.endproc
+
 ;;; Allocate bank
 ;;;
 ;;; Returns:
@@ -476,3 +490,19 @@ error:
     .data
 
 txt_welcome:    .byte "TUNIX", 13, 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOCAL (per process) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .bss
+    .org $9800
+
+lbanks:         .res MAX_BANKS
+lfns:           .res MAX_LFNS
+lfn_id:         .res MAX_LFNS
+lfn_glfn:       .res MAX_LFNS
+
+free_lfn:       .res 1
+pid:            .res 1
+glfn:           .res 1

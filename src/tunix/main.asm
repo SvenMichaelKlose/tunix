@@ -1,12 +1,12 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;                                :::
-;;; ###### ##  ## ####   ## ##  ## ;;;
-;;;   ##   ##  ## ##  ## ##   ##   ;;;
-;;;   ##   ###### ##  ## ## ##  ## ;;;
-;;;                                :::
-;;; Multi-tasking KERNAL extension ;;;
-;;;  (Commodore VIC-20 + UltiMem)  :::
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;                                :::
+ ;;; ###### ##  ## ####   ## ##  ## ;;;
+ ;;;   ##   ##  ## ##  ## ##   ##   ;;;
+ ;;;   ##   ###### ##  ## ## ##  ## ;;;
+ ;;;                                :::
+ ;;; Multi-tasking KERNAL extension ;;;
+ ;;;  (Commodore VIC-20 + UltiMem)  :::
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; CPU
 
@@ -20,7 +20,7 @@ OP_RTS      = $60
 
 DFLTN       = $99
 DFLTO       = $9a
-FNLEN       = $b8
+FNLEN       = $b7
 LFN         = $b8
 SA          = $b9
 DEV         = $ba
@@ -71,7 +71,7 @@ ch:     .res 1
 ;;;;;;;;;;;;;;
 
 banks:          .res MAX_BANKS
-bank_ref:       .res MAX_BANKS
+bank_refs:      .res MAX_BANKS
 
 glfns:          .res MAX_LFNS
 glfn_drv:       .res MAX_LFNS
@@ -332,24 +332,40 @@ done:
 
 .proc fork
     list_popy procs, free_proc
-    beq :+
+    beq error
+
     ;; Insert past current process.
     ldx pid
     lda running,x
     sta running,y
     tya
     sta running,x
-
     pha
 
     jsr fork_raw
-    ;; Increment GLFNS.
-    ;; Increment banks.
 
+    ;; Increment banks.
+    ldy first_lbank
+    beq :++
+:   ldx banks,y
+    inc bank_refs,x
+    lda banks,y
+    tay
+    bne :-
+:
+
+    ;; Return PID.
     pla
-    clc
+    ; 0 for parent.
+    cmp pid
+    bne :+
+    lda #0
+
+:   clc
     rts
-:   sec
+
+error:
+    sec
     rts
 .endproc
 
@@ -361,7 +377,7 @@ set_vic:    .word $9000, $b800, $0400
 set_blk1:   .word $2000, $a000, $2000
 set_blk2:   .word $4000, $a000, $2000
 set_blk3:   .word $6000, $a000, $2000
-set_io23:   .word $9800, $b810, $07f0
+set_io23:   .word $9800, $b800, $07f0
 
 ; Copy process to new banks.
 .proc fork_raw
@@ -592,7 +608,7 @@ set_blk3_to_color:
     list_pop banks, free_bank
     beq :+  ; Oops…
     ;; Own it.
-    inc bank_ref,x
+    inc bank_refs,x
     inc lbanks,x
 :   txa
     rts
@@ -604,7 +620,7 @@ set_blk3_to_color:
 .proc bfree
     dec lbanks,x
     bmi error
-    dec bank_ref,x
+    dec bank_refs,x
     bne :+
     list_push banks, free_bank
 :   clc
@@ -969,6 +985,7 @@ glfn:       .res 1
 pid:        .res 1
 
 first_lfn:  .res 1
+first_lbank:.res 1
 
 reg_a:      .res 1
 reg_x:      .res 1

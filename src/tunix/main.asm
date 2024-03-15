@@ -1,11 +1,11 @@
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- ;;;                                :::
+ ;;;                                ;;;
  ;;; ###### ##  ## ####   ## ##  ## ;;;
  ;;;   ##   ##  ## ##  ## ##   ##   ;;;
  ;;;   ##   ###### ##  ## ## ##  ## ;;;
- ;;;                                :::
+ ;;;                                ;;;
  ;;; Multi-tasking KERNAL extension ;;;
- ;;;  (Commodore VIC-20 + UltiMem)  :::
+ ;;;  (Commodore VIC-20 + UltiMem)  ;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; CPU
@@ -91,7 +91,6 @@ drv_pid:        .res MAX_DRVS
 drv_vl:         .res MAX_DRVS
 drv_vh:         .res MAX_DRVS
 
-devs:           .res MAX_DEVS
 dev_drv:        .res MAX_DEVS
 
 free_bank:      .res 1
@@ -160,6 +159,19 @@ free_drv:       .res 1
 ;;;;;;;;;;;;
 
 .proc main
+    jsr tests
+    jsr init
+    lda #<txt_welcome
+    ldy #>txt_welcome
+    jmp PRTSTR
+.endproc
+
+.proc tests
+    jsr init
+    rts
+.endproc
+
+.proc init
     ;; All banks are R/W RAM.
     ;; Default order expected.
     lda #%11111111
@@ -191,11 +203,8 @@ free_drv:       .res 1
 :   cpx #MAX_DRVS
     bcc :+
     sta drvs,x
-:   cpx #MAX_DEVS
-    bcc :+
-    sta devs,x
 :   inx
-    bne :----
+    bne :---
 
     lda #FIRST_BANK
     sta free_bank
@@ -225,11 +234,7 @@ free_drv:       .res 1
     ;; Escape into a parallel universe.
     jsr gen_copycode
     ldy #0
-    jsr fork_raw
-
-    lda #<txt_welcome
-    ldy #>txt_welcome
-    jmp PRTSTR
+    jmp fork_raw
 .endproc
 
 ;;;;;;;;;;;;;;;;;;

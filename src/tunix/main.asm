@@ -159,15 +159,31 @@ free_drv:       .res 1
 ;;;;;;;;;;;;
 
 .proc main
-    jsr tests
-    jsr init
     lda #<txt_welcome
     ldy #>txt_welcome
-    jmp PRTSTR
+    jsr PRTSTR
+    jsr tests
+    jmp init
 .endproc
 
 .proc tests
     jsr init
+
+    ;;; Data structures
+    ;; Lists.
+    ; First LFN allocation.
+    ; Draw till empty.
+
+    ;; Doubly used lists.
+    ; Allocate free, put back as used.
+    ; In reverse.
+
+    ;; Doubly-linked lists.
+    ; Allocate first.
+    ; Draw till empty.
+    ; Free by index.
+
+    ;; Extended memory.
     rts
 .endproc
 
@@ -265,9 +281,9 @@ free_drv:       .res 1
     lda #$20+1
     sta tmp2
 next_bank:
-    lda #<1364+1
+    lda #<($2000 / 6)
     sta tmp3
-    lda #>1364+1
+    lda #>($2000 / 6)
     sta tmp4
     lda #$00
     sta dl

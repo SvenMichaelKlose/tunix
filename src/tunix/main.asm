@@ -49,7 +49,7 @@ blk5        = $9ffe
 
     .zeropage
 
-.importzp tmp1, tmp2, tmp3, tmp4
+.importzp tmp2, tmp3, tmp4
 .importzp ptr1, ptr2, ptr3, ptr4
 
 ;;; Registers
@@ -63,6 +63,8 @@ dh:     .res 1
 c:
 cl:     .res 1
 ch:     .res 1
+
+tmp1:   .res 1
 
     .data
 
@@ -140,11 +142,11 @@ sleeping:       .res 1
     bne :+
     list_popx list, first
     jmp :++++
-:   stx tmp1
+:   stx tmp2
 
     ;; Search through next.
     ldy first
-:   lda tmp1
+:   lda tmp2
     cmp list,y
     bne :+
     ldx list,y
@@ -200,8 +202,8 @@ halt:
     ; Draw GLFNs until empty.
     ldy #1
 :   popx_glfn
-    stx tmp2 ; Why is tmp1 spoiling
-    cpy tmp2 ; print of "PASSED."?
+    stx tmp2
+    cpy tmp2
     beq :+
     error err_invalid_glfn_order
 :   iny

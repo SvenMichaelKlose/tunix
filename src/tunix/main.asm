@@ -134,6 +134,15 @@ sleeping:       .res 1
 
     .code
 
+;;;;;;;;;;;;;;
+;;; MACROS ;;;
+;;;;;;;;;;;;;;
+
+.macro mvb to, from
+    lda from
+    sta to
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;
 ;;; WORD MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
@@ -144,10 +153,8 @@ sleeping:       .res 1
 .endmacro
 
 .macro setzwi to, val
-    lda #<val
-    sta to
-    lda #>val
-    sta to+1
+    mvb to, #<val
+    mvb to+1, #>val
 .endmacro
 
 .macro inczw at
@@ -340,24 +347,16 @@ err_invalid_glfn_order:
     list_init drvs
 
     ;; Save initial set of banks.
-    lda ram123
-    sta proc_lowmem
-    lda io23
-    sta proc_io23
-    lda blk1
-    sta proc_blk1
-    lda blk2
-    sta proc_blk2
-    lda blk3
-    sta proc_blk3
-    lda blk5
-    sta proc_blk5
+    mvb proc_lowmem, ram123
+    mvb proc_io23, io23
+    mvb proc_blk1, blk1
+    mvb proc_blk2, blk2
+    mvb proc_blk3, blk3
+    mvb proc_blk5, blk5
 
     ;; Point devices to KERNAL.
-    lda #$1a
-    sta drv_vl
-    lda #$03
-    sta drv_vh
+    mvb drv_vl, #$1a
+    mvb drv_vh, #$03
 
     ;; Escape into a parallel universe.
     jsr gen_speedcode
@@ -498,10 +497,47 @@ no_more_procs:
 
 ; fork() copy vectors
 set_lowmem: .word $0000, $b000, $0400
+set_ram123: .word $0400, $a000, $0c00
 set_screen: .word $1000, $a000, $1000
 set_color:  .word $9400, $b400, $0400
-set_vic:    .word $9000, $b800, $0400
 set_io23:   .word $9800, $b800, $07f0
+set_vic:
+    .word $9000, saved_vic+$2000, $0010
+
+.proc save_state
+    lda proc_lowmem,y
+    sta blk5
+    ldaxi set_lowmem
+    jsr smemcpy
+    ldaxi set_screen
+    jsr smemcpy
+    ldaxi set_color
+    jmp smemcpy
+.endproc
+
+set_blk5_to_lowmem:
+    .word $b000, $0000, $0400
+set_blk5_to_screen:
+    .word $8000, $1000, $1000
+set_blk5_to_color:
+    .word $b400, $9400, $0400
+set_blk5_to_vic:
+    .word saved_vic+$2000, $9000, $0010
+
+.proc load_state
+    lda proc_lowmem,y
+    sta blk3
+    ldx stack-$2000
+    txs
+    ldaxi set_blk5_to_lowmem
+    jsr smemcpy
+    ldaxi set_blk5_to_vic
+    jsr smemcpy
+    ldaxi set_blk5_to_color
+    jsr smemcpy
+    ldaxi set_blk5_to_screen
+    jmp smemcpy
+.endproc
 
 ; Copy process to new banks.
 .proc fork_raw
@@ -510,13 +546,7 @@ set_io23:   .word $9800, $b800, $07f0
 
     jsr balloc
     sta proc_lowmem,y
-    sta blk5
-    ldaxi set_lowmem
-    jsr smemcpy
-    ldaxi set_screen
-    jsr smemcpy
-    ldaxi set_color
-    jsr smemcpy
+    jsr save_state
 
     jsr balloc
     sta proc_io23,y
@@ -576,7 +606,6 @@ set_io23:   .word $9800, $b800, $07f0
     sta blk3
     lda proc_blk5,x
     sta blk5
-
     rts
 .endproc
 
@@ -616,90 +645,47 @@ set_io23:   .word $9800, $b800, $07f0
     rts
 .endproc
 
-; Saving state
-set_lowmem_to_blk3:
-    .word $0000, $7000, $0400
-set_vic_to_blk3:
-    .word $9000, saved_vic-$2000, $0010
-set_screen_to_blk3:
-    .word $1000, $6000, $1000
-set_color_to_blk3:
-    .word $9400, $7400, $0400
-
-; Loading state
-set_blk3_to_lowmem:
-    .word $7000, $0000, $0400
-set_blk3_to_vic:
-    .word saved_vic-$2000, $9000, $0010
-set_blk3_to_screen:
-    .word $6000, $1000, $1000
-set_blk3_to_color:
-    .word $7400, $9400, $0400
-
 .proc switch_to
     pha
-    ldx pid
+    ldy pid
 
     ;;; Save state.
     ;; Banks
     lda io23
-    sta proc_io23,x
+    sta proc_io23,y
     lda blk1
-    sta proc_blk1,x
+    sta proc_blk1,y
     lda blk2
-    sta proc_blk2,x
+    sta proc_blk2,y
     lda blk3
-    sta proc_blk3,x
+    sta proc_blk3,y
     lda blk5
-    sta proc_blk5,x
-    ;; Low memory
-    ; Zero page, stack, KERNAL
-    lda proc_lowmem,x
-    sta blk3
-    ldaxi set_lowmem_to_blk3
-    jsr smemcpy
-    ; VIC
-    ldaxi set_vic_to_blk3
-    jsr smemcpy
-    ; Color
-    ldaxi set_color_to_blk3
-    jsr smemcpy
-    ; Internal 4K
-    ldaxi set_screen_to_blk3
-    jsr smemcpy
+    sta proc_blk5,y
+    jsr save_state
     tsx
+    inx
     inx
     stx stack-$2000
 
+    ;; Load state.
     pla
     sta pid
-    tax
-
-    ;; Load state.
-    lda proc_lowmem,x
+    tay
+    jsr load_state
+    lda proc_lowmem,y
+    sta ram123
+    lda proc_io23,y
+    sta io23
+    lda proc_blk1,y
+    sta blk1
+    lda proc_blk2,y
+    sta blk2
+    lda proc_blk3,y
     sta blk3
+    lda proc_blk5,y
+    sta blk5
     ldx stack-$2000
     txs
-    ldaxi set_blk3_to_lowmem
-    jsr smemcpy
-    ldaxi set_blk3_to_vic
-    jsr smemcpy
-    ldaxi set_blk3_to_color
-    jsr smemcpy
-    ldaxi set_blk3_to_screen
-    jsr smemcpy
-    lda proc_lowmem,x
-    sta ram123
-    lda proc_io23,x
-    sta io23
-    lda proc_blk1,x
-    sta blk1
-    lda proc_blk2,x
-    sta blk2
-    lda proc_blk3,x
-    sta blk3
-    lda proc_blk5,x
-    sta blk5
     rts
 .endproc
 
@@ -878,8 +864,9 @@ m:  inc dh
 .byte "DISPATCH"
 
 ; Translate local to global LFN.
-.proc xlat_lfn_glfn
+.proc lfn_to_glfn
     ;; Use existing.
+    tax
     lda lfn_glfn,x
     bne :+
 
@@ -924,11 +911,11 @@ j:  jsr $fffe
     ;; Restore bank.
     pla
     sta blk1
-
     rts
 .endproc
 
 .proc open
+    ;; Save LFN and file name.
     lda FNADR
     pha
     lda FNADR+1
@@ -937,9 +924,8 @@ j:  jsr $fffe
     txa
     pha
 
-    ;; Get GLFN.
-    jsr xlat_lfn_glfn
-    stx LFN
+    jsr lfn_to_glfn
+    sta LFN
 
     ;; Copy file name.
     ldy FNLEN
@@ -967,7 +953,7 @@ j:  jsr $fffe
     jsr call_driver
     sta reg_a
 
-    ;; Restore LFN.
+    ;; Restore LFN and file name.
     pla
     sta LFN
     pla
@@ -981,17 +967,15 @@ j:  jsr $fffe
 .endproc
 
 .proc chkin
-    tax
-    jsr xlat_lfn_glfn
-    stx reg_a
+    jsr lfn_to_glfn
+    sta reg_a
     lda #2
     jmp call_driver
 .endproc
 
 .proc ckout
-    tax
-    jsr xlat_lfn_glfn
-    stx reg_a
+    jsr lfn_to_glfn
+    sta reg_a
     lda #4
     jmp call_driver
 .endproc
@@ -999,56 +983,51 @@ j:  jsr $fffe
 itmp:   .res 1
 
 .proc basin
-    ;; Push input LFN.
+    ;; Translate input LFN.
     lda DFLTN
     pha
-
-    tax
-    jsr xlat_lfn_glfn
-    stx DFLTN
+    jsr lfn_to_glfn
+    sta DFLTN
 
     lda #6
     jsr call_driver
     sta itmp
 
-    ;; Pop input LFN.
+    ;; Restore LFN.
     pla
     sta DFLTN
     php
     lda itmp
     plp
-
     rts
 .endproc
 
 .proc bsout
     sta reg_a
 
+    ;; Translate output LFN.
     lda DFLTO
     pha
-
-    tax
-    jsr xlat_lfn_glfn
-    stx DFLTO
+    jsr lfn_to_glfn
+    sta DFLTO
 
     lda #8
     jsr call_driver
     sta itmp
 
-    ;; Pop output LFN.
+    ;; Restore LFN.
     pla
     sta DFLTO
+
     php
     lda itmp
     plp
-
     rts
 .endproc
 
 .proc close
-    tax
-    jsr xlat_lfn_glfn
-    stx reg_a
+    jsr lfn_to_glfn
+    sta reg_a
 
     ldy glfn_drv,x
     lda #0

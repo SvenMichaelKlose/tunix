@@ -72,15 +72,28 @@ tmp1:   .res 1
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
+;; Extended memory banks
+; List of free ones.
 banks:          .res MAX_BANKS
+; Number of processes that own a single
+; bank.
 bank_refs:      .res MAX_BANKS
 
+;; Global logical file numbers
+;; Shared by fork()ed processes.
+; List of free GLFNs
 glfns:          .res MAX_LFNS
+; Driver used with GLFN @ OPEN.
 glfn_drv:       .res MAX_LFNS
+; Secondary address of GLFN @ OPEN.
 glfn_sa:        .res MAX_LFNS
 
+;; Processes
+; Free slots
 procs:          .res MAX_PROCS
+; Sleeping/running?
 proc_flags:     .res MAX_PROCS
+; Primary banks allocated.
 proc_lowmem:    .res MAX_PROCS
 proc_blk1:      .res MAX_PROCS
 proc_blk2:      .res MAX_PROCS
@@ -88,18 +101,56 @@ proc_blk3:      .res MAX_PROCS
 proc_io23:      .res MAX_PROCS
 proc_blk5:      .res MAX_PROCS
 
+;; Drivers
+; Free driver slots
 drvs:           .res MAX_DRVS
+; Processes registered
 drv_pid:        .res MAX_DRVS
+; Vector tables
 drv_vl:         .res MAX_DRVS
 drv_vh:         .res MAX_DRVS
 
+; Drivers assigned to devices.
 dev_drv:        .res MAX_DEVS
 
+;; Bank allocation
 free_bank:      .res 1
+
+;; First speed code BLK5 to copy from
+;; BLK2 to BLK3.
 copy_bank:      .res 1
+
+;; Pointers into array 'proc'.
 free_proc:      .res 1
 running:        .res 1
 sleeping:       .res 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOCAL (per process) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .bss
+
+;; Extended memory banks
+; List of used ones.
+lbanks:     .res MAX_BANKS
+
+;; Logical file numbers
+; List of used ones
+lfns:       .res MAX_LFNS
+; Translations to global LFNs
+lfn_glfn:   .res MAX_LFNS
+
+;; Process info
+pid:        .res 1
+; CPU state
+reg_a:      .res 1
+reg_x:      .res 1
+reg_y:      .res 1
+stack:      .res 1
+flags:      .res 1
+; VIC
+saved_vic:  .res 16
 
     .code
 
@@ -320,9 +371,9 @@ err_invalid_glfn_order:
     lda #$00
     sta ptr1
     sta ptr2
-    lda #$60
+    lda #$40
     sta ptr1+1
-    lda #$a0
+    lda #$60
     sta ptr2+1
     lda #$00+1
     sta tmp1
@@ -1031,29 +1082,11 @@ itmp:   .res 1
 r:  rts
 .endproc
 
-    .data
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOCAL (per process) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    .bss
-    .org $9800
-
-lbanks:     .res MAX_BANKS
-lfns:       .res MAX_LFNS
-lfn_glfn:   .res MAX_LFNS
+;; Driver info
+; File name copied from calling process.
 filename:   .res 256
-
+; Translated LFN.
 glfn:       .res 1
-pid:        .res 1
 
 first_lfn:  .res 1
 first_lbank:.res 1
-
-reg_a:      .res 1
-reg_x:      .res 1
-reg_y:      .res 1
-stack:      .res 1
-flags:      .res 1
-saved_vic:  .res 16

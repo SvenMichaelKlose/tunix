@@ -49,9 +49,6 @@ blk5        = $9ffe
 
     .zeropage
 
-.importzp tmp2, tmp3, tmp4
-.importzp ptr1, ptr2, ptr3, ptr4
-
 ;;; Registers
 
 s:
@@ -64,7 +61,17 @@ c:
 cl:     .res 1
 ch:     .res 1
 
-tmp1:   .res 1
+tmp1:
+tmp1l:  .res 1
+tmp1h:  .res 1
+tmp2:   .res 2
+tmp3:   .res 2
+tmp4:   .res 2
+
+ptr1:   .res 2
+ptr2:   .res 2
+ptr3:   .res 2
+ptr4:   .res 2
 
     .data
 
@@ -125,34 +132,44 @@ free_proc:      .res 1
 running:        .res 1
 sleeping:       .res 1
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOCAL (per process) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    .bss
-
-;; Extended memory banks
-; List of used ones.
-lbanks:     .res MAX_BANKS
-
-;; Logical file numbers
-; List of used ones
-lfns:       .res MAX_LFNS
-; Translations to global LFNs
-lfn_glfn:   .res MAX_LFNS
-
-;; Process info
-pid:        .res 1
-; CPU state
-reg_a:      .res 1
-reg_x:      .res 1
-reg_y:      .res 1
-stack:      .res 1
-flags:      .res 1
-; VIC
-saved_vic:  .res 16
-
     .code
+
+;;;;;;;;;;;;;;;;;;;
+;;; WORD MACROS ;;;
+;;;;;;;;;;;;;;;;;;;
+
+.macro ldaxi val
+    lda #<val
+    ldx #>val
+.endmacro
+
+.macro setzwi to, val
+    lda #<val
+    sta to
+    lda #>val
+    sta to+1
+.endmacro
+
+.macro inczw at
+    inc at
+    bne :+
+    inc at+1
+:
+.endmacro
+
+.macro qdeczw at
+    dec at
+    bne :+
+    dec at+1
+:
+.endmacro
+
+.macro jqdeczw at, to
+    dec at
+    bne to
+    dec at+1
+    bne to
+.endmacro
 
 ;;;;;;;;;;;;;;;;;;;
 ;;; LIST MACROS ;;;
@@ -294,14 +311,8 @@ err_invalid_glfn_order:
     sta $9ff2
 
     ;; Clear per-process data.
-    lda #$00
-    sta dl
-    lda #$98
-    sta dh
-    lda #$f0
-    sta cl
-    lda #$07
-    sta ch
+    setzwi d, $9800
+    setzwi c, $07f0
     jsr bzero
 
     ;; Set up lists and tables.
@@ -356,7 +367,7 @@ err_invalid_glfn_order:
 ;;; SPEED COPY ;;;
 ;;;;;;;;;;;;;;;;;;
 
-.proc out
+.proc _out
     ldy #0
     sta (d),y
     inc dl
@@ -365,85 +376,76 @@ err_invalid_glfn_order:
 :   rts
 .endproc
 
+.macro out val
+    lda val
+    jsr _out
+.endmacro
+
+.macro outzw at
+    lda at
+    jsr _out
+    lda at+1
+    jsr _out
+.endmacro
+
 .proc gen_copycode
+    ; Grab a new bank for BLK5.
     jsr balloc
     sta copy_bank
-    lda #$00
-    sta ptr1
-    sta ptr2
-    lda #$40
-    sta ptr1+1
-    lda #$60
-    sta ptr2+1
-    lda #$00+1
-    sta tmp1
-    lda #$20+1
-    sta tmp2
+    sta blk5
+    ; Source/dest argument values.
+    setzwi ptr1, $6000
+    setzwi ptr2, $a000
+    ; Total move count.
+    setzwi c, $2100
+
 next_bank:
-    lda #<($2000 / 6)
-    sta tmp3
-    lda #>($2000 / 6)
-    sta tmp4
-    lda #$00
-    sta dl
-    lda #$a0
-    sta dh
-    jmp start
+    ; Per bank move count.
+    setzwi tmp1, ($2000 / 6)
+    ; Bank fill pointer.
+    setzwi d, $a000
 
 next_move:
-    lda #OP_LDA_ABS
-    jsr out
-    lda ptr1
-    jsr out
-    lda ptr1+1
-    jsr out
-    lda #OP_STA_ABS
-    jsr out
-    lda ptr2
-    jsr out
-    lda ptr2+1
-    jsr out
-    inc ptr1
-    bne n1
-    inc ptr1+1
-n1: inc ptr2
-    bne start
-    inc ptr2+1
-start:
-    dec tmp1
-    bne :+
-    dec tmp2
+    ;; Make move.
+    out #OP_LDA_ABS
+    outzw ptr1
+    out #OP_STA_ABS
+    outzw ptr2
+
+    ;; Step
+    ; Increment argument values.
+    inczw ptr1
+    inczw ptr2
+    ; Decrement total move count.
+    qdeczw c
     beq done
-:   dec tmp3
-    bne next_move
-    dec tmp4
-    bne next_move
+    ; Decrement per bank move count.
+    jqdeczw tmp1, next_move
 
     ;; Make switch to next bank.
-    lda #OP_LDA_IMM
-    jsr out
+    out #OP_LDA_IMM
     jsr balloc
     pha
-    jsr out
-    lda #OP_JMP_ABS
-    jsr out
-    lda #<next_copy_bank
-    jsr out
-    lda #>next_copy_bank
-    jsr out
+    out #OP_JMP_ABS
+    out #<next_copy_bank
+    out #>next_copy_bank
     pla
     sta blk5
     jmp next_bank
 
 done:
-    lda #OP_RTS
-    jmp out
-    sta blk5
+    out #OP_RTS
+    rts
+.endproc
+
+.proc copy_blk3_to_blk5
+    stx blk3
+    lda copy_bank
 .endproc
 
 .proc next_copy_bank
-    sta $9ffe
-    jmp $a000
+    sta $9ffa
+    jmp $4000
 .endproc
 
 ;;;;;;;;;;;;;;;;;
@@ -451,6 +453,7 @@ done:
 ;;;;;;;;;;;;;;;;;
 
 .proc fork
+    ;; Grab process slot.
     list_popy procs, free_proc
     beq no_more_procs
 
@@ -494,9 +497,6 @@ set_lowmem: .word $0000, $b000, $0400
 set_screen: .word $1000, $a000, $1000
 set_color:  .word $9400, $b400, $0400
 set_vic:    .word $9000, $b800, $0400
-set_blk1:   .word $2000, $a000, $2000
-set_blk2:   .word $4000, $a000, $2000
-set_blk3:   .word $6000, $a000, $2000
 set_io23:   .word $9800, $b800, $07f0
 
 ; Copy process to new banks.
@@ -508,49 +508,39 @@ set_io23:   .word $9800, $b800, $07f0
     sta proc_lowmem,y
     sta proc_io23,y
     sta blk5
-    lda #<set_lowmem
-    ldx #>set_lowmem
+    ldaxi set_lowmem
     jsr smemcpy
-    lda #<set_screen
-    ldx #>set_screen
+    ldaxi set_screen
     jsr smemcpy
-    lda #<set_color
-    ldx #>set_color
+    ldaxi set_color
     jsr smemcpy
-    lda #<set_io23
-    ldx #>set_io23
+    ldaxi set_io23
     jsr smemcpy
     sty pid
 
     jsr balloc
     sta proc_blk1,y
     sta blk5
-    lda #<set_blk1
-    ldx #>set_blk1
-    jsr smemcpy
+    ldx blk1
+;    jsr copy_blk3_to_blk5
 
     jsr balloc
     sta proc_blk2,y
     sta blk5
-    lda #<set_blk2
-    ldx #>set_blk2
-    jsr smemcpy
+    ldx blk2
+;    jsr copy_blk3_to_blk5
 
     jsr balloc
     sta proc_blk3,y
     sta blk5
-    lda #<set_blk3
-    ldx #>set_blk3
-    jsr smemcpy
+    ldx blk3
+;    jsr copy_blk3_to_blk5
 
-    lda blk5
-    sta blk3
     jsr balloc
     sta proc_blk5,y
+    ldx blk5
     sta blk5
-    lda #<set_blk3
-    ldx #>set_blk3
-    jsr smemcpy
+;    jsr copy_blk3_to_blk5
 
     ldx pid
 
@@ -562,12 +552,15 @@ set_io23:   .word $9800, $b800, $07f0
     sta lbanks,y
     ldy proc_blk2,x
     sta lbanks,y
+    sty blk2
     ldy proc_blk3,x
     sta lbanks,y
-    ldy proc_io23,x
-    sta lbanks,y
+    sty blk3
+;    ldy proc_io23,x
+;    sta lbanks,y
     ldy proc_blk5,x
     sta lbanks,y
+    sty blk5
 
     ;; Restore banks.
     lda proc_blk3,x
@@ -600,13 +593,14 @@ set_io23:   .word $9800, $b800, $07f0
     pla
 
     ;; Free process
-    ; Take off list.
+    ; Take off running or sleeping.
     tax
     lda proc_flags,x
     bmi :+
     list_rm procs, running
     jmp :++
 :   list_rm procs, sleeping
+
     ; Add to free.
 :   list_push procs, free_proc
     clc
@@ -653,20 +647,16 @@ set_blk3_to_color:
     ; Zero page, stack, KERNAL
     lda proc_lowmem,x
     sta blk3
-    lda #<set_lowmem_to_blk3
-    ldx #>set_lowmem_to_blk3
+    ldaxi set_lowmem_to_blk3
     jsr smemcpy
     ; VIC
-    lda #<set_vic_to_blk3
-    ldx #>set_vic_to_blk3
+    ldaxi set_vic_to_blk3
     jsr smemcpy
     ; Color
-    lda #<set_color_to_blk3
-    ldx #>set_color_to_blk3
+    ldaxi set_color_to_blk3
     jsr smemcpy
     ; Internal 4K
-    lda #<set_screen_to_blk3
-    ldx #>set_screen_to_blk3
+    ldaxi set_screen_to_blk3
     jsr smemcpy
     tsx
     inx
@@ -681,17 +671,13 @@ set_blk3_to_color:
     sta blk3
     ldx stack-$2000
     txs
-    lda #<set_blk3_to_lowmem
-    ldx #>set_blk3_to_lowmem
+    ldaxi set_blk3_to_lowmem
     jsr smemcpy
-    lda #<set_blk3_to_vic
-    ldx #>set_blk3_to_vic
-    jmp smemcpy
-    lda #<set_blk3_to_color
-    ldx #>set_blk3_to_color
-    jmp smemcpy
-    lda #<set_blk3_to_screen
-    ldx #>set_blk3_to_screen
+    ldaxi set_blk3_to_vic
+    jsr smemcpy
+    ldaxi set_blk3_to_color
+    jsr smemcpy
+    ldaxi set_blk3_to_screen
     jsr smemcpy
     lda proc_lowmem,x
     sta ram123
@@ -857,22 +843,22 @@ k:  inc sh
 
 ; Clear memory.
 .proc bzero
-    ldx c
+    ldx cl
     inx
-    inc c+1
-    ldy d
+    inc ch
+    ldy dl
     lda #0
-    sta d
+    sta dl
     bne +n ; (jmp)
 l:  sta (d),y
     iny
     beq m
 n:  dex
     bne l
-    dec c+1
+    dec ch
     bne l
     rts
-m:  inc d+1
+m:  inc dh
     jmp n
 .endproc
 
@@ -953,10 +939,7 @@ j:  jsr $fffe
     sta filename,y
     dey
     jmp :-
-:   lda #<filename
-    sta FNADR
-    lda #>filename
-    sta FNADR+1
+:   setzwi FNADR, filename
 
     ;; Assign driver to GLFN.
     ldy DEV
@@ -1081,6 +1064,34 @@ itmp:   .res 1
     bne :-
 r:  rts
 .endproc
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOCAL (per process) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .bss
+    .org $9800
+
+;; Extended memory banks
+; List of used ones.
+lbanks:     .res MAX_BANKS
+
+;; Logical file numbers
+; List of used ones
+lfns:       .res MAX_LFNS
+; Translations to global LFNs
+lfn_glfn:   .res MAX_LFNS
+
+;; Process info
+pid:        .res 1
+; CPU state
+reg_a:      .res 1
+reg_x:      .res 1
+reg_y:      .res 1
+stack:      .res 1
+flags:      .res 1
+; VIC
+saved_vic:  .res 16
 
 ;; Driver info
 ; File name copied from calling process.

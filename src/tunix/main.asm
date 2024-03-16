@@ -107,7 +107,12 @@ free_drv:       .res 1
 ;;; LIST MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
 
-.macro list_pop list, free
+.macro list_init list
+    lda #1
+    sta list
+.endmacro
+
+.macro list_popx list, free
     ldx free
     lda list,x
     sta free
@@ -132,10 +137,10 @@ free_drv:       .res 1
 .endmacro
 
 .macro list_rm list, first
-    ;; Handle head.
+    ;; Check head.
     cpx first
     bne :+
-    list_pop list, first
+    list_popx list, first
     jmp :++++
 :   stx tmp1
 
@@ -154,38 +159,81 @@ free_drv:       .res 1
 :
 .endmacro
 
+.macro pushy_glfn
+    list_pushy glfns, glfns
+.endmacro
+
+.macro popx_glfn
+    list_popx glfns, glfns
+.endmacro
+
+.macro popy_glfn
+    list_popy glfns, glfns
+.endmacro
+
+.macro print asciiz
+    lda #<asciiz
+    ldy #>asciiz
+    jsr PRTSTR
+.endmacro
+
+.macro error asciiz
+    print asciiz
+halt:
+    jmp halt
+.endmacro
+
 ;;;;;;;;;;;;
 ;;; INIT ;;;
 ;;;;;;;;;;;;
 
 .proc main
-    lda #<txt_welcome
-    ldy #>txt_welcome
-    jsr PRTSTR
+    print txt_tests
     jsr tests
+    print txt_booting
     jmp init
 .endproc
 
+.export tests
 .proc tests
     jsr init
 
     ;;; Data structures
-    ;; Lists.
-    ; First LFN allocation.
-    ; Draw till empty.
+    ; Draw GLFNs until empty.
+    ldy #1
+:   popx_glfn
+    stx tmp2 ; Why is tmp1 spoiling
+    cpy tmp2 ; print of "PASSED."?
+    beq :+
+    error err_invalid_glfn_order
+:   iny
+    bne :--
 
-    ;; Doubly used lists.
+    ;; Doubly used list arrays.
     ; Allocate free, put back as used.
     ; In reverse.
 
-    ;; Doubly-linked lists.
+    ;; Doubly-linked listmaps.
     ; Allocate first.
     ; Draw till empty.
     ; Free by index.
 
+    ;;; Syscalls
     ;; Extended memory.
+    ;; Fork
+
     rts
 .endproc
+
+txt_tests:
+    .byte 147   ; Clear screen.
+    .byte "TUNIX", 13
+    .byte "TESTS: ",0
+txt_booting:
+    .byte "PASSED.", 13
+    .byte "BOOTING...",0
+err_invalid_glfn_order:
+    .byte "INVALID GLFN ORDER", 0
 
 .proc init
     ;; All banks are R/W RAM.
@@ -353,7 +401,7 @@ done:
 
 .proc fork
     list_popy procs, free_proc
-    beq error
+    beq no_more_procs
 
     ;; Insert past current process.
     ldx pid
@@ -385,7 +433,7 @@ done:
 :   clc
     rts
 
-error:
+no_more_procs:
     sec
     rts
 .endproc
@@ -506,17 +554,11 @@ set_io23:   .word $9800, $b800, $07f0
     lda proc_flags,x
     bmi :+
     list_rm procs, running
-    beq error
     jmp :++
 :   list_rm procs, sleeping
-    beq error
-:
     ; Add to free.
-    list_push procs, free_proc
+:   list_push procs, free_proc
     clc
-    rts
-error:
-    sec
     rts
 .endproc
 
@@ -626,7 +668,7 @@ set_blk3_to_color:
 ;  X: Bank #
 .proc balloc
     ;; Draw from global pool.
-    list_pop banks, free_bank
+    list_popx banks, free_bank
     beq :+  ; Oops…
     ;; Own it.
     inc bank_refs,x
@@ -637,16 +679,17 @@ set_blk3_to_color:
 
 ; Free bank
 ;
+; Ingnores already free ones.
 ; X: Bank #
 .proc bfree
     dec lbanks,x
-    bmi error
+    bmi invalid_bank
     dec bank_refs,x
     bne :+
     list_push banks, free_bank
 :   clc
     rts
-error:
+invalid_bank:
     inc lbanks,x
     sec
     rts
@@ -674,7 +717,7 @@ error:
 :   dec lfn_glfn,x
     bne :+
     ldy lfn_glfn,x
-    list_pushy glfns, free_glfn
+    pushy_glfn
 :   lda lfns,x
     tax
     bne :--
@@ -687,14 +730,15 @@ done:
 ;;;;;;;;;;;;;;;
 
 ; XA: vectors
-; Returns: X: driver ID. 0 on error.
+; Returns: X: driver ID.
+;             0 if out of slots.
 .proc register_driver
     sta ptr1
     stx ptr1+1
 
     ;; Get slot.
-    list_pop drvs, free_drv
-    beq error
+    list_popx drvs, free_drv
+    beq out_of_slots
 
     ;; Populate slot.
     lda pid
@@ -703,7 +747,8 @@ done:
     sta drv_vl,x
     lda ptr1+1
     sta drv_vh,x
-error:
+
+out_of_slots:
     rts
 .endproc
 
@@ -797,7 +842,7 @@ m:  inc d+1
     beq :+
 
     ;; Allocate GLFN.
-    list_popy glfns, free_glfn
+    popy_glfn
     tya
     sta lfn_glfn,x
 
@@ -987,8 +1032,6 @@ r:  rts
 .endproc
 
     .data
-
-txt_welcome:    .byte "TUNIX", 13, 0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOCAL (per process) ;;;

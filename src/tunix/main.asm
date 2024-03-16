@@ -296,10 +296,12 @@ halt:
 txt_tests:
     .byte 147   ; Clear screen.
     .byte "TUNIX", 13
-    .byte "TESTS: ",0
+    .byte "TESTS..",0
 txt_booting:
-    .byte "PASSED.", 13
-    .byte "BOOTING...",0
+    .byte 13, "BOOTING..",0
+txt_init:
+    .byte ".", 0
+
 err_invalid_glfn_order:
     .byte "INVALID GLFN ORDER", 0
 
@@ -324,10 +326,10 @@ err_invalid_glfn_order:
     sta glfns,x
     sta lfns,x
     cpx #MAX_PROCS
-    bcc :+
+    bcs :+
     sta procs,x
 :   cpx #MAX_DRVS
-    bcc :+
+    bcs :+
     sta drvs,x
 :   inx
     bne :---
@@ -358,7 +360,8 @@ err_invalid_glfn_order:
     sta drv_vh
 
     ;; Escape into a parallel universe.
-    jsr gen_copycode
+    jsr gen_speedcode
+    print txt_init
     ldy #0
     jmp fork_raw
 .endproc
@@ -388,7 +391,7 @@ err_invalid_glfn_order:
     jsr _out
 .endmacro
 
-.proc gen_copycode
+.proc gen_speedcode
     ; Grab a new bank for BLK5.
     jsr balloc
     sta copy_bank
@@ -426,6 +429,7 @@ next_move:
     out #OP_LDA_IMM
     jsr balloc
     pha
+    jsr _out
     out #OP_JMP_ABS
     out #<next_copy_bank
     out #>next_copy_bank
@@ -506,7 +510,6 @@ set_io23:   .word $9800, $b800, $07f0
 
     jsr balloc
     sta proc_lowmem,y
-    sta proc_io23,y
     sta blk5
     ldaxi set_lowmem
     jsr smemcpy
@@ -514,6 +517,10 @@ set_io23:   .word $9800, $b800, $07f0
     jsr smemcpy
     ldaxi set_color
     jsr smemcpy
+
+    jsr balloc
+    sta proc_io23,y
+    sta blk5
     ldaxi set_io23
     jsr smemcpy
     sty pid
@@ -522,31 +529,33 @@ set_io23:   .word $9800, $b800, $07f0
     sta proc_blk1,y
     sta blk5
     ldx blk1
-;    jsr copy_blk3_to_blk5
+    jsr copy_blk3_to_blk5
 
     jsr balloc
     sta proc_blk2,y
     sta blk5
     ldx blk2
-;    jsr copy_blk3_to_blk5
+    jsr copy_blk3_to_blk5
 
     jsr balloc
     sta proc_blk3,y
     sta blk5
     ldx blk3
-;    jsr copy_blk3_to_blk5
+    jsr copy_blk3_to_blk5
 
     jsr balloc
     sta proc_blk5,y
     ldx blk5
     sta blk5
-;    jsr copy_blk3_to_blk5
+    jsr copy_blk3_to_blk5
 
     ldx pid
 
     ;; Release parent's banks.
     lda #0
     ldy proc_lowmem,x
+    sta lbanks,y
+    ldy proc_io23,x
     sta lbanks,y
     ldy proc_blk1,x
     sta lbanks,y
@@ -556,13 +565,13 @@ set_io23:   .word $9800, $b800, $07f0
     ldy proc_blk3,x
     sta lbanks,y
     sty blk3
-;    ldy proc_io23,x
-;    sta lbanks,y
     ldy proc_blk5,x
     sta lbanks,y
     sty blk5
 
-    ;; Restore banks.
+    ;; Restore parent's banks.
+    lda proc_blk2,x
+    sta blk3
     lda proc_blk3,x
     sta blk3
     lda proc_blk5,x

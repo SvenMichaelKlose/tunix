@@ -98,8 +98,6 @@ copy_bank:      .res 1
 free_proc:      .res 1
 running:        .res 1
 sleeping:       .res 1
-free_glfn:      .res 1
-free_drv:       .res 1
 
     .code
 
@@ -272,8 +270,8 @@ err_invalid_glfn_order:
 
     lda #FIRST_BANK
     sta free_bank
-    lda #1
-    sta free_glfn
+    list_init glfns
+    list_init drvs
 
     ;; Save initial set of banks.
     lda ram123
@@ -737,7 +735,7 @@ done:
     stx ptr1+1
 
     ;; Get slot.
-    list_popx drvs, free_drv
+    list_popx drvs, drvs
     beq out_of_slots
 
     ;; Populate slot.

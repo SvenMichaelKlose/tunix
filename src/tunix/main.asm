@@ -304,19 +304,6 @@ sleeping:       .res 1
     jmp init
 .endproc
 
-.proc list_length
-    stax ptr1
-    ldx #0
-    cpy #0
-    beq empty
-:   inx
-    lda (ptr1),y
-    tay
-    bne :-
-empty:
-    rts
-.endproc
-
 .export tests
 .export banks
 .export free_bank
@@ -873,6 +860,23 @@ out_of_slots:
     rts
 .endproc
 
+;;;;;;;;;;;;;;;;;;
+;;; LIST UTILS ;;;
+;;;;;;;;;;;;;;;;;;
+
+.proc list_length
+    stax ptr1
+    ldx #0
+    cpy #0
+    beq empty
+:   inx
+    lda (ptr1),y
+    tay
+    bne :-
+empty:
+    rts
+.endproc
+
 ;;;;;;;;;;;;;
 ;;; ZPLIB ;;;
 ;;;;;;;;;;;;;
@@ -1086,79 +1090,42 @@ tunix:
     jmp call_driver
 .endproc
 
-itmp:   .res 1
+.macro iohandler name, lfn, drvop
+.proc name
+    sta reg_a
+    stx reg_x
+    sty reg_y
 
-.proc basin
     ;; Translate input LFN.
-    lda DFLTN
+    lda lfn
     pha
     jsr lfn_to_glfn
-    sta DFLTN
+    sta lfn
 
-    lda #IDX_BASIN
+    lda #drvop
     jsr call_driver
-    sta itmp
-
-    ;; Restore LFN.
-    pla
-    sta DFLTN
-    php
-    lda itmp
-    plp
-    rts
-.endproc
-
-.proc bsout
     sta reg_a
 
-    ;; Translate output LFN.
-    lda DFLTO
-    pha
-    jsr lfn_to_glfn
-    sta DFLTO
-
-    lda #IDX_BSOUT
-    jsr call_driver
-    sta itmp
-
-    ;; Restore LFN.
-    pla
-    sta DFLTO
-
-    php
-    lda itmp
-    plp
-    rts
-.endproc
-
-.proc getin
-    ;; Translate input LFN.
-    lda DFLTN
-    pha
-    jsr lfn_to_glfn
-    sta DFLTN
-
-    lda #IDX_GETIN
-    jsr call_driver
-    sta itmp
-
     ;; Restore LFN.
     pla
     sta DFLTN
     php
-    lda itmp
+    lda reg_a
     plp
     rts
 .endproc
+.endmacro
+
+iohandler basin, DFLTN, IDX_BASIN
+iohandler bsout, DFLTO, IDX_BSOUT
+iohandler getin, DFLTN, IDX_GETIN
+iohandler blkin, DFLTN, IDX_BLKIN
+iohandler bkout, DFLTO, IDX_BKOUT
 
 .proc clrcn
     jsr lfn_to_glfn
     sta reg_a
-
     ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
     tya
     tax
     lda #IDX_CLRCN
@@ -1194,86 +1161,34 @@ r:  rts
 .endproc
 
 .proc stop
-    jsr lfn_to_glfn
-    sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
+    ldx #0
     lda #IDX_STOP
     jmp call_driver
 .endproc
 
 .proc load
-    jsr lfn_to_glfn
     sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
-    lda #IDX_LOAD
+    stx reg_x
+    sty reg_y
+    ldy DEV
+    ldx dev_drv,y
+    lda #IDX_SAVE
     jmp call_driver
 .endproc
 
 .proc save
-    jsr lfn_to_glfn
     sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
+    stx reg_x
+    sty reg_y
+    ldy DEV
+    ldx dev_drv,y
     lda #IDX_SAVE
     jmp call_driver
 .endproc
 
 .proc usrcmd
-    jsr lfn_to_glfn
-    sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
-    lda #IDX_USRCMD
-    jmp call_driver
-.endproc
-
-.proc blkin
-    jsr lfn_to_glfn
-    sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
-    lda #IDX_BLKIN
-    jmp call_driver
-.endproc
-
-.proc bkout
-    jsr lfn_to_glfn
-    sta reg_a
-
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-
-    tya
-    tax
-    lda #IDX_BKOUT
+    ldx #0
+    lda #IDX_STOP
     jmp call_driver
 .endproc
 

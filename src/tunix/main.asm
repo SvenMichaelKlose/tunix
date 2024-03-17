@@ -32,17 +32,17 @@ IDX_OPEN   = 0
 IDX_CLOSE  = 2
 IDX_CHKIN  = 4
 IDX_CKOUT  = 6
-IDX_CLRCN  = 7
-IDX_BASIN  = 8
-IDX_BSOUT  = 9
-IDX_STOP   = 10
-IDX_GETIN  = 12
-IDX_CLALL  = 14
-IDX_USRCMD = 16
-IDX_LOAD   = 18
-IDX_SAVE   = 20
-IDX_BLKIN  = 22
-IDX_BKOUT  = 24
+IDX_CLRCN  = 8
+IDX_BASIN  = 10
+IDX_BSOUT  = 12
+IDX_STOP   = 14
+IDX_GETIN  = 16
+IDX_CLALL  = 18
+IDX_USRCMD = 20
+IDX_LOAD   = 22
+IDX_SAVE   = 24
+IDX_BLKIN  = 26
+IDX_BKOUT  = 28
 
 ;;; BASIC
 
@@ -116,7 +116,9 @@ glfn_sa:    .res MAX_LFNS
 ;; Processes
 ; Free slots
 procs:      .res MAX_PROCS
-; Sleeping/running?
+; Running/sleeping?
+PROC_RUNNING    = 1
+PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
 ; Primary banks allocated.
 proc_low:   .res MAX_PROCS
@@ -180,6 +182,18 @@ sleeping:   .res 1
 .macro popw to
     pop to+1
     pop to
+.endmacro
+
+.macro saveregs
+    sta reg_a
+    stx reg_x
+    sty reg_y
+.endmacro
+
+.macro loadregs
+    lda reg_a
+    ldx reg_x
+    ldy reg_y
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;
@@ -339,7 +353,6 @@ sleeping:   .res 1
     jsr init
 
     ;;; Data structures
-
     ; Draw GLFNs until empty.
     ldy #1
 :   popx_glfn
@@ -567,7 +580,7 @@ done:
     list_popy procs, free_proc
     beq no_more_procs
 
-    ;; Insert past current process.
+    ;; Insert after current process.
     ldx pid
     lda running,x
     sta running,y
@@ -575,24 +588,23 @@ done:
     sta running,x
     pha
 
+    lda #PROC_RUNNING
+    sta proc_flags,y
     jsr fork_raw
 
-    ;; Increment banks.
+    ;; Increment bank refs.
     ldx first_lbank
     beq :++
 :   inc bank_refs,x
     lda lbanks,x
     tax
     bne :-
-:
 
     ;; Return PID.
-    pla
-    ; 0 for parent.
+:   pla
     cmp pid
     bne :+
-    lda #0
-
+    lda #0  ; (for child)
 :   clc
     rts
 
@@ -645,11 +657,22 @@ set_blk5_to_vic:
     jmp smemcpy
 .endproc
 
+.macro cpyblk proc, blk
+    jsr balloc
+    sta proc,y
+    sta blk5
+    ldx blk
+    jsr copy_blk3_to_blk5
+.endmacro
+
+.macro slbankx proc, blk
+    ldy proc,x
+    sta lbanks,y
+    sty blk
+.endmacro
+
 ; Copy process to new banks.
 .proc fork_raw
-    lda #0
-    sta proc_flags,y
-
     jsr balloc
     sta proc_low,y
     jsr save_state
@@ -659,69 +682,31 @@ set_blk5_to_vic:
     sta blk5
     ldaxi set_io23
     jsr smemcpy
-    sty pid
+    sty pid+$2000
 
-    jsr balloc
-    sta proc_blk1,y
-    sta blk5
-    ldx blk1
-    jsr copy_blk3_to_blk5
+    cpyblk proc_blk1, blk1
+    cpyblk proc_blk2, blk2
+    cpyblk proc_blk3, blk3
+    cpyblk proc_blk5, blk5
 
-    jsr balloc
-    sta proc_blk2,y
-    sta blk5
-    ldx blk2
-    jsr copy_blk3_to_blk5
-
-    jsr balloc
-    sta proc_blk3,y
-    sta blk5
-    ldx blk3
-    jsr copy_blk3_to_blk5
-
-    jsr balloc
-    sta proc_blk5,y
-    ldx blk5
-    sta blk5
-    jsr copy_blk3_to_blk5
-
+    ;; Release and restore parent banks.
     ldx pid
-
-    ;; Release parent's banks.
     lda #0
-    ldy proc_low,x
-    sta lbanks,y
-    ldy proc_io23,x
-    sta lbanks,y
-    ldy proc_blk1,x
-    sta lbanks,y
-    ldy proc_blk2,x
-    sta lbanks,y
-    sty blk2
-    ldy proc_blk3,x
-    sta lbanks,y
-    sty blk3
-    ldy proc_blk5,x
-    sta lbanks,y
-    sty blk5
-
-    ;; Restore parent's banks.
-    lda proc_blk2,x
-    sta blk3
-    lda proc_blk3,x
-    sta blk3
-    lda proc_blk5,x
-    sta blk5
+    slbankx proc_blk2, blk2
+    slbankx proc_blk3, blk3
+    slbankx proc_blk5, blk5
     rts
 .endproc
 
 ; A: Process ID.
 .proc kill
+    tax
+    lda proc_flags,x
+    beq not_there
     pha
 
     ;; Close resources.
     ; Switch to context.
-    ldx pid
     push io23
     lda proc_io23,x
     sta io23
@@ -733,10 +718,10 @@ set_blk5_to_vic:
     pop io23
 
     pla
+    tax
 
     ;; Free process
     ; Take off running or sleeping.
-    tax
     lda proc_flags,x
     bmi :+
 ;   deque_rmx procsf, procsb, running
@@ -745,7 +730,12 @@ set_blk5_to_vic:
 
     ; Add to free.
 :;  deque_addx procsf, procsb, free_proc
+    lda #0
+    sta proc_flags,x
     clc
+    rts
+not_there:
+    sec
     rts
 .endproc
 
@@ -979,26 +969,110 @@ m:  inc dh
     jmp n
 .endproc
 
+;;;;;;;;;;;;;;
+;;; DRIVER ;;;
+;;;;;;;;;;;;;;
+
+tunix_driver:
+.word tunix_open, tunix, tunix
+.word tunix_basin, tunix, tunix, tunix
+.word tunix, tunix, tunix, tunix, tunix
+.word tunix, tunix, tunix
+
+.proc tunix
+    clc
+    rts
+.endproc
+
+.proc tunix_open
+    lda FNLEN
+    beq respond_ok
+    lda filename
+    cmp #'P'
+    beq tunix_procs
+    bne respond_error ; (jmp)
+.endproc
+
+.proc tunix_procs
+    lda filename+1
+    cmp #'F'
+    beq tunix_fork
+    cmp #'K'
+    beq tunix_kill
+    bne respond_error   ; (jmp)
+.endproc
+
+.proc tunix_fork
+    jsr fork
+    bcs respond_error
+    bcc respond ; (jmp)
+.endproc
+
+.proc tunix_kill
+    jsr kill
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
+
+.proc respond_error
+    ldx #0
+    sta responsep
+    inx
+    stx response
+    stx response_len
+    sec
+    rts
+.endproc
+
+.proc respond_ok
+    ldx #0
+    stx response
+    stx responsep
+    inx
+.endproc
+
+.proc respond_len
+    stx response_len
+    clc
+    rts
+.endproc
+
+.proc tunix_basin
+    ldx responsep
+    cpx response_len
+    beq :+
+    lda response,x
+    inc responsep
+    clc
+    rts
+:   sec
+    rts
+.endproc
+    
+; A: Value to respond with error code 0.
+.proc respond
+    sta response+1
+    lda #0
+    sta response
+    sta responsep
+    ldx #2
+    bne respond_len ; (jmp)
+.endproc
+
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
 
 ; Translate local to global LFN.
 .proc lfn_to_glfn
-    ;; Use existing.
     tax
     lda lfn_glfn,x
-    bne :+
-
-    ;; Add LFN .
+    bne :+  ; Use existing...
     list_pushx lfns, first_lfn
     beq :+
-
-    ;; Allocate GLFN.
     popy_glfn
     tya
     sta lfn_glfn,x
-
 :   sta glfn
     rts
 .endproc
@@ -1006,7 +1080,7 @@ m:  inc dh
 ; X: GLFN
 ; A: vector offset
 .proc call_driver
-    ;; Get vector (base + A).
+    ; (vector base + A).
     ldy glfn_drv,x
     clc
     adc drv_vl,y
@@ -1015,35 +1089,25 @@ m:  inc dh
     adc #0
     sta j+2
 
-    ;; Bank in driver.
     push blk1
     ldx drv_pid,y
     lda proc_blk1,x
     sta blk1
-
-    ;; Call with registers.
-    lda reg_a
-    ldx reg_x
-    ldy reg_y
+    loadregs
 j:  jsr $fffe
-
-    ;; Restore bank.
     pop blk1
     rts
 .endproc
 
-tunix:
-    .word open, chkin, ckout, basin
-    .word bsout, getin, clrcn, close
-    .word clall, stop, usrcmd, load
-    .word save, blkin, bkout
+tunix_vectors:
+.word open, chkin, ckout, basin, bsout
+.word getin, clrcn, close, clall, stop
+.word usrcmd, load, save, blkin, bkout
 
 .proc open
-    ;; Save LFN and file name.
     pushw FNADR
     push LFN
     tax
-
     jsr lfn_to_glfn
     sta LFN
 
@@ -1067,13 +1131,11 @@ tunix:
     sta glfn_sa,x
     pla
 
-    ;; Call.
     tax
     lda #IDX_OPEN
     jsr call_driver
     sta reg_a
 
-    ;; Restore LFN and file name.
     pop LFN
     popw FNADR
     php
@@ -1098,11 +1160,7 @@ tunix:
 
 .macro iohandler name, lfn, drvop
 .proc name
-    sta reg_a
-    stx reg_x
-    sty reg_y
-
-    ;; Translate input LFN.
+    saveregs
     push lfn
     jsr lfn_to_glfn
     sta lfn
@@ -1111,7 +1169,6 @@ tunix:
     jsr call_driver
     sta reg_a
 
-    ;; Restore LFN.
     pop lfn
     php
     lda reg_a
@@ -1169,9 +1226,7 @@ r:  rts
 .endproc
 
 .proc load
-    sta reg_a
-    stx reg_x
-    sty reg_y
+    saveregs
     ldy DEV
     ldx dev_drv,y
     lda #IDX_LOAD
@@ -1179,9 +1234,7 @@ r:  rts
 .endproc
 
 .proc save
-    sta reg_a
-    stx reg_x
-    sty reg_y
+    saveregs
     ldy DEV
     ldx dev_drv,y
     lda #IDX_SAVE
@@ -1230,3 +1283,7 @@ glfn:       .res 1
 
 first_lfn:  .res 1
 first_lbank:.res 1
+
+response:       .res 8
+response_len:   .res 1
+responsep:      .res 1

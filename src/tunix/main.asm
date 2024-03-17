@@ -115,7 +115,8 @@ glfn_sa:    .res MAX_LFNS
 
 ;; Processes
 ; Free slots
-procs:      .res MAX_PROCS
+procsf:      .res MAX_PROCS
+procsb:      .res MAX_PROCS
 ; Running/sleeping?
 PROC_RUNNING    = 1
 PROC_SLEEPING   = 128
@@ -184,13 +185,13 @@ sleeping:   .res 1
     pop to
 .endmacro
 
-.macro saveregs
+.macro save_regs
     sta reg_a
     stx reg_x
     sty reg_y
 .endmacro
 
-.macro loadregs
+.macro load_regs
     lda reg_a
     ldx reg_x
     ldy reg_y
@@ -215,7 +216,7 @@ sleeping:   .res 1
     stx to+1
 .endmacro
 
-.macro setzwi to, val
+.macro stzwi to, val
     mvb to, #<val
     mvb to+1, #>val
 .endmacro
@@ -436,8 +437,8 @@ err_fail:
     sta $9ff2
 
     ;; Clear per-process data.
-    setzwi d, $9800
-    setzwi c, $07f0
+    stzwi d, $9800
+    stzwi c, $07f0
     jsr bzero
 
     ;; Set up lists and tables.
@@ -450,7 +451,7 @@ err_fail:
     sta lfns,x
     cpx #MAX_PROCS
     bcs :+
-    sta procs,x
+    sta procsf,x
 :   cpx #MAX_DRVS
     bcs :+
     sta drvs,x
@@ -464,7 +465,7 @@ err_fail:
     ; Manually end lists that do not
     ; fill a page.
     lda #0
-    sta procs+MAX_PROCS-1
+    sta procsf+MAX_PROCS-1
     sta drvs+MAX_DRVS-1
 
     ;; Save initial set of banks.
@@ -490,7 +491,7 @@ err_fail:
 ;;; SPEED COPY ;;;
 ;;;;;;;;;;;;;;;;;;
 
-.proc _out
+.proc outa
     ldy #0
     sta (d),y
     inc dl
@@ -501,14 +502,14 @@ err_fail:
 
 .macro out val
     lda val
-    jsr _out
+    jsr outa
 .endmacro
 
 .macro outzw at
     lda at
-    jsr _out
+    jsr outa
     lda at+1
-    jsr _out
+    jsr outa
 .endmacro
 
 .proc gen_speedcode
@@ -517,16 +518,16 @@ err_fail:
     sta copy_bank
     sta blk5
     ; Source/dest argument values.
-    setzwi ptr1, $6000
-    setzwi ptr2, $a000
+    stzwi ptr1, $6000
+    stzwi ptr2, $a000
     ; Total move count.
-    setzwi c, $2100
+    stzwi c, $2100
 
 next_bank:
     ; Per bank move count.
-    setzwi tmp1, ($2000 / 6)
+    stzwi tmp1, ($2000 / 6)
     ; Bank fill pointer.
-    setzwi d, $a000
+    stzwi d, $a000
 
 next_move:
     ;; Make move.
@@ -549,7 +550,7 @@ next_move:
     out #OP_LDA_IMM
     jsr balloc
     pha
-    jsr _out
+    jsr outa
     out #OP_JMP_ABS
     out #<next_copy_bank
     out #>next_copy_bank
@@ -577,7 +578,7 @@ done:
 
 .proc fork
     ;; Grab process slot.
-    list_popy procs, free_proc
+    list_popy procsf, free_proc
     beq no_more_procs
 
     ;; Insert after current process.
@@ -622,13 +623,35 @@ set_io23:   .word $9800, $b800, $07f0
 set_vic:
     .word $9000, saved_vic+$2000, $0010
 
+.macro get_procblk_x proc, blk
+    lda proc,y
+    sta blk
+.endmacro
+
+.macro get_procblk_y proc, blk
+    lda proc,y
+    sta blk
+.endmacro
+
+.macro set_procblk_x proc, blk
+    lda blk
+    sta proc,x
+.endmacro
+
+.macro set_procblk_y proc, blk
+    lda blk
+    sta proc,y
+.endmacro
+
+.macro smemcpyax set
+    ldaxi set
+    jsr smemcpy
+.endmacro
+
 .proc save_state
-    lda proc_low,y
-    sta blk5
-    ldaxi set_lowmem
-    jsr smemcpy
-    ldaxi set_screen
-    jsr smemcpy
+    get_procblk_y proc_low, blk5
+    smemcpyax set_lowmem
+    smemcpyax set_screen
     ldaxi set_color
     jmp smemcpy
 .endproc
@@ -643,16 +666,12 @@ set_blk5_to_vic:
     .word saved_vic+$2000, $9000, $0010
 
 .proc load_state
-    lda proc_low,y
-    sta blk3
+    get_procblk_y proc_low, blk3
     ldx stack-$2000
     txs
-    ldaxi set_blk5_to_lowmem
-    jsr smemcpy
-    ldaxi set_blk5_to_vic
-    jsr smemcpy
-    ldaxi set_blk5_to_color
-    jsr smemcpy
+    smemcpyax set_blk5_to_lowmem
+    smemcpyax set_blk5_to_vic
+    smemcpyax set_blk5_to_color
     ldaxi set_blk5_to_screen
     jmp smemcpy
 .endproc
@@ -665,7 +684,7 @@ set_blk5_to_vic:
     jsr copy_blk3_to_blk5
 .endmacro
 
-.macro slbankx proc, blk
+.macro sta_lbankx proc, blk
     ldy proc,x
     sta lbanks,y
     sty blk
@@ -692,12 +711,13 @@ set_blk5_to_vic:
     ;; Release and restore parent banks.
     ldx pid
     lda #0
-    slbankx proc_blk2, blk2
-    slbankx proc_blk3, blk3
-    slbankx proc_blk5, blk5
+    sta_lbankx proc_blk2, blk2
+    sta_lbankx proc_blk3, blk3
+    sta_lbankx proc_blk5, blk5
     rts
 .endproc
 
+; Force exit with code 255.
 ; A: Process ID.
 .proc kill
     tax
@@ -708,8 +728,7 @@ set_blk5_to_vic:
     ;; Close resources.
     ; Switch to context.
     push io23
-    lda proc_io23,x
-    sta io23
+    get_procblk_x proc_io23, io23
     ; Free.
     jsr clall
     jsr free_lfns
@@ -724,9 +743,9 @@ set_blk5_to_vic:
     ; Take off running or sleeping.
     lda proc_flags,x
     bmi :+
-;   deque_rmx procsf, procsb, running
+    deque_rmx procsf, procsb, running
     jmp :++
-:;  deque_rmx procsf, procsb, sleeping
+:   deque_rmx procsf, procsb, sleeping
 
     ; Add to free.
 :;  deque_addx procsf, procsb, free_proc
@@ -739,22 +758,70 @@ not_there:
     rts
 .endproc
 
-.proc switch_to
+; Wait for process to exit.
+; A: Process ID
+; Returns: A: Exit code
+.proc wait
+    tax
+    lda proc_flags,x
+    beq not_there
+    push pid
+    set_procblk_x proc_io23, io23
+    list_popy waiting, free_wait
+    list_pushy waiting, first_wait
+    pla
+    sta waiting_pid,y
+    txa
+    jmp sleep
+not_there:
+    sec
+    rts
+.endproc
+
+; Put process to sleep.
+; A: Process ID
+.proc sleep
+    tax
+    lda proc_flags,x
+    beq not_there
+    bmi sleeping_already
+    deque_rmx procsf, procsb, running
+    ;deque_addx procsf, procsb, sleeping
+not_there:
+sleeping_already:
+    sec
+    rts
+.endproc
+
+; Wake up process.
+; A: Process ID
+.proc resume
+    tax
+    lda proc_flags,x
+    beq not_there
+    bpl running_already
+    deque_rmx procsf, procsb, sleeping
+    ;deque_addx procsf, procsb, running
+not_there:
+running_already:
+    sec
+    rts
+.endproc
+
+; Switch to process.
+; A: Process ID
+.proc switch
     pha
     ldy pid
 
     ;;; Save state.
     ;; Banks
-    lda io23
-    sta proc_io23,y
-    lda blk1
-    sta proc_blk1,y
-    lda blk2
-    sta proc_blk2,y
-    lda blk3
-    sta proc_blk3,y
-    lda blk5
-    sta proc_blk5,y
+    set_procblk_y proc_low, ram123
+    set_procblk_y proc_io23, io23
+    set_procblk_y proc_blk1, blk1
+    set_procblk_y proc_blk2, blk2
+    set_procblk_y proc_blk3, blk3
+    set_procblk_y proc_blk5, blk5
     jsr save_state
     tsx
     inx
@@ -765,20 +832,25 @@ not_there:
     pop pid
     tay
     jsr load_state
-    lda proc_low,y
-    sta ram123
-    lda proc_io23,y
-    sta io23
-    lda proc_blk1,y
-    sta blk1
-    lda proc_blk2,y
-    sta blk2
-    lda proc_blk3,y
-    sta blk3
-    lda proc_blk5,y
-    sta blk5
+    get_procblk_y proc_low, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk1, blk1
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
     ldx stack-$2000
     txs
+    rts
+.endproc
+
+; Schedule task switch
+.proc schedule
+    ldx pid
+    lda procsf,x
+    bne :+
+    lda running
+:   cmp pid
+    bne switch
     rts
 .endproc
 
@@ -999,6 +1071,12 @@ tunix_driver:
     beq tunix_fork
     cmp #'K'
     beq tunix_kill
+    cmp #'W'
+    beq tunix_wait
+    cmp #'S'
+    beq tunix_stop
+    cmp #'R'
+    beq tunix_resume
     bne respond_error   ; (jmp)
 .endproc
 
@@ -1009,7 +1087,29 @@ tunix_driver:
 .endproc
 
 .proc tunix_kill
+    lda filename+2
     jsr kill
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
+
+.proc tunix_wait
+    lda filename+2
+    jsr wait
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
+
+.proc tunix_stop
+    lda filename+2
+    jsr stop
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
+
+.proc tunix_resume
+    lda filename+2
+    jsr resume
     bcs respond_error
     bcc respond_ok  ; (jmp)
 .endproc
@@ -1091,9 +1191,8 @@ tunix_driver:
 
     push blk1
     ldx drv_pid,y
-    lda proc_blk1,x
-    sta blk1
-    loadregs
+    get_procblk_x proc_blk1, blk1
+    load_regs
 j:  jsr $fffe
     pop blk1
     rts
@@ -1118,7 +1217,7 @@ tunix_vectors:
     sta filename,y
     dey
     jmp :-
-:   setzwi FNADR, filename
+:   stzwi FNADR, filename
 
     ;; Assign driver to GLFN.
     ldy DEV
@@ -1160,7 +1259,7 @@ tunix_vectors:
 
 .macro iohandler name, lfn, drvop
 .proc name
-    saveregs
+    save_regs
     push lfn
     jsr lfn_to_glfn
     sta lfn
@@ -1226,7 +1325,7 @@ r:  rts
 .endproc
 
 .proc load
-    saveregs
+    save_regs
     ldy DEV
     ldx dev_drv,y
     lda #IDX_LOAD
@@ -1234,7 +1333,7 @@ r:  rts
 .endproc
 
 .proc save
-    saveregs
+    save_regs
     ldy DEV
     ldx dev_drv,y
     lda #IDX_SAVE
@@ -1265,6 +1364,10 @@ lfns:       .res MAX_LFNS
 lfn_glfn:   .res MAX_LFNS
 
 ;; Process info
+waiting:    .res MAX_PROCS
+waiting_pid:.res MAX_PROCS
+free_wait:  .res 1
+first_wait: .res 1
 pid:        .res 1
 ; CPU state
 reg_a:      .res 1
@@ -1284,6 +1387,7 @@ glfn:       .res 1
 first_lfn:  .res 1
 first_lbank:.res 1
 
+; TUNIX device response
 response:       .res 8
 response_len:   .res 1
 responsep:      .res 1

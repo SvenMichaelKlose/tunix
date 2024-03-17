@@ -56,7 +56,7 @@ MAX_DEVS    = 32
 ;;; UltiMem
 
 MAX_BANKS   = 128
-FIRST_BANK  = 6
+FIRST_BANK  = 14
 ram123      = $9ff4
 io23        = $9ff6
 blk1        = $9ff8
@@ -417,10 +417,15 @@ err_fail:
 :   inx
     bne :---
 
-    lda #14
+    lda #FIRST_BANK
     sta free_bank
     list_init glfns
     list_init drvs
+    ; Manually end lists that do not
+    ; fill a page.
+    lda #0
+    sta procs+MAX_PROCS-1
+    sta drvs+MAX_DRVS-1
 
     ;; Save initial set of banks.
     mvb proc_lowmem, ram123
@@ -954,8 +959,6 @@ m:  inc dh
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
 
-.byte "DISPATCH"
-
 ; Translate local to global LFN.
 .proc lfn_to_glfn
     ;; Use existing.
@@ -1008,21 +1011,10 @@ j:  jsr $fffe
 .endproc
 
 tunix:
-    .word open
-    .word chkin
-    .word ckout
-    .word basin
-    .word bsout
-    .word getin
-    .word clrcn
-    .word close
-    .word clall
-    .word stop
-    .word usrcmd
-    .word load
-    .word save
-    .word blkin
-    .word bkout
+    .word open, chkin, ckout, basin
+    .word bsout, getin, clrcn, close
+    .word clall, stop, usrcmd, load
+    .word save, blkin, bkout
 
 .proc open
     ;; Save LFN and file name.
@@ -1108,7 +1100,7 @@ tunix:
 
     ;; Restore LFN.
     pla
-    sta DFLTN
+    sta lfn
     php
     lda reg_a
     plp
@@ -1135,11 +1127,9 @@ iohandler bkout, DFLTO, IDX_BKOUT
 .proc close
     jsr lfn_to_glfn
     sta reg_a
-
     ldy glfn_drv,x
     lda #0
     sta glfn_drv,x
-
     tya
     tax
     lda #IDX_CLOSE
@@ -1172,7 +1162,7 @@ r:  rts
     sty reg_y
     ldy DEV
     ldx dev_drv,y
-    lda #IDX_SAVE
+    lda #IDX_LOAD
     jmp call_driver
 .endproc
 

@@ -244,29 +244,6 @@ sleeping:   .res 1
     sty first
 .endmacro
 
-.macro list_rm list, first
-    ;; Check head.
-    cpx first
-    bne :+
-    list_popx list, first
-    jmp :++++
-:   stx tmp2
-
-    ;; Search through next.
-    ldy first
-:   lda tmp2
-    cmp list,y
-    bne :+
-    ldx list,y
-    lda list,x
-    sta list,y
-    jmp :++
-:   lda list,y
-    tay
-    bne :--
-:
-.endmacro
-
 ;;; List of free GLFNS.
 
 .macro pushy_glfn
@@ -582,12 +559,11 @@ done:
     jsr fork_raw
 
     ;; Increment banks.
-    ldy first_lbank
+    ldx first_lbank
     beq :++
-:   ldx banksf,y
-    inc bank_refs,x
-    lda banksf,y
-    tay
+:   inc bank_refs,x
+    lda lbanks,x
+    tax
     bne :-
 :
 
@@ -746,12 +722,12 @@ set_blk5_to_vic:
     tax
     lda proc_flags,x
     bmi :+
-    list_rm procs, running
+;   deque_rmx procsf, procsb, running
     jmp :++
-:   list_rm procs, sleeping
+:;  deque_rmx procsf, procsb, sleeping
 
     ; Add to free.
-:   list_pushx procs, free_proc
+:;  deque_addx procsf, procsb, free_proc
     clc
     rts
 .endproc

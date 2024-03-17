@@ -18,6 +18,7 @@ OP_RTS      = $60
 
 ;;; KERNAL
 
+STATUS      = $90
 DFLTN       = $99
 DFLTO       = $9a
 FNLEN       = $b7
@@ -117,10 +118,12 @@ glfn_sa:    .res MAX_LFNS
 ; Free slots
 procsf:      .res MAX_PROCS
 procsb:      .res MAX_PROCS
-; Running/sleeping?
+; Flags
+PROC_ZOMBIE     = 0
 PROC_RUNNING    = 1
 PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
+exit_codes: .res MAX_PROCS
 ; Primary banks allocated.
 proc_low:   .res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
@@ -153,6 +156,7 @@ copy_bank:  .res 1
 free_proc:  .res 1
 running:    .res 1
 sleeping:   .res 1
+zombie:     .res 1
 
     .code
 
@@ -163,6 +167,26 @@ sleeping:   .res 1
 .macro mvb to, from
     lda from
     sta to
+.endmacro
+
+.macro phx
+    txa
+    pha
+.endmacro
+
+.macro phy
+    tya
+    pha
+.endmacro
+
+.macro plx
+    pla
+    tax
+.endmacro
+
+.macro ply
+    pla
+    tay
 .endmacro
 
 .macro push from
@@ -717,9 +741,9 @@ set_blk5_to_vic:
     rts
 .endproc
 
-; Force exit with code 255.
+; Force exit.
 ; A: Process ID.
-.proc kill
+.proc proc_free
     tax
     lda proc_flags,x
     beq not_there
@@ -746,15 +770,37 @@ set_blk5_to_vic:
     deque_rmx procsf, procsb, running
     jmp :++
 :   deque_rmx procsf, procsb, sleeping
-
     ; Add to free.
-:;  deque_addx procsf, procsb, free_proc
-    lda #0
+:   list_pushx procsf, zombie
+    lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
     rts
 not_there:
     sec
+    rts
+.endproc
+
+; X: Process ID
+.proc resume_waiting
+    ; Switch to context.
+    push io23
+    get_procblk_x proc_io23, io23
+    ldy waiting
+    beq done
+    ; Resume waiting.
+    phy
+    tax
+    jsr resume
+    ply
+    ; Next waiting...
+    lda waiting,y
+    tay
+    bne :-
+
+done:
+    ldx pid
+    get_procblk_x proc_io23, io23
     rts
 .endproc
 
@@ -765,14 +811,29 @@ not_there:
     tax
     lda proc_flags,x
     beq not_there
+    cmp #PROC_ZOMBIE
+    beq terminate_zombie
+    ;; Put us on waiting list.
+    push io23
     push pid
     set_procblk_x proc_io23, io23
     list_popy waiting, free_wait
     list_pushy waiting, first_wait
     pla
     sta waiting_pid,y
+    pop io23
     txa
-    jmp sleep
+    jsr sleep
+    jsr schedule
+
+terminate_zombie:
+    ;; Remove from zombie list.
+    ;deque_rmx procsf, procsb, zombie
+    list_pushx procsf, free_proc
+    lda exit_codes,x
+    clc
+    rts
+
 not_there:
     sec
     rts
@@ -806,6 +867,36 @@ not_there:
 running_already:
     sec
     rts
+.endproc
+
+; A: Process ID
+.proc kill
+    tax
+    lda #255
+    sta exit_codes,x
+    phx
+    jsr proc_free
+    plx
+    jmp resume_waiting
+.endproc
+
+; A: Exit code
+.proc exit
+    pha
+    lda pid
+    jsr proc_free
+    pla
+    ldx pid
+    jmp resume_waiting
+.endproc
+
+; A: Exit code
+.proc terminate
+    pha
+    lda pid
+    jsr sleep
+    pla
+    jmp resume_waiting
 .endproc
 
 ; Switch to process.
@@ -845,12 +936,20 @@ running_already:
 
 ; Schedule task switch
 .proc schedule
+    php
+    pha
+    phx
+    phy
     ldx pid
     lda procsf,x
     bne :+
     lda running
 :   cmp pid
     bne switch
+    ply
+    plx
+    pla
+    plp
     rts
 .endproc
 
@@ -995,8 +1094,7 @@ p:  lda $ff00,x
 
 ; Copy memory.
 .proc memcpy
-    tya
-    pha
+    phy
     ldy #0
     ldx cl
     inx
@@ -1012,8 +1110,7 @@ q:  dex
     bne l
     dec ch
     bne l
-r:  pla
-    tay
+r:  ply
     rts
 k:  inc sh
     inc dh
@@ -1028,7 +1125,7 @@ k:  inc sh
     ldy dl
     lda #0
     sta dl
-    bne +n ; (jmp)
+    beq +n ; (jmp)
 l:  sta (d),y
     iny
     beq m
@@ -1087,18 +1184,20 @@ tunix_driver:
 .endproc
 
 .macro syscall1 name, fun
-.proc name
-    lda filename+2
-    jsr fun
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
-.endproc
+    .proc name
+        lda filename+2
+        jsr fun
+        bcs respond_error
+        bcc respond_ok  ; (jmp)
+    .endproc
 .endmacro
 
 syscall1 tunix_kill, kill
 syscall1 tunix_wait, wait
 syscall1 tunix_stop, stop
 syscall1 tunix_resume, resume
+syscall1 tunix_exit, exit
+syscall1 tunix_terminate, terminate
 
 .proc respond_error
     ldx #0
@@ -1226,7 +1325,7 @@ tunix_vectors:
     php
     lda reg_a
     plp
-    rts
+    jmp schedule
 .endproc
 
 .proc chkin
@@ -1244,22 +1343,22 @@ tunix_vectors:
 .endproc
 
 .macro iohandler name, lfn, drvop
-.proc name
-    save_regs
-    push lfn
-    jsr lfn_to_glfn
-    sta lfn
+    .proc name
+        save_regs
+        push lfn
+        jsr lfn_to_glfn
+        sta lfn
 
-    lda #drvop
-    jsr call_driver
-    sta reg_a
+        lda #drvop
+        jsr call_driver
+        sta reg_a
 
-    pop lfn
-    php
-    lda reg_a
-    plp
-    rts
-.endproc
+        pop lfn
+        php
+        lda reg_a
+        plp
+        jmp schedule
+    .endproc
 .endmacro
 
 iohandler basin, DFLTN, IDX_BASIN
@@ -1275,7 +1374,8 @@ iohandler bkout, DFLTO, IDX_BKOUT
     tya
     tax
     lda #IDX_CLRCN
-    jmp call_driver
+    jsr call_driver
+    jmp schedule
 .endproc
 
 .proc close
@@ -1287,17 +1387,16 @@ iohandler bkout, DFLTO, IDX_BKOUT
     tya
     tax
     lda #IDX_CLOSE
-    jmp call_driver
+    jsr call_driver
+    jmp schedule
 .endproc
 
 .proc clall
     ldx first_lfn
     beq r
-:   txa
-    pha
+:   phx
     jsr close
-    pla
-    tax
+    plx
     lda lfns,x
     tax
     bne :-
@@ -1307,24 +1406,23 @@ r:  rts
 .proc stop
     ldx #0
     lda #IDX_STOP
-    jmp call_driver
+    jsr call_driver
+    jmp schedule
 .endproc
 
-.proc load
-    save_regs
-    ldy DEV
-    ldx dev_drv,y
-    lda #IDX_LOAD
-    jmp call_driver
-.endproc
+.macro blkiohandler name, idx
+    .proc name
+        save_regs
+        ldy DEV
+        ldx dev_drv,y
+        lda #idx
+        jsr call_driver
+        jmp schedule
+    .endproc
+.endmacro
 
-.proc save
-    save_regs
-    ldy DEV
-    ldx dev_drv,y
-    lda #IDX_SAVE
-    jmp call_driver
-.endproc
+blkiohandler load, IDX_LOAD
+blkiohandler save, IDX_SAVE
 
 .proc usrcmd
     ldx #0
@@ -1355,6 +1453,7 @@ waiting_pid:.res MAX_PROCS
 free_wait:  .res 1
 first_wait: .res 1
 pid:        .res 1
+ppid:       .res 1
 ; CPU state
 reg_a:      .res 1
 reg_x:      .res 1

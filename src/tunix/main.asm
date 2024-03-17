@@ -162,6 +162,26 @@ sleeping:   .res 1
     sta to
 .endmacro
 
+.macro push from
+    lda from
+    pha
+.endmacro
+
+.macro pop to
+    pla
+    sta to
+.endmacro
+
+.macro pushw from
+    push from
+    push from+1
+.endmacro
+
+.macro popw to
+    pop to+1
+    pop to
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;
 ;;; WORD MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
@@ -520,8 +540,7 @@ next_move:
     out #OP_JMP_ABS
     out #<next_copy_bank
     out #>next_copy_bank
-    pla
-    sta blk5
+    pop blk5
     jmp next_bank
 
 done:
@@ -703,8 +722,7 @@ set_blk5_to_vic:
     ;; Close resources.
     ; Switch to context.
     ldx pid
-    lda io23
-    pha
+    push io23
     lda proc_io23,x
     sta io23
     ; Free.
@@ -712,8 +730,7 @@ set_blk5_to_vic:
     jsr free_lfns
     jsr bprocfree
     ; Restore context.
-    pla
-    sta io23
+    pop io23
 
     pla
 
@@ -755,8 +772,7 @@ set_blk5_to_vic:
     stx stack-$2000
 
     ;; Load state.
-    pla
-    sta pid
+    pop pid
     tay
     jsr load_state
     lda proc_low,y
@@ -1000,8 +1016,7 @@ m:  inc dh
     sta j+2
 
     ;; Bank in driver.
-    lda blk1
-    pha
+    push blk1
     ldx drv_pid,y
     lda proc_blk1,x
     sta blk1
@@ -1013,8 +1028,7 @@ m:  inc dh
 j:  jsr $fffe
 
     ;; Restore bank.
-    pla
-    sta blk1
+    pop blk1
     rts
 .endproc
 
@@ -1026,13 +1040,9 @@ tunix:
 
 .proc open
     ;; Save LFN and file name.
-    lda FNADR
-    pha
-    lda FNADR+1
-    pha
-    ldx LFN
-    txa
-    pha
+    pushw FNADR
+    push LFN
+    tax
 
     jsr lfn_to_glfn
     sta LFN
@@ -1064,12 +1074,8 @@ tunix:
     sta reg_a
 
     ;; Restore LFN and file name.
-    pla
-    sta LFN
-    pla
-    sta FNADR+1
-    pla
-    sta FNADR
+    pop LFN
+    popw FNADR
     php
     lda reg_a
     plp
@@ -1097,8 +1103,7 @@ tunix:
     sty reg_y
 
     ;; Translate input LFN.
-    lda lfn
-    pha
+    push lfn
     jsr lfn_to_glfn
     sta lfn
 
@@ -1107,8 +1112,7 @@ tunix:
     sta reg_a
 
     ;; Restore LFN.
-    pla
-    sta lfn
+    pop lfn
     php
     lda reg_a
     plp

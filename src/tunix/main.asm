@@ -915,8 +915,6 @@ running_already:
     set_procblk_y proc_blk5, blk5
     jsr save_state
     tsx
-    inx
-    inx
     stx stack-$2000
 
     ;; Load state.

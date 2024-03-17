@@ -170,6 +170,16 @@ sleeping:       .res 1
     ldx #>val
 .endmacro
 
+.macro ldayi val
+    lda #<val
+    ldy #>val
+.endmacro
+
+.macro stax to
+    sta to
+    stx to+1
+.endmacro
+
 .macro setzwi to, val
     mvb to, #<val
     mvb to+1, #>val
@@ -209,12 +219,16 @@ sleeping:       .res 1
     ldx free
     lda list,x
     sta free
+    lda #0
+    sta list,x
 .endmacro
 
 .macro list_popy list, free
     ldy free
     lda list,y
     sta free
+    lda #0
+    sta list,y
 .endmacro
 
 .macro list_pushx list, first
@@ -290,6 +304,19 @@ sleeping:       .res 1
     jmp init
 .endproc
 
+.proc list_length
+    stax ptr1
+    ldx #0
+    cpy #0
+    beq empty
+:   inx
+    lda (ptr1),y
+    tay
+    bne :-
+empty:
+    rts
+.endproc
+
 .export tests
 .export banks
 .export free_bank
@@ -316,9 +343,35 @@ sleeping:       .res 1
     beq :+
     error err_invalid_first_free_bank
 :   list_pushx banks, first_bank
-
+    ldaxi banks
+    ldy free_bank
+    jsr list_length
+    cpx #$e3
+    beq :+
+    error err_fail
+:   ldaxi banks
+    ldy first_bank
+    jsr list_length
+    cpx #1
+    beq :+
+    error err_fail
     ; In reverse.
-
+:   list_popx banks, first_bank
+    list_pushx banks, free_bank
+    ldaxi banks
+    ldy free_bank
+    jsr list_length
+    cpx #$e4
+    beq :+
+    error err_fail
+:   ldaxi banks
+    ldy first_bank
+    jsr list_length
+    cpx #0
+    beq :+
+    error err_fail
+:
+ 
     ;; Doubly-linked listmaps.
     ; Allocate first.
     ; Draw till empty.
@@ -345,6 +398,8 @@ err_invalid_glfn_order:
     .byte "INVALID GLFN ORDER", 0
 err_invalid_first_free_bank:
     .byte "INVALID FIRST FREE BANK", 0
+err_fail:
+    .byte "TEST FAILED", 0
 
 .proc init
     ;; All banks are R/W RAM.

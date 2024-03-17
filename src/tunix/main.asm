@@ -98,19 +98,18 @@ ptr4:   .res 2
 ;;;;;;;;;;;;;;
 
 ;; Extended memory banks
-; List of free ones.
+; Free list
 banks:     .res MAX_BANKS
-; Number of processes that own a single
-; bank.
+; Usage count
 bank_refs:  .res MAX_BANKS
 
 ;; Global logical file numbers
 ;; Shared by fork()ed processes.
-; List of free GLFNs
+; Free list
 glfns:      .res MAX_LFNS
-; Driver used with GLFN @ OPEN.
+; Drivers @ OPEN
 glfn_drv:   .res MAX_LFNS
-; Secondary address of GLFN @ OPEN.
+; Secondary addresses @ OPEN
 glfn_sa:    .res MAX_LFNS
 
 ;; Processes
@@ -132,11 +131,11 @@ proc_io23:  .res MAX_PROCS
 proc_blk5:  .res MAX_PROCS
 
 ;; Drivers
-; Free driver slots
+; Free list
 drvs:       .res MAX_DRVS
-; Processes registered
+; Processes
 drv_pid:    .res MAX_DRVS
-; Vector tables
+; Vectors
 drv_vl:     .res MAX_DRVS
 drv_vh:     .res MAX_DRVS
 

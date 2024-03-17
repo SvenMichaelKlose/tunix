@@ -98,57 +98,58 @@ ptr4:   .res 2
 
 ;; Extended memory banks
 ; List of free ones.
-banks:          .res MAX_BANKS
+banksf:     .res MAX_BANKS
+banksb:     .res MAX_BANKS
 ; Number of processes that own a single
 ; bank.
-bank_refs:      .res MAX_BANKS
+bank_refs:  .res MAX_BANKS
 
 ;; Global logical file numbers
 ;; Shared by fork()ed processes.
 ; List of free GLFNs
-glfns:          .res MAX_LFNS
+glfns:      .res MAX_LFNS
 ; Driver used with GLFN @ OPEN.
-glfn_drv:       .res MAX_LFNS
+glfn_drv:   .res MAX_LFNS
 ; Secondary address of GLFN @ OPEN.
-glfn_sa:        .res MAX_LFNS
+glfn_sa:    .res MAX_LFNS
 
 ;; Processes
 ; Free slots
-procs:          .res MAX_PROCS
+procs:      .res MAX_PROCS
 ; Sleeping/running?
-proc_flags:     .res MAX_PROCS
+proc_flags: .res MAX_PROCS
 ; Primary banks allocated.
-proc_lowmem:    .res MAX_PROCS
-proc_blk1:      .res MAX_PROCS
-proc_blk2:      .res MAX_PROCS
-proc_blk3:      .res MAX_PROCS
-proc_io23:      .res MAX_PROCS
-proc_blk5:      .res MAX_PROCS
+proc_low:   .res MAX_PROCS
+proc_blk1:  .res MAX_PROCS
+proc_blk2:  .res MAX_PROCS
+proc_blk3:  .res MAX_PROCS
+proc_io23:  .res MAX_PROCS
+proc_blk5:  .res MAX_PROCS
 
 ;; Drivers
 ; Free driver slots
-drvs:           .res MAX_DRVS
+drvs:       .res MAX_DRVS
 ; Processes registered
-drv_pid:        .res MAX_DRVS
+drv_pid:    .res MAX_DRVS
 ; Vector tables
-drv_vl:         .res MAX_DRVS
-drv_vh:         .res MAX_DRVS
+drv_vl:     .res MAX_DRVS
+drv_vh:     .res MAX_DRVS
 
 ; Drivers assigned to devices.
-dev_drv:        .res MAX_DEVS
+dev_drv:    .res MAX_DEVS
 
 ;; Bank allocation
-free_bank:      .res 1
-first_bank:     .res 1
+free_bank:  .res 1
+first_bank: .res 1
 
 ;; First speed code BLK5 to copy from
 ;; BLK2 to BLK3.
-copy_bank:      .res 1
+copy_bank:  .res 1
 
 ;; Pointers into array 'proc'.
-free_proc:      .res 1
-running:        .res 1
-sleeping:       .res 1
+free_proc:  .res 1
+running:    .res 1
+sleeping:   .res 1
 
     .code
 
@@ -280,6 +281,35 @@ sleeping:       .res 1
     list_popy glfns, glfns
 .endmacro
 
+;;;;;;;;;;;;;;;;;;;;
+;;; DEQUE MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;
+; With insert/remove by index.
+; !: First element must have indexes of
+; value 0.
+
+.macro deque_popx fw, first
+    list_popx fw, first
+.endmacro
+
+.macro deque_rmx fw, bw, first
+    lda fw,x
+    ; Link next to previous.
+    tay
+    lda bw,x
+    sta bw,y
+    ; Link previous to next.
+    tay
+    lda fw,x
+    sta fw,y
+    ; Add to free.
+    lda first
+    sta fw,x
+    lda #0
+    sta bw,x
+    stx first
+.endmacro
+
 ;;; UI
 
 .macro print asciiz
@@ -305,7 +335,7 @@ sleeping:       .res 1
 .endproc
 
 .export tests
-.export banks
+.export banksf
 .export free_bank
 .export first_bank
 .proc tests
@@ -325,33 +355,33 @@ sleeping:       .res 1
 
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
-    list_popx banks, free_bank
+    list_popx banksf, free_bank
     cpx #$1c
     beq :+
     error err_invalid_first_free_bank
-:   list_pushx banks, first_bank
-    ldaxi banks
+:   list_pushx banksf, first_bank
+    ldaxi banksf
     ldy free_bank
     jsr list_length
     cpx #$e3
     beq :+
     error err_fail
-:   ldaxi banks
+:   ldaxi banksf
     ldy first_bank
     jsr list_length
     cpx #1
     beq :+
     error err_fail
     ; In reverse.
-:   list_popx banks, first_bank
-    list_pushx banks, free_bank
-    ldaxi banks
+:   list_popx banksf, first_bank
+    list_pushx banksf, free_bank
+    ldaxi banksf
     ldy free_bank
     jsr list_length
     cpx #$e4
     beq :+
     error err_fail
-:   ldaxi banks
+:   ldaxi banksf
     ldy first_bank
     jsr list_length
     cpx #0
@@ -405,7 +435,7 @@ err_fail:
 :   txa
     clc
     adc #1
-    sta banks,x
+    sta banksf,x
     sta glfns,x
     sta lfns,x
     cpx #MAX_PROCS
@@ -428,7 +458,7 @@ err_fail:
     sta drvs+MAX_DRVS-1
 
     ;; Save initial set of banks.
-    mvb proc_lowmem, ram123
+    mvb proc_low, ram123
     mvb proc_io23, io23
     mvb proc_blk1, blk1
     mvb proc_blk2, blk2
@@ -554,9 +584,9 @@ done:
     ;; Increment banks.
     ldy first_lbank
     beq :++
-:   ldx banks,y
+:   ldx banksf,y
     inc bank_refs,x
-    lda banks,y
+    lda banksf,y
     tay
     bne :-
 :
@@ -586,7 +616,7 @@ set_vic:
     .word $9000, saved_vic+$2000, $0010
 
 .proc save_state
-    lda proc_lowmem,y
+    lda proc_low,y
     sta blk5
     ldaxi set_lowmem
     jsr smemcpy
@@ -606,7 +636,7 @@ set_blk5_to_vic:
     .word saved_vic+$2000, $9000, $0010
 
 .proc load_state
-    lda proc_lowmem,y
+    lda proc_low,y
     sta blk3
     ldx stack-$2000
     txs
@@ -626,7 +656,7 @@ set_blk5_to_vic:
     sta proc_flags,y
 
     jsr balloc
-    sta proc_lowmem,y
+    sta proc_low,y
     jsr save_state
 
     jsr balloc
@@ -664,7 +694,7 @@ set_blk5_to_vic:
 
     ;; Release parent's banks.
     lda #0
-    ldy proc_lowmem,x
+    ldy proc_low,x
     sta lbanks,y
     ldy proc_io23,x
     sta lbanks,y
@@ -753,7 +783,7 @@ set_blk5_to_vic:
     sta pid
     tay
     jsr load_state
-    lda proc_lowmem,y
+    lda proc_low,y
     sta ram123
     lda proc_io23,y
     sta io23
@@ -780,13 +810,15 @@ set_blk5_to_vic:
 ;  Z: Out of memory.
 ;  X: Bank #
 .proc balloc
+    sty tmp1
     ;; Draw from global pool.
-    list_popx banks, free_bank
+    list_popx banksf, free_bank
     beq :+  ; Oops…
     ;; Own it.
     inc bank_refs,x
     inc lbanks,x
-:   txa
+:   ldy tmp1
+    txa
     rts
 .endproc
 
@@ -799,7 +831,7 @@ set_blk5_to_vic:
     bmi invalid_bank
     dec bank_refs,x
     bne :+
-    list_pushx banks, free_bank
+    list_pushx banksf, free_bank
 :   clc
     rts
 invalid_bank:

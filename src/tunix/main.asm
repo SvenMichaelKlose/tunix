@@ -25,7 +25,24 @@ LFN         = $b8
 SA          = $b9
 DEV         = $ba
 FNADR       = $bb
-IOPEN       = $031a
+
+IOVECTORS   = $031a
+
+IDX_OPEN   = 0
+IDX_CLOSE  = 2
+IDX_CHKIN  = 4
+IDX_CKOUT  = 6
+IDX_CLRCN  = 7
+IDX_BASIN  = 8
+IDX_BSOUT  = 9
+IDX_STOP   = 10
+IDX_GETIN  = 12
+IDX_CLALL  = 14
+IDX_USRCMD = 16
+IDX_LOAD   = 18
+IDX_SAVE   = 20
+IDX_BLKIN  = 22
+IDX_BKOUT  = 24
 
 ;;; BASIC
 
@@ -122,6 +139,7 @@ dev_drv:        .res MAX_DEVS
 
 ;; Bank allocation
 free_bank:      .res 1
+first_bank:     .res 1
 
 ;; First speed code BLK5 to copy from
 ;; BLK2 to BLK3.
@@ -199,7 +217,7 @@ sleeping:       .res 1
     sta free
 .endmacro
 
-.macro list_push list, first
+.macro list_pushx list, first
     lda first
     sta list,x
     stx first
@@ -234,6 +252,8 @@ sleeping:       .res 1
 :
 .endmacro
 
+;;; List of free GLFNS.
+
 .macro pushy_glfn
     list_pushy glfns, glfns
 .endmacro
@@ -246,6 +266,8 @@ sleeping:       .res 1
     list_popy glfns, glfns
 .endmacro
 
+;;; UI
+
 .macro print asciiz
     lda #<asciiz
     ldy #>asciiz
@@ -254,8 +276,7 @@ sleeping:       .res 1
 
 .macro error asciiz
     print asciiz
-halt:
-    jmp halt
+    ;jmp *
 .endmacro
 
 ;;;;;;;;;;;;
@@ -270,10 +291,14 @@ halt:
 .endproc
 
 .export tests
+.export banks
+.export free_bank
+.export first_bank
 .proc tests
     jsr init
 
     ;;; Data structures
+
     ; Draw GLFNs until empty.
     ldy #1
 :   popx_glfn
@@ -286,6 +311,12 @@ halt:
 
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
+    list_popx banks, free_bank
+    cpx #$1c
+    beq :+
+    error err_invalid_first_free_bank
+:   list_pushx banks, first_bank
+
     ; In reverse.
 
     ;; Doubly-linked listmaps.
@@ -294,6 +325,7 @@ halt:
     ; Free by index.
 
     ;;; Syscalls
+
     ;; Extended memory.
     ;; Fork
 
@@ -311,6 +343,8 @@ txt_init:
 
 err_invalid_glfn_order:
     .byte "INVALID GLFN ORDER", 0
+err_invalid_first_free_bank:
+    .byte "INVALID FIRST FREE BANK", 0
 
 .proc init
     ;; All banks are R/W RAM.
@@ -341,7 +375,7 @@ err_invalid_glfn_order:
 :   inx
     bne :---
 
-    lda #FIRST_BANK
+    lda #14
     sta free_bank
     list_init glfns
     list_init drvs
@@ -640,7 +674,7 @@ set_blk5_to_vic:
 :   list_rm procs, sleeping
 
     ; Add to free.
-:   list_push procs, free_proc
+:   list_pushx procs, free_proc
     clc
     rts
 .endproc
@@ -718,7 +752,7 @@ set_blk5_to_vic:
     bmi invalid_bank
     dec bank_refs,x
     bne :+
-    list_push banks, free_bank
+    list_pushx banks, free_bank
 :   clc
     rts
 invalid_bank:
@@ -871,7 +905,7 @@ m:  inc dh
     bne :+
 
     ;; Add LFN .
-    list_push lfns, first_lfn
+    list_pushx lfns, first_lfn
     beq :+
 
     ;; Allocate GLFN.
@@ -914,6 +948,23 @@ j:  jsr $fffe
     rts
 .endproc
 
+tunix:
+    .word open
+    .word chkin
+    .word ckout
+    .word basin
+    .word bsout
+    .word getin
+    .word clrcn
+    .word close
+    .word clall
+    .word stop
+    .word usrcmd
+    .word load
+    .word save
+    .word blkin
+    .word bkout
+
 .proc open
     ;; Save LFN and file name.
     lda FNADR
@@ -949,7 +1000,7 @@ j:  jsr $fffe
 
     ;; Call.
     tax
-    lda #0
+    lda #IDX_OPEN
     jsr call_driver
     sta reg_a
 
@@ -969,14 +1020,14 @@ j:  jsr $fffe
 .proc chkin
     jsr lfn_to_glfn
     sta reg_a
-    lda #2
+    lda #IDX_CHKIN
     jmp call_driver
 .endproc
 
 .proc ckout
     jsr lfn_to_glfn
     sta reg_a
-    lda #4
+    lda #IDX_CKOUT
     jmp call_driver
 .endproc
 
@@ -989,7 +1040,7 @@ itmp:   .res 1
     jsr lfn_to_glfn
     sta DFLTN
 
-    lda #6
+    lda #IDX_BASIN
     jsr call_driver
     sta itmp
 
@@ -1011,7 +1062,7 @@ itmp:   .res 1
     jsr lfn_to_glfn
     sta DFLTO
 
-    lda #8
+    lda #IDX_BSOUT
     jsr call_driver
     sta itmp
 
@@ -1025,6 +1076,40 @@ itmp:   .res 1
     rts
 .endproc
 
+.proc getin
+    ;; Translate input LFN.
+    lda DFLTN
+    pha
+    jsr lfn_to_glfn
+    sta DFLTN
+
+    lda #IDX_GETIN
+    jsr call_driver
+    sta itmp
+
+    ;; Restore LFN.
+    pla
+    sta DFLTN
+    php
+    lda itmp
+    plp
+    rts
+.endproc
+
+.proc clrcn
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_CLRCN
+    jmp call_driver
+.endproc
+
 .proc close
     jsr lfn_to_glfn
     sta reg_a
@@ -1035,7 +1120,7 @@ itmp:   .res 1
 
     tya
     tax
-    lda #10
+    lda #IDX_CLOSE
     jmp call_driver
 .endproc
 
@@ -1051,6 +1136,90 @@ itmp:   .res 1
     tax
     bne :-
 r:  rts
+.endproc
+
+.proc stop
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_STOP
+    jmp call_driver
+.endproc
+
+.proc load
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_LOAD
+    jmp call_driver
+.endproc
+
+.proc save
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_SAVE
+    jmp call_driver
+.endproc
+
+.proc usrcmd
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_USRCMD
+    jmp call_driver
+.endproc
+
+.proc blkin
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_BLKIN
+    jmp call_driver
+.endproc
+
+.proc bkout
+    jsr lfn_to_glfn
+    sta reg_a
+
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+
+    tya
+    tax
+    lda #IDX_BKOUT
+    jmp call_driver
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;

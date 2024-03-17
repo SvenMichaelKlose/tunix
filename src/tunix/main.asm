@@ -1086,33 +1086,19 @@ tunix_driver:
     bcc respond ; (jmp)
 .endproc
 
-.proc tunix_kill
+.macro syscall1 name, fun
+.proc name
     lda filename+2
-    jsr kill
+    jsr fun
     bcs respond_error
     bcc respond_ok  ; (jmp)
 .endproc
+.endmacro
 
-.proc tunix_wait
-    lda filename+2
-    jsr wait
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
-.endproc
-
-.proc tunix_stop
-    lda filename+2
-    jsr stop
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
-.endproc
-
-.proc tunix_resume
-    lda filename+2
-    jsr resume
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
-.endproc
+syscall1 tunix_kill, kill
+syscall1 tunix_wait, wait
+syscall1 tunix_stop, stop
+syscall1 tunix_resume, resume
 
 .proc respond_error
     ldx #0

@@ -99,8 +99,7 @@ ptr4:   .res 2
 
 ;; Extended memory banks
 ; List of free ones.
-banksf:     .res MAX_BANKS
-banksb:     .res MAX_BANKS
+banks:     .res MAX_BANKS
 ; Number of processes that own a single
 ; bank.
 bank_refs:  .res MAX_BANKS
@@ -371,7 +370,7 @@ zombie:     .res 1
 .endproc
 
 .export tests
-.export banksf
+.export banks
 .export free_bank
 .export first_bank
 .proc tests
@@ -390,33 +389,33 @@ zombie:     .res 1
 
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
-    list_popx banksf, free_bank
+    list_popx banks, free_bank
     cpx #$1c
     beq :+
     error err_invalid_first_free_bank
-:   list_pushx banksf, first_bank
-    ldaxi banksf
+:   list_pushx banks, first_bank
+    ldaxi banks
     ldy free_bank
     jsr list_length
     cpx #$e3
     beq :+
     error err_fail
-:   ldaxi banksf
+:   ldaxi banks
     ldy first_bank
     jsr list_length
     cpx #1
     beq :+
     error err_fail
     ; In reverse.
-:   list_popx banksf, first_bank
-    list_pushx banksf, free_bank
-    ldaxi banksf
+:   list_popx banks, first_bank
+    list_pushx banks, free_bank
+    ldaxi banks
     ldy free_bank
     jsr list_length
     cpx #$e4
     beq :+
     error err_fail
-:   ldaxi banksf
+:   ldaxi banks
     ldy first_bank
     jsr list_length
     cpx #0
@@ -426,11 +425,10 @@ zombie:     .res 1
  
     ;; Doubly-linked listmaps.
     ; Allocate first.
-    ; Draw till empty.
+    ; Draw until empty.
     ; Free by index.
 
     ;;; Syscalls
-
     ;; Extended memory.
     ;; Fork
 
@@ -470,7 +468,7 @@ err_fail:
 :   txa
     clc
     adc #1
-    sta banksf,x
+    sta banks,x
     sta glfns,x
     sta lfns,x
     cpx #MAX_PROCS
@@ -747,7 +745,7 @@ set_blk5_to_vic:
     tax
     lda proc_flags,x
     beq not_there
-    pha
+    phx
 
     ;; Close resources.
     ; Switch to context.
@@ -760,8 +758,7 @@ set_blk5_to_vic:
     ; Restore context.
     pop io23
 
-    pla
-    tax
+    plx
 
     ;; Free process
     ; Take off running or sleeping.
@@ -789,7 +786,7 @@ not_there:
     ldy waiting
     beq done
     ; Resume waiting.
-    phy
+:   phy
     tax
     jsr resume
     ply
@@ -799,8 +796,7 @@ not_there:
     bne :-
 
 done:
-    ldx pid
-    get_procblk_x proc_io23, io23
+    pop io23
     rts
 .endproc
 
@@ -902,11 +898,9 @@ running_already:
 ; Switch to process.
 ; A: Process ID
 .proc switch
+    ;;; Save current.
     pha
     ldy pid
-
-    ;;; Save state.
-    ;; Banks
     set_procblk_y proc_low, ram123
     set_procblk_y proc_io23, io23
     set_procblk_y proc_blk1, blk1
@@ -917,7 +911,7 @@ running_already:
     tsx
     stx stack-$2000
 
-    ;; Load state.
+    ;; Load next.
     pop pid
     tay
     jsr load_state
@@ -951,6 +945,14 @@ running_already:
     rts
 .endproc
 
+; XA: Start address
+.proc execute
+    stax ptr1
+    ldx #$ff
+    txs
+    jmp (ptr1)
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -963,7 +965,7 @@ running_already:
 .proc balloc
     sty tmp1
     ;; Draw from global pool.
-    list_popx banksf, free_bank
+    list_popx banks, free_bank
     beq :+  ; Oops…
     ;; Own it.
     inc bank_refs,x
@@ -982,7 +984,7 @@ running_already:
     bmi invalid_bank
     dec bank_refs,x
     bne :+
-    list_pushx banksf, free_bank
+    list_pushx banks, free_bank
 :   clc
     rts
 invalid_bank:

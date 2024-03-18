@@ -103,6 +103,8 @@ ptr4:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
+global_start:
+
 ;; Extended memory banks
 ; Free list
 banks:          .res MAX_BANKS
@@ -171,6 +173,9 @@ free_proc:  .res 1
 running:    .res 1
 sleeping:   .res 1
 zombie:     .res 1
+
+global_end:
+global_size = global_end - global_start
 
     .code
 
@@ -489,9 +494,7 @@ zombie:     .res 1
     cpx #0
     beq :+
     error err_fail
-:
  
-.export stop
     ;; Deque
     ; Allocate first.
 :   dpopx procs, procsb, free_proc
@@ -512,6 +515,7 @@ zombie:     .res 1
 :
 
     ;;; Syscalls
+    jsr init
     ;; Extended memory.
     ;; Fork
 
@@ -545,7 +549,10 @@ err_fail:
     sta $9ff1
     sta $9ff2
 
-    ;; Clear per-process data.
+    ;; Clear data.
+    stzwi d, global_start
+    stzwi c, global_size
+    jsr bzero
     stzwi d, $9800
     stzwi c, $07f0
     jsr bzero
@@ -1224,6 +1231,29 @@ tunix_driver:
     clc
     rts
 .endproc
+.proc tunix_memory
+    lda filename+1
+    cmp #'A'
+    beq tunix_balloc
+    cmp #'F'
+    beq tunix_bfree
+    jmp respond_error
+.endproc
+
+.proc tunix_balloc
+    jsr balloc
+    txa
+    beq respond_error
+    jmp respond
+.endproc
+
+.proc tunix_bfree
+    ldx filename+2
+    jsr bfree
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
+
 
 .proc tunix_open
     lda FNLEN

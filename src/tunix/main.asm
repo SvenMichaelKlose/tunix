@@ -843,12 +843,22 @@ set_blk5_to_vic:
     jmp smemcpy
 .endproc
 
+.proc free_lbank
+    drmy lbanks, lbanksb, first_lbank
+    rts
+.endproc
+
 .macro cpyblk proc, blk
     jsr balloc
     sta proc,y
     sta blk5
     ldx blk
     jsr copy_blk3_to_blk5
+.endmacro
+
+.macro rmlbankx proc
+    ldy proc,x
+    jsr free_lbank
 .endmacro
 
 ; Copy process to new banks.
@@ -869,14 +879,21 @@ set_blk5_to_vic:
     cpyblk proc_blk3, blk3
     cpyblk proc_blk5, blk5
 
-    ;; Restore parent banks.
+    ;; Restore parent banks and remove
+    ;; then from the childs local banks.
+    push io23
+    get_procblk_y proc_io23, io23
     ldx pid
-    lda proc_blk2,x
-    sta blk2
-    lda proc_blk3,x
-    sta blk3
-    lda proc_blk5,x
-    sta blk5
+    rmlbankx proc_low
+    rmlbankx proc_io23
+    rmlbankx proc_blk1
+    rmlbankx proc_blk2
+    sty blk2
+    rmlbankx proc_blk3
+    sty blk3
+    rmlbankx proc_blk5
+    sty blk5
+    pop io23
     rts
 .endproc
 

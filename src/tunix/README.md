@@ -5,6 +5,9 @@ Multi-tasking KERNAL I/O extension for
 the Commodore VIC-20 with UltiMem
 expansion.
 
+Defective UltiMem RAM banks are detected
+and disabled when TUNIX starts.
+
 # Status: under construction
 
 Slowly growing the TDD way.
@@ -119,6 +122,10 @@ parent.  For the child an ID of 0 is
 returned.  All open files are shared
 by both processes and must be close
 by both.
+
+Extended memory banks are inherited but
+not those that were allocated when the
+parent process was created.
 
 ### "PEname and args": Execute
 

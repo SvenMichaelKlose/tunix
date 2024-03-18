@@ -105,29 +105,30 @@ ptr4:   .res 2
 
 ;; Extended memory banks
 ; Free list
-banks:     .res MAX_BANKS
+banks:          .res MAX_BANKS
 ; Usage count
-bank_refs:  .res MAX_BANKS
+bank_refs:      .res MAX_BANKS
 
 ;; IO pages
-iopages:       .res MAX_IOPAGES
-iopagesb:      .res MAX_IOPAGES
-iopage_pid:    .res MAX_IOPAGES
-iopage_page:   .res MAX_IOPAGES
+iopages:        .res MAX_IOPAGES
+iopagesb:       .res MAX_IOPAGES
+iopage_pid:     .res MAX_IOPAGES
+iopage_page:    .res MAX_IOPAGES
 
 ;; Global logical file numbers
 ;; Shared by fork()ed processes.
 ; Free list
-glfns:      .res MAX_LFNS
+glfns:          .res MAX_LFNS
+glfn_refs:      .res MAX_LFNS
 ; Drivers @ OPEN
-glfn_drv:   .res MAX_LFNS
+glfn_drv:       .res MAX_LFNS
 ; Secondary addresses @ OPEN
-glfn_sa:    .res MAX_LFNS
+glfn_sa:        .res MAX_LFNS
 
 ;; Processes
 ; Free slots
-procs:      .res MAX_PROCS
-procsb:      .res MAX_PROCS
+procs:          .res MAX_PROCS
+procsb:         .res MAX_PROCS
 ; Flags
 PROC_ZOMBIE     = 0
 PROC_RUNNING    = 1
@@ -279,16 +280,36 @@ zombie:     .res 1
     bne to
 .endmacro
 
+.macro jsra to, val
+    lda val
+    jsr to
+.endmacro
+
+.macro jmpa to, val
+    lda val
+    jmp to
+.endmacro
+
+.macro jsrx to, val
+    ldx val
+    jsr to
+.endmacro
+
+.macro jsry to, val
+    ldy val
+    jsr to
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;
 ;;; LIST MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
 
-.macro list_init list
+.macro linit list
     lda #1
     sta list
 .endmacro
 
-.macro list_popx list, free
+.macro lpopx list, free
     ldx free
     lda list,x
     sta free
@@ -296,7 +317,7 @@ zombie:     .res 1
     sta list,x
 .endmacro
 
-.macro list_popy list, free
+.macro lpopy list, free
     ldy free
     lda list,y
     sta free
@@ -304,33 +325,45 @@ zombie:     .res 1
     sta list,y
 .endmacro
 
-.macro list_pushx list, first
+.macro lpushx list, first
     lda first
     sta list,x
     stx first
 .endmacro
 
-.macro list_pushy list, first
+.macro lpushy list, first
     lda first
     sta list,y
     sty first
 .endmacro
 
-.macro list_movex list, from, to
-    list_popy list, from
-    list_pushx list, to
+.macro lmovex list, from, to
+    lpopy list, from
+    lpushx list, to
 .endmacro
 
-.macro list_movey list, from, to
-    list_popy list, from
-    list_pushy list, to
+.macro lmovey list, from, to
+    lpopy list, from
+    lpushy list, to
+.endmacro
+
+.macro lnextx list, loop
+    lda list,x
+    tax
+    bne loop
+.endmacro
+
+.macro lnexty list, loop
+    lda list,y
+    tay
+    bne loop
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;; DEQUE MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-.macro deque_addx fw, bw, first
+.macro daddx fw, bw, first
     lda first
     sta fw,x
     lda #0
@@ -338,7 +371,7 @@ zombie:     .res 1
     stx first
 .endmacro
 
-.macro deque_rmx fw, bw, first
+.macro drmx fw, bw, first
     lda fw,x
     cpx first
     bne :+
@@ -353,9 +386,9 @@ zombie:     .res 1
     sta fw,y
 .endmacro
 
-.macro deque_movex fw, bw, from, to
-    deque_rmx fw, bw, from
-    deque_addx fw, bw, to
+.macro dmovex fw, bw, from, to
+    drmx fw, bw, from
+    daddx fw, bw, to
 .endmacro
 
 ;;; UI
@@ -368,7 +401,7 @@ zombie:     .res 1
 
 .macro error asciiz
     print asciiz
-    ;jmp *
+    jmp halt
 .endmacro
 
 ;;;;;;;;;;;;
@@ -392,7 +425,7 @@ zombie:     .res 1
     ;;; Data structures
     ; Draw GLFNs until empty.
     ldy #1
-:   list_popx glfn, glfn
+:   lpopx glfn, glfn
     stx tmp2
     cpy tmp2
     beq :+
@@ -402,34 +435,30 @@ zombie:     .res 1
 
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
-    list_popx banks, free_bank
+    lpopx banks, free_bank
     cpx #$1c
     beq :+
     error err_invalid_first_free_bank
-:   list_pushx banks, first_bank
+:   lpushx banks, first_bank
     ldaxi banks
-    ldy free_bank
-    jsr list_length
+    jsry list_length, free_bank
     cpx #$e3
     beq :+
     error err_fail
 :   ldaxi banks
-    ldy first_bank
-    jsr list_length
+    jsry list_length, first_bank
     cpx #1
     beq :+
     error err_fail
     ; In reverse.
-:   list_movex banks, first_bank, free_bank
+:   lmovex banks, first_bank, free_bank
     ldaxi banks
-    ldy free_bank
-    jsr list_length
+    jsry list_length, free_bank
     cpx #$e4
     beq :+
     error err_fail
 :   ldaxi banks
-    ldy first_bank
-    jsr list_length
+    jsry list_length, first_bank
     cpx #0
     beq :+
     error err_fail
@@ -445,6 +474,10 @@ zombie:     .res 1
     ;; Fork
 
     rts
+.endproc
+
+.proc halt
+    jmp halt
 .endproc
 
 txt_tests:
@@ -495,10 +528,9 @@ err_fail:
 :   inx
     bne @l
 
-    lda #FIRST_BANK
-    sta free_bank
-    list_init glfns
-    list_init drvs
+    mvb free_bank, #FIRST_BANK
+    linit glfns
+    linit drvs
     ; Manually end lists that do not
     ; fill a page.
     lda #0
@@ -540,15 +572,12 @@ err_fail:
 .endproc
 
 .macro out val
-    lda val
-    jsr outa
+    jsra outa, val
 .endmacro
 
 .macro outzw at
-    lda at
-    jsr outa
-    lda at+1
-    jsr outa
+    jsra outa, at
+    jsra outa, at+1
 .endmacro
 
 .proc gen_speedcode
@@ -617,7 +646,7 @@ done:
 
 .proc fork
     ;; Grab process slot.
-    list_popy procs, free_proc
+    lpopy procs, free_proc
     beq no_more_procs
 
     ;; Insert after current process.
@@ -636,9 +665,7 @@ done:
     ldx first_lbank
     beq :++
 :   inc bank_refs,x
-    lda lbanks,x
-    tax
-    bne :-
+    lnextx lbanks, :-
 
     ;; Return PID.
 :   pla
@@ -775,11 +802,11 @@ set_blk5_to_vic:
     ; Take off running or sleeping.
     lda proc_flags,x
     bmi :+
-    deque_rmx procs, procsb, running
+    drmx procs, procsb, running
     jmp :++
-:   deque_rmx procs, procsb, sleeping
+:   drmx procs, procsb, sleeping
     ; Add to free.
-:   list_pushx procs, zombie
+:   lpushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
@@ -799,9 +826,7 @@ not_there:
     tax
     jsr resume
     ply
-    lda waiting,y
-    tay
-    bne :-
+    lnexty waiting, :-
 done:
     pop io23
     rts
@@ -819,17 +844,16 @@ done:
     push io23
     push pid
     set_procblk_x proc_io23, io23
-    list_movey waiting, free_wait, first_wait
+    lmovey waiting, free_wait, first_wait
     pla
     sta waiting_pid,y
     pop io23
-    txa
     jsr sleep
     jsr schedule
 
 terminate_zombie:
     ;; Remove from zombie list.
-    deque_movex procs, procsb, zombie, free_proc
+    dmovex procs, procsb, zombie, free_proc
     lda exit_codes,x
     clc
     rts
@@ -845,7 +869,7 @@ not_there:
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
-    deque_movex procs, procsb, running, sleeping
+    dmovex procs, procsb, running, sleeping
 not_there:
 already_sleeping:
     sec
@@ -858,7 +882,7 @@ already_sleeping:
     lda proc_flags,x
     beq not_there
     bpl already_running
-    deque_movex procs, procsb, sleeping, running
+    dmovex procs, procsb, sleeping, running
 not_there:
 already_running:
     sec
@@ -878,8 +902,7 @@ already_running:
 ; A: Exit code
 .proc exit
     pha
-    ldx pid
-    jsr proc_free
+    jsrx proc_free, pid
     pla
     ldx pid
     jmp resume_waiting
@@ -888,9 +911,8 @@ already_running:
 ; A: Exit code
 .proc terminate
     pha
-    lda pid
-    jsr sleep
-    pla
+    jsrx sleep, pid
+    plx
     jmp resume_waiting
 .endproc
 
@@ -964,7 +986,7 @@ already_running:
 .proc balloc
     sty tmp1
     ;; Draw from global pool.
-    list_popx banks, free_bank
+    lpopx banks, free_bank
     beq :+  ; Oops…
     ;; Own it.
     inc bank_refs,x
@@ -983,7 +1005,7 @@ already_running:
     bmi invalid_bank
     dec bank_refs,x
     bne :+
-    list_pushx banks, free_bank
+    lpushx banks, free_bank
 :   clc
     rts
 invalid_bank:
@@ -994,13 +1016,11 @@ invalid_bank:
 
 ; Free all banks of current process.
 .proc bprocfree
-    ldx #FIRST_BANK
+    ldx first_lbank
 :   lda lbanks,x
     beq :+
     jsr bfree
-:   inx
-    cpx #MAX_BANKS
-    bne :--
+:   lnextx lbanks, :--
     rts
 .endproc
 
@@ -1012,12 +1032,10 @@ invalid_bank:
     ldy first_lfn
     beq done
 :   ldx lfn_glfn,y
-    dec glfn_ref,x
+    dec glfn_refs,x
     bne :+  ; (Still used.)
-    list_pushx glfns, glfns
-:   lda lfns,y
-    tay
-    bne :--
+    lpushx glfns, glfns
+:   lnexty lfns, :--
 done:
     rts
 .endproc
@@ -1033,8 +1051,8 @@ done:
     stx ptr1+1
 
     ;; Get slot.
-    list_popx drvs, drvs
-    beq out_of_slots
+    lpopx drvs, drvs
+    beq :+
 
     ;; Populate slot.
     lda pid
@@ -1044,8 +1062,7 @@ done:
     lda ptr1+1
     sta drv_vh,x
 
-out_of_slots:
-    rts
+:   rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;;
@@ -1258,7 +1275,7 @@ syscall1 tunix_terminate, terminate, lda
 .proc tunix_alloc_io_page
     lda free_iopage
     beq respond_error
-    list_movex iopages, free_iopage, first_iopage
+    lmovex iopages, free_iopage, first_iopage
     ldx pid
     sta iopage_pid,x
     txa
@@ -1319,7 +1336,7 @@ next:
     ldx filename+2
     lda iopage_pid,x
     beq not_there
-    deque_movex iopages, iopagesb, first_iopage, free_iopage
+    dmovex iopages, iopagesb, first_iopage, free_iopage
     jmp respond_ok
 not_there:
     jmp respond_error
@@ -1335,9 +1352,14 @@ not_there:
 .proc lfn_to_glfn
     lda lfn_glfn,x
     bne :+  ; Use existing...
-    list_pushx lfns, first_lfn
+    lpushx lfns, first_lfn
     beq :+
-    list_popy glfn, glfn
+    phx
+    lpopx glfn, glfn
+    inc glfn_refs,x
+    txa
+    tay
+    plx
     tya
     sta lfn_glfn,x
 :   sta glfn
@@ -1397,8 +1419,7 @@ tunix_vectors:
     pla
 
     tax
-    lda #IDX_OPEN
-    jsr call_driver
+    jsra call_driver, #IDX_OPEN
     sta reg_a
 
     pop LFN
@@ -1412,15 +1433,13 @@ tunix_vectors:
 .proc chkin
     jsr lfn_to_glfn
     sta reg_a
-    lda #IDX_CHKIN
-    jmp call_driver
+    jmpa call_driver, #IDX_CHKIN
 .endproc
 
 .proc ckout
     jsr lfn_to_glfn
     sta reg_a
-    lda #IDX_CKOUT
-    jmp call_driver
+    jmpa call_driver, #IDX_CKOUT
 .endproc
 
 .macro iohandler name, lfn, drvop
@@ -1430,8 +1449,7 @@ tunix_vectors:
         jsr lfn_to_glfn
         sta lfn
 
-        lda #drvop
-        jsr call_driver
+        jsra call_driver, #drvop
         sta reg_a
 
         pop lfn
@@ -1454,8 +1472,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     ldy glfn_drv,x
     tya
     tax
-    lda #IDX_CLRCN
-    jsr call_driver
+    jsra call_driver, #IDX_CLRCN
     jmp schedule
 .endproc
 
@@ -1467,8 +1484,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     sta glfn_drv,x
     tya
     tax
-    lda #IDX_CLOSE
-    jsr call_driver
+    jsra call_driver, #IDX_CLOSE
     jmp schedule
 .endproc
 
@@ -1478,16 +1494,13 @@ iohandler bkout, DFLTO, IDX_BKOUT
 :   phx
     jsr close
     plx
-    lda lfns,x
-    tax
-    bne :-
+    lnextx lfns, :-
 r:  rts
 .endproc
 
 .proc stop
     ldx #0
-    lda #IDX_STOP
-    jsr call_driver
+    jsra call_driver, #IDX_STOP
     jmp schedule
 .endproc
 
@@ -1496,8 +1509,7 @@ r:  rts
         save_regs
         ldy DEV
         ldx dev_drv,y
-        lda #idx
-        jsr call_driver
+        jsra call_driver, #idx
         jmp schedule
     .endproc
 .endmacro
@@ -1507,8 +1519,7 @@ blkiohandler save, IDX_SAVE
 
 .proc usrcmd
     ldx #0
-    lda #IDX_STOP
-    jmp call_driver
+    jmpa call_driver, #IDX_STOP
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;

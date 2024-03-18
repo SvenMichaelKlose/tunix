@@ -415,17 +415,19 @@ zombie:     .res 1
     jmp init
 .endproc
 
+.export glfns
 .export tests
 .export banks
 .export free_bank
 .export first_bank
+.export stop
 .proc tests
     jsr init
 
     ;;; Data structures
     ; Draw GLFNs until empty.
     ldy #1
-:   lpopx glfn, glfn
+:   lpopx glfns, glfns
     stx tmp2
     cpy tmp2
     beq :+
@@ -1355,14 +1357,13 @@ not_there:
     lpushx lfns, first_lfn
     beq :+
     phx
-    lpopx glfn, glfn
+    lpopx glfns, glfns
     inc glfn_refs,x
     txa
     tay
     plx
     tya
-    sta lfn_glfn,x
-:   sta glfn
+:   sta lfn_glfn,x
     rts
 .endproc
 
@@ -1558,8 +1559,6 @@ saved_vic:  .res 16
 ;; Driver info
 ; File name copied from calling process.
 filename:   .res 256
-; Translated LFN.
-glfn:       .res 1
 
 first_lfn:  .res 1
 first_lbank:.res 1

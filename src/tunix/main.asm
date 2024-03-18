@@ -371,13 +371,8 @@ zombie:     .res 1
     stx first
 .endmacro
 
-.macro drmx fw, bw, first
-    lda fw,x
-    cpx first
-    bne :+
-    sta first
-    ; Link next to previous.
-:   tay
+.macro _dlink fw, bw, first_free
+    tay
     lda bw,x
     sta bw,y
     ; Link previous to next.
@@ -386,9 +381,33 @@ zombie:     .res 1
     sta fw,y
 .endmacro
 
-.macro dmovex fw, bw, from, to
+.macro dpopx fw, bw, first_free
+    ldx first_free
+    lda fw,x
+    sta first_free
+    _dlink fw, bw, first_free
+.endmacro
+
+.macro drmx fw, bw, first_free
+    lda fw,x
+    cpx first_free
+    bne :+
+    sta first_free
+:   _dlink fw, bw, first_free
+.endmacro
+
+.macro dallocx fw, bw, from, to
+    dpopx fw, bw, from
+    daddx fw, bw, to
+.endmacro
+
+.macro dfreex fw, bw, from, to
     drmx fw, bw, from
     daddx fw, bw, to
+.endmacro
+
+.macro dmovex fw, bw, from, to
+    dfreex fw, bw, from, to
 .endmacro
 
 ;;; UI
@@ -418,9 +437,15 @@ zombie:     .res 1
 .export glfns
 .export tests
 .export banks
+.export procs
+.export procsb
+.export free_proc
+.export running
+.export sleeping
+.export zombie
 .export free_bank
 .export first_bank
-.export stop
+
 .proc tests
     jsr init
 
@@ -466,10 +491,25 @@ zombie:     .res 1
     error err_fail
 :
  
-    ;; Doubly-linked listmaps.
+.export stop
+    ;; Deque
     ; Allocate first.
-    ; Draw until empty.
+:   dpopx procs, procsb, free_proc
+    phx
+    ldaxi procs
+    jsry list_length, free_proc
+    cpx #MAX_PROCS - 2 ; (+ init)
+    beq :+
+    error err_fail
+:   plx
     ; Free by index.
+    daddx procs, procsb, running
+    ldaxi procs
+    jsry list_length, running
+    cpx #1
+    beq :+
+    error err_fail
+:
 
     ;;; Syscalls
     ;; Extended memory.
@@ -513,6 +553,10 @@ err_fail:
     ;; Set up lists and tables.
     ldx #0
 @l: txa
+    sec
+    sbc #1
+    sta procsb,x
+    txa
     clc
     adc #1
     sta banks,x
@@ -531,6 +575,8 @@ err_fail:
     bne @l
 
     mvb free_bank, #FIRST_BANK
+    mvb free_proc, #1
+    mvb procsb, #0
     linit glfns
     linit drvs
     ; Manually end lists that do not
@@ -855,7 +901,7 @@ done:
 
 terminate_zombie:
     ;; Remove from zombie list.
-    dmovex procs, procsb, zombie, free_proc
+    dfreex procs, procsb, zombie, free_proc
     lda exit_codes,x
     clc
     rts
@@ -1277,7 +1323,7 @@ syscall1 tunix_terminate, terminate, lda
 .proc tunix_alloc_io_page
     lda free_iopage
     beq respond_error
-    lmovex iopages, free_iopage, first_iopage
+    dallocx iopages, iopagesb, free_iopage, first_iopage
     ldx pid
     sta iopage_pid,x
     txa
@@ -1324,21 +1370,24 @@ next:
 .proc tunix_drivers
     lda filename+1
     cmp #'R'
-    beq tunix_register
+    beq reg
     cmp #'A'
-    beq tunix_alloc_io_page
+    beq all
     cmp #'C'
     beq tunix_commit_io_page
     cmp #'F'
     beq tunix_free_io_page
     jmp respond_error
+
+reg:jmp tunix_register
+all:jmp tunix_alloc_io_page
 .endproc
 
 .proc tunix_free_io_page
     ldx filename+2
     lda iopage_pid,x
     beq not_there
-    dmovex iopages, iopagesb, first_iopage, free_iopage
+    dfreex iopages, iopagesb, first_iopage, free_iopage
     jmp respond_ok
 not_there:
     jmp respond_error

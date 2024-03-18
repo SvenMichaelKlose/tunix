@@ -18,7 +18,6 @@ OP_RTS      = $60
 
 ;;; KERNAL
 
-STATUS      = $90
 DFLTN       = $99
 DFLTO       = $9a
 FNLEN       = $b7
@@ -49,10 +48,17 @@ IDX_BKOUT  = 28
 
 PRTSTR      = $cb1e
 
+;;; TUNIX
+
 MAX_LFNS    = 256   ; Has to be.
 MAX_PROCS   = 64
 MAX_DRVS    = 16
 MAX_DEVS    = 32
+MAX_IOPAGES = 4
+
+;;; MACHDEP
+
+IOPAGE_BASE = $7b
 
 ;;; UltiMem
 
@@ -103,6 +109,12 @@ banks:     .res MAX_BANKS
 ; Usage count
 bank_refs:  .res MAX_BANKS
 
+;; IO pages
+iopages:       .res MAX_IOPAGES
+iopagesb:      .res MAX_IOPAGES
+iopage_pid:    .res MAX_IOPAGES
+iopage_page:   .res MAX_IOPAGES
+
 ;; Global logical file numbers
 ;; Shared by fork()ed processes.
 ; Free list
@@ -114,7 +126,7 @@ glfn_sa:    .res MAX_LFNS
 
 ;; Processes
 ; Free slots
-procsf:      .res MAX_PROCS
+procs:      .res MAX_PROCS
 procsb:      .res MAX_PROCS
 ; Flags
 PROC_ZOMBIE     = 0
@@ -145,6 +157,9 @@ dev_drv:    .res MAX_DEVS
 ;; Bank allocation
 free_bank:  .res 1
 first_bank: .res 1
+
+free_iopage:    .res 1
+first_iopage:   .res 1
 
 ;; First speed code BLK5 to copy from
 ;; BLK2 to BLK3.
@@ -301,6 +316,16 @@ zombie:     .res 1
     sty first
 .endmacro
 
+.macro list_movex list, from, to
+    list_popy list, from
+    list_pushx list, to
+.endmacro
+
+.macro list_movey list, from, to
+    list_popy list, from
+    list_pushy list, to
+.endmacro
+
 ;;; List of free GLFNS.
 
 .macro pushy_glfn
@@ -318,30 +343,33 @@ zombie:     .res 1
 ;;;;;;;;;;;;;;;;;;;;
 ;;; DEQUE MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;
-; With insert/remove by index.
-; !: First element must have indexes of
-; value 0.
 
-.macro deque_popx fw, first
-    list_popx fw, first
+.macro deque_addx fw, bw, first
+    lda first
+    sta fw,x
+    lda #0
+    sta bw,x
+    stx first
 .endmacro
 
 .macro deque_rmx fw, bw, first
     lda fw,x
+    cpx first
+    bne :+
+    sta first
     ; Link next to previous.
-    tay
+:   tay
     lda bw,x
     sta bw,y
     ; Link previous to next.
     tay
     lda fw,x
     sta fw,y
-    ; Add to free.
-    lda first
-    sta fw,x
-    lda #0
-    sta bw,x
-    stx first
+.endmacro
+
+.macro deque_movex fw, bw, from, to
+    deque_rmx fw, bw, from
+    deque_addx fw, bw, to
 .endmacro
 
 ;;; UI
@@ -406,8 +434,7 @@ zombie:     .res 1
     beq :+
     error err_fail
     ; In reverse.
-:   list_popx banks, first_bank
-    list_pushx banks, free_bank
+:   list_movex banks, first_bank, free_bank
     ldaxi banks
     ldy free_bank
     jsr list_length
@@ -464,20 +491,23 @@ err_fail:
 
     ;; Set up lists and tables.
     ldx #0
-:   txa
+@l: txa
     clc
     adc #1
     sta banks,x
     sta glfns,x
     sta lfns,x
-    cpx #MAX_PROCS
+    cpx #MAX_IOPAGES
     bcs :+
-    sta procsf,x
+    sta iopages,x
+:   cpx #MAX_PROCS
+    bcs :+
+    sta procs,x
 :   cpx #MAX_DRVS
     bcs :+
     sta drvs,x
 :   inx
-    bne :---
+    bne @l
 
     lda #FIRST_BANK
     sta free_bank
@@ -486,8 +516,10 @@ err_fail:
     ; Manually end lists that do not
     ; fill a page.
     lda #0
-    sta procsf+MAX_PROCS-1
-    sta drvs+MAX_DRVS-1
+    sta procs + MAX_PROCS - 1
+    sta waiting + MAX_PROCS - 1
+    sta drvs + MAX_DRVS - 1
+    sta iopages + MAX_IOPAGES - 1
 
     ;; Save initial set of banks.
     mvb proc_low, ram123
@@ -599,7 +631,7 @@ done:
 
 .proc fork
     ;; Grab process slot.
-    list_popy procsf, free_proc
+    list_popy procs, free_proc
     beq no_more_procs
 
     ;; Insert after current process.
@@ -747,27 +779,22 @@ set_blk5_to_vic:
     phx
 
     ;; Close resources.
-    ; Switch to context.
     push io23
     get_procblk_x proc_io23, io23
-    ; Free.
-    jsr clall
     jsr free_lfns
     jsr bprocfree
-    ; Restore context.
     pop io23
 
-    plx
-
     ;; Free process
+    plx
     ; Take off running or sleeping.
     lda proc_flags,x
     bmi :+
-    deque_rmx procsf, procsb, running
+    deque_rmx procs, procsb, running
     jmp :++
-:   deque_rmx procsf, procsb, sleeping
+:   deque_rmx procs, procsb, sleeping
     ; Add to free.
-:   list_pushx procsf, zombie
+:   list_pushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
@@ -779,21 +806,17 @@ not_there:
 
 ; X: Process ID
 .proc resume_waiting
-    ; Switch to context.
     push io23
     get_procblk_x proc_io23, io23
-    ldy waiting
+    ldy first_wait
     beq done
-    ; Resume waiting.
 :   phy
     tax
     jsr resume
     ply
-    ; Next waiting...
     lda waiting,y
     tay
     bne :-
-
 done:
     pop io23
     rts
@@ -812,8 +835,7 @@ done:
     push io23
     push pid
     set_procblk_x proc_io23, io23
-    list_popy waiting, free_wait
-    list_pushy waiting, first_wait
+    list_movey waiting, free_wait, first_wait
     pla
     sta waiting_pid,y
     pop io23
@@ -823,8 +845,7 @@ done:
 
 terminate_zombie:
     ;; Remove from zombie list.
-    ;deque_rmx procsf, procsb, zombie
-    list_pushx procsf, free_proc
+    deque_movex procs, procsb, zombie, free_proc
     lda exit_codes,x
     clc
     rts
@@ -840,11 +861,10 @@ not_there:
     tax
     lda proc_flags,x
     beq not_there
-    bmi sleeping_already
-    deque_rmx procsf, procsb, running
-    ;deque_addx procsf, procsb, sleeping
+    bmi already_sleeping
+    deque_movex procs, procsb, running, sleeping
 not_there:
-sleeping_already:
+already_sleeping:
     sec
     rts
 .endproc
@@ -855,11 +875,10 @@ sleeping_already:
     tax
     lda proc_flags,x
     beq not_there
-    bpl running_already
-    deque_rmx procsf, procsb, sleeping
-    ;deque_addx procsf, procsb, running
+    bpl already_running
+    deque_movex procs, procsb, sleeping, running
 not_there:
-running_already:
+already_running:
     sec
     rts
 .endproc
@@ -932,7 +951,7 @@ running_already:
     phx
     phy
     ldx pid
-    lda procsf,x
+    lda procs,x
     bne :+
     lda running
 :   cmp pid
@@ -1029,7 +1048,7 @@ done:
 ; XA: vectors
 ; Returns: X: driver ID.
 ;             0 if out of slots.
-.proc register_driver
+.proc register
     sta ptr1
     stx ptr1+1
 
@@ -1137,9 +1156,18 @@ m:  inc dh
     jmp n
 .endproc
 
-;;;;;;;;;;;;;;
-;;; DRIVER ;;;
-;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;
+;;; SYSCALL DRIVER ;;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+.macro syscall1 name, fun
+    .proc name
+        lda filename+2
+        jsr fun
+        bcs respond_error
+        bcc respond_ok  ; (jmp)
+    .endproc
+.endmacro
 
 tunix_driver:
 .word tunix_open, tunix, tunix
@@ -1176,25 +1204,17 @@ tunix_driver:
     bne respond_error   ; (jmp)
 .endproc
 
+syscall1 tunix_kill, kill
+syscall1 tunix_wait, wait
+syscall1 tunix_stop, stop
+syscall1 tunix_resume, resume
+
 .proc tunix_fork
     jsr fork
     bcs respond_error
     bcc respond ; (jmp)
 .endproc
 
-.macro syscall1 name, fun
-    .proc name
-        lda filename+2
-        jsr fun
-        bcs respond_error
-        bcc respond_ok  ; (jmp)
-    .endproc
-.endmacro
-
-syscall1 tunix_kill, kill
-syscall1 tunix_wait, wait
-syscall1 tunix_stop, stop
-syscall1 tunix_resume, resume
 syscall1 tunix_exit, exit
 syscall1 tunix_terminate, terminate
 
@@ -1221,6 +1241,16 @@ syscall1 tunix_terminate, terminate
     rts
 .endproc
 
+; A: Value to respond with error code 0.
+.proc respond
+    sta response+1
+    lda #0
+    sta response
+    sta responsep
+    ldx #2
+    bne respond_len ; (jmp)
+.endproc
+
 .proc tunix_basin
     ldx responsep
     cpx response_len
@@ -1233,19 +1263,70 @@ syscall1 tunix_terminate, terminate
     rts
 .endproc
     
-; A: Value to respond with error code 0.
-.proc respond
-    sta response+1
+syscall1 tunix_register, register
+
+.proc tunix_alloc_io_page
+    lda free_iopage
+    beq respond_error
+    list_movex iopages, free_iopage, first_iopage
+    ldx pid
+    sta iopage_pid,x
+    txa
+    clc
+    adc #IOPAGE_BASE
+    bcc respond ; (jmp)
+.endproc
+
+.proc tunix_commit_io_page
+    ldy #0
+l:  cpy pid
+    beq next
+    lda proc_flags,y
+    beq next
+
+    ;; Copy page.
+    phy
+    push blk5
+    get_procblk_x proc_io23, blk5
+    lda filename+2
+    clc
+    adc #IOPAGE_BASE
+    sta ptr1+1
+    clc
+    adc #2
+    sta ptr2+1
     lda #0
-    sta response
-    sta responsep
-    ldx #2
-    bne respond_len ; (jmp)
+    sta ptr1
+    sta ptr2
+    tay
+:   lda (ptr1),y
+    sta (ptr2),y
+    iny
+    bne :-
+    pop blk5
+    ply
+next:
+    iny
+    cpy #MAX_PROCS
+    bne l
+    jmp respond_ok
+.endproc
+
+.proc tunix_free_io_page
+    ldx filename+2
+    lda iopage_pid,x
+    beq not_there
+    deque_movex iopages, iopagesb, first_iopage, free_iopage
+    jmp respond_ok
+not_there:
+    jmp respond_error
 .endproc
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
+
+.byte "DIPATCH"
 
 ; Translate local to global LFN.
 .proc lfn_to_glfn

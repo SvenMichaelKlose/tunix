@@ -326,20 +326,6 @@ zombie:     .res 1
     list_pushy list, to
 .endmacro
 
-;;; List of free GLFNS.
-
-.macro pushy_glfn
-    list_pushy glfns, glfns
-.endmacro
-
-.macro popx_glfn
-    list_popx glfns, glfns
-.endmacro
-
-.macro popy_glfn
-    list_popy glfns, glfns
-.endmacro
-
 ;;;;;;;;;;;;;;;;;;;;
 ;;; DEQUE MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -406,7 +392,7 @@ zombie:     .res 1
     ;;; Data structures
     ; Draw GLFNs until empty.
     ldy #1
-:   popx_glfn
+:   list_popx glfn, glfn
     stx tmp2
     cpy tmp2
     beq :+
@@ -773,7 +759,6 @@ set_blk5_to_vic:
 ; Force exit.
 ; A: Process ID.
 .proc proc_free
-    tax
     lda proc_flags,x
     beq not_there
     phx
@@ -826,7 +811,6 @@ done:
 ; A: Process ID
 ; Returns: A: Exit code
 .proc wait
-    tax
     lda proc_flags,x
     beq not_there
     cmp #PROC_ZOMBIE
@@ -858,7 +842,6 @@ not_there:
 ; Put process to sleep.
 ; A: Process ID
 .proc sleep
-    tax
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
@@ -872,7 +855,6 @@ already_sleeping:
 ; Wake up process.
 ; A: Process ID
 .proc resume
-    tax
     lda proc_flags,x
     beq not_there
     bpl already_running
@@ -885,7 +867,6 @@ already_running:
 
 ; A: Process ID
 .proc kill
-    tax
     lda #255
     sta exit_codes,x
     phx
@@ -897,7 +878,7 @@ already_running:
 ; A: Exit code
 .proc exit
     pha
-    lda pid
+    ldx pid
     jsr proc_free
     pla
     ldx pid
@@ -1028,14 +1009,14 @@ invalid_bank:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .proc free_lfns
-    ldx first_lfn
+    ldy first_lfn
     beq done
-:   dec lfn_glfn,x
-    bne :+
-    ldy lfn_glfn,x
-    pushy_glfn
-:   lda lfns,x
-    tax
+:   ldx lfn_glfn,y
+    dec glfn_ref,x
+    bne :+  ; (Still used.)
+    list_pushx glfns, glfns
+:   lda lfns,y
+    tay
     bne :--
 done:
     rts
@@ -1046,8 +1027,7 @@ done:
 ;;;;;;;;;;;;;;;
 
 ; XA: vectors
-; Returns: X: driver ID.
-;             0 if out of slots.
+; Returns: X: driver ID or 0.
 .proc register
     sta ptr1
     stx ptr1+1
@@ -1160,9 +1140,9 @@ m:  inc dh
 ;;; SYSCALL DRIVER ;;;
 ;;;;;;;;;;;;;;;;;;;;;;
 
-.macro syscall1 name, fun
+.macro syscall1 name, fun, load
     .proc name
-        lda filename+2
+        load filename+2
         jsr fun
         bcs respond_error
         bcc respond_ok  ; (jmp)
@@ -1186,7 +1166,10 @@ tunix_driver:
     lda filename
     cmp #'P'
     beq tunix_procs
+    cmp #'D'
+    beq d
     bne respond_error ; (jmp)
+d:  jmp tunix_drivers
 .endproc
 
 .proc tunix_procs
@@ -1204,10 +1187,10 @@ tunix_driver:
     bne respond_error   ; (jmp)
 .endproc
 
-syscall1 tunix_kill, kill
-syscall1 tunix_wait, wait
-syscall1 tunix_stop, stop
-syscall1 tunix_resume, resume
+syscall1 tunix_kill, kill, ldx
+syscall1 tunix_wait, wait, ldx
+syscall1 tunix_stop, stop, ldx
+syscall1 tunix_resume, resume, ldx
 
 .proc tunix_fork
     jsr fork
@@ -1215,8 +1198,8 @@ syscall1 tunix_resume, resume
     bcc respond ; (jmp)
 .endproc
 
-syscall1 tunix_exit, exit
-syscall1 tunix_terminate, terminate
+syscall1 tunix_exit, exit, lda
+syscall1 tunix_terminate, terminate, lda
 
 .proc respond_error
     ldx #0
@@ -1263,7 +1246,14 @@ syscall1 tunix_terminate, terminate
     rts
 .endproc
     
-syscall1 tunix_register, register
+.proc tunix_register
+    lda filename+2
+    ldx filename+3
+    jsr register
+    bcs respond_error
+    txa
+    bcc respond ; (jmp)
+.endproc
 
 .proc tunix_alloc_io_page
     lda free_iopage
@@ -1312,6 +1302,19 @@ next:
     jmp respond_ok
 .endproc
 
+.proc tunix_drivers
+    lda filename+1
+    cmp #'R'
+    beq tunix_register
+    cmp #'A'
+    beq tunix_alloc_io_page
+    cmp #'C'
+    beq tunix_commit_io_page
+    cmp #'F'
+    beq tunix_free_io_page
+    jmp respond_error
+.endproc
+
 .proc tunix_free_io_page
     ldx filename+2
     lda iopage_pid,x
@@ -1330,12 +1333,11 @@ not_there:
 
 ; Translate local to global LFN.
 .proc lfn_to_glfn
-    tax
     lda lfn_glfn,x
     bne :+  ; Use existing...
     list_pushx lfns, first_lfn
     beq :+
-    popy_glfn
+    list_popy glfn, glfn
     tya
     sta lfn_glfn,x
 :   sta glfn
@@ -1371,7 +1373,6 @@ tunix_vectors:
 .proc open
     pushw FNADR
     push LFN
-    tax
     jsr lfn_to_glfn
     sta LFN
 
@@ -1552,7 +1553,7 @@ glfn:       .res 1
 first_lfn:  .res 1
 first_lbank:.res 1
 
-; TUNIX device response
+; TUNIX syscall device response
 response:       .res 8
 response_len:   .res 1
 responsep:      .res 1

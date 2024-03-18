@@ -378,7 +378,7 @@ global_size = global_end - global_start
     stx first
 .endmacro
 
-.macro _dlink fw, bw, first_free
+.macro _dlinkx fw, bw, first_free
     tay
     lda bw,x
     sta bw,y
@@ -388,11 +388,21 @@ global_size = global_end - global_start
     sta fw,y
 .endmacro
 
+.macro _dlinky fw, bw, first_free
+    tax
+    lda bw,y
+    sta bw,x
+    ; Link previous to next.
+    tax
+    lda fw,y
+    sta fw,x
+.endmacro
+
 .macro dpopx fw, bw, first_free
     ldx first_free
     lda fw,x
     sta first_free
-    _dlink fw, bw, first_free
+    _dlinkx fw, bw, first_free
 .endmacro
 
 .macro drmx fw, bw, first_free
@@ -400,7 +410,15 @@ global_size = global_end - global_start
     cpx first_free
     bne :+
     sta first_free
-:   _dlink fw, bw, first_free
+:   _dlinkx fw, bw, first_free
+.endmacro
+
+.macro drmy fw, bw, first_free
+    lda fw,y
+    cpy first_free
+    bne :+
+    sta first_free
+:   _dlinky fw, bw, first_free
 .endmacro
 
 .macro dallocx fw, bw, from, to
@@ -415,6 +433,30 @@ global_size = global_end - global_start
 
 .macro dmovex fw, bw, from, to
     dfreex fw, bw, from, to
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS BANK MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.macro get_procblk_x proc, blk
+    lda proc,y
+    sta blk
+.endmacro
+
+.macro get_procblk_y proc, blk
+    lda proc,y
+    sta blk
+.endmacro
+
+.macro set_procblk_x proc, blk
+    lda blk
+    sta proc,x
+.endmacro
+
+.macro set_procblk_y proc, blk
+    lda blk
+    sta proc,y
 .endmacro
 
 ;;; UI
@@ -519,8 +561,17 @@ global_size = global_end - global_start
 
     ;;; Syscalls
     jsr init
-    ;; Extended memory.
+
     ;; Fork
+    jsr fork
+    cmp #1
+    beq :++
+    cmp #0
+    beq :+
+    error err_fail
+:   lda #0
+    jmp exit
+:
 
     rts
 .endproc
@@ -566,8 +617,11 @@ err_fail:
 @l: txa
     sec
     sbc #1
+    cpx #MAX_PROCS
+    bcs :+
     sta procsb,x
-    txa
+
+:   txa
     clc
     adc #1
     sta glfns,x
@@ -581,6 +635,7 @@ err_fail:
 :   cpx #MAX_DRVS
     bcs :+
     sta drvs,x
+
 :   inx
     bne @l
 
@@ -610,11 +665,12 @@ err_fail:
     mvb drv_vl, #$1a
     mvb drv_vh, #$03
 
-    ;; Escape into a parallel universe.
     jsr gen_speedcode
+
+    ;; Make init process.
     print txt_init
     ldy #0
-    jmp fork_raw
+    jmp fork0 ; Fork into process 0.
 .endproc
 
 ;;;;;;;;;;;;;;;;;;
@@ -703,11 +759,16 @@ done:
 ;;; PROCESSES ;;;
 ;;;;;;;;;;;;;;;;;
 
+.export lbanks, lbanksb, first_lbank
+
 .proc fork
     ;; Grab process slot.
     lpopy procs, free_proc
+    cpy #0
     beq no_more_procs
+.endproc
 
+.proc fork0
     ;; Insert after current process.
     ldx pid
     lda running,x
@@ -733,8 +794,9 @@ done:
     lda #0  ; (for child)
 :   clc
     rts
+.endproc
 
-no_more_procs:
+.proc no_more_procs
     sec
     rts
 .endproc
@@ -747,26 +809,6 @@ set_color:  .word $9400, $b400, $0400
 set_io23:   .word $9800, $b800, $07f0
 set_vic:
     .word $9000, saved_vic+$2000, $0010
-
-.macro get_procblk_x proc, blk
-    lda proc,y
-    sta blk
-.endmacro
-
-.macro get_procblk_y proc, blk
-    lda proc,y
-    sta blk
-.endmacro
-
-.macro set_procblk_x proc, blk
-    lda blk
-    sta proc,x
-.endmacro
-
-.macro set_procblk_y proc, blk
-    lda blk
-    sta proc,y
-.endmacro
 
 .macro smemcpyax set
     ldaxi set
@@ -809,12 +851,6 @@ set_blk5_to_vic:
     jsr copy_blk3_to_blk5
 .endmacro
 
-.macro sta_lbankx proc, blk
-    ldy proc,x
-    sta lbanks,y
-    sty blk
-.endmacro
-
 ; Copy process to new banks.
 .proc fork_raw
     jsr balloc
@@ -833,12 +869,14 @@ set_blk5_to_vic:
     cpyblk proc_blk3, blk3
     cpyblk proc_blk5, blk5
 
-    ;; Release and restore parent banks.
+    ;; Restore parent banks.
     ldx pid
-    lda #0
-    sta_lbankx proc_blk2, blk2
-    sta_lbankx proc_blk3, blk3
-    sta_lbankx proc_blk5, blk5
+    lda proc_blk2,x
+    sta blk2
+    lda proc_blk3,x
+    sta blk3
+    lda proc_blk5,x
+    sta blk5
     rts
 .endproc
 
@@ -1046,10 +1084,11 @@ already_running:
     sty tmp1
     ;; Draw from global pool.
     lpopx banks, free_bank
+    cpx #0
     beq :+  ; Oops…
     ;; Own it.
+    daddx lbanks, lbanksb, first_lbank
     inc bank_refs,x
-    inc lbanks,x
 :   ldy tmp1
     txa
     rts
@@ -1060,15 +1099,15 @@ already_running:
 ; Ingnores already free ones.
 ; X: Bank #
 .proc bfree
-    dec lbanks,x
-    bmi invalid_bank
     dec bank_refs,x
+    bmi invalid_bank
     bne :+
     lpushx banks, free_bank
-:   clc
+:   drmx lbanks, lbanksb, first_lbank
+    clc
     rts
 invalid_bank:
-    inc lbanks,x
+    inc bank_refs,x
     sec
     rts
 .endproc
@@ -1457,10 +1496,6 @@ col:            .res 1
     jmp halt
 
 has_ultimem:
-    lda #<txt_found_ultimem
-    ldy #>txt_found_ultimem
-    jsr printstr
-
     ;; Write banks.
     lda #FIRST_BANK
     sta bnk
@@ -1605,9 +1640,6 @@ done:
 .endproc
 
     .rodata
-
-txt_found_ultimem:
-    .byte "ULTIMEM FOUND.", 13, 0
 
 txt_no_ultimem:
     .byte "NO ULTIMEM/VIC-MIDIFOUND."
@@ -1811,10 +1843,12 @@ blkiohandler save, IDX_SAVE
 ;; Extended memory banks
 ; List of used ones.
 lbanks:     .res MAX_BANKS
+lbanksb:    .res MAX_BANKS
 
 ;; Logical file numbers
-; List of used ones
+; Deque of used ones
 lfns:       .res MAX_LFNS
+lfnsb:      .res MAX_LFNS
 ; Translations to global LFNs
 lfn_glfn:   .res MAX_LFNS
 

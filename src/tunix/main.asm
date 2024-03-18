@@ -18,6 +18,9 @@ OP_RTS      = $60
 
 ;;; KERNAL
 
+;__VIC20__ = 1
+.include "cbm_kernal.inc"
+
 DFLTN       = $99
 DFLTO       = $9a
 FNLEN       = $b7
@@ -310,8 +313,7 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;
 
 .macro linit list
-    lda #1
-    sta list
+    mvb list, #1
 .endmacro
 
 .macro lpopx list, free
@@ -433,6 +435,7 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;
 
 .proc main
+    print txt_tunix
     print txt_tests
     jsr tests
     print txt_booting
@@ -468,13 +471,13 @@ global_size = global_end - global_start
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
     lpopx banks, free_bank
-    cpx #$1c
+    cpx #$71
     beq :+
     error err_invalid_first_free_bank
 :   lpushx banks, first_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$e3
+    cpx #$63
     beq :+
     error err_fail
 :   ldaxi banks
@@ -486,7 +489,7 @@ global_size = global_end - global_start
 :   lmovex banks, first_bank, free_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$e4
+    cpx #$64
     beq :+
     error err_fail
 :   ldaxi banks
@@ -526,9 +529,10 @@ global_size = global_end - global_start
     jmp halt
 .endproc
 
-txt_tests:
+txt_tunix:
     .byte 147   ; Clear screen.
-    .byte "TUNIX", 13
+    .byte "TUNIX", 13, 0
+txt_tests:
     .byte "TESTS..",0
 txt_booting:
     .byte 13, "BOOTING..",0
@@ -566,7 +570,6 @@ err_fail:
     txa
     clc
     adc #1
-    sta banks,x
     sta glfns,x
     sta lfns,x
     cpx #MAX_IOPAGES
@@ -581,7 +584,6 @@ err_fail:
 :   inx
     bne @l
 
-    mvb free_bank, #FIRST_BANK
     mvb free_proc, #1
     mvb procsb, #0
     linit glfns
@@ -593,6 +595,8 @@ err_fail:
     sta waiting + MAX_PROCS - 1
     sta drvs + MAX_DRVS - 1
     sta iopages + MAX_IOPAGES - 1
+
+    jsr init_ultimem
 
     ;; Save initial set of banks.
     mvb proc_low, ram123
@@ -1422,6 +1426,201 @@ all:jmp tunix_alloc_io_page
 not_there:
     jmp respond_error
 .endproc
+
+;;;;;;;;;;;;;;;
+;;; ULTIMEM ;;;
+;;;;;;;;;;;;;;;
+
+    .zeropage
+
+bnk:            .res 2
+num_errors:     .res 2
+col:            .res 1
+
+
+    .code
+
+.export init_ultimem
+
+.proc init_ultimem
+    ; Unhide UltiMem registers
+    lda $9f55
+    lda $9faa
+    lda $9f01
+    lda $9ff3
+    cmp #$11
+    beq has_ultimem
+
+    lda #<txt_no_ultimem
+    ldy #>txt_no_ultimem
+    jsr printstr
+    jmp halt
+
+has_ultimem:
+    lda #<txt_found_ultimem
+    ldy #>txt_found_ultimem
+    jsr printstr
+
+    ;; Write banks.
+    lda #FIRST_BANK
+    sta bnk
+    lda #0
+    sta bnk+1
+
+l2: lda #$00
+    sta ptr1
+    lda #$a0
+    sta ptr1+1
+    lda bnk
+    sta $9ffe
+    lda bnk+1
+    sta $9fff
+
+l:  ldy #0
+    lda bnk
+    sta (ptr1),y
+    iny
+    lda bnk+1
+    sta (ptr1),y
+    inc ptr1
+    inc ptr1
+    bne l
+    inc ptr1+1
+    lda ptr1+1
+    cmp #$a1
+    bne l
+
+    inc bnk
+    lda bnk
+    cmp #$80
+    bne l2
+
+    ;; Read banks.
+    lda #FIRST_BANK
+    sta bnk
+    lda #0
+    sta bnk+1
+    sta col
+
+l4: lda #$00
+    sta ptr1
+    lda #$a0
+    sta ptr1+1
+    lda bnk
+    sta $9ffe
+    lda bnk+1
+    sta $9fff
+
+l3: ldy #0
+    lda bnk
+    cmp (ptr1),y
+    bne uerror
+    iny
+    lda bnk+1
+    cmp (ptr1),y
+    bne uerror
+
+    inc ptr1
+    inc ptr1
+    bne l3
+    inc ptr1+1
+    lda ptr1+1
+    cmp #$a1
+    bne l3
+
+    ldx bnk
+    lpushx banks, free_bank
+;    lda #'.'
+;    jsr printbnk
+
+next_bank:
+    inc bnk
+    lda bnk
+    cmp #$80
+    bne l4
+
+    lda num_errors
+    bne has_errors
+    lda #<txt_ram_ok
+    ldy #>txt_ram_ok
+    jsr printstr
+    jmp done
+
+has_errors:
+    jsr printnum
+    lda #<txt_faulty_banks
+    ldy #>txt_faulty_banks
+    jsr printstr
+
+done:
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
+    jsr printnum
+    lda #<txt_banks_free
+    ldy #>txt_banks_free
+    jsr printstr
+
+    rts
+
+.proc printnum
+    rts
+.endproc
+
+uerror:
+    inc num_errors
+    lda #'!'
+    jsr printbnk
+    jmp next_bank
+.endproc
+
+.proc printbnk
+    jsr BSOUT
+    inc col
+    lda col
+    cmp #16
+    bne r
+    lda #13
+    jsr BSOUT
+    lda #0
+    sta col
+r:  rts
+.endproc
+
+.proc printstr
+    sta ptr2
+    sty ptr2+1
+
+l:  ldy #0
+    lda (ptr2),y
+    beq done
+    jsr BSOUT
+    inc ptr2
+    bne l
+    inc ptr2+1
+    bne l   ; (jmp)
+
+done:
+    rts
+.endproc
+
+    .rodata
+
+txt_found_ultimem:
+    .byte "ULTIMEM FOUND.", 13, 0
+
+txt_no_ultimem:
+    .byte "NO ULTIMEM/VIC-MIDIFOUND."
+    .byte 13, 0
+
+txt_faulty_banks:
+    .byte " FAULTY BANKS.", 13,0
+
+txt_ram_ok:
+    .byte 13, "RAM OK.", 13,0
+
+txt_banks_free:
+    .byte " 8K BANKS FREE.", 13,0
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;

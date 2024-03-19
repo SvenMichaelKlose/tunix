@@ -109,73 +109,60 @@ ptr4:   .res 2
 global_start:
 
 ;; Extended memory banks
-; Free list
 banks:          .res MAX_BANKS
-; Usage count
+free_bank:      .res 1
+first_bank:     .res 1
 bank_refs:      .res MAX_BANKS
 
 ;; IO pages
 iopages:        .res MAX_IOPAGES
 iopagesb:       .res MAX_IOPAGES
+free_iopage:    .res 1
+first_iopage:   .res 1
 iopage_pid:     .res MAX_IOPAGES
 iopage_page:    .res MAX_IOPAGES
 
 ;; Global logical file numbers
 ;; Shared by fork()ed processes.
 ; Free list
-glfns:          .res MAX_LFNS
-glfn_refs:      .res MAX_LFNS
-; Drivers @ OPEN
-glfn_drv:       .res MAX_LFNS
-; Secondary addresses @ OPEN
-glfn_sa:        .res MAX_LFNS
+glfns:      .res MAX_LFNS
+glfn_refs:  .res MAX_LFNS
+; Last parameters to OPEN.
+glfn_drv:   .res MAX_LFNS
+glfn_sa:    .res MAX_LFNS
 
 ;; Processes
-; Free slots
-procs:          .res MAX_PROCS
-procsb:         .res MAX_PROCS
-; Flags
-PROC_ZOMBIE     = 0
-PROC_RUNNING    = 1
+procs:      .res MAX_PROCS
+procsb:     .res MAX_PROCS
+free_proc:  .res 1
+running:    .res 1
+sleeping:   .res 1
+zombie:     .res 1
+PROC_ZOMBIE     = 32
+PROC_RUNNING    = 64
 PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
 exit_codes: .res MAX_PROCS
-; Primary banks allocated.
+; Current banks.
 proc_low:   .res MAX_PROCS
+proc_io23:  .res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
 proc_blk2:  .res MAX_PROCS
 proc_blk3:  .res MAX_PROCS
-proc_io23:  .res MAX_PROCS
 proc_blk5:  .res MAX_PROCS
 
 ;; Drivers
-; Free list
 drvs:       .res MAX_DRVS
-; Processes
 drv_pid:    .res MAX_DRVS
-; Vectors
 drv_vl:     .res MAX_DRVS
 drv_vh:     .res MAX_DRVS
 
 ; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
 
-;; Bank allocation
-free_bank:  .res 1
-first_bank: .res 1
-
-free_iopage:    .res 1
-first_iopage:   .res 1
-
 ;; First speed code BLK5 to copy from
 ;; BLK2 to BLK3.
 copy_bank:  .res 1
-
-;; Pointers into array 'proc'.
-free_proc:  .res 1
-running:    .res 1
-sleeping:   .res 1
-zombie:     .res 1
 
 global_end:
 global_size = global_end - global_start
@@ -596,6 +583,8 @@ global_size = global_end - global_start
     jmp halt
 .endproc
 
+    .rodata
+
 txt_tunix:
     .byte 147   ; Clear screen.
     .byte "TUNIX", 13, 0
@@ -612,6 +601,8 @@ err_invalid_first_free_bank:
     .byte "INVALID FIRST FREE BANK", 0
 err_fail:
     .byte "TEST FAILED", 0
+
+    .code
 
 .proc init
     ;; All banks are R/W RAM.
@@ -657,10 +648,8 @@ err_fail:
 
     mvb free_proc, #1
     mvb procsb, #0
-    linit glfns
-    linit drvs
-    ; Manually end lists that do not
-    ; fill a page.
+    mvb glfns, #1
+    mvb drvs, #1
     lda #0
     sta procs + MAX_PROCS - 1
     sta waiting + MAX_PROCS - 1
@@ -822,12 +811,26 @@ done:
     rts
 .endproc
 
-; fork() copy vectors
+    .rodata
+
 set_lowmem: .word $0000, $b000, $0400
 set_screen: .word $1000, $a000, $1000
 set_color:  .word $9400, $b400, $0400
 set_vic:
     .word $9000, saved_vic+$2000, $0010
+
+set_blk5_to_lowmem:
+    .word $b000, $0000, $0400
+set_blk5_to_screen:
+    .word $a000, $1000, $1000
+set_blk5_to_color:
+    .word $b400, $9400, $0400
+set_blk5_to_vic:
+    .word saved_vic+$2000, $9000, $0010
+
+set_io23: .word $9800, $b800, $07f0
+
+    .code
 
 .macro smemcpyax set
     ldaxi set
@@ -841,15 +844,6 @@ set_vic:
     ldaxi set_color
     jmp smemcpy
 .endproc
-
-set_blk5_to_lowmem:
-    .word $b000, $0000, $0400
-set_blk5_to_screen:
-    .word $a000, $1000, $1000
-set_blk5_to_color:
-    .word $b400, $9400, $0400
-set_blk5_to_vic:
-    .word saved_vic+$2000, $9000, $0010
 
 .proc load_state
     get_procblk_y proc_low, blk5
@@ -872,8 +866,6 @@ set_blk5_to_vic:
     ldy proc,x
     jsr free_lbank
 .endmacro
-
-set_io23: .word $9800, $b800, $07f0
 
 ; Copy process to new banks.
 .proc fork_raw
@@ -1310,16 +1302,22 @@ m:  inc dh
     .endproc
 .endmacro
 
+    .rodata
+
 tunix_driver:
-.word tunix_open, tunix, tunix
-.word tunix_basin, tunix, tunix, tunix
-.word tunix, tunix, tunix, tunix, tunix
-.word tunix, tunix, tunix
+    .word tunix_open, tunix, tunix
+    .word tunix_basin, tunix, tunix
+    .word tunix, tunix, tunix, tunix
+    .word tunix, tunix, tunix, tunix
+    .word tunix
+
+    .code
 
 .proc tunix
     clc
     rts
 .endproc
+
 .proc tunix_memory
     lda filename+1
     cmp #'A'
@@ -1700,6 +1698,8 @@ txt_ram_ok:
 txt_banks_free:
     .byte " 8K BANKS FREE.", 13,0
 
+    .code
+
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
@@ -1744,10 +1744,14 @@ j:  jsr $fffe
     rts
 .endproc
 
+    .rodata
+
 tunix_vectors:
 .word open, chkin, ckout, basin, bsout
 .word getin, clrcn, close, clall, stop
 .word usrcmd, load, save, blkin, bkout
+
+    .code
 
 .proc open
     pushw FNADR
@@ -1890,6 +1894,7 @@ blkiohandler save, IDX_SAVE
 ; List of used ones.
 lbanks:     .res MAX_BANKS
 lbanksb:    .res MAX_BANKS
+first_lbank:.res 1
 
 ;; Logical file numbers
 ; Deque of used ones
@@ -1897,6 +1902,7 @@ lfns:       .res MAX_LFNS
 lfnsb:      .res MAX_LFNS
 ; Translations to global LFNs
 lfn_glfn:   .res MAX_LFNS
+first_lfn:  .res 1
 
 ;; Process info
 waiting:    .res MAX_PROCS
@@ -1914,13 +1920,9 @@ flags:      .res 1
 ; VIC
 saved_vic:  .res 16
 
-;; Driver info
+;; Syscalls
 ; File name copied from calling process.
 filename:   .res 256
-
-first_lfn:  .res 1
-first_lbank:.res 1
-
 ; TUNIX syscall device response
 response:       .res 8
 response_len:   .res 1

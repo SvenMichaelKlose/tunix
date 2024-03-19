@@ -371,6 +371,14 @@ global_size = global_end - global_start
     stx first
 .endmacro
 
+.macro daddy fw, bw, first
+    lda first
+    sta fw,y
+    lda #0
+    sta bw,y
+    sty first
+.endmacro
+
 .macro _dlinkx fw, bw, first_free
     tay
     lda bw,x
@@ -426,13 +434,14 @@ global_size = global_end - global_start
     daddx fw, bw, to
 .endmacro
 
-.macro dfreex fw, bw, from, to
-    drmx fw, bw, from
-    daddx fw, bw, to
+.macro dallocy fw, bw, from, to
+    dpopy fw, bw, from
+    daddy fw, bw, to
 .endmacro
 
 .macro dmovex fw, bw, from, to
-    dfreex fw, bw, from, to
+    drmx fw, bw, from
+    daddx fw, bw, to
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -611,12 +620,6 @@ err_fail:
 
 .export init
 .proc init
-    ;; All banks are R/W RAM.
-    ;; Default order expected.
-    lda #%11111111
-    sta $9ff1
-    sta $9ff2
-
     ;; Clear data.
     stzwi d, global_start
     stzwi c, global_size
@@ -625,7 +628,7 @@ err_fail:
     stzwi c, $07f0
     jsr bzero
 
-    ;; Set up lists and tables.
+    ;; Link lists.
     ldx #0
 @l: txa
     beq :++
@@ -768,70 +771,9 @@ done:
     jmp $4000
 .endproc
 
-;;;;;;;;;;;;;;;;;
-;;; PROCESSES ;;;
-;;;;;;;;;;;;;;;;;
-;
-; Low 1K, screen, color and VIC are
-; on the same bank as the IO23 area
-; which is reserved for TUNIX and
-; driver code.
-
-.export fork
-.proc fork
-    ;; Grab process slot.
-    lpopy procs, free_proc
-    cpy #0
-    beq no_more_procs
-.endproc
-
-.export fork0
-.proc fork0
-    ;; Insert after current process.
-    ldx pid
-    lda running,x
-    sta running,y
-    tya
-    sta running,x
-    pha
-
-    jsr fork_raw
-
-    ;; Increment bank refs.
-    ldx first_lbank
-    beq :++
-:   inc bank_refs,x
-    lnextx lbanks, :-
-
-    ;; Increment GLFNs.
-    ldx first_lfn
-    beq :++
-:   inc glfn_refs,x
-    lnextx lfns, :-
-
-:   push blk5
-    io23y_at_blk5
-    tsx
-    stx stack+$2000
-    pop blk5
-
-    lda #PROC_RUNNING
-    sta proc_flags,y
-
-    ;; Return PID.
-:   pla
-    cmp pid
-    bne :+
-    lda #0  ; (for child)
-:   clc
-    rts
-.endproc
-
-.export no_more_procs
-.proc no_more_procs
-    sec
-    rts
-.endproc
+;;;;;;;;;;;;;;;;;;;;;;
+;;; MACHDEP VIC-20 :::
+;;;;;;;;;;;;;;;;;;;;;;
 
     .rodata
 
@@ -859,8 +801,8 @@ set_io23: .word $9800, $b800, $07f0
     jsr smemcpy
 .endmacro
 
-.export save_state
-.proc save_state
+.export save_internal_ram
+.proc save_internal_ram
     get_procblk_y proc_low, blk5
     smemcpyax set_lowmem
     smemcpyax set_screen
@@ -868,8 +810,8 @@ set_io23: .word $9800, $b800, $07f0
     jmp smemcpy
 .endproc
 
-.export load_state
-.proc load_state
+.export load_internal_ram
+.proc load_internal_ram
     get_procblk_y proc_low, blk5
     smemcpyax set_blk5_to_lowmem
     smemcpyax set_blk5_to_vic
@@ -901,7 +843,7 @@ set_io23: .word $9800, $b800, $07f0
 
     jsr balloc
     sta proc_low,y
-    jsr save_state
+    jsr save_internal_ram
 
     jsr balloc
     sta proc_io23,y
@@ -938,6 +880,98 @@ set_io23: .word $9800, $b800, $07f0
     rts
 .endproc
 
+; Switch to process.
+; A: Process ID
+.export switch
+.proc switch
+    ;;; Save current.
+    pha
+    ldy pid
+    jsr save_internal_ram
+    set_procblk_y proc_low, ram123
+    set_procblk_y proc_ram123, ram123
+    set_procblk_y proc_io23, io23
+    set_procblk_y proc_blk1, blk1
+    set_procblk_y proc_blk2, blk2
+    set_procblk_y proc_blk3, blk3
+    set_procblk_y proc_blk5, blk5
+    tsx
+    inx
+    stx stack
+
+    ;; Load next.
+    ply
+    jsr load_internal_ram
+    get_procblk_y proc_low, ram123
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk1, blk1
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    ldx stack
+    txs
+    rts
+.endproc
+
+;;;;;;;;;;;;;;;;;
+;;; PROCESSES ;;;
+;;;;;;;;;;;;;;;;;
+;
+; Low 1K, screen, color and VIC are
+; on the same bank as the IO23 area
+; which is reserved for TUNIX and
+; driver code.
+
+.export fork
+.proc fork
+    ;; Grab process slot.
+    dallocy procs, procsb, free_proc, running
+    cpy #0
+    beq no_more_procs
+.endproc
+
+.export fork0
+.proc fork0
+    phy
+    jsr fork_raw
+
+    ;; Increment bank refs.
+    ldx first_lbank
+    beq :++
+:   inc bank_refs,x
+    lnextx lbanks, :-
+
+    ;; Increment GLFNs.
+:   ldx first_lfn
+    beq :++
+:   inc glfn_refs,x
+    lnextx lfns, :-
+
+:   push blk5
+    io23y_at_blk5
+    tsx
+    stx stack+$2000
+    pop blk5
+
+    lda #PROC_RUNNING
+    sta proc_flags,y
+
+    ;; Return PID.
+    pla
+    cmp pid
+    bne :+
+    lda #0  ; (for child)
+:   clc
+    rts
+.endproc
+
+.export no_more_procs
+.proc no_more_procs
+    sec
+    rts
+.endproc
+
 ; Force exit.
 ; X: Process ID.
 .export zombify
@@ -964,12 +998,12 @@ set_io23: .word $9800, $b800, $07f0
     cmp tmp1
     bne :+
     tax
-    dfreex iopages, iopagesb, first_iopage, free_iopage
+    dmovex iopages, iopagesb, first_iopage, free_iopage
 :   lnexty iopages, :--
 
     ;; Free drivers.
-    ldy drvs
-    beq :++
+:   ldy drvs
+    beq :+++
 :   lda drv_pid,y
     cmp tmp1
     bne :+
@@ -983,7 +1017,7 @@ set_io23: .word $9800, $b800, $07f0
 :   lnexty drvs, :--
 
     ;; Free process
-    ldx tmp1
+:   ldx tmp1
     ; Take off running or sleeping.
     lda proc_flags,x
     bmi :+
@@ -1025,7 +1059,7 @@ done:
     push io23
     push pid
     io23x
-    ;dallocy waiting, free_wait, first_wait
+    dallocy waiting, waitingb, free_wait, first_wait
     pla
     sta waiting_pid,y
     pop io23
@@ -1041,15 +1075,16 @@ terminate_zombie:
     push io23
     io23y
     ;; Remove from waiting list.
-    drmx waiting, first_wait, free_wait
+    dmovex waiting, waitingb, first_wait,free_wait
     ldx first_wait
     bne :+
     ;; Remove zombie.
-    dfreex procs, procsb, zombie, free_proc
+    dmovex procs, procsb, zombie, free_proc
     jmp :+
+
     ;; Resume next waiting.
 :   jsr resume
-:   pop io23
+    pop io23
     lda exit_codes,x
     clc
     rts
@@ -1113,40 +1148,6 @@ already_running:
     jmp resume_waiting
 .endproc
 
-; Switch to process.
-; A: Process ID
-.export switch
-.proc switch
-    ;;; Save current.
-    pha
-    tsx
-    inx
-    stx stack
-    ldy pid
-    set_procblk_y proc_low, ram123
-    set_procblk_y proc_ram123, ram123
-    set_procblk_y proc_io23, io23
-    set_procblk_y proc_blk1, blk1
-    set_procblk_y proc_blk2, blk2
-    set_procblk_y proc_blk3, blk3
-    set_procblk_y proc_blk5, blk5
-    jsr save_state
-
-    ;; Load next.
-    ply
-    jsr load_state
-    get_procblk_y proc_low, ram123
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk1, blk1
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
-    ldx stack
-    txs
-    rts
-.endproc
-
 ; Schedule task switch
 .export schedule
 .proc schedule
@@ -1159,8 +1160,9 @@ already_running:
     bne :+
     lda running
 :   cmp pid
-    bne switch
-    ply
+    beq :+
+    jsr switch
+:   ply
     plx
     pla
     plp
@@ -1608,7 +1610,7 @@ all:jmp tunix_alloc_io_page
     ldx filename+2
     lda iopage_pid,x
     beq not_there
-    dfreex iopages, iopagesb, first_iopage, free_iopage
+    dmovex iopages, iopagesb, first_iopage, free_iopage
     jmp respond_ok
 not_there:
     jmp respond_error
@@ -2020,6 +2022,7 @@ first_lfn:  .res 1
 
 ;; Process info
 waiting:    .res MAX_PROCS
+waitingb:   .res MAX_PROCS
 waiting_pid:.res MAX_PROCS
 free_wait:  .res 1
 first_wait: .res 1

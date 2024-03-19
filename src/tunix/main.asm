@@ -47,10 +47,6 @@ IDX_SAVE   = 24
 IDX_BLKIN  = 26
 IDX_BKOUT  = 28
 
-;;; BASIC
-
-PRTSTR      = $cb1e
-
 ;;; TUNIX
 
 MAX_LFNS    = 256   ; Has to be.
@@ -68,7 +64,7 @@ IOPAGE_BASE = $7b
 .export ram123, io23, blk1, blk2, blk3, blk5
 
 MAX_BANKS   = 128
-FIRST_BANK  = 14
+FIRST_BANK  = 8
 ram123      = $9ff4
 io23        = $9ff6
 blk1        = $9ff8
@@ -108,7 +104,7 @@ ptr4:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start
+.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
 
 global_start:
 
@@ -254,6 +250,11 @@ global_size = global_end - global_start
 .macro stax to
     sta to
     stx to+1
+.endmacro
+
+.macro stay to
+    sta to
+    sty to+1
 .endmacro
 
 .macro stzwi to, val
@@ -582,10 +583,22 @@ m:  inc dh
 ;;; UI ;;;
 ;;;;;;;;;;
 
+.proc printstr
+    mvb tmp1, #0
+    phx
+:   ldy tmp1
+    lda (ptr3),y
+    beq :+
+    jsr BSOUT
+    inc tmp1
+    bne :-  ; (jmp)
+:   plx
+    rts
+.endproc
+
 .macro print asciiz
-    lda #<asciiz
-    ldy #>asciiz
-    jsr PRTSTR
+    stzwi ptr3, asciiz
+    jsr printstr
 .endmacro
 
 .macro error asciiz
@@ -978,7 +991,7 @@ done:
     plx
     stx tmp1
     ldy first_iopage
-    beq :++
+    beq :+++
 :   lda iopage_pid,y
     cmp tmp1
     bne :+
@@ -1070,11 +1083,11 @@ terminate_zombie:
     bne :+
     ;; Remove zombie.
     dmovex procs, procsb, zombie, free_proc
-    jmp :+
+    jmp :++
 
     ;; Resume next waiting.
 :   jsr resume
-    pop io23
+:   pop io23
     lda exit_codes,x
     clc
     rts
@@ -1464,9 +1477,14 @@ not_there:
 ;;; INIT ;;;
 ;;;;;;;;;;;;
 
-bnk         = tmp1
-num_errors  = tmp1+1
-col         = tmp3
+    .zeropage
+
+banks_ok:       .res 1
+banks_faulty:   .res 1
+bnk:            .res 1
+col:            .res 1
+
+    .code
 
 .export init_ultimem
 .proc init_ultimem
@@ -1477,78 +1495,65 @@ col         = tmp3
     lda $9ff3
     cmp #$11
     beq has_ultimem
+    error txt_no_ultimem
 
-    print txt_no_ultimem
-    jmp halt
-
+    ;; Write banks with pattern.
 has_ultimem:
-    ;; Write banks.
-    lda #FIRST_BANK
-    sta bnk
-    lda #0
-    sta bnk+1
+    mvb bnk, #FIRST_BANK
+start_bank_write:
+    stzwi ptr1, $a000
+    mvb blk5, bnk
 
-l2: lda #$00
-    sta ptr1
-    lda #$a0
-    sta ptr1+1
-    lda bnk
-    sta $9ffe
-    lda bnk+1
-    sta $9fff
-
-l:  ldy #0
+write_byte:
+    ldy #0
     lda bnk
     sta (ptr1),y
     iny
-    lda bnk+1
+    lda bnk
     sta (ptr1),y
     inc ptr1
     inc ptr1
-    bne l
+    bne write_byte
     inc ptr1+1
     lda ptr1+1
-    cmp #$a1
-    bne l
-
+    cmp #$a1    ; Just one page.
+    bne write_byte
+    ; Next bank
     inc bnk
     lda bnk
-    cmp #$80
-    bne l2
+    cmp #MAX_BANKS
+    bne start_bank_write
 
-    ;; Read banks.
-    lda #FIRST_BANK
-    sta bnk
+    ;; Read banks and check pattern.
     lda #0
-    sta bnk+1
     sta col
+    sta banks_ok
+    sta banks_faulty
+    mvb bnk, #FIRST_BANK
 
-l4: lda #$00
-    sta ptr1
-    lda #$a0
-    sta ptr1+1
-    lda bnk
-    sta $9ffe
-    lda bnk+1
-    sta $9fff
+start_bank_read:
+    stzwi ptr1, $a000
+    mvb blk5, bnk
 
-l3: ldy #0
+read_byte:
+    ldy #0
     lda bnk
     cmp (ptr1),y
-    bne uerror
+    bne uerror  ; Eek!
     iny
-    lda bnk+1
+    lda bnk
     cmp (ptr1),y
-    bne uerror
+    bne uerror  ; Eek!
 
     inc ptr1
     inc ptr1
-    bne l3
+    bne read_byte
     inc ptr1+1
     lda ptr1+1
-    cmp #$a1
-    bne l3
+    cmp #$a1    ; Just one page.
+    bne read_byte
 
+    inc banks_ok
     ldx bnk
     lpushx banks, free_bank
     lda #'.'
@@ -1557,13 +1562,23 @@ l3: ldy #0
 next_bank:
     inc bnk
     lda bnk
-    cmp #$80
-    bne l4
+    cmp #MAX_BANKS
+    bne start_bank_read
 
-    lda num_errors
+    lda banks_faulty
     bne has_errors
     print txt_ram_ok
     jmp done
+
+uerror:
+    inc banks_faulty
+    lda #'!'
+    jsr printbnk
+    jmp next_bank
+.endproc
+
+.export bank_last
+bank_last = banks + $7f
 
 has_errors:
     jsr printnum
@@ -1572,20 +1587,20 @@ has_errors:
 done:
     ldaxi banks
     jsry list_length, free_bank
-    txa
+    cpx banks_ok
+    beq :+
+    error err_ultimem_num_banks_in_list
+:   txa
     jsr printnum
     print txt_banks_free
     rts
 
+err_ultimem_num_banks_in_list:
+    .byte "WRONG NUMBER OF ITEMS IN "
+    .byte "'BANKS'.", 0
+
 .proc printnum
     rts
-.endproc
-
-uerror:
-    inc num_errors
-    lda #'!'
-    jsr printbnk
-    jmp next_bank
 .endproc
 
 .proc printbnk
@@ -1690,24 +1705,24 @@ txt_banks_free:
 ;;; TESTS ;;;
 ;;;;;;;;;;;;;
 
+    .rodata
+
+err_invalid_glfn_order:
+    .byte "INVALID GLFN ORDER", 0
+err_invalid_first_free_bank:
+    .byte "INVALID FIRST FREE BANK", 0
+err_fail:
+    .byte "TEST FAILED", 0
+
+    .code
+
 .export tests
 .proc tests
     jsr init
 
-    ;;; Data structures
-    ; Draw GLFNs until empty.
-    ldy #1
-:   lpopx glfns, glfns
-    stx tmp2
-    cpy tmp2
-    beq :+
-    error err_invalid_glfn_order
-:   iny
-    bne :--
-
     ;; Doubly used list arrays.
-    ; Pop bankk from free list.
-    lpopx banks, free_bank
+    ; Pop bank from free list.
+:   lpopx banks, free_bank
     cpx #$70
     beq :+
     error err_invalid_first_free_bank
@@ -1715,7 +1730,7 @@ txt_banks_free:
 :   lpushx banks, first_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$62
+    cpx #$68
     beq :+
     error err_fail
 :   ldaxi banks
@@ -1727,7 +1742,7 @@ txt_banks_free:
 :   lmovex banks, first_bank, free_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$63
+    cpx #$69
     beq :+
     error err_fail
 :   ldaxi banks
@@ -1753,11 +1768,9 @@ txt_banks_free:
     cpx #1
     beq :+
     error err_fail
-:
-
+ 
     ;;; Syscalls
-    jsr init
-
+:   jsr init
     ;; Fork
     jsr fork
     cmp #1
@@ -1765,13 +1778,15 @@ txt_banks_free:
     cmp #0
     beq :+
     error err_fail
+    ; Exit child.
 :   lda #0
     jmp exit
-:
-
-    jsr schedule
+    ; Schedule to child.
+:   jsr schedule
+    ; Wait for child.
     lda #1
     jsr wait
+
     rts
 .endproc
 
@@ -1787,17 +1802,6 @@ txt_banks_free:
     print txt_booting
     jmp init
 .endproc
-
-    .rodata
-
-err_invalid_glfn_order:
-    .byte "INVALID GLFN ORDER", 0
-err_invalid_first_free_bank:
-    .byte "INVALID FIRST FREE BANK", 0
-err_fail:
-    .byte "TEST FAILED", 0
-
-    .code
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;

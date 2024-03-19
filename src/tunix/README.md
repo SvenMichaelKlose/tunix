@@ -119,13 +119,13 @@ Returns current process ID byte.
 Makes a copy of the current process
 with a new ID that is returned to the
 parent.  For the child an ID of 0 is
-returned.  All open files are shared
-by both processes and must be close
-by both.
+returned.  Open files are shared
+by both processes and be closed by
+both.
 
 Extended memory banks are inherited but
-not those that were allocated when the
-parent process was created.
+not those that were banked in when
+the fork was initiated.
 
 ### "PEname and args": Execute
 

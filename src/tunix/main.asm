@@ -1706,15 +1706,16 @@ txt_banks_free:
     bne :--
 
     ;; Doubly used list arrays.
-    ; Allocate free, put back as used.
+    ; Pop bankk from free list.
     lpopx banks, free_bank
-    cpx #$77
+    cpx #$70
     beq :+
     error err_invalid_first_free_bank
+    ; Push bank onto free list.
 :   lpushx banks, first_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$69
+    cpx #$62
     beq :+
     error err_fail
 :   ldaxi banks
@@ -1726,7 +1727,7 @@ txt_banks_free:
 :   lmovex banks, first_bank, free_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$6a
+    cpx #$63
     beq :+
     error err_fail
 :   ldaxi banks
@@ -1768,8 +1769,6 @@ txt_banks_free:
     jmp exit
 :
 
-.export stop2
-stop2:
     jsr schedule
     lda #1
     jsr wait

@@ -125,7 +125,6 @@ al 003256 .sleeping
 al 002025 .smemcpy
 al 009CCA .stack
 al 002C75 .stop
-al 002AB0 .stop2
 al 002299 .switch
 al 0025A4 .terminate
 al 002978 .tests
@@ -156,3 +155,4 @@ al 003257 .zombie
 al 00238D .zombify
 al 00120D .Start
 al 00120B .Next
+break .stop2

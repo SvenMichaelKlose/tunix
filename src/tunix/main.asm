@@ -108,7 +108,7 @@ ptr4:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, glfn_sa, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start
+.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start
 
 global_start:
 
@@ -133,7 +133,6 @@ glfns:      .res MAX_LFNS
 glfn_refs:  .res MAX_LFNS
 ; Last parameters to OPEN.
 glfn_drv:   .res MAX_LFNS
-glfn_sa:    .res MAX_LFNS
 
 ;; Processes
 procs:      .res MAX_PROCS
@@ -1879,12 +1878,6 @@ tunix_vectors:
     ldy DEV
     lda dev_drv,y
     sta glfn_drv,x
-
-    ;; Assign secondary address to GLFN.
-    pha
-    lda SA
-    sta glfn_sa,x
-    pla
 
     tax
     jsra call_driver, #IDX_OPEN

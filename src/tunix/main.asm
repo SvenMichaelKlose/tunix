@@ -174,6 +174,8 @@ global_size = global_end - global_start
 
     .code
 
+    jmp start
+
 ;;;;;;;;;;;;;;
 ;;; MACROS ;;;
 ;;;;;;;;;;;;;;
@@ -483,7 +485,100 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, blk5
 .endmacro
 
-;;; UI
+;;;;;;;;;;;;;;;;;;
+;;; LIST UTILS ;;;
+;;;;;;;;;;;;;;;;;;
+
+.export list_length
+.proc list_length
+    stax ptr1
+    ldx #0
+    cpy #0
+    beq empty
+:   inx
+    lda (ptr1),y
+    tay
+    bne :-
+empty:
+    rts
+.endproc
+
+;;;;;;;;;;;;;
+;;; ZPLIB ;;;
+;;;;;;;;;;;;;
+
+; Init s, d and c with values at XA.
+.proc sset
+    sta p+1
+    stx p+2
+    ldx #5
+p:  lda $ff00,x
+    sta 0,x
+    dex
+    bpl p
+    rts
+.endproc
+
+;;;;;;;;;;;;;;
+;;; STDLIB ;;;
+;;;;;;;;;;;;;;
+
+; Copy range at XA.
+.export smemcpy
+.proc smemcpy
+    jsr sset
+.endproc
+
+; Copy memory.
+.proc memcpy
+    phy
+    ldy #0
+    ldx cl
+    inx
+    inc ch
+    bne copy_forwards   ; (jmp)
+
+l:  lda (s),y
+    sta (d),y
+    iny
+    beq k
+copy_forwards:
+q:  dex
+    bne l
+    dec ch
+    bne l
+r:  ply
+    rts
+k:  inc sh
+    inc dh
+    jmp q
+.endproc
+
+; Clear memory.
+.export bzero
+.proc bzero
+    ldx cl
+    inx
+    inc ch
+    ldy dl
+    lda #0
+    sta dl
+    beq +n ; (jmp)
+l:  sta (d),y
+    iny
+    beq m
+n:  dex
+    bne l
+    dec ch
+    bne l
+    rts
+m:  inc dh
+    jmp n
+.endproc
+
+;;;;;;;;;;
+;;; UI ;;;
+;;;;;;;;;;
 
 .macro print asciiz
     lda #<asciiz
@@ -496,191 +591,65 @@ global_size = global_end - global_start
     jmp halt
 .endmacro
 
-;;;;;;;;;;;;
-;;; INIT ;;;
-;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;; EXTENDED MEMORY ;;;
+;;;;;;;;;;;;;;;;;;;;;;;
 
-.export main
-.proc main
-    print txt_tunix
-    print txt_tests
-    jsr tests
-    print txt_booting
-    jmp init
-.endproc
-
-.export tests
-.proc tests
-    jsr init
-
-    ;;; Data structures
-    ; Draw GLFNs until empty.
-    ldy #1
-:   lpopx glfns, glfns
-    stx tmp2
-    cpy tmp2
-    beq :+
-    error err_invalid_glfn_order
-:   iny
-    bne :--
-
-    ;; Doubly used list arrays.
-    ; Allocate free, put back as used.
+; Allocate bank
+;
+; Returns:
+;  Z: Out of memory.
+;  X: Bank #
+.export balloc
+.proc balloc
+    sty tmp1
+    ;; Draw from global pool.
     lpopx banks, free_bank
-    cpx #$77
-    beq :+
-    error err_invalid_first_free_bank
-:   lpushx banks, first_bank
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx #$69
-    beq :+
-    error err_fail
-:   ldaxi banks
-    jsry list_length, first_bank
-    cpx #1
-    beq :+
-    error err_fail
-    ; In reverse.
-:   lmovex banks, first_bank, free_bank
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx #$6a
-    beq :+
-    error err_fail
-:   ldaxi banks
-    jsry list_length, first_bank
     cpx #0
-    beq :+
-    error err_fail
- 
-    ;; Deque
-    ; Allocate first.
-:   dpopx procs, procsb, free_proc
-    phx
-    ldaxi procs
-    jsry list_length, free_proc
-    cpx #MAX_PROCS - 2 ; (+ init)
-    beq :+
-    error err_fail
-:   plx
-    ; Free by index.
-    daddx procs, procsb, running
-    ldaxi procs
-    jsry list_length, running
-    cpx #1
-    beq :+
-    error err_fail
-:
-
-    ;;; Syscalls
-    jsr init
-
-    ;; Fork
-    jsr fork
-    cmp #1
-    beq :++
-    cmp #0
-    beq :+
-    error err_fail
-:   lda #0
-    jmp exit
-:
-
-.export stop2
-stop2:
-    jsr schedule
-    lda #1
-    jsr wait
+    beq :+  ; Oops…
+    ;; Own it.
+    daddx lbanks, lbanksb, first_lbank
+    inc bank_refs,x
+:   ldy tmp1
+    txa
     rts
 .endproc
 
-.export halt
-.proc halt
-    jmp halt
+.export free_lbank
+.proc free_lbank
+    drmy lbanks, lbanksb, first_lbank
+    rts
 .endproc
 
-    .rodata
+; Free bank
+;
+; Ingnores already free ones.
+; X: Bank #
+.export bfree
+.proc bfree
+    dec bank_refs,x
+    bmi invalid_bank
+    bne :+
+    lpushx banks, free_bank
+:   drmx lbanks, lbanksb, first_lbank
+    clc
+    rts
+invalid_bank:
+    inc bank_refs,x
+    sec
+    rts
+.endproc
 
-txt_tunix:  .byte 147   ; Clear screen.
-            .byte "TUNIX", 13, 0
-txt_tests:  .byte "TESTS..",0
-txt_booting:.byte 13, "BOOTING..",0
-txt_init:   .byte ".", 0
-
-err_invalid_glfn_order:
-    .byte "INVALID GLFN ORDER", 0
-err_invalid_first_free_bank:
-    .byte "INVALID FIRST FREE BANK", 0
-err_fail:
-    .byte "TEST FAILED", 0
+; Free all banks of current process.
+.export bprocfree
+.proc bprocfree
+    ldx first_lbank
+:   jsr bfree
+    lnextx lbanks, :-
+    rts
+.endproc
 
     .code
-
-.export init
-.proc init
-    ;; Clear data.
-    stzwi d, global_start
-    stzwi c, global_size
-    jsr bzero
-    stzwi d, $9800
-    stzwi c, $07f0
-    jsr bzero
-
-    ;; Link lists.
-    ldx #0
-@l: txa
-    beq :++
-    sec
-    sbc #1
-    cpx #MAX_PROCS
-    bcs :+
-    sta procsb,x
-:   txa
-:   clc
-    adc #1
-    sta glfns,x
-    sta lfns,x
-    cpx #MAX_IOPAGES
-    bcs :+
-    sta iopages,x
-:   cpx #MAX_PROCS
-    bcs :+
-    sta procs,x
-:   cpx #MAX_DRVS
-    bcs :+
-    sta drvs,x
-:   inx
-    bne @l
-
-    mvb free_proc, #1
-    mvb glfns, #1
-    mvb drvs, #1
-    lda #0
-    sta procs + MAX_PROCS - 1
-    sta waiting + MAX_PROCS - 1
-    sta drvs + MAX_DRVS - 1
-    sta iopages + MAX_IOPAGES - 1
-
-    jsr init_ultimem
-    jsr gen_speedcode
-
-    ;; Point devices to KERNAL.
-    mvb drv_vl, #$1a
-    mvb drv_vh, #$03
-
-    ;; Make init process.
-    print txt_init
-    mvb proc_low, ram123
-    mvb proc_ram123, ram123
-    mvb proc_io23, io23
-    mvb proc_blk1, blk1
-    mvb proc_blk2, blk2
-    mvb proc_blk3, blk3
-    mvb proc_blk5, blk5
-    ldy #0
-    jmp fork0 ; Fork into process 0.
-.endproc
 
 ;;;;;;;;;;;;;;;;;;
 ;;; SPEED COPY ;;;
@@ -910,6 +879,23 @@ set_io23: .word $9800, $b800, $07f0
     get_procblk_y proc_blk5, blk5
     ldx stack
     txs
+    rts
+.endproc
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOGICAL FILE NUMBERS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.export free_lfns
+.proc free_lfns
+    ldy first_lfn
+    beq done
+:   ldx lfn_glfn,y
+    dec glfn_refs,x
+    bne :+  ; (Still used.)
+    lpushx glfns, glfns
+:   lnexty lfns, :--
+done:
     rts
 .endproc
 
@@ -1179,81 +1165,6 @@ already_running:
     jmp (ptr1)
 .endproc
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;;; EXTENDED MEMORY ;;;
-;;;;;;;;;;;;;;;;;;;;;;;
-
-; Allocate bank
-;
-; Returns:
-;  Z: Out of memory.
-;  X: Bank #
-.export balloc
-.proc balloc
-    sty tmp1
-    ;; Draw from global pool.
-    lpopx banks, free_bank
-    cpx #0
-    beq :+  ; Oops…
-    ;; Own it.
-    daddx lbanks, lbanksb, first_lbank
-    inc bank_refs,x
-:   ldy tmp1
-    txa
-    rts
-.endproc
-
-.export free_lbank
-.proc free_lbank
-    drmy lbanks, lbanksb, first_lbank
-    rts
-.endproc
-
-; Free bank
-;
-; Ingnores already free ones.
-; X: Bank #
-.export bfree
-.proc bfree
-    dec bank_refs,x
-    bmi invalid_bank
-    bne :+
-    lpushx banks, free_bank
-:   drmx lbanks, lbanksb, first_lbank
-    clc
-    rts
-invalid_bank:
-    inc bank_refs,x
-    sec
-    rts
-.endproc
-
-; Free all banks of current process.
-.export bprocfree
-.proc bprocfree
-    ldx first_lbank
-:   jsr bfree
-    lnextx lbanks, :-
-    rts
-.endproc
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOGICAL FILE NUMBERS ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-.export free_lfns
-.proc free_lfns
-    ldy first_lfn
-    beq done
-:   ldx lfn_glfn,y
-    dec glfn_refs,x
-    bne :+  ; (Still used.)
-    lpushx glfns, glfns
-:   lnexty lfns, :--
-done:
-    rts
-.endproc
-
 ;;;;;;;;;;;;;;;
 ;;; DRIVERS ;;;
 ;;;;;;;;;;;;;;;
@@ -1287,110 +1198,9 @@ done:
 :   rts
 .endproc
 
-;;;;;;;;;;;;;;;;;;
-;;; LIST UTILS ;;;
-;;;;;;;;;;;;;;;;;;
-
-.export list_length
-.proc list_length
-    stax ptr1
-    ldx #0
-    cpy #0
-    beq empty
-:   inx
-    lda (ptr1),y
-    tay
-    bne :-
-empty:
-    rts
-.endproc
-
-;;;;;;;;;;;;;
-;;; ZPLIB ;;;
-;;;;;;;;;;;;;
-
-; Init s, d and c with values at XA.
-.proc sset
-    sta p+1
-    stx p+2
-    ldx #5
-p:  lda $ff00,x
-    sta 0,x
-    dex
-    bpl p
-    rts
-.endproc
-
-;;;;;;;;;;;;;;
-;;; STDLIB ;;;
-;;;;;;;;;;;;;;
-
-; Copy range at XA.
-.export smemcpy
-.proc smemcpy
-    jsr sset
-.endproc
-
-; Copy memory.
-.proc memcpy
-    phy
-    ldy #0
-    ldx cl
-    inx
-    inc ch
-    bne copy_forwards   ; (jmp)
-
-l:  lda (s),y
-    sta (d),y
-    iny
-    beq k
-copy_forwards:
-q:  dex
-    bne l
-    dec ch
-    bne l
-r:  ply
-    rts
-k:  inc sh
-    inc dh
-    jmp q
-.endproc
-
-; Clear memory.
-.export bzero
-.proc bzero
-    ldx cl
-    inx
-    inc ch
-    ldy dl
-    lda #0
-    sta dl
-    beq +n ; (jmp)
-l:  sta (d),y
-    iny
-    beq m
-n:  dex
-    bne l
-    dec ch
-    bne l
-    rts
-m:  inc dh
-    jmp n
-.endproc
-
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; SYSCALL DRIVER ;;;
 ;;;;;;;;;;;;;;;;;;;;;;
-
-.macro syscall1 name, fun, load
-    .export name
-    .proc name
-        load filename+2
-        jsr fun
-        bcs respond_error
-        bcc respond_ok  ; (jmp)
-    .endproc
-.endmacro
 
     .rodata
 
@@ -1402,6 +1212,16 @@ tunix_driver:
     .word tunix
 
     .code
+
+.macro syscall1 name, fun, load
+    .export name
+    .proc name
+        load filename+2
+        jsr fun
+        bcs respond_error
+        bcc respond_ok  ; (jmp)
+    .endproc
+.endmacro
 
 .export tunix
 .proc tunix
@@ -1570,7 +1390,7 @@ l:  cpy pid
     adc #IOPAGE_BASE
     sta ptr1+1
     clc
-    adc #2
+    adc #$20    ; (Bump to BLK5.)
     sta ptr2+1
     lda #0
     sta ptr1
@@ -1608,27 +1428,27 @@ all:jmp tunix_alloc_io_page
 
 .export tunix_free_io_page
 .proc tunix_free_io_page
-    ldx filename+2
+    lda filename+2
+    sec
+    sbc #IOPAGE_BASE
+    tax
     lda iopage_pid,x
     beq not_there
+    cmp pid
+    bne not_there
     dmovex iopages, iopagesb, first_iopage, free_iopage
     jmp respond_ok
 not_there:
     jmp respond_error
 .endproc
 
-;;;;;;;;;;;;;;;
-;;; ULTIMEM ;;;
-;;;;;;;;;;;;;;;
+;;;;;;;;;;;;
+;;; INIT ;;;
+;;;;;;;;;;;;
 
-    .zeropage
-
-bnk:            .res 2
-num_errors:     .res 2
-col:            .res 1
-
-
-    .code
+bnk         = tmp1
+num_errors  = tmp1+1
+col         = tmp3
 
 .export init_ultimem
 .proc init_ultimem
@@ -1713,8 +1533,8 @@ l3: ldy #0
 
     ldx bnk
     lpushx banks, free_bank
-;    lda #'.'
-;    jsr printbnk
+    lda #'.'
+    jsr printbnk
 
 next_bank:
     inc bnk
@@ -1763,7 +1583,78 @@ uerror:
 r:  rts
 .endproc
 
+.export init
+.proc init
+    ;; Clear data.
+    stzwi d, global_start
+    stzwi c, global_size
+    jsr bzero
+    stzwi d, $9800
+    stzwi c, $07f0
+    jsr bzero
+
+    ;; Link lists.
+    ldx #0
+@l: txa
+    beq :++
+    sec
+    sbc #1
+    cpx #MAX_PROCS
+    bcs :+
+    sta procsb,x
+:   txa
+:   clc
+    adc #1
+    sta glfns,x
+    sta lfns,x
+    cpx #MAX_IOPAGES
+    bcs :+
+    sta iopages,x
+:   cpx #MAX_PROCS
+    bcs :+
+    sta procs,x
+:   cpx #MAX_DRVS
+    bcs :+
+    sta drvs,x
+:   inx
+    bne @l
+
+    mvb free_proc, #1
+    mvb glfns, #1
+    mvb drvs, #1
+    lda #0
+    sta procs + MAX_PROCS - 1
+    sta waiting + MAX_PROCS - 1
+    sta drvs + MAX_DRVS - 1
+    sta iopages + MAX_IOPAGES - 1
+
+    jsr init_ultimem
+    jsr gen_speedcode
+
+    ;; Point devices to KERNAL.
+    mvb drv_vl, #$1a
+    mvb drv_vh, #$03
+
+    ;; Make init process.
+    print txt_init
+    mvb proc_low, ram123
+    mvb proc_ram123, ram123
+    mvb proc_io23, io23
+    mvb proc_blk1, blk1
+    mvb proc_blk2, blk2
+    mvb proc_blk3, blk3
+    mvb proc_blk5, blk5
+    ldy #0
+    jmp fork0 ; Fork into process 0.
+.endproc
+
     .rodata
+
+txt_tunix:  .byte 147   ; Clear screen.
+            .byte "TUNIX", 13, 0
+txt_tests:  .byte "RUNNING TESTS:",13, 0
+txt_booting:.byte 13, "BOOTING..",0
+txt_init:   .byte ".", 0
 
 txt_no_ultimem:
     .byte "NO ULTIMEM/VIC-MIDIFOUND."
@@ -1774,6 +1665,120 @@ txt_ram_ok:
     .byte 13, "RAM OK.", 13,0
 txt_banks_free:
     .byte " 8K BANKS FREE.", 13,0
+
+    .code
+
+;;;;;;;;;;;;;
+;;; TESTS ;;;
+;;;;;;;;;;;;;
+
+.export tests
+.proc tests
+    jsr init
+
+    ;;; Data structures
+    ; Draw GLFNs until empty.
+    ldy #1
+:   lpopx glfns, glfns
+    stx tmp2
+    cpy tmp2
+    beq :+
+    error err_invalid_glfn_order
+:   iny
+    bne :--
+
+    ;; Doubly used list arrays.
+    ; Allocate free, put back as used.
+    lpopx banks, free_bank
+    cpx #$77
+    beq :+
+    error err_invalid_first_free_bank
+:   lpushx banks, first_bank
+    ldaxi banks
+    jsry list_length, free_bank
+    cpx #$69
+    beq :+
+    error err_fail
+:   ldaxi banks
+    jsry list_length, first_bank
+    cpx #1
+    beq :+
+    error err_fail
+    ; In reverse.
+:   lmovex banks, first_bank, free_bank
+    ldaxi banks
+    jsry list_length, free_bank
+    cpx #$6a
+    beq :+
+    error err_fail
+:   ldaxi banks
+    jsry list_length, first_bank
+    cpx #0
+    beq :+
+    error err_fail
+ 
+    ;; Deque
+    ; Allocate first.
+:   dpopx procs, procsb, free_proc
+    phx
+    ldaxi procs
+    jsry list_length, free_proc
+    cpx #MAX_PROCS - 2 ; (+ init)
+    beq :+
+    error err_fail
+:   plx
+    ; Free by index.
+    daddx procs, procsb, running
+    ldaxi procs
+    jsry list_length, running
+    cpx #1
+    beq :+
+    error err_fail
+:
+
+    ;;; Syscalls
+    jsr init
+
+    ;; Fork
+    jsr fork
+    cmp #1
+    beq :++
+    cmp #0
+    beq :+
+    error err_fail
+:   lda #0
+    jmp exit
+:
+
+.export stop2
+stop2:
+    jsr schedule
+    lda #1
+    jsr wait
+    rts
+.endproc
+
+.export halt
+.proc halt
+    jmp halt
+.endproc
+
+.proc start
+    print txt_tunix
+    print txt_tests
+    jsr tests
+    print txt_booting
+    jmp init
+.endproc
+
+    .rodata
+
+err_invalid_glfn_order:
+    .byte "INVALID GLFN ORDER", 0
+err_invalid_first_free_bank:
+    .byte "INVALID FIRST FREE BANK", 0
+err_fail:
+    .byte "TEST FAILED", 0
 
     .code
 
@@ -1997,13 +2002,16 @@ free_wait:  .res 1
 first_wait: .res 1
 pid:        .res 1
 ppid:       .res 1
-; CPU state
+
+;; CPU state
 reg_a:      .res 1
 reg_x:      .res 1
 reg_y:      .res 1
-stack:      .res 1
 flags:      .res 1
-; VIC
+; Task-witching
+stack:      .res 1
+
+;; VIC
 saved_vic:  .res 16
 
 ;; Syscalls

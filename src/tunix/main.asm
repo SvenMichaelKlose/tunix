@@ -852,11 +852,6 @@ set_blk5_to_vic:
     jmp smemcpy
 .endproc
 
-.proc free_lbank
-    drmy lbanks, lbanksb, first_lbank
-    rts
-.endproc
-
 .macro cpyblk proc, blk
     jsr balloc
     sta proc,y
@@ -1126,6 +1121,11 @@ already_running:
     rts
 .endproc
 
+.proc free_lbank
+    drmy lbanks, lbanksb, first_lbank
+    rts
+.endproc
+
 ; Free bank
 ;
 ; Ingnores already free ones.
@@ -1147,10 +1147,8 @@ invalid_bank:
 ; Free all banks of current process.
 .proc bprocfree
     ldx first_lbank
-:   lda lbanks,x
-    beq :+
-    jsr bfree
-:   lnextx lbanks, :--
+:   jsr bfree
+    lnextx lbanks, :-
     rts
 .endproc
 

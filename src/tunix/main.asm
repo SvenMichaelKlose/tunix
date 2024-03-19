@@ -530,6 +530,7 @@ p:  lda $ff00,x
 .endproc
 
 ; Copy memory.
+; s, d, c: source, dest, counter
 .proc memcpy
     phy
     ldy #0
@@ -555,6 +556,7 @@ k:  inc sh
 .endproc
 
 ; Clear memory.
+; d, c: dest, counter
 .export bzero
 .proc bzero
     ldx cl
@@ -596,7 +598,6 @@ m:  inc dh
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Allocate bank
-;
 ; Returns:
 ;  Z: Out of memory.
 ;  X: Bank #
@@ -622,7 +623,6 @@ m:  inc dh
 .endproc
 
 ; Free bank
-;
 ; Ingnores already free ones.
 ; X: Bank #
 .export bfree
@@ -1017,6 +1017,7 @@ done:
     rts
 .endproc
 
+; Resume waiting processes
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
@@ -1030,7 +1031,7 @@ done:
     rts
 .endproc
 
-; Wait for process to exit.
+; Wait for process to exit
 ; X: Process ID
 ; Returns: A: Exit code
 .export wait
@@ -1098,15 +1099,14 @@ already_sleeping:
 .export resume
 .proc resume
     lda proc_flags,x
-    beq not_there
-    bpl already_running
+    bpl not_to_resume
     dmovex procs, procsb, sleeping, running
-not_there:
-already_running:
+not_to_resume:
     sec
     rts
 .endproc
 
+; Kill process with exit code -1
 ; X: Process ID
 .export kill
 .proc kill
@@ -1116,6 +1116,7 @@ already_running:
     jmp resume_waiting
 .endproc
 
+; Exit current process
 ; A: Exit code
 .export exit
 .proc exit
@@ -1125,6 +1126,7 @@ already_running:
     jmp resume_waiting
 .endproc
 
+; Exit but stay resident
 ; A: Exit code
 .export terminate
 .proc terminate
@@ -1169,6 +1171,7 @@ already_running:
 ;;; DRIVERS ;;;
 ;;;;;;;;;;;;;;;
 
+; Register driver and assign to device
 ; XA: vectors
 ; Y: device
 ; Returns: X: driver ID or 0.
@@ -1229,6 +1232,7 @@ tunix_driver:
     rts
 .endproc
 
+; "M?"
 .export tunix_memory
 .proc tunix_memory
     lda filename+1
@@ -1239,6 +1243,7 @@ tunix_driver:
     jmp respond_error
 .endproc
 
+; "MA"
 .export tunix_balloc
 .proc tunix_balloc
     jsr balloc
@@ -1248,6 +1253,7 @@ tunix_driver:
 :   jmp respond_error
 .endproc
 
+; "MFb"
 .export tunix_bfree
 .proc tunix_bfree
     ldx filename+2
@@ -1262,6 +1268,8 @@ tunix_driver:
     lda FNLEN
     beq s
     lda filename
+    cmp #'M'
+    beq tunix_memory
     cmp #'P'
     beq tunix_procs
     cmp #'D'
@@ -1271,6 +1279,7 @@ d:  jmp tunix_drivers
 s:  jmp schedule
 .endproc
 
+; "P?"
 .export tunix_procs
 .proc tunix_procs
     lda filename+1
@@ -1291,7 +1300,10 @@ syscall1 tunix_kill, kill, ldx
 syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
+syscall1 tunix_exit, exit, lda
+syscall1 tunix_terminate, terminate, lda
 
+; "PF"
 .export tunix_fork
 .proc tunix_fork
     jsr fork
@@ -1299,13 +1311,10 @@ syscall1 tunix_resume, resume, ldx
     bcc respond ; (jmp)
 .endproc
 
-syscall1 tunix_exit, exit, lda
-syscall1 tunix_terminate, terminate, lda
-
 .export respond_error
 .proc respond_error
     ldx #0
-    sta responsep
+    stx responsep
     inx
     stx response
     stx response_len
@@ -1328,7 +1337,8 @@ syscall1 tunix_terminate, terminate, lda
     rts
 .endproc
 
-; A: Value to respond with error code 0.
+; Respond with value and error code 0.
+; A: value
 .export respond
 .proc respond
     sta response+1
@@ -1351,7 +1361,8 @@ syscall1 tunix_terminate, terminate, lda
 :   sec
     rts
 .endproc
-    
+
+; "DR"
 .export tunix_register
 .proc tunix_register
     ldy filename+2
@@ -1363,6 +1374,7 @@ syscall1 tunix_terminate, terminate, lda
     bcc respond ; (jmp)
 .endproc
 
+; "DA"
 .export tunix_alloc_io_page
 .proc tunix_alloc_io_page
     lda free_iopage
@@ -1376,6 +1388,7 @@ syscall1 tunix_terminate, terminate, lda
     bcc respond ; (jmp)
 .endproc
 
+; "DCp"
 .export tunix_commit_io_page
 .proc tunix_commit_io_page
     ldy #0
@@ -1412,6 +1425,7 @@ next:
     jmp respond_ok
 .endproc
 
+; "D?"
 .export tunix_drivers
 .proc tunix_drivers
     lda filename+1
@@ -1429,6 +1443,7 @@ reg:jmp tunix_register
 all:jmp tunix_alloc_io_page
 .endproc
 
+; "DFp"
 .export tunix_free_io_page
 .proc tunix_free_io_page
     lda filename+2

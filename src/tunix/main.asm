@@ -1640,9 +1640,7 @@ col:            .res 1
     cmp #$11
     beq has_ultimem
 
-    lda #<txt_no_ultimem
-    ldy #>txt_no_ultimem
-    jsr printstr
+    print txt_no_ultimem
     jmp halt
 
 has_ultimem:
@@ -1726,26 +1724,19 @@ next_bank:
 
     lda num_errors
     bne has_errors
-    lda #<txt_ram_ok
-    ldy #>txt_ram_ok
-    jsr printstr
+    print txt_ram_ok
     jmp done
 
 has_errors:
     jsr printnum
-    lda #<txt_faulty_banks
-    ldy #>txt_faulty_banks
-    jsr printstr
+    print txt_faulty_banks
 
 done:
     ldaxi banks
     jsry list_length, free_bank
     txa
     jsr printnum
-    lda #<txt_banks_free
-    ldy #>txt_banks_free
-    jsr printstr
-
+    print txt_banks_free
     rts
 
 .proc printnum
@@ -1770,23 +1761,6 @@ uerror:
     lda #0
     sta col
 r:  rts
-.endproc
-
-.proc printstr
-    sta ptr2
-    sty ptr2+1
-
-l:  ldy #0
-    lda (ptr2),y
-    beq done
-    jsr BSOUT
-    inc ptr2
-    bne l
-    inc ptr2+1
-    bne l   ; (jmp)
-
-done:
-    rts
 .endproc
 
     .rodata

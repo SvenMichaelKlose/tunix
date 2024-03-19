@@ -393,6 +393,13 @@ global_size = global_end - global_start
     _dlinkx fw, bw, first_free
 .endmacro
 
+.macro dpopy fw, bw, first_free
+    ldy first_free
+    lda fw,y
+    sta first_free
+    _dlinky fw, bw, first_free
+.endmacro
+
 .macro drmx fw, bw, first_free
     lda fw,x
     cpx first_free
@@ -586,15 +593,11 @@ global_size = global_end - global_start
 
     .rodata
 
-txt_tunix:
-    .byte 147   ; Clear screen.
-    .byte "TUNIX", 13, 0
-txt_tests:
-    .byte "TESTS..",0
-txt_booting:
-    .byte 13, "BOOTING..",0
-txt_init:
-    .byte ".", 0
+txt_tunix:  .byte 147   ; Clear screen.
+            .byte "TUNIX", 13, 0
+txt_tests:  .byte "TESTS..",0
+txt_booting:.byte 13, "BOOTING..",0
+txt_init:   .byte ".", 0
 
 err_invalid_glfn_order:
     .byte "INVALID GLFN ORDER", 0
@@ -623,14 +626,14 @@ err_fail:
     ;; Set up lists and tables.
     ldx #0
 @l: txa
+    beq :++
     sec
     sbc #1
     cpx #MAX_PROCS
     bcs :+
     sta procsb,x
-
 :   txa
-    clc
+:   clc
     adc #1
     sta glfns,x
     sta lfns,x
@@ -643,12 +646,10 @@ err_fail:
 :   cpx #MAX_DRVS
     bcs :+
     sta drvs,x
-
 :   inx
     bne @l
 
     mvb free_proc, #1
-    mvb procsb, #0
     mvb glfns, #1
     mvb drvs, #1
     lda #0
@@ -658,12 +659,11 @@ err_fail:
     sta iopages + MAX_IOPAGES - 1
 
     jsr init_ultimem
+    jsr gen_speedcode
 
     ;; Point devices to KERNAL.
     mvb drv_vl, #$1a
     mvb drv_vh, #$03
-
-    jsr gen_speedcode
 
     ;; Make init process.
     print txt_init
@@ -798,6 +798,12 @@ done:
     beq :++
 :   inc bank_refs,x
     lnextx lbanks, :-
+
+    ;; Increment GLFNs.
+    ldx first_lfn
+    beq :++
+:   inc glfn_refs,x
+    lnextx lfns, :-
 
     ;; Return PID.
 :   pla

@@ -493,8 +493,13 @@ global_size = global_end - global_start
 .export running
 .export sleeping
 .export zombie
+.export waiting
+.export free_wait
+.export first_wait
 .export free_bank
 .export first_bank
+.export schedule
+.export wait
 
 .proc tests
     jsr init
@@ -573,6 +578,9 @@ global_size = global_end - global_start
     jmp exit
 :
 
+    jsr schedule
+    lda #1
+    jsr wait
     rts
 .endproc
 
@@ -758,6 +766,11 @@ done:
 ;;;;;;;;;;;;;;;;;
 ;;; PROCESSES ;;;
 ;;;;;;;;;;;;;;;;;
+;
+; Low 1K, screen, color and VIC are
+; on the same bank as the IO23 area
+; which is reserved for TUNIX and
+; driver code.
 
 .export lbanks, lbanksb, first_lbank
 
@@ -803,10 +816,8 @@ done:
 
 ; fork() copy vectors
 set_lowmem: .word $0000, $b000, $0400
-set_ram123: .word $0400, $a000, $0c00
 set_screen: .word $1000, $a000, $1000
 set_color:  .word $9400, $b400, $0400
-set_io23:   .word $9800, $b800, $07f0
 set_vic:
     .word $9000, saved_vic+$2000, $0010
 
@@ -826,16 +837,14 @@ set_vic:
 set_blk5_to_lowmem:
     .word $b000, $0000, $0400
 set_blk5_to_screen:
-    .word $8000, $1000, $1000
+    .word $a000, $1000, $1000
 set_blk5_to_color:
     .word $b400, $9400, $0400
 set_blk5_to_vic:
     .word saved_vic+$2000, $9000, $0010
 
 .proc load_state
-    get_procblk_y proc_low, blk3
-    ldx stack-$2000
-    txs
+    get_procblk_y proc_low, blk5
     smemcpyax set_blk5_to_lowmem
     smemcpyax set_blk5_to_vic
     smemcpyax set_blk5_to_color
@@ -861,8 +870,14 @@ set_blk5_to_vic:
     jsr free_lbank
 .endmacro
 
+set_io23: .word $9800, $b800, $07f0
+
 ; Copy process to new banks.
 .proc fork_raw
+    push blk2
+    push blk3
+    push blk5
+
     jsr balloc
     sta proc_low,y
     jsr save_state
@@ -879,8 +894,7 @@ set_blk5_to_vic:
     cpyblk proc_blk3, blk3
     cpyblk proc_blk5, blk5
 
-    ;; Restore parent banks and remove
-    ;; then from the childs local banks.
+    ;; Remove parent banks from child's.
     push io23
     get_procblk_y proc_io23, io23
     ldx pid
@@ -888,12 +902,13 @@ set_blk5_to_vic:
     rmlbankx proc_io23
     rmlbankx proc_blk1
     rmlbankx proc_blk2
-    sty blk2
     rmlbankx proc_blk3
-    sty blk3
     rmlbankx proc_blk5
-    sty blk5
     pop io23
+
+    pop blk5
+    pop blk3
+    pop blk2
     rts
 .endproc
 
@@ -1044,11 +1059,11 @@ already_running:
     set_procblk_y proc_blk5, blk5
     jsr save_state
     tsx
+    inx
     stx stack-$2000
 
     ;; Load next.
-    pop pid
-    tay
+    ply
     jsr load_state
     get_procblk_y proc_low, ram123
     get_procblk_y proc_io23, io23

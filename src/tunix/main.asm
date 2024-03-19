@@ -1192,7 +1192,7 @@ already_running:
     sta drv_vh,x
 
     ;; Assign to device.
-    tax
+    txa
     sta dev_drv,y
 
 :   rts

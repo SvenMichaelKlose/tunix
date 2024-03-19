@@ -459,6 +459,14 @@ global_size = global_end - global_start
     sta proc,y
 .endmacro
 
+.macro io23x
+    get_procblk_x proc_io23, io23
+.endmacro
+
+.macro io23y
+    get_procblk_y proc_io23, io23
+.endmacro
+
 ;;; UI
 
 .macro print asciiz
@@ -909,14 +917,14 @@ set_io23: .word $9800, $b800, $07f0
 
 ; Force exit.
 ; A: Process ID.
-.proc proc_free
+.proc zombify
     lda proc_flags,x
     beq not_there
     phx
 
     ;; Close resources.
     push io23
-    get_procblk_x proc_io23, io23
+    io23x
     jsr free_lfns
     jsr bprocfree
     pop io23
@@ -943,7 +951,7 @@ not_there:
 ; X: Process ID
 .proc resume_waiting
     push io23
-    get_procblk_x proc_io23, io23
+    io23x
     ldy first_wait
     beq done
 :   phy
@@ -957,27 +965,36 @@ done:
 .endproc
 
 ; Wait for process to exit.
-; A: Process ID
+; X: Process ID
 ; Returns: A: Exit code
 .proc wait
     lda proc_flags,x
     beq not_there
     cmp #PROC_ZOMBIE
     beq terminate_zombie
+
     ;; Put us on waiting list.
     push io23
     push pid
-    set_procblk_x proc_io23, io23
-    lmovey waiting, free_wait, first_wait
+    io23x
+    ;dallocy waiting, free_wait, first_wait
     pla
     sta waiting_pid,y
     pop io23
     jsr sleep
     jsr schedule
+    jmp wait
 
 terminate_zombie:
-    ;; Remove from zombie list.
+    push io23
+    io23y
+    ;; Remove us from the waiting list.
+    drmx waiting, first_wait, free_wait
+    lda first_wait
+    bne :+
+    ;; Remove processfrom zombie list.
     dfreex procs, procsb, zombie, free_proc
+    pop io23
     lda exit_codes,x
     clc
     rts
@@ -1018,7 +1035,7 @@ already_running:
     lda #255
     sta exit_codes,x
     phx
-    jsr proc_free
+    jsr zombify
     plx
     jmp resume_waiting
 .endproc
@@ -1026,7 +1043,7 @@ already_running:
 ; A: Exit code
 .proc exit
     pha
-    jsrx proc_free, pid
+    jsrx zombify, pid
     pla
     ldx pid
     jmp resume_waiting

@@ -41,7 +41,7 @@ al 0035E6 .drv_vh
 al 0035D6 .drv_vl
 al 0035A6 .drvs
 al 0026E7 .execute
-al 0026AD .exit
+al 0026AC .exit
 al 0033A6 .exit_codes
 al 009CDB .filename
 al 002E4F .first_bank
@@ -76,7 +76,7 @@ al 002EDE .iopage_page
 al 002EDA .iopage_pid
 al 002ED0 .iopages
 al 002ED4 .iopagesb
-al 00269E .kill
+al 0026A1 .kill
 al 009800 .lbanks
 al 009880 .lbanksb
 al 009B01 .lfn_glfn
@@ -115,21 +115,21 @@ al 0028C3 .respond_ok
 al 009DDB .response
 al 009DE3 .response_len
 al 009DE4 .responsep
-al 00266E .resume
+al 002671 .resume
 al 00256B .resume_waiting
 al 003363 .running
 al 002CA5 .save
 al 0022CB .save_internal_ram
 al 009CCB .saved_vic
 al 0026C7 .schedule
-al 00263E .sleep
+al 002641 .sleep
 al 003364 .sleeping
 al 0027DD .smemcpy
 al 009CC9 .stack
 al 002C85 .stop
 al 002153 .stop2
 al 0023C8 .switch
-al 0026BB .terminate
+al 0026B8 .terminate
 al 00201B .tests
 al 002822 .tunix
 al 002903 .tunix_alloc_io_page
@@ -151,12 +151,11 @@ al 002886 .tunix_stop
 al 0028AB .tunix_terminate
 al 00287C .tunix_wait
 al 002CBB .usrcmd
-al 002583 .wait
+al 002582 .wait
 al 009C02 .waiting
 al 009C82 .waiting_pid
 al 003365 .zombie
 al 00249F .zombify
 al 00120D .Start
 al 00120B .Next
-break .stop2
 break .stop2

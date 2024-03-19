@@ -1032,13 +1032,13 @@ set_io23: .word $9800, $b800, $07f0
     rts
 .endproc
 
+; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
     push io23
     io23x
     ldy first_wait
     beq done
-    tax
     jsr resume
 done:
     pop io23
@@ -1060,11 +1060,15 @@ done:
     push pid
     io23x
     dallocy waiting, waitingb, free_wait, first_wait
-    pla
+    txa
     sta waiting_pid,y
     pop io23
+
+    ;; Take a nap.
+    phx
     jsr sleep
     jsr schedule
+    plx
     jmp wait
 
 not_there:
@@ -1091,7 +1095,7 @@ terminate_zombie:
 .endproc
 
 ; Put process to sleep.
-; A: Process ID
+; X: Process ID
 .export sleep
 .proc sleep
     lda proc_flags,x
@@ -1118,33 +1122,31 @@ already_running:
     rts
 .endproc
 
-; A: Process ID
+; X: Process ID
 .export kill
 .proc kill
     lda #255
     sta exit_codes,x
-    phx
     jsr zombify
-    plx
     jmp resume_waiting
 .endproc
 
 ; A: Exit code
 .export exit
 .proc exit
-    pha
-    jsrx zombify, pid
-    pla
     ldx pid
+    sta exit_codes,x
+    jsr zombify
     jmp resume_waiting
 .endproc
 
 ; A: Exit code
 .export terminate
 .proc terminate
-    pha
-    jsrx sleep, pid
-    plx
+    ldx pid
+    sta exit_codes,x
+    jsr sleep
+    ldx pid
     jmp resume_waiting
 .endproc
 

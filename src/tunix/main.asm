@@ -467,6 +467,10 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, io23
 .endmacro
 
+.macro io23x_at_blk5
+    get_procblk_x proc_io23, blk5
+.endmacro
+
 .macro io23y_at_blk5
     get_procblk_y proc_io23, blk5
 .endmacro
@@ -1557,7 +1561,7 @@ l:  cpy pid
     ;; Copy page.
     phy
     push blk5
-    get_procblk_x proc_io23, blk5
+    io23x_at_blk5
     lda filename+2
     clc
     adc #IOPAGE_BASE

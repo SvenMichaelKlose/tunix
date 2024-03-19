@@ -145,6 +145,7 @@ proc_flags: .res MAX_PROCS
 exit_codes: .res MAX_PROCS
 ; Current banks.
 proc_low:   .res MAX_PROCS
+proc_ram123:.res MAX_PROCS
 proc_io23:  .res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
 proc_blk2:  .res MAX_PROCS
@@ -513,13 +514,13 @@ global_size = global_end - global_start
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
     lpopx banks, free_bank
-    cpx #$71
+    cpx #$70
     beq :+
     error err_invalid_first_free_bank
 :   lpushx banks, first_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$63
+    cpx #$62
     beq :+
     error err_fail
 :   ldaxi banks
@@ -531,7 +532,7 @@ global_size = global_end - global_start
 :   lmovex banks, first_bank, free_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$64
+    cpx #$63
     beq :+
     error err_fail
 :   ldaxi banks
@@ -658,14 +659,6 @@ err_fail:
 
     jsr init_ultimem
 
-    ;; Save initial set of banks.
-    mvb proc_low, ram123
-    mvb proc_io23, io23
-    mvb proc_blk1, blk1
-    mvb proc_blk2, blk2
-    mvb proc_blk3, blk3
-    mvb proc_blk5, blk5
-
     ;; Point devices to KERNAL.
     mvb drv_vl, #$1a
     mvb drv_vh, #$03
@@ -674,6 +667,13 @@ err_fail:
 
     ;; Make init process.
     print txt_init
+    mvb proc_low, ram123
+    mvb proc_ram123, ram123
+    mvb proc_io23, io23
+    mvb proc_blk1, blk1
+    mvb proc_blk2, blk2
+    mvb proc_blk3, blk3
+    mvb proc_blk5, blk5
     ldy #0
     jmp fork0 ; Fork into process 0.
 .endproc
@@ -701,6 +701,7 @@ err_fail:
 .endmacro
 
 .proc gen_speedcode
+    push blk5
     ; Grab a new bank for BLK5.
     jsr balloc
     sta copy_bank
@@ -747,6 +748,7 @@ next_move:
 
 done:
     out #OP_RTS
+    pop blk5
     rts
 .endproc
 
@@ -756,7 +758,7 @@ done:
 .endproc
 
 .proc next_copy_bank
-    sta $9ffa
+    sta blk2
     jmp $4000
 .endproc
 
@@ -884,6 +886,7 @@ set_io23: .word $9800, $b800, $07f0
     jsr smemcpy
     sty pid+$2000
 
+    cpyblk proc_ram123, ram123
     cpyblk proc_blk1, blk1
     cpyblk proc_blk2, blk2
     cpyblk proc_blk3, blk3
@@ -894,6 +897,7 @@ set_io23: .word $9800, $b800, $07f0
     get_procblk_y proc_io23, io23
     ldx pid
     rmlbankx proc_low
+    rmlbankx proc_ram123
     rmlbankx proc_io23
     rmlbankx proc_blk1
     rmlbankx proc_blk2
@@ -1055,6 +1059,7 @@ already_running:
     pha
     ldy pid
     set_procblk_y proc_low, ram123
+    set_procblk_y proc_ram123, ram123
     set_procblk_y proc_io23, io23
     set_procblk_y proc_blk1, blk1
     set_procblk_y proc_blk2, blk2
@@ -1069,6 +1074,7 @@ already_running:
     ply
     jsr load_state
     get_procblk_y proc_low, ram123
+    get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
     get_procblk_y proc_blk1, blk1
     get_procblk_y proc_blk2, blk2

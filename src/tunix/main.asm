@@ -918,21 +918,35 @@ set_io23: .word $9800, $b800, $07f0
 .endproc
 
 ; Force exit.
-; A: Process ID.
+; X: Process ID.
 .proc zombify
     lda proc_flags,x
-    beq not_there
-    phx
+    beq :+
+    sec
+    rts
 
-    ;; Close resources.
+    ;; Close LFNs and free banks.
+:   phx
     push io23
     io23x
     jsr free_lfns
     jsr bprocfree
     pop io23
 
-    ;; Free process
+    ;; Free IO pages
     plx
+    stx tmp1
+    ldy first_iopage
+    beq :++
+:   lda iopage_pid,y
+    cmp tmp1
+    bne :+
+    tax
+    dfreex iopages, iopagesb, first_iopage, free_iopage
+:   lnexty iopages, :--
+
+    ;; Free process
+    ldx tmp1
     ; Take off running or sleeping.
     lda proc_flags,x
     bmi :+
@@ -944,9 +958,6 @@ set_io23: .word $9800, $b800, $07f0
     lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
-    rts
-not_there:
-    sec
     rts
 .endproc
 

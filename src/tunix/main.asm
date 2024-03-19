@@ -948,17 +948,13 @@ not_there:
     rts
 .endproc
 
-; X: Process ID
 .proc resume_waiting
     push io23
     io23x
     ldy first_wait
     beq done
-:   phy
     tax
     jsr resume
-    ply
-    lnexty waiting, :-
 done:
     pop io23
     rts
@@ -985,22 +981,25 @@ done:
     jsr schedule
     jmp wait
 
+not_there:
+    sec
+    rts
+
 terminate_zombie:
     push io23
     io23y
-    ;; Remove us from the waiting list.
+    ;; Remove from waiting list.
     drmx waiting, first_wait, free_wait
-    lda first_wait
+    ldx first_wait
     bne :+
-    ;; Remove processfrom zombie list.
+    ;; Remove zombie.
     dfreex procs, procsb, zombie, free_proc
-    pop io23
+    jmp :+
+    ;; Resume next waiting.
+:   jsr resume
+:   pop io23
     lda exit_codes,x
     clc
-    rts
-
-not_there:
-    sec
     rts
 .endproc
 

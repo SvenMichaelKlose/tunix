@@ -65,6 +65,8 @@ IOPAGE_BASE = $7b
 
 ;;; UltiMem
 
+.export ram123, io23, blk1, blk2, blk3, blk5
+
 MAX_BANKS   = 128
 FIRST_BANK  = 14
 ram123      = $9ff4
@@ -105,6 +107,8 @@ ptr4:   .res 2
 ;;;;;;;;;;;;;;
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
+
+.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, glfn_sa, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start
 
 global_start:
 
@@ -463,6 +467,10 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, io23
 .endmacro
 
+.macro io23y_at_blk5
+    get_procblk_y proc_io23, blk5
+.endmacro
+
 ;;; UI
 
 .macro print asciiz
@@ -480,6 +488,7 @@ global_size = global_end - global_start
 ;;; INIT ;;;
 ;;;;;;;;;;;;
 
+.export main
 .proc main
     print txt_tunix
     print txt_tests
@@ -488,23 +497,7 @@ global_size = global_end - global_start
     jmp init
 .endproc
 
-.export glfns
 .export tests
-.export banks
-.export procs
-.export procsb
-.export free_proc
-.export running
-.export sleeping
-.export zombie
-.export waiting
-.export free_wait
-.export first_wait
-.export free_bank
-.export first_bank
-.export schedule
-.export wait
-
 .proc tests
     jsr init
 
@@ -522,13 +515,13 @@ global_size = global_end - global_start
     ;; Doubly used list arrays.
     ; Allocate free, put back as used.
     lpopx banks, free_bank
-    cpx #$70
+    cpx #$77
     beq :+
     error err_invalid_first_free_bank
 :   lpushx banks, first_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$62
+    cpx #$69
     beq :+
     error err_fail
 :   ldaxi banks
@@ -540,7 +533,7 @@ global_size = global_end - global_start
 :   lmovex banks, first_bank, free_bank
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$63
+    cpx #$6a
     beq :+
     error err_fail
 :   ldaxi banks
@@ -582,12 +575,15 @@ global_size = global_end - global_start
     jmp exit
 :
 
+.export stop2
+stop2:
     jsr schedule
     lda #1
     jsr wait
     rts
 .endproc
 
+.export halt
 .proc halt
     jmp halt
 .endproc
@@ -609,6 +605,7 @@ err_fail:
 
     .code
 
+.export init
 .proc init
     ;; All banks are R/W RAM.
     ;; Default order expected.
@@ -683,6 +680,7 @@ err_fail:
 ;;; SPEED COPY ;;;
 ;;;;;;;;;;;;;;;;;;
 
+.export outa
 .proc outa
     ldy #0
     sta (d),y
@@ -701,6 +699,7 @@ err_fail:
     jsra outa, at+1
 .endmacro
 
+.export gen_speedcode
 .proc gen_speedcode
     push blk5
     ; Grab a new bank for BLK5.
@@ -753,11 +752,13 @@ done:
     rts
 .endproc
 
+.export copy_blk3_to_blk5
 .proc copy_blk3_to_blk5
     stx blk3
     lda copy_bank
 .endproc
 
+.export next_copy_bank
 .proc next_copy_bank
     sta blk2
     jmp $4000
@@ -772,8 +773,7 @@ done:
 ; which is reserved for TUNIX and
 ; driver code.
 
-.export lbanks, lbanksb, first_lbank
-
+.export fork
 .proc fork
     ;; Grab process slot.
     lpopy procs, free_proc
@@ -781,6 +781,7 @@ done:
     beq no_more_procs
 .endproc
 
+.export fork0
 .proc fork0
     ;; Insert after current process.
     ldx pid
@@ -790,8 +791,6 @@ done:
     sta running,x
     pha
 
-    lda #PROC_RUNNING
-    sta proc_flags,y
     jsr fork_raw
 
     ;; Increment bank refs.
@@ -806,6 +805,15 @@ done:
 :   inc glfn_refs,x
     lnextx lfns, :-
 
+:   push blk5
+    io23y_at_blk5
+    tsx
+    stx stack+$2000
+    pop blk5
+
+    lda #PROC_RUNNING
+    sta proc_flags,y
+
     ;; Return PID.
 :   pla
     cmp pid
@@ -815,6 +823,7 @@ done:
     rts
 .endproc
 
+.export no_more_procs
 .proc no_more_procs
     sec
     rts
@@ -846,6 +855,7 @@ set_io23: .word $9800, $b800, $07f0
     jsr smemcpy
 .endmacro
 
+.export save_state
 .proc save_state
     get_procblk_y proc_low, blk5
     smemcpyax set_lowmem
@@ -854,6 +864,7 @@ set_io23: .word $9800, $b800, $07f0
     jmp smemcpy
 .endproc
 
+.export load_state
 .proc load_state
     get_procblk_y proc_low, blk5
     smemcpyax set_blk5_to_lowmem
@@ -863,20 +874,22 @@ set_io23: .word $9800, $b800, $07f0
     jmp smemcpy
 .endproc
 
-.macro cpyblk proc, blk
+.macro cpyblk procblk, blk
     jsr balloc
-    sta proc,y
+    sta procblk,y
     sta blk5
     ldx blk
     jsr copy_blk3_to_blk5
 .endmacro
 
-.macro rmlbankx proc
-    ldy proc,x
+.macro rmlbankx procblk
+    ldy procblk,x
     jsr free_lbank
 .endmacro
 
-; Copy process to new banks.
+; Copy banks to new process
+; Y: process ID
+.export fork_raw
 .proc fork_raw
     push blk2
     push blk3
@@ -899,9 +912,12 @@ set_io23: .word $9800, $b800, $07f0
     cpyblk proc_blk3, blk3
     cpyblk proc_blk5, blk5
 
+    cpy pid
+    beq :+
+
     ;; Remove parent banks from child's.
     push io23
-    get_procblk_y proc_io23, io23
+    io23y
     ldx pid
     rmlbankx proc_low
     rmlbankx proc_ram123
@@ -912,7 +928,7 @@ set_io23: .word $9800, $b800, $07f0
     rmlbankx proc_blk5
     pop io23
 
-    pop blk5
+:   pop blk5
     pop blk3
     pop blk2
     rts
@@ -920,6 +936,7 @@ set_io23: .word $9800, $b800, $07f0
 
 ; Force exit.
 ; X: Process ID.
+.export zombify
 .proc zombify
     lda proc_flags,x
     beq :+
@@ -977,6 +994,7 @@ set_io23: .word $9800, $b800, $07f0
     rts
 .endproc
 
+.export resume_waiting
 .proc resume_waiting
     push io23
     io23x
@@ -992,6 +1010,7 @@ done:
 ; Wait for process to exit.
 ; X: Process ID
 ; Returns: A: Exit code
+.export wait
 .proc wait
     lda proc_flags,x
     beq not_there
@@ -1034,6 +1053,7 @@ terminate_zombie:
 
 ; Put process to sleep.
 ; A: Process ID
+.export sleep
 .proc sleep
     lda proc_flags,x
     beq not_there
@@ -1047,6 +1067,7 @@ already_sleeping:
 
 ; Wake up process.
 ; A: Process ID
+.export resume
 .proc resume
     lda proc_flags,x
     beq not_there
@@ -1059,6 +1080,7 @@ already_running:
 .endproc
 
 ; A: Process ID
+.export kill
 .proc kill
     lda #255
     sta exit_codes,x
@@ -1069,6 +1091,7 @@ already_running:
 .endproc
 
 ; A: Exit code
+.export exit
 .proc exit
     pha
     jsrx zombify, pid
@@ -1078,6 +1101,7 @@ already_running:
 .endproc
 
 ; A: Exit code
+.export terminate
 .proc terminate
     pha
     jsrx sleep, pid
@@ -1087,9 +1111,13 @@ already_running:
 
 ; Switch to process.
 ; A: Process ID
+.export switch
 .proc switch
     ;;; Save current.
     pha
+    tsx
+    inx
+    stx stack
     ldy pid
     set_procblk_y proc_low, ram123
     set_procblk_y proc_ram123, ram123
@@ -1099,9 +1127,6 @@ already_running:
     set_procblk_y proc_blk3, blk3
     set_procblk_y proc_blk5, blk5
     jsr save_state
-    tsx
-    inx
-    stx stack-$2000
 
     ;; Load next.
     ply
@@ -1113,12 +1138,13 @@ already_running:
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
-    ldx stack-$2000
+    ldx stack
     txs
     rts
 .endproc
 
 ; Schedule task switch
+.export schedule
 .proc schedule
     php
     pha
@@ -1138,6 +1164,7 @@ already_running:
 .endproc
 
 ; XA: Start address
+.export execute
 .proc execute
     stax ptr1
     ldx #$ff
@@ -1154,6 +1181,7 @@ already_running:
 ; Returns:
 ;  Z: Out of memory.
 ;  X: Bank #
+.export balloc
 .proc balloc
     sty tmp1
     ;; Draw from global pool.
@@ -1168,6 +1196,7 @@ already_running:
     rts
 .endproc
 
+.export free_lbank
 .proc free_lbank
     drmy lbanks, lbanksb, first_lbank
     rts
@@ -1177,6 +1206,7 @@ already_running:
 ;
 ; Ingnores already free ones.
 ; X: Bank #
+.export bfree
 .proc bfree
     dec bank_refs,x
     bmi invalid_bank
@@ -1192,6 +1222,7 @@ invalid_bank:
 .endproc
 
 ; Free all banks of current process.
+.export bprocfree
 .proc bprocfree
     ldx first_lbank
 :   jsr bfree
@@ -1203,6 +1234,7 @@ invalid_bank:
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.export free_lfns
 .proc free_lfns
     ldy first_lfn
     beq done
@@ -1222,6 +1254,7 @@ done:
 ; XA: vectors
 ; Y: device
 ; Returns: X: driver ID or 0.
+.export register
 .proc register
     sta ptr1
     stx ptr1+1
@@ -1251,6 +1284,7 @@ done:
 ;;; LIST UTILS ;;;
 ;;;;;;;;;;;;;;;;;;
 
+.export list_length
 .proc list_length
     stax ptr1
     ldx #0
@@ -1285,6 +1319,7 @@ p:  lda $ff00,x
 ;;;;;;;;;;;;;;
 
 ; Copy range at XA.
+.export smemcpy
 .proc smemcpy
     jsr sset
 .endproc
@@ -1315,6 +1350,7 @@ k:  inc sh
 .endproc
 
 ; Clear memory.
+.export bzero
 .proc bzero
     ldx cl
     inx
@@ -1340,6 +1376,7 @@ m:  inc dh
 ;;;;;;;;;;;;;;;;;;;;;;
 
 .macro syscall1 name, fun, load
+    .export name
     .proc name
         load filename+2
         jsr fun
@@ -1359,11 +1396,13 @@ tunix_driver:
 
     .code
 
+.export tunix
 .proc tunix
     clc
     rts
 .endproc
 
+.export tunix_memory
 .proc tunix_memory
     lda filename+1
     cmp #'A'
@@ -1373,6 +1412,7 @@ tunix_driver:
     jmp respond_error
 .endproc
 
+.export tunix_balloc
 .proc tunix_balloc
     jsr balloc
     txa
@@ -1380,6 +1420,7 @@ tunix_driver:
     jmp respond
 .endproc
 
+.export tunix_bfree
 .proc tunix_bfree
     ldx filename+2
     jsr bfree
@@ -1387,7 +1428,7 @@ tunix_driver:
     bcc respond_ok  ; (jmp)
 .endproc
 
-
+.export tunix_open
 .proc tunix_open
     lda FNLEN
     beq respond_ok
@@ -1400,6 +1441,7 @@ tunix_driver:
 d:  jmp tunix_drivers
 .endproc
 
+.export tunix_procs
 .proc tunix_procs
     lda filename+1
     cmp #'F'
@@ -1420,6 +1462,7 @@ syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 
+.export tunix_fork
 .proc tunix_fork
     jsr fork
     bcs respond_error
@@ -1429,6 +1472,7 @@ syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 syscall1 tunix_terminate, terminate, lda
 
+.export respond_error
 .proc respond_error
     ldx #0
     sta responsep
@@ -1439,6 +1483,7 @@ syscall1 tunix_terminate, terminate, lda
     rts
 .endproc
 
+.export respond_ok
 .proc respond_ok
     ldx #0
     stx response
@@ -1446,6 +1491,7 @@ syscall1 tunix_terminate, terminate, lda
     inx
 .endproc
 
+.export respond_len
 .proc respond_len
     stx response_len
     clc
@@ -1453,6 +1499,7 @@ syscall1 tunix_terminate, terminate, lda
 .endproc
 
 ; A: Value to respond with error code 0.
+.export respond
 .proc respond
     sta response+1
     lda #0
@@ -1462,6 +1509,7 @@ syscall1 tunix_terminate, terminate, lda
     bne respond_len ; (jmp)
 .endproc
 
+.export tunix_basin
 .proc tunix_basin
     ldx responsep
     cpx response_len
@@ -1474,6 +1522,7 @@ syscall1 tunix_terminate, terminate, lda
     rts
 .endproc
     
+.export tunix_register
 .proc tunix_register
     ldy filename+2
     lda filename+3
@@ -1484,6 +1533,7 @@ syscall1 tunix_terminate, terminate, lda
     bcc respond ; (jmp)
 .endproc
 
+.export tunix_alloc_io_page
 .proc tunix_alloc_io_page
     lda free_iopage
     beq respond_error
@@ -1496,6 +1546,7 @@ syscall1 tunix_terminate, terminate, lda
     bcc respond ; (jmp)
 .endproc
 
+.export tunix_commit_io_page
 .proc tunix_commit_io_page
     ldy #0
 l:  cpy pid
@@ -1531,6 +1582,7 @@ next:
     jmp respond_ok
 .endproc
 
+.export tunix_drivers
 .proc tunix_drivers
     lda filename+1
     cmp #'R'
@@ -1547,6 +1599,7 @@ reg:jmp tunix_register
 all:jmp tunix_alloc_io_page
 .endproc
 
+.export tunix_free_io_page
 .proc tunix_free_io_page
     ldx filename+2
     lda iopage_pid,x
@@ -1571,7 +1624,6 @@ col:            .res 1
     .code
 
 .export init_ultimem
-
 .proc init_ultimem
     ; Unhide UltiMem registers
     lda $9f55
@@ -1735,13 +1787,10 @@ done:
 txt_no_ultimem:
     .byte "NO ULTIMEM/VIC-MIDIFOUND."
     .byte 13, 0
-
 txt_faulty_banks:
     .byte " FAULTY BANKS.", 13,0
-
 txt_ram_ok:
     .byte 13, "RAM OK.", 13,0
-
 txt_banks_free:
     .byte " 8K BANKS FREE.", 13,0
 
@@ -1754,11 +1803,12 @@ txt_banks_free:
 .byte "DIPATCH"
 
 ; Translate local to global LFN.
+; X: LFN
+.export lfn_to_glfn
 .proc lfn_to_glfn
     lda lfn_glfn,x
     bne :+  ; Use existing...
     lpushx lfns, first_lfn
-    beq :+
     phx
     lpopx glfns, glfns
     inc glfn_refs,x
@@ -1766,12 +1816,13 @@ txt_banks_free:
     tay
     plx
     tya
-:   sta lfn_glfn,x
-    rts
+    sta lfn_glfn,x
+:   rts
 .endproc
 
 ; X: GLFN
 ; A: vector offset
+.export call_driver
 .proc call_driver
     ; (vector base + A).
     ldy glfn_drv,x
@@ -1800,6 +1851,7 @@ tunix_vectors:
 
     .code
 
+.export open
 .proc open
     pushw FNADR
     push LFN
@@ -1838,12 +1890,14 @@ tunix_vectors:
     jmp schedule
 .endproc
 
+.export chkin
 .proc chkin
     jsr lfn_to_glfn
     sta reg_a
     jmpa call_driver, #IDX_CHKIN
 .endproc
 
+.export ckout
 .proc ckout
     jsr lfn_to_glfn
     sta reg_a
@@ -1851,6 +1905,7 @@ tunix_vectors:
 .endproc
 
 .macro iohandler name, lfn, drvop
+    .export name
     .proc name
         save_regs
         push lfn
@@ -1874,6 +1929,7 @@ iohandler getin, DFLTN, IDX_GETIN
 iohandler blkin, DFLTN, IDX_BLKIN
 iohandler bkout, DFLTO, IDX_BKOUT
 
+.export clrcn
 .proc clrcn
     jsr lfn_to_glfn
     sta reg_a
@@ -1884,6 +1940,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     jmp schedule
 .endproc
 
+.export close
 .proc close
     jsr lfn_to_glfn
     sta reg_a
@@ -1896,6 +1953,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     jmp schedule
 .endproc
 
+.export clall
 .proc clall
     ldx first_lfn
     beq r
@@ -1906,6 +1964,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
 r:  rts
 .endproc
 
+.export stop
 .proc stop
     ldx #0
     jsra call_driver, #IDX_STOP
@@ -1913,6 +1972,7 @@ r:  rts
 .endproc
 
 .macro blkiohandler name, idx
+    .export name
     .proc name
         save_regs
         ldy DEV
@@ -1925,6 +1985,7 @@ r:  rts
 blkiohandler load, IDX_LOAD
 blkiohandler save, IDX_SAVE
 
+.export usrcmd
 .proc usrcmd
     ldx #0
     jmpa call_driver, #IDX_STOP
@@ -1936,6 +1997,8 @@ blkiohandler save, IDX_SAVE
 
     .bss
     .org $9800
+
+.export lbanks, lbanksb, first_lbank, lfns, lfnsb, lfn_glfn, first_lfn, waiting, waiting_pid, free_wait, first_wait, pid, ppid, reg_a, reg_x, reg_y, stack, flags, saved_vic, filename, response, response_len, responsep
 
 ;; Extended memory banks
 ; List of used ones.
@@ -1969,7 +2032,7 @@ saved_vic:  .res 16
 
 ;; Syscalls
 ; File name copied from calling process.
-filename:   .res 256
+filename:       .res 256
 ; TUNIX syscall device response
 response:       .res 8
 response_len:   .res 1

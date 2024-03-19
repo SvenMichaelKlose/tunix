@@ -1243,22 +1243,24 @@ tunix_driver:
 .proc tunix_balloc
     jsr balloc
     txa
-    beq respond_error
+    beq :+
     jmp respond
+:   jmp respond_error
 .endproc
 
 .export tunix_bfree
 .proc tunix_bfree
     ldx filename+2
     jsr bfree
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
+    bcs :+
+    jmp respond_ok
+:   jmp respond_error
 .endproc
 
 .export tunix_open
 .proc tunix_open
     lda FNLEN
-    beq respond_ok
+    beq s
     lda filename
     cmp #'P'
     beq tunix_procs
@@ -1266,6 +1268,7 @@ tunix_driver:
     beq d
     bne respond_error ; (jmp)
 d:  jmp tunix_drivers
+s:  jmp schedule
 .endproc
 
 .export tunix_procs
@@ -1867,7 +1870,7 @@ tunix_vectors:
     php
     lda reg_a
     plp
-    jmp schedule
+    rts
 .endproc
 
 .export chkin
@@ -1899,7 +1902,7 @@ tunix_vectors:
         php
         lda reg_a
         plp
-        jmp schedule
+        rts
     .endproc
 .endmacro
 
@@ -1917,7 +1920,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     tya
     tax
     jsra call_driver, #IDX_CLRCN
-    jmp schedule
+    rts
 .endproc
 
 .export close
@@ -1930,7 +1933,7 @@ iohandler bkout, DFLTO, IDX_BKOUT
     tya
     tax
     jsra call_driver, #IDX_CLOSE
-    jmp schedule
+    rts
 .endproc
 
 .export clall
@@ -1948,7 +1951,7 @@ r:  rts
 .proc stop
     ldx #0
     jsra call_driver, #IDX_STOP
-    jmp schedule
+    rts
 .endproc
 
 .macro blkiohandler name, idx
@@ -1958,7 +1961,7 @@ r:  rts
         ldy DEV
         ldx dev_drv,y
         jsra call_driver, #idx
-        jmp schedule
+        rts
     .endproc
 .endmacro
 

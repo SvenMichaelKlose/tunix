@@ -155,6 +155,7 @@ proc_blk5:  .res MAX_PROCS
 ;; Drivers
 drvs:       .res MAX_DRVS
 drv_pid:    .res MAX_DRVS
+drv_dev:    .res MAX_DRVS
 drv_vl:     .res MAX_DRVS
 drv_vh:     .res MAX_DRVS
 
@@ -945,6 +946,21 @@ set_io23: .word $9800, $b800, $07f0
     dfreex iopages, iopagesb, first_iopage, free_iopage
 :   lnexty iopages, :--
 
+    ;; Free drivers.
+    ldy drvs
+    beq :++
+:   lda drv_pid,y
+    cmp tmp1
+    bne :+
+    tax
+    lpushx drvs, drvs
+    ; Set device to KERNAL.
+    lda drv_dev,y
+    tax
+    lda #0  ; KERNAL
+    sta dev_drv,x
+:   lnexty drvs, :--
+
     ;; Free process
     ldx tmp1
     ; Take off running or sleeping.
@@ -1204,6 +1220,7 @@ done:
 ;;;;;;;;;;;;;;;
 
 ; XA: vectors
+; Y: device
 ; Returns: X: driver ID or 0.
 .proc register
     sta ptr1
@@ -1216,10 +1233,16 @@ done:
     ;; Populate slot.
     lda pid
     sta drv_pid,x
+    tya
+    sta drv_dev,x
     lda ptr1
     sta drv_vl,x
     lda ptr1+1
     sta drv_vh,x
+
+    ;; Assign to device.
+    tax
+    sta dev_drv,y
 
 :   rts
 .endproc
@@ -1452,8 +1475,9 @@ syscall1 tunix_terminate, terminate, lda
 .endproc
     
 .proc tunix_register
-    lda filename+2
-    ldx filename+3
+    ldy filename+2
+    lda filename+3
+    ldx filename+4
     jsr register
     bcs respond_error
     txa

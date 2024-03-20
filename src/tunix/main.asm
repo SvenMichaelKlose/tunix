@@ -373,7 +373,7 @@ global_size = global_end - global_start
     sty first
 .endmacro
 
-.macro _dlinkx fw, bw, first_free
+.macro _dlinkx fw, bw
     tay
     lda bw,x
     sta bw,y
@@ -383,7 +383,7 @@ global_size = global_end - global_start
     sta fw,y
 .endmacro
 
-.macro _dlinky fw, bw, first_free
+.macro _dlinky fw, bw
     tax
     lda bw,y
     sta bw,x
@@ -397,14 +397,14 @@ global_size = global_end - global_start
     ldx first_free
     lda fw,x
     sta first_free
-    _dlinkx fw, bw, first_free
+    _dlinkx fw, bw
 .endmacro
 
 .macro dpopy fw, bw, first_free
     ldy first_free
     lda fw,y
     sta first_free
-    _dlinky fw, bw, first_free
+    _dlinky fw, bw
 .endmacro
 
 .macro drmx fw, bw, first_free
@@ -412,7 +412,7 @@ global_size = global_end - global_start
     cpx first_free
     bne :+
     sta first_free
-:   _dlinkx fw, bw, first_free
+:   _dlinkx fw, bw
 .endmacro
 
 .macro drmy fw, bw, first_free
@@ -420,7 +420,7 @@ global_size = global_end - global_start
     cpy first_free
     bne :+
     sta first_free
-:   _dlinky fw, bw, first_free
+:   _dlinky fw, bw
 .endmacro
 
 .macro dallocx fw, bw, from, to
@@ -759,7 +759,7 @@ done:
 
 .export copy_blk3_to_blk5
 .proc copy_blk3_to_blk5
-    stx blk3
+    sta blk3
     lda copy_bank
 .endproc
 
@@ -821,15 +821,16 @@ vec_io23_to_vic:
 vec_io23_to_blk5:
     .word $9800, $b800, $07f0
 
-.macro cpyblk procblk, blk
+.macro forkblky procblk, srcblk
     jsr balloc
     sta procblk,y
     sta blk5
-    ldx blk
+    ldx pid
+    lda procblk,x
     jsr copy_blk3_to_blk5
 .endmacro
 
-.macro rmlbankx procblk
+.macro dereflbankx procblk
     ldy procblk,x
     jsr free_lbank
 .endmacro
@@ -837,19 +838,22 @@ vec_io23_to_blk5:
     .code
 
 ; Copy banks to new process
-; Y: process ID
+; Y: new process ID
 .export fork_raw
 .proc fork_raw
     push blk2
     push blk3
     push blk5
+    sta tmp1
 
-    cpyblk proc_ram123, ram123
-    cpyblk proc_io23, io23
-    cpyblk proc_blk1, blk1
-    cpyblk proc_blk2, blk2
-    cpyblk proc_blk3, blk3
-    cpyblk proc_blk5, blk5
+    ; Copies from BLK3 to BLK5 with
+    ; speed code in BLK2.
+    forkblky proc_ram123, ram123
+    forkblky proc_io23, io23
+    forkblky proc_blk1, blk1
+    forkblky proc_blk2, blk2
+    forkblky proc_blk3, blk3
+    forkblky proc_blk5, blk5
     save_internal_ram
     sty pid+$2000
     tsx
@@ -861,12 +865,12 @@ vec_io23_to_blk5:
     ;; Remove parent banks from child's.
     enter_context_y
     ldx pid
-    rmlbankx proc_ram123
-    rmlbankx proc_io23
-    rmlbankx proc_blk1
-    rmlbankx proc_blk2
-    rmlbankx proc_blk3
-    rmlbankx proc_blk5
+    dereflbankx proc_ram123
+    dereflbankx proc_io23
+    dereflbankx proc_blk1
+    dereflbankx proc_blk2
+    dereflbankx proc_blk3
+    dereflbankx proc_blk5
     leave_context
 
 :   pop blk5
@@ -896,7 +900,6 @@ vec_io23_to_blk5:
 
     ;; Load next.
     ply
-    get_procblk_y proc_io23, blk5
     load_internal_ram
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
@@ -937,6 +940,7 @@ done:
 
 .export fork
 .proc fork
+stop2:.export stop2
     ;; Grab process slot.
     dallocy procs, procsb, free_proc, running
     cpy #0
@@ -1141,17 +1145,6 @@ not_to_resume:
     ldx pid
     sta exit_codes,x
     jsr zombify
-    jmp resume_waiting
-.endproc
-
-; Exit but stay resident
-; A: Exit code
-.export terminate
-.proc terminate
-    ldx pid
-    sta exit_codes,x
-    jsr sleep
-    ldx pid
     jmp resume_waiting
 .endproc
 
@@ -1700,6 +1693,7 @@ r:  rts
     mvb proc_blk3, blk3
     mvb proc_blk5, blk5
     ldy #0
+    sty procs ; Unlink from free list.
     jmp fork0 ; Fork into process 0.
 .endproc
 

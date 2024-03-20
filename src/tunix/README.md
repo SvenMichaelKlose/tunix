@@ -160,11 +160,6 @@ Moves process to the sleeping list.
 
 Moves process to the running list.
 
-### "PTp": Terminate
-
-For drivers to exit and move to the
-sleeping list instead of getting killed.
-
 ## Extended memory
 
 ## "MA": Allocate a bank

@@ -488,6 +488,24 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, blk5
 .endmacro
 
+;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS CONTEXT ;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+.macro enter_context_x
+    push io23
+    io23x
+.endmacro
+
+.macro enter_context_y
+    push io23
+    io23y
+.endmacro
+
+.macro leave_context
+    pop io23
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;
 ;;; LIST UTILS ;;;
 ;;;;;;;;;;;;;;;;;;
@@ -850,8 +868,7 @@ vec_io23_to_blk5:
     beq :+
 
     ;; Remove parent banks from child's.
-    push io23
-    io23y
+    enter_context_y
     ldx pid
     rmlbankx proc_low
     rmlbankx proc_ram123
@@ -860,7 +877,7 @@ vec_io23_to_blk5:
     rmlbankx proc_blk2
     rmlbankx proc_blk3
     rmlbankx proc_blk5
-    pop io23
+    leave_context
 
 :   pop blk5
     pop blk3
@@ -984,14 +1001,13 @@ done:
 
     ;; Close LFNs and free banks.
 :   phx
-    push io23
-    io23x
+    enter_context_x
     jsr free_lfns
     jsr bprocfree
-    pop io23
+    leave_context
+    plx
 
     ;; Free IO pages
-    plx
     stx tmp1
     ldy first_iopage
     beq :+++
@@ -1037,13 +1053,12 @@ done:
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
-    push io23
-    io23x
+    enter_context_x
     ldy first_wait
     beq done
     jsr resume
 done:
-    pop io23
+    leave_context
     rts
 .endproc
 
@@ -1058,13 +1073,11 @@ done:
     beq terminate_zombie
 
     ;; Put us on waiting list.
-    push io23
-    push pid
-    io23x
+    enter_context_x
     dallocy waiting, waitingb, free_wait, first_wait
     txa
     sta waiting_pid,y
-    pop io23
+    leave_context
 
     ;; Take a nap.
     phx
@@ -1078,8 +1091,7 @@ not_there:
     rts
 
 terminate_zombie:
-    push io23
-    io23y
+    enter_context_y
     ;; Remove from waiting list.
     dmovex waiting, waitingb, first_wait,free_wait
     ldx first_wait
@@ -1090,7 +1102,7 @@ terminate_zombie:
 
     ;; Resume next waiting.
 :   jsr resume
-:   pop io23
+:   leave_context
     lda exit_codes,x
     clc
     rts

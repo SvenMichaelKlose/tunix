@@ -8,6 +8,10 @@
  ;;;  (Commodore VIC-20 + UltiMem)  ;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+    jmp start
+
+__VIC20__ = 1
+
 ;;; CPU
 
 OP_LDA_IMM  = $a9
@@ -16,9 +20,22 @@ OP_STA_ABS  = $8d
 OP_JMP_ABS  = $4c
 OP_RTS      = $60
 
+;;; UltiMem
+
+.export ram123, io23, blk1, blk2, blk3, blk5
+MAX_BANKS   = 128
+FIRST_BANK  = 8
+ulticfg1    = $9ff1
+ulticfg2    = $9ff2
+ram123      = $9ff4
+io23        = $9ff6
+blk1        = $9ff8
+blk2        = $9ffa
+blk3        = $9ffc
+blk5        = $9ffe
+
 ;;; KERNAL
 
-;__VIC20__ = 1
 .include "cbm_kernal.inc"
 
 DFLTN       = $99
@@ -58,21 +75,6 @@ MAX_IOPAGES = 4
 ;;; MACHDEP
 
 IOPAGE_BASE = $7b
-
-;;; UltiMem
-
-.export ram123, io23, blk1, blk2, blk3, blk5
-
-MAX_BANKS   = 128
-FIRST_BANK  = 8
-ulticfg1    = $9ff1
-ulticfg2    = $9ff2
-ram123      = $9ff4
-io23        = $9ff6
-blk1        = $9ff8
-blk2        = $9ffa
-blk3        = $9ffc
-blk5        = $9ffe
 
     .zeropage
 
@@ -169,10 +171,6 @@ copy_bank:  .res 1
 
 global_end:
 global_size = global_end - global_start
-
-    .code
-
-    jmp start
 
 ;;;;;;;;;;;;;;
 ;;; MACROS ;;;
@@ -760,22 +758,23 @@ done:
 
     .rodata
 
-set_lowmem: .word $0000, $b000, $0400
-set_screen: .word $1000, $a000, $1000
-set_color:  .word $9400, $b400, $0400
-set_vic:
+vec_lowmem_to_blk5:
+    .word $0000, $b000, $0400
+vec_screen_to_blk5:
+    .word $1000, $a000, $1000
+vec_color_to_blk5:
+    .word $9400, $b400, $0400
+vec_vic_to_blk5:
     .word $9000, saved_vic+$2000, $0010
 
-set_blk5_to_lowmem:
+vec_blk5_to_lowmem:
     .word $b000, $0000, $0400
-set_blk5_to_screen:
+vec_blk5_to_screen:
     .word $a000, $1000, $1000
-set_blk5_to_color:
+vec_blk5_to_color:
     .word $b400, $9400, $0400
-set_blk5_to_vic:
+vec_blk5_to_vic:
     .word saved_vic+$2000, $9000, $0010
-
-set_io23: .word $9800, $b800, $07f0
 
     .code
 
@@ -787,21 +786,27 @@ set_io23: .word $9800, $b800, $07f0
 .export save_internal_ram
 .proc save_internal_ram
     get_procblk_y proc_low, blk5
-    smemcpyax set_lowmem
-    smemcpyax set_screen
-    ldaxi set_color
-    jmp smemcpy
+    smemcpyax vec_lowmem_to_blk5
+    smemcpyax vec_vic_to_blk5
+    smemcpyax vec_color_to_blk5
+    smemcpyax vec_screen_to_blk5
+    rts
 .endproc
 
 .export load_internal_ram
 .proc load_internal_ram
     get_procblk_y proc_low, blk5
-    smemcpyax set_blk5_to_lowmem
-    smemcpyax set_blk5_to_vic
-    smemcpyax set_blk5_to_color
-    ldaxi set_blk5_to_screen
-    jmp smemcpy
+    smemcpyax vec_blk5_to_lowmem
+    smemcpyax vec_blk5_to_vic
+    smemcpyax vec_blk5_to_color
+    smemcpyax vec_blk5_to_screen
+    rts
 .endproc
+
+    .rodata
+
+vec_io23_to_blk5:
+    .word $9800, $b800, $07f0
 
 .macro cpyblk procblk, blk
     jsr balloc
@@ -815,6 +820,8 @@ set_io23: .word $9800, $b800, $07f0
     ldy procblk,x
     jsr free_lbank
 .endmacro
+
+    .code
 
 ; Copy banks to new process
 ; Y: process ID
@@ -831,7 +838,7 @@ set_io23: .word $9800, $b800, $07f0
     jsr balloc
     sta proc_io23,y
     sta blk5
-    ldaxi set_io23
+    ldaxi vec_io23_to_blk5
     jsr smemcpy
     sty pid+$2000
     tsx
@@ -949,7 +956,7 @@ done:
 :   inc glfn_refs,x
     lnextx lfns, :-
 
-    ;; Machine-dependant process copy.
+    ;; Machine-dependend process copy.
 :   jsr fork_raw
 
     lda #PROC_RUNNING

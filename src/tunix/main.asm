@@ -93,14 +93,10 @@ ch:     .res 1
 tmp1:
 tmp1l:  .res 1
 tmp1h:  .res 1
-tmp2:   .res 2
-tmp3:   .res 2
-tmp4:   .res 2
 
 ptr1:   .res 2
 ptr2:   .res 2
 ptr3:   .res 2
-ptr4:   .res 2
 
     .data
 
@@ -1432,16 +1428,16 @@ l:  cpy pid
     lda filename+2
     clc
     adc #IOPAGE_BASE
-    sta ptr1+1
+    sta sh
     clc
     adc #$20    ; (Bump to BLK5.)
-    sta ptr2+1
+    sta dh
     lda #0
-    sta ptr1
-    sta ptr2
+    sta sl
+    sta dl
     tay
-:   lda (ptr1),y
-    sta (ptr2),y
+:   lda (s),y
+    sta (d),y
     iny
     bne :-
     pop blk5

@@ -838,7 +838,6 @@ vec_io23_to_blk5:
     ; speed code in BLK2.
     forkblky proc_ram123, ram123
     forkblky proc_io23, io23
-stop2:.export stop2
     forkblky proc_blk1, blk1
     forkblky proc_blk2, blk2
     forkblky proc_blk3, blk3
@@ -954,11 +953,12 @@ done:
     ;; Machine-dependend process copy.
 :   jsr fork_raw
 
+    ply
     lda #PROC_RUNNING
     sta proc_flags,y
 
     ;; Return PID.
-    pla
+    tya
     cmp pid
     bne :+
     lda #0  ; (for child)
@@ -1720,6 +1720,8 @@ err_invalid_num_free_procs:
 err_fail:
     .byte "TEST FAILED", 0
 
+txt_ex:.byte "CHILD",9
+
     .code
 
 FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
@@ -1771,7 +1773,8 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     beq :+
     error err_fail
     ; Exit child.
-:   lda #0
+:   print txt_ex
+    lda #0
     jmp exit
     ; Move on with child.
 :

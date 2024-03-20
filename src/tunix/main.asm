@@ -664,8 +664,6 @@ invalid_bank:
     rts
 .endproc
 
-    .code
-
 ;;;;;;;;;;;;;;;;;;
 ;;; SPEED COPY ;;;
 ;;;;;;;;;;;;;;;;;;
@@ -785,25 +783,21 @@ vec_io23_to_vic:
     jsr smemcpy
 .endmacro
 
-.export save_internal_ram
-.proc save_internal_ram
+.macro save_internal_ram
     get_procblk_y proc_low, blk5
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_lowmem_to_blk5
     smemcpyax vec_color_to_blk5
     smemcpyax vec_vic_to_blk5
-    rts
-.endproc
+.endmacro
 
-.export load_internal_ram
-.proc load_internal_ram
+.macro load_internal_ram
     get_procblk_y proc_low, blk5
     smemcpyax vec_blk5_to_lowmem
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_io23_to_vic
-    rts
-.endproc
+.endmacro
 
     .rodata
 
@@ -835,7 +829,7 @@ vec_io23_to_blk5:
 
     jsr balloc
     sta proc_low,y
-    jsr save_internal_ram
+    save_internal_ram
 
     jsr balloc
     sta proc_io23,y
@@ -881,7 +875,7 @@ vec_io23_to_blk5:
     ;;; Save current.
     pha
     ldy pid
-    jsr save_internal_ram
+    save_internal_ram
     set_procblk_y proc_low, ram123
     set_procblk_y proc_ram123, ram123
     set_procblk_y proc_io23, io23
@@ -895,7 +889,7 @@ vec_io23_to_blk5:
 
     ;; Load next.
     ply
-    jsr load_internal_ram
+    load_internal_ram
     get_procblk_y proc_low, ram123
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23

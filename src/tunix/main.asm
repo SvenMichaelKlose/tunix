@@ -104,14 +104,13 @@ ptr3:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
+.export global_start, banks, free_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
 
 global_start:
 
 ;; Extended memory banks
 banks:          .res MAX_BANKS
 free_bank:      .res 1
-first_bank:     .res 1
 bank_refs:      .res MAX_BANKS
 
 ;; IO pages
@@ -254,12 +253,12 @@ global_size = global_end - global_start
     sty to+1
 .endmacro
 
-.macro stzwi to, val
+.macro stwi to, val
     mvb to, #<val
     mvb to+1, #>val
 .endmacro
 
-.macro inczw at
+.macro incw at
     inc at
     bne :+
     inc at+1
@@ -312,16 +311,12 @@ global_size = global_end - global_start
     ldx free
     lda list,x
     sta free
-    lda #0
-    sta list,x
 .endmacro
 
 .macro lpopy list, free
     ldy free
     lda list,y
     sta free
-    lda #0
-    sta list,y
 .endmacro
 
 .macro lpushx list, first
@@ -612,7 +607,7 @@ m:  inc dh
 .endproc
 
 .macro print asciiz
-    stzwi ptr3, asciiz
+    stwi ptr3, asciiz
     jsr printstr
 .endmacro
 
@@ -624,6 +619,17 @@ m:  inc dh
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Globally, only free banks are tracked
+; via 'banks[]' and '*free_bank'.
+; The latter could be stored in
+; banks[0] instead. Items in 'bank_refs'
+; increment for each process that shares
+; a bank.
+;
+; Locally, only allocated banks are
+; tracked in deque 'lbanks/lbanksb',
+; starting with 'first_lbank'.
 
 ; Allocate bank
 ; Returns:
@@ -685,10 +691,8 @@ invalid_bank:
 .proc outa
     ldy #0
     sta (d),y
-    inc dl
-    bne :+
-    inc dh
-:   rts
+    incw d
+    rts
 .endproc
 
 .macro out val
@@ -708,16 +712,16 @@ invalid_bank:
     sta copy_bank
     sta blk5
     ; Source/dest argument values.
-    stzwi ptr1, $6000
-    stzwi ptr2, $a000
+    stwi ptr1, $6000
+    stwi ptr2, $a000
     ; Total move count.
-    stzwi c, $2100
+    stwi c, $2100
 
 next_bank:
     ; Per bank move count.
-    stzwi tmp1, ($2000 / 6)
+    stwi tmp1, ($2000 / 6)
     ; Bank fill pointer.
-    stzwi d, $a000
+    stwi d, $a000
 
 next_move:
     ;; Make move.
@@ -728,8 +732,8 @@ next_move:
 
     ;; Step
     ; Increment argument values.
-    inczw ptr1
-    inczw ptr2
+    incw ptr1
+    incw ptr2
     ; Decrement total move count.
     qdeczw c
     beq done
@@ -840,19 +844,16 @@ vec_io23_to_blk5:
     push blk3
     push blk5
 
-    cpyblk proc_io23, io23
-    save_internal_ram
-    sty pid+$2000
-    tsx
-    stx stack+$2000
-.export stop2
-stop2:
-
     cpyblk proc_ram123, ram123
+    cpyblk proc_io23, io23
     cpyblk proc_blk1, blk1
     cpyblk proc_blk2, blk2
     cpyblk proc_blk3, blk3
     cpyblk proc_blk5, blk5
+    save_internal_ram
+    sty pid+$2000
+    tsx
+    stx stack+$2000
 
     cpy pid
     beq :+
@@ -1030,7 +1031,7 @@ done:
     drmx procs, procsb, running
     jmp :++
 :   drmx procs, procsb, sleeping
-    ; Add to free.
+    ; Put on zombie list.
 :   lpushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
@@ -1505,7 +1506,7 @@ col:            .res 1
 has_ultimem:
     mvb bnk, #FIRST_BANK
 start_bank_write:
-    stzwi ptr1, $a000
+    stwi ptr1, $a000
     mvb blk5, bnk
 
 write_byte:
@@ -1536,7 +1537,7 @@ write_byte:
     mvb bnk, #FIRST_BANK
 
 start_bank_read:
-    stzwi ptr1, $a000
+    stwi ptr1, $a000
     mvb blk5, bnk
 
 read_byte:
@@ -1638,11 +1639,11 @@ r:  rts
     bne :-
     
     ;; Clear data.
-    stzwi d, global_start
-    stzwi c, global_size
+    stwi d, global_start
+    stwi c, global_size
     jsr bzero
-    stzwi d, $9800
-    stzwi c, $07f0
+    stwi d, $9800
+    stwi c, $07f0
     jsr bzero
 
     ;; Link lists.
@@ -1732,46 +1733,35 @@ err_invalid_glfn_order:
     .byte "INVALID GLFN ORDER", 0
 err_invalid_first_free_bank:
     .byte "INVALID FIRST FREE BANK", 0
+err_invalid_num_free_procs:
+    .byte "INVALID NUMBER OF FREE PROCS"
+    .byte 0
 err_fail:
     .byte "TEST FAILED", 0
 
     .code
 
+FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
+
 .export tests
 .proc tests
     jsr init
+    ldaxi banks
+    jsry list_length, free_bank
+    cpx #FREE_BANKS_AFTER_INIT
+    beq :+
+    error err_fail
 
     ;; Doubly used list arrays.
     ; Pop bank from free list.
-:   lpopx banks, free_bank
-    cpx #$70
-    beq :+
-    error err_invalid_first_free_bank
-    ; Push bank onto free list.
-:   lpushx banks, first_bank
+:   jsr balloc
+    jsr bfree
     ldaxi banks
     jsry list_length, free_bank
-    cpx #$68
+    cpx #FREE_BANKS_AFTER_INIT
     beq :+
     error err_fail
-:   ldaxi banks
-    jsry list_length, first_bank
-    cpx #1
-    beq :+
-    error err_fail
-    ; In reverse.
-:   lmovex banks, first_bank, free_bank
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx #$69
-    beq :+
-    error err_fail
-:   ldaxi banks
-    jsry list_length, first_bank
-    cpx #0
-    beq :+
-    error err_fail
- 
+
     ;; Deque
     ; Allocate first.
 :   dpopx procs, procsb, free_proc
@@ -1780,7 +1770,7 @@ err_fail:
     jsry list_length, free_proc
     cpx #MAX_PROCS - 2 ; (+ init)
     beq :+
-    error err_fail
+    error err_invalid_num_free_procs
 :   plx
     ; Free by index.
     daddx procs, procsb, running
@@ -1897,7 +1887,7 @@ tunix_vectors:
     sta filename,y
     dey
     jmp :-
-:   stzwi FNADR, filename
+:   stwi FNADR, filename
 
     ;; Assign driver to GLFN.
     ldy DEV
@@ -2036,9 +2026,8 @@ first_lbank:.res 1
 ; Deque of used ones
 lfns:       .res MAX_LFNS
 lfnsb:      .res MAX_LFNS
-; Translations to global LFNs
-lfn_glfn:   .res MAX_LFNS
 first_lfn:  .res 1
+lfn_glfn:   .res MAX_LFNS
 
 ;; Process info
 waiting:    .res MAX_PROCS

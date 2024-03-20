@@ -172,6 +172,8 @@ copy_bank:  .res 1
 global_end:
 global_size = global_end - global_start
 
+    .code
+
 ;;;;;;;;;;;;;;
 ;;; MACROS ;;;
 ;;;;;;;;;;;;;;
@@ -758,23 +760,23 @@ done:
 
     .rodata
 
-vec_lowmem_to_blk5:
-    .word $0000, $b000, $0400
-vec_screen_to_blk5:
-    .word $1000, $a000, $1000
-vec_color_to_blk5:
-    .word $9400, $b400, $0400
 vec_vic_to_blk5:
     .word $9000, saved_vic+$2000, $0010
+vec_screen_to_blk5:
+    .word $1000, $a000, $1000
+vec_lowmem_to_blk5:
+    .word $0000, $b000, $0400
+vec_color_to_blk5:
+    .word $9400, $b400, $0400
 
-vec_blk5_to_lowmem:
-    .word $b000, $0000, $0400
 vec_blk5_to_screen:
     .word $a000, $1000, $1000
+vec_blk5_to_lowmem:
+    .word $b000, $0000, $0400
 vec_blk5_to_color:
     .word $b400, $9400, $0400
-vec_blk5_to_vic:
-    .word saved_vic+$2000, $9000, $0010
+vec_io23_to_vic:
+    .word saved_vic, $9000, $0010
 
     .code
 
@@ -786,10 +788,10 @@ vec_blk5_to_vic:
 .export save_internal_ram
 .proc save_internal_ram
     get_procblk_y proc_low, blk5
-    smemcpyax vec_lowmem_to_blk5
-    smemcpyax vec_vic_to_blk5
-    smemcpyax vec_color_to_blk5
     smemcpyax vec_screen_to_blk5
+    smemcpyax vec_lowmem_to_blk5
+    smemcpyax vec_color_to_blk5
+    smemcpyax vec_vic_to_blk5
     rts
 .endproc
 
@@ -797,9 +799,9 @@ vec_blk5_to_vic:
 .proc load_internal_ram
     get_procblk_y proc_low, blk5
     smemcpyax vec_blk5_to_lowmem
-    smemcpyax vec_blk5_to_vic
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
+    smemcpyax vec_io23_to_vic
     rts
 .endproc
 
@@ -1808,7 +1810,7 @@ err_fail:
     ; Exit child.
 :   lda #0
     jmp exit
-    ; Schedule to child.
+    ; Move on with child.
 :
     jsr schedule
     ; Wait for child.

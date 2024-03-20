@@ -357,7 +357,7 @@ global_size = global_end - global_start
 ;;; DEQUE MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-.macro daddx fw, bw, first
+.macro dpushx fw, bw, first
     lda first
     sta fw,x
     lda #0
@@ -365,7 +365,7 @@ global_size = global_end - global_start
     stx first
 .endmacro
 
-.macro daddy fw, bw, first
+.macro dpushy fw, bw, first
     lda first
     sta fw,y
     lda #0
@@ -373,69 +373,57 @@ global_size = global_end - global_start
     sty first
 .endmacro
 
-.macro _dlinkx fw, bw
-    tay
+.macro drmx fw, bw, first
+    cpx first
+    bne :+
+    lda fw,x
+    sta first
+:   ; Link previous
     lda bw,x
-    sta bw,y
-    ; Link previous to next.
+    beq :+
     tay
     lda fw,x
     sta fw,y
+    ; Link next
+:   tax
+    beq :+
+    tya
+    sta bw,x
+:
 .endmacro
 
-.macro _dlinky fw, bw
-    tax
+.macro drmy fw, bw, first
+    cpy first
+    bne :+
+    lda fw,y
+    sta first
+:   ; Link previous
     lda bw,y
-    sta bw,x
-    ; Link previous to next.
+    beq :+
     tax
     lda fw,y
     sta fw,x
-.endmacro
-
-.macro dpopx fw, bw, first_free
-    ldx first_free
-    lda fw,x
-    sta first_free
-    _dlinkx fw, bw
-.endmacro
-
-.macro dpopy fw, bw, first_free
-    ldy first_free
-    lda fw,y
-    sta first_free
-    _dlinky fw, bw
-.endmacro
-
-.macro drmx fw, bw, first_free
-    lda fw,x
-    cpx first_free
-    bne :+
-    sta first_free
-:   _dlinkx fw, bw
-.endmacro
-
-.macro drmy fw, bw, first_free
-    lda fw,y
-    cpy first_free
-    bne :+
-    sta first_free
-:   _dlinky fw, bw
+    ; Link next
+:   tay
+    beq :+
+    txa
+    sta bw,y
+:
 .endmacro
 
 .macro dallocx fw, bw, from, to
-    dpopx fw, bw, from
-    daddx fw, bw, to
+    lpopx fw, from
+    dpushx fw, bw, to
 .endmacro
 
 .macro dallocy fw, bw, from, to
-    dpopy fw, bw, from
-    daddy fw, bw, to
+    lpopy fw, from
+    dpushy fw, bw, to
 .endmacro
 
 .macro dmovex fw, bw, from, to
     drmx fw, bw, from
-    daddx fw, bw, to
+    dpushx fw, bw, to
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -643,7 +631,7 @@ m:  inc dh
     cpx #0
     beq :+  ; Oops…
     ;; Own it.
-    daddx lbanks, lbanksb, first_lbank
+    dpushx lbanks, lbanksb, first_lbank
     inc bank_refs,x
 :   ldy tmp1
     txa
@@ -1312,7 +1300,6 @@ syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
-syscall1 tunix_terminate, terminate, lda
 
 ; "PF"
 .export tunix_fork
@@ -1758,7 +1745,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
 
     ;; Deque
     ; Allocate first.
-:   dpopx procs, procsb, free_proc
+:   lpopx procs, free_proc
     phx
     ldaxi procs
     jsry list_length, free_proc
@@ -1766,8 +1753,8 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     beq :+
     error err_invalid_num_free_procs
 :   plx
-    ; Free by index.
-    daddx procs, procsb, running
+    ; Push onto running.
+    dpushx procs, procsb, running
     ldaxi procs
     jsry list_length, running
     cpx #1

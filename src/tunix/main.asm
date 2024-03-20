@@ -265,14 +265,14 @@ global_size = global_end - global_start
 :
 .endmacro
 
-.macro qdeczw at
+.macro qdecw at
     dec at
     bne :+
     dec at+1
 :
 .endmacro
 
-.macro jqdeczw at, to
+.macro jqdecw at, to
     dec at
     bne to
     dec at+1
@@ -699,7 +699,7 @@ invalid_bank:
     jsra outa, val
 .endmacro
 
-.macro outzw at
+.macro outw at
     jsra outa, at
     jsra outa, at+1
 .endmacro
@@ -726,19 +726,19 @@ next_bank:
 next_move:
     ;; Make move.
     out #OP_LDA_ABS
-    outzw ptr1
+    outw ptr1
     out #OP_STA_ABS
-    outzw ptr2
+    outw ptr2
 
     ;; Step
     ; Increment argument values.
     incw ptr1
     incw ptr2
     ; Decrement total move count.
-    qdeczw c
+    qdecw c
     beq done
     ; Decrement per bank move count.
-    jqdeczw tmp1, next_move
+    jqdecw tmp1, next_move
 
     ;; Make switch to next bank.
     out #OP_LDA_IMM

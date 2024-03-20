@@ -810,11 +810,11 @@ vec_io23_to_blk5:
     .word $9800, $b800, $07f0
 
 .macro forkblky procblk, srcblk
+    push srcblk
     jsr balloc
     sta procblk,y
     sta blk5
-    ldx pid
-    lda procblk,x
+    pla
     jsr copy_blk3_to_blk5
 .endmacro
 
@@ -838,6 +838,7 @@ vec_io23_to_blk5:
     ; speed code in BLK2.
     forkblky proc_ram123, ram123
     forkblky proc_io23, io23
+stop2:.export stop2
     forkblky proc_blk1, blk1
     forkblky proc_blk2, blk2
     forkblky proc_blk3, blk3
@@ -928,7 +929,6 @@ done:
 
 .export fork
 .proc fork
-stop2:.export stop2
     ;; Grab process slot.
     dallocy procs, procsb, free_proc, running
     cpy #0

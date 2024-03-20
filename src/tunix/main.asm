@@ -104,7 +104,7 @@ ptr3:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_low, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
+.export global_start, banks, free_bank, first_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
 
 global_start:
 
@@ -143,7 +143,6 @@ PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
 exit_codes: .res MAX_PROCS
 ; Current banks.
-proc_low:   .res MAX_PROCS
 proc_ram123:.res MAX_PROCS
 proc_io23:  .res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
@@ -798,7 +797,7 @@ vec_io23_to_vic:
 .endmacro
 
 .macro save_internal_ram
-    get_procblk_y proc_low, blk5
+    get_procblk_y proc_io23, blk5
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_lowmem_to_blk5
     smemcpyax vec_color_to_blk5
@@ -806,7 +805,7 @@ vec_io23_to_vic:
 .endmacro
 
 .macro load_internal_ram
-    get_procblk_y proc_low, blk5
+    get_procblk_y proc_io23, blk5
     smemcpyax vec_blk5_to_lowmem
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
@@ -841,18 +840,13 @@ vec_io23_to_blk5:
     push blk3
     push blk5
 
-    jsr balloc
-    sta proc_low,y
+    cpyblk proc_io23, io23
     save_internal_ram
-
-    jsr balloc
-    sta proc_io23,y
-    sta blk5
-    ldaxi vec_io23_to_blk5
-    jsr smemcpy
     sty pid+$2000
     tsx
     stx stack+$2000
+.export stop2
+stop2:
 
     cpyblk proc_ram123, ram123
     cpyblk proc_blk1, blk1
@@ -866,7 +860,6 @@ vec_io23_to_blk5:
     ;; Remove parent banks from child's.
     enter_context_y
     ldx pid
-    rmlbankx proc_low
     rmlbankx proc_ram123
     rmlbankx proc_io23
     rmlbankx proc_blk1
@@ -888,22 +881,22 @@ vec_io23_to_blk5:
     ;;; Save current.
     pha
     ldy pid
-    save_internal_ram
-    set_procblk_y proc_low, ram123
     set_procblk_y proc_ram123, ram123
     set_procblk_y proc_io23, io23
     set_procblk_y proc_blk1, blk1
     set_procblk_y proc_blk2, blk2
     set_procblk_y proc_blk3, blk3
     set_procblk_y proc_blk5, blk5
+    mvb blk5, io23
+    save_internal_ram
     tsx
     inx ; (Undo the 'pha'.)
     stx stack
 
     ;; Load next.
     ply
+    get_procblk_y proc_io23, blk5
     load_internal_ram
-    get_procblk_y proc_low, ram123
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
     get_procblk_y proc_blk1, blk1
@@ -1643,8 +1636,6 @@ r:  rts
     inx
     cpx #16
     bne :-
-.export stop2
-stop2:
     
     ;; Clear data.
     stzwi d, global_start
@@ -1701,7 +1692,6 @@ stop2:
 
     ;; Make init process.
     print txt_init
-    mvb proc_low, ram123
     mvb proc_ram123, ram123
     mvb proc_io23, io23
     mvb proc_blk1, blk1

@@ -65,6 +65,8 @@ IOPAGE_BASE = $7b
 
 MAX_BANKS   = 128
 FIRST_BANK  = 8
+ulticfg1    = $9ff1
+ulticfg2    = $9ff2
 ram123      = $9ff4
 io23        = $9ff6
 blk1        = $9ff8
@@ -832,6 +834,8 @@ set_io23: .word $9800, $b800, $07f0
     ldaxi set_io23
     jsr smemcpy
     sty pid+$2000
+    tsx
+    stx stack+$2000
 
     cpyblk proc_ram123, ram123
     cpyblk proc_blk1, blk1
@@ -877,7 +881,7 @@ set_io23: .word $9800, $b800, $07f0
     set_procblk_y proc_blk3, blk3
     set_procblk_y proc_blk5, blk5
     tsx
-    inx
+    inx ; (Undo the 'pha'.)
     stx stack
 
     ;; Load next.
@@ -932,7 +936,6 @@ done:
 .export fork0
 .proc fork0
     phy
-    jsr fork_raw
 
     ;; Increment bank refs.
     ldx first_lbank
@@ -946,11 +949,8 @@ done:
 :   inc glfn_refs,x
     lnextx lfns, :-
 
-:   push blk5
-    io23y_at_blk5
-    tsx
-    stx stack+$2000
-    pop blk5
+    ;; Machine-dependant process copy.
+:   jsr fork_raw
 
     lda #PROC_RUNNING
     sta proc_flags,y
@@ -1618,6 +1618,23 @@ r:  rts
 
 .export init
 .proc init
+    ;; Ensure RAM bank configuration.
+    lda #$ff
+    sta ulticfg1
+    sta ulticfg2
+    ldx #4
+:   txa
+    lsr
+    sta $9ff0,x
+    inx
+    lda #0
+    sta $9ff0,x
+    inx
+    cpx #16
+    bne :-
+.export stop2
+stop2:
+    
     ;; Clear data.
     stzwi d, global_start
     stzwi c, global_size
@@ -1661,8 +1678,11 @@ r:  rts
     sta drvs + MAX_DRVS - 1
     sta iopages + MAX_IOPAGES - 1
 
+    ;; Init machdep.
+    push blk5
     jsr init_ultimem
     jsr gen_speedcode
+    pop blk5
 
     ;; Point devices to KERNAL.
     mvb drv_vl, #$1a
@@ -1782,7 +1802,8 @@ err_fail:
 :   lda #0
     jmp exit
     ; Schedule to child.
-:   jsr schedule
+:
+    jsr schedule
     ; Wait for child.
     lda #1
     jsr wait
@@ -1827,6 +1848,9 @@ err_fail:
 :   rts
 .endproc
 
+; Call driver
+; Switches in BLK1 only(!)
+; in.
 ; X: GLFN
 ; A: vector offset
 .export call_driver

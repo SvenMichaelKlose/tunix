@@ -235,13 +235,13 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;
 
 .macro ldaxi val
-    lda #<val
-    ldx #>val
+    lda #<(val)
+    ldx #>(val)
 .endmacro
 
 .macro ldayi val
-    lda #<val
-    ldy #>val
+    lda #<(val)
+    ldy #>(val)
 .endmacro
 
 .macro stax to
@@ -255,8 +255,8 @@ global_size = global_end - global_start
 .endmacro
 
 .macro stwi to, val
-    mvb to, #<val
-    mvb to+1, #>val
+    mvb to, #<(val)
+    mvb to+1, #>(val)
 .endmacro
 
 .macro incw at
@@ -626,7 +626,7 @@ m:  inc dh
 ;  X: Bank #
 .export balloc
 .proc balloc
-    sty tmp1
+    phy
     ;; Draw from global pool.
     lpopx banks, free_bank
     cpx #0
@@ -634,7 +634,7 @@ m:  inc dh
     ;; Own it.
     dpushx lbanks, lbanksb, first_lbank
     inc bank_refs,x
-:   ldy tmp1
+:   ply
     txa
     rts
 .endproc
@@ -851,7 +851,6 @@ vec_io23_to_blk5:
     dpushx lbanks, lbanksb, first_lbank
 
     ; Set return stack.
-stop2:.export stop2
     tsx
     stx stack
 
@@ -869,6 +868,9 @@ stop2:.export stop2
     forkblky proc_blk3, tmp1+1
     forkblky proc_blk5, tmp2
 
+    cpy #0
+    beq :+
+
     ;; Remove parents default banks.
     ldx pid
 .macro dereflbankx procblk
@@ -882,41 +884,10 @@ stop2:.export stop2
     dereflbankx proc_blk3
     dereflbankx proc_blk5
 
-    mvb blk2, tmp1
+:   mvb blk2, tmp1
     mvb blk3, tmp1+1
     mvb blk5, tmp2
     mvb io23, tmp2+1
-    rts
-.endproc
-
-; Switch to process.
-; A: Process ID
-.export switch
-.proc switch
-    ;;; Save current.
-    tsx
-    stx stack
-    pha
-    ldy pid
-    set_procblk_y proc_ram123, ram123
-    set_procblk_y proc_io23, io23
-    set_procblk_y proc_blk1, blk1
-    set_procblk_y proc_blk2, blk2
-    set_procblk_y proc_blk3, blk3
-    set_procblk_y proc_blk5, blk5
-    save_internal_ram_to_blk5_y
-
-    ;; Load next.
-    ply
-    load_internal_ram_from_blk5_y
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk1, blk1
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
-    ldx stack
-    txs
     rts
 .endproc
 
@@ -957,8 +928,6 @@ done:
 ; Y: New process ID.
 .export fork0
 .proc fork0
-    phy
-
     ;; Increment bank refs.
     ldx first_lbank
     beq :++
@@ -972,9 +941,10 @@ done:
     lnextx lfns, :-
 
     ;; Machine-dependend process copy.
-:   jsr fork_raw
-
+:   phy
+    jsr fork_raw
     ply
+
     lda #PROC_RUNNING
     sta proc_flags,y
 
@@ -1155,27 +1125,6 @@ not_to_resume:
     sta exit_codes,x
     jsr zombify
     jmp resume_waiting
-.endproc
-
-; Schedule task switch
-.export schedule
-.proc schedule
-    php
-    pha
-    phx
-    phy
-    ldx pid
-    lda procs,x
-    bne :+
-    lda running
-:   cmp pid
-    beq :+
-    jsr switch
-:   ply
-    plx
-    pla
-    plp
-    rts
 .endproc
 
 ; XA: Start address
@@ -1491,6 +1440,25 @@ col:            .res 1
 
     .code
 
+.export init_ultimem_banks
+.proc init_ultimem_banks
+    ;; Ensure RAM bank configuration.
+    lda #$ff
+    sta ulticfg1
+    sta ulticfg2
+    ldx #4
+:   txa
+    lsr
+    sta $9ff0,x
+    inx
+    lda #0
+    sta $9ff0,x
+    inx
+    cpx #16
+    bne :-
+    rts
+.endproc
+
 .export init_ultimem
 .proc init_ultimem
     ; Unhide UltiMem registers
@@ -1621,30 +1589,26 @@ err_ultimem_num_banks_in_list:
 r:  rts
 .endproc
 
+io_size = io_end - io_start
+
 .export init
 .proc init
-    ;; Ensure RAM bank configuration.
-    lda #$ff
-    sta ulticfg1
-    sta ulticfg2
-    ldx #4
-:   txa
-    lsr
-    sta $9ff0,x
-    inx
-    lda #0
-    sta $9ff0,x
-    inx
-    cpx #16
-    bne :-
-    
+    jsr init_ultimem_banks
+
     ;; Clear data.
     stwi d, global_start
     stwi c, global_size
     jsr bzero
-    stwi d, $9800
-    stwi c, $07f0
+    stwi d, io_end
+    stwi c, $07f0-io_size
     jsr bzero
+
+    ;; Copy IO code.
+    stwi s, io_load
+    stwi d, $9800
+    stwi c, io_end-io_start
+    jsr memcpy
+stop2:.export stop2
 
     ;; Link lists.
     ldx #0
@@ -1682,10 +1646,9 @@ r:  rts
     sta iopages + MAX_IOPAGES - 1
 
     ;; Init machdep.
-    push blk5
     jsr init_ultimem
     jsr gen_speedcode
-    pop blk5
+    jsr init_ultimem_banks
 
     ;; Point devices to KERNAL.
     mvb drv_vl, #$1a
@@ -1699,7 +1662,9 @@ r:  rts
     ; Use new banks.
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
+    sta tunix_io23
     get_procblk_y proc_blk1, blk1
+    sta tunix_blk1
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
@@ -1825,7 +1790,68 @@ FREE_BANKS_AFTER_INIT = $6d ;MAX_BANKS - FIRST_BANK - 6
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
 
-.byte "DIPATCH"
+io_load:
+
+    .org $9800
+
+io_start:
+
+tunix_vectors:
+.word open, chkin, ckout, basin, bsout
+.word getin, clrcn, close, clall, stop
+.word usrcmd, load, save, blkin, bkout
+
+; Switch to process.
+; A: Process ID
+.export switch
+.proc switch
+    ;;; Save current.
+    tsx
+    stx stack
+    pha
+    ldy pid
+    set_procblk_y proc_ram123, ram123
+    set_procblk_y proc_io23, io23
+    set_procblk_y proc_blk1, blk1
+    set_procblk_y proc_blk2, blk2
+    set_procblk_y proc_blk3, blk3
+    set_procblk_y proc_blk5, blk5
+    save_internal_ram_to_blk5_y
+
+    ;; Load next.
+    ply
+    load_internal_ram_from_blk5_y
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk1, blk1
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    ldx stack
+    txs
+    rts
+.endproc
+
+; Schedule task switch
+.export schedule
+.proc schedule
+    php
+    pha
+    phx
+    phy
+    ldx pid
+    lda procs,x
+    bne :+
+    lda running
+:   cmp pid
+    beq :+
+    jsr switch
+:   ply
+    plx
+    pla
+    plp
+    rts
+.endproc
 
 ; Translate local to global LFN.
 ; X: LFN
@@ -1869,15 +1895,6 @@ j:  jsr $fffe
     pop blk1
     rts
 .endproc
-
-    .rodata
-
-tunix_vectors:
-.word open, chkin, ckout, basin, bsout
-.word getin, clrcn, close, clall, stop
-.word usrcmd, load, save, blkin, bkout
-
-    .code
 
 .export open
 .proc open
@@ -2013,14 +2030,16 @@ blkiohandler save, IDX_SAVE
     jmpa call_driver, #IDX_STOP
 .endproc
 
+io_end:
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOCAL (per process) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    .bss
-    .org $9800
-
 .export lbanks, lbanksb, first_lbank, lfns, lfnsb, lfn_glfn, first_lfn, waiting, waiting_pid, free_wait, first_wait, pid, ppid, reg_a, reg_x, reg_y, stack, flags, saved_vic, filename, response, response_len, responsep
+
+tunix_io23: .res 1
+tunix_blk1: .res 1
 
 ;; Extended memory banks
 ; List of used ones.

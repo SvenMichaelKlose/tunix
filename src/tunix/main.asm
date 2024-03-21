@@ -36,7 +36,25 @@ blk5        = $9ffe
 
 ;;; KERNAL
 
-.include "cbm_kernal.inc"
+;.include "cbm_kernal.inc"
+
+READST      = $ffb7
+SETLFN      = $ffba
+SETNAM      = $ffbd
+OPEN        = $ffc0
+CLOSE       = $ffc3
+CHKIN       = $ffc6
+CKOUT       = $ffc9
+CLRCN       = $ffcc
+BASIN       = $ffcf
+BSOUT       = $ffd2
+LOAD        = $ffd5
+SAVE        = $ffd8
+SETTIM      = $ffdb
+RDTIM       = $ffde
+STOP        = $ffe1
+GETIN       = $ffe4
+CLALL       = $ffe7
 
 DFLTN       = $99
 DFLTO       = $9a
@@ -1623,7 +1641,6 @@ io_size = io_end - io_start
     stwi d, $9800
     stwi c, io_end-io_start
     jsr memcpy
-stop2:.export stop2
 
     ;; Link lists.
     ldx #0
@@ -1767,26 +1784,44 @@ FREE_BANKS_AFTER_INIT = $6d ;MAX_BANKS - FIRST_BANK - 6
  
     ;;; Syscalls
 :   jsr init
+
     ;; Fork
-    jsr fork
+stop2:.export stop2
+    lda #31
+    jsr SETLFN
+    lda #2
+    ldx #<cmd_fork
+    ldy #<cmd_fork
+    jsr SETNAM
+    jsr OPEN
     cmp #1
     beq :++
     cmp #0
     beq :+
     error err_fail
+
     ; Exit child.
 :   print txt_ex
     lda #0
-    jmp exit
+    lda #3
+    ldx #<cmd_exit
+    ldy #<cmd_exit
+    jsr SETNAM
+    jsr OPEN
+
     ; Move on with child.
-:
-    jsr schedule
+:   lda #0
+    jsr SETNAM
+    jsr OPEN
     ; Wait for child.
     lda #1
     jsr wait
 
     rts
 .endproc
+
+cmd_fork:   .byte "PF"
+cmd_exit:   .byte "PE", 0
 
 .export halt
 .proc halt

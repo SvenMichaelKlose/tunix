@@ -442,13 +442,21 @@ global_size = global_end - global_start
 .endmacro
 
 .macro set_procblk_x proc, blk
-    lda blk
+    push blk1
+    push blk
+    mvb blk1, tunix_blk1
+    pla
     sta proc,x
+    pop blk1
 .endmacro
 
 .macro set_procblk_y proc, blk
-    lda blk
+    push blk1
+    push blk
+    mvb blk1, tunix_blk1
+    pla
     sta proc,y
+    pop blk1
 .endmacro
 
 .macro io23x
@@ -821,10 +829,12 @@ vec_io23_to_blk5:
 ; Y: new process ID
 .export fork_raw
 .proc fork_raw
-    mvb tmp1, blk2
-    mvb tmp1+1, blk3
-    mvb tmp2, blk5
-    mvb tmp2+1, io23
+    push blk1
+    push blk2
+    push blk3
+    push blk5
+    push io23
+    mvb blk1, tunix_blk1
 
     ; Allocate bank without local ref.
     lpopx banks, free_bank
@@ -884,10 +894,11 @@ vec_io23_to_blk5:
     dereflbankx proc_blk3
     dereflbankx proc_blk5
 
-:   mvb blk2, tmp1
-    mvb blk3, tmp1+1
-    mvb blk5, tmp2
-    mvb io23, tmp2+1
+    pop io23
+    pop blk5
+    pop blk3
+    pop blk2
+    pop blk1
     rts
 .endproc
 
@@ -916,6 +927,9 @@ done:
 ; on the same bank as the IO23 area
 ; which is reserved for TUNIX and
 ; driver code.
+
+.macro enter_tunix
+.endmacro
 
 .export fork
 .proc fork
@@ -959,6 +973,7 @@ done:
 
 .export no_more_procs
 .proc no_more_procs
+    pop blk1
     sec
     rts
 .endproc
@@ -1801,6 +1816,28 @@ tunix_vectors:
 .word getin, clrcn, close, clall, stop
 .word usrcmd, load, save, blkin, bkout
 
+stmp:   .res 1
+
+.proc save_banks_y
+    set_procblk_y proc_ram123, ram123
+    set_procblk_y proc_io23, io23
+    set_procblk_y proc_blk1, blk1
+    set_procblk_y proc_blk2, blk2
+    set_procblk_y proc_blk3, blk3
+    set_procblk_y proc_blk5, blk5
+    rts
+.endproc
+
+.proc load_banks_y
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    get_procblk_y proc_blk1, blk1
+    rts
+.endproc
+
 ; Switch to process.
 ; A: Process ID
 .export switch
@@ -1810,23 +1847,13 @@ tunix_vectors:
     stx stack
     pha
     ldy pid
-    set_procblk_y proc_ram123, ram123
-    set_procblk_y proc_io23, io23
-    set_procblk_y proc_blk1, blk1
-    set_procblk_y proc_blk2, blk2
-    set_procblk_y proc_blk3, blk3
-    set_procblk_y proc_blk5, blk5
+    jsr save_banks_y
     save_internal_ram_to_blk5_y
 
     ;; Load next.
     ply
     load_internal_ram_from_blk5_y
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk1, blk1
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
+    jsr load_banks_y
     ldx stack
     txs
     rts
@@ -1872,8 +1899,6 @@ tunix_vectors:
 .endproc
 
 ; Call driver
-; Switches in BLK1 only(!)
-; in.
 ; X: GLFN
 ; A: vector offset
 .export call_driver
@@ -1887,12 +1912,23 @@ tunix_vectors:
     adc #0
     sta j+2
 
-    push blk1
+    ;; Bank in driver BLK1.
     ldx drv_pid,y
     get_procblk_x proc_blk1, blk1
     load_regs
+
 j:  jsr $fffe
-    pop blk1
+
+    ; Restore BLK1.
+    php
+    pha
+    phx
+    mvb blk1, tunix_blk1
+    ldx pid
+    get_procblk_x proc_blk1, blk1
+    phx
+    pha
+    plp
     rts
 .endproc
 
@@ -1900,8 +1936,6 @@ j:  jsr $fffe
 .proc open
     pushw FNADR
     push LFN
-    jsr lfn_to_glfn
-    sta LFN
 
     ;; Copy file name.
     ldy FNLEN
@@ -1911,6 +1945,11 @@ j:  jsr $fffe
     dey
     jmp :-
 :   stwi FNADR, filename
+
+    mvb blk1, tunix_blk1
+
+    jsr lfn_to_glfn
+    sta LFN
 
     ;; Assign driver to GLFN.
     ldy DEV
@@ -1931,6 +1970,9 @@ j:  jsr $fffe
 
 .export chkin
 .proc chkin
+    pha
+    mvb blk1, tunix_blk1
+    pla
     jsr lfn_to_glfn
     sta reg_a
     jmpa call_driver, #IDX_CHKIN
@@ -1938,6 +1980,9 @@ j:  jsr $fffe
 
 .export ckout
 .proc ckout
+    pha
+    mvb blk1, tunix_blk1
+    pla
     jsr lfn_to_glfn
     sta reg_a
     jmpa call_driver, #IDX_CKOUT
@@ -1946,6 +1991,9 @@ j:  jsr $fffe
 .macro iohandler name, lfn, drvop
     .export name
     .proc name
+    pha
+    mvb blk1, tunix_blk1
+    pla
         save_regs
         push lfn
         jsr lfn_to_glfn
@@ -1970,6 +2018,9 @@ iohandler bkout, DFLTO, IDX_BKOUT
 
 .export clrcn
 .proc clrcn
+    pha
+    mvb blk1, tunix_blk1
+    pla
     jsr lfn_to_glfn
     sta reg_a
     ldy glfn_drv,x
@@ -1981,6 +2032,9 @@ iohandler bkout, DFLTO, IDX_BKOUT
 
 .export close
 .proc close
+    pha
+    mvb blk1, tunix_blk1
+    pla
     jsr lfn_to_glfn
     sta reg_a
     ldy glfn_drv,x
@@ -2005,6 +2059,9 @@ r:  rts
 
 .export stop
 .proc stop
+    pha
+    mvb blk1, tunix_blk1
+    pla
     ldx #0
     jsra call_driver, #IDX_STOP
     rts
@@ -2013,6 +2070,9 @@ r:  rts
 .macro blkiohandler name, idx
     .export name
     .proc name
+        pha
+        mvb blk1, tunix_blk1
+        pla
         save_regs
         ldy DEV
         ldx dev_drv,y
@@ -2026,6 +2086,9 @@ blkiohandler save, IDX_SAVE
 
 .export usrcmd
 .proc usrcmd
+    pha
+    mvb blk1, tunix_blk1
+    pla
     ldx #0
     jmpa call_driver, #IDX_STOP
 .endproc

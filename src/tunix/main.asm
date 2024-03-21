@@ -93,6 +93,7 @@ ch:     .res 1
 tmp1:
 tmp1l:  .res 1
 tmp1h:  .res 1
+tmp2:   .res 2
 
 ptr1:   .res 2
 ptr2:   .res 2
@@ -748,6 +749,7 @@ done:
 .export copy_blk3_to_blk5
 .proc copy_blk3_to_blk5
     sta blk3
+    stx blk5
     lda copy_bank
 .endproc
 
@@ -778,8 +780,8 @@ vec_blk5_to_lowmem:
     .word $b000, $0000, $0400
 vec_blk5_to_color:
     .word $b400, $9400, $0400
-vec_io23_to_vic:
-    .word saved_vic, $9000, $0010
+vec_blk5_to_vic:
+    .word saved_vic+$2000, $9000, $0010
 
     .code
 
@@ -788,20 +790,24 @@ vec_io23_to_vic:
     jsr smemcpy
 .endmacro
 
-.macro save_internal_ram
-    get_procblk_y proc_io23, blk5
+.macro save_internal_ram_to_blk5
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_lowmem_to_blk5
     smemcpyax vec_color_to_blk5
     smemcpyax vec_vic_to_blk5
 .endmacro
 
-.macro load_internal_ram
+.macro save_internal_ram_to_blk5_y
+    get_procblk_y proc_io23, blk5
+    save_internal_ram_to_blk5
+.endmacro
+
+.macro load_internal_ram_from_blk5_y
     get_procblk_y proc_io23, blk5
     smemcpyax vec_blk5_to_lowmem
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
-    smemcpyax vec_io23_to_vic
+    smemcpyax vec_blk5_to_vic
 .endmacro
 
     .rodata
@@ -809,61 +815,77 @@ vec_io23_to_vic:
 vec_io23_to_blk5:
     .word $9800, $b800, $07f0
 
-.macro forkblky procblk, srcblk
-    push srcblk
-    jsr balloc
-    sta procblk,y
-    sta blk5
-    pla
-    jsr copy_blk3_to_blk5
-.endmacro
-
-.macro dereflbankx procblk
-    ldy procblk,x
-    jsr free_lbank
-.endmacro
-
     .code
 
 ; Copy banks to new process
 ; Y: new process ID
 .export fork_raw
 .proc fork_raw
-    push blk2
-    push blk3
-    push blk5
-    sta tmp1
+    mvb tmp1, blk2
+    mvb tmp1+1, blk3
+    mvb tmp2, blk5
+    mvb tmp2+1, io23
+
+    ; Allocate bank without local ref.
+    lpopx banks, free_bank
+    inc bank_refs,x
+    txa
+    sta proc_io23,y
+
+    ; Copy IO23.
+    phx
+    sta blk5
+    ldaxi vec_io23_to_blk5
+    jsr smemcpy
+    ; Low, screen, color, VIC.
+    save_internal_ram_to_blk5
+
+    ; Switch to child context.
+    pop io23
+
+    ; New PID.
+    sty pid
+
+    ; Add local ref.
+    tax
+    dpushx lbanks, lbanksb, first_lbank
+
+    ; Set return stack.
+stop2:.export stop2
+    tsx
+    stx stack
 
     ; Copies from BLK3 to BLK5 with
     ; speed code in BLK2.
+    .macro forkblky procblk, srcblk
+        jsr balloc
+        sta procblk,y
+        lda srcblk
+        jsr copy_blk3_to_blk5
+    .endmacro
     forkblky proc_ram123, ram123
-    forkblky proc_io23, io23
     forkblky proc_blk1, blk1
-    forkblky proc_blk2, blk2
-    forkblky proc_blk3, blk3
-    forkblky proc_blk5, blk5
-    save_internal_ram
-    sty pid+$2000
-    tsx
-    stx stack+$2000
+    forkblky proc_blk2, tmp1
+    forkblky proc_blk3, tmp1+1
+    forkblky proc_blk5, tmp2
 
-    cpy pid
-    beq :+
-
-    ;; Remove parent banks from child's.
-    enter_context_y
+    ;; Remove parents default banks.
     ldx pid
+.macro dereflbankx procblk
+    ldy procblk,x
+    jsr free_lbank
+.endmacro
     dereflbankx proc_ram123
     dereflbankx proc_io23
     dereflbankx proc_blk1
     dereflbankx proc_blk2
     dereflbankx proc_blk3
     dereflbankx proc_blk5
-    leave_context
 
-:   pop blk5
-    pop blk3
-    pop blk2
+    mvb blk2, tmp1
+    mvb blk3, tmp1+1
+    mvb blk5, tmp2
+    mvb io23, tmp2+1
     rts
 .endproc
 
@@ -872,6 +894,8 @@ vec_io23_to_blk5:
 .export switch
 .proc switch
     ;;; Save current.
+    tsx
+    stx stack
     pha
     ldy pid
     set_procblk_y proc_ram123, ram123
@@ -880,15 +904,11 @@ vec_io23_to_blk5:
     set_procblk_y proc_blk2, blk2
     set_procblk_y proc_blk3, blk3
     set_procblk_y proc_blk5, blk5
-    mvb blk5, io23
-    save_internal_ram
-    tsx
-    inx ; (Undo the 'pha'.)
-    stx stack
+    save_internal_ram_to_blk5_y
 
     ;; Load next.
     ply
-    load_internal_ram
+    load_internal_ram_from_blk5_y
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
     get_procblk_y proc_blk1, blk1
@@ -934,6 +954,7 @@ done:
     beq no_more_procs
 .endproc
 
+; Y: New process ID.
 .export fork0
 .proc fork0
     phy
@@ -1176,8 +1197,7 @@ not_to_resume:
 ; Returns: X: driver ID or 0.
 .export register
 .proc register
-    sta ptr1
-    stx ptr1+1
+    stax ptr1
 
     ;; Get slot.
     lpopx drvs, drvs
@@ -1672,16 +1692,18 @@ r:  rts
     mvb drv_vh, #$03
 
     ;; Make init process.
-    print txt_init
-    mvb proc_ram123, ram123
-    mvb proc_io23, io23
-    mvb proc_blk1, blk1
-    mvb proc_blk2, blk2
-    mvb proc_blk3, blk3
-    mvb proc_blk5, blk5
+    print txt_init  ; Print '.'.
     ldy #0
     sty procs ; Unlink from free list.
-    jmp fork0 ; Fork into process 0.
+    jsr fork0 ; Fork into process 0.
+    ; Use new banks.
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk1, blk1
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    rts
 .endproc
 
     .rodata
@@ -1724,7 +1746,7 @@ txt_ex:.byte "CHILD",9
 
     .code
 
-FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
+FREE_BANKS_AFTER_INIT = $6d ;MAX_BANKS - FIRST_BANK - 6
 
 .export tests
 .proc tests

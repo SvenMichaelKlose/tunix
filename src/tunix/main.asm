@@ -613,6 +613,7 @@ m:  inc dh
 .export printstr
 .proc printstr
     mvb tmp1, #0
+    jsr CLALL
     phx
 :   ldy tmp1
     lda (ptr3),y
@@ -1212,7 +1213,7 @@ not_to_resume:
 .export tunix_driver
 tunix_driver:
     .word tunix_open, tunix, tunix
-    .word tunix_basin, tunix, tunix
+    .word tunix, tunix, tunix_basin
     .word tunix, tunix, tunix, tunix
     .word tunix, tunix, tunix, tunix
     .word tunix
@@ -1815,6 +1816,10 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
+debug:.export debug
+    pha
+    jsr CLALL
+    pla
     cmp #1
     beq :++
     cmp #0
@@ -2028,8 +2033,8 @@ io_load:
 io_start:
 
 tunix_vectors:
-.word open, chkin, ckout, basin, bsout
-.word getin, clrcn, close, clall, stop
+.word open, close, chkin, ckout, clrcn
+.word basin, bsout, stop, getin, clall
 .word usrcmd, load, save, blkin, bkout
 
 stmp:   .res 1
@@ -2155,7 +2160,9 @@ iowrap usrcmd, usrcmd2
     jsr close
     plx
     lnextx lfns, :-
-r:  rts
+r:  mvb DFLTN, #0
+    mvb DFLTO, #3
+    rts
 .endproc
 
 .macro blkiohandler name, idx

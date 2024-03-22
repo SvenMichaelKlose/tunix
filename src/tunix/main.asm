@@ -536,6 +536,7 @@ empty:
 ;;;;;;;;;;;;;
 
 ; Init s, d and c with values at XA.
+.export sset
 .proc sset
     sta p+1
     stx p+2
@@ -559,6 +560,7 @@ p:  lda $ff00,x
 
 ; Copy memory.
 ; s, d, c: source, dest, counter
+.export memcpy
 .proc memcpy
     phy
     ldy #0
@@ -1608,10 +1610,12 @@ err_ultimem_num_banks_in_list:
     .byte "WRONG NUMBER OF ITEMS IN "
     .byte "'BANKS'.", 0
 
+.export printnum
 .proc printnum
     rts
 .endproc
 
+.export printbnk
 .proc printbnk
     jsr BSOUT
     inc col
@@ -1853,6 +1857,7 @@ cmd_exit:   .byte "PE", 0
     jmp halt
 .endproc
 
+.export start
 .proc start
     print txt_tunix
     print txt_tests
@@ -2039,6 +2044,7 @@ tunix_vectors:
 
 stmp:   .res 1
 
+.export call_driver2
 .proc call_driver2
 j:  jsr $fffe
 
@@ -2058,6 +2064,7 @@ j:  jsr $fffe
     rts
 .endproc
 
+.export save_banks_y
 .proc save_banks_y
     set_procblk_y proc_ram123, ram123
     set_procblk_y proc_io23, io23
@@ -2068,6 +2075,7 @@ j:  jsr $fffe
     rts
 .endproc
 
+.export load_banks_y
 .proc load_banks_y
     get_procblk_y proc_ram123, ram123
     get_procblk_y proc_io23, io23
@@ -2099,6 +2107,7 @@ j:  jsr $fffe
     rts
 .endproc
 
+.export tunix_enter
 .proc tunix_enter
     pha
     mvb blk1, tunix_blk1
@@ -2106,6 +2115,7 @@ j:  jsr $fffe
     rts
 .endproc
 
+.export tunix_leave
 .proc tunix_leave
     php
     lda reg_a
@@ -2154,6 +2164,7 @@ iowrap usrcmd, usrcmd2
 
 .export clall
 .proc clall
+debug:.export debug
     push blk1
     mvb blk1, tunix_blk1
     ldx first_lfn

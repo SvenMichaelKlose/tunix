@@ -184,6 +184,9 @@ dev_drv:    .res MAX_DEVS
 ;; BLK2 to BLK3.
 copy_bank:  .res 1
 
+old_kernal_vectors:
+            .res 32
+
 global_end:
 global_size = global_end - global_start
 
@@ -976,8 +979,7 @@ done:
     lnextx lfns, :-
 
     ;; Machine-dependend process copy.
-:
-    phy
+:   phy
     jsr fork_raw
     ply
 
@@ -1710,15 +1712,21 @@ io_size = io_end - io_start
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
 
-    ;; Point all devices to KERNAL.
-    mvb drv_vl, #$1a
-    mvb drv_vh, #$03
+    ;; Save KERNAL vectors.
+    stwi s, IOVECTORS
+    stwi d, old_kernal_vectors
+    stwi c, 30
+    jsr memcpy
 
     ;; Replace KERNAL vectors.
     stwi s, tunix_vectors
     stwi d, IOVECTORS
     stwi c, 30
     jsr memcpy
+
+    ;; Point devices to KERNAL.
+    mvb drv_vl, #<old_kernal_vectors
+    mvb drv_vh, #>old_kernal_vectors
 
     ;; Register device #31.
     ldaxi tunix_driver
@@ -1886,7 +1894,6 @@ cmd_exit:   .byte "PE", 0
     adc #0
     sta g+2
     sta h+2
-    ldx #0
 g:  lda $ffff
     sta call_driver2+1
 h:  lda $ffff
@@ -2205,7 +2212,7 @@ tunix_io23: .res 1
 tunix_blk1: .res 1
 
 ;; Extended memory banks
-; List of used ones.
+; Deque of used ones.
 lbanks:     .res MAX_BANKS
 lbanksb:    .res MAX_BANKS
 first_lbank:.res 1

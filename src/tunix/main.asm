@@ -1951,28 +1951,48 @@ h:  lda $ffff
 
 .export chkin2
 .proc chkin2
-    jsr lfn_to_glfn
     sta reg_a
-    jmpa call_driver, #IDX_CHKIN
+    tax
+    lda lfn_glfn,x
+    beq :+
+    tax
+    lda glfn_drv,x
+    sta DFLTN
+    clc
+    rts
+:   sec
+    rts
+    //jmpa call_driver, #IDX_CHKIN
 .endproc
 
 .export ckout2
 .proc ckout2
-    jsr lfn_to_glfn
     sta reg_a
-    jmpa call_driver, #IDX_CKOUT
+    tax
+    lda lfn_glfn,x
+    beq :+
+    tax
+    lda glfn_drv,x
+    sta DFLTO
+    clc
+    rts
+:   sec
+    rts
+    //jmpa call_driver, #IDX_CKOUT
 .endproc
 
-.macro iohandler name2, lfn, drvop
+.macro iohandler name2, devnum, drvop
     .export name2
     .proc name2
         save_regs
-        push lfn
+        push devnum
         jsr lfn_to_glfn
-        sta lfn
+        tax
+        lda glfn_drv,x
+        sta devnum
         jsra call_driver, #drvop
         sta reg_a
-        pop lfn
+        pop devnum
         jmp tunix_leave
     .endproc
 .endmacro

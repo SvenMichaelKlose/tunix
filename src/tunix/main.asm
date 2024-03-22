@@ -38,31 +38,33 @@ blk5        = $9ffe
 
 ;.include "cbm_kernal.inc"
 
-READST      = $ffb7
-SETLFN      = $ffba
-SETNAM      = $ffbd
-OPEN        = $ffc0
-CLOSE       = $ffc3
-CHKIN       = $ffc6
-CKOUT       = $ffc9
-CLRCN       = $ffcc
-BASIN       = $ffcf
-BSOUT       = $ffd2
-LOAD        = $ffd5
-SAVE        = $ffd8
-SETTIM      = $ffdb
-RDTIM       = $ffde
-STOP        = $ffe1
-GETIN       = $ffe4
-CLALL       = $ffe7
+FRESTOR = $FD52
 
-DFLTN       = $99
-DFLTO       = $9a
-FNLEN       = $b7
-LFN         = $b8
-SA          = $b9
-DEV         = $ba
-FNADR       = $bb
+READST  = $ffb7
+SETLFN  = $ffba
+SETNAM  = $ffbd
+OPEN    = $ffc0
+CLOSE   = $ffc3
+CHKIN   = $ffc6
+CKOUT   = $ffc9
+CLRCN   = $ffcc
+BASIN   = $ffcf
+BSOUT   = $ffd2
+LOAD    = $ffd5
+SAVE    = $ffd8
+SETTIM  = $ffdb
+RDTIM   = $ffde
+STOP    = $ffe1
+GETIN   = $ffe4
+CLALL   = $ffe7
+
+DFLTN   = $99
+DFLTO   = $9a
+FNLEN   = $b7
+LFN     = $b8
+SA      = $b9
+DEV     = $ba
+FNADR   = $bb
 
 IOVECTORS   = $031a
 
@@ -608,6 +610,7 @@ m:  inc dh
 ;;; UI ;;;
 ;;;;;;;;;;
 
+.export printstr
 .proc printstr
     mvb tmp1, #0
     phx
@@ -847,41 +850,37 @@ vec_io23_to_blk5:
 ; Y: new process ID
 .export fork_raw
 .proc fork_raw
-    push blk1
-    push blk2
-    push blk3
-    push blk5
     push io23
+    mvb tmp1, blk1
+    mvb tmp1+1, blk2
+    mvb tmp2, blk3
+    mvb tmp2+1, blk5
     mvb blk1, tunix_blk1
 
-    ; Allocate bank without local ref.
+    ;; Make child's IO23 and use it.
+    ; Allocate IO23 bank globally.
     lpopx banks, free_bank
     inc bank_refs,x
     txa
     sta proc_io23,y
-
-    ; Copy IO23.
     phx
+    ; Copy IO23.
     sta blk5
     ldaxi vec_io23_to_blk5
     jsr smemcpy
     ; Low, screen, color, VIC.
     save_internal_ram_to_blk5
-
-    ; Switch to child context.
     pop io23
-
-    ; New PID.
-    sty pid
-
-    ; Add local ref.
-    tax
+    sty pid  ; New PID.
+    tax      ; Add local ref.
+    ; Register new IO23 bank locally.
     dpushx lbanks, lbanksb, first_lbank
-
     ; Set return stack.
     tsx
-    stx stack
+    inx
+    sta stack
 
+    ;; Copy remaining banks.
     ; Copies from BLK3 to BLK5 with
     ; speed code in BLK2.
     .macro forkblky procblk, srcblk
@@ -891,13 +890,13 @@ vec_io23_to_blk5:
         jsr copy_blk3_to_blk5
     .endmacro
     forkblky proc_ram123, ram123
-    forkblky proc_blk1, blk1
-    forkblky proc_blk2, tmp1
-    forkblky proc_blk3, tmp1+1
-    forkblky proc_blk5, tmp2
+    forkblky proc_blk2, tmp1+1
+    forkblky proc_blk3, tmp2
+    forkblky proc_blk5, tmp2+1
+    forkblky proc_blk1, tmp1
 
     cpy #0
-    beq :+
+    beq :+  ; Do not undo init proc.
 
     ;; Remove parents default banks.
     ldx pid
@@ -912,11 +911,12 @@ vec_io23_to_blk5:
     dereflbankx proc_blk3
     dereflbankx proc_blk5
 
+    ;; Restore bank set.
+:   mvb blk5, tmp2+1
+    mvb blk3, tmp2
+    mvb blk2, tmp1+1
+    mvb blk1, tmp1
     pop io23
-    pop blk5
-    pop blk3
-    pop blk2
-    pop blk1
     rts
 .endproc
 
@@ -973,7 +973,8 @@ done:
     lnextx lfns, :-
 
     ;; Machine-dependend process copy.
-:   phy
+:
+    phy
     jsr fork_raw
     ply
 
@@ -1626,6 +1627,7 @@ io_size = io_end - io_start
 
 .export init
 .proc init
+    jsr FRESTOR
     jsr init_ultimem_banks
 
     ;; Clear data.
@@ -1682,12 +1684,10 @@ io_size = io_end - io_start
     jsr gen_speedcode
     jsr init_ultimem_banks
 
-    ;; Point devices to KERNAL.
-    mvb drv_vl, #$1a
-    mvb drv_vh, #$03
-
     ;; Make init process.
     print txt_init  ; Print '.'.
+    mvb tunix_io23, #3
+    mvb tunix_blk1, #4
     ldy #0
     sty procs ; Unlink from free list.
     jsr fork0 ; Fork into process 0.
@@ -1700,6 +1700,21 @@ io_size = io_end - io_start
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
+
+    ;; Point devices to KERNAL.
+    mvb drv_vl, #$1a
+    mvb drv_vh, #$03
+
+    ;; Register device #31.
+    ldaxi tunix_driver
+    ldy #31
+    jsr register
+
+    ;; Replace KERNAL vectors.
+    stwi s, tunix_vectors
+    stwi d, IOVECTORS
+    stwi c, 30
+    jsr memcpy
     rts
 .endproc
 
@@ -1743,7 +1758,7 @@ txt_ex:.byte "CHILD",9
 
     .code
 
-FREE_BANKS_AFTER_INIT = $6d ;MAX_BANKS - FIRST_BANK - 6
+FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
 
 .export tests
 .proc tests
@@ -1783,15 +1798,16 @@ FREE_BANKS_AFTER_INIT = $6d ;MAX_BANKS - FIRST_BANK - 6
     error err_fail
  
     ;;; Syscalls
-:   jsr init
+:
+    jsr init
 
     ;; Fork
-stop2:.export stop2
     lda #31
+    tax
     jsr SETLFN
     lda #2
     ldx #<cmd_fork
-    ldy #<cmd_fork
+    ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
     cmp #1
@@ -1840,58 +1856,96 @@ cmd_exit:   .byte "PE", 0
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
 
-io_load:
+.export open2
+.proc open2
+    lda LFN
+    jsr lfn_to_glfn
+    sta LFN
+    tax
 
-    .org $9800
+    ;; Assign driver to GLFN.
+    ldy DEV
+    lda dev_drv,y
+    sta glfn_drv,x
 
-io_start:
+    tax
+    jsra call_driver, #IDX_OPEN
+    sta reg_a
 
-tunix_vectors:
-.word open, chkin, ckout, basin, bsout
-.word getin, clrcn, close, clall, stop
-.word usrcmd, load, save, blkin, bkout
-
-stmp:   .res 1
-
-.proc save_banks_y
-    set_procblk_y proc_ram123, ram123
-    set_procblk_y proc_io23, io23
-    set_procblk_y proc_blk1, blk1
-    set_procblk_y proc_blk2, blk2
-    set_procblk_y proc_blk3, blk3
-    set_procblk_y proc_blk5, blk5
+    pop LFN
+    popw FNADR
+    php
+    lda reg_a
+    plp
     rts
 .endproc
 
-.proc load_banks_y
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
-    get_procblk_y proc_blk1, blk1
-    rts
+.export chkin2
+.proc chkin2
+    jsr lfn_to_glfn
+    sta reg_a
+    jmpa call_driver, #IDX_CHKIN
 .endproc
 
-; Switch to process.
-; A: Process ID
-.export switch
-.proc switch
-    ;;; Save current.
-    tsx
-    stx stack
-    pha
-    ldy pid
-    jsr save_banks_y
-    save_internal_ram_to_blk5_y
+.export ckout2
+.proc ckout2
+    jsr lfn_to_glfn
+    sta reg_a
+    jmpa call_driver, #IDX_CKOUT
+.endproc
 
-    ;; Load next.
-    ply
-    load_internal_ram_from_blk5_y
-    jsr load_banks_y
-    ldx stack
-    txs
-    rts
+.macro iohandler name2, lfn, drvop
+    .export name2
+    .proc name2
+        save_regs
+        push lfn
+        jsr lfn_to_glfn
+        sta lfn
+        jsra call_driver, #drvop
+        sta reg_a
+        pop lfn
+        jmp tunix_leave
+    .endproc
+.endmacro
+
+iohandler basin2, DFLTN, IDX_BASIN
+iohandler bsout2, DFLTO, IDX_BSOUT
+iohandler getin2, DFLTN, IDX_GETIN
+iohandler blkin2, DFLTN, IDX_BLKIN
+iohandler bkout2, DFLTO, IDX_BKOUT
+
+.export clrcn2
+.proc clrcn2
+    jsr lfn_to_glfn
+    sta reg_a
+    ldy glfn_drv,x
+    tya
+    tax
+    jmpa call_driver, #IDX_CLRCN
+.endproc
+
+.export close2
+.proc close2
+    jsr lfn_to_glfn
+    sta reg_a
+    ldy glfn_drv,x
+    lda #0
+    sta glfn_drv,x
+    tya
+    tax
+    jmpa call_driver, #IDX_CLOSE
+.endproc
+
+.export stop2
+.proc stop2
+    ldx #0
+    jmpa call_driver, #IDX_STOP
+.endproc
+
+.export usrcmd2
+.proc usrcmd2
+    ldx #0
+    jmpa call_driver, #IDX_STOP
 .endproc
 
 ; Schedule task switch
@@ -1942,16 +1996,32 @@ stmp:   .res 1
     ldy glfn_drv,x
     clc
     adc drv_vl,y
-    sta j+1
+    sta call_driver2+1
     lda drv_vh,y
     adc #0
-    sta j+2
+    sta call_driver2+2
 
     ;; Bank in driver BLK1.
     ldx drv_pid,y
     get_procblk_x proc_blk1, blk1
     load_regs
+    jmp call_driver2
+.endproc
 
+io_load:
+
+    .org $9800
+
+io_start:
+
+tunix_vectors:
+.word open, chkin, ckout, basin, bsout
+.word getin, clrcn, close, clall, stop
+.word usrcmd, load, save, blkin, bkout
+
+stmp:   .res 1
+
+.proc call_driver2
 j:  jsr $fffe
 
     ; Restore BLK1.
@@ -1960,9 +2030,67 @@ j:  jsr $fffe
     phx
     mvb blk1, tunix_blk1
     ldx pid
+    get_procblk_x proc_blk2, blk2
+    get_procblk_x proc_blk3, blk3
+    get_procblk_x proc_blk5, blk5
     get_procblk_x proc_blk1, blk1
     phx
     pha
+    plp
+    rts
+.endproc
+
+.proc save_banks_y
+    set_procblk_y proc_ram123, ram123
+    set_procblk_y proc_io23, io23
+    set_procblk_y proc_blk1, blk1
+    set_procblk_y proc_blk2, blk2
+    set_procblk_y proc_blk3, blk3
+    set_procblk_y proc_blk5, blk5
+    rts
+.endproc
+
+.proc load_banks_y
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    get_procblk_y proc_blk1, blk1
+    rts
+.endproc
+
+; Switch to process.
+; A: Process ID
+.export switch
+.proc switch
+    ;;; Save current.
+    tsx
+    stx stack
+    pha
+    ldy pid
+    jsr save_banks_y
+    save_internal_ram_to_blk5_y
+
+    ;; Load next.
+    ply
+    load_internal_ram_from_blk5_y
+    jsr load_banks_y
+    ldx stack
+    txs
+    rts
+.endproc
+
+.proc tunix_enter
+    pha
+    mvb blk1, tunix_blk1
+    pla
+    rts
+.endproc
+
+.proc tunix_leave
+    php
+    lda reg_a
     plp
     rts
 .endproc
@@ -1975,111 +2103,36 @@ j:  jsr $fffe
     ;; Copy file name.
     ldy FNLEN
     beq :++
+    dey
 :   lda (FNADR),y
     sta filename,y
     dey
-    jmp :-
+    bpl :-
 :   stwi FNADR, filename
 
     mvb blk1, tunix_blk1
-
-    jsr lfn_to_glfn
-    sta LFN
-
-    ;; Assign driver to GLFN.
-    ldy DEV
-    lda dev_drv,y
-    sta glfn_drv,x
-
-    tax
-    jsra call_driver, #IDX_OPEN
-    sta reg_a
-
-    pop LFN
-    popw FNADR
-    php
-    lda reg_a
-    plp
-    rts
+    jmp open2
 .endproc
 
-.export chkin
-.proc chkin
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    jsr lfn_to_glfn
-    sta reg_a
-    jmpa call_driver, #IDX_CHKIN
-.endproc
-
-.export ckout
-.proc ckout
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    jsr lfn_to_glfn
-    sta reg_a
-    jmpa call_driver, #IDX_CKOUT
-.endproc
-
-.macro iohandler name, lfn, drvop
+.macro iowrap name, name2
     .export name
     .proc name
-    pha
-    mvb blk1, tunix_blk1
-    pla
-        save_regs
-        push lfn
-        jsr lfn_to_glfn
-        sta lfn
-
-        jsra call_driver, #drvop
-        sta reg_a
-
-        pop lfn
-        php
-        lda reg_a
-        plp
-        rts
+        jsr tunix_enter
+        jmp name2
     .endproc
 .endmacro
 
-iohandler basin, DFLTN, IDX_BASIN
-iohandler bsout, DFLTO, IDX_BSOUT
-iohandler getin, DFLTN, IDX_GETIN
-iohandler blkin, DFLTN, IDX_BLKIN
-iohandler bkout, DFLTO, IDX_BKOUT
-
-.export clrcn
-.proc clrcn
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    jsr lfn_to_glfn
-    sta reg_a
-    ldy glfn_drv,x
-    tya
-    tax
-    jsra call_driver, #IDX_CLRCN
-    rts
-.endproc
-
-.export close
-.proc close
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    jsr lfn_to_glfn
-    sta reg_a
-    ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
-    tya
-    tax
-    jsra call_driver, #IDX_CLOSE
-    rts
-.endproc
+iowrap chkin, chkin2
+iowrap ckout, ckout2
+iowrap basin, basin2
+iowrap bsout, bsout2
+iowrap getin, getin2
+iowrap blkin, blkin2
+iowrap bkout, bkout2
+iowrap clrcn, clrcn2
+iowrap close, close2
+iowrap stop, stop2
+iowrap usrcmd, usrcmd2
 
 .export clall
 .proc clall
@@ -2092,41 +2145,19 @@ iohandler bkout, DFLTO, IDX_BKOUT
 r:  rts
 .endproc
 
-.export stop
-.proc stop
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    ldx #0
-    jsra call_driver, #IDX_STOP
-    rts
-.endproc
-
 .macro blkiohandler name, idx
     .export name
     .proc name
-        pha
-        mvb blk1, tunix_blk1
-        pla
+        jsr tunix_enter
         save_regs
         ldy DEV
         ldx dev_drv,y
-        jsra call_driver, #idx
-        rts
+        jmpa call_driver, #idx
     .endproc
 .endmacro
 
 blkiohandler load, IDX_LOAD
 blkiohandler save, IDX_SAVE
-
-.export usrcmd
-.proc usrcmd
-    pha
-    mvb blk1, tunix_blk1
-    pla
-    ldx #0
-    jmpa call_driver, #IDX_STOP
-.endproc
 
 io_end:
 
@@ -2134,7 +2165,7 @@ io_end:
 ;;; LOCAL (per process) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.export lbanks, lbanksb, first_lbank, lfns, lfnsb, lfn_glfn, first_lfn, waiting, waiting_pid, free_wait, first_wait, pid, ppid, reg_a, reg_x, reg_y, stack, flags, saved_vic, filename, response, response_len, responsep
+.export tunix_io23, tunix_blk1, lbanks, lbanksb, first_lbank, lfns, lfnsb, lfn_glfn, first_lfn, waiting, waiting_pid, free_wait, first_wait, pid, ppid, reg_a, reg_x, reg_y, stack, flags, saved_vic, filename, response, response_len, responsep
 
 tunix_io23: .res 1
 tunix_blk1: .res 1

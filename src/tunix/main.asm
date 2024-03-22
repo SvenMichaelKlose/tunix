@@ -1204,9 +1204,9 @@ not_to_resume:
 :   rts
 .endproc
 
-;;;;;;;;;;;;;;;;;;;;;;
-;;; SYSCALL DRIVER ;;;
-;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;; DRIVER ;;;
+;;;;;;;;;;;;;;
 
     .rodata
 
@@ -1816,7 +1816,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
-debug:.export debug
     pha
     jsr CLALL
     pla
@@ -1865,6 +1864,54 @@ cmd_exit:   .byte "PE", 0
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
+
+; Call driver
+; X: GLFN
+; A: vector offset
+.export call_driver
+.proc call_driver
+    ; (vector base + A).
+    ldy glfn_drv,x
+    clc
+    adc drv_vl,y
+    sta g+1
+    sta h+1
+    inc h+1
+    lda drv_vh,y
+    adc #0
+    sta g+2
+    sta h+2
+    ldx #0
+g:  lda $ffff
+    sta call_driver2+1
+h:  lda $ffff
+    sta call_driver2+2
+
+    ;; Bank in driver BLK1.
+    ldx drv_pid,y
+    get_procblk_x proc_blk1, blk1
+    load_regs
+    jmp call_driver2
+.endproc
+
+; Translate local to global LFN.
+; X: LFN
+.export lfn_to_glfn
+.proc lfn_to_glfn
+    tax
+    lda lfn_glfn,x
+    bne :+  ; Use existing...
+    lpushx lfns, first_lfn
+    phx
+    lpopx glfns, glfns
+    inc glfn_refs,x
+    txa
+    tay
+    plx
+    tya
+    sta lfn_glfn,x
+:   rts
+.endproc
 
 .export open2
 .proc open2
@@ -1977,53 +2024,6 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pla
     plp
     rts
-.endproc
-
-; Translate local to global LFN.
-; X: LFN
-.export lfn_to_glfn
-.proc lfn_to_glfn
-    lda lfn_glfn,x
-    bne :+  ; Use existing...
-    lpushx lfns, first_lfn
-    phx
-    lpopx glfns, glfns
-    inc glfn_refs,x
-    txa
-    tay
-    plx
-    tya
-    sta lfn_glfn,x
-:   rts
-.endproc
-
-; Call driver
-; X: GLFN
-; A: vector offset
-.export call_driver
-.proc call_driver
-    ; (vector base + A).
-    ldy glfn_drv,x
-    clc
-    adc drv_vl,y
-    sta g+1
-    sta h+1
-    inc h+1
-    lda drv_vh,y
-    adc #0
-    sta g+2
-    sta h+2
-    ldx #0
-g:  lda $ffff
-    sta call_driver2+1
-h:  lda $ffff
-    sta call_driver2+2
-
-    ;; Bank in driver BLK1.
-    ldx drv_pid,y
-    get_procblk_x proc_blk1, blk1
-    load_regs
-    jmp call_driver2
 .endproc
 
 io_load:
@@ -2154,6 +2154,8 @@ iowrap usrcmd, usrcmd2
 
 .export clall
 .proc clall
+    push blk1
+    mvb blk1, tunix_blk1
     ldx first_lfn
     beq r
 :   phx
@@ -2162,6 +2164,7 @@ iowrap usrcmd, usrcmd2
     lnextx lfns, :-
 r:  mvb DFLTN, #0
     mvb DFLTO, #3
+    pop blk1
     rts
 .endproc
 

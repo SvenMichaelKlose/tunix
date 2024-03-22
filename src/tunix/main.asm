@@ -452,7 +452,7 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro get_procblk_x proc, blk
-    lda proc,y
+    lda proc,x
     sta blk
 .endmacro
 
@@ -1209,6 +1209,7 @@ not_to_resume:
 
     .rodata
 
+.export tunix_driver
 tunix_driver:
     .word tunix_open, tunix, tunix
     .word tunix_basin, tunix, tunix
@@ -1630,15 +1631,17 @@ io_size = io_end - io_start
     jsr FRESTOR
     jsr init_ultimem_banks
 
-    ;; Clear data.
+    ;; Clear global data.
     stwi d, global_start
     stwi c, global_size
     jsr bzero
+
+    ;; Init local data.
+    ; Clear.
     stwi d, io_end
     stwi c, $07f0-io_size
     jsr bzero
-
-    ;; Copy IO code.
+    ; Move in code.
     stwi s, io_load
     stwi d, $9800
     stwi c, io_end-io_start
@@ -1684,7 +1687,7 @@ io_size = io_end - io_start
     jsr gen_speedcode
     jsr init_ultimem_banks
 
-    ;; Make init process.
+    ;; Make init process 0.
     print txt_init  ; Print '.'.
     mvb tunix_io23, #3
     mvb tunix_blk1, #4
@@ -1697,25 +1700,25 @@ io_size = io_end - io_start
     sta tunix_io23
     get_procblk_y proc_blk1, blk1
     sta tunix_blk1
+    sta blk1
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
 
-    ;; Point devices to KERNAL.
+    ;; Point all devices to KERNAL.
     mvb drv_vl, #$1a
     mvb drv_vh, #$03
-
-    ;; Register device #31.
-    ldaxi tunix_driver
-    ldy #31
-    jsr register
 
     ;; Replace KERNAL vectors.
     stwi s, tunix_vectors
     stwi d, IOVECTORS
     stwi c, 30
     jsr memcpy
-    rts
+
+    ;; Register device #31.
+    ldaxi tunix_driver
+    ldy #31
+    jmp register
 .endproc
 
     .rodata
@@ -1762,6 +1765,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
 
 .export tests
 .proc tests
+.if 0
     jsr init
     ldaxi banks
     jsry list_length, free_bank
@@ -1799,6 +1803,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
  
     ;;; Syscalls
 :
+.endif
     jsr init
 
     ;; Fork
@@ -1996,9 +2001,17 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     ldy glfn_drv,x
     clc
     adc drv_vl,y
-    sta call_driver2+1
+    sta g+1
+    sta h+1
+    inc h+1
     lda drv_vh,y
     adc #0
+    sta g+2
+    sta h+2
+    ldx #0
+g:  lda $ffff
+    sta call_driver2+1
+h:  lda $ffff
     sta call_driver2+2
 
     ;; Bank in driver BLK1.
@@ -2024,7 +2037,7 @@ stmp:   .res 1
 .proc call_driver2
 j:  jsr $fffe
 
-    ; Restore BLK1.
+    ; Restore banks.
     php
     pha
     phx
@@ -2034,8 +2047,8 @@ j:  jsr $fffe
     get_procblk_x proc_blk3, blk3
     get_procblk_x proc_blk5, blk5
     get_procblk_x proc_blk1, blk1
-    phx
-    pha
+    plx
+    pla
     plp
     rts
 .endproc

@@ -476,11 +476,11 @@ global_size = global_end - global_start
     dallocy procs, procsb, free_proc, running
 .endmacro
 
-.macro mv_running_sleep_x
+.macro mv_running_sleeping_x
     dmovex procs, procsb, running, sleeping
 .endmacro
 
-.macro mv_sleep_running_x
+.macro mv_sleeping_running_x
     dmovex procs, procsb, sleeping, running
 .endmacro
 
@@ -1008,9 +1008,6 @@ done:
 ; which is reserved for TUNIX and
 ; driver code.
 
-.macro enter_tunix
-.endmacro
-
 .export fork
 .proc fork
     ;; Grab process slot.
@@ -1065,7 +1062,7 @@ done:
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
-    mv_running_sleep_x
+    mv_running_sleeping_x
     clc
     rts
 not_there:
@@ -1080,7 +1077,7 @@ already_sleeping:
 .proc resume
     lda proc_flags,x
     bpl not_to_resume
-    mv_sleep_running_x
+    mv_sleeping_running_x
 not_to_resume:
     sec
     rts

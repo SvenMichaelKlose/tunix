@@ -1005,6 +1005,34 @@ done:
     rts
 .endproc
 
+; Put process to sleep.
+; X: Process ID
+.export sleep
+.proc sleep
+    lda proc_flags,x
+    beq not_there
+    bmi already_sleeping
+    dmovex procs, procsb, running, sleeping
+    clc
+    rts
+not_there:
+already_sleeping:
+    sec
+    rts
+.endproc
+
+; Wake up process.
+; A: Process ID
+.export resume
+.proc resume
+    lda proc_flags,x
+    bpl not_to_resume
+    dmovex procs, procsb, sleeping, running
+not_to_resume:
+    sec
+    rts
+.endproc
+
 ; Force exit.
 ; X: Process ID.
 .export zombify
@@ -1074,6 +1102,9 @@ done:
     jsr resume
 done:
     leave_context
+    ldx running
+    lda procs,x
+:   beq :-  ; Idle for interrupts.
     jmp schedule
 .endproc
 
@@ -1084,8 +1115,6 @@ done:
 .proc wait
     lda proc_flags,x
     beq not_there
-    cmp #PROC_ZOMBIE
-    beq terminate_zombie
 
     ;; Put us on waiting list.
     enter_context_x
@@ -1094,12 +1123,17 @@ done:
     sta waiting_pid,y
     leave_context
 
+:   lda proc_flags,x
+    cmp #PROC_ZOMBIE
+    beq terminate_zombie
+
     ;; Take a nap.
     phx
+    lda pid
     jsr sleep
     jsr schedule
     plx
-    jmp wait
+    jmp :-
 
 not_there:
     sec
@@ -1120,32 +1154,6 @@ terminate_zombie:
 :   leave_context
     lda exit_codes,x
     clc
-    rts
-.endproc
-
-; Put process to sleep.
-; X: Process ID
-.export sleep
-.proc sleep
-    lda proc_flags,x
-    beq not_there
-    bmi already_sleeping
-    dmovex procs, procsb, running, sleeping
-not_there:
-already_sleeping:
-    sec
-    rts
-.endproc
-
-; Wake up process.
-; A: Process ID
-.export resume
-.proc resume
-    lda proc_flags,x
-    bpl not_to_resume
-    dmovex procs, procsb, sleeping, running
-not_to_resume:
-    sec
     rts
 .endproc
 
@@ -1834,7 +1842,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
-debug:.export debug
     jsr BASIN
     pha
     jsr CLALL

@@ -217,6 +217,7 @@ TUNIX is eavesdropping.
 
 Copies the filename to the IO area (255 byte maximum) and translates the LFN to
 a GLFN before calling the driver.
+A CHKIN is also performed.
 
 ## CHKIN/CKOUT: Select input/output by LFN
 

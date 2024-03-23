@@ -86,11 +86,12 @@ IDX_BKOUT  = 28
 
 ;;; TUNIX
 
-MAX_LFNS    = 256   ; Has to be.
-MAX_PROCS   = 64
-MAX_DRVS    = 16
-MAX_DEVS    = 32
-MAX_IOPAGES = 4
+TUNIX_DEVICE = 31
+MAX_LFNS     = 256   ; Has to be.
+MAX_PROCS    = 64
+MAX_DRVS     = 16
+MAX_DEVS     = 32
+MAX_IOPAGES  = 4
 
 ;;; MACHDEP
 
@@ -1073,7 +1074,7 @@ done:
     jsr resume
 done:
     leave_context
-    rts
+    jmp schedule
 .endproc
 
 ; Wait for process to exit
@@ -1275,6 +1276,7 @@ tunix_driver:
 
 .export tunix_open
 .proc tunix_open
+    mvb DFLTN, #TUNIX_DEVICE
     lda FNLEN
     beq s
     lda filename
@@ -1732,9 +1734,9 @@ io_size = io_end - io_start
     mvb drv_vl, #<old_kernal_vectors
     mvb drv_vh, #>old_kernal_vectors
 
-    ;; Register device #31.
+    ;; Register TUNIX device.
     ldaxi tunix_driver
-    ldy #31
+    ldy #TUNIX_DEVICE
     jmp register
 .endproc
 
@@ -1824,7 +1826,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     jsr init
 
     ;; Fork
-    lda #31
+    lda #TUNIX_DEVICE
     tax
     jsr SETLFN
     lda #2
@@ -1832,6 +1834,8 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
+debug:.export debug
+    jsr BASIN
     pha
     jsr CLALL
     pla
@@ -1883,12 +1887,11 @@ cmd_exit:   .byte "PE", 0
 ;;;;;;;;;;;;;;;;;
 
 ; Call driver
-; X: GLFN
+; Y: driver
 ; A: vector offset
 .export call_driver
 .proc call_driver
     ; (vector base + A).
-    ldy glfn_drv,x
     clc
     adc drv_vl,y
     sta g+1
@@ -1942,6 +1945,7 @@ h:  lda $ffff
     sta glfn_drv,x
 
     tax
+    ldy glfn_drv,x
     jsra call_driver, #IDX_OPEN
     sta reg_a
 
@@ -1987,21 +1991,23 @@ h:  lda $ffff
     rts
 .endproc
 
-.macro iohandler name2, drvop
+.macro iohandler name2, device, drvop
     .export name2
     .proc name2
         save_regs
+        ldx device
+        ldy dev_drv,x
         jsra call_driver, #drvop
         sta reg_a
         jmp tunix_leave
     .endproc
 .endmacro
 
-iohandler basin2, IDX_BASIN
-iohandler bsout2, IDX_BSOUT
-iohandler getin2, IDX_GETIN
-iohandler blkin2, IDX_BLKIN
-iohandler bkout2, IDX_BKOUT
+iohandler basin2, DFLTN, IDX_BASIN
+iohandler getin2, DFLTN, IDX_GETIN
+iohandler bsout2, DFLTO, IDX_BSOUT
+iohandler blkin2, DFLTN, IDX_BLKIN
+iohandler bkout2, DFLTO, IDX_BKOUT
 
 .export close2
 .proc close2
@@ -2012,18 +2018,21 @@ iohandler bkout2, IDX_BKOUT
     sta glfn_drv,x
     tya
     tax
+    ldy glfn_drv,x
     jmpa call_driver, #IDX_CLOSE
 .endproc
 
 .export stop2
 .proc stop2
     ldx #0
+    ldy glfn_drv,x
     jmpa call_driver, #IDX_STOP
 .endproc
 
 .export usrcmd2
 .proc usrcmd2
     ldx #0
+    ldy glfn_drv,x
     jmpa call_driver, #IDX_STOP
 .endproc
 

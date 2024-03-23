@@ -1893,6 +1893,11 @@ cmd_exit:   .byte "PE", 0
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
 
+.export call_glfn_driver
+.proc call_glfn_driver
+    ldy glfn_drv,x
+.endproc
+
 ; Call driver
 ; Y: driver
 ; A: vector offset
@@ -1952,8 +1957,7 @@ h:  lda $ffff
     sta glfn_drv,x
 
     tax
-    ldy glfn_drv,x
-    jsra call_driver, #IDX_OPEN
+    jsra call_glfn_driver, #IDX_OPEN
     sta reg_a
 
     pop LFN
@@ -2025,21 +2029,29 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     sta glfn_drv,x
     tya
     tax
-    ldy glfn_drv,x
-    jmpa call_driver, #IDX_CLOSE
+    jmpa call_glfn_driver, #IDX_CLOSE
+.endproc
+
+.export clall2
+.proc clall2
+    ldx first_lfn
+    beq :++
+:   phx
+    jsr close
+    plx
+    lnextx lfns, :-
+:   rts
 .endproc
 
 .export stop2
 .proc stop2
-    ldx #0
-    ldy glfn_drv,x
+    ldy #0
     jmpa call_driver, #IDX_STOP
 .endproc
 
 .export usrcmd2
 .proc usrcmd2
-    ldx #0
-    ldy glfn_drv,x
+    ldy #0
     jmpa call_driver, #IDX_STOP
 .endproc
 
@@ -2198,24 +2210,19 @@ iowrap usrcmd, usrcmd2
 
 .export clrcn
 .proc clrcn
+    ; TODO: Call all LFNs.
     jsr tunix_enter
+    ldy #0
     jmpa call_driver, #IDX_CLRCN
 .endproc
 
+; Close all open files.
 .export clall
 .proc clall
-    ;; Close all open files.
     push blk1
     mvb blk1, tunix_blk1
-    ldx first_lfn
-    beq r
-:   phx
-    jsr close
-    plx
-    lnextx lfns, :-
-
-    ;; Reset to standard I/O.
-r:  mvb DFLTN, #0
+    jsr clall2
+    mvb DFLTN, #0
     mvb DFLTO, #3
     pop blk1
     rts

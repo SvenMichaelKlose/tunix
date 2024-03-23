@@ -902,7 +902,7 @@ vec_io23_to_blk5:
     dpushx lbanks, lbanksb, first_lbank
     ; Set return stack.
     tsx
-    inx
+    inx ; (Undo 'push io23'.)
     sta stack
 
     ;; Copy remaining banks.
@@ -1859,6 +1859,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
+debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork
@@ -1963,23 +1964,14 @@ h:  lda $ffff
     lda LFN
     jsr lfn_to_glfn
     sta LFN
-    tax
-
-    ;; Assign driver to GLFN.
     ldy DEV
     lda dev_drv,y
-    sta glfn_drv,x
-
-    tax
-    jsra call_glfn_driver, #IDX_OPEN
+    tay
+    jsra call_driver, #IDX_OPEN
     sta reg_a
-
     pop LFN
     popw FNADR
-    php
-    lda reg_a
-    plp
-    rts
+    jmp tunix_leave
 .endproc
 
 .export chkin2
@@ -1994,9 +1986,9 @@ h:  lda $ffff
     lda drv_dev,y
     sta DFLTN
     clc
-    rts
+    jmp tunix_leave
 :   sec
-    rts
+    jmp tunix_leave
 .endproc
 
 .export ckout2
@@ -2011,9 +2003,9 @@ h:  lda $ffff
     lda drv_dev,y
     sta DFLTO
     clc
-    rts
+    jmp tunix_leave
 :   sec
-    rts
+    jmp tunix_leave
 .endproc
 
 .macro iohandler name2, device, drvop
@@ -2022,9 +2014,7 @@ h:  lda $ffff
         save_regs
         ldx device
         ldy dev_drv,x
-        jsra call_driver, #drvop
-        sta reg_a
-        jmp tunix_leave
+        jmpa call_driver, #drvop
     .endproc
 .endmacro
 
@@ -2054,7 +2044,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     jsr close
     plx
     lnextx lfns, :-
-:   rts
+:   jmp tunix_leave
 .endproc
 
 .export stop2
@@ -2179,6 +2169,13 @@ j:  jsr $fffe
 .export tunix_leave
 .proc tunix_leave
     php
+    txa
+    pha
+    ldx pid
+    lda proc_blk1,x
+    sta blk1
+    pla
+    tax
     lda reg_a
     plp
     rts
@@ -2235,11 +2232,7 @@ iowrap usrcmd, usrcmd2
 .proc clall
     push blk1
     mvb blk1, tunix_blk1
-    jsr clall2
-    mvb DFLTN, #0
-    mvb DFLTO, #3
-    pop blk1
-    rts
+    jmp clall2
 .endproc
 
 .macro blkiohandler name, idx

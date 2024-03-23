@@ -2000,16 +2000,6 @@ iohandler getin2, IDX_GETIN
 iohandler blkin2, IDX_BLKIN
 iohandler bkout2, IDX_BKOUT
 
-.export clrcn2
-.proc clrcn2
-    jsr lfn_to_glfn
-    sta reg_a
-    ldy glfn_drv,x
-    tya
-    tax
-    jmpa call_driver, #IDX_CLRCN
-.endproc
-
 .export close2
 .proc close2
     jsr lfn_to_glfn
@@ -2181,13 +2171,19 @@ iowrap bsout, bsout2
 iowrap getin, getin2
 iowrap blkin, blkin2
 iowrap bkout, bkout2
-iowrap clrcn, clrcn2
 iowrap close, close2
 iowrap stop, stop2
 iowrap usrcmd, usrcmd2
 
+.export clrcn
+.proc clrcn
+    jsr tunix_enter
+    jmpa call_driver, #IDX_CLRCN
+.endproc
+
 .export clall
 .proc clall
+    ;; Close all open files.
     push blk1
     mvb blk1, tunix_blk1
     ldx first_lfn
@@ -2196,6 +2192,8 @@ iowrap usrcmd, usrcmd2
     jsr close
     plx
     lnextx lfns, :-
+
+    ;; Reset to standard I/O.
 r:  mvb DFLTN, #0
     mvb DFLTO, #3
     pop blk1

@@ -1,6 +1,3 @@
-; UltiMem burn utility
-; Written by Sven Michael Klose <pixel@hugbox,org>
-
 __VIC20__ = 1
 .include "cbm_kernal.inc"
 

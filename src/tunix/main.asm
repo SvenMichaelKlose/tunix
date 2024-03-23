@@ -123,7 +123,21 @@ ptr3:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-.export global_start, banks, free_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
+.export global_start, banks, free_bank
+.export bank_refs, iopages, iopagesb
+.export free_iopage, first_iopage
+.export iopage_pid, iopage_page, glfns
+.export glfn_refs, glfn_drv, procs
+.export procsb, free_proc, running
+.export sleeping, zombie, proc_flags
+.export exit_codes, proc_ram123
+.export proc_io23, proc_blk1, proc_blk2
+.export proc_blk3, proc_blk5, drvs
+.export drv_pid, drv_dev, drv_vl
+.export drv_vh, dev_drv, copy_bank
+.export global_end, global_size
+.export global_start, banks_ok
+.export banks_faulty
 
 global_start:
 
@@ -2248,7 +2262,14 @@ io_end:
 ;;; LOCAL (per process) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.export tunix_io23, tunix_blk1, lbanks, lbanksb, first_lbank, lfns, lfnsb, lfn_glfn, first_lfn, waiting, waiting_pid, free_wait, first_wait, pid, ppid, reg_a, reg_x, reg_y, stack, flags, saved_vic, filename, response, response_len, responsep
+.export tunix_io23, tunix_blk1, lbanks
+.export lbanksb, first_lbank, lfns
+.export lfnsb, lfn_glfn, first_lfn
+.export waiting, waiting_pid, free_wait
+.export first_wait, pid, ppid, reg_a
+.export reg_x, reg_y, stack, flags
+.export saved_vic, filename, response
+.export response_len, responsep
 
 tunix_io23: .res 1
 tunix_blk1: .res 1

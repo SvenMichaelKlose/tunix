@@ -1831,6 +1831,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     pha
     jsr CLALL
     pla
+debug:.export debug
     cmp #1
     beq :++
     cmp #0
@@ -1957,12 +1958,13 @@ h:  lda $ffff
     beq :+
     tax
     lda glfn_drv,x
+    tay
+    lda drv_dev,y
     sta DFLTN
     clc
     rts
 :   sec
     rts
-    //jmpa call_driver, #IDX_CHKIN
 .endproc
 
 .export ckout2
@@ -1973,35 +1975,30 @@ h:  lda $ffff
     beq :+
     tax
     lda glfn_drv,x
+    tay
+    lda drv_dev,y
     sta DFLTO
     clc
     rts
 :   sec
     rts
-    //jmpa call_driver, #IDX_CKOUT
 .endproc
 
-.macro iohandler name2, devnum, drvop
+.macro iohandler name2, drvop
     .export name2
     .proc name2
         save_regs
-        push devnum
-        jsr lfn_to_glfn
-        tax
-        lda glfn_drv,x
-        sta devnum
         jsra call_driver, #drvop
         sta reg_a
-        pop devnum
         jmp tunix_leave
     .endproc
 .endmacro
 
-iohandler basin2, DFLTN, IDX_BASIN
-iohandler bsout2, DFLTO, IDX_BSOUT
-iohandler getin2, DFLTN, IDX_GETIN
-iohandler blkin2, DFLTN, IDX_BLKIN
-iohandler bkout2, DFLTO, IDX_BKOUT
+iohandler basin2, IDX_BASIN
+iohandler bsout2, IDX_BSOUT
+iohandler getin2, IDX_GETIN
+iohandler blkin2, IDX_BLKIN
+iohandler bkout2, IDX_BKOUT
 
 .export clrcn2
 .proc clrcn2
@@ -2191,7 +2188,6 @@ iowrap usrcmd, usrcmd2
 
 .export clall
 .proc clall
-debug:.export debug
     push blk1
     mvb blk1, tunix_blk1
     ldx first_lfn

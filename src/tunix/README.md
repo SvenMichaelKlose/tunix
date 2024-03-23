@@ -207,3 +207,26 @@ cess to all others.
 ### "DFp": Free IO page
 
 Frees an IO page.
+
+# KERNAL I/O behaviour
+
+These are the KERNAL I/O functions which
+TUNIX is eavesdropping.
+
+## OPEN: Open a logical file
+
+Copies the filename to the IO area (255 byte maximum) and translates the LFN to
+a GLFN before calling the driver.
+
+## CHKIN/CKOUT: Select input/output by LFN
+
+Checks if the LFN has been opened and
+returns an error as there's no driver
+any way.  The original routines are not
+called.
+
+## CLALL: Close all open files
+
+This one does not just drop all open
+files like the standard KERNAL routine
+but calls CLOSE on each driver,

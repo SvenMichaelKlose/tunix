@@ -702,7 +702,9 @@ invalid_bank:
 .export bprocfree
 .proc bprocfree
     ldx first_lbank
-:   jsr bfree
+:   phx
+    jsr bfree
+    plx
     lnextx lbanks, :-
     rts
 .endproc
@@ -1019,7 +1021,7 @@ done:
     leave_context
     plx
 
-    ;; Free IO pages
+    ;; Free IO pages.
     stx tmp1
     ldy first_iopage
     beq :+++
@@ -1045,7 +1047,7 @@ done:
     sta dev_drv,x
 :   lnexty drvs, :--
 
-    ;; Free process
+    ;; Free process.
 :   ldx tmp1
     ; Take off running or sleeping.
     lda proc_flags,x
@@ -1293,6 +1295,8 @@ s:  jmp schedule
     lda filename+1
     cmp #'F'
     beq tunix_fork
+    cmp #'E'
+    beq tunix_exit
     cmp #'K'
     beq tunix_kill
     cmp #'W'
@@ -1831,7 +1835,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     pha
     jsr CLALL
     pla
-debug:.export debug
     cmp #1
     beq :++
     cmp #0
@@ -1843,7 +1846,7 @@ debug:.export debug
     lda #0
     lda #3
     ldx #<cmd_exit
-    ldy #<cmd_exit
+    ldy #>cmd_exit
     jsr SETNAM
     jsr OPEN
 
@@ -2025,18 +2028,20 @@ iohandler bkout2, IDX_BKOUT
 .endproc
 
 ; Schedule task switch
+; Picks next or first on running list.
 .export schedule
 .proc schedule
     php
     pha
     phx
     phy
+    mvb blk1, tunix_blk1
     ldx pid
     lda procs,x
     bne :+
     lda running
 :   cmp pid
-    beq :+
+    beq :+  ; Don't switch to self.
     jsr switch
 :   ply
     plx

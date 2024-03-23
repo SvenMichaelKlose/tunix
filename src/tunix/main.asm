@@ -499,9 +499,9 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, blk5
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;;; PROCESS CONTEXT ;;;
-;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS CONTEXT (IO23) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_context_x
     push io23
@@ -1781,6 +1781,8 @@ err_invalid_first_free_bank:
 err_invalid_num_free_procs:
     .byte "INVALID NUMBER OF FREE PROCS"
     .byte 0
+err_cannot_fork:
+    .byte "CANNOT FORK", 0
 err_fail:
     .byte "TEST FAILED", 0
 
@@ -1842,15 +1844,10 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_fork
     jsr SETNAM
     jsr OPEN
-    jsr BASIN
-    pha
-    jsr CLALL
-    pla
-    cmp #1
-    beq :++
-    cmp #0
-    beq :+
-    error err_fail
+    bcc :+
+    error err_cannot_fork
+:   cmp #0
+    bne :++
 
     ; Exit child.
 :   print txt_ex
@@ -1861,19 +1858,20 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     jsr SETNAM
     jsr OPEN
 
-    ; Move on with child.
-:   lda #0
+    ; Wait for child to exit.
+:   sta cmd_wait+3
+    lda #0
+    lda #3
+    ldx #<cmd_wait
+    ldy #>cmd_wait
     jsr SETNAM
     jsr OPEN
-    ; Wait for child.
-    lda #1
-    jsr wait
-
     rts
 .endproc
 
 cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE", 0
+cmd_wait:   .byte "PW", 0
 
 .export halt
 .proc halt

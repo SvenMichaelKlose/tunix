@@ -22,12 +22,11 @@ Slowly growing the TDD way.
 
 # System calls
 
-System calls are performed via calls
-to OPEN on device #31.  The first letter
-of the file name denotes the command
-group, the second the command in that
-group.  Argument bytes may follow.
-
+System calls are performed via opening
+a file on device #31.  The first
+character of the filename denotes the
+command group, the second the command in
+that group.  Argument bytes may follow.
 Downcase letters in the examples are
 placeholders for argument bytes.
 
@@ -35,6 +34,10 @@ After sending a system call via OPEN
 an error code may be read using BASIN.
 (Calling CHKIN is not required.)  It may
 followed by return values.
+On assembly level the carry flag tells
+if an error occured (carry set with code
+in accumulator instead of the return
+value).
 
 ~~~C
 // Get process ID.

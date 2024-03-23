@@ -2161,6 +2161,13 @@ j:  jsr $fffe
 .export tunix_enter
 .proc tunix_enter
     pha
+    txa
+    pha
+    ldx pid
+    lda blk1
+    sta proc_blk1,x
+    pla
+    tax
     mvb blk1, tunix_blk1
     pla
     rts
@@ -2196,7 +2203,7 @@ j:  jsr $fffe
     bpl :-
 :   stwi FNADR, filename
 
-    mvb blk1, tunix_blk1
+    jsr tunix_enter
     jmp open2
 .endproc
 
@@ -2216,6 +2223,7 @@ iowrap getin, getin2
 iowrap blkin, blkin2
 iowrap bkout, bkout2
 iowrap close, close2
+iowrap clall, clall2
 iowrap stop, stop2
 iowrap usrcmd, usrcmd2
 
@@ -2225,14 +2233,6 @@ iowrap usrcmd, usrcmd2
     jsr tunix_enter
     ldy #0
     jmpa call_driver, #IDX_CLRCN
-.endproc
-
-; Close all open files.
-.export clall
-.proc clall
-    push blk1
-    mvb blk1, tunix_blk1
-    jmp clall2
 .endproc
 
 .macro blkiohandler name, idx
@@ -2307,3 +2307,7 @@ filename:       .res 256
 response:       .res 8
 response_len:   .res 1
 responsep:      .res 1
+
+.if * >= $9ff0
+.error "IO23 overflow!"
+.endif

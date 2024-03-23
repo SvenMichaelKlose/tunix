@@ -101,6 +101,9 @@ IOPAGE_BASE = $7b
 
 ;;; Registers
 
+.export s, sl, sh, d, dl, dh
+.export c, cl, ch
+
 s:
 sl:     .res 1
 sh:     .res 1
@@ -111,13 +114,7 @@ c:
 cl:     .res 1
 ch:     .res 1
 
-tmp1:
-tmp1l:  .res 1
-tmp1h:  .res 1
-tmp2:   .res 2
-
 ptr1:   .res 2
-ptr2:   .res 2
 ptr3:   .res 2
 
     .data
@@ -129,6 +126,11 @@ ptr3:   .res 2
 .export global_start, banks, free_bank, bank_refs, iopages, iopagesb, free_iopage, first_iopage, iopage_pid, iopage_page, glfns, glfn_refs, glfn_drv, procs, procsb, free_proc, running, sleeping, zombie, proc_flags, exit_codes, proc_ram123, proc_io23, proc_blk1, proc_blk2, proc_blk3, proc_blk5, drvs, drv_pid, drv_dev, drv_vl, drv_vh, dev_drv, copy_bank, global_end, global_size, global_start, banks_ok, banks_faulty
 
 global_start:
+
+tmp1:   .res 2
+tmp2:   .res 2
+
+ptr2:   .res 2
 
 ;; Extended memory banks
 banks:          .res MAX_BANKS

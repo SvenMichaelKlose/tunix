@@ -467,6 +467,43 @@ global_size = global_end - global_start
     dpushx fw, bw, to
 .endmacro
 
+.macro dmovey fw, bw, from, to
+    drmy fw, bw, from
+    dpushy fw, bw, to
+.endmacro
+
+.macro alloc_proc_y
+    dallocy procs, procsb, free_proc, running
+.endmacro
+
+.macro mv_running_sleep_x
+    dmovex procs, procsb, running, sleeping
+.endmacro
+
+.macro mv_sleep_running_x
+    dmovex procs, procsb, sleeping, running
+.endmacro
+
+.macro add_waiting_y
+    dallocy waiting, waitingb, free_wait, first_wait
+.endmacro
+
+.macro rm_waiting_y
+    dmovey waiting, waitingb, first_wait,free_wait
+.endmacro
+
+.macro rm_zombie_x
+    dmovex procs, procsb, zombie, free_proc
+.endmacro
+
+.macro alloc_iopage_x
+    dallocx iopages, iopagesb, free_iopage, first_iopage
+.endmacro
+
+.macro free_iopage_x
+    dmovex iopages, iopagesb, first_iopage, free_iopage
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS BANK MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -977,7 +1014,7 @@ done:
 .export fork
 .proc fork
     ;; Grab process slot.
-    dallocy procs, procsb, free_proc, running
+    alloc_proc_y
     cpy #0
     beq no_more_procs
 .endproc
@@ -1028,7 +1065,7 @@ done:
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
-    dmovex procs, procsb, running, sleeping
+    mv_running_sleep_x
     clc
     rts
 not_there:
@@ -1043,7 +1080,7 @@ already_sleeping:
 .proc resume
     lda proc_flags,x
     bpl not_to_resume
-    dmovex procs, procsb, sleeping, running
+    mv_sleep_running_x
 not_to_resume:
     sec
     rts
@@ -1074,9 +1111,10 @@ not_to_resume:
     cmp tmp1
     bne :+
     tax
-    dmovex iopages, iopagesb, first_iopage, free_iopage
+    free_iopage_x
 :   lnexty iopages, :--
 
+debug:.export debug
     ;; Free drivers.
 :   ldy drvs
     beq :+++
@@ -1134,8 +1172,8 @@ done:
 
     ;; Put us on waiting list.
     enter_context_x
-    dallocy waiting, waitingb, free_wait, first_wait
-    txa
+    add_waiting_y
+    lda pid
     sta waiting_pid,y
     leave_context
 
@@ -1156,18 +1194,23 @@ not_there:
     rts
 
 terminate_zombie:
-    enter_context_y
-    ;; Remove from waiting list.
-    dmovex waiting, waitingb, first_wait,free_wait
-    ldx first_wait
-    bne :+
-    ;; Remove zombie.
-    dmovex procs, procsb, zombie, free_proc
-    jmp :++
+    enter_context_x
+    ldy pid
+    rm_waiting_y
+    ldy first_wait
+    bne resume_next_waiting
+    rm_zombie_x
+    jmp return_zombie_exit_code
 
-    ;; Resume next waiting.
-:   jsr resume
-:   leave_context
+resume_next_waiting:
+    phx
+    tya
+    tax
+    jsr resume
+    plx
+
+return_zombie_exit_code:
+    leave_context
     lda exit_codes,x
     clc
     rts
@@ -1416,7 +1459,7 @@ syscall1 tunix_exit, exit, lda
 .proc tunix_alloc_io_page
     lda free_iopage
     beq respond_error
-    dallocx iopages, iopagesb, free_iopage, first_iopage
+    alloc_iopage_x
     ldx pid
     sta iopage_pid,x
     txa
@@ -1491,7 +1534,7 @@ all:jmp tunix_alloc_io_page
     beq not_there
     cmp pid
     bne not_there
-    dmovex iopages, iopagesb, first_iopage, free_iopage
+    free_iopage_x
     jmp respond_ok
 not_there:
     jmp respond_error
@@ -1859,7 +1902,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
-debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork
@@ -2082,6 +2124,20 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     rts
 .endproc
 
+; Switch to process.
+; A: Process ID
+.export switch
+.proc switch
+    ;;; Save current.
+    tsx
+    stx stack
+    pha
+    ldy pid
+    jsr save_banks_y
+    save_internal_ram_to_blk5_y
+    jmp switch2
+.endproc
+
 io_load:
 
     .org $9800
@@ -2137,18 +2193,8 @@ j:  jsr $fffe
     rts
 .endproc
 
-; Switch to process.
-; A: Process ID
-.export switch
-.proc switch
-    ;;; Save current.
-    tsx
-    stx stack
-    pha
-    ldy pid
-    jsr save_banks_y
-    save_internal_ram_to_blk5_y
-
+.export switch2
+.proc switch2
     ;; Load next.
     ply
     load_internal_ram_from_blk5_y

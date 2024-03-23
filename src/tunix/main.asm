@@ -22,7 +22,9 @@ OP_RTS      = $60
 
 ;;; UltiMem
 
-.export ram123, io23, blk1, blk2, blk3, blk5
+.export ram123, io23, blk1, blk2, blk3
+.export blk5
+
 MAX_BANKS   = 128
 FIRST_BANK  = 8
 ulticfg1    = $9ff1
@@ -37,6 +39,13 @@ blk5        = $9ffe
 ;;; KERNAL
 
 ;.include "cbm_kernal.inc"
+
+.export FRESTOR, READST, SETLFN, SETNAM
+.export OPEN, CLOSE, CHKIN, CKOUT, CLRCN
+.export BASIN, BSOUT, LOAD, SAVE, SETTIM
+.export RDTIM, STOP, GETIN, CLALL
+
+PETSCII_CLRSCR = 147
 
 FRESTOR = $FD52
 
@@ -91,11 +100,11 @@ MAX_LFNS     = 256   ; Has to be.
 MAX_PROCS    = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
-MAX_IOPAGES  = 4
 
 ;;; MACHDEP
 
-IOPAGE_BASE = $7b
+IOPAGE_BASE  = $9b
+MAX_IOPAGES  = 4
 
     .zeropage
 
@@ -117,11 +126,11 @@ ch:     .res 1
 ptr1:   .res 2
 ptr3:   .res 2
 
-    .data
-
 ;;;;;;;;;;;;;;
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
+
+    .bss
 
 .export global_start, banks, free_bank
 .export bank_refs, iopages, iopagesb
@@ -143,6 +152,7 @@ global_start:
 
 tmp1:   .res 2
 tmp2:   .res 2
+tmp3:   .res 2
 
 ptr2:   .res 2
 
@@ -180,6 +190,7 @@ PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
 exit_codes: .res MAX_PROCS
 ; Current banks.
+proc_data:  .res MAX_PROCS
 proc_ram123:.res MAX_PROCS
 proc_io23:  .res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
@@ -917,16 +928,19 @@ vec_io23_to_blk5:
     mvb tmp1+1, blk2
     mvb tmp2, blk3
     mvb tmp2+1, blk5
+    mvb tmp3, ram123
     mvb blk1, tunix_blk1
+    ldx pid
+    lda proc_data,x
+    sta tmp3+1
 
     ;; Make child's IO23 and use it.
     ; Allocate IO23 bank globally.
     lpopx banks, free_bank
-    inc bank_refs,x
-    txa
     sta proc_io23,y
+    inc bank_refs,x
     phx
-    ; Copy IO23.
+    ; Copy.
     sta blk5
     ldaxi vec_io23_to_blk5
     jsr smemcpy
@@ -934,8 +948,8 @@ vec_io23_to_blk5:
     save_internal_ram_to_blk5
     pop io23
     sty pid  ; New PID.
-    tax      ; Add local ref.
-    ; Register new IO23 bank locally.
+    ; Register new IO23 locally.
+    tax
     dpushx lbanks, lbanksb, first_lbank
     ; Set return stack.
     tsx
@@ -951,7 +965,8 @@ vec_io23_to_blk5:
         lda srcblk
         jsr copy_blk3_to_blk5
     .endmacro
-    forkblky proc_ram123, ram123
+    forkblky proc_data, tmp3+1
+    forkblky proc_ram123, tmp3
     forkblky proc_blk2, tmp1+1
     forkblky proc_blk3, tmp2
     forkblky proc_blk5, tmp2+1
@@ -960,12 +975,14 @@ vec_io23_to_blk5:
     cpy #0
     beq :+  ; Do not undo init proc.
 
-    ;; Remove parents default banks.
+    ;; Remove parent's active banks
+    ;; from local list.
     ldx pid
 .macro dereflbankx procblk
     ldy procblk,x
     jsr free_lbank
 .endmacro
+    dereflbankx proc_data
     dereflbankx proc_ram123
     dereflbankx proc_io23
     dereflbankx proc_blk1
@@ -973,7 +990,8 @@ vec_io23_to_blk5:
     dereflbankx proc_blk3
     dereflbankx proc_blk5
 
-    ;; Restore bank set.
+    ;; Restore forked proc's banks.
+:   mvb ram123, tmp3
 :   mvb blk5, tmp2+1
     mvb blk3, tmp2
     mvb blk2, tmp1+1
@@ -1006,7 +1024,8 @@ done:
 ; Low 1K, screen, color and VIC are
 ; on the same bank as the IO23 area
 ; which is reserved for TUNIX and
-; driver code.
+; driver code.  In addition the RAM123
+; area holds per-process data.
 
 .export fork
 .proc fork
@@ -1019,6 +1038,11 @@ done:
 ; Y: New process ID.
 .export fork0
 .proc fork0
+    ;; Machine-dependend process copy.
+:   phy
+    jsr fork_raw
+    ply
+
     ;; Increment bank refs.
     ldx first_lbank
     beq :++
@@ -1026,15 +1050,15 @@ done:
     lnextx lbanks, :-
 
     ;; Increment GLFNs.
-:   ldx first_lfn
+:   push ram123
+    lda proc_data,y
+debug:.export debug
+    sta ram123
+    ldx first_lfn
     beq :++
 :   inc glfn_refs,x
     lnextx lfns, :-
-
-    ;; Machine-dependend process copy.
-:   phy
-    jsr fork_raw
-    ply
+:   pop ram123
 
     lda #PROC_RUNNING
     sta proc_flags,y
@@ -1111,7 +1135,6 @@ not_to_resume:
     free_iopage_x
 :   lnexty iopages, :--
 
-debug:.export debug
     ;; Free drivers.
 :   ldy drvs
     beq :+++
@@ -1340,7 +1363,6 @@ tunix_driver:
 
 .export tunix_open
 .proc tunix_open
-    mvb DFLTN, #TUNIX_DEVICE
     lda FNLEN
     beq s
     lda filename
@@ -1668,19 +1690,10 @@ has_errors:
     print txt_faulty_banks
 
 done:
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx banks_ok
-    beq :+
-    error err_ultimem_num_banks_in_list
-:   txa
+    lda banks_ok
     jsr printnum
     print txt_banks_free
     rts
-
-err_ultimem_num_banks_in_list:
-    .byte "WRONG NUMBER OF ITEMS IN "
-    .byte "'BANKS'.", 0
 
 .export printnum
 .proc printnum
@@ -1701,6 +1714,20 @@ err_ultimem_num_banks_in_list:
 r:  rts
 .endproc
 
+    .rodata
+
+txt_no_ultimem:
+    .byte "NO ULTIMEM/VIC-MIDIFOUND."
+    .byte 13, 0
+txt_faulty_banks:
+    .byte " FAULTY BANKS.", 13,0
+txt_ram_ok:
+    .byte 13, "RAM OK.", 13,0
+txt_banks_free:
+    .byte " 8K BANKS FREE.", 13,0
+
+    .code
+
 io_size = io_end - io_start
 
 .export init
@@ -1713,26 +1740,29 @@ io_size = io_end - io_start
     stwi c, global_size
     jsr bzero
 
-    ;; Init local data.
-    ; Clear.
+    ;; Init local (per-process).
+    stwi s, io_load
+    stwi d, $9800
+    stwi c, io_size
+    jsr memcpy
     stwi d, io_end
     stwi c, $07f0-io_size
     jsr bzero
-    ; Move in code.
-    stwi s, io_load
-    stwi d, $9800
-    stwi c, io_end-io_start
-    jsr memcpy
+    stwi d, $0400
+    stwi c, $0c00
+    jsr bzero
 
     ;; Link lists.
     ldx #0
 @l: txa
     beq :++
+    ; Pointers to previous elements.
     sec
     sbc #1
     cpx #MAX_PROCS
     bcs :+
     sta procsb,x
+    ; Pointers to next elements.
 :   txa
 :   clc
     adc #1
@@ -1750,6 +1780,7 @@ io_size = io_end - io_start
 :   inx
     bne @l
 
+    ;; Finish up lists.
     mvb free_proc, #1
     mvb glfns, #1
     mvb drvs, #1
@@ -1766,8 +1797,12 @@ io_size = io_end - io_start
 
     ;; Make init process 0.
     print txt_init  ; Print '.'.
-    mvb tunix_io23, #3
-    mvb tunix_blk1, #4
+    ldx #2
+    sta proc_data
+    inx
+    stx tunix_io23
+    inx
+    stx tunix_blk1
     ldy #0
     sty procs ; Unlink from free list.
     jsr fork0 ; Fork into process 0.
@@ -1806,23 +1841,20 @@ io_size = io_end - io_start
 
     .rodata
 
-txt_tunix:  .byte 147   ; Clear screen.
-            .byte "TUNIX", 13, 0
-txt_tests:  .byte "RUNNING TESTS:",13, 0
-txt_booting:.byte 13, "BOOTING..",0
-txt_init:   .byte ".", 0
+tunix_vectors:
+.word open, close, chkin, ckout, clrcn
+.word basin, bsout, stop, getin, clall
+.word usrcmd, load, save, blkin, bkout
 
-txt_no_ultimem:
-    .byte "NO ULTIMEM/VIC-MIDIFOUND."
-    .byte 13, 0
-txt_faulty_banks:
-    .byte " FAULTY BANKS.", 13,0
-txt_ram_ok:
-    .byte 13, "RAM OK.", 13,0
-txt_banks_free:
-    .byte " 8K BANKS FREE.", 13,0
-
-    .code
+txt_tunix:
+    .byte PETSCII_CLRSCR
+    .byte "TUNIX", 13, 0
+txt_tests:
+    .byte "RUNNING TESTS:",13, 0
+txt_booting:
+    .byte 13, "BOOTING..",0
+txt_init:
+    .byte ".", 0
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -1842,7 +1874,8 @@ err_cannot_fork:
 err_fail:
     .byte "TEST FAILED", 0
 
-txt_ex:.byte "CHILD",9
+txt_ex:
+    .byte "CHILD",9
 
     .code
 
@@ -2106,7 +2139,6 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pha
     phx
     phy
-    mvb blk1, tunix_blk1
     ldx pid
     lda procs,x
     bne :+
@@ -2141,13 +2173,6 @@ io_load:
 
 io_start:
 
-tunix_vectors:
-.word open, close, chkin, ckout, clrcn
-.word basin, bsout, stop, getin, clall
-.word usrcmd, load, save, blkin, bkout
-
-stmp:   .res 1
-
 .export call_driver2
 .proc call_driver2
 j:  jsr $fffe
@@ -2156,7 +2181,6 @@ j:  jsr $fffe
     php
     pha
     phx
-    mvb blk1, tunix_blk1
     ldx pid
     get_procblk_x proc_blk2, blk2
     get_procblk_x proc_blk3, blk3
@@ -2204,13 +2228,15 @@ j:  jsr $fffe
 .export tunix_enter
 .proc tunix_enter
     pha
-    txa
-    pha
+    phx
     ldx pid
+    lda ram123
+    sta proc_ram123,x
+    lda proc_data,x
+    sta ram123
     lda blk1
     sta proc_blk1,x
-    pla
-    tax
+    plx
     mvb blk1, tunix_blk1
     pla
     rts
@@ -2219,13 +2245,13 @@ j:  jsr $fffe
 .export tunix_leave
 .proc tunix_leave
     php
-    txa
-    pha
+    phx
     ldx pid
     lda proc_blk1,x
     sta blk1
-    pla
-    tax
+    lda proc_ram123,x
+    sta ram123
+    plx
     lda reg_a
     plp
     rts
@@ -2307,8 +2333,7 @@ io_end:
 .export saved_vic, filename, response
 .export response_len, responsep
 
-tunix_io23: .res 1
-tunix_blk1: .res 1
+    .bss
 
 ;; Extended memory banks
 ; Deque of used ones.
@@ -2316,21 +2341,15 @@ lbanks:     .res MAX_BANKS
 lbanksb:    .res MAX_BANKS
 first_lbank:.res 1
 
-;; Logical file numbers
-; Deque of used ones
-lfns:       .res MAX_LFNS
-lfnsb:      .res MAX_LFNS
-first_lfn:  .res 1
-lfn_glfn:   .res MAX_LFNS
-
 ;; Process info
 waiting:    .res MAX_PROCS
 waitingb:   .res MAX_PROCS
 waiting_pid:.res MAX_PROCS
 free_wait:  .res 1
 first_wait: .res 1
-pid:        .res 1
-ppid:       .res 1
+
+tunix_io23:   .res 1  ; Per-process.
+tunix_blk1:   .res 1  ; Same for all.
 
 ;; CPU state
 reg_a:      .res 1
@@ -2339,6 +2358,9 @@ reg_y:      .res 1
 flags:      .res 1
 ; Task-witching
 stack:      .res 1
+
+pid:        .res 1
+ppid:       .res 1
 
 ;; VIC
 saved_vic:  .res 16
@@ -2353,4 +2375,18 @@ responsep:      .res 1
 
 .if * >= $9ff0
 .error "IO23 overflow!"
+.endif
+
+    .bss
+    .org $0400
+
+;; Logical file numbers
+; Deque of used ones
+lfns:       .res MAX_LFNS
+lfnsb:      .res MAX_LFNS
+first_lfn:  .res 1
+lfn_glfn:   .res MAX_LFNS
+
+.if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
+.error "IO pages overflow!"
 .endif

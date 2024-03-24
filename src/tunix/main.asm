@@ -619,10 +619,6 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS CONTEXT (IO23) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Contains all bookkeeping of resources
-; for a process.  LFNs are maintained in
-; shadow block RAM123.
 
 .macro enter_context_x
     push io23
@@ -749,7 +745,7 @@ m:  inc dh
 .export printstr
 .proc printstr
     mvb tmp1, #0
-    jsr CLALL
+    jsr CLRCN
     phx
 :   ldy tmp1
     lda (ptr3),y
@@ -844,7 +840,7 @@ invalid_bank:
 ;;;;;;;;;;;;;;;;;;
 ;
 ; Generates memory moving speed code
-; across multiple Ultimem banks.
+; across multiple extended memory banks.
 ;
 ; ATM a block copy from BLK3 to BLK5 is
 ; created, starting with bank
@@ -869,6 +865,7 @@ invalid_bank:
 
 .export gen_speedcode
 .proc gen_speedcode
+    print txt_speed_code
     push blk5
     ; Grab a new bank for BLK5.
     jsr balloc
@@ -917,6 +914,7 @@ next_move:
 done:
     out #OP_RTS
     pop blk5
+    print txt_newline
     rts
 .endproc
 
@@ -932,6 +930,13 @@ done:
     sta blk2
     jmp $4000
 .endproc
+
+    .rodata
+
+txt_speed_code:
+    .byte "MAKING SPEED CODE...", 0
+txt_newline:
+    .byte 13, 0
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; MACHDEP VIC-20 :::
@@ -1147,7 +1152,6 @@ done:
     ;; Increment GLFNs.
 :   push ram123
     lda proc_data,y
-debug:.export debug
     sta ram123
     ldx first_lfn
     beq :++
@@ -1898,7 +1902,7 @@ io_size = io_end - io_start
     jsr init_ultimem_banks
 
     ;; Make init process 0.
-    print txt_init  ; Print '.'.
+    print txt_init
     ldx #2
     sta proc_data
     inx
@@ -1950,13 +1954,14 @@ tunix_vectors:
 
 txt_tunix:
     .byte PETSCII_CLRSCR
-    .byte "TUNIX", 13, 0
+    .byte "STARTING TUNIX", 13, 0
 txt_tests:
-    .byte "RUNNING TESTS:",13, 0
+    .byte "CHECKING SANITY.",13, 0
+txt_init:
+    .byte "STARTING INIT PROCESS."
+    .byte 13, 0
 txt_booting:
     .byte 13, "BOOTING..",0
-txt_init:
-    .byte ".", 0
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -2122,7 +2127,9 @@ h:  lda $ffff
 
 .export open2
 .proc open2
-    lda LFN
+    pushw FNADR
+    stwi FNADR, filename
+    push LFN
     jsr lfn_to_glfn
     sta LFN
     ldy DEV
@@ -2331,13 +2338,17 @@ j:  jsr $fffe
     pha
     phx
     ldx pid
+    ; Save active RAM123.
     lda ram123
     sta proc_ram123,x
-    lda proc_data,x
-    sta ram123
+    ; Save active BLK1.
     lda blk1
     sta proc_blk1,x
+    ; Set additional local on RAM123.
+    lda proc_data,x
+    sta ram123
     plx
+    ; Map in global to BLK1.
     mvb blk1, tunix_blk1
     pla
     rts
@@ -2363,9 +2374,6 @@ j:  jsr $fffe
 
 .export open
 .proc open
-    pushw FNADR
-    push LFN
-
     ;; Move filename + pointer to IO23.
     ldy FNLEN
     beq :++
@@ -2374,9 +2382,8 @@ j:  jsr $fffe
     sta filename,y
     dey
     bpl :-
-:   stwi FNADR, filename
 
-    jsr tunix_enter
+:   jsr tunix_enter
     jmp open2
 .endproc
 
@@ -2441,19 +2448,6 @@ io_end:
 
     .bss
 
-;; Extended memory banks
-; Deque of used ones.
-lbanks:         .res MAX_BANKS
-lbanksb:        .res MAX_BANKS
-first_lbank:    .res 1
-
-;; Process info
-waiting:        .res MAX_PROCS
-waitingb:       .res MAX_PROCS
-waiting_pid:    .res MAX_PROCS
-free_wait:      .res 1
-first_wait:     .res 1
-
 ;; Vitals
 tunix_io23:     .res 1  ; Per-process.
 tunix_blk1:     .res 1  ; Same for all.
@@ -2483,6 +2477,19 @@ responsep:      .res 1
 
     .bss
     .org $0400  ; RAM123
+
+;; Extended memory banks
+; Deque of used ones.
+lbanks:         .res MAX_BANKS
+lbanksb:        .res MAX_BANKS
+first_lbank:    .res 1
+
+;; Process info
+waiting:        .res MAX_PROCS
+waitingb:       .res MAX_PROCS
+waiting_pid:    .res MAX_PROCS
+free_wait:      .res 1
+first_wait:     .res 1
 
 ;; Logical file numbers
 ; Deque of used ones

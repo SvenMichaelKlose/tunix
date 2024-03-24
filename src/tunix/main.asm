@@ -48,6 +48,7 @@ blk5        = $9ffe
 PETSCII_CLRSCR = 147
 
 FRESTOR = $FD52
+PRTFIX  = $DDCD
 
 READST  = $ffb7
 SETLFN  = $ffba
@@ -1827,7 +1828,20 @@ done:
 
 .export printnum
 .proc printnum
-    rts
+    ldx #0
+    stx tmp1
+    clc
+    rol
+    rol tmp1
+    clc
+    rol
+    rol tmp1
+    clc
+    rol
+    rol tmp1
+    tax
+    lda tmp1
+    jmp PRTFIX
 .endproc
 
 .export printbnk
@@ -1854,7 +1868,7 @@ txt_faulty_banks:
 txt_ram_ok:
     .byte 13, "RAM OK.", 13,0
 txt_banks_free:
-    .byte " 8K BANKS FREE.", 13,0
+    .byte "K RAM FREE.", 13,0
 
     .code
 

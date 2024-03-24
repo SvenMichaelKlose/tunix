@@ -9,7 +9,7 @@
     ldy d
     lda #0
     sta d
-    bne +n ; (jmp)
+    beq +n ; (jmp)
 l:  sta (d),y
     iny
     beq m

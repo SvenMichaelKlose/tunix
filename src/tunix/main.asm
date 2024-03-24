@@ -2378,12 +2378,11 @@ j:  jsr $fffe
     rts
 .endproc
 
-; Restore process bank configuration.
-; Only the areas TUNIX occupies (RAM123
-; and BLK1).
+; Restore banks on BLK1 & RAM123.
 .export tunix_leave
 .proc tunix_leave
     php
+    pha
     phx
     ldx pid
     lda proc_blk1,x
@@ -2391,6 +2390,7 @@ j:  jsr $fffe
     lda proc_ram123,x
     sta ram123
     plx
+    pla
     lda reg_a
     plp
     rts

@@ -1569,11 +1569,13 @@ syscall1 tunix_exit, exit, lda
 ; A: value
 .export respond
 .proc respond
+    pha
     sta response+1
     lda #0
     sta response
     sta responsep
     ldx #2
+    pla
     bne respond_len ; (jmp)
 .endproc
 
@@ -2079,6 +2081,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
+debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork

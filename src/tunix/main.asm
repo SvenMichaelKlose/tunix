@@ -2259,6 +2259,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static KERNAL I/O handlers. ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Always there for every process.
 
 io_load:
     .org $9800  ; IO23
@@ -2432,7 +2434,7 @@ io_end:
 .export lbanksb, first_lbank, lfns
 .export lfnsb, lfn_glfn, first_lfn
 .export waiting, waiting_pid, free_wait
-.export first_wait, pid, ppid, reg_a
+.export first_wait, pid, reg_a
 .export reg_x, reg_y, stack, flags
 .export saved_vic, filename, response
 .export response_len, responsep
@@ -2452,32 +2454,26 @@ waiting_pid:    .res MAX_PROCS
 free_wait:      .res 1
 first_wait:     .res 1
 
+;; Vitals
 tunix_io23:     .res 1  ; Per-process.
 tunix_blk1:     .res 1  ; Same for all.
+pid:            .res 1
 
-;; CPU state
+;; Machine state
 reg_a:          .res 1
 reg_x:          .res 1
 reg_y:          .res 1
 flags:          .res 1
-; Task-witching
 stack:          .res 1
-
-pid:            .res 1
-ppid:           .res 1
-
-;; VIC
 saved_vic:      .res 16
 
 ;; Syscalls
-; File name copied from calling process.
 filename:       .res 256
-; TUNIX syscall device response
 response:       .res 8
 response_len:   .res 1
 responsep:      .res 1
 
-.if * >= $9ff0
+.if * >= IOPAGE_BASE * 256
 .error "IO23 overflow!"
 .endif
 

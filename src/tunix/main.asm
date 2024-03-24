@@ -223,6 +223,9 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;
 ;;; MACROS ;;;
 ;;;;;;;;;;;;;;
+;
+; Convenience macros to dampen down
+; repetition.
 
 .macro mvb to, from
     lda from
@@ -280,10 +283,6 @@ global_size = global_end - global_start
     ldx reg_x
     ldy reg_y
 .endmacro
-
-;;;;;;;;;;;;;;;;;;;
-;;; WORD MACROS ;;;
-;;;;;;;;;;;;;;;;;;;
 
 .macro ldaxi val
     lda #<(val)
@@ -354,10 +353,19 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;
 ;;; LIST MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
+;
+; Macros for singly-linked lists.
+; 'lpop*' and 'lnext*' also work with
+; deques.
+;
+; There may be either multiple lists or
+; deques in one set of arrays.
 
 .macro linit list
     mvb list, #1
 .endmacro
+
+;; Pop from front of list.
 
 .macro lpopx list, free
     ldx free
@@ -371,6 +379,8 @@ global_size = global_end - global_start
     sta free
 .endmacro
 
+; Push to front of list.
+
 .macro lpushx list, first
     lda first
     sta list,x
@@ -383,6 +393,7 @@ global_size = global_end - global_start
     sty first
 .endmacro
 
+;; Move between lists.
 .macro lmovex list, from, to
     lpopy list, from
     lpushx list, to
@@ -392,6 +403,8 @@ global_size = global_end - global_start
     lpopy list, from
     lpushy list, to
 .endmacro
+
+;; Forwards iteration.
 
 .macro lnextx list, loop
     lda list,x
@@ -408,6 +421,14 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;;
 ;;; DEQUE MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;
+;
+; Deques are doubly-linked lists that
+; allow fast random insert and remove
+; operations.  An additional array con-
+; tains the backwards pointers. (e.g.
+; 'procsb' holds those for 'procs'.
+
+;; Push to front of deque.
 
 .macro dpushx fw, bw, first
     lda first
@@ -424,6 +445,8 @@ global_size = global_end - global_start
     sta bw,y
     sty first
 .endmacro
+
+;; Remove from deque.
 
 .macro drmx fw, bw, first
     cpx first
@@ -463,6 +486,13 @@ global_size = global_end - global_start
 :
 .endmacro
 
+;; Allocate item in deque.
+;
+; Pops item from front of a 'free' list
+; and pushes it onto the front of an
+; 'allocated' list in the same deque
+; array.
+
 .macro dallocx fw, bw, from, to
     lpopx fw, from
     dpushx fw, bw, to
@@ -472,6 +502,11 @@ global_size = global_end - global_start
     lpopy fw, from
     dpushy fw, bw, to
 .endmacro
+
+;; Move between deques
+;
+; Also used to move items back to free
+; lists.
 
 .macro dmovex fw, bw, from, to
     drmx fw, bw, from
@@ -483,9 +518,17 @@ global_size = global_end - global_start
     dpushy fw, bw, to
 .endmacro
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS LIST MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Allocate free process.
+
 .macro alloc_proc_y
     dallocy procs, procsb, free_proc, running
 .endmacro
+
+;; Move between running to sleeping.
 
 .macro mv_running_sleeping_x
     dmovex procs, procsb, running, sleeping
@@ -495,17 +538,27 @@ global_size = global_end - global_start
     dmovex procs, procsb, sleeping, running
 .endmacro
 
+;; Processes waiting for others to exit.
+
+; Allocate local slot in waiting list.
 .macro add_waiting_y
     dallocy waiting, waitingb, free_wait, first_wait
 .endmacro
 
+; Remove process from waiting list.
 .macro rm_waiting_y
     dmovey waiting, waitingb, first_wait,free_wait
 .endmacro
 
+; Make zombie a free process.
+
 .macro rm_zombie_x
     dmovex procs, procsb, zombie, free_proc
 .endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; IO PAGE LIST MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro alloc_iopage_x
     dallocx iopages, iopagesb, free_iopage, first_iopage
@@ -566,6 +619,10 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS CONTEXT (IO23) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Contains all bookkeeping of resources
+; for a process.  LFNs are maintained in
+; shadow block RAM123.
 
 .macro enter_context_x
     push io23
@@ -616,9 +673,16 @@ p:  lda $ff00,x
     rts
 .endproc
 
-;;;;;;;;;;;;;;
-;;; STDLIB ;;;
-;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; MEMORY BLOCK CLEAR/MOVE ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Copy descriptor 'set' over copy
+; vectors and move it, baby.
+.macro smemcpyax set
+    ldaxi set
+    jsr smemcpy
+.endmacro
 
 ; Copy range at XA.
 .export smemcpy
@@ -676,9 +740,11 @@ m:  inc dh
     jmp n
 .endproc
 
-;;;;;;;;;;
-;;; UI ;;;
-;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;
+;;; USER INTERFACE ;;;
+;;;;;;;;;;;;;;;;;;;;;;
+;
+; Blah.
 
 .export printstr
 .proc printstr
@@ -746,7 +812,6 @@ m:  inc dh
 .endproc
 
 ; Free bank
-; Ingnores already free ones.
 ; X: Bank #
 .export bfree
 .proc bfree
@@ -777,6 +842,13 @@ invalid_bank:
 ;;;;;;;;;;;;;;;;;;
 ;;; SPEED COPY ;;;
 ;;;;;;;;;;;;;;;;;;
+;
+; Generates memory moving speed code
+; across multiple Ultimem banks.
+;
+; ATM a block copy from BLK3 to BLK5 is
+; created, starting with bank
+; 'copy_bank'.
 
 .export outa
 .proc outa
@@ -864,6 +936,9 @@ done:
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; MACHDEP VIC-20 :::
 ;;;;;;;;;;;;;;;;;;;;;;
+;
+; Process forks and switches.  TUNIX is
+; not ready to support other platforms.
 
     .rodata
 
@@ -886,11 +961,6 @@ vec_blk5_to_vic:
     .word saved_vic+$2000, $9000, $0010
 
     .code
-
-.macro smemcpyax set
-    ldaxi set
-    jsr smemcpy
-.endmacro
 
 .macro save_internal_ram_to_blk5
     smemcpyax vec_screen_to_blk5
@@ -1004,6 +1074,27 @@ vec_io23_to_blk5:
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; Translate local to global LFN.
+; Creates missing ones.
+; X: LFN
+.export lfn_to_glfn
+.proc lfn_to_glfn
+    tax
+    lda lfn_glfn,x
+    bne :+  ; Use existing...
+    lpushx lfns, first_lfn
+    phx
+    lpopx glfns, glfns
+    inc glfn_refs,x
+    txa
+    tay
+    plx
+    tya
+    sta lfn_glfn,x
+:   rts
+.endproc
+
+;; Free all LFNs of the current process.
 .export free_lfns
 .proc free_lfns
     ldy first_lfn
@@ -1025,8 +1116,12 @@ done:
 ; on the same bank as the IO23 area
 ; which is reserved for TUNIX and
 ; driver code.  In addition the RAM123
-; area holds per-process data.
+; area holds LFN data.
 
+; Clone the current process.
+; Returns:
+; A: New process ID for the parent and
+;    0 for the child.
 .export fork
 .proc fork
     ;; Grab process slot.
@@ -1095,8 +1190,8 @@ already_sleeping:
     rts
 .endproc
 
-; Wake up process.
-; A: Process ID
+; Wake process up.
+; A: Process ID.
 .export resume
 .proc resume
     lda proc_flags,x
@@ -1184,7 +1279,8 @@ done:
 
 ; Wait for process to exit
 ; X: Process ID
-; Returns: A: Exit code
+; Returns:
+; A: Exit code
 .export wait
 .proc wait
     lda proc_flags,x
@@ -1271,8 +1367,9 @@ return_zombie_exit_code:
 
 ; Register driver and assign to device
 ; XA: vectors
-; Y: device
-; Returns: X: driver ID or 0.
+; Y:  device
+; Returns:
+; X:  driver ID or 0.
 .export register
 .proc register
     stax ptr1
@@ -1301,6 +1398,9 @@ return_zombie_exit_code:
 ;;;;;;;;;;;;;;
 ;;; DRIVER ;;;
 ;;;;;;;;;;;;;;
+;
+; Takes on system calls via device
+; TUNIX_DEVICE (#31 by default).
 
     .rodata
 
@@ -1562,6 +1662,8 @@ not_there:
 ;;;;;;;;;;;;
 ;;; INIT ;;;
 ;;;;;;;;;;;;
+;
+; Booting the thing.
 
     .zeropage
 
@@ -1859,6 +1961,8 @@ txt_init:
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
 ;;;;;;;;;;;;;
+;
+; Tests running before regular boot.
 
     .rodata
 
@@ -1979,6 +2083,10 @@ cmd_wait:   .byte "PW", 0
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
 ;;;;;;;;;;;;;;;;;
+;
+; KERNAL I/O handlers with resident
+; parts in IO23 that bank in BLK1
+; (this place right here).
 
 .export call_glfn_driver
 .proc call_glfn_driver
@@ -2010,25 +2118,6 @@ h:  lda $ffff
     get_procblk_x proc_blk1, blk1
     load_regs
     jmp call_driver2
-.endproc
-
-; Translate local to global LFN.
-; X: LFN
-.export lfn_to_glfn
-.proc lfn_to_glfn
-    tax
-    lda lfn_glfn,x
-    bne :+  ; Use existing...
-    lpushx lfns, first_lfn
-    phx
-    lpopx glfns, glfns
-    inc glfn_refs,x
-    txa
-    tay
-    plx
-    tya
-    sta lfn_glfn,x
-:   rts
 .endproc
 
 .export open2
@@ -2167,10 +2256,12 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     jmp switch2
 .endproc
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Static KERNAL I/O handlers. ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 io_load:
-
-    .org $9800
-
+    .org $9800  ; IO23
 io_start:
 
 .export call_driver2
@@ -2192,6 +2283,8 @@ j:  jsr $fffe
     rts
 .endproc
 
+; Copy active bank numbers to process
+; state.
 .export save_banks_y
 .proc save_banks_y
     set_procblk_y proc_ram123, ram123
@@ -2203,6 +2296,8 @@ j:  jsr $fffe
     rts
 .endproc
 
+; Copy active bank numbers from process
+; state.
 .export load_banks_y
 .proc load_banks_y
     get_procblk_y proc_ram123, ram123
@@ -2225,6 +2320,10 @@ j:  jsr $fffe
     rts
 .endproc
 
+; Map in rest of TUNIX.
+; It's in RAM123 and BLK1.  Saves
+; current bank configuration to process
+; state.
 .export tunix_enter
 .proc tunix_enter
     pha
@@ -2242,6 +2341,9 @@ j:  jsr $fffe
     rts
 .endproc
 
+; Restore process bank configuration.
+; Only the areas TUNIX occupies (RAM123
+; and BLK1).
 .export tunix_leave
 .proc tunix_leave
     php
@@ -2262,7 +2364,7 @@ j:  jsr $fffe
     pushw FNADR
     push LFN
 
-    ;; Copy file name.
+    ;; Move filename + pointer to IO23.
     ldy FNLEN
     beq :++
     dey
@@ -2323,6 +2425,8 @@ io_end:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOCAL (per process) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; The data part of the IO23 area.
 
 .export tunix_io23, tunix_blk1, lbanks
 .export lbanksb, first_lbank, lfns
@@ -2337,33 +2441,33 @@ io_end:
 
 ;; Extended memory banks
 ; Deque of used ones.
-lbanks:     .res MAX_BANKS
-lbanksb:    .res MAX_BANKS
-first_lbank:.res 1
+lbanks:         .res MAX_BANKS
+lbanksb:        .res MAX_BANKS
+first_lbank:    .res 1
 
 ;; Process info
-waiting:    .res MAX_PROCS
-waitingb:   .res MAX_PROCS
-waiting_pid:.res MAX_PROCS
-free_wait:  .res 1
-first_wait: .res 1
+waiting:        .res MAX_PROCS
+waitingb:       .res MAX_PROCS
+waiting_pid:    .res MAX_PROCS
+free_wait:      .res 1
+first_wait:     .res 1
 
-tunix_io23:   .res 1  ; Per-process.
-tunix_blk1:   .res 1  ; Same for all.
+tunix_io23:     .res 1  ; Per-process.
+tunix_blk1:     .res 1  ; Same for all.
 
 ;; CPU state
-reg_a:      .res 1
-reg_x:      .res 1
-reg_y:      .res 1
-flags:      .res 1
+reg_a:          .res 1
+reg_x:          .res 1
+reg_y:          .res 1
+flags:          .res 1
 ; Task-witching
-stack:      .res 1
+stack:          .res 1
 
-pid:        .res 1
-ppid:       .res 1
+pid:            .res 1
+ppid:           .res 1
 
 ;; VIC
-saved_vic:  .res 16
+saved_vic:      .res 16
 
 ;; Syscalls
 ; File name copied from calling process.
@@ -2377,15 +2481,19 @@ responsep:      .res 1
 .error "IO23 overflow!"
 .endif
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Additional local bank ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
     .bss
-    .org $0400
+    .org $0400  ; RAM123
 
 ;; Logical file numbers
 ; Deque of used ones
-lfns:       .res MAX_LFNS
-lfnsb:      .res MAX_LFNS
-first_lfn:  .res 1
-lfn_glfn:   .res MAX_LFNS
+lfns:           .res MAX_LFNS
+lfnsb:          .res MAX_LFNS
+first_lfn:      .res 1
+lfn_glfn:       .res MAX_LFNS
 
 .if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
 .error "IO pages overflow!"

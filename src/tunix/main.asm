@@ -616,6 +616,14 @@ global_size = global_end - global_start
     get_procblk_y proc_io23, blk5
 .endmacro
 
+.macro datax
+    get_procblk_x proc_data, ram123
+.endmacro
+
+.macro datay
+    get_procblk_y proc_data, ram123
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS CONTEXT (IO23) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -623,14 +631,19 @@ global_size = global_end - global_start
 .macro enter_context_x
     push io23
     io23x
+    push ram123
+    datax
 .endmacro
 
 .macro enter_context_y
     push io23
     io23y
+    push ram123
+    datay
 .endmacro
 
 .macro leave_context
+    pop ram123
     pop io23
 .endmacro
 
@@ -998,7 +1011,6 @@ vec_io23_to_blk5:
 ; Y: new process ID
 .export fork_raw
 .proc fork_raw
-    push io23
     mvb tmp1, blk1
     mvb tmp1+1, blk2
     mvb tmp2, blk3
@@ -1010,19 +1022,31 @@ vec_io23_to_blk5:
     sta tmp3+1
 
     ;; Make child's IO23 and use it.
+    push io23 ; Save parent's.
     ; Allocate IO23 bank globally.
     lpopx banks, free_bank
     sta proc_io23,y
     inc bank_refs,x
     phx
-    ; Copy.
+    ; Copy parent's IO23 into child's.
     sta blk5
     ldaxi vec_io23_to_blk5
     jsr smemcpy
-    ; Low, screen, color, VIC.
+    ; Also lowmem, screen, color + VIC.
     save_internal_ram_to_blk5
+    ; Allocate additional local.
+    lpopx banks, free_bank ; (BLK5)
+    pha
+    sta proc_data,y
+    inc bank_refs,x
+    lda tmp3+1 ; (BLK3)
+    jsr copy_blk3_to_blk5
+    plx
+    dpushx lbanks, lbanksb, first_lbank
+    stx ram123 ; Map in addtional local.
+    ; Map in child's IO23.
     pop io23
-    sty pid  ; New PID.
+    sty pid  ; Set its PID.
     ; Register new IO23 locally.
     tax
     dpushx lbanks, lbanksb, first_lbank
@@ -1035,12 +1059,11 @@ vec_io23_to_blk5:
     ; Copies from BLK3 to BLK5 with
     ; speed code in BLK2.
     .macro forkblky procblk, srcblk
-        jsr balloc
+        jsr balloc ; (BLK5)
         sta procblk,y
-        lda srcblk
+        lda srcblk ; (BLK3)
         jsr copy_blk3_to_blk5
     .endmacro
-    forkblky proc_data, tmp3+1
     forkblky proc_ram123, tmp3
     forkblky proc_blk2, tmp1+1
     forkblky proc_blk3, tmp2
@@ -1235,6 +1258,7 @@ not_to_resume:
 :   lnexty iopages, :--
 
     ;; Free drivers.
+:.if 0
 :   ldy drvs
     beq :+++
 :   lda drv_pid,y
@@ -1248,7 +1272,7 @@ not_to_resume:
     lda #0  ; KERNAL
     sta dev_drv,x
 :   lnexty drvs, :--
-
+.endif
     ;; Free process.
 :   ldx tmp1
     ; Take off running or sleeping.

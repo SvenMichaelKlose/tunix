@@ -1260,10 +1260,10 @@ child:
     rts
 .endproc
 
-; Put process to sleep.
+; Suspend process.
 ; X: Process ID
-.export sleep
-.proc sleep
+.export suspend
+.proc suspend
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
@@ -1278,12 +1278,12 @@ already_sleeping:
 
 ; Wake process up.
 ; A: Process ID.
-.export resume
-.proc resume
+.export continue
+.proc continue
     lda proc_flags,x
-    bpl not_to_resume
+    bpl not_to_continue
     mv_sleeping_running_x
-not_to_resume:
+not_to_continue:
     sec
     rts
 .endproc
@@ -1352,12 +1352,12 @@ not_to_resume:
 
 ; Resume waiting processes
 ; X: ID of process waiting for
-.export resume_waiting
-.proc resume_waiting
+.export continue_waiting
+.proc continue_waiting
     enter_context_x
     ldy first_wait
     beq done
-    jsr resume
+    jsr continue
 done:
     leave_context
     jmp schedule
@@ -1386,7 +1386,7 @@ done:
     ;; Take a nap.
     phx
     ldx pid
-    jsr sleep
+    jsr suspend
     jsr schedule
     plx
     jmp :-
@@ -1400,15 +1400,15 @@ terminate_zombie:
     ldy pid
     rm_waiting_y
     ldy first_wait
-    bne resume_next_waiting
+    bne continue_next_waiting
     rm_zombie_x
     jmp return_zombie_exit_code
 
-resume_next_waiting:
+continue_next_waiting:
     phx
     tya
     tax
-    jsr resume
+    jsr continue
     plx
 
 return_zombie_exit_code:
@@ -1425,7 +1425,7 @@ return_zombie_exit_code:
     lda #255
     sta exit_codes,x
     jsr zombify
-    jmp resume_waiting
+    jmp continue_waiting
 .endproc
 
 ; Exit current process
@@ -1434,9 +1434,8 @@ return_zombie_exit_code:
 .proc exit
     ldx pid
     sta exit_codes,x
-debug:.export debug
     jsr zombify
-    jmp resume_waiting
+    jmp continue_waiting
 .endproc
 
 ; XA: Start address
@@ -1578,15 +1577,15 @@ s:  jmp schedule
     beq tunix_wait
     cmp #'S'
     beq tunix_stop
-    cmp #'R'
-    beq tunix_resume
+    cmp #'C'
+    beq tunix_continue
     bne respond_error   ; (jmp)
 .endproc
 
 syscall1 tunix_kill, kill, ldx
 syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
-syscall1 tunix_resume, resume, ldx
+syscall1 tunix_continue, continue, ldx
 syscall1 tunix_exit, exit, lda
 
 ; "PF"
@@ -2069,7 +2068,7 @@ txt_init:
     .byte "STARTING INIT"
     .byte 13, 0
 txt_booting:
-    .byte 13, "BOOTING", 13, 0
+    .byte 13, "BOOTING TUNIX", 13, 0
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -2433,19 +2432,6 @@ j:  jsr $fffe
     plx
     pla
     plp
-    rts
-.endproc
-
-; Copy active bank numbers to process
-; state.
-.export save_banks_y
-.proc save_banks_y
-    set_procblk_y proc_ram123, ram123
-    set_procblk_y proc_io23, io23
-    set_procblk_y proc_blk1, blk1
-    set_procblk_y proc_blk2, blk2
-    set_procblk_y proc_blk3, blk3
-    set_procblk_y proc_blk5, blk5
     rts
 .endproc
 

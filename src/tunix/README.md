@@ -155,11 +155,11 @@ its exit code.
 
 Exits any process with exit code 255.
 
-### "PSp": Stop
+### "PSp": Suspend
 
 Moves process to the sleeping list.
 
-### "PRp": Resume
+### "PCp": Continue
 
 Moves process to the running list.
 

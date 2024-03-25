@@ -708,6 +708,13 @@ p:  lda $ff00,x
 .export smemcpy
 .proc smemcpy
     jsr sset
+    pushw s
+    pushw d
+    pushw c
+    jsr memcpy
+    popw c
+    popw d
+    popw s
 .endproc
 
 ; Copy memory.
@@ -1076,8 +1083,7 @@ vec_io23_to_blk5:
     pha
     ; Copy parent's IO23 into child's.
     sta blk5
-    ldaxi vec_io23_to_blk5
-    jsr smemcpy
+    smemcpyax vec_io23_to_blk5
     ; Copy lowmem, screen, color & VIC.
     save_internal_ram_to_blk5
 
@@ -1934,6 +1940,13 @@ txt_ram_ok:
 txt_banks_free:
     .byte "K RAM FREE.", 13,0
 
+vec_io_reloc:
+    .word io_load, $9800, io_size
+vec_backup_kernal:
+    .word IOVECTORS, old_kernal_vectors, 30
+vec_tunix_kernal:
+    .word tunix_vectors, IOVECTORS, 30
+
     .code
 
 io_size = io_end - io_start
@@ -1949,10 +1962,7 @@ io_size = io_end - io_start
     jsr bzero
 
     ;; Init local (per-process).
-    stwi s, io_load
-    stwi d, $9800
-    stwi c, io_size
-    jsr memcpy
+    smemcpyax vec_io_reloc
     stwi d, io_end
     stwi c, $07f0-io_size
     jsr bzero
@@ -2035,15 +2045,9 @@ io_size = io_end - io_start
 
     ;;; Init KERNAL vectors.
     ;; Save
-    stwi s, IOVECTORS
-    stwi d, old_kernal_vectors
-    stwi c, 30
-    jsr memcpy
+    smemcpyax vec_backup_kernal
     ;; Replace
-    stwi s, tunix_vectors
-    stwi d, IOVECTORS
-    stwi c, 30
-    jsr memcpy
+    smemcpyax vec_tunix_kernal
 
     ;;; Make devices default to KERNAL.
     mvb drv_vl, #<old_kernal_vectors

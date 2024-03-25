@@ -144,10 +144,12 @@ ptr3:   .res 2
 .export proc_io23, proc_blk1, proc_blk2
 .export proc_blk3, proc_blk5, drvs
 .export drv_pid, drv_dev, drv_vl
-.export drv_vh, dev_drv, copy_bank
-.export global_end, global_size
-.export global_start, banks_ok
-.export banks_faulty
+.export drv_vh, dev_drv, global_end
+.export global_size, global_start
+.export banks_ok, banks_faulty
+.export copy_bank_blk3_to_blk5
+.export copy_bank_blk5_to_lowmem
+.export copy_bank_lowmem_to_blk5
 
 global_start:
 
@@ -209,12 +211,12 @@ drv_vh:     .res MAX_DRVS
 ; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
 
-;; First speed code BLK5 to copy from
-;; BLK2 to BLK3.
-copy_bank:  .res 1
+;; Initial speed code banks.
+copy_bank_blk3_to_blk5:   .res 1
+copy_bank_blk5_to_lowmem: .res 1
+copy_bank_lowmem_to_blk5: .res 1
 
-old_kernal_vectors:
-            .res 32
+old_kernal_vectors: .res 32
 
 global_end:
 global_size = global_end - global_start
@@ -525,7 +527,7 @@ global_size = global_end - global_start
 
 ;; Allocate free process.
 
-.macro alloc_proc_y
+.macro alloc_proc_running_y
     dallocy procs, procsb, free_proc, running
 .endmacro
 
@@ -877,20 +879,50 @@ invalid_bank:
     jsra outa, at+1
 .endmacro
 
-.export gen_speedcode
-.proc gen_speedcode
+.export gen_speedcodes
+.proc gen_speedcodes
     print txt_speed_code
     push blk5
-    ; Grab a new bank for BLK5.
+
+    ;; Make copy from BLK3 to BLK5.
     jsr balloc
-    sta copy_bank
+    sta copy_bank_blk3_to_blk5
     sta blk5
     ; Source/dest argument values.
     stwi ptr1, $6000
     stwi ptr2, $a000
-    ; Total move count.
-    stwi c, $2100
+    ; Total count (quick countdown).
+    stwi c, $2000
+    jsr gen_speedcode
+    out #OP_RTS
 
+    ;; Make copy from lowmem to BLK5.
+    jsr balloc
+    sta copy_bank_lowmem_to_blk5
+    sta blk5
+    stwi ptr1, $0000
+    stwi ptr2, $b000
+    stwi c, $0400
+    jsr gen_speedcode
+    out #OP_RTS
+
+    ;; Make copy from BLK5 to lowmem.
+    jsr balloc
+    sta copy_bank_blk5_to_lowmem
+    sta blk5
+    stwi ptr1, $b000
+    stwi ptr2, $0000
+    stwi c, $0400
+    jsr gen_speedcode
+    out #OP_JMP_ABS
+
+    pop blk5
+    print txt_newline
+    rts
+.endproc
+
+.export gen_speedcode
+.proc gen_speedcode
 next_bank:
     ; Per bank move count.
     stwi tmp1, ($2000 / 6)
@@ -926,9 +958,6 @@ next_move:
     jmp next_bank
 
 done:
-    out #OP_RTS
-    pop blk5
-    print txt_newline
     rts
 .endproc
 
@@ -936,7 +965,7 @@ done:
 .proc copy_blk3_to_blk5
     sta blk3
     stx blk5
-    lda copy_bank
+    lda copy_bank_blk3_to_blk5
 .endproc
 
 .export next_copy_bank
@@ -965,15 +994,11 @@ vec_vic_to_blk5:
     .word $9000, saved_vic+$2000, $0010
 vec_screen_to_blk5:
     .word $1000, $a000, $1000
-vec_lowmem_to_blk5:
-    .word $0000, $b000, $0400
 vec_color_to_blk5:
     .word $9400, $b400, $0400
 
 vec_blk5_to_screen:
     .word $a000, $1000, $1000
-vec_blk5_to_lowmem:
-    .word $b000, $0000, $0400
 vec_blk5_to_color:
     .word $b400, $9400, $0400
 vec_blk5_to_vic:
@@ -982,8 +1007,9 @@ vec_blk5_to_vic:
     .code
 
 .macro save_internal_ram_to_blk5
+    lda copy_bank_lowmem_to_blk5
+    jsr next_copy_bank
     smemcpyax vec_screen_to_blk5
-    smemcpyax vec_lowmem_to_blk5
     smemcpyax vec_color_to_blk5
     smemcpyax vec_vic_to_blk5
 .endmacro
@@ -991,14 +1017,6 @@ vec_blk5_to_vic:
 .macro save_internal_ram_to_blk5_y
     get_procblk_y proc_io23, blk5
     save_internal_ram_to_blk5
-.endmacro
-
-.macro load_internal_ram_from_blk5_y
-    get_procblk_y proc_io23, blk5
-    smemcpyax vec_blk5_to_lowmem
-    smemcpyax vec_blk5_to_color
-    smemcpyax vec_blk5_to_screen
-    smemcpyax vec_blk5_to_vic
 .endmacro
 
     .rodata
@@ -1026,9 +1044,10 @@ vec_io23_to_blk5:
     push io23 ; Save parent's.
     ; Allocate IO23 bank globally.
     lpopx banks, free_bank
+    txa
     sta proc_io23,y
     inc bank_refs,x
-    phx
+    pha
     ; Copy parent's IO23 into child's.
     sta blk5
     ldaxi vec_io23_to_blk5
@@ -1037,7 +1056,7 @@ vec_io23_to_blk5:
     save_internal_ram_to_blk5
     ; Allocate additional local.
     lpopx banks, free_bank ; (BLK5)
-    pha
+    phx
     sta proc_data,y
     inc bank_refs,x
     lda tmp3+1 ; (BLK3)
@@ -1154,7 +1173,7 @@ done:
 .export fork
 .proc fork
     ;; Grab process slot.
-    alloc_proc_y
+    alloc_proc_running_y
     cpy #0
     beq no_more_procs
 .endproc
@@ -1328,7 +1347,7 @@ done:
 
     ;; Take a nap.
     phx
-    lda pid
+    ldx pid
     jsr sleep
     jsr schedule
     plx
@@ -1920,6 +1939,7 @@ io_size = io_end - io_start
 :   cpx #MAX_PROCS
     bcs :+
     sta procs,x
+    sta waiting,x
 :   cpx #MAX_DRVS
     bcs :+
     sta drvs,x
@@ -1928,6 +1948,7 @@ io_size = io_end - io_start
 
     ;; Finish up lists.
     mvb free_proc, #1
+    mvb free_wait, #1
     mvb glfns, #1
     mvb drvs, #1
     lda #0
@@ -1938,7 +1959,7 @@ io_size = io_end - io_start
 
     ;; Init machdep.
     jsr init_ultimem
-    jsr gen_speedcode
+    jsr gen_speedcodes
     jsr init_ultimem_banks
 
     ;; Make init process 0.
@@ -2081,7 +2102,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
-debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork
@@ -2098,7 +2118,7 @@ debug:.export debug
     jsr OPEN
 
     ; Wait for child to exit.
-:   sta cmd_wait+3
+:   sta cmd_wait+2
     lda #0
     lda #3
     ldx #<cmd_wait
@@ -2301,6 +2321,33 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     ldy pid
     jsr save_banks_y
     save_internal_ram_to_blk5_y
+
+    ;;; Load next.
+    ply
+    ;; Copy in low mem...
+    get_procblk_y proc_io23, blk5
+    lda copy_bank_blk5_to_lowmem
+    sta blk2
+    ; Set return address.  We cannot use
+    ; the stack as its just about to be
+    ; overwritten.
+    lda #<:+
+    sta $5801
+    lda #>:+
+    sta $5802
+    lda copy_bank_blk5_to_lowmem
+    jmp next_copy_bank
+    ;; ...color, screen and VIC config.
+:   smemcpyax vec_blk5_to_color
+    smemcpyax vec_blk5_to_screen
+    smemcpyax vec_blk5_to_vic
+    ;; Restore last bank configuration.
+    get_procblk_y proc_ram123, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    ; Jump out of BLK1 to restore that.
     jmp switch2
 .endproc
 
@@ -2346,25 +2393,9 @@ j:  jsr $fffe
     rts
 .endproc
 
-; Copy active bank numbers from process
-; state.
-.export load_banks_y
-.proc load_banks_y
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
-    get_procblk_y proc_blk1, blk1
-    rts
-.endproc
-
 .export switch2
 .proc switch2
-    ;; Load next.
-    ply
-    load_internal_ram_from_blk5_y
-    jsr load_banks_y
+    get_procblk_y proc_blk1, blk1
     ldx stack
     txs
     rts

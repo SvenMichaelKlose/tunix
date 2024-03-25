@@ -234,3 +234,29 @@ called.
 This one does not just drop all open
 files like the standard KERNAL routine
 but calls CLOSE on each driver,
+
+# Forking
+
+When a process calls OPEN to do a fork,
+only the IO23 area contains TUNIX code.
+It's OPEN function is in there.  It
+needs to replace BLK1 by TUNIX and
+RAM123 by an additional per-process
+info bank, saving the former bank
+numbers of BLK1 and RAM123 to the global
+process info, before calling the real
+OPEN function.  This is to save precious
+space for IO pages that drivers might
+need.
+Then all banks of a process (RAM123,
+IO23, BLK1, BLK2, BLK3, BLK5 and an
+additional RAM123 bank for TUNIX data
+need to be copied into newly allocated
+banks.  This is done via BLK2 (running
+speed code), BLK3 (source) and BLK5
+(destination).
+
+On the way through a system call the
+bank configuration saved in the process
+lists must not be destroyed by
+accidently saved kernel banks.

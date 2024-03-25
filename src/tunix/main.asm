@@ -147,9 +147,9 @@ ptr3:   .res 2
 .export drv_vh, dev_drv, global_end
 .export global_size, global_start
 .export banks_ok, banks_faulty
-.export copy_bank_blk3_to_blk5
-.export copy_bank_blk5_to_lowmem
-.export copy_bank_lowmem_to_blk5
+.export speedcopy_blk3_to_blk5
+.export speedcopy_blk5_to_lowmem
+.export speedcopy_lowmem_to_blk5
 
 global_start:
 
@@ -212,9 +212,9 @@ drv_vh:     .res MAX_DRVS
 dev_drv:    .res MAX_DEVS
 
 ;; Initial speed code banks.
-copy_bank_blk3_to_blk5:   .res 1
-copy_bank_blk5_to_lowmem: .res 1
-copy_bank_lowmem_to_blk5: .res 1
+speedcopy_blk3_to_blk5:   .res 1
+speedcopy_blk5_to_lowmem: .res 1
+speedcopy_lowmem_to_blk5: .res 1
 
 old_kernal_vectors: .res 32
 
@@ -886,7 +886,7 @@ invalid_bank:
 
     ;; Make copy from BLK3 to BLK5.
     jsr balloc
-    sta copy_bank_blk3_to_blk5
+    sta speedcopy_blk3_to_blk5
     sta blk5
     ; Source/dest argument values.
     stwi ptr1, $6000
@@ -898,7 +898,7 @@ invalid_bank:
 
     ;; Make copy from lowmem to BLK5.
     jsr balloc
-    sta copy_bank_lowmem_to_blk5
+    sta speedcopy_lowmem_to_blk5
     sta blk5
     stwi ptr1, $0000
     stwi ptr2, $b000
@@ -908,7 +908,7 @@ invalid_bank:
 
     ;; Make copy from BLK5 to lowmem.
     jsr balloc
-    sta copy_bank_blk5_to_lowmem
+    sta speedcopy_blk5_to_lowmem
     sta blk5
     stwi ptr1, $b000
     stwi ptr2, $0000
@@ -952,8 +952,8 @@ next_move:
     pha
     jsr outa
     out #OP_JMP_ABS
-    out #<next_copy_bank
-    out #>next_copy_bank
+    out #<next_speedcopy
+    out #>next_speedcopy
     pop blk5
     jmp next_bank
 
@@ -965,11 +965,11 @@ done:
 .proc copy_blk3_to_blk5
     sta blk3
     stx blk5
-    lda copy_bank_blk3_to_blk5
+    lda speedcopy_blk3_to_blk5
 .endproc
 
-.export next_copy_bank
-.proc next_copy_bank
+.export next_speedcopy
+.proc next_speedcopy
     sta blk2
     jmp $4000
 .endproc
@@ -1007,8 +1007,8 @@ vec_blk5_to_vic:
     .code
 
 .macro save_internal_ram_to_blk5
-    lda copy_bank_lowmem_to_blk5
-    jsr next_copy_bank
+    lda speedcopy_lowmem_to_blk5
+    jsr next_speedcopy
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_color_to_blk5
     smemcpyax vec_vic_to_blk5
@@ -1019,6 +1019,11 @@ vec_blk5_to_vic:
     save_internal_ram_to_blk5
 .endmacro
 
+.macro save_internal_ram_to_blk5_x
+    get_procblk_x proc_io23, blk5
+    save_internal_ram_to_blk5
+.endmacro
+
     .rodata
 
 vec_io23_to_blk5:
@@ -1026,23 +1031,30 @@ vec_io23_to_blk5:
 
     .code
 
-; Copy banks to new process
-; Y: new process ID
+;; Fork banks and save stack.
+; The child will never see this code
+; starts as if it was returning from
+; this function after schedule() called
+; switch().
+; Y: child process ID
+; Returns Y unaffected.
 .export fork_raw
 .proc fork_raw
-    mvb tmp1, blk1
-    mvb tmp1+1, blk2
-    mvb tmp2, blk3
-    mvb tmp2+1, blk5
-    mvb tmp3, ram123
-    mvb blk1, tunix_blk1
     ldx pid
-    lda proc_data,x
-    sta tmp3+1
+    stx tmp1
+    lda proc_ram123,x
+    sta tmp2
 
-    ;; Make child's IO23 and use it.
-    push io23 ; Save parent's.
-    ; Allocate IO23 bank globally.
+    push ram123
+    push io23
+    push blk2
+    push blk3
+    push blk5
+
+    ;;; Make child's per-process banks.
+    ;; Allocate IO23 bank globally only
+    ; as the new RAM123 containing the
+    ; local bank list is not there yet.
     lpopx banks, free_bank
     txa
     sta proc_io23,y
@@ -1052,69 +1064,63 @@ vec_io23_to_blk5:
     sta blk5
     ldaxi vec_io23_to_blk5
     jsr smemcpy
-    ; Also lowmem, screen, color + VIC.
+    ; Copy lowmem, screen, color & VIC.
     save_internal_ram_to_blk5
-    ; Allocate additional local.
+
+    ;; Allocate additional RAM123.
     lpopx banks, free_bank ; (BLK5)
-    phx
+    txa
     sta proc_data,y
     inc bank_refs,x
-    lda tmp3+1 ; (BLK3)
-    jsr copy_blk3_to_blk5
-    plx
-    stx ram123 ; Map in addtional local.
+    ; Copy parent's into child's.
+    lda tmp2 ; (Parent's saved RAM123.)
+    sta blk3
+    stx blk5
+    lda speedcopy_blk3_to_blk5
+    jsr next_speedcopy
+    stx ram123 ; Map in additional.
+    ; Register new RAM123 locally.
     dpushx lbanks, lbanksb, first_lbank
     ; Map in child's IO23.
-    pop io23
-    sty pid  ; Set its PID.
     ; Register new IO23 locally.
     tax
     dpushx lbanks, lbanksb, first_lbank
-    ; Set return stack.
+    ; Update PID and stack pointer.
+    pop io23
+    sty pid
     tsx
-    inx ; (Undo 'push io23'.)
-    sta stack
+    inx ; Undo 'push blk2'.
+    inx ; Undo 'push blk3'.
+    inx ; Undo 'push blk5'.
+    inx ; Undo 'push io23'.
+    inx ; Undo 'push ram123'.
+    stx stack
 
     ;; Copy remaining banks.
     ; Copies from BLK3 to BLK5 with
     ; speed code in BLK2.
-    .macro forkblky procblk, srcblk
-        jsr balloc ; (BLK5)
+    .macro forkblky procblk
+        ldx tmp1 ; parent
+        lda procblk,x
+        sta blk3
+        jsr balloc
         sta procblk,y
-        lda srcblk ; (BLK3)
-        jsr copy_blk3_to_blk5
+        sta blk5
+        lda speedcopy_blk3_to_blk5
+        sta blk2
+        jsr $4000
     .endmacro
-    forkblky proc_ram123, tmp3
-    forkblky proc_blk2, tmp1+1
-    forkblky proc_blk3, tmp2
-    forkblky proc_blk5, tmp2+1
-    forkblky proc_blk1, tmp1
+    forkblky proc_ram123
+    forkblky proc_blk1
+    forkblky proc_blk2
+    forkblky proc_blk3
+    forkblky proc_blk5
 
-    cpy #0
-    beq :+  ; Do not undo init proc.
-
-    ;; Remove parent's active banks
-    ;; from local list.
-    ldx pid
-.macro dereflbankx procblk
-    ldy procblk,x
-    jsr free_lbank
-.endmacro
-    dereflbankx proc_data
-    dereflbankx proc_ram123
-    dereflbankx proc_io23
-    dereflbankx proc_blk1
-    dereflbankx proc_blk2
-    dereflbankx proc_blk3
-    dereflbankx proc_blk5
-
-    ;; Restore forked proc's banks.
-:   mvb ram123, tmp3
-:   mvb blk5, tmp2+1
-    mvb blk3, tmp2
-    mvb blk2, tmp1+1
-    mvb blk1, tmp1
+    pop blk5
+    pop blk3
+    pop blk2
     pop io23
+    pop ram123
     rts
 .endproc
 
@@ -1163,10 +1169,10 @@ done:
 ; Low 1K, screen, color and VIC are
 ; on the same bank as the IO23 area
 ; which is reserved for TUNIX and
-; driver code.  In addition the RAM123
-; area holds LFN data.
+; driver code.  The RAM123 area holds
+; additional per-process data.
 
-; Clone the current process.
+; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
 ;    0 for the child.
@@ -1175,42 +1181,75 @@ done:
     ;; Grab process slot.
     alloc_proc_running_y
     cpy #0
-    beq no_more_procs
+    bne :+
+    jmp no_more_procs
+:
 .endproc
 
+; Fork process to a specific ID.
 ; Y: New process ID.
 .export fork0
 .proc fork0
-    ;; Machine-dependend process copy.
-:   phy
+    ldx pid
+    phx
     jsr fork_raw
-    ply
+    ; Parent and child return here with
+    ; the same stack contents but
+    ; different PIDs on IO23, so we can
+    ; tell them apart.
+    plx ; Parent's PID.
+    cpx pid
+    bne child
 
-    ;; Increment bank refs.
-    ldx first_lbank
-    beq :++
-:   inc bank_refs,x
-    lnextx lbanks, :-
-
-    ;; Increment GLFNs.
-:   push ram123
+    ;; Remove parent banks from child.
+    cpy #0
+    beq :+  ; Unless first process...
+    push ram123
     lda proc_data,y
     sta ram123
+    ldx pid
+    .macro unref_lbank_x procblk
+        ldy procblk,x
+        jsr free_lbank
+    .endmacro
+    phy
+    unref_lbank_x proc_data
+    unref_lbank_x proc_ram123
+    unref_lbank_x proc_io23
+    unref_lbank_x proc_blk1
+    unref_lbank_x proc_blk2
+    unref_lbank_x proc_blk3
+    unref_lbank_x proc_blk5
+    ply
+    pop ram123
+
+    ;; Mark child as running.
+:   lda #PROC_RUNNING
+    sta proc_flags,y
+
+    ;;; Increment child's GLFN refs.
+    ;; Enter child's RAM123.
+    push ram123
+    lda proc_data,y
+    sta ram123
+    ;; Increment GLFN of each LFN.
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
     lnextx lfns, :-
+    ;; Leave child's RAM123.
 :   pop ram123
-
-    lda #PROC_RUNNING
-    sta proc_flags,y
-
-    ;; Return PID.
     tya
-    cmp pid
-    bne :+
-    lda #0  ; (for child)
-:   clc
+    clc
+    rts
+
+child:
+    get_procblk_y proc_data, ram123
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    lda #0
+    clc
     rts
 .endproc
 
@@ -1595,7 +1634,7 @@ syscall1 tunix_exit, exit, lda
     sta responsep
     ldx #2
     pla
-    bne respond_len ; (jmp)
+    jmp respond_len
 .endproc
 
 .export tunix_basin
@@ -1917,7 +1956,8 @@ io_size = io_end - io_start
     stwi c, $0c00
     jsr bzero
 
-    ;; Link lists.
+    ;;; Init lists.
+    ;; Link
     ldx #0
 @l: txa
     beq :++
@@ -1945,8 +1985,7 @@ io_size = io_end - io_start
     sta drvs,x
 :   inx
     bne @l
-
-    ;; Finish up lists.
+    ;; Finish up.
     mvb free_proc, #1
     mvb free_wait, #1
     mvb glfns, #1
@@ -1957,50 +1996,54 @@ io_size = io_end - io_start
     sta drvs + MAX_DRVS - 1
     sta iopages + MAX_IOPAGES - 1
 
-    ;; Init machdep.
+    ;;; Init machdep.
     jsr init_ultimem
     jsr gen_speedcodes
     jsr init_ultimem_banks
 
-    ;; Make init process 0.
+    ;;; Make init process 0.
     print txt_init
+    ;; Make holograhic process to fork.
     ldx #2
-    sta proc_data
+    stx proc_data
+    stx proc_ram123
     inx
     stx tunix_io23
+    stx proc_io23
     inx
     stx tunix_blk1
+    stx proc_blk1
+    inx
+    stx proc_blk2
+    inx
+    stx proc_blk3
+    inx
+    stx proc_blk5
+    ; Unlink from free list.
     ldy #0
-    sty procs ; Unlink from free list.
-    jsr fork0 ; Fork into process 0.
-    ; Use new banks.
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    sta tunix_io23
-    get_procblk_y proc_blk1, blk1
-    sta tunix_blk1
+    sty procs
+    jsr fork0
+    lda proc_blk1
     sta blk1
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
+    sta tunix_blk1
 
-    ;; Save KERNAL vectors.
+    ;;; Init KERNAL vectors.
+    ;; Save
     stwi s, IOVECTORS
     stwi d, old_kernal_vectors
     stwi c, 30
     jsr memcpy
-
-    ;; Replace KERNAL vectors.
+    ;; Replace
     stwi s, tunix_vectors
     stwi d, IOVECTORS
     stwi c, 30
     jsr memcpy
 
-    ;; Point devices to KERNAL.
+    ;;; Make devices default to KERNAL.
     mvb drv_vl, #<old_kernal_vectors
     mvb drv_vh, #>old_kernal_vectors
 
-    ;; Register TUNIX device.
+    ;;; Register TUNIX device.
     ldaxi tunix_driver
     ldy #TUNIX_DEVICE
     jmp register
@@ -2124,6 +2167,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_wait
     ldy #>cmd_wait
     jsr SETNAM
+debug:.export debug
     jsr OPEN
     rts
 .endproc
@@ -2188,7 +2232,6 @@ h:  lda $ffff
 
 .export open2
 .proc open2
-    pushw FNADR
     stwi FNADR, filename
     push LFN
     jsr lfn_to_glfn
@@ -2302,13 +2345,16 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda running
 :   cmp pid
     beq :+  ; Don't switch to self.
-    push blk2
-    push blk3
-    push blk5
+    tay
+    ldx pid
+    set_procblk_x proc_blk2, blk2
+    set_procblk_x proc_blk3, blk3
+    set_procblk_x proc_blk5, blk5
     jsr switch
-    pop blk5
-    pop blk3
-    pop blk2
+    get_procblk_x proc_data, ram123
+    get_procblk_x proc_blk2, blk2
+    get_procblk_x proc_blk3, blk3
+    get_procblk_x proc_blk5, blk5
 :   ply
     plx
     pla
@@ -2316,22 +2362,27 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     rts
 .endproc
 
-; Switch to process.
-; A: Process ID
+; Switch low mem and IO23 only(!).
+; The process being switched to will
+; never see this function but return
+; from the function that switched it
+; away before (either switch() itself
+; or fork()).
+; Y: Process ID
 .export switch
 .proc switch
     ;;; Save current.
-    pha
-    ldy pid
-    save_internal_ram_to_blk5_y
-    ply
-
-    ;;; Load next.
     tsx
     stx stack
+    ldx io23
+    stx blk5
+    ldx pid
+    save_internal_ram_to_blk5_x
+
+    ;;; Load next.
     ;; Copy in low mem...
     get_procblk_y proc_io23, blk5
-    lda copy_bank_blk5_to_lowmem
+    lda speedcopy_blk5_to_lowmem
     sta blk2
     ; Set return address.  We cannot use
     ; the stack as its just about to be
@@ -2340,15 +2391,15 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     sta $5801
     lda #>:+
     sta $5802
-    lda copy_bank_blk5_to_lowmem
-    jmp next_copy_bank
+    jmp $4000
     ;; ...color, screen and VIC config.
-:
-    smemcpyax vec_blk5_to_color
+:   smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
+    mvb io23, blk5
     ldx stack
     txs
+    rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2439,6 +2490,7 @@ j:  jsr $fffe
 .export open
 .proc open
     ;; Move filename + pointer to IO23.
+    pushw FNADR
     ldy FNLEN
     beq :++
     dey
@@ -2446,7 +2498,6 @@ j:  jsr $fffe
     sta filename,y
     dey
     bpl :-
-
 :   jsr tunix_enter
     jmp open2
 .endproc

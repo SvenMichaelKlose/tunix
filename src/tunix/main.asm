@@ -1062,8 +1062,8 @@ vec_io23_to_blk5:
     lda tmp3+1 ; (BLK3)
     jsr copy_blk3_to_blk5
     plx
-    dpushx lbanks, lbanksb, first_lbank
     stx ram123 ; Map in addtional local.
+    dpushx lbanks, lbanksb, first_lbank
     ; Map in child's IO23.
     pop io23
     sty pid  ; Set its PID.
@@ -2302,7 +2302,13 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda running
 :   cmp pid
     beq :+  ; Don't switch to self.
+    push blk2
+    push blk3
+    push blk5
     jsr switch
+    pop blk5
+    pop blk3
+    pop blk2
 :   ply
     plx
     pla
@@ -2315,15 +2321,14 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .export switch
 .proc switch
     ;;; Save current.
-    tsx
-    stx stack
     pha
     ldy pid
-    jsr save_banks_y
     save_internal_ram_to_blk5_y
+    ply
 
     ;;; Load next.
-    ply
+    tsx
+    stx stack
     ;; Copy in low mem...
     get_procblk_y proc_io23, blk5
     lda copy_bank_blk5_to_lowmem
@@ -2338,17 +2343,12 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda copy_bank_blk5_to_lowmem
     jmp next_copy_bank
     ;; ...color, screen and VIC config.
-:   smemcpyax vec_blk5_to_color
+:
+    smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
-    ;; Restore last bank configuration.
-    get_procblk_y proc_ram123, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
-    ; Jump out of BLK1 to restore that.
-    jmp switch2
+    ldx stack
+    txs
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2390,14 +2390,6 @@ j:  jsr $fffe
     set_procblk_y proc_blk2, blk2
     set_procblk_y proc_blk3, blk3
     set_procblk_y proc_blk5, blk5
-    rts
-.endproc
-
-.export switch2
-.proc switch2
-    get_procblk_y proc_blk1, blk1
-    ldx stack
-    txs
     rts
 .endproc
 

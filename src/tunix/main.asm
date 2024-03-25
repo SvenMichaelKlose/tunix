@@ -235,6 +235,11 @@ global_size = global_end - global_start
     sta to
 .endmacro
 
+.macro mvw to, from
+    mvb to, from
+    mvb to+1, from+1
+.endmacro
+
 .macro phx
     txa
     pha
@@ -656,7 +661,9 @@ global_size = global_end - global_start
 
 .export list_length
 .proc list_length
-    stax ptr1
+    stax tmp1
+    pushw ptr1
+    mvw ptr1,tmp1
     ldx #0
     cpy #0
     beq empty
@@ -665,6 +672,7 @@ global_size = global_end - global_start
     tay
     bne :-
 empty:
+    popw ptr1
     rts
 .endproc
 
@@ -774,8 +782,10 @@ m:  inc dh
 .endproc
 
 .macro print asciiz
+    pushw ptr3
     stwi ptr3, asciiz
     jsr printstr
+    popw ptr3
 .endmacro
 
 .macro error asciiz
@@ -883,6 +893,8 @@ invalid_bank:
 .proc gen_speedcodes
     print txt_speed_code
     push blk5
+    pushw ptr1
+    pushw c
 
     ;; Make copy from BLK3 to BLK5.
     jsr balloc
@@ -916,6 +928,8 @@ invalid_bank:
     jsr gen_speedcode
     out #OP_JMP_ABS
 
+    popw c
+    popw ptr1
     pop blk5
     print txt_newline
     rts
@@ -1436,15 +1450,6 @@ return_zombie_exit_code:
     sta exit_codes,x
     jsr zombify
     jmp continue_waiting
-.endproc
-
-; XA: Start address
-.export execute
-.proc execute
-    stax ptr1
-    ldx #$ff
-    txs
-    jmp (ptr1)
 .endproc
 
 ;;;;;;;;;;;;;;;

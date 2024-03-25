@@ -1293,7 +1293,7 @@ not_to_resume:
 .export zombify
 .proc zombify
     lda proc_flags,x
-    beq :+
+    bne :+
     sec
     rts
 
@@ -1305,6 +1305,7 @@ not_to_resume:
     leave_context
     plx
 
+.if 0
     ;; Free IO pages.
     stx tmp1
     ldy first_iopage
@@ -1317,7 +1318,7 @@ not_to_resume:
 :   lnexty iopages, :--
 
     ;; Free drivers.
-:.if 0
+:
 :   ldy drvs
     beq :+++
 :   lda drv_pid,y
@@ -1332,6 +1333,7 @@ not_to_resume:
     sta dev_drv,x
 :   lnexty drvs, :--
 .endif
+
     ;; Free process.
 :   ldx tmp1
     ; Take off running or sleeping.
@@ -1358,9 +1360,6 @@ not_to_resume:
     jsr resume
 done:
     leave_context
-    ldx running
-    lda procs,x
-:   beq :-  ; Idle for interrupts.
     jmp schedule
 .endproc
 
@@ -1435,6 +1434,7 @@ return_zombie_exit_code:
 .proc exit
     ldx pid
     sta exit_codes,x
+debug:.export debug
     jsr zombify
     jmp resume_waiting
 .endproc
@@ -2026,6 +2026,8 @@ io_size = io_end - io_start
     lda proc_blk1
     sta blk1
     sta tunix_blk1
+    lda #PROC_RUNNING
+    sta proc_flags
 
     ;;; Init KERNAL vectors.
     ;; Save
@@ -2167,7 +2169,6 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldx #<cmd_wait
     ldy #>cmd_wait
     jsr SETNAM
-debug:.export debug
     jsr OPEN
     rts
 .endproc

@@ -2062,12 +2062,14 @@ txt_tunix:
     .byte PETSCII_CLRSCR
     .byte "STARTING TUNIX", 13, 0
 txt_tests:
-    .byte "CHECKING SANITY.",13, 0
+    .byte "CHECKING SANITY",13, 0
+txt_tests_passed:
+    .byte "SANITY CHECKS PASSED",13, 0
 txt_init:
-    .byte "STARTING INIT PROCESS."
+    .byte "STARTING INIT"
     .byte 13, 0
 txt_booting:
-    .byte 13, "BOOTING..",0
+    .byte 13, "BOOTING", 13, 0
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -2089,8 +2091,8 @@ err_cannot_fork:
 err_fail:
     .byte "TEST FAILED", 0
 
-txt_ex:
-    .byte "CHILD",9
+txt_child:
+    .byte "CHILD SAYING HELLO!", 13, 9
 
     .code
 
@@ -2154,7 +2156,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     bne :++
 
     ; Exit child.
-:   print txt_ex
+:   print txt_child
     lda #0
     lda #3
     ldx #<cmd_exit
@@ -2170,6 +2172,8 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     ldy #>cmd_wait
     jsr SETNAM
     jsr OPEN
+
+    print txt_tests_passed
     rts
 .endproc
 

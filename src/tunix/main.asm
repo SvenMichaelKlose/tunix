@@ -10,7 +10,10 @@
 
     jmp start
 
-__VIC20__ = 1
+;;; Compile-time
+
+__VIC20__       = 1
+EARLY_TESTS     = 1
 
 ;;; CPU
 
@@ -363,7 +366,7 @@ global_size = global_end - global_start
 ;;;;;;;;;;;;;;;;;;;
 ;
 ; Macros for singly-linked lists.
-; 'lpop*' and 'lnext*' also work with
+; 'lpop*' and 'lloop*' also work with
 ; deques.
 ;
 ; There may be either multiple lists or
@@ -414,13 +417,13 @@ global_size = global_end - global_start
 
 ;; Forwards iteration.
 
-.macro lnextx list, loop
+.macro lloopx list, loop
     lda list,x
     tax
     bne loop
 .endmacro
 
-.macro lnexty list, loop
+.macro lloopy list, loop
     lda list,y
     tay
     bne loop
@@ -864,7 +867,7 @@ invalid_bank:
 :   phx
     jsr bfree
     plx
-    lnextx lbanks, :-
+    lloopx lbanks, :-
     rts
 .endproc
 
@@ -998,7 +1001,7 @@ done:
     .rodata
 
 txt_speed_code:
-    .byte "MAKING SPEED CODE...", 0
+    .byte "MAKING SPEED CODE.", 0
 txt_newline:
     .byte 13, 0
 
@@ -1177,7 +1180,7 @@ vec_io23_to_blk5:
     dec glfn_refs,x
     bne :+  ; (Still used.)
     lpushx glfns, glfns
-:   lnexty lfns, :--
+:   lloopy lfns, :--
 done:
     rts
 .endproc
@@ -1256,7 +1259,7 @@ done:
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
-    lnextx lfns, :-
+    lloopx lfns, :-
     ;; Leave child's RAM123.
 :   pop ram123
     tya
@@ -1335,7 +1338,7 @@ not_to_continue:
     bne :+
     tax
     free_iopage_x
-:   lnexty iopages, :--
+:   lloopy iopages, :--
 
     ;; Free drivers.
 :
@@ -1351,7 +1354,7 @@ not_to_continue:
     tax
     lda #0  ; KERNAL
     sta dev_drv,x
-:   lnexty drvs, :--
+:   lloopy drvs, :--
 .endif
 
     ;; Free process.
@@ -2068,16 +2071,11 @@ tunix_vectors:
 
 txt_tunix:
     .byte PETSCII_CLRSCR
-    .byte "STARTING TUNIX", 13, 0
-txt_tests:
-    .byte "CHECKING SANITY",13, 0
-txt_tests_passed:
-    .byte "SANITY CHECKS PASSED",13, 0
+    .byte "STARTING.", 13, 0
 txt_init:
-    .byte "STARTING INIT"
-    .byte 13, 0
+    .byte "STARTING INIT.", 13, 0
 txt_booting:
-    .byte 13, "BOOTING TUNIX", 13, 0
+    .byte "BOOTING.", 13, 0
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -2085,36 +2083,46 @@ txt_booting:
 ;
 ; Tests running before regular boot.
 
+.ifdef EARLY_TESTS
+
     .rodata
 
-err_invalid_glfn_order:
-    .byte "INVALID GLFN ORDER", 0
-err_invalid_first_free_bank:
-    .byte "INVALID FIRST FREE BANK", 0
-err_invalid_num_free_procs:
-    .byte "INVALID NUMBER OF FREE PROCS"
-    .byte 0
-err_cannot_fork:
-    .byte "CANNOT FORK", 0
-err_fail:
-    .byte "TEST FAILED", 0
-
+txt_tests:
+    .byte "CHECKING SANITY.",13, 0
+txt_tests_passed:
+    .byte "SANITY CHECKS PASSED.",13, 0
 txt_child:
     .byte "CHILD SAYING HELLO!", 13, 9
 
+err_free_banks_after_init:
+    .byte "WRONG TOTAL # OF FREE BANKS."
+    .byte 0
+err_free_banks_after_free:
+    .byte "WRONG # OF BANKS AFTER "
+    .byte "FREEING ONE AGAIN.", 0
+err_wrong_glfn_order:
+    .byte "WRONG GLFN ORDER.", 0
+err_wrong_deque_index:
+    .byte "UNEXPECTED DEQUE INDEX OF "
+    .byte "FIRST ALLOCATED ONE.", 0
+err_wrong_free_proc_count:
+    .byte "WRONG NUMBER OF FREE PROCS."
+    .byte 0
+err_cannot_fork:
+    .byte "ERROR: CANNOT FORK.", 0
+
     .code
 
-FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
+FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
 
 .export tests
 .proc tests
-.if 0
     jsr init
     ldaxi banks
     jsry list_length, free_bank
     cpx #FREE_BANKS_AFTER_INIT
     beq :+
-    error err_fail
+    error err_free_banks_after_init
 
     ;; Doubly used list arrays.
     ; Pop bank from free list.
@@ -2124,7 +2132,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     jsry list_length, free_bank
     cpx #FREE_BANKS_AFTER_INIT
     beq :+
-    error err_fail
+    error err_free_banks_after_free
 
     ;; Deque
     ; Allocate first.
@@ -2134,7 +2142,7 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     jsry list_length, free_proc
     cpx #MAX_PROCS - 2 ; (+ init)
     beq :+
-    error err_invalid_num_free_procs
+    error err_wrong_free_proc_count
 :   plx
     ; Push onto running.
     dpushx procs, procsb, running
@@ -2142,12 +2150,10 @@ FREE_BANKS_AFTER_INIT = $6a ;MAX_BANKS - FIRST_BANK - 6
     jsry list_length, running
     cpx #1
     beq :+
-    error err_fail
+    error err_wrong_deque_index
  
     ;;; Syscalls
-:
-.endif
-    jsr init
+:   jsr init
 
     ;; Fork
     lda #TUNIX_DEVICE
@@ -2189,6 +2195,10 @@ cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE", 0
 cmd_wait:   .byte "PW", 0
 
+.endif
+
+    .code
+
 .export halt
 .proc halt
     jmp halt
@@ -2197,8 +2207,10 @@ cmd_wait:   .byte "PW", 0
 .export start
 .proc start
     print txt_tunix
+.ifdef EARLY_TESTS
     print txt_tests
     jsr tests
+.endif
     print txt_booting
     jmp init
 .endproc
@@ -2328,7 +2340,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   phx
     jsr close
     plx
-    lnextx lfns, :-
+    lloopx lfns, :-
 :   jmp tunix_leave
 .endproc
 

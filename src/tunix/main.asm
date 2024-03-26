@@ -460,7 +460,6 @@ global_size = global_end - global_start
 ;; Remove from deque.
 
 .macro drmx fw, bw, first
-    phx
     cpx first
     bne :+
     lda fw,x
@@ -476,11 +475,10 @@ global_size = global_end - global_start
     beq :+
     tya
     sta bw,x
-:   plx
+:
 .endmacro
 
 .macro drmy fw, bw, first
-    phy
     cpy first
     bne :+
     lda fw,y
@@ -496,7 +494,7 @@ global_size = global_end - global_start
     beq :+
     txa
     sta bw,y
-:   ply
+:
 .endmacro
 
 ;; Allocate item in deque.
@@ -1359,7 +1357,8 @@ not_to_continue:
 :   lloopy drvs, :--
 .endif
 
-    ;; Free process.
+    ;; Remove process from waiting or
+    ;; sleeping list.
 :   ldx tmp1
     ; Take off running or sleeping.
     lda proc_flags,x
@@ -2094,7 +2093,7 @@ txt_tests:
 txt_tests_passed:
     .byte "SANITY CHECKS PASSED.",13, 0
 txt_child:
-    .byte "CHILD SAYING HELLO!", 13, 9
+    .byte "CHILD SAYING HELLO!", 13, 0
 
 err_free_banks_after_init:
     .byte "WRONG TOTAL # OF FREE BANKS."

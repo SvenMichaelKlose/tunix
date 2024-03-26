@@ -460,6 +460,7 @@ global_size = global_end - global_start
 ;; Remove from deque.
 
 .macro drmx fw, bw, first
+    phx
     cpx first
     bne :+
     lda fw,x
@@ -475,10 +476,11 @@ global_size = global_end - global_start
     beq :+
     tya
     sta bw,x
-:
+:   plx
 .endmacro
 
 .macro drmy fw, bw, first
+    phy
     cpy first
     bne :+
     lda fw,y
@@ -494,7 +496,7 @@ global_size = global_end - global_start
     beq :+
     txa
     sta bw,y
-:
+:   ply
 .endmacro
 
 ;; Allocate item in deque.

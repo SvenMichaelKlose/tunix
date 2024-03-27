@@ -70,7 +70,6 @@ al 00251E .continue
 al 0025D5 .continue_waiting
 al 00229E .copy_blk3_to_blk5
 al 000002 .d
-al 002C4E .debug
 al 003902 .dev_drv
 al 000003 .dh
 al 000002 .dl
@@ -207,4 +206,3 @@ al 003671 .zombie
 al 002551 .zombify
 al 00120D .Start
 al 00120B .Next
-break .debug

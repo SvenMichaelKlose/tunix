@@ -2178,6 +2178,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     ldy #>cmd_exit
     jsr SETNAM
     jsr OPEN
+    ; NOT REACHED
 
     ; Wait for child to exit.
 :   sta cmd_wait+2

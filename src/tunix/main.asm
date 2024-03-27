@@ -103,6 +103,7 @@ IDX_BKOUT  = 28
 TUNIX_DEVICE = 31
 MAX_LFNS     = 256   ; Has to be.
 MAX_PROCS    = 64
+MAX_SIGNALS  = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
 
@@ -566,6 +567,14 @@ global_size = global_end - global_start
 
 .macro rm_zombie_x
     dmovex procs, procsb, zombie, free_proc
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;
+;;; SIGNAL MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;
+
+.macro alloc_signal_y
+    dallocy signals, signalsb, free_signal, pending_signal
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1056,7 +1065,7 @@ vec_io23_to_blk5:
 
     .code
 
-;; Fork banks and save stack.
+; Fork banks and save stack.
 ; The child will never see this code
 ; starts as if it was returning from
 ; this function after schedule() called
@@ -1303,12 +1312,12 @@ already_sleeping:
 
 ; Wake process up.
 ; A: Process ID.
-.export continue
-.proc continue
+.export resume
+.proc resume
     lda proc_flags,x
-    bpl not_to_continue
+    bpl not_to_resume
     mv_sleeping_running_x
-not_to_continue:
+not_to_resume:
     sec
     rts
 .endproc
@@ -1378,12 +1387,12 @@ not_to_continue:
 
 ; Resume waiting processes
 ; X: ID of process waiting for
-.export continue_waiting
-.proc continue_waiting
+.export resume_waiting
+.proc resume_waiting
     enter_context_x
     ldy first_wait
     beq done
-    jsr continue
+    jsr resume
 done:
     leave_context
     jmp schedule
@@ -1426,15 +1435,15 @@ terminate_zombie:
     ldy pid
     rm_waiting_y
     ldy first_wait
-    bne continue_next_waiting
+    bne resume_next_waiting
     rm_zombie_x
     jmp return_zombie_exit_code
 
-continue_next_waiting:
+resume_next_waiting:
     phx
     tya
     tax
-    jsr continue
+    jsr resume
     plx
 
 return_zombie_exit_code:
@@ -1451,7 +1460,7 @@ return_zombie_exit_code:
     lda #255
     sta exit_codes,x
     jsr zombify
-    jmp continue_waiting
+    jmp resume_waiting
 .endproc
 
 ; Exit current process
@@ -1461,7 +1470,124 @@ return_zombie_exit_code:
     ldx pid
     sta exit_codes,x
     jsr zombify
-    jmp continue_waiting
+    jmp resume_waiting
+.endproc
+
+;;;;;;;;;;;;;;;
+;;; SIGNALS ;;;
+;;;;;;;;;;;;;;;
+
+; Send signal
+; X: process ID
+; Y: signal type (0-255)
+; A: payload
+.proc sig_kill
+    sty tmp1    ; type
+    sta tmp2    ; payload
+    lda proc_flags,x
+    beq no_proc
+    push ram123
+    lda proc_data,x
+    sta ram123
+    lda pending_signal_types,y
+    bne ignore
+
+retry:
+    lda free_signal
+    beq out_of_slots
+    phy
+    alloc_signal_y
+    tya
+    ply
+    sta pending_signal_types,y
+    sta signal_type,y
+    lda tmp2
+    sta signal_payload,y
+    jmp resume
+
+ignore:
+    clc
+    rts
+
+out_of_slots:
+    phx
+    jsr resume
+    plx
+    jsr schedule
+    jmp retry
+
+no_proc:
+    clc
+    rts
+.endproc
+
+; Deliver pending signal to current
+; process.  For use in tunix_leave().
+.macro sigaction1
+    lda is_processing_signal
+    bne :++
+:   dpopx pending_signals
+    cpx #0
+    beq :+ ; No signal pending.
+    lda signal_type,x
+    tay
+    lda pending_signal_types,y
+    beq :- ; No handler for the type.
+    inc is_processing_signal
+    lda #0
+    sta pending_signal_types,y
+    lda signal_handler_l,y
+    sta sigjmp + 1
+    lda signal_handler_h,y
+    sta sigjmp + 2
+:
+.endmacro
+
+.macro sigaction2
+    php
+    pha
+    lda sigjmp + 2
+    beq :++
+    phx
+    phy
+sigjmp:
+    jsr $1234
+    lda #0
+    sta sigjmp + 2
+    ply
+    plx
+    dec is_processing_signal
+:   pla
+    plp
+.endmacro
+
+; Register handler for signal type.
+; X: type
+; A: handler high byte
+; Y: handler low byte
+.proc set_handler
+    sta tmp1
+    sta signal_handler_h,x
+    tya
+    sta signal_handler_l,x
+    clc
+    rts
+.endproc
+
+; Unregister handler for signal type.
+; X: type
+; Returns with error if no handler was
+; registered for the type.
+.proc reset_handler
+    lda signal_handler_h,x
+    bne no_handler_set
+    lda #0
+    sta signal_handler_h,x
+    clc
+    rts
+no_handler_set:
+    sec
+    rts
 .endproc
 
 ;;;;;;;;;;;;;;;
@@ -1594,15 +1720,15 @@ s:  jmp schedule
     beq tunix_wait
     cmp #'S'
     beq tunix_stop
-    cmp #'C'
-    beq tunix_continue
+    cmp #'R'
+    beq tunix_resume
     bne respond_error   ; (jmp)
 .endproc
 
 syscall1 tunix_kill, kill, ldx
 syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
-syscall1 tunix_continue, continue, ldx
+syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 
 ; "PF"
@@ -2690,6 +2816,17 @@ lfns:           .res MAX_LFNS
 lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
 lfn_glfn:       .res MAX_LFNS
+
+;; Signals
+signals:          .res MAX_SIGNALS
+signalsb:         .res MAX_SIGNALS
+signal_type:      .res MAX_SIGNALS
+signal_payload:   .res MAX_SIGNALS
+signal_handler_l: .res MAX_SIGNALS
+signal_handler_h: .res MAX_SIGNALS
+pending_signal_types: .res 256
+free_signal:    .res 1
+pending_signal: .res 1
 
 .if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
 .error "IO pages overflow!"

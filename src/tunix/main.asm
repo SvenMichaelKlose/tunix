@@ -14,7 +14,7 @@
 
 __VIC20__       = 1
 EARLY_TESTS     = 1
-;BLEEDING_EDGE   = 1
+BLEEDING_EDGE   = 1
 
 ;;; CPU
 
@@ -1338,10 +1338,10 @@ not_to_resume:
     jsr bprocfree
     leave_context
     plx
+    stx tmp1
 
 .if 0
     ;; Free IO pages.
-    stx tmp1
     ldy first_iopage
     beq :+++
 :   lda iopage_pid,y
@@ -1547,7 +1547,7 @@ no_proc:
     php
     pha
     lda sigjmp + 2
-    beq :++
+    beq :+
     phx
     phy
 sigjmp:
@@ -1701,7 +1701,10 @@ tunix_driver:
     beq tunix_procs
     cmp #'D'
     beq d
+    cmp #'I'
     bne respond_error ; (jmp)
+    lda pid
+    jmp respond
 d:  jmp tunix_drivers
 s:  jmp schedule
 .endproc
@@ -2175,8 +2178,6 @@ io_size = io_end - io_start
     lda proc_blk1
     sta blk1
     sta tunix_blk1
-    lda #PROC_RUNNING
-    sta proc_flags
 
     ;;; Init KERNAL vectors.
     ;; Save
@@ -2223,6 +2224,7 @@ cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE", 0
 cmd_kill:   .byte "PK", 0
 cmd_wait:   .byte "PW", 0
+cmd_getpid: .byte "PI", 0
 
 txt_tests:
     .byte "CHECKING SANITY.", 13, 0
@@ -2249,7 +2251,13 @@ err_wrong_free_proc_count:
     .byte "WRONG NUMBER OF FREE PROCS."
     .byte 0
 err_cannot_fork:
-    .byte "ERROR: CANNOT FORK.", 0
+    .byte "CANNOT FORK.", 0
+err_child_running_after_exit:
+    .byte "CHILD STILL RUNNING AFTER "
+    .byte "EXIT.", 0
+err_init_pid_not_0:
+    .byte "INIT PID NOT 0 AFTER FORK."
+    .byte 0
 
     .code
 
@@ -2320,6 +2328,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     ldy #>cmd_exit
     jsr SETNAM
     jsr OPEN
+    error err_child_running_after_exit
     ; NOT REACHED
 
     ; Wait for child to exit.
@@ -2333,11 +2342,24 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     jsr SETNAM
     jsr OPEN
 
+    ;; Check if back in init.
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #2
+    ldx #<cmd_getpid
+    ldy #>cmd_getpid
+    jsr SETNAM
+debug:.export debug
+    jsr OPEN
+    cmp #0
+    beq :+
+    error err_init_pid_not_0
+
 .ifdef BLEEDING_EDGE
     ;; Fork and kill, then wait for
     ;; child.
-debug:.export debug
-    lda #TUNIX_DEVICE
+:   lda #TUNIX_DEVICE
     tax
     jsr SETLFN
     lda #2

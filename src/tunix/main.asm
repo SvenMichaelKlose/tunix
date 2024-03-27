@@ -14,6 +14,7 @@
 
 __VIC20__       = 1
 EARLY_TESTS     = 1
+;BLEEDING_EDGE   = 1
 
 ;;; CPU
 
@@ -1066,7 +1067,7 @@ vec_io23_to_blk5:
 .proc fork_raw
     ldx pid
     stx tmp1
-    lda proc_ram123,x
+    lda proc_data,x
     sta tmp2
 
     push ram123
@@ -1090,13 +1091,14 @@ vec_io23_to_blk5:
     ; Copy lowmem, screen, color & VIC.
     save_internal_ram_to_blk5
 
-    ;; Allocate additional RAM123.
-    lpopx banks, free_bank ; (BLK5)
+    ;; Fork additional RAM123.
+    ; Allocate bank.
+    lpopx banks, free_bank
     txa
     sta proc_data,y
     inc bank_refs,x
     ; Copy parent's into child's.
-    lda tmp2 ; (Parent's saved RAM123.)
+    lda tmp2 ; (Parent's shadow RAM123.)
     sta blk3
     stx blk5
     lda speedcopy_blk3_to_blk5
@@ -1945,11 +1947,14 @@ txt_banks_free:
     .byte "K RAM FREE.", 13,0
 
 vec_io_reloc:
-    .word io_load, $9800, io_size
+    .word io_load, $9800
+    .word io_size
 vec_backup_kernal:
-    .word IOVECTORS, old_kernal_vectors, 30
+    .word IOVECTORS, old_kernal_vectors
+    .word 30
 vec_tunix_kernal:
-    .word tunix_vectors, IOVECTORS, 30
+    .word tunix_vectors, IOVECTORS
+    .word 30
 
     .code
 
@@ -2088,12 +2093,20 @@ txt_booting:
 
     .rodata
 
+cmd_fork:   .byte "PF"
+cmd_exit:   .byte "PE", 0
+cmd_kill:   .byte "PK", 0
+cmd_wait:   .byte "PW", 0
+
 txt_tests:
-    .byte "CHECKING SANITY.",13, 0
-txt_tests_passed:
-    .byte "SANITY CHECKS PASSED.",13, 0
+    .byte "CHECKING SANITY.", 13, 0
 txt_child:
     .byte "CHILD SAYING HELLO!", 13, 0
+txt_hyperactive_child:
+    .byte ":)", 0
+txt_tests_passed:
+    .byte "!!!    SUCCESS:   !!!", 13
+    .byte "!!! CHECKS PASSED !!!", 13, 0
 
 err_free_banks_after_init:
     .byte "WRONG TOTAL # OF FREE BANKS."
@@ -2119,6 +2132,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
 .export tests
 .proc tests
     jsr init
+
     ldaxi banks
     jsry list_length, free_bank
     cpx #FREE_BANKS_AFTER_INIT
@@ -2156,7 +2170,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     ;;; Syscalls
 :   jsr init
 
-    ;; Fork
+    ;; Fork and wait for child to exit.
     lda #TUNIX_DEVICE
     tax
     jsr SETLFN
@@ -2172,7 +2186,9 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
 
     ; Exit child.
 :   print txt_child
-    lda #0
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
     lda #3
     ldx #<cmd_exit
     ldy #>cmd_exit
@@ -2182,20 +2198,68 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
 
     ; Wait for child to exit.
 :   sta cmd_wait+2
-    lda #0
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
     lda #3
     ldx #<cmd_wait
     ldy #>cmd_wait
     jsr SETNAM
     jsr OPEN
 
+.ifdef BLEEDING_EDGE
+    ;; Fork and kill, then wait for
+    ;; child.
+debug:.export debug
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #2
+    ldx #<cmd_fork
+    ldy #>cmd_fork
+    jsr SETNAM
+    jsr OPEN
+    bcc :+
+    error err_cannot_fork
+:   cmp #0
+    bne :++
+
+    ; Be a busy child.
+:   print txt_hyperactive_child
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #0
+    jsr SETNAM
+    jsr OPEN
+    jmp :-
+
+    ; Kill child.
+:   sta cmd_kill+2
+    sta cmd_wait+2
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_kill
+    ldy #>cmd_kill
+    jsr SETNAM
+    jsr OPEN
+
+    ; Wait for child.
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_kill
+    ldy #>cmd_kill
+    jsr SETNAM
+    jsr OPEN
+.endif
+
     print txt_tests_passed
     rts
 .endproc
-
-cmd_fork:   .byte "PF"
-cmd_exit:   .byte "PE", 0
-cmd_wait:   .byte "PW", 0
 
 .endif
 

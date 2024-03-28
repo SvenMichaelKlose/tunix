@@ -1241,11 +1241,14 @@ done:
     cpy #0
     bne :+
 
-    ; Use new shadow BLK1.
+    ;; Process 0 init.
+    ; Use new shadow banks.
     lda proc_blk1
     sta blk1
     sta tunix_blk1
-    bne :+  ; (jmp)
+    lda proc_data
+    sta ram123
+    bne :++  ; (jmp)
 
     ;; Remove parent banks from child.
 :   push ram123
@@ -2186,9 +2189,6 @@ io_size = io_end - io_start
     ldy #0
     sty procs
     jsr fork0
-    ; Use new shadow RAM123.
-    lda proc_data
-    sta ram123
 
     ;;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
@@ -2329,6 +2329,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
+debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork

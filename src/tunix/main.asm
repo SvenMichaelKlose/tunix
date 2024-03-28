@@ -1248,12 +1248,12 @@ items_proc_info:
 ; X: process ID
 .export proc_info
 .proc proc_info
-    stx tmp1
+    stx tmp2
     pushw ptr3
     stwi ptr3, items_proc_info
 
     jsr print_head
-    lda tmp1
+    lda tmp2
     tax
     jsr print_cv
     jsr print_cr
@@ -2515,7 +2515,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 :   print txt_testing_processes
     jsr init
 
-    ; Fork and wait for child to exit.
+    ;; Fork and wait for child to exit.
     jsr lib_fork
     bcc :+
     error err_cannot_fork
@@ -2524,7 +2524,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 :   print txt_child
     jsr lib_exit
     error err_child_running_after_exit
-
 :   lda #0
     jsr lib_proc_info
     lda #1
@@ -2533,7 +2532,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     lda #1
     jsr lib_wait
 
-    ; Check our process ID.
+    ;; Check our process ID.
     jsr lib_getpid
     cmp #0
     beq :+
@@ -2541,7 +2540,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .ifdef BLEEDING_EDGE
     ;; Fork, kill, then wait for child.
-debug:.export debug
 :   jsr lib_fork
     bcc :+
     error err_cannot_fork

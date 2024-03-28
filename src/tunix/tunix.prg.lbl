@@ -68,7 +68,6 @@ al 002C60 .close2
 al 0098BF .clrcn
 al 0022F0 .copy_blk3_to_blk5
 al 000002 .d
-al 002A76 .debug
 al 003C8B .dev_drv
 al 000003 .dh
 al 000002 .dl

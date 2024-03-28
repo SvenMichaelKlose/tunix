@@ -1248,6 +1248,9 @@ items_proc_info:
 ; X: process ID
 .export proc_info
 .proc proc_info
+    lda proc_flags,x
+    beq no_proc
+
     stx tmp2
     pushw ptr3
     stwi ptr3, items_proc_info
@@ -1277,6 +1280,9 @@ items_proc_info:
 
     popw ptr3
     clc
+    rts
+no_proc:
+    sec
     rts
 .endproc
 
@@ -2530,6 +2536,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_proc_info
     ; Wait for child to exit.
     lda #1
+;jmp halt
     jsr lib_wait
 
     ;; Check our process ID.
@@ -2557,7 +2564,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     error err_cannot_wait
 :
 .endif
-
     print txt_tests_passed
     rts
 .endproc
@@ -2623,14 +2629,13 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     sta g+2
     sta h+2
 g:  lda $ffff
-    sta call_driver2+1
+    sta call_driver3+1
 h:  lda $ffff
-    sta call_driver2+2
+    sta call_driver3+2
 
     ;; Bank in driver BLK1.
     ldx drv_pid,y
-    get_procblk_x proc_blk1, blk1
-    load_regs
+    lda proc_blk1,x
     jmp call_driver2
 .endproc
 
@@ -2749,16 +2754,16 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda running
 :   cmp pid
     beq :+  ; Don't switch to self.
-    tay
+    push blk2
+    push blk3
+    push blk5
     ldx pid
-    set_procblk_x proc_blk2, blk2
-    set_procblk_x proc_blk3, blk3
-    set_procblk_x proc_blk5, blk5
     jsr switch
+    pop blk5
+    pop blk3
+    pop blk2
+    ldx pid
     get_procblk_x proc_data, ram123
-    get_procblk_x proc_blk2, blk2
-    get_procblk_x proc_blk3, blk3
-    get_procblk_x proc_blk5, blk5
 :   ply
     plx
     pla
@@ -2818,16 +2823,19 @@ io_start:
 
 .export call_driver2
 .proc call_driver2
-j:  jsr $fffe
+    sta blk1
+    load_regs
+.endproc
+
+.export call_driver3
+.proc call_driver3
+    jsr $fffe
 
     ; Restore banks.
     php
     pha
     phx
     ldx pid
-    get_procblk_x proc_blk2, blk2
-    get_procblk_x proc_blk3, blk3
-    get_procblk_x proc_blk5, blk5
     get_procblk_x proc_blk1, blk1
     plx
     pla

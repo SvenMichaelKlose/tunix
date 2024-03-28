@@ -1770,6 +1770,8 @@ tunix_driver:
 
 .export tunix_open
 .proc tunix_open
+    lda DEV
+    sta DFLTN
     lda FNLEN
     beq s
     lda filename

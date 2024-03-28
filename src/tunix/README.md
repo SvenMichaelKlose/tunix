@@ -465,7 +465,7 @@ character of the filename denotes the
 command group, the second the command in
 that group.  Argument bytes may follow.
 
-After sending a system call via OPEN
+After sending a system call via OPEN,
 an error code may be read using BASIN.
 (Calling CHKIN is not required.)  It may
 followed by return values.

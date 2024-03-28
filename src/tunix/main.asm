@@ -556,7 +556,7 @@ global_size = global_end - global_start
 ;; Processes waiting for others to exit.
 
 ; Allocate local slot in waiting list.
-.macro add_waiting_y
+.macro alloc_waiting_y
     dallocy waiting, waitingb, free_wait, first_wait
 .endmacro
 
@@ -611,15 +611,6 @@ global_size = global_end - global_start
     mvb blk1, tunix_blk1
     pla
     sta proc,x
-    pop blk1
-.endmacro
-
-.macro set_procblk_y proc, blk
-    push blk1
-    push blk
-    mvb blk1, tunix_blk1
-    pla
-    sta proc,y
     pop blk1
 .endmacro
 
@@ -1211,6 +1202,37 @@ done:
 ; banked in for TUNIX, holds additional
 ; per-process data.
 
+    .rodata
+
+items_proc_info:
+    .byte "ID", 0
+    .byte "BANKS", 0
+    .byte 0
+
+.export in
+.proc in
+    ldy #0
+    lda (ptr3),y
+    incw ptr3
+    rts
+.endproc
+
+; Print process info
+; X: process ID
+.export proc_info
+.proc proc_info
+    pushw ptr3
+    stwi ptr1, items_proc_info
+:   jsr in
+    cmp #0
+    beq :+
+    jsr printstr
+    incw ptr3
+    jmp :-
+    popw ptr3
+    rts
+.endproc
+
 ; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
@@ -1407,14 +1429,17 @@ done:
     lda proc_flags,x
     beq not_there
 
-    ;; Put us on waiting list.
+    ;; Put us on waiting list of the
+    ;; process.
+    mvb tmp1, pid
     enter_context_x
-    add_waiting_y
-    lda pid
+    alloc_waiting_y
+    lda tmp1
     sta waiting_pid,y
     leave_context
 
-:   lda proc_flags,x
+check_if_zombie:
+    lda proc_flags,x
     cmp #PROC_ZOMBIE
     beq terminate_zombie
 
@@ -1424,7 +1449,7 @@ done:
     jsr suspend
     jsr schedule
     plx
-    jmp :-
+    jmp check_if_zombie
 
 not_there:
     sec
@@ -2260,8 +2285,7 @@ err_wrong_deque_index:
     .byte "UNEXPECTED DEQUE INDEX OF "
     .byte "FIRST ALLOCATED ONE.", 0
 err_wrong_free_proc_count:
-    .byte "WRONG NUMBER OF FREE PROCS."
-    .byte 0
+    .byte "WRONG # OF FREE PROCS.", 0
 err_cannot_fork:
     .byte "CANNOT FORK.", 0
 err_child_running_after_exit:
@@ -2796,11 +2820,12 @@ io_end:
 .export tunix_io23, tunix_blk1, lbanks
 .export lbanksb, first_lbank, lfns
 .export lfnsb, lfn_glfn, first_lfn
-.export waiting, waiting_pid, free_wait
-.export first_wait, pid, reg_a
-.export reg_x, reg_y, stack, flags
-.export saved_vic, filename, response
-.export response_len, responsep
+.export waiting, waitingb, waiting_pid
+.export free_wait, first_wait, pid
+.export reg_a, reg_x, reg_y, stack
+.export flags, saved_vic, filename
+.export response, response_len
+.export responsep
 
     .bss
 

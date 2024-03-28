@@ -146,9 +146,9 @@ ptr3:   .res 2
 .export procsb, free_proc, running
 .export sleeping, zombie, proc_flags
 .export exit_codes, proc_ram123
-.export proc_io23, proc_blk1, proc_blk2
-.export proc_blk3, proc_blk5, drvs
-.export drv_pid, drv_dev, drv_vl
+.export proc_data, proc_io23, proc_blk1
+.export proc_blk2, proc_blk3, proc_blk5
+.export drvs, drv_pid, drv_dev, drv_vl
 .export drv_vh, dev_drv, global_end
 .export global_size, global_start
 .export banks_ok, banks_faulty
@@ -1100,7 +1100,7 @@ vec_io23_to_blk5:
     ; Copy lowmem, screen, color & VIC.
     save_internal_ram_to_blk5
 
-    ;; Fork additional RAM123.
+    ;; Fork shadow RAM123.
     ; Allocate bank.
     lpopx banks, free_bank
     txa
@@ -1112,7 +1112,7 @@ vec_io23_to_blk5:
     stx blk5
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
-    stx ram123 ; Map in additional.
+    stx ram123 ; Map in new.
     ; Register new RAM123 locally.
     dpushx lbanks, lbanksb, first_lbank
     ; Map in child's IO23.
@@ -1145,10 +1145,12 @@ vec_io23_to_blk5:
         jsr $4000
     .endmacro
     forkblky proc_ram123
-    forkblky proc_blk1
     forkblky proc_blk2
     forkblky proc_blk3
     forkblky proc_blk5
+    ; Must come last to preserve proc
+    ; data.
+    forkblky proc_blk1
 
     pop blk5
     pop blk3
@@ -1203,8 +1205,9 @@ done:
 ; Low 1K, screen, color and VIC are
 ; on the same bank as the IO23 area
 ; which is reserved for TUNIX and
-; driver code.  The RAM123 area holds
-; additional per-process data.
+; driver code.  A shadow RAM123, only
+; banked in for TUNIX, holds additional
+; per-process data.
 
 ; Fork current process.
 ; Returns:
@@ -1235,10 +1238,17 @@ done:
     cpx pid
     bne child
 
-    ;; Remove parent banks from child.
     cpy #0
-    beq :+  ; Unless first process...
-    push ram123
+    bne :+
+
+    ; Use new shadow BLK1.
+    lda proc_blk1
+    sta blk1
+    sta tunix_blk1
+    bne :+  ; (jmp)
+
+    ;; Remove parent banks from child.
+:   push ram123
     lda proc_data,y
     sta ram123
     ldx pid
@@ -1701,10 +1711,7 @@ tunix_driver:
     beq tunix_procs
     cmp #'D'
     beq d
-    cmp #'I'
     bne respond_error ; (jmp)
-    lda pid
-    jmp respond
 d:  jmp tunix_drivers
 s:  jmp schedule
 .endproc
@@ -1725,7 +1732,10 @@ s:  jmp schedule
     beq tunix_stop
     cmp #'R'
     beq tunix_resume
+    cmp #'I'
     bne respond_error   ; (jmp)
+    lda pid
+    jmp respond
 .endproc
 
 syscall1 tunix_kill, kill, ldx
@@ -2156,6 +2166,7 @@ io_size = io_end - io_start
     ;;; Make init process 0.
     print txt_init
     ;; Make holograhic process to fork.
+    ; Fill in banks for process 0.
     ldx #2
     stx proc_data
     stx proc_ram123
@@ -2175,15 +2186,13 @@ io_size = io_end - io_start
     ldy #0
     sty procs
     jsr fork0
-    lda proc_blk1
-    sta blk1
-    sta tunix_blk1
+    ; Use new shadow RAM123.
+    lda proc_data
+    sta ram123
 
     ;;; Init KERNAL vectors.
-    ;; Save
-    smemcpyax vec_backup_kernal
-    ;; Replace
-    smemcpyax vec_tunix_kernal
+    smemcpyax vec_backup_kernal ; Save
+    smemcpyax vec_tunix_kernal ; Replace
 
     ;;; Make devices default to KERNAL.
     mvb drv_vl, #<old_kernal_vectors
@@ -2228,6 +2237,10 @@ cmd_getpid: .byte "PI", 0
 
 txt_tests:
     .byte "CHECKING SANITY.", 13, 0
+txt_testing_data:
+    .byte "CHECKING DATA.", 13, 0
+txt_testing_processes:
+    .byte "CHECKING PROCESSES.", 13, 0
 txt_child:
     .byte "CHILD SAYING HELLO!", 13, 0
 txt_hyperactive_child:
@@ -2261,10 +2274,13 @@ err_init_pid_not_0:
 
     .code
 
-FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
+; TODO: Make a proper formula from
+; defined constants.
+FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .export tests
 .proc tests
+    print txt_testing_data
     jsr init
 
     ldaxi banks
@@ -2302,7 +2318,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     error err_wrong_deque_index
  
     ;;; Syscalls
-:   jsr init
+:   print txt_testing_processes
+    jsr init
 
     ;; Fork and wait for child to exit.
     lda #TUNIX_DEVICE
@@ -2350,7 +2367,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
     ldx #<cmd_getpid
     ldy #>cmd_getpid
     jsr SETNAM
-debug:.export debug
     jsr OPEN
     cmp #0
     beq :+
@@ -2601,7 +2617,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     rts
 .endproc
 
-; Switch low mem and IO23 only(!).
+; Switch internal RAM and IO23 only(!).
 ; The process being switched to will
 ; never see this function but return
 ; from the function that switched it
@@ -2685,7 +2701,7 @@ j:  jsr $fffe
     ; Save active BLK1.
     lda blk1
     sta proc_blk1,x
-    ; Set additional local on RAM123.
+    ; Set shadow RAM123.
     lda proc_data,x
     sta ram123
     plx

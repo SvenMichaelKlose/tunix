@@ -807,6 +807,74 @@ r:  plx
     jmp halt
 .endmacro
 
+.export in
+.proc in
+    ldy #0
+    lda (ptr3),y
+    incw ptr3
+    rts
+.endproc
+
+.export peek
+.proc peek
+    ldy #0
+    lda (ptr3),y
+    rts
+.endproc
+
+.export print_cr
+.proc print_cr
+    phx
+    lda #13
+    jsr BSOUT
+    plx
+    rts
+.endproc
+
+.export outa
+.proc outa
+    ldy #0
+    sta (d),y
+    incw d
+    rts
+.endproc
+
+.macro out val
+    jsra outa, val
+.endmacro
+
+.macro outw at
+    jsra outa, at
+    jsra outa, at+1
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; SYSTEM CALL RETURN DATA ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.export print_cv
+.proc print_cv
+    sta tmp1
+    pushw ptr3
+    phx
+    lda #','
+    jsr BSOUT
+    lda tmp1
+    jsr printdecbyte
+    plx
+    popw ptr3
+    rts
+.endproc
+
+.export print_head
+.proc print_head
+    phx
+    jsr printstr
+    incw ptr3
+    plx
+    rts
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -885,23 +953,6 @@ invalid_bank:
 ; ATM a block copy from BLK3 to BLK5 is
 ; created, starting with bank
 ; 'copy_bank'.
-
-.export outa
-.proc outa
-    ldy #0
-    sta (d),y
-    incw d
-    rts
-.endproc
-
-.macro out val
-    jsra outa, val
-.endmacro
-
-.macro outw at
-    jsra outa, at
-    jsra outa, at+1
-.endmacro
 
 .export gen_speedcodes
 .proc gen_speedcodes
@@ -1209,53 +1260,6 @@ items_proc_info:
     .byte "ID", 0
     .byte "BANKS", 0
     .byte 0
-
-.export in
-.proc in
-    ldy #0
-    lda (ptr3),y
-    incw ptr3
-    rts
-.endproc
-
-.export peek
-.proc peek
-    ldy #0
-    lda (ptr3),y
-    rts
-.endproc
-
-.export print_cr
-.proc print_cr
-    phx
-    lda #13
-    jsr BSOUT
-    plx
-    rts
-.endproc
-
-.export print_cv
-.proc print_cv
-    sta tmp1
-    pushw ptr3
-    phx
-    lda #','
-    jsr BSOUT
-    lda tmp1
-    jsr printdecbyte
-    plx
-    popw ptr3
-    rts
-.endproc
-
-.export print_head
-.proc print_head
-    phx
-    jsr printstr
-    incw ptr3
-    plx
-    rts
-.endproc
 
 ; Print process info
 ; X: process ID
@@ -2474,6 +2478,10 @@ err_child_running_after_exit:
 err_init_pid_not_0:
     .byte "INIT PID NOT 0 AFTER FORK."
     .byte 0
+err_cannot_kill:
+    .byte "CANNOT KILL.", 0
+err_cannot_wait:
+    .byte "CANNOT WAIT.", 0
 
     .code
 
@@ -2535,14 +2543,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     error err_child_running_after_exit
 
     ; Wait for child to exit.
-:   pha
-    lda #0
+:   lda #0
     jsr lib_proc_info
     lda #1
     jsr lib_proc_info
-    pla
-    jsr CLRCN
-    jsr BASIN
+    lda #1
     jsr lib_wait
 
     ; Check our process ID.
@@ -2552,8 +2557,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     error err_init_pid_not_0
 
 .ifdef BLEEDING_EDGE
-    ;; Fork and kill, then wait for
-    ;; child.
+    ;; Fork, kill, then wait for child.
 :   jsr lib_fork
     bcc :+
     error err_cannot_fork
@@ -2562,8 +2566,14 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ; Kill child.
 :   lda #2
     jsr lib_kill
-    lda #2
+    bcc :+
+    error err_cannot_kill
+    ; Wait for child
+:   lda #2
     jsr lib_wait
+    bcc :+
+    error err_cannot_wait
+:
 .endif
 
     print txt_tests_passed

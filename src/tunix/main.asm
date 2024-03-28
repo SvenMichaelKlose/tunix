@@ -1268,7 +1268,6 @@ items_proc_info:
     jsr print_head
     lda tmp1
     tax
-debug:.export debug
     jsr print_cv
     jsr print_cr
 
@@ -2118,7 +2117,7 @@ has_errors:
 
 done:
     lda banks_ok
-    jsr printdecbyte
+    jsr printdecbyte_x8
     print txt_banks_free
     rts
 
@@ -2141,8 +2140,8 @@ done:
     jmp PRTFIX
 .endproc
 
-.export printnum_x8
-.proc printnum_x8
+.export printdecbyte_x8
+.proc printdecbyte_x8
     ldx #0
     stx tmp1
     clc
@@ -2537,8 +2536,13 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
     ; Wait for child to exit.
 :   pha
+    lda #0
+    jsr lib_proc_info
+    lda #1
     jsr lib_proc_info
     pla
+    jsr CLRCN
+    jsr BASIN
     jsr lib_wait
 
     ; Check our process ID.
@@ -2556,9 +2560,9 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 :   cmp #0
     bne hyperactive_child
     ; Kill child.
-:   pha
+:   lda #2
     jsr lib_kill
-    pla
+    lda #2
     jsr lib_wait
 .endif
 
@@ -2566,10 +2570,17 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     rts
 .endproc
 
-hyperactive_child:
-:   print txt_hyperactive_child
+.export hyperactive_child
+.proc hyperactive_child
+    ldx #0
+:   phx
+    print txt_hyperactive_child
     jsr lib_schedule
-    jmp :-
+    plx
+    dex
+    bne :-
+    rts
+.endproc
 
 .endif
 

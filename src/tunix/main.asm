@@ -462,6 +462,7 @@ global_size = global_end - global_start
 ;; Remove from deque.
 
 .macro drmx fw, bw, first
+    phx
     cpx first
     bne :+
     lda fw,x
@@ -477,10 +478,11 @@ global_size = global_end - global_start
     beq :+
     tya
     sta bw,x
-:
+:   plx
 .endmacro
 
 .macro drmy fw, bw, first
+    phy
     cpy first
     bne :+
     lda fw,y
@@ -496,7 +498,7 @@ global_size = global_end - global_start
     beq :+
     txa
     sta bw,y
-:
+:   ply
 .endmacro
 
 ;; Allocate item in deque.
@@ -1308,7 +1310,7 @@ already_sleeping:
 .endproc
 
 ; Wake process up.
-; A: Process ID.
+; X: Process ID.
 .export resume
 .proc resume
     lda proc_flags,x
@@ -1349,7 +1351,6 @@ not_to_resume:
 :   lloopy iopages, :--
 
     ;; Free drivers.
-:
 :   ldy drvs
     beq :+++
 :   lda drv_pid,y
@@ -1368,21 +1369,23 @@ not_to_resume:
     ;; Remove process from waiting or
     ;; sleeping list.
 :   ldx tmp1
-    ; Take off running or sleeping.
     lda proc_flags,x
-    bmi :+
+    bmi take_off_sleeping
+take_off_running:
     drmx procs, procsb, running
-    jmp :++
-:   drmx procs, procsb, sleeping
-    ; Put on zombie list.
-:   lpushx procs, zombie
+    jmp put_on_zombie_list
+take_off_sleeping:
+    drmx procs, procsb, sleeping
+
+put_on_zombie_list:
+    lpushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
     rts
 .endproc
 
-; Resume waiting processes
+; Resume waiting process
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
@@ -2172,7 +2175,7 @@ io_size = io_end - io_start
     ; Unlink from free list.
     ldy #0
     sty procs
-
+    ;; Fork all banks.
     ldx #0
     jsr fork_raw
     get_procblk_y proc_data, ram123
@@ -2182,6 +2185,7 @@ io_size = io_end - io_start
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
+    ;; Mark as running.
     lda #PROC_RUNNING
     sta proc_flags
 

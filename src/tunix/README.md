@@ -8,9 +8,6 @@ the Commodore VIC-20 with UltiMem
 expansion.  It's the foundation of the
 INGLE operating system distribution.
 
-Status: under construction, slowly
-growing the TDD way.
-
 ## Wanted Features
 
 * Up to +35K RAM for all processes.
@@ -20,6 +17,58 @@ growing the TDD way.
 * Resume on reset for crashed apps.
 * Networking.
 * Remote computing.
+
+## Memory
+
+Except for the IO23 area, which is
+reserved for TUNIX and drivers, all
+memory is available to programs.
+
+## Performance
+
+Thanks to the UltiMem expansion, TUNIX
+is blazingly fast as most of process
+switching is done in hardware, allowing
+apps to access up to 40K RAM (IO23 area
+not included).
+
+### System calls
+
+The most expensive operation is the
+fork() system call, which can take up to
+355ms to complete since the address
+space of the forked process need to be
+copied completely.
+Switching one native VIC application to
+another takes 21ms, from a native to a
+TUNIX app (or vice versa) 7ms and a
+swith from a TUNIX app to another TUNIX
+app brills at 0.3ms to 10ms.  The main
+difference making TUNIX apps faster is
+that they do not access screen memory,
+which is handled by the console driver
+exclusively.
+
+Time-consuming task switches aren't much
+of a factor as native apps are not
+multi-tasked and run only when they are
+active on the console. TUNIX apps can
+still run alongside unless that has been
+disabled (e.g. to run programs that take
+over the machine).
+
+## I/O
+
+Calling a driver takes 0.27ms.  This
+leaves us with at least 17.7s overhead
+for transmitting or receiving 64K
+characters via device drivers.
+
+The TUNIX system call driver's overhead
+is limited to parsing and dispatching
+commands.  Resource allocation and
+deallocation uses fast deque operations
+at constant execution times.
 
 ## Educational Purpose
 
@@ -111,50 +160,6 @@ community-driven project:
   range of learners, encouraging cross-
   pollination of ideas and techniques.
 
-## Performance
-
-Thanks to the UltiMem expansion, TUNIX
-is blazingly fast as most of process
-switching is done in hardware, allwing
-apps to access up to 40K RAM.
-
-### System calls
-
-The most expensive operation is the
-fork() system call, which can take up to
-355ms to complete since the address
-space of the forked process need to be
-copied completely.
-Switching one native VIC application to
-another takes 21ms, from a native to a
-TUNIX app (or vice versa) 7ms and a
-swith from a TUNIX app to another TUNIX
-app brills at 0.3ms to 10ms.  The main
-difference making TUNIX apps faster is
-that they do not access screen memory,
-which is handled by the console driver
-exclusively.
-
-Time-consuming task switches aren't much
-of a factor as native apps are not
-multi-tasked and run only when they are
-active on the console. TUNIX apps can
-still run alongside unless that has been
-disabled (e.g. to run programs that take
-over the machine).
-
-## I/O
-
-Calling a driver takes 0.27ms.  This
-leaves us with at least 17.7s overhead
-for transmitting or receiving 64K
-characters via device drivers.
-
-The TUNIX system call driver's overhead
-is limited to parsing and dispatching
-commands.  Resource allocation and
-deallocation uses fast deque operations
-at constant execution times.
 
 # Using TUNIX
 

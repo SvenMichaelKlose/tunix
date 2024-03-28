@@ -1120,7 +1120,7 @@ vec_io23_to_blk5:
     tax
     dpushx lbanks, lbanksb, first_lbank
     ; Update PID and stack pointer.
-    pop io23
+    pop io23 ; (Child's IO23.)
     sty pid
     tsx
     inx ; Undo 'push blk2'.
@@ -1220,14 +1220,8 @@ done:
     cpy #0
     bne :+
     jmp no_more_procs
-:
-.endproc
 
-; Fork process to a specific ID.
-; Y: New process ID.
-.export fork0
-.proc fork0
-    ldx pid
+:   ldx pid
     phx
     jsr fork_raw
     ; Parent and child return here with
@@ -1238,20 +1232,8 @@ done:
     cpx pid
     bne child
 
-    cpy #0
-    bne :+
-
-    ;; Process 0 init.
-    ; Use new shadow banks.
-    lda proc_blk1
-    sta blk1
-    sta tunix_blk1
-    lda proc_data
-    sta ram123
-    bne :++  ; (jmp)
-
     ;; Remove parent banks from child.
-:   push ram123
+    push ram123
     lda proc_data,y
     sta ram123
     ldx pid
@@ -1270,10 +1252,6 @@ done:
     ply
     pop ram123
 
-    ;; Mark child as running.
-:   lda #PROC_RUNNING
-    sta proc_flags,y
-
     ;;; Increment child's GLFN refs.
     ;; Enter child's RAM123.
     push ram123
@@ -1286,12 +1264,18 @@ done:
     lloopx lfns, :-
     ;; Leave child's RAM123.
 :   pop ram123
+
+    ;; Mark child as running.
+child_init:
+    lda #PROC_RUNNING
+    sta proc_flags,y
     tya
     clc
     rts
 
 child:
     get_procblk_y proc_data, ram123
+    get_procblk_y proc_io23, io23
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
@@ -2188,7 +2172,18 @@ io_size = io_end - io_start
     ; Unlink from free list.
     ldy #0
     sty procs
-    jsr fork0
+
+    ldx #0
+    jsr fork_raw
+    get_procblk_y proc_data, ram123
+    get_procblk_y proc_io23, io23
+    get_procblk_y proc_blk1, blk1
+    sta tunix_blk1
+    get_procblk_y proc_blk2, blk2
+    get_procblk_y proc_blk3, blk3
+    get_procblk_y proc_blk5, blk5
+    lda #PROC_RUNNING
+    sta proc_flags
 
     ;;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
@@ -2329,7 +2324,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ldx #<cmd_fork
     ldy #>cmd_fork
     jsr SETNAM
-debug:.export debug
     jsr OPEN
     bcc :+
     error err_cannot_fork

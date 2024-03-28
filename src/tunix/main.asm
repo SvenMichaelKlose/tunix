@@ -118,6 +118,7 @@ MAX_IOPAGES  = 4
 
 .export s, sl, sh, d, dl, dh
 .export c, cl, ch
+.export ptr1, ptr3
 
 s:
 sl:     .res 1
@@ -784,13 +785,13 @@ m:  inc dh
     mvb tmp1, #0
     jsr CLRCN
     phx
-:   ldy tmp1
+l:  ldy #0
     lda (ptr3),y
-    beq :+
+    beq r
     jsr BSOUT
-    inc tmp1
-    bne :-  ; (jmp)
-:   plx
+    incw ptr3
+    jmp l
+r:  plx
     rts
 .endproc
 
@@ -1217,19 +1218,79 @@ items_proc_info:
     rts
 .endproc
 
+.export peek
+.proc peek
+    ldy #0
+    lda (ptr3),y
+    rts
+.endproc
+
+.export print_cr
+.proc print_cr
+    phx
+    lda #13
+    jsr BSOUT
+    plx
+    rts
+.endproc
+
+.export print_cv
+.proc print_cv
+    sta tmp1
+    pushw ptr3
+    phx
+    lda #','
+    jsr BSOUT
+    lda tmp1
+    jsr printdecbyte
+    plx
+    popw ptr3
+    rts
+.endproc
+
+.export print_head
+.proc print_head
+    phx
+    jsr printstr
+    incw ptr3
+    plx
+    rts
+.endproc
+
 ; Print process info
 ; X: process ID
 .export proc_info
 .proc proc_info
+    stx tmp1
     pushw ptr3
-    stwi ptr1, items_proc_info
-:   jsr in
-    cmp #0
-    beq :+
-    jsr printstr
-    incw ptr3
-    jmp :-
+    stwi ptr3, items_proc_info
+
+    jsr print_head
+    lda tmp1
+    tax
+debug:.export debug
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    lda proc_data,x
+    jsr print_cv
+    lda proc_io23,x
+    jsr print_cv
+    lda proc_ram123,x
+    jsr print_cv
+    lda proc_blk1,x
+    jsr print_cv
+    lda proc_blk2,x
+    jsr print_cv
+    lda proc_blk3,x
+    jsr print_cv
+    lda proc_blk5,x
+    jsr print_cv
+    jsr print_cr
+
     popw ptr3
+    clc
     rts
 .endproc
 
@@ -1734,7 +1795,12 @@ s:  jmp schedule
 ; "P?"
 .export tunix_procs
 .proc tunix_procs
-    lda filename+1
+    lda FNLEN
+    cmp #1
+    bne :+
+    lda pid
+    jmp respond
+:   lda filename+1
     cmp #'F'
     beq tunix_fork
     cmp #'E'
@@ -1748,9 +1814,8 @@ s:  jmp schedule
     cmp #'R'
     beq tunix_resume
     cmp #'I'
+    beq tunix_proc_info
     bne respond_error   ; (jmp)
-    lda pid
-    jmp respond
 .endproc
 
 syscall1 tunix_kill, kill, ldx
@@ -1758,6 +1823,7 @@ syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
+syscall1 tunix_proc_info, proc_info, ldx
 
 ; "PF"
 .export tunix_fork
@@ -2047,17 +2113,36 @@ uerror:
 bank_last = banks + $7f
 
 has_errors:
-    jsr printnum
+    jsr printdecbyte
     print txt_faulty_banks
 
 done:
     lda banks_ok
-    jsr printnum
+    jsr printdecbyte
     print txt_banks_free
     rts
 
-.export printnum
-.proc printnum
+.export printdecbyte
+.proc printdecbyte
+    sta tmp1
+    phx
+    ldx tmp1
+    lda #0
+    jsr PRTFIX
+    plx
+    rts
+.endproc
+
+.export printdecword
+.proc printdecword
+    sta tmp1
+    txa
+    lda tmp1
+    jmp PRTFIX
+.endproc
+
+.export printnum_x8
+.proc printnum_x8
     ldx #0
     stx tmp1
     clc
@@ -2243,6 +2328,101 @@ txt_init:
 txt_booting:
     .byte "BOOTING.", 13, 0
 
+;;;;;;;;;;;;;;;
+;;; LIBRARY ;;;
+;;;;;;;;;;;;;;;
+
+.export lib_schedule
+.proc lib_schedule
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #0
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+.export lib_getpid
+.proc lib_getpid
+    ;; Check if back in init.
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #1
+    ldx #<cmd_getpid
+    ldy #>cmd_getpid
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+.export lib_fork
+.proc lib_fork
+    ;; Fork and wait for child to exit.
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #2
+    ldx #<cmd_fork
+    ldy #>cmd_fork
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+.export lib_exit
+.proc lib_exit
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_exit
+    ldy #>cmd_exit
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; A: process ID
+.export lib_kill
+.proc lib_kill
+    sta cmd_kill+2
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_kill
+    ldy #>cmd_kill
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; A: process ID
+.export lib_wait
+.proc lib_wait
+    sta cmd_wait + 2
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_wait
+    ldy #>cmd_wait
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; Print process info.
+; A: process ID
+.export lib_proc_info
+.proc lib_proc_info
+    sta cmd_proc_info + 2
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFN
+    lda #3
+    ldx #<cmd_proc_info
+    ldy #>cmd_proc_info
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
 ;;;;;;;;;;;;;
@@ -2257,7 +2437,8 @@ cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE", 0
 cmd_kill:   .byte "PK", 0
 cmd_wait:   .byte "PW", 0
-cmd_getpid: .byte "PI", 0
+cmd_getpid: .byte "P"
+cmd_proc_info:  .byte "PI", 0
 
 txt_tests:
     .byte "CHECKING SANITY.", 13, 0
@@ -2344,53 +2525,24 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 :   print txt_testing_processes
     jsr init
 
-    ;; Fork and wait for child to exit.
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #2
-    ldx #<cmd_fork
-    ldy #>cmd_fork
-    jsr SETNAM
-    jsr OPEN
+    ; Fork and wait for child to exit.
+    jsr lib_fork
     bcc :+
     error err_cannot_fork
 :   cmp #0
     bne :++
-
-    ; Exit child.
 :   print txt_child
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #3
-    ldx #<cmd_exit
-    ldy #>cmd_exit
-    jsr SETNAM
-    jsr OPEN
+    jsr lib_exit
     error err_child_running_after_exit
-    ; NOT REACHED
 
     ; Wait for child to exit.
-:   sta cmd_wait+2
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #3
-    ldx #<cmd_wait
-    ldy #>cmd_wait
-    jsr SETNAM
-    jsr OPEN
+:   pha
+    jsr lib_proc_info
+    pla
+    jsr lib_wait
 
-    ;; Check if back in init.
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #2
-    ldx #<cmd_getpid
-    ldy #>cmd_getpid
-    jsr SETNAM
-    jsr OPEN
+    ; Check our process ID.
+    jsr lib_getpid
     cmp #0
     beq :+
     error err_init_pid_not_0
@@ -2398,55 +2550,26 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .ifdef BLEEDING_EDGE
     ;; Fork and kill, then wait for
     ;; child.
-:   lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #2
-    ldx #<cmd_fork
-    ldy #>cmd_fork
-    jsr SETNAM
-    jsr OPEN
+:   jsr lib_fork
     bcc :+
     error err_cannot_fork
 :   cmp #0
-    bne :++
-
-    ; Be a busy child.
-:   print txt_hyperactive_child
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #0
-    jsr SETNAM
-    jsr OPEN
-    jmp :-
-
+    bne hyperactive_child
     ; Kill child.
-:   sta cmd_kill+2
-    sta cmd_wait+2
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #3
-    ldx #<cmd_kill
-    ldy #>cmd_kill
-    jsr SETNAM
-    jsr OPEN
-
-    ; Wait for child.
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFN
-    lda #3
-    ldx #<cmd_kill
-    ldy #>cmd_kill
-    jsr SETNAM
-    jsr OPEN
+:   pha
+    jsr lib_kill
+    pla
+    jsr lib_wait
 .endif
 
     print txt_tests_passed
     rts
 .endproc
+
+hyperactive_child:
+:   print txt_hyperactive_child
+    jsr lib_schedule
+    jmp :-
 
 .endif
 

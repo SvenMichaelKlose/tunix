@@ -608,9 +608,21 @@ ID,PID,NAME,FLAGS,MEM,IOP
 2,1,"BASIC",R,49152,0
 ~~~
 
-### "PI": Process ID
+### "P": Process ID
 
 Returns current process ID.
+
+### "PI": Process ID
+
+Returns a list of double-colon-separated
+key/value pairs, the keys being composed
+of upper case letters and digits only.
+List values are comma-separated.
+
+Currently returned fields:
+
+* "ID": Process ID.
+* "BANKS": List of extended memory banks.
 
 ### "PNp<new name>": Process name
 

@@ -8,7 +8,7 @@ ASMSOURCES= \
 include ../Makefile.rules
 
 %.o: %.asm
-	$(AS) -o $@ $<
+	$(AS) $(ASFLAGS) -I$(CA65_INCLUDE) -o $@ $<
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -I../lib/ -o $@ $<

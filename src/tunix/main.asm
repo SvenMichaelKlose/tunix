@@ -42,35 +42,18 @@ blk5        = $9ffe
 
 ;;; KERNAL
 
-;.include "cbm_kernal.inc"
+.include "cbm_kernal.inc"
 
-.export FRESTOR, READST, SETLFN, SETNAM
-.export OPEN, CLOSE, CHKIN, CKOUT, CLRCN
-.export BASIN, BSOUT, LOAD, SAVE, SETTIM
+.export FRESTOR, READST, SETLFS, SETNAM
+.export OPEN, CLOSE, CHKIN, CKOUT
+.export CLRCHN, BASIN, BSOUT, LOAD
+.export SAVE, SETTIM
 .export RDTIM, STOP, GETIN, CLALL
 
 PETSCII_CLRSCR = 147
 
 FRESTOR = $FD52
 PRTFIX  = $DDCD
-
-READST  = $ffb7
-SETLFN  = $ffba
-SETNAM  = $ffbd
-OPEN    = $ffc0
-CLOSE   = $ffc3
-CHKIN   = $ffc6
-CKOUT   = $ffc9
-CLRCN   = $ffcc
-BASIN   = $ffcf
-BSOUT   = $ffd2
-LOAD    = $ffd5
-SAVE    = $ffd8
-SETTIM  = $ffdb
-RDTIM   = $ffde
-STOP    = $ffe1
-GETIN   = $ffe4
-CLALL   = $ffe7
 
 DFLTN   = $99
 DFLTO   = $9a
@@ -86,7 +69,7 @@ IDX_OPEN   = 0
 IDX_CLOSE  = 2
 IDX_CHKIN  = 4
 IDX_CKOUT  = 6
-IDX_CLRCN  = 8
+IDX_CLRCHN = 8
 IDX_BASIN  = 10
 IDX_BSOUT  = 12
 IDX_STOP   = 14
@@ -783,7 +766,7 @@ m:  inc dh
 .export printstr
 .proc printstr
     mvb tmp1, #0
-    jsr CLRCN
+    jsr CLRCHN
     phx
 l:  ldy #0
     lda (ptr3),y
@@ -2339,7 +2322,7 @@ txt_booting:
 .proc lib_schedule
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #0
     jsr SETNAM
     jmp OPEN
@@ -2350,7 +2333,7 @@ txt_booting:
     ;; Check if back in init.
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #1
     ldx #<cmd_getpid
     ldy #>cmd_getpid
@@ -2363,7 +2346,7 @@ txt_booting:
     ;; Fork and wait for child to exit.
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #2
     ldx #<cmd_fork
     ldy #>cmd_fork
@@ -2375,7 +2358,7 @@ txt_booting:
 .proc lib_exit
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #3
     ldx #<cmd_exit
     ldy #>cmd_exit
@@ -2389,7 +2372,7 @@ txt_booting:
     sta cmd_kill+2
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #3
     ldx #<cmd_kill
     ldy #>cmd_kill
@@ -2403,7 +2386,7 @@ txt_booting:
     sta cmd_wait + 2
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #3
     ldx #<cmd_wait
     ldy #>cmd_wait
@@ -2418,7 +2401,7 @@ txt_booting:
     sta cmd_proc_info + 2
     lda #TUNIX_DEVICE
     tax
-    jsr SETLFN
+    jsr SETLFS
     lda #3
     ldx #<cmd_proc_info
     ldy #>cmd_proc_info
@@ -2542,11 +2525,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_exit
     error err_child_running_after_exit
 
-    ; Wait for child to exit.
 :   lda #0
     jsr lib_proc_info
     lda #1
     jsr lib_proc_info
+    ; Wait for child to exit.
     lda #1
     jsr lib_wait
 
@@ -2558,6 +2541,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .ifdef BLEEDING_EDGE
     ;; Fork, kill, then wait for child.
+debug:.export debug
 :   jsr lib_fork
     bcc :+
     error err_cannot_fork
@@ -2936,7 +2920,7 @@ iowrap usrcmd, usrcmd2
     ; TODO: Call all LFNs.
     jsr tunix_enter
     ldy #0
-    jmpa call_driver, #IDX_CLRCN
+    jmpa call_driver, #IDX_CLRCHN
 .endproc
 
 .macro blkiohandler name, idx

@@ -509,32 +509,32 @@ if (!id)
     child_stuff ();
 ~~~
 
-## List Functions
+## Returned Lists And Tables
 
-Some functions return a carriage-return
-ended lines of comma-separated values or
-key/value pairs, separated by a double
-colon.  The value can be a list of
-comma-separated values.
-
-Functions returning a list of comma-
-separated values first send a comma-
-separated list of column names.
+Some functions either return a list of
+key/value pairs or a table.  Both are
+lines of comma-separated values.
+Tables are headed with a list of column
+names.  Key/value lists always have the
+keys in the first column.
 
 Column names and keys are composed of
-upper case ASCII letters or digits.
+upper case ASCII letters.
 
 Values are either decimals, hexadecimal
-bytes or words starting with a "$" or
+bytes or words of fixed length (2 or 4
+characters) starting with a "$", or
 strings surrounded by double quotes.
-Strings containing quotes must use
+Quotes inside strings are printed as
 quadruple quotes ("").
 
 The order and number of keys may vary,
-depending on the function returning
-them.
+depending on the function and the
+version of TUNIX.  Assuming fixed
+layouts will jeopardize backwards-
+compatibility.
 
-An example:
+An example for a table:
 
 ~~~
 ID,PID,NAME
@@ -548,6 +548,15 @@ ID,PID,NAME
 3,0,"SOMETHING ""COOL"""
 ~~~
 
+## Code Examples
+
+Lower case letters in system call file-
+name examples are byte values.
+
+C examples are for the cc65 compiler
+suite and need to include header file
+'cbm.h'.
+
 ## General
 
 ### "": Schedule
@@ -559,10 +568,30 @@ else.  Like the other system calls it
 may switch unless in single-tasking mode
 (command "SS").
 
+~~~BASIC
+OPEN31,31,31,""
+~~~
+
+~~~asm
+lda #31
+tax
+jsr SETFLS
+lda #0
+jsr SETNAM
+jsr OPEN
+
+; Library version:
+jsr tunix_schedule
+~~~
+
+~~~c
+cbm_k_open (31, 31, 0, "");
+~~~
+
 ### "G$": List general infomation
 
-This function returns these key/value
-pairs:
+This function returns a list with these
+keys:
 
 1. "NPROCS": Number of processes.
 2. "MPROCS": Max. number of processes.
@@ -605,13 +634,18 @@ A process returns these fields:
 4. FLAGS: (R)running, (S) sleeping,
    (Z)ombie
 5. MEM: Allocated memory in bytes.
-6. IOP: Number of allocated IO pages.
+6. NDRV: Number of registered drivers.
+7. NIOP: Number of allocated IO pages.
+8. LFNS: Number of logical file numbers.
+
+Running processes are listed before
+sleeping ones.
 
 ~~~
-ID,PID,NAME,FLAGS,MEM,IOP
-0,0,"INIT",S,49152,0
-1,0,"CONSOLE",R,49152,0
-2,1,"BASIC",R,49152,0
+ID,PID,NAME,FLAGS,MEM,NDRV,NIOP,LFNS
+1,0,"CONSOLE",R,49152,0,0,8
+2,1,"BASIC",R,49152,0,0,3
+0,0,"INIT",S,49152,0,0,2
 ~~~
 
 ### "P": Process ID
@@ -678,9 +712,11 @@ launch native programs.
 ### "PXc": Exit
 
 Exits the current process with an exit
-code.  It remains on the process list
-until its parent exits or returns from a
-wait() on it.
+code.  All resources are freed but it
+remains on the process list until its
+parent exits or returns from a wait()
+for the exit code and its waiting list
+is empty (see wait()).
 
 ### "PWp": Wait
 
@@ -690,6 +726,8 @@ its exit code.
 ### "PKp": Kill
 
 Exits any process with exit code 255.
+Parents have to call wait() to make the
+process leave the system.
 
 ### "PSp": Suspend
 
@@ -699,20 +737,22 @@ next task switch.
 
 ### "PRp": Resume
 
-Moves a process to the running list.
+Moves a process to the running list.  It
+will run again then the running list is
+restarted in the scheduler.
 
 ## Extended Memory
 
 Allocation and deallocation of extended
-memory banks happens fast at a constant
-speed.
+memory banks happens fast at an almost
+constant speed.  Banks may be placed
+anywhere except in the IO23 area.
 
 ### "M$": Get memory information
 
-1. "USED": Total extended memory in
-   bytes.
-2. "FREE": Used extended memory in
-   bytes.
+1. "TOTAL": Total bytes.
+2. "USED": Used bytes.
+3. "FREE": Free bytes.
 
 ## "MA": Allocate a bank
 
@@ -722,7 +762,11 @@ memory.
 
 ## "MFb": Free a bank
 
-Frees a bank.
+Frees a bank.  All processes sharing it
+need to free it before it can be
+released back into the global pool.
+All banks of a process will be freed
+on exit.
 
 ## Drivers
 

@@ -2661,7 +2661,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_proc_info
     ; Wait for child to exit.
     lda #1
-;debug:.export debug
     jsr lib_wait
 
     ;; Check our process ID.
@@ -2680,12 +2679,12 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     bne :+
     jmp hyperactive_child
     ; Kill child.
-:   lda #2
+:   lda #1
     jsr lib_kill
     bcc :+
     error err_cannot_kill
     ; Wait for child
-:   lda #2
+:   lda #1
     jsr lib_wait
     bcc :+
     error err_cannot_wait
@@ -2704,14 +2703,9 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .export hyperactive_child
 .proc hyperactive_child
-    ldx #0
-:   phx
-    print txt_hyperactive_child
+:   print txt_hyperactive_child
     jsr lib_schedule
-    plx
-    dex
-    bne :-
-    rts
+    jmp :-
 .endproc
 
 .endif
@@ -2881,12 +2875,25 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pha
     phx
     phy
+
+    ;; Get next running.
     ldx pid
     lda procs,x
-    bne :+
-    lda running
+    bne :++
+
+    ;; Restart list.
+    ; Process 0 running?
+    lda proc_flags
+    cmp #PROC_RUNNING
+    bne :+  ; No...
+    lda #0
+    beq :++ ; (jmp)
+:   lda running
+
+    ;; Switch.
 :   cmp pid
-    beq :+  ; Don't switch to self.
+    beq :+ ; Don't switch to self.
+
     tay
     push blk2
     push blk3
@@ -2897,6 +2904,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pop blk2
     ldx pid
     get_procblk_x proc_data, ram123
+
 :   ply
     plx
     pla

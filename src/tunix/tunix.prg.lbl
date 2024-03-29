@@ -70,7 +70,7 @@ al 00311C .close2
 al 0098BE .clrcn
 al 00232C .copy_blk3_to_blk5
 al 000002 .d
-al 0020FD .debug
+al 002F10 .debug
 al 003CB4 .dev_drv
 al 000003 .dh
 al 000002 .dl

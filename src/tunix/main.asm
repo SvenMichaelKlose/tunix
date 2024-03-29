@@ -1618,7 +1618,7 @@ reap_zombie:
     rm_zombie_x
     lda #0
     sta proc_flags,x
-    bne return_code ; (jmp)
+    beq return_code ; (jmp)
 .endproc
 
 ; Kill process with exit code -1

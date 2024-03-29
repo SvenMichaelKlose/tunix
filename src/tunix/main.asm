@@ -1112,6 +1112,8 @@ vec_io23_to_blk5:
     stx tmp1
     lda proc_data,x
     sta tmp2
+    tsx
+    stx tmp2+1
 
     push ram123
     push io23
@@ -1156,13 +1158,7 @@ vec_io23_to_blk5:
     ; Update PID and stack pointer.
     pop io23 ; (Child's IO23.)
     sty pid
-    tsx
-    inx ; Undo 'push blk2'.
-    inx ; Undo 'push blk3'.
-    inx ; Undo 'push blk5'.
-    inx ; Undo 'push io23'.
-    inx ; Undo 'push ram123'.
-    stx stack
+    mvb stack, tmp2+1
 
     ;; Copy remaining banks.
     ; Copies from BLK3 to BLK5 with

@@ -845,7 +845,51 @@ r:  plx
 ;;; SYSTEM CALL RETURN DATA ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Print command followed by deciman byte
+; Print '$' and hexadecimal byte in A.
+.export print_hexbyte
+.proc print_hexbyte
+    pha
+    lda #'$'
+    jsr BSOUT
+    pla
+    pha
+    lsr
+    lsr
+    lsr
+    lsr
+    jsr print_nibble
+    pla
+.endproc
+
+; Print hexadecimal low nibble in A.
+.export print_nibble
+.proc print_nibble
+    and #$0f
+    cmp #10
+    bcs :+
+    adc #249
+    sec
+:   adc #54
+    jmp BSOUT
+.endproc
+
+; Print comma followed by hexadecimal
+; byte in A.
+.export print_chb
+.proc print_chb
+    sta tmp1
+    pushw ptr3
+    phx
+    lda #','
+    jsr BSOUT
+    lda tmp1
+    jsr print_hexbyte
+    plx
+    popw ptr3
+    rts
+.endproc
+
+; Print comma followed by deciaml byte
 ; in A.
 .export print_cv
 .proc print_cv
@@ -1291,19 +1335,19 @@ items_proc_info:
 
     jsr print_head
     lda proc_data,x
-    jsr print_cv
+    jsr print_chb
     lda proc_io23,x
-    jsr print_cv
+    jsr print_chb
     lda proc_ram123,x
-    jsr print_cv
+    jsr print_chb
     lda proc_blk1,x
-    jsr print_cv
+    jsr print_chb
     lda proc_blk2,x
-    jsr print_cv
+    jsr print_chb
     lda proc_blk3,x
-    jsr print_cv
+    jsr print_chb
     lda proc_blk5,x
-    jsr print_cv
+    jsr print_chb
     jsr print_cr
 
     jsr print_head
@@ -2559,6 +2603,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     print txt_testing_data
     jsr init
 
+    ;;;;;;;;;;;;;;;;;;;;;;
+    ;;; LISTS & DEQUES ;;;
+    ;;;;;;;;;;;;;;;;;;;;;;
+
+    ;; Totel free banks.
     ldaxi banks
     jsry list_length, free_bank
     cpx #FREE_BANKS_AFTER_INIT
@@ -2593,7 +2642,10 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     beq :+
     error err_wrong_deque_index
  
-    ;;; Syscalls
+    ;;;;;;;;;;;;;;;;
+    ;;; Syscalls ;;;
+    ;;;;;;;;;;;;;;;;
+
 :   print txt_testing_processes
     jsr init
 

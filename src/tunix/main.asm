@@ -1724,6 +1724,18 @@ tunix_driver:
 
     .code
 
+;; System call with byte argument that
+;; will never fail.
+.macro syscall1v name, fun, load
+    .export name
+    .proc name
+        load filename+2
+        jmp fun
+    .endproc
+.endmacro
+
+;; System call with byte argument that
+;; might fail.
 .macro syscall1 name, fun, load
     .export name
     .proc name
@@ -1734,9 +1746,10 @@ tunix_driver:
     .endproc
 .endmacro
 
+;; Do nothing.
 .export tunix
 .proc tunix
-    clc
+    sec
     rts
 .endproc
 
@@ -1820,7 +1833,7 @@ syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
-syscall1 tunix_proc_info, proc_info, ldx
+syscall1v tunix_proc_info, proc_info, ldx
 
 ; "PF"
 .export tunix_fork

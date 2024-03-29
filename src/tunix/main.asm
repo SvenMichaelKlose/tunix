@@ -622,26 +622,32 @@ global_size = global_end - global_start
     get_procblk_y proc_data, ram123
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; PROCESS CONTEXT (IO23) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS CONTEXT (IO23+RAM123) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.macro enter_context_x
-    push io23
-    io23x
+.macro enter_data_x
     push ram123
     datax
 .endmacro
 
-.macro enter_context_y
-    push io23
-    io23y
+.macro enter_data_y
     push ram123
     datay
 .endmacro
 
-.macro leave_context
+.macro leave_data
     pop ram123
+.endmacro
+
+.macro enter_tunix_x
+    push io23
+    io23x
+    enter_data_x
+.endmacro
+
+.macro leave_tunix
+    leave_data
     pop io23
 .endmacro
 
@@ -1312,9 +1318,7 @@ no_proc:
     bne child
 
     ;; Remove parent banks from child.
-    push ram123
-    lda proc_data,y
-    sta ram123
+    enter_data_y
     ldx pid
     .macro unref_lbank_x procblk
         ldy procblk,x
@@ -1329,20 +1333,18 @@ no_proc:
     unref_lbank_x proc_blk3
     unref_lbank_x proc_blk5
     ply
-    pop ram123
+    leave_data
 
     ;;; Increment child's GLFN refs.
     ;; Enter child's RAM123.
-    push ram123
-    lda proc_data,y
-    sta ram123
+    enter_data_y
     ;; Increment GLFN of each LFN.
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
     lloopx lfns, :-
     ;; Leave child's RAM123.
-:   pop ram123
+:   leave_data
 
     ;; Mark child as running.
 child_init:
@@ -1409,10 +1411,10 @@ not_to_resume:
 
     ;; Close LFNs and free banks.
 :   phx
-    enter_context_x
+    enter_tunix_x
     jsr free_lfns
     jsr bprocfree
-    leave_context
+    leave_tunix
     plx
     stx tmp1
 
@@ -1464,12 +1466,12 @@ put_on_zombie_list:
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
-    enter_context_x
+    enter_tunix_x
     ldy first_wait
     beq done
     jsr resume
 done:
-    leave_context
+    leave_tunix
     jmp schedule
 .endproc
 
@@ -1485,11 +1487,11 @@ done:
     ;; Put us on waiting list of the
     ;; process.
     mvb tmp1, pid
-    enter_context_x
+    enter_tunix_x
     alloc_waiting_y
     lda tmp1
     sta waiting_pid,y
-    leave_context
+    leave_tunix
 
 check_if_zombie:
     lda proc_flags,x
@@ -1509,7 +1511,7 @@ not_there:
     rts
 
 terminate_zombie:
-    enter_context_x
+    enter_tunix_x
     ldy pid
     rm_waiting_y
     ldy first_wait
@@ -1525,7 +1527,7 @@ resume_next_waiting:
     plx
 
 return_zombie_exit_code:
-    leave_context
+    leave_tunix
     lda exit_codes,x
     clc
     rts
@@ -1565,9 +1567,7 @@ return_zombie_exit_code:
     sta tmp2    ; payload
     lda proc_flags,x
     beq no_proc
-    push ram123
-    lda proc_data,x
-    sta ram123
+    enter_data_x
     lda pending_signal_types,y
     bne ignore
 
@@ -1585,6 +1585,7 @@ retry:
     jmp resume
 
 ignore:
+    leave_data
     clc
     rts
 
@@ -1724,6 +1725,17 @@ tunix_driver:
 
     .code
 
+;; System call without arguments that
+;; might fail.
+.macro syscall0 name, fun
+    .export name
+    .proc name
+        jsr fun
+        bcs respond_error
+        bcc respond_ok  ; (jmp)
+    .endproc
+.endmacro
+
 ;; System call with byte argument that
 ;; will never fail.
 .macro syscall1v name, fun, load
@@ -1774,16 +1786,6 @@ tunix_driver:
 :   jmp respond_error
 .endproc
 
-; "MFb"
-.export tunix_bfree
-.proc tunix_bfree
-    ldx filename+2
-    jsr bfree
-    bcs :+
-    jmp respond_ok
-:   jmp respond_error
-.endproc
-
 .export tunix_open
 .proc tunix_open
     lda DEV
@@ -1828,20 +1830,14 @@ s:  jmp schedule
     bne respond_error   ; (jmp)
 .endproc
 
+syscall1 tunix_bfree, bfree, ldx
+syscall0 tunix_fork, fork
 syscall1 tunix_kill, kill, ldx
 syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 syscall1v tunix_proc_info, proc_info, ldx
-
-; "PF"
-.export tunix_fork
-.proc tunix_fork
-    jsr fork
-    bcs respond_error
-    bcc respond ; (jmp)
-.endproc
 
 .export respond_error
 .proc respond_error

@@ -1244,6 +1244,8 @@ items_proc_info:
     .byte "BANKS", 0
     .byte 0
 
+    .code
+
 ; Print process info
 ; X: process ID
 .export proc_info
@@ -2324,6 +2326,8 @@ txt_booting:
 ;;; LIBRARY ;;;
 ;;;;;;;;;;;;;;;
 
+    .code
+
 .export lib_schedule
 .proc lib_schedule
     lda #TUNIX_DEVICE
@@ -2983,7 +2987,11 @@ response_len:   .res 1
 responsep:      .res 1
 
 .if * >= IOPAGE_BASE * 256
-.error "IO23 overflow!"
+.error "IO23 overflows IO pages!"
+.endif
+
+.if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
+.error "IO pages overflow!"
 .endif
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3023,7 +3031,3 @@ signal_handler_h: .res MAX_SIGNALS
 pending_signal_types: .res 256
 free_signal:    .res 1
 pending_signal: .res 1
-
-.if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
-.error "IO pages overflow!"
-.endif

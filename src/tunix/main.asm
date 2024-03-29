@@ -866,10 +866,9 @@ r:  plx
 .proc print_nibble
     and #$0f
     cmp #10
-    bcs :+
-    adc #249
-    sec
-:   adc #54
+    bcc :+
+    adc #6
+:   adc #48
     jmp BSOUT
 .endproc
 

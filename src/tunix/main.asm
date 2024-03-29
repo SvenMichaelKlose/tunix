@@ -2429,7 +2429,7 @@ txt_tunix:
 txt_init:
     .byte "STARTING INIT.", 13, 0
 txt_booting:
-    .byte "BOOTING.", 13, 0
+    .byte 13, "BOOTING.", 13, 0
 
 ;;;;;;;;;;;;;;;
 ;;; LIBRARY ;;;
@@ -2661,7 +2661,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_proc_info
     ; Wait for child to exit.
     lda #1
-debug:.export debug
+;debug:.export debug
     jsr lib_wait
 
     ;; Check our process ID.
@@ -2913,6 +2913,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 ; Y: Process ID
 .export switch
 .proc switch
+    sei
+
     ;;; Save current.
     tsx
     stx stack
@@ -2943,6 +2945,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   mvb io23, blk5
     ldx stack
     txs
+    cli
     rts
 .endproc
 
@@ -3013,7 +3016,7 @@ io_start:
     pla
     lda reg_a
     plp
-    rts
+    jmp schedule
 .endproc
 
 .export open

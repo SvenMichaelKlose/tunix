@@ -612,23 +612,40 @@ ID,PID,NAME,FLAGS,MEM,IOP
 
 Returns current process ID.
 
-### "PI": Process ID
+### "PI": Process info
 
-Returns a list of double-colon-separated
-key/value pairs, the keys being composed
-of upper case letters and digits only.
-List values are comma-separated.
+Discloses all internal information about
+a process.  Returns a list of double-
+colon-separated key/value pairs, the
+keys being composed of upper case
+letters and digits only.  List values
+are comma-separated.
 
 Currently returned fields:
 
 * "ID": Process ID.
-* "BANKS": List of extended memory banks.
+* "FLAGS": RSZ
+* "EXITCODE": Exit code (0 by default).
+* "WAITING": Processes waiting for exit.
+* "MEMORY": Banks assigned to shadow
+  RAM123, proc RAM123, IO23, BLK1, BLK2,
+  BLK3 & BLK5.
+* "BANKS": List of extended memory
+  banks.
+* "STACK": Last saved tack pointer.
+* "LFNS": Used LFNs.
+* "GLFNS": Analoguous global LFNs.
+* "IOPAGES": Allocated IO pages.
+* "DRIVERS": Registered drivers.
+* "DEVICES": Device drivers.
+* "SIGNALS": Signals to receive.
 
 ### "PNp<new name>": Process name
 
 Sets the name of process 'p' (zero-
 terminated string) if it follows the
-command.  Return the current name.
+command.  Returns the current name if
+none was set.
 
 ### "PF": Fork
 

@@ -1414,7 +1414,6 @@ not_to_resume:
     plx
     stx tmp1
 
-.if 0
     ;; Free IO pages.
     ldy first_iopage
     beq :+++
@@ -1439,7 +1438,6 @@ not_to_resume:
     lda #0  ; KERNAL
     sta dev_drv,x
 :   lloopy drvs, :--
-.endif
 
     ;; Remove process from waiting or
     ;; sleeping list.

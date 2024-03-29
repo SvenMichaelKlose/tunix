@@ -1243,19 +1243,33 @@ done:
 
 items_proc_info:
     .byte "ID", 0
-    .byte "BANKS", 0
+    .byte "MEMORY", 0
+    .byte "LFNS", 0
+    .byte "NBANKS", 0
     .byte 0
 
     .code
+
+.macro print_csv list, first
+    ldx first
+    beq :++
+    txa
+:   jsr print_cv
+    lda list,x
+    tax
+    bne :-
+    jsr print_cr
+.endmacro
 
 ; Print process info
 ; X: process ID
 .export proc_info
 .proc proc_info
     lda proc_flags,x
-    beq no_proc
+    bne :+
+    jmp no_proc
 
-    stx tmp2
+:   stx tmp2
     pushw ptr3
     stwi ptr3, items_proc_info
 
@@ -1279,6 +1293,16 @@ items_proc_info:
     lda proc_blk3,x
     jsr print_cv
     lda proc_blk5,x
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    print_csv lfns, first_lfn
+
+    jsr print_head
+    ldaxi lbanks
+    jsry list_length, first_lbank
+    txa
     jsr print_cv
     jsr print_cr
 
@@ -1376,6 +1400,8 @@ child:
     beq not_there
     bmi already_sleeping
     mv_running_sleeping_x
+    lda #PROC_SLEEPING
+    sta proc_flags,x
     clc
     rts
 not_there:
@@ -1391,6 +1417,10 @@ already_sleeping:
     lda proc_flags,x
     bpl not_to_resume
     mv_sleeping_running_x
+    lda #PROC_RUNNING
+    sta proc_flags,x
+    clc
+    rts
 not_to_resume:
     sec
     rts
@@ -1414,6 +1444,7 @@ not_to_resume:
     plx
     stx tmp1
 
+.if 0
     ;; Free IO pages.
     ldy first_iopage
     beq :+++
@@ -1438,8 +1469,9 @@ not_to_resume:
     lda #0  ; KERNAL
     sta dev_drv,x
 :   lloopy drvs, :--
+.endif
 
-    ;; Remove process from waiting or
+    ;; Remove process from running or
     ;; sleeping list.
 :   ldx tmp1
     lda proc_flags,x
@@ -1465,6 +1497,7 @@ put_on_zombie_list:
     enter_tunix_x
     ldy first_wait
     beq done
+    ldx waiting_pid,y
     jsr resume
 done:
     leave_tunix
@@ -1483,7 +1516,7 @@ done:
     ;; Put us on waiting list of the
     ;; process.
     mvb tmp1, pid
-    enter_tunix_x
+    enter_tunix_x ; TODO: data only.
     alloc_waiting_y
     lda tmp1
     sta waiting_pid,y
@@ -1496,9 +1529,11 @@ check_if_zombie:
 
     ;; Take a nap.
     phx
+    phy
     ldx pid
     jsr suspend
     jsr schedule
+    ply
     plx
     jmp check_if_zombie
 
@@ -1508,7 +1543,6 @@ not_there:
 
 terminate_zombie:
     enter_tunix_x
-    ldy pid
     rm_waiting_y
     ldy first_wait
     bne resume_next_waiting
@@ -2275,6 +2309,8 @@ io_size = io_end - io_start
     ;;; Make init process 0.
     print txt_init
     ;; Make holograhic process to fork.
+    lda #0
+    sta procs
     ; Fill in banks for process 0.
     ldx #2
     stx proc_data
@@ -2551,17 +2587,15 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     bcc :+
     error err_cannot_fork
 :   cmp #0
-    bne :++
-:   print txt_child
-    jsr lib_exit
-    error err_child_running_after_exit
+    bne :+
+    jmp baby
 :   lda #0
     jsr lib_proc_info
     lda #1
     jsr lib_proc_info
     ; Wait for child to exit.
     lda #1
-;jmp halt
+debug:.export debug
     jsr lib_wait
 
     ;; Check our process ID.
@@ -2572,11 +2606,13 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .ifdef BLEEDING_EDGE
     ;; Fork, kill, then wait for child.
-:   jsr lib_fork
+:
+    jsr lib_fork
     bcc :+
     error err_cannot_fork
 :   cmp #0
-    bne hyperactive_child
+    bne :+
+    jmp hyperactive_child
     ; Kill child.
 :   lda #2
     jsr lib_kill
@@ -2591,6 +2627,13 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .endif
     print txt_tests_passed
     rts
+.endproc
+
+.export baby
+.proc baby
+    print txt_child
+    jsr lib_exit
+    error err_child_running_after_exit
 .endproc
 
 .export hyperactive_child
@@ -2778,10 +2821,10 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda running
 :   cmp pid
     beq :+  ; Don't switch to self.
+    tay
     push blk2
     push blk3
     push blk5
-    ldx pid
     jsr switch
     pop blk5
     pop blk3

@@ -2704,7 +2704,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export hyperactive_child
 .proc hyperactive_child
 :   print txt_hyperactive_child
-    jsr lib_schedule
     jmp :-
 .endproc
 

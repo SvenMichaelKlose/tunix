@@ -2922,8 +2922,12 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     save_internal_ram_to_blk5_x
 
     ;;; Load next.
-    ;; Copy in low mem...
     get_procblk_y proc_io23, blk5
+    ;; ...color, screen and VIC config.
+    smemcpyax vec_blk5_to_color
+    smemcpyax vec_blk5_to_screen
+    smemcpyax vec_blk5_to_vic
+    ;; Copy in low mem...
     lda speedcopy_blk5_to_lowmem
     sta blk2
     ; Set return address.  We cannot use
@@ -2934,12 +2938,9 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda #>:+
     sta $5802
     jmp $4000
-    ;; ...color, screen and VIC config.
-:   smemcpyax vec_blk5_to_color
-    smemcpyax vec_blk5_to_screen
-    smemcpyax vec_blk5_to_vic
+
     ;; Hop over.
-    mvb io23, blk5
+:   mvb io23, blk5
     ldx stack
     txs
     rts

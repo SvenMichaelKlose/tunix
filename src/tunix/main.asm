@@ -2437,18 +2437,24 @@ cmd_getpid: .byte "P"
 cmd_proc_info:  .byte "PI", 0
 
 txt_tests:
-    .byte "CHECKING SANITY.", 13, 0
+    .byte "!!! RUNNING TESTS !!!"
+    .byte 13, 0
 txt_testing_data:
-    .byte "CHECKING DATA.", 13, 0
+    .byte "!!! TESTING DATA !!!"
+    .byte 13, 0
 txt_testing_processes:
-    .byte "CHECKING PROCESSES.", 13, 0
+    .byte 13
+    .byte "!!! TESTING PROCS !!!"
+    .byte 13, 0
 txt_child:
-    .byte "CHILD SAYING HELLO!", 13, 0
+    .byte "CHILD SAYING HELLO!"
+    .byte 13, 0
 txt_hyperactive_child:
     .byte ":)", 0
 txt_tests_passed:
     .byte "!!!    SUCCESS:   !!!", 13
-    .byte "!!! CHECKS PASSED !!!", 13, 0
+    .byte "!!! CHECKS PASSED !!!"
+    .byte 13, 0
 
 err_free_banks_after_init:
     .byte "WRONG TOTAL # OF FREE BANKS."

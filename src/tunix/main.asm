@@ -550,7 +550,6 @@ global_size = global_end - global_start
 .endmacro
 
 ; Make zombie a free process.
-
 .macro rm_zombie_x
     dmovex procs, procsb, zombie, free_proc
 .endmacro
@@ -622,9 +621,9 @@ global_size = global_end - global_start
     get_procblk_y proc_data, ram123
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; PROCESS CONTEXT (IO23+RAM123) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS SHADOW RAM123 ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_data_x
     push ram123
@@ -640,6 +639,11 @@ global_size = global_end - global_start
     pop ram123
 .endmacro
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;     PROCESS CONTEXT    ;;;
+;;; (SHADOW RAM123 + IO23) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 .macro enter_tunix_x
     push io23
     io23x
@@ -650,27 +654,6 @@ global_size = global_end - global_start
     leave_data
     pop io23
 .endmacro
-
-;;;;;;;;;;;;;;;;;;
-;;; LIST UTILS ;;;
-;;;;;;;;;;;;;;;;;;
-
-.export list_length
-.proc list_length
-    stax tmp1
-    pushw ptr1
-    mvw ptr1,tmp1
-    ldx #0
-    cpy #0
-    beq empty
-:   inx
-    lda (ptr1),y
-    tay
-    bne :-
-empty:
-    popw ptr1
-    rts
-.endproc
 
 ;;;;;;;;;;;;;
 ;;; ZPLIB ;;;
@@ -763,6 +746,27 @@ m:  inc dh
     jmp n
 .endproc
 
+;;;;;;;;;;;;;;;;;;
+;;; LIST UTILS ;;;
+;;;;;;;;;;;;;;;;;;
+
+.export list_length
+.proc list_length
+    stax tmp1
+    pushw ptr1
+    mvw ptr1,tmp1
+    ldx #0
+    cpy #0
+    beq empty
+:   inx
+    lda (ptr1),y
+    tay
+    bne :-
+empty:
+    popw ptr1
+    rts
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; USER INTERFACE ;;;
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -841,6 +845,8 @@ r:  plx
 ;;; SYSTEM CALL RETURN DATA ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; Print command followed by deciman byte
+; in A.
 .export print_cv
 .proc print_cv
     sta tmp1
@@ -855,6 +861,8 @@ r:  plx
     rts
 .endproc
 
+; Print string at ptr3 and step over the
+; terminating 0.
 .export print_head
 .proc print_head
     phx
@@ -943,6 +951,7 @@ invalid_bank:
 ; created, starting with bank
 ; 'copy_bank'.
 
+; Make all wanted block moves.
 .export gen_speedcodes
 .proc gen_speedcodes
     print txt_speed_code
@@ -989,6 +998,7 @@ invalid_bank:
     rts
 .endproc
 
+; Make single block copy.
 .export gen_speedcode
 .proc gen_speedcode
 next_bank:
@@ -1511,10 +1521,10 @@ done:
 .export wait
 .proc wait
     lda proc_flags,x
-    beq not_there
+    beq invalid_pid
 
-    ;; Put us on waiting list of the
-    ;; process.
+    ; Put us on waiting list of the
+    ; process.
     mvb tmp1, pid
     enter_tunix_x ; TODO: data only.
     alloc_waiting_y
@@ -1525,9 +1535,9 @@ done:
 check_if_zombie:
     lda proc_flags,x
     cmp #PROC_ZOMBIE
-    beq terminate_zombie
+    beq end_wait
 
-    ;; Take a nap.
+    ; Take a nap.
     phx
     phy
     ldx pid
@@ -1537,30 +1547,35 @@ check_if_zombie:
     plx
     jmp check_if_zombie
 
-not_there:
+invalid_pid:
     sec
     rts
+.endproc
 
-terminate_zombie:
+; X: Zombie process ID.
+; Y: Slot in zombie's waiting list.
+.export end_wait
+.proc end_wait
     enter_tunix_x
     rm_waiting_y
     ldy first_wait
-    bne resume_next_waiting
-    rm_zombie_x
-    jmp return_zombie_exit_code
-
-resume_next_waiting:
+    beq reap_zombie
     phx
     tya
     tax
     jsr resume
     plx
-
-return_zombie_exit_code:
+return_code:
     leave_tunix
     lda exit_codes,x
     clc
     rts
+
+reap_zombie:
+    rm_zombie_x
+    lda #0
+    sta proc_flags,x
+    bne return_code ; (jmp)
 .endproc
 
 ; Kill process with exit code -1
@@ -2839,11 +2854,11 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .endproc
 
 ; Switch internal RAM and IO23 only(!).
+;
 ; The process being switched to will
 ; never see this function but return
-; from the function that switched it
-; away before (either switch() itself
-; or fork()).
+; from either fork() or switch().
+;
 ; Y: Process ID
 .export switch
 .proc switch
@@ -2872,6 +2887,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
+    ;; Hop over.
     mvb io23, blk5
     ldx stack
     txs

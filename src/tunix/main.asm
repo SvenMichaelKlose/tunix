@@ -2696,7 +2696,6 @@ h:  lda $ffff
 .macro iohandler name2, device, drvop
     .export name2
     .proc name2
-        save_regs
         ldx device
         ldy dev_drv,x
         jmpa call_driver, #drvop
@@ -2849,26 +2848,21 @@ io_start:
 
 ; Map in rest of TUNIX.
 ; It's in RAM123 and BLK1.  Saves
-; current bank configuration to process
-; state.
+; current RAM123 and BLK to process
+; tables.
 .export tunix_enter
 .proc tunix_enter
-    pha
-    phx
+    save_regs
     ldx pid
-    ; Save active RAM123.
+    lda blk1
+    tay
+    mvb blk1, tunix_blk1
+    tya
+    sta proc_blk1,x
     lda ram123
     sta proc_ram123,x
-    ; Save active BLK1.
-    lda blk1
-    sta proc_blk1,x
-    ; Set shadow RAM123.
     lda proc_data,x
     sta ram123
-    plx
-    ; Map in global to BLK1.
-    mvb blk1, tunix_blk1
-    pla
     rts
 .endproc
 
@@ -2937,7 +2931,6 @@ iowrap usrcmd, usrcmd2
     .export name
     .proc name
         jsr tunix_enter
-        save_regs
         ldy DEV
         ldx dev_drv,y
         jmpa call_driver, #idx

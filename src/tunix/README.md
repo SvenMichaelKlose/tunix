@@ -457,7 +457,9 @@ if the carry flag is set:
 * 9: Illegal device number.
      Also if tape buffer is below $0200.
 
-# System calls
+# System Calls
+
+## Doing System Calls
 
 System calls are performed via opening
 a file on device #31.  The first
@@ -468,15 +470,18 @@ that group.  Argument bytes may follow.
 After sending a system call via OPEN,
 an error code may be read using BASIN.
 (Calling CHKIN is not required.)  It may
-followed by return values.
+be followed by return values.
+
 On assembly level the carry flag tells
 if an error occured (carry set with code
 in accumulator instead of the return
-value).
+value).  For both ca65 and cc65, system
+call libraries are around.
 
 ~~~C
 // Get process ID.
-open (31, 31, 0, "PI");
+open (31, 31, 0, "P");
+// (Never returns with an error.)
 pid = basin ();
 ~~~
 
@@ -504,39 +509,41 @@ if (!id)
     child_stuff ();
 ~~~
 
-~~~C
-// Get process IDs, flags and names.
-open (31, 31, 0, "PL");
-while (n = basin ()) {
-    if (readst ())
-        break;
-    printf ("%d %d %s\n", id, f, n);
-}
-printf ("\n");
-~~~
+## List Functions
 
-## List functions
+Some functions return a carriage-return
+ended lines of comma-separated values or
+key/value pairs, separated by a double
+colon.  The value can be a list of
+comma-separated values.
 
-The functions return a list of comma-
-separated values, terminated by
-newlines. It is introduced by a comma-
-separated list of field names that never
-contain commas themselves.  The order
-and number of fields may vary.
+Functions returning a list of comma-
+separated values first send a comma-
+separated list of column names.
 
-Fields containing strings start and end
-with double quotes (").  Inside double
-quotes have to be quadruple quotes ("").
+Column names and keys are composed of
+upper case ASCII letters or digits.
+
+Values are either decimals, hexadecimal
+bytes or words starting with a "$" or
+strings surrounded by double quotes.
+Strings containing quotes must use
+quadruple quotes ("").
+
+The order and number of keys may vary,
+depending on the function returning
+them.
 
 An example:
 
 ~~~
 ID,PID,NAME
-0,1,"INIT"
+0,0,"INIT"
 1,0,"CONSOLE"
 1,0,"RAMDISK"
 1,0,"C1541"
-1,0,"IP65"
+1,0,"SLIP"
+1,0,"UIP"
 2,0,"BASIC"
 3,0,"SOMETHING ""COOL"""
 ~~~
@@ -554,9 +561,8 @@ may switch unless in single-tasking mode
 
 ### "G$": List general infomation
 
-Unlike the other list functions this
-one returns a list of comma-separated
-key/value pairs.  These are the keys:
+This function returns these key/value
+pairs:
 
 1. "NPROCS": Number of processes.
 2. "MPROCS": Max. number of processes.

@@ -1559,6 +1559,7 @@ return_zombie_exit_code:
 ; X: process ID
 ; Y: signal type (0-255)
 ; A: payload
+.export sig_kill
 .proc sig_kill
     sty tmp1    ; type
     sta tmp2    ; payload
@@ -1643,6 +1644,7 @@ sigjmp:
 ; X: type
 ; A: handler high byte
 ; Y: handler low byte
+.export set_handler
 .proc set_handler
     sta tmp1
     sta signal_handler_h,x
@@ -1656,6 +1658,7 @@ sigjmp:
 ; X: type
 ; Returns with error if no handler was
 ; registered for the type.
+.export reset_handler
 .proc reset_handler
     lda signal_handler_h,x
     bne no_handler_set
@@ -1793,7 +1796,7 @@ s:  jmp schedule
     cmp #1
     bne :+
     lda pid
-    jmp respond
+    jmp respond1
 :   lda filename+1
     cmp #'F'
     beq tunix_fork
@@ -1853,6 +1856,13 @@ syscall1 tunix_proc_info, proc_info, ldx
     rts
 .endproc
 
+.export respond1
+.proc respond1
+    sta respond
+    ldx #1
+    bne respond_len ; (jmp)
+.endproc
+    
 ; Respond with value and error code 0.
 ; A: value
 .export respond
@@ -2963,6 +2973,12 @@ io_end:
 .export flags, saved_vic, filename
 .export response, response_len
 .export responsep
+.export signals, signalsb, signal_type
+.export signal_payload
+.export signal_handler_l
+.export signal_handler_h
+.export pending_signal_types
+.export free_signal, pending_signal
 
     .bss
 

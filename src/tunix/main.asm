@@ -550,7 +550,7 @@ global_size = global_end - global_start
 .endmacro
 
 ; Make zombie a free process.
-.macro rm_zombie_x
+.macro reap_zombie_x
     dmovex procs, procsb, zombie, free_proc
 .endmacro
 
@@ -1622,7 +1622,7 @@ return_code:
     rts
 
 reap_zombie:
-    rm_zombie_x
+    reap_zombie_x
     lda #0
     sta proc_flags,x
     beq return_code ; (jmp)
@@ -1665,19 +1665,23 @@ invalid_pid:
     sty tmp1    ; type
     sta tmp2    ; payload
     lda proc_flags,x
-    beq no_proc
+    beq invalid_pid
     enter_data_x
+
+    ; Do nothing if signal of the same
+    ; type is already pending.
     lda pending_signal_types,y
     bne ignore
 
 retry:
+    ; Grab a slot on the queue.
     lda free_signal
     beq out_of_slots
-    phy
     alloc_signal_y
     tya
-    ply
+    ; Save on local type scoreboard.
     sta pending_signal_types,y
+    lda tmp1
     sta signal_type,y
     lda tmp2
     sta signal_payload,y
@@ -1695,29 +1699,30 @@ out_of_slots:
     jsr schedule
     jmp retry
 
-no_proc:
-    clc
+invalid_pid:
+    sec
     rts
 .endproc
 
 ; Deliver pending signal to current
 ; process.  For use in tunix_leave().
 .macro sigaction1
+    ; Do not deliver if one is still
+    ; processed.
     lda is_processing_signal
     bne :++
+    ; Grap pending.
 :   dpopx pending_signals
     cpx #0
     beq :+ ; No signal pending.
     lda signal_type,x
     tay
-    lda pending_signal_types,y
-    beq :- ; No handler for the type.
     inc is_processing_signal
     lda #0
     sta pending_signal_types,y
-    lda signal_handler_l,y
+    lda signal_handler_l,x
     sta sigjmp + 1
-    lda signal_handler_h,y
+    lda signal_handler_h,x
     sta sigjmp + 2
 :
 .endmacro
@@ -2454,9 +2459,20 @@ txt_init:
 txt_booting:
     .byte 13, "BOOTING.", 13, 0
 
+.ifdef EARLY_TESTS
+
 ;;;;;;;;;;;;;;;
 ;;; LIBRARY ;;;
 ;;;;;;;;;;;;;;;
+
+    .rodata
+
+cmd_fork:   .byte "PF"
+cmd_exit:   .byte "PE", 0
+cmd_kill:   .byte "PK", 0
+cmd_wait:   .byte "PW", 0
+cmd_getpid: .byte "P"
+cmd_proc_info:  .byte "PI", 0
 
     .code
 
@@ -2556,17 +2572,6 @@ txt_booting:
 ;;;;;;;;;;;;;
 ;
 ; Tests running before regular boot.
-
-.ifdef EARLY_TESTS
-
-    .rodata
-
-cmd_fork:   .byte "PF"
-cmd_exit:   .byte "PE", 0
-cmd_kill:   .byte "PK", 0
-cmd_wait:   .byte "PW", 0
-cmd_getpid: .byte "P"
-cmd_proc_info:  .byte "PI", 0
 
 txt_tests:
     .byte "!!! RUNNING TESTS !!!"

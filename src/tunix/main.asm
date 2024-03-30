@@ -1811,9 +1811,9 @@ no_handler_set:
 :   rts
 .endproc
 
-;;;;;;;;;;;;;;
-;;; DRIVER ;;;
-;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; SYSCALL DRIVER (DEVICE #31) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Takes on system calls via device
 ; TUNIX_DEVICE (#31 by default).
@@ -1836,8 +1836,9 @@ tunix_driver:
     .export name
     .proc name
         jsr fun
-        bcs respond_error
-        bcc respond_ok  ; (jmp)
+        bcs :+
+        jmp respond_ok
+:       jmp respond_error
     .endproc
 .endmacro
 
@@ -1858,8 +1859,9 @@ tunix_driver:
     .proc name
         load filename+2
         jsr fun
-        bcs respond_error
-        bcc respond_ok  ; (jmp)
+        bcs :+
+        jmp respond_ok
+:       jmp respond_error
     .endproc
 .endmacro
 
@@ -1868,27 +1870,6 @@ tunix_driver:
 .proc tunix
     sec
     rts
-.endproc
-
-; "M?"
-.export tunix_memory
-.proc tunix_memory
-    lda filename+1
-    cmp #'A'
-    beq tunix_balloc
-    cmp #'F'
-    beq tunix_bfree
-    jmp respond_error
-.endproc
-
-; "MA"
-.export tunix_balloc
-.proc tunix_balloc
-    jsr balloc
-    txa
-    beq :+
-    jmp respond
-:   jmp respond_error
 .endproc
 
 .export tunix_open
@@ -1901,59 +1882,16 @@ tunix_driver:
     cmp #'M'
     beq tunix_memory
     cmp #'P'
-    beq tunix_procs
+    beq p
+    cmp #'G'
+    beq g
     cmp #'D'
     beq d
     jmp respond_error
+p:  jmp tunix_procs
 d:  jmp tunix_drivers
 s:  jmp schedule
-.endproc
-
-; "P?"
-.export tunix_procs
-.proc tunix_procs
-    lda FNLEN
-    cmp #1
-    bne :+
-    lda pid
-    jmp respond1
-:   lda filename+1
-    cmp #'F'
-    beq tunix_fork
-    cmp #'E'
-    beq tunix_exit
-    cmp #'K'
-    beq tunix_kill
-    cmp #'W'
-    beq tunix_wait
-    cmp #'S'
-    beq tunix_stop
-    cmp #'R'
-    beq tunix_resume
-    cmp #'I'
-    beq tunix_proc_info
-    bne respond_error   ; (jmp)
-.endproc
-
-syscall1 tunix_bfree, bfree, ldx
-syscall0 tunix_fork, fork
-;syscall1 tunix_kill, kill, ldx
-syscall1 tunix_wait, wait, ldx
-syscall1 tunix_stop, stop, ldx
-syscall1 tunix_resume, resume, ldx
-syscall1 tunix_exit, exit, lda
-syscall1v tunix_proc_info, proc_info, ldx
-.export tunix_kill
-.proc tunix_kill
-    ldx filename+2
-    ldy FNLEN
-    lda #255
-    cpy #4
-    bne :+
-    lda filename+3
-:   jsr kill
-    bcs respond_error
-    bcc respond_ok  ; (jmp)
+g:  jmp tunix_general
 .endproc
 
 .export respond_error
@@ -2016,6 +1954,110 @@ syscall1v tunix_proc_info, proc_info, ldx
     rts
 .endproc
 
+;; GENERAL
+
+; "G?"
+.export tunix_general
+.proc tunix_general
+    sec
+    rts
+.endproc
+
+;; MEMORY
+
+; "M?"
+.export tunix_memory
+.proc tunix_memory
+    lda filename+1
+    cmp #'A'
+    beq tunix_balloc
+    cmp #'F'
+    beq tunix_bfree
+    jmp respond_error
+.endproc
+
+; "MA"
+.export tunix_balloc
+.proc tunix_balloc
+    jsr balloc
+    txa
+    beq :+
+    jmp respond
+:   jmp respond_error
+.endproc
+
+; "MFb"
+syscall1 tunix_bfree, bfree, ldx
+
+;; PROCESSES
+
+; "P?"
+.export tunix_procs
+.proc tunix_procs
+    lda FNLEN
+    cmp #1
+    bne :+
+    lda pid
+    jmp respond1
+:   lda filename+1
+    cmp #'F'
+    beq tunix_fork
+    cmp #'E'
+    beq tunix_exit
+    cmp #'K'
+    beq tunix_kill
+    cmp #'W'
+    beq tunix_wait
+    cmp #'S'
+    beq tunix_stop
+    cmp #'R'
+    beq tunix_resume
+    cmp #'I'
+    beq tunix_proc_info
+    jmp respond_error
+.endproc
+
+syscall0 tunix_fork, fork
+syscall1 tunix_wait, wait, ldx
+syscall1 tunix_stop, stop, ldx
+syscall1 tunix_resume, resume, ldx
+syscall1 tunix_exit, exit, lda
+syscall1v tunix_proc_info, proc_info, ldx
+
+.export tunix_kill
+.proc tunix_kill
+    ldx filename+2
+    ldy FNLEN
+    lda #255
+    cpy #4
+    bne :+
+    lda filename+3
+:   jsr kill
+    bcs :+
+    jmp respond_ok
+:   jmp respond_error
+.endproc
+
+;; DRIVERS
+
+; "D?"
+.export tunix_drivers
+.proc tunix_drivers
+    lda filename+1
+    cmp #'R'
+    beq r
+    cmp #'A'
+    beq ai
+    cmp #'C'
+    beq tunix_commit_io_page
+    cmp #'F'
+    beq fi
+    jmp respond_error
+r:  jmp tunix_register
+ai: jmp tunix_alloc_io_page
+fi: jmp tunix_free_io_page
+.endproc
+
 ; "DR"
 .export tunix_register
 .proc tunix_register
@@ -2023,23 +2065,28 @@ syscall1v tunix_proc_info, proc_info, ldx
     lda filename+3
     ldx filename+4
     jsr register
-    bcs respond_error
+    bcs :+
     txa
-    bcc respond ; (jmp)
+    jmp respond ; (jmp)
+:   jmp respond_error
 .endproc
+
+;; I/O PAGES
 
 ; "DA"
 .export tunix_alloc_io_page
 .proc tunix_alloc_io_page
     lda free_iopage
-    beq respond_error
+    beq no_more
     alloc_iopage_x
     ldx pid
     sta iopage_pid,x
     txa
     clc
     adc #IOPAGE_BASE
-    bcc respond ; (jmp)
+    jmp respond
+no_more:
+    jmp respond_error
 .endproc
 
 ; "DCp"
@@ -2077,24 +2124,6 @@ next:
     cpy #MAX_PROCS
     bne l
     jmp respond_ok
-.endproc
-
-; "D?"
-.export tunix_drivers
-.proc tunix_drivers
-    lda filename+1
-    cmp #'R'
-    beq reg
-    cmp #'A'
-    beq all
-    cmp #'C'
-    beq tunix_commit_io_page
-    cmp #'F'
-    beq tunix_free_io_page
-    jmp respond_error
-
-reg:jmp tunix_register
-all:jmp tunix_alloc_io_page
 .endproc
 
 ; "DFp"

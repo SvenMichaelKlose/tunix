@@ -1296,6 +1296,12 @@ done:
 
     .rodata
 
+items_proc_list:
+    .byte "ID", 0
+    .byte "NLFNS", 0
+    .byte "NBANKS", 0
+    .byte 0
+
 items_proc_info:
     .byte "ID", 0
     .byte "MEMORY", 0
@@ -1316,6 +1322,34 @@ items_proc_info:
     bne :-
     jsr print_cr
 .endmacro
+
+.export proc_list_item
+.proc proc_list_item
+    phx
+    txa
+    jsr printdecbyte
+    jsr print_cr
+    plx
+    rts
+.endproc
+
+; Print process list
+; X: process ID
+.export proc_list
+.proc proc_list
+    pushw zp2
+    stwi zp2, items_proc_list
+    jsr print_head
+    jsr print_cr
+    ldx #0
+    jsr proc_list_item
+    ldx running
+    beq :+
+l:  jsr proc_list_item
+    lloopx procs, l
+:   popw zp2
+    rts
+.endproc
 
 ; Print process info
 ; X: process ID
@@ -2012,6 +2046,8 @@ syscall1 tunix_bfree, bfree, ldx
     beq tunix_stop
     cmp #'R'
     beq tunix_resume
+    cmp #'L'
+    beq tunix_proc_list
     cmp #'I'
     beq tunix_proc_info
     jmp respond_error
@@ -2023,6 +2059,7 @@ syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 syscall1v tunix_proc_info, proc_info, ldx
+syscall0 tunix_proc_list, proc_list
 
 .export tunix_kill
 .proc tunix_kill
@@ -3187,11 +3224,11 @@ response_len:   .res 1
 responsep:      .res 1
 
 .if * >= IOPAGE_BASE * 256
-.error "IO23 overflows IO pages!"
+    .error "IO23 overflows IO pages!"
 .endif
 
 .if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
-.error "IO pages overflow!"
+    .error "IO pages overflow!"
 .endif
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

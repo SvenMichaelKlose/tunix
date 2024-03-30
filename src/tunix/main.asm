@@ -1348,6 +1348,7 @@ items_proc_info:
 l:  jsr proc_list_item
     lloopx procs, l
 :   popw zp2
+    clc
     rts
 .endproc
 
@@ -1695,8 +1696,8 @@ invalid_pid:
 ; X: process ID
 ; Y: signal type (0-255)
 ; A: payload
-.export sig_kill
-.proc sig_kill
+.export signal
+.proc signal
     sty tmp1    ; type
     sta tmp2    ; payload
     lda proc_flags,x
@@ -2820,7 +2821,16 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr tests
 .endif
     print txt_booting
-    jmp init
+    jsr init
+
+    ;; Start user proc.
+    jsr fork
+    cmp #0
+    beq :+
+    ldx #0
+    jsr suspend
+    jmp schedule
+:   rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;

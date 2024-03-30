@@ -163,12 +163,19 @@ community-driven project:
 
 # Using TUNIX
 
+## Plain TUNIX
+
+TUNIX is loaded like any other program.
+After start-up it creates kernel process
+0 and user process 1 in which you will
+end up with the "READY." message.
+
 ## Using The Console
 
-Pressing and releasing the Commodore key
-alone opens the console menu.  Ten slots
-are available and can be selected by
-pressing their number.  'C' creates a
+Pressing and releasing the C= & SHIFT
+key alone opens the console menu.  Ten
+slots are available and can be selected
+by pressing their number.  'C' creates a
 new BASIC instance in a slot.  'M'
 followed by a number moves it to another
 slot and 'X' empties a slot.

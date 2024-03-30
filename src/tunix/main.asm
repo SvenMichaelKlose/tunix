@@ -2330,6 +2330,7 @@ has_errors:
 
 print_free_ram:
     lda banks_ok
+print_free_ram_a:
     jsr printdecbyte_x8
     print txt_banks_free
     rts
@@ -2857,7 +2858,10 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr RAMSPC
     ldayi txt_welcome
     jsr PRTSTR
-    jsr print_free_ram
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
+    jsr print_free_ram_a
     jsr print_cr
     lda #$37
     ldy #$e4

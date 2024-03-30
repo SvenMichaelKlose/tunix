@@ -706,7 +706,7 @@ p:  lda $ff00,x
     ldx cl
     inx
     inc ch
-    bne copy_forwards   ; (jmp)
+    bne copy_forwards ; (jmp)
 
 l:  lda (s),y
     sta (d),y
@@ -2067,7 +2067,7 @@ fi: jmp tunix_free_io_page
     jsr register
     bcs :+
     txa
-    jmp respond ; (jmp)
+    jmp respond
 :   jmp respond_error
 .endproc
 
@@ -2602,6 +2602,8 @@ cmd_proc_info:  .byte "PI", 0
 ;;;;;;;;;;;;;
 ;
 ; Tests running before regular boot.
+
+    .rodata
 
 txt_tests:
     .byte "!!! RUNNING TESTS !!!"

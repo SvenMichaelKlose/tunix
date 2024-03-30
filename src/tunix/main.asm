@@ -63,7 +63,8 @@ SA      = $b9
 DEV     = $ba
 FNADR   = $bb
 
-IOVECTORS   = $031a
+IOVECTORS       = $031a
+IOVECTOR_SIZE   = 30
 
 IDX_OPEN   = 0
 IDX_CLOSE  = 2
@@ -2319,10 +2320,10 @@ vec_io_reloc:
     .word io_size
 vec_backup_kernal:
     .word IOVECTORS, old_kernal_vectors
-    .word 30
+    .word IOVECTOR_SIZE
 vec_tunix_kernal:
     .word tunix_vectors, IOVECTORS
-    .word 30
+    .word IOVECTOR_SIZE
 
     .code
 
@@ -3100,14 +3101,14 @@ iowrap usrcmd, usrcmd2
     .export name
     .proc name
         jsr tunix_enter
-        ldy DEV
-        ldx dev_drv,y
-        jmpa call_driver, #idx
+        ldx DEV
+        ldy dev_drv,x
+        jmpa call_driver, idx
     .endproc
 .endmacro
 
-blkiohandler load, IDX_LOAD
-blkiohandler save, IDX_SAVE
+blkiohandler load, #IDX_LOAD
+blkiohandler save, #IDX_SAVE
 
 io_end:
 

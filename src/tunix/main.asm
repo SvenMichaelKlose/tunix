@@ -52,9 +52,9 @@ blk5        = $9ffe
 
 PETSCII_CLRSCR = 147
 
-FRESTOR = $FD52
-PRTFIX  = $DDCD
+FRESTOR = $fd52
 
+STATUS  = $90
 DFLTN   = $99
 DFLTO   = $9a
 FNLEN   = $b7
@@ -81,6 +81,18 @@ IDX_LOAD   = 22
 IDX_SAVE   = 24
 IDX_BLKIN  = 26
 IDX_BKOUT  = 28
+
+;;; BASIC
+
+TXTTAB     = $2b
+
+RAMSPC     = $c408
+READY      = $c474
+PRTSTR     = $cb1e
+PRTFIX     = $ddcd
+COLDBA     = $e378
+INITBA     = $e3a4
+INITVCTRS  = $e45b
 
 ;;; TUNIX
 
@@ -1909,6 +1921,8 @@ tunix_driver:
 
 .export tunix_open
 .proc tunix_open
+    lda #0
+    sta STATUS
     lda DEV
     sta DFLTN
     lda FNLEN
@@ -2297,7 +2311,8 @@ next_bank:
     lda banks_faulty
     bne has_errors
     print txt_ram_ok
-    jmp done
+    jsr print_free_ram
+    jmp print_cr
 
 uerror:
     inc banks_faulty
@@ -2313,7 +2328,7 @@ has_errors:
     jsr printdecbyte
     print txt_faulty_banks
 
-done:
+print_free_ram:
     lda banks_ok
     jsr printdecbyte_x8
     print txt_banks_free
@@ -2380,7 +2395,7 @@ txt_faulty_banks:
 txt_ram_ok:
     .byte 13, "RAM OK.", 13,0
 txt_banks_free:
-    .byte "K RAM FREE.", 13,0
+    .byte "K RAM FREE.", 0
 
 vec_io_reloc:
     .word io_load, $9800
@@ -2462,6 +2477,7 @@ io_size = io_end - io_start
 
     ;;; Make init process 0.
     print txt_init
+    inc multitasking
     ;; Make holograhic process to fork.
     lda #0
     sta procs
@@ -2827,11 +2843,35 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr fork
     cmp #0
     beq :+
+
+    ;; Suspend TUNIX process.
     ldx #0
     jsr suspend
     jmp schedule
-:   rts
+
+    ;; BASIC cold start.
+:   jsr INITVCTRS
+    jsr INITBA
+    lda TXTTAB
+    ldy TXTTAB+1
+    jsr RAMSPC
+    ldayi txt_welcome
+    jsr PRTSTR
+    jsr print_free_ram
+    jsr print_cr
+    lda #$37
+    ldy #$e4
+    jsr PRTSTR
+    jsr $e412
+    ldx #$f8
+    txs
+    jmp READY
 .endproc
+
+    .rodata
+
+txt_welcome:
+    .byte PETSCII_CLRSCR, "TUNIX - ", 0
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
@@ -2840,6 +2880,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 ; KERNAL I/O handlers with resident
 ; parts in IO23 that bank in BLK1
 ; (this place right here).
+
+    .code
 
 .export call_glfn_driver
 .proc call_glfn_driver
@@ -2978,6 +3020,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .proc schedule
     php
     pha
+    lda multitasking
+    beq r
     phx
     phy
 
@@ -3012,7 +3056,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 
 :   ply
     plx
-    pla
+r:  pla
     plp
     rts
 .endproc
@@ -3218,6 +3262,7 @@ io_end:
 tunix_io23:     .res 1  ; Per-process.
 tunix_blk1:     .res 1  ; Same for all.
 pid:            .res 1
+multitasking:   .res 1
 
 ;; Machine state
 reg_a:          .res 1

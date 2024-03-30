@@ -163,41 +163,41 @@ community-driven project:
 
 # Using TUNIX
 
-TUNIX' user interface allows you to
-switch between consoles you either
-created with a fresh instance of BASIC,
-or cloned with something running, and
-of course to kill or restart a console.
-The menu to do that opens up when
-starting TUNIX or by pressing and
-releasing the Commodore key.
+## Using The Console
 
-## The Console Menu
+Pressing and releasing the Commodore key
+alone opens the console menu.  Ten slots
+are available and can be selected by
+pressing their number.  'C' creates a
+new BASIC instance in a slot.  'M'
+followed by a number moves it to another
+slot and 'X' empties a slot.
 
-The console menu display a list of
-console slots and their ID numbers.
-10 slots are available.
-It is controlled by the keyboard.
-Numbers 0-9 select a console.  RETURN
-sitches to it.  Other commands for
-selected consoles are:
+Each slot also has a memory and device
+configuration.  You may for example
+select the TUNIX 40x24 char terminal, or
+simulate an unexpanded VIC.  Wanted
+drivers must be loaded in one of the
+slots.
 
-* "C": Clone console.
-* "Mi": Move console to slot numner 'i'.
-* "R": Restart BASIC in selected 
-* "X": Remove console from slot.
+# Programming For TUNIX
 
-# Programming for TUNIX
+TUNIX uses KERNAL I/O to provide system
+calls and can be used with any programm-
+ing language that supports it.
 
-TUNIX is hijacking the standard KERNAL
-I/O to run and provide its services.
+Implementing drivers will most likely
+require using assembly language.
+
+## No Standard I/O File Handles
+
 Unlike Unixoids the KERNAL does not
 provide default LFNs for standard I/O.
 Instead, apps reset the current LFN-
 derived device pair to the keyboard and
 screen device using the CLRCN system
-call.  To make up for this, a driver
-allows to connect LFNs to devices, so a
+call.  To make up for this, driver
+LFNDEV connects LFNs to devices, so a
 process' standard I/O can be pipelined.
 
 # CBM & TUNIX KERNAL I/O
@@ -347,7 +347,7 @@ READST system call).
 ## GETIN - Input character from channel
 
 Same as BASIN but returning 0 with the
-keyboard if no input is available.  E
+keyboard if no input is available.
 
 ## BSOUT - output a character to channel
 
@@ -563,11 +563,14 @@ suite and need to include header file
 ### "": Schedule
 
 A filename of length 0.
-Gives TUNIX the opportunity to switch to
-the next process without doing anything
-else.  Like the other system calls it
-may switch unless in single-tasking mode
-(command "SS").
+Does nothing but give TUNIX the
+opportunity to switch to the next
+process without doing anything else.
+Like any of the other system calls it
+may or may not switch unless in
+single-tasking mode (command "SS") or
+the current process has been put to
+sleep.
 
 ~~~BASIC
 OPEN31,31,31,""
@@ -603,9 +606,9 @@ keys:
 
 ### "GM": Multi-task
 
-Enables task-switching via interrupt.
-The default.  Task switches are
-scheduled after all system calls.
+Enables task-switching which is the
+default.  Task switches are scheduled
+before system calls return.
 
 Processes that did not free the screen
 will have that switched in for the time
@@ -618,29 +621,27 @@ sparingly.
 
 ### "GX": Shut down
 
-Closes all files, kills all processes
-and returns to plain BASIC.
+Kills all processes and returns to
+BASIC.
 
 ## Processes
 
 ### "P$": Process list
 
-Returns a comma-separated value list
-(CSV), headed by field names.
-A process returns these fields:
+Returns a list with these fields:
 
-1. ID: Process ID.
-2. PID: Parent rocess ID.
-3. NAME: Pathname if the executable.
-4. FLAGS: (R)running, (S) sleeping,
+*. ID: Process ID.
+*. PID: Parent rocess ID.
+*. NAME: Pathname if the executable.
+*. FLAGS: (R)running, (S) sleeping,
    (Z)ombie
-5. MEM: Allocated memory in bytes.
-6. NDRV: Number of registered drivers.
-7. NIOP: Number of allocated IO pages.
-8. LFNS: Number of logical file numbers.
+*. MEM: Allocated memory in bytes.
+*. NDRV: Number of registered drivers.
+*. NIOP: Number of allocated IO pages.
+*. LFNS: Number of logical file numbers.
 
 Running processes are listed before
-sleeping ones.
+sleeping ones, followed by zombies.
 
 ~~~
 ID,PID,NAME,FLAGS,MEM,NDRV,NIOP,LFNS
@@ -656,13 +657,8 @@ Returns current process ID.
 ### "PI": Process info
 
 Discloses all internal information about
-a process.  Returns a list of double-
-colon-separated key/value pairs, the
-keys being composed of upper case
-letters and digits only.  List values
-are comma-separated.
-
-Currently returned fields:
+a process.  Returns a key/value list
+with these keys:
 
 * "ID": Process ID.
 * "FLAGS": RSZ
@@ -701,8 +697,6 @@ Extended memory banks are inherited but
 not those that were banked in when
 the fork was initiated.
 
-A fork takes 25ms.
-
 ### "PEname and args": Execute
 
 Replaces the current process by an
@@ -726,16 +720,16 @@ its exit code.
 
 ### "PKp[c]": Kill
 
-Kills any process with exit code (de-
-fault is 255 if code is not specified).
-Parents have to call wait() to make the
-process leave the system.
+Kills any process with an optional exit
+code (default is 255 if none is
+specified).  Parents have to call wait()
+to make the process leave the system.
 
 ### "PSp": Suspend
 
 Moves process to the sleeping list so
 that it won't be executed after the
-next task switch.
+next switch.
 
 ### "PRp": Resume
 
@@ -772,37 +766,32 @@ on exit.
 
 ## Drivers
 
-Drivers process KERNAL I/O calls for a
-specific device.  They operate in the
-context of the calling program but in
-their very own address space.  The IO23
-area is used as a hub to cross address
-spaces.
+Processes may register named KERNAL I/O
+tables of drivers.  Drivers process
+KERNAL I/O calls for a device they've
+been assigned to.  A driver may be
+assigned to many devices of different
+processes simultaneously.
 
-Processes may register one or more
-KERNAL I/O vector tables to be used
-with devices.
+When a driver function is called, TUNIX
+only banks in BLK1 of the process that
+registered the driver to make up for the
+low hardware performance.  The context
+of TUNIX is still that of the calling
+process.  The driver must make sure
+that used zeropage locations are
+restored upon return to the caller.
 
-When a driver functions is called, TUNIX
-only banks in BLK1 of the driver process
-to make up for the low performance of
-the hardware.  If the presence of
-zeropage locations or additional banks
-is required, the driver must set missing
-banks and/or restore used zeropage
-locations itself.
-
-TUNIX translates logical file names to
-global logical file numners (GLFNs), so
-they won't collide with those used by
-other processes unless they are shared
-after a fork().
+Also, TUNIX translates logical file
+numbers to global logical file numners
+(GLFNs), so they won't collide with
+those used by other processes unless
+they got shared after a fork.
 An LFN is always translated to the same GLFN until the process exits.
 
 ### "DL": Driver list
 
-Returns a comma-separated value list,
-headed by field names.
+Returns a list with these fields:
 
 TUNIX returns these fields:
 
@@ -819,7 +808,7 @@ Example output:
 ~~~
 ID,PID,NAME,FLAGS,MEM,IOP
 0,0,INIT,S,49152,0
-1,0,CONSOLE,R,49152,0
+1,0,CONSOLE,R,49152,1
 2,1,BASIC,R,49152,0
 ~~~
 
@@ -854,35 +843,31 @@ Frees an IO page.
 ## Signals
 
 Signals are asynchronuous calls of
-other process' functions.  These
+other processes' functions.  These
 functions, called _handlers_,
 can be _registered_ by _signal type_ (a
-byte value) or default TUNIX handlers
-are called instead when a signal is
+byte value) or default handlers are
+called instead when a signal is
 _delivered_.  The exact handler to call
-is determined at the time it is sent to
-allow unregistering a handler, to be
-able to call the default action as a
-fallback.
+is determined at the time it is sent.
 
 Signal type values can be chosen freely
-as long as they are not used by the
-TUNIX system itself.  A byte of payload
-can be sent as well as the source of a
-signal is not tracked to allow post-
-mortem delivery (with the process ID of
-the sender gone).
+as long as they are not used by TUNIX
+itself.  A byte of payload can be sent
+as well as the source of a signal is not
+tracked to allow post-mortem delivery
+(with the process ID of the sender
+gone).
 
 Pending signals are queued so low-level
 interrupt handlers can send them with
 little overhead.  Sending is cancelled
 if a signal of the same type is already
-on the queue.  It is not check if the
-process provides a handler for the
-signal type.  The signal is discarded on
-delivery when the handler is missing.
-This allows to send signals via
-networks.
+on the queue.  It is not checked if the
+target process provides a handler for
+the signal type.  The signal is
+discarded on delivery when the handler
+is missing.
 
 ## System calls
 
@@ -890,8 +875,3 @@ networks.
 
 "SRthh": Register handler
 "SUt": Unregister handler
-
-## Internals
-
-Internally, signals are tracked per
-destination process.

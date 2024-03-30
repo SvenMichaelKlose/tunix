@@ -161,14 +161,29 @@ community-driven project:
   pollination of ideas and techniques.
 
 
-# Using TUNIX
+# Installing TUNIX
 
-## Plain TUNIX
+TUNIX can recover-on-reset.  Whenever a
+process hangs up the system, it can be
+killed by pressing the reset button of
+the UltiMem expansion and TUNIX will
+continue with the other processes.  But
+that functionality requires the TUNIX
+boot loader to be installed on the
+UltiMem, which is highly recommended.
+Already installed boot ROMs can be
+relocated within the first 64K of Flash
+ROM and booted with the SHIFT key
+pressed on reset.
 
-TUNIX is loaded like any other program.
-After start-up it creates kernel process
-0 and user process 1 in which you will
-end up with the "READY." message.
+# Running TUNIX
+
+After starting the TUNIX program it'll
+entertain you with some diagnostic
+messages and boot an instance of BASIC
+with process ID 1.  Now you can run
+load drivers or apps in addition to
+native ones.
 
 ## Using The Console
 
@@ -819,13 +834,17 @@ ID,PID,NAME,FLAGS,MEM,IOP
 2,1,BASIC,R,49152,0
 ~~~
 
-### "DRdvv": Register
+### "DRvvname...": Register
 
-Registers a KERNAL I/O vector table for
-a device.  Global to all processes.  It
+Registers a named KERNAL I/O vector
+table.  Global to all processes.  It
 unregisters when the driver exits.
 
-### "DVd": Get driver of device
+### "DDpdd": Assign driver to device
+
+### "DUpd": Unassign driver
+
+### "DVd": Get vectors of device
 
 Used to overlay vectors by a another
 driver.
@@ -878,7 +897,6 @@ is missing.
 
 ## System calls
 
-"SStp": Signal
-
+"SStp": Send signal
 "SRthh": Register handler
 "SUt": Unregister handler

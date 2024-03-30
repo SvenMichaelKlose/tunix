@@ -1704,6 +1704,8 @@ invalid_pid:
 ;;; SIGNALS ;;;
 ;;;;;;;;;;;;;;;
 
+.ifdef BLEEDING_EDGE
+
 ; Send signal
 ; X: process ID
 ; Y: signal type (0-255)
@@ -1823,6 +1825,8 @@ no_handler_set:
     sec
     rts
 .endproc
+
+.endif ; .ifdef BLEEDING_EDGE
 
 ;;;;;;;;;;;;;;;
 ;;; DRIVERS ;;;
@@ -2674,7 +2678,7 @@ txt_child:
     .byte "CHILD SAYING HELLO!"
     .byte 13, 0
 txt_hyperactive_child:
-    .byte ":)", 0
+    .byte ":):):):):):):):):):):):)", 0
 txt_tests_passed:
     .byte "!!!    SUCCESS:   !!!", 13
     .byte "!!! CHECKS PASSED !!!"
@@ -2784,7 +2788,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     beq :+
     error err_init_pid_not_0
 
-.ifdef BLEEDING_EDGE
     ;; Fork, kill, then wait for child.
 :   jsr lib_fork
     bcc :+
@@ -2803,7 +2806,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     bcc :+
     error err_cannot_wait
 :
-.endif
     print txt_tests_passed
     rts
 .endproc

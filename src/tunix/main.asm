@@ -101,7 +101,7 @@ MAX_IOPAGES  = 4
 
 .export s, sl, sh, d, dl, dh
 .export c, cl, ch
-.export ptr1, ptr3
+.export zp1, zp2
 
 s:
 sl:     .res 1
@@ -113,8 +113,8 @@ c:
 cl:     .res 1
 ch:     .res 1
 
-ptr1:   .res 2
-ptr3:   .res 2
+zp1:   .res 2
+zp2:   .res 2
 
 ;;;;;;;;;;;;;;
 ;;; GLOBAL ;;;
@@ -146,7 +146,7 @@ tmp1:   .res 2
 tmp2:   .res 2
 tmp3:   .res 2
 
-ptr2:   .res 2
+ptr1:   .res 2
 
 ;; Extended memory banks
 banks:          .res MAX_BANKS
@@ -621,9 +621,9 @@ global_size = global_end - global_start
     get_procblk_y proc_data, ram123
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; PROCESS SHADOW RAM123 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;
+;;; SHADOW RAM123 ;;;
+;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_data_x
     push ram123
@@ -753,17 +753,17 @@ m:  inc dh
 .export list_length
 .proc list_length
     stax tmp1
-    pushw ptr1
-    mvw ptr1,tmp1
+    pushw zp1
+    mvw zp1,tmp1
     ldx #0
     cpy #0
     beq empty
 :   inx
-    lda (ptr1),y
+    lda (zp1),y
     tay
     bne :-
 empty:
-    popw ptr1
+    popw zp1
     rts
 .endproc
 
@@ -779,20 +779,20 @@ empty:
     jsr CLRCHN
     phx
 l:  ldy #0
-    lda (ptr3),y
+    lda (zp2),y
     beq r
     jsr BSOUT
-    incw ptr3
+    incw zp2
     jmp l
 r:  plx
     rts
 .endproc
 
 .macro print asciiz
-    pushw ptr3
-    stwi ptr3, asciiz
+    pushw zp2
+    stwi zp2, asciiz
     jsr printstr
-    popw ptr3
+    popw zp2
 .endmacro
 
 .macro error asciiz
@@ -803,15 +803,15 @@ r:  plx
 .export in
 .proc in
     ldy #0
-    lda (ptr3),y
-    incw ptr3
+    lda (zp2),y
+    incw zp2
     rts
 .endproc
 
 .export peek
 .proc peek
     ldy #0
-    lda (ptr3),y
+    lda (zp2),y
     rts
 .endproc
 
@@ -877,14 +877,14 @@ r:  plx
 .export print_chb
 .proc print_chb
     sta tmp1
-    pushw ptr3
+    pushw zp2
     phx
     lda #','
     jsr BSOUT
     lda tmp1
     jsr print_hexbyte
     plx
-    popw ptr3
+    popw zp2
     rts
 .endproc
 
@@ -893,24 +893,24 @@ r:  plx
 .export print_cv
 .proc print_cv
     sta tmp1
-    pushw ptr3
+    pushw zp2
     phx
     lda #','
     jsr BSOUT
     lda tmp1
     jsr printdecbyte
     plx
-    popw ptr3
+    popw zp2
     rts
 .endproc
 
-; Print string at ptr3 and step over the
+; Print string at zp2 and step over the
 ; terminating 0.
 .export print_head
 .proc print_head
     phx
     jsr printstr
-    incw ptr3
+    incw zp2
     plx
     rts
 .endproc
@@ -999,7 +999,7 @@ invalid_bank:
 .proc gen_speedcodes
     print txt_speed_code
     push blk5
-    pushw ptr1
+    pushw zp1
     pushw c
 
     ;; Make copy from BLK3 to BLK5.
@@ -1007,8 +1007,8 @@ invalid_bank:
     sta speedcopy_blk3_to_blk5
     sta blk5
     ; Source/dest argument values.
-    stwi ptr1, $6000
-    stwi ptr2, $a000
+    stwi zp1, $6000
+    stwi ptr1, $a000
     ; Total count (quick countdown).
     stwi c, $2000
     jsr gen_speedcode
@@ -1018,8 +1018,8 @@ invalid_bank:
     jsr balloc
     sta speedcopy_lowmem_to_blk5
     sta blk5
-    stwi ptr1, $0000
-    stwi ptr2, $b000
+    stwi zp1, $0000
+    stwi ptr1, $b000
     stwi c, $0400
     jsr gen_speedcode
     out #OP_RTS
@@ -1028,14 +1028,14 @@ invalid_bank:
     jsr balloc
     sta speedcopy_blk5_to_lowmem
     sta blk5
-    stwi ptr1, $b000
-    stwi ptr2, $0000
+    stwi zp1, $b000
+    stwi ptr1, $0000
     stwi c, $0400
     jsr gen_speedcode
     out #OP_JMP_ABS
 
     popw c
-    popw ptr1
+    popw zp1
     pop blk5
     print txt_newline
     rts
@@ -1053,14 +1053,14 @@ next_bank:
 next_move:
     ;; Make move.
     out #OP_LDA_ABS
-    outw ptr1
+    outw zp1
     out #OP_STA_ABS
-    outw ptr2
+    outw ptr1
 
     ;; Step
     ; Increment argument values.
+    incw zp1
     incw ptr1
-    incw ptr2
     ; Decrement total move count.
     qdecw c
     beq done
@@ -1153,10 +1153,11 @@ vec_io23_to_blk5:
     .code
 
 ; Fork banks and save stack.
-; The child will never see this code
-; starts as if it was returning from
-; this function after schedule() called
-; switch().
+;
+; The child will never see this code as
+; if it was returning from this function
+; after schedule() called switch().
+;
 ; Y: child process ID
 ; Returns Y unaffected.
 .export fork_raw
@@ -1286,11 +1287,11 @@ done:
 ;;;;;;;;;;;;;;;;;
 ;
 ; Low 1K, screen, color and VIC are
-; on the same bank as the IO23 area
+; on the same bank as the IO23 area,
 ; which is reserved for TUNIX and
-; driver code.  A shadow RAM123, only
-; banked in for TUNIX, holds additional
-; per-process data.
+; drivers.  A shadow RAM123, only banked
+; in for TUNIX, holds additional per-
+; process data.
 
     .rodata
 
@@ -1303,6 +1304,7 @@ items_proc_info:
 
     .code
 
+; Print list indexes as CSV line.
 .macro print_csv list, first
     ldx first
     beq :++
@@ -1323,8 +1325,8 @@ items_proc_info:
     jmp no_proc
 
 :   stx tmp2
-    pushw ptr3
-    stwi ptr3, items_proc_info
+    pushw zp2
+    stwi zp2, items_proc_info
 
     jsr print_head
     lda tmp2
@@ -1359,7 +1361,7 @@ items_proc_info:
     jsr print_cv
     jsr print_cr
 
-    popw ptr3
+    popw zp2
     clc
     rts
 no_proc:
@@ -1479,7 +1481,8 @@ not_to_resume:
     rts
 .endproc
 
-; Force exit.
+; Free all resources of a process and
+; turn it into a zombie.
 ; X: Process ID.
 .export zombify
 .proc zombify
@@ -1595,6 +1598,7 @@ invalid_pid:
     rts
 .endproc
 
+; Stop process from waiting.
 ; X: Zombie process ID.
 ; Y: Slot in zombie's waiting list.
 .export end_wait
@@ -1603,11 +1607,14 @@ invalid_pid:
     rm_waiting_y
     ldy first_wait
     beq reap_zombie
+
+    ; Resume next waiting.
     phx
     tya
     tax
     jsr resume
     plx
+
 return_code:
     leave_tunix
     lda exit_codes,x
@@ -1621,24 +1628,28 @@ reap_zombie:
     beq return_code ; (jmp)
 .endproc
 
-; Kill process with exit code -1
-; X: Process ID
-.export kill
-.proc kill
-    lda #255
-    sta exit_codes,x
-    jsr zombify
-    jmp resume_waiting
-.endproc
-
 ; Exit current process
 ; A: Exit code
 .export exit
 .proc exit
     ldx pid
+.endproc
+
+; Kill process with exit code in A.
+; X: Process ID
+; A: Exit code
+.export kill
+.proc kill
     sta exit_codes,x
+    lda proc_flags,x
+    beq invalid_pid
     jsr zombify
-    jmp resume_waiting
+    jsr resume_waiting
+    clc
+    rts
+invalid_pid:
+    sec
+    rts
 .endproc
 
 ;;;;;;;;;;;;;;;
@@ -1771,7 +1782,7 @@ no_handler_set:
 ; X:  driver ID or 0.
 .export register
 .proc register
-    stax ptr1
+    stax zp1
 
     ;; Get slot.
     lpopx drvs, drvs
@@ -1782,9 +1793,9 @@ no_handler_set:
     sta drv_pid,x
     tya
     sta drv_dev,x
-    lda ptr1
+    lda zp1
     sta drv_vl,x
-    lda ptr1+1
+    lda zp1+1
     sta drv_vh,x
 
     ;; Assign to device.
@@ -1887,7 +1898,7 @@ tunix_driver:
     beq tunix_procs
     cmp #'D'
     beq d
-    bne respond_error ; (jmp)
+    jmp respond_error
 d:  jmp tunix_drivers
 s:  jmp schedule
 .endproc
@@ -1920,12 +1931,24 @@ s:  jmp schedule
 
 syscall1 tunix_bfree, bfree, ldx
 syscall0 tunix_fork, fork
-syscall1 tunix_kill, kill, ldx
+;syscall1 tunix_kill, kill, ldx
 syscall1 tunix_wait, wait, ldx
 syscall1 tunix_stop, stop, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 syscall1v tunix_proc_info, proc_info, ldx
+.export tunix_kill
+.proc tunix_kill
+    ldx filename+2
+    ldy FNLEN
+    lda #255
+    cpy #4
+    bne :+
+    lda filename+3
+:   jsr kill
+    bcs respond_error
+    bcc respond_ok  ; (jmp)
+.endproc
 
 .export respond_error
 .proc respond_error
@@ -2134,21 +2157,21 @@ col:            .res 1
 has_ultimem:
     mvb bnk, #FIRST_BANK
 start_bank_write:
-    stwi ptr1, $a000
+    stwi zp1, $a000
     mvb blk5, bnk
 
 write_byte:
     ldy #0
     lda bnk
-    sta (ptr1),y
+    sta (zp1),y
     iny
     lda bnk
-    sta (ptr1),y
-    inc ptr1
-    inc ptr1
+    sta (zp1),y
+    inc zp1
+    inc zp1
     bne write_byte
-    inc ptr1+1
-    lda ptr1+1
+    inc zp1+1
+    lda zp1+1
     cmp #$a1    ; Just one page.
     bne write_byte
     ; Next bank
@@ -2165,24 +2188,24 @@ write_byte:
     mvb bnk, #FIRST_BANK
 
 start_bank_read:
-    stwi ptr1, $a000
+    stwi zp1, $a000
     mvb blk5, bnk
 
 read_byte:
     ldy #0
     lda bnk
-    cmp (ptr1),y
+    cmp (zp1),y
     bne uerror  ; Eek!
     iny
     lda bnk
-    cmp (ptr1),y
+    cmp (zp1),y
     bne uerror  ; Eek!
 
-    inc ptr1
-    inc ptr1
+    inc zp1
+    inc zp1
     bne read_byte
-    inc ptr1+1
-    lda ptr1+1
+    inc zp1+1
+    lda zp1+1
     cmp #$a1    ; Just one page.
     bne read_byte
 
@@ -2671,8 +2694,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .ifdef BLEEDING_EDGE
     ;; Fork, kill, then wait for child.
-:
-    jsr lib_fork
+:   jsr lib_fork
     bcc :+
     error err_cannot_fork
 :   cmp #0

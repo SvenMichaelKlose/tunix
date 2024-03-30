@@ -551,7 +551,8 @@ ID,PID,NAME
 ## Code Examples
 
 Lower case letters in system call file-
-name examples are byte values.
+name examples are byte values.  Letters
+in brackets are optional.
 
 C examples are for the cc65 compiler
 suite and need to include header file
@@ -723,9 +724,10 @@ is empty (see wait()).
 Waits for a process to exit and returns
 its exit code.
 
-### "PKp": Kill
+### "PKp[c]": Kill
 
-Exits any process with exit code 255.
+Kills any process with exit code (de-
+fault is 255 if code is not specified).
 Parents have to call wait() to make the
 process leave the system.
 

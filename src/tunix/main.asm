@@ -14,7 +14,7 @@
 
 __VIC20__       = 1
 EARLY_TESTS     = 1
-BLEEDING_EDGE   = 0
+;BLEEDING_EDGE   = 1
 
 ;;; CPU
 
@@ -1713,7 +1713,7 @@ invalid_pid:
 ;;; SIGNALS ;;;
 ;;;;;;;;;;;;;;;
 
-.if BLEEDING_EDGE
+.ifdef BLEEDING_EDGE
 
 ; Send signal
 ; X: process ID
@@ -2436,8 +2436,8 @@ vec_tunix_kernal:
 
 io_size = io_end - io_start
 
-.export init
-.proc init
+.export boot
+.proc boot
     jsr FRESTOR
     jsr init_ultimem_banks
 
@@ -2501,7 +2501,7 @@ io_size = io_end - io_start
     jsr init_ultimem_banks
 
     ;;; Make init process 0.
-    print txt_init
+    print txt_starting_multitasking
     inc multitasking
     ;; Make holograhic process to fork.
     lda #0
@@ -2539,6 +2539,8 @@ io_size = io_end - io_start
     lda #PROC_RUNNING
     sta proc_flags
 
+    print txt_registering
+
     ;;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
     smemcpyax vec_tunix_kernal ; Replace
@@ -2561,12 +2563,16 @@ tunix_vectors:
 .word usrcmd, load, save, blkin, bkout
 
 txt_tunix:
-  .byte PETSCII_CLRSCR
-  .byte "STARTING.", 13, 0
-txt_init:
-  .byte "STARTING INIT.", 13, 0
+  ;.byte PETSCII_CLRSCR
+  .byte "STARTING TUNIX.", 13, 0
 txt_booting:
   .byte 13, "BOOTING.", 13, 0
+txt_starting_multitasking:
+  .byte "STARTING MULTITASKING.", 13, 0
+txt_registering:
+  .byte "STARTING SYSCALLS.", 13, 0
+txt_init:
+  .byte "STARTING INIT.", 13, 0
 
 .ifdef EARLY_TESTS
 
@@ -2691,7 +2697,6 @@ txt_tests:
 txt_testing_data:
   .byte "!!! TESTING DATA !!!", 13, 0
 txt_testing_processes:
-  .byte 13
   .byte "!!! TESTING PROCS !!!", 13, 0
 txt_child:
   .byte "CHILD SAYING HELLO!", 13, 0
@@ -2753,7 +2758,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export tests
 .proc tests
     print txt_testing_data
-    jsr init
+    jsr boot
 
     ;;;;;;;;;;;;;;;;;;;;;;
     ;;; LISTS & DEQUES ;;;
@@ -2798,8 +2803,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; Syscalls ;;;
     ;;;;;;;;;;;;;;;;
 
-:   print txt_testing_processes
-    jsr init
+:   jsr boot
+    print txt_testing_processes
 
     ;; Fork and wait for child to exit.
     print note_forking
@@ -2869,6 +2874,12 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
 .endif
 
+    .rodata
+
+err_out_of_running_procs:
+  .byte "OUT OF RUNNING PROCS. HALTING."
+  .byte 13, 0
+
     .code
 
 .export halt
@@ -2879,14 +2890,16 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export start
 .proc start
     print txt_tunix
+
 .ifdef EARLY_TESTS
     print txt_tests
     jsr tests
 .endif
-    print txt_booting
-    jsr init
 
-    ;; Start user proc.
+    print txt_booting
+    jsr boot
+
+    print txt_init
     jsr fork
     cmp #0
     beq :+
@@ -2894,7 +2907,12 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;; Suspend TUNIX process.
     ldx #0
     jsr suspend
-    jmp schedule
+    jsr schedule
+    lda #0
+    sta multitasking
+    print err_out_of_running_procs
+idle:
+    jmp idle
 
     ;; BASIC cold start.
 :   jsr INITVCTRS
@@ -2902,6 +2920,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     lda TXTTAB
     ldy TXTTAB+1
     jsr RAMSPC
+
     ldayi txt_welcome
     jsr PRTSTR
     ldaxi banks
@@ -2920,7 +2939,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     .rodata
 
 txt_welcome:
-  .byte PETSCII_CLRSCR, "TUNIX - ", 0
+  .byte 13 ; PETSCII_CLRSCR
+  .byte "TUNIX - ", 0
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
@@ -3359,7 +3379,7 @@ lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
 lfn_glfn:       .res MAX_LFNS
 
-.if BLEEDING_EDGE
+.ifdef BLEEDING_EDGEDE
 
 .export signals, signalsb, signal_type
 .export signal_payload

@@ -659,20 +659,20 @@ keys:
 5. "NIOPAGES": Number of IO pages.
 6. "UIOPAGES": Number of used IO pages.
 
-### "GM": Multi-task
+### "GM": Set Mode (task-switching).
 
-Enables task-switching which is the
-default.  Task switches are scheduled
-before system calls return.
+Enables or disables task-switching for
+the current process.  It is disabled if
+the seconday address of the system call
+is 0.  That shoud be done sparingly in
+a multi-tasking environment.
+Switches are scheduled before system
+calls return and are highly
+unpredictable.
 
 Processes that did not free the screen
 will have that switched in for the time
 they are running.
-
-### "GS": Single-task
-
-Disables task-switching.  Should be used
-sparingly.
 
 ### "GX": Shut down
 

@@ -2012,7 +2012,16 @@ g:  jmp tunix_general
 ; "G?"
 .export tunix_general
 .proc tunix_general
-    sec
+    lda filename+1
+    cmp #'M'
+    beq tunix_mode
+    jmp respond_error
+.endproc
+
+.export tunix_mode
+.proc tunix_mode
+    mvb multitasking, SA
+    clc
     rts
 .endproc
 

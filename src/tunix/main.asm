@@ -1898,7 +1898,7 @@ tunix_driver:
 .macro syscall1v name, fun, load
     .export name
     .proc name
-        load filename+2
+        load SA
         jmp fun
     .endproc
 .endmacro
@@ -1908,7 +1908,7 @@ tunix_driver:
 .macro syscall1 name, fun, load
     .export name
     .proc name
-        load filename+2
+        load SA
         jsr fun
         bcs :+
         jmp respond_ok
@@ -2091,12 +2091,12 @@ syscall0 tunix_proc_list, proc_list
 
 .export tunix_kill
 .proc tunix_kill
-    ldx filename+2
+    ldx SA
     ldy FNLEN
     lda #255
     cpy #4
     bne :+
-    lda filename+3
+    lda filename+2
 :   jsr kill
     bcs :+
     jmp respond_ok
@@ -2126,9 +2126,9 @@ fi: jmp tunix_free_io_page
 ; "DR"
 .export tunix_register
 .proc tunix_register
-    ldy filename+2
-    lda filename+3
-    ldx filename+4
+    ldy SA
+    lda filename+2
+    ldx filename+3
     jsr register
     bcs :+
     txa
@@ -2167,7 +2167,7 @@ l:  cpy pid
     phy
     push blk5
     io23x_at_blk5
-    lda filename+2
+    lda SA
     clc
     adc #IOPAGE_BASE
     sta sh
@@ -2194,7 +2194,7 @@ next:
 ; "DFp"
 .export tunix_free_io_page
 .proc tunix_free_io_page
-    lda filename+2
+    lda SA
     sec
     sbc #IOPAGE_BASE
     tax
@@ -2566,11 +2566,11 @@ txt_booting:
     .rodata
 
 cmd_fork:   .byte "PF"
-cmd_exit:   .byte "PE", 0
-cmd_kill:   .byte "PK", 0
-cmd_wait:   .byte "PW", 0
+cmd_exit:   .byte "PE"
+cmd_kill:   .byte "PK"
+cmd_wait:   .byte "PW"
 cmd_getpid: .byte "P"
-cmd_proc_info:  .byte "PI", 0
+cmd_proc_info:  .byte "PI"
 
     .code
 
@@ -2610,8 +2610,10 @@ cmd_proc_info:  .byte "PI", 0
     jmp OPEN
 .endproc
 
+; A: Exit code.
 .export lib_exit
 .proc lib_exit
+    tay
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
@@ -2625,7 +2627,7 @@ cmd_proc_info:  .byte "PI", 0
 ; A: process ID
 .export lib_kill
 .proc lib_kill
-    sta cmd_kill+2
+    tay
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
@@ -2639,7 +2641,7 @@ cmd_proc_info:  .byte "PI", 0
 ; A: process ID
 .export lib_wait
 .proc lib_wait
-    sta cmd_wait + 2
+    tay
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
@@ -2654,7 +2656,7 @@ cmd_proc_info:  .byte "PI", 0
 ; A: process ID
 .export lib_proc_info
 .proc lib_proc_info
-    sta cmd_proc_info + 2
+    tay
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS

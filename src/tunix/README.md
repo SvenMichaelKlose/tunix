@@ -178,14 +178,17 @@ TUNIX can recover-on-reset.  Whenever a
 process hangs up the system, it can be
 killed by pressing the reset button of
 the UltiMem expansion and TUNIX will
-continue with the other processes.  But
-that functionality requires the TUNIX
-boot loader to be installed on the
-UltiMem, which is highly recommended.
-Already installed boot ROMs can be
-relocated within the first 64K of Flash
-ROM and booted with the SHIFT key
-pressed on reset.
+continue with the other processes.
+It requires the TUNIX boot loader to be
+installed on the UltiMem ROM, which is
+highly recommended to regular users.
+
+An already installed boot ROMs can be
+relocated within the first 64K of the
+UltiMem Flash ROM and booted instead of
+TUNIX by pressing the SHIFT key during
+reset.  It can also be launched from
+within TUNIX.
 
 # Running TUNIX
 
@@ -521,6 +524,8 @@ a file on device #31.  The first
 character of the filename denotes the
 command group, the second the command in
 that group.  Argument bytes may follow.
+First arguments are passed as the
+secondary address to SETLFS.
 
 After sending a system call via OPEN,
 an error code may be read using BASIN.
@@ -544,7 +549,7 @@ Most system calls return an error code:
 
 ~~~C
 // Put process 1 to sleep.
-open (31, 31, 0, "PS\x01");
+open (31, 31, 1, "PS");
 err = basin ();
 if (err)
     printf ("Process 1 already asleep.");
@@ -711,9 +716,11 @@ Returns current process ID.
 
 ### "PI": Process info
 
+Secondary address: process ID.
+
 Discloses all internal information about
-a process.  Returns a key/value list
-with these keys:
+the process specified in the SA.
+Returns a key/value list with these keys:
 
 * "ID": Process ID.
 * "FLAGS": RSZ
@@ -732,7 +739,9 @@ with these keys:
 * "DEVICES": Device drivers.
 * "SIGNALS": Signals to receive.
 
-### "PNp<new name>": Process name
+### "PNname": Process name
+
+The secondary address is the process ID.
 
 Sets the name of process 'p' (zero-
 terminated string) if it follows the
@@ -759,7 +768,9 @@ executable in TUNIX format.  But fear
 not:  'runprg' and 'basic' will also
 launch native programs.
 
-### "PXc": Exit
+### "PX": Exit
+
+Secondary address: exit code.
 
 Exits the current process with an exit
 code.  All resources are freed but it
@@ -768,25 +779,33 @@ parent exits or returns from a wait()
 for the exit code and its waiting list
 is empty (see wait()).
 
-### "PWp": Wait
+### "PW": Wait
+
+Secondary address: process ID.
 
 Waits for a process to exit and returns
 its exit code.
 
-### "PKp[c]": Kill
+### "PK[c]": Kill
+
+Secondary address: process ID.
 
 Kills any process with an optional exit
 code (default is 255 if none is
 specified).  Parents have to call wait()
 to make the process leave the system.
 
-### "PSp": Suspend
+### "PS": Suspend
+
+Secondary address: process ID.
 
 Moves process to the sleeping list so
 that it won't be executed after the
 next switch.
 
-### "PRp": Resume
+### "PR": Resume
+
+Secondary address: process ID.
 
 Moves a process to the running list.  It
 will run again then the running list is
@@ -807,11 +826,13 @@ anywhere except in the IO23 area.
 
 ## "MA": Allocate a bank
 
-Allocates a bank and returns its number.
+Allocates a bank and returns its ID.
 Returns with an error when out of
 memory.
 
-## "MFb": Free a bank
+## "MF": Free a bank
+
+Secondary address: bank ID.
 
 Frees a bank.  All processes sharing it
 need to free it before it can be
@@ -869,15 +890,23 @@ ID,PID,NAME,FLAGS,MEM,IOP
 
 ### "DRvvname...": Register
 
+The secondary address is unused.
+
 Registers a named KERNAL I/O vector
 table.  Global to all processes.  It
 unregisters when the driver exits.
 
-### "DDpdd": Assign driver to device
+### "DD<dev><drv>": Assign driver to device
 
-### "DUpd": Unassign driver
+Secondary address: process ID.
+
+### "DUd": Unassign driver
+
+Secondary address: process ID.
 
 ### "DVd": Get vectors of device
+
+Secondary address: device number.
 
 Used to overlay vectors by a another
 driver.
@@ -890,14 +919,17 @@ Used to run interrupt handlers.
 Needs to be commited (to be portable)
 before use.
 
-### "DCp": Commit IO page
+### "DC": Commit IO page
+
+Secondary address: IO page.
 
 Copies the page from the current pro-
 cess to all others.
 
-### "DFp": Free IO page
+### "DF": Free IO page
 
-Frees an IO page.
+Frees the IO page specified by the
+secondary address.
 
 ## Signals
 
@@ -928,8 +960,16 @@ the signal type.  The signal is
 discarded on delivery when the handler
 is missing.
 
-## System calls
+## System Calls
 
-"SStp": Send signal
-"SRthh": Register handler
-"SUt": Unregister handler
+### "SSp": Send signal to process
+
+Secondary address: signal type.
+
+### "SRhh": Register handler
+
+Secondary address: signal type.
+
+### "SU": Unregister handler
+
+Secondary address: signal type.

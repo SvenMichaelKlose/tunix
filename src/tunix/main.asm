@@ -14,7 +14,7 @@
 
 __VIC20__       = 1
 EARLY_TESTS     = 1
-BLEEDING_EDGE   = 1
+BLEEDING_EDGE   = 0
 
 ;;; CPU
 
@@ -1111,9 +1111,9 @@ done:
     .rodata
 
 txt_speed_code:
-    .byte "MAKING SPEED CODE.", 0
+  .byte "MAKING SPEED CODE.", 0
 txt_newline:
-    .byte 13, 0
+  .byte 13, 0
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; MACHDEP VIC-20 :::
@@ -1125,18 +1125,18 @@ txt_newline:
     .rodata
 
 vec_vic_to_blk5:
-    .word $9000, saved_vic+$2000, $0010
+  .word $9000, saved_vic+$2000, $0010
 vec_screen_to_blk5:
-    .word $1000, $a000, $1000
+  .word $1000, $a000, $1000
 vec_color_to_blk5:
-    .word $9400, $b400, $0400
+  .word $9400, $b400, $0400
 
 vec_blk5_to_screen:
-    .word $a000, $1000, $1000
+  .word $a000, $1000, $1000
 vec_blk5_to_color:
-    .word $b400, $9400, $0400
+  .word $b400, $9400, $0400
 vec_blk5_to_vic:
-    .word saved_vic+$2000, $9000, $0010
+  .word saved_vic+$2000, $9000, $0010
 
     .code
 
@@ -1161,7 +1161,7 @@ vec_blk5_to_vic:
     .rodata
 
 vec_io23_to_blk5:
-    .word $9800, $b800, $07f0
+  .word $9800, $b800, $07f0
 
     .code
 
@@ -1309,17 +1309,17 @@ done:
     .rodata
 
 items_proc_list:
-    .byte "ID", 0
-    .byte "NLFNS", 0
-    .byte "NBANKS", 0
-    .byte 0
+  .byte "ID", 0
+  .byte "NLFNS", 0
+  .byte "NBANKS", 0
+  .byte 0
 
 items_proc_info:
-    .byte "ID", 0
-    .byte "MEMORY", 0
-    .byte "LFNS", 0
-    .byte "NBANKS", 0
-    .byte 0
+  .byte "ID", 0
+  .byte "MEMORY", 0
+  .byte "LFNS", 0
+  .byte "NBANKS", 0
+  .byte 0
 
     .code
 
@@ -1470,7 +1470,6 @@ no_proc:
 :   leave_data
 
     ;; Mark child as running.
-child_init:
     lda #PROC_RUNNING
     sta proc_flags,y
     tya
@@ -1602,7 +1601,9 @@ put_on_zombie_list:
     ldy first_wait
     beq done
     ldx waiting_pid,y
+    leave_tunix
     jsr resume
+    jmp schedule
 done:
     leave_tunix
     jmp schedule
@@ -1628,15 +1629,18 @@ done:
 
 check_if_zombie:
     lda proc_flags,x
+    beq guru_meditation
     cmp #PROC_ZOMBIE
     beq end_wait
 
     ; Take a nap.
     phx
     phy
+    push blk1
     ldx pid
     jsr suspend
     jsr schedule
+    pop blk1
     ply
     plx
     jmp check_if_zombie
@@ -1644,6 +1648,11 @@ check_if_zombie:
 invalid_pid:
     sec
     rts
+.endproc
+
+.export guru_meditation
+.proc guru_meditation
+    jmp guru_meditation
 .endproc
 
 ; Stop process from waiting.
@@ -1704,7 +1713,7 @@ invalid_pid:
 ;;; SIGNALS ;;;
 ;;;;;;;;;;;;;;;
 
-.ifdef BLEEDING_EDGE
+.if BLEEDING_EDGE
 
 ; Send signal
 ; X: process ID
@@ -1746,7 +1755,9 @@ out_of_slots:
     phx
     jsr resume
     plx
+    push blk1
     jsr schedule
+    pop blk1
     jmp retry
 
 invalid_pid:
@@ -1826,7 +1837,7 @@ no_handler_set:
     rts
 .endproc
 
-.endif ; .ifdef BLEEDING_EDGE
+.endif ; .if BLEEDING_EDGE
 
 ;;;;;;;;;;;;;;;
 ;;; DRIVERS ;;;
@@ -1873,11 +1884,11 @@ no_handler_set:
 
 .export tunix_driver
 tunix_driver:
-    .word tunix_open, tunix, tunix
-    .word tunix, tunix, tunix_basin
-    .word tunix, tunix, tunix, tunix
-    .word tunix, tunix, tunix, tunix
-    .word tunix
+  .word tunix_open, tunix, tunix
+  .word tunix, tunix, tunix_basin
+  .word tunix, tunix, tunix, tunix
+  .word tunix, tunix, tunix, tunix
+  .word tunix
 
     .code
 
@@ -2402,24 +2413,24 @@ r:  rts
     .rodata
 
 txt_no_ultimem:
-    .byte "NO ULTIMEM/VIC-MIDIFOUND."
-    .byte 13, 0
+  .byte "NO ULTIMEM/VIC-MIDIFOUND."
+  .byte 13, 0
 txt_faulty_banks:
-    .byte " FAULTY BANKS.", 13,0
+  .byte " FAULTY BANKS.", 13,0
 txt_ram_ok:
-    .byte 13, "RAM OK.", 13,0
+  .byte 13, "RAM OK.", 13,0
 txt_banks_free:
-    .byte "K RAM FREE.", 0
+  .byte "K RAM FREE.", 0
 
 vec_io_reloc:
-    .word io_load, $9800
-    .word io_size
+  .word io_load, $9800
+  .word io_size
 vec_backup_kernal:
-    .word IOVECTORS, old_kernal_vectors
-    .word IOVECTOR_SIZE
+  .word IOVECTORS, old_kernal_vectors
+  .word IOVECTOR_SIZE
 vec_tunix_kernal:
-    .word tunix_vectors, IOVECTORS
-    .word IOVECTOR_SIZE
+  .word tunix_vectors, IOVECTORS
+  .word IOVECTOR_SIZE
 
     .code
 
@@ -2550,12 +2561,12 @@ tunix_vectors:
 .word usrcmd, load, save, blkin, bkout
 
 txt_tunix:
-    .byte PETSCII_CLRSCR
-    .byte "STARTING.", 13, 0
+  .byte PETSCII_CLRSCR
+  .byte "STARTING.", 13, 0
 txt_init:
-    .byte "STARTING INIT.", 13, 0
+  .byte "STARTING INIT.", 13, 0
 txt_booting:
-    .byte 13, "BOOTING.", 13, 0
+  .byte 13, "BOOTING.", 13, 0
 
 .ifdef EARLY_TESTS
 
@@ -2676,50 +2687,62 @@ cmd_proc_info:  .byte "PI"
     .rodata
 
 txt_tests:
-    .byte "!!! RUNNING TESTS !!!"
-    .byte 13, 0
+  .byte "!!! RUNNING TESTS !!!", 13, 0
 txt_testing_data:
-    .byte "!!! TESTING DATA !!!"
-    .byte 13, 0
+  .byte "!!! TESTING DATA !!!", 13, 0
 txt_testing_processes:
-    .byte 13
-    .byte "!!! TESTING PROCS !!!"
-    .byte 13, 0
+  .byte 13
+  .byte "!!! TESTING PROCS !!!", 13, 0
 txt_child:
-    .byte "CHILD SAYING HELLO!"
-    .byte 13, 0
+  .byte "CHILD SAYING HELLO!", 13, 0
 txt_hyperactive_child:
-    .byte ":):):):):):):):):):):):)", 0
+  .byte ":):):):):):):):):):):):)", 0
 txt_tests_passed:
-    .byte "!!!    SUCCESS:   !!!", 13
-    .byte "!!! CHECKS PASSED !!!"
-    .byte 13, 0
+  .byte "!!!    SUCCESS:   !!!", 13
+  .byte "!!! CHECKS PASSED !!!", 13, 0
+
+note_forking:
+  .byte "FORKING.", 13, 0
+note_running_baby:
+  .byte "RUNNING BABY.", 13, 0
+note_waiting_for_child:
+  .byte "WAITING FOR CHILD.", 13, 0
+note_child_exited:
+  .byte "CHILD EXITED.", 13, 0
+note_getting_pid:
+  .byte "GETTING PID.", 13, 0
+note_forking_hyperactive:
+  .byte "FORKING HYPERACTIVE CHILD."
+  .byte 13, 0
+note_killing_hyperactive:
+  .byte "KILLING HYPERACTIVE.", 13, 0
+note_waiting_for_hyperactive:
+  .byte "WAITING FOR HYPERACTIVE TO EXIT.", 13, 0
 
 err_free_banks_after_init:
-    .byte "WRONG TOTAL # OF FREE BANKS."
-    .byte 0
+  .byte "WRONG TOTAL # OF FREE BANKS."  
+  .byte 0
 err_free_banks_after_free:
-    .byte "WRONG # OF BANKS AFTER "
-    .byte "FREEING ONE AGAIN.", 0
+  .byte "WRONG # OF BANKS AFTER "
+  .byte "FREEING ONE AGAIN.", 0
 err_wrong_glfn_order:
-    .byte "WRONG GLFN ORDER.", 0
+  .byte "WRONG GLFN ORDER.", 0
 err_wrong_deque_index:
-    .byte "UNEXPECTED DEQUE INDEX OF "
-    .byte "FIRST ALLOCATED ONE.", 0
+  .byte "UNEXPECTED DEQUE INDEX OF "
+  .byte "FIRST ALLOCATED ONE.", 0
 err_wrong_free_proc_count:
-    .byte "WRONG # OF FREE PROCS.", 0
+  .byte "WRONG # OF FREE PROCS.", 0
 err_cannot_fork:
-    .byte "CANNOT FORK.", 0
+  .byte "CANNOT FORK.", 0
 err_child_running_after_exit:
-    .byte "CHILD STILL RUNNING AFTER "
-    .byte "EXIT.", 0
+  .byte "CHILD STILL RUNNING AFTER "
+  .byte "EXIT.", 0
 err_init_pid_not_0:
-    .byte "INIT PID NOT 0 AFTER FORK."
-    .byte 0
+  .byte "INIT PID NOT 0 AFTER FORK.", 0
 err_cannot_kill:
-    .byte "CANNOT KILL.", 0
+  .byte "CANNOT KILL.", 0
 err_cannot_wait:
-    .byte "CANNOT WAIT.", 0
+  .byte "CANNOT WAIT.", 0
 
     .code
 
@@ -2779,10 +2802,14 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr init
 
     ;; Fork and wait for child to exit.
+    print note_forking
     jsr lib_fork
     bcc :+
     error err_cannot_fork
-:   cmp #0
+:   pha
+    print note_running_baby
+    pla
+    cmp #0
     bne :+
     jmp baby
 :   lda #0
@@ -2790,29 +2817,35 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     lda #1
     jsr lib_proc_info
     ; Wait for child to exit.
+    print note_waiting_for_child
     lda #1
     jsr lib_wait
+    print note_child_exited
 
     ;; Check our process ID.
+    print note_getting_pid
     jsr lib_getpid
     cmp #0
     beq :+
     error err_init_pid_not_0
 
     ;; Fork, kill, then wait for child.
-:   jsr lib_fork
+:   print note_forking_hyperactive
+    jsr lib_fork
     bcc :+
     error err_cannot_fork
 :   cmp #0
     bne :+
     jmp hyperactive_child
     ; Kill child.
-:   lda #1
+:   print note_killing_hyperactive
+    lda #1
     jsr lib_kill
     bcc :+
     error err_cannot_kill
     ; Wait for child
-:   lda #1
+:   print note_waiting_for_hyperactive
+    lda #1
     jsr lib_wait
     bcc :+
     error err_cannot_wait
@@ -2876,8 +2909,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     txa
     jsr print_free_ram_a
     jsr print_cr
-    lda #$37
-    ldy #$e4
+    ldayi $e437
     jsr PRTSTR
     jsr $e412
     ldx #$f8
@@ -2888,7 +2920,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     .rodata
 
 txt_welcome:
-    .byte PETSCII_CLRSCR, "TUNIX - ", 0
+  .byte PETSCII_CLRSCR, "TUNIX - ", 0
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
@@ -2926,9 +2958,12 @@ h:  lda $ffff
     sta call_driver3+2
 
     ;; Bank in driver BLK1.
+    ldx pid
+    cpy #0
+    beq :+
     ldx drv_pid,y
-    lda proc_blk1,x
-    jmp call_driver2
+:   lda proc_blk1,x
+    jmp call_driver1
 .endproc
 
 .export open2
@@ -2941,10 +2976,10 @@ h:  lda $ffff
     lda dev_drv,y
     tay
     jsra call_driver, #IDX_OPEN
-    sta reg_a
     pop LFN
     popw FNADR
-    jmp tunix_leave
+    lda reg_a
+    rts ;jmp tunix_leave
 .endproc
 
 .export chkin2
@@ -3133,26 +3168,38 @@ io_load:
     .org $9800  ; IO23
 io_start:
 
+.export call_driver1
+.proc call_driver1
+    sta blk1
+.endproc
+
 .export call_driver2
 .proc call_driver2
-    sta blk1
     load_regs
 .endproc
 
 .export call_driver3
 .proc call_driver3
     jsr $fffe
-
-    ; Restore banks.
+    save_regs
     php
-    pha
-    phx
-    ldx pid
-    get_procblk_x proc_blk1, blk1
-    plx
     pla
+    sta flags
+.endproc
+
+; Restore banks on BLK1 & RAM123.
+.export tunix_leave
+.proc tunix_leave
+    ldx pid
+    lda proc_blk1,x
+    sta blk1
+    lda proc_ram123,x
+    sta ram123
+    lda flags
+    pha
+    load_regs
     plp
-    rts
+    jmp schedule
 .endproc
 
 ; Map in rest of TUNIX.
@@ -3162,6 +3209,10 @@ io_start:
 .export tunix_enter
 .proc tunix_enter
     save_regs
+.endproc
+
+.export tunix_enter2
+.proc tunix_enter2
     ldx pid
     lda blk1
     tay
@@ -3175,26 +3226,10 @@ io_start:
     rts
 .endproc
 
-; Restore banks on BLK1 & RAM123.
-.export tunix_leave
-.proc tunix_leave
-    php
-    pha
-    phx
-    ldx pid
-    lda proc_blk1,x
-    sta blk1
-    lda proc_ram123,x
-    sta ram123
-    plx
-    pla
-    lda reg_a
-    plp
-    jmp schedule
-.endproc
-
 .export open
 .proc open
+    save_regs
+
     ;; Move filename + pointer to IO23.
     pushw FNADR
     ldy FNLEN
@@ -3204,7 +3239,7 @@ io_start:
     sta filename,y
     dey
     bpl :-
-:   jsr tunix_enter
+:   jsr tunix_enter2
     jmp open2
 .endproc
 
@@ -3266,12 +3301,6 @@ io_end:
 .export flags, saved_vic, filename
 .export response, response_len
 .export responsep
-.export signals, signalsb, signal_type
-.export signal_payload
-.export signal_handler_l
-.export signal_handler_h
-.export pending_signal_types
-.export free_signal, pending_signal
 
     .bss
 
@@ -3330,6 +3359,15 @@ lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
 lfn_glfn:       .res MAX_LFNS
 
+.if BLEEDING_EDGE
+
+.export signals, signalsb, signal_type
+.export signal_payload
+.export signal_handler_l
+.export signal_handler_h
+.export pending_signal_types
+.export free_signal, pending_signal
+
 ;; Signals
 signals:          .res MAX_SIGNALS
 signalsb:         .res MAX_SIGNALS
@@ -3340,3 +3378,5 @@ signal_handler_h: .res MAX_SIGNALS
 pending_signal_types: .res 256
 free_signal:    .res 1
 pending_signal: .res 1
+
+.endif ; .if BLEEDING_EDGE

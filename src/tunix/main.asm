@@ -2914,8 +2914,13 @@ err_out_of_running_procs:
 idle:
     jmp idle
 
+:   lda #0
+    jsr lib_proc_info
+    lda #1
+    jsr lib_proc_info
+
     ;; BASIC cold start.
-:   jsr INITVCTRS
+    jsr INITVCTRS
     jsr INITBA
     lda TXTTAB
     ldy TXTTAB+1

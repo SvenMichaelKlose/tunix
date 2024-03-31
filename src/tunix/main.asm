@@ -603,10 +603,13 @@ global_size = global_end - global_start
 
 .macro set_procblk_x proc, blk
     push blk1
+    push blk2
     push blk
     mvb blk1, tunix_blk1
+    mvb blk2, tunix_blk2
     pla
     sta proc,x
+    pop blk2
     pop blk1
 .endmacro
 
@@ -1369,11 +1372,24 @@ items_proc_info:
 prt:tya
     jsr BSOUT
     plx
-    jsr print_comma
+
     phx
+    jsr print_comma
     lda exit_codes,x
     jsr printdecbyte
     plx
+
+;    phx
+;    jsr print_comma
+;    enter_data_x
+;    ldaxi waiting
+;    jsry list_length, first_wait
+;    stx tmp1
+;    leave_data
+;    lda tmp1
+;    jsr printdecbyte
+;    plx
+
     jsr print_cr
     rts
 .endproc
@@ -2554,6 +2570,7 @@ io_size = io_end - io_start
     stx tunix_blk1
     stx proc_blk1
     inx
+    stx tunix_blk2
     stx proc_blk2
     inx
     stx proc_blk3
@@ -2570,6 +2587,7 @@ io_size = io_end - io_start
     get_procblk_y proc_blk1, blk1
     sta tunix_blk1
     get_procblk_y proc_blk2, blk2
+    sta tunix_blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
     ;; Mark as running.
@@ -3227,6 +3245,7 @@ r:  pla
 ; Always there for every process.
 
 io_load:
+
     .org $9800  ; IO23
 io_start:
 
@@ -3255,6 +3274,8 @@ io_start:
     ldx pid
     lda proc_blk1,x
     sta blk1
+    lda proc_blk2,x
+    sta blk2
     lda proc_ram123,x
     sta ram123
     lda flags
@@ -3279,6 +3300,7 @@ io_start:
     lda blk1
     tay
     mvb blk1, tunix_blk1
+    mvb blk2, tunix_blk2
     tya
     sta proc_blk1,x
     lda ram123
@@ -3354,7 +3376,8 @@ io_end:
 ;
 ; The data part of the IO23 area.
 
-.export tunix_io23, tunix_blk1, lbanks
+.export tunix_io23, tunix_blk1
+.export tunix_blk2, lbanks
 .export lbanksb, first_lbank, lfns
 .export lfnsb, lfn_glfn, first_lfn
 .export waiting, waitingb, waiting_pid
@@ -3369,6 +3392,7 @@ io_end:
 ;; Vitals
 tunix_io23:     .res 1  ; Per-process.
 tunix_blk1:     .res 1  ; Same for all.
+tunix_blk2:     .res 1  ; Same for all.
 pid:            .res 1
 multitasking:   .res 1
 

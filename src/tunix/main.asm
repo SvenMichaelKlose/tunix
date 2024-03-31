@@ -1319,8 +1319,8 @@ done:
 
 items_proc_list:
   .byte "ID", 0
-  .byte "NLFNS", 0
-  .byte "NBANKS", 0
+  .byte "FLAGS", 0
+  .byte "EXITCODE", 0
   .byte 0
 
 items_proc_info:
@@ -1369,6 +1369,11 @@ items_proc_info:
 prt:tya
     jsr BSOUT
     plx
+    jsr print_comma
+    phx
+    lda exit_codes,x
+    jsr printdecbyte
+    plx
     jsr print_cr
     rts
 .endproc
@@ -1379,6 +1384,10 @@ prt:tya
 .proc proc_list
     pushw zp2
     stwi zp2, items_proc_list
+    jsr print_head
+    jsr print_comma
+    jsr print_head
+    jsr print_comma
     jsr print_head
     jsr print_cr
     ldx #0

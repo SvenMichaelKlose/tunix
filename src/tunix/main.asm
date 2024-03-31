@@ -837,6 +837,15 @@ r:  plx
     rts
 .endproc
 
+.export print_comma
+.proc print_comma
+    phx
+    lda #','
+    jsr BSOUT
+    plx
+    rts
+.endproc
+
 .export outa
 .proc outa
     ldy #0
@@ -1340,8 +1349,27 @@ items_proc_info:
     phx
     txa
     jsr printdecbyte
-    jsr print_cr
     plx
+
+    jsr print_comma
+    phx
+    ldy #'?'
+    lda proc_flags,x
+    cmp #PROC_RUNNING
+    bne :+
+    ldy #'R'
+    bne prt ; (jmp)
+:   cmp #PROC_SLEEPING
+    bne :+
+    ldy #'S'
+    bne prt ; (jmp)
+:   cmp #PROC_ZOMBIE
+    bne prt
+    ldy #'Z'
+prt:tya
+    jsr BSOUT
+    plx
+    jsr print_cr
     rts
 .endproc
 

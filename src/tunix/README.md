@@ -3,61 +3,72 @@ TUNIX
 
 # Introduction
 
-Multi-tasking KERNAL I/O extension for
-the Commodore VIC-20 with UltiMem
-expansion.  It's the foundation of the
-INGLE operating system distribution.
-
-## Wanted Features
-
-* Up to +35K RAM for all processes.
-* Portable UNIX-style KERNAL I/O API.
-* Pre-emptive multi-tasking.
-* Loadable drivers.
-* Resume on reset for crashed apps.
-* Networking.
-* Remote computing.
+TUNIX is a KERNAL extension for the
+Commodore VIC-20 with UltiMem expansion,
+adding pre-emptive multi-tasking,
+loadable drivers and a recover-on-reset
+feature.
 
 ## Memory
 
 Except for the IO23 area, which is
 reserved for TUNIX and drivers, all
-memory is available to programs.
+address space is available to programs.
 
 ## Performance
 
-Thanks to the UltiMem expansion, TUNIX
-is blazingly fast as most of process
-switching is done in hardware, allowing
-apps to access up to 40K RAM (IO23 area
-not included).
+(The time spans mentioned here have been
+guessed.)
+
+Jim Brain's UltiMem expansion makes the
+TUNIX project possible in the first
+place.  Thanks to it, most process
+switching can be done in hardware and
+by automatically generated speed code.
+[^speed-code]
+
+[^speed-code]:
+  Speed code is devoid of instructions
+  that test or take turns.  E.g. instead
+  of looping over the same piece of code
+  again and again, speed code
+  instructions are repeated a fixed
+  number of times to spare end-of-
+  loop tests and conditional jumps.  The
+  backdraw is that the code is highly-
+  specialized and can gain enormous
+  sizes.  Copying an 8K memory block
+  takes about 48K of speed code but is
+  several magnitudes faster than a
+  regular copy loop, saving the TUNIX
+  day.
 
 ### System calls
 
 The most expensive operation is the
 fork() system call, which can take up to
 355ms to complete since the address
-space of the forked process need to be
-copied completely.
-Switching one native VIC application to
-another takes 21ms, from a native to a
-TUNIX app (or vice versa) 7ms and a
-swith from a TUNIX app to another TUNIX
-app brills at 0.3ms to 10ms.  The main
-difference making TUNIX apps faster is
-that they do not access screen memory,
-which is handled by the console driver
-exclusively.
+space of the forked process is cloned
+completely.
+
+### Task Switches
+
+Switching from one native VIC
+application to another takes 21ms, from
+a native to a TUNIX app 7ms (175ms the
+other way around), and a swith from one
+TUNIX app to another TUNIX app brills
+with 0.3ms to 10ms.
 
 Time-consuming task switches aren't much
 of a factor as native apps are not
-multi-tasked and run only when they are
-active on the console. TUNIX apps can
+multi-tasked and only run when they are
+active on the console.  TUNIX apps can
 still run alongside unless that has been
 disabled (e.g. to run programs that take
 over the machine).
 
-## I/O
+### I/O
 
 Calling a driver takes 0.27ms.  This
 leaves us with at least 17.7s overhead
@@ -181,9 +192,31 @@ pressed on reset.
 After starting the TUNIX program it'll
 entertain you with some diagnostic
 messages and boot an instance of BASIC
-with process ID 1.  Now you can run
-load drivers or apps in addition to
-native ones.
+with process ID 1.  Now you can load
+drivers or run apps in addition to
+native ones.  
+
+Plain TUNIX is not very practical. By
+appending an asterisk "\*" and the name
+and arguments of another program to its
+load name, TUNIX can be instructed to
+load and run that as the init process.
+
+The init process should be loading the
+desired drivers and launch the user's
+preferred interface.  To start TUNIX
+with the default init program, launch it
+with:
+
+~~~BASIC
+LOAD"TUNIX\*INIT",8
+~~~
+
+## The Init Process
+
+The init process loads filenames of apps
+to launch from file INIT.CFG, line by
+line, and goes to sleep.
 
 ## Using The Console
 

@@ -16,6 +16,26 @@ __VIC20__       = 1
 EARLY_TESTS     = 1
 ;BLEEDING_EDGE   = 1
 
+;;; Linker
+
+.import __BOOT_LOAD__
+.import __BOOT_RUN__
+.import __BOOT_SIZE__
+.import __GLOBALBSS_RUN__
+.import __GLOBALBSS_SIZE__
+.import __LOCALCODE_LOAD__
+.import __LOCALCODE_RUN__
+.import __LOCALCODE_SIZE__
+.import __LOCALBSS_RUN__
+.import __LOCALBSS_SIZE__
+.import __LOCALBSS2_RUN__
+.import __LOCALBSS2_SIZE__
+.import __APP_FILEOFFS__
+.import __APP_LAST__
+.import __APP_SIZE__
+.import __APP_START__
+.import __ULTIMEM_SIZE__
+
 ;;; CPU
 
 OP_LDA_IMM  = $a9
@@ -31,14 +51,19 @@ OP_RTS      = $60
 
 MAX_BANKS   = 128
 FIRST_BANK  = 8
-ulticfg1    = $9ff1
-ulticfg2    = $9ff2
-ram123      = $9ff4
-io23        = $9ff6
-blk1        = $9ff8
-blk2        = $9ffa
-blk3        = $9ffc
-blk5        = $9ffe
+
+    .segment "ULTIMEM"
+
+ulticfg0: .res 1
+ulticfg1: .res 1
+ulticfg2: .res 1
+ultiid:   .res 1
+ram123:   .res 2
+io23:     .res 2
+blk1:     .res 2
+blk2:     .res 2
+blk3:     .res 2
+blk5:     .res 2
 
 ;;; KERNAL
 
@@ -133,9 +158,9 @@ zp2:   .res 2
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
 
-    .bss
+    .segment "GLOBALBSS"
 
-.export global_start, banks, free_bank
+.export banks, free_bank
 .export bank_refs, iopages, iopagesb
 .export free_iopage, first_iopage
 .export iopage_pid, iopage_page, glfns
@@ -146,14 +171,11 @@ zp2:   .res 2
 .export proc_data, proc_io23, proc_blk1
 .export proc_blk2, proc_blk3, proc_blk5
 .export drvs, drv_pid, drv_dev, drv_vl
-.export drv_vh, dev_drv, global_end
-.export global_size, global_start
+.export drv_vh, dev_drv
 .export banks_ok, banks_faulty
 .export speedcopy_blk3_to_blk5
 .export speedcopy_blk5_to_lowmem
 .export speedcopy_lowmem_to_blk5
-
-global_start:
 
 tmp1:   .res 2
 tmp2:   .res 2
@@ -220,8 +242,89 @@ speedcopy_lowmem_to_blk5: .res 1
 
 old_kernal_vectors: .res 32
 
-global_end:
-global_size = global_end - global_start
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; LOCAL (per process) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .segment "LOCALBSS"
+
+.export tunix_io23, tunix_blk1, lbanks
+.export lbanksb, first_lbank, lfns
+.export lfnsb, lfn_glfn, first_lfn
+.export waiting, waitingb, waiting_pid
+.export free_wait, first_wait, pid
+.export reg_a, reg_x, reg_y, stack
+.export flags, saved_vic, filename
+.export response, response_len
+.export responsep
+
+;; Vitals
+tunix_io23:     .res 1  ; Per-process.
+tunix_blk1:     .res 1  ; Same for all.
+pid:            .res 1
+multitasking:   .res 1
+
+;; Machine state
+reg_a:          .res 1
+reg_x:          .res 1
+reg_y:          .res 1
+flags:          .res 1
+stack:          .res 1
+saved_vic:      .res 16
+
+;; Syscalls
+filename:       .res 256
+response:       .res 8
+response_len:   .res 1
+responsep:      .res 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Additional local bank ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .segment "LOCALBSS2"
+
+;; Extended memory banks
+; Deque of used ones.
+lbanks:         .res MAX_BANKS
+lbanksb:        .res MAX_BANKS
+first_lbank:    .res 1
+
+;; Process info
+waiting:        .res MAX_PROCS
+waitingb:       .res MAX_PROCS
+waiting_pid:    .res MAX_PROCS
+free_wait:      .res 1
+first_wait:     .res 1
+
+;; Logical file numbers
+; Deque of used ones
+lfns:           .res MAX_LFNS
+lfnsb:          .res MAX_LFNS
+first_lfn:      .res 1
+lfn_glfn:       .res MAX_LFNS
+
+.ifdef BLEEDING_EDGEDE
+
+.export signals, signalsb, signal_type
+.export signal_payload
+.export signal_handler_l
+.export signal_handler_h
+.export pending_signal_types
+.export free_signal, pending_signal
+
+;; Signals
+signals:          .res MAX_SIGNALS
+signalsb:         .res MAX_SIGNALS
+signal_type:      .res MAX_SIGNALS
+signal_payload:   .res MAX_SIGNALS
+signal_handler_l: .res MAX_SIGNALS
+signal_handler_h: .res MAX_SIGNALS
+pending_signal_types: .res 256
+free_signal:          .res 1
+pending_signal:       .res 1
+
+.endif ; .if BLEEDING_EDGE
 
     .code
 
@@ -601,18 +704,6 @@ global_size = global_end - global_start
     sta blk
 .endmacro
 
-.macro set_procblk_x proc, blk
-    push blk1
-    push blk2
-    push blk
-    mvb blk1, tunix_blk1
-    mvb blk2, tunix_blk2
-    pla
-    sta proc,x
-    pop blk2
-    pop blk1
-.endmacro
-
 .macro io23x
     get_procblk_x proc_io23, io23
 .endmacro
@@ -671,6 +762,8 @@ global_size = global_end - global_start
     pop io23
 .endmacro
 
+    .segment "LIB"
+
 ;;;;;;;;;;;;;
 ;;; ZPLIB ;;;
 ;;;;;;;;;;;;;
@@ -712,8 +805,10 @@ p:  lda $ff00,x
     popw s
 .endproc
 
-; Copy memory.
-; s, d, c: source, dest, counter
+; Copy memory (forwards).
+; s: source
+; d: destination
+; c: count
 .export memcpy
 .proc memcpy
     phy
@@ -738,6 +833,35 @@ k:  inc sh
     inc dh
     jmp q
 .endproc
+
+; Copy memory (backwards).
+; s: source
+; d: destination
+; c: count
+.export memcpybw
+.proc memcpybw
+    ldy #0
+    ldx c
+    inx
+    inc c+1
+    bne copy_backwards
+
+l2: lda (s),y
+    sta (d),y
+    dey
+    cpy #$ff
+    beq m2
+copy_backwards:
+q2: dex
+    bne l2
+    dec c+1
+    bne l2
+    rts
+m2: dec s+1
+    dec d+1
+    jmp q2
+.endproc
+
 
 ; Clear memory.
 ; d, c: dest, counter
@@ -865,6 +989,8 @@ r:  plx
     jsra outa, at
     jsra outa, at+1
 .endmacro
+
+    .segment "KERNEL"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SYSTEM CALL RETURN DATA ;;;
@@ -1019,6 +1145,15 @@ invalid_bank:
 ; created, starting with bank
 ; 'copy_bank'.
 
+    .segment "KERNELDATA"
+
+txt_speed_code:
+  .byte "MAKING SPEED CODE.", 0
+txt_carriage_return:
+  .byte 13, 0
+
+    .segment "KERNEL"
+
 ; Make all wanted block moves.
 .export gen_speedcodes
 .proc gen_speedcodes
@@ -1062,7 +1197,7 @@ invalid_bank:
     popw c
     popw zp1
     pop blk5
-    print txt_newline
+    print txt_carriage_return
     rts
 .endproc
 
@@ -1120,13 +1255,6 @@ done:
     jmp $4000
 .endproc
 
-    .rodata
-
-txt_speed_code:
-  .byte "MAKING SPEED CODE.", 0
-txt_newline:
-  .byte 13, 0
-
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;; MACHDEP VIC-20 :::
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -1134,7 +1262,7 @@ txt_newline:
 ; Process forks and switches.  TUNIX is
 ; not ready to support other platforms.
 
-    .rodata
+    .segment "MACHDEPDATA"
 
 vec_vic_to_blk5:
   .word $9000, saved_vic+$2000, $0010
@@ -1149,8 +1277,6 @@ vec_blk5_to_color:
   .word $b400, $9400, $0400
 vec_blk5_to_vic:
   .word saved_vic+$2000, $9000, $0010
-
-    .code
 
 .macro save_internal_ram_to_blk5
     lda speedcopy_lowmem_to_blk5
@@ -1170,12 +1296,12 @@ vec_blk5_to_vic:
     save_internal_ram_to_blk5
 .endmacro
 
-    .rodata
+    .segment "MACHDEPDATA"
 
 vec_io23_to_blk5:
   .word $9800, $b800, $07f0
 
-    .code
+    .segment "MACHDEP"
 
 ; Fork banks and save stack.
 ;
@@ -1269,6 +1395,8 @@ vec_io23_to_blk5:
     rts
 .endproc
 
+    .segment "KERNEL"
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1318,7 +1446,7 @@ done:
 ; in for TUNIX, holds additional per-
 ; process data.
 
-    .rodata
+    .segment "KERNELDATA"
 
 items_proc_list:
   .byte "ID", 0
@@ -1333,7 +1461,7 @@ items_proc_info:
   .byte "NBANKS", 0
   .byte 0
 
-    .code
+    .segment "KERNEL"
 
 ; Print list indexes as CSV line.
 .macro print_csv list, first
@@ -1682,8 +1810,9 @@ done:
 
 check_if_zombie:
     lda proc_flags,x
-    beq guru_meditation
-    cmp #PROC_ZOMBIE
+    bne :+
+    jmp guru_meditation
+:   cmp #PROC_ZOMBIE
     beq end_wait
 
     ; Take a nap.
@@ -1701,11 +1830,6 @@ check_if_zombie:
 invalid_pid:
     sec
     rts
-.endproc
-
-.export guru_meditation
-.proc guru_meditation
-    jmp guru_meditation
 .endproc
 
 ; Stop process from waiting.
@@ -1926,6 +2050,38 @@ no_handler_set:
 :   rts
 .endproc
 
+;;;;;;;;;;;;;;;;;
+;;; PROCESS 0 ;;;
+;;;;;;;;;;;;;;;;;
+
+    .segment "KERNELDATA"
+
+err_out_of_running_procs:
+  .byte "OUT OF RUNNING PROCS. HALTING."
+  .byte 13, 0
+
+    .segment "KERNEL"
+
+.export proc0
+.proc proc0
+    ldx #0
+    jsr suspend
+    jsr schedule
+    lda #0
+    sta multitasking
+    print err_out_of_running_procs
+.endproc
+
+.export halt
+.proc halt
+    jmp halt
+.endproc
+
+.export guru_meditation
+.proc guru_meditation
+    jmp guru_meditation
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SYSCALL DRIVER (DEVICE #31) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1933,7 +2089,7 @@ no_handler_set:
 ; Takes on system calls via device
 ; TUNIX_DEVICE (#31 by default).
 
-    .rodata
+    .segment "KERNELDATA"
 
 .export tunix_driver
 tunix_driver:
@@ -1943,7 +2099,7 @@ tunix_driver:
   .word tunix, tunix, tunix, tunix
   .word tunix
 
-    .code
+    .segment "KERNEL"
 
 ;; System call without arguments that
 ;; might fail.
@@ -2158,7 +2314,7 @@ syscall0 tunix_proc_list, proc_list
     ldx SA
     ldy FNLEN
     lda #255
-    cpy #4
+    cpy #3
     bne :+
     lda filename+2
 :   jsr kill
@@ -2285,7 +2441,7 @@ banks_faulty:   .res 1
 bnk:            .res 1
 col:            .res 1
 
-    .code
+    .segment "KERNEL"
 
 .export init_ultimem_banks
 .proc init_ultimem_banks
@@ -2463,7 +2619,7 @@ print_free_ram_a:
 r:  rts
 .endproc
 
-    .rodata
+    .segment "KERNELDATA"
 
 txt_no_ultimem:
   .byte "NO ULTIMEM/VIC-MIDIFOUND."
@@ -2476,18 +2632,19 @@ txt_banks_free:
   .byte "K RAM FREE.", 0
 
 vec_io_reloc:
-  .word io_load, $9800
-  .word io_size
+  .word __LOCALCODE_LOAD__
+  .word __LOCALCODE_RUN__
+  .word __LOCALCODE_SIZE__
 vec_backup_kernal:
-  .word IOVECTORS, old_kernal_vectors
+  .word IOVECTORS
+  .word old_kernal_vectors
   .word IOVECTOR_SIZE
 vec_tunix_kernal:
-  .word tunix_vectors, IOVECTORS
+  .word tunix_vectors
+  .word IOVECTORS
   .word IOVECTOR_SIZE
 
-    .code
-
-io_size = io_end - io_start
+    .segment "KERNEL"
 
 .export boot
 .proc boot
@@ -2495,17 +2652,17 @@ io_size = io_end - io_start
     jsr init_ultimem_banks
 
     ;; Clear global data.
-    stwi d, global_start
-    stwi c, global_size
+    stwi d, __GLOBALBSS_RUN__
+    stwi c, __GLOBALBSS_SIZE__
     jsr bzero
 
     ;; Init local (per-process).
     smemcpyax vec_io_reloc
-    stwi d, io_end
-    stwi c, $07f0-io_size
+    stwi d, __LOCALBSS_RUN__
+    stwi c, __LOCALBSS_SIZE__ - __ULTIMEM_SIZE__
     jsr bzero
-    stwi d, $0400
-    stwi c, $0c00
+    stwi d, __LOCALBSS2_RUN__
+    stwi c, __LOCALBSS2_SIZE__
     jsr bzero
 
     ;;; Init lists.
@@ -2570,7 +2727,6 @@ io_size = io_end - io_start
     stx tunix_blk1
     stx proc_blk1
     inx
-    stx tunix_blk2
     stx proc_blk2
     inx
     stx proc_blk3
@@ -2582,14 +2738,19 @@ io_size = io_end - io_start
     ;; Fork all banks.
     ldx #0
     jsr fork_raw
-    get_procblk_y proc_data, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk1, blk1
+    ;get_procblk_y proc_data, ram123
+    ;get_procblk_y proc_io23, io23
+    ;get_procblk_y proc_blk1, blk1
+    mvb ram123, proc_data
+    mvb io23, proc_io23
+    mvb blk1, proc_blk1
     sta tunix_blk1
-    get_procblk_y proc_blk2, blk2
-    sta tunix_blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
+    mvb blk2, proc_blk2
+    mvb blk3, proc_blk3
+    mvb blk5, proc_blk5
+    ;get_procblk_y proc_blk2, blk2
+    ;get_procblk_y proc_blk3, blk3
+    ;get_procblk_y proc_blk5, blk5
     ;; Mark as running.
     lda #PROC_RUNNING
     sta proc_flags
@@ -2610,12 +2771,14 @@ io_size = io_end - io_start
     jmp register
 .endproc
 
-    .rodata
+    .segment "KERNELDATA"
 
 tunix_vectors:
 .word open, close, chkin, ckout, clrcn
 .word basin, bsout, stop, getin, clall
 .word usrcmd, load, save, blkin, bkout
+
+    .segment "KERNELDATA"
 
 txt_tunix:
   ;.byte PETSCII_CLRSCR
@@ -2629,13 +2792,11 @@ txt_registering:
 txt_init:
   .byte "STARTING INIT.", 13, 0
 
-.ifdef EARLY_TESTS
-
 ;;;;;;;;;;;;;;;
 ;;; LIBRARY ;;;
 ;;;;;;;;;;;;;;;
 
-    .rodata
+    .segment "KERNELDATA"
 
 cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE"
@@ -2644,7 +2805,7 @@ cmd_wait:   .byte "PW"
 cmd_getpid: .byte "P"
 cmd_proc_info:  .byte "PI"
 
-    .code
+    .segment "KERNEL"
 
 .export lib_schedule
 .proc lib_schedule
@@ -2689,7 +2850,7 @@ cmd_proc_info:  .byte "PI"
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
-    lda #3
+    lda #2
     ldx #<cmd_exit
     ldy #>cmd_exit
     jsr SETNAM
@@ -2697,8 +2858,10 @@ cmd_proc_info:  .byte "PI"
 .endproc
 
 ; A: process ID
+; X: exit code
 .export lib_kill
 .proc lib_kill
+    stx cmd_kill+2
     tay
     lda #TUNIX_DEVICE
     tax
@@ -2717,7 +2880,7 @@ cmd_proc_info:  .byte "PI"
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
-    lda #3
+    lda #2
     ldx #<cmd_wait
     ldy #>cmd_wait
     jsr SETNAM
@@ -2732,275 +2895,12 @@ cmd_proc_info:  .byte "PI"
     lda #TUNIX_DEVICE
     tax
     jsr SETLFS
-    lda #3
+    lda #2
     ldx #<cmd_proc_info
     ldy #>cmd_proc_info
     jsr SETNAM
     jmp OPEN
 .endproc
-
-;;;;;;;;;;;;;
-;;; TESTS ;;;
-;;;;;;;;;;;;;
-;
-; Tests running before regular boot.
-
-    .rodata
-
-txt_tests:
-  .byte "!!! RUNNING TESTS !!!", 13, 0
-txt_testing_data:
-  .byte "!!! TESTING DATA !!!", 13, 0
-txt_testing_processes:
-  .byte "!!! TESTING PROCS !!!", 13, 0
-txt_child:
-  .byte "CHILD SAYING HELLO!", 13, 0
-txt_hyperactive_child:
-  .byte ":):):):):):):):):):):):)", 0
-txt_tests_passed:
-  .byte "!!!    SUCCESS:   !!!", 13
-  .byte "!!! CHECKS PASSED !!!", 13, 0
-
-note_forking:
-  .byte "FORKING.", 13, 0
-note_running_baby:
-  .byte "RUNNING BABY.", 13, 0
-note_waiting_for_child:
-  .byte "WAITING FOR CHILD.", 13, 0
-note_child_exited:
-  .byte "CHILD EXITED.", 13, 0
-note_getting_pid:
-  .byte "GETTING PID.", 13, 0
-note_forking_hyperactive:
-  .byte "FORKING HYPERACTIVE CHILD."
-  .byte 13, 0
-note_killing_hyperactive:
-  .byte "KILLING HYPERACTIVE.", 13, 0
-note_waiting_for_hyperactive:
-  .byte "WAITING FOR HYPERACTIVE TO EXIT.", 13, 0
-
-err_free_banks_after_init:
-  .byte "WRONG TOTAL # OF FREE BANKS."  
-  .byte 0
-err_free_banks_after_free:
-  .byte "WRONG # OF BANKS AFTER "
-  .byte "FREEING ONE AGAIN.", 0
-err_wrong_glfn_order:
-  .byte "WRONG GLFN ORDER.", 0
-err_wrong_deque_index:
-  .byte "UNEXPECTED DEQUE INDEX OF "
-  .byte "FIRST ALLOCATED ONE.", 0
-err_wrong_free_proc_count:
-  .byte "WRONG # OF FREE PROCS.", 0
-err_cannot_fork:
-  .byte "CANNOT FORK.", 0
-err_child_running_after_exit:
-  .byte "CHILD STILL RUNNING AFTER "
-  .byte "EXIT.", 0
-err_init_pid_not_0:
-  .byte "INIT PID NOT 0 AFTER FORK.", 0
-err_cannot_kill:
-  .byte "CANNOT KILL.", 0
-err_cannot_wait:
-  .byte "CANNOT WAIT.", 0
-
-    .code
-
-; TODO: Make a proper formula from
-; defined constants.
-FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
-
-.export tests
-.proc tests
-    print txt_testing_data
-    jsr boot
-
-    ;;;;;;;;;;;;;;;;;;;;;;
-    ;;; LISTS & DEQUES ;;;
-    ;;;;;;;;;;;;;;;;;;;;;;
-
-    ;; Totel free banks.
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx #FREE_BANKS_AFTER_INIT
-    beq :+
-    error err_free_banks_after_init
-
-    ;; Doubly used list arrays.
-    ; Pop bank from free list.
-:   jsr balloc
-    jsr bfree
-    ldaxi banks
-    jsry list_length, free_bank
-    cpx #FREE_BANKS_AFTER_INIT
-    beq :+
-    error err_free_banks_after_free
-
-    ;; Deque
-    ; Allocate first.
-:   lpopx procs, free_proc
-    phx
-    ldaxi procs
-    jsry list_length, free_proc
-    cpx #MAX_PROCS - 2 ; (+ init)
-    beq :+
-    error err_wrong_free_proc_count
-:   plx
-    ; Push onto running.
-    dpushx procs, procsb, running
-    ldaxi procs
-    jsry list_length, running
-    cpx #1
-    beq :+
-    error err_wrong_deque_index
- 
-    ;;;;;;;;;;;;;;;;
-    ;;; Syscalls ;;;
-    ;;;;;;;;;;;;;;;;
-
-:   jsr boot
-    print txt_testing_processes
-
-    ;; Fork and wait for child to exit.
-    print note_forking
-    jsr lib_fork
-    bcc :+
-    error err_cannot_fork
-:   pha
-    print note_running_baby
-    pla
-    cmp #0
-    bne :+
-    jmp baby
-:   lda #0
-    jsr lib_proc_info
-    lda #1
-    jsr lib_proc_info
-    ; Wait for child to exit.
-    print note_waiting_for_child
-    lda #1
-    jsr lib_wait
-    print note_child_exited
-
-    ;; Check our process ID.
-    print note_getting_pid
-    jsr lib_getpid
-    cmp #0
-    beq :+
-    error err_init_pid_not_0
-
-    ;; Fork, kill, then wait for child.
-:   print note_forking_hyperactive
-    jsr lib_fork
-    bcc :+
-    error err_cannot_fork
-:   cmp #0
-    bne :+
-    jmp hyperactive_child
-    ; Kill child.
-:   print note_killing_hyperactive
-    lda #1
-    jsr lib_kill
-    bcc :+
-    error err_cannot_kill
-    ; Wait for child
-:   print note_waiting_for_hyperactive
-    lda #1
-    jsr lib_wait
-    bcc :+
-    error err_cannot_wait
-:
-    print txt_tests_passed
-    rts
-.endproc
-
-.export baby
-.proc baby
-    print txt_child
-    jsr lib_exit
-    error err_child_running_after_exit
-.endproc
-
-.export hyperactive_child
-.proc hyperactive_child
-:   print txt_hyperactive_child
-    jmp :-
-.endproc
-
-.endif
-
-    .rodata
-
-err_out_of_running_procs:
-  .byte "OUT OF RUNNING PROCS. HALTING."
-  .byte 13, 0
-
-    .code
-
-.export halt
-.proc halt
-    jmp halt
-.endproc
-
-.export start
-.proc start
-    print txt_tunix
-
-.ifdef EARLY_TESTS
-    print txt_tests
-    jsr tests
-.endif
-
-    print txt_booting
-    jsr boot
-
-    print txt_init
-    jsr fork
-    cmp #0
-    beq :+
-
-    ;; Suspend TUNIX process.
-    ldx #0
-    jsr suspend
-    jsr schedule
-    lda #0
-    sta multitasking
-    print err_out_of_running_procs
-idle:
-    jmp idle
-
-:   lda #0
-    jsr lib_proc_info
-    lda #1
-    jsr lib_proc_info
-
-    ;; BASIC cold start.
-    jsr INITVCTRS
-    jsr INITBA
-    lda TXTTAB
-    ldy TXTTAB+1
-    jsr RAMSPC
-
-    ldayi txt_welcome
-    jsr PRTSTR
-    ldaxi banks
-    jsry list_length, free_bank
-    txa
-    jsr print_free_ram_a
-    jsr print_cr
-    ldayi $e437
-    jsr PRTSTR
-    jsr $e412
-    ldx #$f8
-    txs
-    jmp READY
-.endproc
-
-    .rodata
-
-txt_welcome:
-  .byte 13 ; PETSCII_CLRSCR
-  .byte "TUNIX - ", 0
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
@@ -3010,7 +2910,7 @@ txt_welcome:
 ; parts in IO23 that bank in BLK1
 ; (this place right here).
 
-    .code
+    .segment "KERNEL"
 
 .export call_glfn_driver
 .proc call_glfn_driver
@@ -3154,10 +3054,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 ;
 ; Always there for every process.
 
-io_load:
-
-    .org $9800  ; IO23
-io_start:
+    .segment "LOCALCODE"
 
 ; Schedule task switch
 ; Picks next or first on running list.
@@ -3304,7 +3201,6 @@ r:  pla
     lda blk1
     tay
     mvb blk1, tunix_blk1
-    mvb blk2, tunix_blk2
     tya
     sta proc_blk1,x
     lda ram123
@@ -3372,101 +3268,254 @@ iowrap usrcmd, usrcmd2
 blkiohandler load, #IDX_LOAD
 blkiohandler save, #IDX_SAVE
 
-io_end:
+.ifdef EARLY_TESTS
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOCAL (per process) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;; TESTS ;;;
+;;;;;;;;;;;;;
 ;
-; The data part of the IO23 area.
+; Tests running before regular boot.
 
-.export tunix_io23, tunix_blk1
-.export tunix_blk2, lbanks
-.export lbanksb, first_lbank, lfns
-.export lfnsb, lfn_glfn, first_lfn
-.export waiting, waitingb, waiting_pid
-.export free_wait, first_wait, pid
-.export reg_a, reg_x, reg_y, stack
-.export flags, saved_vic, filename
-.export response, response_len
-.export responsep
+    .segment "BOOT"
 
-    .bss
+txt_tests:
+  .byte "!!! RUNNING TESTS !!!", 13, 0
+txt_testing_data:
+  .byte "!!! TESTING DATA !!!", 13, 0
+txt_testing_processes:
+  .byte "!!! TESTING PROCS !!!", 13, 0
+txt_child:
+  .byte "CHILD SAYING HELLO!", 13, 0
+txt_hyperactive_child:
+  .byte ":):):):):):):):):):):):)", 0
+txt_tests_passed:
+  .byte "!!!    SUCCESS:   !!!", 13
+  .byte "!!! CHECKS PASSED !!!", 13, 0
 
-;; Vitals
-tunix_io23:     .res 1  ; Per-process.
-tunix_blk1:     .res 1  ; Same for all.
-tunix_blk2:     .res 1  ; Same for all.
-pid:            .res 1
-multitasking:   .res 1
+note_forking:
+  .byte "FORKING.", 13, 0
+note_running_baby:
+  .byte "RUNNING BABY.", 13, 0
+note_waiting_for_child:
+  .byte "WAITING FOR CHILD.", 13, 0
+note_child_exited:
+  .byte "CHILD EXITED.", 13, 0
+note_getting_pid:
+  .byte "GETTING PID.", 13, 0
+note_forking_hyperactive:
+  .byte "FORKING HYPERACTIVE CHILD."
+  .byte 13, 0
+note_killing_hyperactive:
+  .byte "KILLING HYPERACTIVE.", 13, 0
+note_waiting_for_hyperactive:
+  .byte "WAITING FOR HYPERACTIVE TO EXIT.", 13, 0
 
-;; Machine state
-reg_a:          .res 1
-reg_x:          .res 1
-reg_y:          .res 1
-flags:          .res 1
-stack:          .res 1
-saved_vic:      .res 16
+err_free_banks_after_init:
+  .byte "WRONG TOTAL # OF FREE BANKS."  
+  .byte 0
+err_free_banks_after_free:
+  .byte "WRONG # OF BANKS AFTER "
+  .byte "FREEING ONE AGAIN.", 0
+err_wrong_glfn_order:
+  .byte "WRONG GLFN ORDER.", 0
+err_wrong_deque_index:
+  .byte "UNEXPECTED DEQUE INDEX OF "
+  .byte "FIRST ALLOCATED ONE.", 0
+err_wrong_free_proc_count:
+  .byte "WRONG # OF FREE PROCS.", 0
+err_cannot_fork:
+  .byte "CANNOT FORK.", 0
+err_child_running_after_exit:
+  .byte "CHILD STILL RUNNING AFTER "
+  .byte "EXIT.", 0
+err_init_pid_not_0:
+  .byte "INIT PID NOT 0 AFTER FORK.", 0
+err_cannot_kill:
+  .byte "CANNOT KILL.", 0
+err_cannot_wait:
+  .byte "CANNOT WAIT.", 0
 
-;; Syscalls
-filename:       .res 256
-response:       .res 8
-response_len:   .res 1
-responsep:      .res 1
+    .segment "BOOT"
 
-.if * >= IOPAGE_BASE * 256
-    .error "IO23 overflows IO pages!"
-.endif
+; TODO: Make a proper formula from
+; defined constants.
+FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
-.if (IOPAGE_BASE + MAX_IOPAGES) * 256 > $a000
-    .error "IO pages overflow!"
-.endif
+.export tests
+.proc tests
+    print txt_testing_data
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Additional local bank ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;
+    ;;; LISTS & DEQUES ;;;
+    ;;;;;;;;;;;;;;;;;;;;;;
 
-    .bss
-    .org $0400  ; RAM123
+    ;; Totel free banks.
+    ldaxi banks
+    jsry list_length, free_bank
+    cpx #FREE_BANKS_AFTER_INIT
+    beq :+
+    error err_free_banks_after_init
 
-;; Extended memory banks
-; Deque of used ones.
-lbanks:         .res MAX_BANKS
-lbanksb:        .res MAX_BANKS
-first_lbank:    .res 1
+    ;; Doubly used list arrays.
+    ; Pop bank from free list.
+:   jsr balloc
+    jsr bfree
+    ldaxi banks
+    jsry list_length, free_bank
+    cpx #FREE_BANKS_AFTER_INIT
+    beq :+
+    error err_free_banks_after_free
 
-;; Process info
-waiting:        .res MAX_PROCS
-waitingb:       .res MAX_PROCS
-waiting_pid:    .res MAX_PROCS
-free_wait:      .res 1
-first_wait:     .res 1
+    ;; Deque
+    ; Allocate first.
+:   lpopx procs, free_proc
+    phx
+    ldaxi procs
+    jsry list_length, free_proc
+    cpx #MAX_PROCS - 2 ; (+ init)
+    beq :+
+    error err_wrong_free_proc_count
+:   plx
+    ; Push onto running.
+    dpushx procs, procsb, running
+    ldaxi procs
+    jsry list_length, running
+    cpx #1
+    beq :+
+    error err_wrong_deque_index
+ 
+    ;;;;;;;;;;;;;;;;
+    ;;; Syscalls ;;;
+    ;;;;;;;;;;;;;;;;
 
-;; Logical file numbers
-; Deque of used ones
-lfns:           .res MAX_LFNS
-lfnsb:          .res MAX_LFNS
-first_lfn:      .res 1
-lfn_glfn:       .res MAX_LFNS
+:   print txt_testing_processes
 
-.ifdef BLEEDING_EDGEDE
+    ;; Fork and wait for child to exit.
+    print note_forking
+    jsr lib_fork
+    bcc :+
+    error err_cannot_fork
+:   pha
+    print note_running_baby
+    pla
+    cmp #0
+    bne :+
+    jmp baby
+:   lda #0
+    jsr lib_proc_info
+    lda #1
+    jsr lib_proc_info
+    ; Wait for child to exit.
+    print note_waiting_for_child
+    lda #1
+    jsr lib_wait
+    print note_child_exited
 
-.export signals, signalsb, signal_type
-.export signal_payload
-.export signal_handler_l
-.export signal_handler_h
-.export pending_signal_types
-.export free_signal, pending_signal
+    ;; Check our process ID.
+    print note_getting_pid
+    jsr lib_getpid
+    cmp #0
+    beq :+
+    error err_init_pid_not_0
 
-;; Signals
-signals:          .res MAX_SIGNALS
-signalsb:         .res MAX_SIGNALS
-signal_type:      .res MAX_SIGNALS
-signal_payload:   .res MAX_SIGNALS
-signal_handler_l: .res MAX_SIGNALS
-signal_handler_h: .res MAX_SIGNALS
-pending_signal_types: .res 256
-free_signal:    .res 1
-pending_signal: .res 1
+    ;; Fork, kill, then wait for child.
+:   print note_forking_hyperactive
+    jsr lib_fork
+    bcc :+
+    error err_cannot_fork
+:   cmp #0
+    bne :+
+    jmp hyperactive_child
+    ; Kill child.
+:   pha
+    print note_killing_hyperactive
+    pla
+    pha
+    jsr lib_kill
+    bcc :+
+    error err_cannot_kill
+    ; Wait for child
+:   print note_waiting_for_hyperactive
+    pla
+    jsr lib_wait
+    bcc :+
+    error err_cannot_wait
+:
+    print txt_tests_passed
+    rts
+.endproc
 
-.endif ; .if BLEEDING_EDGE
+.export baby
+.proc baby
+    print txt_child
+    jsr lib_exit
+    error err_child_running_after_exit
+.endproc
+
+.export hyperactive_child
+.proc hyperactive_child
+:   print txt_hyperactive_child
+    jmp :-
+.endproc
+
+.endif ; .ifdef EARLY_TESTS
+
+;;;;;;;;;;;;;
+;;; START ;;;
+;;;;;;;;;;;;;
+
+    .segment "BOOTDATA"
+
+txt_welcome:
+  .byte 13 ; PETSCII_CLRSCR
+  .byte "TUNIX - ", 0
+
+    .segment "KERNEL"
+
+.export start
+.proc start
+    print txt_tunix
+
+    ; Relocate boot & tests.
+    stwi s, __BOOT_LOAD__ + __BOOT_SIZE__ - 1
+    stwi d, __BOOT_RUN__ + __BOOT_SIZE__ - 1
+    stwi c, __BOOT_SIZE__
+    jsr memcpybw
+
+    jsr boot
+
+.ifdef EARLY_TESTS
+    print txt_tests
+    jsr tests
+.endif ; .ifdef EARLY_TESTS
+
+    print txt_init
+    jsr fork
+    cmp #0
+    beq :+
+    jmp proc0
+:   lda #0
+    jsr lib_proc_info
+    lda #1
+    jsr lib_proc_info
+
+    ;; BASIC cold start.
+    jsr INITVCTRS
+    jsr INITBA
+    lda TXTTAB
+    ldy TXTTAB+1
+    jsr RAMSPC
+    ldayi txt_welcome
+    jsr PRTSTR
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
+    jsr print_free_ram_a
+    jsr print_cr
+    ldayi $e437
+    jsr PRTSTR
+    jsr $e412
+    ldx #$f8
+    txs
+    jmp READY
+.endproc

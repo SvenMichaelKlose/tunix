@@ -3146,6 +3146,17 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     jmpa call_driver, #IDX_STOP
 .endproc
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Static KERNAL I/O handlers. ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Always there for every process.
+
+io_load:
+
+    .org $9800  ; IO23
+io_start:
+
 ; Schedule task switch
 ; Picks next or first on running list.
 .export schedule
@@ -3237,17 +3248,6 @@ r:  pla
     cli
     rts
 .endproc
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Static KERNAL I/O handlers. ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Always there for every process.
-
-io_load:
-
-    .org $9800  ; IO23
-io_start:
 
 .export call_driver1
 .proc call_driver1

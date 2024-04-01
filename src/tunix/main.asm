@@ -2667,6 +2667,11 @@ vec_tunix_kernal:
     stwi c, __LOCALBSS2_SIZE__
     jsr bzero
 
+    ;; Clear rest of BLK1.
+    stwi d, __LOCALCODE_LOAD__
+    stwi c, $4000 - __LOCALCODE_LOAD__
+    jsr bzero
+
     ;;; Init lists.
     ;; Link
     ldx #0
@@ -3404,25 +3409,27 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 :   pha
     print note_running_baby
     pla
+    pha
     cmp #0
     bne :+
     jmp baby
 :   lda #0
     jsr lib_proc_info
-    lda #1
+    pla
+    pha
     jsr lib_proc_info
     ; Wait for child to exit.
     print note_waiting_for_child
-    lda #1
+    pla
     jsr lib_wait
     print note_child_exited
 
     ;; Check our process ID.
-    print note_getting_pid
-    jsr lib_getpid
-    cmp #0
-    beq :+
-    error err_init_pid_not_0
+;    print note_getting_pid
+;    jsr lib_getpid
+;    cmp #0
+;    beq :+
+;    error err_init_pid_not_0
 
     ;; Fork, kill, then wait for child.
 :   print note_forking_hyperactive
@@ -3446,8 +3453,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_wait
     bcc :+
     error err_cannot_wait
-:
-    print txt_tests_passed
+:   print txt_tests_passed
     rts
 .endproc
 

@@ -2657,7 +2657,9 @@ vec_tunix_kernal:
     jsr bzero
 
     ;; Init local (per-process).
+    ; Copy I/O handlers.
     smemcpyax vec_io_reloc
+    ; Clear data areas.
     stwi d, __LOCALBSS_RUN__
     stwi c, __LOCALBSS_SIZE__ - __ULTIMEM_SIZE__
     jsr bzero
@@ -2798,9 +2800,13 @@ txt_init:
 
     .segment "KERNELDATA"
 
+.export cmd_fork, cmd_exit, cmd_kill
+.export cmd_wait, cmd_getpid
+.export cmd_proc_info
+
 cmd_fork:   .byte "PF"
 cmd_exit:   .byte "PE"
-cmd_kill:   .byte "PK"
+cmd_kill:   .byte "PKc"
 cmd_wait:   .byte "PW"
 cmd_getpid: .byte "P"
 cmd_proc_info:  .byte "PI"

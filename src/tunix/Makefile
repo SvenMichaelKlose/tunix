@@ -14,7 +14,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -I../lib/ -o $@ $<
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib
+	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -m $(PROGRAM).map -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 tunix: $(PROGRAM)
 	exomizer-3.0.2 sfx basic $(PROGRAM) -t52 -o tunix

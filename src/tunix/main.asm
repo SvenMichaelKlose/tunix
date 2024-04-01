@@ -3027,11 +3027,13 @@ txt_welcome:
     adc drv_vl,y
     sta g+1
     sta h+1
-    inc h+1
     lda drv_vh,y
     adc #0
     sta g+2
     sta h+2
+    inc h+1
+    bne g
+    inc h+2
 g:  lda $ffff
     sta call_driver3+1
 h:  lda $ffff
@@ -3185,8 +3187,9 @@ io_start:
     ;; Switch.
 :   cmp pid
     beq :+ ; Don't switch to self.
-
     tay
+    push ram123
+    push blk1
     push blk2
     push blk3
     push blk5
@@ -3194,8 +3197,8 @@ io_start:
     pop blk5
     pop blk3
     pop blk2
-    ldx pid
-    get_procblk_x proc_data, ram123
+    pop blk1
+    pop ram123
 
 :   ply
     plx
@@ -3208,7 +3211,8 @@ r:  pla
 ;
 ; The process being switched to will
 ; never see this function but return
-; from either fork() or switch().
+; from either fork() or switch(),
+; depending on which was called before.
 ;
 ; Y: Process ID
 .export switch

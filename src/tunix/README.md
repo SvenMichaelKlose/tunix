@@ -1,13 +1,14 @@
-TUNIX
-=====
+The TUNIX OS project
+====================
+
+„Tu nix!“ (German for "Do nothing!").
 
 # Introduction
 
 TUNIX is a KERNAL extension for the
-Commodore VIC-20 with UltiMem expansion,
-adding pre-emptive multi-tasking,
-loadable drivers and a recover-on-reset
-feature.
+Commodore VIC-20 with UltiMem expansion
+which adds pre-emptive multi-tasking,
+loadable drivers and recover-on-reset.
 
 ## Memory
 
@@ -20,6 +21,8 @@ address space is available to programs.
 (The time spans mentioned here have been
 guessed.)
 
+TUNIX isn't optimized for performance
+but for simplicity and robustness.
 Jim Brain's UltiMem expansion makes the
 TUNIX project possible in the first
 place.  Thanks to it, most process
@@ -42,6 +45,14 @@ by automatically generated speed code.
   several magnitudes faster than a
   regular copy loop, saving the TUNIX
   day.
+
+TUNIX uses fast deque (doubly-linked
+list)/map combinations with byte
+pointers to perform operations on
+internal data structures at a more or
+less constant time.  The following
+sections cover some essential timings
+in more detail.
 
 ### System calls
 
@@ -171,7 +182,6 @@ community-driven project:
   range of learners, encouraging cross-
   pollination of ideas and techniques.
 
-
 # Installing TUNIX
 
 TUNIX can recover-on-reset.  Whenever a
@@ -240,23 +250,32 @@ slots.
 
 # Programming For TUNIX
 
-TUNIX uses KERNAL I/O to provide system
-calls and can be used with any programm-
-ing language that supports it.
-
+TUNIX can be used with any programming
+language that supports regular file I/O.
 Implementing drivers will most likely
-require using assembly language.
+require using assembly language at some
+point, no matter what the rest of the
+driver was written in.
+
+The number one set of programming tools
+for TUNIX is the cc65 compiler suite
+for 6502/6518-CPU platforms.  It comes
+with an ANSI-C compiler, assembler and
+linker, a Unix-like standard C library,
+exhaustive documentation, and a vibrant
+community.
 
 ## No Standard I/O File Handles
 
 Unlike Unixoids the KERNAL does not
 provide default LFNs for standard I/O.
 Instead, apps reset the current LFN-
-derived device pair to the keyboard and
-screen device using the CLRCN system
-call.  To make up for this, driver
-LFNDEV connects LFNs to devices, so a
-process' standard I/O can be pipelined.
+derived device pair (aka "channels") to
+the keyboard and screen device using the
+CLRCN system call.  To make up for this,
+driver LFNDEV connects LFNs to devices,
+so a process' standard I/O can be
+pipelined.
 
 # CBM & TUNIX KERNAL I/O
 

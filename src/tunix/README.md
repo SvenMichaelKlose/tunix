@@ -277,6 +277,10 @@ driver LFNDEV connects LFNs to devices,
 so a process' standard I/O can be
 pipelined.
 
+To get around resetting the channel pair
+you may decide to OPEN device #0 and #3
+to have LFNs for CHKIN and CKOUT.
+
 # CBM & TUNIX KERNAL I/O
 
 This section describes the behaviour of

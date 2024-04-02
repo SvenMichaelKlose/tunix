@@ -180,9 +180,9 @@ tmp3:   .res 2
 ptr1:   .res 2
 
 ;;; Extended memory banks
-banks:          .res MAX_BANKS
-free_bank:      .res 1
-bank_refs:      .res MAX_BANKS
+banks:      .res MAX_BANKS
+free_bank:  .res 1
+bank_refs:  .res MAX_BANKS
 
 ;;; IO pages
 iopages:        .res MAX_IOPAGES
@@ -1032,7 +1032,6 @@ r:  plx
     lda tmp1
     jmp PRTFIX
 .endproc
-
 
 ; Print '$' and hexadecimal byte in A.
 .export print_hexbyte
@@ -2810,6 +2809,7 @@ cmd_exit:   .byte "PE"
 cmd_kill:   .byte "PKc"
 cmd_wait:   .byte "PW"
 cmd_getpid: .byte "P"
+cmd_proc_list:  .byte "PL"
 cmd_proc_info:  .byte "PI"
 
     .segment "KERNEL"
@@ -2890,6 +2890,20 @@ cmd_proc_info:  .byte "PI"
     lda #2
     ldx #<cmd_wait
     ldy #>cmd_wait
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; Print process info.
+; A: process ID
+.export lib_proc_list
+.proc lib_proc_list
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #2
+    ldx #<cmd_proc_list
+    ldy #>cmd_proc_list
     jsr SETNAM
     jmp OPEN
 .endproc
@@ -3357,7 +3371,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; LISTS & DEQUES ;;;
     ;;;;;;;;;;;;;;;;;;;;;;
 
-    ;; Totel free banks.
+    ;; Total free banks.
     ldaxi banks
     jsry list_length, free_bank
     cpx #FREE_BANKS_AFTER_INIT
@@ -3375,7 +3389,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     error err_free_banks_after_free
 
     ;; Deque
-    ; Allocate first.
+    ; Allocate first free proc.
 :   lpopx procs, free_proc
     phx
     ldaxi procs
@@ -3384,19 +3398,22 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     beq :+
     error err_wrong_free_proc_count
 :   plx
-    ; Push onto running.
+    ; Push free proc onto running.
     dpushx procs, procsb, running
     ldaxi procs
     jsry list_length, running
     cpx #1
     beq :+
     error err_wrong_deque_index
- 
+    ; Move it back to free procs.
+:   drmx procs, procsb, running
+    dpushx procs, procsb, free_proc
+
     ;;;;;;;;;;;;;;;;
     ;;; Syscalls ;;;
     ;;;;;;;;;;;;;;;;
 
-:   print txt_testing_processes
+    print txt_testing_processes
 
     ;; Fork and wait for child to exit.
     print note_forking
@@ -3410,7 +3427,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     cmp #0
     bne :+
     jmp baby
-:   lda #0
+:   jsr lib_proc_list
+    lda #0
     jsr lib_proc_info
     pla
     pha
@@ -3505,7 +3523,7 @@ txt_welcome:
     jmp proc0
 :   lda #0
     jsr lib_proc_info
-    lda #1
+    jsr lib_getpid
     jsr lib_proc_info
 
     ;; BASIC cold start.

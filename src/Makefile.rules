@@ -8,6 +8,6 @@ LD      = $(CC65_HOME)/bin/ld65
 #ASFLAGS =
 CFLAGS  = -O -Or -Os -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
 #CFLAGS  = -r -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
-LDFLAGS = -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
+LDFLAGS = -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
 
 EXOMIZER ?= exomizer-2.0.10

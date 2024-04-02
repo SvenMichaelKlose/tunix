@@ -743,7 +743,8 @@ Secondary address: process ID.
 
 Discloses all internal information about
 the process specified in the SA.
-Returns a key/value list with these keys:
+Returns a key/value list with these
+keys:
 
 * "ID": Process ID.
 * "FLAGS": RSZ
@@ -996,3 +997,52 @@ Secondary address: signal type.
 ### "SU": Unregister handler
 
 Secondary address: signal type.
+
+# Internals
+
+## How A Task Switch Is Performed
+
+There are two functions in TUNIX that
+perform a task switch: fork_raw() and
+switch().  fork_raw() copies the current
+process in its whole, including the
+stack and it's pointer.  When the new
+process is being switched to, it returns
+from fork_raw() like it's parent but
+with its parent's ID on the stack.
+That way fork() can tell if it deals
+with a returning parent or child.
+
+switch() just exchanges the address
+space and thus the stack to contiue with
+the next process.
+
+On the VIC-20 low memory must be copied
+twice for a task switch as the UltiMem
+expansion cannot access internal memory.
+
+# How Banking Is Performed
+
+TUNIX occupies the IO23 area to be
+around for all processes.  BLK1 holds
+the kernel and global data and RAM123
+contains per-process data.  These blocks
+are used by processes as well.  So when
+a programm enters an I/O function, the
+TUNIX kernel and data are banked in to
+work and the process' banks need to come
+back on return.  This seems to be solved
+easily by saving a process' bank
+configuration in its kernel tables but
+it makes calling I/O functions from
+within drivers impossible, as they are
+working in the caller's context but in
+their own address spaces.  Calling I/O
+would overwrite the process' bank
+configuration with the driver's set,
+and desaster would be inevitable.
+
+To get around this, the bank number of
+BLK1 is pushed on the stack and popped
+off on return.  Other blocks are
+preserved the same way just in time.

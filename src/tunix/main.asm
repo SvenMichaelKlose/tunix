@@ -30,10 +30,6 @@ EARLY_TESTS     = 1
 .import __LOCALBSS_SIZE__
 .import __LOCALBSS2_RUN__
 .import __LOCALBSS2_SIZE__
-.import __APP_FILEOFFS__
-.import __APP_LAST__
-.import __APP_SIZE__
-.import __APP_START__
 .import __ULTIMEM_SIZE__
 
 ;;; CPU
@@ -183,12 +179,12 @@ tmp3:   .res 2
 
 ptr1:   .res 2
 
-;; Extended memory banks
+;;; Extended memory banks
 banks:          .res MAX_BANKS
 free_bank:      .res 1
 bank_refs:      .res MAX_BANKS
 
-;; IO pages
+;;; IO pages
 iopages:        .res MAX_IOPAGES
 iopagesb:       .res MAX_IOPAGES
 free_iopage:    .res 1
@@ -196,15 +192,15 @@ first_iopage:   .res 1
 iopage_pid:     .res MAX_IOPAGES
 iopage_page:    .res MAX_IOPAGES
 
-;; Global logical file numbers
-;; Shared by fork()ed processes.
-; Free list
+;;; Global logical file numbers
+;;; Shared by fork()ed processes.
+;; Free list
 glfns:      .res MAX_LFNS
 glfn_refs:  .res MAX_LFNS
-; Last parameters to OPEN.
+;; Last parameters to OPEN.
 glfn_drv:   .res MAX_LFNS
 
-;; Processes
+;;; Processes
 procs:      .res MAX_PROCS
 procsb:     .res MAX_PROCS
 free_proc:  .res 1
@@ -216,30 +212,34 @@ PROC_RUNNING    = 64
 PROC_SLEEPING   = 128
 proc_flags: .res MAX_PROCS
 exit_codes: .res MAX_PROCS
-; Current banks.
-proc_data:  .res MAX_PROCS
-proc_ram123:.res MAX_PROCS
+;; Current banks.
+; Kernel and IO pages (per-process)
 proc_io23:  .res MAX_PROCS
+; Shadow RAM123 (per-process)
+proc_data:  .res MAX_PROCS
+; Process RAM123
+proc_ram123:.res MAX_PROCS
 proc_blk1:  .res MAX_PROCS
 proc_blk2:  .res MAX_PROCS
 proc_blk3:  .res MAX_PROCS
 proc_blk5:  .res MAX_PROCS
 
-;; Drivers
+;;; Drivers
 drvs:       .res MAX_DRVS
 drv_pid:    .res MAX_DRVS
 drv_dev:    .res MAX_DRVS
 drv_vl:     .res MAX_DRVS
 drv_vh:     .res MAX_DRVS
 
-; Drivers assigned to devices.
+;;; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
 
-;; Initial speed code banks.
+;;; Initial speed code banks.
 speedcopy_blk3_to_blk5:   .res 1
 speedcopy_blk5_to_lowmem: .res 1
 speedcopy_lowmem_to_blk5: .res 1
 
+;;; KERNAL
 old_kernal_vectors: .res 32
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -996,6 +996,44 @@ r:  plx
 ;;; SYSTEM CALL RETURN DATA ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.export print_decbyte
+.proc print_decbyte
+    sta tmp1
+    phx
+    ldx tmp1
+    lda #0
+    jsr PRTFIX
+    plx
+    rts
+.endproc
+
+.export print_decword
+.proc print_decword
+    sta tmp1
+    txa
+    lda tmp1
+    jmp PRTFIX
+.endproc
+
+.export print_decbyte_x8
+.proc print_decbyte_x8
+    ldx #0
+    stx tmp1
+    clc
+    rol
+    rol tmp1
+    clc
+    rol
+    rol tmp1
+    clc
+    rol
+    rol tmp1
+    tax
+    lda tmp1
+    jmp PRTFIX
+.endproc
+
+
 ; Print '$' and hexadecimal byte in A.
 .export print_hexbyte
 .proc print_hexbyte
@@ -1049,7 +1087,7 @@ r:  plx
     lda #','
     jsr BSOUT
     lda tmp1
-    jsr printdecbyte
+    jsr print_decbyte
     plx
     popw zp2
     rts
@@ -1065,6 +1103,18 @@ r:  plx
     plx
     rts
 .endproc
+
+; Print list indexes as CSV line.
+.macro print_csv list, first
+    ldx first
+    beq :++
+    txa
+:   jsr print_cv
+    lda list,x
+    tax
+    bne :-
+    jsr print_cr
+.endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
@@ -1395,11 +1445,11 @@ vec_io23_to_blk5:
     rts
 .endproc
 
-    .segment "KERNEL"
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .segment "KERNEL"
 
 ; Translate local to global LFN.
 ; Creates missing ones.
@@ -1463,23 +1513,11 @@ items_proc_info:
 
     .segment "KERNEL"
 
-; Print list indexes as CSV line.
-.macro print_csv list, first
-    ldx first
-    beq :++
-    txa
-:   jsr print_cv
-    lda list,x
-    tax
-    bne :-
-    jsr print_cr
-.endmacro
-
 .export proc_list_item
 .proc proc_list_item
     phx
     txa
-    jsr printdecbyte
+    jsr print_decbyte
     plx
 
     jsr print_comma
@@ -1504,7 +1542,7 @@ prt:tya
     phx
     jsr print_comma
     lda exit_codes,x
-    jsr printdecbyte
+    jsr print_decbyte
     plx
 
 ;    phx
@@ -1515,7 +1553,7 @@ prt:tya
 ;    stx tmp1
 ;    leave_data
 ;    lda tmp1
-;    jsr printdecbyte
+;    jsr print_decbyte
 ;    plx
 
     jsr print_cr
@@ -2558,52 +2596,15 @@ uerror:
 bank_last = banks + $7f
 
 has_errors:
-    jsr printdecbyte
+    jsr print_decbyte
     print txt_faulty_banks
 
 print_free_ram:
     lda banks_ok
 print_free_ram_a:
-    jsr printdecbyte_x8
+    jsr print_decbyte_x8
     print txt_banks_free
     rts
-
-.export printdecbyte
-.proc printdecbyte
-    sta tmp1
-    phx
-    ldx tmp1
-    lda #0
-    jsr PRTFIX
-    plx
-    rts
-.endproc
-
-.export printdecword
-.proc printdecword
-    sta tmp1
-    txa
-    lda tmp1
-    jmp PRTFIX
-.endproc
-
-.export printdecbyte_x8
-.proc printdecbyte_x8
-    ldx #0
-    stx tmp1
-    clc
-    rol
-    rol tmp1
-    clc
-    rol
-    rol tmp1
-    clc
-    rol
-    rol tmp1
-    tax
-    lda tmp1
-    jmp PRTFIX
-.endproc
 
 .export printbnk
 .proc printbnk
@@ -2721,8 +2722,9 @@ vec_tunix_kernal:
     print txt_starting_multitasking
     inc multitasking
     ;; Make holograhic process to fork.
+    ; Unlink from free list.
     lda #0
-    sta procs
+    sta procs ; (Running alone.)
     ; Fill in banks for process 0.
     ldx #2
     stx proc_data
@@ -2739,15 +2741,12 @@ vec_tunix_kernal:
     stx proc_blk3
     inx
     stx proc_blk5
-    ; Unlink from free list.
-    ldy #0
-    sty procs
     ;; Fork all banks.
     ldx #0
     jsr fork_raw
-    ;get_procblk_y proc_data, ram123
-    ;get_procblk_y proc_io23, io23
-    ;get_procblk_y proc_blk1, blk1
+    ; Continue with forked banks.
+    ; TODO: Unref RAM123 as proc 0 will
+    ; use the shadow RAM123.
     mvb ram123, proc_data
     mvb io23, proc_io23
     mvb blk1, proc_blk1
@@ -2755,9 +2754,6 @@ vec_tunix_kernal:
     mvb blk2, proc_blk2
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
-    ;get_procblk_y proc_blk2, blk2
-    ;get_procblk_y proc_blk3, blk3
-    ;get_procblk_y proc_blk5, blk5
     ;; Mark as running.
     lda #PROC_RUNNING
     sta proc_flags
@@ -3144,8 +3140,9 @@ r:  pla
     ;; Copy in low mem...
     lda speedcopy_blk5_to_lowmem
     sta blk2
-    ; Set return address.  We cannot use
-    ; the stack as its just about to be
+    ; Set return address of speed copy
+    ; manually as we cannot use the
+    ; stack since its just about to be
     ; overwritten.
     lda #<:+
     sta $5801

@@ -2982,7 +2982,7 @@ h:  lda $ffff
     pop LFN
     popw FNADR
     lda reg_a
-    rts ;jmp tunix_leave
+    jmp tunix_leave
 .endproc
 
 .export chkin2
@@ -3024,7 +3024,8 @@ h:  lda $ffff
     .proc name2
         ldx device
         ldy dev_drv,x
-        jmpa call_driver, #drvop
+        jsra call_driver, #drvop
+        jmp tunix_leave
     .endproc
 .endmacro
 
@@ -3043,7 +3044,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     sta glfn_drv,x
     tya
     tax
-    jmpa call_glfn_driver, #IDX_CLOSE
+    jsra call_glfn_driver, #IDX_CLOSE
+    jmp tunix_leave
 .endproc
 
 .export clall2
@@ -3060,13 +3062,15 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .export stop2
 .proc stop2
     ldy #0
-    jmpa call_driver, #IDX_STOP
+    jsra call_driver, #IDX_STOP
+    jmp tunix_leave
 .endproc
 
 .export usrcmd2
 .proc usrcmd2
     ldy #0
-    jmpa call_driver, #IDX_STOP
+    jsra call_driver, #IDX_STOP
+    jmp tunix_leave
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3189,7 +3193,10 @@ r:  pla
     php
     pla
     sta flags
+    rts
 .endproc
+
+fnord: .res 2
 
 ; Restore banks on BLK1 & RAM123.
 .export tunix_leave
@@ -3274,7 +3281,8 @@ iowrap usrcmd, usrcmd2
     ; TODO: Call all LFNs.
     jsr tunix_enter
     ldy #0
-    jmpa call_driver, #IDX_CLRCHN
+    jsra call_driver, #IDX_CLRCHN
+    jmp tunix_leave
 .endproc
 
 .macro blkiohandler name, idx
@@ -3283,7 +3291,8 @@ iowrap usrcmd, usrcmd2
         jsr tunix_enter
         ldx DEV
         ldy dev_drv,x
-        jmpa call_driver, idx
+        jsra call_driver, idx
+        jmp tunix_leave
     .endproc
 .endmacro
 

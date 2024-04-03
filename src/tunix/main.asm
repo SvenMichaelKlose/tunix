@@ -207,6 +207,7 @@ free_proc:  .res 1
 running:    .res 1
 sleeping:   .res 1
 zombie:     .res 1
+PROC_BABY       = 16
 PROC_ZOMBIE     = 32
 PROC_RUNNING    = 64
 PROC_SLEEPING   = 128
@@ -1118,17 +1119,6 @@ r:  plx
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Globally, only free banks are tracked
-; via 'banks[]' and '*free_bank'.
-; The latter could be stored in
-; banks[0] instead. Items in 'bank_refs'
-; increment for each process that shares
-; a bank.
-;
-; Locally, only allocated banks are
-; tracked in deque 'lbanks/lbanksb',
-; starting with 'first_lbank'.
 
 ; Allocate bank
 ; Returns:
@@ -1687,8 +1677,8 @@ no_proc:
     ;; Leave child's RAM123.
 :   leave_data
 
-    ;; Mark child as running.
-    lda #PROC_RUNNING
+    ;; Mark child as baby.
+    lda #PROC_BABY
     sta proc_flags,y
     tya
     clc
@@ -3202,12 +3192,18 @@ fnord: .res 2
 .export tunix_leave
 .proc tunix_leave
     ldx pid
+    ldy proc_flags,x
+    pop ram123
+    pop blk1
+    cpy #PROC_BABY
+    bne :+
+    ; Replace parent's after fork().
     lda proc_blk1,x
     sta blk1
-    lda proc_blk2,x
-    sta blk2
     lda proc_ram123,x
     sta ram123
+:   lda #PROC_RUNNING
+    sta proc_flags,x
     lda flags
     pha
     load_regs
@@ -3226,14 +3222,12 @@ fnord: .res 2
 
 .export tunix_enter2
 .proc tunix_enter2
-    ldx pid
-    lda blk1
-    tay
+    popw fnord
+    push blk1
+    push ram123
+    pushw fnord
     mvb blk1, tunix_blk1
-    tya
-    sta proc_blk1,x
-    lda ram123
-    sta proc_ram123,x
+    ldx pid
     lda proc_data,x
     sta ram123
     rts

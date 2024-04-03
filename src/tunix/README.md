@@ -1000,15 +1000,28 @@ Secondary address: signal type.
 
 # Internals
 
-## How A Task Switch Is Performed
+## Extended Memory Management
+
+Globally, only free banks are tracked
+via 'banks[]' and '\*free\_bank'.  The
+latter could be stored in banks[0]
+instead. Items in 'bank\_refs' increment
+for each process that shares a bank.
+
+Locally (per-process), only allocated
+banks are tracked in deque
+'lbanks/lbanksb', starting with
+'first\_lbank'.
+
+## Task Switching
 
 There are two functions in TUNIX that
-perform a task switch: fork_raw() and
-switch().  fork_raw() copies the current
+perform a task switch: fork\_raw() and
+switch().  fork\_raw() copies the current
 process in its whole, including the
 stack and it's pointer.  When the new
 process is being switched to, it returns
-from fork_raw() like it's parent but
+from fork\_raw() like it's parent but
 with its parent's ID on the stack.
 That way fork() can tell if it deals
 with a returning parent or child.
@@ -1021,7 +1034,7 @@ On the VIC-20 low memory must be copied
 twice for a task switch as the UltiMem
 expansion cannot access internal memory.
 
-# How Banking Is Performed
+## Banking: Managing Pieces Of Address Space
 
 TUNIX occupies the IO23 area to be
 around for all processes.  BLK1 holds

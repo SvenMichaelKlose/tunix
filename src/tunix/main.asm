@@ -942,21 +942,6 @@ r:  plx
     jmp halt
 .endmacro
 
-.export in
-.proc in
-    ldy #0
-    lda (zp2),y
-    incw zp2
-    rts
-.endproc
-
-.export peek
-.proc peek
-    ldy #0
-    lda (zp2),y
-    rts
-.endproc
-
 .export print_cr
 .proc print_cr
     phx

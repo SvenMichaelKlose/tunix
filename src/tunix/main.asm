@@ -2095,6 +2095,8 @@ err_out_of_running_procs:
     ldx #0
     jsr suspend
     jsr schedule
+    lda running
+    bne proc0
     lda #0
     sta multitasking
     print err_out_of_running_procs
@@ -3421,7 +3423,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
     ;; Fork and wait for child to exit.
     print note_forking
-debug:.export debug
     jsr lib_fork
     bcc :+
     error err_cannot_fork

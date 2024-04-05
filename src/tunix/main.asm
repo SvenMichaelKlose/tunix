@@ -3081,48 +3081,36 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 ; Picks next or first on running list.
 .export schedule
 .proc schedule
-    php
-    pha
     lda multitasking
     beq r
-    phx
-    phy
 
     ;; Get next running.
     ldx pid
     lda procs,x
     bne :++
-
-    ;; Restart list.
-    ; Process 0 running?
+    ; Restart list.
     lda proc_flags
     cmp #PROC_RUNNING
     bne :+  ; No...
     lda #0
     beq :++ ; (jmp)
 :   lda running
-
-    ;; Switch.
+    ; Avoid switch to self.
 :   cmp pid
-    beq :+ ; Don't switch to self.
+    beq r
+
     tay
     push ram123
-    push blk1
     push blk2
     push blk3
     push blk5
-    jsr switch
+    jsr switch ; Switch IO23 & lowmem.
     pop blk5
     pop blk3
     pop blk2
-    pop blk1
     pop ram123
 
-:   ply
-    plx
-r:  pla
-    plp
-    rts
+r:  rts
 .endproc
 
 ; Switch internal RAM and IO23 only(!).
@@ -3196,40 +3184,41 @@ r:  pla
     rts
 .endproc
 
-fnord: .res 2
-
 ; Restore banks on BLK1 & RAM123.
 .export tunix_leave
 .proc tunix_leave
+    jsr schedule
+
     ldx pid
     ldy proc_flags,x
     pop ram123
     pop blk1
+
+    ; Init baby banks after fork().
     cpy #PROC_BABY
     bne :+
-    ; Replace parent's after fork().
-    lda proc_blk1,x
-    sta blk1
+    mvb blk1,tunix_blk1
+    lda #PROC_RUNNING
+    sta proc_flags,x
     lda proc_ram123,x
     sta ram123
-:   lda #PROC_RUNNING
-    sta proc_flags,x
-    lda flags
+    lda proc_blk1,x
+    sta blk1
+
+    ; Restore syscall return values.
+:   lda flags
     pha
     load_regs
     plp
-    jmp schedule
+    rts
 .endproc
 
-; Map in rest of TUNIX.
-; It's in RAM123 and BLK1.  Saves
-; current RAM123 and BLK to process
-; tables.
 .export tunix_enter
 .proc tunix_enter
     save_regs
 .endproc
 
+; Map in RAM123 and BLK1.
 .export tunix_enter2
 .proc tunix_enter2
     popw fnord
@@ -3243,12 +3232,13 @@ fnord: .res 2
     rts
 .endproc
 
+fnord: .res 2
+
 .export open
 .proc open
     save_regs
 
     ;; Move filename + pointer to IO23.
-    pushw FNADR
     ldy FNLEN
     beq :++
     dey
@@ -3257,6 +3247,7 @@ fnord: .res 2
     dey
     bpl :-
 :   jsr tunix_enter2
+    pushw FNADR
     jmp open2
 .endproc
 
@@ -3430,6 +3421,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
     ;; Fork and wait for child to exit.
     print note_forking
+debug:.export debug
     jsr lib_fork
     bcc :+
     error err_cannot_fork

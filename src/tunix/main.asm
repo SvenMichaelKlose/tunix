@@ -21,6 +21,9 @@ EARLY_TESTS     = 1
 .import __BOOT_LOAD__
 .import __BOOT_RUN__
 .import __BOOT_SIZE__
+.import __BOOTDATA_LOAD__
+.import __BOOTDATA_RUN__
+.import __BOOTDATA_SIZE__
 .import __GLOBALBSS_RUN__
 .import __GLOBALBSS_SIZE__
 .import __LOCALCODE_LOAD__
@@ -3509,10 +3512,16 @@ txt_welcome:
 .proc start
     print txt_tunix
 
+.ifdef EARLY_TESTS
     ; Relocate boot & tests.
     stwi s, __BOOT_LOAD__ + __BOOT_SIZE__ - 1
     stwi d, __BOOT_RUN__ + __BOOT_SIZE__ - 1
     stwi c, __BOOT_SIZE__
+    jsr memcpybw
+.endif ; .ifdef EARLY_TESTS
+    stwi s, __BOOTDATA_LOAD__ + __BOOTDATA_SIZE__ - 1
+    stwi d, __BOOTDATA_RUN__ + __BOOTDATA_SIZE__ - 1
+    stwi c, __BOOTDATA_SIZE__
     jsr memcpybw
 
     jsr boot

@@ -128,6 +128,7 @@ MAX_DEVS     = 32
 
 IOPAGE_BASE  = $9b
 MAX_IOPAGES  = 4
+STACK_LIMIT  = 16
 
     .zeropage
 
@@ -2109,6 +2110,11 @@ err_out_of_running_procs:
     jmp guru_meditation
 .endproc
 
+.export stack_overflow
+.proc stack_overflow
+    jmp stack_overflow
+.endproc
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SYSCALL DRIVER (DEVICE #31) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3133,7 +3139,11 @@ r:  pla
 
     ;;; Save current.
     tsx
-    stx stack
+    cpx #STACK_LIMIT
+    bcs :+
+    jsr stack_overflow
+    ; NOT REACHED.
+:   stx stack
     ldx io23
     stx blk5
     ldx pid

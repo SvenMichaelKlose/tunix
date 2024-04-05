@@ -21,9 +21,6 @@ EARLY_TESTS     = 1
 .import __BOOT_LOAD__
 .import __BOOT_RUN__
 .import __BOOT_SIZE__
-.import __BOOTDATA_LOAD__
-.import __BOOTDATA_RUN__
-.import __BOOTDATA_SIZE__
 .import __GLOBALBSS_RUN__
 .import __GLOBALBSS_SIZE__
 .import __LOCALCODE_LOAD__
@@ -1524,6 +1521,10 @@ items_proc_info:
 :   cmp #PROC_SLEEPING
     bne :+
     ldy #'S'
+    bne prt ; (jmp)
+:   cmp #PROC_BABY
+    bne :+
+    ldy #'B'
     bne prt ; (jmp)
 :   cmp #PROC_ZOMBIE
     bne prt
@@ -3500,7 +3501,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 ;;; START ;;;
 ;;;;;;;;;;;;;
 
-    .segment "BOOTDATA"
+    .segment "KERNELDATA"
 
 txt_welcome:
   .byte 13 ; PETSCII_CLRSCR
@@ -3519,10 +3520,6 @@ txt_welcome:
     stwi c, __BOOT_SIZE__
     jsr memcpybw
 .endif ; .ifdef EARLY_TESTS
-    stwi s, __BOOTDATA_LOAD__ + __BOOTDATA_SIZE__ - 1
-    stwi d, __BOOTDATA_RUN__ + __BOOTDATA_SIZE__ - 1
-    stwi c, __BOOTDATA_SIZE__
-    jsr memcpybw
 
     jsr boot
 

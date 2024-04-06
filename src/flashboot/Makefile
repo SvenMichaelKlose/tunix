@@ -1,5 +1,5 @@
 PROGRAM=flashboot.bin
-ASMSOURCES=rom-info.asm
+ASMSOURCES=rom-info.asm start.asm
 #ASMSOURCES=alloc.asm api.asm copy-bank.asm launch.asm main.asm save-state.asm rom-info.asm prgend.asm
 SOURCES=main.c
 

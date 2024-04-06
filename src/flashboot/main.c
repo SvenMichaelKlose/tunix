@@ -1,5 +1,7 @@
 // TUNIX UltiMem Flash Boot
 
+#include <stdio.h>
+
 #include <lib/ultimem/ultimem.h>
 
 #pragma code-name (push, "TRAMPOLINE")
@@ -16,9 +18,7 @@ boot (char bank)
 void
 main (void)
 {
-    ultimem_unhide ();
     *ULTIMEM_CONTROL = ULTIMEM_CTRL_LED;
-    *ULTIMEM_CONFIG1 = 0x3f;
-    *ULTIMEM_CONFIG2 = 0xff;
+printf ("HELLO WORLD!");
     boot ((*ULTIMEM_CONTROL & ULTIMEM_CTRL_SWITCH1) ? 1 : 127);
 }

@@ -25,13 +25,16 @@ TUNIX_DEVICE    = 31
 
         .data
 
-cmd_fork:       .byte "PF"
-cmd_exit:       .byte "PE"
-cmd_kill:       .byte "PKc"
-cmd_wait:       .byte "PW"
-cmd_getpid:     .byte "P"
-cmd_proc_list:  .byte "PL"
-cmd_proc_info:  .byte "PI"
+cmd_fork:           .byte "PF"
+cmd_exit:           .byte "PE"
+cmd_kill:           .byte "PKc"
+cmd_wait:           .byte "PW"
+cmd_getpid:         .byte "P"
+cmd_iopage_alloc:   .byte "DA"
+cmd_iopage_commit:  .byte "DC"
+cmd_iopage_free:    .byte "DF"
+cmd_proc_list:      .byte "PL"
+cmd_proc_info:      .byte "PI"
 
         .code
 
@@ -140,6 +143,51 @@ cmd_proc_info:  .byte "PI"
     lda #2
     ldx #<cmd_proc_info
     ldy #>cmd_proc_info
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; Allocate I/O page
+; Returns:
+;  A: Page number
+.export lib_iopage_alloc
+.proc lib_iopage_alloc
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #2
+    ldx #<cmd_iopage_alloc
+    ldy #>cmd_iopage_alloc
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; Commit I/O page
+;  A: Page number
+.export lib_iopage_commit
+.proc lib_iopage_commit
+    tay
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #2
+    ldx #<cmd_iopage_commit
+    ldy #>cmd_iopage_commit
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; Free I/O page
+;  A: Page number
+.export lib_iopage_free
+.proc lib_iopage_free
+    tay
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #2
+    ldx #<cmd_iopage_free
+    ldy #>cmd_iopage_free
     jsr SETNAM
     jmp OPEN
 .endproc

@@ -1,5 +1,9 @@
-.import lib_schedule, lib_getpid, lib_fork
+.import lib_schedule, lib_getpid
+.import lib_fork
 .import lib_exit, lib_kill, lib_wait
+.import lib_iopage_alloc
+.import lib_iopage_commit
+.import lib_iopage_free
 .import lib_proc_list, lib_proc_info
 .import popax
 
@@ -12,6 +16,9 @@
 .export _tunix_resume = lib_wait
 .export _tunix_proc_list = lib_proc_list
 .export _tunix_proc_info = lib_proc_info
+.export _tunix_iopage_alloc = lib_iopage_alloc
+.export _tunix_iopage_commit = lib_iopage_commit
+.export _tunix_iopage_free = lib_iopage_free
 
 ; A: process ID
 ; X: exit code

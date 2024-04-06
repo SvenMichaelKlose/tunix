@@ -20,3 +20,19 @@ unused UltiMem button on reset.
 Settings could be stored in a journal on
 the eigth boot block so more functions
 could be included conveniently.
+
+# (old plan) Ultimate Ultiboot
+
+[ ] Can run as PRG with any confi-
+    guration of the UltiMem.
+[ ] Can make and burn images.
+[ ] Can install itself as one of the
+    boot ROMs.
+
+[ ] Fast memory config selection.
+[ ] Alternative boot ROMs.
+[ ] Launch from disk or Ultifs.
+[ ] Autostart.
+[ ] Autostart device preference.
+[ ] Memorize launch for next reset or
+    hotkey.

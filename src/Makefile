@@ -11,6 +11,7 @@ all:
 	$(MAKE) -C lib/gfx all
 	$(MAKE) -C lib/term all
 	$(MAKE) -C lib/term-test all
+	$(MAKE) -C lib/tunix all
 	$(MAKE) -C lib/keyboard all
 	$(MAKE) -C lib/lineedit all
 	$(MAKE) -C lib/log all
@@ -40,6 +41,7 @@ clean:
 	$(MAKE) -C lib/gfx clean
 	$(MAKE) -C lib/term clean
 	$(MAKE) -C lib/term-test clean
+	$(MAKE) -C lib/tunix clean
 	$(MAKE) -C lib/keyboard clean
 	$(MAKE) -C lib/lineedit clean
 	$(MAKE) -C lib/log clean

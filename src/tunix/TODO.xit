@@ -1,11 +1,17 @@
 Initial release
+[ ] Working BASIC LOAD.
+[ ] IO page tests.  The virtual console
+    will need them for interrupt
+    handling.
+[ ] Virtual CBM console
 [ ] Screen & stack moves with speed
     code.
 [@] Info syscalls
-[ ] Installer
 [@] Boot loader selection
 [@] Restore-on-reset update
-[ ] Virtual CBM console
+[ ] Installer.  Relocate installed boot
+    ROM.
+[ ] Uninstaller.
 
 [ ] Multiple driver instances
 [ ] Syscall "PE" (exec)

@@ -1,0 +1,20 @@
+Initial release
+[@] Info syscalls
+[ ] Installer
+[@] Boot loader selection
+[@] Restore-on-reset update
+[ ] Virtual CBM console
+
+[ ] Multiple driver instances
+[ ] Syscall "PE" (exec)
+[ ] Tested signals
+[ ] wait() by signal
+
+[ ] UltiFS port
+[ ] 40x24 terminal port
+
+Resource optimizations
+[ ] Free any address range to have TUNIX
+    free memory banks in a portable
+    fashion and to reduce slow low
+    memory copies during task switches.

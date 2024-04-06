@@ -16,7 +16,7 @@ __VIC20__       = 1
 EARLY_TESTS     = 1
 BLEEDING_EDGE   = 1
 
-;;; Linker
+;;; Segmentation
 
 .import __BOOT_LOAD__
 .import __BOOT_RUN__
@@ -32,12 +32,17 @@ BLEEDING_EDGE   = 1
 .import __LOCALBSS2_SIZE__
 .import __ULTIMEM_SIZE__
 
+;;; Syscall wrappers
+
 .import lib_schedule
 .import lib_getpid
 .import lib_fork
 .import lib_exit
 .import lib_kill
 .import lib_wait
+.import lib_iopage_alloc
+.import lib_iopage_commit
+.import lib_iopage_free
 .import lib_proc_list
 .import lib_proc_info
 
@@ -2037,8 +2042,8 @@ r:  rts
 .endproc
 
 ; "DA"
-.export tunix_alloc_io_page
-.proc tunix_alloc_io_page
+.export tunix_iopage_alloc
+.proc tunix_iopage_alloc
     lda free_iopage
     beq no_more
     alloc_iopage_x
@@ -2053,8 +2058,8 @@ no_more:
 .endproc
 
 ; "DCp"
-.export tunix_commit_io_page
-.proc tunix_commit_io_page
+.export tunix_iopage_commit
+.proc tunix_iopage_commit
     ldy #0
 l:  cpy pid
     beq next
@@ -2090,8 +2095,8 @@ next:
 .endproc
 
 ; "DFp"
-.export tunix_free_io_page
-.proc tunix_free_io_page
+.export tunix_iopage_free
+.proc tunix_iopage_free
     lda SA
     sec
     sbc #IOPAGE_BASE - 1
@@ -2482,9 +2487,9 @@ syscall0 tunix_proc_list, proc_list
     beq fi
     jmp respond_error
 r:  jmp tunix_register
-ai: jmp tunix_alloc_io_page
-co: jmp tunix_commit_io_page
-fi: jmp tunix_free_io_page
+ai: jmp tunix_iopage_alloc
+co: jmp tunix_iopage_commit
+fi: jmp tunix_iopage_free
 .endproc
 
 ;;;;;;;;;;;;
@@ -3364,6 +3369,13 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_wait
     bcc :+
     error err_cannot_wait
+
+    ;;;;;;;;;;;;;;;;
+    ;;; IO pages ;;;
+    ;;;;;;;;;;;;;;;;
+
+:   jsr lib_iopage_alloc
+
 :   print txt_tests_passed
     rts
 .endproc

@@ -1,5 +1,6 @@
 Initial release
 [ ] Working BASIC LOAD.
+[ ] Init app name as argument.
 [ ] IO page tests.  The virtual console
     will need them for interrupt
     handling.

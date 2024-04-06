@@ -14,7 +14,7 @@
 
 __VIC20__       = 1
 EARLY_TESTS     = 1
-;BLEEDING_EDGE   = 1
+BLEEDING_EDGE   = 1
 
 ;;; Linker
 
@@ -306,7 +306,7 @@ lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
 lfn_glfn:       .res MAX_LFNS
 
-.ifdef BLEEDING_EDGEDE
+.ifdef BLEEDING_EDGE
 
 .export signals, signalsb, signal_type
 .export signal_payload

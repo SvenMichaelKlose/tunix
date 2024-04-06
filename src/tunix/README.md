@@ -1,14 +1,113 @@
-The TUNIX OS project
+The TUNIX Project
 ====================
 
 „Tu nix!“ (German for "Do nothing!").
 
-# Introduction
+This document describes TUNIX for users
+and developers and most importantly what
+TUNIX is going to look like.  Please
+see the
+(list of things to do)[TOOD.xit] for a
+bigger picture of that.
+
+Special thanks go to Lee Davidson and
+Simon Rowe for their efforts of
+documentating the KERNAL and file I/O of
+Commodore 8-bit machines and the VIC-20
+in particular, which inspired some
+sections of this manual greatly.
+
+# What is TUNIX?
 
 TUNIX is a KERNAL extension for the
-Commodore VIC-20 with UltiMem expansion
+Commodore VIC-20 with UltiMem expansion.
 which adds pre-emptive multi-tasking,
 loadable drivers and recover-on-reset.
+
+## The Commodore KERNAL
+
+The Commodore KERNAL is essentially the
+operating system of Commodore 8-bit
+computers, such as the Commodore
+PET, VIC, C64 and so on.  Think of it as
+the bridge between the computer's
+hardware and the software you interact
+with.  The KERNAL's role is like
+getting to know the backstage crew of a
+theater production.  It does all the
+heavy lifting in the background,
+enabling the show (or in this case, the
+computer) to perform basic functions
+smoothly.
+
+## Basic Functions
+
+* Input/Output (I/O) Management: The
+  KERNAL is responsible for handling all
+  the communication between the
+  computer’s hardware components, like
+  the keyboard, screen, disk drives, and
+  printers.  Whenever you press a key or
+  a program wants to display something
+  on the screen, the KERNAL is the
+  intermediary that makes that happen.
+
+* File Management: It provides the
+  functionality for reading, writing,
+  and managing files on disk.  This
+  includes opening files, saving data,
+  and listing directory contents.  It's
+  like the librarian that knows where
+  every book is placed and helps you to
+  find or store them.
+
+* Memory Management: The KERNAL also
+  plays a crucial role in managing the
+  computer's memory, deciding which
+  parts of the memory are used for what
+  purpose.  Think of it as organizing
+  your desk space efficiently so you can
+  work without clutter.
+
+* Device Management: Commodore computers
+  could connect to various external
+  devices, such as printers, modems, or
+  external disk drives.  The KERNAL
+  includes routines (set sequences of
+  instructions) for managing these
+  devices seamlessly, allowing software
+  to use them without needing to know
+  the nitty-gritty details of how they
+  work.
+
+* Error Handling: When something goes
+  wrong, like trying to read a file that
+  doesn't exist, the KERNAL steps in to
+  handle the error, often providing
+  messages to the user or software about
+  what went wrong.
+
+## Why It Matters
+
+The significance of the KERNAL lies in
+its foundational role in making the
+Commodore computers versatile and
+user-friendly.  It's what allowed
+programmers to create a vast array of
+software, from simple text editors to
+complex games, without having to start
+from scratch every time.  This operating
+system layer facilitated the explosion
+of creative and useful applications that
+defined the Commodore experience.
+
+In essence, the Commodore KERNAL is like
+the conductor of an orchestra, ensuring
+that each part of the computer plays
+together in harmony, allowing users to
+enjoy the symphony of software that
+became available for these iconic
+machines.
 
 ## Memory
 
@@ -21,8 +120,6 @@ address space is available to programs.
 (The time spans mentioned here have been
 guessed.)
 
-TUNIX isn't optimized for performance
-but for simplicity and robustness.
 Jim Brain's UltiMem expansion makes the
 TUNIX project possible in the first
 place.  Thanks to it, most process
@@ -46,38 +143,38 @@ by automatically generated speed code.
   regular copy loop, saving the TUNIX
   day.
 
-TUNIX uses fast deque (doubly-linked
-list)/map combinations with byte
-pointers to perform operations on
-internal data structures at a more or
-less constant time.  The following
-sections cover some essential timings
-in more detail.
+TUNIX isn't optimized for performance
+but for simplicity and robustness.
+The following sections cover some
+essential timings in more detail.
 
 ### System calls
 
 The most expensive operation is the
 fork() system call, which can take up to
-355ms to complete since the address
-space of the forked process is cloned
-completely.
+0.4s to complete since the address space
+of the forked process is cloned
+completely.  Without speed code this
+would take about 0.8s.
 
 ### Task Switches
 
 Switching from one native VIC
 application to another takes 21ms, from
-a native to a TUNIX app 7ms (175ms the
-other way around), and a swith from one
-TUNIX app to another TUNIX app brills
-with 0.3ms to 10ms.
+a native to a TUNIX app takes 7ms (175ms
+the other way around), and a swith from
+a TUNIX app to another TUNIX app brills
+at 0.3ms to 10ms.
 
 Time-consuming task switches aren't much
 of a factor as native apps are not
-multi-tasked and only run when they are
-active on the console.  TUNIX apps can
-still run alongside unless that has been
-disabled (e.g. to run programs that take
-over the machine).
+multi-tasking and only run when they are
+connected to an active console.  TUNIX
+apps can still run alongside unless
+that has been disabled (e.g. to run
+programs that take over the machine, to
+get the maximum performance out of the
+machine).
 
 ### I/O
 
@@ -87,10 +184,10 @@ for transmitting or receiving 64K
 characters via device drivers.
 
 The TUNIX system call driver's overhead
-is limited to parsing and dispatching
-commands.  Resource allocation and
-deallocation uses fast deque operations
-at constant execution times.
+is parsing and dispatching commands.
+Resource allocation and deallocation
+uses fast deque operations at constant
+execution times.
 
 ## Educational Purpose
 
@@ -1059,3 +1156,17 @@ To get around this, the bank number of
 BLK1 is pushed on the stack and popped
 off on return.  Other blocks are
 preserved the same way just in time.
+
+# Drivers
+
+## Signal polling
+
+Some programming lanugages can not
+implement signal handlers.  A driver
+could allow to read incoming signals.
+
+## FIFO
+
+For inter-process communication.
+
+## RAM disk

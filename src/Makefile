@@ -17,6 +17,7 @@ all:
 	$(MAKE) -C lib/log all
 	$(MAKE) -C lib/text all
 	$(MAKE) -C lib/gui all
+	$(MAKE) -C cbm-console all
 	$(MAKE) -C flashboot all
 	$(MAKE) -C fstest all
 	$(MAKE) -C desktop all
@@ -47,6 +48,7 @@ clean:
 	$(MAKE) -C lib/log clean
 	$(MAKE) -C lib/text clean
 	$(MAKE) -C lib/gui clean
+	$(MAKE) -C cbm-console clean
 	$(MAKE) -C flashboot clean
 	$(MAKE) -C fstest clean
 	$(MAKE) -C desktop clean

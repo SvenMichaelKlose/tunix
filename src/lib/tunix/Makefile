@@ -1,6 +1,7 @@
 LIBRARY=libtunix.a
 ASMSOURCES= \
-    main.asm
+    main.asm \
+    c-wrappers.asm
 
 include ../../Makefile.rules
 
@@ -13,4 +14,4 @@ $(LIBRARY): $(ASMSOURCES:.asm=.o)
 all: $(LIBRARY)
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(LIBRARY)
+	rm -f $(ASMSOURCES:.asm=.o) $(CSOURCES:.asm=.o) $(LIBRARY)

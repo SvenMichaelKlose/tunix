@@ -7,9 +7,9 @@
  */
 
 #define ULTIMEM_CONTROL         ((char *) 0x9ff0)
-#define ULTIMEM_CTRL_LED        1
+#define ULTIMEM_CTRL_LED        1       /* LED status */
 #define ULTIMEM_CTRL_SWITCH0    2       /* Middle switch. 0=pressed. */
-#define ULTIMEM_CTRL_SWITCH1    2       /* Left-most switch. 0=pressed. */
+#define ULTIMEM_CTRL_SWITCH1    4       /* Left-most switch. 0=pressed. */
 #define ULTIMEM_CTRL_RESET      64      /* Soft-reset. Keep registers. */
 #define ULTIMEM_CTRL_HIDE       128     /* Hide registers. */
 

@@ -186,12 +186,12 @@ free_bank:  .res 1
 bank_refs:  .res MAX_BANKS
 
 ;;; IO pages
-iopages:        .res MAX_IOPAGES
-iopagesb:       .res MAX_IOPAGES
+iopages:        .res MAX_IOPAGES + 1
+iopagesb:       .res MAX_IOPAGES + 1
 free_iopage:    .res 1
 first_iopage:   .res 1
-iopage_pid:     .res MAX_IOPAGES
-iopage_page:    .res MAX_IOPAGES
+iopage_pid:     .res MAX_IOPAGES + 1
+iopage_page:    .res MAX_IOPAGES + 1
 
 ;;; Global logical file numbers
 ;;; Shared by fork()ed processes.
@@ -227,11 +227,11 @@ proc_blk3:  .res MAX_PROCS
 proc_blk5:  .res MAX_PROCS
 
 ;;; Drivers
-drvs:       .res MAX_DRVS
-drv_pid:    .res MAX_DRVS
-drv_dev:    .res MAX_DRVS
-drv_vl:     .res MAX_DRVS
-drv_vh:     .res MAX_DRVS
+drvs:       .res MAX_DRVS + 1
+drv_pid:    .res MAX_DRVS + 1
+drv_dev:    .res MAX_DRVS + 1
+drv_vl:     .res MAX_DRVS + 1
+drv_vh:     .res MAX_DRVS + 1
 
 ;;; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
@@ -1743,38 +1743,15 @@ not_to_resume:
     jsr bprocfree
     leave_tunix
     plx
-    stx tmp1
 
-.if 0
-    ;; Free IO pages.
-    ldy first_iopage
-    beq :+++
-:   lda iopage_pid,y
-    cmp tmp1
-    bne :+
-    tax
-    free_iopage_x
-:   lloopy iopages, :--
-
-    ;; Free drivers.
-:   ldy drvs
-    beq :+++
-:   lda drv_pid,y
-    cmp tmp1
-    bne :+
-    tax
-    lpushx drvs, drvs
-    ; Set device to KERNAL.
-    lda drv_dev,y
-    tax
-    lda #0  ; KERNAL
-    sta dev_drv,x
-:   lloopy drvs, :--
-.endif
+    phx
+    jsr free_iopages
+    jsr free_drivers
+    plx
 
     ;; Remove process from running or
     ;; sleeping list.
-:   ldx tmp1
+    ldx tmp1
     lda proc_flags,x
     bmi take_off_sleeping
 take_off_running:
@@ -2033,9 +2010,117 @@ no_handler_set:
 
 .endif ; .if BLEEDING_EDGE
 
-;;;;;;;;;;;;;;;
-;;; DRIVERS ;;;
-;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;
+;;; I/O PAGES ;;;
+;;;;;;;;;;;;;;;;;
+
+; Free IO pages of a process.
+; X: process ID
+.proc free_iopages
+    stx tmp1
+    ldy first_iopage
+    beq r
+l:  lda iopage_pid,y
+    cmp tmp1
+    bne n
+    tax
+    free_iopage_x
+n:  lloopy iopages, l
+r:  rts
+.endproc
+
+; "DA"
+.export tunix_alloc_io_page
+.proc tunix_alloc_io_page
+    lda free_iopage
+    beq no_more
+    alloc_iopage_x
+    ldx pid
+    sta iopage_pid,x
+    txa
+    clc
+    adc #IOPAGE_BASE - 1
+    jmp respond
+no_more:
+    jmp respond_error
+.endproc
+
+; "DCp"
+.export tunix_commit_io_page
+.proc tunix_commit_io_page
+    ldy #0
+l:  cpy pid
+    beq next
+    lda proc_flags,y
+    beq next
+
+    ;; Copy page.
+    phy
+    push blk5
+    io23x_at_blk5
+    lda SA
+    clc
+    adc #IOPAGE_BASE - 1
+    sta sh
+    clc
+    adc #$20    ; (Bump to BLK5.)
+    sta dh
+    lda #0
+    sta sl
+    sta dl
+    tay
+:   lda (s),y
+    sta (d),y
+    iny
+    bne :-
+    pop blk5
+    ply
+next:
+    iny
+    cpy #MAX_PROCS
+    bne l
+    jmp respond_ok
+.endproc
+
+; "DFp"
+.export tunix_free_io_page
+.proc tunix_free_io_page
+    lda SA
+    sec
+    sbc #IOPAGE_BASE - 1
+    tax
+    lda iopage_pid,x
+    beq not_there
+    cmp pid
+    bne not_there
+    free_iopage_x
+    jmp respond_ok
+not_there:
+    jmp respond_error
+.endproc
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; DRIVER REGISTRATION ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Free drivers of a process.
+; X: process ID
+free_drivers:
+    stx tmp1
+    ldy drvs
+    beq r
+l:  lda drv_pid,y
+    cmp tmp1
+    bne n
+    tax
+    lpushx drvs, drvs
+    ; Set device to KERNAL.
+    lda drv_dev,y
+    tax
+    lda #0  ; KERNAL
+    sta dev_drv,x
+n:  lloopy drvs, l
+r:  rts
 
 ; Register driver and assign to device
 ; XA: vectors
@@ -2066,6 +2151,20 @@ no_handler_set:
 
 :   rts
 .endproc
+
+; "DR"
+.export tunix_register
+.proc tunix_register
+    ldy SA
+    lda filename+2
+    ldx filename+3
+    jsr register
+    bcs :+
+    txa
+    jmp respond
+:   jmp respond_error
+.endproc
+
 
 ;;;;;;;;;;;;;;;;;
 ;;; PROCESS 0 ;;;
@@ -2269,7 +2368,7 @@ g:  jmp tunix_general
     rts
 .endproc
 
-;; MEMORY
+;; EXTENDED MEMORY
 
 ; "M?"
 .export tunix_memory
@@ -2333,6 +2432,7 @@ syscall1 tunix_exit, exit, lda
 syscall1v tunix_proc_info, proc_info, ldx
 syscall0 tunix_proc_list, proc_list
 
+; "PK"
 .export tunix_kill
 .proc tunix_kill
     ldx SA
@@ -2347,7 +2447,7 @@ syscall0 tunix_proc_list, proc_list
 :   jmp respond_error
 .endproc
 
-;; DRIVERS
+;;; DRIVER REGISTRATION
 
 ; "D?"
 .export tunix_drivers
@@ -2358,98 +2458,14 @@ syscall0 tunix_proc_list, proc_list
     cmp #'A'
     beq ai
     cmp #'C'
-    beq tunix_commit_io_page
+    beq co
     cmp #'F'
     beq fi
     jmp respond_error
 r:  jmp tunix_register
 ai: jmp tunix_alloc_io_page
+co: jmp tunix_commit_io_page
 fi: jmp tunix_free_io_page
-.endproc
-
-; "DR"
-.export tunix_register
-.proc tunix_register
-    ldy SA
-    lda filename+2
-    ldx filename+3
-    jsr register
-    bcs :+
-    txa
-    jmp respond
-:   jmp respond_error
-.endproc
-
-;; I/O PAGES
-
-; "DA"
-.export tunix_alloc_io_page
-.proc tunix_alloc_io_page
-    lda free_iopage
-    beq no_more
-    alloc_iopage_x
-    ldx pid
-    sta iopage_pid,x
-    txa
-    clc
-    adc #IOPAGE_BASE
-    jmp respond
-no_more:
-    jmp respond_error
-.endproc
-
-; "DCp"
-.export tunix_commit_io_page
-.proc tunix_commit_io_page
-    ldy #0
-l:  cpy pid
-    beq next
-    lda proc_flags,y
-    beq next
-
-    ;; Copy page.
-    phy
-    push blk5
-    io23x_at_blk5
-    lda SA
-    clc
-    adc #IOPAGE_BASE
-    sta sh
-    clc
-    adc #$20    ; (Bump to BLK5.)
-    sta dh
-    lda #0
-    sta sl
-    sta dl
-    tay
-:   lda (s),y
-    sta (d),y
-    iny
-    bne :-
-    pop blk5
-    ply
-next:
-    iny
-    cpy #MAX_PROCS
-    bne l
-    jmp respond_ok
-.endproc
-
-; "DFp"
-.export tunix_free_io_page
-.proc tunix_free_io_page
-    lda SA
-    sec
-    sbc #IOPAGE_BASE
-    tax
-    lda iopage_pid,x
-    beq not_there
-    cmp pid
-    bne not_there
-    free_iopage_x
-    jmp respond_ok
-not_there:
-    jmp respond_error
 .endproc
 
 ;;;;;;;;;;;;
@@ -2676,14 +2692,14 @@ vec_tunix_kernal:
     adc #1
     sta glfns,x
     sta lfns,x
-    cpx #MAX_IOPAGES
+    cpx #MAX_IOPAGES + 1
     bcs :+
     sta iopages,x
 :   cpx #MAX_PROCS
     bcs :+
     sta procs,x
     sta waiting,x
-:   cpx #MAX_DRVS
+:   cpx #MAX_DRVS + 1
     bcs :+
     sta drvs,x
 :   inx
@@ -2691,13 +2707,14 @@ vec_tunix_kernal:
     ;; Finish up.
     mvb free_proc, #1
     mvb free_wait, #1
+    mvb free_iopage, #1
     mvb glfns, #1
     mvb drvs, #1
     lda #0
     sta procs + MAX_PROCS - 1
     sta waiting + MAX_PROCS - 1
-    sta drvs + MAX_DRVS - 1
-    sta iopages + MAX_IOPAGES - 1
+    sta drvs + MAX_DRVS
+    sta iopages + MAX_IOPAGES
 
     ;;; Init machdep.
     jsr init_ultimem
@@ -3302,7 +3319,7 @@ txt_testing_data:
 txt_testing_processes:
   .byte "!!! TESTING PROCS !!!", 13, 0
 txt_child:
-  .byte "CHILD SAYING HELLO!", 13, 0
+  .byte "BABY.", 13, 0
 txt_hyperactive_child:
   .byte ":):):):):):):):):):):):)", 0
 txt_tests_passed:
@@ -3311,8 +3328,6 @@ txt_tests_passed:
 
 note_forking:
   .byte "FORKING.", 13, 0
-note_running_baby:
-  .byte "RUNNING BABY.", 13, 0
 note_waiting_for_child:
   .byte "WAITING FOR CHILD.", 13, 0
 note_child_exited:
@@ -3416,9 +3431,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     bcc :+
     error err_cannot_fork
 :   pha
-    print note_running_baby
-    pla
-    pha
     cmp #0
     bne :+
     jmp baby

@@ -1,4 +1,6 @@
 Initial release
+[ ] Screen & stack moves with speed
+    code.
 [@] Info syscalls
 [ ] Installer
 [@] Boot loader selection
@@ -13,8 +15,7 @@ Initial release
 [ ] UltiFS port
 [ ] 40x24 terminal port
 
-Resource optimizations
-[ ] Free any address range to have TUNIX
-    free memory banks in a portable
-    fashion and to reduce slow low
-    memory copies during task switches.
+[ ] Syscall to free any address range so
+    TUNIX can free memory banks in a
+    portable fashion and drop expensive
+    memory moves.

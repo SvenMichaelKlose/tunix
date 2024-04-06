@@ -118,11 +118,12 @@ INITVCTRS  = $e45b
 ;;; TUNIX
 
 TUNIX_DEVICE = 31
-MAX_LFNS     = 256   ; Has to be.
+MAX_LFNS     = 256  ; Has to be.
 MAX_PROCS    = 64
 MAX_SIGNALS  = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
+MAX_DRV_NAME = 8    ; This too.
 
 ;;; MACHDEP
 
@@ -232,6 +233,7 @@ drv_pid:    .res MAX_DRVS + 1
 drv_dev:    .res MAX_DRVS + 1
 drv_vl:     .res MAX_DRVS + 1
 drv_vh:     .res MAX_DRVS + 1
+drv_names:  .res MAX_DRVS * MAX_DRV_NAME
 
 ;;; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
@@ -475,10 +477,6 @@ pending_signal:       .res 1
 ;
 ; There may be either multiple lists or
 ; deques in one set of arrays.
-
-.macro linit list
-    mvb list, #1
-.endmacro
 
 ;; Pop from front of list.
 
@@ -3080,8 +3078,6 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Static KERNAL I/O handlers. ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;
-; Always there for every process.
 
     .segment "LOCALCODE"
 
@@ -3097,7 +3093,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda procs,x
     bne :++
     ; Restart list.
-    lda proc_flags
+    lda proc_flags  ; (process 0)
     cmp #PROC_RUNNING
     bne :+  ; No...
     lda #0
@@ -3340,7 +3336,8 @@ note_forking_hyperactive:
 note_killing_hyperactive:
   .byte "KILLING HYPERACTIVE.", 13, 0
 note_waiting_for_hyperactive:
-  .byte "WAITING FOR HYPERACTIVE TO EXIT.", 13, 0
+  .byte "WAITING FOR HYPERACTIVE TO "
+  .byte "EXIT.", 13, 0
 
 err_free_banks_after_init:
   .byte "WRONG TOTAL # OF FREE BANKS."  

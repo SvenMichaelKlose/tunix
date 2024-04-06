@@ -1,5 +1,5 @@
 The TUNIX Project
-====================
+=================
 
 „Tu nix!“ (German for "Do nothing!").
 
@@ -1156,6 +1156,16 @@ To get around this, the bank number of
 BLK1 is pushed on the stack and popped
 off on return.  Other blocks are
 preserved the same way just in time.
+
+# Process Creation
+
+A completey new process is created once
+when TUNIX starts: process 0.  From then
+on, running processes are cloned only by
+the fork() system call. {explain the
+convenience}.
+
+{explain baby state of process}
 
 # Drivers
 

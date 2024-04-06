@@ -131,9 +131,13 @@ IOPAGE_BASE  = $9b
 MAX_IOPAGES  = 4
 STACK_LIMIT  = 16
 
-    .zeropage
+;;;;;;;;;;;;;;;;
+;;; ZEROPAGE ;;;
+;;;;;;;;;;;;;;;;
+;
+; To be restored on syscall return.
 
-;;; Registers
+    .zeropage
 
 .export s, sl, sh, d, dl, dh
 .export c, cl, ch
@@ -149,12 +153,14 @@ c:
 cl:     .res 1
 ch:     .res 1
 
-zp1:   .res 2
-zp2:   .res 2
+zp1:    .res 2
+zp2:    .res 2
 
 ;;;;;;;;;;;;;;
 ;;; GLOBAL ;;;
 ;;;;;;;;;;;;;;
+;
+; The same for all processes.
 
     .segment "GLOBALBSS"
 
@@ -246,9 +252,11 @@ speedcopy_lowmem_to_blk5: .res 1
 ;;; KERNAL
 old_kernal_vectors: .res 32
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; LOCAL (per process) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;
+;;; LOCAL ;;;
+;;;;;;;;;;;;;
+;
+; Per process.
 
     .segment "LOCALBSS"
 
@@ -258,12 +266,10 @@ old_kernal_vectors: .res 32
 .export waiting, waitingb, waiting_pid
 .export free_wait, first_wait, pid
 .export reg_a, reg_x, reg_y, stack
-.export flags, saved_vic, filename
-.export response, response_len
-.export responsep
+.export flags, saved_vic
 
 ;; Vitals
-tunix_io23:     .res 1  ; Per-process.
+tunix_io23:     .res 1  ; Per process.
 tunix_blk1:     .res 1  ; Same for all.
 pid:            .res 1
 multitasking:   .res 1
@@ -275,12 +281,6 @@ reg_y:          .res 1
 flags:          .res 1
 stack:          .res 1
 saved_vic:      .res 16
-
-;; Syscalls
-filename:       .res 256
-response:       .res 8
-response_len:   .res 1
-responsep:      .res 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Additional local bank ;;;
@@ -2207,8 +2207,20 @@ err_out_of_running_procs:
 ;;; SYSCALL DRIVER (DEVICE #31) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Takes on system calls via device
+; Handles system calls via device
 ; TUNIX_DEVICE (#31 by default).
+
+.export filename
+.export response, response_len
+.export responsep
+
+    .segment "LOCALBSS"
+
+;; Syscalls
+filename:       .res 256
+response:       .res 8
+response_len:   .res 1
+responsep:      .res 1
 
     .segment "KERNELDATA"
 

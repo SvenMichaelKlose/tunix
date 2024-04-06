@@ -19,10 +19,10 @@ include ../../Makefile.rules
 %.o: %.c
 	$(CC) -O -c $(CFLAGS) -I../ingle/ -o $@ $<
 
+all: $(LIBRARY)
+
 $(LIBRARY): $(SOURCES_asm:.asm=.o) $(SOURCES:.c=.o)
 	$(AR) a $@ $^
-
-all: $(LIBRARY)
 
 clean:
 	rm -f $(SOURCES:.c=.o) $(SOURCES_asm:.asm=.o) $(LIBRARY)

@@ -10,10 +10,10 @@ include ../../Makefile.rules
 %.o: %.c
 	$(CC) -O -c $(CFLAGS) -I../../ -o $@ $<
 
+all: $(LIBRARY)
+
 $(LIBRARY): $(SOURCES:.c=.o)
 	$(AR) a $@ $^
-
-all: $(LIBRARY)
 
 clean:
 	rm -f $(SOURCES:.c=.o) $(LIBRARY)

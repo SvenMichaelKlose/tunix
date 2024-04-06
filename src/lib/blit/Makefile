@@ -8,10 +8,10 @@ include ../../Makefile.rules
 %.o: %.asm
 	$(AS) -g -o $@ $<
 
+all: $(LIBRARY)
+
 $(LIBRARY): $(SOURCES:.asm=.o)
 	$(AR) a $@ $^
-
-all: $(LIBRARY)
 
 clean:
 	rm -f $(SOURCES:.asm=.o) $(LIBRARY)

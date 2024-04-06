@@ -10,10 +10,10 @@ include ../Makefile.rules
 %.o: %.asm
 	$(AS) -D$(TV)=1 -o $@ $<
 
+all: $(PROGRAM)
+
 $(PROGRAM): $(ASMSOURCES:.asm=.o)
 	$(LD) -C ld.cfg -Ln $(PROGRAM).lbl -o $@ $^
-
-all: $(PROGRAM)
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(PROGRAM) $(PROGRAM).lbl

@@ -20,11 +20,11 @@ include ../Makefile.rules
 %.o: %.c
 	$(CC) -c $(CFLAGS) -Oi -DTEST -o $@ -I../ $<
 
-$(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
-	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a ../lib/log/liblog.a $(CC65_HOME)/share/cc65/lib/vic20.lib
-
 all: $(PROGRAM)
 	$(EXOMIZER) sfx basic -t 52 ultifs.prg -o ultifs
+
+$(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
+	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a ../lib/log/liblog.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map $(PROGRAM).dbg ultifs

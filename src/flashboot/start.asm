@@ -1,5 +1,10 @@
 .import _ultimem_unhide
 
+; The RAM bank to copy this ROM to,
+; before executing the cc65 binary in
+; it.
+RAM_BANK    = 6
+
 READY     := $C474
 PRNTCRLF  := $CAD7
 PTRSTR    := $CB1E
@@ -27,7 +32,6 @@ c:  .res 2
     ldx #$ff
     txs
 
-debug:.export debug
     jsr _ultimem_unhide
 
     lda #%00111100 ; IO 23
@@ -42,6 +46,8 @@ l0: lda ramify,x
     bne l0
     jmp $9800
 
+; Relocated up to 'continue'.
+; No absolute jumps in here.
 ramify:
     lda #0
     sta s
@@ -53,7 +59,7 @@ ramify:
     sta d+1
     lda #$20
     sta c+1
-    lda #8
+    lda #RAM_BANK
     sta $9ffc
 
     ldy #0
@@ -71,14 +77,14 @@ q:  dex
     bne l
     dec c+1
     bne l
-    lda #%11110000
+    lda #%11111111
     sta $9ff2
-    lda #8
+    lda #RAM_BANK
     sta $9ffe
     jmp continue
 k:  inc s+1
     inc d+1
-    bne q
+    bne q   ; (jmp)
 
 continue:
 
@@ -88,3 +94,5 @@ continue:
     jsr INITSK      ; VIC & clear screen
     jsr INITVCTRS   ; BASIC vectors
     jsr INITBA      ; BASIC zero page
+    jsr FREMSG
+    jmp READY

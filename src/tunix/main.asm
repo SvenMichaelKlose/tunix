@@ -3341,11 +3341,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     print note_child_exited
 
     ;; Check our process ID.
-;    print note_getting_pid
-;    jsr lib_getpid
-;    cmp #0
-;    beq :+
-;    error err_init_pid_not_0
+    print note_getting_pid
+    jsr lib_getpid
+    cmp #0
+    beq :+
+    error err_init_pid_not_0
 
     ;; Fork, kill, then wait for child.
 :   print note_forking_hyperactive

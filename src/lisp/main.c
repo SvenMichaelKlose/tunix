@@ -1,5 +1,3 @@
-// Atto Lisp interpreter
-
 #ifndef __CBM__
 #define __CBM__
 #endif

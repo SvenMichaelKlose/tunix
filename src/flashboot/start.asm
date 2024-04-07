@@ -1,7 +1,7 @@
 .import _ultimem_unhide
 
 ; Just start BASIC.
-;JUST_RESET = 1
+;START_BASIC = 1
 
 ; The RAM bank to copy this ROM to,
 ; before executing the cc65 binary in
@@ -91,13 +91,14 @@ k:  inc s+1
 
 continue:
 
-.ifdef JUST_RESET
     jsr INITMEM     ; Init memory
     jsr FRESTOR     ; I/O vectors
     jsr INITVIA     ; VIAs
     jsr INITSK      ; VIC & clear screen
+
+.ifdef START_BASIC
     jsr INITVCTRS   ; BASIC vectors
     jsr INITBA      ; BASIC zero page
     jsr FREMSG
     jmp READY
-.endif ; .ifdef JUST_RESET
+.endif ; .ifdef START_BASIC

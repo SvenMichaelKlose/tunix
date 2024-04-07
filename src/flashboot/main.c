@@ -45,9 +45,9 @@ draw_panel (uchar x, uchar y,
 bool
 bank_is_empty (uchar bank)
 {
-    char * p;
+    register char * p = BLK3_START;
+    *ULTIMEM_CONFIG2 = 0xdf; // BLK3 ROM
     *ULTIMEM_BLK3 = bank;
-    p = BLK3_START;
     do {
         if (*p++ != 0xff)
             return false;
@@ -103,16 +103,19 @@ menu (void)
     char c, i, j, y;
 
     y = 0;
-    draw_panel (0, y, 21, NUM_BOOT_BANKS + 3, "Select a boot ROM:");
+    draw_panel (0, y, 21, NUM_BOOT_BANKS + 3, "Select boot ROM:");
     y += 2;
     cputsxy (2, y++, "0:BASIC");
     for (i = 0; i < NUM_BOOT_BANKS; i++) {
         cputcxy (2, y++, '0' + 1 + i);
         cputs (":");
-        for (j = 0; j < 16; j++) {
-            c = names[i * 16 + j];
-            cputc (c ? c : ' ');
-        }
+        if (bank_is_empty (i))
+            cputs ("(empty)");
+        else
+            for (j = 0; j < 16; j++) {
+                c = names[i * 16 + j];
+                cputc (c ? c : ' ');
+            }
     }
     y += 2;
     cputsxy (1, y++, "K: +3 +8 +16 +24");

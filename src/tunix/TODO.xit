@@ -1,6 +1,6 @@
 Initial release
 [x] Primitive IO page tests.
-[@] Working BASIC LOAD.
+[x] Working BASIC LOAD.
 [@] Virtual CBM console
 [@] Huge syscall responses (for info).
 [@] Info syscalls

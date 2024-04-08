@@ -285,6 +285,8 @@ old_kernal_vectors: .res 32
 ;; Vitals
 tunix_io23:     .res 1  ; Per process.
 tunix_blk1:     .res 1  ; Same for all.
+old_load:       .res 2  ; KERNAL LOAD
+old_save:       .res 2  ; KERNAL SAVE
 pid:            .res 1
 multitasking:   .res 1
 
@@ -407,6 +409,13 @@ pending_signal:       .res 1
     sta reg_a
     stx reg_x
     sty reg_y
+.endmacro
+
+.macro save_regs_and_flags
+    save_regs
+    php
+    pla
+    sta flags
 .endmacro
 
 .macro load_regs
@@ -1699,7 +1708,6 @@ child:
 
 .export no_more_procs
 .proc no_more_procs
-    pop blk1
     sec
     rts
 .endproc
@@ -2775,6 +2783,10 @@ vec_tunix_kernal:
 
     ;;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
+    mvw old_load, old_kernal_vectors + IDX_LOAD
+    mvw old_save, old_kernal_vectors + IDX_SAVE
+    stwi old_kernal_vectors + IDX_LOAD, kernal_load
+    stwi old_kernal_vectors + IDX_SAVE, kernal_save
     smemcpyax vec_tunix_kernal ; Replace
 
     ;;; Make devices default to KERNAL.
@@ -2790,7 +2802,7 @@ vec_tunix_kernal:
     .segment "KERNELDATA"
 
 tunix_vectors:
-.word open, close, chkin, ckout, clrcn
+.word open, close, chkin, ckout, clrchn
 .word basin, bsout, stop, getin, clall
 .word usrcmd, load, save, blkin, bkout
 
@@ -2850,7 +2862,7 @@ h:  lda $ffff
     cpy #0
     beq :+
     ldx drv_pid,y
-:   lda proc_blk1,x
+:   ldy proc_blk1,x
     jmp call_driver1
 .endproc
 
@@ -3053,21 +3065,16 @@ r:  rts
 
 .export call_driver1
 .proc call_driver1
-    sta blk1
-.endproc
-
-.export call_driver2
-.proc call_driver2
+    push blk1
+    sty blk1
     load_regs
 .endproc
 
 .export call_driver3
 .proc call_driver3
     jsr $fffe
-    save_regs
-    php
-    pla
-    sta flags
+    save_regs_and_flags
+    pop blk1
     rts
 .endproc
 
@@ -3109,11 +3116,11 @@ r:  rts
 .export tunix_enter2
 .proc tunix_enter2
     popw fnord
+    ldx pid
     push blk1
     push ram123
     pushw fnord
     mvb blk1, tunix_blk1
-    ldx pid
     lda proc_data,x
     sta ram123
     rts
@@ -3158,8 +3165,8 @@ iowrap clall, clall2
 iowrap stop, stop2
 iowrap usrcmd, usrcmd2
 
-.export clrcn
-.proc clrcn
+.export clrchn
+.proc clrchn
     ; TODO: Call all LFNs.
     jsr tunix_enter
     ldy #0
@@ -3181,13 +3188,63 @@ iowrap usrcmd, usrcmd2
 blkiohandler load, #IDX_LOAD
 blkiohandler save, #IDX_SAVE
 
-.ifdef EARLY_TESTS
+;;;;;;;;;;;;;;;;;;;;;
+;;; KERNAL DRIVER ;;;
+;;;;;;;;;;;;;;;;;;;;;
+
+    .segment "LOCALCODE"
+
+.export kernal_load
+.proc kernal_load
+    ; Restore process banks.
+    ldx pid
+    push blk1
+    push ram123
+    lda proc_blk1,x
+    sta blk1
+    lda proc_ram123,x
+    sta ram123
+    ; Call KERNAL.
+    load_regs
+    jsr j
+    save_regs_and_flags
+    ; Restore our banks.
+    pop ram123
+    pop blk1
+    load_regs
+    rts
+j:  jmp (old_load)
+.endproc
+
+.export kernal_save
+.proc kernal_save
+    ; Restore process banks.
+    ldx pid
+    push blk1
+    push ram123
+    lda proc_blk1,x
+    sta blk1
+    lda proc_ram123,x
+    sta ram123
+    ; Call KERNAL.
+    load_regs
+    jsr j
+    save_regs_and_flags
+    ; Restore our banks.
+    pop ram123
+    pop blk1
+    load_regs
+    rts
+j:  jmp (old_save)
+.endproc
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
 ;;;;;;;;;;;;;
 ;
 ; Tests running before regular boot.
+
+.ifdef EARLY_TESTS
 
     .segment "BOOT"
 
@@ -3446,21 +3503,17 @@ txt_welcome:
 .endif ; .ifdef EARLY_TESTS
 
     print txt_init
-    jsr fork
+    jsr lib_fork
     cmp #0
     beq :+
     jmp proc0
-:   lda #0
+:   jsr lib_proc_list
+    lda #0
     jsr lib_proc_info
     jsr lib_getpid
     jsr lib_proc_info
 
-    ;; BASIC cold start.
-    jsr INITVCTRS
-    jsr INITBA
-    lda TXTTAB
-    ldy TXTTAB+1
-    jsr RAMSPC
+    ; Welcome messages with free RAM.
     ldayi txt_welcome
     jsr PRTSTR
     ldaxi banks
@@ -3470,6 +3523,10 @@ txt_welcome:
     jsr print_cr
     ldayi $e437
     jsr PRTSTR
+
+    ;; BASIC cold start.
+    jsr INITVCTRS
+    jsr INITBA
     jsr $e412
     ldx #$f8
     txs

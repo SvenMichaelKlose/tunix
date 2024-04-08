@@ -133,7 +133,7 @@ INITVCTRS  = $e45b
 
 TUNIX_DEVICE = 31
 MAX_LFNS     = 256  ; Has to be.
-MAX_PROCS    = 64
+MAX_PROCS    = 64   ; No more than 127.
 MAX_SIGNALS  = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
@@ -2060,7 +2060,7 @@ no_more:
 ; "DCp"
 .export tunix_iopage_commit
 .proc tunix_iopage_commit
-    ;; Loop through all processes.
+    ;; Loop through all other processes.
     ldy #0
 l:  cpy pid
     beq next
@@ -2098,14 +2098,17 @@ next:
 ; "DFp"
 .export tunix_iopage_free
 .proc tunix_iopage_free
+debug:.export debug
     lda SA
     sec
-    sbc #IOPAGE_BASE - 1
+    sbc #IOPAGE_BASE
     tax
     lda iopage_pid,x
-    beq not_there
+    bmi not_there   ; Page is free...
     cmp pid
-    bne not_there
+    bne not_there   ; Not ours...
+    lda #255
+    sta iopage_pid,x
     free_iopage_x
     jmp respond_ok
 not_there:
@@ -2707,6 +2710,10 @@ vec_tunix_kernal:
 :   cpx #MAX_DRVS + 1
     bcs :+
     sta drvs,x
+:   cpx #MAX_IOPAGES + 1
+    bcs :+
+    lda #255
+    sta iopage_pid,x
 :   inx
     bne @l
     ;; Finish up.
@@ -3241,7 +3248,10 @@ err_cannot_kill:
 err_cannot_wait:
   .byte "CANNOT WAIT.", 0
 err_expected_iopage_base:
-  .byte "IO PAGE NOT AT IOPAGE BASE.", 0
+  .byte "I/O PAGE NOT AT IOPAGE BASE."
+  .byte 0
+err_cannot_free_iopage:
+  .byte "CANNOT FREE I/O PAGE.", 0
 
     .segment "BOOT"
 
@@ -3356,11 +3366,14 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; IO pages ;;;
     ;;;;;;;;;;;;;;;;
 
-debug:.export debug
 :   jsr lib_iopage_alloc
     cmp #IOPAGE_BASE
     beq :+
     error err_expected_iopage_base
+
+:   jsr lib_iopage_free
+    bcc :+
+    error err_cannot_free_iopage
 
 :   print txt_tests_passed
     rts

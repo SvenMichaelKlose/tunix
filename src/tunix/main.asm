@@ -2098,7 +2098,6 @@ next:
 ; "DFp"
 .export tunix_iopage_free
 .proc tunix_iopage_free
-debug:.export debug
     lda SA
     sec
     sbc #IOPAGE_BASE
@@ -3222,6 +3221,12 @@ note_killing_hyperactive:
 note_waiting_for_hyperactive:
   .byte "WAITING FOR HYPERACTIVE TO "
   .byte "EXIT.", 13, 0
+note_iopage_alloc:
+  .byte "ALLOCATING I/O PAGE.", 13, 0
+note_iopage_commit:
+  .byte "COMMITTING I/O PAGE.", 13, 0
+note_iopage_free:
+  .byte "FREE I/O PAGE.", 13, 0
 
 err_free_banks_after_init:
   .byte "WRONG TOTAL # OF FREE BANKS."  
@@ -3250,6 +3255,8 @@ err_cannot_wait:
 err_expected_iopage_base:
   .byte "I/O PAGE NOT AT IOPAGE BASE."
   .byte 0
+err_cannot_commit_iopage:
+  .byte "CANNOT COMMIT I/O PAGE.", 0
 err_cannot_free_iopage:
   .byte "CANNOT FREE I/O PAGE.", 0
 
@@ -3366,12 +3373,25 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; IO pages ;;;
     ;;;;;;;;;;;;;;;;
 
-:   jsr lib_iopage_alloc
+:   print note_iopage_alloc
+    jsr lib_iopage_alloc
     cmp #IOPAGE_BASE
     beq :+
     error err_expected_iopage_base
 
-:   jsr lib_iopage_free
+:   pha
+    print note_iopage_commit
+    pla
+    pha
+    jsr lib_iopage_commit
+    bcc :+
+    error err_cannot_commit_iopage
+
+:   pla
+    pha
+    print note_iopage_free
+    pla
+    jsr lib_iopage_free
     bcc :+
     error err_cannot_free_iopage
 

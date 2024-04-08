@@ -16,15 +16,15 @@ al 00FFBA .SETLFS
 al 00FFBD .SETNAM
 al 00FFDB .SETTIM
 al 00FFE1 .STOP
-al 0030BB .__APP_FILEOFFS__
-al 00457B .__APP_LAST__
+al 003179 .__APP_FILEOFFS__
+al 004639 .__APP_LAST__
 al 002000 .__APP_SIZE__
 al 004000 .__APP_START__
 al 003D3F .__BOOT_LOAD__
 al 004000 .__BOOT_RUN__
-al 00057B .__BOOT_SIZE__
-al 0042BA .__BSS_LOAD__
-al 0042BA .__BSS_RUN__
+al 000639 .__BOOT_SIZE__
+al 004378 .__BSS_LOAD__
+al 004378 .__BSS_RUN__
 al 000000 .__BSS_SIZE__
 al 000001 .__EXEHDR__
 al 003372 .__GLOBALBSS_LOAD__
@@ -41,7 +41,7 @@ al 003B6D .__LOCALCODE_LOAD__
 al 009800 .__LOCALCODE_RUN__
 al 0001D2 .__LOCALCODE_SIZE__
 al 000E01 .__MAIN_FILEOFFS__
-al 0042BA .__MAIN_LAST__
+al 004378 .__MAIN_LAST__
 al 004000 .__MAIN_SIZE__
 al 002000 .__MAIN_START__
 al 009FF0 .__ULTIMEM_LOAD__
@@ -51,7 +51,7 @@ al 000000 .__ZP_FILEOFFS__
 al 00000E .__ZP_LAST__
 al 000090 .__ZP_SIZE__
 al 000000 .__ZP_START__
-al 00452D .baby
+al 0045EB .baby
 al 002271 .balloc
 al 0033F9 .bank_last
 al 0033FB .bank_refs
@@ -93,7 +93,7 @@ al 002FB1 .close2
 al 0099A5 .clrcn
 al 002447 .copy_blk3_to_blk5
 al 000002 .d
-al 0029EF .debug
+al 00457B .debug
 al 003B2A .dev_drv
 al 000003 .dh
 al 000002 .dl
@@ -129,7 +129,7 @@ al 003591 .glfn_refs
 al 003491 .glfns
 al 002ACC .guru_meditation
 al 002AC9 .halt
-al 004561 .hyperactive_child
+al 00461F .hyperactive_child
 al 002C3C .init_ultimem
 al 009FF6 .io23
 al 00348C .iopage_page
@@ -236,7 +236,7 @@ al 009999 .stop
 al 002FDE .stop2
 al 00265C .suspend
 al 009845 .switch
-al 004254 .tests
+al 0042A8 .tests
 al 002AD2 .tunix
 al 002B68 .tunix_balloc
 al 002B37 .tunix_basin

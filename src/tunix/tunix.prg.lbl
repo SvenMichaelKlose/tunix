@@ -93,7 +93,6 @@ al 002FB1 .close2
 al 0099A5 .clrcn
 al 002447 .copy_blk3_to_blk5
 al 000002 .d
-al 00457B .debug
 al 003B2A .dev_drv
 al 000003 .dh
 al 000002 .dl

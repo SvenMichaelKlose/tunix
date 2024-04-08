@@ -1,19 +1,18 @@
 Initial release
-[ ] Working BASIC LOAD.
-[ ] Init app name as argument.
-[ ] IO page tests.  The virtual console
-    will need them for interrupt
-    handling.
-[ ] Virtual CBM console
-[ ] Screen & stack moves with speed
-    code.
+[x] Primitive IO page tests.
+[@] Working BASIC LOAD.
+[@] Virtual CBM console
+[@] Huge syscall responses (for info).
 [@] Info syscalls
 [@] Boot loader selection
 [@] Restore-on-reset update
-[ ] Installer.  Relocate installed boot
-    ROM.
-[ ] Uninstaller.
+[@] Boot bank editor
+[ ] Screen & stack moves with speed
+    code.
+[ ] Init app name as argument.
+[ ] Userland tests
 
+Next time
 [ ] Multiple driver instances
 [ ] Syscall "PE" (exec)
 [ ] Tested signals

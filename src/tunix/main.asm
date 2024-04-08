@@ -2047,8 +2047,8 @@ r:  rts
     lda free_iopage
     beq no_more
     alloc_iopage_x
-    ldx pid
-    sta iopage_pid,x
+    ldy pid
+    sta iopage_pid,y
     txa
     clc
     adc #IOPAGE_BASE - 1
@@ -2060,6 +2060,7 @@ no_more:
 ; "DCp"
 .export tunix_iopage_commit
 .proc tunix_iopage_commit
+    ;; Loop through all processes.
     ldy #0
 l:  cpy pid
     beq next
@@ -3239,6 +3240,8 @@ err_cannot_kill:
   .byte "CANNOT KILL.", 0
 err_cannot_wait:
   .byte "CANNOT WAIT.", 0
+err_expected_iopage_base:
+  .byte "IO PAGE NOT AT IOPAGE BASE.", 0
 
     .segment "BOOT"
 
@@ -3353,7 +3356,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; IO pages ;;;
     ;;;;;;;;;;;;;;;;
 
+debug:.export debug
 :   jsr lib_iopage_alloc
+    cmp #IOPAGE_BASE
+    beq :+
+    error err_expected_iopage_base
 
 :   print txt_tests_passed
     rts

@@ -1758,7 +1758,7 @@ not_to_resume:
 
     phx
     jsr free_iopages
-    jsr free_drivers
+    ;jsr free_drivers
     plx
 
     ;; Remove process from running or
@@ -2342,7 +2342,7 @@ g:  jmp tunix_general
 
 .export respond1
 .proc respond1
-    sta respond
+    sta response
     ldx #1
     bne respond_len ; (jmp)
 .endproc
@@ -2507,25 +2507,6 @@ col:            .res 1
 
     .segment "KERNEL"
 
-.export init_ultimem_banks
-.proc init_ultimem_banks
-    ;; Ensure RAM bank configuration.
-    lda #$ff
-    sta ulticfg1
-    sta ulticfg2
-    ldx #4
-:   txa
-    lsr
-    sta $9ff0,x
-    inx
-    lda #0
-    sta $9ff0,x
-    inx
-    cpx #16
-    bne :-
-    rts
-.endproc
-
 .export init_ultimem
 .proc init_ultimem
     ; Unhide UltiMem registers
@@ -2676,7 +2657,6 @@ vec_tunix_kernal:
 .export boot
 .proc boot
     jsr FRESTOR
-    jsr init_ultimem_banks
 
     ;; Clear global data.
     stwi d, __GLOBALBSS_RUN__
@@ -2743,7 +2723,6 @@ vec_tunix_kernal:
     ;;; Init machdep.
     jsr init_ultimem
     jsr gen_speedcodes
-    jsr init_ultimem_banks
 
     ;;; Make init process 0.
     print txt_starting_multitasking
@@ -2753,21 +2732,21 @@ vec_tunix_kernal:
     lda #0
     sta procs ; (Running alone.)
     ; Fill in banks for process 0.
-    ldx #2
-    stx proc_data
-    stx proc_ram123
-    inx
-    stx tunix_io23
-    stx proc_io23
-    inx
-    stx tunix_blk1
-    stx proc_blk1
-    inx
-    stx proc_blk2
-    inx
-    stx proc_blk3
-    inx
-    stx proc_blk5
+    lda ram123
+    sta proc_data
+    sta proc_ram123
+    lda io23
+    sta tunix_io23
+    sta proc_io23
+    lda blk1
+    sta tunix_blk1
+    sta proc_blk1
+    lda blk2
+    sta proc_blk2
+    lda blk3
+    sta proc_blk3
+    lda blk5
+    sta proc_blk5
     ;; Fork all banks.
     ldx #0
     jsr fork_raw

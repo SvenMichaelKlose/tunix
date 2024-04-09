@@ -29,18 +29,19 @@ loadable drivers and recover-on-reset.
 The Commodore KERNAL is essentially the
 operating system of Commodore 8-bit
 computers, such as the Commodore
-PET, VIC, C64 and so on.  Think of it as
-the bridge between the computer's
-hardware and the software you interact
-with.  The KERNAL's role is like
-getting to know the backstage crew of a
-theater production.  It does all the
-heavy lifting in the background,
-enabling the show (or in this case, the
-computer) to perform basic functions
-smoothly.
+PET, VIC, C64 and so on.  It plays a
+foundational role in making the
+Commodore computers versatile and
+user-friendly.  It's what allowed
+programmers to create a vast array of
+software, from simple text editors to
+complex games, without having to start
+from scratch every time.  This operating
+system layer facilitated the explosion
+of creative and useful applications that
+defined the Commodore experience.
 
-## Basic Functions
+It's basic functions are:
 
 * Input/Output (I/O) Management: The
   KERNAL is responsible for handling all
@@ -86,28 +87,6 @@ smoothly.
   handle the error, often providing
   messages to the user or software about
   what went wrong.
-
-## Why It Matters
-
-The significance of the KERNAL lies in
-its foundational role in making the
-Commodore computers versatile and
-user-friendly.  It's what allowed
-programmers to create a vast array of
-software, from simple text editors to
-complex games, without having to start
-from scratch every time.  This operating
-system layer facilitated the explosion
-of creative and useful applications that
-defined the Commodore experience.
-
-In essence, the Commodore KERNAL is like
-the conductor of an orchestra, ensuring
-that each part of the computer plays
-together in harmony, allowing users to
-enjoy the symphony of software that
-became available for these iconic
-machines.
 
 ## Memory
 
@@ -844,17 +823,19 @@ Returns a key/value list with these
 keys:
 
 * "ID": Process ID.
-* "FLAGS": RSZ
-* "EXITCODE": Exit code (0 by default).
+* "FLAGS": One of "BRSZ" (baby, running,
+  sleeping, zombie).
+* "EXITCODE": Exit code.  It should have
+  no other value than 0 unless killed.
 * "WAITING": Processes waiting for exit.
-* "MEMORY": Banks assigned to shadow
-  RAM123, proc RAM123, IO23, BLK1, BLK2,
-  BLK3 & BLK5.
+* "MEMORY": Banks assigned to 
+  RAM123 (TUNIX), IO23 (TUNIX),
+  RAM123, BLK1, BLK2, BLK3 and BLK5.
 * "BANKS": List of extended memory
   banks.
 * "STACK": Last saved tack pointer.
 * "LFNS": Used LFNs.
-* "GLFNS": Analoguous global LFNs.
+* "GLFNS": Assigned global LFNs.
 * "IOPAGES": Allocated IO pages.
 * "DRIVERS": Registered drivers.
 * "DEVICES": Device drivers.

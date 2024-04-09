@@ -1,27 +1,25 @@
 Initial release
 [x] Primitive IO page tests.
 [x] Working BASIC LOAD.
+
+[@] Screen & stack moves with speed code.
 [@] Virtual CBM console
 [@] Huge syscall responses (for info).
 [@] Info syscalls
 [@] Boot loader selection
 [@] Restore-on-reset update
 [@] Boot bank editor
-[ ] Screen & stack moves with speed
-    code.
+
 [ ] Init app name as argument.
 [ ] Userland tests
 
 Next time
 [ ] Multiple driver instances
 [ ] Syscall "PE" (exec)
+[ ] Syscall to clone() (fork() only selected resources)
+[ ] Syscall to free parts of address space.
 [ ] Tested signals
-[ ] wait() by signal
+[ ] Replace kill/wait() by version with signals.
 
 [ ] UltiFS port
 [ ] 40x24 terminal port
-
-[ ] Syscall to free any address range so
-    TUNIX can free memory banks in a
-    portable fashion and drop expensive
-    memory moves.

@@ -769,10 +769,9 @@ pending_signal:       .res 1
     pop ram123
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;     PROCESS CONTEXT    ;;;
-;;; (SHADOW RAM123 + IO23) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;
+;;; CONTEXT ;;;
+;;;;;;;;;;;;;;;
 
 .macro enter_tunix_x
     push io23
@@ -783,6 +782,20 @@ pending_signal:       .res 1
 .macro leave_tunix
     leave_data
     pop io23
+.endmacro
+
+.macro enter_process_x
+    push blk1
+    push ram123
+    lda proc_blk1,x
+    sta blk1
+    lda proc_ram123,x
+    sta ram123
+.endmacro
+
+.macro leave_process
+    pop ram123
+    pop blk1
 .endmacro
 
     .segment "LIB"
@@ -3198,22 +3211,14 @@ blkiohandler save, #IDX_SAVE
 .proc kernal_block
     ; Restore process banks.
     ldx pid
-    push blk1
-    push ram123
-    lda proc_blk1,x
-    sta blk1
-    lda proc_ram123,x
-    sta ram123
-    ; Call KERNAL.
+    enter_process_x
     load_regs
 .endproc
 .export kernal_block2
 .proc kernal_block2
     jsr $ffff
     save_regs_and_flags
-    ; Restore our banks.
-    pop ram123
-    pop blk1
+    leave_process
     load_regs
     rts
 .endproc

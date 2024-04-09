@@ -45,7 +45,7 @@ draw_panel (uchar x, uchar y,
 bool
 bank_is_empty (uchar bank)
 {
-    register char * p = BLK3_START;
+    char * p = BLK3_START;
     *ULTIMEM_CONFIG2 = 0xdf; // BLK3 ROM
     *ULTIMEM_BLK3 = bank;
     do {
@@ -102,8 +102,8 @@ menu (void)
 {
     char c, i, j, y;
 
-    y = 0;
-    draw_panel (0, y, 21, NUM_BOOT_BANKS + 3, "Select boot ROM:");
+    y = 4;
+    draw_panel (0, y, 21, NUM_BOOT_BANKS + 4, "Boot ROM editor");
     y += 2;
     cputsxy (2, y++, "0:BASIC");
     for (i = 0; i < NUM_BOOT_BANKS; i++) {
@@ -111,24 +111,22 @@ menu (void)
         cputs (":");
         if (bank_is_empty (i))
             cputs ("(empty)");
+        else if (!names[i * 16])
+            cputs ("unnamed");
         else
             for (j = 0; j < 16; j++) {
                 c = names[i * 16 + j];
                 cputc (c ? c : ' ');
             }
     }
-    y += 2;
-    cputsxy (1, y++, "K: +3 +8 +16 +24");
-    cputsxy (1, y++, "[Boot] [Save] [Load]  [Burn] [Move] [Name]  [Dump]");
+    y += 3;
+    cputsxy (1, y++, "[Boot] [Kill] [Burn]  [Name] [View] [Quit]");
 }
 
 void
 main (void)
 {
-    memset (names, 32, sizeof (names));
-    strcpy (names, "TUNIX");
-    strcpy (&names[16], "ULTIBOOT");
-    strcpy (&names[32], "VFORTH");
+    bzero (names, sizeof (names));
     clrscr ();
     *ULTIMEM_CONTROL = ULTIMEM_CTRL_LED;
     menu ();

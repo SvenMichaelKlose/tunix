@@ -1,7 +1,7 @@
 .import _ultimem_unhide
 
 ; Just start BASIC.
-;START_BASIC = 1
+START_BASIC = 1
 
 ; The RAM bank to copy this ROM to,
 ; before executing the cc65 binary in
@@ -37,10 +37,9 @@ c:  .res 2
 
     jsr _ultimem_unhide
 
-    lda #%00111100 ; IO 23
     lda #%00111111 ; IO 23
     sta $9ff1
-    lda #%01110000 ; RAM in BLK3.
+    lda #%01111111
     sta $9ff2
     ldx #0
 l0: lda ramify,x

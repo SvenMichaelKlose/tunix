@@ -97,6 +97,9 @@ LFN     = $b8
 SA      = $b9
 DEV     = $ba
 FNADR   = $bb
+NDX     = $c6 ; keyboard buffer length
+KEYD    = $0277
+
 
 IOVECTORS       = $031a
 IOVECTOR_SIZE   = 30
@@ -118,6 +121,8 @@ IDX_BLKIN  = 26
 IDX_BKOUT  = 28
 
 ;;; BASIC
+
+TOK_LOAD   = $93
 
 TXTTAB     = $2b
 
@@ -3525,7 +3530,26 @@ txt_welcome:
     jsr INITVCTRS
     jsr INITBA
     jsr $e412
+
+.if 0
+    sei
+    ldx #0
+    sei
+l:  lda loadkeys_a,x
+    beq :+
+    sta KEYD,x
+    inx
+    bne l   ; (jmp)
+:   stx NDX
+    cli
+.endif
+
+    ldx #0
     ldx #$f8
     txs
     jmp READY
 .endproc
+
+loadkeys:
+  .byte "LOAD", '"', "INIT", '"', ",8"
+  .byte 13, "RUN", 13, 0

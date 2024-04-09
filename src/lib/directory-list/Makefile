@@ -1,4 +1,4 @@
-LIBRARY=libdirectorylist.a
+LIBRARY=libdirectory-list.a
 SOURCES= \
     main.c
 

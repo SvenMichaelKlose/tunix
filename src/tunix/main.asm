@@ -3194,8 +3194,8 @@ blkiohandler save, #IDX_SAVE
 
     .segment "LOCALCODE"
 
-.export kernal_load
-.proc kernal_load
+.export kernal_block
+.proc kernal_block
     ; Restore process banks.
     ldx pid
     push blk1
@@ -3206,36 +3206,28 @@ blkiohandler save, #IDX_SAVE
     sta ram123
     ; Call KERNAL.
     load_regs
-    jsr j
+.endproc
+.export kernal_block2
+.proc kernal_block2
+    jsr $ffff
     save_regs_and_flags
     ; Restore our banks.
     pop ram123
     pop blk1
     load_regs
     rts
-j:  jmp (old_load)
+.endproc
+
+.export kernal_load
+.proc kernal_load
+    mvw kernal_block2 + 1, old_load
+    jmp kernal_block
 .endproc
 
 .export kernal_save
 .proc kernal_save
-    ; Restore process banks.
-    ldx pid
-    push blk1
-    push ram123
-    lda proc_blk1,x
-    sta blk1
-    lda proc_ram123,x
-    sta ram123
-    ; Call KERNAL.
-    load_regs
-    jsr j
-    save_regs_and_flags
-    ; Restore our banks.
-    pop ram123
-    pop blk1
-    load_regs
-    rts
-j:  jmp (old_save)
+    mvw kernal_block2 + 1, old_save
+    jmp kernal_block
 .endproc
 
 ;;;;;;;;;;;;;

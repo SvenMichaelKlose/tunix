@@ -16,15 +16,15 @@ al 00FFBA .SETLFS
 al 00FFBD .SETNAM
 al 00FFDB .SETTIM
 al 00FFE1 .STOP
-al 003231 .__APP_FILEOFFS__
+al 003206 .__APP_FILEOFFS__
 al 004639 .__APP_LAST__
 al 002000 .__APP_SIZE__
 al 004000 .__APP_START__
-al 003DF7 .__BOOT_LOAD__
+al 003DCC .__BOOT_LOAD__
 al 004000 .__BOOT_RUN__
 al 000639 .__BOOT_SIZE__
-al 004430 .__BSS_LOAD__
-al 004430 .__BSS_RUN__
+al 004405 .__BSS_LOAD__
+al 004405 .__BSS_RUN__
 al 000000 .__BSS_SIZE__
 al 000001 .__EXEHDR__
 al 003396 .__GLOBALBSS_LOAD__
@@ -34,14 +34,14 @@ al 000001 .__LOADADDR__
 al 000400 .__LOCALBSS2_LOAD__
 al 000400 .__LOCALBSS2_RUN__
 al 000746 .__LOCALBSS2_SIZE__
-al 009A66 .__LOCALBSS_LOAD__
-al 009A66 .__LOCALBSS_RUN__
+al 009A3B .__LOCALBSS_LOAD__
+al 009A3B .__LOCALBSS_RUN__
 al 000127 .__LOCALBSS_SIZE__
 al 003B91 .__LOCALCODE_LOAD__
 al 009800 .__LOCALCODE_RUN__
-al 000266 .__LOCALCODE_SIZE__
+al 00023B .__LOCALCODE_SIZE__
 al 000E01 .__MAIN_FILEOFFS__
-al 004430 .__MAIN_LAST__
+al 004405 .__MAIN_LAST__
 al 004000 .__MAIN_SIZE__
 al 002000 .__MAIN_START__
 al 009FF0 .__ULTIMEM_LOAD__
@@ -103,12 +103,12 @@ al 003A79 .drvs
 al 00280C .end_wait
 al 0028A2 .exit
 al 003879 .exit_codes
-al 009A83 .filename
+al 009A58 .filename
 al 0034AA .first_iopage
 al 000500 .first_lbank
 al 0007C3 .first_lfn
 al 0005C2 .first_wait
-al 009A71 .flags
+al 009A46 .flags
 al 0025A4 .fork
 al 0030C6 .fork_raw
 al 00341E .free_bank
@@ -134,8 +134,10 @@ al 0034B0 .iopage_page
 al 0034AB .iopage_pid
 al 00349F .iopages
 al 0034A4 .iopagesb
-al 0099DA .kernal_load
-al 009A20 .kernal_save
+al 0099DA .kernal_block
+al 0099FA .kernal_block2
+al 009A1D .kernal_load
+al 009A2C .kernal_save
 al 0028A5 .kill
 al 000400 .lbanks
 al 000480 .lbanksb
@@ -165,7 +167,7 @@ al 002F38 .open2
 al 0021C8 .outa
 al 000B45 .pending_signal
 al 000A44 .pending_signal_types
-al 009A6C .pid
+al 009A41 .pid
 al 002225 .print_chb
 al 0021BE .print_comma
 al 0021B4 .print_cr
@@ -193,9 +195,9 @@ al 003939 .proc_ram123
 al 0037B5 .procs
 al 0037F5 .procsb
 al 009FF4 .ram123
-al 009A6E .reg_a
-al 009A6F .reg_x
-al 009A70 .reg_y
+al 009A43 .reg_a
+al 009A44 .reg_x
+al 009A45 .reg_y
 al 002A60 .register
 al 002929 .reset_handler
 al 002B21 .respond
@@ -203,15 +205,15 @@ al 002B1A .respond1
 al 002AFE .respond_error
 al 002B15 .respond_len
 al 002B0C .respond_ok
-al 009B83 .response
-al 009B8B .response_len
-al 009B8C .responsep
+al 009B58 .response
+al 009B60 .response_len
+al 009B61 .responsep
 al 002698 .resume
 al 002769 .resume_waiting
 al 003836 .running
 al 000000 .s
 al 0099CA .save
-al 009A73 .saved_vic
+al 009A48 .saved_vic
 al 009800 .schedule
 al 00291D .set_handler
 al 000001 .sh
@@ -229,7 +231,7 @@ al 003B6E .speedcopy_blk3_to_blk5
 al 003B6F .speedcopy_blk5_to_lowmem
 al 003B70 .speedcopy_lowmem_to_blk5
 al 0020CE .sset
-al 009A72 .stack
+al 009A47 .stack
 al 002ACB .stack_overflow
 al 00301A .start
 al 0099A1 .stop
@@ -241,7 +243,7 @@ al 002ACE .tunix
 al 002B64 .tunix_balloc
 al 002B33 .tunix_basin
 al 002B70 .tunix_bfree
-al 009A67 .tunix_blk1
+al 009A3C .tunix_blk1
 al 003267 .tunix_driver
 al 002C16 .tunix_drivers
 al 009916 .tunix_enter
@@ -249,7 +251,7 @@ al 00991F .tunix_enter2
 al 002BE1 .tunix_exit
 al 002BAF .tunix_fork
 al 002B45 .tunix_general
-al 009A66 .tunix_io23
+al 009A3B .tunix_io23
 al 00297F .tunix_iopage_alloc
 al 0029AB .tunix_iopage_commit
 al 0029EB .tunix_iopage_free
@@ -344,6 +346,4 @@ al 00FDF9 .IOINIT
 al 00E518 .CINT
 al 00120D .Start
 al 00120B .Next
-break .debug
-break .debug
 break .debug

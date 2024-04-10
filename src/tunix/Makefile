@@ -14,7 +14,7 @@ include ../Makefile.rules
 all: $(CRUNSHED)
 
 $(CRUNSHED): $(PROGRAM)
-	$(EXOMIZER) sfx basic $(PROGRAM) -t52 -o $(CRUNSHED)
+	$(EXOMIZER) sfx basic -x3 $(PROGRAM) -t52 -o $(CRUNSHED)
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/tunix/libtunix.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib

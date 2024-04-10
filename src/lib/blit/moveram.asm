@@ -4,7 +4,7 @@
 
 .code
 
-.proc moveram
+.proc moveram   ; TODO: Rename.
     ldy #0
     ldx c
     inx

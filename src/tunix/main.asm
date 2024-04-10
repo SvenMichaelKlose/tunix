@@ -3533,10 +3533,8 @@ txt_welcome:
     jsr print_cr
 
     ;; BASIC cold start.
-.ifndef START_INIT
     ldayi $e437
     jsr PRTSTR
-.endif
     jsr INITVCTRS
     jsr INITBA
     jsr $e412

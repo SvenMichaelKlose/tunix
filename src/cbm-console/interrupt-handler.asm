@@ -7,14 +7,14 @@
     .zeropage
 
 s:
-sl:     .res 1
-sh:     .res 1
+sl: .res 1
+sh: .res 1
 d:
-dl:     .res 1
-dh:     .res 1
+dl: .res 1
+dh: .res 1
 c:
-cl:     .res 1
-ch:     .res 1
+cl: .res 1
+ch: .res 1
 
     .bss
 
@@ -66,4 +66,3 @@ done:
     cli
     rts
 .endproc
-

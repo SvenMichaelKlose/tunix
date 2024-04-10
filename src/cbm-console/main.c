@@ -1,31 +1,20 @@
 // TUNIX virtual console
-//
-// Open console menu when C= key has
-// been released without combination.
 
 #include <lib/tunix/tunix.h>
 
-char active;
+extern char iopage;
+extern char active;
+extern char menu_pid;
+extern void install_interrupt_handler (void);
+
 char menu_pid;
+char iopage;
+
 char consoles[8];
-
-void
-install_iopage (void)
-{
-}
-
-void
-init_roms (void)
-{
-}
+char active;
 
 void
 start_basic (void)
-{
-}
-
-void
-link_iopage (void)
 {
 }
 
@@ -52,18 +41,8 @@ launch (char i)
         consoles[i] = pid;
         select_console (i);
     } else {
-        init_roms ();
-        link_iopage ();
         start_basic ();
     }
-}
-
-// IO page installed.
-void
-interrupt_handler ()
-{
-    //if (CBM_KEY())
-        tunix_resume (menu_pid);
 }
 
 void
@@ -83,7 +62,12 @@ main (int argc, char * argv[])
 {
     (void) argc;
     (void) argv;
-    install_iopage ();
+
+    cputs ("VIRTUAL CONSOLE\n");
     menu_pid = tunix_getpid ();
+    iopage = tunix_iopage_alloc ();
+    //if (!iopage)
+    //    error ("OUT OF MEMORY FOR I/O PAGE");
+    install_interrupt_handler ();
     menu ();
 }

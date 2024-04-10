@@ -1,7 +1,7 @@
 .import lib_schedule, lib_getpid
 .import lib_fork, lib_suspend
-.export lib_resume, lib_exit, lib_kill
-.export lib_wait
+.import lib_resume, lib_exit, lib_kill
+.import lib_wait
 .import lib_iopage_alloc
 .import lib_iopage_commit
 .import lib_iopage_free

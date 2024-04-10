@@ -1,6 +1,7 @@
 .import lib_schedule, lib_getpid
-.import lib_fork
-.import lib_exit, lib_kill, lib_wait
+.import lib_fork, lib_suspend
+.export lib_resume, lib_exit, lib_kill
+.export lib_wait
 .import lib_iopage_alloc
 .import lib_iopage_commit
 .import lib_iopage_free
@@ -12,8 +13,8 @@
 .export _tunix_fork = lib_fork
 .export _tunix_exit = lib_exit
 .export _tunix_wait = lib_wait
-.export _tunix_suspend = lib_wait
-.export _tunix_resume = lib_wait
+.export _tunix_suspend = lib_suspend
+.export _tunix_resume = lib_resume
 .export _tunix_proc_list = lib_proc_list
 .export _tunix_proc_info = lib_proc_info
 .export _tunix_iopage_alloc = lib_iopage_alloc

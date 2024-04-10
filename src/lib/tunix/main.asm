@@ -18,6 +18,7 @@ TUNIX_DEVICE    = 31
 .ifdef DEBUG
 
 .export cmd_fork, cmd_exit, cmd_kill
+.export cmd_suspend, cmd_release
 .export cmd_wait, cmd_getpid
 .export cmd_proc_info
 
@@ -27,6 +28,8 @@ TUNIX_DEVICE    = 31
 
 cmd_fork:           .byte "PF"
 cmd_exit:           .byte "PE"
+cmd_suspend:        .byte "PS"
+cmd_resume:         .byte "PR"
 cmd_kill:           .byte "PKc"
 cmd_wait:           .byte "PW"
 cmd_getpid:         .byte "P"
@@ -100,6 +103,34 @@ cmd_proc_info:      .byte "PI"
     lda #3
     ldx #<cmd_kill
     ldy #>cmd_kill
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; A: process ID
+.export lib_suspend
+.proc lib_suspend
+    tay
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #3
+    ldx #<cmd_suspend
+    ldy #>cmd_suspend
+    jsr SETNAM
+    jmp OPEN
+.endproc
+
+; A: process ID
+.export lib_resume
+.proc lib_resume
+    tay
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    lda #3
+    ldx #<cmd_resume
+    ldy #>cmd_resume
     jsr SETNAM
     jmp OPEN
 .endproc

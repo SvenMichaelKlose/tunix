@@ -13,7 +13,8 @@
 ;;; Compile-time
 
 __VIC20__       = 1
-EARLY_TESTS     = 1
+START_INIT      = 1
+;EARLY_TESTS     = 1
 BLEEDING_EDGE   = 1
 
 ;;; Segmentation
@@ -87,6 +88,7 @@ blk5:     .res 2
 
 PETSCII_CLRSCR = 147
 
+INITVIC = $e5c3
 FRESTOR = $fd52
 
 STATUS  = $90
@@ -2321,8 +2323,6 @@ tunix_driver:
 
 .export tunix_open
 .proc tunix_open
-    lda #0
-    sta STATUS
     lda DEV
     sta DFLTN
     lda FNLEN
@@ -2357,6 +2357,7 @@ g:  jmp tunix_general
 .export respond_ok
 .proc respond_ok
     ldx #0
+    stx STATUS
     stx response
     stx responsep
     inx
@@ -2372,7 +2373,9 @@ g:  jmp tunix_general
 .export respond1
 .proc respond1
     sta response
-    ldx #1
+    ldx #0
+    stx STATUS
+    inx
     bne respond_len ; (jmp)
 .endproc
     
@@ -3487,6 +3490,7 @@ txt_welcome:
 
 .export start
 .proc start
+    jsr INITVIC
     print txt_tunix
 
 .ifdef EARLY_TESTS
@@ -3509,11 +3513,15 @@ txt_welcome:
     cmp #0
     beq :+
     jmp proc0
-:   jsr lib_proc_list
+:
+
+.ifdef EARLY_TESTS
+    jsr lib_proc_list
     lda #0
     jsr lib_proc_info
     jsr lib_getpid
     jsr lib_proc_info
+.endif
 
     ; Welcome messages with free RAM.
     ldayi txt_welcome
@@ -3523,19 +3531,21 @@ txt_welcome:
     txa
     jsr print_free_ram_a
     jsr print_cr
-    ldayi $e437
-    jsr PRTSTR
 
     ;; BASIC cold start.
+.ifndef START_INIT
+    ldayi $e437
+    jsr PRTSTR
+.endif
     jsr INITVCTRS
     jsr INITBA
     jsr $e412
 
-.if 0
+.ifdef START_INIT
     sei
     ldx #0
     sei
-l:  lda loadkeys_a,x
+l:  lda loadkeys,x
     beq :+
     sta KEYD,x
     inx

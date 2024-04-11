@@ -14,8 +14,13 @@
 
 __VIC20__       = 1
 START_INIT      = 1
-;EARLY_TESTS     = 1
+EARLY_TESTS     = 1
 BLEEDING_EDGE   = 1
+
+;; Assertions
+
+; IO23, RAM123 * 2, BLK1/2/3/5
+DEFAULT_BANKS_PER_PROC  = 7
 
 ;;; Segmentation
 
@@ -720,6 +725,26 @@ pending_signal:       .res 1
     dmovex iopages, iopagesb, first_iopage, free_iopage
 .endmacro
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK ALLOCATION MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.macro alloc_bank_x
+    lpopx banks, free_bank
+.endmacro
+
+.macro alloc_lbank_x
+    dpushx lbanks, lbanksb, first_lbank
+.endmacro
+
+.macro free_bank_x
+    lpushx banks, free_bank
+.endmacro
+
+.macro free_lbank_x
+:   drmx lbanks, lbanksb, first_lbank
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS BANK MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1141,6 +1166,7 @@ r:  plx
     tax
     bne :-
     jsr print_cr
+:
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -1151,15 +1177,14 @@ r:  plx
 ; Returns:
 ;  Z: Out of memory.
 ;  X: Bank #
+
 .export balloc
 .proc balloc
     phy
-    ;; Draw from global pool.
-    lpopx banks, free_bank
+    alloc_bank_x
     cpx #0
     beq :+  ; Oops…
-    ;; Own it.
-    dpushx lbanks, lbanksb, first_lbank
+    alloc_lbank_x
     inc bank_refs,x
 :   ply
     txa
@@ -1179,8 +1204,8 @@ r:  plx
     dec bank_refs,x
     bmi invalid_bank
     bne :+
-    lpushx banks, free_bank
-:   drmx lbanks, lbanksb, first_lbank
+    free_bank_x
+:   free_lbank_x
     clc
     rts
 invalid_bank:
@@ -1371,9 +1396,8 @@ vec_io23_to_blk5:
 
 ; Fork banks and save stack.
 ;
-; The child will never see this code as
-; if it was returning from this function
-; after schedule() called switch().
+; The child will never see this function
+; but return from it.
 ;
 ; Y: child process ID
 ; Returns Y unaffected.
@@ -1393,10 +1417,8 @@ vec_io23_to_blk5:
     push blk5
 
     ;;; Make child's per-process banks.
-    ;; Allocate IO23 bank globally only
-    ; as the new RAM123 containing the
-    ; local bank list is not there yet.
-    lpopx banks, free_bank
+    ;; Fork IO23.
+    alloc_bank_x
     txa
     sta proc_io23,y
     inc bank_refs,x
@@ -1408,8 +1430,7 @@ vec_io23_to_blk5:
     save_internal_ram_to_blk5
 
     ;; Fork shadow RAM123.
-    ; Allocate bank.
-    lpopx banks, free_bank
+    alloc_bank_x
     txa
     sta proc_data,y
     inc bank_refs,x
@@ -1420,20 +1441,16 @@ vec_io23_to_blk5:
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
     stx ram123 ; Map in new.
-    ; Register new RAM123 locally.
-    dpushx lbanks, lbanksb, first_lbank
-    ; Map in child's IO23.
-    ; Register new IO23 locally.
+    alloc_lbank_x
+    pop io23
     tax
-    dpushx lbanks, lbanksb, first_lbank
-    ; Update PID and stack pointer.
-    pop io23 ; (Child's IO23.)
+    alloc_lbank_x
     sty pid
     mvb stack, tmp2+1
 
     ;; Copy remaining banks.
-    ; Copies from BLK3 to BLK5 with
-    ; speed code in BLK2.
+    ; Copy from BLK3 to BLK5 with speed
+    ; code in BLK2.
     .macro forkblky procblk
         ldx tmp1 ; parent
         lda procblk,x
@@ -1449,8 +1466,8 @@ vec_io23_to_blk5:
     forkblky proc_blk2
     forkblky proc_blk3
     forkblky proc_blk5
-    ; Must come last to preserve proc
-    ; data.
+    ; Must come last to preserve
+    ; balloc()'s bookkeeping.
     forkblky proc_blk1
 
     pop blk5
@@ -1512,150 +1529,6 @@ done:
 ; in for TUNIX, holds additional per-
 ; process data.
 
-    .segment "KERNELDATA"
-
-items_proc_list:
-  .byte "ID", 0
-  .byte "FLAGS", 0
-  .byte "EXITCODE", 0
-  .byte 0
-
-items_proc_info:
-  .byte "ID", 0
-  .byte "MEMORY", 0
-  .byte "LFNS", 0
-  .byte "NBANKS", 0
-  .byte 0
-
-    .segment "KERNEL"
-
-.export proc_list_item
-.proc proc_list_item
-    phx
-    txa
-    jsr print_decbyte
-    plx
-
-    jsr print_comma
-    phx
-    ldy #'?'
-    lda proc_flags,x
-    cmp #PROC_RUNNING
-    bne :+
-    ldy #'R'
-    bne prt ; (jmp)
-:   cmp #PROC_SLEEPING
-    bne :+
-    ldy #'S'
-    bne prt ; (jmp)
-:   cmp #PROC_BABY
-    bne :+
-    ldy #'B'
-    bne prt ; (jmp)
-:   cmp #PROC_ZOMBIE
-    bne prt
-    ldy #'Z'
-prt:tya
-    jsr BSOUT
-    plx
-
-    phx
-    jsr print_comma
-    lda exit_codes,x
-    jsr print_decbyte
-    plx
-
-;    phx
-;    jsr print_comma
-;    enter_data_x
-;    ldaxi waiting
-;    jsry list_length, first_wait
-;    stx tmp1
-;    leave_data
-;    lda tmp1
-;    jsr print_decbyte
-;    plx
-
-    jsr print_cr
-    rts
-.endproc
-
-; Print process list
-; X: process ID
-.export proc_list
-.proc proc_list
-    pushw zp2
-    stwi zp2, items_proc_list
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_cr
-    ldx #0
-    jsr proc_list_item
-    ldx running
-    beq :+
-l:  jsr proc_list_item
-    lloopx procs, l
-:   popw zp2
-    clc
-    rts
-.endproc
-
-; Print process info
-; X: process ID
-.export proc_info
-.proc proc_info
-    lda proc_flags,x
-    bne :+
-    jmp no_proc
-
-:   stx tmp2
-    pushw zp2
-    stwi zp2, items_proc_info
-
-    jsr print_head
-    lda tmp2
-    tax
-    jsr print_cv
-    jsr print_cr
-
-    jsr print_head
-    lda proc_data,x
-    jsr print_chb
-    lda proc_io23,x
-    jsr print_chb
-    lda proc_ram123,x
-    jsr print_chb
-    lda proc_blk1,x
-    jsr print_chb
-    lda proc_blk2,x
-    jsr print_chb
-    lda proc_blk3,x
-    jsr print_chb
-    lda proc_blk5,x
-    jsr print_chb
-    jsr print_cr
-
-    jsr print_head
-    print_csv lfns, first_lfn
-
-    jsr print_head
-    ldaxi lbanks
-    jsry list_length, first_lbank
-    txa
-    jsr print_cv
-    jsr print_cr
-
-    popw zp2
-    clc
-    rts
-no_proc:
-    sec
-    rts
-.endproc
-
 ; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
@@ -1678,6 +1551,8 @@ no_proc:
     plx ; Parent's PID.
     cpx pid
     bne child
+;    cpx #0
+;    beq r
 
     ;; Remove parent banks from child.
     enter_data_y
@@ -1698,29 +1573,30 @@ no_proc:
     leave_data
 
     ;;; Increment child's GLFN refs.
-    ;; Enter child's RAM123.
     enter_data_y
-    ;; Increment GLFN of each LFN.
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
     lloopx lfns, :-
-    ;; Leave child's RAM123.
 :   leave_data
 
     ;; Mark child as baby.
     lda #PROC_BABY
     sta proc_flags,y
-    tya
+
+r:  tya
     clc
     rts
 
 child:
+    ; Map in child's banks for the first
+    ; time.
     get_procblk_y proc_data, ram123
     get_procblk_y proc_io23, io23
     get_procblk_y proc_blk2, blk2
     get_procblk_y proc_blk3, blk3
     get_procblk_y proc_blk5, blk5
+
     lda #0
     clc
     rts
@@ -1916,6 +1792,158 @@ reap_zombie:
     clc
     rts
 invalid_pid:
+    sec
+    rts
+.endproc
+
+;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS INFO ;;;
+;;;;;;;;;;;;;;;;;;;;
+
+    .segment "KERNELDATA"
+
+items_proc_list:
+  .byte "ID", 0
+  .byte "FLAGS", 0
+  .byte "EXITCODE", 0
+  .byte 0
+
+    .segment "KERNEL"
+
+.export proc_list_item
+.proc proc_list_item
+    phx
+    txa
+    jsr print_decbyte
+    plx
+
+    jsr print_comma
+    phx
+    ldy #'?'
+    lda proc_flags,x
+    cmp #PROC_RUNNING
+    bne :+
+    ldy #'R'
+    bne prt ; (jmp)
+:   cmp #PROC_SLEEPING
+    bne :+
+    ldy #'S'
+    bne prt ; (jmp)
+:   cmp #PROC_BABY
+    bne :+
+    ldy #'B'
+    bne prt ; (jmp)
+:   cmp #PROC_ZOMBIE
+    bne prt
+    ldy #'Z'
+prt:tya
+    jsr BSOUT
+    plx
+
+    phx
+    jsr print_comma
+    lda exit_codes,x
+    jsr print_decbyte
+    plx
+
+;    phx
+;    jsr print_comma
+;    enter_data_x
+;    ldaxi waiting
+;    jsry list_length, first_wait
+;    stx tmp1
+;    leave_data
+;    lda tmp1
+;    jsr print_decbyte
+;    plx
+
+    jsr print_cr
+    rts
+.endproc
+
+    .segment "KERNEL"
+
+; Print process list
+; X: process ID
+.export proc_list
+.proc proc_list
+    pushw zp2
+    stwi zp2, items_proc_list
+    jsr print_head
+    jsr print_comma
+    jsr print_head
+    jsr print_comma
+    jsr print_head
+    jsr print_cr
+    ldx #0
+    jsr proc_list_item
+    ldx running
+    beq :+
+l:  jsr proc_list_item
+    lloopx procs, l
+:   popw zp2
+    clc
+    rts
+.endproc
+
+    .segment "KERNELDATA"
+
+items_proc_info:
+  .byte "ID", 0
+  .byte "MEMORY", 0
+  .byte "LFNS", 0
+  .byte "#BANKS", 0
+  .byte 0
+
+; Print process info
+; X: process ID
+.export proc_info
+.proc proc_info
+    lda proc_flags,x
+    bne :+
+    jmp no_proc
+
+:   stx tmp2
+    pushw zp2
+    stwi zp2, items_proc_info
+
+    jsr print_head
+    lda tmp2
+    tax
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    lda proc_data,x
+    jsr print_chb
+    lda proc_io23,x
+    jsr print_chb
+    lda proc_ram123,x
+    jsr print_chb
+    lda proc_blk1,x
+    jsr print_chb
+    lda proc_blk2,x
+    jsr print_chb
+    lda proc_blk3,x
+    jsr print_chb
+    lda proc_blk5,x
+    jsr print_chb
+    jsr print_cr
+
+    jsr print_head
+    print_csv lfns, first_lfn
+
+    jsr print_head
+    ldaxi lbanks
+    jsry list_length, first_lbank
+    txa
+    jsr print_cv
+    jsr print_cr
+
+    popw zp2
+    clc
+    rts
+no_proc:
     sec
     rts
 .endproc
@@ -2792,13 +2820,19 @@ vec_tunix_kernal:
     mvb ram123, proc_data
     mvb io23, proc_io23
     mvb blk1, proc_blk1
-    sta tunix_blk1
+    sta tunix_blk1 ; For all on IO23.
     mvb blk2, proc_blk2
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
-    ;; Mark as running.
-    lda #PROC_RUNNING
-    sta proc_flags
+    mvb proc_flags, #PROC_RUNNING
+
+    ; Remove allocated lbanks forever.
+    ldx #0
+    txa
+:   sta lbanks,x
+    inx
+    bne :-
+    sta first_lbank
 
     print txt_registering
 
@@ -2830,7 +2864,7 @@ tunix_vectors:
     .segment "KERNELDATA"
 
 txt_tunix:
-  ;.byte PETSCII_CLRSCR
+  .byte PETSCII_CLRSCR
   .byte "STARTING TUNIX.", 13, 0
 txt_booting:
   .byte 13, "BOOTING.", 13, 0
@@ -3305,6 +3339,9 @@ err_wrong_free_proc_count:
   .byte "WRONG # OF FREE PROCS.", 0
 err_cannot_fork:
   .byte "CANNOT FORK.", 0
+err_num_lbanks_after_fork:
+  .byte "WRONG # OF LBANKS AFTER FORK."
+  .byte 0
 err_child_running_after_exit:
   .byte "CHILD STILL RUNNING AFTER "
   .byte "EXIT.", 0
@@ -3464,7 +3501,15 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export baby
 .proc baby
     print txt_child
-    jsr lib_exit
+debug:.export debug
+    jsr lib_getpid
+    jsr lib_proc_info
+    ldaxi lbanks
+    jsry list_length, first_lbank
+    cpx #10
+    beq :+
+    error err_num_lbanks_after_fork
+:   jsr lib_exit
     error err_child_running_after_exit
 .endproc
 

@@ -831,6 +831,8 @@ keys:
 * "MEMORY": Banks assigned to 
   RAM123 (TUNIX), IO23 (TUNIX),
   RAM123, BLK1, BLK2, BLK3 and BLK5.
+* "#BANKS": Number of extended memory
+  banks.
 * "BANKS": List of extended memory
   banks.
 * "STACK": Last saved tack pointer.

@@ -436,6 +436,11 @@ pending_signal:       .res 1
     ldy reg_y
 .endmacro
 
+.macro ldax from
+    lda from
+    ldx from+1
+.endmacro
+
 .macro ldaxi val
     lda #<(val)
     ldx #>(val)
@@ -843,7 +848,20 @@ pending_signal:       .res 1
     stx p+2
     ldx #5
 p:  lda $ff00,x
-    sta 0,x
+    sta s,x
+    dex
+    bpl p
+    rts
+.endproc
+
+; Init s, d and c with values at XA.
+.export dset
+.proc dset
+    sta p+1
+    stx p+2
+    ldx #3
+p:  lda $ff00,x
+    sta d,x
     dex
     bpl p
     rts
@@ -863,10 +881,12 @@ p:  lda $ff00,x
 ; Copy range at XA.
 .export smemcpy
 .proc smemcpy
-    jsr sset
+    stax tmp3
     pushw s
     pushw d
     pushw c
+    ldax tmp3
+    jsr sset
     jsr memcpy
     popw c
     popw d
@@ -929,6 +949,29 @@ q2: dex
 m2: dec s+1
     dec d+1
     jmp q2
+.endproc
+
+; Copy descriptor 'set' over copy
+; vectors and move it, baby.
+.macro sbzeroax set
+    ldaxi set
+    jsr sbzero
+.endmacro
+
+; Copy range at XA.
+.export sbzero
+.proc sbzero
+    stax tmp3
+    pushw s
+    pushw d
+    pushw c
+    ldax tmp3
+    jsr dset
+    jsr bzero
+    popw c
+    popw d
+    popw s
+    rts
 .endproc
 
 
@@ -2713,32 +2756,30 @@ vec_tunix_kernal:
   .word IOVECTORS
   .word IOVECTOR_SIZE
 
+clr_globalbss:
+  .word __GLOBALBSS_RUN__
+  .word __GLOBALBSS_SIZE__
+clr_localbss:
+  .word __LOCALBSS_RUN__
+  .word __LOCALBSS_SIZE__ - __ULTIMEM_SIZE__
+clr_localbss2:
+  .word __LOCALBSS2_RUN__
+  .word __LOCALBSS2_SIZE__
+clr_rest_of_blk1:
+  .word __LOCALCODE_LOAD__
+  .word $4000 - __LOCALCODE_LOAD__
+
     .segment "KERNEL"
 
 .export boot
 .proc boot
     jsr FRESTOR
 
-    ;; Clear global data.
-    stwi d, __GLOBALBSS_RUN__
-    stwi c, __GLOBALBSS_SIZE__
-    jsr bzero
-
-    ;; Init local (per-process).
-    ; Copy I/O handlers.
+    sbzeroax clr_globalbss
     smemcpyax vec_io_reloc
-    ; Clear data areas.
-    stwi d, __LOCALBSS_RUN__
-    stwi c, __LOCALBSS_SIZE__ - __ULTIMEM_SIZE__
-    jsr bzero
-    stwi d, __LOCALBSS2_RUN__
-    stwi c, __LOCALBSS2_SIZE__
-    jsr bzero
-
-    ;; Clear rest of BLK1.
-    stwi d, __LOCALCODE_LOAD__
-    stwi c, $4000 - __LOCALCODE_LOAD__
-    jsr bzero
+    sbzeroax clr_localbss
+    sbzeroax clr_localbss2
+    sbzeroax clr_rest_of_blk1
 
     ;;; Init lists.
     ;; Link
@@ -3502,7 +3543,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export baby
 .proc baby
     print txt_child
-debug:.export debug
     jsr lib_getpid
     jsr lib_proc_info
     ldaxi lbanks

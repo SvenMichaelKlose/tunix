@@ -974,7 +974,6 @@ m2: dec s+1
     rts
 .endproc
 
-
 ; Clear memory.
 ; d, c: dest, counter
 .export bzero
@@ -3572,6 +3571,13 @@ txt_welcome:
   .byte 13 ; PETSCII_CLRSCR
   .byte "TUNIX - ", 0
 
+.ifdef EARLY_TESTS
+vec_reloc_boot_and_tests:
+  .word __BOOT_LOAD__ + __BOOT_SIZE__ - 1
+  .word __BOOT_RUN__ + __BOOT_SIZE__ - 1
+  .word __BOOT_SIZE__
+.endif ; .ifdef EARLY_TESTS
+
     .segment "KERNEL"
 
 .export start
@@ -3580,10 +3586,8 @@ txt_welcome:
     print txt_tunix
 
 .ifdef EARLY_TESTS
-    ; Relocate boot & tests.
-    stwi s, __BOOT_LOAD__ + __BOOT_SIZE__ - 1
-    stwi d, __BOOT_RUN__ + __BOOT_SIZE__ - 1
-    stwi c, __BOOT_SIZE__
+    ldaxi vec_reloc_boot_and_tests
+    jsr sset
     jsr memcpybw
 .endif ; .ifdef EARLY_TESTS
 

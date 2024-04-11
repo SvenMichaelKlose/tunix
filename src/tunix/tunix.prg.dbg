@@ -1,6 +1,6 @@
 version	major=2,minor=0
 info	csym=0,file=744,lib=2,line=2853,mod=4,scope=16,seg=19,span=149,sym=81,type=5
-file	id=0,name="main.asm",size=59315,mtime=0x66185D8A,mod=0
+file	id=0,name="main.asm",size=59315,mtime=0x6618652A,mod=0
 file	id=1,name="main.asm",size=3743,mtime=0x6616AEEB,mod=1
 file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x66182CF3,mod=0
 file	id=3,name="/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x65CE3B26,mod=1

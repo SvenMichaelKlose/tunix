@@ -1,8 +1,8 @@
 version	major=2,minor=0
 info	csym=0,file=744,lib=2,line=2855,mod=4,scope=16,seg=19,span=149,sym=81,type=5
-file	id=0,name="main.asm",size=59339,mtime=0x66182C46,mod=0
+file	id=0,name="main.asm",size=59331,mtime=0x66183707,mod=0
 file	id=1,name="main.asm",size=3743,mtime=0x6616AEEB,mod=1
-file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x6615069C,mod=0
+file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x66182CF3,mod=0
 file	id=3,name="/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x65CE3B26,mod=1
 file	id=4,name="cbm/exehdr.s",size=1184,mtime=0x654285F4,mod=2
 file	id=5,name="cbm/loadaddr.s",size=399,mtime=0x654285F4,mod=3
@@ -2883,7 +2883,7 @@ seg	id=12,name="KERNELDATA",start=0x00300A,size=0x03D5,addrsize=absolute,type=ro
 seg	id=13,name="MACHDEPDATA",start=0x0033DF,size=0x002A,addrsize=absolute,type=ro,oname="tunix.prg",ooffs=8672
 seg	id=14,name="MACHDEP",start=0x002EC8,size=0x0142,addrsize=absolute,type=ro,oname="tunix.prg",ooffs=7369
 seg	id=15,name="LOCALCODE",start=0x009800,size=0x023B,addrsize=absolute,type=rw,oname="tunix.prg",ooffs=10781
-seg	id=16,name="BOOT",start=0x004000,size=0x0685,addrsize=absolute,type=rw,oname="tunix.prg",ooffs=11352
+seg	id=16,name="TESTS",start=0x004000,size=0x0685,addrsize=absolute,type=rw,oname="tunix.prg",ooffs=11352
 seg	id=17,name="EXEHDR",start=0x001201,size=0x000C,addrsize=absolute,type=ro,oname="tunix.prg",ooffs=2
 seg	id=18,name="LOADADDR",start=0x0011FF,size=0x0002,addrsize=absolute,type=ro,oname="tunix.prg",ooffs=0
 span	id=0,seg=3,start=0,size=2,type=0

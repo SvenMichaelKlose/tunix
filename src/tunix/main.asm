@@ -24,9 +24,9 @@ DEFAULT_BANKS_PER_PROC  = 7
 
 ;;; Segmentation
 
-.import __BOOT_LOAD__
-.import __BOOT_RUN__
-.import __BOOT_SIZE__
+.import __TESTS_LOAD__
+.import __TESTS_RUN__
+.import __TESTS_SIZE__
 .import __GLOBALBSS_RUN__
 .import __GLOBALBSS_SIZE__
 .import __LOCALCODE_LOAD__
@@ -3326,7 +3326,7 @@ blkiohandler save, #IDX_SAVE
 
 .ifdef EARLY_TESTS
 
-    .segment "BOOT"
+    .segment "TESTS"
 
 txt_tests:
   .byte "!!! RUNNING TESTS !!!", 13, 0
@@ -3400,7 +3400,7 @@ err_cannot_commit_iopage:
 err_cannot_free_iopage:
   .byte "CANNOT FREE I/O PAGE.", 0
 
-    .segment "BOOT"
+    .segment "TESTS"
 
 ; TODO: Make a proper formula from
 ; defined constants.
@@ -3572,10 +3572,10 @@ txt_welcome:
   .byte "TUNIX - ", 0
 
 .ifdef EARLY_TESTS
-vec_reloc_boot_and_tests:
-  .word __BOOT_LOAD__ + __BOOT_SIZE__ - 1
-  .word __BOOT_RUN__ + __BOOT_SIZE__ - 1
-  .word __BOOT_SIZE__
+vec_reloc_tests:
+  .word __TESTS_LOAD__ + __TESTS_SIZE__ - 1
+  .word __TESTS_RUN__ + __TESTS_SIZE__ - 1
+  .word __TESTS_SIZE__
 .endif ; .ifdef EARLY_TESTS
 
     .segment "KERNEL"
@@ -3586,7 +3586,7 @@ vec_reloc_boot_and_tests:
     print txt_tunix
 
 .ifdef EARLY_TESTS
-    ldaxi vec_reloc_boot_and_tests
+    ldaxi vec_reloc_tests
     jsr sset
     jsr memcpybw
 .endif ; .ifdef EARLY_TESTS

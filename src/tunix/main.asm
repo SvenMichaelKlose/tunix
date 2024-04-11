@@ -2980,8 +2980,7 @@ h:  lda $ffff
 
 .export chkin2
 .proc chkin2
-    sta reg_a
-    tax
+    ldx reg_a
     lda lfn_glfn,x
     beq :+
     tax
@@ -2997,8 +2996,7 @@ h:  lda $ffff
 
 .export ckout2
 .proc ckout2
-    sta reg_a
-    tax
+    ldx reg_a
     lda lfn_glfn,x
     beq :+
     tax

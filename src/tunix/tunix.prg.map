@@ -1,0 +1,134 @@
+Modules list:
+-------------
+main.o:
+    CODE              Offs=000000  Size=000003  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=00000E  Align=00001  Fill=0000
+    ULTIMEM           Offs=000000  Size=000010  Align=00001  Fill=0000
+    GLOBALBSS         Offs=000000  Size=0007FB  Align=00001  Fill=0000
+    LOCALBSS          Offs=000000  Size=000127  Align=00001  Fill=0000
+    LOCALBSS2         Offs=000000  Size=000746  Align=00001  Fill=0000
+    LIB               Offs=000000  Size=000106  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000CBB  Align=00001  Fill=0000
+    KERNELDATA        Offs=000000  Size=0003BF  Align=00001  Fill=0000
+    MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
+    MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
+    LOCALCODE         Offs=000000  Size=00023B  Align=00001  Fill=0000
+    BOOT              Offs=000000  Size=000685  Align=00001  Fill=0000
+../lib/tunix/libtunix.a(main.o):
+    CODE              Offs=000003  Size=0000F1  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000018  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(exehdr.o):
+    EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(loadaddr.o):
+    LOADADDR          Offs=000000  Size=000002  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+ZEROPAGE              000000  00000D  00000E  00001
+LOCALBSS2             000400  000B45  000746  00001
+LOADADDR              0011FF  001200  000002  00001
+EXEHDR                001201  00120C  00000C  00001
+CODE                  002000  0020F3  0000F4  00001
+LIB                   0020F4  0021F9  000106  00001
+KERNEL                0021FA  002EB4  000CBB  00001
+MACHDEP               002EB5  002FF6  000142  00001
+KERNELDATA            002FF7  0033B5  0003BF  00001
+MACHDEPDATA           0033B6  0033DF  00002A  00001
+DATA                  0033E0  0033F7  000018  00001
+GLOBALBSS             0033F8  003BF2  0007FB  00001
+BOOT                  004000  004684  000685  00001
+LOCALCODE             009800  009A3A  00023B  00001
+LOCALBSS              009A3B  009B61  000127  00001
+ULTIMEM               009FF0  009FFF  000010  00001
+
+
+Exports list by name:
+---------------------
+__BOOT_LOAD__             003E2E RLA    __BOOT_RUN__              004000 RLA    
+__BOOT_SIZE__             000685 REA    __EXEHDR__                000001 REA    
+__GLOBALBSS_RUN__         0033F8 RLA    __GLOBALBSS_SIZE__        0007FB REA    
+__LOADADDR__              000001 REA    __LOCALBSS2_RUN__         000400 RLA    
+__LOCALBSS2_SIZE__        000746 REA    __LOCALBSS_RUN__          009A3B RLA    
+__LOCALBSS_SIZE__         000127 REA    __LOCALCODE_LOAD__        003BF3 RLA    
+__LOCALCODE_RUN__         009800 RLA    __LOCALCODE_SIZE__        00023B REA    
+__ULTIMEM_SIZE__          000010 REA    lib_exit                  002035 RLA    
+lib_fork                  002023 RLA    lib_getpid                002011 RLA    
+lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
+lib_iopage_free           0020E1 RLA    lib_kill                  002048 RLA    
+lib_proc_info             0020A9 RLA    lib_proc_list             002097 RLA    
+lib_wait                  002084 RLA    
+
+
+Exports list by value:
+----------------------
+__EXEHDR__                000001 REA    __LOADADDR__              000001 REA    
+__ULTIMEM_SIZE__          000010 REA    __LOCALBSS_SIZE__         000127 REA    
+__LOCALCODE_SIZE__        00023B REA    __LOCALBSS2_RUN__         000400 RLA    
+__BOOT_SIZE__             000685 REA    __LOCALBSS2_SIZE__        000746 REA    
+__GLOBALBSS_SIZE__        0007FB REA    lib_getpid                002011 RLA    
+lib_fork                  002023 RLA    lib_exit                  002035 RLA    
+lib_kill                  002048 RLA    lib_wait                  002084 RLA    
+lib_proc_list             002097 RLA    lib_proc_info             0020A9 RLA    
+lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
+lib_iopage_free           0020E1 RLA    __GLOBALBSS_RUN__         0033F8 RLA    
+__LOCALCODE_LOAD__        003BF3 RLA    __BOOT_LOAD__             003E2E RLA    
+__BOOT_RUN__              004000 RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALBSS_RUN__          009A3B RLA    
+
+
+Imports list:
+-------------
+__BOOT_LOAD__ ([linker generated]):
+    main.o                    main.asm:27
+__BOOT_RUN__ ([linker generated]):
+    main.o                    main.asm:28
+__BOOT_SIZE__ ([linker generated]):
+    main.o                    main.asm:29
+__EXEHDR__ (exehdr.o):
+    [linker generated]        vic.cfg:3
+__GLOBALBSS_RUN__ ([linker generated]):
+    main.o                    main.asm:30
+__GLOBALBSS_SIZE__ ([linker generated]):
+    main.o                    main.asm:31
+__LOADADDR__ (loadaddr.o):
+    [linker generated]        vic.cfg:2
+__LOCALBSS2_RUN__ ([linker generated]):
+    main.o                    main.asm:37
+__LOCALBSS2_SIZE__ ([linker generated]):
+    main.o                    main.asm:38
+__LOCALBSS_RUN__ ([linker generated]):
+    main.o                    main.asm:35
+__LOCALBSS_SIZE__ ([linker generated]):
+    main.o                    main.asm:36
+__LOCALCODE_LOAD__ ([linker generated]):
+    main.o                    main.asm:32
+__LOCALCODE_RUN__ ([linker generated]):
+    main.o                    main.asm:33
+__LOCALCODE_SIZE__ ([linker generated]):
+    main.o                    main.asm:34
+__ULTIMEM_SIZE__ ([linker generated]):
+    main.o                    main.asm:39
+lib_exit (main.o):
+    main.o                    main.asm:46
+lib_fork (main.o):
+    main.o                    main.asm:45
+lib_getpid (main.o):
+    main.o                    main.asm:44
+lib_iopage_alloc (main.o):
+    main.o                    main.asm:49
+lib_iopage_commit (main.o):
+    main.o                    main.asm:50
+lib_iopage_free (main.o):
+    main.o                    main.asm:51
+lib_kill (main.o):
+    main.o                    main.asm:47
+lib_proc_info (main.o):
+    main.o                    main.asm:53
+lib_proc_list (main.o):
+    main.o                    main.asm:52
+lib_wait (main.o):
+    main.o                    main.asm:48
+

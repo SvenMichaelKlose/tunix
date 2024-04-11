@@ -871,6 +871,7 @@ p:  lda $ff00,x
     popw c
     popw d
     popw s
+    rts
 .endproc
 
 ; Copy memory (forwards).

@@ -233,6 +233,7 @@ glfns:      .res MAX_LFNS
 glfn_refs:  .res MAX_LFNS
 ;; Last parameters to OPEN.
 glfn_drv:   .res MAX_LFNS
+glfn_sa:    .res MAX_LFNS
 
 ;;; Processes
 procs:      .res MAX_PROCS
@@ -2968,6 +2969,9 @@ h:  lda $ffff
     push LFN
     jsr lfn_to_glfn
     sta LFN
+    tax
+    lda SA
+    sta glfn_sa,x
     ldy DEV
     lda dev_drv,y
     tay
@@ -2983,9 +2987,9 @@ h:  lda $ffff
     ldx reg_a
     lda lfn_glfn,x
     beq :+
-    tax
-    lda glfn_drv,x
-    tay
+    lda glfn_sa,x
+    sta SA
+    ldy glfn_drv,x
     lda drv_dev,y
     sta DFLTN
     clc
@@ -3000,8 +3004,9 @@ h:  lda $ffff
     lda lfn_glfn,x
     beq :+
     tax
-    lda glfn_drv,x
-    tay
+    lda glfn_sa,x
+    sta SA
+    ldy glfn_drv,x
     lda drv_dev,y
     sta DFLTO
     clc
@@ -3030,6 +3035,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .proc close2
     jsr lfn_to_glfn
     sta reg_a
+    lda glfn_sa,x
+    sta SA
     ldy glfn_drv,x
     lda #0
     sta glfn_drv,x

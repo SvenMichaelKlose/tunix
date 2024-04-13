@@ -151,8 +151,8 @@ MAX_SIGNALS  = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
 ;MAX_DRV_NAME = 8
-MAX_IOPAGES  = 3
-IOPAGE_BASE  = $9c
+MAX_IOPAGES  = 4
+IOPAGE_BASE  = $9b
 STACK_LIMIT  = 16
 
 ;;;;;;;;;;;;;;;;
@@ -3087,11 +3087,9 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     jmp tunix_leave
 .endproc
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Static KERNAL I/O handlers. ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    .segment "LOCALCODE"
+;;;;;;;;;;;;;;;;;
+;;; SCHEDULER ;;;
+;;;;;;;;;;;;;;;;;
 
 ; Schedule task switch
 ; Picks next or first on running list.
@@ -3182,6 +3180,12 @@ r:  rts
     cli
     rts
 .endproc
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; KERNAL I/O handlers ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    .segment "LOCALCODE"
 
 .export call_driver1
 .proc call_driver1

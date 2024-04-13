@@ -2155,8 +2155,8 @@ r:  rts
     lda free_iopage
     beq no_more
     alloc_iopage_x
-    ldy pid
-    sta iopage_pid,y
+    lda pid
+    sta iopage_pid,x
     txa
     clc
     adc #IOPAGE_BASE - 1
@@ -2208,7 +2208,7 @@ next:
 .proc tunix_iopage_free
     lda SA
     sec
-    sbc #IOPAGE_BASE
+    sbc #IOPAGE_BASE - 1
     tax
     lda iopage_pid,x
     bmi not_there   ; Page is free...
@@ -3423,8 +3423,8 @@ err_wrong_num_free_iopages:
 ; defined constants.
 FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
-.export tests
-.proc tests
+.export tests_data
+.proc tests_data
     print txt_testing_data
 
     ;;;;;;;;;;;;;;;;;;;;;;
@@ -3468,11 +3468,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ; Move it back to free procs.
 :   drmx procs, procsb, running
     dpushx procs, procsb, free_proc
+    rts
+.endproc
 
-    ;;;;;;;;;;;;;;;;
-    ;;; Syscalls ;;;
-    ;;;;;;;;;;;;;;;;
-
+.export tests_processes
+.proc tests_processes
     print txt_testing_processes
 
     ;; Fork and wait for child to exit.
@@ -3525,12 +3525,12 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     jsr lib_wait
     bcc :+
     error err_cannot_wait
+:   rts
+.endproc
 
-    ;;;;;;;;;;;;;;;;
-    ;;; IO pages ;;;
-    ;;;;;;;;;;;;;;;;
-
-:   ldaxi iopages
+.export tests_iopages
+.proc tests_iopages
+    ldaxi iopages
     jsry list_length, free_iopage
     cpx #MAX_IOPAGES - 1
     beq :+
@@ -3570,6 +3570,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     pha
     print note_iopage_free
     pla
+debug:.export debug
     jsr lib_iopage_free
     bcc :+
     error err_cannot_free_iopage
@@ -3579,8 +3580,16 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     cpx #MAX_IOPAGES - 1
     beq :+
     error err_wrong_num_free_iopages
+:   rts
+.endproc
 
-:   print txt_tests_passed
+.export tests
+.proc tests
+    print txt_tests
+    jsr tests_data
+    jsr tests_processes
+    jsr tests_iopages
+    print txt_tests_passed
     rts
 .endproc
 
@@ -3652,7 +3661,6 @@ vec_reloc_tests:
     jsr boot
 
 .ifdef EARLY_TESTS
-    print txt_tests
     jsr tests
 .endif ; .ifdef EARLY_TESTS
 

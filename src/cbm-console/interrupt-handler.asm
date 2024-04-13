@@ -25,14 +25,21 @@ SHFLAG  = $028d
 .proc interrupt_handler
     lda SHFLAG
     cmp #1  ; C= + SHIFT
-    bne done
+    bne interrupt_handler3
+    lda $9ff8
+    pha
+.endproc
+.proc interrupt_handler2
+    lda #0
+    sta $9ff8
     lda _active
     jsr lib_suspend
     lda _menu_pid
     jsr lib_resume
-done:
+    pla
+    sta $9ff8
 .endproc
-.proc interrupt_handler2
+.proc interrupt_handler3
     jmp $ffff
 .endproc
 
@@ -41,10 +48,12 @@ done:
 .export _install_interrupt_handler
 .proc _install_interrupt_handler
     ; Configure handler.
-    lda $0314
+    lda $9ff8
     sta interrupt_handler2 + 1
+    lda $0314
+    sta interrupt_handler3 + 1
     lda $0315
-    sta interrupt_handler2 + 2
+    sta interrupt_handler3 + 2
 
     ; Move interrupt handler to I/O page.
     lda #<interrupt_handler

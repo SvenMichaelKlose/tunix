@@ -1,6 +1,8 @@
 // TUNIX virtual console
 
 #include <lib/tunix/tunix.h>
+#include <conio.h>
+#include <stdio.h>
 
 extern char iopage;
 extern char active;
@@ -57,17 +59,22 @@ menu (void)
     }
 }
 
+extern int main (int argc, char * argv[]);
 int
 main (int argc, char * argv[])
 {
     (void) argc;
     (void) argv;
 
-    cputs ("VIRTUAL CONSOLE\n");
+    *(char *) 0x900f = 0x1b;
     menu_pid = tunix_getpid ();
     iopage = tunix_iopage_alloc ();
-    //if (!iopage)
-    //    error ("OUT OF MEMORY FOR I/O PAGE");
+    printf ("CBM vconsole\n");
+    printf ("I/O page is %02x.\n", iopage);
+    if (!iopage) {
+        printf ("Out of memory for I/O page.\n");
+        return -1;
+    }
     install_interrupt_handler ();
     menu ();
 }

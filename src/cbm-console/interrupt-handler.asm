@@ -16,29 +16,36 @@ c:
 cl: .res 1
 ch: .res 1
 
-    .bss
-
-old_handler:    .res 2
-
     .code
 
 SHFLAG  = $028d
 
 ; Keep relocatable for I/O page.
+.export interrupt_handler
 .proc interrupt_handler
     lda SHFLAG
-    cmp #3  ; C= + SHIFT
+    cmp #1  ; C= + SHIFT
     bne done
     lda _active
     jsr lib_suspend
     lda _menu_pid
     jsr lib_resume
 done:
-    jmp (old_handler)
 .endproc
+.proc interrupt_handler2
+    jmp $ffff
+.endproc
+
+    .code
 
 .export _install_interrupt_handler
 .proc _install_interrupt_handler
+    ; Configure handler.
+    lda $0314
+    sta interrupt_handler2 + 1
+    lda $0315
+    sta interrupt_handler2 + 2
+
     ; Move interrupt handler to I/O page.
     lda #<interrupt_handler
     sta sl
@@ -53,12 +60,8 @@ done:
     sta cl
     jsr moveram
 
-    ; Install handler.
+    ; Redirect IRQ.
     sei
-    lda $0314
-    sta old_handler
-    lda $0315
-    sta old_handler+1
     lda #0
     sta $0314
     lda _iopage

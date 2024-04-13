@@ -1,3 +1,4 @@
+.import lib_mode
 .import lib_schedule, lib_getpid
 .import lib_fork, lib_suspend
 .import lib_resume, lib_exit, lib_kill
@@ -8,6 +9,7 @@
 .import lib_proc_list, lib_proc_info
 .import popax
 
+.export _tunix_mode = lib_mode
 .export _tunix_schedule = lib_schedule
 .export _tunix_getpid = lib_getpid
 .export _tunix_fork = lib_fork

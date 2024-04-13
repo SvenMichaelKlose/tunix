@@ -17,6 +17,7 @@ TUNIX_DEVICE    = 31
 
 .ifdef DEBUG
 
+.export cmd_mode
 .export cmd_fork, cmd_exit, cmd_kill
 .export cmd_suspend, cmd_release
 .export cmd_wait, cmd_getpid
@@ -26,6 +27,7 @@ TUNIX_DEVICE    = 31
 
         .data
 
+cmd_mode:           .byte "GM"
 cmd_fork:           .byte "PF"
 cmd_exit:           .byte "PE"
 cmd_suspend:        .byte "PS"
@@ -40,6 +42,18 @@ cmd_proc_list:      .byte "PL"
 cmd_proc_info:      .byte "PI"
 
         .code
+
+.export lib_mode
+.proc lib_mode
+    tay
+    lda #TUNIX_DEVICE
+    tax
+    jsr SETLFS
+    ldx #<cmd_mode
+    ldy #>cmd_mode
+    jsr SETNAM
+    jmp OPEN
+.endproc
 
 .export lib_schedule
 .proc lib_schedule

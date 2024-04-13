@@ -1,6 +1,7 @@
 #ifndef _TUNIX_H_
 #define _TUNIX_H_
 
+extern void tunix_mode (char);
 extern void tunix_schedule (void);
 extern char tunix_getpid (void);
 extern char tunix_fork (void);

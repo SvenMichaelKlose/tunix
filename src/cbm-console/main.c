@@ -2,6 +2,7 @@
 
 #include <lib/tunix/tunix.h>
 #include <conio.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 extern char iopage;
@@ -23,6 +24,8 @@ start_basic (void)
 void
 draw_menu (void)
 {
+    clrscr ();
+    printf ("Pick a console:");
 }
 
 void
@@ -41,22 +44,31 @@ launch (char i)
     char pid = tunix_fork ();
     if (pid) {
         consoles[i] = pid;
-        select_console (i);
     } else {
         start_basic ();
+        tunix_suspend (pid);
+        exit (0);
     }
 }
 
 void
 menu (void)
 {
-    //char c;
+    char c;
+
+    tunix_suspend (menu_pid);
 
     while (1) {
+        if (!consoles[active])
+            break;
         tunix_suspend (consoles[active]);
         draw_menu ();
-//        c = key_in ();
+        c = cbm_k_basin ();
+        tunix_suspend (menu_pid);
+        tunix_resume (consoles[active]);
     }
+
+    printf ("CBM console exits.\n");
 }
 
 extern int main (int argc, char * argv[]);
@@ -66,15 +78,16 @@ main (int argc, char * argv[])
     (void) argc;
     (void) argv;
 
-    *(char *) 0x900f = 0x1b;
+    printf ("TUNIX CBM console\n");
     menu_pid = tunix_getpid ();
+    printf ("PID is %02x.\n", menu_pid);
     iopage = tunix_iopage_alloc ();
-    printf ("CBM vconsole\n");
     printf ("I/O page is %02x.\n", iopage);
     if (!iopage) {
         printf ("Out of memory for I/O page.\n");
         return -1;
     }
     install_interrupt_handler ();
+    launch (0);
     menu ();
 }

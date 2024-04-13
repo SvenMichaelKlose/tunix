@@ -471,7 +471,7 @@ returned:
 * 5: device not present
 * 6: file is not an input file
 
-## CHKOUT - Set output device by LFN.
+## CKOUT - Set output device by LFN.
 
 Takes the LFN in X and sets the output
 device of BASIN and GETIN to the one
@@ -489,7 +489,8 @@ returned:
 
 Reads a byte from the device selected by
 CHKOUT, CLRCN or CLALL and returns it in
-A.
+A.  If no device was selected, BASIN
+reads from device #0.
 
 When reading from the KERNAL keyboard,
 the input is buffered up to a length of
@@ -509,7 +510,8 @@ keyboard if no input is available.
 ## BSOUT - output a character to channel
 
 Writes a byte to the device selected by
-CHKOUT, CLRCN or CLALL.
+CHKOUT, CLRCN or CLALL, otherwise it
+writes to device #3.
 
 NOTE: Care must be taken when using
 routine to send data to a serial device

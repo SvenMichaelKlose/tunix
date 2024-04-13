@@ -1,4 +1,4 @@
-.import _iopage, _active, _menu_pid
+.import _iopage, _active, _consoles, _menu_pid
 .import lib_suspend, lib_resume
 .import moveram
 
@@ -32,7 +32,8 @@ SHFLAG  = $028d
 .proc interrupt_handler2
     lda #0
     sta $9ff8
-    lda _active
+    ldx _active
+    lda _consoles,x
     jsr lib_suspend
     lda _menu_pid
     jsr lib_resume

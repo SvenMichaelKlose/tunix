@@ -7,6 +7,7 @@
 
 extern char iopage;
 extern char active;
+extern char consoles[8];
 extern char menu_pid;
 extern void install_interrupt_handler (void);
 
@@ -19,6 +20,7 @@ char active;
 void
 start_basic (void)
 {
+    printf ("Console 1\n");
 }
 
 void
@@ -46,7 +48,6 @@ launch (char i)
         consoles[i] = pid;
     } else {
         start_basic ();
-        tunix_suspend (pid);
         exit (0);
     }
 }
@@ -56,15 +57,13 @@ menu (void)
 {
     char c;
 
-    tunix_suspend (menu_pid);
-
     while (1) {
+        tunix_suspend (menu_pid);
         if (!consoles[active])
             break;
         tunix_suspend (consoles[active]);
         draw_menu ();
         c = cbm_k_basin ();
-        tunix_suspend (menu_pid);
         tunix_resume (consoles[active]);
     }
 

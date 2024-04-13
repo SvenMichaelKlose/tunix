@@ -51,10 +51,10 @@ al 000002 .__LOADADDR_SIZE__
 al 000001 .__LOADADDR__
 al 000400 .__LOCALBSS2_LOAD__
 al 000400 .__LOCALBSS2_RUN__
-al 000746 .__LOCALBSS2_SIZE__
+al 000750 .__LOCALBSS2_SIZE__
 al 009A41 .__LOCALBSS_LOAD__
 al 009A41 .__LOCALBSS_RUN__
-al 000127 .__LOCALBSS_SIZE__
+al 00011D .__LOCALBSS_SIZE__
 al 003D92 .__LOCALCODE_LOAD__
 al 009800 .__LOCALCODE_RUN__
 al 000241 .__LOCALCODE_SIZE__
@@ -244,9 +244,9 @@ al 00293B .respond1
 al 00291D .respond_error
 al 002936 .respond_len
 al 00292B .respond_ok
-al 009B5E .response
-al 009B66 .response_len
-al 009B67 .responsep
+al 000B46 .response
+al 000B4E .response_len
+al 000B4F .responsep
 al 00261C .resume
 al 0026F3 .resume_waiting
 al 003AB7 .running

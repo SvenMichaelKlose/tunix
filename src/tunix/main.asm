@@ -2342,8 +2342,11 @@ err_out_of_running_procs:
 
     .segment "LOCALBSS"
 
-;; Syscalls
 filename:       .res 256
+
+    .segment "LOCALBSS2"
+
+;; Syscalls
 response:       .res 8
 response_len:   .res 1
 responsep:      .res 1

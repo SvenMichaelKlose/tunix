@@ -15,7 +15,7 @@
 __VIC20__       = 1
 START_INIT      = 1
 EARLY_TESTS     = 1
-;RELOC_TESTS_BACKWORDS = 1
+RELOC_TESTS_BACKWORDS = 1
 BLEEDING_EDGE   = 1
 
 ;; Assertions
@@ -3000,8 +3000,11 @@ h:  lda $ffff
     lda glfn_dev,x
     sta DFLTN
     clc
-    jmp tunix_leave
+    bcc :++
 :   sec
+:   php
+    pla
+    sta flags
     jmp tunix_leave
 .endproc
 
@@ -3016,8 +3019,11 @@ h:  lda $ffff
     lda glfn_dev,x
     sta DFLTO
     clc
-    jmp tunix_leave
+    bcc :++
 :   sec
+:   php
+    pla
+    sta flags
     jmp tunix_leave
 .endproc
 
@@ -3524,6 +3530,12 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     ;;; IO pages ;;;
     ;;;;;;;;;;;;;;;;
 
+:   ldaxi iopages
+    jsry list_length, free_iopage
+    cpx #MAX_IOPAGES - 1
+    beq :+
+    error err_wrong_num_free_iopages
+
 :   print note_iopage_alloc
     jsr lib_iopage_alloc
     cmp #IOPAGE_BASE
@@ -3531,12 +3543,28 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     error err_expected_iopage_base
 
 :   pha
+    ldaxi iopages
+    jsry list_length, free_iopage
+    cpx #MAX_IOPAGES - 2
+    beq :+
+    error err_wrong_num_free_iopages
+
+:   pla
+    pha
     print note_iopage_commit
     pla
     pha
     jsr lib_iopage_commit
     bcc :+
     error err_cannot_commit_iopage
+
+:   pla
+    pha
+    ldaxi iopages
+    jsry list_length, free_iopage
+    cpx #MAX_IOPAGES - 2
+    beq :+
+    error err_wrong_num_free_iopages
 
 :   pla
     pha
@@ -3551,6 +3579,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     cpx #MAX_IOPAGES - 1
     beq :+
     error err_wrong_num_free_iopages
+
 :   print txt_tests_passed
     rts
 .endproc

@@ -3095,6 +3095,10 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .proc schedule
     lda multitasking
     beq r
+    php
+    pla
+    and #4
+    bne r
 
     ;; Get next running.
     ldx pid
@@ -3570,7 +3574,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     pha
     print note_iopage_free
     pla
-debug:.export debug
     jsr lib_iopage_free
     bcc :+
     error err_cannot_free_iopage

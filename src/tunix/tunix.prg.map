@@ -12,7 +12,7 @@ main.o:
     KERNELDATA        Offs=000000  Size=0003D5  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
-    LOCALCODE         Offs=000000  Size=00023B  Align=00001  Fill=0000
+    LOCALCODE         Offs=000000  Size=000241  Align=00001  Fill=0000
     TESTS             Offs=000000  Size=000767  Align=00001  Fill=0000
 ../lib/tunix/libtunix.a(main.o):
     CODE              Offs=000003  Size=0000F1  Align=00001  Fill=0000
@@ -40,8 +40,8 @@ MACHDEPDATA           0033C5  0033EE  00002A  00001
 DATA                  0033EF  003406  000018  00001
 GLOBALBSS             003407  003D7D  000977  00001
 TESTS                 004000  004766  000767  00001
-LOCALCODE             009800  009A3A  00023B  00001
-LOCALBSS              009A3B  009B61  000127  00001
+LOCALCODE             009800  009A40  000241  00001
+LOCALBSS              009A41  009B67  000127  00001
 ULTIMEM               009FF0  009FFF  000010  00001
 
 
@@ -50,9 +50,9 @@ Exports list by name:
 __EXEHDR__                000001 REA    __GLOBALBSS_RUN__         003407 RLA    
 __GLOBALBSS_SIZE__        000977 REA    __LOADADDR__              000001 REA    
 __LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000746 REA    
-__LOCALBSS_RUN__          009A3B RLA    __LOCALBSS_SIZE__         000127 REA    
+__LOCALBSS_RUN__          009A41 RLA    __LOCALBSS_SIZE__         000127 REA    
 __LOCALCODE_LOAD__        003D7E RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALCODE_SIZE__        00023B REA    __TESTS_LOAD__            003FB9 RLA    
+__LOCALCODE_SIZE__        000241 REA    __TESTS_LOAD__            003FBF RLA    
 __TESTS_RUN__             004000 RLA    __TESTS_SIZE__            000767 REA    
 __ULTIMEM_SIZE__          000010 REA    lib_exit                  002035 RLA    
 lib_fork                  002023 RLA    lib_getpid                002011 RLA    
@@ -66,7 +66,7 @@ Exports list by value:
 ----------------------
 __EXEHDR__                000001 REA    __LOADADDR__              000001 REA    
 __ULTIMEM_SIZE__          000010 REA    __LOCALBSS_SIZE__         000127 REA    
-__LOCALCODE_SIZE__        00023B REA    __LOCALBSS2_RUN__         000400 RLA    
+__LOCALCODE_SIZE__        000241 REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000746 REA    __TESTS_SIZE__            000767 REA    
 __GLOBALBSS_SIZE__        000977 REA    lib_getpid                002011 RLA    
 lib_fork                  002023 RLA    lib_exit                  002035 RLA    
@@ -74,9 +74,9 @@ lib_kill                  002048 RLA    lib_wait                  002084 RLA
 lib_proc_list             002097 RLA    lib_proc_info             0020A9 RLA    
 lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
 lib_iopage_free           0020E1 RLA    __GLOBALBSS_RUN__         003407 RLA    
-__LOCALCODE_LOAD__        003D7E RLA    __TESTS_LOAD__            003FB9 RLA    
+__LOCALCODE_LOAD__        003D7E RLA    __TESTS_LOAD__            003FBF RLA    
 __TESTS_RUN__             004000 RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALBSS_RUN__          009A3B RLA    
+__LOCALBSS_RUN__          009A41 RLA    
 
 
 Imports list:

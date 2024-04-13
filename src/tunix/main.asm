@@ -15,6 +15,7 @@
 __VIC20__       = 1
 START_INIT      = 1
 EARLY_TESTS     = 1
+;RELOC_TESTS_BACKWORDS = 1
 BLEEDING_EDGE   = 1
 
 ;; Assertions
@@ -194,6 +195,7 @@ zp2:    .res 2
 .export bank_refs, iopages, iopagesb
 .export free_iopage, first_iopage
 .export iopage_pid, iopage_page, glfns
+.export glfn_dev
 .export glfn_refs, glfn_drv, procs
 .export procsb, free_proc, running
 .export sleeping, zombie, proc_flags
@@ -233,6 +235,7 @@ glfns:      .res MAX_LFNS
 glfn_refs:  .res MAX_LFNS
 ;; Last parameters to OPEN.
 glfn_drv:   .res MAX_LFNS
+glfn_dev:   .res MAX_LFNS
 glfn_sa:    .res MAX_LFNS
 
 ;;; Processes
@@ -2743,7 +2746,7 @@ txt_ram_ok:
 txt_banks_free:
   .byte "K RAM FREE.", 0
 
-vec_io_reloc:
+vec_localcode_reloc:
   .word __LOCALCODE_LOAD__
   .word __LOCALCODE_RUN__
   .word __LOCALCODE_SIZE__
@@ -2776,7 +2779,6 @@ clr_rest_of_blk1:
     jsr FRESTOR
 
     sbzeroax clr_globalbss
-    smemcpyax vec_io_reloc
     sbzeroax clr_localbss
     sbzeroax clr_localbss2
     sbzeroax clr_rest_of_blk1
@@ -2876,21 +2878,23 @@ clr_rest_of_blk1:
     bne :-
     sta first_lbank
 
-    print txt_registering
+    ;;; Start syscall driver
+    print txt_starting_syscalls
 
-    ;;; Init KERNAL vectors.
+    ;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
+    ; Wrap KERNAL's LOAD & SAVE.
     mvw old_load, old_kernal_vectors + IDX_LOAD
     mvw old_save, old_kernal_vectors + IDX_SAVE
     stwi old_kernal_vectors + IDX_LOAD, kernal_load
     stwi old_kernal_vectors + IDX_SAVE, kernal_save
     smemcpyax vec_tunix_kernal ; Replace
 
-    ;;; Make devices default to KERNAL.
+    ;; Make devices default to KERNAL.
     mvb drv_vl, #<old_kernal_vectors
     mvb drv_vh, #>old_kernal_vectors
 
-    ;;; Register TUNIX device.
+    ;; Register TUNIX device.
     ldaxi tunix_driver
     ldy #TUNIX_DEVICE
     jmp register
@@ -2912,7 +2916,7 @@ txt_booting:
   .byte 13, "BOOTING.", 13, 0
 txt_starting_multitasking:
   .byte "STARTING MULTITASKING.", 13, 0
-txt_registering:
+txt_starting_syscalls:
   .byte "STARTING SYSCALLS.", 13, 0
 txt_init:
   .byte "STARTING INIT.", 13, 0
@@ -2972,8 +2976,11 @@ h:  lda $ffff
     tax
     lda SA
     sta glfn_sa,x
-    ldy DEV
+    lda DEV
+    sta glfn_dev,x
+    tay
     lda dev_drv,y
+    sta glfn_drv,x
     tay
     jsra call_driver, #IDX_OPEN
     pop LFN
@@ -2984,13 +2991,13 @@ h:  lda $ffff
 
 .export chkin2
 .proc chkin2
-    ldx reg_a
+    ldx reg_x
     lda lfn_glfn,x
     beq :+
+    tax
     lda glfn_sa,x
     sta SA
-    ldy glfn_drv,x
-    lda drv_dev,y
+    lda glfn_dev,x
     sta DFLTN
     clc
     jmp tunix_leave
@@ -3000,14 +3007,13 @@ h:  lda $ffff
 
 .export ckout2
 .proc ckout2
-    ldx reg_a
+    ldx reg_x
     lda lfn_glfn,x
     beq :+
     tax
     lda glfn_sa,x
     sta SA
-    ldy glfn_drv,x
-    lda drv_dev,y
+    lda glfn_dev,x
     sta DFLTO
     clc
     jmp tunix_leave
@@ -3405,8 +3411,6 @@ err_cannot_commit_iopage:
 err_cannot_free_iopage:
   .byte "CANNOT FREE I/O PAGE.", 0
 
-    .segment "TESTS"
-
 ; TODO: Make a proper formula from
 ; defined constants.
 FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
@@ -3572,15 +3576,22 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 
     .segment "KERNELDATA"
 
+.export txt_welcome
 txt_welcome:
   .byte 13 ; PETSCII_CLRSCR
   .byte "TUNIX - ", 0
 
 .ifdef EARLY_TESTS
 vec_reloc_tests:
+.ifdef RELOC_TESTS_BACKWORDS
   .word __TESTS_LOAD__ + __TESTS_SIZE__ - 1
   .word __TESTS_RUN__ + __TESTS_SIZE__ - 1
   .word __TESTS_SIZE__
+.else
+  .word __TESTS_LOAD__
+  .word __TESTS_RUN__
+  .word __TESTS_SIZE__
+.endif ; .ifdef RELOC_TESTS_BACKWORDS
 .endif ; .ifdef EARLY_TESTS
 
     .segment "KERNEL"
@@ -3590,10 +3601,16 @@ vec_reloc_tests:
     jsr INITVIC
     print txt_tunix
 
+    ;; Relocate.
+    smemcpyax vec_localcode_reloc
 .ifdef EARLY_TESTS
+.ifdef RELOC_TESTS_BACKWORDS
     ldaxi vec_reloc_tests
     jsr sset
     jsr memcpybw
+.else
+    smemcpyax vec_reloc_tests
+.endif ; .ifdef RELOC_TESTS_BACKWORDS
 .endif ; .ifdef EARLY_TESTS
 
     jsr boot
@@ -3609,14 +3626,6 @@ vec_reloc_tests:
     beq :+
     jmp proc0
 :
-
-.ifdef EARLY_TESTS
-    jsr lib_proc_list
-    lda #0
-    jsr lib_proc_info
-    jsr lib_getpid
-    jsr lib_proc_info
-.endif
 
     ; Welcome messages with free RAM.
     ldayi txt_welcome

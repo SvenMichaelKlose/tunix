@@ -4,11 +4,11 @@ main.o:
     CODE              Offs=000000  Size=000003  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=00000E  Align=00001  Fill=0000
     ULTIMEM           Offs=000000  Size=000010  Align=00001  Fill=0000
-    GLOBALBSS         Offs=000000  Size=0008FB  Align=00001  Fill=0000
+    GLOBALBSS         Offs=000000  Size=0009FB  Align=00001  Fill=0000
     LOCALBSS          Offs=000000  Size=000127  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000746  Align=00001  Fill=0000
     LIB               Offs=000000  Size=00015A  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000C8A  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000C69  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=0003D5  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
@@ -33,12 +33,12 @@ LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
 CODE                  002000  0020F3  0000F4  00001
 LIB                   0020F4  00224D  00015A  00001
-KERNEL                00224E  002ED7  000C8A  00001
-MACHDEP               002ED8  003019  000142  00001
-KERNELDATA            00301A  0033EE  0003D5  00001
-MACHDEPDATA           0033EF  003418  00002A  00001
-DATA                  003419  003430  000018  00001
-GLOBALBSS             003431  003D2B  0008FB  00001
+KERNEL                00224E  002EB6  000C69  00001
+MACHDEP               002EB7  002FF8  000142  00001
+KERNELDATA            002FF9  0033CD  0003D5  00001
+MACHDEPDATA           0033CE  0033F7  00002A  00001
+DATA                  0033F8  00340F  000018  00001
+GLOBALBSS             003410  003E0A  0009FB  00001
 TESTS                 004000  004684  000685  00001
 LOCALCODE             009800  009A3A  00023B  00001
 LOCALBSS              009A3B  009B61  000127  00001
@@ -47,12 +47,12 @@ ULTIMEM               009FF0  009FFF  000010  00001
 
 Exports list by name:
 ---------------------
-__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         003431 RLA    
-__GLOBALBSS_SIZE__        0008FB REA    __LOADADDR__              000001 REA    
+__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         003410 RLA    
+__GLOBALBSS_SIZE__        0009FB REA    __LOADADDR__              000001 REA    
 __LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000746 REA    
 __LOCALBSS_RUN__          009A3B RLA    __LOCALBSS_SIZE__         000127 REA    
-__LOCALCODE_LOAD__        003D2C RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALCODE_SIZE__        00023B REA    __TESTS_LOAD__            003F67 RLA    
+__LOCALCODE_LOAD__        003E0B RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALCODE_SIZE__        00023B REA    __TESTS_LOAD__            004046 RLA    
 __TESTS_RUN__             004000 RLA    __TESTS_SIZE__            000685 REA    
 __ULTIMEM_SIZE__          000010 REA    lib_exit                  002035 RLA    
 lib_fork                  002023 RLA    lib_getpid                002011 RLA    
@@ -68,14 +68,14 @@ __EXEHDR__                000001 REA    __LOADADDR__              000001 REA
 __ULTIMEM_SIZE__          000010 REA    __LOCALBSS_SIZE__         000127 REA    
 __LOCALCODE_SIZE__        00023B REA    __LOCALBSS2_RUN__         000400 RLA    
 __TESTS_SIZE__            000685 REA    __LOCALBSS2_SIZE__        000746 REA    
-__GLOBALBSS_SIZE__        0008FB REA    lib_getpid                002011 RLA    
+__GLOBALBSS_SIZE__        0009FB REA    lib_getpid                002011 RLA    
 lib_fork                  002023 RLA    lib_exit                  002035 RLA    
 lib_kill                  002048 RLA    lib_wait                  002084 RLA    
 lib_proc_list             002097 RLA    lib_proc_info             0020A9 RLA    
 lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
-lib_iopage_free           0020E1 RLA    __GLOBALBSS_RUN__         003431 RLA    
-__LOCALCODE_LOAD__        003D2C RLA    __TESTS_LOAD__            003F67 RLA    
-__TESTS_RUN__             004000 RLA    __LOCALCODE_RUN__         009800 RLA    
+lib_iopage_free           0020E1 RLA    __GLOBALBSS_RUN__         003410 RLA    
+__LOCALCODE_LOAD__        003E0B RLA    __TESTS_RUN__             004000 RLA    
+__TESTS_LOAD__            004046 RLA    __LOCALCODE_RUN__         009800 RLA    
 __LOCALBSS_RUN__          009A3B RLA    
 
 
@@ -84,51 +84,51 @@ Imports list:
 __EXEHDR__ (exehdr.o):
     [linker generated]        vic.cfg:3
 __GLOBALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:30
-__GLOBALBSS_SIZE__ ([linker generated]):
     main.o                    main.asm:31
+__GLOBALBSS_SIZE__ ([linker generated]):
+    main.o                    main.asm:32
 __LOADADDR__ (loadaddr.o):
     [linker generated]        vic.cfg:2
 __LOCALBSS2_RUN__ ([linker generated]):
-    main.o                    main.asm:37
-__LOCALBSS2_SIZE__ ([linker generated]):
     main.o                    main.asm:38
-__LOCALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:35
-__LOCALBSS_SIZE__ ([linker generated]):
-    main.o                    main.asm:36
-__LOCALCODE_LOAD__ ([linker generated]):
-    main.o                    main.asm:32
-__LOCALCODE_RUN__ ([linker generated]):
-    main.o                    main.asm:33
-__LOCALCODE_SIZE__ ([linker generated]):
-    main.o                    main.asm:34
-__TESTS_LOAD__ ([linker generated]):
-    main.o                    main.asm:27
-__TESTS_RUN__ ([linker generated]):
-    main.o                    main.asm:28
-__TESTS_SIZE__ ([linker generated]):
-    main.o                    main.asm:29
-__ULTIMEM_SIZE__ ([linker generated]):
+__LOCALBSS2_SIZE__ ([linker generated]):
     main.o                    main.asm:39
+__LOCALBSS_RUN__ ([linker generated]):
+    main.o                    main.asm:36
+__LOCALBSS_SIZE__ ([linker generated]):
+    main.o                    main.asm:37
+__LOCALCODE_LOAD__ ([linker generated]):
+    main.o                    main.asm:33
+__LOCALCODE_RUN__ ([linker generated]):
+    main.o                    main.asm:34
+__LOCALCODE_SIZE__ ([linker generated]):
+    main.o                    main.asm:35
+__TESTS_LOAD__ ([linker generated]):
+    main.o                    main.asm:28
+__TESTS_RUN__ ([linker generated]):
+    main.o                    main.asm:29
+__TESTS_SIZE__ ([linker generated]):
+    main.o                    main.asm:30
+__ULTIMEM_SIZE__ ([linker generated]):
+    main.o                    main.asm:40
 lib_exit (main.o):
-    main.o                    main.asm:46
-lib_fork (main.o):
-    main.o                    main.asm:45
-lib_getpid (main.o):
-    main.o                    main.asm:44
-lib_iopage_alloc (main.o):
-    main.o                    main.asm:49
-lib_iopage_commit (main.o):
-    main.o                    main.asm:50
-lib_iopage_free (main.o):
-    main.o                    main.asm:51
-lib_kill (main.o):
     main.o                    main.asm:47
-lib_proc_info (main.o):
-    main.o                    main.asm:53
-lib_proc_list (main.o):
+lib_fork (main.o):
+    main.o                    main.asm:46
+lib_getpid (main.o):
+    main.o                    main.asm:45
+lib_iopage_alloc (main.o):
+    main.o                    main.asm:50
+lib_iopage_commit (main.o):
+    main.o                    main.asm:51
+lib_iopage_free (main.o):
     main.o                    main.asm:52
-lib_wait (main.o):
+lib_kill (main.o):
     main.o                    main.asm:48
+lib_proc_info (main.o):
+    main.o                    main.asm:54
+lib_proc_list (main.o):
+    main.o                    main.asm:53
+lib_wait (main.o):
+    main.o                    main.asm:49
 

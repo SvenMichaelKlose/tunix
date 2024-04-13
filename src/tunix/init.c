@@ -11,7 +11,5 @@ main (void)
 {
     *(char *) 0x900f = 0x1b;
     clrscr ();
-    printf ("Welcome to TUNIX!\n");
-    printf ("THIS LINE WON'T PRINT!\n");
-    while (1);
+    printf ("Welcome to TUNIX!");
 }

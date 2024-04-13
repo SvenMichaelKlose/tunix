@@ -150,12 +150,9 @@ MAX_PROCS    = 64   ; No more than 127.
 MAX_SIGNALS  = 64
 MAX_DRVS     = 16
 MAX_DEVS     = 32
-MAX_DRV_NAME = 8    ; This too.
-
-;;; MACHDEP
-
-IOPAGE_BASE  = $9b
-MAX_IOPAGES  = 4
+;MAX_DRV_NAME = 8
+MAX_IOPAGES  = 3
+IOPAGE_BASE  = $9c
 STACK_LIMIT  = 16
 
 ;;;;;;;;;;;;;;;;
@@ -269,7 +266,7 @@ drv_pid:    .res MAX_DRVS + 1
 drv_dev:    .res MAX_DRVS + 1
 drv_vl:     .res MAX_DRVS + 1
 drv_vh:     .res MAX_DRVS + 1
-drv_names:  .res MAX_DRVS * MAX_DRV_NAME
+;drv_names:  .res MAX_DRVS * MAX_DRV_NAME
 
 ;;; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
@@ -2138,6 +2135,7 @@ no_handler_set:
 
 ; Free IO pages of a process.
 ; X: process ID
+.export free_iopages
 .proc free_iopages
     stx tmp1
     ldy first_iopage
@@ -2799,39 +2797,36 @@ clr_rest_of_blk1:
     cpx #MAX_PROCS
     bcs :+
     sta procsb,x
+:   cpx #MAX_IOPAGES
+    bcs :+
+    sta iopagesb,x
     ; Pointers to next elements.
 :   txa
-:   clc
+    clc
     adc #1
     sta glfns,x
     sta lfns,x
-    cpx #MAX_IOPAGES + 1
-    bcs :+
-    sta iopages,x
-:   cpx #MAX_PROCS
+    cpx #MAX_PROCS - 1
     bcs :+
     sta procs,x
     sta waiting,x
-:   cpx #MAX_DRVS + 1
+:   cpx #MAX_DRVS - 1
     bcs :+
     sta drvs,x
-:   cpx #MAX_IOPAGES + 1
+:   cpx #MAX_IOPAGES - 1
     bcs :+
+    sta iopages,x
     lda #255
     sta iopage_pid,x
 :   inx
     bne @l
     ;; Finish up.
-    mvb free_proc, #1
-    mvb free_wait, #1
-    mvb free_iopage, #1
-    mvb glfns, #1
-    mvb drvs, #1
-    lda #0
-    sta procs + MAX_PROCS - 1
-    sta waiting + MAX_PROCS - 1
-    sta drvs + MAX_DRVS
-    sta iopages + MAX_IOPAGES
+    lda #1
+    sta free_proc
+    sta free_wait
+    sta free_iopage
+    sta glfns
+    sta drvs
 
     ;;; Init machdep.
     jsr init_ultimem
@@ -3415,6 +3410,8 @@ err_cannot_commit_iopage:
   .byte "CANNOT COMMIT I/O PAGE.", 0
 err_cannot_free_iopage:
   .byte "CANNOT FREE I/O PAGE.", 0
+err_wrong_num_free_iopages:
+  .byte "WRONG # OF FREE I/O PAGES.", 0
 
 ; TODO: Make a proper formula from
 ; defined constants.
@@ -3549,6 +3546,11 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     bcc :+
     error err_cannot_free_iopage
 
+:   ldaxi iopages
+    jsry list_length, free_iopage
+    cpx #MAX_IOPAGES - 1
+    beq :+
+    error err_wrong_num_free_iopages
 :   print txt_tests_passed
     rts
 .endproc

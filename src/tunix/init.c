@@ -10,6 +10,6 @@ void
 main (void)
 {
     *(char *) 0x900f = 0x1b;
-    clrscr ();
+    //clrscr ();
     printf ("Welcome to TUNIX!");
 }

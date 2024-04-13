@@ -684,17 +684,23 @@ pending_signal:       .res 1
 ;; Allocate free process.
 
 .macro alloc_proc_running_y
+    sei
     dallocy procs, procsb, free_proc, running
+    cli
 .endmacro
 
 ;; Move between running to sleeping.
 
 .macro mv_running_sleeping_x
+    sei
     dmovex procs, procsb, running, sleeping
+    cli
 .endmacro
 
 .macro mv_sleeping_running_x
+    sei
     dmovex procs, procsb, sleeping, running
+    cli
 .endmacro
 
 ;; Processes waiting for others to exit.
@@ -1582,7 +1588,6 @@ done:
 ;    0 for the child.
 .export fork
 .proc fork
-    ;; Grab process slot.
     alloc_proc_running_y
     cpy #0
     bne :+
@@ -1716,6 +1721,7 @@ not_to_resume:
     ;; sleeping list.
     ldx tmp1
     lda proc_flags,x
+    sei
     bmi take_off_sleeping
 take_off_running:
     drmx procs, procsb, running
@@ -1728,6 +1734,7 @@ put_on_zombie_list:
     lda #PROC_ZOMBIE
     sta proc_flags,x
     clc
+    cli
     rts
 .endproc
 

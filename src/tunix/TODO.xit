@@ -10,7 +10,7 @@ Initial release
 [@] Restore-on-reset update
 [@] Boot bank editor
 
-[ ] Init app name as argument.
+[?] Init app name as argument.
 [ ] Userland tests
 
 Next time

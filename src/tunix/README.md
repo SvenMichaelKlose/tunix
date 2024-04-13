@@ -630,8 +630,7 @@ secondary address to SETLFS.
 
 After sending a system call via OPEN,
 an error code may be read using BASIN.
-(Calling CHKIN is not required.)  It may
-be followed by return values.
+It may be followed by return values.
 
 On assembly level the carry flag tells
 if an error occured (carry set with code
@@ -643,6 +642,7 @@ call libraries are around.
 // Get process ID.
 open (31, 31, 0, "P");
 // (Never returns with an error.)
+chkin (31);
 pid = basin ();
 ~~~
 
@@ -651,6 +651,7 @@ Most system calls return an error code:
 ~~~C
 // Put process 1 to sleep.
 open (31, 31, 1, "PS");
+chkin (31);
 err = basin ();
 if (err)
     printf ("Process 1 already asleep.");
@@ -662,6 +663,7 @@ values:
 ~~~C
 // Fork
 open (31, 31, 0, "PF");
+chkin (31);
 err = basin ();
 if (err)
     error ();

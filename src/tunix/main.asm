@@ -681,23 +681,17 @@ pending_signal:       .res 1
 ;; Allocate free process.
 
 .macro alloc_proc_running_y
-    sei
     dallocy procs, procsb, free_proc, running
-    cli
 .endmacro
 
 ;; Move between running to sleeping.
 
 .macro mv_running_sleeping_x
-    sei
     dmovex procs, procsb, running, sleeping
-    cli
 .endmacro
 
 .macro mv_sleeping_running_x
-    sei
     dmovex procs, procsb, sleeping, running
-    cli
 .endmacro
 
 ;; Processes waiting for others to exit.
@@ -1664,9 +1658,12 @@ child:
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
+    php
+    sei
     mv_running_sleeping_x
     lda #PROC_SLEEPING
     sta proc_flags,x
+    plp
     clc
     rts
 not_there:
@@ -1681,9 +1678,12 @@ already_sleeping:
 .proc resume
     lda proc_flags,x
     bpl not_to_resume
+    php
+    sei
     mv_sleeping_running_x
     lda #PROC_RUNNING
     sta proc_flags,x
+    plp
     clc
     rts
 not_to_resume:
@@ -1718,6 +1718,7 @@ not_to_resume:
     ;; sleeping list.
     ldx tmp1
     lda proc_flags,x
+    php
     sei
     bmi take_off_sleeping
 take_off_running:
@@ -1730,8 +1731,8 @@ put_on_zombie_list:
     lpushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
+    plp
     clc
-    cli
     rts
 .endproc
 
@@ -2548,7 +2549,7 @@ syscall1 tunix_bfree, bfree, ldx
     cmp #'W'
     beq tunix_wait
     cmp #'S'
-    beq tunix_stop
+    beq tunix_suspend
     cmp #'R'
     beq tunix_resume
     cmp #'L'
@@ -2560,7 +2561,7 @@ syscall1 tunix_bfree, bfree, ldx
 
 syscall0 tunix_fork, fork
 syscall1 tunix_wait, wait, ldx
-syscall1 tunix_stop, stop, ldx
+syscall1 tunix_suspend, suspend, ldx
 syscall1 tunix_resume, resume, ldx
 syscall1 tunix_exit, exit, lda
 syscall1v tunix_proc_info, proc_info, ldx
@@ -3105,15 +3106,14 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda procs,x
     bne :++
     ; Restart list.
-    lda proc_flags  ; (process 0)
+    lda proc_flags + 0
     cmp #PROC_RUNNING
     bne :+  ; No...
     lda #0
     beq :++ ; (jmp)
 :   lda running
-    ; Avoid switch to self.
 :   cmp pid
-    beq r
+    beq r ; (Don't switch to self.)
 
     tay
     push ram123

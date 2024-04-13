@@ -8,15 +8,15 @@ main.o:
     LOCALBSS          Offs=000000  Size=000127  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000746  Align=00001  Fill=0000
     LIB               Offs=000000  Size=00015A  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000C60  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000C61  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=0003D5  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
     LOCALCODE         Offs=000000  Size=000241  Align=00001  Fill=0000
     TESTS             Offs=000000  Size=000767  Align=00001  Fill=0000
 ../lib/tunix/libtunix.a(main.o):
-    CODE              Offs=000003  Size=0000F1  Align=00001  Fill=0000
-    DATA              Offs=000000  Size=000018  Align=00001  Fill=0000
+    CODE              Offs=000003  Size=000102  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=00001A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(exehdr.o):
     EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(loadaddr.o):
@@ -31,14 +31,14 @@ ZEROPAGE              000000  00000D  00000E  00001
 LOCALBSS2             000400  000B45  000746  00001
 LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
-CODE                  002000  0020F3  0000F4  00001
-LIB                   0020F4  00224D  00015A  00001
-KERNEL                00224E  002EAD  000C60  00001
-MACHDEP               002EAE  002FEF  000142  00001
-KERNELDATA            002FF0  0033C4  0003D5  00001
-MACHDEPDATA           0033C5  0033EE  00002A  00001
-DATA                  0033EF  003406  000018  00001
-GLOBALBSS             003407  003D7D  000977  00001
+CODE                  002000  002104  000105  00001
+LIB                   002105  00225E  00015A  00001
+KERNEL                00225F  002EBF  000C61  00001
+MACHDEP               002EC0  003001  000142  00001
+KERNELDATA            003002  0033D6  0003D5  00001
+MACHDEPDATA           0033D7  003400  00002A  00001
+DATA                  003401  00341A  00001A  00001
+GLOBALBSS             00341B  003D91  000977  00001
 TESTS                 004000  004766  000767  00001
 LOCALCODE             009800  009A40  000241  00001
 LOCALBSS              009A41  009B67  000127  00001
@@ -47,19 +47,19 @@ ULTIMEM               009FF0  009FFF  000010  00001
 
 Exports list by name:
 ---------------------
-__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         003407 RLA    
+__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         00341B RLA    
 __GLOBALBSS_SIZE__        000977 REA    __LOADADDR__              000001 REA    
 __LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000746 REA    
 __LOCALBSS_RUN__          009A41 RLA    __LOCALBSS_SIZE__         000127 REA    
-__LOCALCODE_LOAD__        003D7E RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALCODE_SIZE__        000241 REA    __TESTS_LOAD__            003FBF RLA    
+__LOCALCODE_LOAD__        003D92 RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALCODE_SIZE__        000241 REA    __TESTS_LOAD__            003FD3 RLA    
 __TESTS_RUN__             004000 RLA    __TESTS_SIZE__            000767 REA    
-__ULTIMEM_SIZE__          000010 REA    lib_exit                  002035 RLA    
-lib_fork                  002023 RLA    lib_getpid                002011 RLA    
-lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
-lib_iopage_free           0020E1 RLA    lib_kill                  002048 RLA    
-lib_proc_info             0020A9 RLA    lib_proc_list             002097 RLA    
-lib_wait                  002084 RLA    
+__ULTIMEM_SIZE__          000010 REA    lib_exit                  002046 RLA    
+lib_fork                  002034 RLA    lib_getpid                002022 RLA    
+lib_iopage_alloc          0020CD RLA    lib_iopage_commit         0020DF RLA    
+lib_iopage_free           0020F2 RLA    lib_kill                  002059 RLA    
+lib_proc_info             0020BA RLA    lib_proc_list             0020A8 RLA    
+lib_wait                  002095 RLA    
 
 
 Exports list by value:
@@ -68,13 +68,13 @@ __EXEHDR__                000001 REA    __LOADADDR__              000001 REA
 __ULTIMEM_SIZE__          000010 REA    __LOCALBSS_SIZE__         000127 REA    
 __LOCALCODE_SIZE__        000241 REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000746 REA    __TESTS_SIZE__            000767 REA    
-__GLOBALBSS_SIZE__        000977 REA    lib_getpid                002011 RLA    
-lib_fork                  002023 RLA    lib_exit                  002035 RLA    
-lib_kill                  002048 RLA    lib_wait                  002084 RLA    
-lib_proc_list             002097 RLA    lib_proc_info             0020A9 RLA    
-lib_iopage_alloc          0020BC RLA    lib_iopage_commit         0020CE RLA    
-lib_iopage_free           0020E1 RLA    __GLOBALBSS_RUN__         003407 RLA    
-__LOCALCODE_LOAD__        003D7E RLA    __TESTS_LOAD__            003FBF RLA    
+__GLOBALBSS_SIZE__        000977 REA    lib_getpid                002022 RLA    
+lib_fork                  002034 RLA    lib_exit                  002046 RLA    
+lib_kill                  002059 RLA    lib_wait                  002095 RLA    
+lib_proc_list             0020A8 RLA    lib_proc_info             0020BA RLA    
+lib_iopage_alloc          0020CD RLA    lib_iopage_commit         0020DF RLA    
+lib_iopage_free           0020F2 RLA    __GLOBALBSS_RUN__         00341B RLA    
+__LOCALCODE_LOAD__        003D92 RLA    __TESTS_LOAD__            003FD3 RLA    
 __TESTS_RUN__             004000 RLA    __LOCALCODE_RUN__         009800 RLA    
 __LOCALBSS_RUN__          009A41 RLA    
 

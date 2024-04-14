@@ -13,6 +13,7 @@
 .export _tunix_schedule = lib_schedule
 .export _tunix_getpid = lib_getpid
 .export _tunix_fork = lib_fork
+.export _tunix_kill;
 .export _tunix_exit = lib_exit
 .export _tunix_wait = lib_wait
 .export _tunix_suspend = lib_suspend

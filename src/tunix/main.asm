@@ -13,9 +13,8 @@
 ;;; Compile-time
 
 __VIC20__       = 1
-;START_INIT      = 1
+START_INIT      = 1
 EARLY_TESTS     = 1
-RELOC_TESTS_BACKWORDS = 1
 BLEEDING_EDGE   = 1
 
 ;; Assertions
@@ -38,6 +37,12 @@ DEFAULT_BANKS_PER_PROC  = 7
 .import __LOCALBSS2_RUN__
 .import __LOCALBSS2_SIZE__
 .import __ULTIMEM_SIZE__
+
+;;; Zeropage utils
+
+.import zpw_dec_x
+.import zpw_add_xy
+.import zpw_cmp_xy
 
 ;;; Syscall wrappers
 
@@ -3655,38 +3660,43 @@ txt_welcome:
 
 .ifdef EARLY_TESTS
 vec_reloc_tests:
-.ifdef RELOC_TESTS_BACKWORDS
-  .word __TESTS_LOAD__ + __TESTS_SIZE__ - 1
-  .word __TESTS_RUN__ + __TESTS_SIZE__ - 1
-  .word __TESTS_SIZE__
-.else
   .word __TESTS_LOAD__
   .word __TESTS_RUN__
   .word __TESTS_SIZE__
-.endif ; .ifdef RELOC_TESTS_BACKWORDS
 .endif ; .ifdef EARLY_TESTS
 
     .segment "KERNEL"
 
-.export start
-.proc start
-    jsr INITVIC
-    print txt_tunix
-
-    ;; Relocate.
+.export relocate
+.proc relocate
+debug:.export debug
     smemcpyax vec_localcode_reloc
 .ifdef EARLY_TESTS
-.ifdef RELOC_TESTS_BACKWORDS
     ldaxi vec_reloc_tests
     jsr sset
-    jsr memcpybw
-.else
-    smemcpyax vec_reloc_tests
-.endif ; .ifdef RELOC_TESTS_BACKWORDS
+    ldx #s
+    ldy #d
+    jsr zpw_cmp_xy
+    bcc :+
+    jmp memcpy
+:   pushw c
+    ldx #c
+    jsr zpw_dec_x
+    ldx #s
+    ldy #c
+    jsr zpw_add_xy
+    ldx #d
+    jsr zpw_add_xy
+    popw c
+    jmp memcpybw
 .endif ; .ifdef EARLY_TESTS
+.endproc
 
+.export start
+.proc start
+    print txt_tunix
+    jsr relocate
     jsr boot
-
 .ifdef EARLY_TESTS
     jsr tests
 .endif ; .ifdef EARLY_TESTS
@@ -3696,10 +3706,9 @@ vec_reloc_tests:
     cmp #0
     beq :+
     jmp proc0
-:
 
     ; Welcome messages with free RAM.
-    ldayi txt_welcome
+:   ldayi txt_welcome
     jsr PRTSTR
     ldaxi banks
     jsry list_length, free_bank

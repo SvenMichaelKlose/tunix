@@ -8,7 +8,7 @@ main.o:
     LOCALBSS          Offs=000000  Size=00011D  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000750  Align=00001  Fill=0000
     LIB               Offs=000000  Size=00015A  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000D28  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000D63  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=0003E1  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
@@ -17,6 +17,8 @@ main.o:
 ../lib/tunix/libtunix.a(main.o):
     CODE              Offs=000003  Size=000102  Align=00001  Fill=0000
     DATA              Offs=000000  Size=00001A  Align=00001  Fill=0000
+../lib/zp/libzp.a(word.o):
+    CODE              Offs=000105  Size=000065  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(exehdr.o):
     EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(loadaddr.o):
@@ -31,14 +33,14 @@ ZEROPAGE              000000  00000D  00000E  00001
 LOCALBSS2             000400  000B4F  000750  00001
 LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
-CODE                  002000  002104  000105  00001
-LIB                   002105  00225E  00015A  00001
-KERNEL                00225F  002F86  000D28  00001
-MACHDEP               002F87  0030C8  000142  00001
-KERNELDATA            0030C9  0034A9  0003E1  00001
-MACHDEPDATA           0034AA  0034D3  00002A  00001
-DATA                  0034D4  0034ED  00001A  00001
-GLOBALBSS             0034EE  003E68  00097B  00001
+CODE                  002000  002169  00016A  00001
+LIB                   00216A  0022C3  00015A  00001
+KERNEL                0022C4  003026  000D63  00001
+MACHDEP               003027  003168  000142  00001
+KERNELDATA            003169  003549  0003E1  00001
+MACHDEPDATA           00354A  003573  00002A  00001
+DATA                  003574  00358D  00001A  00001
+GLOBALBSS             00358E  003F08  00097B  00001
 TESTS                 004000  004766  000767  00001
 LOCALCODE             009800  009985  000186  00001
 LOCALBSS              009986  009AA2  00011D  00001
@@ -47,19 +49,21 @@ ULTIMEM               009FF0  009FFF  000010  00001
 
 Exports list by name:
 ---------------------
-__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         0034EE RLA    
+__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         00358E RLA    
 __GLOBALBSS_SIZE__        00097B REA    __LOADADDR__              000001 REA    
 __LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000750 REA    
 __LOCALBSS_RUN__          009986 RLA    __LOCALBSS_SIZE__         00011D REA    
-__LOCALCODE_LOAD__        003E69 RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALCODE_SIZE__        000186 REA    __TESTS_LOAD__            003FEF RLA    
+__LOCALCODE_LOAD__        003F09 RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALCODE_SIZE__        000186 REA    __TESTS_LOAD__            00408F RLA    
 __TESTS_RUN__             004000 RLA    __TESTS_SIZE__            000767 REA    
 __ULTIMEM_SIZE__          000010 REA    lib_exit                  002046 RLA    
 lib_fork                  002034 RLA    lib_getpid                002022 RLA    
 lib_iopage_alloc          0020CD RLA    lib_iopage_commit         0020DF RLA    
 lib_iopage_free           0020F2 RLA    lib_kill                  002059 RLA    
 lib_proc_info             0020BA RLA    lib_proc_list             0020A8 RLA    
-lib_wait                  002095 RLA    
+lib_wait                  002095 RLA    zpw_add_xy                002110 RLA    
+zpw_cmp_xy                002120 RLA    zpw_dec_x                 002136 RLA    
+
 
 
 Exports list by value:
@@ -73,10 +77,12 @@ lib_fork                  002034 RLA    lib_exit                  002046 RLA
 lib_kill                  002059 RLA    lib_wait                  002095 RLA    
 lib_proc_list             0020A8 RLA    lib_proc_info             0020BA RLA    
 lib_iopage_alloc          0020CD RLA    lib_iopage_commit         0020DF RLA    
-lib_iopage_free           0020F2 RLA    __GLOBALBSS_RUN__         0034EE RLA    
-__LOCALCODE_LOAD__        003E69 RLA    __TESTS_LOAD__            003FEF RLA    
-__TESTS_RUN__             004000 RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALBSS_RUN__          009986 RLA    
+lib_iopage_free           0020F2 RLA    zpw_add_xy                002110 RLA    
+zpw_cmp_xy                002120 RLA    zpw_dec_x                 002136 RLA    
+__GLOBALBSS_RUN__         00358E RLA    __LOCALCODE_LOAD__        003F09 RLA    
+__TESTS_RUN__             004000 RLA    __TESTS_LOAD__            00408F RLA    
+__LOCALCODE_RUN__         009800 RLA    __LOCALBSS_RUN__          009986 RLA    
+
 
 
 Imports list:
@@ -84,51 +90,57 @@ Imports list:
 __EXEHDR__ (exehdr.o):
     [linker generated]        vic.cfg:3
 __GLOBALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:31
+    main.o                    main.asm:30
 __GLOBALBSS_SIZE__ ([linker generated]):
-    main.o                    main.asm:32
+    main.o                    main.asm:31
 __LOADADDR__ (loadaddr.o):
     [linker generated]        vic.cfg:2
 __LOCALBSS2_RUN__ ([linker generated]):
-    main.o                    main.asm:38
-__LOCALBSS2_SIZE__ ([linker generated]):
-    main.o                    main.asm:39
-__LOCALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:36
-__LOCALBSS_SIZE__ ([linker generated]):
     main.o                    main.asm:37
-__LOCALCODE_LOAD__ ([linker generated]):
-    main.o                    main.asm:33
-__LOCALCODE_RUN__ ([linker generated]):
-    main.o                    main.asm:34
-__LOCALCODE_SIZE__ ([linker generated]):
+__LOCALBSS2_SIZE__ ([linker generated]):
+    main.o                    main.asm:38
+__LOCALBSS_RUN__ ([linker generated]):
     main.o                    main.asm:35
+__LOCALBSS_SIZE__ ([linker generated]):
+    main.o                    main.asm:36
+__LOCALCODE_LOAD__ ([linker generated]):
+    main.o                    main.asm:32
+__LOCALCODE_RUN__ ([linker generated]):
+    main.o                    main.asm:33
+__LOCALCODE_SIZE__ ([linker generated]):
+    main.o                    main.asm:34
 __TESTS_LOAD__ ([linker generated]):
-    main.o                    main.asm:28
+    main.o                    main.asm:27
 __TESTS_RUN__ ([linker generated]):
-    main.o                    main.asm:29
+    main.o                    main.asm:28
 __TESTS_SIZE__ ([linker generated]):
-    main.o                    main.asm:30
+    main.o                    main.asm:29
 __ULTIMEM_SIZE__ ([linker generated]):
-    main.o                    main.asm:40
+    main.o                    main.asm:39
 lib_exit (main.o):
-    main.o                    main.asm:47
-lib_fork (main.o):
-    main.o                    main.asm:46
-lib_getpid (main.o):
-    main.o                    main.asm:45
-lib_iopage_alloc (main.o):
-    main.o                    main.asm:50
-lib_iopage_commit (main.o):
-    main.o                    main.asm:51
-lib_iopage_free (main.o):
     main.o                    main.asm:52
+lib_fork (main.o):
+    main.o                    main.asm:51
+lib_getpid (main.o):
+    main.o                    main.asm:50
+lib_iopage_alloc (main.o):
+    main.o                    main.asm:55
+lib_iopage_commit (main.o):
+    main.o                    main.asm:56
+lib_iopage_free (main.o):
+    main.o                    main.asm:57
 lib_kill (main.o):
-    main.o                    main.asm:48
-lib_proc_info (main.o):
-    main.o                    main.asm:54
-lib_proc_list (main.o):
     main.o                    main.asm:53
+lib_proc_info (main.o):
+    main.o                    main.asm:59
+lib_proc_list (main.o):
+    main.o                    main.asm:58
 lib_wait (main.o):
-    main.o                    main.asm:49
+    main.o                    main.asm:54
+zpw_add_xy (word.o):
+    main.o                    main.asm:44
+zpw_cmp_xy (word.o):
+    main.o                    main.asm:45
+zpw_dec_x (word.o):
+    main.o                    main.asm:43
 

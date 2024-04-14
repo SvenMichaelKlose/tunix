@@ -17,8 +17,9 @@ make_baby ()
     char pid = tunix_fork ();
     if (pid)
         return pid;
-    printf ("Baby %d.\n", tunix_getpid ());
-    tunix_suspend (tunix_getpid ());
+    pid = tunix_getpid ();
+    printf ("Baby %d.\n", pid);
+    tunix_exit (0);
 }
 
 void
@@ -26,7 +27,9 @@ test_fork (char nprocs)
 {
     char i, mi, pid;
 
-    printf ("Testing %d forked procs.\n", nprocs);
+    printf ("Trying %d procs at once."
+            "\n",
+            nprocs);
 
     for (i = 0; i < nprocs; i++) {
         printf ("Fork #%d.\n", i);
@@ -38,7 +41,8 @@ test_fork (char nprocs)
 
     for (mi = i, i = 0; i < mi; i++) {
         pid = processes[i];
-        printf ("Waiting for %d.\n", pid);
+        printf ("Waiting for %d.\n",
+                pid);
         tunix_wait (pid);
     }
 }
@@ -48,10 +52,10 @@ main (void)
 {
     char nprocs;
 
-    *(char *) 0x900f = 0x1b;
-    //clrscr ();
     printf ("Doing userland test!\n");
-    for (nprocs = 1; nprocs < 16; nprocs++)
+    for (nprocs = 1;
+         nprocs < 16;
+         nprocs++)
         test_fork (nprocs);
     printf ("Welcome to TUNIX!");
 }

@@ -21,7 +21,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -Oi -DTEST -o $@ -I../ $<
 
 all: $(PROGRAM)
-	$(EXOMIZER) sfx basic -t 52 ultifs.prg -o ultifs
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 ultifs.prg -o ultifs
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a ../lib/log/liblog.a $(CC65_HOME)/share/cc65/lib/vic20.lib

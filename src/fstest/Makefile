@@ -11,7 +11,7 @@ include ../Makefile.rules
 	$(CC) -c $(CFLAGS) -o $@ -I../ $<
 
 all: $(PROGRAM)
-	$(EXOMIZER) sfx basic -t 52 fstest.prg -o fstest
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 fstest.prg -o fstest
 	c1541 -format "fstest,01" d64 test.d64 -write fstest
 
 $(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)

@@ -19,7 +19,7 @@ $(ARCHIVE): $(CRUNSHED)
 	zip $(ARCHIVE) $(ARCHIVE_FILES)
 
 $(CRUNSHED): $(PROGRAM)
-	$(EXOMIZER) sfx basic -t 52 $(PROGRAM) -o $(CRUNSHED)
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 $(PROGRAM) -o $(CRUNSHED)
 
 $(PROGRAM): $(SOURCES:.c=.o)
 	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ \

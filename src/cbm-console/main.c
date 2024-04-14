@@ -18,24 +18,10 @@ char consoles[8];
 char active;
 
 void
-start_basic (void)
-{
-    printf ("Console 1\n");
-}
-
-void
 draw_menu (void)
 {
     clrscr ();
     printf ("Pick a console:");
-}
-
-void
-select_console (char i)
-{
-    tunix_suspend (consoles[active]);
-    active = i;
-    tunix_resume (consoles[active]);
 }
 
 // Launch new BASIC instance on a
@@ -47,7 +33,7 @@ launch (char i)
     if (pid) {
         consoles[i] = pid;
     } else {
-        start_basic ();
+        tunix_proc_list ();
         exit (0);
     }
 }
@@ -79,9 +65,9 @@ main (int argc, char * argv[])
 
     printf ("TUNIX CBM console\n");
     menu_pid = tunix_getpid ();
-    printf ("PID is %02x.\n", menu_pid);
+    printf ("PID is $%02x.\n", menu_pid);
     iopage = tunix_iopage_alloc ();
-    printf ("I/O page is %02x.\n", iopage);
+    printf ("I/O page is $%02x.\n", iopage);
     if (!iopage) {
         printf ("Out of memory for I/O page.\n");
         return -1;
@@ -89,4 +75,6 @@ main (int argc, char * argv[])
     install_interrupt_handler ();
     launch (0);
     menu ();
+
+    return 0;
 }

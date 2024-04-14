@@ -7,12 +7,14 @@ all:
 	mkdir -p bin
 	cp src/fstest/fstest bin/
 	cp src/tunix/tunix bin/
+	cp src/tunix/init bin/
+	cp src/cbm-console/cbm-console bin/
 	cp src/ultiburn/ultiburn bin/
 	cp src/ultidump/ultidump bin/
 	cp src/ultitest/ultitest bin/
 	cp src/vi/README.md bin/vi.md
 	cp src/vi/vi bin/
-	c1541 -format "ingle,01" d64 ingle.d64 -write bin/tunix -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi
+	c1541 -format "ingle,01" d64 ingle.d64 -write bin/tunix -write bin/init -write bin/cbm-console -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi
 
 clean:
 	$(MAKE) -C src clean

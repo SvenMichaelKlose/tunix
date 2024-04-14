@@ -26,6 +26,7 @@ SHFLAG  = $028d
     lda SHFLAG
     cmp #1  ; C= + SHIFT
     bne interrupt_handler3
+    beq interrupt_handler3
     lda $9ff8
     pha
 .endproc

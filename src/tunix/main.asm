@@ -650,13 +650,19 @@ pending_signal:       .res 1
 ; array.
 
 .macro dallocx fw, bw, from, to
+    php
+    sei
     lpopx fw, from
     dpushx fw, bw, to
+    plp
 .endmacro
 
 .macro dallocy fw, bw, from, to
+    php
+    sei
     lpopy fw, from
     dpushy fw, bw, to
+    plp
 .endmacro
 
 ;; Move between deques
@@ -665,13 +671,19 @@ pending_signal:       .res 1
 ; lists.
 
 .macro dmovex fw, bw, from, to
+    php
+    sei
     drmx fw, bw, from
     dpushx fw, bw, to
+    plp
 .endmacro
 
 .macro dmovey fw, bw, from, to
+    php
+    sei
     drmy fw, bw, from
     dpushy fw, bw, to
+    plp
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1228,8 +1240,11 @@ r:  plx
     alloc_bank_x
     cpx #0
     beq :+  ; Oops…
+    php
+    sei
     alloc_lbank_x
     inc bank_refs,x
+    plp
 :   ply
     txa
     rts
@@ -1245,15 +1260,19 @@ r:  plx
 ; X: Bank #
 .export bfree
 .proc bfree
+    php
+    sei
     dec bank_refs,x
     bmi invalid_bank
     bne :+
     free_bank_x
 :   free_lbank_x
+    plp
     clc
     rts
 invalid_bank:
     inc bank_refs,x
+    plp
     sec
     rts
 .endproc
@@ -1579,12 +1598,17 @@ done:
 ;    0 for the child.
 .export fork
 .proc fork
+    php
+    sei
     alloc_proc_running_y
     cpy #0
     bne :+
     jmp no_more_procs
 
-:   ldx pid
+:   lda #PROC_BABY
+    sta proc_flags,y
+    plp
+    ldx pid
     phx
     jsr fork_raw
     ; Parent and child return here with
@@ -1594,8 +1618,6 @@ done:
     plx ; Parent's PID.
     cpx pid
     bne child
-;    cpx #0
-;    beq r
 
     ;; Remove parent banks from child.
     enter_data_y
@@ -1623,12 +1645,13 @@ done:
     lloopx lfns, :-
 :   leave_data
 
-    ;; Mark child as baby.
-    lda #PROC_BABY
-    sta proc_flags,y
-
 r:  tya
     clc
+    rts
+
+no_more_procs:
+    plp
+    sec
     rts
 
 child:
@@ -1642,12 +1665,6 @@ child:
 
     lda #0
     clc
-    rts
-.endproc
-
-.export no_more_procs
-.proc no_more_procs
-    sec
     rts
 .endproc
 

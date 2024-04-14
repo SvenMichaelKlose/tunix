@@ -13,7 +13,7 @@
 ;;; Compile-time
 
 __VIC20__       = 1
-START_INIT      = 1
+;START_INIT      = 1
 EARLY_TESTS     = 1
 RELOC_TESTS_BACKWORDS = 1
 BLEEDING_EDGE   = 1
@@ -3133,6 +3133,8 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   cmp pid
     beq r ; (Don't switch to self.)
 
+    php
+    sei
     tay
     push ram123
     push blk2
@@ -3143,6 +3145,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pop blk3
     pop blk2
     pop ram123
+    plp
 
 r:  rts
 .endproc
@@ -3157,8 +3160,6 @@ r:  rts
 ; Y: Process ID
 .export switch
 .proc switch
-    sei
-
     ;;; Save current.
     tsx
     cpx #STACK_LIMIT
@@ -3194,7 +3195,6 @@ r:  rts
 :   mvb io23, blk5
     ldx stack
     txs
-    cli
     rts
 .endproc
 

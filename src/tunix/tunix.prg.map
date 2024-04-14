@@ -8,7 +8,7 @@ main.o:
     LOCALBSS          Offs=000000  Size=00011D  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000750  Align=00001  Fill=0000
     LIB               Offs=000000  Size=00015A  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000D39  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000D28  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=0003E1  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=000142  Align=00001  Fill=0000
@@ -33,12 +33,12 @@ LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
 CODE                  002000  002104  000105  00001
 LIB                   002105  00225E  00015A  00001
-KERNEL                00225F  002F97  000D39  00001
-MACHDEP               002F98  0030D9  000142  00001
-KERNELDATA            0030DA  0034BA  0003E1  00001
-MACHDEPDATA           0034BB  0034E4  00002A  00001
-DATA                  0034E5  0034FE  00001A  00001
-GLOBALBSS             0034FF  003E79  00097B  00001
+KERNEL                00225F  002F86  000D28  00001
+MACHDEP               002F87  0030C8  000142  00001
+KERNELDATA            0030C9  0034A9  0003E1  00001
+MACHDEPDATA           0034AA  0034D3  00002A  00001
+DATA                  0034D4  0034ED  00001A  00001
+GLOBALBSS             0034EE  003E68  00097B  00001
 TESTS                 004000  004766  000767  00001
 LOCALCODE             009800  009985  000186  00001
 LOCALBSS              009986  009AA2  00011D  00001
@@ -47,12 +47,12 @@ ULTIMEM               009FF0  009FFF  000010  00001
 
 Exports list by name:
 ---------------------
-__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         0034FF RLA    
+__EXEHDR__                000001 REA    __GLOBALBSS_RUN__         0034EE RLA    
 __GLOBALBSS_SIZE__        00097B REA    __LOADADDR__              000001 REA    
 __LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000750 REA    
 __LOCALBSS_RUN__          009986 RLA    __LOCALBSS_SIZE__         00011D REA    
-__LOCALCODE_LOAD__        003E7A RLA    __LOCALCODE_RUN__         009800 RLA    
-__LOCALCODE_SIZE__        000186 REA    __TESTS_LOAD__            004000 RLA    
+__LOCALCODE_LOAD__        003E69 RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALCODE_SIZE__        000186 REA    __TESTS_LOAD__            003FEF RLA    
 __TESTS_RUN__             004000 RLA    __TESTS_SIZE__            000767 REA    
 __ULTIMEM_SIZE__          000010 REA    lib_exit                  002046 RLA    
 lib_fork                  002034 RLA    lib_getpid                002022 RLA    
@@ -73,8 +73,8 @@ lib_fork                  002034 RLA    lib_exit                  002046 RLA
 lib_kill                  002059 RLA    lib_wait                  002095 RLA    
 lib_proc_list             0020A8 RLA    lib_proc_info             0020BA RLA    
 lib_iopage_alloc          0020CD RLA    lib_iopage_commit         0020DF RLA    
-lib_iopage_free           0020F2 RLA    __GLOBALBSS_RUN__         0034FF RLA    
-__LOCALCODE_LOAD__        003E7A RLA    __TESTS_LOAD__            004000 RLA    
+lib_iopage_free           0020F2 RLA    __GLOBALBSS_RUN__         0034EE RLA    
+__LOCALCODE_LOAD__        003E69 RLA    __TESTS_LOAD__            003FEF RLA    
 __TESTS_RUN__             004000 RLA    __LOCALCODE_RUN__         009800 RLA    
 __LOCALBSS_RUN__          009986 RLA    
 

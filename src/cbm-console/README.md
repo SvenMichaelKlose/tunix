@@ -1,12 +1,9 @@
-C1541 DOS compatibility tests
-=============================
+Virtual CBM consoles
+====================
 
-To help implement new filesystems.
+Under construction.
 
-Takes the device number as it's argument.
-This will test device #12:
-
-~~~
-LOAD"FSTEST",8
-RUN:REM12
-~~~
+* Opens a menu after C=+SHIFT was
+  pressed.
+* Allows to clone, switch or kill
+  a console.

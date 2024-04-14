@@ -28,6 +28,23 @@
 n:  rts
 .endproc
 
+.proc zpd_dec_x
+    inc 0,x
+    lda 0,x
+    cmp #$ff
+    bne n
+    inc 1,x
+    lda 1,x
+    cmp #$ff
+    bne n
+    inc 2,x
+    lda 2,x
+    cmp #$ff
+    bne n
+    inc 3,x
+n:  rts
+.endproc
+
 .proc zpd_addb_xay
     sta 0,y
     lda #0

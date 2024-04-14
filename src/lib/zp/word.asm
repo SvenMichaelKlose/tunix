@@ -1,5 +1,6 @@
 .export zpw_mov_xy
 .export zpw_add_xy
+.export zpw_cmp_xy
 .export zpw_inc_x
 .export zpw_dec_x
 .export zpw_addb_xay
@@ -24,6 +25,16 @@
     adc 1,y
     sta 1,x
     rts
+.endproc
+
+.proc zpw_cmp_xy
+    lda 1,x
+    cmp 1,y
+    bcc :+
+    bne :+
+    lda 0,x
+    cmp 0,y
+:   rts
 .endproc
 
 .proc zpw_inc_x

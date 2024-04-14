@@ -13,7 +13,7 @@ include ../Makefile.rules
 	$(AS) $(ASFLAGS) -I$(CA65_INCLUDE) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -I../lib/ -o $@ $<
+	$(CC) -c $(CFLAGS) -I.. -o $@ $<
 
 all: $(CRUNSHED) $(CRUNSHED_init)
 

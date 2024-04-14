@@ -396,6 +396,3 @@ al 00FDF9 .IOINIT
 al 00E518 .CINT
 al 00120D .Start
 al 00120B .Next
-break .debug
-break .debug
-break .debug

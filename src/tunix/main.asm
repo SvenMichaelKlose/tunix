@@ -1042,6 +1042,18 @@ empty:
 ;
 ; Blah.
 
+.macro error asciiz
+    stwi zp2, asciiz
+    jmp error_
+.endmacro
+
+.proc error_
+    sei
+    jsr FRESTOR
+    jsr printstr
+:   jmp :-
+.endproc
+
 .export printstr
 .proc printstr
     mvb tmp1, #0
@@ -1062,11 +1074,6 @@ r:  plx
     stwi zp2, asciiz
     jsr printstr
     popw zp2
-.endmacro
-
-.macro error asciiz
-    print asciiz
-    jmp halt
 .endmacro
 
 .export print_cr
@@ -1487,9 +1494,9 @@ vec_io23_to_blk5:
     ;;; Make child's per-process banks.
     ;; Fork IO23.
     alloc_bank_x
+    inc bank_refs,x
     txa
     sta proc_io23,y
-    inc bank_refs,x
     pha
     ; Copy parent's IO23 into child's.
     sta blk5
@@ -1499,9 +1506,9 @@ vec_io23_to_blk5:
 
     ;; Fork shadow RAM123.
     alloc_bank_x
+    inc bank_refs,x
     txa
     sta proc_data,y
-    inc bank_refs,x
     ; Copy parent's into child's.
     lda tmp2 ; (Parent's shadow RAM123.)
     sta blk3
@@ -3367,6 +3374,20 @@ blkiohandler save, #IDX_SAVE
     mvw kernal_block2 + 1, old_save
     jmp kernal_block
 .endproc
+
+;;;;;;;;;;;;;;;;;;;;;
+;;; SANITY CHECKS ;;;
+;;;;;;;;;;;;;;;;;;;;;
+
+.ifdef SANITY_CHECKS
+
+    .segment "KERNAL"
+
+.export sanity_checks
+.proc sanity_checks
+.endproc
+
+.endif ; .ifdef SANITY_CHECKS
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;

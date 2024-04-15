@@ -1618,10 +1618,8 @@ done:
     sei
     alloc_proc_running_y
     cpy #0
-    bne :+
-    jmp no_more_procs
-
-:   lda #PROC_BABY
+    beq no_more_procs
+    lda #PROC_BABY
     sta proc_flags,y
     plp
     ldx pid
@@ -3242,13 +3240,15 @@ r:  rts
 .proc tunix_leave
     jsr schedule
 
+    ; Get process flags before...
     ldx pid
     ldy proc_flags,x
+    ; ...restoring its banks.
     pop blk2
     pop blk1
     pop ram123
 
-    ; Init baby banks after fork().
+    ; Init banks of baby after fork().
     cpy #PROC_BABY
     bne :+
     mvb blk1,tunix_blk1
@@ -3425,6 +3425,8 @@ txt_tests_passed:
   .byte "!!!    SUCCESS:   !!!", 13
   .byte "!!! CHECKS PASSED !!!", 13, 0
 
+note_test_syscall:
+  .byte "TESTING SIMPLE SYSCALL", 13, 0
 note_forking:
   .byte "FORKING.", 13, 0
 note_waiting_for_child:
@@ -3487,7 +3489,7 @@ err_wrong_num_free_iopages:
 
 ; TODO: Make a proper formula from
 ; defined constants.
-FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
+FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
 
 .export tests_data
 .proc tests_data
@@ -3646,6 +3648,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .proc tests
     print txt_tests
     jsr tests_data
+    print note_test_syscall
+    jsr lib_schedule
     jsr tests_processes
     jsr tests_iopages
     print txt_tests_passed
@@ -3721,6 +3725,7 @@ vec_reloc_tests:
     smemcpyax vec_localcode_reloc
     jsr boot
 .ifdef EARLY_TESTS
+debug:.export debug
     jsr tests
 .endif ; .ifdef EARLY_TESTS
 

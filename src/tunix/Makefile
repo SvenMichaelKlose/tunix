@@ -4,6 +4,8 @@ PROGRAM_init=init.prg
 CRUNSHED_init=init
 ASMSOURCES= \
 	main.asm
+CSOURCES= \
+	start.c
 SOURCES_init= \
 	init.c
 
@@ -23,7 +25,7 @@ $(CRUNSHED): $(PROGRAM)
 $(CRUNSHED_init): $(PROGRAM_init)
 	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) $(PROGRAM_init) -t52 -o $(CRUNSHED_init)
 
-$(PROGRAM): $(ASMSOURCES:.asm=.o)
+$(PROGRAM): $(ASMSOURCES:.asm=.o) $(CSOURCES:.c=.o)
 	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/tunix/libtunix.a ../lib/ultimem/libultimem.a ../lib/zp/libzp.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 $(PROGRAM_init): $(SOURCES_init:.c=.o)

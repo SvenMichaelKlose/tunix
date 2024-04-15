@@ -8,7 +8,12 @@
  ;;;  (Commodore VIC-20 + UltiMem)  ;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    jmp start
+    .segment "PRGSTART"
+
+    .import __STARTUP_RUN__
+    jmp __STARTUP_RUN__
+
+.export _tunix = start
 
 ;;; Compile-time
 
@@ -91,11 +96,7 @@ blk5:     .res 2
 
 .include "cbm_kernal.inc"
 
-.export FRESTOR, READST, SETLFS, SETNAM
-.export OPEN, CLOSE, CHKIN, CKOUT
-.export CLRCHN, BASIN, BSOUT, LOAD
-.export SAVE, SETTIM
-.export RDTIM, STOP, GETIN, CLALL
+.export FRESTOR
 
 PETSCII_CLRSCR = 147
 
@@ -214,7 +215,6 @@ zp2:    .res 2
 tmp1:   .res 2
 tmp2:   .res 2
 tmp3:   .res 2
-
 ptr1:   .res 2
 
 ;;; Extended memory banks
@@ -271,7 +271,6 @@ drv_pid:    .res MAX_DRVS + 1
 drv_dev:    .res MAX_DRVS + 1
 drv_vl:     .res MAX_DRVS + 1
 drv_vh:     .res MAX_DRVS + 1
-;drv_names:  .res MAX_DRVS * MAX_DRV_NAME
 
 ;;; Drivers assigned to devices.
 dev_drv:    .res MAX_DEVS
@@ -303,6 +302,7 @@ old_kernal_vectors: .res 32
 ;; Vitals
 tunix_io23:     .res 1  ; Per process.
 tunix_blk1:     .res 1  ; Same for all.
+tunix_blk2:     .res 1  ; Same for all.
 old_load:       .res 2  ; KERNAL LOAD
 old_save:       .res 2  ; KERNAL SAVE
 pid:            .res 1
@@ -772,38 +772,38 @@ pending_signal:       .res 1
 ;;; PROCESS BANK MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.macro get_procblk_x proc, blk
+.macro get_proc_blk_x proc, blk
     lda proc,x
     sta blk
 .endmacro
 
-.macro get_procblk_y proc, blk
+.macro get_proc_blk_y proc, blk
     lda proc,y
     sta blk
 .endmacro
 
 .macro io23x
-    get_procblk_x proc_io23, io23
+    get_proc_blk_x proc_io23, io23
 .endmacro
 
 .macro io23y
-    get_procblk_y proc_io23, io23
+    get_proc_blk_y proc_io23, io23
 .endmacro
 
 .macro io23x_at_blk5
-    get_procblk_x proc_io23, blk5
+    get_proc_blk_x proc_io23, blk5
 .endmacro
 
 .macro io23y_at_blk5
-    get_procblk_y proc_io23, blk5
+    get_proc_blk_y proc_io23, blk5
 .endmacro
 
 .macro datax
-    get_procblk_x proc_data, ram123
+    get_proc_blk_x proc_data, ram123
 .endmacro
 
 .macro datay
-    get_procblk_y proc_data, ram123
+    get_proc_blk_y proc_data, ram123
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -840,17 +840,21 @@ pending_signal:       .res 1
 .endmacro
 
 .macro enter_process_x
-    push blk1
     push ram123
-    lda proc_blk1,x
-    sta blk1
+    push blk1
+    push blk2
     lda proc_ram123,x
     sta ram123
+    lda proc_blk2,x
+    sta blk2
+    lda proc_blk1,x
+    sta blk1
 .endmacro
 
 .macro leave_process
-    pop ram123
+    pop blk2
     pop blk1
+    pop ram123
 .endmacro
 
     .segment "LIB"
@@ -1408,13 +1412,6 @@ done:
     rts
 .endproc
 
-.export copy_blk3_to_blk5
-.proc copy_blk3_to_blk5
-    sta blk3
-    stx blk5
-    lda speedcopy_blk3_to_blk5
-.endproc
-
 .export next_speedcopy
 .proc next_speedcopy
     sta blk2
@@ -1445,20 +1442,22 @@ vec_blk5_to_vic:
   .word saved_vic+$2000, $9000, $0010
 
 .macro save_internal_ram_to_blk5
+    push blk2
     lda speedcopy_lowmem_to_blk5
     jsr next_speedcopy
+    pop blk2
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_color_to_blk5
     smemcpyax vec_vic_to_blk5
 .endmacro
 
 .macro save_internal_ram_to_blk5_y
-    get_procblk_y proc_io23, blk5
+    get_proc_blk_y proc_io23, blk5
     save_internal_ram_to_blk5
 .endmacro
 
 .macro save_internal_ram_to_blk5_x
-    get_procblk_x proc_io23, blk5
+    get_proc_blk_x proc_io23, blk5
     save_internal_ram_to_blk5
 .endmacro
 
@@ -1513,11 +1512,14 @@ vec_io23_to_blk5:
     lda tmp2 ; (Parent's shadow RAM123.)
     sta blk3
     stx blk5
+    push blk2
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
-    stx ram123 ; Map in new.
+    pop blk2
+    stx ram123 ; Bank in shadow RAM123.
     alloc_lbank_x
-    pop io23
+    ; Finish up IO23.
+    pop io23 ; Bank in IO23.
     tax
     alloc_lbank_x
     sty pid
@@ -1533,9 +1535,11 @@ vec_io23_to_blk5:
         jsr balloc
         sta procblk,y
         sta blk5
+        push blk2
         lda speedcopy_blk3_to_blk5
         sta blk2
         jsr $4000
+        pop blk2
     .endmacro
     forkblky proc_ram123
     forkblky proc_blk2
@@ -1667,13 +1671,13 @@ no_more_procs:
     rts
 
 child:
-    ; Map in child's banks for the first
-    ; time.
-    get_procblk_y proc_data, ram123
-    get_procblk_y proc_io23, io23
-    get_procblk_y proc_blk2, blk2
-    get_procblk_y proc_blk3, blk3
-    get_procblk_y proc_blk5, blk5
+    ; Map in rest of child's banks for
+    ; the first time.
+    get_proc_blk_y proc_data, ram123
+    get_proc_blk_y proc_io23, io23
+    get_proc_blk_y proc_blk3, blk2
+    get_proc_blk_y proc_blk3, blk3
+    get_proc_blk_y proc_blk5, blk5
 
     lda #0
     clc
@@ -1810,9 +1814,11 @@ check_if_zombie:
     phx
     phy
     push blk1
+    push blk2
     ldx pid
     jsr suspend
     jsr schedule
+    pop blk2
     pop blk1
     ply
     plx
@@ -2076,7 +2082,9 @@ out_of_slots:
     jsr resume
     plx
     push blk1
+    push blk2
     jsr schedule
+    pop blk2
     pop blk1
     jmp retry
 
@@ -2776,11 +2784,11 @@ txt_no_ultimem:
   .byte "NO ULTIMEM/VIC-MIDIFOUND."
   .byte 13, 0
 txt_faulty_banks:
-  .byte " FAULTY BANKS.", 13,0
+  .byte " FAULTY BANKS.", 13, 0
 txt_ram_ok:
-  .byte 13, "RAM OK.", 13,0
+  .byte 13, "RAM OK.", 13, 0
 txt_banks_free:
-  .byte "K RAM FREE.", 0
+  .byte "K RAM FREE.", 13, 0
 
 vec_localcode_reloc:
   .word __LOCALCODE_LOAD__
@@ -2804,9 +2812,6 @@ clr_localbss:
 clr_localbss2:
   .word __LOCALBSS2_RUN__
   .word __LOCALBSS2_SIZE__
-clr_rest_of_blk1:
-  .word __LOCALCODE_LOAD__
-  .word $4000 - __LOCALCODE_LOAD__
 
     .segment "KERNEL"
 
@@ -2817,7 +2822,6 @@ clr_rest_of_blk1:
     sbzeroax clr_globalbss
     sbzeroax clr_localbss
     sbzeroax clr_localbss2
-    sbzeroax clr_rest_of_blk1
 
     ;;; Init lists.
     ;; Link
@@ -2883,12 +2887,13 @@ clr_rest_of_blk1:
     sta tunix_blk1
     sta proc_blk1
     lda blk2
+    sta tunix_blk2
     sta proc_blk2
     lda blk3
     sta proc_blk3
     lda blk5
     sta proc_blk5
-    ;; Fork all banks.
+    ;; Fork process 0.
     ldx #0
     jsr fork_raw
     ; Continue with forked banks.
@@ -2899,6 +2904,7 @@ clr_rest_of_blk1:
     mvb blk1, proc_blk1
     sta tunix_blk1 ; For all on IO23.
     mvb blk2, proc_blk2
+    sta tunix_blk2 ; For all on IO23.
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
     mvb proc_flags, #PROC_RUNNING
@@ -2943,10 +2949,8 @@ tunix_vectors:
     .segment "KERNELDATA"
 
 txt_tunix:
-  .byte PETSCII_CLRSCR
-  .byte "STARTING TUNIX.", 13, 0
-txt_booting:
-  .byte 13, "BOOTING.", 13, 0
+  .byte PETSCII_CLRSCR, $8e
+  .byte "BOOTING TUNIX.", 13, 0
 txt_starting_multitasking:
   .byte "STARTING MULTITASKING.", 13, 0
 txt_starting_syscalls:
@@ -3185,12 +3189,13 @@ r:  rts
     save_internal_ram_to_blk5_x
 
     ;;; Load next.
-    get_procblk_y proc_io23, blk5
+    get_proc_blk_y proc_io23, blk5
     ;; ...color, screen and VIC config.
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
     ;; Copy in low mem...
+    push blk2
     lda speedcopy_blk5_to_lowmem
     sta blk2
     ; Set return address of speed copy
@@ -3202,9 +3207,10 @@ r:  rts
     lda #>:+
     sta $5802
     jmp $4000
+:   pop blk2
 
     ;; Hop over.
-:   mvb io23, blk5
+    mvb io23, blk5
     ldx stack
     txs
     rts
@@ -3238,19 +3244,23 @@ r:  rts
 
     ldx pid
     ldy proc_flags,x
-    pop ram123
+    pop blk2
     pop blk1
+    pop ram123
 
     ; Init baby banks after fork().
     cpy #PROC_BABY
     bne :+
     mvb blk1,tunix_blk1
+    mvb blk2,tunix_blk2
     lda #PROC_RUNNING
     sta proc_flags,x
     lda proc_ram123,x
     sta ram123
     lda proc_blk1,x
     sta blk1
+    lda proc_blk2,x
+    sta blk2
 
     ; Restore syscall return values.
 :   lda flags
@@ -3270,10 +3280,12 @@ r:  rts
 .proc tunix_enter2
     popw fnord
     ldx pid
-    push blk1
     push ram123
+    push blk1
+    push blk2
     pushw fnord
     mvb blk1, tunix_blk1
+    mvb blk2, tunix_blk2
     lda proc_data,x
     sta ram123
     rts
@@ -3538,13 +3550,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
     cmp #0
     bne :+
     jmp baby
-:   jsr lib_proc_list
-    lda #0
-    jsr lib_proc_info
-    pla
-    pha
-    jsr lib_proc_info
-    ; Wait for child to exit.
+:   ; Wait for child to exit.
     print note_waiting_for_child
     pla
     jsr lib_wait
@@ -3649,8 +3655,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8 - 3
 .export baby
 .proc baby
     print txt_child
-    jsr lib_getpid
-    jsr lib_proc_info
     ldaxi lbanks
     jsry list_length, first_lbank
     cpx #10
@@ -3690,8 +3694,6 @@ vec_reloc_tests:
 
 .export relocate
 .proc relocate
-debug:.export debug
-    smemcpyax vec_localcode_reloc
 .ifdef EARLY_TESTS
     ldaxi vec_reloc_tests
     jsr sset
@@ -3716,7 +3718,7 @@ debug:.export debug
 .export start
 .proc start
     print txt_tunix
-    jsr relocate
+    smemcpyax vec_localcode_reloc
     jsr boot
 .ifdef EARLY_TESTS
     jsr tests

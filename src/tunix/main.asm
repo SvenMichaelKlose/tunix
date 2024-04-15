@@ -1500,7 +1500,7 @@ vec_io23_to_blk5:
     ;; Copy remaining banks.
     ; Copy from BLK3 to BLK5 with speed
     ; code in BLK2.
-    .macro forkblky procblk
+    .macro fork_blk_y procblk
         ldx tmp1 ; parent
         lda procblk,x
         sta blk3
@@ -1513,13 +1513,13 @@ vec_io23_to_blk5:
         jsr $4000
         pop blk2
     .endmacro
-    forkblky proc_ram123
-    forkblky proc_blk2
-    forkblky proc_blk3
-    forkblky proc_blk5
+    fork_blk_y proc_ram123
+    fork_blk_y proc_blk2
+    fork_blk_y proc_blk3
+    fork_blk_y proc_blk5
     ; Must come last to preserve
     ; balloc()'s bookkeeping.
-    forkblky proc_blk1
+    fork_blk_y proc_blk1
 
     pop blk5
     pop blk3
@@ -2857,16 +2857,24 @@ clr_localbss2:
     ;; Fork process 0.
     ldx #0
     jsr fork_raw
+
+    ; Move old BLK1 with new procdata
+    ; to new.
+    mvb blk3, blk1
+    mvb blk5, proc_blk1
+    lda speedcopy_blk3_to_blk5
+    jsr next_speedcopy
+
     ; Continue with forked banks.
     ; TODO: Unref RAM123 as proc 0 will
     ; use the shadow RAM123.
+    mvb blk1, proc_blk1
+    mvb blk2, proc_blk2
     mvb proc_flags, #PROC_RUNNING
     mvb io23, proc_io23
     mvb tunix_blk1, proc_blk1
     mvb tunix_blk2, proc_blk2
     mvb ram123, proc_data
-    mvb blk1, proc_blk1
-    mvb blk2, proc_blk2
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
 
@@ -3451,7 +3459,7 @@ err_wrong_num_free_iopages:
 
 ; TODO: Make a proper formula from
 ; defined constants.
-FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 6 - 8
+FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
 
 .export tests_data
 .proc tests_data
@@ -3657,7 +3665,6 @@ txt_welcome:
     smemcpyax vec_localcode_reloc
     jsr boot
 .ifdef EARLY_TESTS
-debug:.export debug
     jsr tests
 .endif ; .ifdef EARLY_TESTS
 

@@ -22,6 +22,12 @@ make_baby ()
     tunix_exit (0);
 }
 
+extern void debug (void);
+void
+debug (void)
+{
+}
+
 void
 test_fork (char nprocs)
 {
@@ -33,6 +39,8 @@ test_fork (char nprocs)
 
     for (i = 0; i < nprocs; i++) {
         printf ("Fork #%d.\n", i);
+        if (nprocs == 2 && i == 0)
+            debug ();
         pid = make_baby ();
         if (!pid)
             break;

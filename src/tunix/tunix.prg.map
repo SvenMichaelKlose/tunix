@@ -5,10 +5,10 @@ main.o:
     PRGSTART          Offs=000000  Size=000003  Align=00001  Fill=0000
     ULTIMEM           Offs=000000  Size=000010  Align=00001  Fill=0000
     GLOBALBSS         Offs=000000  Size=00097B  Align=00001  Fill=0000
-    LOCALBSS          Offs=000000  Size=00011E  Align=00001  Fill=0000
+    LOCALBSS          Offs=000000  Size=00011D  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000750  Align=00001  Fill=0000
     LIB               Offs=000000  Size=000143  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000CF9  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000CFC  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=0003D5  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
     MACHDEP           Offs=000000  Size=00017A  Align=00001  Fill=0000
@@ -144,18 +144,18 @@ ONCE                  00203A  0020C3  00008A  00001
 PRGSTART              0020C4  0020C6  000003  00001
 CODE                  0020C7  002A2D  000967  00001
 LIB                   002A2E  002B70  000143  00001
-KERNEL                002B71  003869  000CF9  00001
-MACHDEP               00386A  0039E3  00017A  00001
-KERNELDATA            0039E4  003DB8  0003D5  00001
-MACHDEPDATA           003DB9  003DE2  00002A  00001
-RODATA                003DE3  003EF4  000112  00001
-DATA                  003EF5  003F86  000092  00001
-GLOBALBSS             003F87  004901  00097B  00001
-TESTS                 004AB0  005127  000678  00001
-INIT                  005128  005153  00002C  00001
-BSS                   005154  005185  000032  00001
+KERNEL                002B71  00386C  000CFC  00001
+MACHDEP               00386D  0039E6  00017A  00001
+KERNELDATA            0039E7  003DBB  0003D5  00001
+MACHDEPDATA           003DBC  003DE5  00002A  00001
+RODATA                003DE6  003EF7  000112  00001
+DATA                  003EF8  003F89  000092  00001
+GLOBALBSS             003F8A  004904  00097B  00001
+TESTS                 004AB3  00512A  000678  00001
+INIT                  00512B  005156  00002C  00001
+BSS                   005157  005188  000032  00001
 LOCALCODE             009800  0099AD  0001AE  00001
-LOCALBSS              0099AE  009ACB  00011E  00001
+LOCALBSS              0099AE  009ACA  00011D  00001
 ULTIMEM               009FF0  009FFF  000010  00001
 
 
@@ -164,35 +164,35 @@ Exports list by name:
 BSOUT                     00FFD2 RLA    CKOUT                     00FFC9 RLA    
 CLRCH                     00FFCC RLA    OPEN                      00FFC0 RLA    
 READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
-ST                        000090 RLZ    __BSS_RUN__               005154 RLA    
+ST                        000090 RLZ    __BSS_RUN__               005157 RLA    
 __BSS_SIZE__              000032 REA    __CONSTRUCTOR_COUNT__     000002 REA    
 __CONSTRUCTOR_TABLE__     0020C0 RLA    __DESTRUCTOR_COUNT__      000000 REA    
-__DESTRUCTOR_TABLE__      003EF5 RLA    __EXEHDR__                000001 REA    
-__GLOBALBSS_RUN__         003F87 RLA    __GLOBALBSS_SIZE__        00097B REA    
+__DESTRUCTOR_TABLE__      003EF8 RLA    __EXEHDR__                000001 REA    
+__GLOBALBSS_RUN__         003F8A RLA    __GLOBALBSS_SIZE__        00097B REA    
 __LOADADDR__              000001 REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000750 REA    __LOCALBSS_RUN__          0099AE RLA    
-__LOCALBSS_SIZE__         00011E REA    __LOCALCODE_LOAD__        004902 RLA    
+__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_LOAD__        004905 RLA    
 __LOCALCODE_RUN__         009800 RLA    __LOCALCODE_SIZE__        0001AE REA    
 __MAIN_SIZE__             003800 REA    __MAIN_START__            002000 RLA    
 __STACKSIZE__             000800 REA    __STARTUP_RUN__           002000 RLA    
 __STARTUP__               000001 REA    __ULTIMEM_SIZE__          000010 REA    
-___directerrno            0021E2 RLA    ___errno                  005181 RLA    
-___mappederrno            0021EC RLA    ___oserror                005154 RLA    
+___directerrno            0021E2 RLA    ___errno                  005184 RLA    
+___mappederrno            0021EC RLA    ___oserror                005157 RLA    
 ___osmaperrno             002820 RLA    ___seterrno               00259E RLA    
-__argc                    003F30 RLA    __argv                    003F32 RLA    
-__ctype                   003E10 RLA    __ctypeidx                003E1B RLA    
-__hextab                  003DF4 RLA    __longminstr              003E04 RLA    
+__argc                    003F33 RLA    __argv                    003F35 RLA    
+__ctype                   003E13 RLA    __ctypeidx                003E1E RLA    
+__hextab                  003DF7 RLA    __longminstr              003E07 RLA    
 __printf                  0022ED RLA    _fwrite                   00262B RLA    
 _ltoa                     002724 RLA    _main                     0020C8 RLA    
-_printf                   002844 RLA    _stdout                   003F29 RLA    
+_printf                   002844 RLA    _stdout                   003F2C RLA    
 _strlen                   0028CC RLA    _strlower                 0028E2 RLA    
-_tunix                    0037D1 REA    _ultoa                    002765 RLA    
+_tunix                    0037D4 REA    _ultoa                    002765 RLA    
 _vfprintf                 002990 RLA    _write                    0029B9 RLA    
 addysp                    0025A8 RLA    axlong                    0025B5 RLA    
 axulong                   0025BB RLA    callmain                  0025C2 RLA    
 ctypemaskdirect           0025E9 RLA    decsp4                    002603 RLA    
 decsp6                    002610 RLA    donelib                   0025D9 RLA    
-fdtab                     003F59 RLA    incsp2                    0026AC RLA    
+fdtab                     003F5C RLA    incsp2                    0026AC RLA    
 incsp3                    0026BA RLA    incsp6                    0026BF RLA    
 initlib                   00203A RLA    initmainargs              002046 RLAI   
 initstdout                0020AF  LAI   ldaxysp                   0026C6 RLA    
@@ -225,7 +225,7 @@ ptr1                      000016 RLZ    ptr2                      000018 RLZ
 ptr3                      00001A RLZ    ptr4                      00001C RLZ    
 tmp1                      00001E RLZ    tmp2                      00001F RLZ    
 regbank                   000022 RLZ    __BSS_SIZE__              000032 REA    
-ST                        000090 RLZ    __LOCALBSS_SIZE__         00011E REA    
+ST                        000090 RLZ    __LOCALBSS_SIZE__         00011D REA    
 __LOCALCODE_SIZE__        0001AE REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000750 REA    __STACKSIZE__             000800 REA    
 __GLOBALBSS_SIZE__        00097B REA    __MAIN_START__            002000 RLA    
@@ -256,14 +256,14 @@ pushwysp                  002898 RLA    rwcommon                  0028B2 RLA
 _strlen                   0028CC RLA    _strlower                 0028E2 RLA    
 tosudivax                 00290B RLA    _vfprintf                 002990 RLA    
 _write                    0029B9 RLA    zerobss                   002A0B RLA    
-_tunix                    0037D1 REA    __MAIN_SIZE__             003800 REA    
-__hextab                  003DF4 RLA    __longminstr              003E04 RLA    
-__ctype                   003E10 RLA    __ctypeidx                003E1B RLA    
-__DESTRUCTOR_TABLE__      003EF5 RLA    _stdout                   003F29 RLA    
-__argc                    003F30 RLA    __argv                    003F32 RLA    
-fdtab                     003F59 RLA    __GLOBALBSS_RUN__         003F87 RLA    
-__LOCALCODE_LOAD__        004902 RLA    __BSS_RUN__               005154 RLA    
-___oserror                005154 RLA    ___errno                  005181 RLA    
+_tunix                    0037D4 REA    __MAIN_SIZE__             003800 REA    
+__hextab                  003DF7 RLA    __longminstr              003E07 RLA    
+__ctype                   003E13 RLA    __ctypeidx                003E1E RLA    
+__DESTRUCTOR_TABLE__      003EF8 RLA    _stdout                   003F2C RLA    
+__argc                    003F33 RLA    __argv                    003F35 RLA    
+fdtab                     003F5C RLA    __GLOBALBSS_RUN__         003F8A RLA    
+__LOCALCODE_LOAD__        004905 RLA    __BSS_RUN__               005157 RLA    
+___oserror                005157 RLA    ___errno                  005184 RLA    
 __LOCALCODE_RUN__         009800 RLA    __LOCALBSS_RUN__          0099AE RLA    
 READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
 OPEN                      00FFC0 RLA    CKOUT                     00FFC9 RLA    

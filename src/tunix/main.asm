@@ -291,7 +291,7 @@ old_kernal_vectors: .res 32
 
     .segment "LOCALBSS"
 
-.export tunix_io23, tunix_blk1
+.export tunix_blk1
 .export tunix_blk2, lbanks, lbanksb
 .export first_lbank, lfns, lfnsb
 .export lfn_glfn, first_lfn, waiting
@@ -301,7 +301,6 @@ old_kernal_vectors: .res 32
 .export multitasking, old_load, old_save
 
 ;; Vitals
-tunix_io23:     .res 1  ; Per process.
 tunix_blk1:     .res 1  ; Same for all.
 tunix_blk2:     .res 1  ; Same for all.
 old_load:       .res 2  ; KERNAL LOAD
@@ -2861,16 +2860,15 @@ clr_localbss2:
     ; Continue with forked banks.
     ; TODO: Unref RAM123 as proc 0 will
     ; use the shadow RAM123.
-    mvb ram123, proc_data
+    mvb proc_flags, #PROC_RUNNING
     mvb io23, proc_io23
-    sta tunix_io23
+    mvb tunix_blk1, proc_blk1
+    mvb tunix_blk2, proc_blk2
+    mvb ram123, proc_data
     mvb blk1, proc_blk1
-    sta tunix_blk1
     mvb blk2, proc_blk2
-    sta tunix_blk2
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
-    mvb proc_flags, #PROC_RUNNING
 
     ; Remove allocated lbanks forever.
     ldx #0

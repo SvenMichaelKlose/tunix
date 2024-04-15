@@ -8,12 +8,12 @@
  ;;;  (Commodore VIC-20 + UltiMem)  ;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+.export _tunix = start
+
     .segment "PRGSTART"
 
     .import __STARTUP_RUN__
     jmp __STARTUP_RUN__
-
-.export _tunix = start
 
 ;;; Compile-time
 
@@ -291,13 +291,14 @@ old_kernal_vectors: .res 32
 
     .segment "LOCALBSS"
 
-.export tunix_io23, tunix_blk1, lbanks
-.export lbanksb, first_lbank, lfns
-.export lfnsb, lfn_glfn, first_lfn
-.export waiting, waitingb, waiting_pid
-.export free_wait, first_wait, pid
-.export reg_a, reg_x, reg_y, stack
-.export flags, saved_vic
+.export tunix_io23, tunix_blk1
+.export tunix_blk2, lbanks, lbanksb
+.export first_lbank, lfns, lfnsb
+.export lfn_glfn, first_lfn, waiting
+.export waitingb, waiting_pid, free_wait
+.export first_wait, pid, reg_a, reg_x
+.export reg_y, stack, flags, saved_vic
+.export multitasking, old_load, old_save
 
 ;; Vitals
 tunix_io23:     .res 1  ; Per process.
@@ -828,18 +829,18 @@ pending_signal:       .res 1
 ;;; CONTEXT ;;;
 ;;;;;;;;;;;;;;;
 
-.macro enter_tunix_x
+.macro enter_proc_context_x
     push io23
     io23x
     enter_data_x
 .endmacro
 
-.macro leave_tunix
+.macro leave_proc_context
     leave_data
     pop io23
 .endmacro
 
-.macro enter_process_x
+.macro enter_proc_banks_x
     push ram123
     push blk1
     push blk2
@@ -851,7 +852,7 @@ pending_signal:       .res 1
     sta blk1
 .endmacro
 
-.macro leave_process
+.macro leave_proc_banks
     pop blk2
     pop blk1
     pop ram123
@@ -943,34 +944,6 @@ r:  ply
 k:  inc sh
     inc dh
     jmp q
-.endproc
-
-; Copy memory (backwards).
-; s: source
-; d: destination
-; c: count
-.export memcpybw
-.proc memcpybw
-    ldy #0
-    ldx c
-    inx
-    inc c+1
-    bne copy_backwards
-
-l2: lda (s),y
-    sta (d),y
-    dey
-    cpy #$ff
-    beq m2
-copy_backwards:
-q2: dex
-    bne l2
-    dec c+1
-    bne l2
-    rts
-m2: dec s+1
-    dec d+1
-    jmp q2
 .endproc
 
 ; Copy descriptor 'set' over copy
@@ -1734,10 +1707,10 @@ not_to_resume:
 
     ;; Close LFNs and free banks.
 :   phx
-    enter_tunix_x
+    enter_proc_context_x
     jsr free_lfns
     jsr bprocfree
-    leave_tunix
+    leave_proc_context
     plx
 
     phx
@@ -1771,15 +1744,15 @@ put_on_zombie_list:
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
-    enter_tunix_x
+    enter_data_x
     ldy first_wait
     beq done
     ldx waiting_pid,y
-    leave_tunix
+    leave_data
     jsr resume
     jmp schedule
 done:
-    leave_tunix
+    leave_data
     jmp schedule
 .endproc
 
@@ -1795,11 +1768,11 @@ done:
     ; Put us on waiting list of the
     ; process.
     mvb tmp1, pid
-    enter_tunix_x ; TODO: data only.
+    enter_data_x
     alloc_waiting_y
     lda tmp1
     sta waiting_pid,y
-    leave_tunix
+    leave_data
 
 check_if_zombie:
     lda proc_flags,x
@@ -1832,8 +1805,9 @@ invalid_pid:
 ; Y: Slot in zombie's waiting list.
 .export end_wait
 .proc end_wait
-    enter_tunix_x
+    enter_data_x
     rm_waiting_y
+    leave_data
     ldy first_wait
     beq reap_zombie
 
@@ -1845,7 +1819,6 @@ invalid_pid:
     plx
 
 return_code:
-    leave_tunix
     lda exit_codes,x
     clc
     rts
@@ -2875,22 +2848,13 @@ clr_localbss2:
     lda #0
     sta procs ; (Running alone.)
     ; Fill in banks for process 0.
-    lda ram123
+    mvb proc_ram123, ram123
     sta proc_data
-    sta proc_ram123
-    lda io23
-    sta tunix_io23
-    sta proc_io23
-    lda blk1
-    sta tunix_blk1
-    sta proc_blk1
-    lda blk2
-    sta tunix_blk2
-    sta proc_blk2
-    lda blk3
-    sta proc_blk3
-    lda blk5
-    sta proc_blk5
+    mvb proc_io23, io23
+    mvb proc_blk1, blk1
+    mvb proc_blk2, blk2
+    mvb proc_blk3, blk3
+    mvb proc_blk5, blk5
     ;; Fork process 0.
     ldx #0
     jsr fork_raw
@@ -2899,10 +2863,11 @@ clr_localbss2:
     ; use the shadow RAM123.
     mvb ram123, proc_data
     mvb io23, proc_io23
+    sta tunix_io23
     mvb blk1, proc_blk1
-    sta tunix_blk1 ; For all on IO23.
+    sta tunix_blk1
     mvb blk2, proc_blk2
-    sta tunix_blk2 ; For all on IO23.
+    sta tunix_blk2
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
     mvb proc_flags, #PROC_RUNNING
@@ -3174,6 +3139,7 @@ r:  rts
 ; Y: Process ID
 .export switch
 .proc switch
+    mvw tmp3, blk2
     ;;; Save current.
     tsx
     cpx #STACK_LIMIT
@@ -3193,7 +3159,6 @@ r:  rts
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
     ;; Copy in low mem...
-    push blk2
     lda speedcopy_blk5_to_lowmem
     sta blk2
     ; Set return address of speed copy
@@ -3205,10 +3170,9 @@ r:  rts
     lda #>:+
     sta $5802
     jmp $4000
-:   pop blk2
 
     ;; Hop over.
-    mvb io23, blk5
+:   mvb io23, blk5
     ldx stack
     txs
     rts
@@ -3363,14 +3327,14 @@ blkiohandler save, #IDX_SAVE
 .proc kernal_block
     ; Restore process banks.
     ldx pid
-    enter_process_x
+    enter_proc_banks_x
     load_regs
 .endproc
 .export kernal_block2
 .proc kernal_block2
     jsr $ffff
     save_regs_and_flags
-    leave_process
+    leave_proc_banks
     load_regs
     rts
 .endproc
@@ -3687,37 +3651,7 @@ txt_welcome:
   .byte 13 ; PETSCII_CLRSCR
   .byte "TUNIX - ", 0
 
-.ifdef EARLY_TESTS
-vec_reloc_tests:
-  .word __TESTS_LOAD__
-  .word __TESTS_RUN__
-  .word __TESTS_SIZE__
-.endif ; .ifdef EARLY_TESTS
-
     .segment "KERNEL"
-
-.export relocate
-.proc relocate
-.ifdef EARLY_TESTS
-    ldaxi vec_reloc_tests
-    jsr sset
-    ldx #s
-    ldy #d
-    jsr zpw_cmp_xy
-    bcc :+
-    jmp memcpy
-:   pushw c
-    ldx #c
-    jsr zpw_dec_x
-    ldx #s
-    ldy #c
-    jsr zpw_add_xy
-    ldx #d
-    jsr zpw_add_xy
-    popw c
-    jmp memcpybw
-.endif ; .ifdef EARLY_TESTS
-.endproc
 
 .export start
 .proc start

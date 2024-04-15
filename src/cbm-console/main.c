@@ -30,12 +30,10 @@ void
 launch (char i)
 {
     char pid = tunix_fork ();
-    if (pid) {
+    if (pid)
         consoles[i] = pid;
-    } else {
-        tunix_proc_list ();
+    else
         exit (0);
-    }
 }
 
 void

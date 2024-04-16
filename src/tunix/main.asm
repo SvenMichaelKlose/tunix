@@ -1671,7 +1671,6 @@ child:
     ; the first time.
     get_proc_blk_y proc_data, ram123
     get_proc_blk_y proc_io23, io23
-    get_proc_blk_y proc_blk3, blk2
     get_proc_blk_y proc_blk3, blk3
     get_proc_blk_y proc_blk5, blk5
 
@@ -3200,9 +3199,10 @@ r:  rts
     lda #>:+
     sta $5802
     jmp $4000
+:   mvb blk2, tunix_blk2
 
     ;; Hop over.
-:   mvb io23, blk5
+    mvb io23, blk5
     ldx stack
     txs
     rts
@@ -3244,7 +3244,16 @@ r:  rts
 
     ; Init banks of baby after fork().
     cpy #PROC_BABY
-    bne :+
+    beq grow_baby
+
+    ; Restore syscall return values.
+:   lda flags
+    pha
+    load_regs
+    plp
+    rts
+
+grow_baby:
     mvb blk1,tunix_blk1
     mvb blk2,tunix_blk2
     lda #PROC_RUNNING
@@ -3255,13 +3264,7 @@ r:  rts
     sta blk1
     lda proc_blk2,x
     sta blk2
-
-    ; Restore syscall return values.
-:   lda flags
-    pha
-    load_regs
-    plp
-    rts
+    jmp :-
 .endproc
 
 .export tunix_enter

@@ -159,7 +159,7 @@ MAX_DEVS     = 32
 ;MAX_DRV_NAME = 8
 MAX_IOPAGES  = 4
 IOPAGE_BASE  = $9b
-STACK_LIMIT  = 16
+STACK_FENCE  = 16
 
 ;;;;;;;;;;;;;;;;
 ;;; ZEROPAGE ;;;
@@ -1621,10 +1621,8 @@ done:
     unref_lbank_x proc_blk3
     unref_lbank_x proc_blk5
     ply
-    leave_data
 
     ;;; Increment child's GLFN refs.
-    enter_data_y
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
@@ -3145,16 +3143,14 @@ r:  rts
 ; Y: Process ID
 .export switch
 .proc switch
-    mvw tmp3, blk2
     ;;; Save current.
     tsx
-    cpx #STACK_LIMIT
+    cpx #STACK_FENCE
     bcs :+
     jsr stack_overflow
     ; NOT REACHED.
 :   stx stack
-    ldx io23
-    stx blk5
+    mvb blk5, io23
     ldx pid
     save_internal_ram_to_blk5_x
 

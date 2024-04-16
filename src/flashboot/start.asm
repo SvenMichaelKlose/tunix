@@ -6,7 +6,7 @@ START_BASIC = 1
 ; The RAM bank to copy this ROM to,
 ; before executing the cc65 binary in
 ; it.
-RAM_BANK    = 6
+RAM_BANK    = 7
 
 READY     := $C474
 PRNTCRLF  := $CAD7

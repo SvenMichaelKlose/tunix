@@ -39,7 +39,7 @@ test_fork (char nprocs)
 
     for (i = 0; i < nprocs; i++) {
         printf ("Fork #%d.\n", i);
-        if (nprocs == 2 && i == 0)
+        if (nprocs == 1 && i == 0)
             debug ();
         pid = make_baby ();
         if (!pid)

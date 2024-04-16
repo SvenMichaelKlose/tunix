@@ -9,11 +9,16 @@
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .export _tunix = start
+.import __STARTUP_RUN__
 
     .segment "PRGSTART"
 
-    .import __STARTUP_RUN__
     jmp __STARTUP_RUN__
+
+.export debug
+.proc debug
+    rts
+.endproc
 
 ;;; Compile-time
 
@@ -590,29 +595,43 @@ pending_signal:       .res 1
 ;; Push to front of deque.
 
 .macro dpushx fw, bw, first
-    lda first
-    sta fw,x
     lda #0
     sta bw,x
+    phy
+    ldy first
+    beq :+
+    txa
+    sta bw,y
+:   tya
+    sta fw,x
     stx first
+    ply
 .endmacro
 
 .macro dpushy fw, bw, first
-    lda first
-    sta fw,y
     lda #0
     sta bw,y
+    phx
+    ldx first
+    beq :+
+    tya
+    sta bw,x
+:   txa
+    sta fw,y
     sty first
+    plx
 .endmacro
 
 ;; Remove from deque.
 
 .macro drmx fw, bw, first
     phx
+    phy
     cpx first
     bne :+
     lda fw,x
     sta first
+    jmp :++
 :   ; Link previous
     lda bw,x
     beq :+
@@ -620,19 +639,25 @@ pending_signal:       .res 1
     lda fw,x
     sta fw,y
     ; Link next
-:   tax
+:   ldy fw,x
     beq :+
-    tya
+    lda bw,x
+    sta bw,y
+:   lda #0
+    sta fw,x
     sta bw,x
-:   plx
+    ply
+    plx
 .endmacro
 
 .macro drmy fw, bw, first
+    phx
     phy
     cpy first
     bne :+
     lda fw,y
     sta first
+    jmp :++
 :   ; Link previous
     lda bw,y
     beq :+
@@ -640,11 +665,15 @@ pending_signal:       .res 1
     lda fw,y
     sta fw,x
     ; Link next
-:   tay
+:   ldx fw,y
     beq :+
-    txa
+    lda bw,y
+    sta bw,x
+:   lda #0
+    sta fw,y
     sta bw,y
-:   ply
+    ply
+    plx
 .endmacro
 
 ;; Allocate item in deque.
@@ -689,6 +718,26 @@ pending_signal:       .res 1
     drmy fw, bw, from
     dpushy fw, bw, to
     plp
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK ALLOCATION MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.macro alloc_bank_x
+    lpopx banks, free_bank
+.endmacro
+
+.macro alloc_lbank_x
+    dpushx lbanks, lbanksb, first_lbank
+.endmacro
+
+.macro free_bank_x
+    lpushx banks, free_bank
+.endmacro
+
+.macro free_lbank_x
+    drmx lbanks, lbanksb, first_lbank
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -746,26 +795,6 @@ pending_signal:       .res 1
 
 .macro free_iopage_x
     dmovex iopages, iopagesb, first_iopage, free_iopage
-.endmacro
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; BANK ALLOCATION MACROS ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-.macro alloc_bank_x
-    lpopx banks, free_bank
-.endmacro
-
-.macro alloc_lbank_x
-    dpushx lbanks, lbanksb, first_lbank
-.endmacro
-
-.macro free_bank_x
-    lpushx banks, free_bank
-.endmacro
-
-.macro free_lbank_x
-:   drmx lbanks, lbanksb, first_lbank
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1559,14 +1588,13 @@ vec_io23_to_blk5:
 .export free_lfns
 .proc free_lfns
     ldy first_lfn
-    beq done
+    beq r
 :   ldx lfn_glfn,y
     dec glfn_refs,x
     bne :+  ; (Still used.)
     lpushx glfns, glfns
 :   lloopy lfns, :--
-done:
-    rts
+r:  rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;
@@ -1649,6 +1677,7 @@ child:
 
     lda #0
     clc
+    cli
     rts
 .endproc
 
@@ -3116,19 +3145,18 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   cmp pid
     beq r ; (Don't switch to self.)
 
-    php
-    sei
     tay
     push ram123
     push blk2
     push blk3
     push blk5
+    sei
     jsr switch ; Switch IO23 & lowmem.
+    cli
     pop blk5
     pop blk3
     pop blk2
     pop ram123
-    plp
 
 r:  rts
 .endproc
@@ -3427,6 +3455,19 @@ err_wrong_glfn_order:
 err_wrong_deque_index:
   .byte "UNEXPECTED DEQUE INDEX OF "
   .byte "FIRST ALLOCATED ONE.", 0
+err_bad_lbanks:
+  .byte "BAD LBANKS.", 0
+err_bad_lbanksb:
+  .byte "BAD LBANKSB.", 0
+err_bad_lbanks_rm:
+  .byte "BAD LBANKS AFTER REMOVAL.", 0
+err_bad_lbanksb_rm:
+  .byte "BAD LBANKSB AFTER REMOVAL.", 0
+err_lbanks_not_empty:
+  .byte "LBANKS/LBANKSB NOT EMPTY.", 0
+err_first_lbank_not_0:
+  .byte "FIRST LBANK NOT 0 FOR ENPTY "
+  .byte "DEQUE.", 0
 err_wrong_free_proc_count:
   .byte "WRONG # OF FREE PROCS.", 0
 err_cannot_fork:
@@ -3453,9 +3494,32 @@ err_cannot_free_iopage:
 err_wrong_num_free_iopages:
   .byte "WRONG # OF FREE I/O PAGES.", 0
 
+.export expected_lbanks
+.export expected_lbanksb
+.export expected_lbanks_rm
+.export expected_lbanksb_rm
+
+expected_lbanks:
+  .byte 0, 0, 1, 2
+expected_lbanksb:
+  .byte 0, 2, 3, 0
+expected_lbanks_rm:
+  .byte 0, 0, 0, 1
+expected_lbanksb_rm:
+  .byte 0, 3, 0, 0
+
 ; TODO: Make a proper formula from
 ; defined constants.
 FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
+
+.proc clear_lbanks
+    stwi d, lbanks
+    stwi c, MAX_BANKS
+    jsr bzero
+    lda #0
+    sta first_lbank
+    rts
+.endproc
 
 .export tests_data
 .proc tests_data
@@ -3502,7 +3566,84 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
     ; Move it back to free procs.
 :   drmx procs, procsb, running
     dpushx procs, procsb, free_proc
-    rts
+    jsr clear_lbanks
+    ldx #1
+    alloc_lbank_x
+    ldx #2
+    alloc_lbank_x
+    ldx #3
+    alloc_lbank_x
+
+    stwi s, lbanks
+    stwi d, expected_lbanks
+    stwi c, 4
+    jsr cmpmem
+    beq :+
+    error err_bad_lbanks
+:   stwi s, lbanksb
+    stwi d, expected_lbanksb
+    stwi c, 4
+    jsr cmpmem
+    beq :+
+    error err_bad_lbanksb
+
+:   ldx #2
+    free_lbank_x
+    stwi s, lbanks
+    stwi d, expected_lbanks_rm
+    stwi c, 4
+    jsr cmpmem
+    beq :+
+    error err_bad_lbanks_rm
+:   stwi s, lbanksb
+    stwi d, expected_lbanksb_rm
+    stwi c, 4
+    jsr cmpmem
+    beq :+
+    error err_bad_lbanksb_rm
+
+:   ldx #1
+    free_lbank_x
+    ldx #3
+    free_lbank_x
+    ldx #0
+:   lda lbanks,x
+    bne :+
+    lda lbanksb,x
+    bne :+
+    inx
+    cpx #MAX_BANKS
+    bne :-
+    beq :++
+:   error err_lbanks_not_empty
+
+:   lda first_lbank
+    beq :+
+    error err_first_lbank_not_0
+
+:   rts
+.endproc
+
+.export cmpmem
+.proc cmpmem
+    ldx cl
+    inx
+    inc ch
+    ldy #0
+    beq :+ ; (jmp)
+l:  lda (s),y
+    cmp (d),y
+    bne r
+    iny
+    beq y0
+:   dex
+    bne l
+    dec ch
+    bne l
+r:  rts
+y0: inc sh
+    inc dh
+    bne :- ; (jmp)
 .endproc
 
 .export tests_processes
@@ -3511,6 +3652,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
 
     ;; Fork and wait for child to exit.
     print note_forking
+    jsr lib_getpid
+    jsr lib_proc_info
     jsr lib_fork
     bcc :+
     error err_cannot_fork

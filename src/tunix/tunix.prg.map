@@ -2,18 +2,18 @@ Modules list:
 -------------
 main.o:
     ZEROPAGE          Offs=000000  Size=00000E  Align=00001  Fill=0000
-    PRGSTART          Offs=000000  Size=000003  Align=00001  Fill=0000
+    PRGSTART          Offs=000000  Size=000004  Align=00001  Fill=0000
     ULTIMEM           Offs=000000  Size=000010  Align=00001  Fill=0000
     GLOBALBSS         Offs=000000  Size=00097B  Align=00001  Fill=0000
     LOCALBSS          Offs=000000  Size=00011D  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000750  Align=00001  Fill=0000
     LIB               Offs=000000  Size=000143  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000CF4  Align=00001  Fill=0000
-    KERNELDATA        Offs=000000  Size=0003D5  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000DD9  Align=00001  Fill=0000
+    KERNELDATA        Offs=000000  Size=000427  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=00002A  Align=00001  Fill=0000
-    MACHDEP           Offs=000000  Size=00017A  Align=00001  Fill=0000
+    MACHDEP           Offs=000000  Size=000190  Align=00001  Fill=0000
     LOCALCODE         Offs=000000  Size=0001AE  Align=00001  Fill=0000
-    TESTS             Offs=000000  Size=000678  Align=00001  Fill=0000
+    TESTS             Offs=000000  Size=000942  Align=00001  Fill=0000
 start.o:
     CODE              Offs=000000  Size=000019  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000011  Align=00001  Fill=0000
@@ -141,19 +141,19 @@ LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
 STARTUP               002000  002039  00003A  00001
 ONCE                  00203A  0020C3  00008A  00001
-PRGSTART              0020C4  0020C6  000003  00001
-LIB                   0020C7  002209  000143  00001
-KERNEL                00220A  002EFD  000CF4  00001
-MACHDEP               002EFE  003077  00017A  00001
-KERNELDATA            003078  00344C  0003D5  00001
-MACHDEPDATA           00344D  003476  00002A  00001
-RODATA                003477  003588  000112  00001
-DATA                  003589  00361A  000092  00001
-GLOBALBSS             00361B  003F95  00097B  00001
-CODE                  004144  004AAA  000967  00001
-TESTS                 004AAB  005122  000678  00001
-INIT                  005123  00514E  00002C  00001
-BSS                   00514F  005180  000032  00001
+PRGSTART              0020C4  0020C7  000004  00001
+LIB                   0020C8  00220A  000143  00001
+KERNEL                00220B  002FE3  000DD9  00001
+MACHDEP               002FE4  003173  000190  00001
+KERNELDATA            003174  00359A  000427  00001
+MACHDEPDATA           00359B  0035C4  00002A  00001
+RODATA                0035C5  0036D6  000112  00001
+DATA                  0036D7  003768  000092  00001
+GLOBALBSS             003769  0040E3  00097B  00001
+CODE                  004292  004BF8  000967  00001
+TESTS                 004BF9  00553A  000942  00001
+INIT                  00553B  005566  00002C  00001
+BSS                   005567  005598  000032  00001
 LOCALCODE             009800  0099AD  0001AE  00001
 LOCALBSS              0099AE  009ACA  00011D  00001
 ULTIMEM               009FF0  009FFF  000010  00001
@@ -164,55 +164,55 @@ Exports list by name:
 BSOUT                     00FFD2 RLA    CKOUT                     00FFC9 RLA    
 CLRCH                     00FFCC RLA    OPEN                      00FFC0 RLA    
 READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
-ST                        000090 RLZ    __BSS_RUN__               00514F RLA    
+ST                        000090 RLZ    __BSS_RUN__               005567 RLA    
 __BSS_SIZE__              000032 REA    __CONSTRUCTOR_COUNT__     000002 REA    
 __CONSTRUCTOR_TABLE__     0020C0 RLA    __DESTRUCTOR_COUNT__      000000 REA    
-__DESTRUCTOR_TABLE__      003589 RLA    __EXEHDR__                000001 REA    
-__GLOBALBSS_RUN__         00361B RLA    __GLOBALBSS_SIZE__        00097B REA    
+__DESTRUCTOR_TABLE__      0036D7 RLA    __EXEHDR__                000001 REA    
+__GLOBALBSS_RUN__         003769 RLA    __GLOBALBSS_SIZE__        00097B REA    
 __LOADADDR__              000001 REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000750 REA    __LOCALBSS_RUN__          0099AE RLA    
-__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_LOAD__        003F96 RLA    
+__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_LOAD__        0040E4 RLA    
 __LOCALCODE_RUN__         009800 RLA    __LOCALCODE_SIZE__        0001AE REA    
 __MAIN_SIZE__             003800 REA    __MAIN_START__            002000 RLA    
 __STACKSIZE__             000800 REA    __STARTUP_RUN__           002000 RLA    
 __STARTUP__               000001 REA    __ULTIMEM_SIZE__          000010 REA    
-___directerrno            00425F RLA    ___errno                  00517C RLA    
-___mappederrno            004269 RLA    ___oserror                00514F RLA    
-___osmaperrno             00489D RLA    ___seterrno               00461B RLA    
-__argc                    0035C4 RLA    __argv                    0035C6 RLA    
-__ctype                   0034A4 RLA    __ctypeidx                0034AF RLA    
-__hextab                  003488 RLA    __longminstr              003498 RLA    
-__printf                  00436A RLA    _fwrite                   0046A8 RLA    
-_ltoa                     0047A1 RLA    _main                     004145 RLA    
-_printf                   0048C1 RLA    _stdout                   0035BD RLA    
-_strlen                   004949 RLA    _strlower                 00495F RLA    
-_tunix                    002E65 REA    _ultoa                    0047E2 RLA    
-_vfprintf                 004A0D RLA    _write                    004A36 RLA    
-addysp                    004625 RLA    axlong                    004632 RLA    
-axulong                   004638 RLA    callmain                  00463F RLA    
-ctypemaskdirect           004666 RLA    decsp4                    004680 RLA    
-decsp6                    00468D RLA    donelib                   004656 RLA    
-fdtab                     0035ED RLA    incsp2                    004729 RLA    
-incsp3                    004737 RLA    incsp6                    00473C RLA    
+___directerrno            0043AD RLA    ___errno                  005594 RLA    
+___mappederrno            0043B7 RLA    ___oserror                005567 RLA    
+___osmaperrno             0049EB RLA    ___seterrno               004769 RLA    
+__argc                    003712 RLA    __argv                    003714 RLA    
+__ctype                   0035F2 RLA    __ctypeidx                0035FD RLA    
+__hextab                  0035D6 RLA    __longminstr              0035E6 RLA    
+__printf                  0044B8 RLA    _fwrite                   0047F6 RLA    
+_ltoa                     0048EF RLA    _main                     004293 RLA    
+_printf                   004A0F RLA    _stdout                   00370B RLA    
+_strlen                   004A97 RLA    _strlower                 004AAD RLA    
+_tunix                    002F4B REA    _ultoa                    004930 RLA    
+_vfprintf                 004B5B RLA    _write                    004B84 RLA    
+addysp                    004773 RLA    axlong                    004780 RLA    
+axulong                   004786 RLA    callmain                  00478D RLA    
+ctypemaskdirect           0047B4 RLA    decsp4                    0047CE RLA    
+decsp6                    0047DB RLA    donelib                   0047A4 RLA    
+fdtab                     00373B RLA    incsp2                    004877 RLA    
+incsp3                    004885 RLA    incsp6                    00488A RLA    
 initlib                   00203A RLA    initmainargs              002046 RLAI   
-initstdout                0020AF  LAI   ldaxysp                   004743 RLA    
-lib_exit                  0041A0 RLA    lib_fork                  00418E RLA    
-lib_getpid                00417C RLA    lib_iopage_alloc          004227 RLA    
-lib_iopage_commit         004239 RLA    lib_iopage_free           00424C RLA    
-lib_kill                  0041B3 RLA    lib_schedule              00416E RLA    
-lib_wait                  0041EF RLA    mul8x16                   004865 RLA    
-mul8x16a                  00486F RLA    negeax                    00474A RLA    
-popax                     004721 RLA    popptr1                   0048B3 RLA    
-ptr1                      000016 RLZ    ptr2                      000018 RLZ    
-ptr3                      00001A RLZ    ptr4                      00001C RLZ    
-push1                     0048F4 RLA    pusha0                    0048FB RLA    
-pushax                    0048FD RLA    pusheax                   004771 RLA    
-pushwysp                  004915 RLA    regbank                   000022 RLZ    
-rwcommon                  00492F RLA    sp                        00000E RLZ    
-sreg                      000010 RLZ    tmp1                      00001E RLZ    
-tmp2                      00001F RLZ    tosudivax                 004988 RLA    
-tosumulax                 00481E RLA    zerobss                   004A88 RLA    
-
+initstdout                0020AF  LAI   ldaxysp                   004891 RLA    
+lib_exit                  0042EE RLA    lib_fork                  0042DC RLA    
+lib_getpid                0042CA RLA    lib_iopage_alloc          004375 RLA    
+lib_iopage_commit         004387 RLA    lib_iopage_free           00439A RLA    
+lib_kill                  004301 RLA    lib_proc_info             004362 RLA    
+lib_schedule              0042BC RLA    lib_wait                  00433D RLA    
+mul8x16                   0049B3 RLA    mul8x16a                  0049BD RLA    
+negeax                    004898 RLA    popax                     00486F RLA    
+popptr1                   004A01 RLA    ptr1                      000016 RLZ    
+ptr2                      000018 RLZ    ptr3                      00001A RLZ    
+ptr4                      00001C RLZ    push1                     004A42 RLA    
+pusha0                    004A49 RLA    pushax                    004A4B RLA    
+pusheax                   0048BF RLA    pushwysp                  004A63 RLA    
+regbank                   000022 RLZ    rwcommon                  004A7D RLA    
+sp                        00000E RLZ    sreg                      000010 RLZ    
+tmp1                      00001E RLZ    tmp2                      00001F RLZ    
+tosudivax                 004AD6 RLA    tosumulax                 00496C RLA    
+zerobss                   004BD6 RLA    
 
 
 Exports list by value:
@@ -231,44 +231,44 @@ __LOCALBSS2_SIZE__        000750 REA    __STACKSIZE__             000800 REA
 __GLOBALBSS_SIZE__        00097B REA    __MAIN_START__            002000 RLA    
 __STARTUP_RUN__           002000 RLA    initlib                   00203A RLA    
 initmainargs              002046 RLAI   initstdout                0020AF  LAI   
-__CONSTRUCTOR_TABLE__     0020C0 RLA    _tunix                    002E65 REA    
-__hextab                  003488 RLA    __longminstr              003498 RLA    
-__ctype                   0034A4 RLA    __ctypeidx                0034AF RLA    
-__DESTRUCTOR_TABLE__      003589 RLA    _stdout                   0035BD RLA    
-__argc                    0035C4 RLA    __argv                    0035C6 RLA    
-fdtab                     0035ED RLA    __GLOBALBSS_RUN__         00361B RLA    
-__MAIN_SIZE__             003800 REA    __LOCALCODE_LOAD__        003F96 RLA    
-_main                     004145 RLA    lib_schedule              00416E RLA    
-lib_getpid                00417C RLA    lib_fork                  00418E RLA    
-lib_exit                  0041A0 RLA    lib_kill                  0041B3 RLA    
-lib_wait                  0041EF RLA    lib_iopage_alloc          004227 RLA    
-lib_iopage_commit         004239 RLA    lib_iopage_free           00424C RLA    
-___directerrno            00425F RLA    ___mappederrno            004269 RLA    
-__printf                  00436A RLA    ___seterrno               00461B RLA    
-addysp                    004625 RLA    axlong                    004632 RLA    
-axulong                   004638 RLA    callmain                  00463F RLA    
-donelib                   004656 RLA    ctypemaskdirect           004666 RLA    
-decsp4                    004680 RLA    decsp6                    00468D RLA    
-_fwrite                   0046A8 RLA    popax                     004721 RLA    
-incsp2                    004729 RLA    incsp3                    004737 RLA    
-incsp6                    00473C RLA    ldaxysp                   004743 RLA    
-negeax                    00474A RLA    pusheax                   004771 RLA    
-_ltoa                     0047A1 RLA    _ultoa                    0047E2 RLA    
-tosumulax                 00481E RLA    mul8x16                   004865 RLA    
-mul8x16a                  00486F RLA    ___osmaperrno             00489D RLA    
-popptr1                   0048B3 RLA    _printf                   0048C1 RLA    
-push1                     0048F4 RLA    pusha0                    0048FB RLA    
-pushax                    0048FD RLA    pushwysp                  004915 RLA    
-rwcommon                  00492F RLA    _strlen                   004949 RLA    
-_strlower                 00495F RLA    tosudivax                 004988 RLA    
-_vfprintf                 004A0D RLA    _write                    004A36 RLA    
-zerobss                   004A88 RLA    __BSS_RUN__               00514F RLA    
-___oserror                00514F RLA    ___errno                  00517C RLA    
-__LOCALCODE_RUN__         009800 RLA    __LOCALBSS_RUN__          0099AE RLA    
-READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
-OPEN                      00FFC0 RLA    CKOUT                     00FFC9 RLA    
-CLRCH                     00FFCC RLA    BSOUT                     00FFD2 RLA    
-
+__CONSTRUCTOR_TABLE__     0020C0 RLA    _tunix                    002F4B REA    
+__hextab                  0035D6 RLA    __longminstr              0035E6 RLA    
+__ctype                   0035F2 RLA    __ctypeidx                0035FD RLA    
+__DESTRUCTOR_TABLE__      0036D7 RLA    _stdout                   00370B RLA    
+__argc                    003712 RLA    __argv                    003714 RLA    
+fdtab                     00373B RLA    __GLOBALBSS_RUN__         003769 RLA    
+__MAIN_SIZE__             003800 REA    __LOCALCODE_LOAD__        0040E4 RLA    
+_main                     004293 RLA    lib_schedule              0042BC RLA    
+lib_getpid                0042CA RLA    lib_fork                  0042DC RLA    
+lib_exit                  0042EE RLA    lib_kill                  004301 RLA    
+lib_wait                  00433D RLA    lib_proc_info             004362 RLA    
+lib_iopage_alloc          004375 RLA    lib_iopage_commit         004387 RLA    
+lib_iopage_free           00439A RLA    ___directerrno            0043AD RLA    
+___mappederrno            0043B7 RLA    __printf                  0044B8 RLA    
+___seterrno               004769 RLA    addysp                    004773 RLA    
+axlong                    004780 RLA    axulong                   004786 RLA    
+callmain                  00478D RLA    donelib                   0047A4 RLA    
+ctypemaskdirect           0047B4 RLA    decsp4                    0047CE RLA    
+decsp6                    0047DB RLA    _fwrite                   0047F6 RLA    
+popax                     00486F RLA    incsp2                    004877 RLA    
+incsp3                    004885 RLA    incsp6                    00488A RLA    
+ldaxysp                   004891 RLA    negeax                    004898 RLA    
+pusheax                   0048BF RLA    _ltoa                     0048EF RLA    
+_ultoa                    004930 RLA    tosumulax                 00496C RLA    
+mul8x16                   0049B3 RLA    mul8x16a                  0049BD RLA    
+___osmaperrno             0049EB RLA    popptr1                   004A01 RLA    
+_printf                   004A0F RLA    push1                     004A42 RLA    
+pusha0                    004A49 RLA    pushax                    004A4B RLA    
+pushwysp                  004A63 RLA    rwcommon                  004A7D RLA    
+_strlen                   004A97 RLA    _strlower                 004AAD RLA    
+tosudivax                 004AD6 RLA    _vfprintf                 004B5B RLA    
+_write                    004B84 RLA    zerobss                   004BD6 RLA    
+__BSS_RUN__               005567 RLA    ___oserror                005567 RLA    
+___errno                  005594 RLA    __LOCALCODE_RUN__         009800 RLA    
+__LOCALBSS_RUN__          0099AE RLA    READST                    00FFB7 RLA    
+SETLFS                    00FFBA RLA    OPEN                      00FFC0 RLA    
+CKOUT                     00FFC9 RLA    CLRCH                     00FFCC RLA    
+BSOUT                     00FFD2 RLA    
 
 
 Imports list:
@@ -303,25 +303,25 @@ __DESTRUCTOR_TABLE__ ([linker generated]):
 __EXEHDR__ (exehdr.o):
     [linker generated]        vic.cfg:3
 __GLOBALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:35
+    main.o                    main.asm:40
 __GLOBALBSS_SIZE__ ([linker generated]):
-    main.o                    main.asm:36
+    main.o                    main.asm:41
 __LOADADDR__ (loadaddr.o):
     [linker generated]        vic.cfg:2
 __LOCALBSS2_RUN__ ([linker generated]):
-    main.o                    main.asm:42
+    main.o                    main.asm:47
 __LOCALBSS2_SIZE__ ([linker generated]):
-    main.o                    main.asm:43
+    main.o                    main.asm:48
 __LOCALBSS_RUN__ ([linker generated]):
-    main.o                    main.asm:40
+    main.o                    main.asm:45
 __LOCALBSS_SIZE__ ([linker generated]):
-    main.o                    main.asm:41
+    main.o                    main.asm:46
 __LOCALCODE_LOAD__ ([linker generated]):
-    main.o                    main.asm:37
+    main.o                    main.asm:42
 __LOCALCODE_RUN__ ([linker generated]):
-    main.o                    main.asm:38
+    main.o                    main.asm:43
 __LOCALCODE_SIZE__ ([linker generated]):
-    main.o                    main.asm:39
+    main.o                    main.asm:44
 __MAIN_SIZE__ ([linker generated]):
     crt0.o                    vic20/crt0.s:11
 __MAIN_START__ ([linker generated]):
@@ -330,11 +330,11 @@ __STACKSIZE__ ([linker generated]):
     crt0.o                    vic20/crt0.s:12
     [linker generated]        vic.cfg:12
 __STARTUP_RUN__ ([linker generated]):
-    main.o                    main.asm:15
+    main.o                    main.asm:12
 __STARTUP__ (crt0.o):
     start.o                   start.s:13
 __ULTIMEM_SIZE__ ([linker generated]):
-    main.o                    main.asm:44
+    main.o                    main.asm:49
 ___directerrno (_directerrno.o):
     write.o                   /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:10
 ___errno (errno.o):
@@ -422,23 +422,25 @@ initmainargs (mainargs.o):
 ldaxysp (ldaxsp.o):
     fwrite.o                  common/fwrite.s:11
 lib_exit (main.o):
-    main.o                    main.asm:57
-lib_fork (main.o):
-    main.o                    main.asm:56
-lib_getpid (main.o):
-    main.o                    main.asm:55
-lib_iopage_alloc (main.o):
-    main.o                    main.asm:60
-lib_iopage_commit (main.o):
-    main.o                    main.asm:61
-lib_iopage_free (main.o):
     main.o                    main.asm:62
+lib_fork (main.o):
+    main.o                    main.asm:61
+lib_getpid (main.o):
+    main.o                    main.asm:60
+lib_iopage_alloc (main.o):
+    main.o                    main.asm:65
+lib_iopage_commit (main.o):
+    main.o                    main.asm:66
+lib_iopage_free (main.o):
+    main.o                    main.asm:67
 lib_kill (main.o):
-    main.o                    main.asm:58
+    main.o                    main.asm:63
+lib_proc_info (main.o):
+    main.o                    main.asm:69
 lib_schedule (main.o):
-    main.o                    main.asm:54
-lib_wait (main.o):
     main.o                    main.asm:59
+lib_wait (main.o):
+    main.o                    main.asm:64
 mul8x16 (mul8.o):
     mul.o                     runtime/mul.s:8
 mul8x16a (mul8.o):

@@ -217,15 +217,21 @@ zp2:    .res 2
 .export speedcopy_blk5_to_lowmem
 .export speedcopy_lowmem_to_blk5
 
+;; Temporaries
 tmp1:   .res 2
 tmp2:   .res 2
 tmp3:   .res 2
 ptr1:   .res 2
 
+;;; Speed code banks
+speedcopy_blk3_to_blk5:   .res 1
+speedcopy_blk5_to_lowmem: .res 1
+speedcopy_lowmem_to_blk5: .res 1
+
 ;;; Extended memory banks
-banks:      .res MAX_BANKS
-free_bank:  .res 1
-bank_refs:  .res MAX_BANKS
+banks:          .res MAX_BANKS
+free_bank:      .res 1
+bank_refs:      .res MAX_BANKS
 
 ;;; IO pages
 iopages:        .res MAX_IOPAGES + 1
@@ -238,55 +244,51 @@ iopage_page:    .res MAX_IOPAGES + 1
 ;;; Global logical file numbers
 ;;; Shared by fork()ed processes.
 ;; Free list
-glfns:      .res MAX_LFNS
-glfn_refs:  .res MAX_LFNS
+glfns:          .res MAX_LFNS
+glfn_refs:      .res MAX_LFNS
 ;; Last parameters to OPEN.
-glfn_drv:   .res MAX_LFNS
-glfn_dev:   .res MAX_LFNS
-glfn_sa:    .res MAX_LFNS
+glfn_drv:       .res MAX_LFNS
+glfn_dev:       .res MAX_LFNS
+glfn_sa:        .res MAX_LFNS
 
 ;;; Processes
-procs:      .res MAX_PROCS
-procsb:     .res MAX_PROCS
-free_proc:  .res 1
-running:    .res 1
-sleeping:   .res 1
-zombie:     .res 1
+procs:          .res MAX_PROCS
+procsb:         .res MAX_PROCS
+free_proc:      .res 1
+running:        .res 1
+sleeping:       .res 1
+zombie:         .res 1
 PROC_BABY       = 16
 PROC_ZOMBIE     = 32
 PROC_RUNNING    = 64
 PROC_SLEEPING   = 128
-proc_flags: .res MAX_PROCS
-exit_codes: .res MAX_PROCS
+proc_flags:     .res MAX_PROCS
+exit_codes:     .res MAX_PROCS
 ;; Current banks.
 ; Kernel and IO pages (per-process)
-proc_io23:  .res MAX_PROCS
+proc_io23:      .res MAX_PROCS
 ; Shadow RAM123 (per-process)
-proc_data:  .res MAX_PROCS
+proc_data:      .res MAX_PROCS
 ; Process RAM123
-proc_ram123:.res MAX_PROCS
-proc_blk1:  .res MAX_PROCS
-proc_blk2:  .res MAX_PROCS
-proc_blk3:  .res MAX_PROCS
-proc_blk5:  .res MAX_PROCS
+proc_ram123:    .res MAX_PROCS
+proc_blk1:      .res MAX_PROCS
+proc_blk2:      .res MAX_PROCS
+proc_blk3:      .res MAX_PROCS
+proc_blk5:      .res MAX_PROCS
 
 ;;; Drivers
-drvs:       .res MAX_DRVS + 1
-drv_pid:    .res MAX_DRVS + 1
-drv_dev:    .res MAX_DRVS + 1
-drv_vl:     .res MAX_DRVS + 1
-drv_vh:     .res MAX_DRVS + 1
+drvs:           .res MAX_DRVS + 1
+drv_pid:        .res MAX_DRVS + 1
+drv_dev:        .res MAX_DRVS + 1
+drv_vl:         .res MAX_DRVS + 1
+drv_vh:         .res MAX_DRVS + 1
 
 ;;; Drivers assigned to devices.
-dev_drv:    .res MAX_DEVS
-
-;;; Initial speed code banks.
-speedcopy_blk3_to_blk5:   .res 1
-speedcopy_blk5_to_lowmem: .res 1
-speedcopy_lowmem_to_blk5: .res 1
+dev_drv:        .res MAX_DEVS
 
 ;;; KERNAL
-old_kernal_vectors: .res 32
+old_kernal_vectors:
+                .res 32
 
 ;;;;;;;;;;;;;
 ;;; LOCAL ;;;
@@ -357,15 +359,15 @@ lfn_glfn:       .res MAX_LFNS
 .export free_signal, pending_signal
 
 ;; Signals
-signals:          .res MAX_SIGNALS
-signalsb:         .res MAX_SIGNALS
-signal_type:      .res MAX_SIGNALS
-signal_payload:   .res MAX_SIGNALS
-signal_handler_l: .res MAX_SIGNALS
-signal_handler_h: .res MAX_SIGNALS
-pending_signal_types: .res 256
-free_signal:          .res 1
-pending_signal:       .res 1
+signals:                .res MAX_SIGNALS
+signalsb:               .res MAX_SIGNALS
+signal_type:            .res MAX_SIGNALS
+signal_payload:         .res MAX_SIGNALS
+signal_handler_l:       .res MAX_SIGNALS
+signal_handler_h:       .res MAX_SIGNALS
+pending_signal_types:   .res 256
+free_signal:            .res 1
+pending_signal:         .res 1
 
 .endif ; .if BLEEDING_EDGE
 
@@ -1482,6 +1484,9 @@ vec_blk5_to_color:
 vec_blk5_to_vic:
   .word saved_vic+$2000, $9000, $0010
 
+vec_io23_to_blk5:
+  .word $9800, $b800, $07f0
+
 .macro save_internal_ram_to_blk5
     push blk2
     lda speedcopy_lowmem_to_blk5
@@ -1503,11 +1508,6 @@ vec_blk5_to_vic:
 .endmacro
 
     .segment "MACHDEPDATA"
-
-vec_io23_to_blk5:
-  .word $9800, $b800, $07f0
-
-    .segment "MACHDEP"
 
 ; Fork banks and save stack.
 ;
@@ -1553,10 +1553,9 @@ vec_io23_to_blk5:
     lda tmp2 ; (Parent's shadow RAM123.)
     sta blk3
     stx blk5
-    push blk2
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
-    pop blk2
+    mvb blk2, tunix_blk2
     stx ram123 ; Bank in shadow RAM123.
     alloc_lbank_x
     ; Finish up IO23.
@@ -1569,26 +1568,31 @@ vec_io23_to_blk5:
     ;; Copy remaining banks.
     ; Copy from BLK3 to BLK5 with speed
     ; code in BLK2.
-    .macro fork_blk_y procblk
+    .macro alloc_blk_y procblk
+        jsr balloc
+        sta procblk,y
+    .endmacro
+    alloc_blk_y proc_ram123
+    alloc_blk_y proc_blk1
+    alloc_blk_y proc_blk2
+    alloc_blk_y proc_blk3
+    alloc_blk_y proc_blk5
+
+    .macro copy_blk_y procblk
         ldx tmp1 ; parent
         lda procblk,x
         sta blk3
-        jsr balloc
-        sta procblk,y
+        lda procblk,y
         sta blk5
-        push blk2
         lda speedcopy_blk3_to_blk5
-        sta blk2
-        jsr $4000
-        pop blk2
+        jsr next_speedcopy
+        mvb blk2, tunix_blk2
     .endmacro
-    fork_blk_y proc_ram123
-    fork_blk_y proc_blk2
-    fork_blk_y proc_blk3
-    fork_blk_y proc_blk5
-    ; Must come last to preserve
-    ; balloc()'s bookkeeping.
-    fork_blk_y proc_blk1
+    copy_blk_y proc_ram123
+    copy_blk_y proc_blk1
+    copy_blk_y proc_blk2
+    copy_blk_y proc_blk3
+    copy_blk_y proc_blk5
 
     pop blk5
     pop blk3
@@ -2829,6 +2833,10 @@ clr_localbss:
 clr_localbss2:
   .word __LOCALBSS2_RUN__
   .word __LOCALBSS2_SIZE__
+clr_lbanks:
+  .word lbanks, MAX_BANKS
+clr_lbanksb:
+  .word lbanksb, MAX_BANKS
 
     .segment "KERNEL"
 
@@ -2894,27 +2902,41 @@ clr_localbss2:
     lda #0
     sta procs ; (Running alone.)
     ; Fill in banks for process 0.
-    mvb proc_ram123, ram123
-    sta proc_data
-    mvb proc_io23, io23
-    mvb proc_blk1, blk1
-    mvb proc_blk2, blk2
-    mvb proc_blk3, blk3
-    mvb proc_blk5, blk5
+    mvb proc_ram123+1, ram123
+    sta proc_data+1
+    mvb proc_io23+1, io23
+    mvb proc_blk1+1, blk1
+    sta tunix_blk1
+    mvb proc_blk2+1, blk2
+    sta tunix_blk2
+    mvb proc_blk3+1, blk3
+    mvb proc_blk5+1, blk5
     ;; Fork process 0.
-    ldx #0
+    inc pid
+    ldy #0
     jsr fork_raw
+    dec pid
 
     ; Move old BLK1 with new procdata
     ; to new.
+    push blk3
+    push blk5
     mvb blk3, blk1
     mvb blk5, proc_blk1
+    push blk2
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
+    pop blk2
+    mvb blk3, blk2
+    mvb blk5, proc_blk2
+    push blk2
+    lda speedcopy_blk3_to_blk5
+    jsr next_speedcopy
+    pop blk2
+    pop blk5
+    pop blk3
 
     ; Continue with forked banks.
-    ; TODO: Unref RAM123 as proc 0 will
-    ; use the shadow RAM123.
     mvb blk1, proc_blk1
     mvb blk2, proc_blk2
     mvb proc_flags, #PROC_RUNNING
@@ -2925,17 +2947,15 @@ clr_localbss2:
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
 
+    ; Free unused bank.
+    lda proc_ram123
+    jsr bfree
     ; Remove allocated lbanks forever.
-    ldx #0
-    txa
-:   sta lbanks,x
-    inx
-    bne :-
-    sta first_lbank
+    sbzeroax clr_lbanks
+    sbzeroax clr_lbanksb
 
     ;;; Start syscall driver
     print txt_starting_syscalls
-
     ;; Init KERNAL vectors.
     smemcpyax vec_backup_kernal ; Save
     ; Wrap KERNAL's LOAD & SAVE.

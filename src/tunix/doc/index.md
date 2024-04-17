@@ -1135,11 +1135,36 @@ preserved the same way just in time.
 
 A completey new process is created once
 when TUNIX starts: process 0.  From then
-on, running processes are cloned only by
-the fork() system call. {explain the
-convenience}.
+on, running processes are created by the
+fork() system call only.  The fork()
+system call duplicates the running
+process and returns the ID of the new
+process called a 'child process', or
+'child' for short.
 
-{explain baby state of process}
+Forking an already existing process
+spares initializations as the whole of
+the program is copied as well as inter-
+process communication overhead as both
+processes have all information required
+to run.  Merely shared resources need
+some updates.
+
+To fork a process its whole address
+space is copied into a new set of banks
+and the GLFN reference counts are
+incremented to reflect the cloned list
+of LFNs.  Also, the processs is assigned
+a new ID.
+
+A freshly forked process that did not
+yet run is called a 'baby process' (a
+notion unique to TUNIX).  Before it
+returns from fork(), the duplicated
+bank configuration on the stack, which
+is restored in all cases, is overwritten
+by the new banks and the child is marked
+as being a regular, running process.
 
 # Drivers
 

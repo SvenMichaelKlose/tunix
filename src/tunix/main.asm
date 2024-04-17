@@ -1756,21 +1756,17 @@ not_to_resume:
     rts
 
     ;; Close LFNs and free banks.
-:   phx
-    enter_proc_context_x
+:   enter_proc_context_x
+    phx
     jsr free_lfns
     jsr bprocfree
-    leave_proc_context
-    plx
-
-    phx
     jsr free_iopages
     jsr free_drivers
     plx
+    leave_proc_context
 
     ;; Remove process from running or
     ;; sleeping list.
-    ldx tmp1
     lda proc_flags,x
     php
     sei
@@ -2192,15 +2188,14 @@ no_handler_set:
 ;;; I/O PAGES ;;;
 ;;;;;;;;;;;;;;;;;
 
-; Free IO pages of a process.
-; X: process ID
+; Free IO pages of process.
 .export free_iopages
 .proc free_iopages
-    stx tmp1
+    ldx pid
     ldy first_iopage
     beq r
 l:  lda iopage_pid,y
-    cmp tmp1
+    cmp pid
     bne n
     tax
     free_iopage_x
@@ -2285,14 +2280,13 @@ not_there:
 ;;; DRIVER REGISTRATION ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Free drivers of a process.
-; X: process ID
+; Free drivers of process.
 free_drivers:
-    stx tmp1
+    ldx pid
     ldy drvs
     beq r
 l:  lda drv_pid,y
-    cmp tmp1
+    cmp pid
     bne n
     tax
     lpushx drvs, drvs

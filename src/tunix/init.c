@@ -89,7 +89,7 @@ test_fork (char nprocs)
     char nbanks_b;
     char i, mi, pid;
 
-    printf ("## %d procs at once.\n",
+    printf ("## %d children at once.\n",
             nprocs);
 
     for (i = 0; i < nprocs; i++) {
@@ -109,7 +109,7 @@ test_fork (char nprocs)
     }
 
     tunix_mode (0);
-    printf ("%d procs total.\n", i);
+    printf ("%d children total.\n", i);
     tunix_mode (1);
 
     for (mi = i, i = 0; i < mi; i++) {
@@ -128,7 +128,7 @@ test_fork (char nprocs)
     nbanks_b = test_alloc0 (3);
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
-        printf ("! Missing %d banks "
+        printf ("! %d banks missing "
                 "after forks.",
                 nbanks_a - nbanks_b);
         while (1);

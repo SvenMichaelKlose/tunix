@@ -8,7 +8,7 @@
  ;;;  (Commodore VIC-20 + UltiMem)  ;;;
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.export _tunix = start
+.export _tunix = boot
 .import __STARTUP_RUN__
 
     .segment "PRGSTART"
@@ -882,9 +882,10 @@ pending_signal:         .res 1
     lda proc_ram123,x
     sta ram123
     lda proc_blk2,x
-    sta blk2
+    pha
     lda proc_blk1,x
     sta blk1
+    pop blk2
 .endmacro
 
 .macro leave_proc_banks
@@ -1532,8 +1533,8 @@ vec_io23_to_blk5:
     push blk3
     push blk5
 
-    ;;; Make child's per-process banks.
-    ;; Fork IO23.
+    ;;; Clone child's per-process banks.
+    ;; Clone IO23.
     alloc_bank_x
     inc bank_refs,x
     txa
@@ -1545,19 +1546,19 @@ vec_io23_to_blk5:
     ; Copy lowmem, screen, color & VIC.
     save_internal_ram_to_blk5
 
-    ;; Fork shadow RAM123.
+    ;; Clone procdata RAM123.
     alloc_bank_x
     inc bank_refs,x
     txa
     sta proc_data,y
     ; Copy parent's into child's.
-    lda tmp2 ; (Parent's shadow RAM123.)
+    lda tmp2 ; (Parent's procdata.)
     sta blk3
     stx blk5
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
     mvb blk2, tunix_blk2
-    stx ram123 ; Bank in shadow RAM123.
+    stx ram123 ; Bank in procdata.
     alloc_lbank_x
     ; Finish up IO23.
     pop io23 ; Bank in IO23.
@@ -1566,7 +1567,7 @@ vec_io23_to_blk5:
     sty pid
     mvb stack, tmp2+1
 
-    ;; Copy remaining banks.
+    ;; Clone remaining banks.
     ; Copy from BLK3 to BLK5 with speed
     ; code in BLK2.
     .macro alloc_blk_y procblk
@@ -1649,9 +1650,9 @@ r:  rts
 ; Low 1K, screen, color and VIC are
 ; on the same bank as the IO23 area,
 ; which is reserved for TUNIX and
-; drivers.  A shadow RAM123, only banked
-; in for TUNIX, holds additional per-
-; process data.
+; drivers.  A procdata RAM123, only
+; banked in for TUNIX, holds additional
+; per-process data.
 
 ; Fork current process.
 ; Returns:
@@ -1841,13 +1842,9 @@ check_if_zombie:
     ; Take a nap.
     phx
     phy
-    push blk1
-    push blk2
     ldx pid
     jsr suspend
     jsr schedule
-    pop blk2
-    pop blk1
     ply
     plx
     jmp check_if_zombie
@@ -2841,14 +2838,16 @@ clr_lbanksb:
 
     .segment "KERNEL"
 
-.export boot
-.proc boot
-    jsr FRESTOR
-
+.export clear_bss_segments
+.proc clear_bss_segments
     sbzeroax clr_globalbss
     sbzeroax clr_localbss
     sbzeroax clr_localbss2
+    rts
+.endproc
 
+.export init_data
+.proc init_data
     ;;; Init lists.
     ;; Link
     ldx #0
@@ -2890,11 +2889,11 @@ clr_lbanksb:
     sta free_iopage
     sta glfns
     sta drvs
+    rts
+.endproc
 
-    ;;; Init machdep.
-    jsr init_ultimem
-    jsr gen_speedcodes
-
+.export make_proc0
+.proc make_proc0
     ;;; Make init process 0.
     print txt_starting_multitasking
     inc multitasking
@@ -2912,6 +2911,7 @@ clr_lbanksb:
     sta tunix_blk2
     mvb proc_blk3+1, blk3
     mvb proc_blk5+1, blk5
+
     ;; Fork process 0.
     inc pid
     ldy #0
@@ -2948,18 +2948,16 @@ clr_lbanksb:
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
 
-    ; Free unused bank.
-    lda proc_ram123
-    jsr bfree
-    ; Remove allocated lbanks forever.
+    ; Remove lbank entries forever.
     sbzeroax clr_lbanks
     sbzeroax clr_lbanksb
+    rts
+.endproc
 
-    ;;; Start syscall driver
+.export register_syscall_driver
+.proc register_syscall_driver
     print txt_starting_syscalls
-    ;; Init KERNAL vectors.
-    smemcpyax vec_backup_kernal ; Save
-    ; Wrap KERNAL's LOAD & SAVE.
+    smemcpyax vec_backup_kernal
     mvw old_load, old_kernal_vectors + IDX_LOAD
     mvw old_save, old_kernal_vectors + IDX_SAVE
     stwi old_kernal_vectors + IDX_LOAD, kernal_load
@@ -2976,14 +2974,72 @@ clr_lbanksb:
     jmp register
 .endproc
 
+.export boot
+.proc boot
+    jsr FRESTOR
+    print txt_tunix
+    smemcpyax vec_localcode_reloc
+    jsr clear_bss_segments
+    jsr init_data
+    jsr init_ultimem
+    jsr gen_speedcodes
+    jsr make_proc0
+    jsr register_syscall_driver
+.ifdef EARLY_TESTS
+    jsr tests
+.endif ; .ifdef EARLY_TESTS
+
+    print txt_init
+    jsr lib_fork
+    cmp #0
+    beq :+
+    jmp proc0
+
+    ; Welcome messages with free RAM.
+:   ldayi txt_welcome
+    jsr PRTSTR
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
+    jsr print_free_ram_a
+    jsr print_cr
+
+    ;; BASIC cold start.
+    ldayi $e437
+    jsr PRTSTR
+    jsr INITVCTRS
+    jsr INITBA
+    jsr $e412
+
+.ifdef START_INIT
+    sei
+    ldx #0
+    sei
+l:  lda loadkeys,x
+    beq :+
+    sta KEYD,x
+    inx
+    bne l   ; (jmp)
+:   stx NDX
+    cli
+.endif
+
+    ldx #0
+    ldx #$f8
+    txs
+    jmp READY
+.endproc
+
     .segment "KERNELDATA"
 
-tunix_vectors:
-.word open, close, chkin, ckout, clrchn
-.word basin, bsout, stop, getin, clall
-.word usrcmd, load, save, blkin, bkout
+.export txt_welcome
+txt_welcome:
+  .byte 13 ; PETSCII_CLRSCR
+  .byte "TUNIX - ", 0
 
-    .segment "KERNELDATA"
+loadkeys:
+  .byte "LOAD", '"', "INIT", '"', ",8"
+  .byte 13, "RUN", 13, 0
 
 txt_tunix:
   .byte PETSCII_CLRSCR, $8e
@@ -2994,6 +3050,11 @@ txt_starting_syscalls:
   .byte "STARTING SYSCALLS.", 13, 0
 txt_init:
   .byte "STARTING INIT.", 13, 0
+
+tunix_vectors:
+.word open, close, chkin, ckout, clrchn
+.word basin, bsout, stop, getin, clall
+.word usrcmd, load, save, blkin, bkout
 
 ;;;;;;;;;;;;;;;;;
 ;;; DISPATCH ;;;;
@@ -3807,70 +3868,3 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
 .endproc
 
 .endif ; .ifdef EARLY_TESTS
-
-;;;;;;;;;;;;;
-;;; START ;;;
-;;;;;;;;;;;;;
-
-    .segment "KERNELDATA"
-
-.export txt_welcome
-txt_welcome:
-  .byte 13 ; PETSCII_CLRSCR
-  .byte "TUNIX - ", 0
-
-    .segment "KERNEL"
-
-.export start
-.proc start
-    print txt_tunix
-    smemcpyax vec_localcode_reloc
-    jsr boot
-.ifdef EARLY_TESTS
-    jsr tests
-.endif ; .ifdef EARLY_TESTS
-
-    print txt_init
-    jsr lib_fork
-    cmp #0
-    beq :+
-    jmp proc0
-
-    ; Welcome messages with free RAM.
-:   ldayi txt_welcome
-    jsr PRTSTR
-    ldaxi banks
-    jsry list_length, free_bank
-    txa
-    jsr print_free_ram_a
-    jsr print_cr
-
-    ;; BASIC cold start.
-    ldayi $e437
-    jsr PRTSTR
-    jsr INITVCTRS
-    jsr INITBA
-    jsr $e412
-
-.ifdef START_INIT
-    sei
-    ldx #0
-    sei
-l:  lda loadkeys,x
-    beq :+
-    sta KEYD,x
-    inx
-    bne l   ; (jmp)
-:   stx NDX
-    cli
-.endif
-
-    ldx #0
-    ldx #$f8
-    txs
-    jmp READY
-.endproc
-
-loadkeys:
-  .byte "LOAD", '"', "INIT", '"', ",8"
-  .byte 13, "RUN", 13, 0

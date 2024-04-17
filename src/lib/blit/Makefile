@@ -1,6 +1,7 @@
 LIBRARY=libblit.a
 SOURCES= \
     clrram.asm \
+    cmp.asm \
     moveram.asm \
     memmove.asm
 

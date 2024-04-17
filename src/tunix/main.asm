@@ -741,6 +741,10 @@ pending_signal:       .res 1
     drmx lbanks, lbanksb, first_lbank
 .endmacro
 
+.macro free_lbank_y
+    drmy lbanks, lbanksb, first_lbank
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS LIST MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1294,7 +1298,17 @@ r:  plx
 
 .export free_lbank
 .proc free_lbank
-    drmy lbanks, lbanksb, first_lbank
+    free_lbank_y
+    rts
+.endproc
+
+.export free_lbank_a
+.proc free_lbank_a
+    sta tmp1
+    phy
+    ldy tmp1
+    jsr free_lbank
+    ply
     rts
 .endproc
 
@@ -1661,20 +1675,17 @@ r:  rts
 
     ;; Remove parent banks from child.
     enter_data_y
-    ldx pid
-    .macro unref_lbank_x procblk
-        ldy procblk,x
-        jsr free_lbank
+    .macro unref_lbank procblk
+        lda procblk,x
+        jsr free_lbank_a
     .endmacro
-    phy
-    unref_lbank_x proc_data
-    unref_lbank_x proc_ram123
-    unref_lbank_x proc_io23
-    unref_lbank_x proc_blk1
-    unref_lbank_x proc_blk2
-    unref_lbank_x proc_blk3
-    unref_lbank_x proc_blk5
-    ply
+    unref_lbank proc_data
+    unref_lbank proc_ram123
+    unref_lbank proc_io23
+    unref_lbank proc_blk1
+    unref_lbank proc_blk2
+    unref_lbank proc_blk3
+    unref_lbank proc_blk5
 
     ;;; Increment child's GLFN refs.
     ldx first_lfn
@@ -1702,7 +1713,6 @@ child:
 
     lda #0
     clc
-    cli
     rts
 .endproc
 

@@ -129,8 +129,10 @@ test_fork (char nprocs)
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
         printf ("! %d banks missing "
-                "after forks.",
-                nbanks_a - nbanks_b);
+                "after fork test "
+                "(round %d)).",
+                nbanks_a - nbanks_b,
+                nprocs);
         while (1);
         tunix_exit (-1);
     }

@@ -18,10 +18,10 @@ test_alloc0 (char phase)
     int i, mi;
     char bank;
 
-    printf ("### (Round %d.)\n",
+    printf ("## (Round %d.)\n",
             phase);
 
-    printf ("#### Allocating.\n");
+    printf ("### Allocating.\n");
     for (i = 0; i < 156; i++) {
         bank = tunix_alloc ();
         if (!bank) {
@@ -32,14 +32,14 @@ test_alloc0 (char phase)
         printf ("$%02x ", bank);
     }
 
-    printf ("#### Freeing.\n");
+    printf ("### Freeing.\n");
     for (mi = i, i = 0; i < mi; i++) {
         bank = banks[i];
         printf ("$%02x ", bank);
         tunix_free (bank);
     }
 
-    printf ("\n### Done.\n");
+    printf ("\n## Done.\n");
     return mi;
 }
 
@@ -61,10 +61,12 @@ test_alloc (void)
 char
 make_baby ()
 {
+    char i;
     char pid = tunix_fork ();
     if (pid)
         return pid;
-    tunix_mode (0);
+    for (i = 0; i < 10; i++)
+        tunix_schedule ();
     tunix_exit (0);
 }
 
@@ -111,16 +113,26 @@ test_fork (char nprocs)
 }
 
 void
-main (void)
+test_forks (char maxprocs)
 {
     char nprocs;
 
-    printf ("# Doing userland test!\n");
+    printf ("# Forks\n");
+
+    for (nprocs = 0;
+         nprocs < maxprocs;
+         nprocs++)
+        test_fork (nprocs + 1);
+}
+
+void
+main (void)
+{
+    printf ("Doing userland test!\n");
 
     test_alloc ();
-    for (nprocs = 1;
-         nprocs < 3;
-         nprocs++)
-        test_fork (nprocs);
+    test_forks (4);
+    test_forks (4);
+
     printf ("Welcome to TUNIX!");
 }

@@ -45,7 +45,7 @@ test_fork (char nprocs)
         //if (!pid) break;
         processes[i] = pid;
         tunix_mode (0);
-        printf ("Forked %02x.\n", pid);
+        printf ("Forked $%02x.\n", pid);
         tunix_proc_info (pid);
         tunix_mode (1);
     }
@@ -53,11 +53,11 @@ test_fork (char nprocs)
     for (mi = i, i = 0; i < mi; i++) {
         pid = processes[i];
         tunix_mode (0);
-        printf ("Waiting for %02x.\n", pid);
+        printf ("Waiting for $%02x.\n", pid);
         tunix_mode (1);
         tunix_wait (pid);
         tunix_mode (0);
-        printf ("%02x exited.\n", pid);
+        printf ("$%02x exited.\n", pid);
         tunix_mode (1);
     }
     printf ("***\n");

@@ -530,6 +530,8 @@ pending_signal:       .res 1
 ; deques in one set of arrays.
 
 ;; Pop from front of list.
+; Ensure that lists aren't empty before
+; use.
 
 .macro lpopx list, free
     ldx free
@@ -543,7 +545,7 @@ pending_signal:       .res 1
     sta free
 .endmacro
 
-; Push to front of list.
+;; Push to front of list.
 
 .macro lpushx list, first
     lda first
@@ -558,8 +560,9 @@ pending_signal:       .res 1
 .endmacro
 
 ;; Move between lists.
+
 .macro lmovex list, from, to
-    lpopy list, from
+    lpopx list, from
     lpushx list, to
 .endmacro
 
@@ -643,6 +646,7 @@ pending_signal:       .res 1
     beq :+
     lda bw,x
     sta bw,y
+    ; Optional.
 :   lda #0
     sta fw,x
     sta bw,x
@@ -669,6 +673,7 @@ pending_signal:       .res 1
     beq :+
     lda bw,y
     sta bw,x
+    ; Optional.
 :   lda #0
     sta fw,y
     sta bw,y

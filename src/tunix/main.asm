@@ -1340,10 +1340,11 @@ invalid_bank:
 .proc free_lbanks
     ldx first_lbank
     beq r
-:   phx
+:   lda lbanks,x
+    pha
     jsr bfree
     plx
-    lloopx lbanks, :-
+    bne :-
 r:  rts
 .endproc
 

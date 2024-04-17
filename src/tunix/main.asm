@@ -1761,20 +1761,15 @@ not_to_resume:
 ; X: Process ID.
 .export zombify
 .proc zombify
-    lda proc_flags,x
-    bne :+
-    sec
-    rts
-
-    ;; Close LFNs and free banks.
-:   enter_proc_context_x
+    ;; Free resources.
     phx
+    enter_proc_context_x
     jsr free_lfns
     jsr free_lbanks
     jsr free_iopages
     jsr free_drivers
-    plx
     leave_proc_context
+    plx
 
     ;; Remove process from running or
     ;; sleeping list.
@@ -2109,11 +2104,7 @@ out_of_slots:
     phx
     jsr resume
     plx
-    push blk1
-    push blk2
     jsr schedule
-    pop blk2
-    pop blk1
     jmp retry
 
 invalid_pid:

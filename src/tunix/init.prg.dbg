@@ -1,6 +1,6 @@
 version	major=2,minor=0
 info	csym=0,file=735,lib=2,line=3398,mod=56,scope=96,seg=11,span=1668,sym=1256,type=6
-file	id=0,name="init.s",size=10198,mtime=0x661FBA53,mod=0
+file	id=0,name="init.s",size=10198,mtime=0x661FBB75,mod=0
 file	id=1,name="/usr/local/share/cc65/asminc/longbranch.mac",size=2632,mtime=0x661EA8D5,mod=0
 file	id=2,name="main.asm",size=4368,mtime=0x661F98B8,mod=1
 file	id=3,name="/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x65CE3B26,mod=1

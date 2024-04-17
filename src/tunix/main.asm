@@ -1320,14 +1320,15 @@ invalid_bank:
 .endproc
 
 ; Free all banks of current process.
-.export bprocfree
-.proc bprocfree
+.export free_lbanks
+.proc free_lbanks
     ldx first_lbank
+    beq r
 :   phx
     jsr bfree
     plx
     lloopx lbanks, :-
-    rts
+r:  rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;;
@@ -1759,7 +1760,7 @@ not_to_resume:
 :   enter_proc_context_x
     phx
     jsr free_lfns
-    jsr bprocfree
+    jsr free_lbanks
     jsr free_iopages
     jsr free_drivers
     plx

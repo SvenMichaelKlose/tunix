@@ -75,12 +75,12 @@ al 0020F0 .__hextab
 al 002100 .__longminstr
 al 0017FC .__printf
 al 0022CB ._banks
-al 00140A ._debug
+al 001266 ._debug
 al 001231 ._exit
 al 001B61 ._fwrite
 al 001C61 ._ltoa
 al 0015A2 ._main
-al 0013CD ._make_baby
+al 0013CE ._make_baby
 al 001D81 ._printf
 al 00228B ._processes
 al 00222B ._stderr
@@ -90,8 +90,8 @@ al 001E2A ._strlen
 al 001E2E ._strlen_ptr4
 al 001E40 ._strlower
 al 001E40 ._strlwr
-al 001377 ._test_alloc
-al 001266 ._test_alloc0
+al 001378 ._test_alloc
+al 001267 ._test_alloc0
 al 00140B ._test_fork
 al 001570 ._test_forks
 al 0015D8 ._tunix_alloc

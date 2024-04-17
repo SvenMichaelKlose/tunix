@@ -12,17 +12,22 @@
 char processes[MAX_PROCS];
 char banks[256];
 
+extern void debug (void);
+void
+debug (void)
+{
+}
+
 char
-test_alloc0 (char phase)
+test_alloc0 (char round)
 {
     int i, mi;
     char bank;
 
-    printf ("## (Round %d.)\n",
-            phase);
+    printf ("## (Round %d.)\n", round);
 
     printf ("### Allocating.\n");
-    for (i = 0; i < 156; i++) {
+    for (i = 0; i < 256; i++) {
         bank = tunix_alloc ();
         if (!bank) {
             printf ("\n%d banks allocated.\n", i);
@@ -76,12 +81,6 @@ make_baby (char schedule_rounds)
     tunix_exit (0);
 }
 
-extern void debug (void);
-void
-debug (void)
-{
-}
-
 void
 test_fork (char nprocs)
 {
@@ -125,7 +124,7 @@ test_fork (char nprocs)
     }
     printf ("\n");
 
-    nbanks_b = test_alloc0 (3);
+    nbanks_b = test_alloc0 (4);
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
         printf ("! %d banks missing "

@@ -628,7 +628,6 @@ pending_signal:       .res 1
 ;; Remove from deque.
 
 .macro drmx fw, bw, first
-    phx
     phy
     cpx first
     bne :+
@@ -651,12 +650,10 @@ pending_signal:       .res 1
     sta fw,x
     sta bw,x
     ply
-    plx
 .endmacro
 
 .macro drmy fw, bw, first
     phx
-    phy
     cpy first
     bne :+
     lda fw,y
@@ -677,7 +674,6 @@ pending_signal:       .res 1
 :   lda #0
     sta fw,y
     sta bw,y
-    ply
     plx
 .endmacro
 

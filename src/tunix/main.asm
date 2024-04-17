@@ -1765,7 +1765,7 @@ not_to_resume:
 
     phx
     jsr free_iopages
-    ;jsr free_drivers
+    jsr free_drivers
     plx
 
     ;; Remove process from running or

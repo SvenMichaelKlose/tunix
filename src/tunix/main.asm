@@ -921,6 +921,8 @@ p:  lda $ff00,x
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; MEMORY BLOCK CLEAR/MOVE ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TODO: Enhance src/lib/blit and use
+; that instead.
 
 ; Copy descriptor 'set' over copy
 ; vectors and move it, baby.
@@ -1018,6 +1020,28 @@ n:  dex
     rts
 m:  inc dh
     jmp n
+.endproc
+
+.export cmpmem
+.proc cmpmem
+    ldx cl
+    inx
+    inc ch
+    ldy #0
+    beq :+ ; (jmp)
+l:  lda (s),y
+    cmp (d),y
+    bne r
+    iny
+    beq y0
+:   dex
+    bne l
+    dec ch
+    bne l
+r:  rts
+y0: inc sh
+    inc dh
+    bne :- ; (jmp)
 .endproc
 
 ;;;;;;;;;;;;;;;;;;
@@ -3625,28 +3649,6 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
     error err_first_lbank_not_0
 
 :   rts
-.endproc
-
-.export cmpmem
-.proc cmpmem
-    ldx cl
-    inx
-    inc ch
-    ldy #0
-    beq :+ ; (jmp)
-l:  lda (s),y
-    cmp (d),y
-    bne r
-    iny
-    beq y0
-:   dex
-    bne l
-    dec ch
-    bne l
-r:  rts
-y0: inc sh
-    inc dh
-    bne :- ; (jmp)
 .endproc
 
 .export tests_processes

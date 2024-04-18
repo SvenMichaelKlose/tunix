@@ -27,9 +27,7 @@ test_alloc0 (char round)
     printf ("## (Round %d.)\n", round);
 
     printf ("### Allocating.\n");
-    for (i = 0; i < 97; i++) {
-        if (i == 96)
-            debug ();
+    for (i = 0; i < 128; i++) {
         bank = tunix_alloc ();
         if (!bank)
             break;
@@ -70,11 +68,14 @@ test_alloc (void)
 char
 make_baby (char schedule_rounds)
 {
-    char i;
-    char pid = tunix_fork ();
+    char i, pid;
+
+    tunix_mode (1);
+    pid = tunix_fork ();
     if (pid > 0)
         return pid;
-    tunix_mode (1);
+    if (pid == 255)
+        return 0;
     for (i = 0;
          i < schedule_rounds;
          i++)
@@ -95,15 +96,14 @@ test_fork (char nprocs)
     for (i = 0; i < nprocs; i++) {
         tunix_mode (0);
         printf ("Forking %d.\n", i + 1);
-        //if (nprocs == 1 && i == 0)
-            //debug ();
-        pid = make_baby (10);
         tunix_mode (1);
+        pid = make_baby (10);
         if (pid < 1)
             break;
         processes[i] = pid;
         tunix_mode (0);
         printf ("Forked $%02x.\n", pid);
+        if (nprocs == 2 && i == 1) debug ();
         tunix_proc_info (pid);
         tunix_mode (1);
     }
@@ -133,6 +133,7 @@ test_fork (char nprocs)
                 "(round %d)).",
                 nbanks_a - nbanks_b,
                 nprocs);
+        tunix_mode (1);
         tunix_exit (-1);
     }
     printf ("## %d children done.\n",

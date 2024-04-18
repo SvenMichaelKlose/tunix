@@ -1503,8 +1503,8 @@ vec_io23_to_blk5:
 ;
 ; Y: child process ID
 ; Returns Y unaffected.
-.export fork_raw
-.proc fork_raw
+.export machdep_fork
+.proc machdep_fork
     ldx pid
     stx tmp1
     lda proc_data,x
@@ -1529,7 +1529,9 @@ vec_io23_to_blk5:
     sta blk5
     smemcpyax vec_io23_to_blk5
     ; Copy lowmem, screen, color & VIC.
+    sei
     save_internal_ram_to_blk5
+    cli
 
     ;; Clone procdata RAM123.
     alloc_bank_x
@@ -1553,8 +1555,6 @@ vec_io23_to_blk5:
     mvb stack, tmp2+1
 
     ;; Clone remaining banks.
-    ; Copy from BLK3 to BLK5 with speed
-    ; code in BLK2.
     .macro alloc_blk_y procblk
         jsr balloc
         sta procblk,y
@@ -1565,6 +1565,25 @@ vec_io23_to_blk5:
     alloc_blk_y proc_blk3
     alloc_blk_y proc_blk5
 
+    ;; Ensure banks have been allocated.
+    lda proc_data,y
+    beq o
+    lda proc_ram123,y
+    beq o
+    lda proc_io23,y
+    beq o
+    lda proc_blk1,y
+    beq o
+    lda proc_blk2,y
+    beq o
+    lda proc_blk3,y
+    beq o
+    lda proc_blk5,y
+    bne banks_ok
+o:  jmp out_of_memory
+banks_ok:
+
+    ; Copy old into new banks.
     .macro copy_blk_y procblk
         ldx tmp1 ; parent
         lda procblk,x
@@ -1581,12 +1600,20 @@ vec_io23_to_blk5:
     copy_blk_y proc_blk3
     copy_blk_y proc_blk5
 
-    pop blk5
+    clc
+
+r:  pop blk5
     pop blk3
     pop blk2
     pop io23
     pop ram123
     rts
+
+.export out_of_memory
+out_of_memory:
+    jsr free_lbanks
+    sec
+    bcs r ; (jmp)
 .endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1639,6 +1666,33 @@ r:  rts
 ; banked in for TUNIX, holds additional
 ; per-process data.
 
+.export unref_parent_banks
+.proc unref_parent_banks
+    ;; Remove banks of parent from
+    ;; child's lbank list.
+    .macro unref_lbank procblk
+        lda procblk,x
+        jsr free_lbank_a
+    .endmacro
+    unref_lbank proc_data
+    unref_lbank proc_ram123
+    unref_lbank proc_io23
+    unref_lbank proc_blk1
+    unref_lbank proc_blk2
+    unref_lbank proc_blk3
+    unref_lbank proc_blk5
+    rts
+.endproc
+
+.export increment_glfn_refs
+.proc increment_glfn_refs
+    ldx first_lfn
+    beq :++
+:   inc glfn_refs,x
+    lloop_x lfns, :-
+:   rts
+.endproc
+
 ; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
@@ -1652,56 +1706,37 @@ r:  rts
     lda #PROC_BABY
     sta proc_flags,y
 
-    ; Clone address space into new
-    ; banks.
     ldx pid
     phx
-    jsr fork_raw
-    ; Parent and child return here with
-    ; the same stack contents but
-    ; different PIDs on IO23, so we can
-    ; tell them apart.
-    plx ; Parent's PID.
-    cpx pid
+    jsr machdep_fork
+    plx     ; Parent's ID.
+    bcs e
+    cpx pid ; Real ID.
     bne child
 
     enter_procdata_y
-
-    ;; Remove cloned banks from child's
-    ;; lbank list.
-    .macro unref_lbank procblk
-        lda procblk,x
-        jsr free_lbank_a
-    .endmacro
-    unref_lbank proc_data
-    unref_lbank proc_ram123
-    unref_lbank proc_io23
-    unref_lbank proc_blk1
-    unref_lbank proc_blk2
-    unref_lbank proc_blk3
-    unref_lbank proc_blk5
-
-    ;;; Increment child's GLFN refs.
-    ldx first_lfn
-    beq :++
-:   inc glfn_refs,x
-    lloop_x lfns, :-
-
-:   leave_procdata
+    jsr unref_parent_banks
+    jsr increment_glfn_refs
+    leave_procdata
 
 r:  tya
     clc
     rts
 
+e:  cpx pid ; Real ID.
+    bne child
+    dmove_y procs, procsb, running, free_proc
+
 no_more_procs:
-    plp
     lda #255
     sec
     rts
 
 child:
     ; Map in rest of child's banks for
-    ; the first time.
+    ; the first time.  RAM123, BLK1 and
+    ; BLK2 will be mapped in by
+    ; tunix_leave().
     get_proc_blk_y proc_data, ram123
     get_proc_blk_y proc_io23, io23
     get_proc_blk_y proc_blk3, blk3
@@ -1844,14 +1879,16 @@ reap_zombie:
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
+    mvb multitasking, #1
     enter_procdata_x
     ldy first_wait
     beq r
     ldx waiting_pid,y
     leave_procdata
-    jmp resume
+    jsr resume
+    jmp schedule    ; Ensure exits.
 r:  leave_procdata
-    rts
+    jmp schedule    ; Same here.
 .endproc
 
 ; Exit current process
@@ -1859,6 +1896,8 @@ r:  leave_procdata
 .export exit
 .proc exit
     ldx pid
+    jsr zombify
+    jmp resume_waiting
 .endproc
 
 ; Kill process with exit code in A.
@@ -2885,7 +2924,7 @@ clr_lbanksb:
     ;; Fork process 0.
     inc pid
     ldy #0
-    jsr fork_raw
+    jsr machdep_fork
     dec pid
 
     ; Move old BLK1 with new procdata
@@ -3089,7 +3128,6 @@ h:  lda $ffff
     jsra call_driver, #IDX_OPEN
     pop LFN
     popw FNADR
-    lda reg_a
     jmp tunix_leave
 .endproc
 
@@ -3324,6 +3362,7 @@ r:  rts
     plp
     rts
 
+.export grow_baby
 grow_baby:
     ; Back to kernel.
     mvb blk1,tunix_blk1
@@ -3333,9 +3372,9 @@ grow_baby:
     lda proc_ram123,x
     sta ram123
     lda proc_blk1,x
+    ldy proc_blk2,x
     sta blk1
-    lda proc_blk2,x
-    sta blk2
+    sty blk2
     jmp :-
 .endproc
 

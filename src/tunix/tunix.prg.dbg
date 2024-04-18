@@ -1,8 +1,8 @@
 version	major=2,minor=0
 info	csym=0,file=748,lib=2,line=5660,mod=51,scope=86,seg=22,span=1668,sym=1259,type=6
-file	id=0,name="main.asm",size=63109,mtime=0x662150F7,mod=0
+file	id=0,name="main.asm",size=63087,mtime=0x66215903,mod=0
 file	id=1,name="main.asm",size=2690,mtime=0x66210B68,mod=2
-file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x662034F3,mod=0
+file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x662151CA,mod=0
 file	id=3,name="start.s",size=1155,mtime=0x661D85D3,mod=1
 file	id=4,name="/usr/local/share/cc65/asminc/longbranch.mac",size=2632,mtime=0x661A23B5,mod=1
 file	id=5,name="/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x65CE3B26,mod=2

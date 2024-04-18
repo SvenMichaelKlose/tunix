@@ -303,7 +303,7 @@ old_kernal_vectors:
 .export first_lbank, lfns, lfnsb
 .export lfn_glfn, first_lfn, waiting
 .export waitingb, waiting_pid, free_wait
-.export first_wait, pid, reg_a, reg_x
+.export first_waiting, pid, reg_a, reg_x
 .export reg_y, stack, flags, saved_vic
 .export multitasking, old_load, old_save
 
@@ -340,7 +340,7 @@ waiting:        .res MAX_PROCS
 waitingb:       .res MAX_PROCS
 waiting_pid:    .res MAX_PROCS
 free_wait:      .res 1
-first_wait:     .res 1
+first_waiting:  .res 1
 
 ;; Logical file numbers
 ; Deque of used ones
@@ -759,12 +759,12 @@ pending_signal:         .res 1
 
 ; Allocate local slot in waiting list.
 .macro alloc_waiting_y
-    dalloc_y waiting, waitingb, free_wait, first_wait
+    dalloc_y waiting, waitingb, free_wait, first_waiting
 .endmacro
 
 ; Remove process from waiting list.
 .macro free_waiting_y
-    dmove_y waiting, waitingb, first_wait,free_wait
+    dmove_y waiting, waitingb, first_waiting,free_wait
 .endmacro
 
 ; Make zombie a free process.
@@ -1820,8 +1820,6 @@ put_on_zombie_list:
     lda proc_flags,x
     beq invalid_pid
 
-    ; Put us on waiting list of the
-    ; process.
     enter_procdata_x
     alloc_waiting_y
     lda pid
@@ -1844,21 +1842,15 @@ check_if_zombie:
 invalid_pid:
     sec
     rts
-.endproc
 
-; Stop process from waiting.
-; X: Zombie process ID.
-; Y: Slot in zombie's waiting list.
-.export end_wait
-.proc end_wait
+end_wait:
     enter_procdata_x
     free_waiting_y
-    ldy first_wait
+    ldy first_waiting
     leave_procdata
     cpy #0
     beq reap_zombie
 
-    ; Resume next waiting.
     phx
     jsr resume_waiting
     plx
@@ -1875,29 +1867,28 @@ reap_zombie:
     beq return_code ; (jmp)
 .endproc
 
-; Resume waiting process
-; X: ID of process waiting for
-.export resume_waiting
-.proc resume_waiting
-    mvb multitasking, #1
-    enter_procdata_x
-    ldy first_wait
-    beq r
-    ldx waiting_pid,y
-    leave_procdata
-    jsr resume
-    jmp schedule    ; Ensure exits.
-r:  leave_procdata
-    jmp schedule    ; Same here.
-.endproc
-
 ; Exit current process
 ; A: Exit code
 .export exit
 .proc exit
     ldx pid
     jsr zombify
-    jmp resume_waiting
+    ;jmp resume_waiting
+.endproc
+
+; Resume waiting process
+; X: ID of process waiting for
+.export resume_waiting
+.proc resume_waiting
+    mvb multitasking, #1
+    enter_procdata_x
+    ldy first_waiting
+    ldx waiting_pid,y
+    leave_procdata
+    tya ; (cpy #0)
+    beq r
+    jsr resume
+r:  jmp schedule
 .endproc
 
 ; Kill process with exit code in A.
@@ -1971,7 +1962,7 @@ prt:tya
 ;    jsr print_comma
 ;    enter_procdata_x
 ;    ldaxi waiting
-;    jsry list_length, first_wait
+;    jsry list_length, first_waiting
 ;    stx tmp1
 ;    leave_procdata
 ;    lda tmp1

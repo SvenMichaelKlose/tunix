@@ -784,50 +784,18 @@ pending_signal:         .res 1
 ;;; PROCESS BANK MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-.macro get_proc_blk_x proc, blk
-    mvb blk, {proc,x}
-.endmacro
-
-.macro get_proc_blk_y proc, blk
-    mvb blk, {proc,y}
-.endmacro
-
-.macro io23_x
-    get_proc_blk_x proc_io23, io23
-.endmacro
-
-.macro io23_y
-    get_proc_blk_y proc_io23, io23
-.endmacro
-
-.macro io23_x_at_blk5
-    get_proc_blk_x proc_io23, blk5
-.endmacro
-
-.macro io23_y_at_blk5
-    get_proc_blk_y proc_io23, blk5
-.endmacro
-
-.macro procdata_x
-    get_proc_blk_x proc_data, ram123
-.endmacro
-
-.macro procdata_y
-    get_proc_blk_y proc_data, ram123
-.endmacro
-
 ;;;;;;;;;;;;;;;;;;;;;
 ;;; SHADOW RAM123 ;;;
 ;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_procdata_x
     push ram123
-    procdata_x
+    mvb ram123, {proc_data,x}
 .endmacro
 
 .macro enter_procdata_y
     push ram123
-    procdata_y
+    mvb ram123, {proc_data,y}
 .endmacro
 
 .macro leave_procdata
@@ -840,7 +808,7 @@ pending_signal:         .res 1
 
 .macro enter_context_x
     push io23
-    io23_x
+    mvb io23, {proc_io23,x}
     enter_procdata_x
 .endmacro
 
@@ -1464,13 +1432,13 @@ vec_io23_to_blk5:
     smemcpyax vec_vic_to_blk5
 .endmacro
 
-.macro save_internal_ram_to_blk5_y
-    get_proc_blk_y proc_io23, blk5
+.macro save_internal_ram_to_blk5_x
+    mvb blk5, {proc_io23,x}
     save_internal_ram_to_blk5
 .endmacro
 
-.macro save_internal_ram_to_blk5_x
-    get_proc_blk_x proc_io23, blk5
+.macro save_internal_ram_to_blk5_y
+    mvb blk5, {proc_io23,y}
     save_internal_ram_to_blk5
 .endmacro
 
@@ -1712,10 +1680,10 @@ child:
     ; the first time.  RAM123, BLK1 and
     ; BLK2 will be mapped in by
     ; tunix_leave().
-    get_proc_blk_y proc_data, ram123
-    get_proc_blk_y proc_io23, io23
-    get_proc_blk_y proc_blk3, blk3
-    get_proc_blk_y proc_blk5, blk5
+    mvb ram123, {proc_data,y}
+    mvb io23, {proc_io23,y}
+    mvb blk3, {proc_blk3,y}
+    mvb blk5, {proc_blk5,y}
 
     lda #0
     clc
@@ -2198,7 +2166,7 @@ l:  cpy pid
     ;; Copy page.
     phy
     push blk5
-    io23_x_at_blk5
+    mvb blk5, {proc_io23,x}
     lda SA
     clc
     adc #IOPAGE_BASE - 1
@@ -3225,7 +3193,7 @@ r:  rts
     save_internal_ram_to_blk5_x
 
     ;;; Load next.
-    get_proc_blk_y proc_io23, blk5
+    mvb blk5, {proc_io23,y}
     ;; ...color, screen and VIC config.
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen

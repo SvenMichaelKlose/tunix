@@ -763,7 +763,7 @@ pending_signal:         .res 1
 .endmacro
 
 ; Remove process from waiting list.
-.macro rm_waiting_y
+.macro free_waiting_y
     dmove_y waiting, waitingb, first_wait,free_wait
 .endmacro
 
@@ -1817,7 +1817,7 @@ invalid_pid:
 .export end_wait
 .proc end_wait
     enter_procdata_x
-    rm_waiting_y
+    free_waiting_y
     ldy first_wait
     leave_procdata
     cpy #0

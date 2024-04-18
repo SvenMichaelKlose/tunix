@@ -46,42 +46,6 @@ cmd_proc_info:      .byte "PI"
 
         .code
 
-.export lib_mode
-.proc lib_mode
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    ldx #<cmd_mode
-    ldy #>cmd_mode
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-.export lib_alloc
-.proc lib_alloc
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    ldx #<cmd_alloc
-    ldy #>cmd_alloc
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-.export lib_free
-.proc lib_free
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    ldx #<cmd_free
-    ldy #>cmd_free
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
 .export lib_schedule
 .proc lib_schedule
     lda #TUNIX_DEVICE
@@ -92,174 +56,63 @@ cmd_proc_info:      .byte "PI"
     jmp OPEN
 .endproc
 
-.export lib_getpid
-.proc lib_getpid
-    ;; Check if back in init.
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #1
-    ldx #<cmd_getpid
-    ldy #>cmd_getpid
-    jsr SETNAM
-    jmp OPEN
-.endproc
+.macro syscall0 name, cmd, len
+    .export name
+    .proc name
+        lda #TUNIX_DEVICE
+        tax
+        jsr SETLFS
+        lda #len
+        ldx #<cmd
+        ldy #>cmd
+        jsr SETNAM
+        jmp OPEN
+    .endproc
+.endmacro
 
-.export lib_fork
-.proc lib_fork
-    ;; Fork and wait for child to exit.
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_fork
-    ldy #>cmd_fork
-    jsr SETNAM
-    jmp OPEN
-.endproc
+.macro syscall1 name, cmd, len
+    .export name
+    .proc name
+        tay
+        lda #TUNIX_DEVICE
+        tax
+        jsr SETLFS
+        lda #len
+        ldx #<cmd
+        ldy #>cmd
+        jsr SETNAM
+        jmp OPEN
+    .endproc
+.endmacro
 
-; A: Exit code.
-.export lib_exit
-.proc lib_exit
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_exit
-    ldy #>cmd_exit
-    jsr SETNAM
-    jmp OPEN
-.endproc
+.macro syscall2 name, cmd, len
+    .export name
+    .proc name
+        stx cmd+2
+        tay
+        lda #TUNIX_DEVICE
+        tax
+        jsr SETLFS
+        lda #len
+        ldx #<cmd
+        ldy #>cmd
+        jsr SETNAM
+        jmp OPEN
+    .endproc
+.endmacro
 
-; A: process ID
-; X: exit code
-.export lib_kill
-.proc lib_kill
-    stx cmd_kill+2
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #3
-    ldx #<cmd_kill
-    ldy #>cmd_kill
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; A: process ID
-.export lib_suspend
-.proc lib_suspend
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #3
-    ldx #<cmd_suspend
-    ldy #>cmd_suspend
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; A: process ID
-.export lib_resume
-.proc lib_resume
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #3
-    ldx #<cmd_resume
-    ldy #>cmd_resume
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; A: process ID
-.export lib_wait
-.proc lib_wait
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_wait
-    ldy #>cmd_wait
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; Print process info.
-; A: process ID
-.export lib_proc_list
-.proc lib_proc_list
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_proc_list
-    ldy #>cmd_proc_list
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; Print process info.
-; A: process ID
-.export lib_proc_info
-.proc lib_proc_info
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_proc_info
-    ldy #>cmd_proc_info
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; Allocate I/O page
-; Returns:
-;  A: Page number
-.export lib_iopage_alloc
-.proc lib_iopage_alloc
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_iopage_alloc
-    ldy #>cmd_iopage_alloc
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; Commit I/O page
-;  A: Page number
-.export lib_iopage_commit
-.proc lib_iopage_commit
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_iopage_commit
-    ldy #>cmd_iopage_commit
-    jsr SETNAM
-    jmp OPEN
-.endproc
-
-; Free I/O page
-;  A: Page number
-.export lib_iopage_free
-.proc lib_iopage_free
-    tay
-    lda #TUNIX_DEVICE
-    tax
-    jsr SETLFS
-    lda #2
-    ldx #<cmd_iopage_free
-    ldy #>cmd_iopage_free
-    jsr SETNAM
-    jmp OPEN
-.endproc
+syscall1 lib_mode,          cmd_mode, 2
+syscall0 lib_alloc,         cmd_alloc, 2
+syscall1 lib_free,          cmd_free, 2
+syscall0 lib_getpid,        cmd_getpid, 1
+syscall0 lib_fork,          cmd_fork, 2
+syscall1 lib_exit,          cmd_exit, 2
+syscall2 lib_kill,          cmd_kill, 3
+syscall1 lib_suspend,       cmd_suspend, 2
+syscall1 lib_resume,        cmd_resume, 2
+syscall1 lib_wait,          cmd_wait, 2
+syscall1 lib_proc_list,     cmd_proc_list, 2
+syscall1 lib_proc_info,     cmd_proc_info, 2
+syscall0 lib_iopage_alloc,  cmd_iopage_alloc, 2
+syscall1 lib_iopage_commit, cmd_iopage_commit, 2
+syscall1 lib_iopage_free,   cmd_iopage_free, 2

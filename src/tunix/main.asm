@@ -525,7 +525,7 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;
 ;
 ; Macros for singly-linked lists.
-; 'lpop*' and 'lloop*' also work with
+; 'lpop*' and 'lloop_*' also work with
 ; deques.
 ;
 ; There may be either multiple lists or
@@ -535,13 +535,13 @@ pending_signal:         .res 1
 ; Ensure that lists aren't empty before
 ; use.
 
-.macro lpopx list, free
+.macro lpop_x list, free
     ldx free
     lda list,x
     sta free
 .endmacro
 
-.macro lpopy list, free
+.macro lpop_y list, free
     ldy free
     lda list,y
     sta free
@@ -549,13 +549,13 @@ pending_signal:         .res 1
 
 ;; Push to front of list.
 
-.macro lpushx list, first
+.macro lpush_x list, first
     lda first
     sta list,x
     stx first
 .endmacro
 
-.macro lpushy list, first
+.macro lpush_y list, first
     lda first
     sta list,y
     sty first
@@ -563,25 +563,25 @@ pending_signal:         .res 1
 
 ;; Move between lists.
 
-.macro lmovex list, from, to
-    lpopx list, from
-    lpushx list, to
+.macro lmove_x list, from, to
+    lpop_x list, from
+    lpush_x list, to
 .endmacro
 
-.macro lmovey list, from, to
-    lpopy list, from
-    lpushy list, to
+.macro lmove_y list, from, to
+    lpop_y list, from
+    lpush_y list, to
 .endmacro
 
 ;; Forwards iteration.
 
-.macro lloopx list, loop
+.macro lloop_x list, loop
     lda list,x
     tax
     bne loop
 .endmacro
 
-.macro lloopy list, loop
+.macro lloop_y list, loop
     lda list,y
     tay
     bne loop
@@ -599,7 +599,7 @@ pending_signal:         .res 1
 
 ;; Push to front of deque.
 
-.macro dpushx fw, bw, first
+.macro dpush_x fw, bw, first
     lda #0
     sta bw,x
     phy
@@ -613,7 +613,7 @@ pending_signal:         .res 1
     ply
 .endmacro
 
-.macro dpushy fw, bw, first
+.macro dpush_y fw, bw, first
     lda #0
     sta bw,y
     phx
@@ -629,7 +629,7 @@ pending_signal:         .res 1
 
 ;; Remove from deque.
 
-.macro drmx fw, bw, first
+.macro drm_x fw, bw, first
     phy
     cpx first
     bne :+
@@ -654,7 +654,7 @@ pending_signal:         .res 1
     ply
 .endmacro
 
-.macro drmy fw, bw, first
+.macro drm_y fw, bw, first
     phx
     cpy first
     bne :+
@@ -686,14 +686,14 @@ pending_signal:         .res 1
 ; 'allocated' list in the same deque
 ; array.
 
-.macro dallocx fw, bw, from, to
-    lpopx fw, from
-    dpushx fw, bw, to
+.macro dalloc_x fw, bw, from, to
+    lpop_x fw, from
+    dpush_x fw, bw, to
 .endmacro
 
-.macro dallocy fw, bw, from, to
-    lpopy fw, from
-    dpushy fw, bw, to
+.macro dalloc_y fw, bw, from, to
+    lpop_y fw, from
+    dpush_y fw, bw, to
 .endmacro
 
 ;; Move between deques
@@ -701,14 +701,14 @@ pending_signal:         .res 1
 ; Also used to move items back to free
 ; lists.
 
-.macro dmovex fw, bw, from, to
-    drmx fw, bw, from
-    dpushx fw, bw, to
+.macro dmove_x fw, bw, from, to
+    drm_x fw, bw, from
+    dpush_x fw, bw, to
 .endmacro
 
-.macro dmovey fw, bw, from, to
-    drmy fw, bw, from
-    dpushy fw, bw, to
+.macro dmove_y fw, bw, from, to
+    drm_y fw, bw, from
+    dpush_y fw, bw, to
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -716,23 +716,23 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro alloc_bank_x
-    lpopx banks, free_bank
+    lpop_x banks, free_bank
 .endmacro
 
 .macro alloc_lbank_x
-    dpushx lbanks, lbanksb, first_lbank
+    dpush_x lbanks, lbanksb, first_lbank
 .endmacro
 
 .macro free_bank_x
-    lpushx banks, free_bank
+    lpush_x banks, free_bank
 .endmacro
 
 .macro free_lbank_x
-    drmx lbanks, lbanksb, first_lbank
+    drm_x lbanks, lbanksb, first_lbank
 .endmacro
 
 .macro free_lbank_y
-    drmy lbanks, lbanksb, first_lbank
+    drm_y lbanks, lbanksb, first_lbank
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -742,34 +742,34 @@ pending_signal:         .res 1
 ;; Allocate free process.
 
 .macro alloc_proc_running_y
-    dallocy procs, procsb, free_proc, running
+    dalloc_y procs, procsb, free_proc, running
 .endmacro
 
 ;; Move between running to sleeping.
 
 .macro mv_running_sleeping_x
-    dmovex procs, procsb, running, sleeping
+    dmove_x procs, procsb, running, sleeping
 .endmacro
 
 .macro mv_sleeping_running_x
-    dmovex procs, procsb, sleeping, running
+    dmove_x procs, procsb, sleeping, running
 .endmacro
 
 ;; Processes waiting for others to exit.
 
 ; Allocate local slot in waiting list.
 .macro alloc_waiting_y
-    dallocy waiting, waitingb, free_wait, first_wait
+    dalloc_y waiting, waitingb, free_wait, first_wait
 .endmacro
 
 ; Remove process from waiting list.
 .macro rm_waiting_y
-    dmovey waiting, waitingb, first_wait,free_wait
+    dmove_y waiting, waitingb, first_wait,free_wait
 .endmacro
 
 ; Make zombie a free process.
 .macro reap_zombie_x
-    dmovex procs, procsb, zombie, free_proc
+    dmove_x procs, procsb, zombie, free_proc
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -777,7 +777,7 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;;;
 
 .macro alloc_signal_y
-    dallocy signals, signalsb, free_signal, pending_signal
+    dalloc_y signals, signalsb, free_signal, pending_signal
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -785,11 +785,11 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro alloc_iopage_x
-    dallocx iopages, iopagesb, free_iopage, first_iopage
+    dalloc_x iopages, iopagesb, free_iopage, first_iopage
 .endmacro
 
 .macro free_iopage_x
-    dmovex iopages, iopagesb, first_iopage, free_iopage
+    dmove_x iopages, iopagesb, first_iopage, free_iopage
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -806,27 +806,27 @@ pending_signal:         .res 1
     sta blk
 .endmacro
 
-.macro io23x
+.macro io23_x
     get_proc_blk_x proc_io23, io23
 .endmacro
 
-.macro io23y
+.macro io23_y
     get_proc_blk_y proc_io23, io23
 .endmacro
 
-.macro io23x_at_blk5
+.macro io23_x_at_blk5
     get_proc_blk_x proc_io23, blk5
 .endmacro
 
-.macro io23y_at_blk5
+.macro io23_y_at_blk5
     get_proc_blk_y proc_io23, blk5
 .endmacro
 
-.macro datax
+.macro procdata_x
     get_proc_blk_x proc_data, ram123
 .endmacro
 
-.macro datay
+.macro procdata_y
     get_proc_blk_y proc_data, ram123
 .endmacro
 
@@ -834,17 +834,17 @@ pending_signal:         .res 1
 ;;; SHADOW RAM123 ;;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-.macro enter_data_x
+.macro enter_procdata_x
     push ram123
-    datax
+    procdata_x
 .endmacro
 
-.macro enter_data_y
+.macro enter_procdata_y
     push ram123
-    datay
+    procdata_y
 .endmacro
 
-.macro leave_data
+.macro leave_procdata
     pop ram123
 .endmacro
 
@@ -852,18 +852,18 @@ pending_signal:         .res 1
 ;;; CONTEXT ;;;
 ;;;;;;;;;;;;;;;
 
-.macro enter_proc_context_x
+.macro enter_context_x
     push io23
-    io23x
-    enter_data_x
+    io23_x
+    enter_procdata_x
 .endmacro
 
-.macro leave_proc_context
-    leave_data
+.macro leave_context
+    leave_procdata
     pop io23
 .endmacro
 
-.macro enter_proc_banks_x
+.macro enter_banks_x
     push ram123
     push blk1
     push blk2
@@ -876,7 +876,7 @@ pending_signal:         .res 1
     pop blk2
 .endmacro
 
-.macro leave_proc_banks
+.macro leave_banks
     pop blk2
     pop blk1
     pop ram123
@@ -1276,10 +1276,10 @@ r:  plx
     phy
     alloc_bank_x
     cpx #0
-    beq :+  ; Oops…
+    beq n  ; Oops…
     alloc_lbank_x
     inc bank_refs,x
-:   ply
+n:  ply
     txa
     rts
 .endproc
@@ -1603,9 +1603,9 @@ vec_io23_to_blk5:
     tax
     lda lfn_glfn,x
     bne :+  ; Use existing...
-    lpushx lfns, first_lfn
+    lpush_x lfns, first_lfn
     phx
-    lpopx glfns, glfns
+    lpop_x glfns, glfns
     inc glfn_refs,x
     txa
     tay
@@ -1623,8 +1623,8 @@ vec_io23_to_blk5:
 :   ldx lfn_glfn,y
     dec glfn_refs,x
     bne :+  ; (Still used.)
-    lpushx glfns, glfns
-:   lloopy lfns, :--
+    lpush_x glfns, glfns
+:   lloop_y lfns, :--
 r:  rts
 .endproc
 
@@ -1665,7 +1665,7 @@ r:  rts
     cpx pid
     bne child
 
-    enter_data_y
+    enter_procdata_y
 
     ;; Remove cloned banks from child's
     ;; lbank list.
@@ -1685,9 +1685,9 @@ r:  rts
     ldx first_lfn
     beq :++
 :   inc glfn_refs,x
-    lloopx lfns, :-
+    lloop_x lfns, :-
 
-:   leave_data
+:   leave_procdata
 
 r:  tya
     clc
@@ -1753,24 +1753,24 @@ not_to_resume:
 .proc zombify
     ;; Free resources.
     phx
-    enter_proc_context_x
+    enter_context_x
     jsr free_lfns
     jsr free_lbanks
     jsr free_iopages
     jsr free_drivers
-    leave_proc_context
+    leave_context
     plx
 
     ;; Remove process from running or
     ;; sleeping list.
     lda proc_flags,x
     bmi :+
-    drmx procs, procsb, running
+    drm_x procs, procsb, running
     jmp put_on_zombie_list
-:   drmx procs, procsb, sleeping
+:   drm_x procs, procsb, sleeping
 
 put_on_zombie_list:
-    lpushx procs, zombie
+    lpush_x procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
     rts
@@ -1787,11 +1787,11 @@ put_on_zombie_list:
 
     ; Put us on waiting list of the
     ; process.
-    enter_data_x
+    enter_procdata_x
     alloc_waiting_y
     lda pid
     sta waiting_pid,y
-    leave_data
+    leave_procdata
 
 check_if_zombie:
     lda proc_flags,x
@@ -1816,10 +1816,10 @@ invalid_pid:
 ; Y: Slot in zombie's waiting list.
 .export end_wait
 .proc end_wait
-    enter_data_x
+    enter_procdata_x
     rm_waiting_y
     ldy first_wait
-    leave_data
+    leave_procdata
     cpy #0
     beq reap_zombie
 
@@ -1844,13 +1844,13 @@ reap_zombie:
 ; X: ID of process waiting for
 .export resume_waiting
 .proc resume_waiting
-    enter_data_x
+    enter_procdata_x
     ldy first_wait
     beq r
     ldx waiting_pid,y
-    leave_data
+    leave_procdata
     jmp resume
-r:  leave_data
+r:  leave_procdata
     rts
 .endproc
 
@@ -1930,11 +1930,11 @@ prt:tya
 
 ;    phx
 ;    jsr print_comma
-;    enter_data_x
+;    enter_procdata_x
 ;    ldaxi waiting
 ;    jsry list_length, first_wait
 ;    stx tmp1
-;    leave_data
+;    leave_procdata
 ;    lda tmp1
 ;    jsr print_decbyte
 ;    plx
@@ -1962,7 +1962,7 @@ prt:tya
     ldx running
     beq :+
 l:  jsr proc_list_item
-    lloopx procs, l
+    lloop_x procs, l
 :   popw zp2
     clc
     rts
@@ -2046,7 +2046,7 @@ no_proc:
     sta tmp2    ; payload
     lda proc_flags,x
     beq invalid_pid
-    enter_data_x
+    enter_procdata_x
 
     ; Do nothing if signal of the same
     ; type is already pending.
@@ -2068,7 +2068,7 @@ retry:
     jmp resume
 
 ignore:
-    leave_data
+    leave_procdata
     clc
     rts
 
@@ -2173,7 +2173,7 @@ l:  lda iopage_pid,y
     bne n
     tax
     free_iopage_x
-n:  lloopy iopages, l
+n:  lloop_y iopages, l
 r:  rts
 .endproc
 
@@ -2206,7 +2206,7 @@ l:  cpy pid
     ;; Copy page.
     phy
     push blk5
-    io23x_at_blk5
+    io23_x_at_blk5
     lda SA
     clc
     adc #IOPAGE_BASE - 1
@@ -2263,13 +2263,13 @@ l:  lda drv_pid,y
     cmp pid
     bne n
     tax
-    lpushx drvs, drvs
+    lpush_x drvs, drvs
     ; Set device to KERNAL.
     lda drv_dev,y
     tax
     lda #0  ; KERNAL
     sta dev_drv,x
-n:  lloopy drvs, l
+n:  lloop_y drvs, l
 r:  rts
 
 ; Register driver and assign to device
@@ -2282,7 +2282,7 @@ r:  rts
     stax zp1
 
     ;; Get slot.
-    lpopx drvs, drvs
+    lpop_x drvs, drvs
     beq :+
 
     ;; Populate slot.
@@ -2716,7 +2716,7 @@ read_byte:
 
     inc banks_ok
     ldx bnk
-    lpushx banks, free_bank
+    lpush_x banks, free_bank
     lda #'.'
     jsr printbnk
 
@@ -3169,7 +3169,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 :   phx
     jsr close
     plx
-    lloopx lfns, :-
+    lloop_x lfns, :-
 :   jmp tunix_leave
 .endproc
 
@@ -3432,14 +3432,14 @@ blkiohandler save, #IDX_SAVE
 .proc kernal_block
     ; Restore process banks.
     ldx pid
-    enter_proc_banks_x
+    enter_banks_x
     load_regs
 .endproc
 .export kernal_block2
 .proc kernal_block2
     jsr $ffff
     save_regs_and_flags
-    leave_proc_banks
+    leave_banks
     load_regs
     rts
 .endproc
@@ -3455,20 +3455,6 @@ blkiohandler save, #IDX_SAVE
     mvw kernal_block2 + 1, old_save
     jmp kernal_block
 .endproc
-
-;;;;;;;;;;;;;;;;;;;;;
-;;; SANITY CHECKS ;;;
-;;;;;;;;;;;;;;;;;;;;;
-
-.ifdef SANITY_CHECKS
-
-    .segment "KERNAL"
-
-.export sanity_checks
-.proc sanity_checks
-.endproc
-
-.endif ; .ifdef SANITY_CHECKS
 
 ;;;;;;;;;;;;;
 ;;; TESTS ;;;
@@ -3623,7 +3609,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
 
     ;; Deque
     ; Allocate first free proc.
-:   lpopx procs, free_proc
+:   lpop_x procs, free_proc
     phx
     ldaxi procs
     jsry list_length, free_proc
@@ -3632,15 +3618,15 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
     error err_wrong_free_proc_count
 :   plx
     ; Push free proc onto running.
-    dpushx procs, procsb, running
+    dpush_x procs, procsb, running
     ldaxi procs
     jsry list_length, running
     cpx #1
     beq :+
     error err_wrong_deque_index
     ; Move it back to free procs.
-:   drmx procs, procsb, running
-    dpushx procs, procsb, free_proc
+:   drm_x procs, procsb, running
+    dpush_x procs, procsb, free_proc
     jsr clear_lbanks
     ldx #1
     alloc_lbank_x

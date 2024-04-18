@@ -27,15 +27,16 @@ test_alloc0 (char round)
     printf ("## (Round %d.)\n", round);
 
     printf ("### Allocating.\n");
-    for (i = 0; i < 255; i++) {
+    for (i = 0; i < 97; i++) {
+        if (i == 96)
+            debug ();
         bank = tunix_alloc ();
-        if (!bank) {
-            printf ("\n%d banks allocated.", i);
+        if (!bank)
             break;
-        }
         banks[i] = bank;
         printf ("$%02x ", bank);
     }
+    printf ("\n%d banks allocated.", i);
 
     printf ("\n### Freeing.\n");
     for (mi = i, i = 0; i < mi; i++) {

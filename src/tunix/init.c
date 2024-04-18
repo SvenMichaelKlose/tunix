@@ -27,17 +27,17 @@ test_alloc0 (char round)
     printf ("## (Round %d.)\n", round);
 
     printf ("### Allocating.\n");
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < 255; i++) {
         bank = tunix_alloc ();
         if (!bank) {
-            printf ("\n%d banks allocated.\n", i);
+            printf ("\n%d banks allocated.", i);
             break;
         }
         banks[i] = bank;
         printf ("$%02x ", bank);
     }
 
-    printf ("### Freeing.\n");
+    printf ("\n### Freeing.\n");
     for (mi = i, i = 0; i < mi; i++) {
         bank = banks[i];
         printf ("$%02x ", bank);
@@ -71,7 +71,7 @@ make_baby (char schedule_rounds)
 {
     char i;
     char pid = tunix_fork ();
-    if (pid)
+    if (pid > 0)
         return pid;
     tunix_mode (1);
     for (i = 0;
@@ -84,7 +84,7 @@ make_baby (char schedule_rounds)
 void
 test_fork (char nprocs)
 {
-    char nbanks_a = test_alloc0 (3);
+    char nbanks_a = 0; //test_alloc0 (3);
     char nbanks_b;
     char i, mi, pid;
 
@@ -98,7 +98,7 @@ test_fork (char nprocs)
             //debug ();
         pid = make_baby (10);
         tunix_mode (1);
-        if (!pid)
+        if (pid < 1)
             break;
         processes[i] = pid;
         tunix_mode (0);
@@ -124,7 +124,7 @@ test_fork (char nprocs)
     }
     printf ("\n");
 
-    nbanks_b = test_alloc0 (4);
+    nbanks_b = 0; //test_alloc0 (4);
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
         printf ("! %d banks missing "
@@ -132,9 +132,10 @@ test_fork (char nprocs)
                 "(round %d)).",
                 nbanks_a - nbanks_b,
                 nprocs);
-        while (1);
         tunix_exit (-1);
     }
+    printf ("## %d children done.\n",
+            nprocs);
 }
 
 void

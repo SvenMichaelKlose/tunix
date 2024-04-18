@@ -687,19 +687,13 @@ pending_signal:         .res 1
 ; array.
 
 .macro dallocx fw, bw, from, to
-    php
-    sei
     lpopx fw, from
     dpushx fw, bw, to
-    plp
 .endmacro
 
 .macro dallocy fw, bw, from, to
-    php
-    sei
     lpopy fw, from
     dpushy fw, bw, to
-    plp
 .endmacro
 
 ;; Move between deques
@@ -708,19 +702,13 @@ pending_signal:         .res 1
 ; lists.
 
 .macro dmovex fw, bw, from, to
-    php
-    sei
     drmx fw, bw, from
     dpushx fw, bw, to
-    plp
 .endmacro
 
 .macro dmovey fw, bw, from, to
-    php
-    sei
     drmy fw, bw, from
     dpushy fw, bw, to
-    plp
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1289,11 +1277,8 @@ r:  plx
     alloc_bank_x
     cpx #0
     beq :+  ; Oops…
-    php
-    sei
     alloc_lbank_x
     inc bank_refs,x
-    plp
 :   ply
     txa
     rts
@@ -1319,22 +1304,22 @@ r:  plx
 ; X: Bank #
 .export bfree
 .proc bfree
-    php
-    sei
     dec bank_refs,x
     bmi invalid_bank
     bne :+
     free_bank_x
 :   free_lbank_x
-    plp
     clc
     rts
 invalid_bank:
+    error err_invalid_bank
     inc bank_refs,x
-    plp
     sec
     rts
 .endproc
+
+err_invalid_bank:
+    .byte "BFREE INVALID BANK.", 0
 
 ; Free all banks of current process.
 .export free_lbanks
@@ -1660,14 +1645,15 @@ r:  rts
 ;    0 for the child.
 .export fork
 .proc fork
-    php
-    sei
+    ;; Allocate slot.
     alloc_proc_running_y
     cpy #0
     beq no_more_procs
     lda #PROC_BABY
     sta proc_flags,y
-    plp
+
+    ; Clone address space into new
+    ; banks.
     ldx pid
     phx
     jsr fork_raw
@@ -1679,8 +1665,10 @@ r:  rts
     cpx pid
     bne child
 
-    ;; Remove parent banks from child.
     enter_data_y
+
+    ;; Remove cloned banks from child's
+    ;; lbank list.
     .macro unref_lbank procblk
         lda procblk,x
         jsr free_lbank_a
@@ -1698,6 +1686,7 @@ r:  rts
     beq :++
 :   inc glfn_refs,x
     lloopx lfns, :-
+
 :   leave_data
 
 r:  tya
@@ -1706,6 +1695,7 @@ r:  tya
 
 no_more_procs:
     plp
+    lda #255
     sec
     rts
 
@@ -1729,12 +1719,9 @@ child:
     lda proc_flags,x
     beq not_there
     bmi already_sleeping
-    php
-    sei
     mv_running_sleeping_x
     lda #PROC_SLEEPING
     sta proc_flags,x
-    plp
     clc
     rts
 not_there:
@@ -1749,12 +1736,9 @@ already_sleeping:
 .proc resume
     lda proc_flags,x
     bpl not_to_resume
-    php
-    sei
     mv_sleeping_running_x
     lda #PROC_RUNNING
     sta proc_flags,x
-    plp
     clc
     rts
 not_to_resume:
@@ -1780,38 +1764,16 @@ not_to_resume:
     ;; Remove process from running or
     ;; sleeping list.
     lda proc_flags,x
-    php
-    sei
-    bmi take_off_sleeping
-take_off_running:
+    bmi :+
     drmx procs, procsb, running
     jmp put_on_zombie_list
-take_off_sleeping:
-    drmx procs, procsb, sleeping
+:   drmx procs, procsb, sleeping
 
 put_on_zombie_list:
     lpushx procs, zombie
     lda #PROC_ZOMBIE
     sta proc_flags,x
-    plp
-    clc
     rts
-.endproc
-
-; Resume waiting process
-; X: ID of process waiting for
-.export resume_waiting
-.proc resume_waiting
-    enter_data_x
-    ldy first_wait
-    beq done
-    ldx waiting_pid,y
-    leave_data
-    jsr resume
-    jmp schedule
-done:
-    leave_data
-    jmp schedule
 .endproc
 
 ; Wait for process to exit
@@ -1825,21 +1787,16 @@ done:
 
     ; Put us on waiting list of the
     ; process.
-    mvb tmp1, pid
     enter_data_x
     alloc_waiting_y
-    lda tmp1
+    lda pid
     sta waiting_pid,y
     leave_data
 
 check_if_zombie:
     lda proc_flags,x
-    bne :+
-    jmp guru_meditation
-:   cmp #PROC_ZOMBIE
+    cmp #PROC_ZOMBIE
     beq end_wait
-
-    ; Take a nap.
     phx
     phy
     ldx pid
@@ -1861,15 +1818,14 @@ invalid_pid:
 .proc end_wait
     enter_data_x
     rm_waiting_y
-    leave_data
     ldy first_wait
+    leave_data
+    cpy #0
     beq reap_zombie
 
     ; Resume next waiting.
     phx
-    tya
-    tax
-    jsr resume
+    jsr resume_waiting
     plx
 
 return_code:
@@ -1882,6 +1838,20 @@ reap_zombie:
     lda #0
     sta proc_flags,x
     beq return_code ; (jmp)
+.endproc
+
+; Resume waiting process
+; X: ID of process waiting for
+.export resume_waiting
+.proc resume_waiting
+    enter_data_x
+    ldy first_wait
+    beq r
+    ldx waiting_pid,y
+    leave_data
+    jmp resume
+r:  leave_data
+    rts
 .endproc
 
 ; Exit current process
@@ -3014,7 +2984,6 @@ clr_lbanksb:
 .ifdef START_INIT
     sei
     ldx #0
-    sei
 l:  lda loadkeys,x
     beq :+
     sta KEYD,x
@@ -3337,15 +3306,14 @@ r:  rts
 .proc tunix_leave
     jsr schedule
 
-    ; Get process flags before...
+    ; Pre-fetch process flags.
     ldx pid
     ldy proc_flags,x
-    ; ...restoring its banks.
+
+    ; Restoring its banks.
     pop blk2
     pop blk1
     pop ram123
-
-    ; Init banks of baby after fork().
     cpy #PROC_BABY
     beq grow_baby
 
@@ -3357,6 +3325,7 @@ r:  rts
     rts
 
 grow_baby:
+    ; Back to kernel.
     mvb blk1,tunix_blk1
     mvb blk2,tunix_blk2
     lda #PROC_RUNNING

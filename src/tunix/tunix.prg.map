@@ -8,8 +8,8 @@ main.o:
     LOCALBSS          Offs=000000  Size=00011D  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=000750  Align=00001  Fill=0000
     LIB               Offs=000000  Size=000163  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000DDE  Align=00001  Fill=0000
-    KERNELDATA        Offs=000000  Size=000429  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000DC8  Align=00001  Fill=0000
+    KERNELDATA        Offs=000000  Size=00041D  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=0001AE  Align=00001  Fill=0000
     LOCALCODE         Offs=000000  Size=0001B3  Align=00001  Fill=0000
     TESTS             Offs=000000  Size=000912  Align=00001  Fill=0000
@@ -142,16 +142,16 @@ STARTUP               002000  002039  00003A  00001
 ONCE                  00203A  0020C3  00008A  00001
 PRGSTART              0020C4  0020C7  000004  00001
 LIB                   0020C8  00222A  000163  00001
-KERNEL                00222B  003008  000DDE  00001
-KERNELDATA            003009  003431  000429  00001
-MACHDEPDATA           003432  0035DF  0001AE  00001
-RODATA                0035E0  0036F1  000112  00001
-DATA                  0036F2  003787  000096  00001
-GLOBALBSS             003788  004102  00097B  00001
-CODE                  0042B6  004C3E  000989  00001
-TESTS                 004C3F  005550  000912  00001
-INIT                  005551  00557C  00002C  00001
-BSS                   00557D  0055AE  000032  00001
+KERNEL                00222B  002FF2  000DC8  00001
+KERNELDATA            002FF3  00340F  00041D  00001
+MACHDEPDATA           003410  0035BD  0001AE  00001
+RODATA                0035BE  0036CF  000112  00001
+DATA                  0036D0  003765  000096  00001
+GLOBALBSS             003766  0040E0  00097B  00001
+CODE                  004294  004C1C  000989  00001
+TESTS                 004C1D  00552E  000912  00001
+INIT                  00552F  00555A  00002C  00001
+BSS                   00555B  00558C  000032  00001
 LOCALCODE             009800  0099B2  0001B3  00001
 LOCALBSS              0099B3  009ACF  00011D  00001
 ULTIMEM               009FF0  009FFF  000010  00001
@@ -162,55 +162,55 @@ Exports list by name:
 BSOUT                     00FFD2 RLA    CKOUT                     00FFC9 RLA    
 CLRCH                     00FFCC RLA    OPEN                      00FFC0 RLA    
 READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
-ST                        000090 RLZ    __BSS_RUN__               00557D RLA    
+ST                        000090 RLZ    __BSS_RUN__               00555B RLA    
 __BSS_SIZE__              000032 REA    __CONSTRUCTOR_COUNT__     000002 REA    
 __CONSTRUCTOR_TABLE__     0020C0 RLA    __DESTRUCTOR_COUNT__      000000 REA    
-__DESTRUCTOR_TABLE__      0036F2 RLA    __EXEHDR__                000001 REA    
-__GLOBALBSS_RUN__         003788 RLA    __GLOBALBSS_SIZE__        00097B REA    
+__DESTRUCTOR_TABLE__      0036D0 RLA    __EXEHDR__                000001 REA    
+__GLOBALBSS_RUN__         003766 RLA    __GLOBALBSS_SIZE__        00097B REA    
 __LOADADDR__              000001 REA    __LOCALBSS2_RUN__         000400 RLA    
 __LOCALBSS2_SIZE__        000750 REA    __LOCALBSS_RUN__          0099B3 RLA    
-__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_LOAD__        004103 RLA    
+__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_LOAD__        0040E1 RLA    
 __LOCALCODE_RUN__         009800 RLA    __LOCALCODE_SIZE__        0001B3 REA    
-__MAIN_SIZE__             003800 REA    __MAIN_START__            002000 RLA    
-__STACKSIZE__             000800 REA    __STARTUP_RUN__           002000 RLA    
+__MAIN_SIZE__             003F00 REA    __MAIN_START__            002000 RLA    
+__STACKSIZE__             000100 REA    __STARTUP_RUN__           002000 RLA    
 __STARTUP__               000001 REA    __ULTIMEM_SIZE__          000010 REA    
-___directerrno            0043F3 RLA    ___errno                  0055AA RLA    
-___mappederrno            0043FD RLA    ___oserror                00557D RLA    
-___osmaperrno             004A31 RLA    ___seterrno               0047AF RLA    
-__argc                    003731 RLA    __argv                    003733 RLA    
-__ctype                   00360D RLA    __ctypeidx                003618 RLA    
-__hextab                  0035F1 RLA    __longminstr              003601 RLA    
-__printf                  0044FE RLA    _fwrite                   00483C RLA    
-_ltoa                     004935 RLA    _main                     0042B7 RLA    
-_printf                   004A55 RLA    _stdout                   00372A RLA    
-_strlen                   004ADD RLA    _strlower                 004AF3 RLA    
-_tunix                    002D6F REA    _ultoa                    004976 RLA    
-_vfprintf                 004BA1 RLA    _write                    004BCA RLA    
-addysp                    0047B9 RLA    axlong                    0047C6 RLA    
-axulong                   0047CC RLA    callmain                  0047D3 RLA    
-ctypemaskdirect           0047FA RLA    decsp4                    004814 RLA    
-decsp6                    004821 RLA    donelib                   0047EA RLA    
-fdtab                     00375A RLA    incsp2                    0048BD RLA    
-incsp3                    0048CB RLA    incsp6                    0048D0 RLA    
+___directerrno            0043D1 RLA    ___errno                  005588 RLA    
+___mappederrno            0043DB RLA    ___oserror                00555B RLA    
+___osmaperrno             004A0F RLA    ___seterrno               00478D RLA    
+__argc                    00370F RLA    __argv                    003711 RLA    
+__ctype                   0035EB RLA    __ctypeidx                0035F6 RLA    
+__hextab                  0035CF RLA    __longminstr              0035DF RLA    
+__printf                  0044DC RLA    _fwrite                   00481A RLA    
+_ltoa                     004913 RLA    _main                     004295 RLA    
+_printf                   004A33 RLA    _stdout                   003708 RLA    
+_strlen                   004ABB RLA    _strlower                 004AD1 RLA    
+_tunix                    002D5A REA    _ultoa                    004954 RLA    
+_vfprintf                 004B7F RLA    _write                    004BA8 RLA    
+addysp                    004797 RLA    axlong                    0047A4 RLA    
+axulong                   0047AA RLA    callmain                  0047B1 RLA    
+ctypemaskdirect           0047D8 RLA    decsp4                    0047F2 RLA    
+decsp6                    0047FF RLA    donelib                   0047C8 RLA    
+fdtab                     003738 RLA    incsp2                    00489B RLA    
+incsp3                    0048A9 RLA    incsp6                    0048AE RLA    
 initlib                   00203A RLA    initmainargs              002046 RLAI   
-initstdout                0020AF  LAI   ldaxysp                   0048D7 RLA    
-lib_exit                  004334 RLA    lib_fork                  004322 RLA    
-lib_getpid                004310 RLA    lib_iopage_alloc          0043BB RLA    
-lib_iopage_commit         0043CD RLA    lib_iopage_free           0043E0 RLA    
-lib_kill                  004347 RLA    lib_proc_info             0043A8 RLA    
-lib_schedule              004302 RLA    lib_wait                  004383 RLA    
-mul8x16                   0049F9 RLA    mul8x16a                  004A03 RLA    
-negeax                    0048DE RLA    popax                     0048B5 RLA    
-popptr1                   004A47 RLA    ptr1                      000016 RLZ    
+initstdout                0020AF  LAI   ldaxysp                   0048B5 RLA    
+lib_exit                  004312 RLA    lib_fork                  004300 RLA    
+lib_getpid                0042EE RLA    lib_iopage_alloc          004399 RLA    
+lib_iopage_commit         0043AB RLA    lib_iopage_free           0043BE RLA    
+lib_kill                  004325 RLA    lib_proc_info             004386 RLA    
+lib_schedule              0042E0 RLA    lib_wait                  004361 RLA    
+mul8x16                   0049D7 RLA    mul8x16a                  0049E1 RLA    
+negeax                    0048BC RLA    popax                     004893 RLA    
+popptr1                   004A25 RLA    ptr1                      000016 RLZ    
 ptr2                      000018 RLZ    ptr3                      00001A RLZ    
-ptr4                      00001C RLZ    push1                     004A88 RLA    
-pusha0                    004A8F RLA    pushax                    004A91 RLA    
-pusheax                   004905 RLA    pushwysp                  004AA9 RLA    
-regbank                   000022 RLZ    rwcommon                  004AC3 RLA    
+ptr4                      00001C RLZ    push1                     004A66 RLA    
+pusha0                    004A6D RLA    pushax                    004A6F RLA    
+pusheax                   0048E3 RLA    pushwysp                  004A87 RLA    
+regbank                   000022 RLZ    rwcommon                  004AA1 RLA    
 sp                        00000E RLZ    sreg                      000010 RLZ    
 tmp1                      00001E RLZ    tmp2                      00001F RLZ    
-tosudivax                 004B1C RLA    tosumulax                 0049B2 RLA    
-zerobss                   004C1C RLA    
+tosudivax                 004AFA RLA    tosumulax                 004990 RLA    
+zerobss                   004BFA RLA    
 
 
 Exports list by value:
@@ -223,46 +223,46 @@ ptr1                      000016 RLZ    ptr2                      000018 RLZ
 ptr3                      00001A RLZ    ptr4                      00001C RLZ    
 tmp1                      00001E RLZ    tmp2                      00001F RLZ    
 regbank                   000022 RLZ    __BSS_SIZE__              000032 REA    
-ST                        000090 RLZ    __LOCALBSS_SIZE__         00011D REA    
-__LOCALCODE_SIZE__        0001B3 REA    __LOCALBSS2_RUN__         000400 RLA    
-__LOCALBSS2_SIZE__        000750 REA    __STACKSIZE__             000800 REA    
+ST                        000090 RLZ    __STACKSIZE__             000100 REA    
+__LOCALBSS_SIZE__         00011D REA    __LOCALCODE_SIZE__        0001B3 REA    
+__LOCALBSS2_RUN__         000400 RLA    __LOCALBSS2_SIZE__        000750 REA    
 __GLOBALBSS_SIZE__        00097B REA    __MAIN_START__            002000 RLA    
 __STARTUP_RUN__           002000 RLA    initlib                   00203A RLA    
 initmainargs              002046 RLAI   initstdout                0020AF  LAI   
-__CONSTRUCTOR_TABLE__     0020C0 RLA    _tunix                    002D6F REA    
-__hextab                  0035F1 RLA    __longminstr              003601 RLA    
-__ctype                   00360D RLA    __ctypeidx                003618 RLA    
-__DESTRUCTOR_TABLE__      0036F2 RLA    _stdout                   00372A RLA    
-__argc                    003731 RLA    __argv                    003733 RLA    
-fdtab                     00375A RLA    __GLOBALBSS_RUN__         003788 RLA    
-__MAIN_SIZE__             003800 REA    __LOCALCODE_LOAD__        004103 RLA    
-_main                     0042B7 RLA    lib_schedule              004302 RLA    
-lib_getpid                004310 RLA    lib_fork                  004322 RLA    
-lib_exit                  004334 RLA    lib_kill                  004347 RLA    
-lib_wait                  004383 RLA    lib_proc_info             0043A8 RLA    
-lib_iopage_alloc          0043BB RLA    lib_iopage_commit         0043CD RLA    
-lib_iopage_free           0043E0 RLA    ___directerrno            0043F3 RLA    
-___mappederrno            0043FD RLA    __printf                  0044FE RLA    
-___seterrno               0047AF RLA    addysp                    0047B9 RLA    
-axlong                    0047C6 RLA    axulong                   0047CC RLA    
-callmain                  0047D3 RLA    donelib                   0047EA RLA    
-ctypemaskdirect           0047FA RLA    decsp4                    004814 RLA    
-decsp6                    004821 RLA    _fwrite                   00483C RLA    
-popax                     0048B5 RLA    incsp2                    0048BD RLA    
-incsp3                    0048CB RLA    incsp6                    0048D0 RLA    
-ldaxysp                   0048D7 RLA    negeax                    0048DE RLA    
-pusheax                   004905 RLA    _ltoa                     004935 RLA    
-_ultoa                    004976 RLA    tosumulax                 0049B2 RLA    
-mul8x16                   0049F9 RLA    mul8x16a                  004A03 RLA    
-___osmaperrno             004A31 RLA    popptr1                   004A47 RLA    
-_printf                   004A55 RLA    push1                     004A88 RLA    
-pusha0                    004A8F RLA    pushax                    004A91 RLA    
-pushwysp                  004AA9 RLA    rwcommon                  004AC3 RLA    
-_strlen                   004ADD RLA    _strlower                 004AF3 RLA    
-tosudivax                 004B1C RLA    _vfprintf                 004BA1 RLA    
-_write                    004BCA RLA    zerobss                   004C1C RLA    
-__BSS_RUN__               00557D RLA    ___oserror                00557D RLA    
-___errno                  0055AA RLA    __LOCALCODE_RUN__         009800 RLA    
+__CONSTRUCTOR_TABLE__     0020C0 RLA    _tunix                    002D5A REA    
+__hextab                  0035CF RLA    __longminstr              0035DF RLA    
+__ctype                   0035EB RLA    __ctypeidx                0035F6 RLA    
+__DESTRUCTOR_TABLE__      0036D0 RLA    _stdout                   003708 RLA    
+__argc                    00370F RLA    __argv                    003711 RLA    
+fdtab                     003738 RLA    __GLOBALBSS_RUN__         003766 RLA    
+__MAIN_SIZE__             003F00 REA    __LOCALCODE_LOAD__        0040E1 RLA    
+_main                     004295 RLA    lib_schedule              0042E0 RLA    
+lib_getpid                0042EE RLA    lib_fork                  004300 RLA    
+lib_exit                  004312 RLA    lib_kill                  004325 RLA    
+lib_wait                  004361 RLA    lib_proc_info             004386 RLA    
+lib_iopage_alloc          004399 RLA    lib_iopage_commit         0043AB RLA    
+lib_iopage_free           0043BE RLA    ___directerrno            0043D1 RLA    
+___mappederrno            0043DB RLA    __printf                  0044DC RLA    
+___seterrno               00478D RLA    addysp                    004797 RLA    
+axlong                    0047A4 RLA    axulong                   0047AA RLA    
+callmain                  0047B1 RLA    donelib                   0047C8 RLA    
+ctypemaskdirect           0047D8 RLA    decsp4                    0047F2 RLA    
+decsp6                    0047FF RLA    _fwrite                   00481A RLA    
+popax                     004893 RLA    incsp2                    00489B RLA    
+incsp3                    0048A9 RLA    incsp6                    0048AE RLA    
+ldaxysp                   0048B5 RLA    negeax                    0048BC RLA    
+pusheax                   0048E3 RLA    _ltoa                     004913 RLA    
+_ultoa                    004954 RLA    tosumulax                 004990 RLA    
+mul8x16                   0049D7 RLA    mul8x16a                  0049E1 RLA    
+___osmaperrno             004A0F RLA    popptr1                   004A25 RLA    
+_printf                   004A33 RLA    push1                     004A66 RLA    
+pusha0                    004A6D RLA    pushax                    004A6F RLA    
+pushwysp                  004A87 RLA    rwcommon                  004AA1 RLA    
+_strlen                   004ABB RLA    _strlower                 004AD1 RLA    
+tosudivax                 004AFA RLA    _vfprintf                 004B7F RLA    
+_write                    004BA8 RLA    zerobss                   004BFA RLA    
+__BSS_RUN__               00555B RLA    ___oserror                00555B RLA    
+___errno                  005588 RLA    __LOCALCODE_RUN__         009800 RLA    
 __LOCALBSS_RUN__          0099B3 RLA    READST                    00FFB7 RLA    
 SETLFS                    00FFBA RLA    OPEN                      00FFC0 RLA    
 CKOUT                     00FFC9 RLA    CLRCH                     00FFCC RLA    

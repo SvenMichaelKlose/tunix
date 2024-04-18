@@ -1432,16 +1432,6 @@ vec_io23_to_blk5:
     smemcpyax vec_vic_to_blk5
 .endmacro
 
-.macro save_internal_ram_to_blk5_x
-    mvb blk5, {proc_io23,x}
-    save_internal_ram_to_blk5
-.endmacro
-
-.macro save_internal_ram_to_blk5_y
-    mvb blk5, {proc_io23,y}
-    save_internal_ram_to_blk5
-.endmacro
-
     .segment "MACHDEPDATA"
 
 ; Fork banks and save stack.
@@ -1484,15 +1474,15 @@ vec_io23_to_blk5:
     alloc_bank_x
     inc bank_refs,x
     txa
+    sta ram123 ; Bank in procdata.
     sta proc_data,y
+    alloc_lbank_x
     ; Copy parent's into child's.
     mvb blk3, tmp2 ; (Parent's procdata)
     stx blk5
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
     mvb blk2, tunix_blk2
-    stx ram123 ; Bank in procdata.
-    alloc_lbank_x
     ; Finish up IO23.
     pop io23 ; Bank in IO23.
     tax
@@ -1801,7 +1791,15 @@ return_code:
 
 reap_zombie:
     reap_zombie_x
-    mvb {proc_flags,x}, #0
+    lda #0
+    sta proc_flags,x
+    sta proc_data,x
+    sta proc_io23,x
+    sta proc_ram123,x
+    sta proc_blk1,x
+    sta proc_blk2,x
+    sta proc_blk3,x
+    sta proc_blk5,x
     beq return_code ; (jmp)
 .endproc
 
@@ -1809,6 +1807,7 @@ reap_zombie:
 ; A: Exit code
 .export exit
 .proc exit
+    mvb multitasking, #1
     ldx pid
     jsr zombify
     ;jmp resume_waiting
@@ -3145,6 +3144,7 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     ldx pid
     lda procs,x
     bne :++
+
     ; Restart list.
     lda proc_flags + 0
     cmp #PROC_RUNNING
@@ -3152,9 +3152,9 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     lda #0
     beq :++ ; (jmp)
 :   lda running
+
 :   cmp pid
     beq r ; (Don't switch to self.)
-
     tay
     push ram123
     push blk2
@@ -3188,17 +3188,17 @@ r:  rts
     jsr stack_overflow
     ; NOT REACHED.
 :   stx stack
-    mvb blk5, io23
     ldx pid
-    save_internal_ram_to_blk5_x
+    mvb blk5, {proc_io23,x}
+    save_internal_ram_to_blk5
 
     ;;; Load next.
     mvb blk5, {proc_io23,y}
-    ;; ...color, screen and VIC config.
+    ;; Color, screen and VIC.
     smemcpyax vec_blk5_to_color
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
-    ;; Copy in low mem...
+    ;; Low memory (incl. stack).
     mvb blk2, speedcopy_blk5_to_lowmem
     ; Set return address of speed copy
     ; manually as we cannot use the

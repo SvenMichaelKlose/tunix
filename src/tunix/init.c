@@ -70,8 +70,8 @@ make_baby (char schedule_rounds)
 {
     char i, pid;
 
-    tunix_mode (1);
     pid = tunix_fork ();
+    tunix_mode (1);
     if (pid > 0)
         return pid;
     if (pid == 255)
@@ -97,14 +97,14 @@ test_fork (char nprocs)
         tunix_mode (0);
         printf ("Forking %d.\n", i + 1);
         tunix_mode (1);
-        pid = make_baby (10);
+        pid = make_baby (0);
         if (pid < 1)
             break;
         processes[i] = pid;
         tunix_mode (0);
         printf ("Forked $%02x.\n", pid);
-        if (nprocs == 2 && i == 1) debug ();
         tunix_proc_info (pid);
+        if (nprocs == 2 && i == 1) debug ();
         tunix_mode (1);
     }
 

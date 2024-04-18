@@ -537,27 +537,23 @@ pending_signal:         .res 1
 
 .macro lpop_x list, free
     ldx free
-    lda list,x
-    sta free
+    mvb free, {list,x}
 .endmacro
 
 .macro lpop_y list, free
     ldy free
-    lda list,y
-    sta free
+    mvb free, {list,y}
 .endmacro
 
 ;; Push to front of list.
 
 .macro lpush_x list, first
-    lda first
-    sta list,x
+    mvb {list,x}, first
     stx first
 .endmacro
 
 .macro lpush_y list, first
-    lda first
-    sta list,y
+    mvb {list,y}, first
     sty first
 .endmacro
 
@@ -600,8 +596,7 @@ pending_signal:         .res 1
 ;; Push to front of deque.
 
 .macro dpush_x fw, bw, first
-    lda #0
-    sta bw,x
+    mvb {bw,x}, #0
     phy
     ldy first
     beq :+
@@ -614,8 +609,7 @@ pending_signal:         .res 1
 .endmacro
 
 .macro dpush_y fw, bw, first
-    lda #0
-    sta bw,y
+    mvb {bw,y}, #0
     phx
     ldx first
     beq :+
@@ -633,20 +627,17 @@ pending_signal:         .res 1
     phy
     cpx first
     bne :+
-    lda fw,x
-    sta first
+    mvb first, {fw,x}
     jmp :++
 :   ; Link previous
     lda bw,x
     beq :+
     tay
-    lda fw,x
-    sta fw,y
+    mvb {fw,y}, {fw,x}
     ; Link next
 :   ldy fw,x
     beq :+
-    lda bw,x
-    sta bw,y
+    mvb {bw,y}, {bw,x}
     ; Optional.
 :   lda #0
     sta fw,x
@@ -658,20 +649,17 @@ pending_signal:         .res 1
     phx
     cpy first
     bne :+
-    lda fw,y
-    sta first
+    mvb first, {fw,y}
     jmp :++
 :   ; Link previous
     lda bw,y
     beq :+
     tax
-    lda fw,y
-    sta fw,x
+    mvb {fw,x}, {fw,y}
     ; Link next
 :   ldx fw,y
     beq :+
-    lda bw,y
-    sta bw,x
+    mvb {bw,x}, {bw,y}
     ; Optional.
 :   lda #0
     sta fw,y
@@ -797,13 +785,11 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro get_proc_blk_x proc, blk
-    lda proc,x
-    sta blk
+    mvb blk, {proc,x}
 .endmacro
 
 .macro get_proc_blk_y proc, blk
-    lda proc,y
-    sta blk
+    mvb blk, {proc,y}
 .endmacro
 
 .macro io23_x
@@ -867,12 +853,10 @@ pending_signal:         .res 1
     push ram123
     push blk1
     push blk2
-    lda proc_ram123,x
-    sta ram123
+    mvb ram123, {proc_ram123,x}
     lda proc_blk2,x
     pha
-    lda proc_blk1,x
-    sta blk1
+    mvb blk1, {proc_blk1,x}
     pop blk2
 .endmacro
 
@@ -894,8 +878,7 @@ pending_signal:         .res 1
     sta p+1
     stx p+2
     ldx #5
-p:  lda $ff00,x
-    sta s,x
+p:  mvb {s,x}, {$ff00,x}
     dex
     bpl p
     rts
@@ -907,8 +890,7 @@ p:  lda $ff00,x
     sta p+1
     stx p+2
     ldx #3
-p:  lda $ff00,x
-    sta d,x
+p:  mvb {d,x}, {$ff00,x}
     dex
     bpl p
     rts
@@ -956,8 +938,7 @@ p:  lda $ff00,x
     inc ch
     bne copy_forwards ; (jmp)
 
-l:  lda (s),y
-    sta (d),y
+l:  mvb {(d),y}, {(s),y}
     iny
     beq k
 copy_forwards:
@@ -1003,8 +984,7 @@ k:  inc sh
     inx
     inc ch
     ldy dl
-    lda #0
-    sta dl
+    mvb dl, #0
     beq +n ; (jmp)
 l:  sta (d),y
     iny
@@ -1507,8 +1487,7 @@ vec_io23_to_blk5:
 .proc machdep_fork
     ldx pid
     stx tmp1
-    lda proc_data,x
-    sta tmp2
+    mvb tmp2, {proc_data,x}
     tsx
     stx tmp2+1
 
@@ -1539,8 +1518,7 @@ vec_io23_to_blk5:
     txa
     sta proc_data,y
     ; Copy parent's into child's.
-    lda tmp2 ; (Parent's procdata.)
-    sta blk3
+    mvb blk3, tmp2 ; (Parent's procdata)
     stx blk5
     lda speedcopy_blk3_to_blk5
     jsr next_speedcopy
@@ -1586,10 +1564,8 @@ banks_ok:
     ; Copy old into new banks.
     .macro copy_blk_y procblk
         ldx tmp1 ; parent
-        lda procblk,x
-        sta blk3
-        lda procblk,y
-        sta blk5
+        mvb blk3, {procblk,x}
+        mvb blk5, {procblk,y}
         lda speedcopy_blk3_to_blk5
         jsr next_speedcopy
         mvb blk2, tunix_blk2
@@ -1703,8 +1679,7 @@ r:  rts
     alloc_proc_running_y
     cpy #0
     beq no_more_procs
-    lda #PROC_BABY
-    sta proc_flags,y
+    mvb {proc_flags,y}, #PROC_BABY
 
     ldx pid
     phx
@@ -1755,8 +1730,7 @@ child:
     beq not_there
     bmi already_sleeping
     mv_running_sleeping_x
-    lda #PROC_SLEEPING
-    sta proc_flags,x
+    mvb {proc_flags,x}, #PROC_SLEEPING
     clc
     rts
 not_there:
@@ -1772,8 +1746,7 @@ already_sleeping:
     lda proc_flags,x
     bpl not_to_resume
     mv_sleeping_running_x
-    lda #PROC_RUNNING
-    sta proc_flags,x
+    mvb {proc_flags,x}, #PROC_RUNNING
     clc
     rts
 not_to_resume:
@@ -1806,8 +1779,7 @@ not_to_resume:
 
 put_on_zombie_list:
     lpush_x procs, zombie
-    lda #PROC_ZOMBIE
-    sta proc_flags,x
+    mvb {proc_flags,x}, #PROC_ZOMBIE
     rts
 .endproc
 
@@ -1822,8 +1794,7 @@ put_on_zombie_list:
 
     enter_procdata_x
     alloc_waiting_y
-    lda pid
-    sta waiting_pid,y
+    mvb {waiting_pid,y}, pid
     leave_procdata
 
 check_if_zombie:
@@ -1862,8 +1833,7 @@ return_code:
 
 reap_zombie:
     reap_zombie_x
-    lda #0
-    sta proc_flags,x
+    mvb {proc_flags,x}, #0
     beq return_code ; (jmp)
 .endproc
 
@@ -2091,10 +2061,8 @@ retry:
     tya
     ; Save on local type scoreboard.
     sta pending_signal_types,y
-    lda tmp1
-    sta signal_type,y
-    lda tmp2
-    sta signal_payload,y
+    mvb {signal_type,y}, tmp1
+    mvb {signal_payload,y}, tmp2
     jmp resume
 
 ignore:
@@ -2128,26 +2096,22 @@ invalid_pid:
     lda signal_type,x
     tay
     inc is_processing_signal
-    lda #0
-    sta pending_signal_types,y
-    lda signal_handler_l,x
-    sta sigjmp + 1
-    lda signal_handler_h,x
-    sta sigjmp + 2
+    mvb {pending_signal_types,y}, #0
+    mvb sigjmp+1, {signal_handler_l,x}
+    mvb sigjmp+2, {signal_handler_h,x}
 :
 .endmacro
 
 .macro sigaction2
     php
     pha
-    lda sigjmp + 2
+    lda sigjmp+2
     beq :+
     phx
     phy
 sigjmp:
     jsr $1234
-    lda #0
-    sta sigjmp + 2
+    mvb sigjmp+2, #0
     ply
     plx
     dec is_processing_signal
@@ -2177,8 +2141,7 @@ sigjmp:
 .proc reset_handler
     lda signal_handler_h,x
     bne no_handler_set
-    lda #0
-    sta signal_handler_h,x
+    mvb {signal_handler_h,x}, #0
     clc
     rts
 no_handler_set:
@@ -2213,8 +2176,7 @@ r:  rts
     lda free_iopage
     beq no_more
     alloc_iopage_x
-    lda pid
-    sta iopage_pid,x
+    mvb {iopage_pid,x}, pid
     txa
     clc
     adc #IOPAGE_BASE - 1
@@ -2272,8 +2234,7 @@ next:
     bmi not_there   ; Page is free...
     cmp pid
     bne not_there   ; Not ours...
-    lda #255
-    sta iopage_pid,x
+    mvb {iopage_pid,x}, #255
     free_iopage_x
     jmp respond_ok
 not_there:
@@ -2297,8 +2258,7 @@ l:  lda drv_pid,y
     ; Set device to KERNAL.
     lda drv_dev,y
     tax
-    lda #0  ; KERNAL
-    sta dev_drv,x
+    mvb {dev_drv,x}, #0 ; KERNAL
 n:  lloop_y drvs, l
 r:  rts
 
@@ -2316,14 +2276,11 @@ r:  rts
     beq :+
 
     ;; Populate slot.
-    lda pid
-    sta drv_pid,x
+    mvb {drv_pid,x}, pid
     tya
     sta drv_dev,x
-    lda zp1
-    sta drv_vl,x
-    lda zp1+1
-    sta drv_vh,x
+    mvb {drv_vl,x}, zp1
+    mvb {drv_vh,x}, zp1+1
 
     ;; Assign to device.
     txa
@@ -2365,8 +2322,7 @@ err_out_of_running_procs:
     jsr schedule
     lda running
     bne proc0
-    lda #0
-    sta multitasking
+    mvb multitasking, #0
     print err_out_of_running_procs
 .endproc
 
@@ -2697,11 +2653,9 @@ start_bank_write:
 
 write_byte:
     ldy #0
-    lda bnk
-    sta (zp1),y
+    mvb {(zp1),y}, bnk
     iny
-    lda bnk
-    sta (zp1),y
+    mvb {(zp1),y}, bnk
     inc zp1
     inc zp1
     bne write_byte
@@ -2792,8 +2746,7 @@ print_free_ram_a:
     bne r
     lda #13
     jsr BSOUT
-    lda #0
-    sta col
+    mvb col, #0
 r:  rts
 .endproc
 
@@ -2878,8 +2831,7 @@ clr_lbanksb:
 :   cpx #MAX_IOPAGES - 1
     bcs :+
     sta iopages,x
-    lda #255
-    sta iopage_pid,x
+    mvb {iopage_pid,x}, #255
 :   inx
     bne @l
     ;; Finish up.
@@ -2899,8 +2851,7 @@ clr_lbanksb:
     inc multitasking
     ;; Make holograhic process to fork.
     ; Unlink from free list.
-    lda #0
-    sta procs ; (Running alone.)
+    mvb procs, #0 ; (Running alone.)
     ; Fill in banks for process 0.
     mvb proc_ram123+1, ram123
     sta proc_data+1
@@ -3108,13 +3059,10 @@ h:  lda $ffff
     jsr lfn_to_glfn
     sta LFN
     tax
-    lda SA
-    sta glfn_sa,x
-    lda DEV
-    sta glfn_dev,x
+    mvb {glfn_sa,x}, SA
+    mvb {glfn_dev,x}, DEV
     tay
-    lda dev_drv,y
-    sta glfn_drv,x
+    mvb {glfn_drv,x}, {dev_drv,y}
     tay
     jsra call_driver, #IDX_OPEN
     pop LFN
@@ -3128,10 +3076,8 @@ h:  lda $ffff
     lda lfn_glfn,x
     beq :+
     tax
-    lda glfn_sa,x
-    sta SA
-    lda glfn_dev,x
-    sta DFLTN
+    mvb SA, {glfn_sa,x}
+    mvb DFLTN, {glfn_dev,x}
     clc
     bcc :++
 :   sec
@@ -3147,10 +3093,8 @@ h:  lda $ffff
     lda lfn_glfn,x
     beq :+
     tax
-    lda glfn_sa,x
-    sta SA
-    lda glfn_dev,x
-    sta DFLTO
+    mvb SA, {glfn_sa,x}
+    mvb DFLTO, {glfn_dev,x}
     clc
     bcc :++
 :   sec
@@ -3180,11 +3124,9 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .proc close2
     jsr lfn_to_glfn
     sta reg_a
-    lda glfn_sa,x
-    sta SA
+    mvb SA, {glfn_sa,x}
     ldy glfn_drv,x
-    lda #0
-    sta glfn_drv,x
+    mvb {glfn_drv,x}, #0
     tya
     tax
     jsra call_glfn_driver, #IDX_CLOSE
@@ -3289,16 +3231,13 @@ r:  rts
     smemcpyax vec_blk5_to_screen
     smemcpyax vec_blk5_to_vic
     ;; Copy in low mem...
-    lda speedcopy_blk5_to_lowmem
-    sta blk2
+    mvb blk2, speedcopy_blk5_to_lowmem
     ; Set return address of speed copy
     ; manually as we cannot use the
     ; stack since its just about to be
     ; overwritten.
-    lda #<:+
-    sta $5801
-    lda #>:+
-    sta $5802
+    mvb $5801, #<:+
+    mvb $5802, #>:+
     jmp $4000
 :   mvb blk2, tunix_blk2
 
@@ -3355,13 +3294,10 @@ r:  rts
 
 .export grow_baby
 grow_baby:
-    ; Back to kernel.
     mvb blk1,tunix_blk1
     mvb blk2,tunix_blk2
-    lda #PROC_RUNNING
-    sta proc_flags,x
-    lda proc_ram123,x
-    sta ram123
+    mvb {proc_flags,x}, #PROC_RUNNING
+    mvb ram123, {proc_ram123,x}
     lda proc_blk1,x
     ldy proc_blk2,x
     sta blk1
@@ -3385,8 +3321,7 @@ grow_baby:
     pushw fnord
     mvb blk1, tunix_blk1
     mvb blk2, tunix_blk2
-    lda proc_data,x
-    sta ram123
+    mvb ram123, {proc_data,x}
     rts
 .endproc
 
@@ -3400,8 +3335,7 @@ fnord: .res 2
     ldy FNLEN
     beq :++
     dey
-:   lda (FNADR),y
-    sta filename,y
+:   mvb {filename,y}, {(FNADR),y}
     dey
     bpl :-
 :   jsr tunix_enter2
@@ -3607,8 +3541,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
     stwi d, lbanks
     stwi c, MAX_BANKS
     jsr bzero
-    lda #0
-    sta first_lbank
+    mvb first_lbank, #0
     rts
 .endproc
 

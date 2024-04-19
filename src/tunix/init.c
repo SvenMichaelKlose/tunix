@@ -104,12 +104,12 @@ test_fork (char nprocs)
         tunix_mode (0);
         printf ("Forked $%02x.\n", pid);
         tunix_proc_info (pid);
-        if (nprocs == 2 && i == 1) debug ();
         tunix_mode (1);
     }
 
     tunix_mode (0);
     printf ("%d children total.\n", i);
+    tunix_proc_list ();
     tunix_mode (1);
 
     for (mi = i, i = 0; i < mi; i++) {
@@ -118,6 +118,7 @@ test_fork (char nprocs)
         printf ("Waiting for $%02x.\n",
                 pid);
         tunix_mode (1);
+        if (nprocs == 2 && i == 0) debug ();
         tunix_wait (pid);
         tunix_mode (0);
         printf ("$%02x exited.\n", pid);

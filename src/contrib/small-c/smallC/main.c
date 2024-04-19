@@ -101,13 +101,9 @@ main(int argc, char *argv[]) {
     }
 
     smacptr = macptr; /* command line defined macros -d */
-    /*if (!param) {
+
+    if (!param)
           usage();
-      }*/
-    if (i == argc) {
-        compile(NULL); /* training mode - read code from stdin */
-        exit(0);
-    }
 
     for (; i<argc; i++) {
         param = argv[i];

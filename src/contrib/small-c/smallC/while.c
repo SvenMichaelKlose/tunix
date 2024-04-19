@@ -1,4 +1,6 @@
-/*      File while.c: 2.1 (83/03/20,16:02:22) */
+
+//      File while.c: 2.1 (83/03/20,16:02:22) 
+
 /*% cc -O -c %
  *
  */
@@ -7,7 +9,9 @@
 #include "defs.h"
 #include "data.h"
 
-addwhile (WHILE *ptr) {
+addwhile (WHILE * ptr)
+{
+
 /*int     ptr[];
     int     k;
 
@@ -17,40 +21,45 @@ addwhile (WHILE *ptr) {
         return;
     }
     /*k = 0;
-    while (k < WSSIZ)
-            *wsptr++ = ptr[k++]; */
+       while (k < WSSIZ)
+       *wsptr++ = ptr[k++]; */
     ws[while_table_index++] = *ptr;
 }
 
-delwhile () {
+delwhile ()
+{
     if (readwhile ()) {
-        /*wsptr = wsptr - WSSIZ;*/
+        //wsptr = wsptr - WSSIZ; 
         while_table_index--;
     }
 }
 
-WHILE *readwhile () {
+WHILE *
+readwhile ()
+{
     if (while_table_index == 0) {
-    /*if (wsptr == ws) {*/
+        //if (wsptr == ws) { 
         error ("no active do/for/while/switch");
         return (0);
     } else {
-        /*return (wsptr-WSSIZ);*/
+        //return (wsptr-WSSIZ); 
         return &ws[while_table_index - 1];
     }
 }
 
-WHILE *findwhile () {
-    /*int     *ptr;*/
+WHILE *
+findwhile ()
+{
+    //int     *ptr; 
     int while_table_idx;
 
-    /*for (ptr = wsptr; ptr != ws;) {*/
+    //for (ptr = wsptr; ptr != ws;) { 
     while_table_idx = while_table_index;
     for (; while_table_idx != 0;) {
-        /*ptr = ptr - WSSIZ;*/
+        //ptr = ptr - WSSIZ; 
         while_table_idx--;
         /*if (ptr[WSTYP] != WSSWITCH)
-                return (ptr);*/
+           return (ptr); */
         if (ws[while_table_idx].type != WSSWITCH)
             return &ws[while_table_idx];
     }
@@ -58,11 +67,13 @@ WHILE *findwhile () {
     return (0);
 }
 
-WHILE *readswitch () {
-    WHILE *ptr; /*int     *ptr;*/
+WHILE *
+readswitch ()
+{
+    WHILE *ptr;                 //int     *ptr; 
 
     if (ptr = readwhile ()) {
-        /*if (ptr[WSTYP] == WSSWITCH)*/
+        //if (ptr[WSTYP] == WSSWITCH) 
         if (ptr->type == WSSWITCH) {
             return (ptr);
         }
@@ -70,8 +81,9 @@ WHILE *readswitch () {
     return (0);
 }
 
-addcase (int val) {
-    int     lab;
+addcase (int val)
+{
+    int lab;
 
     if (swstp == SWSTSZ)
         error ("too many case labels");
@@ -83,4 +95,3 @@ addcase (int val) {
         newline ();
     }
 }
-

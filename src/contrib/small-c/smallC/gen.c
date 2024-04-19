@@ -1,4 +1,6 @@
-/*      File gen.c: 2.1 (83/03/20,16:02:06) */
+
+//      File gen.c: 2.1 (83/03/20,16:02:06) 
+
 /*% cc -O -c %
  *
  */
@@ -10,7 +12,8 @@
 /**
  * return next available internal label number
  */
-getlabel() {
+getlabel ()
+{
     return (nxtlab++);
 }
 
@@ -18,7 +21,8 @@ getlabel() {
  * print specified number as label
  * @param label
  */
-print_label(int label) {
+print_label (int label)
+{
     output_label_prefix ();
     output_decimal (label);
 }
@@ -28,7 +32,8 @@ print_label(int label) {
  * not used ?
  * @param lab label number
  */
-glabel(char *lab) {
+glabel (char *lab)
+{
     output_string (lab);
     output_label_terminator ();
     newline ();
@@ -39,7 +44,8 @@ glabel(char *lab) {
  * @param nlab label number
  * @return 
  */
-generate_label(int nlab) {
+generate_label (int nlab)
+{
     print_label (nlab);
     output_label_terminator ();
     newline ();
@@ -50,7 +56,8 @@ generate_label(int nlab) {
  * @param c
  * @return 
  */
-output_byte(char c) {
+output_byte (char c)
+{
     if (c == 0)
         return (0);
     fputc (c, output);
@@ -62,7 +69,8 @@ output_byte(char c) {
  * @param ptr the string
  * @return 
  */
-output_string(char ptr[]) {
+output_string (char ptr[])
+{
     int k;
     k = 0;
     while (output_byte (ptr[k++]));
@@ -72,7 +80,8 @@ output_string(char ptr[]) {
  * outputs a tab
  * @return 
  */
-print_tab() {
+print_tab ()
+{
     output_byte ('\t');
 }
 
@@ -81,7 +90,7 @@ print_tab() {
  * @param ptr
  * @return 
  */
-output_line(char ptr[])
+output_line (char ptr[])
 {
     output_with_tab (ptr);
     newline ();
@@ -92,7 +101,8 @@ output_line(char ptr[])
  * @param ptr
  * @return 
  */
-output_with_tab(char ptr[]) {
+output_with_tab (char ptr[])
+{
     print_tab ();
     output_string (ptr);
 }
@@ -102,8 +112,9 @@ output_with_tab(char ptr[]) {
  * @param number
  * @return 
  */
-output_decimal(int number) {
-    fprintf(output, "%d", number);
+output_decimal (int number)
+{
+    fprintf (output, "%d", number);
 }
 
 /**
@@ -111,14 +122,16 @@ output_decimal(int number) {
  * @param lval
  * @return 
  */
-store(LVALUE *lval) {
+store (LVALUE * lval)
+{
     if (lval->indirect == 0)
         gen_put_memory (lval->symbol);
     else
         gen_put_indirect (lval->indirect);
 }
 
-rvalue(LVALUE *lval, int reg) {
+rvalue (LVALUE * lval, int reg)
+{
     if ((lval->symbol != 0) & (lval->indirect == 0))
         gen_get_memory (lval->symbol);
     else
@@ -132,7 +145,8 @@ rvalue(LVALUE *lval, int reg) {
  * @param ft : false - test jz, true test jnz
  * @return 
  */
-test(int label, int ft) {
+test (int label, int ft)
+{
     needbrack ("(");
     expression (YES);
     needbrack (")");
@@ -146,16 +160,17 @@ test(int label, int ft) {
  * @param size
  * @return 
  */
-scale_const(int type, int otag, int *size) {
+scale_const (int type, int otag, int *size)
+{
     switch (type) {
-        case CINT:
-        case UINT:
-            *size += *size;
-            break;
-        case STRUCT:
-            *size *= tag_table[otag].size;
-            break;
-        default:
-            break;
+    case CINT:
+    case UINT:
+        *size += *size;
+        break;
+    case STRUCT:
+        *size *= tag_table[otag].size;
+        break;
+    default:
+        break;
     }
 }

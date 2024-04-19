@@ -1,4 +1,6 @@
-/*      File lex.c: 2.1 (83/03/20,16:02:09) */
+
+//      File lex.c: 2.1 (83/03/20,16:02:09) 
+
 /*% cc -O -c %
  *
  */
@@ -12,11 +14,11 @@
  * @param c
  * @return
  */
-alpha(char c) {
+alpha (char c)
+{
     c = c & 127;
     return (((c >= 'a') && (c <= 'z')) ||
-            ((c >= 'A') && (c <= 'Z')) ||
-            (c == '_'));
+            ((c >= 'A') && (c <= 'Z')) || (c == '_'));
 }
 
 /**
@@ -24,7 +26,8 @@ alpha(char c) {
  * @param c
  * @return
  */
-numeric(char c) {
+numeric (char c)
+{
     c = c & 127;
     return ((c >= '0') && (c <= '9'));
 }
@@ -34,7 +37,8 @@ numeric(char c) {
  * @param c
  * @return
  */
-alphanumeric(char c) {
+alphanumeric (char c)
+{
     return ((alpha (c)) || (numeric (c)));
 }
 
@@ -42,12 +46,14 @@ alphanumeric(char c) {
  * semicolon enforcer
  * called whenever syntax requires a semicolon
  */
-need_semicolon() {
+need_semicolon ()
+{
     if (!match (";"))
         error ("missing semicolon");
 }
 
-junk() {
+junk ()
+{
     if (alphanumeric (inbyte ()))
         while (alphanumeric (ch ()))
             gch ();
@@ -60,7 +66,8 @@ junk() {
     blanks ();
 }
 
-endst() {
+endst ()
+{
     blanks ();
     return ((streq (line + lptr, ";") | (ch () == 0)));
 }
@@ -70,7 +77,8 @@ endst() {
  * @param str
  * @return
  */
-needbrack(char *str) {
+needbrack (char *str)
+{
     if (!match (str)) {
         error ("missing bracket");
         gen_comment ();
@@ -84,8 +92,10 @@ needbrack(char *str) {
  * @param str1
  * @return
  */
-sstreq(str1) char *str1; {
-    return (streq(line + lptr, str1));
+sstreq (str1)
+char *str1;
+{
+    return (streq (line + lptr, str1));
 }
 
 /**
@@ -98,7 +108,8 @@ sstreq(str1) char *str1; {
  * @param str2 address2
  * @return
  */
-streq(char str1[], char str2[]) {
+streq (char str1[], char str2[])
+{
     int k;
     k = 0;
     while (str2[k]) {
@@ -117,7 +128,8 @@ streq(char str1[], char str2[]) {
  * @param len
  * @return
  */
-astreq (char str1[], char str2[], int len) {
+astreq (char str1[], char str2[], int len)
+{
     int k;
     k = 0;
     while (k < len) {
@@ -144,9 +156,10 @@ astreq (char str1[], char str2[], int len) {
  * @param lit
  * @return
  */
-match (char *lit) {
+match (char *lit)
+{
     int k;
-    blanks();
+    blanks ();
     if (k = streq (line + lptr, lit)) {
         lptr = lptr + k;
         return (1);
@@ -164,10 +177,11 @@ match (char *lit) {
  * @param len
  * @return
  */
-amatch(char *lit, int len) {
+amatch (char *lit, int len)
+{
     int k;
 
-    blanks();
+    blanks ();
     if (k = astreq (line + lptr, lit, len)) {
         lptr = lptr + k;
         while (alphanumeric (ch ()))
@@ -177,7 +191,8 @@ amatch(char *lit, int len) {
     return (0);
 }
 
-blanks() {
+blanks ()
+{
     FOREVER {
         while (ch () == 0) {
             preprocess ();
@@ -197,34 +212,35 @@ blanks() {
  * returns declaration type
  * @return CCHAR, CINT, UCHAR, UINT
  */
-int get_type() {
+int
+get_type ()
+{
     if (amatch ("register", 8)) {
-        if (amatch("char", 4))
+        if (amatch ("char", 4))
             return CCHAR;
         else if (amatch ("int", 3))
             return CINT;
         else
             return CINT;
-    } else if(amatch("unsigned", 8)) {
-        if (amatch("char", 4)) {
+    } else if (amatch ("unsigned", 8)) {
+        if (amatch ("char", 4)) {
             return UCHAR;
-        } else if (amatch("int", 3)) {
+        } else if (amatch ("int", 3)) {
             return UINT;
         }
-    } else if(amatch("signed", 8)) {
-        if (amatch("char", 4)) {
+    } else if (amatch ("signed", 8)) {
+        if (amatch ("char", 4)) {
             return CCHAR;
-        } else if (amatch("int", 3)) {
+        } else if (amatch ("int", 3)) {
             return CINT;
         }
     } else if (amatch ("char", 4)) {
         return CCHAR;
     } else if (amatch ("int", 3)) {
         return CINT;
-    /* recognize structs being passed as a proper type */
+        // recognize structs being passed as a proper type 
     } else if (amatch ("struct", 6)) {
         return STRUCT;
     }
     return 0;
 }
-

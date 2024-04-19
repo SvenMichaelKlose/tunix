@@ -1,6 +1,7 @@
-exit(retcode) int retcode; {
+exit (retcode)
+int retcode;
+{
 #asm
-        jmp     0
+    jmp 0
 #endasm
 }
-

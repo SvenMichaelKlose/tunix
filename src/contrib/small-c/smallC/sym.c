@@ -1,3 +1,4 @@
+
 /*
  * File sym.c: 2.1 (83/03/20,16:02:19)
  */
@@ -16,10 +17,11 @@
  * @param is_struct struct or union or no meaning
  * @return
  */
-declare_global(int type, int storage, TAG_SYMBOL *mtag, int otag, int is_struct)
+declare_global (int type, int storage, TAG_SYMBOL * mtag,
+                int otag, int is_struct)
 {
-    int     dim, identity;
-    char    sname[NAMESIZE];
+    int dim, identity;
+    char sname[NAMESIZE];
 
     FOREVER {
         FOREVER {
@@ -37,36 +39,45 @@ declare_global(int type, int storage, TAG_SYMBOL *mtag, int otag, int is_struct)
                 multidef (sname);
             if (match ("[")) {
                 dim = needsub ();
-                /*if (dim || storage == EXTERN) {*/
-                    identity = ARRAY;
+                //if (dim || storage == EXTERN) { 
+                identity = ARRAY;
                 /*} else {
-                    identity = POINTER;
-                }*/
+                   identity = POINTER;
+                   } */
             }
-            /* add symbol*/
-            if (mtag == 0) { /* real variable, not a struct/union member */
-                identity = initials(sname, type, identity, dim, otag);
-                add_global (sname, identity, type, (!dim ? -1 : dim), storage);
+            // add symbol 
+            if (mtag == 0) {    // real variable, not a struct/union member 
+                identity =
+                    initials (sname, type, identity, dim,
+                              otag);
+                add_global (sname, identity, type,
+                            (!dim ? -1 : dim), storage);
                 if (type == STRUCT) {
-                    symbol_table[current_symbol_table_idx].tagidx = otag;
+                    symbol_table[current_symbol_table_idx].
+                        tagidx = otag;
                 }
                 break;
             } else if (is_struct) {
-                /* structure member, mtag->size is offset */
-                add_member(sname, identity, type, mtag->size, storage, (type & CINT) ? dim*INTSIZE : dim);
-                /* store (correctly scaled) size of member in tag table entry */
+                // structure member, mtag->size is offset 
+                add_member (sname, identity, type,
+                            mtag->size, storage,
+                            (type & CINT) ? dim *
+                            INTSIZE : dim);
+                // store (correctly scaled) size of member in tag table entry 
                 if (identity == POINTER)
                     type = CINT;
-                scale_const(type, otag, &dim);
+                scale_const (type, otag, &dim);
                 mtag->size += dim;
-            }
-            else {
-                /* union member, offset is always zero */
-                add_member(sname, identity, type, 0, storage, (type & CINT) ? dim*INTSIZE : dim);
-                /* store maximum member size in tag table entry */
+            } else {
+                // union member, offset is always zero 
+                add_member (sname, identity, type, 0,
+                            storage,
+                            (type & CINT) ? dim *
+                            INTSIZE : dim);
+                // store maximum member size in tag table entry 
                 if (identity == POINTER)
                     type = CINT;
-                scale_const(type, otag, &dim);
+                scale_const (type, otag, &dim);
                 if (mtag->size < dim)
                     mtag->size = dim;
             }
@@ -84,50 +95,56 @@ declare_global(int type, int storage, TAG_SYMBOL *mtag, int otag, int is_struct)
  * @param dim
  * @return 1 if variable is initialized
  */
-int initials(char *symbol_name, int type, int identity, int dim, int otag) {
+int
+initials (char *symbol_name, int type, int identity,
+          int dim, int otag)
+{
     int dim_unknown = 0;
     litptr = 0;
-    if(dim == 0) { /* allow for xx[] = {..}; declaration */
+    if (dim == 0) {             // allow for xx[] = {..}; declaration 
         dim_unknown = 1;
     }
-    if (!(type & CCHAR) && !(type & CINT) && !(type == STRUCT)) {
-        error("unsupported storage size");
+    if (!(type & CCHAR) && !(type & CINT)
+        && !(type == STRUCT)) {
+        error ("unsupported storage size");
     }
-    if(match("=")) {
-        /* an array or struct */
-        if(match("{")) {
-            /* aggregate initialiser */
-            if ((identity == POINTER || identity == VARIABLE) && type == STRUCT)
-            {
-                /* aggregate is structure or pointer to structure */
+    if (match ("=")) {
+        // an array or struct 
+        if (match ("{")) {
+            // aggregate initialiser 
+            if ((identity == POINTER
+                 || identity == VARIABLE)
+                && type == STRUCT) {
+                // aggregate is structure or pointer to structure 
                 dim = 0;
-                struct_init(&tag_table[otag], symbol_name);
-            }
-            else {
-                while((dim > 0) || (dim_unknown)) {
+                struct_init (&tag_table[otag], symbol_name);
+            } else {
+                while ((dim > 0) || (dim_unknown)) {
                     if (identity == ARRAY && type == STRUCT) {
-                        /* array of struct */
-                        needbrack("{");
-                        struct_init(&tag_table[otag], symbol_name);
+                        // array of struct 
+                        needbrack ("{");
+                        struct_init (&tag_table[otag],
+                                     symbol_name);
                         --dim;
-                        needbrack("}");
-                    }
-                    else {
-                        if (init(symbol_name, type, identity, &dim, 0)) {
+                        needbrack ("}");
+                    } else {
+                        if (init
+                            (symbol_name, type, identity,
+                             &dim, 0)) {
                             dim_unknown++;
                         }
                     }
-                    if(match(",") == 0) {
+                    if (match (",") == 0) {
                         break;
                     }
                 }
-                if(--dim_unknown == 0)
+                if (--dim_unknown == 0)
                     identity = POINTER;
             }
-            needbrack("}");
-        /* single constant */
+            needbrack ("}");
+            // single constant 
         } else {
-            init(symbol_name, type, identity, &dim, 0);
+            init (symbol_name, type, identity, &dim, 0);
         }
     }
     return identity;
@@ -137,20 +154,25 @@ int initials(char *symbol_name, int type, int identity, int dim, int otag) {
  * initialise structure
  * @param tag
  */
-struct_init(TAG_SYMBOL *tag, char *symbol_name) {
-    int dim ;
+struct_init (TAG_SYMBOL * tag, char *symbol_name)
+{
+    int dim;
     int member_idx;
 
     member_idx = tag->member_idx;
-    while (member_idx < tag->member_idx + tag->number_of_members) {
-        init(symbol_name, member_table[tag->member_idx + member_idx].type,
-            member_table[tag->member_idx + member_idx].identity, &dim, tag);
+    while (member_idx <
+           tag->member_idx + tag->number_of_members) {
+        init (symbol_name,
+              member_table[tag->member_idx +
+                           member_idx].type,
+              member_table[tag->member_idx +
+                           member_idx].identity, &dim, tag);
         ++member_idx;
-        if((!match(",")) &&
-            (member_idx != (tag->member_idx + tag->number_of_members)))
-        {
-            error("struct initialisaton out of data");
-            break ;
+        if ((!match (",")) &&
+            (member_idx !=
+             (tag->member_idx + tag->number_of_members))) {
+            error ("struct initialisaton out of data");
+            break;
         }
     }
 }
@@ -164,25 +186,29 @@ struct_init(TAG_SYMBOL *tag, char *symbol_name) {
  * @param tag
  * @return
  */
-init(char *symbol_name, int type, int identity, int *dim, TAG_SYMBOL *tag) {
+init (char *symbol_name, int type, int identity, int *dim,
+      TAG_SYMBOL * tag)
+{
     int value, number_of_chars;
-    if(identity == POINTER) {
-        error("cannot assign to pointer");
+    if (identity == POINTER) {
+        error ("cannot assign to pointer");
     }
-    if(quoted_string(&value)) {
-        if((identity == VARIABLE) || !(type & CCHAR))
-            error("found string: must assign to char pointer or array");
+    if (quoted_string (&value)) {
+        if ((identity == VARIABLE) || !(type & CCHAR))
+            error
+                ("found string: must assign to char pointer or array");
         number_of_chars = litptr - value;
         *dim = *dim - number_of_chars;
         while (number_of_chars > 0) {
-            add_data_initials(symbol_name, CCHAR, litq[value++], tag);
+            add_data_initials (symbol_name, CCHAR,
+                               litq[value++], tag);
             number_of_chars = number_of_chars - 1;
         }
-    } else if (number(&value)) {
-        add_data_initials(symbol_name, CINT, value, tag);
+    } else if (number (&value)) {
+        add_data_initials (symbol_name, CINT, value, tag);
         *dim = *dim - 1;
-    } else if(quoted_char(&value)) {
-        add_data_initials(symbol_name, CCHAR, value, tag);
+    } else if (quoted_char (&value)) {
+        add_data_initials (symbol_name, CCHAR, value, tag);
         *dim = *dim - 1;
     } else {
         return 0;
@@ -198,24 +224,25 @@ init(char *symbol_name, int type, int identity, int *dim, TAG_SYMBOL *tag) {
  * @param stclass
  * @param otag index of tag in tag_table
  */
-declare_local(int typ, int stclass, int otag) {
-    int     k, j;
-    char    sname[NAMESIZE];
+declare_local (int typ, int stclass, int otag)
+{
+    int k, j;
+    char sname[NAMESIZE];
 
     FOREVER {
         FOREVER {
-            if (endst())
+            if (endst ())
                 return;
-            if (match("*"))
+            if (match ("*"))
                 j = POINTER;
             else
                 j = VARIABLE;
-            if (!symname(sname))
-                illname();
-            if (-1 != find_locale(sname))
+            if (!symname (sname))
+                illname ();
+            if (-1 != find_locale (sname))
                 multidef (sname);
-            if (match("[")) {
-                k = needsub();
+            if (match ("[")) {
+                k = needsub ();
                 if (k) {
                     j = ARRAY;
                     if (typ & CINT) {
@@ -232,35 +259,39 @@ declare_local(int typ, int stclass, int otag) {
                     k = INTSIZE;
                 } else {
                     switch (typ) {
-                        case CCHAR:
-                        case UCHAR:
-                            k = 1;
-                            break;
-                        case STRUCT:
-                            k = tag_table[otag].size;
-                            break;
-                        default:
-                            k = INTSIZE;
+                    case CCHAR:
+                    case UCHAR:
+                        k = 1;
+                        break;
+                    case STRUCT:
+                        k = tag_table[otag].size;
+                        break;
+                    default:
+                        k = INTSIZE;
                     }
                 }
             }
             if (stclass != LSTATIC) {
-                stkp = gen_modify_stack(stkp - k);
-                /* local structs need their tagidx set */
-                current_symbol_table_idx = add_local(sname, j, typ, stkp, AUTO);
-                if(typ == STRUCT) {
-                    symbol_table[current_symbol_table_idx].tagidx = otag;
+                stkp = gen_modify_stack (stkp - k);
+                // local structs need their tagidx set 
+                current_symbol_table_idx =
+                    add_local (sname, j, typ, stkp, AUTO);
+                if (typ == STRUCT) {
+                    symbol_table[current_symbol_table_idx].
+                        tagidx = otag;
                 }
             } else {
-                /* local structs need their tagidx set */
-                current_symbol_table_idx = add_local(sname, j, typ, k, LSTATIC);
-                if(typ == STRUCT) {
-                    symbol_table[current_symbol_table_idx].tagidx = otag;
+                // local structs need their tagidx set 
+                current_symbol_table_idx =
+                    add_local (sname, j, typ, k, LSTATIC);
+                if (typ == STRUCT) {
+                    symbol_table[current_symbol_table_idx].
+                        tagidx = otag;
                 }
             }
             break;
         }
-        if (!match(","))
+        if (!match (","))
             return;
     }
 }
@@ -269,7 +300,8 @@ declare_local(int typ, int stclass, int otag) {
  * get required array size. [xx]
  * @return array size
  */
-needsub() {
+needsub ()
+{
     int num[1];
 
     if (match ("]"))
@@ -291,7 +323,9 @@ needsub() {
  * @param sname
  * @return table index
  */
-int find_global (char *sname) {
+int
+find_global (char *sname)
+{
     int idx;
 
     idx = 0;
@@ -308,7 +342,9 @@ int find_global (char *sname) {
  * @param sname
  * @return table index
  */
-int find_locale (char *sname) {
+int
+find_locale (char *sname)
+{
     int idx;
 
     idx = local_table_index;
@@ -329,10 +365,14 @@ int find_locale (char *sname) {
  * @param storage
  * @return new index
  */
-int add_global (char *sname, int identity, int type, int offset, int storage) {
+int
+add_global (char *sname, int identity, int type, int offset,
+            int storage)
+{
     SYMBOL *symbol;
     char *buffer_ptr;
-    if ((current_symbol_table_idx = find_global(sname)) > -1) {
+    if ((current_symbol_table_idx =
+         find_global (sname)) > -1) {
         return (current_symbol_table_idx);
     }
     if (global_table_index >= NUMBER_OF_GLOBALS) {
@@ -342,7 +382,7 @@ int add_global (char *sname, int identity, int type, int offset, int storage) {
     current_symbol_table_idx = global_table_index;
     symbol = &symbol_table[current_symbol_table_idx];
     buffer_ptr = symbol->name;
-    while (alphanumeric(*buffer_ptr++ = *sname++));
+    while (alphanumeric (*buffer_ptr++ = *sname++));
     symbol->identity = identity;
     symbol->type = type;
     symbol->storage = storage;
@@ -360,35 +400,38 @@ int add_global (char *sname, int identity, int type, int offset, int storage) {
  * @param storage_class
  * @return
  */
-int add_local(char *sname, int identity, int type, int offset,
-    int storage_class)
+int
+add_local (char *sname, int identity, int type, int offset,
+           int storage_class)
 {
     int k;
     SYMBOL *symbol;
     char *buffer_ptr;
 
-    if ((current_symbol_table_idx = find_locale (sname)) > -1) {
+    if ((current_symbol_table_idx =
+         find_locale (sname)) > -1) {
         return (current_symbol_table_idx);
     }
-    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
+    if (local_table_index >=
+        NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
         error ("local symbol table overflow");
         return (0);
     }
     current_symbol_table_idx = local_table_index;
     symbol = &symbol_table[current_symbol_table_idx];
     buffer_ptr = symbol->name;
-    while (alphanumeric(*buffer_ptr++ = *sname++));
+    while (alphanumeric (*buffer_ptr++ = *sname++));
     symbol->identity = identity;
     symbol->type = type;
     symbol->storage = storage_class;
     if (storage_class == LSTATIC) {
-        data_segment_gdata();
-        print_label(k = getlabel());
-        output_label_terminator();
-        gen_def_storage();
-        output_number(offset);
-        newline();
-        code_segment_gtext();
+        data_segment_gdata ();
+        print_label (k = getlabel ());
+        output_label_terminator ();
+        gen_def_storage ();
+        output_number (offset);
+        newline ();
+        code_segment_gtext ();
         offset = k;
     }
     symbol->offset = offset;
@@ -399,14 +442,15 @@ int add_local(char *sname, int identity, int type, int offset,
 /**
  * test if next input string is legal symbol name
  */
-symname(char *sname) {
+symname (char *sname)
+{
     int k;
 
-    blanks();
+    blanks ();
     if (!alpha (ch ()))
         return (0);
     k = 0;
-    while (alphanumeric(ch ()))
+    while (alphanumeric (ch ()))
         sname[k++] = gch ();
     sname[k] = 0;
     return (1);
@@ -415,7 +459,8 @@ symname(char *sname) {
 /**
  * print error message
  */
-illname() {
+illname ()
+{
     error ("illegal symbol name");
 }
 
@@ -424,10 +469,10 @@ illname() {
  * @param symbol_name
  * @return
  */
-multidef (char *symbol_name) {
+multidef (char *symbol_name)
+{
     error ("already defined");
     gen_comment ();
     output_string (symbol_name);
     newline ();
 }
-

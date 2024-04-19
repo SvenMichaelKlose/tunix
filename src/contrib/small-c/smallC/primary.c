@@ -1,3 +1,4 @@
+
 /*
  * File primary.c: 2.4 (84/11/27,16:26:07)
  */
@@ -6,83 +7,88 @@
 #include "defs.h"
 #include "data.h"
 
-primary (LVALUE *lval) {
-    char    sname[NAMESIZE];
-    int     num[1], k, symbol_table_idx, offset, reg, otag;
+primary (LVALUE * lval)
+{
+    char sname[NAMESIZE];
+    int num[1], k, symbol_table_idx, offset, reg, otag;
     SYMBOL *symbol;
 
-    lval->ptr_type = 0;  /* clear pointer/array type */
+    lval->ptr_type = 0;         // clear pointer/array type 
     lval->tagsym = 0;
     if (match ("(")) {
         k = hier1 (lval);
         needbrack (")");
         return (k);
     }
-    if (amatch("sizeof", 6)) {
-        needbrack("(");
-        gen_immediate();
-        if (amatch("int", 3) || amatch("unsigned int", 12)){
-            blanks();
-            /* pointers and ints are both INTSIZE */
-            match("*");
-            output_number(INTSIZE);
-        }
-        else if (amatch("char", 4) || amatch("unsigned char", 13)){
-            /* if sizeof a char pointer, output INTSIZE */
-            if(match("*"))
-                output_number(INTSIZE);
+    if (amatch ("sizeof", 6)) {
+        needbrack ("(");
+        gen_immediate ();
+        if (amatch ("int", 3)
+            || amatch ("unsigned int", 12)) {
+            blanks ();
+            // pointers and ints are both INTSIZE 
+            match ("*");
+            output_number (INTSIZE);
+        } else if (amatch ("char", 4)
+                   || amatch ("unsigned char", 13)) {
+            // if sizeof a char pointer, output INTSIZE 
+            if (match ("*"))
+                output_number (INTSIZE);
             else
-                output_number(1);
-        }
-        else if (amatch("struct", 6)){
-            if(symname(sname) == 0){
-                illname();
+                output_number (1);
+        } else if (amatch ("struct", 6)) {
+            if (symname (sname) == 0) {
+                illname ();
             }
-            if((otag = find_tag(sname)) == -1){
-                error("struct tag undefined");
+            if ((otag = find_tag (sname)) == -1) {
+                error ("struct tag undefined");
             }
-            /* Write out struct size, or INTSIZE if struct pointer */
-            if(match("*"))
-                output_number(INTSIZE);
+            // Write out struct size, or INTSIZE if struct pointer 
+            if (match ("*"))
+                output_number (INTSIZE);
             else
-                output_number(tag_table[otag].size);
-        } else if (symname(sname)) {
-            if (((symbol_table_idx = find_locale(sname)) > -1) ||
-                ((symbol_table_idx = find_global(sname)) > -1)) {
+                output_number (tag_table[otag].size);
+        } else if (symname (sname)) {
+            if (((symbol_table_idx =
+                  find_locale (sname)) > -1)
+                || ((symbol_table_idx = find_global (sname))
+                    > -1)) {
                 symbol = &symbol_table[symbol_table_idx];
                 if (symbol->storage == LSTATIC)
-                    error("sizeof local static");
+                    error ("sizeof local static");
                 offset = symbol->offset;
                 if ((symbol->type & CINT) ||
                     (symbol->identity == POINTER))
                     offset *= INTSIZE;
                 else if (symbol->type == STRUCT)
-                    offset *= tag_table[symbol->tagidx].size;
-                output_number(offset);
+                    offset *=
+                        tag_table[symbol->tagidx].size;
+                output_number (offset);
             } else {
-                error("sizeof undeclared variable");
-                output_number(0);
+                error ("sizeof undeclared variable");
+                output_number (0);
             }
         } else {
-            error("sizeof only on type or variable");
+            error ("sizeof only on type or variable");
         }
-        needbrack(")");
-        newline();
+        needbrack (")");
+        newline ();
         lval->symbol = 0;
         lval->indirect = 0;
-        return(0);
+        return (0);
     }
     if (symname (sname)) {
-        if ((symbol_table_idx = find_locale(sname)) > -1) {
+        if ((symbol_table_idx = find_locale (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
-            reg = gen_get_locale(symbol);
+            reg = gen_get_locale (symbol);
             lval->symbol = symbol;
             lval->indirect = symbol->type;
             if (symbol->type == STRUCT) {
                 lval->tagsym = &tag_table[symbol->tagidx];
             }
             if (symbol->identity == ARRAY ||
-                (symbol->identity == VARIABLE && symbol->type == STRUCT)) {
+                (symbol->identity == VARIABLE
+                 && symbol->type == STRUCT)) {
                 lval->ptr_type = symbol->type;
                 return reg;
             }
@@ -92,49 +98,51 @@ primary (LVALUE *lval) {
             }
             return FETCH | reg;
         }
-        if ((symbol_table_idx = find_global(sname)) > -1) {
+        if ((symbol_table_idx = find_global (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
             if (symbol->identity != FUNCTION) {
                 lval->symbol = symbol;
                 lval->indirect = 0;
                 if (symbol->type == STRUCT) {
-                    lval->tagsym = &tag_table[symbol->tagidx];
+                    lval->tagsym =
+                        &tag_table[symbol->tagidx];
                 }
                 if (symbol->identity != ARRAY &&
-                    (symbol->identity != VARIABLE || symbol->type != STRUCT)) {
+                    (symbol->identity != VARIABLE
+                     || symbol->type != STRUCT)) {
                     if (symbol->identity == POINTER) {
                         lval->ptr_type = symbol->type;
                     }
                     return FETCH | HL_REG;
                 }
-                gen_immediate();
-                output_string(symbol->name);
-                newline();
+                gen_immediate ();
+                output_string (symbol->name);
+                newline ();
                 lval->indirect = symbol->type;
                 lval->ptr_type = symbol->type;
                 return 0;
             }
         }
-        blanks();
-        if (ch() != '(')
-            error("undeclared variable");
-        symbol_table_idx = add_global(sname, FUNCTION, CINT, 0, PUBLIC);
+        blanks ();
+        if (ch () != '(')
+            error ("undeclared variable");
+        symbol_table_idx =
+            add_global (sname, FUNCTION, CINT, 0, PUBLIC);
         symbol = &symbol_table[symbol_table_idx];
         lval->symbol = symbol;
         lval->indirect = 0;
         return 0;
     }
-    if (constant(num)) {
+    if (constant (num)) {
         lval->symbol = 0;
         lval->indirect = 0;
         return 0;
-    }
-    else {
-        error("invalid expression");
-        gen_immediate();
-        output_number(0);
-        newline();
-        junk();
+    } else {
+        error ("invalid expression");
+        gen_immediate ();
+        output_number (0);
+        newline ();
+        junk ();
         return 0;
     }
 
@@ -146,7 +154,8 @@ primary (LVALUE *lval) {
  * @param val2
  * @return
  */
-dbltest (LVALUE *val1, LVALUE *val2) {
+dbltest (LVALUE * val1, LVALUE * val2)
+{
     if (val1 == NULL)
         return (FALSE);
     if (val1->ptr_type) {
@@ -165,7 +174,8 @@ dbltest (LVALUE *val1, LVALUE *val2) {
  * @param lval2
  * @return
  */
-result (LVALUE *lval, LVALUE *lval2) {
+result (LVALUE * lval, LVALUE * lval2)
+{
     if (lval->ptr_type && lval2->ptr_type)
         lval->ptr_type = 0;
     else if (lval2->ptr_type) {
@@ -175,7 +185,8 @@ result (LVALUE *lval, LVALUE *lval2) {
     }
 }
 
-constant (int val[]) {
+constant (int val[])
+{
     if (number (val))
         gen_immediate ();
     else if (quoted_char (val))
@@ -191,40 +202,41 @@ constant (int val[]) {
     return (1);
 }
 
-number (int val[]) {
-    int     k, minus, base;
-    char    c;
+number (int val[])
+{
+    int k, minus, base;
+    char c;
 
     k = minus = 1;
     while (k) {
         k = 0;
-        if (match("+"))
+        if (match ("+"))
             k = 1;
-        if (match("-")) {
+        if (match ("-")) {
             minus = (-minus);
             k = 1;
         }
     }
-    if (!numeric(c = ch ()))
+    if (!numeric (c = ch ()))
         return (0);
-    if (match("0x") || match ("0X"))
-        while (numeric(c = ch ()) ||
+    if (match ("0x") || match ("0X"))
+        while (numeric (c = ch ()) ||
                (c >= 'a' && c <= 'f') ||
                (c >= 'A' && c <= 'F')) {
             inbyte ();
-            k = k * 16 + (numeric (c) ? (c - '0') : ((c & 07) + 9));
-        }
-    else {
+            k = k * 16 +
+                (numeric (c) ? (c - '0') : ((c & 07) + 9));
+    } else {
         base = (c == '0') ? 8 : 10;
-        while (numeric(ch())) {
+        while (numeric (ch ())) {
             c = inbyte ();
             k = k * base + (c - '0');
         }
     }
     if (minus < 0)
-            k = (-k);
+        k = (-k);
     val[0] = k;
-    if(k < 0) {
+    if (k < 0) {
         return (UINT);
     } else {
         return (CINT);
@@ -236,15 +248,16 @@ number (int val[]) {
  * @param value returns the char found
  * @return 1 if we have, 0 otherwise
  */
-quoted_char (int *value) {
-    int     k;
-    char    c;
+quoted_char (int *value)
+{
+    int k;
+    char c;
 
     k = 0;
     if (!match ("'"))
         return (0);
     while ((c = gch ()) != '\'') {
-        c = (c == '\\') ? spechar(): c;
+        c = (c == '\\') ? spechar () : c;
         k = (k & 255) * 256 + (c & 255);
     }
     *value = k;
@@ -257,8 +270,9 @@ quoted_char (int *value) {
  * @param position returns beginning of the string
  * @return 1 if such string found, 0 otherwise
  */
-quoted_string (int *position) {
-    char    c;
+quoted_string (int *position)
+{
+    char c;
 
     if (!match ("\""))
         return (0);
@@ -273,8 +287,8 @@ quoted_string (int *position) {
                     break;
             return (1);
         }
-        c = gch();
-        litq[litptr++] = (c == '\\') ? spechar(): c;
+        c = gch ();
+        litq[litptr++] = (c == '\\') ? spechar () : c;
     }
     gch ();
     litq[litptr++] = 0;
@@ -284,19 +298,27 @@ quoted_string (int *position) {
 /**
  * decode special characters (preceeded by back slashes)
  */
-spechar() {
+spechar ()
+{
     char c;
-    c = ch();
+    c = ch ();
 
-    if      (c == 'n') c = LF;
-    else if (c == 't') c = TAB;
-    else if (c == 'r') c = CR;
-    else if (c == 'f') c = FFEED;
-    else if (c == 'b') c = BKSP;
-    else if (c == '0') c = EOS;
-    else if (c == EOS) return 0;
+    if (c == 'n')
+        c = LF;
+    else if (c == 't')
+        c = TAB;
+    else if (c == 'r')
+        c = CR;
+    else if (c == 'f')
+        c = FFEED;
+    else if (c == 'b')
+        c = BKSP;
+    else if (c == '0')
+        c = EOS;
+    else if (c == EOS)
+        return 0;
 
-    gch();
+    gch ();
     return (c);
 }
 
@@ -307,8 +329,10 @@ spechar() {
  * of HL
  * @param ptr name of the function
  */
-void callfunction (char *ptr) {
-    int     nargs;
+void
+callfunction (char *ptr)
+{
+    int nargs;
 
     nargs = 0;
     blanks ();
@@ -327,7 +351,7 @@ void callfunction (char *ptr) {
     }
     needbrack (")");
     if (aflag)
-        gnargs(nargs / INTSIZE);
+        gnargs (nargs / INTSIZE);
     if (ptr)
         gen_call (ptr);
     else
@@ -335,7 +359,7 @@ void callfunction (char *ptr) {
     stkp = gen_modify_stack (stkp + nargs);
 }
 
-needlval () {
+needlval ()
+{
     error ("must be lvalue");
 }
-

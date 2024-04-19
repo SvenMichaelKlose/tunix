@@ -1,5 +1,5 @@
 #include <stdio.h>
-getchar() {
-        return(fgetc(stdin));
+getchar ()
+{
+    return (fgetc (stdin));
 }
-

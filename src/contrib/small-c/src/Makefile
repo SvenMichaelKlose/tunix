@@ -36,7 +36,7 @@ scc6502: $(OBJ)
 #	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) scc6502 scc8080 *~ lib/*~ include/*~
+	rm -f $(OBJ) scc6502 scc8080 test.s *~ */*~
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

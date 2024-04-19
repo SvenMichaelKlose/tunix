@@ -1,15 +1,8 @@
-
-/*
- * File expr.c: 2.2 (83/06/21,11:24:26)
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
 
-/**
- * unsigned operand ?
- */
+// Unsigned operand?
 nosign (LVALUE * is)
 {
     SYMBOL *ptr;
@@ -21,13 +14,11 @@ nosign (LVALUE * is)
     return 0;
 }
 
-/**
- * lval.symbol - symbol table address, else 0 for constant
- * lval.indirect - type indirect object to fetch, else 0 for static object
- * lval.ptr_type - type pointer or array, else 0
- * @param comma
- * @return
- */
+// lval.symbol - symbol table address,
+// else 0 for constant lval.indirect -
+// type indirect object to fetch, else
+// 0 for static object lval.ptr_type -
+// type pointer or array, else 0.
 expression (int comma)
 {
     LVALUE lval;
@@ -42,11 +33,7 @@ expression (int comma)
     } while (match (","));
 }
 
-/**
- * assignment operators
- * @param lval
- * @return
- */
+// Assignment
 hier1 (LVALUE * lval)
 {
     int k;
@@ -154,11 +141,7 @@ hier1 (LVALUE * lval)
     }
 }
 
-/**
- * processes ? : expression
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// ? : expression
 hier1a (LVALUE * lval)
 {
     int k, lab1, lab2;
@@ -194,11 +177,7 @@ hier1a (LVALUE * lval)
         return (0);
 }
 
-/**
- * processes logical or ||
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "||"
 hier1b (LVALUE * lval)
 {
     int k, lab;
@@ -223,11 +202,7 @@ hier1b (LVALUE * lval)
         return (0);
 }
 
-/**
- * processes logical and &&
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "&&"
 hier1c (LVALUE * lval)
 {
     int k, lab;
@@ -252,11 +227,7 @@ hier1c (LVALUE * lval)
         return (0);
 }
 
-/**
- * processes bitwise or |
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "|"
 hier2 (LVALUE * lval)
 {
     int k;
@@ -283,11 +254,7 @@ hier2 (LVALUE * lval)
     }
 }
 
-/**
- * processes bitwise exclusive or
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "^"
 hier3 (LVALUE * lval)
 {
     int k;
@@ -313,11 +280,7 @@ hier3 (LVALUE * lval)
     }
 }
 
-/**
- * processes bitwise and &
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "&"
 hier4 (LVALUE * lval)
 {
     int k;
@@ -345,11 +308,7 @@ hier4 (LVALUE * lval)
 
 }
 
-/**
- * processes equal and not equal operators
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "==" and "!="
 hier5 (LVALUE * lval)
 {
     int k;
@@ -380,11 +339,7 @@ hier5 (LVALUE * lval)
 
 }
 
-/**
- * comparison operators
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// Comparison other than "==" and "!=".
 hier6 (LVALUE * lval)
 {
     int k;
@@ -449,11 +404,7 @@ hier6 (LVALUE * lval)
 
 }
 
-/**
- * bitwise left, right shift
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "<<" and ">>"
 hier7 (LVALUE * lval)
 {
     int k;
@@ -494,11 +445,7 @@ hier7 (LVALUE * lval)
 
 }
 
-/**
- * addition, subtraction
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "+" and "-"
 hier8 (LVALUE * lval)
 {
     int k;
@@ -551,11 +498,7 @@ hier8 (LVALUE * lval)
     }
 }
 
-/**
- * multiplication, division, modulus
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "*", "/" and "%"
 hier9 (LVALUE * lval)
 {
     int k;
@@ -601,11 +544,7 @@ hier9 (LVALUE * lval)
 
 }
 
-/**
- * increment, decrement, negation operators
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// "++", "--" and unary "-"
 hier10 (LVALUE * lval)
 {
     int k;
@@ -722,11 +661,7 @@ hier10 (LVALUE * lval)
 
 }
 
-/**
- * array subscripting
- * @param lval
- * @return 0 or 1, fetch or no fetch
- */
+// Array subscript
 hier11 (LVALUE * lval)
 {
     int direct, k;

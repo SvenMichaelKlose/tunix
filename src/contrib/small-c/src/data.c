@@ -1,16 +1,10 @@
-
-//      File data.c: 2.2 (84/11/27,16:26:13) 
-
-/*% cc -O -c %
- *
- */
-
 #include <stdio.h>
 #include "defs.h"
 
 // storage words 
 SYMBOL symbol_table[NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS];
-int global_table_index, rglobal_table_index;
+int global_table_index,
+    rglobal_table_index;
 int local_table_index;
 
 WHILE ws[WSTABSZ];
@@ -27,11 +21,15 @@ char line[LINESIZE];
 char mline[LINESIZE];
 int lptr, mptr;
 
-TAG_SYMBOL tag_table[NUMTAG];   // start of structure tag table 
-int tag_table_index;            // ptr to next entry 
+// start of structure tag table 
+TAG_SYMBOL tag_table[NUMTAG];
+// ptr to next entry 
+int tag_table_index;
 
-SYMBOL member_table[NUMMEMB];   // structure member table 
-int member_table_index;         // ptr to next member 
+// structure member table 
+SYMBOL member_table[NUMMEMB];
+// ptr to next member 
+int member_table_index;
 
 // miscellaneous storage 
 int nxtlab,
@@ -55,8 +53,10 @@ int sflag;
 int cflag;
 int errs;
 int aflag;
-int uflag;                      // undocumented 8085 instructions 
+// undocumented 8085 instructions 
+int uflag;
 
 INITIALS initials_table[NUMBER_OF_GLOBALS];
-char initials_data_table[INITIALS_SIZE];        // 5kB space for initialisation data 
+// 5kB space for initialisation data 
+char initials_data_table[INITIALS_SIZE];
 int initials_idx = 0, initials_data_idx = 0;

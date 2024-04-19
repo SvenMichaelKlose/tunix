@@ -1,6 +1,4 @@
 
-//      File data.h: 2.2 (84/11/27,16:26:11) 
-
 // storage words 
 extern SYMBOL symbol_table[NUMBER_OF_GLOBALS +
                            NUMBER_OF_LOCALS];
@@ -18,20 +16,27 @@ extern int macptr;
 extern char line[];
 extern char mline[];
 extern int lptr, mptr;
-extern char finame[INCLSIZ + 1][20];    // global input filenames for error messages 
-extern int srcln[];             // source file line counters for error messages 
+// Global input filenames for error
+// messages.
+extern char finame[INCLSIZ + 1][20];
+// Source file line counters for error
+// messages.
+extern int srcln[];
 
-extern TAG_SYMBOL tag_table[NUMTAG];    // start of structure tag table 
-extern int tag_table_index;     // ptr to next entry 
+// start of structure tag table 
+extern TAG_SYMBOL tag_table[NUMTAG];
+// ptr to next entry 
+extern int tag_table_index;
 
-extern SYMBOL member_table[NUMMEMB];    // structure member table 
-extern int member_table_index;  // ptr to next member< 
+// structure member table 
+extern SYMBOL member_table[NUMMEMB];
+// ptr to next member< 
+extern int member_table_index;
 
 // miscellaneous storage 
 extern int nxtlab,
-    litlab,
-    stkp,
-    argstk, ncmp, errcnt, glbflag, ctext, cmode, lastst;
+    litlab, stkp, argstk, ncmp, errcnt,
+    glbflag, ctext, cmode, lastst;
 
 extern FILE *input, *input2, *output;
 extern FILE *inclstk[];
@@ -48,7 +53,8 @@ extern int sflag;
 extern int cflag;
 extern int errs;
 extern int aflag;
-extern int uflag;               // undocumented 8085 instructions 
+// undocumented 8085 instructions 
+extern int uflag;
 
 extern INITIALS initials_table[NUMBER_OF_GLOBALS];
 

@@ -1,19 +1,7 @@
-
-//      File lex.c: 2.1 (83/03/20,16:02:09) 
-
-/*% cc -O -c %
- *
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
 
-/**
- * test if given character is alpha
- * @param c
- * @return
- */
 alpha (char c)
 {
     c = c & 127;
@@ -21,31 +9,17 @@ alpha (char c)
             ((c >= 'A') && (c <= 'Z')) || (c == '_'));
 }
 
-/**
- * test if given character is numeric
- * @param c
- * @return
- */
 numeric (char c)
 {
     c = c & 127;
     return ((c >= '0') && (c <= '9'));
 }
 
-/**
- * test if given character is alphanumeric
- * @param c
- * @return
- */
 alphanumeric (char c)
 {
     return ((alpha (c)) || (numeric (c)));
 }
 
-/**
- * semicolon enforcer
- * called whenever syntax requires a semicolon
- */
 need_semicolon ()
 {
     if (!match (";"))
@@ -72,11 +46,6 @@ endst ()
     return ((streq (line + lptr, ";") | (ch () == 0)));
 }
 
-/**
- * enforces bracket
- * @param str
- * @return
- */
 needbrack (char *str)
 {
     if (!match (str)) {
@@ -87,30 +56,24 @@ needbrack (char *str)
     }
 }
 
-/**
- *
- * @param str1
- * @return
- */
 sstreq (str1)
 char *str1;
 {
     return (streq (line + lptr, str1));
 }
 
-/**
- * indicates whether or not the current substring in the source line matches a
- * literal string
- * accepts the address of the current character in the source
- * line and the address of the a literal string, and returns the substring
- * length if a match occurs and zero otherwise
- * @param str1 address1
- * @param str2 address2
- * @return
- */
+// Indicates whether or not the current
+// substring in the source line matches
+// a literal string.  Accepts the
+// address of the current character in
+// the source line and the address of
+// the a literal string, and returns the
+// substring length if a match occurs
+// and zero otherwise.
 streq (char str1[], char str2[])
 {
     int k;
+
     k = 0;
     while (str2[k]) {
         if ((str1[k] != str2[k]))
@@ -120,14 +83,7 @@ streq (char str1[], char str2[])
     return (k);
 }
 
-/**
- * compares two string both must be zero ended, otherwise no match found
- * ensures that the entire token is examined
- * @param str1
- * @param str2
- * @param len
- * @return
- */
+// Compare zero-terminated string
 astreq (char str1[], char str2[], int len)
 {
     int k;
@@ -148,14 +104,15 @@ astreq (char str1[], char str2[], int len)
     return (k);
 }
 
-/**
- * looks for a match between a literal string and the current token in
- * the input line. It skips over the token and returns true if a match occurs
- * otherwise it retains the current position in the input line and returns false
- * there is no verification that all of the token was matched
- * @param lit
- * @return
- */
+// Looks for a match between a literal
+// string and the current token in the
+// input line.  It skips over the token
+// and returns true if a match occurs
+// otherwise it retains the current
+// position in the input line and
+// returns false there is no
+// verification that all of the token
+// was matched.
 match (char *lit)
 {
     int k;
@@ -167,16 +124,14 @@ match (char *lit)
     return (0);
 }
 
-/**
- * compares two string both must be zero ended, otherwise no match found
- * advances line pointer only if match found
- * it assumes that an alphanumeric (including underscore) comparison
- * is being made and guarantees that all of the token in the source line is
- * scanned in the process
- * @param lit
- * @param len
- * @return
- */
+// Compares zero-terminated strings.
+// Advances line pointer only if match
+// found.  It assumes that an
+// alphanumeric (including underscore)
+// comparison is being made and
+// guarantees that all of the token in
+// the source line is scanned in the
+// process.
 amatch (char *lit, int len)
 {
     int k;
@@ -208,10 +163,8 @@ blanks ()
     }
 }
 
-/**
- * returns declaration type
- * @return CCHAR, CINT, UCHAR, UINT
- */
+// Returns one of declaration types
+// CCHAR, CINT, UCHAR or UINT.
 int
 get_type ()
 {
@@ -225,9 +178,8 @@ get_type ()
     } else if (amatch ("unsigned", 8)) {
         if (amatch ("char", 4)) {
             return UCHAR;
-        } else if (amatch ("int", 3)) {
+        } else if (amatch ("int", 3))
             return UINT;
-        }
     } else if (amatch ("signed", 8)) {
         if (amatch ("char", 4)) {
             return CCHAR;
@@ -238,7 +190,8 @@ get_type ()
         return CCHAR;
     } else if (amatch ("int", 3)) {
         return CINT;
-        // recognize structs being passed as a proper type 
+    // Recognize structs being passed
+    // as a proper type.
     } else if (amatch ("struct", 6)) {
         return STRUCT;
     }

@@ -1,8 +1,3 @@
-
-/*
- * File primary.c: 2.4 (84/11/27,16:26:07)
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
@@ -13,7 +8,8 @@ primary (LVALUE * lval)
     int num[1], k, symbol_table_idx, offset, reg, otag;
     SYMBOL *symbol;
 
-    lval->ptr_type = 0;         // clear pointer/array type 
+    // clear pointer/array type 
+    lval->ptr_type = 0;
     lval->tagsym = 0;
     if (match ("(")) {
         k = hier1 (lval);
@@ -148,12 +144,8 @@ primary (LVALUE * lval)
 
 }
 
-/**
- * true if val1 -> int pointer or int array and val2 not pointer or array
- * @param val1
- * @param val2
- * @return
- */
+// true if val1 -> int pointer or int
+// array and val2 not pointer or array.
 dbltest (LVALUE * val1, LVALUE * val2)
 {
     if (val1 == NULL)
@@ -168,12 +160,7 @@ dbltest (LVALUE * val1, LVALUE * val2)
     return (FALSE);
 }
 
-/**
- * determine type of binary operation
- * @param lval
- * @param lval2
- * @return
- */
+// Determine type of binary operation.
 result (LVALUE * lval, LVALUE * lval2)
 {
     if (lval->ptr_type && lval2->ptr_type)
@@ -243,11 +230,10 @@ number (int val[])
     }
 }
 
-/**
- * Test if we have one char enclosed in single quotes
- * @param value returns the char found
- * @return 1 if we have, 0 otherwise
- */
+// Test if we have one char enclosed in
+// single quotes.
+// @param value returns the char found
+// @return 1 if we have, 0 otherwise
 quoted_char (int *value)
 {
     int k;
@@ -264,12 +250,13 @@ quoted_char (int *value)
     return (1);
 }
 
-/**
- * Test if we have string enclosed in double quotes. e.g. "abc".
- * Load the string into literal pool.
- * @param position returns beginning of the string
- * @return 1 if such string found, 0 otherwise
- */
+// Test if we have string enclosed in
+// double quotes. e.g. "abc".
+// Load the string into literal pool.
+// @param position returns beginning of
+// the string.
+// @return 1 if such string found,
+// 0 otherwise
 quoted_string (int *position)
 {
     char c;
@@ -295,9 +282,8 @@ quoted_string (int *position)
     return (1);
 }
 
-/**
- * decode special characters (preceeded by back slashes)
- */
+// Decode special characters (preceeded
+// by back slashes).
 spechar ()
 {
     char c;
@@ -322,13 +308,12 @@ spechar ()
     return (c);
 }
 
-/**
- * perform a function call
- * called from "hier11", this routine will either call the named
- * function, or if the supplied ptr is zero, will call the contents
- * of HL
- * @param ptr name of the function
- */
+// Perform a function call.
+// Called from hier11(), this routine
+// will either call the named function,
+// or if the supplied ptr is zero, will
+// call the contents of HL.
+// @param ptr name of the function.
 void
 callfunction (char *ptr)
 {

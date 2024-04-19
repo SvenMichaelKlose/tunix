@@ -1,8 +1,3 @@
-
-/*
- * File main.c: 2.7 (Rev.1) (17/5/21,1:38:54)
- */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -11,12 +6,16 @@
 
 FILE *logFile = NULL;
 
-char finame[INCLSIZ + 1][20];   // global input filenames for error messages 
+// Global input filenames for error
+// messages.
+char finame[INCLSIZ + 1][20];
 
-int srcln[INCLSIZ + 1] = { 0, 0, 0, 0 };        // source file line counters for error messages 
+// Source file line counters for error
+// messages.
+int srcln[INCLSIZ + 1] = { 0, 0, 0, 0 };
 
-// Simple oputs function to replace the ugly fputs(foo, stdout) 
-
+// Simple oputs function to replace the
+// ugly fputs(foo, stdout).
 void
 oputs (char *str)
 {
@@ -35,39 +34,41 @@ main (int argc, char *argv[])
     aflag = 1;
     uflag = 0;
 
-    setbuf (stdout, NULL);      // disable stdout buffering *//* why exactly? 
+    // disable stdout buffering */
+    // TOOD: why exactly? 
+    setbuf (stdout, NULL);
 
     for (i = 1; i < argc; i++) {
         param = argv[i];
         if (*param == '-') {
             while (*++param) {
                 switch (*param) {
-                    // output c source as asm comments 
+                // output c source as asm comments 
                 case 't':
                 case 'T':
                     ctext = 1;
                     break;
-                    // assemble .s files - do #define ASNM to make it work 
+                // assemble .s files - do #define ASNM to make it work 
                 case 's':
                 case 'S':
                     sflag = 1;
                     break;
-                    // linker - this option does not work 
+                // linker - this option does not work 
                 case 'c':
                 case 'C':
                     cflag = 1;
                     break;
-                    // no argument count in A to function calls 
+                // no argument count in A to function calls 
                 case 'a':
                 case 'A':
                     aflag = 0;
                     break;
-                    // use undocumented 8085 instructions 
+                // use undocumented 8085 instructions 
                 case 'u':
                 case 'U':
                     uflag = 1;
                     break;
-                    // define macro 
+                // define macro 
                 case 'd':
                 case 'D':
                     bp = ++param;
@@ -82,7 +83,7 @@ main (int argc, char *argv[])
                     param--;
                     defmac (bp);
                     break;
-                    // set the log if one wishes 
+                // set the log if one wishes 
                 case 'l':
                 case 'L':
                     if (logFile) {
@@ -113,7 +114,8 @@ main (int argc, char *argv[])
         }
     }
 
-    smacptr = macptr;           // command line defined macros -d 
+    // command line defined macros -d 
+    smacptr = macptr;
 
     if (!param)
         usage ();
@@ -131,11 +133,8 @@ main (int argc, char *argv[])
     exit (errs != 0);
 }
 
-/**
- * compile one file if filename is NULL redirect do to stdin/stdout
- * @param file filename
- * @return
- */
+// Compile one file if filename is NULL
+// redirect do to stdin/stdout.
 compile (char *file)
 {
     strcpy (finame[0], file);   // copy actual filename to filename array 
@@ -200,17 +199,11 @@ compile (char *file)
 #endif
 }
 
-// Writes the frontend version to the output 
-
 frontend_version ()
 {
     output_string ("; Front End (2.7,84/11/28)");
 }
 
-/**
- * prints usage
- * @return exits the execution
- */
 usage ()
 {
     oputs
@@ -233,11 +226,10 @@ usage ()
     exit (1);
 }
 
-/**
- * process all input text
- * at this level, only static declarations, defines, includes,
- * and function definitions are legal.
- */
+// Process all input text.
+// At this level, only static
+// declarations, defines, includes,
+// and function definitions are legal.
 parse ()
 {
     while (!feof (input)) {
@@ -261,28 +253,27 @@ parse ()
     }
 }
 
-/**
- * parse top level declarations
- * @param stclass storage
- * @param mtag
- * @param is_struct
- * @return
- */
-do_declarations (int stclass, TAG_SYMBOL * mtag,
+// Parse top level declarations.
+do_declarations (int stclass,
+                 TAG_SYMBOL * mtag,
                  int is_struct)
 {
     int type;
-    int otag;                   // tag of struct object being declared 
-    int sflag;                  // TRUE for struct definition, zero for union 
+    // Tag of struct object being
+    // declared.
+    int otag;
+    // TRUE for struct definition,
+    // FALSE for union.
+    int sflag;
     char sname[NAMESIZE];
 
     blanks ();
     if ((sflag = amatch ("struct", 6))
         || amatch ("union", 5)) {
-        if (symname (sname) == 0) {     // legal name ? 
+        if (symname (sname) == 0)
             illname ();
-        }
-        // structure not previously defined 
+        // Structure not previously
+        // defined.
         if ((otag = find_tag (sname)) == -1) {
             otag = define_struct (sname, stclass, sflag);
         }
@@ -301,9 +292,7 @@ do_declarations (int stclass, TAG_SYMBOL * mtag,
     return (1);
 }
 
-/**
- * dump the literal pool
- */
+// Dump ppol of literals.
 dumplits ()
 {
     int j, k;
@@ -327,9 +316,7 @@ dumplits ()
     }
 }
 
-/**
- * dump all static variables
- */
+// Dump static variables.
 dumpglbs ()
 {
     int dim, i, list_size, line_count, value;
@@ -378,7 +365,7 @@ dumpglbs ()
                                               tagidx]);
                             output_number (value);
                         } else {
-                            // dump zero, no more data available 
+                            // Dump zero, no more data available.
                             output_number (0);
                         }
                         line_count++;
@@ -400,11 +387,7 @@ dumpglbs ()
     }
 }
 
-/**
- * dump struct data
- * @param symbol struct variable
- * @param position position of the struct in the array, or zero
- */
+// Dump struct data.
 dump_struct (SYMBOL * symbol, int position)
 {
     int i, number_of_members, value;
@@ -416,14 +399,18 @@ dump_struct (SYMBOL * symbol, int position)
         SYMBOL member =
             member_table[tag_table[symbol->tagidx].
                          member_idx + i];
-        /* array members need proper storage space (the compiler currently
-         * doesn't allow arrays in structs to be initilized */
+        // Array members need proper
+        // storage space (the compiler
+        // currently doesn't allow
+        // arrays in structs to be
+        // initilized.
         if (member.identity == ARRAY) {
             gen_def_storage ();
             output_number (member.struct_size);
             newline ();
         } else {
-            // both pointers and ints take two bytes 
+            // Both pointers and ints
+            // take two bytes.
             if (member.type & CINT
                 || member.identity == POINTER) {
                 gen_def_word ();
@@ -431,7 +418,7 @@ dump_struct (SYMBOL * symbol, int position)
                 gen_def_byte ();
             }
             if (position < get_size (symbol->name)) {
-                // dump data 
+                // dump data
                 value =
                     get_item_at (symbol->name,
                                  position *
@@ -440,7 +427,8 @@ dump_struct (SYMBOL * symbol, int position)
                                             tagidx]);
                 output_number (value);
             } else {
-                // dump zero, no more data available 
+                // Dump zero, no more
+                // data available.
                 output_number (0);
             }
             newline ();
@@ -448,9 +436,6 @@ dump_struct (SYMBOL * symbol, int position)
     }
 }
 
-/**
- * report errors
- */
 errorsummary ()
 {
     if (ncmp)
@@ -479,11 +464,9 @@ errorsummary ()
         pl ("Error(s)");
 }
 
-/**
- * test for C or similar filename, e.g. xxxxx.x, tests the dot at end-1 postion
- * @param s the filename
- * @return the last char if it contains dot, space otherwise
- */
+// Test for C or similar filename, e.g.
+// xxxxx.x, tests the dot at end-1
+// postion.
 filename_typeof (char *s)
 {
     s += strlen (s) - 2;

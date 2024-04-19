@@ -1,8 +1,3 @@
-
-/*
- * File stmt.c: 2.1 (83/03/20,16:02:17)
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"

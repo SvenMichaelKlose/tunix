@@ -1,18 +1,8 @@
-
-//      File io.c: 2.1 (83/03/20,16:02:07) 
-
-/*% cc -O -c %
- *
- */
-
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
 #include "data.h"
 
-/*
- *      open input file
- */
 openin (p)
 char *p;
 {
@@ -26,12 +16,8 @@ char *p;
     }
     kill ();
     return (YES);
-
 }
 
-/*
- *      open output file
- */
 openout ()
 {
     outfname (fname);
@@ -41,24 +27,18 @@ openout ()
     }
     kill ();
     return (YES);
-
 }
 
-/*
- *      change input filename to output filename
- */
+// Make output name from input name.
 outfname (s)
 char *s;
 {
     while (*s)
         s++;
     *--s = 's';
-
 }
 
-/**
- * remove NL from filenames
- */
+// Terminate string at line feed.
 fixname (s)
 char *s;
 {
@@ -66,12 +46,9 @@ char *s;
     if (!*s)
         return;
     *(--s) = 0;
-
 }
 
-/**
- * check that filename is "*.c"
- */
+// Check that filename is "*.c".
 checkname (s)
 char *s;
 {
@@ -82,7 +59,6 @@ char *s;
     if (*--s != '.')
         return (NO);
     return (YES);
-
 }
 
 kill ()
@@ -108,7 +84,9 @@ readline ()
             line[lptr++] = k;
         }
         line[lptr] = 0;
-        srcln[inclsp]++;        // increment source line number of actual file 
+        // increment source line number
+        // of actual file 
+        srcln[inclsp]++;
         if (k <= 0)
             if (input2 != NULL) {
                 input2 = inclstk[--inclsp];
@@ -145,43 +123,31 @@ inchar ()
     return (gch ());
 }
 
-/**
- * gets current char from input line and moves to the next one
- * @return current char
- */
+// Gets current char from input line and
+// moves to the next one.
 gch ()
 {
     if (ch () == 0)
         return (0);
-    else
-        return (line[lptr++] & 127);
+    return (line[lptr++] & 127);
 }
 
-/**
- * returns next char
- * @return next char
- */
+// Next char.
 nch ()
 {
     if (ch () == 0)
         return (0);
-    else
-        return (line[lptr + 1] & 127);
+    return (line[lptr + 1] & 127);
 }
 
-/**
- * returns current char
- * @return current char
- */
+// Current char.
 ch ()
 {
     return (line[lptr] & 127);
 }
 
-/*
- *      print a carriage return and a string only to console
- *
- */
+// Print a carriage return and a string
+// only to console.
 pl (str)
 char *str;
 {

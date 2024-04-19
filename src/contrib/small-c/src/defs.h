@@ -1,8 +1,3 @@
-
-/*
- * File defs.h: 2.1 (83/03/21,02:07:20)
- */
-
 // Intel 8080 architecture defs 
 #define INTSIZE 2
 
@@ -25,13 +20,23 @@
 #define NAMEMAX         32
 
 struct symbol {
-    char name[NAMESIZE];        // symbol name 
-    int identity;               // variable, array, pointer, function 
-    int type;                   // char, int, uchar, unit 
-    int storage;                // public, auto, extern, static, lstatic, defauto 
-    int offset;                 // offset 
-    int tagidx;                 // index of struct in tag table 
-    int struct_size;            // the size, in bytes, of a member of a struct - only used for member declarations 
+    // symbol name 
+    char name[NAMESIZE];
+    // variable, array, pointer,
+    // function 
+    int identity;
+    // char, int, uchar, unit 
+    int type;
+    // public, auto, extern, static
+    // lstatic, defauto 
+    int storage;
+    int offset;
+    // index of struct in tag table 
+    int tagidx;
+    // The size, in bytes, of a member
+    // of a struct - only used for
+    // member declarations.
+    int struct_size;
 };
 #define SYMBOL struct symbol
 
@@ -42,10 +47,14 @@ struct symbol {
 #define NUMTAG      10
 
 struct tag_symbol {
-    char name[NAMESIZE];        // structure tag name 
-    int size;                   // size of struct in bytes 
-    int member_idx;             // index of first member 
-    int number_of_members;      // number of tag members 
+    // structure tag name 
+    char name[NAMESIZE];
+    // size of struct in bytes 
+    int size;
+    // index of first member 
+    int member_idx;
+    // number of tag members 
+    int number_of_members;
 };
 #define TAG_SYMBOL struct tag_symbol
 
@@ -55,28 +64,29 @@ struct tag_symbol {
 #define NULL_TAG (TAG_SYMBOL *)0
 #endif
 
-// Define the structure member table parameters 
+// Define the structure member table
+// parameters 
 #define NUMMEMB     30
 
-// possible entries for "ident" 
+// Possible entries for "ident".
 #define VARIABLE        1
 #define ARRAY           2
 #define POINTER         3
 #define FUNCTION        4
 
-/**
- * possible entries for "type"
- * high order 14 bits give length of object
- * low order 2 bits make type unique within length
- */
-#define UNSIGNED        1
-#define STRUCT          2
-#define CCHAR           (1 << 2)
-#define UCHAR           ((1 << 2) + 1)
-#define CINT            (2 << 2)
-#define UINT            ((2 << 2) + 1)
+// Possible entries for "type"
+// High order 14 bits give length of
+// object.
+// Low order 2 bits make type unique
+// within length.
+#define UNSIGNED    1
+#define STRUCT      2
+#define CCHAR       (1 << 2)
+#define UCHAR       ((1 << 2) + 1)
+#define CINT        (2 << 2)
+#define UINT        ((2 << 2) + 1)
 
-// possible entries for storage 
+// Possible entries for "storage".
 #define PUBLIC  1
 #define AUTO    2
 #define EXTERN  3
@@ -85,17 +95,25 @@ struct tag_symbol {
 #define LSTATIC 5
 #define DEFAUTO 6
 
-// "do"/"for"/"while"/"switch" statement stack 
+// "do"/"for"/"while"/"switch"
+// statement stack 
 #define WSTABSZ 20
 
 struct while_rec {
-    int symbol_idx;             // symbol table address 
-    int stack_pointer;          // stack pointer 
-    int type;                   // type 
-    int case_test;              // case or test 
-    int incr_def;               // continue label ? 
-    int body_tab;               // body of loop, switch ? 
-    int while_exit;             // exit label 
+    // symbol table address 
+    int symbol_idx;
+    // stack pointer 
+    int stack_pointer;
+    // type 
+    int type;
+    // case or test 
+    int case_test;
+    // continue label ? 
+    int incr_def;
+    // body of loop, switch ? 
+    int body_tab;
+    // exit label 
+    int while_exit;
 };
 #define WHILE struct while_rec
 
@@ -143,71 +161,66 @@ struct while_rec {
 #define DE_REG 1<<2
 
 struct lvalue {
-    SYMBOL *symbol;             // symbol table address, or 0 for constant 
-    int indirect;               // type of indirect object, 0 for static object 
-    int ptr_type;               // type of pointer or array, 0 for other idents 
-    TAG_SYMBOL *tagsym;         // tag symbol address, 0 if not struct 
+    // Symbol table address, or
+    // 0 for constant.
+    SYMBOL *symbol;
+    // Type of indirect object,
+    // 0 for static object.
+    int indirect;
+    // Type of pointer or array,
+    // 0 for other idents.
+    int ptr_type;
+    // Tag symbol address,
+    // 0 if not struct.
+    TAG_SYMBOL *tagsym;
 };
 #define LVALUE struct lvalue
 
-/**
- * path to include directories. set at compile time on host machine
- * @return
- */
+// Path to include directories. set at
+// compile time on host machine
 char *inclib ();
 
 WHILE *readwhile ();
 WHILE *findwhile ();
 WHILE *readswitch ();
 
-/**
- * Output the variable symbol at scptr as an extrn or a public
- * @param scptr
- */
+// Output the variable symbol at scptr
+// as an extrn or a public.
 void ppubext (SYMBOL * scptr);
 
-/**
- * Output the function symbol at scptr as an extrn or a public
- * @param scptr
- */
+// Output function symbol at scptr as
+// an extrn or a public.
 void fpubext (SYMBOL * scptr);
 
-/**
- * fetch a static memory cell into the primary register
- * @param sym
- */
+// Load static memory cell into the
+// primary register.
 void gen_get_memory (SYMBOL * sym);
 
-/**
- * fetch the specified object type indirect through the primary
- * register into the primary register
- * @param typeobj object type
- */
+// Load object type indirect through the
+// primary into the primary register.
 void gen_get_indirect (char typeobj, int reg);
 
-/**
- * asm - store the primary register into the specified static memory cell
- * @param sym
- */
+// Write primary to static memory cell.
 void gen_put_memory (SYMBOL * sym);
 
-// initialisation of global variables 
-#define INIT_TYPE    NAMESIZE
-#define INIT_LENGTH  NAMESIZE+1
-#define INITIALS_SIZE 5*1024
+// Initialisation of global variables-
+#define INIT_TYPE       NAMESIZE
+#define INIT_LENGTH     NAMESIZE+1
+#define INITIALS_SIZE   5*1024
 
 struct initials_table {
-    char name[NAMESIZE];        // symbol name 
-    int type;                   // type 
-    int dim;                    // length of data (possibly an array) 
-    int data_len;               // index of tag or zero 
+    // symbol name 
+    char name[NAMESIZE];
+    // type 
+    int type;
+    // length of data (possibly an
+    // array) 
+    int dim;
+    // index of tag or zero 
+    int data_len;
 };
 #define INITIALS struct initials_table
 
-/**
- * determine if 'sname' is a member of the struct with tag 'tag'
- * @param tag
- * @param sname
- * @return pointer to member symbol if it is, else 0
- */
+// Determine if 'sname' is a member of
+// the struct with tag 'tag'
 SYMBOL *find_member (TAG_SYMBOL * tag, char *sname);

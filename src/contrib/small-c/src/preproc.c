@@ -1,19 +1,10 @@
-
-//      File preproc.c: 2.3 (84/11/27,11:47:40) 
-
-/*% cc -O -c %
- *
- */
-
 #include <stdio.h>
 #include <string.h>
 #include "defs.h"
 #include "data.h"
 
-/**
- * remove "brackets" surrounding include file name
- * @see DEFLIB
- */
+// Remove "brackets" surrounding
+// include file name.  Ssee DEFLIB.
 FILE *
 fix_include_name ()
 {
@@ -45,9 +36,7 @@ fix_include_name ()
     return (fp);
 }
 
-/**
- * open an include file
- */
+// Open include file.
 doinclude ()
 {
     char *p;
@@ -65,14 +54,12 @@ doinclude ()
         error ("Could not open include file");
     }
     kill ();
-
 }
 
-/**
- * "asm" pseudo-statement
- * enters mode where assembly language statements are passed
- * intact through parser
- */
+// "#asm" pseudo-statement.
+// Enters mode where assembly language
+// statements are passed intact through
+// parser.
 doasm ()
 {
     cmode = 0;
@@ -87,7 +74,6 @@ doasm ()
     }
     kill ();
     cmode = 1;
-
 }
 
 dodefine ()
@@ -109,7 +95,6 @@ doundef ()
     if (mp = findmac (sname))
         delmac (mp);
     kill ();
-
 }
 
 preprocess ()
@@ -132,7 +117,6 @@ int ifdef;
     k = symname (sname) && findmac (sname);
     if (k != ifdef)
         skiplevel = iflevel;
-
 }
 
 ifline ()
@@ -168,19 +152,16 @@ ifline ()
         if (!skiplevel)
             return (0);
     }
-
 }
 
 noiferr ()
 {
     error ("no matching #if...");
-
 }
 
-/**
- * preprocess - copies mline to line with special treatment of preprocess cmds
- * @return
- */
+// Preprocess
+// Copies mline to line with special
+// treatment of preprocess cmds.
 cpp ()
 {
     int k;
@@ -284,7 +265,6 @@ cpp ()
     while (line[lptr++] = mline[mptr++]);
     lptr = 0;
     return (cpped);
-
 }
 
 keepch (c)
@@ -293,8 +273,7 @@ char c;
     mline[mptr] = c;
     if (mptr < MPMAX)
         mptr++;
-    return (c);
-
+    return c;
 }
 
 defmac (s)
@@ -331,30 +310,25 @@ addmac ()
 
 }
 
-/**
- * removes one line comments from defines
- * @param c
- * @return
- */
+// Skip one line comment.
 remove_one_line_comment (c)
 char c;
 {
     if ((c == '/') && (ch () == '/')) {
         while (gch ());
         return 0;
-    } else {
+    } else
         return c;
-    }
 }
 
 delmac (mp)
 int mp;
 {
     --mp;
-    --mp;                       // step over previous null 
+    // step over previous null 
+    --mp;
     while (mp >= 0 && macq[mp])
         macq[mp--] = '%';
-
 }
 
 putmac (c)
@@ -363,8 +337,7 @@ char c;
     macq[macptr] = c;
     if (macptr < MACMAX)
         macptr++;
-    return (c);
-
+    return c;
 }
 
 findmac (sname)
@@ -381,8 +354,7 @@ char *sname;
         while (macq[k++]);
         while (macq[k++]);
     }
-    return (0);
-
+    return 0;
 }
 
 toggle (name, onoff)

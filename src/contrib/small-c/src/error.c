@@ -1,14 +1,6 @@
-
-//      File error.c: 2.1 (83/03/20,16:02:00) 
-
-/*% cc -O -c %
- *
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
-
 
 error (ptr)
 char ptr[];
@@ -27,13 +19,16 @@ doerror (ptr)
 char *ptr;
 {
     int k;
-    if (finame[inclsp]) {       // print actual source filename 
+    // print actual source filename 
+    if (finame[inclsp]) {
         output_string (finame[inclsp]);
     }
     output_string (":");
-    output_decimal (srcln[inclsp]);     // print source line number 
+    // print source line number 
+    output_decimal (srcln[inclsp]);
     output_string (":");
-    output_decimal (lptr);      // print column number 
+    // print column number 
+    output_decimal (lptr);
     output_string (": error: ");
     output_string (ptr);
     newline ();

@@ -1,24 +1,19 @@
-
-/*
- * File sym.c: 2.1 (83/03/20,16:02:19)
- */
-
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
 
-/**
- * declare a static variable
- * @param type
- * @param storage
- * @param mtag tag of struct whose members are being declared, or zero
- * @param otag tag of struct object being declared. only matters if mtag is
- *             non-zero
- * @param is_struct struct or union or no meaning
- * @return
- */
-declare_global (int type, int storage, TAG_SYMBOL * mtag,
-                int otag, int is_struct)
+// Declare a static variable.
+// mtag: Tag of struct whose members are
+//       being declared, or 0.
+// otag: Tag of struct object being
+//       declared.  Only used with mtag.
+// is_struct:
+//       Tells if mtag is a struct or
+//       union or no meaning.
+declare_global (int type, int storage,
+                TAG_SYMBOL * mtag,
+                int otag,
+                int is_struct)
 {
     int dim, identity;
     char sname[NAMESIZE];
@@ -46,7 +41,9 @@ declare_global (int type, int storage, TAG_SYMBOL * mtag,
                    } */
             }
             // add symbol 
-            if (mtag == 0) {    // real variable, not a struct/union member 
+            if (mtag == 0) {
+                // real variable, not a
+                // struct/union member.
                 identity =
                     initials (sname, type, identity, dim,
                               otag);
@@ -87,23 +84,19 @@ declare_global (int type, int storage, TAG_SYMBOL * mtag,
     }
 }
 
-/**
- * initialize global objects
- * @param symbol_name
- * @param type char or integer or struct
- * @param identity
- * @param dim
- * @return 1 if variable is initialized
- */
+// Initialize global objects.
+// Returns 1 if variable is initialized.
 int
-initials (char *symbol_name, int type, int identity,
-          int dim, int otag)
+initials (char *symbol_name, int type,
+          int identity, int dim,
+          int otag)
 {
     int dim_unknown = 0;
     litptr = 0;
-    if (dim == 0) {             // allow for xx[] = {..}; declaration 
+    // Allow for xx[] = {..};
+    // declaration.
+    if (dim == 0)
         dim_unknown = 1;
-    }
     if (!(type & CCHAR) && !(type & CINT)
         && !(type == STRUCT)) {
         error ("unsupported storage size");
@@ -150,11 +143,9 @@ initials (char *symbol_name, int type, int identity,
     return identity;
 }
 
-/**
- * initialise structure
- * @param tag
- */
-struct_init (TAG_SYMBOL * tag, char *symbol_name)
+// Initialise structure.
+struct_init (TAG_SYMBOL * tag,
+             char *symbol_name)
 {
     int dim;
     int member_idx;
@@ -177,22 +168,15 @@ struct_init (TAG_SYMBOL * tag, char *symbol_name)
     }
 }
 
-/**
- * evaluate one initializer, add data to table
- * @param symbol_name
- * @param type
- * @param identity
- * @param dim
- * @param tag
- * @return
- */
-init (char *symbol_name, int type, int identity, int *dim,
+// Evaluate one initializer,
+// add data to table.
+init (char *symbol_name, int type,
+      int identity, int *dim,
       TAG_SYMBOL * tag)
 {
     int value, number_of_chars;
-    if (identity == POINTER) {
+    if (identity == POINTER)
         error ("cannot assign to pointer");
-    }
     if (quoted_string (&value)) {
         if ((identity == VARIABLE) || !(type & CCHAR))
             error
@@ -216,15 +200,13 @@ init (char *symbol_name, int type, int identity, int *dim,
     return 1;
 }
 
-/**
- * declare local variables
- * works just like "declglb", but modifies machine stack and adds
- * symbol table entry with appropriate stack offset to find it again
- * @param typ
- * @param stclass
- * @param otag index of tag in tag_table
- */
-declare_local (int typ, int stclass, int otag)
+// Declare local variables.
+// Works just like declglb(), but
+// modifies machine stack and adds
+// symbol table entry with appropriate
+// stack offset to find it again.
+declare_local (int typ, int stclass,
+               int otag)
 {
     int k, j;
     char sname[NAMESIZE];
@@ -296,10 +278,7 @@ declare_local (int typ, int stclass, int otag)
     }
 }
 
-/**
- * get required array size. [xx]
- * @return array size
- */
+// Get array size.
 needsub ()
 {
     int num[1];
@@ -318,11 +297,7 @@ needsub ()
     return (num[0]);
 }
 
-/**
- * search global table for given symbol name
- * @param sname
- * @return table index
- */
+// Find global symbol.
 int
 find_global (char *sname)
 {
@@ -337,11 +312,7 @@ find_global (char *sname)
     return (-1);
 }
 
-/**
- * search local table for given symbol name
- * @param sname
- * @return table index
- */
+// Find local symbol.
 int
 find_locale (char *sname)
 {
@@ -356,17 +327,10 @@ find_locale (char *sname)
     return (-1);
 }
 
-/**
- * add new symbol to global table
- * @param sname
- * @param identity
- * @param type
- * @param offset size in bytes
- * @param storage
- * @return new index
- */
+// Add global symbol.
 int
-add_global (char *sname, int identity, int type, int offset,
+add_global (char *sname, int identity,
+            int type, int offset,
             int storage)
 {
     SYMBOL *symbol;
@@ -391,17 +355,10 @@ add_global (char *sname, int identity, int type, int offset,
     return (current_symbol_table_idx);
 }
 
-/**
- * add new symbol to local table
- * @param sname
- * @param identity
- * @param type
- * @param offset size in bytes
- * @param storage_class
- * @return
- */
+// Add new symbol to local table.
 int
-add_local (char *sname, int identity, int type, int offset,
+add_local (char *sname, int identity,
+           int type, int offset,
            int storage_class)
 {
     int k;
@@ -439,9 +396,8 @@ add_local (char *sname, int identity, int type, int offset,
     return (current_symbol_table_idx);
 }
 
-/**
- * test if next input string is legal symbol name
- */
+// Test if next input string is legal
+// symbol name.
 symname (char *sname)
 {
     int k;
@@ -456,19 +412,11 @@ symname (char *sname)
     return (1);
 }
 
-/**
- * print error message
- */
 illname ()
 {
     error ("illegal symbol name");
 }
 
-/**
- * print error message
- * @param symbol_name
- * @return
- */
 multidef (char *symbol_name)
 {
     error ("already defined");

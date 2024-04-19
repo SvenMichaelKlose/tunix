@@ -204,9 +204,7 @@ compile (char *file)
 
 frontend_version ()
 {
-    output_line ("Front End (2.7,84/11/28)");
-    gen_comment ();
-    output_line ("Front End for ASXXXX (2.8,13/01/20)");
+    output_string ("; Front End (2.7,84/11/28)");
 }
 
 /**

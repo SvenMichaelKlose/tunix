@@ -22,17 +22,21 @@ else
 endif
 
 SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c preproc.c \
-      primary.c stmt.c sym.c while.c code8080.c struct.c
+      primary.c stmt.c sym.c while.c struct.c code6502.c #code8080.c
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all:    scc8080
+all:    scc6502
+	./scc6502 -t test.c
 
-scc8080: $(OBJ)
-	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
+scc6502: $(OBJ)
+	$(CC) -o scc6502 $(CFLAGS) $(OBJ)
+
+#scc8080: $(OBJ)
+#	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) scc8080.exe scc8080 *~ lib/*~ include/*~
+	rm -f $(OBJ) scc6502 scc8080 *~ lib/*~ include/*~
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

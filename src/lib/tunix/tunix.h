@@ -4,6 +4,7 @@
 extern void tunix_mode (char);
 extern char tunix_alloc (void);
 extern void tunix_free (char);
+extern char tunix_mem_info (void);
 extern void tunix_schedule (void);
 extern char tunix_getpid (void);
 extern char tunix_fork (void);

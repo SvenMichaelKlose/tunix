@@ -915,9 +915,11 @@ anywhere except in the IO23 area.
 
 ### "M$": Get memory information
 
-1. "TOTAL": Total bytes.
-2. "USED": Used bytes.
-3. "FREE": Free bytes.
+1. "TOTAL": Number of banks.
+2. "USED": Number of used banks.
+3. "FREE": Number of free banks
+4. "FAULTY": Number of faulty ones.
+5. "BANKSIZE": Size of a bank in bytes.
 
 ## "MA": Allocate a bank
 

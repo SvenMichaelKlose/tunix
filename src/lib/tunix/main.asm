@@ -31,6 +31,7 @@ TUNIX_DEVICE    = 31
 cmd_mode:           .byte "GM"
 cmd_alloc:          .byte "MA"
 cmd_free:           .byte "MF"
+cmd_mem_info:       .byte "MI"
 cmd_fork:           .byte "PF"
 cmd_exit:           .byte "PE"
 cmd_suspend:        .byte "PS"
@@ -104,6 +105,7 @@ cmd_proc_info:      .byte "PI"
 syscall1 lib_mode,          cmd_mode, 2
 syscall0 lib_alloc,         cmd_alloc, 2
 syscall1 lib_free,          cmd_free, 2
+syscall0 lib_mem_info,      cmd_mem_info, 2
 syscall0 lib_getpid,        cmd_getpid, 1
 syscall0 lib_fork,          cmd_fork, 2
 syscall1 lib_exit,          cmd_exit, 2

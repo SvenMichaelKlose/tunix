@@ -1,5 +1,5 @@
 .import lib_mode
-.import lib_alloc, lib_free
+.import lib_alloc, lib_free, lib_mem_info
 .import lib_schedule, lib_getpid
 .import lib_fork, lib_suspend
 .import lib_resume, lib_exit, lib_kill
@@ -13,6 +13,7 @@
 .export _tunix_mode = lib_mode
 .export _tunix_alloc = lib_alloc
 .export _tunix_free = lib_free
+.export _tunix_mem_info = lib_mem_info
 .export _tunix_schedule = lib_schedule
 .export _tunix_getpid = lib_getpid
 .export _tunix_fork = lib_fork

@@ -229,6 +229,8 @@ speedcopy_blk5_to_lowmem: .res 1
 speedcopy_lowmem_to_blk5: .res 1
 
 ;;; Extended memory banks
+banks_ok:       .res 1
+banks_faulty:   .res 1
 banks:          .res MAX_BANKS
 free_bank:      .res 1
 bank_refs:      .res MAX_BANKS
@@ -1218,7 +1220,6 @@ r:  plx
 ; Returns:
 ;  Z: Out of memory.
 ;  X: Bank #
-
 .export balloc
 .proc balloc
     phy
@@ -1266,8 +1267,12 @@ invalid_bank:
     rts
 .endproc
 
+    .segment "KERNELDATA"
+
 err_invalid_bank:
     .byte "BFREE INVALID BANK.", 0
+
+    .segment "KERNEL"
 
 ; Free all banks of current process.
 .export free_lbanks
@@ -1280,6 +1285,61 @@ err_invalid_bank:
     plx
     bne :-
 r:  rts
+.endproc
+
+items_mem_info:
+  .byte "TOTAL", 0
+  .byte "USED", 0
+  .byte "FREE", 0
+  .byte "FAULTY", 0
+  .byte "BANKSIZE,8192", 0
+  .byte 0
+
+.export mem_info
+.proc mem_info
+    pushw zp2
+    stwi zp2, items_mem_info
+
+    jsr print_head
+    lda banks_ok
+    clc
+    adc #FIRST_BANK
+    ldx #0
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    ldaxi banks
+    jsry list_length, free_bank
+    stx tmp1
+    lda banks_ok
+    sec
+    sbc tmp1
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    lda banks_faulty
+    ldx #0
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    jsr print_cr
+
+    popw zp2
+    clc
+    rts
+no_proc:
+    sec
+    rts
 .endproc
 
 ;;;;;;;;;;;;;;;;;;
@@ -1515,9 +1575,9 @@ vec_io23_to_blk5:
     lda proc_blk3,y
     beq o
     lda proc_blk5,y
-    bne banks_ok
+    bne banks_complete
 o:  jmp out_of_memory
-banks_ok:
+banks_complete:
 
     ; Copy old into new banks.
     .macro copy_blk_y procblk
@@ -1847,17 +1907,6 @@ invalid_pid:
 ;;; PROCESS INFO ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-    .segment "KERNELDATA"
-
-items_proc_list:
-  .byte "ID", 0
-  .byte "FLAGS", 0
-  .byte "#BANK", 0
-  .byte "#LFN", 0
-  .byte "#WAITING", 0
-  .byte "EXITCODE", 0
-  .byte 0
-
     .segment "KERNEL"
 
 .export proc_list_item
@@ -1929,6 +1978,17 @@ prt:tya
     jsr print_cr
     rts
 .endproc
+
+    .segment "KERNELDATA"
+
+items_proc_list:
+  .byte "ID", 0
+  .byte "FLAGS", 0
+  .byte "#BANK", 0
+  .byte "#LFN", 0
+  .byte "#WAITING", 0
+  .byte "EXITCODE", 0
+  .byte 0
 
     .segment "KERNEL"
 
@@ -2544,6 +2604,8 @@ g:  jmp tunix_general
     beq tunix_balloc
     cmp #'F'
     beq tunix_bfree
+    cmp #'I'
+    beq tunix_mem_info
     jmp respond_error
 .endproc
 
@@ -2559,6 +2621,9 @@ g:  jmp tunix_general
 
 ; "MFb"
 syscall1 tunix_bfree, bfree, ldx
+
+; "MI"
+syscall0 tunix_mem_info, mem_info
 
 ;; PROCESSES
 
@@ -2642,8 +2707,6 @@ fi: jmp tunix_iopage_free
 
     .zeropage
 
-banks_ok:       .res 1
-banks_faulty:   .res 1
 bnk:            .res 1
 col:            .res 1
 

@@ -86,7 +86,7 @@ make_baby (char schedule_rounds)
 void
 test_fork (char nprocs)
 {
-    char nbanks_a = 0; //test_alloc0 (3);
+    char nbanks_a = test_alloc0 (3);
     char nbanks_b;
     char i, mi, pid;
 
@@ -118,7 +118,7 @@ test_fork (char nprocs)
         printf ("Waiting for $%02x.\n",
                 pid);
         tunix_mode (1);
-        if (nprocs == 2 && i == 0) debug ();
+        //if (nprocs == 2 && i == 0) debug ();
         tunix_wait (pid);
         tunix_mode (0);
         printf ("$%02x exited.\n", pid);
@@ -126,7 +126,7 @@ test_fork (char nprocs)
     }
     printf ("\n");
 
-    nbanks_b = 0; //test_alloc0 (4);
+    nbanks_b = test_alloc0 (4);
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
         printf ("! %d banks missing "

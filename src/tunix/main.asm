@@ -1922,13 +1922,29 @@ prt:tya
     jsr print_comma
     jsr print_head
     jsr print_cr
-    ldx #0
-    jsr proc_list_item
+
     ldx running
     beq :+
-l:  jsr proc_list_item
-    lloop_x procs, l
-:   popw zp2
+l1: jsr proc_list_item
+    lloop_x procs, l1
+:
+
+    ldx sleeping
+    beq :+
+l2: jsr proc_list_item
+    lloop_x procs, l2
+:
+
+    ldx zombie
+    beq :+
+l3: jsr proc_list_item
+    lloop_x procs, l3
+:
+
+    ldx #0
+    jsr proc_list_item
+
+    popw zp2
     clc
     rts
 .endproc
@@ -3133,22 +3149,21 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 .proc schedule
     lda multitasking
     beq r
-    php
-    pla
-    and #4
-    bne r
 
     ;; Get next running.
     ldx pid
     lda procs,x
+    and #PROC_RUNNING | PROC_BABY
     bne :++
 
-    ; Restart list.
+    ;; Restart list.
+    ; Check if proc 0 is running.
     lda proc_flags + 0
     cmp #PROC_RUNNING
     bne :+  ; No...
     lda #0
     beq :++ ; (jmp)
+    ; Use regular first running.
 :   lda running
 
 :   cmp pid

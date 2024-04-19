@@ -134,7 +134,7 @@ test_fork (char nprocs)
                 "(round %d)).",
                 nbanks_a - nbanks_b,
                 nprocs);
-        tunix_mode (1);
+        while (1);
         tunix_exit (-1);
     }
     printf ("## %d children done.\n",

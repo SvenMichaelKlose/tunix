@@ -1506,6 +1506,7 @@ vec_io23_to_blk5:
     ldx pid
     stx tmp1
     mvb tmp2, {proc_data,x}
+    ; Save sp for child to return with.
     tsx
     stx tmp2+1
 
@@ -1547,6 +1548,7 @@ vec_io23_to_blk5:
     pop io23 ; Bank in IO23.
     tax
     alloc_lbank_x
+    ; Set child ID and stack pointer.
     sty pid
     mvb stack, tmp2+1
 
@@ -1624,15 +1626,16 @@ out_of_memory:
     tax
     lda lfn_glfn,x
     bne :+  ; Use existing...
+    ; Get LFN slot.
     lpush_x lfns, first_lfn
+    ; Allocate GLFN.
     phx
     lpop_x glfns, glfns
     inc glfn_refs,x
-    txa
-    tay
+    ; Link GLFN to LFN.
+    stx tmp1
     plx
-    tya
-    sta lfn_glfn,x
+    mvb {lfn_glfn,x}, tmp1
 :   rts
 .endproc
 
@@ -3033,6 +3036,8 @@ clr_lbanksb:
     txa
     jsr print_free_ram_a
     jsr print_cr
+
+    ; Move on to BASIC.
     jsr basic_cold_init
 .ifdef START_INIT
     jsr start_init

@@ -130,6 +130,7 @@ test_fork (char nprocs)
     if (nbanks_a != nbanks_b) {
         tunix_mode (0);
         tunix_mem_info ();
+        tunix_proc_list ();
         printf ("! %d banks missing "
                 "after fork test "
                 "(round %d)).",

@@ -406,7 +406,6 @@ gen_multiply_by_two ()
 }
 
 // Divide primary register by INTSIZE.
-// TODO: Check if used at all.
 gen_divide_by_two ()
 {
     // push primary in prep for

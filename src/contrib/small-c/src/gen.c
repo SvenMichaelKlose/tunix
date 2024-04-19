@@ -15,15 +15,6 @@ print_label (int label)
     output_decimal (label);
 }
 
-// Label
-// TODO: Not used?
-glabel (char *lab)
-{
-    output_string (lab);
-    output_label_terminator ();
-    newline ();
-}
-
 // Numeric label
 generate_label (int nlab)
 {

@@ -34,10 +34,6 @@ main (int argc, char *argv[])
     aflag = 1;
     uflag = 0;
 
-    // disable stdout buffering */
-    // TOOD: why exactly? 
-    setbuf (stdout, NULL);
-
     for (i = 1; i < argc; i++) {
         param = argv[i];
         if (*param == '-') {

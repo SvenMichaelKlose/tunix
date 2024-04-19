@@ -2290,9 +2290,12 @@ r:  rts
 
     .segment "KERNELDATA"
 
-err_out_of_running_procs:
-  .byte "OUT OF RUNNING PROCS. HALTING."
-  .byte 13, 0
+msg_exiting_init:
+  .byte "NOTHING TO RUN.", 13, 0
+  .byte "EXITING INIT.", 13, 0
+
+msg_shutdown:
+  .byte "SYSTEM DOWN. BYE!", 13, 13, 0
 
     .segment "KERNEL"
 
@@ -2304,7 +2307,11 @@ err_out_of_running_procs:
     lda running
     bne proc0
     mvb multitasking, #0
-    print err_out_of_running_procs
+    print msg_exiting_init
+    jsr proc_list
+    print msg_shutdown
+    jsr basic_cold_init
+    jmp get_ready
 .endproc
 
 .export halt
@@ -2935,15 +2942,34 @@ clr_lbanksb:
     txa
     jsr print_free_ram_a
     jsr print_cr
+    jsr basic_cold_init
+.ifdef START_INIT
+    jsr start_init
+.endif
+    ;jmp get_ready
+.endproc
 
+.export get_ready
+.proc get_ready
+    ldx #0
+    ldx #$f8
+    txs
+    jmp READY
+.endproc
+
+.export basic_cold_init
+.proc basic_cold_init
     ;; BASIC cold start.
     ldayi $e437
     jsr PRTSTR
     jsr INITVCTRS
     jsr INITBA
-    jsr $e412
+    jmp $e412
+.endproc
 
 .ifdef START_INIT
+.export start_init
+.proc start_init
     sei
     ldx #0
 l:  lda loadkeys,x
@@ -2953,13 +2979,9 @@ l:  lda loadkeys,x
     bne l   ; (jmp)
 :   stx NDX
     cli
-.endif
-
-    ldx #0
-    ldx #$f8
-    txs
-    jmp READY
+    rts
 .endproc
+.endif
 
     .segment "KERNELDATA"
 
@@ -3412,17 +3434,16 @@ blkiohandler save, #IDX_SAVE
     .segment "TESTS"
 
 txt_tests:
-  .byte "!!! RUNNING TESTS !!!", 13, 0
+  .byte "RUNNING TESTS.", 13, 0
 txt_testing_data:
-  .byte "!!! TESTING DATA !!!", 13, 0
+  .byte "TESTING DATA.", 13, 0
 txt_testing_processes:
-  .byte "!!! TESTING PROCS !!!", 13, 0
+  .byte "TESTING PROCS.", 13, 0
 txt_child:
   .byte "BABY.", 13, 0
 txt_hyperactive_child:
   .byte ":):):):):):):):):):):):)", 0
 txt_tests_passed:
-  .byte "!!!    SUCCESS:   !!!", 13
   .byte "!!! CHECKS PASSED !!!", 13, 0
 
 note_test_syscall:

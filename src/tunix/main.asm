@@ -1783,7 +1783,6 @@ end_wait:
     phx
     jsr resume_waiting
     plx
-
 return_code:
     lda exit_codes,x
     clc
@@ -1810,7 +1809,6 @@ reap_zombie:
     mvb multitasking, #1
     ldx pid
     jsr zombify
-    ;jmp resume_waiting
 .endproc
 
 ; Resume waiting process

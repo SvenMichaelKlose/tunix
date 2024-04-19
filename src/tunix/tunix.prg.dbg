@@ -1,6 +1,6 @@
 version	major=2,minor=0
 info	csym=0,file=748,lib=2,line=5570,mod=51,scope=86,seg=22,span=1668,sym=1259,type=6
-file	id=0,name="main.asm",size=62192,mtime=0x662184AC,mod=0
+file	id=0,name="main.asm",size=62192,mtime=0x66218517,mod=0
 file	id=1,name="main.asm",size=2690,mtime=0x66210B68,mod=2
 file	id=2,name="/usr/local/share/cc65/asminc/cbm_kernal.inc",size=6066,mtime=0x66217E0A,mod=0
 file	id=3,name="start.s",size=1155,mtime=0x661D85D3,mod=1

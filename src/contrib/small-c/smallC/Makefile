@@ -32,7 +32,7 @@ scc8080: $(OBJ)
 	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) scc8080.exe scc8080
+	rm -f $(OBJ) scc8080.exe scc8080 *~ lib/*~ include/*~
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

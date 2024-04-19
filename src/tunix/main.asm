@@ -1291,6 +1291,7 @@ items_mem_info:
   .byte "TOTAL", 0
   .byte "USED", 0
   .byte "FREE", 0
+  .byte "RESERVED", 0
   .byte "FAULTY", 0
   .byte "BANKSIZE,8192", 0
   .byte 0
@@ -1311,17 +1312,23 @@ items_mem_info:
     jsr print_head
     ldaxi banks
     jsry list_length, free_bank
-    txa
+    stx tmp1
+    lda banks_ok
+    sec
+    sbc tmp1
     jsr print_cv
     jsr print_cr
 
     jsr print_head
     ldaxi banks
     jsry list_length, free_bank
-    stx tmp1
-    lda banks_ok
-    sec
-    sbc tmp1
+    txa
+    jsr print_cv
+    jsr print_cr
+
+    jsr print_head
+    lda #FIRST_BANK
+    ldx #0
     jsr print_cv
     jsr print_cr
 

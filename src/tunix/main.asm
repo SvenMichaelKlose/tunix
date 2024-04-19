@@ -1852,6 +1852,9 @@ invalid_pid:
 items_proc_list:
   .byte "ID", 0
   .byte "FLAGS", 0
+  .byte "#BANK", 0
+  .byte "#LFN", 0
+  .byte "#WAITING", 0
   .byte "EXITCODE", 0
   .byte 0
 
@@ -1889,20 +1892,39 @@ prt:tya
 
     phx
     jsr print_comma
-    lda exit_codes,x
+    enter_procdata_x
+    ldaxi first_lbank
+    jsry list_length, first_lbank
+    leave_procdata
+    txa
     jsr print_decbyte
     plx
 
-;    phx
-;    jsr print_comma
-;    enter_procdata_x
-;    ldaxi waiting
-;    jsry list_length, first_waiting
-;    stx tmp1
-;    leave_procdata
-;    lda tmp1
-;    jsr print_decbyte
-;    plx
+    phx
+    jsr print_comma
+    enter_procdata_x
+    ldaxi first_lfn
+    jsry list_length, first_lfn
+    leave_procdata
+    txa
+    jsr print_decbyte
+    plx
+
+    phx
+    jsr print_comma
+    enter_procdata_x
+    ldaxi waiting
+    jsry list_length, first_waiting
+    leave_procdata
+    txa
+    jsr print_decbyte
+    plx
+
+    phx
+    jsr print_comma
+    lda exit_codes,x
+    jsr print_decbyte
+    plx
 
     jsr print_cr
     rts
@@ -1916,6 +1938,12 @@ prt:tya
 .proc proc_list
     pushw zp2
     stwi zp2, items_proc_list
+    jsr print_head
+    jsr print_comma
+    jsr print_head
+    jsr print_comma
+    jsr print_head
+    jsr print_comma
     jsr print_head
     jsr print_comma
     jsr print_head

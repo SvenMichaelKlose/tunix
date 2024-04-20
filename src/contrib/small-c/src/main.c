@@ -309,7 +309,7 @@ dumpglbs ()
     while (current_symbol_table_idx < global_table_index) {
         SYMBOL *symbol = &symbol_table[current_symbol_table_idx];
         if (symbol->identity != FUNCTION) {
-            gen_vdecl (symbol);
+            gen_decl_var (symbol);
             if (symbol->storage != EXTERN) {
                 def_global (symbol->name);
                 dim = symbol->offset;
@@ -351,7 +351,7 @@ dumpglbs ()
                 newline ();
             }
         } else
-            gen_fdecl (symbol);
+            gen_decl_fun (symbol);
         current_symbol_table_idx++;
     }
 }

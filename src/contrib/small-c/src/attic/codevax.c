@@ -190,7 +190,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-gen_vdecl (scptr)
+gen_decl_var (scptr)
 char *scptr;
 {
     if (scptr[STORAGE] == STATIC)
@@ -205,10 +205,10 @@ char *scptr;
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-gen_fdecl (scptr)
+gen_decl_fun (scptr)
 char *scptr;
 {
-    gen_vdecl (scptr);
+    gen_decl_var (scptr);
 
 }
 

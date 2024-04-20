@@ -428,7 +428,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-gen_vdecl(scptr) char *scptr; {
+gen_decl_var(scptr) char *scptr; {
         if (cptr[STORAGE] == STATIC) return;
         ot (scptr[STORAGE] == EXTERN ? "extrn\t" : "public\t");
         prefix ();
@@ -440,7 +440,7 @@ gen_vdecl(scptr) char *scptr; {
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-gen_fdecl(scptr) char *scptr; {
+gen_decl_fun(scptr) char *scptr; {
         if (scptr[STORAGE] == STATIC) return;
         ot (scptr[OFFSET] == FUNCTION ? "public\t" : "extrn\t");
         prefix ();
@@ -1288,7 +1288,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-gen_vdecl(scptr) char *scptr; {
+gen_decl_var(scptr) char *scptr; {
         if (scptr[STORAGE] == STATIC) return;
         ot (".globl\t");
         prefix ();
@@ -1300,8 +1300,8 @@ gen_vdecl(scptr) char *scptr; {
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-gen_fdecl(scptr) char *scptr; {
-        gen_vdecl(scptr);
+gen_decl_fun(scptr) char *scptr; {
+        gen_decl_var(scptr);
 
 }
 
@@ -2157,7 +2157,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-gen_vdecl(scptr) char *scptr; {
+gen_decl_var(scptr) char *scptr; {
         if (scptr[STORAGE] == STATIC) return;
         ot ("global\t");
         prefix ();
@@ -2169,8 +2169,8 @@ gen_vdecl(scptr) char *scptr; {
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-gen_fdecl(scptr) char *scptr; {
-        gen_vdecl(scptr);
+gen_decl_fun(scptr) char *scptr; {
+        gen_decl_var(scptr);
 
 }
 
@@ -3074,7 +3074,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-gen_vdecl(scptr) char *scptr; {
+gen_decl_var(scptr) char *scptr; {
         if (scptr[STORAGE] == STATIC) return;
         ot (".globl\t");
         prefix ();
@@ -3086,8 +3086,8 @@ gen_vdecl(scptr) char *scptr; {
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-gen_fdecl(scptr) char *scptr; {
-        gen_vdecl(scptr);
+gen_decl_fun(scptr) char *scptr; {
+        gen_decl_var(scptr);
 
 }
 

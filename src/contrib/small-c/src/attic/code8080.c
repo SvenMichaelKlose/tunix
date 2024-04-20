@@ -123,7 +123,7 @@ gen_data_segment ()
  * @param scptr
  */
 void
-gen_vdecl (SYMBOL * scptr)
+gen_decl_var (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage ==
         STATIC)
@@ -139,7 +139,7 @@ gen_vdecl (SYMBOL * scptr)
  * @param scptr
  */
 void
-gen_fdecl (SYMBOL * scptr)
+gen_decl_fun (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;

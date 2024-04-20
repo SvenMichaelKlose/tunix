@@ -114,7 +114,7 @@ _gen_storage_decl (int do_import, char *n)
 }
 
 // Import/export variable symbol.
-gen_vdecl (SYMBOL * scptr)
+gen_decl_var (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage == STATIC)
         return;
@@ -122,7 +122,7 @@ gen_vdecl (SYMBOL * scptr)
 }
 
 // Import/export function symbol.
-gen_fdecl (SYMBOL * scptr)
+gen_decl_fun (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;
@@ -277,7 +277,7 @@ gen_get_indirect (char typeobj, int reg)
     } else if (typeobj == UCHAR) {
         if (reg & DE_REG)
             gen_swap ();
-        gen_call("cguchar");
+        gen_call ("cguchar");
     } else
         gen_call ("ccgint");
 }

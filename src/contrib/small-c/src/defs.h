@@ -219,11 +219,11 @@ struct lvalue {
 
 // Output the variable symbol at scptr
 // as an extrn or a public.
-void gen_vdecl (SYMBOL * scptr);
+void gen_decl_var (SYMBOL * scptr);
 
 // Output function symbol at scptr as
 // an extrn or a public.
-void gen_fdecl (SYMBOL * scptr);
+void gen_decl_fun (SYMBOL * scptr);
 
 // Load static memory cell into the
 // primary register.

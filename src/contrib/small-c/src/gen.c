@@ -43,6 +43,10 @@ output_decimal (int number)
     fprintf (output, "%d", number);
 }
 
+//////////////
+/// LABELS ///
+//////////////
+
 // Return next available label number.
 getlabel ()
 {
@@ -74,6 +78,10 @@ gen_global (char *n)
     output_string (n);
 }
 
+////////////////////////
+/// MEMORY LOCATIONS ///
+////////////////////////
+
 // Store values in memory.
 store (LVALUE * lval)
 {
@@ -92,6 +100,10 @@ rvalue (LVALUE * lval, int reg)
     return HL_REG;
 }
 
+////////////
+/// TEST ///
+////////////
+
 // Parses test part "(expression)"
 // input and generates assembly for
 // jump.
@@ -105,8 +117,12 @@ test (int label, int ft)
     gen_test_jump (label, ft);
 }
 
-// Scale constant depending on type.
-scale_const (int type, int otag, int *size)
+///////////////////////
+/// TYPE CONVERSION ///
+///////////////////////
+
+scale_const (int type, int otag,
+             int *size)
 {
     switch (type) {
     case CINT:

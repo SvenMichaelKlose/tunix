@@ -30,6 +30,16 @@ MOS 6502-CPU and to compile Small-C by
 itself on such systems.  (Older versions
 were able to compile themselves.)
 
+# New in v3.1
+
+For 'unsigned int' declarations the
+'int' keyword can be omitted:
+
+~~~C
+unsigned int i;
+unsigned i2;    // Same.
+~~~
+
 # Language
 
 Comment may be K&R or ANSI-style.
@@ -52,7 +62,8 @@ have initializers.
 char  c;
 char  c = 0;    // No.
 short s;
-int   i;
+unsinged u;     // unsinged int
+int      i;
 unsigned char  uc;
 unsigned short us;
 unsigned int   ii;
@@ -74,15 +85,106 @@ Pointers are supported with single
 indirection.
 
 ~~~C
-    return *ptrs;   // Yes.
+    return *ptrs;
     return **ptrs;  // No.
-    return rec->entry;        // Yes.
+    return rec->entry;
     return res->entry->next;  // No.
+~~~
+
+Arrays can only have one dimension.
+
+~~~C
+char array1[5];
+char array1[23][42]; // No.
+~~~
+
+Initializers must be constant.
+
+~~~C
+char i = 2;
+char k = 1 + 1;     // No.
+char array[4];
+char array[4 + 1];  // No,
+char array[4] = {1, 2, 3, 4};
+char array[4] = {1, 2 + 3, 4}; // No.
+struct node {
+    char left;
+    char right;
+} = {1, 2};
+~~~
+
+Eventually variables want to be exported
+for the linker:
+
+~~~C
+extern char global_state;
 ~~~
 
 Functions must not be declared and their
 argument definitions are not known or
-checked at call time.
+checked at call time.  The return value
+may be 'void' or omitted (which defaults
+to int but the return type cannot be
+checked at compile-time).
+
+Local variables have to precede the
+statements.  They can be declared
+static.
+
+~~~C
+
+some_fun(); // No forward declarations!
+
+// K&R-style argument types.
+some_fun (to, have)
+char *to;
+int  have;
+{
+    int i;
+    static int j;
+}
+
+// ANSI-style argument types.
+some_fun (char *to, int have)
+{
+}
+~~~
+
+Control flow expressopms are: do, for,
+if, switch/case, while and return.
+
+Literals are:
+
+~~~
+'c'
+"string"
+23          // decimal
+0x1234      // hexadecimal
+0XDEADBEEF  // hexadecimal
+0755        // octal
+~~~
+
+Operators are:
+
+~~~
+// Unary
+!, - ++, --, ~
+*, [], ->, &
+
+Binary
++, -, *, /, %, ^
+==, !=, <, >, <=, >=
+|, &,
+||, &&,
+<<, >>
+
+// Assignment
+=, +=, -=, *=, /=, %=
+|=, &=, %=, ^=
+<<=, >>=
+
+sizeof()
+~~~
 
 # Supported Targets
 

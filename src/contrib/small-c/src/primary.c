@@ -244,7 +244,7 @@ quoted_string (int *position)
     char c;
 
     if (!match ("\""))
-        return (0);
+        return 0;
     *position = litptr;
     while (ch () != '"') {
         if (ch () == 0)
@@ -286,7 +286,7 @@ spechar ()
     else if (c == EOS)
         return 0;
     gch ();
-    return (c);
+    return c;
 }
 
 // Perform a function call.

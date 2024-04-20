@@ -50,7 +50,7 @@ output_decimal (int number)
 // Return next available label number.
 getlabel ()
 {
-    return (nxtlab++);
+    return nxtlab++;
 }
 
 def_local (int nlab)

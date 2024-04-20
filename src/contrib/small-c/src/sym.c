@@ -302,7 +302,7 @@ add_global (char *sname, int identity,
     SYMBOL *symbol;
     char *buffer_ptr;
     if ((current_symbol_table_idx = find_global (sname)) > -1)
-        return (current_symbol_table_idx);
+        return current_symbol_table_idx;
     if (global_table_index >= NUMBER_OF_GLOBALS) {
         error ("global symbol table overflow");
         return 0;
@@ -316,7 +316,7 @@ add_global (char *sname, int identity,
     symbol->storage = storage;
     symbol->offset = offset;
     global_table_index++;
-    return (current_symbol_table_idx);
+    return current_symbol_table_idx;
 }
 
 // Add new symbol to local table.
@@ -330,7 +330,7 @@ add_local (char *sname, int identity,
     char *buffer_ptr;
 
     if ((current_symbol_table_idx = find_local (sname)) > -1)
-        return (current_symbol_table_idx);
+        return current_symbol_table_idx;
     if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
         error ("local symbol table overflow");
         return 0;
@@ -353,7 +353,7 @@ add_local (char *sname, int identity,
     }
     symbol->offset = offset;
     local_table_index++;
-    return (current_symbol_table_idx);
+    return current_symbol_table_idx;
 }
 
 // Test if next input string is legal

@@ -79,7 +79,7 @@ findmac (char *sname)
     while (k < macptr) {
         if (astreq (sname, macq + k, NAMEMAX)) {
             while (macq[k++]);
-            return (k);
+            return k;
         }
         while (macq[k++]);
         while (macq[k++]);
@@ -207,7 +207,7 @@ ifline ()
     FOREVER {
         readline ();
         if (feof (input))
-            return (1);
+            return 1;
         if (match ("#ifdef")) {
             doifdef (YES);
             continue;
@@ -352,7 +352,7 @@ cpp ()
     lptr = mptr = 0;
     while (line[lptr++] = mline[mptr++]);
     lptr = 0;
-    return (cpped);
+    return cpped;
 }
 
 preprocess ()

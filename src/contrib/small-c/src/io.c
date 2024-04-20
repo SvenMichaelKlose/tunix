@@ -108,7 +108,7 @@ inbyte ()
             return 0;
         preprocess ();
     }
-    return (gch ());
+    return gch ();
 }
 
 inchar ()
@@ -117,7 +117,7 @@ inchar ()
         readline ();
     if (feof (input))
         return 0;
-    return (gch ());
+    return gch ();
 }
 
 // Gets current char from input line and
@@ -126,7 +126,7 @@ gch ()
 {
     if (!ch ())
         return 0;
-    return (line[lptr++] & 127);
+    return line[lptr++] & 127;
 }
 
 // Next char.
@@ -134,13 +134,13 @@ nch ()
 {
     if (!ch ())
         return 0;
-    return (line[lptr + 1] & 127);
+    return line[lptr + 1] & 127;
 }
 
 // Current char.
 ch ()
 {
-    return (line[lptr] & 127);
+    return line[lptr] & 127;
 }
 
 // Print a carriage return and a string

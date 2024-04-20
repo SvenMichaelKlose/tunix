@@ -317,7 +317,7 @@ gen_modify_stack (int newstkp)
 
     k = newstkp - stkp;
     if (k == 0)
-        return (newstkp);
+        return newstkp;
     if (k > 0) {
         if (k < 7) {
             if (k & 1) {
@@ -331,7 +331,7 @@ gen_modify_stack (int newstkp)
                 output_line ("sta b");
                 k = k - INTSIZE;
             }
-            return (newstkp);
+            return newstkp;
         }
     } else {
         if (k > -7) {
@@ -346,7 +346,7 @@ gen_modify_stack (int newstkp)
                 output_line ("pha");
                 k = k + INTSIZE;
             }
-            return (newstkp);
+            return newstkp;
         }
     }
     gen_swap ();
@@ -356,7 +356,7 @@ gen_modify_stack (int newstkp)
     gen_call ("add_sp");
     output_line ("sphl");
     gen_swap ();
-    return (newstkp);
+    return newstkp;
 }
 
 /////////////////
@@ -697,11 +697,11 @@ char *
 inclib ()
 {
 #ifdef  cpm
-    return ("B:");
+    return "B:";
 #endif
 #ifdef  unix
 #ifdef  INCDIR
-    return (INCDIR);
+    return INCDIR;
 #else
     return "";
 #endif
@@ -717,9 +717,9 @@ assemble (char *s)
     strcat (buf, " ");
     strcat (buf, s);
     buf[strlen (buf) - 1] = 's';
-    return (system (buf));
+    return system (buf);
 #else
-    return (0);
+    return 0;
 #endif
 }
 
@@ -729,6 +729,6 @@ link ()
 #ifdef  LDNM
     fputs ("I don't know how to link files yet\n", stderr);
 #else
-    return (0);
+    return 0;
 #endif
 }

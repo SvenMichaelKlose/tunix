@@ -5,19 +5,20 @@
 alpha (char c)
 {
     c = c & 127;
-    return (((c >= 'a') && (c <= 'z')) ||
-            ((c >= 'A') && (c <= 'Z')) || (c == '_'));
+    return c >= 'a' && c <= 'z'
+           || c >= 'A' && c <= 'Z'
+           || c == '_';
 }
 
 numeric (char c)
 {
     c = c & 127;
-    return ((c >= '0') && (c <= '9'));
+    return c >= '0' && c <= '9';
 }
 
 alphanumeric (char c)
 {
-    return ((alpha (c)) || (numeric (c)));
+    return alpha (c) || numeric (c);
 }
 
 need_semicolon ()
@@ -43,7 +44,8 @@ junk ()
 endst ()
 {
     blanks ();
-    return ((streq (line + lptr, ";") | (ch () == 0)));
+    return streq (line + lptr, ";")
+           || !ch ();
 }
 
 needbrack (char *str)
@@ -58,7 +60,7 @@ needbrack (char *str)
 
 sstreq (char *str1)
 {
-    return (streq (line + lptr, str1));
+    return streq (line + lptr, str1);
 }
 
 // Indicates whether or not the current
@@ -76,10 +78,10 @@ streq (char str1[], char str2[])
     k = 0;
     while (str2[k]) {
         if ((str1[k] != str2[k]))
-            return (0);
+            return 0;
         k++;
     }
-    return (k);
+    return k;
 }
 
 // Compare zero-terminated string
@@ -97,10 +99,10 @@ astreq (char str1[], char str2[], int len)
         k++;
     }
     if (alphanumeric (str1[k]))
-        return (0);
+        return 0;
     if (alphanumeric (str2[k]))
-        return (0);
-    return (k);
+        return 0;
+    return k;
 }
 
 // Looks for a match between a literal
@@ -118,9 +120,9 @@ match (char *lit)
     blanks ();
     if (k = streq (line + lptr, lit)) {
         lptr = lptr + k;
-        return (1);
+        return 1;
     }
-    return (0);
+    return 0;
 }
 
 // Compares zero-terminated strings.
@@ -140,9 +142,9 @@ amatch (char *lit, int len)
         lptr = lptr + k;
         while (alphanumeric (ch ()))
             inbyte ();
-        return (1);
+        return 1;
     }
-    return (0);
+    return 0;
 }
 
 blanks ()

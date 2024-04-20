@@ -10,6 +10,7 @@ the C programming language.
 
 This ersion intents to add documentation
 and self-hosting on 6502-CPU platforms.
+See [the roadmap](ROADMAP.xit).
 
 # Compilation And Usage
 

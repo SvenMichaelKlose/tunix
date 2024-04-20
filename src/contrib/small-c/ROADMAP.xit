@@ -1,0 +1,17 @@
+Port of Small-C to 8-bit platforms
+
+[x] Make perceivable. (linting, etc.)
+[x] Initial review.
+[x] Create roadmap.
+[@] Add documentation.
+[@] Clean up code.
+[ ] Generate intermediate byte code.
+[ ] Implement external IR to asm
+    generator for the 6502-CPU.
+[ ] External byte IR to text IR
+    conversion.
+[ ] Store symbol, tag and member table
+    in files with btree index and cache.
+[ ] Run-time library for CBM KERNALs
+    (Commodore 8-bit computers).
+[ ] Celebrate.

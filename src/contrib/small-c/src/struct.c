@@ -3,7 +3,6 @@
 #include "defs.h"
 #include "data.h"
 
-// Look up a tag in tag table by name.
 int
 find_tag (char *sname)
 {
@@ -11,9 +10,8 @@ find_tag (char *sname)
 
     index = 0;
     while (index < tag_table_index) {
-        if (astreq (sname, tag_table[index].name, NAMEMAX)) {
+        if (astreq (sname, tag_table[index].name, NAMEMAX))
             return index;
-        }
         ++index;
     }
     return -1;
@@ -27,20 +25,14 @@ find_member (TAG_SYMBOL * tag, char *sname)
     int member_idx;
 
     member_idx = tag->member_idx;
-
-    while (member_idx <
-           tag->member_idx + tag->number_of_members) {
-        if (strcmp (member_table[member_idx].name, sname) ==
-            0)
+    while (member_idx < tag->member_idx + tag->number_of_members) {
+        if (strcmp (member_table[member_idx].name, sname) == 0)
             return &member_table[member_idx];
         ++member_idx;
     }
     return 0;
 }
 
-// Add new structure member to table.
-// identity: variable, array, pointer,
-//           function
 add_member (char *sname, char identity,
             char type, int offset,
             int storage_class,
@@ -70,16 +62,15 @@ define_struct (char *sname, int storage,
                int is_struct)
 {
     TAG_SYMBOL *symbol;
-    char *buffer_ptr;
+    char *s;
 
-    //tag_table_index++; 
     if (tag_table_index >= NUMTAG) {
         error ("struct table overflow");
         return 0;
     }
     symbol = &tag_table[tag_table_index];
-    buffer_ptr = symbol->name;
-    while (alphanumeric (*buffer_ptr++ = *sname++));
+    s = symbol->name;
+    while (alphanumeric (*s++ = *sname++));
     symbol->size = 0;
     symbol->member_idx = member_table_index;
 
@@ -89,7 +80,6 @@ define_struct (char *sname, int storage,
                          &tag_table[tag_table_index],
                          is_struct);
     } while (!match ("}"));
-    symbol->number_of_members =
-        member_table_index - symbol->member_idx;
+    symbol->number_of_members = member_table_index - symbol->member_idx;
     return tag_table_index++;
 }

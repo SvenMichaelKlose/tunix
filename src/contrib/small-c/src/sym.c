@@ -93,8 +93,7 @@ initials (char *symbol_name, int type,
 {
     int dim_unknown = 0;
     litptr = 0;
-    // Allow for xx[] = {..};
-    // declaration.
+    // Allow for xx[] = {..}; decl.
     if (dim == 0)
         dim_unknown = 1;
     if (!(type & CCHAR) && !(type & CINT)
@@ -154,14 +153,11 @@ struct_init (TAG_SYMBOL * tag,
     while (member_idx <
            tag->member_idx + tag->number_of_members) {
         init (symbol_name,
-              member_table[tag->member_idx +
-                           member_idx].type,
-              member_table[tag->member_idx +
-                           member_idx].identity, &dim, tag);
+              member_table[tag->member_idx + member_idx].type,
+              member_table[tag->member_idx + member_idx].identity, &dim, tag);
         ++member_idx;
         if ((!match (",")) &&
-            (member_idx !=
-             (tag->member_idx + tag->number_of_members))) {
+            (member_idx != (tag->member_idx + tag->number_of_members))) {
             error ("struct initialisaton out of data");
             break;
         }
@@ -179,13 +175,11 @@ init (char *symbol_name, int type,
         error ("cannot assign to pointer");
     if (quoted_string (&value)) {
         if ((identity == VARIABLE) || !(type & CCHAR))
-            error
-                ("found string: must assign to char pointer or array");
+            error ("found string: must assign to char pointer or array");
         number_of_chars = litptr - value;
         *dim = *dim - number_of_chars;
         while (number_of_chars > 0) {
-            add_data_initials (symbol_name, CCHAR,
-                               litq[value++], tag);
+            add_data_initials (symbol_name, CCHAR, litq[value++], tag);
             number_of_chars = number_of_chars - 1;
         }
     } else if (number (&value)) {
@@ -194,9 +188,8 @@ init (char *symbol_name, int type,
     } else if (quoted_char (&value)) {
         add_data_initials (symbol_name, CCHAR, value, tag);
         *dim = *dim - 1;
-    } else {
+    } else
         return 0;
-    }
     return 1;
 }
 
@@ -365,12 +358,10 @@ add_local (char *sname, int identity,
     SYMBOL *symbol;
     char *buffer_ptr;
 
-    if ((current_symbol_table_idx =
-         find_local (sname)) > -1) {
+    if ((current_symbol_table_idx = find_local (sname)) > -1) {
         return (current_symbol_table_idx);
     }
-    if (local_table_index >=
-        NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
+    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
         error ("local symbol table overflow");
         return (0);
     }

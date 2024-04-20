@@ -2,36 +2,35 @@
 #include "defs.h"
 #include "data.h"
 
-/**
- * statement parser
- * called whenever syntax requires a statement.  this routine
- * performs that statement and returns a number telling which one
- * @param func func is true if we require a "function_statement", which
- * must be compound, and must contain "statement_list" (even if
- * "declaration_list" is omitted)
- * @return statement type
- */
+// Statement parser
+// Called whenever syntax requires a
+// statement.  This routine performs
+// that statement and returns a number
+// telling which one.
+// @param func func is true if we
+// require a "function_statement", which
+// must be compound, and must contain
+// "statement_list" (even if
+// "declaration_list" is omitted)
+// Returns statement type (see defs.h).
 statement (int func)
 {
-    if ((ch () == 0) & feof (input))
-        return (0);
+    if (!(ch ()) & feof (input))
+        return 0;
     lastst = 0;
     if (func)
         if (match ("{")) {
             do_compound (YES);
-            return (lastst);
+            return lastst;
         } else
             error ("function requires compound statement");
     if (match ("{"))
         do_compound (NO);
     else
         do_statement ();
-    return (lastst);
+    return lastst;
 }
 
-/**
- * declaration
- */
 statement_declare ()
 {
     if (amatch ("register", 8))
@@ -42,45 +41,38 @@ statement_declare ()
         do_local_declares (LSTATIC);
     else if (do_local_declares (AUTO));
     else
-        return (NO);
-    return (YES);
+        return NO;
+    return YES;
 }
 
-/**
- * local declarations
- * @param stclass
- * @return
- */
 do_local_declares (int stclass)
 {
     int type = 0;
-    int otag;                   // tag of struct object being declared 
-    int sflag;                  // TRUE for struct definition, zero for union 
+    // Tag of struct object being
+    // declared.
+    int otag;
+    // TRUE for struct definition, zero
+    // for union.
+    int sflag;
     char sname[NAMESIZE];
     blanks ();
     if ((sflag = amatch ("struct", 6))
         || amatch ("union", 5)) {
-        if (symname (sname) == 0) {     // legal name ? 
+        if (!symname (sname) == 0)
             illname ();
-        }
-        if ((otag = find_tag (sname)) == -1) {  // structure not previously defined 
+        if ((otag = find_tag (sname)) == -1)
             otag = define_struct (sname, stclass, sflag);
-        }
         declare_local (STRUCT, stclass, otag);
     } else if (type = get_type ()) {
         declare_local (type, stclass, -1);
     } else if (stclass == LSTATIC || stclass == DEFAUTO) {
         declare_local (CINT, stclass, -1);
-    } else {
-        return (0);
-    }
+    } else
+        return 0;
     need_semicolon ();
-    return (1);
+    return 1;
 }
 
-/**
- * non-declaration statement
- */
 do_statement ()
 {
     if (amatch ("if", 2)) {
@@ -125,23 +117,13 @@ do_statement ()
         do_compound (NO);
     else {
         expression (YES);
-
-/*      if (match (":")) {
-            dolabel ();
-            lastst = statement (NO);
-        } else {
-*/ need_semicolon ();
+        need_semicolon ();
         lastst = STEXP;
-/*      }
-*/ }
+    }
 }
 
-/**
- * compound statement
- * allow any number of statements to fall between "{" and "}"
- * 'func' is true if we are in a "function_statement", which
- * must contain "statement_list"
- */
+// Compound statement
+// TODO: Remove arg.
 do_compound (int func)
 {
     int decls;
@@ -151,18 +133,14 @@ do_compound (int func)
     while (!match ("}")) {
         if (feof (input))
             return;
-        if (decls) {
-            if (!statement_declare ())
-                decls = NO;
-        } else
+        if (!decls)
             do_statement ();
+        else if (!statement_declare ())
+            decls = NO;
     }
     ncmp--;
 }
 
-/**
- * "if" statement
- */
 doif ()
 {
     int fstkp, flab1, flab2;
@@ -187,9 +165,6 @@ doif ()
     def_local (flab2);
 }
 
-/**
- * "while" statement
- */
 dowhile ()
 {
     WHILE ws;
@@ -210,9 +185,6 @@ dowhile ()
     delwhile ();
 }
 
-/**
- * "do" statement
- */
 dodo ()
 {
     WHILE ws;
@@ -238,9 +210,6 @@ dodo ()
     delwhile ();
 }
 
-/**
- * "for" statement
- */
 dofor ()
 {
     WHILE ws;
@@ -284,9 +253,6 @@ dofor ()
     delwhile ();
 }
 
-/**
- * "switch" statement
- */
 doswitch ()
 {
     WHILE ws;
@@ -306,7 +272,8 @@ doswitch ()
     needbrack ("(");
     expression (YES);
     needbrack (")");
-    stkp = stkp + INTSIZE;      // '?case' will adjust the stack 
+    // '?case' will adjust the stack 
+    stkp = stkp + INTSIZE;
     gen_jump_case ();
     statement (NO);
     ptr = readswitch ();
@@ -319,9 +286,6 @@ doswitch ()
     delwhile ();
 }
 
-/**
- * "case" label
- */
 docase ()
 {
     int val;
@@ -338,9 +302,6 @@ docase ()
         error ("no active switch");
 }
 
-/**
- * "default" label
- */
 dodefault ()
 {
     WHILE *ptr;
@@ -355,9 +316,6 @@ dodefault ()
         error ("no active switch");
 }
 
-/**
- * "return" statement
- */
 doreturn ()
 {
     if (endst () == 0)
@@ -365,9 +323,6 @@ doreturn ()
     gen_jump (fexitlab);
 }
 
-/**
- * "break" statement
- */
 dobreak ()
 {
     WHILE *ptr;
@@ -378,12 +333,9 @@ dobreak ()
     gen_jump (ptr->while_exit);
 }
 
-/**
- * "continue" statement
- */
 docont ()
 {
-    WHILE *ptr;                 //int     *ptr; 
+    WHILE *ptr;
 
     if ((ptr = findwhile ()) == 0)
         return;
@@ -394,9 +346,7 @@ docont ()
         gen_jump (ptr->case_test);
 }
 
-/**
- * dump switch table
- */
+// Dump switch table.
 dumpsw (WHILE * ws)
 {
     int i, j;

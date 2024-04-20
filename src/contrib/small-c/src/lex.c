@@ -33,7 +33,7 @@ junk ()
             gch ();
     else
         while (alphanumeric (ch ())) {
-            if (ch () == 0)
+            if (!ch ())
                 break;
             gch ();
         }
@@ -56,8 +56,7 @@ needbrack (char *str)
     }
 }
 
-sstreq (str1)
-char *str1;
+sstreq (char *str1)
 {
     return (streq (line + lptr, str1));
 }

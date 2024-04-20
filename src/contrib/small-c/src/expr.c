@@ -7,10 +7,8 @@ nosign (LVALUE * is)
 {
     SYMBOL *ptr;
 
-    if ((is->ptr_type) ||
-        ((ptr = is->symbol) && (ptr->type & UNSIGNED))) {
+    if ((is->ptr_type) || ((ptr = is->symbol) && (ptr->type & UNSIGNED)))
         return 1;
-    }
     return 0;
 }
 

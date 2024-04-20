@@ -2,21 +2,19 @@
 #include "defs.h"
 #include "data.h"
 
-error (ptr)
-char ptr[];
+error (char msg)
 {
     FILE *tempfile;
 
     tempfile = output;
     output = stdout;
-    doerror (ptr);
+    doerror (msg);
     output = tempfile;
-    doerror (ptr);
+    doerror (msg);
     errcnt++;
 }
 
-doerror (ptr)
-char *ptr;
+doerror (char *msg)
 {
     int k;
     // print actual source filename 
@@ -30,7 +28,7 @@ char *ptr;
     // print column number 
     output_decimal (lptr);
     output_string (": error: ");
-    output_string (ptr);
+    output_string (msg);
     newline ();
     output_string (line);
     newline ();

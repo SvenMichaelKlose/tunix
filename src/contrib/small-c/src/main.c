@@ -102,16 +102,13 @@ main (int argc, char *argv[])
 
                     if (!(logFile = fopen (param, "ab")))
                         perror ("CAN'T OPEN LOGFILE");
-
                     break;
-
                 default:
                     usage ();
                 }
             }
-        } else {
+        } else
             break;
-        }
     }
 
     // command line defined macros -d 
@@ -148,23 +145,16 @@ compile (char *file)
             iflevel =
             skiplevel =
             swstp = litptr = stkp = errcnt = ncmp = lastst =
-            //quote[1] = 
             0;
         input2 = NULL;
-        //quote[0] = '"'; 
         cmode = 1;
         glbflag = 1;
         nxtlab = 0;
         litlab = getlabel ();
         defmac ("end\tmemory");
-        //add_global("memory", ARRAY, CCHAR, 0, EXTERN); 
-        //add_global("stack", ARRAY, CCHAR, 0, EXTERN); 
-        rglobal_table_index = global_table_index;       //rglbptr = glbptr; 
-        //add_global("etext", ARRAY, CCHAR, 0, EXTERN); 
-        //add_global("edata", ARRAY, CCHAR, 0, EXTERN); 
+        rglobal_table_index = global_table_index;
         defmac ("short\tint");
         initmac ();
-        // compiler body 
         if (file == NULL) {
             input = stdin;
         } else if (!openin (file))
@@ -187,9 +177,8 @@ compile (char *file)
         errs = errs || errfile;
 #ifndef NOASLD
     }
-    if (!errfile && !sflag) {
+    if (!errfile && !sflag)
         errs = errs || assemble (file);
-    }
 #else
     } else {
         oputs ("Don't understand file ");
@@ -246,9 +235,8 @@ parse ()
             dodefine ();
         } else if (match ("#undef"))
             doundef ();
-        else {
+        else
             newfunc ();
-        }
         blanks ();
     }
 }
@@ -270,26 +258,21 @@ do_declarations (int stclass,
     blanks ();
     if ((sflag = amatch ("struct", 6))
         || amatch ("union", 5)) {
-        if (symname (sname) == 0)
+        if (!symname (sname))
             illname ();
         // Structure not previously
         // defined.
-        if ((otag = find_tag (sname)) == -1) {
+        if ((otag = find_tag (sname)) == -1)
             otag = define_struct (sname, stclass, sflag);
-        }
-        declare_global (STRUCT, stclass, mtag, otag,
-                        is_struct);
-    } else if (type = get_type ()) {
-        declare_global (type, stclass, mtag, NULL_TAG,
-                        is_struct);
-    } else if (stclass == PUBLIC) {
-        return (0);
-    } else {
-        declare_global (CINT, stclass, mtag, NULL_TAG,
-                        is_struct);
-    }
+        declare_global (STRUCT, stclass, mtag, otag, is_struct);
+    } else if (type = get_type ())
+        declare_global (type, stclass, mtag, NULL_TAG, is_struct);
+    else if (stclass == PUBLIC)
+        return 0;
+    else
+        declare_global (CINT, stclass, mtag, NULL_TAG, is_struct);
     need_semicolon ();
-    return (1);
+    return 1;
 }
 
 // Dump ppol of literals.
@@ -324,8 +307,7 @@ dumpglbs ()
         return;
     current_symbol_table_idx = rglobal_table_index;
     while (current_symbol_table_idx < global_table_index) {
-        SYMBOL *symbol =
-            &symbol_table[current_symbol_table_idx];
+        SYMBOL *symbol = &symbol_table[current_symbol_table_idx];
         if (symbol->identity != FUNCTION) {
             gen_vdecl (symbol);
             if (symbol->storage != EXTERN) {
@@ -333,11 +315,11 @@ dumpglbs ()
                 dim = symbol->offset;
                 list_size = 0;
                 line_count = 0;
-                if (find_symbol_initials (symbol->name)) {      // has initials 
+                if (find_symbol_initials (symbol->name)) {
+                    // has initials 
                     list_size = get_size (symbol->name);
-                    if (dim == -1) {
+                    if (dim == -1)
                         dim = list_size;
-                    }
                 }
                 for (i = 0; i < dim; i++) {
                     if (symbol->type == STRUCT) {
@@ -349,31 +331,21 @@ dumpglbs ()
                                 (symbol->identity ==
                                  POINTER)) {
                                 gen_dataw ();
-                            } else {
+                            } else
                                 gen_datab ();
-                            }
                         }
                         if (i < list_size) {
                             // dump data 
-                            value =
-                                get_item_at (symbol->name,
-                                             i,
-                                             &tag_table
-                                             [symbol->
-                                              tagidx]);
+                            value = get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]);
                             output_number (value);
-                        } else {
+                        } else
                             // Dump zero, no more data available.
                             output_number (0);
-                        }
                         line_count++;
-                        if (line_count % 10 == 0) {
+                        if (line_count % 10 == 0)
                             line_count = 0;
-                        } else {
-                            if (i < dim - 1) {
-                                output_byte (',');
-                            }
-                        }
+                        else if (i < dim - 1)
+                            output_byte (',');
                     }
                 }
                 newline ();
@@ -388,14 +360,11 @@ dumpglbs ()
 dump_struct (SYMBOL * symbol, int position)
 {
     int i, number_of_members, value;
-    number_of_members =
-        tag_table[symbol->tagidx].number_of_members;
+    number_of_members = tag_table[symbol->tagidx].number_of_members;
     newline ();
     for (i = 0; i < number_of_members; i++) {
         // i is the index of current member, get type 
-        SYMBOL member =
-            member_table[tag_table[symbol->tagidx].
-                         member_idx + i];
+        SYMBOL member = member_table[tag_table[symbol->tagidx].  member_idx + i];
         // Array members need proper
         // storage space (the compiler
         // currently doesn't allow
@@ -408,20 +377,13 @@ dump_struct (SYMBOL * symbol, int position)
         } else {
             // Both pointers and ints
             // take two bytes.
-            if (member.type & CINT
-                || member.identity == POINTER) {
+            if (member.type & CINT || member.identity == POINTER)
                 gen_dataw ();
-            } else {
+            else
                 gen_datab ();
-            }
             if (position < get_size (symbol->name)) {
                 // dump data
-                value =
-                    get_item_at (symbol->name,
-                                 position *
-                                 number_of_members + i,
-                                 &tag_table[symbol->
-                                            tagidx]);
+                value = get_item_at (symbol->name, position * number_of_members + i, &tag_table[symbol-> tagidx]);
                 output_number (value);
             } else {
                 // Dump zero, no more
@@ -444,17 +406,13 @@ errorsummary ()
         errfile = YES;
     output_string (" error(s) in compilation");
     newline ();
-    gen_comment ();
-    output_line ("\nliteral pool:");
+    output_string ("; literal pool: ");
     output_decimal (litptr);
     newline ();
-    gen_comment ();
-    output_line ("\nglobal pool:");
-    output_decimal (global_table_index -
-                    rglobal_table_index);
+    output_string ("; global pool: ");
+    output_decimal (global_table_index - rglobal_table_index);
     newline ();
-    gen_comment ();
-    output_line ("\nMacro pool:");
+    output_string ("; Macro pool: ");
     output_decimal (macptr);
     newline ();
     if (errcnt > 0)
@@ -468,6 +426,6 @@ filename_typeof (char *s)
 {
     s += strlen (s) - 2;
     if (*s == '.')
-        return (*(s + 1));
-    return (' ');
+        return *(s + 1);
+    return ' ';
 }

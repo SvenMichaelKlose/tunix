@@ -53,7 +53,6 @@ add_member (char *sname, char identity,
     symbol->offset = offset;
     // set size for arrays 
     symbol->struct_size = member_size;
-
     member_table_index++;
 }
 

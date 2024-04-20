@@ -5,7 +5,8 @@
 
 // Add new symbol to table, initialise
 // begin position in data array.
-add_symbol_initials (char *symbol_name, char type)
+add_symbol_initials (char *symbol_name,
+                     char type)
 {
     strcpy (initials_table[initials_idx].name, symbol_name);
     initials_table[initials_idx].type = type;
@@ -24,17 +25,14 @@ find_symbol_initials (char *symbol_name)
         if (initials_idx >= NUMBER_OF_GLOBALS)
             error ("initials table overrun");
 
-        if (astreq
-            (symbol_name,
-             &initials_table[initials_idx].name, NAMEMAX)) {
+        if (astreq (symbol_name, &initials_table[initials_idx].name, NAMEMAX)) {
             result = 1;
             break;
         } else {
             // Move to next symbol
             // count position in data
             // array.
-            initials_data_idx +=
-                initials_table[initials_idx].data_len;
+            initials_data_idx += initials_table[initials_idx].data_len;
         }
     }
     return result;
@@ -45,10 +43,8 @@ add_data_initials (char *symbol_name, int type, int value,
                    TAG_SYMBOL * tag)
 {
     int position;
-    if (find_symbol_initials (symbol_name) == 0) {
-        add_symbol_initials (symbol_name,
-                             tag == 0 ? type : STRUCT);
-    }
+    if (find_symbol_initials (symbol_name) == 0)
+        add_symbol_initials (symbol_name, tag == 0 ? type : STRUCT);
     if (tag != 0) {
         // Find number of members, dim
         // is total number of values
@@ -59,25 +55,18 @@ add_data_initials (char *symbol_name, int type, int value,
         int member_type =
             member_table[tag->member_idx + index].type;
         // add it recursively.
-        add_data_initials (symbol_name, member_type, value,
-                           0);
+        add_data_initials (symbol_name, member_type, value, 0);
     } else {
         position = initials_table[initials_idx].data_len;
         if (type & CCHAR) {
-            initials_data_table[initials_data_idx +
-                                position] = 0xff & value;
+            initials_data_table[initials_data_idx + position] = 0xff & value;
             initials_table[initials_idx].data_len += 1;
         } else if (type & CINT) {
 
-            initials_data_table[initials_data_idx +
-                                position] =
-                (0xff00 & value) >> 8;
+            initials_data_table[initials_data_idx + position] = (0xff00 & value) >> 8;
 
-            initials_data_table[initials_data_idx +
-                                position + 1] =
-                0xff & value;
-            initials_table[initials_idx].data_len +=
-                INTSIZE;
+            initials_data_table[initials_data_idx + position + 1] = 0xff & value;
+            initials_table[initials_idx].data_len += INTSIZE;
         }
         initials_table[initials_idx].dim += 1;
     }
@@ -89,9 +78,8 @@ int
 get_size (char *symbol_name)
 {
     int result = 0;
-    if (find_symbol_initials (symbol_name) != 0) {
+    if (find_symbol_initials (symbol_name) != 0)
         result = initials_table[initials_idx].dim;
-    }
     return result;
 }
 
@@ -104,50 +92,28 @@ get_item_at (char *symbol_name,
     int result = 0, i, type;
     if (find_symbol_initials (symbol_name) != 0) {
         if (initials_table[initials_idx].type & CCHAR) {
-            result =
-                initials_data_table[initials_data_idx +
-                                    position];
+            result = initials_data_table[initials_data_idx + position];
         } else if (initials_table[initials_idx].type & CINT) {
             position *= INTSIZE;
-            result =
-                (initials_data_table
-                 [initials_data_idx + position] << 8) +
-                (unsigned char)
-                initials_data_table[initials_data_idx +
-                                    position + 1];
-        } else if (initials_table[initials_idx].type ==
-                   STRUCT) {
+            result = (initials_data_table[initials_data_idx + position] << 8)
+                         + (unsigned char) initials_data_table[initials_data_idx + position + 1];
+        } else if (initials_table[initials_idx].type == STRUCT) {
             // Find number of members.
             int number_of_members = tag->number_of_members;
-            // Point behind the last
+            // Point behind the last.
             // full struct.
-            int index =
-                (position / number_of_members) * tag->size;
+            int index = (position / number_of_members) * tag->size;
             // Move to required member.
-            for (i = 0; i < (position % number_of_members);
-                 i++) {
-                type =
-                    member_table[tag->member_idx + i].type;
-                if (type & CCHAR) {
-                    index += 1;
-                } else {
-                    index += INTSIZE;
-                }
+            for (i = 0; i < (position % number_of_members); i++) {
+                type = member_table[tag->member_idx + i].type;
+                index += (type & CCHAR) ? 1 : INTSIZE;
             }
             // Get value.
             type = member_table[tag->member_idx + i].type;
-            if (type & CCHAR) {
-                result =
-                    initials_data_table[initials_data_idx +
-                                        index];
-            } else {
-                result =
-                    (initials_data_table
-                     [initials_data_idx + index] << 8) +
-                    (unsigned char)
-                    initials_data_table[initials_data_idx +
-                                        index + 1];
-            }
+            result = (type & CCHAR) ?
+                initials_data_table[initials_data_idx + index] :
+                (initials_data_table [initials_data_idx + index] << 8)
+                    + (unsigned char) initials_data_table[initials_data_idx + index + 1];
         }
     }
     return result;

@@ -3,6 +3,90 @@
 #include "defs.h"
 #include "data.h"
 
+keepch (char c)
+{
+    mline[mptr] = c;
+    if (mptr < MPMAX)
+        mptr++;
+    return c;
+}
+
+toggle (char name, int onoff)
+{
+    switch (name) {
+    case 'C':
+        ctext = onoff;
+        break;
+    }
+}
+
+remove_one_line_comment (char c)
+{
+    if ((c == '/') && (ch () == '/')) {
+        while (gch ());
+        return 0;
+    }
+    return c;
+}
+
+putmac (char c)
+{
+    macq[macptr] = c;
+    if (macptr < MACMAX)
+        macptr++;
+    return c;
+}
+
+addmac ()
+{
+    char sname[NAMESIZE];
+    int k;
+    int mp;
+
+    if (!symname (sname)) {
+        illname ();
+        kill ();
+        return;
+    }
+    if (mp = findmac (sname)) {
+        error ("Duplicate define");
+        delmac (mp);
+    }
+    k = 0;
+    while (putmac (sname[k++]));
+    while (ch () == ' ' | ch () == 9)
+        gch ();
+    while (putmac (remove_one_line_comment (gch ())));
+    if (macptr >= MACMAX)
+        error ("macro table full");
+
+}
+
+delmac (int mp)
+{
+    // step over previous NULL. 
+    --mp;
+    --mp;
+    while (mp >= 0 && macq[mp])
+        macq[mp--] = '%';
+}
+
+findmac (char *sname)
+{
+    int k;
+
+    k = 0;
+    while (k < macptr) {
+        if (astreq (sname, macq + k, NAMEMAX)) {
+            while (macq[k++]);
+            return (k);
+        }
+        while (macq[k++]);
+        while (macq[k++]);
+    }
+    return 0;
+}
+
 // Remove "brackets" surrounding
 // include file name.  Ssee DEFLIB.
 FILE *
@@ -16,13 +100,13 @@ fix_include_name ()
     ibp = &buf[0];
 
     if ((c1 = gch ()) != '"' && c1 != '<')
-        return (NULL);
+        return NULL;
     for (p = line + lptr; *p;)
         *ibp++ = *p++;
     c2 = *(--p);
     if (c1 == '"' ? (c2 != '"') : (c2 != '>')) {
         error ("incorrect delimiter");
-        return (NULL);
+        return NULL;
     }
     *(--ibp) = 0;
     fp = NULL;
@@ -30,10 +114,12 @@ fix_include_name ()
         strcpy (buf2, DEFLIB);
         strcat (buf2, buf);
         fp = fopen (buf2, "r");
-        strcpy (finame[inclsp + 1], buf2);      // copy include filename to filename array 
-        srcln[inclsp + 1] = 0;  // reset source line counter 
+        // Copy include filename to filename array.
+        strcpy (finame[inclsp + 1], buf2);
+        // Reset source line counter.
+        srcln[inclsp + 1] = 0;
     }
-    return (fp);
+    return fp;
 }
 
 // Open include file.
@@ -43,16 +129,16 @@ doinclude ()
     FILE *inp2;
 
     blanks ();
-    if (inp2 = fix_include_name ())
+    if (inp2 = fix_include_name ()) {
         if (inclsp < INCLSIZ) {
             inclstk[inclsp++] = input2;
             input2 = inp2;
         } else {
             fclose (inp2);
             error ("too many nested includes");
-    } else {
+        }
+    } else
         error ("Could not open include file");
-    }
     kill ();
 }
 
@@ -97,15 +183,7 @@ doundef ()
     kill ();
 }
 
-preprocess ()
-{
-    if (ifline ())
-        return;
-    while (cpp ());
-}
-
-doifdef (ifdef)
-int ifdef;
+doifdef (int ifdef)
 {
     char sname[NAMESIZE];
     int k;
@@ -117,6 +195,11 @@ int ifdef;
     k = symname (sname) && findmac (sname);
     if (k != ifdef)
         skiplevel = iflevel;
+}
+
+noiferr ()
+{
+    error ("no matching #if...");
 }
 
 ifline ()
@@ -150,13 +233,15 @@ ifline ()
             continue;
         }
         if (!skiplevel)
-            return (0);
+            return 0;
     }
 }
 
-noiferr ()
+defmac (char *s)
 {
-    error ("no matching #if...");
+    kill ();
+    strcpy (line, s);
+    addmac ();
 }
 
 // Preprocess
@@ -167,12 +252,15 @@ cpp ()
     int k;
     char c, sname[NAMESIZE];
     int tog;
-    int cpped;                  // non-zero if something expanded 
+    // Non-zero if something expanded.
+    int cpped;
 
     cpped = 0;
-    // don't expand lines with preprocessor commands in them 
+    // Don't expand lines with
+    // preprocessor commands in
+    // them.
     if (!cmode || line[0] == '#')
-        return (0);
+        return 0;
 
     mptr = lptr = 0;
     while (ch ()) {
@@ -235,8 +323,8 @@ cpp ()
                 }
             inchar ();
             inchar ();
-            // one line comment 
         } else if ((ch () == '/') & (nch () == '/')) {
+            // one line comment 
             while (gch ());
         } else if (alphanumeric (ch ())) {
             k = 0;
@@ -267,103 +355,9 @@ cpp ()
     return (cpped);
 }
 
-keepch (c)
-char c;
+preprocess ()
 {
-    mline[mptr] = c;
-    if (mptr < MPMAX)
-        mptr++;
-    return c;
-}
-
-defmac (s)
-char *s;
-{
-    kill ();
-    strcpy (line, s);
-    addmac ();
-}
-
-addmac ()
-{
-    char sname[NAMESIZE];
-    int k;
-    int mp;
-
-    if (!symname (sname)) {
-        illname ();
-        kill ();
+    if (ifline ())
         return;
-    }
-    if (mp = findmac (sname)) {
-        error ("Duplicate define");
-        delmac (mp);
-    }
-    k = 0;
-    while (putmac (sname[k++]));
-    while (ch () == ' ' | ch () == 9)
-        gch ();
-    //while (putmac (gch ())); 
-    while (putmac (remove_one_line_comment (gch ())));
-    if (macptr >= MACMAX)
-        error ("macro table full");
-
-}
-
-// Skip one line comment.
-remove_one_line_comment (c)
-char c;
-{
-    if ((c == '/') && (ch () == '/')) {
-        while (gch ());
-        return 0;
-    } else
-        return c;
-}
-
-delmac (mp)
-int mp;
-{
-    --mp;
-    // step over previous null 
-    --mp;
-    while (mp >= 0 && macq[mp])
-        macq[mp--] = '%';
-}
-
-putmac (c)
-char c;
-{
-    macq[macptr] = c;
-    if (macptr < MACMAX)
-        macptr++;
-    return c;
-}
-
-findmac (sname)
-char *sname;
-{
-    int k;
-
-    k = 0;
-    while (k < macptr) {
-        if (astreq (sname, macq + k, NAMEMAX)) {
-            while (macq[k++]);
-            return (k);
-        }
-        while (macq[k++]);
-        while (macq[k++]);
-    }
-    return 0;
-}
-
-toggle (name, onoff)
-char name;
-int onoff;
-{
-    switch (name) {
-    case 'C':
-        ctext = onoff;
-        break;
-    }
+    while (cpp ());
 }

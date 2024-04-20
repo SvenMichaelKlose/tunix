@@ -86,11 +86,12 @@ newfunc ()
 // @param t argument type (char, int)
 getarg (int t)
 {
-    int j, legalname, address, argptr, otag;
+    int j, legalname, address,
+        argptr, otag;
     char n[NAMESIZE];
 
     FOREVER {
-        if (argstk == 0)
+        if (!argstk)
             return;
         // If a struct is being passed,
         // its tag must be read in

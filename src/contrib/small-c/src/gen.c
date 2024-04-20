@@ -9,9 +9,9 @@
 output_byte (char c)
 {
     if (c == 0)
-        return (0);
+        return 0;
     fputc (c, output);
-    return (c);
+    return c;
 }
 
 output_string (char ptr[])
@@ -82,7 +82,6 @@ gen_global (char *n)
 /// MEMORY LOCATIONS ///
 ////////////////////////
 
-// Store values in memory.
 store (LVALUE * lval)
 {
     if (lval->indirect == 0)

@@ -62,7 +62,7 @@ output_label_terminator ()
 
 gen_comment ()
 {
-    output_byte (';');
+    output_string ("; ");
 }
 
 ////////////////

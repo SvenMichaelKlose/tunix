@@ -26,16 +26,16 @@ print_tab ()
     output_byte ('\t');
 }
 
-output_line (char ptr[])
-{
-    output_with_tab (ptr);
-    newline ();
-}
-
 output_with_tab (char ptr[])
 {
     print_tab ();
     output_string (ptr);
+}
+
+output_line (char ptr[])
+{
+    output_with_tab (ptr);
+    newline ();
 }
 
 output_decimal (int number)

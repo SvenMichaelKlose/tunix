@@ -445,16 +445,16 @@ errorsummary ()
     output_string (" error(s) in compilation");
     newline ();
     gen_comment ();
-    output_with_tab ("literal pool:");
+    output_line ("\nliteral pool:");
     output_decimal (litptr);
     newline ();
     gen_comment ();
-    output_with_tab ("global pool:");
+    output_line ("\nglobal pool:");
     output_decimal (global_table_index -
                     rglobal_table_index);
     newline ();
     gen_comment ();
-    output_with_tab ("Macro pool:");
+    output_line ("\nMacro pool:");
     output_decimal (macptr);
     newline ();
     if (errcnt > 0)

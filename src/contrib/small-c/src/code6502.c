@@ -146,9 +146,11 @@ gen_immediate ()
     output_with_tab ("lhli ");
 }
 
-_gen_load_2nd ()
+_gen_load_2nd_const (int v)
 {
     output_with_tab ("ldei ");
+    output_number (v);
+    newline ();
 }
 
 // Load address of local symbol into
@@ -178,9 +180,7 @@ gen_increment_primary_reg (LVALUE * lval)
 {
     switch (lval->ptr_type) {
     case STRUCT:
-        _gen_load_2nd ();
-        output_number (lval->tagsym->size);
-        newline ();
+        _gen_load_2nd_const (lval->tagsym->size);
         gen_call ("add_de");
         break;
     case CINT:
@@ -201,10 +201,8 @@ gen_decrement_primary_reg (LVALUE * lval)
         gen_call ("dec_hl");
         break;
     case STRUCT:
-        _gen_load_2nd ();
-        output_number (lval->tagsym->size - 1);
-        newline ();
-        // two's complement 
+        _gen_load_2nd_const (lval->tagsym->size - 1);
+        // two's complement of secondary.
         output_line ("mov   a,d");
         output_line ("cma");
         output_line ("mov   d,a");
@@ -499,9 +497,7 @@ gen_add (int *lval, int *lval2)
 // Add offset to primary.
 add_offset (int val)
 {
-    _gen_load_2nd ();
-    output_number (val);
-    newline ();
+    _gen_load_2nd_const (val);
     gen_call ("add_de");
 }
 
@@ -527,9 +523,7 @@ gen_multiply (int type, int size)
         gen_multiply_by_two ();
         break;
     case STRUCT:
-        _gen_load_2nd ();
-        output_number (size);
-        newline ();
+        _gen_load_2nd_const (size);
         gen_call ("ccmul");
         break;
     default:

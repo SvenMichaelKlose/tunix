@@ -2,6 +2,10 @@
 #include "defs.h"
 #include "data.h"
 
+//////////////////////
+/// INITIALIZATION ///
+//////////////////////
+
 void
 initmac ()
 {
@@ -29,9 +33,9 @@ trailer ()
 {
 }
 
-////////////////
-/// Assembly ///
-////////////////
+//////////////
+/// OUTPUT ///
+//////////////
 
 newline ()
 {
@@ -39,6 +43,13 @@ newline ()
     output_byte (CR);
 #endif
     output_byte (LF);
+}
+
+// Decimal number.
+output_number (num)
+int num;
+{
+    output_decimal (num);
 }
 
 // Label prefix
@@ -59,29 +70,61 @@ gen_comment ()
     output_byte (';');
 }
 
-// Code (text) segment.
+////////////////
+/// SEGMENTS ///
+////////////////
+
 code_segment_gtext ()
 {
     output_line (".code");
 }
 
-// Data segment
 data_segment_gdata ()
 {
     output_line (".data");
+}
+
+////////////
+/// DATA ///
+////////////
+
+gen_def_byte ()
+{
+    output_with_tab (".byte ");
+}
+
+gen_def_word ()
+{
+    output_with_tab (".word ");
+}
+
+gen_def_storage ()
+{
+    output_with_tab (".res ");
+}
+
+//////////////
+/// LABELS ///
+//////////////
+
+_gen_storage_decl (int do_import, char *n)
+{
+    output_with_tab (
+        do_import ?
+            ".import " :
+            ".export "
+    );
+    output_string (n);
+    newline ();
 }
 
 // Import/export variable symbol at
 // scptr.
 ppubext (SYMBOL * scptr)
 {
-    if (symbol_table[current_symbol_table_idx].storage ==
-        STATIC)
+    if (symbol_table[current_symbol_table_idx].storage == STATIC)
         return;
-    output_with_tab (scptr->storage ==
-                     EXTERN ? ".import " : ".export ");
-    output_string (scptr->name);
-    newline ();
+    _gen_storage_decl (scptr->storage == EXTERN, scptr->name);
 }
 
 // Import/export function symbol at
@@ -90,18 +133,109 @@ fpubext (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;
-    output_with_tab (scptr->offset ==
-                     FUNCTION ? ".export " : ".import ");
-    output_string (scptr->name);
-    newline ();
+    _gen_storage_decl (scptr->offset == FUNCTION, scptr->name);
 }
 
-// Decimal number.
-output_number (num)
-int num;
+/////////////////
+/// REGISTERS ///
+/////////////////
+
+// Swap primary and secondary.
+gen_swap ()
 {
-    output_decimal (num);
+    gen_call ("xchg");
 }
+
+// Print partial instruction to get an
+// immediate value into primary.
+gen_immediate ()
+{
+    output_with_tab ("lhli ");
+}
+
+_gen_load_2nd ()
+{
+    output_with_tab ("ldei ");
+}
+
+// Load address of local symbol into
+// primary.
+gen_get_local (SYMBOL * sym)
+{
+    if (sym->storage == LSTATIC) {
+        gen_immediate ();
+        gen_local (sym->offset);
+        newline ();
+        return HL_REG;
+    } else {
+        gen_immediate ();
+        output_number (sym->offset - stkp);
+        newline ();
+        gen_call ("add_sp");
+        return HL_REG;
+    }
+    error ("gen_get_local() with no clue.");
+}
+
+// Convert primary value into logical
+// value (0 if 0, 1 otherwise)
+gen_convert_primary_reg_value_to_bool ()
+{
+    gen_call ("ccbool");
+}
+
+// Increment the primary register by 1
+// if char, INTSIZE if int.
+gen_increment_primary_reg (LVALUE * lval)
+{
+    switch (lval->ptr_type) {
+    case STRUCT:
+        _gen_load_2nd ();
+        output_number (lval->tagsym->size);
+        newline ();
+        gen_call ("add_de");
+        break;
+    case CINT:
+    case UINT:
+    default:
+        gen_call ("inc_hl");
+        break;
+    }
+}
+
+// Decrement the primary register by one
+// if char, INTSIZE if int.
+gen_decrement_primary_reg (LVALUE * lval)
+{
+    gen_call ("dec_hl");
+    switch (lval->ptr_type) {
+    case CINT:
+    case UINT:
+        gen_call ("dec_hl");
+        break;
+    case STRUCT:
+        _gen_load_2nd ();
+        output_number (lval->tagsym->size - 1);
+        newline ();
+        // two's complement 
+        output_line ("mov   a,d");
+        output_line ("cma");
+        output_line ("mov   d,a");
+        output_line ("mov   a,e");
+        output_line ("cma");
+        output_line ("mov  e,a");
+        output_line ("inx  d");
+        // subtract 
+        gen_call ("add_de");
+        break;
+    default:
+        break;
+    }
+}
+
+//////////////
+/// MEMORY ///
+//////////////
 
 // Load memory into primary register.
 gen_get_memory (SYMBOL * sym)
@@ -126,25 +260,6 @@ gen_get_memory (SYMBOL * sym)
     }
 }
 
-// Load address of symbol into primary.
-// @return which register pair contains
-// the result.
-gen_get_local (SYMBOL * sym)
-{
-    if (sym->storage == LSTATIC) {
-        gen_immediate ();
-        gen_local (sym->offset);
-        newline ();
-        return HL_REG;
-    } else {
-        gen_immediate ();
-        output_number (sym->offset - stkp);
-        newline ();
-        gen_call ("add_sp");
-        return HL_REG;
-    }
-}
-
 // Store primary register at symbol
 // address.
 void
@@ -158,6 +273,10 @@ gen_put_memory (SYMBOL * sym)
     output_string (sym->name);
     newline ();
 }
+
+///////////////////
+/// INDIRECTION ///
+///////////////////
 
 // Store the specified object type in
 // primary at the address in the
@@ -191,23 +310,11 @@ gen_get_indirect (char typeobj, int reg)
         gen_call ("ccgint");
 }
 
-// Swap the primary and secondary
-// registers.
-gen_swap ()
-{
-    gen_call ("xchg");
-}
+/////////////
+/// STACK ///
+/////////////
 
-// Print partial instruction to get an
-// immediate value into primary
-// register.
-gen_immediate ()
-{
-    output_with_tab ("lhli ");
-}
-
-// Push the primary register onto the
-// stack.
+// Push register onto the stack.
 gen_push (int reg)
 {
     if (reg & DE_REG) {
@@ -232,83 +339,6 @@ gen_pop ()
 gen_swap_stack ()
 {
     output_line ("xthl");
-}
-
-// Call subroutine.
-gen_call (char *sname)
-{
-    output_with_tab ("jsr ");
-    output_string (sname);
-    newline ();
-}
-
-// Entry point declaration.
-declare_entry_point (char *symbol_name)
-{
-    output_string (symbol_name);
-    output_label_terminator ();
-    newline(); 
-}
-
-// Return from subroutine.
-gen_ret ()
-{
-    output_line ("rts");
-}
-
-// Perform subroutine call to value on
-// top of stack.
-callstk ()
-{
-    gen_immediate ();
-    output_string ("#.+5");
-    newline ();
-    gen_swap_stack ();
-    gen_call ("callptr");
-    stkp = stkp + INTSIZE;
-}
-
-// Jump.
-gen_jump (label)
-int label;
-{
-    output_with_tab ("jmp ");
-    gen_local (label);
-    newline ();
-}
-
-// test the primary register and jumps
-// to label conditionally.
-// If 'ft' is true, jumps if not zero.
-gen_test_jump (label, ft)
-int label, ft;
-{
-    output_line ("lda h");
-    output_line ("ora l");
-    if (ft)
-        output_with_tab ("bne ");
-    else
-        output_with_tab ("beq ");
-    gen_local (label);
-    newline ();
-}
-
-// Define byte.
-gen_def_byte ()
-{
-    output_with_tab (".byte ");
-}
-
-// Define word.
-gen_def_word ()
-{
-    output_with_tab (".word ");
-}
-
-// Define BSS byte.
-gen_def_storage ()
-{
-    output_with_tab (".res ");
 }
 
 // Update stack pointer to new position.
@@ -360,13 +390,107 @@ gen_modify_stack (int newstkp)
     return (newstkp);
 }
 
-// Multiply primary register by INTSIZE.
+/////////////////
+/// FUNCTIONS ///
+/////////////////
+
+// Call subroutine.
+gen_call (char *sname)
+{
+    output_with_tab ("jsr ");
+    output_string (sname);
+    newline ();
+}
+
+// Entry point declaration.
+declare_entry_point (char *symbol_name)
+{
+    output_string (symbol_name);
+    output_label_terminator ();
+    newline(); 
+}
+
+// Return from subroutine.
+gen_ret ()
+{
+    output_line ("rts");
+}
+
+// Perform subroutine call to value on
+// top of stack.
+callstk ()
+{
+    gen_immediate ();
+    output_string ("#.+5");
+    newline ();
+    gen_swap_stack ();
+    gen_call ("callptr");
+    stkp = stkp + INTSIZE;
+}
+
+// Squirrel away argument count in a
+// register that modstk doesn't touch.
+gnargs (d)
+int d;
+{
+    output_with_tab (";#arg");
+    output_number (d);
+    newline ();
+}
+
+/////////////
+/// JUMPS ///
+/////////////
+
+gen_jump (label)
+int label;
+{
+    output_with_tab ("jmp ");
+    gen_local (label);
+    newline ();
+}
+
+// 'case' jump
+gen_jump_case ()
+{
+    output_with_tab ("jmp cccase");
+    newline ();
+}
+
+////////////
+/// TEST ///
+////////////
+
+// Test primary and jump to label.
+// ft != 0: Jump if not zero.
+// ft == 0: Jump if zero.
+gen_test_jump (label, ft)
+int label, ft;
+{
+    output_line ("lda h");
+    output_line ("ora l");
+    if (ft)
+        output_with_tab ("bne ");
+    else
+        output_with_tab ("beq ");
+    gen_local (label);
+    newline ();
+}
+
+///////////////////
+/// ARITHMETICS ///
+///////////////////
+
+gen_twos_complement ()
+{
+    gen_call ("ccneg");
+}
+
 gen_multiply_by_two ()
 {
     gen_call ("asl_hl");
 }
 
-// Divide primary register by INTSIZE.
 gen_divide_by_two ()
 {
     // push primary in prep for
@@ -378,16 +502,9 @@ gen_divide_by_two ()
     gen_arithm_shift_right ();
 }
 
-// 'case' jump
-gen_jump_case ()
-{
-    output_with_tab ("jmp cccase");
-    newline ();
-}
-
-// Sum of primary and secondary register
-// If lval2 is int pointer and lval is
-// not, scale lval.
+// Sum of primary and secondary
+// If lval2 is int* and lval is not,
+// scale lval.
 gen_add (lval, lval2)
 int *lval, *lval2;
 {
@@ -400,8 +517,15 @@ int *lval, *lval2;
     gen_call ("add_de");
 }
 
-// Subtract primary register from
-// secondary.
+// Add offset to primary.
+add_offset (int val)
+{
+    _gen_load_2nd ();
+    output_number (val);
+    newline ();
+    gen_call ("add_de");
+}
+
 gen_sub ()
 {
     gen_pop ();
@@ -414,6 +538,26 @@ gen_mult ()
 {
     gen_pop ();
     gen_call ("ccmul");
+}
+
+// Multiply primary by the length of
+// some variable.
+gen_multiply (int type, int size)
+{
+    switch (type) {
+    case CINT:
+    case UINT:
+        gen_multiply_by_two ();
+        break;
+    case STRUCT:
+        _gen_load_2nd ();
+        output_number (size);
+        newline ();
+        gen_call ("ccmul");
+        break;
+    default:
+        break;
+    }
 }
 
 // Divide the secondary register by
@@ -451,6 +595,10 @@ gen_umod ()
     gen_udiv ();
     gen_swap ();
 }
+
+////////////////////////
+/// BIT MANIPULATION ///
+////////////////////////
 
 // Inclusive 'or' the primary and
 // secondary registers.
@@ -501,10 +649,10 @@ gen_arithm_shift_left ()
     gen_call ("ccasl");
 }
 
-// Two's complement of primary.
-gen_twos_complement ()
+// One's complement of primary.
+gen_complement ()
 {
-    gen_call ("ccneg");
+    gen_call ("cccom");
 }
 
 // Logical complement of primary.
@@ -513,74 +661,16 @@ gen_logical_negation ()
     gen_call ("cclneg");
 }
 
-// One's complement of primary.
-gen_complement ()
-{
-    gen_call ("cccom");
-}
-
-// Convert primary value into logical
-// value (0 if 0, 1 otherwise)
-gen_convert_primary_reg_value_to_bool ()
-{
-    gen_call ("ccbool");
-}
-
-// Increment the primary register by 1
-// if char, INTSIZE if int.
-gen_increment_primary_reg (LVALUE * lval)
-{
-    switch (lval->ptr_type) {
-    case STRUCT:
-        gen_immediate2 ();
-        output_number (lval->tagsym->size);
-        newline ();
-        gen_call ("add_de");
-        break;
-    case CINT:
-    case UINT:
-    default:
-        gen_call ("inc_hl");
-        break;
-    }
-}
-
-// Decrement the primary register by one
-// if char, INTSIZE if int.
-gen_decrement_primary_reg (LVALUE * lval)
-{
-    gen_call ("dec_hl");
-    switch (lval->ptr_type) {
-    case CINT:
-    case UINT:
-        gen_call ("dec_hl");
-        break;
-    case STRUCT:
-        gen_immediate2 ();
-        output_number (lval->tagsym->size - 1);
-        newline ();
-        // two's complement 
-        output_line ("mov   a,d");
-        output_line ("cma");
-        output_line ("mov   d,a");
-        output_line ("mov   a,e");
-        output_line ("cma");
-        output_line ("mov  e,a");
-        output_line ("inx  d");
-        // subtract 
-        gen_call ("add_de");
-        break;
-    default:
-        break;
-    }
-}
+////////////////////
+/// CONDITIONALS ///
+////////////////////
 
 /*
   Following are the conditional
   operators.  They compare the secondary
   against the primary and put a literal
   1 in the primary if the condition is
-  true.  Otherwise they clear primary.
+  true, 0 otherwise.
  */
 
 gen_equal ()
@@ -643,6 +733,10 @@ gen_unsigned_greater_or_equal ()
     gen_call ("ccuge");
 }
 
+/////////////////
+/// TOP-LEVEL ///
+/////////////////
+
 char *
 inclib ()
 {
@@ -656,16 +750,6 @@ inclib ()
     return "";
 #endif
 #endif
-}
-
-// Squirrel away argument count in a
-// register that modstk doesn't touch.
-gnargs (d)
-int d;
-{
-    output_with_tab (";#arg");
-    output_number (d);
-    newline ();
 }
 
 int
@@ -682,7 +766,6 @@ char *s;
 #else
     return (0);
 #endif
-
 }
 
 int
@@ -693,40 +776,4 @@ link ()
 #else
     return (0);
 #endif
-}
-
-// Print partial instruction to get an
-// immediate value into the secondary.
-gen_immediate2 ()
-{
-    output_with_tab ("ldei ");
-}
-
-// Add offset to primary.
-add_offset (int val)
-{
-    gen_immediate2 ();
-    output_number (val);
-    newline ();
-    gen_call ("add_de");
-}
-
-// Multiply primary by the length of
-// some variable.
-gen_multiply (int type, int size)
-{
-    switch (type) {
-    case CINT:
-    case UINT:
-        gen_multiply_by_two ();
-        break;
-    case STRUCT:
-        gen_immediate2 ();
-        output_number (size);
-        newline ();
-        gen_call ("ccmul");
-        break;
-    default:
-        break;
-    }
 }

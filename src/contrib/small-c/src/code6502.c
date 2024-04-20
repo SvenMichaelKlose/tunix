@@ -153,7 +153,7 @@ gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
         gen_immediate ();
-        print_label (sym->offset);
+        gen_local (sym->offset);
         newline ();
         return HL_REG;
     } else {
@@ -293,7 +293,7 @@ gen_jump (label)
 int label;
 {
     output_with_tab ("jmp ");
-    print_label (label);
+    gen_local (label);
     newline ();
 }
 
@@ -309,7 +309,7 @@ int label, ft;
         output_with_tab ("bne ");
     else
         output_with_tab ("beq ");
-    print_label (label);
+    gen_local (label);
     newline ();
 }
 

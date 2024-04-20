@@ -2,32 +2,9 @@
 #include "defs.h"
 #include "data.h"
 
-// Return next available label number.
-getlabel ()
-{
-    return (nxtlab++);
-}
-
-// Print specified number as label.
-print_label (int label)
-{
-    output_label_prefix ();
-    output_decimal (label);
-}
-
-def_local (int nlab)
-{
-    print_label (nlab);
-    output_label_terminator ();
-    newline ();
-}
-
-def_global (char *n)
-{
-    output_string (n);
-    output_label_terminator ();
-    newline ();
-}
+////////////////////
+/// BASIC OUTPUT ///
+////////////////////
 
 output_byte (char c)
 {
@@ -64,6 +41,37 @@ output_with_tab (char ptr[])
 output_decimal (int number)
 {
     fprintf (output, "%d", number);
+}
+
+// Return next available label number.
+getlabel ()
+{
+    return (nxtlab++);
+}
+
+def_local (int nlab)
+{
+    output_decimal (nlab);
+    output_label_terminator ();
+    newline ();
+}
+
+def_global (char *n)
+{
+    output_string (n);
+    output_label_terminator ();
+    newline ();
+}
+
+gen_local (int label)
+{
+    output_label_prefix ();
+    output_decimal (label);
+}
+
+gen_global (char *n)
+{
+    output_string (n);
 }
 
 // Store values in memory.

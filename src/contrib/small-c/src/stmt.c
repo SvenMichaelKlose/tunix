@@ -300,7 +300,7 @@ doswitch ()
     ws.incr_def = ws.while_exit = getlabel ();
     addwhile (&ws);
     gen_immediate ();
-    print_label (ws.body_tab);
+    gen_local (ws.body_tab);
     newline ();
     gen_push (HL_REG);
     needbrack ("(");
@@ -411,7 +411,7 @@ dumpsw (WHILE * ws)
             while (i--) {
                 output_number (swstcase[j]);
                 output_byte (',');
-                print_label (swstlab[j++]);
+                gen_local (swstlab[j++]);
                 if ((i == 0) | (j >= swstp)) {
                     newline ();
                     break;
@@ -421,7 +421,7 @@ dumpsw (WHILE * ws)
         }
     }
     gen_def_word ();
-    print_label (ws->incr_def);
+    gen_local (ws->incr_def);
     output_string (",0");
     newline ();
     code_segment_gtext ();

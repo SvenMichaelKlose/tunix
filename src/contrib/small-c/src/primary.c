@@ -181,7 +181,7 @@ constant (int val[])
         gen_immediate ();
     else if (quoted_string (val)) {
         gen_immediate ();
-        print_label (litlab);
+        gen_local (litlab);
         output_byte ('+');
     } else
         return (0);

@@ -1,25 +1,29 @@
 Small C (v3.2)
 ==============
 
-This is a compiler for a subset of
-the C programming language.
+This is a retargetable one-pass compiler
+for a subset of the C programming
+language.
 
-This ersion intents to add documentation
-and self-hosting on 6502-CPU platforms.
-See [the roadmap](ROADMAP.xit).
+This particular ersion aims to add
+documentation, as well as self-hosting
+on 6502-CPU platforms.
 
 Currently the MOS 6502 target is under
 construction.  Therefore the other
 targets are disabled.
 
-# Links
-
-* [Build & Use](BUILD.md)
-* [Authors](AUTHORS.md)
-* [Roadmap](ROADMAP.md)
-* [Change Log](CHANGELOG.md)
-
+* [Licensing](LICENSE.md)
 * [Github repository](https://github.com/SvenMichaelKlose/).
+* [Build & Use](BUILD.md)
+* [Roadmap](ROADMAP.md)
+* [Authors](AUTHORS.md)
+* [Changelog](CHANGELOG.md)
+* [Bugs](BUGS.md)
+* [Codestyle](CODESTYLE.sh)
+* [Testing](TESTING.md)
 
 * [Language Reference](doc/language.md)
 * [Adding New Targets](doc/target.md)
+
+* [Blog](BLOG-smk.md)

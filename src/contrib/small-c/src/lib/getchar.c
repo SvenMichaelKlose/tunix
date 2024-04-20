@@ -1,5 +1,6 @@
 #include <stdio.h>
+
 getchar ()
 {
-    return (fgetc (stdin));
+    return fgetc (stdin);
 }

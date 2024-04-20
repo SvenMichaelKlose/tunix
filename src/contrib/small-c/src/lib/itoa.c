@@ -1,8 +1,8 @@
 #include <stdio.h>
+
 #define EOS 0
-itoa (n, s)
-char s[];
-int n;
+
+itoa (int n, char s[])
 {
     int i, sign;
     if ((sign = n) < 0)

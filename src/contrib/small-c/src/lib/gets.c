@@ -1,9 +1,10 @@
 #include <stdio.h>
+
 #define EOL     10
 #define BKSP    8
 #define CTRLU   0x15
-gets (s)
-char *s;
+
+gets (char *s)
 {
     char c, *ts;
     ts = s;

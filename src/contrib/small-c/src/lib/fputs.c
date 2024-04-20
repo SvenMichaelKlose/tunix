@@ -1,10 +1,7 @@
 #include <stdio.h>
 
-fputs (str, fp)
-FILE *fp;
-char *str;
+fputs (char *str, FILE *fp)
 {
     while (*str)
         fputc (*str++, fp);
-
 }

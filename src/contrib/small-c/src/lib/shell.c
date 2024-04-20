@@ -1,12 +1,8 @@
+// Shell sort of string
+// v[0] .... v[n-1] into increasing * order.
+// Reference CPL pg. 108.
 
-/* Shell sort of string v[0] .... v[n-1] into increasing
- * order.
- *      Reference CPL pg. 108.
- */
-
-shellsort (v, n)
-int v[];
-int n;
+shellsort (int v[], int n)
 {
     int gap, i, j;
     char *temp;

@@ -1,14 +1,7 @@
-
-/*
-#include        <stdio.h>
-*/
 #define NULL 0
 #define FILE char
 
-fgets (s, n, iop)
-int n;
-char *s;
-register FILE *iop;
+fgets (int s, char *n, register FILE *iop)
 {
     register c;
     register char *cs;
@@ -20,8 +13,7 @@ register FILE *iop;
             break;
     }
     if (c < 0 && cs == s)
-        return (NULL);
+        return NULL;
     *cs++ = '\0';
-    return (s);
-
+    return s;
 }

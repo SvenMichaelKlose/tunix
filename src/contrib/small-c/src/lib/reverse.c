@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-// Reverse a character string, reference CPL p 59 
-reverse (s)
-char *s;
+// Reverse a character string.
+// Reference CPL p 59 
+reverse (char *s)
 {
     int i, j;
     char c;
@@ -15,5 +15,5 @@ char *s;
         i++;
         j--;
     }
-    return (s);
+    return s;
 }

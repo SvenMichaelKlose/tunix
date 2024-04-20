@@ -1,12 +1,10 @@
+// Binary search for string word in
+// table[0] .. table[n-1]
+// reference CPL pg. 125
 
-/* binary search for string word in table[0] .. table[n-1]
- *      reference CPL pg. 125
- */
 #include <stdio.h>
-binary (word, table, n)
-char *word;
-int table[];
-int n;
+
+binary (char *word, int table[], int n)
 {
     int low, high, mid, cond;
     low = 0;
@@ -18,7 +16,7 @@ int n;
         else if (cond > 0)
             low = mid + 1;
         else
-            return (mid);
+            return mid;
     }
-    return (-1);
+    return -1;
 }

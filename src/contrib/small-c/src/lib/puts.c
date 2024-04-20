@@ -1,7 +1,8 @@
 #include <stdio.h>
+
 #define EOL 10
-puts (str)
-char *str;
+
+puts (char *str)
 {
     while (*str)
         putchar (*str++);

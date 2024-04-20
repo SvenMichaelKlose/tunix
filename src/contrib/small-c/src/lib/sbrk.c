@@ -1,17 +1,14 @@
 extern char *brkend;
-sbrk (incr)
-char *incr;
+
+sbrk (char *incr)
 {
     char *stktop;
 
     stktop = Xstktop () - 200;
-
-    // do we have enough space? 
     if (brkend + incr < stktop) {
         stktop = brkend;
         brkend = brkend + incr;
-        return (stktop);
+        return stktop;
     } else
-        return (-1);
-
+        return -1;
 }

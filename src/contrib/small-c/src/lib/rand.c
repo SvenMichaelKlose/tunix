@@ -1,11 +1,8 @@
-
 int xxseed;
 
-srand (x)
-int x;
+srand (int x)
 {
     xxseed = x;
-
 }
 
 rand ()
@@ -13,12 +10,11 @@ rand ()
     xxseed = xxseed * 251 + 123;
     if (xxseed < 0)
         xxseed = -xxseed;
-    return (xxseed);
-
+    return xxseed;
 }
 
 getrand ()
 {
     puts ("Type a character");
-    return (getchar () * 123);
+    return getchar () * 123;
 }

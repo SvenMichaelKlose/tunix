@@ -1,6 +1,6 @@
 #include <stdio.h>
-putchar (c)
-char c;
+
+putchar (char c)
 {
     return fputc (c, stdout);
 }

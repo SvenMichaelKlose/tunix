@@ -1,10 +1,10 @@
+// Print a number in any radix.
+
 #include <stdio.h>
 
-// print a number in any radish 
 #define DIGARR "0123456789ABCDEF"
-printn (number, radix, file)
-int number, radix;
-FILE *file;
+
+printn (int number, int radix, FILE *file)
 {
     int i;
     char *digitreps;

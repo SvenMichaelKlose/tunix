@@ -46,8 +46,7 @@ newline ()
 }
 
 // Decimal number.
-output_number (num)
-int num;
+output_number (int num)
 {
     output_decimal (num);
 }
@@ -430,8 +429,7 @@ callstk ()
 
 // Squirrel away argument count in a
 // register that modstk doesn't touch.
-gnargs (d)
-int d;
+gnargs (int d)
 {
     output_with_tab (";#arg");
     output_number (d);
@@ -442,8 +440,7 @@ int d;
 /// JUMPS ///
 /////////////
 
-gen_jump (label)
-int label;
+gen_jump (int label)
 {
     output_with_tab ("jmp ");
     gen_local (label);
@@ -464,8 +461,7 @@ gen_jump_case ()
 // Test primary and jump to label.
 // ft != 0: Jump if not zero.
 // ft == 0: Jump if zero.
-gen_test_jump (label, ft)
-int label, ft;
+gen_test_jump (int label, int ft)
 {
     output_line ("lda h");
     output_line ("ora l");
@@ -505,8 +501,7 @@ gen_divide_by_two ()
 // Sum of primary and secondary
 // If lval2 is int* and lval is not,
 // scale lval.
-gen_add (lval, lval2)
-int *lval, *lval2;
+gen_add (int *lval, int *lval2)
 {
     gen_pop ();
     if (dbltest (lval2, lval)) {
@@ -753,8 +748,7 @@ inclib ()
 }
 
 int
-assemble (s)
-char *s;
+assemble (char *s)
 {
 #ifdef  ASNM
     char buf[100];

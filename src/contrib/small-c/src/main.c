@@ -299,7 +299,7 @@ dumplits ()
 
     if (litptr == 0)
         return;
-    gen_local (litlab);
+    def_local (litlab);
     k = 0;
     while (k < litptr) {
         gen_def_byte ();
@@ -329,7 +329,7 @@ dumpglbs ()
         if (symbol->identity != FUNCTION) {
             ppubext (symbol);
             if (symbol->storage != EXTERN) {
-                gen_global (symbol->name);
+                def_global (symbol->name);
                 dim = symbol->offset;
                 list_size = 0;
                 line_count = 0;

@@ -63,6 +63,6 @@ addcase (int val)
     else {
         swstcase[swstp] = val;
         swstlab[swstp++] = lab = getlabel ();
-        gen_local (lab);
+        def_local (lab);
     }
 }

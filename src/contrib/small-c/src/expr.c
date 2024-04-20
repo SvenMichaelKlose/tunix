@@ -159,7 +159,7 @@ hier1a (LVALUE * lval)
         if (k & FETCH)
             k = rvalue (lval2, k);
         gen_jump (lab2 = getlabel ());
-        gen_local (lab1);
+        def_local (lab1);
         blanks ();
         if (!match (":")) {
             error ("missing colon");
@@ -168,7 +168,7 @@ hier1a (LVALUE * lval)
         k = hier1b (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
-        gen_local (lab2);
+        def_local (lab2);
     } else
         return (0);
 }
@@ -190,7 +190,7 @@ hier1b (LVALUE * lval)
         k = hier1c (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
-        gen_local (lab);
+        def_local (lab);
         gen_convert_primary_reg_value_to_bool ();
     } else
         return (0);
@@ -213,7 +213,7 @@ hier1c (LVALUE * lval)
         k = hier2 (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
-        gen_local (lab);
+        def_local (lab);
         gen_convert_primary_reg_value_to_bool ();
     } else
         return (0);

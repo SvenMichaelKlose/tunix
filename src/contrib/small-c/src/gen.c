@@ -15,14 +15,14 @@ print_label (int label)
     output_decimal (label);
 }
 
-gen_local (int nlab)
+def_local (int nlab)
 {
     print_label (nlab);
     output_label_terminator ();
     newline ();
 }
 
-gen_global (char *n)
+def_global (char *n)
 {
     output_string (n);
     output_label_terminator ();

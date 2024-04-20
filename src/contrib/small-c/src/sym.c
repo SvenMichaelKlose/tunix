@@ -374,7 +374,7 @@ add_local (char *sname, int identity,
     symbol->storage = storage_class;
     if (storage_class == LSTATIC) {
         data_segment_gdata ();
-        gen_local (k = getlabel ());
+        def_local (k = getlabel ());
         gen_def_storage ();
         output_number (offset);
         newline ();

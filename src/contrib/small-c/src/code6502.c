@@ -120,7 +120,6 @@ fpubext (SYMBOL * scptr)
 output_number (num)
 int num;
 {
-    output_byte ('#');
     output_decimal (num);
 }
 

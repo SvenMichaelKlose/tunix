@@ -7,109 +7,104 @@ Small C is an enhanced version of the
 public domain compiler for a subset of
 the C programming language, based on
 Chris Lewis' revival of Ron Cain's
-original Small C compiler.  Chris Lewis
-introduced several upgrades and new
-features while maintaining the
+original Small C compiler.
+
+Chris Lewis introduced several upgrades
+and new features while maintaining the
 simplicity and fun of tinkering that the
-earlier versions promoted.  It has then
-been cleaned up by
+earlier versions promoted.
+
+P.L. Woods added ANSI-style argument
+type declarations.
+
+More cleaning up was done by
 https://github.com/ncb85/SmallC-857
-from where this version has been forked.
+which was used as the basis for what
+you have here.
 
-# Statis
+# Status
 
-This ersion intents to add a code
-generator for the MOS 6502-CPU and to
-compile scc by itself on such systems.
+This ersion intents to add
+documentation, a code generator for the
+MOS 6502-CPU and to compile Small-C by
+itself on such systems.  (Older versions
+were able to compile themselves.)
 
-# Features
+# Language
 
-* **Basic Language Support**: While
-  lacking complex features like `#if`
-  preprocessor directives and support
-  for `double`, `float`, and `long` data
-  types, Small C v3.1 can compile a
-  subset of C sufficient to compile
-  itself and other simple programs.
-* **Structures and Unions**: Introduced
-  handling for structs and unions which
-  were not supported in previous
-  releases.
-* **Unsigned Types & C99 One Line
-  Comments**: Supports unsigned integers
-  and one-line comments (`//`) as per
-  the C99 standard.
-* **Windows EOLs**: Adds the capability
-  to handle Windows-style end of lines,
-  enhancing cross-platform usability.
-* **Global Variables Initialization**:
-  Global variables are automatically
-  initialized to zero if not explicitly
-  initialized by the programmer.
-* **Advanced Instruction Set Support**:
-  Includes undocumented 8085
-  instructions like LHLX, SHLX, LDSI,
-  ARHL for better control over
-  hardware-specific operations.
-* **Enhanced Method Declarations**:
-  Supports ANSI style function and
-  method declarations.
-* **Silent Compilation with GCC**:
-  Rewritten parts of the codebase to
-  ensure silent compilation with GCC,
-  avoiding warnings.
-* **Target Assemblers**: Generates code
-  suitable for the ASXXXX
-  assembler/linker system.
+Comment may be K&R or ANSI-style.
+
+~~~C
+/*
+  Kerningham & Ritchie style comment
+*/
+
+// ANSI one-liner
+~~~
+
+Small-C supports signed or unsigned
+chars and ints, as well as structs
+and unions.  Shorts are the same as
+ints.  Variacle declarations cannot
+have initializers.
+
+~~~C
+char  c;
+char  c = 0;    // No.
+short s;
+int   i;
+unsigned char  uc;
+unsigned short us;
+unsigned int   ii;
+struc btnode {
+    char parent;
+    char left;
+    char right;
+    char data;
+};
+union {
+    char same;
+    char memory;
+    char location;
+    char for_all_four;
+};
+~~~
+
+Pointers are supported with single
+indirection.
+
+~~~C
+    return *ptrs;   // Yes.
+    return **ptrs;  // No.
+    return rec->entry;        // Yes.
+    return res->entry->next;  // No.
+~~~
+
+Functions must not be declared and their
+argument definitions are not known or
+checked at call time.
 
 # Supported Targets
 
-* **Code Generators**: Initially
-  supports a variety of target
-  architectures including 6809, M68K,
-  VAX, and 8080 with provided Makefiles
-  for System V and BSD compatible
-  systems.
-* **Runtime Support**: The generated
-  code may require a runtime support
-  library for operations difficult to
-  process on certain CPUs or for OS
-  interface functions (specifics vary by
-  target processor).
+Currently the MOS 6502 target is under
+construction.
 
 # Compilation and Usage
 
-* **Compiling Small C**: Use the
-  provided Makefile appropriate for your
-  system (`System V` or `BSD`).  Adjust
-  `INCDIR` and `LIBDIR` in the Makefile
-  to specify custom locations for the
-  compiler output.
-* **Warnings**: Due to its subset
-  nature, compiling Small C with
-  standard UNIX C compilers will
-  generate multiple warnings which can
-  be safely ignored as long as pointers
-  and integers are treated
-  interchangeably and have the same
-  size.
+Use the provided Makefile appropriate
+for your system (`System V` or `BSD`).
+Warnings by the host compiler are
+pretty normal.
 
 # Adding New Targets
 
-* **Custom Code Generators**: Adding
-  support for new machine targets
-  involves creating a new `codexxx.c`
-  file for the target without altering
-  existing infrastructure.
-* **Support and Contributions**:
-  Contributions for new coders or bug
-  fixes are highly welcomed; please
-  contact the maintainers if you
-  encounter any issues or have
-  enhancements.
+Adding support for new machine targets
+involves creating a new `codexxx.c` file
+for the target without altering existing
+infrastructure.
 
-# Contact
+# Contrinuting
 
-For contributions, bug reports, or
-additional support, please contact the
-maintainers via GitHub.
+Contributions for new coders or bug
+fixes are highly welcomed; please
+contact the maintainers via GitHub.

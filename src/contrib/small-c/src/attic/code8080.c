@@ -196,7 +196,7 @@ int
 gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
-        gen_immediate ();
+        gen_load_1st ();
         print_label (sym->offset);
         newline ();
         return HL_REG;
@@ -208,7 +208,7 @@ gen_get_local (SYMBOL * sym)
             newline ();
             return DE_REG;
         } else {
-            gen_immediate ();
+            gen_load_1st ();
             output_number (sym->offset - stkp);
             newline ();
             output_line ("dad \tsp");
@@ -300,7 +300,7 @@ gen_swap ()
  * print partial instruction to get an immediate value into
  * the primary register
  */
-gen_immediate ()
+gen_load_1st ()
 {
     output_with_tab ("lxi \th,");
 }
@@ -370,7 +370,7 @@ gen_ret ()
  */
 callstk ()
 {
-    gen_immediate ();
+    gen_load_1st ();
     output_string ("#.+5");
     newline ();
     gen_swap_stack ();
@@ -469,7 +469,7 @@ gen_modify_stack (int newstkp)
         }
     }
     gen_swap ();
-    gen_immediate ();
+    gen_load_1st ();
     output_number (k);
     newline ();
     output_line ("dad \tsp");
@@ -492,7 +492,7 @@ gen_multiply_by_two ()
 gen_divide_by_two ()
 {
     gen_push (HL_REG);          // push primary in prep for gasr 
-    gen_immediate ();
+    gen_load_1st ();
     output_number (1);
     newline ();
     gen_arithm_shift_right ();  // divide by two 
@@ -681,7 +681,7 @@ gen_increment_primary_reg (LVALUE * lval)
 {
     switch (lval->ptr_type) {
     case STRUCT:
-        gen_immediate2 ();
+        gen_load_1st2 ();
         output_number (lval->tagsym->size);
         newline ();
         output_line ("dad \td");
@@ -707,7 +707,7 @@ gen_decrement_primary_reg (LVALUE * lval)
         output_line ("dcx \th");
         break;
     case STRUCT:
-        gen_immediate2 ();
+        gen_load_1st2 ();
         output_number (lval->tagsym->size - 1);
         newline ();
         // two's complement 
@@ -881,7 +881,7 @@ link ()
  * print partial instruction to get an immediate value into
  * the secondary register
  */
-gen_immediate2 ()
+gen_load_1st2 ()
 {
     output_with_tab ("lxi \td,");
 }
@@ -892,7 +892,7 @@ gen_immediate2 ()
  */
 add_offset (int val)
 {
-    gen_immediate2 ();
+    gen_load_1st2 ();
     output_number (val);
     newline ();
     output_line ("dad \td");
@@ -911,7 +911,7 @@ gen_multiply (int type, int size)
         gen_multiply_by_two ();
         break;
     case STRUCT:
-        gen_immediate2 ();
+        gen_load_1st2 ();
         output_number (size);
         newline ();
         gen_call ("ccmul");

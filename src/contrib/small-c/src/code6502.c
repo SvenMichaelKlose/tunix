@@ -141,7 +141,7 @@ gen_swap ()
 
 // Print partial instruction to get an
 // immediate value into primary.
-gen_immediate ()
+gen_load_1st ()
 {
     output_with_tab ("lhli ");
 }
@@ -158,11 +158,11 @@ _gen_load_2nd_const (int v)
 gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
-        gen_immediate ();
+        gen_load_1st ();
         gen_local (sym->offset);
         newline ();
     } else {
-        gen_immediate ();
+        gen_load_1st ();
         output_number (sym->offset - stkp);
         newline ();
         gen_call ("add_sp");
@@ -360,7 +360,7 @@ gen_modify_stack (int newstkp)
         }
     }
     gen_swap ();
-    gen_immediate ();
+    gen_load_1st ();
     output_number (k);
     newline ();
     gen_call ("add_sp");
@@ -405,7 +405,7 @@ gen_ret ()
 // top of stack.
 callstk ()
 {
-    gen_immediate ();
+    gen_load_1st ();
     output_string ("#.+5");
     newline ();
     gen_swap_stack ();
@@ -474,7 +474,7 @@ gen_divide_by_two ()
     // push primary in prep for
     // gen_arithm_shift_right ().
     gen_push (HL_REG);
-    gen_immediate ();
+    gen_load_1st ();
     output_number (1);
     newline ();
     gen_arithm_shift_right ();

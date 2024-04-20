@@ -18,7 +18,7 @@ primary (LVALUE * lval)
     }
     if (amatch ("sizeof", 6)) {
         needbrack ("(");
-        gen_immediate ();
+        gen_load_1st ();
         if (amatch ("int", 3)
             || amatch ("unsigned int", 12)
             || amatch ("unsigned", 8)) {
@@ -112,7 +112,7 @@ primary (LVALUE * lval)
                     }
                     return FETCH | HL_REG;
                 }
-                gen_immediate ();
+                gen_load_1st ();
                 output_string (symbol->name);
                 newline ();
                 lval->indirect = symbol->type;
@@ -136,7 +136,7 @@ primary (LVALUE * lval)
         return 0;
     } else {
         error ("invalid expression");
-        gen_immediate ();
+        gen_load_1st ();
         output_number (0);
         newline ();
         junk ();
@@ -176,11 +176,11 @@ result (LVALUE * lval, LVALUE * lval2)
 constant (int val[])
 {
     if (number (val))
-        gen_immediate ();
+        gen_load_1st ();
     else if (quoted_char (val))
-        gen_immediate ();
+        gen_load_1st ();
     else if (quoted_string (val)) {
-        gen_immediate ();
+        gen_load_1st ();
         gen_local (litlab);
         output_byte ('+');
     } else

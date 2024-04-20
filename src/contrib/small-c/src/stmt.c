@@ -299,7 +299,7 @@ doswitch ()
     ws.body_tab = getlabel ();
     ws.incr_def = ws.while_exit = getlabel ();
     addwhile (&ws);
-    gen_immediate ();
+    gen_load_1st ();
     gen_local (ws.body_tab);
     newline ();
     gen_push (HL_REG);

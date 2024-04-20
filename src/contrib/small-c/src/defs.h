@@ -219,11 +219,11 @@ struct lvalue {
 
 // Output the variable symbol at scptr
 // as an extrn or a public.
-void ppubext (SYMBOL * scptr);
+void gen_vdecl (SYMBOL * scptr);
 
 // Output function symbol at scptr as
 // an extrn or a public.
-void fpubext (SYMBOL * scptr);
+void gen_fdecl (SYMBOL * scptr);
 
 // Load static memory cell into the
 // primary register.

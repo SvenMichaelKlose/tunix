@@ -190,7 +190,7 @@ gdata ()
 /*
  *  Output the variable symbol at scptr as an extrn or a public
  */
-ppubext (scptr)
+gen_vdecl (scptr)
 char *scptr;
 {
     if (scptr[STORAGE] == STATIC)
@@ -205,10 +205,10 @@ char *scptr;
 /*
  * Output the function symbol at scptr as an extrn or a public
  */
-fpubext (scptr)
+gen_fdecl (scptr)
 char *scptr;
 {
-    ppubext (scptr);
+    gen_vdecl (scptr);
 
 }
 

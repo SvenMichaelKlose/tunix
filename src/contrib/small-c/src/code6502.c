@@ -69,12 +69,12 @@ gen_comment ()
 /// SEGMENTS ///
 ////////////////
 
-code_segment_gtext ()
+gen_code_segment ()
 {
     output_line (".code");
 }
 
-data_segment_gdata ()
+gen_data_segment ()
 {
     output_line (".data");
 }
@@ -83,17 +83,17 @@ data_segment_gdata ()
 /// DATA ///
 ////////////
 
-gen_def_byte ()
+gen_datab ()
 {
     output_with_tab (".byte ");
 }
 
-gen_def_word ()
+gen_dataw ()
 {
     output_with_tab (".word ");
 }
 
-gen_def_storage ()
+gen_bss ()
 {
     output_with_tab (".res ");
 }
@@ -114,7 +114,7 @@ _gen_storage_decl (int do_import, char *n)
 }
 
 // Import/export variable symbol.
-ppubext (SYMBOL * scptr)
+gen_vdecl (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage == STATIC)
         return;
@@ -122,7 +122,7 @@ ppubext (SYMBOL * scptr)
 }
 
 // Import/export function symbol.
-fpubext (SYMBOL * scptr)
+gen_fdecl (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;
@@ -133,14 +133,11 @@ fpubext (SYMBOL * scptr)
 /// REGISTERS ///
 /////////////////
 
-// Swap primary and secondary.
 gen_swap ()
 {
     gen_call ("xchg");
 }
 
-// Print partial instruction to get an
-// immediate value into primary.
 gen_load_1st ()
 {
     output_with_tab ("lhli ");
@@ -153,8 +150,6 @@ _gen_load_2nd_const (int v)
     newline ();
 }
 
-// Load address of local symbol into
-// primary.
 gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
@@ -170,13 +165,8 @@ gen_get_local (SYMBOL * sym)
     return HL_REG;
 }
 
-gen_convert_primary_reg_value_to_bool ()
-{
-    gen_call ("ccbool");
-}
-
 // Pointer increment
-gen_increment_primary_reg (LVALUE * lval)
+gen_ptrinc (LVALUE * lval)
 {
     switch (lval->ptr_type) {
     case STRUCT:
@@ -192,7 +182,7 @@ gen_increment_primary_reg (LVALUE * lval)
 }
 
 // Pointer decrement
-gen_decrement_primary_reg (LVALUE * lval)
+gen_ptrdec (LVALUE * lval)
 {
     gen_call ("dec_hl");
     switch (lval->ptr_type) {
@@ -455,29 +445,44 @@ gen_test_jump (int label, int ft)
     newline ();
 }
 
+/////////////
+/// TRUTH ///
+/////////////
+
+gen_tobool ()
+{
+    gen_call ("ccbool");
+}
+
+gen_not ()
+{
+    gen_call ("cclneg");
+}
+
+
 ///////////////////
 /// ARITHMETICS ///
 ///////////////////
 
-gen_twos_complement ()
+gen_neg ()
 {
     gen_call ("ccneg");
 }
 
-gen_multiply_by_two ()
+gen_mul2 ()
 {
     gen_call ("asl_hl");
 }
 
-gen_divide_by_two ()
+gen_div2 ()
 {
     // push primary in prep for
-    // gen_arithm_shift_right ().
+    // gen_asr ().
     gen_push (HL_REG);
     gen_load_1st ();
     output_number (1);
     newline ();
-    gen_arithm_shift_right ();
+    gen_asr ();
 }
 
 // Sum of primary and secondary
@@ -488,14 +493,14 @@ gen_add (int *lval, int *lval2)
     gen_pop ();
     if (dbltest (lval2, lval)) {
         gen_swap ();
-        gen_multiply_by_two ();
+        gen_mul2 ();
         gen_swap ();
     }
     gen_call ("add_de");
 }
 
 // Add offset to primary.
-add_offset (int val)
+gen_add_const (int val)
 {
     _gen_load_2nd_const (val);
     gen_call ("add_de");
@@ -508,19 +513,19 @@ gen_sub ()
 
 // Multiply primary and secondary
 // registers (result in primary)
-gen_mult ()
+gen_mul ()
 {
     gen_call1 ("ccmul");
 }
 
 // Multiply primary by the length of
 // some variable.
-gen_multiply (int type, int size)
+gen_mul_const (int type, int size)
 {
     switch (type) {
     case CINT:
     case UINT:
-        gen_multiply_by_two ();
+        gen_mul2 ();
         break;
     case STRUCT:
         _gen_load_2nd_const (size);
@@ -589,9 +594,19 @@ gen_and ()
     gen_call1 ("ccand");
 }
 
+// One's complement of primary.
+gen_complement ()
+{
+    gen_call ("cccom");
+}
+
+//////////////
+/// SHIFTS ///
+//////////////
+
 // Arithmetic shift right the secondary // register the number of times in the
 // primary.  Result in primary.
-gen_arithm_shift_right ()
+gen_asr ()
 {
     gen_call1 ("ccasr");
 }
@@ -599,7 +614,7 @@ gen_arithm_shift_right ()
 // Logically shift right the secondary
 // register the number of times in the
 // primary register.  Result in primary.
-gen_logical_shift_right ()
+gen_lsr ()
 {
     gen_call1 ("cclsr");
 }
@@ -607,21 +622,9 @@ gen_logical_shift_right ()
 // Arithmetic shift left secondary
 // register the number of times in the
 // primary register.  Result in primary.
-gen_arithm_shift_left ()
+gen_asl ()
 {
     gen_call1 ("ccasl");
-}
-
-// One's complement of primary.
-gen_complement ()
-{
-    gen_call ("cccom");
-}
-
-// Logical complement of primary.
-gen_logical_negation ()
-{
-    gen_call ("cclneg");
 }
 
 ////////////////////
@@ -636,52 +639,52 @@ gen_logical_negation ()
   true, 0 otherwise.
  */
 
-gen_equal ()
+gen_eq ()
 {
     gen_call1 ("cceq");
 }
 
-gen_not_equal ()
+gen_neq ()
 {
     gen_call1 ("ccne");
 }
 
-gen_less_than ()
+gen_lt ()
 {
     gen_call1 ("cclt");
 }
 
-gen_less_or_equal ()
+gen_lte ()
 {
     gen_call1 ("ccle");
 }
 
-gen_greater_than ()
+gen_gt ()
 {
     gen_call1 ("ccgt");
 }
 
-gen_greater_or_equal ()
+gen_gte ()
 {
     gen_call1 ("ccge");
 }
 
-gen_unsigned_less_than ()
+gen_ult ()
 {
     gen_call1 ("ccult");
 }
 
-gen_unsigned_less_or_equal ()
+gen_ulte ()
 {
     gen_call1 ("ccule");
 }
 
-gen_usigned_greater_than ()
+gen_ugt ()
 {
     gen_call1 ("ccugt");
 }
 
-gen_unsigned_greater_or_equal ()
+gen_ugte ()
 {
     gen_call1 ("ccuge");
 }

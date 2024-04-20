@@ -102,7 +102,7 @@ trailer ()
  * text (code) segment
  */
 void
-code_segment_gtext ()
+gen_code_segment ()
 {
     output_line
         ("\t.area  SMALLC_GENERATED  (REL,CON,CSEG)");
@@ -112,7 +112,7 @@ code_segment_gtext ()
  * data segment
  */
 void
-data_segment_gdata ()
+gen_data_segment ()
 {
     output_line
         ("\t.area  SMALLC_GENERATED_DATA  (REL,CON,DSEG)");
@@ -123,7 +123,7 @@ data_segment_gdata ()
  * @param scptr
  */
 void
-ppubext (SYMBOL * scptr)
+gen_vdecl (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage ==
         STATIC)
@@ -139,7 +139,7 @@ ppubext (SYMBOL * scptr)
  * @param scptr
  */
 void
-fpubext (SYMBOL * scptr)
+gen_fdecl (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;
@@ -411,7 +411,7 @@ int label, ft;
 /**
  * print pseudo-op  to define a byte
  */
-gen_def_byte ()
+gen_datab ()
 {
     output_with_tab (".db\t");
 }
@@ -419,7 +419,7 @@ gen_def_byte ()
 /**
  * print pseudo-op to define storage
  */
-gen_def_storage ()
+gen_bss ()
 {
     output_with_tab (".ds\t");
 }
@@ -427,7 +427,7 @@ gen_def_storage ()
 /**
  * print pseudo-op to define a word
  */
-gen_def_word ()
+gen_dataw ()
 {
     output_with_tab (".dw\t");
 }
@@ -481,7 +481,7 @@ gen_modify_stack (int newstkp)
 /**
  * multiply the primary register by INTSIZE
  */
-gen_multiply_by_two ()
+gen_mul2 ()
 {
     output_line ("dad \th");
 }
@@ -489,13 +489,13 @@ gen_multiply_by_two ()
 /**
  * divide the primary register by INTSIZE, never used
  */
-gen_divide_by_two ()
+gen_div2 ()
 {
     gen_push (HL_REG);          // push primary in prep for gasr 
     gen_load_1st ();
     output_number (1);
     newline ();
-    gen_arithm_shift_right ();  // divide by two 
+    gen_asr ();  // divide by two 
 }
 
 /**
@@ -519,7 +519,7 @@ int *lval, *lval2;
     gen_pop ();
     if (dbltest (lval2, lval)) {
         gen_swap ();
-        gen_multiply_by_two ();
+        gen_mul2 ();
         gen_swap ();
     }
     output_line ("dad \td");
@@ -537,7 +537,7 @@ gen_sub ()
 /**
  * multiply the primary and secondary registers (result in primary)
  */
-gen_mult ()
+gen_mul ()
 {
     gen_pop ();
     gen_call ("ccmul");
@@ -616,7 +616,7 @@ gen_and ()
  * arithmetic shift right the secondary register the number of
  * times in the primary register (results in primary register)
  */
-gen_arithm_shift_right ()
+gen_asr ()
 {
     gen_pop ();
     gen_call ("ccasr");
@@ -626,7 +626,7 @@ gen_arithm_shift_right ()
  * logically shift right the secondary register the number of
  * times in the primary register (results in primary register)
  */
-gen_logical_shift_right ()
+gen_lsr ()
 {
     gen_pop ();
     gen_call ("cclsr");
@@ -636,7 +636,7 @@ gen_logical_shift_right ()
  * arithmetic shift left the secondary register the number of
  * times in the primary register (results in primary register)
  */
-gen_arithm_shift_left ()
+gen_asl ()
 {
     gen_pop ();
     gen_call ("ccasl");
@@ -645,7 +645,7 @@ gen_arithm_shift_left ()
 /**
  * two's complement of primary register
  */
-gen_twos_complement ()
+gen_neg ()
 {
     gen_call ("ccneg");
 }
@@ -653,7 +653,7 @@ gen_twos_complement ()
 /**
  * logical complement of primary register
  */
-gen_logical_negation ()
+gen_not ()
 {
     gen_call ("cclneg");
 }
@@ -669,7 +669,7 @@ gen_complement ()
 /**
  * Convert primary value into logical value (0 if 0, 1 otherwise)
  */
-gen_convert_primary_reg_value_to_bool ()
+gen_tobool ()
 {
     gen_call ("ccbool");
 }
@@ -677,7 +677,7 @@ gen_convert_primary_reg_value_to_bool ()
 /**
  * increment the primary register by 1 if char, INTSIZE if int
  */
-gen_increment_primary_reg (LVALUE * lval)
+gen_ptrinc (LVALUE * lval)
 {
     switch (lval->ptr_type) {
     case STRUCT:
@@ -698,7 +698,7 @@ gen_increment_primary_reg (LVALUE * lval)
 /**
  * decrement the primary register by one if char, INTSIZE if int
  */
-gen_decrement_primary_reg (LVALUE * lval)
+gen_ptrdec (LVALUE * lval)
 {
     output_line ("dcx \th");
     switch (lval->ptr_type) {
@@ -736,7 +736,7 @@ gen_decrement_primary_reg (LVALUE * lval)
 /**
  * equal
  */
-gen_equal ()
+gen_eq ()
 {
     gen_pop ();
     gen_call ("cceq");
@@ -745,7 +745,7 @@ gen_equal ()
 /**
  * not equal
  */
-gen_not_equal ()
+gen_neq ()
 {
     gen_pop ();
     gen_call ("ccne");
@@ -754,7 +754,7 @@ gen_not_equal ()
 /**
  * less than (signed)
  */
-gen_less_than ()
+gen_lt ()
 {
     gen_pop ();
     gen_call ("cclt");
@@ -763,7 +763,7 @@ gen_less_than ()
 /**
  * less than or equal (signed)
  */
-gen_less_or_equal ()
+gen_lte ()
 {
     gen_pop ();
     gen_call ("ccle");
@@ -772,7 +772,7 @@ gen_less_or_equal ()
 /**
  * greater than (signed)
  */
-gen_greater_than ()
+gen_gt ()
 {
     gen_pop ();
     gen_call ("ccgt");
@@ -781,7 +781,7 @@ gen_greater_than ()
 /**
  * greater than or equal (signed)
  */
-gen_greater_or_equal ()
+gen_gte ()
 {
     gen_pop ();
     gen_call ("ccge");
@@ -790,7 +790,7 @@ gen_greater_or_equal ()
 /**
  * less than (unsigned)
  */
-gen_unsigned_less_than ()
+gen_ult ()
 {
     gen_pop ();
     gen_call ("ccult");
@@ -799,7 +799,7 @@ gen_unsigned_less_than ()
 /**
  * less than or equal (unsigned)
  */
-gen_unsigned_less_or_equal ()
+gen_ulte ()
 {
     gen_pop ();
     gen_call ("ccule");
@@ -808,7 +808,7 @@ gen_unsigned_less_or_equal ()
 /**
  * greater than (unsigned)
  */
-gen_usigned_greater_than ()
+gen_ugt ()
 {
     gen_pop ();
     gen_call ("ccugt");
@@ -817,7 +817,7 @@ gen_usigned_greater_than ()
 /**
  * greater than or equal (unsigned)
  */
-gen_unsigned_greater_or_equal ()
+gen_ugte ()
 {
     gen_pop ();
     gen_call ("ccuge");
@@ -890,7 +890,7 @@ gen_load_1st2 ()
  * add offset to primary register
  * @param val the value
  */
-add_offset (int val)
+gen_add_const (int val)
 {
     gen_load_1st2 ();
     output_number (val);
@@ -903,12 +903,12 @@ add_offset (int val)
  * @param type
  * @param size
  */
-gen_multiply (int type, int size)
+gen_mul_const (int type, int size)
 {
     switch (type) {
     case CINT:
     case UINT:
-        gen_multiply_by_two ();
+        gen_mul2 ();
         break;
     case STRUCT:
         gen_load_1st2 ();

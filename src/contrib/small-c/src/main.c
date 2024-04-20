@@ -174,10 +174,10 @@ compile (char *file)
         } else if (!openout ())
             return;
         header ();
-        code_segment_gtext ();
+        gen_code_segment ();
         parse ();
         fclose (input);
-        data_segment_gdata ();
+        gen_data_segment ();
         dumplits ();
         dumpglbs ();
         errorsummary ();
@@ -302,7 +302,7 @@ dumplits ()
     def_local (litlab);
     k = 0;
     while (k < litptr) {
-        gen_def_byte ();
+        gen_datab ();
         j = 8;
         while (j--) {
             output_number (litq[k++] & 127);
@@ -327,7 +327,7 @@ dumpglbs ()
         SYMBOL *symbol =
             &symbol_table[current_symbol_table_idx];
         if (symbol->identity != FUNCTION) {
-            ppubext (symbol);
+            gen_vdecl (symbol);
             if (symbol->storage != EXTERN) {
                 def_global (symbol->name);
                 dim = symbol->offset;
@@ -348,9 +348,9 @@ dumpglbs ()
                             if ((symbol->type & CINT) ||
                                 (symbol->identity ==
                                  POINTER)) {
-                                gen_def_word ();
+                                gen_dataw ();
                             } else {
-                                gen_def_byte ();
+                                gen_datab ();
                             }
                         }
                         if (i < list_size) {
@@ -379,7 +379,7 @@ dumpglbs ()
                 newline ();
             }
         } else
-            fpubext (symbol);
+            gen_fdecl (symbol);
         current_symbol_table_idx++;
     }
 }
@@ -402,7 +402,7 @@ dump_struct (SYMBOL * symbol, int position)
         // arrays in structs to be
         // initilized.
         if (member.identity == ARRAY) {
-            gen_def_storage ();
+            gen_bss ();
             output_number (member.struct_size);
             newline ();
         } else {
@@ -410,9 +410,9 @@ dump_struct (SYMBOL * symbol, int position)
             // take two bytes.
             if (member.type & CINT
                 || member.identity == POINTER) {
-                gen_def_word ();
+                gen_dataw ();
             } else {
-                gen_def_byte ();
+                gen_datab ();
             }
             if (position < get_size (symbol->name)) {
                 // dump data

@@ -401,12 +401,12 @@ dumpsw (WHILE * ws)
 {
     int i, j;
 
-    data_segment_gdata ();
+    gen_data_segment ();
     def_local (ws->body_tab);
     if (ws->case_test != swstp) {
         j = ws->case_test;
         while (j < swstp) {
-            gen_def_word ();
+            gen_dataw ();
             i = 4;
             while (i--) {
                 output_number (swstcase[j]);
@@ -420,9 +420,9 @@ dumpsw (WHILE * ws)
             }
         }
     }
-    gen_def_word ();
+    gen_dataw ();
     gen_local (ws->incr_def);
     output_string (",0");
     newline ();
-    code_segment_gtext ();
+    gen_code_segment ();
 }

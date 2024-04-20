@@ -373,12 +373,12 @@ add_local (char *sname, int identity,
     symbol->type = type;
     symbol->storage = storage_class;
     if (storage_class == LSTATIC) {
-        data_segment_gdata ();
+        gen_data_segment ();
         def_local (k = getlabel ());
-        gen_def_storage ();
+        gen_bss ();
         output_number (offset);
         newline ();
-        code_segment_gtext ();
+        gen_code_segment ();
         offset = k;
     }
     symbol->offset = offset;

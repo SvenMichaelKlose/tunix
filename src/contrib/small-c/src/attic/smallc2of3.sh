@@ -1804,7 +1804,7 @@ dumpglbs ()
         cptr = rglbptr;
         while (cptr < glbptr) {
                 if (cptr[IDENT] != FUNCTION) {
-                        ppubext(cptr);
+                        gen_vdecl(cptr);
                         if (cptr[STORAGE] != EXTERN) {
                                 prefix ();
                                 outstr (cptr);
@@ -1818,7 +1818,7 @@ dumpglbs ()
                                 nl ();
                         }
                 } else {
-                        fpubext(cptr);
+                        gen_fdecl(cptr);
                 }
                 cptr = cptr + SYMSIZ;
         }

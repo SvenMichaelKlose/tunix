@@ -27,7 +27,7 @@ SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c prepro
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 all:    scc6502
-	./scc6502 -t sym.c
+	./scc6502 -t test.c
 
 scc6502: $(OBJ)
 	$(CC) -o scc6502 $(CFLAGS) $(OBJ)

@@ -1,4 +1,7 @@
 // Just some code to test new targets.
+
+char array[5 + 3];
+
 main (char argc, char *argv[])
 {
     char i;

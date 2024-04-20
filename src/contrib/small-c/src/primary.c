@@ -20,7 +20,8 @@ primary (LVALUE * lval)
         needbrack ("(");
         gen_immediate ();
         if (amatch ("int", 3)
-            || amatch ("unsigned int", 12)) {
+            || amatch ("unsigned int", 12)
+            || amatch ("unsigned", 8)) {
             blanks ();
             // pointers and ints are both INTSIZE 
             match ("*");

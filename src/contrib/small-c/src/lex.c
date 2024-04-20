@@ -171,29 +171,28 @@ get_type ()
     if (amatch ("register", 8)) {
         if (amatch ("char", 4))
             return CCHAR;
-        else if (amatch ("int", 3))
+        if (amatch ("int", 3))
             return CINT;
-        else
-            return CINT;
-    } else if (amatch ("unsigned", 8)) {
-        if (amatch ("char", 4)) {
-            return UCHAR;
-        } else if (amatch ("int", 3))
-            return UINT;
-    } else if (amatch ("signed", 8)) {
-        if (amatch ("char", 4)) {
-            return CCHAR;
-        } else if (amatch ("int", 3)) {
-            return CINT;
-        }
-    } else if (amatch ("char", 4)) {
-        return CCHAR;
-    } else if (amatch ("int", 3)) {
         return CINT;
-    // Recognize structs being passed
-    // as a proper type.
-    } else if (amatch ("struct", 6)) {
-        return STRUCT;
     }
+    if (amatch ("unsigned", 8)) {
+        if (amatch ("char", 4))
+            return UCHAR;
+        if (amatch ("int", 3))
+            return UINT;
+        return CINT;
+    } else if (amatch ("signed", 8)) {
+        if (amatch ("char", 4))
+            return CCHAR;
+        if (amatch ("int", 3))
+            return CINT;
+        return CINT;
+    }
+    if (amatch ("char", 4))
+        return CCHAR;
+    if (amatch ("int", 3))
+        return CINT;
+    if (amatch ("struct", 6))
+        return STRUCT;
     return 0;
 }

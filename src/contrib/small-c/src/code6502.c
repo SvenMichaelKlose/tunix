@@ -45,25 +45,21 @@ newline ()
     output_byte (LF);
 }
 
-// Decimal number.
 output_number (int num)
 {
     output_decimal (num);
 }
 
-// Label prefix
 output_label_prefix ()
 {
     output_byte ('_');
 }
 
-// Label definition terminator
 output_label_terminator ()
 {
     output_byte (':');
 }
 
-// Comment line start.
 gen_comment ()
 {
     output_byte (';');
@@ -117,8 +113,7 @@ _gen_storage_decl (int do_import, char *n)
     newline ();
 }
 
-// Import/export variable symbol at
-// scptr.
+// Import/export variable symbol.
 ppubext (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage == STATIC)
@@ -126,8 +121,7 @@ ppubext (SYMBOL * scptr)
     _gen_storage_decl (scptr->storage == EXTERN, scptr->name);
 }
 
-// Import/export function symbol at
-// scptr.
+// Import/export function symbol.
 fpubext (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
@@ -165,26 +159,21 @@ gen_get_local (SYMBOL * sym)
         gen_immediate ();
         gen_local (sym->offset);
         newline ();
-        return HL_REG;
     } else {
         gen_immediate ();
         output_number (sym->offset - stkp);
         newline ();
         gen_call ("add_sp");
-        return HL_REG;
     }
-    error ("gen_get_local() with no clue.");
+    return HL_REG;
 }
 
-// Convert primary value into logical
-// value (0 if 0, 1 otherwise)
 gen_convert_primary_reg_value_to_bool ()
 {
     gen_call ("ccbool");
 }
 
-// Increment the primary register by 1
-// if char, INTSIZE if int.
+// Pointer increment
 gen_increment_primary_reg (LVALUE * lval)
 {
     switch (lval->ptr_type) {
@@ -202,8 +191,7 @@ gen_increment_primary_reg (LVALUE * lval)
     }
 }
 
-// Decrement the primary register by one
-// if char, INTSIZE if int.
+// Pointer decrement
 gen_decrement_primary_reg (LVALUE * lval)
 {
     gen_call ("dec_hl");
@@ -236,7 +224,6 @@ gen_decrement_primary_reg (LVALUE * lval)
 /// MEMORY ///
 //////////////
 
-// Load memory into primary register.
 gen_get_memory (SYMBOL * sym)
 {
     if ((sym->identity != POINTER) && (sym->type == CCHAR)) {
@@ -259,8 +246,6 @@ gen_get_memory (SYMBOL * sym)
     }
 }
 
-// Store primary register at symbol
-// address.
 void
 gen_put_memory (SYMBOL * sym)
 {
@@ -313,7 +298,6 @@ gen_get_indirect (char typeobj, int reg)
 /// STACK ///
 /////////////
 
-// Push register onto the stack.
 gen_push (int reg)
 {
     if (reg & DE_REG) {
@@ -325,16 +309,14 @@ gen_push (int reg)
     }
 }
 
-// Pop the top of the stack into
-// secondary register.
+// Pop into secondary.
 gen_pop ()
 {
     output_line ("pop de");
     stkp = stkp + INTSIZE;
 }
 
-// Swap the primary register and top
-// of the stack.
+// Swap primary and top of stack.
 gen_swap_stack ()
 {
     output_line ("xthl");
@@ -393,12 +375,19 @@ gen_modify_stack (int newstkp)
 /// FUNCTIONS ///
 /////////////////
 
-// Call subroutine.
 gen_call (char *sname)
 {
     output_with_tab ("jsr ");
     output_string (sname);
     newline ();
+}
+
+// Call with argument in secondary popped
+// from stack.
+gen_call1 (char *n)
+{
+    gen_pop ();
+    gen_call (n);
 }
 
 // Entry point declaration.
@@ -409,7 +398,6 @@ declare_entry_point (char *symbol_name)
     newline(); 
 }
 
-// Return from subroutine.
 gen_ret ()
 {
     output_line ("rts");
@@ -453,10 +441,6 @@ gen_jump_case ()
     output_with_tab ("jmp cccase");
     newline ();
 }
-
-////////////
-/// TEST ///
-////////////
 
 // Test primary and jump to label.
 // ft != 0: Jump if not zero.
@@ -523,16 +507,14 @@ add_offset (int val)
 
 gen_sub ()
 {
-    gen_pop ();
-    gen_call ("ccsub");
+    gen_call1 ("ccsub");
 }
 
 // Multiply primary and secondary
 // registers (result in primary)
 gen_mult ()
 {
-    gen_pop ();
-    gen_call ("ccmul");
+    gen_call1 ("ccmul");
 }
 
 // Multiply primary by the length of
@@ -560,8 +542,7 @@ gen_multiply (int type, int size)
 // remainder in secondary.
 gen_div ()
 {
-    gen_pop ();
-    gen_call ("ccdiv");
+    gen_call1 ("ccdiv");
 }
 
 // Unsigned divide secondary register
@@ -569,8 +550,7 @@ gen_div ()
 // remainder in secondary.
 gen_udiv ()
 {
-    gen_pop ();
-    gen_call ("ccudiv");
+    gen_call1 ("ccudiv");
 }
 
 // Remainder (mod) of secondary register
@@ -599,31 +579,27 @@ gen_umod ()
 // secondary registers.
 gen_or ()
 {
-    gen_pop ();
-    gen_call ("ccor");
+    gen_call1 ("ccor");
 }
 
 // Exclusive 'or' the primary and
 // secondary registers.
 gen_xor ()
 {
-    gen_pop ();
-    gen_call ("ccxor");
+    gen_call1 ("ccxor");
 }
 
 // 'and' primary and secondary.
 gen_and ()
 {
-    gen_pop ();
-    gen_call ("ccand");
+    gen_call1 ("ccand");
 }
 
 // Arithmetic shift right the secondary // register the number of times in the
 // primary.  Result in primary.
 gen_arithm_shift_right ()
 {
-    gen_pop ();
-    gen_call ("ccasr");
+    gen_call1 ("ccasr");
 }
 
 // Logically shift right the secondary
@@ -631,8 +607,7 @@ gen_arithm_shift_right ()
 // primary register.  Result in primary.
 gen_logical_shift_right ()
 {
-    gen_pop ();
-    gen_call ("cclsr");
+    gen_call1 ("cclsr");
 }
 
 // Arithmetic shift left secondary
@@ -640,8 +615,7 @@ gen_logical_shift_right ()
 // primary register.  Result in primary.
 gen_arithm_shift_left ()
 {
-    gen_pop ();
-    gen_call ("ccasl");
+    gen_call1 ("ccasl");
 }
 
 // One's complement of primary.
@@ -670,62 +644,52 @@ gen_logical_negation ()
 
 gen_equal ()
 {
-    gen_pop ();
-    gen_call ("cceq");
+    gen_call1 ("cceq");
 }
 
 gen_not_equal ()
 {
-    gen_pop ();
-    gen_call ("ccne");
+    gen_call1 ("ccne");
 }
 
 gen_less_than ()
 {
-    gen_pop ();
-    gen_call ("cclt");
+    gen_call1 ("cclt");
 }
 
 gen_less_or_equal ()
 {
-    gen_pop ();
-    gen_call ("ccle");
+    gen_call1 ("ccle");
 }
 
 gen_greater_than ()
 {
-    gen_pop ();
-    gen_call ("ccgt");
+    gen_call1 ("ccgt");
 }
 
 gen_greater_or_equal ()
 {
-    gen_pop ();
-    gen_call ("ccge");
+    gen_call1 ("ccge");
 }
 
 gen_unsigned_less_than ()
 {
-    gen_pop ();
-    gen_call ("ccult");
+    gen_call1 ("ccult");
 }
 
 gen_unsigned_less_or_equal ()
 {
-    gen_pop ();
-    gen_call ("ccule");
+    gen_call1 ("ccule");
 }
 
 gen_usigned_greater_than ()
 {
-    gen_pop ();
-    gen_call ("ccugt");
+    gen_call1 ("ccugt");
 }
 
 gen_unsigned_greater_or_equal ()
 {
-    gen_pop ();
-    gen_call ("ccuge");
+    gen_call1 ("ccuge");
 }
 
 /////////////////

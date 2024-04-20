@@ -1,7 +1,14 @@
+///////////////
+/// MACHDEP ///
+///////////////
+
 // Intel 8080 architecture defs 
 #define INTSIZE 2
 
-// miscellaneous 
+/////////////////////
+/// Miscellaneous ///
+/////////////////////
+
 #define FOREVER for(;;)
 #define FALSE   0
 #define TRUE    1
@@ -15,64 +22,15 @@
 #define FFEED   12
 #define TAB     9
 
-// system-wide name size (for symbols) 
-#define NAMESIZE        33
-#define NAMEMAX         32
-
-struct symbol {
-    // symbol name 
-    char name[NAMESIZE];
-    // variable, array, pointer,
-    // function 
-    int identity;
-    // char, int, uchar, unit 
-    int type;
-    // public, auto, extern, static
-    // lstatic, defauto 
-    int storage;
-    int offset;
-    // index of struct in tag table 
-    int tagidx;
-    // The size, in bytes, of a member
-    // of a struct - only used for
-    // member declarations.
-    int struct_size;
-};
-#define SYMBOL struct symbol
-
-#define NUMBER_OF_GLOBALS 100
-#define NUMBER_OF_LOCALS 20
-
-// Define the structure tag table parameters 
-#define NUMTAG      10
-
-struct tag_symbol {
-    // structure tag name 
-    char name[NAMESIZE];
-    // size of struct in bytes 
-    int size;
-    // index of first member 
-    int member_idx;
-    // number of tag members 
-    int number_of_members;
-};
-#define TAG_SYMBOL struct tag_symbol
-
-#ifdef SMALL_C
-#define NULL_TAG 0
-#else
-#define NULL_TAG (TAG_SYMBOL *)0
-#endif
-
-// Define the structure member table
-// parameters 
-#define NUMMEMB     30
+/////////////
+/// TYPES ///
+/////////////
 
 // Possible entries for "ident".
-#define VARIABLE        1
-#define ARRAY           2
-#define POINTER         3
-#define FUNCTION        4
+#define VARIABLE    1
+#define ARRAY       2
+#define POINTER     3
+#define FUNCTION    4
 
 // Possible entries for "type"
 // High order 14 bits give length of
@@ -94,6 +52,65 @@ struct tag_symbol {
 #define STATIC  4
 #define LSTATIC 5
 #define DEFAUTO 6
+
+///////////////
+/// SYMBOLS ///
+///////////////
+
+#define NAMESIZE    33
+#define NAMEMAX     32
+
+struct symbol {
+    char name[NAMESIZE];
+    // variable, array, pointer,
+    // function 
+    int identity;
+    // char, int, uchar, unit 
+    int type;
+    // public, auto, extern, static
+    // lstatic, defauto 
+    int storage;
+    int offset;
+    // index of struct in tag table 
+    int tagidx;
+    // The size, in bytes, of a member
+    // of a struct - only used for
+    // member declarations.
+    int struct_size;
+};
+#define SYMBOL struct symbol
+
+#define NUMBER_OF_GLOBALS   100
+#define NUMBER_OF_LOCALS    20
+
+///////////////////
+/// STRUCT TAGS ///
+///////////////////
+
+#ifdef SMALL_C
+#define NULL_TAG 0
+#else
+#define NULL_TAG (TAG_SYMBOL *)0
+#endif
+
+// Maximum number of members per struct.
+#define NUMMEMB     30
+
+// Define the structure tag table
+// parameters.
+#define NUMTAG      10
+
+struct tag_symbol {
+    char name[NAMESIZE]; // Struct name.
+    int size;       // Bytes.
+    int member_idx; // First member.
+    int number_of_members;
+};
+#define TAG_SYMBOL struct tag_symbol
+
+/////////////////////////
+/// LOOP CONTROL FLOW ///
+/////////////////////////
 
 // "do"/"for"/"while"/"switch"
 // statement stack 
@@ -118,13 +135,17 @@ struct while_rec {
 #define WHILE struct while_rec
 
 // possible entries for "wstyp" 
-#define WSWHILE 0
-#define WSFOR   1
-#define WSDO    2
-#define WSSWITCH        3
+#define WSWHILE     0
+#define WSFOR       1
+#define WSDO        2
+#define WSSWITCH    3
 
 // "switch" label stack 
 #define SWSTSZ  100
+
+////////////////////
+/// PREPROCESSOR ///
+////////////////////
 
 // literal pool 
 #define LITABSZ 5000
@@ -142,6 +163,19 @@ struct while_rec {
 // "include" stack 
 #define INCLSIZ     3
 
+// Path to include directories. set at
+// compile time on host machine.
+#define DEFLIB  inclib()
+extern char *inclib ();
+
+WHILE *readwhile ();
+WHILE *findwhile ();
+WHILE *readswitch ();
+
+//////////////////
+/// STATEMENTS ///
+//////////////////
+
 // statement types (tokens) 
 #define STIF        1
 #define STWHILE     2
@@ -153,8 +187,6 @@ struct while_rec {
 #define STDO        8
 #define STFOR       9
 #define STSWITCH    10
-
-#define DEFLIB  inclib()
 
 #define FETCH  1
 #define HL_REG 1<<1
@@ -176,13 +208,9 @@ struct lvalue {
 };
 #define LVALUE struct lvalue
 
-// Path to include directories. set at
-// compile time on host machine
-char *inclib ();
-
-WHILE *readwhile ();
-WHILE *findwhile ();
-WHILE *readswitch ();
+///////////////////////
+/// CODE GENERATION ///
+///////////////////////
 
 // Output the variable symbol at scptr
 // as an extrn or a public.
@@ -203,24 +231,26 @@ void gen_get_indirect (char typeobj, int reg);
 // Write primary to static memory cell.
 void gen_put_memory (SYMBOL * sym);
 
-// Initialisation of global variables-
+////////////////////
+/// GLOBAL SCOPE ///
+////////////////////
+
+// Initialisation of global variables.
 #define INIT_TYPE       NAMESIZE
 #define INIT_LENGTH     NAMESIZE+1
 #define INITIALS_SIZE   5*1024
 
 struct initials_table {
-    // symbol name 
     char name[NAMESIZE];
-    // type 
     int type;
-    // length of data (possibly an
-    // array) 
+    // length of data (array).
     int dim;
-    // index of tag or zero 
+    // index of tag or zero.
     int data_len;
 };
+
 #define INITIALS struct initials_table
 
-// Determine if 'sname' is a member of
-// the struct with tag 'tag'
-SYMBOL *find_member (TAG_SYMBOL * tag, char *sname);
+// Check if 'sname' is a struct member.
+SYMBOL *find_member (TAG_SYMBOL * tag,
+                     char *sname);

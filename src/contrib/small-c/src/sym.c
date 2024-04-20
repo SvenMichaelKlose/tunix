@@ -221,7 +221,7 @@ declare_local (int typ, int stclass,
                 j = VARIABLE;
             if (!symname (sname))
                 illname ();
-            if (-1 != find_locale (sname))
+            if (-1 != find_local (sname))
                 multidef (sname);
             if (match ("[")) {
                 k = needsub ();
@@ -314,7 +314,7 @@ find_global (char *sname)
 
 // Find local symbol.
 int
-find_locale (char *sname)
+find_local (char *sname)
 {
     int idx;
 
@@ -366,7 +366,7 @@ add_local (char *sname, int identity,
     char *buffer_ptr;
 
     if ((current_symbol_table_idx =
-         find_locale (sname)) > -1) {
+         find_local (sname)) > -1) {
         return (current_symbol_table_idx);
     }
     if (local_table_index >=

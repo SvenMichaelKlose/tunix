@@ -46,7 +46,7 @@ primary (LVALUE * lval)
                 output_number (tag_table[otag].size);
         } else if (symname (sname)) {
             if (((symbol_table_idx =
-                  find_locale (sname)) > -1)
+                  find_local (sname)) > -1)
                 || ((symbol_table_idx = find_global (sname))
                     > -1)) {
                 symbol = &symbol_table[symbol_table_idx];
@@ -74,7 +74,7 @@ primary (LVALUE * lval)
         return (0);
     }
     if (symname (sname)) {
-        if ((symbol_table_idx = find_locale (sname)) > -1) {
+        if ((symbol_table_idx = find_local (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
             reg = gen_get_locale (symbol);
             lval->symbol = symbol;

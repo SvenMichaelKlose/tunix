@@ -41,7 +41,7 @@ newfunc ()
         // K&R style argument declaration 
         while (!match (")")) {
             if (symname (n)) {
-                if (find_locale (n) > -1)
+                if (find_local (n) > -1)
                     multidef (n);
                 else {
                     add_local (n, 0, 0, argstk, AUTO);
@@ -124,7 +124,7 @@ getarg (int t)
             j = POINTER;
         }
         if (legalname) {
-            if ((argptr = find_locale (n)) > -1) {
+            if ((argptr = find_local (n)) > -1) {
                 symbol_table[argptr].identity = j;
                 symbol_table[argptr].type = t;
                 address =
@@ -197,7 +197,7 @@ doLocalAnsiArgument (int type)
     else
         identity = VARIABLE;
     if (symname (symbol_name)) {
-        if (find_locale (symbol_name) > -1) {
+        if (find_local (symbol_name) > -1) {
             multidef (symbol_name);
         } else {
             argptr =

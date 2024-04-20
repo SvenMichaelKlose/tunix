@@ -15,10 +15,16 @@ print_label (int label)
     output_decimal (label);
 }
 
-// Numeric label
-generate_label (int nlab)
+gen_local (int nlab)
 {
     print_label (nlab);
+    output_label_terminator ();
+    newline ();
+}
+
+gen_global (char *n)
+{
+    output_string (n);
     output_label_terminator ();
     newline ();
 }

@@ -63,8 +63,6 @@ addcase (int val)
     else {
         swstcase[swstp] = val;
         swstlab[swstp++] = lab = getlabel ();
-        print_label (lab);
-        output_label_terminator ();
-        newline ();
+        gen_local (lab);
     }
 }

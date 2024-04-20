@@ -31,9 +31,7 @@ newfunc ()
         add_global (n, FUNCTION, CINT, FUNCTION, PUBLIC);
     if (!match ("("))
         error ("missing open paren");
-    output_string (n);
-    output_label_terminator ();
-    newline ();
+    gen_global (n);
     local_table_index = NUMBER_OF_GLOBALS;      //locptr = STARTLOC; 
     argstk = 0;
     // ANSI style argument declaration 
@@ -72,9 +70,7 @@ newfunc ()
         }
     }
     statement (YES);
-    print_label (fexitlab);
-    output_label_terminator ();
-    newline ();
+    gen_local (fexitlab);
     gen_modify_stack (0);
     gen_ret ();
     stkp = 0;

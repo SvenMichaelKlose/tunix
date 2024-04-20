@@ -299,8 +299,7 @@ dumplits ()
 
     if (litptr == 0)
         return;
-    print_label (litlab);
-    output_label_terminator ();
+    gen_local (litlab);
     k = 0;
     while (k < litptr) {
         gen_def_byte ();
@@ -330,8 +329,7 @@ dumpglbs ()
         if (symbol->identity != FUNCTION) {
             ppubext (symbol);
             if (symbol->storage != EXTERN) {
-                output_string (symbol->name);
-                output_label_terminator ();
+                gen_global (symbol->name);
                 dim = symbol->offset;
                 list_size = 0;
                 line_count = 0;
@@ -380,9 +378,8 @@ dumpglbs ()
                 }
                 newline ();
             }
-        } else {
+        } else
             fpubext (symbol);
-        }
         current_symbol_table_idx++;
     }
 }

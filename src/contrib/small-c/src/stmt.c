@@ -176,15 +176,15 @@ doif ()
     stkp = gen_modify_stack (fstkp);
     local_table_index = flev;
     if (!amatch ("else", 4)) {
-        generate_label (flab1);
+        gen_local (flab1);
         return;
     }
     gen_jump (flab2 = getlabel ());
-    generate_label (flab1);
+    gen_local (flab1);
     statement (NO);
     stkp = gen_modify_stack (fstkp);
     local_table_index = flev;
-    generate_label (flab2);
+    gen_local (flab2);
 }
 
 /**
@@ -200,11 +200,11 @@ dowhile ()
     ws.case_test = getlabel ();
     ws.while_exit = getlabel ();
     addwhile (&ws);
-    generate_label (ws.case_test);
+    gen_local (ws.case_test);
     test (ws.while_exit, FALSE);
     statement (NO);
     gen_jump (ws.case_test);
-    generate_label (ws.while_exit);
+    gen_local (ws.while_exit);
     local_table_index = ws.symbol_idx;
     stkp = gen_modify_stack (ws.stack_pointer);
     delwhile ();
@@ -224,15 +224,15 @@ dodo ()
     ws.case_test = getlabel ();
     ws.while_exit = getlabel ();
     addwhile (&ws);
-    generate_label (ws.body_tab);
+    gen_local (ws.body_tab);
     statement (NO);
     if (!match ("while")) {
         error ("missing while");
         return;
     }
-    generate_label (ws.case_test);
+    gen_local (ws.case_test);
     test (ws.body_tab, TRUE);
-    generate_label (ws.while_exit);
+    gen_local (ws.while_exit);
     local_table_index = ws.symbol_idx;
     stkp = gen_modify_stack (ws.stack_pointer);
     delwhile ();
@@ -260,7 +260,7 @@ dofor ()
         expression (YES);
         need_semicolon ();
     }
-    generate_label (pws->case_test);
+    gen_local (pws->case_test);
     if (!match (";")) {
         expression (YES);
         gen_test_jump (pws->body_tab, TRUE);
@@ -268,17 +268,17 @@ dofor ()
         need_semicolon ();
     } else
         pws->case_test = pws->body_tab;
-    generate_label (pws->incr_def);
+    gen_local (pws->incr_def);
     if (!match (")")) {
         expression (YES);
         needbrack (")");
         gen_jump (pws->case_test);
     } else
         pws->incr_def = pws->case_test;
-    generate_label (pws->body_tab);
+    gen_local (pws->body_tab);
     statement (NO);
     gen_jump (pws->incr_def);
-    generate_label (pws->while_exit);
+    gen_local (pws->while_exit);
     local_table_index = pws->symbol_idx;
     stkp = gen_modify_stack (pws->stack_pointer);
     delwhile ();
@@ -312,7 +312,7 @@ doswitch ()
     ptr = readswitch ();
     gen_jump (ptr->while_exit);
     dumpsw (ptr);
-    generate_label (ptr->while_exit);
+    gen_local (ptr->while_exit);
     local_table_index = ptr->symbol_idx;
     stkp = gen_modify_stack (ptr->stack_pointer);
     swstp = ptr->case_test;
@@ -348,7 +348,7 @@ dodefault ()
 
     if (ptr = readswitch ()) {
         ptr->incr_def = lab = getlabel ();
-        generate_label (lab);
+        gen_local (lab);
         if (!match (":"))
             error ("missing colon");
     } else
@@ -402,7 +402,7 @@ dumpsw (WHILE * ws)
     int i, j;
 
     data_segment_gdata ();
-    generate_label (ws->body_tab);
+    gen_local (ws->body_tab);
     if (ws->case_test != swstp) {
         j = ws->case_test;
         while (j < swstp) {

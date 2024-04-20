@@ -44,7 +44,7 @@ extern int inclsp;
 extern char fname[];
 
 extern char quote[];
-extern int current_symbol_table_idx;    //extern  char    *cptr; 
+extern int current_symbol_table_idx;
 extern int *iptr;
 extern int fexitlab;
 extern int iflevel, skiplevel;
@@ -53,8 +53,11 @@ extern int sflag;
 extern int cflag;
 extern int errs;
 extern int aflag;
+
+#ifdef I8080
 // undocumented 8085 instructions 
 extern int uflag;
+#endif
 
 extern INITIALS initials_table[NUMBER_OF_GLOBALS];
 

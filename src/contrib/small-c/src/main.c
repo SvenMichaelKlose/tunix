@@ -32,7 +32,9 @@ main (int argc, char *argv[])
     ctext = 0;
     errs = 0;
     aflag = 1;
+#ifdef I8080
     uflag = 0;
+#endif
 
     for (i = 1; i < argc; i++) {
         param = argv[i];
@@ -62,7 +64,9 @@ main (int argc, char *argv[])
                 // use undocumented 8085 instructions 
                 case 'u':
                 case 'U':
+#ifdef I8080
                     uflag = 1;
+#endif
                     break;
                 // define macro 
                 case 'd':

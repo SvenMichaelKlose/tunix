@@ -53,8 +53,11 @@ int sflag;
 int cflag;
 int errs;
 int aflag;
+
+#ifdef I8080
 // undocumented 8085 instructions 
 int uflag;
+#endif
 
 INITIALS initials_table[NUMBER_OF_GLOBALS];
 // 5kB space for initialisation data 

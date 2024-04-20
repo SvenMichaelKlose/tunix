@@ -157,19 +157,11 @@ gen_get_local (SYMBOL * sym)
         newline ();
         return HL_REG;
     } else {
-        if (uflag && !(sym->identity == ARRAY)) {       /* ||
-                                                           (sym->identity == VARIABLE && sym->type == STRUCT))) { */
-            output_with_tab ("ldei ");
-            output_number (sym->offset - stkp);
-            newline ();
-            return DE_REG;
-        } else {
-            gen_immediate ();
-            output_number (sym->offset - stkp);
-            newline ();
-            gen_call ("add_sp");
-            return HL_REG;
-        }
+        gen_immediate ();
+        output_number (sym->offset - stkp);
+        newline ();
+        gen_call ("add_sp");
+        return HL_REG;
     }
 }
 
@@ -214,19 +206,9 @@ gen_get_indirect (char typeobj, int reg)
     } else if (typeobj == UCHAR) {
         if (reg & DE_REG)
             gen_swap ();
-        //gen_call("cguchar");
-        output_line ("ldy #0");
-        output_line ("lda (hl),y");
-        output_line ("sta l");
-        output_line ("sty h");
-    } else {                    //int 
-        if (uflag) {
-            if (reg & HL_REG)
-                gen_swap ();
-            output_line ("lhlx");
-        } else
-            gen_call ("ccgint");
-    }
+        gen_call("cguchar");
+    } else
+        gen_call ("ccgint");
 }
 
 // Swap the primary and secondary

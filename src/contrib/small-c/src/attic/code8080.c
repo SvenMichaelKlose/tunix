@@ -193,7 +193,7 @@ gen_get_memory (SYMBOL * sym)
  * @return which register pair contains result
  */
 int
-gen_get_locale (SYMBOL * sym)
+gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
         gen_immediate ();

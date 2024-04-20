@@ -77,7 +77,7 @@ primary (LVALUE * lval)
     if (symname (sname)) {
         if ((symbol_table_idx = find_local (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
-            reg = gen_get_locale (symbol);
+            reg = gen_get_local (symbol);
             lval->symbol = symbol;
             lval->indirect = symbol->type;
             if (symbol->type == STRUCT) {

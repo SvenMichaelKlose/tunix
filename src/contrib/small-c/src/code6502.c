@@ -149,7 +149,7 @@ gen_get_memory (SYMBOL * sym)
 // Load address of symbol into primary.
 // @return which register pair contains
 // the result.
-gen_get_locale (SYMBOL * sym)
+gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC) {
         gen_immediate ();

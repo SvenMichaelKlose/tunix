@@ -18,6 +18,10 @@ for your system (`System V` or `BSD`).
 Warnings by the host compiler are
 pretty normal.
 
+If you intend to add other machine
+pleas see
+[Adding New Targets Oneself](#adding_targets).
+
 # Contributions And Contributors
 
 This version is based on Chris Lewis'
@@ -60,16 +64,11 @@ Currently the MOS 6502 target is under
 construction.  Therefore the other
 targets are disabled.
 
-# Adding New Targets Oneself
-
-Adding support for new targets involves
-creating a new code generator file.
-
 # Contributing
 
 Contributions are highly welcomed;
-please contact the maintainers via
-[GitHub](https://github.com/SvenMichaelKlose/).
+please join
+[Small-C v3.2 on GitHub](https://github.com/SvenMichaelKlose/).
 
 # Language
 
@@ -100,7 +99,7 @@ char  c;
 char  c = 0;
 char  c = 0 + 1;    ; // No!
 short s;
-unsinged u; // Short for 'unsinged int'.
+unsigned u; // Short for 'unsigned int'.
 int      i;
 unsigned char  uc;
 unsigned short us;
@@ -619,11 +618,11 @@ operand.
 
 ~~~C
 int a = 10;
-int* ptr;
+int *ptr;
 ptr = &a; // ptr holds the address of a
 ~~~
 
-#### Dereference (`*`)
+#### Dereference (`\*`)
 
 Accesses the value at the address
 pointed to by its operand (pointer).
@@ -661,3 +660,37 @@ int arr[3] = {10, 20, 30};
 int x;
 x = arr[1]; // x is 20
 ~~~
+
+<a href="#addin_targets"></a>
+
+# Adding New Targets Oneself
+
+Adding support for new targets merely
+involves creating a new code generator
+from an existing one to print code for
+an assembler (or whatever else) of your
+choice.  It as simple as it can get.
+
+## Compiler Architecture
+
+Small-C is a one-pass compiler which
+does preprocessing, parsing and
+compiling in one go.
+
+Internally the intermediate
+representation is a two-adress machine
+using two int registers instead of
+addresses.  One register is called the
+'primary register' as it always holds
+the first operand and the result of an
+operation.  The 'secondary' register
+serves holding an optional second
+operand or as temporary storage for
+intermediate results.
+
+Local variables (and function arguments
+alongside) are stored on the CPU stack.
+All arguments are of size 'int'.
+
+Code generators need to provide 15
+well-defined functions to be complete.

@@ -599,31 +599,36 @@ hier10 (LVALUE * lval)
             lval->indirect = ptr->type;
         else
             lval->indirect = CINT;
-        lval->ptr_type = 0;     // flag as not pointer or array 
+        // Not pointer or array.
+        lval->ptr_type = 0;
         return FETCH | k;
     } else if (ch () == '&' && nch () != '&'
                && nch () != '=') {
         inbyte ();
         k = hier10 (lval);
         if ((k & FETCH) == 0) {
-            /* Without this check, this error triggers when trying to
-             * evaluate a struct's address (a legal operation). Because
-             * structs are stored as an address, nothing more than not
-             * erroring is needed to load their address. */
-            if (lval->symbol->type != STRUCT) {
+            // Without this check, this
+            // error triggers when
+            // trying to evaluate a
+            // struct's address (a legal
+            // operation).  Because
+            // structs are stored as an
+            // address, nothing more
+            // than not erroring is
+            // needed to load their
+            // address.
+            if (lval->symbol->type != STRUCT)
                 error ("illegal address");
-            }
             return (0);
         }
         ptr = lval->symbol;
         lval->ptr_type = ptr->type;
         if (lval->indirect) {
-            if (k & DE_REG) {
+            if (k & DE_REG)
                 gen_swap ();
-            }
             return (HL_REG);
         }
-        // global and non-array 
+        // Global and non-array.
         gen_immediate ();
         output_string ((ptr = lval->symbol)->name);
         newline ();
@@ -721,12 +726,10 @@ hier11 (LVALUE * lval)
                 junk ();
                 return 0;
             }
-            if ((k & FETCH) && direct == 0) {
+            if ((k & FETCH) && direct == 0)
                 k = rvalue (lval, k);
-            }
-            if (k == DE_REG) {
+            if (k == DE_REG)
                 gen_swap ();
-            }
 
             // move pointer from struct begin to struct member 
 

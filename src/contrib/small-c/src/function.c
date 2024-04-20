@@ -8,7 +8,7 @@ int argtop;
 // Called from parse(), this routine
 // tries to make a function out of what
 // follows.
-// Modified version by  P.L. Woods,
+// Modified version by  P.L. Woods.
 newfunc ()
 {
     char n[NAMESIZE];
@@ -200,15 +200,14 @@ doLocalAnsiArgument (int type)
         if (find_local (symbol_name) > -1) {
             multidef (symbol_name);
         } else {
-            argptr =
-                add_local (symbol_name, identity, type, 0,
-                           AUTO);
+            argptr = add_local (symbol_name, identity, type, 0, AUTO);
             argstk = argstk + INTSIZE;
             ptr = local_table_index;
-            // if argument is a struct, properly set the argument's tagidx 
+            // if argument is a struct, properly set the argument's tagidx.
             if (type == STRUCT) {
                 if (identity != POINTER) {
-                    // because each argument takes exactly two bytes on the stack, whole structs can't be passed to functions 
+                    // Because each argument takes exactly two bytes
+                    // on the stack, whole structs can't be passed to functions.
                     error
                         ("only struct pointers, not structs, can be passed to functions");
                 }

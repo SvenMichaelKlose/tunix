@@ -166,11 +166,14 @@ struct while_rec {
 // Path to include directories. set at
 // compile time on host machine.
 #define DEFLIB  inclib()
+
+#ifndef SMALLC
 extern char *inclib ();
 
 WHILE *readwhile ();
 WHILE *findwhile ();
 WHILE *readswitch ();
+#endif
 
 //////////////////
 /// STATEMENTS ///
@@ -212,6 +215,8 @@ struct lvalue {
 /// CODE GENERATION ///
 ///////////////////////
 
+#ifndef SMALLC
+
 // Output the variable symbol at scptr
 // as an extrn or a public.
 void ppubext (SYMBOL * scptr);
@@ -230,6 +235,8 @@ void gen_get_indirect (char typeobj, int reg);
 
 // Write primary to static memory cell.
 void gen_put_memory (SYMBOL * sym);
+
+#endif
 
 ////////////////////
 /// GLOBAL SCOPE ///
@@ -251,6 +258,10 @@ struct initials_table {
 
 #define INITIALS struct initials_table
 
+#ifndef SMALLC
+
 // Check if 'sname' is a struct member.
 SYMBOL *find_member (TAG_SYMBOL * tag,
                      char *sname);
+
+#endif

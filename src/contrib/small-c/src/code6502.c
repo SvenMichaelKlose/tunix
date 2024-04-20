@@ -26,7 +26,7 @@ void
 initmac ()
 {
     defmac ("CPU6502 1");
-    defmac ("smallc 1");
+    defmac ("SMALLC 1");
 }
 
 ////////////
@@ -702,7 +702,7 @@ inclib ()
 gnargs (d)
 int d;
 {
-    output_with_tab ("mvi  a,");
+    output_with_tab (";#arg");
     output_number (d);
     newline ();
 }

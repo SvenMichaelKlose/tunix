@@ -106,6 +106,17 @@ unsigned short us;
 unsigned int   ii;
 ~~~
 
+## Pointers
+
+Pointers are always assumed to be of
+size 'int' and can be dereferenced only
+once withon an expression.
+
+~~~C
+v = \*p;
+v = \*\*p;  // No!
+~~~
+
 ## Composite Types
 
 ### Arrays
@@ -123,16 +134,17 @@ char array1[23][42]; // No.
 ### Structures And Unions
 
 A 'struct' allows to group up items into
-named records.
-A 'union' is a struct where all elements
-share the same memory location.
-'struct' and 'union' may be mixed and
-nested.
+named records.  A 'union' is a struct
+where all elements share the same memory
+location.  'struct' and 'union' may be
+mixed and nested.
 
 Elements an be accessed via the dot
 operator '.' is the type is static or
 with the arrow operator '->' with a
-pointer to it.
+pointer to it.  But indirections (using
+the arrow operator '->') cannot be
+queued up.
 
 ~~~C
 struct btnode {
@@ -618,7 +630,7 @@ operand.
 
 ~~~C
 int a = 10;
-int *ptr;
+int \*ptr;
 ptr = &a; // ptr holds the address of a
 ~~~
 
@@ -669,7 +681,18 @@ Adding support for new targets merely
 involves creating a new code generator
 from an existing one to print code for
 an assembler (or whatever else) of your
-choice.  It as simple as it can get.
+choice.
+
+## Code Generator Predefinitions
+
+Define ASNM and LDNM to the names of
+the assembler and linker respectively
+
+INTSIZE is the size of an integer in
+the target machine.
+BYTEOFF is the offset of an byte within
+an integer on the target machine. (ie:
+8080,pdp11 = 0, 6809 = 1, 360 = 3)
 
 ## Compiler Architecture
 

@@ -2,26 +2,6 @@
 #include "defs.h"
 #include "data.h"
 
-/*
-  Some predefinitions:
-
-  Define ASNM and LDNM to the names of
-  the assembler and linker respectively
-
-  INTSIZE is the size of an integer in
-      the target machine:
-  BYTEOFF is the offset of an byte
-      within an integer on the target
-      machine. (ie: 8080,pdp11 = 0,
-                    6809 = 1,
-                    360 = 3)
-
-  This compiler assumes that an integer
-  is the SAME length as a pointer - in
-  fact, the compiler uses INTSIZE for
-  both.
-*/
-
 void
 initmac ()
 {

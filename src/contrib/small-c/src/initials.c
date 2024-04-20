@@ -3,21 +3,6 @@
 #include "defs.h"
 #include "data.h"
 
-// Erase data storage.
-create_initials ()
-{
-    /*int i;
-       for (i=0; i<INITIALS_SIZE; i++) {
-       initials_data_table[i] = 0;
-       }
-       for (i=0; i<NUMBER_OF_GLOBALS; i++) {
-       initials_table[i].type = 0;
-       initials_table[i].name[0] = 0;
-       initials_table[i].dim = 0;
-       initials_table[i].data_len = 0;
-       } */
-}
-
 // Add new symbol to table, initialise
 // begin position in data array.
 add_symbol_initials (char *symbol_name, char type)

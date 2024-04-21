@@ -316,8 +316,6 @@ callfunction (char *ptr)
             break;
     }
     needbrack (")");
-    if (aflag)
-        gnargs (nargs / INTSIZE);
     if (ptr)
         gen_call (ptr);
     else

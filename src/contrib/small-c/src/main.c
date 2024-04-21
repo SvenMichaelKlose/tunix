@@ -32,7 +32,6 @@ main (int argc, char *argv[])
     macptr = 0;
     ctext = 0;
     errs = 0;
-    aflag = 1;
 #ifdef I8080
     uflag = 0;
 #endif
@@ -42,22 +41,10 @@ main (int argc, char *argv[])
         if (*param == '-') {
             while (*++param) {
                 switch (*param) {
-                // output c source as asm comments 
+                // Include source in object files.
                 case 't':
                 case 'T':
                     ctext = 1;
-                    break;
-                // no argument count in A to function calls 
-                case 'a':
-                case 'A':
-                    aflag = 0;
-                    break;
-                // use undocumented 8085 instructions 
-                case 'u':
-                case 'U':
-#ifdef I8080
-                    uflag = 1;
-#endif
                     break;
                 // define macro 
                 case 'd':
@@ -73,26 +60,6 @@ main (int argc, char *argv[])
                         param++;
                     param--;
                     defmac (bp);
-                    break;
-                // set the log if one wishes 
-                case 'l':
-                case 'L':
-                    if (logFile) {
-                        fclose (logFile);
-                        logFile = NULL;
-                    }
-
-                    if (logFile = fopen (++param, "rb")) {
-                        fclose (logFile);
-                        logFile = NULL;
-
-                        oputs ("Appending log to ");
-                        oputs (param);
-                        oputs (".\n");
-                    }
-
-                    if (!(logFile = fopen (param, "ab")))
-                        perror ("CAN'T OPEN LOGFILE");
                     break;
                 default:
                     usage ();
@@ -144,13 +111,13 @@ compile (char *file)
         defmac ("short int");
         rglobal_table_index = global_table_index;
         initmac ();
-        if (file == NULL) {
+        if (!file)
             input = stdin;
-        } else if (!openin (file))
+        else if (!openin (file))
             return;
-        if (file == NULL) {
+        if (!file)
             output = stdout;
-        } else if (!openout ())
+        else if (!openout ())
             return;
         header ();
         gen_code_segment ();
@@ -178,23 +145,14 @@ frontend_version ()
 
 usage ()
 {
-    oputs
-        ("usage: scc [-tcsah] [-dSYM[=VALUE]] [-l[log]] files\n");
-    oputs ("-t: output c source as asm comments\n");
-    oputs
-        ("-a: no argument count in A to function calls\n");
-    oputs ("-d: define macro\n");
-    oputs
-        ("-u: use undocumented 8085 instructions LDSI, LHLX, SHLX\n");
-    oputs
-        ("-s: assemble generated output, not implemented\n");
-    oputs ("-c: link, not implemented\n");
-    oputs ("-h: displays usage\n");
-    oputs ("-l: set the log\n");
-    oputs
-        ("log - a file that you wish to contain most (if not all) messages\n");
-    oputs
-        ("files - one or more files. no filename redirects to stdin/stdout\n");
+    oputs ("Usage: scc [-th] [-dSYM[=VALUE]] input-files\n"
+           "-d: Define macro.\n"
+           "-t: Include C source in .o files.\n"
+           "-h: Print this message and exit.\n"
+           "input-files: Use standard I/O if none\n"
+           "    have been specified.  Names must\n"
+           "    end on suffix '.c'.  Output files\n"
+           "    will have suffix '.o'.\n");
     exit (1);
 }
 

@@ -48,7 +48,6 @@ int fexitlab;
 int iflevel, skiplevel;
 int errfile;
 int errs;
-int aflag;
 
 INITIALS initials_table[NUMBER_OF_GLOBALS];
 // 5kB space for initialisation data 

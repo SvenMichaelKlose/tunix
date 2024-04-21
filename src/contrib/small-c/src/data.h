@@ -76,7 +76,6 @@ extern char quote[];
 extern int current_symbol_table_idx;
 extern int fexitlab;
 extern int errs;
-extern int aflag;
 
 ///////////////////////
 /// INITIALIZATIONS ///

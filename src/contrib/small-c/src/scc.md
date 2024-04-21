@@ -4,13 +4,17 @@ scc - Small-C compiler frontend
 # Uusage
 
 ~~~sh
-scc [-tah] [-dSYM[=VALUE]] [-l[log]] input-files
+scc [-tah] [-dSYM[=VALUE]] input-files
 ~~~
 
-* input-files: Use standard I/O if
-  missing.  They have to end on suffix
-  '.c', which whill be changed to '.o'
-  for the output object file.
+Compiles input-files one by one and
+and generates object code.  Standard I/O
+is used instead, if missing.
+
+Specified input file names have to end
+on suffix '.c', which whill be changed
+to '.o' for the output object file.
+
 * -h: Print help text.
 * -t: Include source in object files.
 * -dSYM[=VALUE]:
@@ -26,3 +30,7 @@ scc [-tah] [-dSYM[=VALUE]] [-l[log]] input-files
 # See Also:
 
 [Github repository](https://github.com/SvenMichaelKlose/small-c/)
+
+# Copyright
+
+This software is in the Public Domain.

@@ -30,27 +30,125 @@ name:
 
 #define IR_LOCAL 8
 #define IR_GLOBAL 9
-#define IR_IMPORT 10
-#define IR_EXPORT 11
-#define IR_SWAP 12
+
+.macro import name
+.import name
+.endmacro
+
+.macro export name
+.export name
+.endmacro
+
+.macro swap
+    pusha
+    pushb
+    popa
+    popb
+.endmacro
+
 #define IR_LDAL 13
 #define IR_LDA 14
 #define IR_LDB 15
-#define IR_ADDSP 16
-#define IR_ADDA 17
-#define IR_ADDB 18
-#define IR_INCA 19
-#define IR_DECA 20
-#define IR_DECB 21
+
+; A += sp
+.macro addsp
+    tsx
+    txa
+    clc
+    adc regal
+    sta regal
+    bcc :+
+    inc regah
+:
+.endmacro
+
+; A += B
+; Fast version
+.macro adda
+    lda regal
+    clc
+    adc regbl
+    sta regal
+    lda regah
+    adc regbl
+    sta regah
+.endmacro
+
+; Slow version
+.macro adda
+    jsr _adda_
+.endmacro
+
+#define IR_ADDB 55
+
+.macro inca
+    inc regal
+    bne :+
+    inc regah
+:
+.endm
+
+.macro getchar
+    ldy #0
+    sta regah
+    lda (regb),y
+    lda regal
+.endm
+
+.macro getuchar
+    ldy #0
+    lda (regb),y
+    sta regal
+    bpl :+
+    iny
+:   sty regah
+.endm
+
+.macro getint
+    ldy #0
+    lda (regb),y
+    sta regal
+    iny
+    lda (regb),y
+    sta regah
+.endm
+
+.macro putchar
+    ldy #0
+    lda regal
+    sta (regb),y
+.endm
+
+.macro putint
+    ldy #0
+    lda regal
+    sta (regb),y
+    iny
+    lda regah
+    sta (regb),y
+.endm
+
+.macro deca
+    dec regal
+    lda regal
+    cmp #255
+    bne :+
+    dec regah
+:
+.endm
+
+.macro decb
+    dec regbl
+    lda regbl
+    cmp #255
+    bne :+
+    dec regbh
+:
+.endm
+
 #define IR_SIGNEXT 22
 #define IR_STA 23
 #define IR_STAL 24
-#define IR_PUTCHAR 25
-#define IR_PUTINT 26
-#define IR_GETCHAR 27
-#define IR_GETUCHAR 28
-#define IR_GETINT 29
-#define IR_PUSHA 30
 
 .macro pusha
     lda regal
@@ -81,14 +179,46 @@ name:
 .endmacro
 
 #define IR_SWAPSTACK 34
-#define IR_INCS1 35
-#define IR_INCS2 36
-#define IR_DECS1 37
-#define IR_DECS2 38
+
+.macro incs1
+    tsx
+    inx
+    txs
+.endmacro
+
+.macro incs2
+    tsx
+    inx
+    inx
+    txs
+.endmacro
+
+.macro decs1
+    tsx
+    dex
+    txs
+.endmacro
+
+.macro decs2
+    tsx
+    dex
+    dex
+    txs
+.endmacro
+
 #define IR_SPHL 39
-#define IR_CALL 40
-#define IR_CALLPTR 41
-#define IR_RET 42
+
+.macro call global
+    jsr global
+.endmacro
+
+.macro callptr
+    jsr __callptr   ; jmp (rega)
+.endmacro
+
+.macro ret
+    rts
+.endmacro
 
 .macro jmp local
     jmp @local
@@ -122,41 +252,110 @@ name:
 #define IR_ASL 51
 #define IR_ASR 52
 #define IR_LSR 53
-
-; Fast version
-.macro adda
-    lda regal
-    clc
-    adc regbl
-    sta regal
-    lda regah
-    adc regbl
-    sta regah
-.endmacro
-
-; Slow version
-.macro adda
-    jsr _adda_
-.endmacro
-
-#define IR_ADDB 55
 #define IR_SUB 56
 #define IR_MUL 57
 #define IR_DIV 58
-#define IR_UDIV 59
-#define IR_AND 60
-#define IR_OR 61
-#define IR_XOR 62
+
+.macro umul
+    jsr _umul_
+.endmacro
+
+.macro udiv
+    jsr _udiv_
+.endmacro
+
+.macro and
+    lda regal
+    and regbl
+    sta regal
+    lda regah
+    and regbh
+    sta regah
+.endmacro
+
+.macro or
+    lda regal
+    ora regbl
+    sta regal
+    lda regah
+    ora regbh
+    sta regah
+.endmacro
+
+.macro xor
+    lda regal
+    eor regbl
+    sta regal
+    lda regah
+    eor regbh
+    sta regah
+.endmacro
+
 #define IR_COMPA 63
 #define IR_COMPB 64
-#define IR_EQ 65
-#define IR_NE 66
-#define IR_LT 67
-#define IR_LTE 68
+
+.macro eq
+    ldx #0
+    lda regal
+    stx regal
+    cmp regbl
+    bne :+
+    lda regah
+    cmp regbh
+    beq :+
+:   inx
+:   stx regal
+.endmacro
+
+.macro neq
+    ldx #0
+    lda regal
+    stx regal
+    cmp regbl
+    beq :+
+    inx
+    lda regah
+    cmp regbh
+    bne :+
+:   inx
+:   stx regal
+.endmacro
+
+.macro lt
+    ldx #0
+    lda regah
+    stx regah
+    cmp regbh
+    bcs :+
+    inx
+    lda regah
+    cmp regbh
+    bcc :+
+:   inx
+:   stx regal
+.endmacro
+
+.macro lte
+    ldx #0
+    lda regah
+    stx regah
+    cmp regbh
+    beq :+
+    bcs :++
+:   lda regah
+    cmp regbh
+    beq :++
+    bcc :++
+:   inx
+:   stx regal
+.endmacro
+
 #define IR_GT 69
 #define IR_GTE 70
 #define IR_ULT 71
 #define IR_ULTE 72
 #define IR_UGT 73
 #define IR_UGTE 74
-#define IR_SRCLINE 75
+
+.macro srcline str
+.endmacro

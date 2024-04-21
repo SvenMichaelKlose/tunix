@@ -5,11 +5,15 @@ Port of Small-C to 8-bit platforms
 [x] Create roadmap.
 [x] Add documentation.
 [x] Clean up code.
-[@] Rewind to Small-C subset for self-hosting.
 [@] Generate intermediate byte code.
+[x] IR header file generator.
+[@] ir2txt: External byte IR to text IR conversion.
+[@] Assembly macro set and run-time for 6502-CPU target.
+[ ] Store symbol, tag and member table in files.
+    With btree index and cache.
 [ ] Make/use stdlib functions for char predicates.
-[ ] Implement external IR to asm generator for the 6502-CPU.
-[ ] External byte IR to text IR conversion.
-[ ] Store symbol, tag and member table in files with btree index and cache.
-[ ] Run-time library for CBM KERNALs (Commodore 8-bit computers).
+[ ] Run-time library for CBM KERNALs
+    (Commodore 8-bit computers).
+[ ] Rewind to Small-C subset for self-hosting.
+[ ] Make self-hosting.
 [ ] Celebrate.

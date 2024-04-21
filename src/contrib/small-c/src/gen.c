@@ -6,7 +6,7 @@
 /// OUTPUT ///
 //////////////
 
-output_byte (char c)
+outb (char c)
 {
     if (!c)
         return 0;
@@ -14,31 +14,36 @@ output_byte (char c)
     return c;
 }
 
-output_string (char ptr[])
+outs (char ptr[])
 {
     int k;
     k = 0;
-    while (output_byte (ptr[k++]));
+    while (outb (ptr[k++]));
 }
 
 print_tab ()
 {
-    output_byte ('\t');
+    outb ('\t');
 }
 
-output_with_tab (char ptr[])
+outtabs (char ptr[])
 {
     print_tab ();
-    output_string (ptr);
+    outs (ptr);
 }
 
-output_line (char ptr[])
+newline ()
 {
-    output_with_tab (ptr);
+    outb (LF);
+}
+
+outl (char ptr[])
+{
+    outtabs (ptr);
     newline ();
 }
 
-output_decimal (int number)
+outn (int number)
 {
     fprintf (output, "%d", number);
 }

@@ -636,7 +636,7 @@ hier10 (LVALUE * lval)
         }
         // Global and non-array.
         gen_load_1st ();
-        output_string ((ptr = lval->symbol)->name);
+        outs ((ptr = lval->symbol)->name);
         newline ();
         lval->indirect = ptr->type;
         return HL_REG;
@@ -771,7 +771,7 @@ hier11 (LVALUE * lval)
         return k;
     if (ptr->identity == FUNCTION) {
         gen_load_1st ();
-        output_string (ptr);
+        outs (ptr);
         newline ();
         return 0;
     }

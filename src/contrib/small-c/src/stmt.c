@@ -359,20 +359,20 @@ dumpsw (WHILE * ws)
             gen_dataw ();
             i = 4;
             while (i--) {
-                output_number (swstcase[j]);
-                output_byte (',');
+                outn (swstcase[j]);
+                outb (',');
                 gen_local (swstlab[j++]);
                 if (!i || j >= swstp) {
                     newline ();
                     break;
                 }
-                output_byte (',');
+                outb (',');
             }
         }
     }
     gen_dataw ();
     gen_local (ws->incr_def);
-    output_string (",0");
+    outs (",0");
     newline ();
     gen_code_segment ();
 }

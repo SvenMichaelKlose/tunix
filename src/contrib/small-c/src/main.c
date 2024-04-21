@@ -190,7 +190,7 @@ compile (char *file)
 
 frontend_version ()
 {
-    output_string ("; Front End (2.7,84/11/28)");
+    outs ("; Front End (2.7,84/11/28)");
 }
 
 usage ()
@@ -288,12 +288,12 @@ dumplits ()
         gen_datab ();
         j = 8;
         while (j--) {
-            output_number (litq[k++] & 127);
+            outn (litq[k++] & 127);
             if (!j || k >= litptr) {
                 newline ();
                 break;
             }
-            output_byte (',');
+            outb (',');
         }
     }
 }
@@ -336,15 +336,15 @@ dumpglbs ()
                         if (i < list_size) {
                             // dump data 
                             value = get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]);
-                            output_number (value);
+                            outn (value);
                         } else
                             // Dump zero, no more data available.
-                            output_number (0);
+                            outn (0);
                         line_count++;
                         if (!(line_count % 10))
                             line_count = 0;
                         else if (i < dim - 1)
-                            output_byte (',');
+                            outb (',');
                     }
                 }
                 newline ();
@@ -371,7 +371,7 @@ dump_struct (SYMBOL * symbol, int position)
         // initilized.
         if (member.identity == ARRAY) {
             gen_bss ();
-            output_number (member.struct_size);
+            outn (member.struct_size);
             newline ();
         } else {
             // Both pointers and ints
@@ -383,11 +383,11 @@ dump_struct (SYMBOL * symbol, int position)
             if (position < get_size (symbol->name)) {
                 // dump data
                 value = get_item_at (symbol->name, position * number_of_members + i, &tag_table[symbol-> tagidx]);
-                output_number (value);
+                outn (value);
             } else {
                 // Dump zero, no more
                 // data available.
-                output_number (0);
+                outn (0);
             }
             newline ();
         }
@@ -400,19 +400,19 @@ errorsummary ()
         error ("missing closing bracket");
     newline ();
     gen_comment ();
-    output_decimal (errcnt);
+    outn (errcnt);
     if (errcnt)
         errfile = YES;
-    output_string (" error(s) in compilation");
+    outs (" error(s) in compilation");
     newline ();
-    output_string ("; literal pool: ");
-    output_decimal (litptr);
+    outs ("; literal pool: ");
+    outn (litptr);
     newline ();
-    output_string ("; global pool: ");
-    output_decimal (global_table_index - rglobal_table_index);
+    outs ("; global pool: ");
+    outn (global_table_index - rglobal_table_index);
     newline ();
-    output_string ("; Macro pool: ");
-    output_decimal (macptr);
+    outs ("; Macro pool: ");
+    outn (macptr);
     newline ();
     if (errcnt > 0)
         pl ("Error(s)");

@@ -19,27 +19,27 @@ doerror (char *msg)
     int k;
     // print actual source filename 
     if (finame[inclsp]) {
-        output_string (finame[inclsp]);
+        outs (finame[inclsp]);
     }
-    output_string (":");
+    outs (":");
     // print source line number 
-    output_decimal (srcln[inclsp]);
-    output_string (":");
+    outn (srcln[inclsp]);
+    outs (":");
     // print column number 
-    output_decimal (lptr);
-    output_string (": error: ");
-    output_string (msg);
+    outn (lptr);
+    outs (": error: ");
+    outs (msg);
     newline ();
-    output_string (line);
+    outs (line);
     newline ();
     k = 0;
     while (k < lptr) {
         if (line[k] == 9)
             print_tab ();
         else
-            output_byte (' ');
+            outb (' ');
         k++;
     }
-    output_byte ('^');
+    outb ('^');
     newline ();
 }

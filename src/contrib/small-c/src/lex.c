@@ -53,7 +53,7 @@ needbrack (char *str)
     if (!match (str)) {
         error ("missing bracket");
         gen_comment ();
-        output_string (str);
+        outs (str);
         newline ();
     }
 }

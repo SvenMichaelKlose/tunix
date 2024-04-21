@@ -92,7 +92,7 @@ readline ()
         if (lptr) {
             if (ctext & cmode) {
                 gen_comment ();
-                output_string (line);
+                outs (line);
                 newline ();
             }
             lptr = 0;

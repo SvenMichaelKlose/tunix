@@ -348,7 +348,7 @@ add_local (char *sname, int identity,
         gen_data_segment ();
         def_local (k = getlabel ());
         gen_bss ();
-        output_number (offset);
+        outn (offset);
         newline ();
         gen_code_segment ();
         offset = k;
@@ -383,6 +383,6 @@ multidef (char *symbol_name)
 {
     error ("already defined");
     gen_comment ();
-    output_string (symbol_name);
+    outs (symbol_name);
     newline ();
 }

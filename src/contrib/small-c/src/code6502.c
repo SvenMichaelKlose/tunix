@@ -31,30 +31,14 @@ trailer ()
 /// OUTPUT ///
 //////////////
 
-newline ()
-{
-    output_byte (LF);
-}
-
-output_number (int num)
-{
-    output_decimal (num);
-}
-
-output_label_prefix ()
-{
-    output_byte ('_');
-}
-
 output_label_terminator ()
 {
-    output_byte (':');
-    newline ();
+    outb (':');
 }
 
 gen_comment ()
 {
-    output_string ("; ");
+    outs ("; ");
 }
 
 ////////////////
@@ -63,12 +47,12 @@ gen_comment ()
 
 gen_code_segment ()
 {
-    output_line (".code");
+    outl (".code");
 }
 
 gen_data_segment ()
 {
-    output_line (".data");
+    outl (".data");
 }
 
 ////////////
@@ -77,17 +61,17 @@ gen_data_segment ()
 
 gen_datab ()
 {
-    output_with_tab (".byte ");
+    outtabs (".byte ");
 }
 
 gen_dataw ()
 {
-    output_with_tab (".word ");
+    outtabs (".word ");
 }
 
 gen_bss ()
 {
-    output_with_tab (".res ");
+    outtabs (".res ");
 }
 
 //////////////
@@ -96,39 +80,40 @@ gen_bss ()
 
 def_local (int nlab)
 {
-    output_decimal (nlab);
+    outb ('_');
+    outn (nlab);
     output_label_terminator ();
 }
 
 def_global (char *n)
 {
-    output_string (n);
+    outs (n);
     output_label_terminator ();
 }
 
 gen_local (int label)
 {
-    output_label_prefix ();
-    output_decimal (label);
+    outb ('_');
+    outn (label);
 }
 
 gen_global (char *n)
 {
-    output_string (n);
+    outs (n);
 }
 
-_gen_storage_decl (int do_import, char *n)
+_gen_storage_decl (int do_import,
+                   char *n)
 {
-    output_with_tab (
+    outtabs (
         do_import ?
             ".import " :
             ".export "
     );
-    output_string (n);
+    outs (n);
     newline ();
 }
 
-// Import/export variable symbol.
 gen_decl_var (SYMBOL * scptr)
 {
     if (symbol_table[current_symbol_table_idx].storage == STATIC)
@@ -136,7 +121,6 @@ gen_decl_var (SYMBOL * scptr)
     _gen_storage_decl (scptr->storage == EXTERN, scptr->name);
 }
 
-// Import/export function symbol.
 gen_decl_fun (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
@@ -155,13 +139,13 @@ gen_swap ()
 
 gen_load_1st ()
 {
-    output_with_tab ("lhli ");
+    outtabs ("lhli ");
 }
 
 _gen_load_2nd_const (int v)
 {
-    output_with_tab ("ldei ");
-    output_number (v);
+    outtabs ("ldei ");
+    outn (v);
     newline ();
 }
 
@@ -173,7 +157,7 @@ gen_get_local (SYMBOL * sym)
         newline ();
     } else {
         gen_load_1st ();
-        output_number (sym->offset - stkp);
+        outn (sym->offset - stkp);
         newline ();
         gen_call ("add_sp");
     }
@@ -208,13 +192,13 @@ gen_ptrdec (LVALUE * lval)
     case STRUCT:
         _gen_load_2nd_const (lval->tagsym->size - 1);
         // two's complement of secondary.
-        output_line ("mov   a,d");
-        output_line ("cma");
-        output_line ("mov   d,a");
-        output_line ("mov   a,e");
-        output_line ("cma");
-        output_line ("mov  e,a");
-        output_line ("inx  d");
+        outl ("mov   a,d");
+        outl ("cma");
+        outl ("mov   d,a");
+        outl ("mov   a,e");
+        outl ("cma");
+        outl ("mov  e,a");
+        outl ("inx  d");
         // subtract 
         gen_call ("add_de");
         break;
@@ -231,21 +215,21 @@ gen_get_memory (SYMBOL * sym)
 {
     if (sym->identity != POINTER
         && sym->type == CCHAR) {
-        output_with_tab ("lda ");
-        output_string (sym->name);
+        outtabs ("lda ");
+        outs (sym->name);
         newline ();
         gen_call ("ccsxt");
     } else if (sym->identity != POINTER
                && sym->type == UCHAR) {
-        output_with_tab ("lda ");
-        output_string (sym->name);
+        outtabs ("lda ");
+        outs (sym->name);
         newline ();
-        output_line ("sta l");
-        output_line ("lda #0");
-        output_line ("sta h");
+        outl ("sta l");
+        outl ("lda #0");
+        outl ("sta h");
     } else {
-        output_with_tab ("lhl ");
-        output_string (sym->name);
+        outtabs ("lhl ");
+        outs (sym->name);
         newline ();
     }
 }
@@ -255,11 +239,11 @@ gen_put_memory (SYMBOL * sym)
 {
     if (sym->identity != POINTER
         && (sym->type & CCHAR)) {
-        output_line ("lda l");
-        output_with_tab ("sta ");
+        outl ("lda l");
+        outtabs ("sta ");
     } else
-        output_with_tab ("sthl ");
-    output_string (sym->name);
+        outtabs ("sthl ");
+    outs (sym->name);
     newline ();
 }
 
@@ -306,10 +290,10 @@ gen_get_indirect (char typeobj, int reg)
 gen_push (int reg)
 {
     if (reg & DE_REG) {
-        output_line ("push de");
+        outl ("push de");
         stkp = stkp - INTSIZE;
     } else {
-        output_line ("push hl");
+        outl ("push hl");
         stkp = stkp - INTSIZE;
     }
 }
@@ -317,14 +301,14 @@ gen_push (int reg)
 // Pop into secondary.
 gen_pop ()
 {
-    output_line ("pop de");
+    outl ("pop de");
     stkp = stkp + INTSIZE;
 }
 
 // Swap primary and top of stack.
 gen_swap_stack ()
 {
-    output_line ("xthl");
+    outl ("xthl");
 }
 
 // Update stack pointer to new position.
@@ -338,14 +322,14 @@ gen_modify_stack (int newstkp)
     if (k > 0) {
         if (k < 7) {
             if (k & 1) {
-                output_line ("tsx");
-                output_line ("inx");
-                output_line ("txs");
+                outl ("tsx");
+                outl ("inx");
+                outl ("txs");
                 k--;
             }
             while (k) {
-                output_line ("pla");
-                output_line ("sta b");
+                outl ("pla");
+                outl ("sta b");
                 k = k - INTSIZE;
             }
             return newstkp;
@@ -353,14 +337,14 @@ gen_modify_stack (int newstkp)
     } else {
         if (k > -7) {
             if (k & 1) {
-                output_line ("tsx");
-                output_line ("dex");
-                output_line ("txs");
+                outl ("tsx");
+                outl ("dex");
+                outl ("txs");
                 k++;
             }
             while (k) {
-                output_line ("lda b");
-                output_line ("pha");
+                outl ("lda b");
+                outl ("pha");
                 k = k + INTSIZE;
             }
             return newstkp;
@@ -368,10 +352,10 @@ gen_modify_stack (int newstkp)
     }
     gen_swap ();
     gen_load_1st ();
-    output_number (k);
+    outn (k);
     newline ();
     gen_call ("add_sp");
-    output_line ("sphl");
+    outl ("sphl");
     gen_swap ();
     return newstkp;
 }
@@ -382,8 +366,8 @@ gen_modify_stack (int newstkp)
 
 gen_call (char *sname)
 {
-    output_with_tab ("jsr ");
-    output_string (sname);
+    outtabs ("jsr ");
+    outs (sname);
     newline ();
 }
 
@@ -397,7 +381,7 @@ gen_call1 (char *n)
 
 gen_ret ()
 {
-    output_line ("rts");
+    outl ("rts");
 }
 
 // Perform subroutine call to value on
@@ -405,7 +389,7 @@ gen_ret ()
 callstk ()
 {
     gen_load_1st ();
-    output_string ("#.+5");
+    outs ("#.+5");
     newline ();
     gen_swap_stack ();
     gen_call ("callptr");
@@ -416,8 +400,8 @@ callstk ()
 // register that modstk doesn't touch.
 gnargs (int d)
 {
-    output_with_tab (";#arg");
-    output_number (d);
+    outtabs (";#arg");
+    outn (d);
     newline ();
 }
 
@@ -427,7 +411,7 @@ gnargs (int d)
 
 gen_jump (int label)
 {
-    output_with_tab ("jmp ");
+    outtabs ("jmp ");
     gen_local (label);
     newline ();
 }
@@ -435,7 +419,7 @@ gen_jump (int label)
 // 'case' jump
 gen_jump_case ()
 {
-    output_with_tab ("jmp cccase");
+    outtabs ("jmp cccase");
     newline ();
 }
 
@@ -444,12 +428,12 @@ gen_jump_case ()
 // ft == 0: Jump if zero.
 gen_test_jump (int label, int ft)
 {
-    output_line ("lda h");
-    output_line ("ora l");
+    outl ("lda h");
+    outl ("ora l");
     if (ft)
-        output_with_tab ("bne ");
+        outtabs ("bne ");
     else
-        output_with_tab ("beq ");
+        outtabs ("beq ");
     gen_local (label);
     newline ();
 }
@@ -489,7 +473,7 @@ gen_div2 ()
     // gen_asr ().
     gen_push (HL_REG);
     gen_load_1st ();
-    output_number (1);
+    outn (1);
     newline ();
     gen_asr ();
 }

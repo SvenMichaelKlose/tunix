@@ -25,14 +25,14 @@ primary (LVALUE * lval)
             blanks ();
             // Pointers and ints are both INTSIZE.
             match ("*");
-            output_number (INTSIZE);
+            outn (INTSIZE);
         } else if (amatch ("char", 4)
                    || amatch ("unsigned char", 13)) {
             // If sizeof a char pointer, output INTSIZE.
             if (match ("*"))
-                output_number (INTSIZE);
+                outn (INTSIZE);
             else
-                output_number (1);
+                outn (1);
         } else if (amatch ("struct", 6)) {
             if (!symname (sname))
                 illname ();
@@ -41,9 +41,9 @@ primary (LVALUE * lval)
             // Write out struct size, or INTSIZE
             // if struct pointer .
             if (match ("*"))
-                output_number (INTSIZE);
+                outn (INTSIZE);
             else
-                output_number (tag_table[otag].size);
+                outn (tag_table[otag].size);
         } else if (symname (sname)) {
             if (((symbol_table_idx = find_local (sname)) > -1) || ((symbol_table_idx = find_global (sname)) > -1)) {
                 symbol = &symbol_table[symbol_table_idx];
@@ -55,10 +55,10 @@ primary (LVALUE * lval)
                     offset *= INTSIZE;
                 else if (symbol->type == STRUCT)
                     offset *= tag_table[symbol->tagidx].size;
-                output_number (offset);
+                outn (offset);
             } else {
                 error ("sizeof undeclared variable");
-                output_number (0);
+                outn (0);
             }
         } else
             error ("sizeof only on type or variable");
@@ -101,7 +101,7 @@ primary (LVALUE * lval)
                     return FETCH | HL_REG;
                 }
                 gen_load_1st ();
-                output_string (symbol->name);
+                outs (symbol->name);
                 newline ();
                 lval->indirect = symbol->type;
                 lval->ptr_type = symbol->type;
@@ -124,7 +124,7 @@ primary (LVALUE * lval)
     } else {
         error ("invalid expression");
         gen_load_1st ();
-        output_number (0);
+        outn (0);
         newline ();
         junk ();
         return 0;
@@ -168,10 +168,10 @@ constant (int val[])
     else if (quoted_string (val)) {
         gen_load_1st ();
         gen_local (litlab);
-        output_byte ('+');
+        outb ('+');
     } else
         return 0;
-    output_number (val[0]);
+    outn (val[0]);
     newline ();
     return 1;
 }

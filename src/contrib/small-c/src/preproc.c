@@ -155,7 +155,7 @@ doasm ()
             break;
         if (feof (input))
             break;
-        output_string (line);
+        outs (line);
         newline ();
     }
     kill ();

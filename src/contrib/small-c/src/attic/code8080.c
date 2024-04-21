@@ -29,16 +29,16 @@
 void
 header ()
 {
-    output_string
+    outs
         ("; Small C 8080\n;\tCoder (2.4,84/11/27)\n;");
     frontend_version ();
     newline ();
-    output_line
+    outl
         ("\t;program area SMALLC_GENERATED is RELOCATABLE");
-    output_line ("\t.module SMALLC_GENERATED");
-    output_line
+    outl ("\t.module SMALLC_GENERATED");
+    outl
         ("\t.list   (err, loc, bin, eqt, cyc, lin, src, lst, md)");
-    output_line ("\t.nlist  (pag)");
+    outl ("\t.nlist  (pag)");
 }
 
 /**
@@ -48,9 +48,9 @@ header ()
 newline ()
 {
 #if __CYGWIN__ == 1
-    output_byte (CR);
+    outb (CR);
 #endif
-    output_byte (LF);
+    outb (LF);
 }
 
 void
@@ -68,7 +68,7 @@ initmac ()
 void
 output_label_prefix ()
 {
-    output_byte ('$');
+    outb ('$');
 }
 
 /**
@@ -77,7 +77,7 @@ output_label_prefix ()
 void
 output_label_terminator ()
 {
-    output_byte (':');
+    outb (':');
 }
 
 /**
@@ -86,7 +86,7 @@ output_label_terminator ()
 void
 gen_comment ()
 {
-    output_byte (';');
+    outb (';');
 }
 
 /**
@@ -95,7 +95,7 @@ gen_comment ()
 void
 trailer ()
 {
-    output_line (";\t.end");
+    outl (";\t.end");
 }
 
 /**
@@ -104,7 +104,7 @@ trailer ()
 void
 gen_code_segment ()
 {
-    output_line
+    outl
         ("\t.area  SMALLC_GENERATED  (REL,CON,CSEG)");
 }
 
@@ -114,7 +114,7 @@ gen_code_segment ()
 void
 gen_data_segment ()
 {
-    output_line
+    outl
         ("\t.area  SMALLC_GENERATED_DATA  (REL,CON,DSEG)");
 }
 
@@ -128,9 +128,9 @@ gen_decl_var (SYMBOL * scptr)
     if (symbol_table[current_symbol_table_idx].storage ==
         STATIC)
         return;
-    output_with_tab (scptr->storage ==
+    outtabs (scptr->storage ==
                      EXTERN ? ";extrn\t" : ".globl\t");
-    output_string (scptr->name);
+    outs (scptr->name);
     newline ();
 }
 
@@ -143,9 +143,9 @@ gen_decl_fun (SYMBOL * scptr)
 {
     if (scptr->storage == STATIC)
         return;
-    output_with_tab (scptr->offset ==
+    outtabs (scptr->offset ==
                      FUNCTION ? ".globl\t" : ";extrn\t");
-    output_string (scptr->name);
+    outs (scptr->name);
     newline ();
 }
 
@@ -154,11 +154,11 @@ gen_decl_fun (SYMBOL * scptr)
  * @param num
  */
 void
-output_number (num)
+outn (num)
 int num;
 {
-    output_byte ('#');
-    output_decimal (num);
+    outb ('#');
+    outn (num);
 }
 
 /**
@@ -169,20 +169,20 @@ void
 gen_get_memory (SYMBOL * sym)
 {
     if ((sym->identity != POINTER) && (sym->type == CCHAR)) {
-        output_with_tab ("lda\t");
-        output_string (sym->name);
+        outtabs ("lda\t");
+        outs (sym->name);
         newline ();
         gen_call ("ccsxt");
     } else if ((sym->identity != POINTER)
                && (sym->type == UCHAR)) {
-        output_with_tab ("lda\t");
-        output_string (sym->name);
+        outtabs ("lda\t");
+        outs (sym->name);
         newline ();
-        output_line ("mov \tl,a");
-        output_line ("mvi \th,#0");
+        outl ("mov \tl,a");
+        outl ("mvi \th,#0");
     } else {
-        output_with_tab ("lhld\t");
-        output_string (sym->name);
+        outtabs ("lhld\t");
+        outs (sym->name);
         newline ();
     }
 }
@@ -203,15 +203,15 @@ gen_get_local (SYMBOL * sym)
     } else {
         if (uflag && !(sym->identity == ARRAY)) {       /* ||
                                                            (sym->identity == VARIABLE && sym->type == STRUCT))) { */
-            output_with_tab ("ldsi\t");
-            output_number (sym->offset - stkp);
+            outtabs ("ldsi\t");
+            outn (sym->offset - stkp);
             newline ();
             return DE_REG;
         } else {
             gen_load_1st ();
-            output_number (sym->offset - stkp);
+            outn (sym->offset - stkp);
             newline ();
-            output_line ("dad \tsp");
+            outl ("dad \tsp");
             return HL_REG;
         }
     }
@@ -225,12 +225,12 @@ void
 gen_put_memory (SYMBOL * sym)
 {
     if ((sym->identity != POINTER) && (sym->type & CCHAR)) {
-        output_line ("mov \ta,l");
-        output_with_tab ("sta \t");
+        outl ("mov \ta,l");
+        outtabs ("sta \t");
     } else {
-        output_with_tab ("shld\t");
+        outtabs ("shld\t");
     }
-    output_string (sym->name);
+    outs (sym->name);
     newline ();
 }
 
@@ -245,11 +245,11 @@ gen_put_indirect (char typeobj)
     gen_pop ();
     if (typeobj & CCHAR) {
         //gen_call("ccpchar"); 
-        output_line ("mov \ta,l");
-        output_line ("stax\td");
+        outl ("mov \ta,l");
+        outl ("stax\td");
     } else {
         if (uflag) {
-            output_line ("shlx");
+            outl ("shlx");
         } else {
             gen_call ("ccpint");
         }
@@ -274,14 +274,14 @@ gen_get_indirect (char typeobj, int reg)
             gen_swap ();
         }
         //gen_call("cguchar"); 
-        output_line ("mov \tl,m");
-        output_line ("mvi \th,0");
+        outl ("mov \tl,m");
+        outl ("mvi \th,0");
     } else {                    //int 
         if (uflag) {
             if (reg & HL_REG) {
                 gen_swap ();
             }
-            output_line ("lhlx");
+            outl ("lhlx");
         } else {
             gen_call ("ccgint");
         }
@@ -293,7 +293,7 @@ gen_get_indirect (char typeobj, int reg)
  */
 gen_swap ()
 {
-    output_line ("xchg");
+    outl ("xchg");
 }
 
 /**
@@ -302,7 +302,7 @@ gen_swap ()
  */
 gen_load_1st ()
 {
-    output_with_tab ("lxi \th,");
+    outtabs ("lxi \th,");
 }
 
 /**
@@ -311,10 +311,10 @@ gen_load_1st ()
 gen_push (int reg)
 {
     if (reg & DE_REG) {
-        output_line ("push\td");
+        outl ("push\td");
         stkp = stkp - INTSIZE;
     } else {
-        output_line ("push\th");
+        outl ("push\th");
         stkp = stkp - INTSIZE;
     }
 }
@@ -324,7 +324,7 @@ gen_push (int reg)
  */
 gen_pop ()
 {
-    output_line ("pop \td");
+    outl ("pop \td");
     stkp = stkp + INTSIZE;
 }
 
@@ -333,7 +333,7 @@ gen_pop ()
  */
 gen_swap_stack ()
 {
-    output_line ("xthl");
+    outl ("xthl");
 }
 
 /**
@@ -342,8 +342,8 @@ gen_swap_stack ()
  */
 gen_call (char *sname)
 {
-    output_with_tab ("call\t");
-    output_string (sname);
+    outtabs ("call\t");
+    outs (sname);
     newline ();
 }
 
@@ -352,7 +352,7 @@ gen_call (char *sname)
  */
 declare_entry_point (char *symbol_name)
 {
-    output_string (symbol_name);
+    outs (symbol_name);
     output_label_terminator ();
     //newline(); 
 }
@@ -362,7 +362,7 @@ declare_entry_point (char *symbol_name)
  */
 gen_ret ()
 {
-    output_line ("ret");
+    outl ("ret");
 }
 
 /**
@@ -371,10 +371,10 @@ gen_ret ()
 callstk ()
 {
     gen_load_1st ();
-    output_string ("#.+5");
+    outs ("#.+5");
     newline ();
     gen_swap_stack ();
-    output_line ("pchl");
+    outl ("pchl");
     stkp = stkp + INTSIZE;
 }
 
@@ -385,7 +385,7 @@ callstk ()
 gen_jump (label)
 int label;
 {
-    output_with_tab ("jmp \t");
+    outtabs ("jmp \t");
     print_label (label);
     newline ();
 }
@@ -398,12 +398,12 @@ int label;
 gen_test_jump (label, ft)
 int label, ft;
 {
-    output_line ("mov \ta,h");
-    output_line ("ora \tl");
+    outl ("mov \ta,h");
+    outl ("ora \tl");
     if (ft)
-        output_with_tab ("jnz \t");
+        outtabs ("jnz \t");
     else
-        output_with_tab ("jz  \t");
+        outtabs ("jz  \t");
     print_label (label);
     newline ();
 }
@@ -413,7 +413,7 @@ int label, ft;
  */
 gen_datab ()
 {
-    output_with_tab (".db\t");
+    outtabs (".db\t");
 }
 
 /**
@@ -421,7 +421,7 @@ gen_datab ()
  */
 gen_bss ()
 {
-    output_with_tab (".ds\t");
+    outtabs (".ds\t");
 }
 
 /**
@@ -429,7 +429,7 @@ gen_bss ()
  */
 gen_dataw ()
 {
-    output_with_tab (".dw\t");
+    outtabs (".dw\t");
 }
 
 /**
@@ -446,11 +446,11 @@ gen_modify_stack (int newstkp)
     if (k > 0) {
         if (k < 7) {
             if (k & 1) {
-                output_line ("inx \tsp");
+                outl ("inx \tsp");
                 k--;
             }
             while (k) {
-                output_line ("pop \tb");
+                outl ("pop \tb");
                 k = k - INTSIZE;
             }
             return (newstkp);
@@ -458,11 +458,11 @@ gen_modify_stack (int newstkp)
     } else {
         if (k > -7) {
             if (k & 1) {
-                output_line ("dcx \tsp");
+                outl ("dcx \tsp");
                 k++;
             }
             while (k) {
-                output_line ("push\tb");
+                outl ("push\tb");
                 k = k + INTSIZE;
             }
             return (newstkp);
@@ -470,10 +470,10 @@ gen_modify_stack (int newstkp)
     }
     gen_swap ();
     gen_load_1st ();
-    output_number (k);
+    outn (k);
     newline ();
-    output_line ("dad \tsp");
-    output_line ("sphl");
+    outl ("dad \tsp");
+    outl ("sphl");
     gen_swap ();
     return (newstkp);
 }
@@ -483,7 +483,7 @@ gen_modify_stack (int newstkp)
  */
 gen_mul2 ()
 {
-    output_line ("dad \th");
+    outl ("dad \th");
 }
 
 /**
@@ -493,7 +493,7 @@ gen_div2 ()
 {
     gen_push (HL_REG);          // push primary in prep for gasr 
     gen_load_1st ();
-    output_number (1);
+    outn (1);
     newline ();
     gen_asr ();  // divide by two 
 }
@@ -503,7 +503,7 @@ gen_div2 ()
  */
 gen_jump_case ()
 {
-    output_with_tab ("jmp \tcccase");
+    outtabs ("jmp \tcccase");
     newline ();
 }
 
@@ -522,7 +522,7 @@ int *lval, *lval2;
         gen_mul2 ();
         gen_swap ();
     }
-    output_line ("dad \td");
+    outl ("dad \td");
 }
 
 /**
@@ -682,15 +682,15 @@ gen_ptrinc (LVALUE * lval)
     switch (lval->ptr_type) {
     case STRUCT:
         gen_load_1st2 ();
-        output_number (lval->tagsym->size);
+        outn (lval->tagsym->size);
         newline ();
-        output_line ("dad \td");
+        outl ("dad \td");
         break;
     case CINT:
     case UINT:
-        output_line ("inx \th");
+        outl ("inx \th");
     default:
-        output_line ("inx \th");
+        outl ("inx \th");
         break;
     }
 }
@@ -700,26 +700,26 @@ gen_ptrinc (LVALUE * lval)
  */
 gen_ptrdec (LVALUE * lval)
 {
-    output_line ("dcx \th");
+    outl ("dcx \th");
     switch (lval->ptr_type) {
     case CINT:
     case UINT:
-        output_line ("dcx \th");
+        outl ("dcx \th");
         break;
     case STRUCT:
         gen_load_1st2 ();
-        output_number (lval->tagsym->size - 1);
+        outn (lval->tagsym->size - 1);
         newline ();
         // two's complement 
-        output_line ("mov  \ta,d");
-        output_line ("cma");
-        output_line ("mov  \td,a");
-        output_line ("mov  \ta,e");
-        output_line ("cma");
-        output_line ("mov \te,a");
-        output_line ("inx \td");
+        outl ("mov  \ta,d");
+        outl ("cma");
+        outl ("mov  \td,a");
+        outl ("mov  \ta,e");
+        outl ("cma");
+        outl ("mov \te,a");
+        outl ("inx \td");
         // subtract 
-        output_line ("dad \td");
+        outl ("dad \td");
         break;
     default:
         break;
@@ -845,8 +845,8 @@ inclib ()
 gnargs (d)
 int d;
 {
-    output_with_tab ("mvi \ta,");
-    output_number (d);
+    outtabs ("mvi \ta,");
+    outn (d);
     newline ();
 }
 
@@ -883,7 +883,7 @@ link ()
  */
 gen_load_1st2 ()
 {
-    output_with_tab ("lxi \td,");
+    outtabs ("lxi \td,");
 }
 
 /**
@@ -893,9 +893,9 @@ gen_load_1st2 ()
 gen_add_const (int val)
 {
     gen_load_1st2 ();
-    output_number (val);
+    outn (val);
     newline ();
-    output_line ("dad \td");
+    outl ("dad \td");
 }
 
 /**
@@ -912,7 +912,7 @@ gen_mul_const (int type, int size)
         break;
     case STRUCT:
         gen_load_1st2 ();
-        output_number (size);
+        outn (size);
         newline ();
         gen_call ("ccmul");
         break;

@@ -33,9 +33,6 @@ trailer ()
 
 newline ()
 {
-#if __CYGWIN__ == 1
-    output_byte (CR);
-#endif
     output_byte (LF);
 }
 

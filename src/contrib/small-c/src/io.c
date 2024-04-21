@@ -150,9 +150,6 @@ pl (char *str)
     int k;
 
     k = 0;
-#if __CYGWIN__ == 1
-    putchar (CR);
-#endif
     putchar (LF);
     while (str[k])
         putchar (str[k++]);

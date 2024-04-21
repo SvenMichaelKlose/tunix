@@ -63,8 +63,6 @@ struct ircode codes[] = {
     {"ASL",         0},
     {"ASR",         0},
     {"LSR",         0},
-    {"ADDA",        0},
-    {"ADDB",        0},
     {"SUB",         0},
     {"MUL",         0},
     {"DIV",         0},

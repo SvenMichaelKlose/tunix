@@ -46,16 +46,6 @@ main (int argc, char *argv[])
                 case 'T':
                     ctext = 1;
                     break;
-                // assemble .s files - do #define ASNM to make it work 
-                case 's':
-                case 'S':
-                    sflag = 1;
-                    break;
-                // linker - this option does not work 
-                case 'c':
-                case 'C':
-                    cflag = 1;
-                    break;
                 // no argument count in A to function calls 
                 case 'a':
                 case 'A':
@@ -123,10 +113,6 @@ main (int argc, char *argv[])
         macptr = smacptr;
         compile (param);
     }
-#ifndef NOASLD
-    if (!errs && !sflag && !cflag)
-        errs = errs || link ();
-#endif
     exit (!!errs);
 }
 
@@ -175,17 +161,11 @@ compile (char *file)
         fclose (output);
         pl ("");
         errs = errs || errfile;
-#ifndef NOASLD
-    }
-    if (!errfile && !sflag)
-        errs = errs || assemble (file);
-#else
     } else {
         oputs ("Don't understand file ");
         oputs (file);
         errs = 1;
     }
-#endif
 }
 
 frontend_version ()

@@ -42,24 +42,21 @@ FILE *inclstk[INCLSIZ];
 int inclsp;
 char fname[20];
 
-/*char    quote[2];
-char    *cptr;*/
 int current_symbol_table_idx;
 int *iptr;
 int fexitlab;
 int iflevel, skiplevel;
 int errfile;
-int sflag;
-int cflag;
 int errs;
 int aflag;
-
-#ifdef I8080
-// undocumented 8085 instructions 
-int uflag;
-#endif
 
 INITIALS initials_table[NUMBER_OF_GLOBALS];
 // 5kB space for initialisation data 
 char initials_data_table[INITIALS_SIZE];
 int initials_idx = 0, initials_data_idx = 0;
+
+
+#ifdef I8080
+// undocumented 8085 instructions 
+int uflag;
+#endif

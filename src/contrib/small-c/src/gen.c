@@ -2,9 +2,9 @@
 #include "defs.h"
 #include "data.h"
 
-////////////////////
-/// BASIC OUTPUT ///
-////////////////////
+//////////////
+/// OUTPUT ///
+//////////////
 
 output_byte (char c)
 {
@@ -51,31 +51,6 @@ output_decimal (int number)
 getlabel ()
 {
     return nxtlab++;
-}
-
-def_local (int nlab)
-{
-    output_decimal (nlab);
-    output_label_terminator ();
-    newline ();
-}
-
-def_global (char *n)
-{
-    output_string (n);
-    output_label_terminator ();
-    newline ();
-}
-
-gen_local (int label)
-{
-    output_label_prefix ();
-    output_decimal (label);
-}
-
-gen_global (char *n)
-{
-    output_string (n);
 }
 
 ////////////////////////

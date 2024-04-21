@@ -151,9 +151,9 @@ compile (char *file)
         glbflag = 1;
         nxtlab = 0;
         litlab = getlabel ();
-        defmac ("end\tmemory");
+        defmac ("SMALLC 1");
+        defmac ("short int");
         rglobal_table_index = global_table_index;
-        defmac ("short\tint");
         initmac ();
         if (file == NULL) {
             input = stdin;

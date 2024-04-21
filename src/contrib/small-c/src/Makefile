@@ -22,12 +22,12 @@ else
 endif
 
 SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c preproc.c \
-      primary.c stmt.c sym.c while.c struct.c code6502.c #code8080.c
+      primary.c stmt.c sym.c while.c struct.c ir.c
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 all:    scc6502
-	./scc6502 -t test.c
+	./scc6502 test.c
 
 scc6502: $(OBJ)
 	$(CC) -o scc6502 $(CFLAGS) $(OBJ)

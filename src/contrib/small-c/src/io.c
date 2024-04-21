@@ -90,11 +90,8 @@ readline ()
             }
         // Write source line as comment.
         if (lptr) {
-            if (ctext & cmode) {
-                gen_comment ();
-                outs (line);
-                newline ();
-            }
+            if (ctext & cmode)
+                gen_srcline (line);
             lptr = 0;
             return;
         }

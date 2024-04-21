@@ -5,7 +5,7 @@ How To Build Small-C v3.2
 
 You need a Unix-like system with a
 working C compiler environment and GNU
-Make (Linux) or BSD Make.
+Make.
 
 On Debian-based systems install a C
 programming environment like so:
@@ -17,7 +17,7 @@ sudo apt install build-essentials
 # Build From Source
 
 Step into direcory 'src' and run the
-make you have:
+make script;
 
 ~~~sh
 cd src

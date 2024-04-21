@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 FILE *logFile = NULL;
 
@@ -120,8 +121,10 @@ main (int argc, char *argv[])
 // redirect do to stdin/stdout.
 compile (char *file)
 {
-    strcpy (finame[0], file);   // copy actual filename to filename array 
-    srcln[0] = 0;               // reset source line counter 
+    // copy actual filename to filename array.
+    strcpy (finame[0], file);
+    // reset source line counter 
+    srcln[0] = 0;
     if (file == NULL || filename_typeof (file) == 'c') {
         global_table_index = 0;
         local_table_index = NUMBER_OF_GLOBALS;
@@ -260,22 +263,15 @@ dumplits ()
 {
     int j, k;
 
+    // TODO: Check what this achieves.
     if (!litptr)
         return;
     def_local (litlab);
     k = 0;
-    while (k < litptr) {
-        gen_datab ();
-        j = 8;
-        while (j--) {
-            outn (litq[k++] & 127);
-            if (!j || k >= litptr) {
-                newline ();
-                break;
-            }
-            outb (',');
-        }
-    }
+    outb (IR_DATAB);
+    outw (litptr - k);
+    while (k < litptr)
+        outb (litq[k++] & 127);
 }
 
 // Dump static variables.
@@ -316,15 +312,13 @@ dumpglbs ()
                         if (i < list_size) {
                             // dump data 
                             value = get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]);
-                            outn (value);
+                            outw (value);
                         } else
                             // Dump zero, no more data available.
-                            outn (0);
+                            outw (0);
                         line_count++;
                         if (!(line_count % 10))
                             line_count = 0;
-                        else if (i < dim - 1)
-                            outb (',');
                     }
                 }
                 newline ();
@@ -363,11 +357,11 @@ dump_struct (SYMBOL * symbol, int position)
             if (position < get_size (symbol->name)) {
                 // dump data
                 value = get_item_at (symbol->name, position * number_of_members + i, &tag_table[symbol-> tagidx]);
-                outn (value);
+                outw (value);
             } else {
                 // Dump zero, no more
                 // data available.
-                outn (0);
+                outw (0);
             }
             newline ();
         }
@@ -378,7 +372,9 @@ errorsummary ()
 {
     if (ncmp)
         error ("missing closing bracket");
-    newline ();
+    return;
+
+    // We're making IR code.
     gen_comment ();
     outn (errcnt);
     if (errcnt)

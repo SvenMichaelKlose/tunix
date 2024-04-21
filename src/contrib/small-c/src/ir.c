@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 //////////////////////
 /// INITIALIZATION ///
@@ -33,12 +34,12 @@ trailer ()
 
 output_label_terminator ()
 {
-    outb (':');
+    //outb (':');
 }
 
 gen_comment ()
 {
-    outs ("; ");
+    //outs ("; ");
 }
 
 ////////////////
@@ -47,12 +48,12 @@ gen_comment ()
 
 gen_code_segment ()
 {
-    outl (".code");
+    outb (IR_SEG_CODE);
 }
 
 gen_data_segment ()
 {
-    outl (".data");
+    outb (IR_SEG_DATA);
 }
 
 ////////////
@@ -61,17 +62,17 @@ gen_data_segment ()
 
 gen_datab ()
 {
-    outtabs (".byte ");
+    outb (IR_DATAB);
 }
 
 gen_dataw ()
 {
-    outtabs (".word ");
+    outb (IR_DATAW);
 }
 
 gen_bss ()
 {
-    outtabs (".res ");
+    outb (IR_BSSB);
 }
 
 //////////////
@@ -80,38 +81,40 @@ gen_bss ()
 
 def_local (int nlab)
 {
-    outb ('_');
-    outn (nlab);
-    output_label_terminator ();
+    outb (IR_DEFLOCAL);
+    outw (nlab);
 }
 
 def_global (char *n)
 {
+    outb (IR_DEFGLOBAL);
     outs (n);
-    output_label_terminator ();
+    outb (0);
 }
 
 gen_local (int label)
 {
-    outb ('_');
-    outn (label);
+    outb (IR_LOCAL);
+    outw (label);
 }
 
 gen_global (char *n)
 {
+    outb (IR_GLOBAL);
     outs (n);
+    outb (0);
 }
 
 _gen_storage_decl (int do_import,
                    char *n)
 {
-    outtabs (
+    outb (
         do_import ?
-            ".import " :
-            ".export "
+            IR_IMPORT :
+            IR_EXPORT
     );
     outs (n);
-    newline ();
+    outb (0);
 }
 
 gen_decl_var (SYMBOL * scptr)
@@ -134,19 +137,18 @@ gen_decl_fun (SYMBOL * scptr)
 
 gen_swap ()
 {
-    gen_call ("xchg");
+    outb (IR_SWAP);
 }
 
 gen_load_1st ()
 {
-    outtabs ("lhli ");
+    outb (IR_LDA);
 }
 
 _gen_load_2nd_const (int v)
 {
-    outtabs ("ldei ");
-    outn (v);
-    newline ();
+    outb (IR_LDB);
+    outw (v);
 }
 
 gen_get_local (SYMBOL * sym)
@@ -154,12 +156,11 @@ gen_get_local (SYMBOL * sym)
     if (sym->storage == LSTATIC) {
         gen_load_1st ();
         gen_local (sym->offset);
-        newline ();
     } else {
         gen_load_1st ();
-        outn (sym->offset - stkp);
-        newline ();
-        gen_call ("add_sp");
+        //TODO: gen_load_1st_const ();
+        outw (sym->offset - stkp);
+        outb (IR_ADDSP);
     }
     return REGA;
 }
@@ -170,12 +171,12 @@ gen_ptrinc (LVALUE * lval)
     switch (lval->ptr_type) {
     case STRUCT:
         _gen_load_2nd_const (lval->tagsym->size);
-        gen_call ("add_de");
+        outb (IR_ADDB);
         break;
     case CINT:
     case UINT:
     default:
-        gen_call ("inc_hl");
+        outb (IR_INCA);
         break;
     }
 }
@@ -183,24 +184,16 @@ gen_ptrinc (LVALUE * lval)
 // Pointer decrement
 gen_ptrdec (LVALUE * lval)
 {
-    gen_call ("dec_hl");
+    outb (IR_DECA);
     switch (lval->ptr_type) {
     case CINT:
     case UINT:
-        gen_call ("dec_hl");
+        outb (IR_DECA);
         break;
     case STRUCT:
         _gen_load_2nd_const (lval->tagsym->size - 1);
-        // two's complement of secondary.
-        outl ("mov   a,d");
-        outl ("cma");
-        outl ("mov   d,a");
-        outl ("mov   a,e");
-        outl ("cma");
-        outl ("mov  e,a");
-        outl ("inx  d");
-        // subtract 
-        gen_call ("add_de");
+        outb (IR_COMPB);
+        outb (IR_ADDB);
         break;
     default:
         break;
@@ -215,22 +208,19 @@ gen_get_memory (SYMBOL * sym)
 {
     if (sym->identity != POINTER
         && sym->type == CCHAR) {
-        outtabs ("lda ");
+        outb (IR_LDAL);
         outs (sym->name);
-        newline ();
-        gen_call ("ccsxt");
+        outb (0);
+        outb ("IR_SIGNEXT");
     } else if (sym->identity != POINTER
                && sym->type == UCHAR) {
-        outtabs ("lda ");
+        outb (IR_LDAL);
         outs (sym->name);
-        newline ();
-        outl ("sta l");
-        outl ("lda #0");
-        outl ("sta h");
+        outb (0);
     } else {
-        outtabs ("lhl ");
+        outb (IR_LDA);
         outs (sym->name);
-        newline ();
+        outb (0);
     }
 }
 
@@ -239,12 +229,11 @@ gen_put_memory (SYMBOL * sym)
 {
     if (sym->identity != POINTER
         && (sym->type & CCHAR)) {
-        outl ("lda l");
-        outtabs ("sta ");
+        outb (IR_STAL);
     } else
-        outtabs ("sthl ");
+        outb (IR_STA);
     outs (sym->name);
-    newline ();
+    outb (0);
 }
 
 ///////////////////
@@ -259,10 +248,9 @@ void
 gen_put_indirect (char typeobj)
 {
     gen_pop ();
-    if (typeobj & CCHAR)
-        gen_call ("ccpchar"); 
-    else
-        gen_call ("ccpint");
+    outb (typeobj & CCHAR ?
+            IR_PUTCHAR :
+            IR_PUTINT);
 }
 
 // Fetch the specified object type
@@ -273,14 +261,14 @@ gen_get_indirect (char typeobj, int reg)
 {
     if (typeobj == CCHAR) {
         if (reg & REGB)
-            gen_swap ();
-        gen_call ("ccgchar");
+            outb (IR_SWAP);
+        outb (IR_GETCHAR);
     } else if (typeobj == UCHAR) {
         if (reg & REGB)
             gen_swap ();
-        gen_call ("cguchar");
+        outb (IR_GETUCHAR);
     } else
-        gen_call ("ccgint");
+        outb (IR_GETINT);
 }
 
 /////////////
@@ -289,26 +277,23 @@ gen_get_indirect (char typeobj, int reg)
 
 gen_push (int reg)
 {
-    if (reg & REGB) {
-        outl ("push de");
-        stkp = stkp - INTSIZE;
-    } else {
-        outl ("push hl");
-        stkp = stkp - INTSIZE;
-    }
+    outb (reg & REGB ?
+            IR_PUSHB :
+            IR_PUSHA);
+    stkp = stkp - INTSIZE;
 }
 
 // Pop into secondary.
 gen_pop ()
 {
-    outl ("pop de");
+    outb (IR_POPB);
     stkp = stkp + INTSIZE;
 }
 
 // Swap primary and top of stack.
 gen_swap_stack ()
 {
-    outl ("xthl");
+    outb (IR_SWAPSTACK);
 }
 
 // Update stack pointer to new position.
@@ -322,14 +307,11 @@ gen_modify_stack (int newstkp)
     if (k > 0) {
         if (k < 7) {
             if (k & 1) {
-                outl ("tsx");
-                outl ("inx");
-                outl ("txs");
+                outb (IR_INCS1);
                 k--;
             }
             while (k) {
-                outl ("pla");
-                outl ("sta b");
+                outb (IR_INCS2);
                 k = k - INTSIZE;
             }
             return newstkp;
@@ -337,14 +319,11 @@ gen_modify_stack (int newstkp)
     } else {
         if (k > -7) {
             if (k & 1) {
-                outl ("tsx");
-                outl ("dex");
-                outl ("txs");
+                outb (IR_DECS1);
                 k++;
             }
             while (k) {
-                outl ("lda b");
-                outl ("pha");
+                outb (IR_DECS2);
                 k = k + INTSIZE;
             }
             return newstkp;
@@ -352,10 +331,9 @@ gen_modify_stack (int newstkp)
     }
     gen_swap ();
     gen_load_1st ();
-    outn (k);
-    newline ();
-    gen_call ("add_sp");
-    outl ("sphl");
+    outw (k);
+    outb (IR_ADDSP);
+    outb (IR_SPHL);
     gen_swap ();
     return newstkp;
 }
@@ -366,33 +344,33 @@ gen_modify_stack (int newstkp)
 
 gen_call (char *sname)
 {
-    outtabs ("jsr ");
+    outb (IR_CALL);
     outs (sname);
-    newline ();
+    outb (0);
 }
 
-// Call with argument in secondary popped
-// from stack.
-gen_call1 (char *n)
+// Call with argument in secondary
+// popped from stack.
+outb1 (char ir)
 {
     gen_pop ();
-    gen_call (n);
+    outb (ir);
 }
 
 gen_ret ()
 {
-    outl ("rts");
+    outb (IR_RET);
 }
 
 // Perform subroutine call to value on
 // top of stack.
+// TODO: Put it into an IR code.
 callstk ()
 {
     gen_load_1st ();
-    outs ("#.+5");
-    newline ();
+    //outs ("#.+5");
     gen_swap_stack ();
-    gen_call ("callptr");
+    outb (IR_CALLPTR);
     stkp = stkp + INTSIZE;
 }
 
@@ -400,9 +378,6 @@ callstk ()
 // register that modstk doesn't touch.
 gnargs (int d)
 {
-    outtabs (";#arg");
-    outn (d);
-    newline ();
 }
 
 /////////////
@@ -411,16 +386,14 @@ gnargs (int d)
 
 gen_jump (int label)
 {
-    outtabs ("jmp ");
+    outb (IR_JMP);
     gen_local (label);
-    newline ();
 }
 
 // 'case' jump
 gen_jump_case ()
 {
-    outtabs ("jmp cccase");
-    newline ();
+    outb (IR_JMPCASE);
 }
 
 // Test primary and jump to label.
@@ -428,14 +401,8 @@ gen_jump_case ()
 // ft == 0: Jump if zero.
 gen_test_jump (int label, int ft)
 {
-    outl ("lda h");
-    outl ("ora l");
-    if (ft)
-        outtabs ("bne ");
-    else
-        outtabs ("beq ");
+    outb (ft ? IR_JMPNZ : IR_JMPZ);
     gen_local (label);
-    newline ();
 }
 
 /////////////
@@ -444,14 +411,13 @@ gen_test_jump (int label, int ft)
 
 gen_tobool ()
 {
-    gen_call ("ccbool");
+    outb (IR_BOOL);
 }
 
 gen_not ()
 {
-    gen_call ("cclneg");
+    outb (IR_LNEG);
 }
-
 
 ///////////////////
 /// ARITHMETICS ///
@@ -459,23 +425,17 @@ gen_not ()
 
 gen_neg ()
 {
-    gen_call ("ccneg");
+    outb (IR_NEG);
 }
 
 gen_mul2 ()
 {
-    gen_call ("asl_hl");
+    outb (IR_ASL);
 }
 
 gen_div2 ()
 {
-    // push primary in prep for
-    // gen_asr ().
-    gen_push (REGA);
-    gen_load_1st ();
-    outn (1);
-    newline ();
-    gen_asr ();
+    outb (IR_ASR);
 }
 
 // Sum of primary and secondary
@@ -489,26 +449,26 @@ gen_add (int *lval, int *lval2)
         gen_mul2 ();
         gen_swap ();
     }
-    gen_call ("add_de");
+    outb (IR_ADDB);
 }
 
 // Add offset to primary.
 gen_add_const (int val)
 {
     _gen_load_2nd_const (val);
-    gen_call ("add_de");
+    outb (IR_ADDB);
 }
 
 gen_sub ()
 {
-    gen_call1 ("ccsub");
+    outb1 (IR_SUB);
 }
 
 // Multiply primary and secondary
 // registers (result in primary)
 gen_mul ()
 {
-    gen_call1 ("ccmul");
+    outb1 (IR_MUL);
 }
 
 // Multiply primary by the length of
@@ -522,7 +482,7 @@ gen_mul_const (int type, int size)
         break;
     case STRUCT:
         _gen_load_2nd_const (size);
-        gen_call ("ccmul");
+        gen_mul ();
         break;
     default:
         break;
@@ -534,7 +494,7 @@ gen_mul_const (int type, int size)
 // remainder in secondary.
 gen_div ()
 {
-    gen_call1 ("ccdiv");
+    outb1 (IR_DIV);
 }
 
 // Unsigned divide secondary register
@@ -542,7 +502,7 @@ gen_div ()
 // remainder in secondary.
 gen_udiv ()
 {
-    gen_call1 ("ccudiv");
+    outb1 (IR_UDIV);
 }
 
 // Remainder (mod) of secondary register
@@ -571,26 +531,26 @@ gen_umod ()
 // secondary registers.
 gen_or ()
 {
-    gen_call1 ("ccor");
+    outb1 (IR_OR);
 }
 
 // Exclusive 'or' the primary and
 // secondary registers.
 gen_xor ()
 {
-    gen_call1 ("ccxor");
+    outb1 (IR_XOR);
 }
 
 // 'and' primary and secondary.
 gen_and ()
 {
-    gen_call1 ("ccand");
+    outb1 (IR_AND);
 }
 
 // One's complement of primary.
 gen_complement ()
 {
-    gen_call ("cccom");
+    outb (IR_COMPA);
 }
 
 //////////////
@@ -601,7 +561,7 @@ gen_complement ()
 // primary.  Result in primary.
 gen_asr ()
 {
-    gen_call1 ("ccasr");
+    outb1 (IR_ASR);
 }
 
 // Logically shift right the secondary
@@ -609,7 +569,7 @@ gen_asr ()
 // primary register.  Result in primary.
 gen_lsr ()
 {
-    gen_call1 ("cclsr");
+    outb1 (IR_LSR);
 }
 
 // Arithmetic shift left secondary
@@ -617,7 +577,7 @@ gen_lsr ()
 // primary register.  Result in primary.
 gen_asl ()
 {
-    gen_call1 ("ccasl");
+    outb1 (IR_ASL);
 }
 
 ////////////////////
@@ -634,52 +594,52 @@ gen_asl ()
 
 gen_eq ()
 {
-    gen_call1 ("cceq");
+    outb1 (IR_EQ);
 }
 
 gen_neq ()
 {
-    gen_call1 ("ccne");
+    outb1 (IR_NE);
 }
 
 gen_lt ()
 {
-    gen_call1 ("cclt");
+    outb1 (IR_LT);
 }
 
 gen_lte ()
 {
-    gen_call1 ("ccle");
+    outb1 (IR_LTE);
 }
 
 gen_gt ()
 {
-    gen_call1 ("ccgt");
+    outb1 (IR_GT);
 }
 
 gen_gte ()
 {
-    gen_call1 ("ccge");
+    outb1 (IR_GTE);
 }
 
 gen_ult ()
 {
-    gen_call1 ("ccult");
+    outb1 (IR_ULT);
 }
 
 gen_ulte ()
 {
-    gen_call1 ("ccule");
+    outb1 (IR_ULTE);
 }
 
 gen_ugt ()
 {
-    gen_call1 ("ccugt");
+    outb1 (IR_UGT);
 }
 
 gen_ugte ()
 {
-    gen_call1 ("ccuge");
+    outb1 (IR_UGTE);
 }
 
 /////////////////

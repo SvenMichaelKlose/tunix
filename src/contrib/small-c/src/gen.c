@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 //////////////
 /// OUTPUT ///
@@ -8,10 +9,13 @@
 
 outb (char c)
 {
-    if (!c)
-        return 0;
     fputc (c, output);
-    return c;
+}
+
+outw (char c)
+{
+    fputc (c & 255, output);
+    fputc (c >> 8, output);
 }
 
 outs (char ptr[])
@@ -46,6 +50,17 @@ outl (char ptr[])
 outn (int number)
 {
     fprintf (output, "%d", number);
+}
+
+//////////////
+/// SOURCE ///
+//////////////
+
+gen_srcline (char *n)
+{
+    outb (IR_SRCLINE);
+    outs (line);
+    outb (0);
 }
 
 //////////////

@@ -29,14 +29,20 @@ OBJ = $(addsuffix .o, $(basename $(SRC)))
 all:    scc6502
 	./scc6502 test.c
 
-scc6502: $(OBJ)
+mkir: $(OBJ)
+	$(CC) -o mkir $(CFLAGS) mkir.c
+
+ir.h: mkir
+	./mkir > ir.h
+
+scc6502: ir.h $(OBJ)
 	$(CC) -o scc6502 $(CFLAGS) $(OBJ)
 
 #scc8080: $(OBJ)
 #	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) scc6502 scc8080 test.s *~ */*~
+	rm -f $(OBJ) scc6502 scc8080 test.s *~ */*~ mkir mkir.o ir.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -7,7 +7,9 @@ nosign (LVALUE * is)
 {
     SYMBOL *ptr;
 
-    if ((is->ptr_type) || ((ptr = is->symbol) && (ptr->type & UNSIGNED)))
+    if (is->ptr_type
+        || ((ptr = is->symbol)
+            && (ptr->type & UNSIGNED)))
         return 1;
     return 0;
 }
@@ -40,7 +42,7 @@ hier1 (LVALUE * lval)
 
     k = hier1a (lval);
     if (match ("=")) {
-        if ((k & FETCH) == 0) {
+        if (!(k & FETCH)) {
             needlval ();
             return 0;
         }
@@ -61,7 +63,7 @@ hier1 (LVALUE * lval)
             match (">>=") ||
             match ("<<=") ||
             match ("&=") || match ("^=") || match ("|=")) {
-            if ((k & FETCH) == 0) {
+            if (!(k & FETCH)) {
                 needlval ();
                 return 0;
             }
@@ -225,13 +227,16 @@ hier2 (LVALUE * lval)
 
     k = hier3 (lval);
     blanks ();
-    if ((ch () != '|') | (nch () == '|') | (nch () == '='))
+    if (ch () != '|'
+        || nch () == '|'
+        || nch () == '=')
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
     FOREVER {
-        if ((ch () == '|') & (nch () != '|') & (nch () !=
-                                                '=')) {
+        if (ch () == '|'
+            && nch () != '|'
+            && nch () != '=') {
             inbyte ();
             gen_push (k);
             k = hier3 (lval2);
@@ -252,12 +257,14 @@ hier3 (LVALUE * lval)
 
     k = hier4 (lval);
     blanks ();
-    if ((ch () != '^') | (nch () == '='))
+    if (ch () != '^'
+        || nch () == '=')
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
     FOREVER {
-        if ((ch () == '^') & (nch () != '=')) {
+        if (ch () == '^'
+            && nch () != '=') {
             inbyte ();
             gen_push (k);
             k = hier4 (lval2);
@@ -278,13 +285,16 @@ hier4 (LVALUE * lval)
 
     k = hier5 (lval);
     blanks ();
-    if ((ch () != '&') | (nch () == '|') | (nch () == '='))
+    if (ch () != '&'
+        || nch () == '|'
+        || nch () == '=')
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
     FOREVER {
-        if ((ch () == '&') & (nch () != '&') & (nch () !=
-                                                '=')) {
+        if (ch () == '&'
+            && nch () != '&'
+            && nch () != '=') {
             inbyte ();
             gen_push (k);
             k = hier5 (lval2);
@@ -365,7 +375,8 @@ hier6 (LVALUE * lval)
                 continue;
             }
             gen_gte ();
-        } else if ((sstreq ("<")) && !sstreq ("<<")) {
+        } else if (sstreq ("<")
+                   && !sstreq ("<<")) {
             inbyte ();
             gen_push (k);
             k = hier7 (lval2);
@@ -376,7 +387,8 @@ hier6 (LVALUE * lval)
                 continue;
             }
             gen_lt ();
-        } else if ((sstreq (">")) && !sstreq (">>")) {
+        } else if (sstreq (">")
+                   && !sstreq (">>")) {
             inbyte ();
             gen_push (k);
             k = hier7 (lval2);
@@ -443,7 +455,9 @@ hier8 (LVALUE * lval)
 
     k = hier9 (lval);
     blanks ();
-    if ((ch () != '+') & (ch () != '-') | nch () == '=')
+    if (ch () != '+'
+        && ch () != '-'
+        || nch () == '=')
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
@@ -478,8 +492,8 @@ hier8 (LVALUE * lval)
             }
             gen_sub ();
             // if both pointers, scale result 
-            if ((lval->ptr_type & CINT)
-                && (lval2->ptr_type & CINT)) {
+            if (lval->ptr_type & CINT
+                && lval2->ptr_type & CINT) {
                 gen_div2 ();   // divide by intsize 
             }
             result (lval, lval2);
@@ -496,8 +510,10 @@ hier9 (LVALUE * lval)
 
     k = hier10 (lval);
     blanks ();
-    if (((ch () != '*') && (ch () != '/') &&
-         (ch () != '%')) || (nch () == '='))
+    if ((ch () != '*'
+         && ch () != '/'
+         && (ch () != '%'))
+        || nch () == '=')
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
@@ -541,7 +557,7 @@ hier10 (LVALUE * lval)
     SYMBOL *ptr;
 
     if (match ("++")) {
-        if (((k = hier10 (lval)) & FETCH) == 0) {
+        if (!((k = hier10 (lval)) & FETCH)) {
             needlval ();
             return 0;
         }
@@ -552,7 +568,7 @@ hier10 (LVALUE * lval)
         store (lval);
         return HL_REG;
     } else if (match ("--")) {
-        if (((k = hier10 (lval)) & FETCH) == 0) {
+        if (!((k = hier10 (lval)) & FETCH)) {
             needlval ();
             return 0;
         }
@@ -596,7 +612,7 @@ hier10 (LVALUE * lval)
                && nch () != '=') {
         inbyte ();
         k = hier10 (lval);
-        if ((k & FETCH) == 0) {
+        if (!(k & FETCH)) {
             // Without this check, this
             // error triggers when
             // trying to evaluate a
@@ -627,7 +643,7 @@ hier10 (LVALUE * lval)
     } else {
         k = hier11 (lval);
         if (match ("++")) {
-            if ((k & FETCH) == 0) {
+            if (!(k & FETCH)) {
                 needlval ();
                 return 0;
             }
@@ -639,7 +655,7 @@ hier10 (LVALUE * lval)
             gen_ptrdec (lval);
             return HL_REG;
         } else if (match ("--")) {
-            if ((k & FETCH) == 0) {
+            if (!(k & FETCH)) {
                 needlval ();
                 return 0;
             }
@@ -666,11 +682,14 @@ hier11 (LVALUE * lval)
     k = primary (lval);
     ptr = lval->symbol;
     blanks ();
-    if ((ch () == '[') || (ch () == '(') || (ch () == '.')
-        || ((ch () == '-') && (nch () == '>')))
+    if (ch () == '['
+        || ch () == '('
+        || ch () == '.'
+        || (ch () == '-'
+            && nch () == '>'))
         FOREVER {
         if (match ("[")) {
-            if (ptr == 0) {
+            if (!ptr) {
                 error ("can't subscript");
                 junk ();
                 needbrack ("]");
@@ -692,7 +711,7 @@ hier11 (LVALUE * lval)
             lval->ptr_type = 0;
             k = FETCH | HL_REG;
         } else if (match ("(")) {
-            if (ptr == 0) {
+            if (!ptr) {
                 callfunction (0);
             } else if (ptr->identity != FUNCTION) {
                 k = rvalue (lval, k);
@@ -703,20 +722,18 @@ hier11 (LVALUE * lval)
             lval->symbol = 0;
             k = 0;
         } else if ((direct = match (".")) || match ("->")) {
-            if (lval->tagsym == 0) {
+            if (!lval->tagsym) {
                 error ("can't take member");
                 junk ();
                 return 0;
             }
-            if (symname (sname) == 0 ||
-                ((ptr =
-                  find_member (lval->tagsym,
-                               sname)) == 0)) {
+            if (!symname (sname) ||
+                (!(ptr = find_member (lval->tagsym, sname)))) {
                 error ("unknown member");
                 junk ();
                 return 0;
             }
-            if ((k & FETCH) && direct == 0)
+            if ((k & FETCH) && !direct)
                 k = rvalue (lval, k);
             if (k == DE_REG)
                 gen_swap ();
@@ -750,7 +767,7 @@ hier11 (LVALUE * lval)
         } else
             return k;
         }
-    if (ptr == 0)
+    if (!ptr)
         return k;
     if (ptr->identity == FUNCTION) {
         gen_load_1st ();

@@ -20,7 +20,7 @@ delwhile ()
 WHILE *
 readwhile ()
 {
-    if (while_table_index == 0) {
+    if (!while_table_index) {
         error ("no active do/for/while/switch");
         return 0;
     }
@@ -30,13 +30,10 @@ readwhile ()
 WHILE *
 findwhile ()
 {
-    int while_table_idx;
-    while_table_idx = while_table_index;
-    for (; while_table_idx != 0;) {
-        while_table_idx--;
-        if (ws[while_table_idx].type != WSSWITCH)
-            return &ws[while_table_idx];
-    }
+    int i;
+    for (i = while_table_index; i--;)
+        if (ws[i].type != WSSWITCH)
+            return &ws[i];
     error ("no active do/for/while");
     return 0;
 }

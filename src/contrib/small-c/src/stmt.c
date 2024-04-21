@@ -58,7 +58,7 @@ do_local_declares (int stclass)
     blanks ();
     if ((sflag = amatch ("struct", 6))
         || amatch ("union", 5)) {
-        if (!symname (sname) == 0)
+        if (!symname (sname))
             illname ();
         if ((otag = find_tag (sname)) == -1)
             otag = define_struct (sname, stclass, sflag);
@@ -318,7 +318,7 @@ dodefault ()
 
 doreturn ()
 {
-    if (endst () == 0)
+    if (!endst ())
         expression (YES);
     gen_jump (fexitlab);
 }
@@ -327,7 +327,7 @@ dobreak ()
 {
     WHILE *ptr;
 
-    if ((ptr = readwhile ()) == 0)
+    if (!(ptr = readwhile ()))
         return;
     gen_modify_stack (ptr->stack_pointer);
     gen_jump (ptr->while_exit);
@@ -337,7 +337,7 @@ docont ()
 {
     WHILE *ptr;
 
-    if ((ptr = findwhile ()) == 0)
+    if (!(ptr = findwhile ()))
         return;
     gen_modify_stack (ptr->stack_pointer);
     if (ptr->type == WSFOR)
@@ -362,7 +362,7 @@ dumpsw (WHILE * ws)
                 output_number (swstcase[j]);
                 output_byte (',');
                 gen_local (swstlab[j++]);
-                if ((i == 0) | (j >= swstp)) {
+                if (!i || j >= swstp) {
                     newline ();
                     break;
                 }

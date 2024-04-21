@@ -8,7 +8,7 @@
 
 output_byte (char c)
 {
-    if (c == 0)
+    if (!c)
         return 0;
     fputc (c, output);
     return c;
@@ -84,7 +84,7 @@ gen_global (char *n)
 
 store (LVALUE * lval)
 {
-    if (lval->indirect == 0)
+    if (!lval->indirect)
         gen_put_memory (lval->symbol);
     else
         gen_put_indirect (lval->indirect);
@@ -92,7 +92,7 @@ store (LVALUE * lval)
 
 rvalue (LVALUE * lval, int reg)
 {
-    if ((lval->symbol != 0) & (lval->indirect == 0))
+    if (lval->symbol && !lval->indirect)
         gen_get_memory (lval->symbol);
     else
         gen_get_indirect (lval->indirect, reg);

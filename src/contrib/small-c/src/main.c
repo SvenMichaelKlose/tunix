@@ -127,7 +127,7 @@ main (int argc, char *argv[])
     if (!errs && !sflag && !cflag)
         errs = errs || link ();
 #endif
-    exit (errs != 0);
+    exit (!!errs);
 }
 
 // Compile one file if filename is NULL
@@ -280,7 +280,7 @@ dumplits ()
 {
     int j, k;
 
-    if (litptr == 0)
+    if (!litptr)
         return;
     def_local (litlab);
     k = 0;
@@ -289,7 +289,7 @@ dumplits ()
         j = 8;
         while (j--) {
             output_number (litq[k++] & 127);
-            if ((j == 0) | (k >= litptr)) {
+            if (!j || k >= litptr) {
                 newline ();
                 break;
             }
@@ -325,11 +325,10 @@ dumpglbs ()
                     if (symbol->type == STRUCT) {
                         dump_struct (symbol, i);
                     } else {
-                        if (line_count % 10 == 0) {
+                        if (!(line_count % 10)) {
                             newline ();
-                            if ((symbol->type & CINT) ||
-                                (symbol->identity ==
-                                 POINTER)) {
+                            if (symbol->type & CINT
+                                || symbol->identity == POINTER) {
                                 gen_dataw ();
                             } else
                                 gen_datab ();
@@ -342,7 +341,7 @@ dumpglbs ()
                             // Dump zero, no more data available.
                             output_number (0);
                         line_count++;
-                        if (line_count % 10 == 0)
+                        if (!(line_count % 10))
                             line_count = 0;
                         else if (i < dim - 1)
                             output_byte (',');

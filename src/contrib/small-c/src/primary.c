@@ -34,7 +34,7 @@ primary (LVALUE * lval)
             else
                 output_number (1);
         } else if (amatch ("struct", 6)) {
-            if (!symname (sname) == 0)
+            if (!symname (sname))
                 illname ();
             if ((otag = find_tag (sname)) == -1)
                 error ("struct tag undefined");
@@ -50,8 +50,8 @@ primary (LVALUE * lval)
                 if (symbol->storage == LSTATIC)
                     error ("sizeof local static");
                 offset = symbol->offset;
-                if ((symbol->type & CINT) ||
-                    (symbol->identity == POINTER))
+                if (symbol->type & CINT
+                    || symbol->identity == POINTER)
                     offset *= INTSIZE;
                 else if (symbol->type == STRUCT)
                     offset *= tag_table[symbol->tagidx].size;
@@ -247,12 +247,12 @@ quoted_string (int *position)
         return 0;
     *position = litptr;
     while (ch () != '"') {
-        if (ch () == 0)
+        if (!ch ())
             break;
         if (litptr >= LITMAX) {
             error ("string space exhausted");
             while (!match ("\""))
-                if (gch () == 0)
+                if (!gch ())
                     break;
             return 1;
         }
@@ -302,13 +302,13 @@ callfunction (char *ptr)
 
     nargs = 0;
     blanks ();
-    if (ptr == 0)
+    if (!ptr)
         gen_push (HL_REG);
     while (!streq (line + lptr, ")")) {
         if (endst ())
             break;
         expression (NO);
-        if (ptr == 0)
+        if (!ptr)
             gen_swap_stack ();
         gen_push (HL_REG);
         nargs = nargs + INTSIZE;

@@ -77,7 +77,7 @@ streq (char str1[], char str2[])
 
     k = 0;
     while (str2[k]) {
-        if ((str1[k] != str2[k]))
+        if (str1[k] != str2[k])
             return 0;
         k++;
     }
@@ -90,11 +90,11 @@ astreq (char str1[], char str2[], int len)
     int k;
     k = 0;
     while (k < len) {
-        if ((str1[k] != str2[k]))
+        if (str1[k] != str2[k])
             break;
-        if (str1[k] == 0)
+        if (!str1[k])
             break;
-        if (str2[k] == 0)
+        if (!str2[k])
             break;
         k++;
     }
@@ -150,7 +150,7 @@ amatch (char *lit, int len)
 blanks ()
 {
     FOREVER {
-        while (ch () == 0) {
+        while (!ch ()) {
             preprocess ();
             if (feof (input))
                 break;

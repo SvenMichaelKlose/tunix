@@ -26,7 +26,7 @@ find_member (TAG_SYMBOL * tag, char *sname)
 
     member_idx = tag->member_idx;
     while (member_idx < tag->member_idx + tag->number_of_members) {
-        if (strcmp (member_table[member_idx].name, sname) == 0)
+        if (!strcmp (member_table[member_idx].name, sname))
             return &member_table[member_idx];
         ++member_idx;
     }

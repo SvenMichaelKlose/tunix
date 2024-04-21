@@ -43,9 +43,9 @@ add_data_initials (char *symbol_name, int type, int value,
                    TAG_SYMBOL * tag)
 {
     int position;
-    if (find_symbol_initials (symbol_name) == 0)
-        add_symbol_initials (symbol_name, tag == 0 ? type : STRUCT);
-    if (tag != 0) {
+    if (!find_symbol_initials (symbol_name))
+        add_symbol_initials (symbol_name, tag ? STRUCT : type);
+    if (tag) {
         // Find number of members, dim
         // is total number of values
         // added.
@@ -78,7 +78,7 @@ int
 get_size (char *symbol_name)
 {
     int result = 0;
-    if (find_symbol_initials (symbol_name) != 0)
+    if (find_symbol_initials (symbol_name))
         result = initials_table[initials_idx].dim;
     return result;
 }
@@ -90,7 +90,7 @@ get_item_at (char *symbol_name,
              TAG_SYMBOL * tag)
 {
     int result = 0, i, type;
-    if (find_symbol_initials (symbol_name) != 0) {
+    if (find_symbol_initials (symbol_name)) {
         if (initials_table[initials_idx].type & CCHAR) {
             result = initials_data_table[initials_data_idx + position];
         } else if (initials_table[initials_idx].type & CINT) {

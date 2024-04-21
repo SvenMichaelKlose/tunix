@@ -35,7 +35,7 @@ newfunc ()
     local_table_index = NUMBER_OF_GLOBALS;      //locptr = STARTLOC; 
     argstk = 0;
     // ANSI style argument declaration 
-    if (doAnsiArguments () == 0) {
+    if (!doAnsiArguments ()) {
         // K&R style argument declaration 
         while (!match (")")) {
             if (symname (n)) {
@@ -98,7 +98,7 @@ getarg (int t)
         // before checking if it is a
         // pointer.
         if (t == STRUCT) {
-            if (symname (n) == 0) {
+            if (!symname (n)) {
                 // Make sure tag doesn't
                 // contain odd symbols,
                 // etc.
@@ -152,7 +152,7 @@ doAnsiArguments ()
 {
     int type;
     type = get_type ();
-    if (type == 0)
+    if (!type)
         // No type detected, revert back
         // to K&R style 
         return 0;
@@ -182,10 +182,8 @@ doLocalAnsiArgument (int type)
     // tag must be read in before
     // checking if it is a pointer.
     if (type == STRUCT) {
-        if (symname (symbol_name) == 0) {
-            // make sure tag doesn't contain odd symbols, etc 
+        if (!symname (symbol_name))
             illname ();
-        }
         if ((otag = find_tag (symbol_name)) == -1)
             error ("struct tag undefined");
     }

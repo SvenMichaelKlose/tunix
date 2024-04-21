@@ -35,7 +35,7 @@ declare_global (int type, int storage,
                 identity = ARRAY;
             }
             // Add symbol.
-            if (mtag == 0) {
+            if (!mtag) {
                 // Real variable, not a struct/union member.
                 identity = initials (sname, type, identity, dim, otag);
                 add_global (sname, identity, type, (!dim ? -1 : dim), storage);
@@ -76,7 +76,7 @@ initials (char *symbol_name, int type,
     int dim_unknown = 0;
     litptr = 0;
     // Allow for xx[] = {..}; decl.
-    if (dim == 0)
+    if (!dim)
         dim_unknown = 1;
     if (!(type & CCHAR) && !(type & CINT)
         && !(type == STRUCT)) {
@@ -108,10 +108,10 @@ initials (char *symbol_name, int type,
                             dim_unknown++;
                         }
                     }
-                    if (match (",") == 0)
+                    if (!match (","))
                         break;
                 }
-                if (--dim_unknown == 0)
+                if (!--dim_unknown)
                     identity = POINTER;
             }
             needbrack ("}");
@@ -135,7 +135,8 @@ struct_init (TAG_SYMBOL * tag,
               member_table[tag->member_idx + member_idx].type,
               member_table[tag->member_idx + member_idx].identity, &dim, tag);
         ++member_idx;
-        if ((!match (",")) && (member_idx != (tag->member_idx + tag->number_of_members))) {
+        if (!match (",")
+            && (member_idx != (tag->member_idx + tag->number_of_members))) {
             error ("struct initialisaton out of data");
             break;
         }
@@ -152,7 +153,8 @@ init (char *symbol_name, int type,
     if (identity == POINTER)
         error ("cannot assign to pointer");
     if (quoted_string (&value)) {
-        if ((identity == VARIABLE) || !(type & CCHAR))
+        if (identity == VARIABLE
+            || !(type & CCHAR))
             error ("found string: must assign to char pointer or array");
         number_of_chars = litptr - value;
         *dim = *dim - number_of_chars;

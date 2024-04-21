@@ -103,7 +103,7 @@ readline ()
 
 inbyte ()
 {
-    while (ch () == 0) {
+    while (!ch ()) {
         if (feof (input))
             return 0;
         preprocess ();
@@ -113,7 +113,7 @@ inbyte ()
 
 inchar ()
 {
-    if (ch () == 0)
+    if (!ch ())
         readline ();
     if (feof (input))
         return 0;

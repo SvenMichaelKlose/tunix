@@ -214,13 +214,14 @@ gen_ptrdec (LVALUE * lval)
 
 gen_get_memory (SYMBOL * sym)
 {
-    if ((sym->identity != POINTER) && (sym->type == CCHAR)) {
+    if (sym->identity != POINTER
+        && sym->type == CCHAR) {
         output_with_tab ("lda ");
         output_string (sym->name);
         newline ();
         gen_call ("ccsxt");
-    } else if ((sym->identity != POINTER)
-               && (sym->type == UCHAR)) {
+    } else if (sym->identity != POINTER
+               && sym->type == UCHAR) {
         output_with_tab ("lda ");
         output_string (sym->name);
         newline ();
@@ -237,7 +238,8 @@ gen_get_memory (SYMBOL * sym)
 void
 gen_put_memory (SYMBOL * sym)
 {
-    if ((sym->identity != POINTER) && (sym->type & CCHAR)) {
+    if (sym->identity != POINTER
+        && (sym->type & CCHAR)) {
         output_line ("lda l");
         output_with_tab ("sta ");
     } else
@@ -316,7 +318,7 @@ gen_modify_stack (int newstkp)
     int k;
 
     k = newstkp - stkp;
-    if (k == 0)
+    if (!k)
         return newstkp;
     if (k > 0) {
         if (k < 7) {

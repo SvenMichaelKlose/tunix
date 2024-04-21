@@ -22,7 +22,7 @@ toggle (char name, int onoff)
 
 remove_one_line_comment (char c)
 {
-    if ((c == '/') && (ch () == '/')) {
+    if (c == '/' && ch () == '/') {
         while (gch ());
         return 0;
     }
@@ -218,7 +218,7 @@ ifline ()
             if (iflevel) {
                 if (skiplevel == iflevel)
                     skiplevel = 0;
-                else if (skiplevel == 0)
+                else if (!skiplevel)
                     skiplevel = iflevel;
             } else
                 noiferr ();
@@ -264,15 +264,17 @@ cpp ()
 
     mptr = lptr = 0;
     while (ch ()) {
-        if ((ch () == ' ') | (ch () == 9)) {
+        if (ch () == ' '
+            || ch () == 9) {
             keepch (' ');
-            while ((ch () == ' ') | (ch () == 9))
+            while (ch () == ' '
+                   || ch () == 9)
                 gch ();
         } else if (ch () == '"') {
             keepch (ch ());
             gch ();
             while (ch () != '"') {
-                if (ch () == 0) {
+                if (!ch ()) {
                     error ("missing quote");
                     break;
                 }
@@ -286,7 +288,7 @@ cpp ()
             keepch ('\'');
             gch ();
             while (ch () != '\'') {
-                if (ch () == 0) {
+                if (!ch ()) {
                     error ("missing apostrophe");
                     break;
                 }
@@ -296,12 +298,11 @@ cpp ()
             }
             gch ();
             keepch ('\'');
-        } else if ((ch () == '/') & (nch () == '*')) {
+        } else if (ch () == '/'
+                   && nch () == '*') {
             inchar ();
             inchar ();
-            while ((((c =
-                      ch ()) == '*') & (nch () == '/')) ==
-                   0)
+            while (!(((c = ch ()) == '*') && nch () == '/'))
                 if (c == '$') {
                     inchar ();
                     tog = TRUE;
@@ -314,7 +315,7 @@ cpp ()
                         toggle (c, tog);
                     }
                 } else {
-                    if (ch () == 0)
+                    if (!ch ())
                         readline ();
                     else
                         inchar ();
@@ -323,7 +324,7 @@ cpp ()
                 }
             inchar ();
             inchar ();
-        } else if ((ch () == '/') & (nch () == '/')) {
+        } else if (ch () == '/' & nch () == '/') {
             // one line comment 
             while (gch ());
         } else if (alphanumeric (ch ())) {

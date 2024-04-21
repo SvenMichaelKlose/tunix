@@ -52,6 +52,7 @@ output_label_prefix ()
 output_label_terminator ()
 {
     output_byte (':');
+    newline ();
 }
 
 gen_comment ()
@@ -100,14 +101,12 @@ def_local (int nlab)
 {
     output_decimal (nlab);
     output_label_terminator ();
-    newline ();
 }
 
 def_global (char *n)
 {
     output_string (n);
     output_label_terminator ();
-    newline ();
 }
 
 gen_local (int label)
@@ -397,14 +396,6 @@ gen_call1 (char *n)
 {
     gen_pop ();
     gen_call (n);
-}
-
-// Entry point declaration.
-declare_entry_point (char *symbol_name)
-{
-    output_string (symbol_name);
-    output_label_terminator ();
-    newline(); 
 }
 
 gen_ret ()

@@ -46,7 +46,8 @@ primary (LVALUE * lval)
             else
                 outn (tag_table[otag].size);
         } else if (symname (sname)) {
-            if (((symbol_table_idx = find_local (sname)) > -1) || ((symbol_table_idx = find_global (sname)) > -1)) {
+            if (((symbol_table_idx = find_local (sname)) > -1)
+                || ((symbol_table_idx = find_global (sname)) > -1)) {
                 symbol = &symbol_table[symbol_table_idx];
                 if (symbol->storage == LSTATIC)
                     error ("sizeof local static");
@@ -96,7 +97,9 @@ primary (LVALUE * lval)
                 lval->indirect = 0;
                 if (symbol->type == STRUCT)
                     lval->tagsym = &tag_table[symbol->tagidx];
-                if (symbol->identity != ARRAY && (symbol->identity != VARIABLE || symbol->type != STRUCT)) {
+                if (symbol->identity != ARRAY
+                    && (symbol->identity != VARIABLE
+                        || symbol->type != STRUCT)) {
                     if (symbol->identity == POINTER)
                         lval->ptr_type = symbol->type;
                     return FETCH | REGA;
@@ -200,7 +203,7 @@ number (int val[])
         }
     }
     if (minus < 0)
-        k = (-k);
+        k = -k;
     val[0] = k;
     if (k < 0)
         return UINT;

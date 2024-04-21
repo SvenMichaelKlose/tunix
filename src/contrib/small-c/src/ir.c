@@ -68,14 +68,9 @@ _ldami (char *s)
     out1s (IR_LDAMI, s);
 }
 
-_ldaci (int v)
-{
-    out1 (IR_LDACI, v);
-}
-
 gen_ldaci (int v)
 {
-    _ldaci (v);
+    out1 (IR_LDACI, v);
 }
 
 gen_ldbci (int v)
@@ -83,50 +78,25 @@ gen_ldbci (int v)
     out1 (IR_LDBCI, v);
 }
 
-_ldbci (int v)
-{
-    out1s (IR_LDBCI, v);
-}
-
-_addb ()
-{
-    outb (IR_ADDB);
-}
-
-_addsp ()
-{
-    outb (IR_ADDSP);
-}
-
-_inca ()
-{
-    outb (IR_INCA);
-}
-
-_incs1 ()
-{
-    outb (IR_INCS1);
-}
-
-_incs2 ()
-{
-    outb (IR_INCS2);
-}
-
-_decs1 ()
-{
-    outb (IR_DECS1);
-}
-
-_decs2 ()
-{
-    outb (IR_DECS2);
-}
-
-_callptr ()
-{
-    outb (IR_CALLPTR);
-}
+_addb () { outb (IR_ADDB); }
+_addsp () { outb (IR_ADDSP); }
+_callptr () { outb (IR_CALLPTR); }
+_compa () { outb (IR_COMPA); }
+_compb () { outb (IR_COMPB); }
+_inca () { outb (IR_INCA); }
+_deca () { outb (IR_DECA); }
+_decs1 () { outb (IR_DECS1); }
+_decs2 () { outb (IR_DECS2); }
+_incs1 () { outb (IR_INCS1); }
+_incs2 () { outb (IR_INCS2); }
+_getc () { outb (IR_GETC); }
+_geti () { outb (IR_GETI); }
+_getuc () { outb (IR_GETUC); }
+_signext () { outb (IR_SIGNEXT); }
+_sphl () { outb (IR_SPHL); }
+_stac () { outb (IR_SIGNEXT); }
+_stai () { outb (IR_SIGNEXT); }
+_popb () { outb (IR_POPB); }
 
 ////////////////
 /// SEGMENTS ///
@@ -146,20 +116,9 @@ gen_data_segment ()
 /// DATA ///
 ////////////
 
-gen_datab ()
-{
-    outb (IR_DATAB);
-}
-
-gen_dataw ()
-{
-    outb (IR_DATAW);
-}
-
-gen_bss ()
-{
-    outb (IR_BSSB);
-}
+gen_datab () { outb (IR_DATAB); }
+gen_dataw () { outb (IR_DATAW); }
+gen_bss ()   { outb (IR_BSSB); }
 
 //////////////
 /// LABELS ///
@@ -210,17 +169,14 @@ gen_decl_fun (SYMBOL * s)
 /// REGISTERS ///
 /////////////////
 
-gen_swap ()
-{
-    outb (IR_SWAP);
-}
+gen_swap () { outb (IR_SWAP); }
 
 gen_get_local (SYMBOL * sym)
 {
     if (sym->storage == LSTATIC)
-        _ldaci (sym->offset);
+        gen_ldaci (sym->offset);
     else {
-        _ldaci (sym->offset - stkp);
+        gen_ldaci (sym->offset - stkp);
         _addsp ();
     }
     return REGA;
@@ -245,15 +201,15 @@ gen_ptrinc (LVALUE * lval)
 // Pointer decrement
 gen_ptrdec (LVALUE * lval)
 {
-    outb (IR_DECA);
+    _deca ();
     switch (lval->ptr_type) {
     case CINT:
     case UINT:
-        outb (IR_DECA);
+        _deca ();
         break;
     case STRUCT:
         gen_ldbci (lval->tagsym->size - 1);
-        outb (IR_COMPB);
+        _compb ();
         _addb ();
         break;
     default:
@@ -272,7 +228,7 @@ gen_get_memory (SYMBOL * sym)
     if (sym->identity != POINTER
         && sym->type == CCHAR) {
         _ldamc (sym->name);
-        outb (IR_SIGNEXT);
+        _signext ();
     } else if (sym->identity != POINTER
                && sym->type == UCHAR)
         _ldamc (sym->name);
@@ -285,9 +241,9 @@ gen_put_memory (SYMBOL * sym)
 {
     if (sym->identity != POINTER
         && (sym->type & CCHAR)) {
-        outb (IR_STAC);
+        _stac ();
     } else
-        outb (IR_STAI);
+        _stai ();
     outs (sym->name);
 }
 
@@ -316,14 +272,14 @@ gen_get_indirect (char typeobj, int reg)
 {
     if (typeobj == CCHAR) {
         if (reg & REGB)
-            outb (IR_SWAP);
-        outb (IR_GETC);
+            gen_swap ();
+        _getc ();
     } else if (typeobj == UCHAR) {
         if (reg & REGB)
             gen_swap ();
-        outb (IR_GETUC);
+        _getuc ();
     } else
-        outb (IR_GETI);
+        _geti ();
 }
 
 /////////////
@@ -341,7 +297,7 @@ gen_push (int reg)
 // Pop into secondary.
 gen_pop ()
 {
-    outb (IR_POPB);
+    _popb ();
     stkp = stkp + INTSIZE;
 }
 
@@ -360,6 +316,7 @@ gen_modify_stack (int newstkp)
     if (!k)
         return newstkp;
     if (k > 0) {
+        // TODO: Remove this limit.
         if (k < 7) {
             if (k & 1) {
                 _incs1 ();
@@ -385,9 +342,9 @@ gen_modify_stack (int newstkp)
         }
     }
     gen_swap ();
-    _ldaci (k);
+    gen_ldaci (k);
     _addsp ();
-    outb (IR_SPHL);
+    _sphl ();
     gen_swap ();
     return newstkp;
 }
@@ -410,26 +367,17 @@ out2 (char ir)
     outb (ir);
 }
 
-gen_ret ()
-{
-    outb (IR_RET);
-}
+gen_ret () { outb (IR_RET); }
 
 // Perform subroutine call to value on
 // top of stack.
 // TODO: Put it into an IR code.
 callstk ()
 {
-    _ldaci (5); // TODO: ???
+    gen_ldaci (5); // TODO: ???
     gen_swap_stack ();
     _callptr ();
     stkp = stkp + INTSIZE;
-}
-
-// Squirrel away argument count in a
-// register that modstk doesn't touch.
-gnargs (int d)
-{
 }
 
 /////////////
@@ -461,34 +409,16 @@ gen_test_jump (int label, int ft)
 /// TRUTH ///
 /////////////
 
-gen_tobool ()
-{
-    outb (IR_BOOL);
-}
-
-gen_not ()
-{
-    outb (IR_NOT);
-}
+gen_tobool () { outb (IR_BOOL); }
+gen_not ()    { outb (IR_NOT); }
 
 ///////////////////
 /// ARITHMETICS ///
 ///////////////////
 
-gen_neg ()
-{
-    outb (IR_NEG);
-}
-
-gen_mul2 ()
-{
-    outb (IR_ASL);
-}
-
-gen_div2 ()
-{
-    outb (IR_ASR);
-}
+gen_neg ()  { outb (IR_NEG); }
+gen_mul2 () { outb (IR_ASL); }
+gen_div2 () { outb (IR_ASR); }
 
 // Sum of primary and secondary
 // If lval2 is int* and lval is not,
@@ -511,17 +441,11 @@ gen_add_const (int val)
     _addb ();
 }
 
-gen_sub ()
-{
-    out2 (IR_SUB);
-}
+gen_sub () { out2 (IR_SUB); }
 
 // Multiply primary and secondary
 // registers (result in primary)
-gen_mul ()
-{
-    out2 (IR_MUL);
-}
+gen_mul () { out2 (IR_MUL); }
 
 // Multiply primary by the length of
 // some variable.
@@ -544,18 +468,12 @@ gen_mul_const (int type, int size)
 // Divide the secondary register by
 // primary.  Quotient in primary,
 // remainder in secondary.
-gen_div ()
-{
-    out2 (IR_DIV);
-}
+gen_div () { out2 (IR_DIV); }
 
 // Unsigned divide secondary register
 // by the primary.  Quotient in primary,
 // remainder in secondary.
-gen_udiv ()
-{
-    out2 (IR_UDIV);
-}
+gen_udiv () { out2 (IR_UDIV); }
 
 // Remainder (mod) of secondary register
 // divided by the primary.  Remainder in
@@ -581,29 +499,17 @@ gen_umod ()
 
 // Inclusive 'or' the primary and
 // secondary registers.
-gen_or ()
-{
-    out2 (IR_OR);
-}
+gen_or () { out2 (IR_OR); }
 
 // Exclusive 'or' the primary and
 // secondary registers.
-gen_xor ()
-{
-    out2 (IR_XOR);
-}
+gen_xor () { out2 (IR_XOR); }
 
 // 'and' primary and secondary.
-gen_and ()
-{
-    out2 (IR_AND);
-}
+gen_and () { out2 (IR_AND); }
 
 // One's complement of primary.
-gen_complement ()
-{
-    outb (IR_COMPA);
-}
+gen_complement () { _compa (); }
 
 //////////////
 /// SHIFTS ///
@@ -611,26 +517,17 @@ gen_complement ()
 
 // Arithmetic shift right the secondary // register the number of times in the
 // primary.  Result in primary.
-gen_asr ()
-{
-    out2 (IR_ASR);
-}
+gen_asr () { out2 (IR_ASR); }
 
 // Logically shift right the secondary
 // register the number of times in the
 // primary register.  Result in primary.
-gen_lsr ()
-{
-    out2 (IR_LSR);
-}
+gen_lsr () { out2 (IR_LSR); }
 
 // Arithmetic shift left secondary
 // register the number of times in the
 // primary register.  Result in primary.
-gen_asl ()
-{
-    out2 (IR_ASL);
-}
+gen_asl () { out2 (IR_ASL); }
 
 ////////////////////
 /// CONDITIONALS ///
@@ -644,55 +541,16 @@ gen_asl ()
   true, 0 otherwise.
  */
 
-gen_eq ()
-{
-    out2 (IR_EQ);
-}
-
-gen_neq ()
-{
-    out2 (IR_NE);
-}
-
-gen_lt ()
-{
-    out2 (IR_LT);
-}
-
-gen_lte ()
-{
-    out2 (IR_LTE);
-}
-
-gen_gt ()
-{
-    out2 (IR_GT);
-}
-
-gen_gte ()
-{
-    out2 (IR_GTE);
-}
-
-gen_ult ()
-{
-    out2 (IR_ULT);
-}
-
-gen_ulte ()
-{
-    out2 (IR_ULTE);
-}
-
-gen_ugt ()
-{
-    out2 (IR_UGT);
-}
-
-gen_ugte ()
-{
-    out2 (IR_UGTE);
-}
+gen_eq ()   { out2 (IR_EQ); }
+gen_neq ()  { out2 (IR_NE); }
+gen_lt ()   { out2 (IR_LT); }
+gen_lte ()  { out2 (IR_LTE); }
+gen_gt ()   { out2 (IR_GT); }
+gen_gte ()  { out2 (IR_GTE); }
+gen_ult ()  { out2 (IR_ULT); }
+gen_ulte () { out2 (IR_ULTE); }
+gen_ugt ()  { out2 (IR_UGT); }
+gen_ugte () { out2 (IR_UGTE); }
 
 /////////////////
 /// TOP-LEVEL ///
@@ -701,14 +559,9 @@ gen_ugte ()
 char *
 inclib ()
 {
-#ifdef  cpm
-    return "B:";
-#endif
-#ifdef  unix
 #ifdef  INCDIR
     return INCDIR;
 #else
     return "";
-#endif
 #endif
 }

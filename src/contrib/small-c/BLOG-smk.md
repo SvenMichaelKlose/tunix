@@ -11,6 +11,9 @@ file.  Goes well with the missing 'enum'
 of the Small-C dialect.  Four hours of
 sleep wasn't a big deal.
 
+Started writing ca65 assembly macros to
+gain more insight.
+
 # 2024-04-21 06:48
 
 The code generator is now producing

@@ -89,7 +89,6 @@ def_global (char *n)
 {
     outb (IR_DEFGLOBAL);
     outs (n);
-    outb (0);
 }
 
 gen_local (int label)
@@ -102,7 +101,6 @@ gen_global (char *n)
 {
     outb (IR_GLOBAL);
     outs (n);
-    outb (0);
 }
 
 _gen_storage_decl (int do_import,
@@ -114,7 +112,6 @@ _gen_storage_decl (int do_import,
             IR_EXPORT
     );
     outs (n);
-    outb (0);
 }
 
 gen_decl_var (SYMBOL * scptr)
@@ -210,17 +207,14 @@ gen_get_memory (SYMBOL * sym)
         && sym->type == CCHAR) {
         outb (IR_LDAL);
         outs (sym->name);
-        outb (0);
-        outb ("IR_SIGNEXT");
+        outb (IR_SIGNEXT);
     } else if (sym->identity != POINTER
                && sym->type == UCHAR) {
         outb (IR_LDAL);
         outs (sym->name);
-        outb (0);
     } else {
         outb (IR_LDA);
         outs (sym->name);
-        outb (0);
     }
 }
 
@@ -233,7 +227,6 @@ gen_put_memory (SYMBOL * sym)
     } else
         outb (IR_STA);
     outs (sym->name);
-    outb (0);
 }
 
 ///////////////////
@@ -346,7 +339,6 @@ gen_call (char *sname)
 {
     outb (IR_CALL);
     outs (sname);
-    outb (0);
 }
 
 // Call with argument in secondary
@@ -387,7 +379,7 @@ gnargs (int d)
 gen_jump (int label)
 {
     outb (IR_JMP);
-    gen_local (label);
+    outw (label);
 }
 
 // 'case' jump
@@ -402,7 +394,7 @@ gen_jump_case ()
 gen_test_jump (int label, int ft)
 {
     outb (ft ? IR_JMPNZ : IR_JMPZ);
-    gen_local (label);
+    outw (label);
 }
 
 /////////////

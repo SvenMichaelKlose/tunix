@@ -16,6 +16,10 @@ OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 all: $(SCC)
 	./$(SCC) test/test.c
+	./ir2txt < test/test.o
+
+ir2txt:
+	$(CC) -o ir2txt $(CFLAGS) ir2txt.c
 
 mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
@@ -23,11 +27,11 @@ mkir:
 ir.h: mkir
 	./mkir > ir.h
 
-$(SCC): ir.h $(OBJ)
+$(SCC): ir.h ir2txt $(OBJ)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir.h
+	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir2txt ir2txt.o ir.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

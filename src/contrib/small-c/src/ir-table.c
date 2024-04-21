@@ -17,21 +17,17 @@ struct ircode codes[] = {
     {"EXPORT",      'l'},
     {"SWAP",        0},
     {"LDAL",        'b'},
-    // TODO: Where are the other loads
-    // with // constants?
-    {"LDA",         0},
-    {"LDB",         0},
-    // Add stack pointer to primary.
+    {"LDA",         'l'},
+    {"LDB",         'l'},
     {"ADDSP",       0},
-    // Add secondary to primary.
     {"ADDA",        0},
     {"ADDB",        0},
     {"INCA",        0},
     {"DECA",        0},
     {"DECB",        0},
     {"SIGNEXT",     0},
-    {"STA",         0},
-    {"STAL",        0},
+    {"STA",         'l'},
+    {"STAL",        'w'},
     {"PUTCHAR",     0},
     {"PUTINT",      0},
     {"GETCHAR",     0},

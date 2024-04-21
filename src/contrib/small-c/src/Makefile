@@ -26,10 +26,10 @@ SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c prepro
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all:    scc6502
-	./scc6502 test.c
+all: scc6502
+	./scc6502 test/test.c
 
-mkir: $(OBJ)
+mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
 
 ir.h: mkir
@@ -38,11 +38,8 @@ ir.h: mkir
 scc6502: ir.h $(OBJ)
 	$(CC) -o scc6502 $(CFLAGS) $(OBJ)
 
-#scc8080: $(OBJ)
-#	$(CC) -o scc8080 $(CFLAGS) $(OBJ)
-
 clean:
-	rm -f $(OBJ) scc6502 scc8080 test.s *~ */*~ mkir mkir.o ir.h
+	rm -f $(OBJ) scc6502 ./test/test.s *~ */*~ mkir mkir.o ir.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

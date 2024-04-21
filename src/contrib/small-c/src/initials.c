@@ -14,7 +14,6 @@ add_symbol_initials (char *symbol_name,
 
 // Find symbol in table, count position
 // in data array.
-int
 find_symbol_initials (char *symbol_name)
 {
     int result = 0;
@@ -74,7 +73,6 @@ add_data_initials (char *symbol_name, int type, int value,
 
 // Get number of data items for given
 // symbol.
-int
 get_size (char *symbol_name)
 {
     int result = 0;
@@ -84,7 +82,6 @@ get_size (char *symbol_name)
 }
 
 // Get item at position.
-int
 get_item_at (char *symbol_name,
              int position,
              TAG_SYMBOL * tag)

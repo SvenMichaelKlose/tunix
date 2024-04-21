@@ -3,7 +3,6 @@
 #include "defs.h"
 #include "data.h"
 
-int
 find_tag (char *sname)
 {
     int index;
@@ -56,7 +55,6 @@ add_member (char *sname, char identity,
     member_table_index++;
 }
 
-int
 define_struct (char *sname, int storage,
                int is_struct)
 {

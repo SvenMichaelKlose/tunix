@@ -166,7 +166,6 @@ blanks ()
 
 // Returns one of declaration types
 // CCHAR, CINT, UCHAR or UINT.
-int
 get_type ()
 {
     if (amatch ("register", 8)) {

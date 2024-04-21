@@ -68,7 +68,6 @@ declare_global (int type, int storage,
 
 // Initialize global objects.
 // Returns 1 if variable is initialized.
-int
 initials (char *symbol_name, int type,
           int identity, int dim,
           int otag)
@@ -266,7 +265,6 @@ needsub ()
 }
 
 // Find global symbol.
-int
 find_global (char *sname)
 {
     int idx;
@@ -281,7 +279,6 @@ find_global (char *sname)
 }
 
 // Find local symbol.
-int
 find_local (char *sname)
 {
     int idx;
@@ -296,7 +293,6 @@ find_local (char *sname)
 }
 
 // Add global symbol.
-int
 add_global (char *sname, int identity,
             int type, int offset,
             int storage)
@@ -322,7 +318,6 @@ add_global (char *sname, int identity,
 }
 
 // Add new symbol to local table.
-int
 add_local (char *sname, int identity,
            int type, int offset,
            int storage_class)

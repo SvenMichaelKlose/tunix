@@ -660,28 +660,3 @@ inclib ()
 #endif
 #endif
 }
-
-int
-assemble (char *s)
-{
-#ifdef  ASNM
-    char buf[100];
-    strcpy (buf, ASNM);
-    strcat (buf, " ");
-    strcat (buf, s);
-    buf[strlen (buf) - 1] = 's';
-    return system (buf);
-#else
-    return 0;
-#endif
-}
-
-int
-link ()
-{
-#ifdef  LDNM
-    fputs ("I don't know how to link files yet\n", stderr);
-#else
-    return 0;
-#endif
-}

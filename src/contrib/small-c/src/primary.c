@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 primary (LVALUE * lval)
 {
@@ -18,7 +19,7 @@ primary (LVALUE * lval)
     }
     if (amatch ("sizeof", 6)) {
         needbrack ("(");
-        gen_load_1st ();
+        outb (IR_LDACI);
         if (amatch ("int", 3)
             || amatch ("unsigned int", 12)
             || amatch ("unsigned", 8)) {
@@ -100,9 +101,7 @@ primary (LVALUE * lval)
                         lval->ptr_type = symbol->type;
                     return FETCH | REGA;
                 }
-                gen_load_1st ();
-                outs (symbol->name);
-                newline ();
+                gen_ldaci (symbol->name);
                 lval->indirect = symbol->type;
                 lval->ptr_type = symbol->type;
                 return 0;
@@ -123,9 +122,7 @@ primary (LVALUE * lval)
         return 0;
     } else {
         error ("invalid expression");
-        gen_load_1st ();
-        outn (0);
-        newline ();
+        gen_ldaci (0);
         junk ();
         return 0;
     }
@@ -162,17 +159,15 @@ result (LVALUE * lval, LVALUE * lval2)
 constant (int val[])
 {
     if (number (val))
-        gen_load_1st ();
+        gen_ldaci (val[0]);
     else if (quoted_char (val))
-        gen_load_1st ();
+        gen_ldaci (val[0]);
     else if (quoted_string (val)) {
-        gen_load_1st ();
+        gen_ldaci (val[0]);
         gen_local (litlab);
         outb ('+');
     } else
         return 0;
-    outn (val[0]);
-    newline ();
     return 1;
 }
 

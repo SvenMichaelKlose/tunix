@@ -635,9 +635,7 @@ hier10 (LVALUE * lval)
             return REGA;
         }
         // Global and non-array.
-        gen_load_1st ();
-        outs ((ptr = lval->symbol)->name);
-        newline ();
+        gen_ldaci ((ptr = lval->symbol)->name);
         lval->indirect = ptr->type;
         return REGA;
     } else {
@@ -770,9 +768,7 @@ hier11 (LVALUE * lval)
     if (!ptr)
         return k;
     if (ptr->identity == FUNCTION) {
-        gen_load_1st ();
-        outs (ptr);
-        newline ();
+        gen_ldaci (ptr);
         return 0;
     }
     return k;

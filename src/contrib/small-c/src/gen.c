@@ -12,10 +12,10 @@ outb (char c)
     fputc (c, output);
 }
 
-outw (char c)
+outw (int v)
 {
-    fputc (c & 255, output);
-    fputc (c >> 8, output);
+    fputc (v & 255, output);
+    fputc (v >> 8, output);
 }
 
 outs (char ptr[])

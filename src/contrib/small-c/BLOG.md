@@ -3,6 +3,12 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-22 00:02 S.M. Klose
+
+Generating IR codes has been updated big time and 'ir2txt'
+generates first correct IR assembly that'll go through
+6502/ca65-macros.asm next.  And the first automated tests.
+
 # 2024-04-21 11:24 S.M. Klose
 
 New 'mkir' is generating the 'ir.h'

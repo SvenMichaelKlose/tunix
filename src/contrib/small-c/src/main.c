@@ -250,7 +250,6 @@ dumpglbs ()
                 list_size = 0;
                 line_count = 0;
                 if (find_symbol_initials (symbol->name)) {
-                    // has initials 
                     list_size = get_size (symbol->name);
                     if (dim == -1)
                         dim = list_size;
@@ -259,18 +258,14 @@ dumpglbs ()
                     if (symbol->type == STRUCT) {
                         dump_struct (symbol, i);
                     } else {
-                        if (!(line_count % 10)) {
-                            newline ();
-                            if (symbol->type & CINT
-                                || symbol->identity == POINTER) {
-                                gen_dataw ();
-                            } else
-                                gen_datab ();
-                        }
+                        if (symbol->type & CINT
+                            || symbol->identity == POINTER) {
+                            gen_dataw ();
+                        } else
+                            gen_datab ();
                         if (i < list_size) {
                             // dump data 
-                            value = get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]);
-                            outw (value);
+                            outw (get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]));
                         } else
                             // Dump zero, no more data available.
                             outw (0);
@@ -279,7 +274,6 @@ dumpglbs ()
                             line_count = 0;
                     }
                 }
-                newline ();
             }
         } else
             gen_decl_fun (symbol);

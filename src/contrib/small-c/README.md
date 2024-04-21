@@ -13,7 +13,7 @@ Currently the MOS 6502 target is under
 construction.  Therefore the other
 targets are disabled.
 
-* [Blog](BLOG-smk.md)
+* [Blog](BLOG.md)
 
 * [Licensing](LICENSE.md)
 * [Github repository](https://github.com/SvenMichaelKlose/).

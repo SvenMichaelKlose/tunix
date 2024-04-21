@@ -79,7 +79,17 @@ name:
     jsr _adda_
 .endmacro
 
-#define IR_ADDB 55
+; A -= B
+; Fast version
+.macro sub
+    lda regal
+    sec
+    sbc regbl
+    sta regal
+    lda regah
+    sec regbl
+    sta regah
+.endmacro
 
 .macro inca
     inc regal
@@ -146,7 +156,14 @@ name:
 :
 .endm
 
-#define IR_SIGNEXT 22
+.macro signext
+    ldy #0
+    lda regal
+    bpl :+
+    dey
+:   sta regah
+.endm
+
 #define IR_STA 23
 #define IR_STAL 24
 
@@ -246,13 +263,66 @@ name:
 .macro bool
 .endmacro
 
-#define IR_LNEG 48
-#define IR_NEG 49
+.macro asl
+    ldy regbl
+:   asl regal
+    ror regah
+    dey
+    bne :-
+.endm
+
+.macro lsr
+    ldy regbl
+:   lsr regah
+    ror regal
+    dey
+    bne :-
+.endm
+
+.macro asr
+    ldy regbl
+    ldx regah
+:   cpx #128
+    ror regah
+    ror regal
+    dey
+    bne :-
+.endm
+
+.macro compa
+    lda #$ff
+    eor regal
+    sta regal
+    lda #$ff
+    eor regah
+    sta regah
+.endmacro
+
+.macro compb
+    lda #$ff
+    eor regbl
+    sta regbl
+    lda #$ff
+    eor regbh
+    sta regbh
+.endmacro
+
+.macro lneg
+    ldy #1
+    lda regal
+    ora regah
+    beq :+
+    dey
+:   sty regal
+    sty regah
+.endmacro
+
+.macro neg
+    compa
+    inca
+.endmacro
+
 #define IR_ASLA 50
-#define IR_ASL 51
-#define IR_ASR 52
-#define IR_LSR 53
-#define IR_SUB 56
 #define IR_MUL 57
 #define IR_DIV 58
 
@@ -290,9 +360,6 @@ name:
     eor regbh
     sta regah
 .endmacro
-
-#define IR_COMPA 63
-#define IR_COMPB 64
 
 .macro eq
     ldx #0

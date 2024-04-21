@@ -4,7 +4,7 @@
 TARGDIR = /home/notebook/Public/work/smallCextended/lib
 INCDIR = "./include/"
 
-SCC= scc
+SCC = scc
 
 INSTFLAGS = -DINCDIR=$(INCDIR)
    CFLAGS = '$(INSTFLAGS)' -ggdb -g
@@ -14,8 +14,8 @@ SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c prepro
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all: scc
-	./scc test/test.c
+all: $(SCC)
+	./$(SCC) test/test.c
 
 mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
@@ -23,11 +23,11 @@ mkir:
 ir.h: mkir
 	./mkir > ir.h
 
-scc: ir.h $(OBJ)
-	$(CC) -o sc $(CFLAGS) $(OBJ)
+$(SCC): ir.h $(OBJ)
+	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) scc ./test/test.s *~ */*~ mkir mkir.o ir.h
+	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

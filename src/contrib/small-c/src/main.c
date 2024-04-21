@@ -173,13 +173,13 @@ compile (char *file)
 
 frontend_version ()
 {
-    outs ("; Front End (2.7,84/11/28)");
+    outs ("; Front End (3.2,24/04/21)");
 }
 
 usage ()
 {
     oputs
-        ("usage: sccXXXX [-tcsah] [-dSYM[=VALUE]] [-l[log]] files\n");
+        ("usage: scc [-tcsah] [-dSYM[=VALUE]] [-l[log]] files\n");
     oputs ("-t: output c source as asm comments\n");
     oputs
         ("-a: no argument count in A to function calls\n");

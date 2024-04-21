@@ -33,7 +33,7 @@ outfname (char *s)
 {
     while (*s)
         s++;
-    *--s = 's';
+    *--s = 'o';
 }
 
 // Terminate string at line feed.

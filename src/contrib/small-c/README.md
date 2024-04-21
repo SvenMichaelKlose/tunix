@@ -13,6 +13,8 @@ Currently the MOS 6502 target is under
 construction.  Therefore the other
 targets are disabled.
 
+* [Blog](BLOG-smk.md)
+
 * [Licensing](LICENSE.md)
 * [Github repository](https://github.com/SvenMichaelKlose/).
 * [Build & Use](BUILD.md)
@@ -27,4 +29,6 @@ targets are disabled.
 * [Language Reference](doc/language.md)
 * [Adding New Targets](doc/target.md)
 
-* [Blog](BLOG-smk.md)
+# External Resources
+
+* [Small-C v1.1](https://github.com/trcwm/smallc_v1) (original from Dr.Dobb's magazine

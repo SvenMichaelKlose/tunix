@@ -1,7 +1,15 @@
 Small C blog
 ============
 
-By Sven Michael Klose <pixel@hugbox.org>
+Informal narratives about the project by
+Sven Michael Klose <pixel@hugbox.org>
+
+# 2024-04-21 11:24
+
+New 'mkir' is generating the 'ir.h'
+file.  Goes well with the missing 'enum'
+of the Small-C dialect.  Four hours of
+sleep wasn't a big deal.
 
 # 2024-04-21 06:48
 

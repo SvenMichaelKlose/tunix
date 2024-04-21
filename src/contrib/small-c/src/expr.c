@@ -566,7 +566,7 @@ hier10 (LVALUE * lval)
         k = rvalue (lval, k);
         gen_ptrinc (lval);
         store (lval);
-        return HL_REG;
+        return REGA;
     } else if (match ("--")) {
         if (!((k = hier10 (lval)) & FETCH)) {
             needlval ();
@@ -577,25 +577,25 @@ hier10 (LVALUE * lval)
         k = rvalue (lval, k);
         gen_ptrdec (lval);
         store (lval);
-        return HL_REG;
+        return REGA;
     } else if (match ("-")) {
         k = hier10 (lval);
         if (k & FETCH)
             k = rvalue (lval, k);
         gen_neg ();
-        return HL_REG;
+        return REGA;
     } else if (match ("~")) {
         k = hier10 (lval);
         if (k & FETCH)
             k = rvalue (lval, k);
         gen_complement ();
-        return HL_REG;
+        return REGA;
     } else if (match ("!")) {
         k = hier10 (lval);
         if (k & FETCH)
             k = rvalue (lval, k);
         gen_not ();
-        return HL_REG;
+        return REGA;
     } else if (ch () == '*' && nch () != '=') {
         inbyte ();
         k = hier10 (lval);
@@ -630,16 +630,16 @@ hier10 (LVALUE * lval)
         ptr = lval->symbol;
         lval->ptr_type = ptr->type;
         if (lval->indirect) {
-            if (k & DE_REG)
+            if (k & REGB)
                 gen_swap ();
-            return HL_REG;
+            return REGA;
         }
         // Global and non-array.
         gen_load_1st ();
         outs ((ptr = lval->symbol)->name);
         newline ();
         lval->indirect = ptr->type;
-        return HL_REG;
+        return REGA;
     } else {
         k = hier11 (lval);
         if (match ("++")) {
@@ -653,7 +653,7 @@ hier10 (LVALUE * lval)
             gen_ptrinc (lval);
             store (lval);
             gen_ptrdec (lval);
-            return HL_REG;
+            return REGA;
         } else if (match ("--")) {
             if (!(k & FETCH)) {
                 needlval ();
@@ -665,7 +665,7 @@ hier10 (LVALUE * lval)
             gen_ptrdec (lval);
             store (lval);
             gen_ptrinc (lval);
-            return HL_REG;
+            return REGA;
         } else
             return k;
     }
@@ -709,7 +709,7 @@ hier11 (LVALUE * lval)
             //lval->symbol = 0; 
             lval->indirect = ptr->type;
             lval->ptr_type = 0;
-            k = FETCH | HL_REG;
+            k = FETCH | REGA;
         } else if (match ("(")) {
             if (!ptr) {
                 callfunction (0);
@@ -735,7 +735,7 @@ hier11 (LVALUE * lval)
             }
             if ((k & FETCH) && !direct)
                 k = rvalue (lval, k);
-            if (k == DE_REG)
+            if (k == REGB)
                 gen_swap ();
 
             // move pointer from struct begin to struct member 
@@ -762,7 +762,7 @@ hier11 (LVALUE * lval)
                 //lval->val_type = CINT; 
                 k = 0;
             } else {
-                k = FETCH | HL_REG;
+                k = FETCH | REGA;
             }
         } else
             return k;

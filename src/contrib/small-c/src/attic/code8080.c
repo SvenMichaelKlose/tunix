@@ -199,20 +199,20 @@ gen_get_local (SYMBOL * sym)
         gen_load_1st ();
         print_label (sym->offset);
         newline ();
-        return HL_REG;
+        return REGA;
     } else {
         if (uflag && !(sym->identity == ARRAY)) {       /* ||
                                                            (sym->identity == VARIABLE && sym->type == STRUCT))) { */
             outtabs ("ldsi\t");
             outn (sym->offset - stkp);
             newline ();
-            return DE_REG;
+            return REGB;
         } else {
             gen_load_1st ();
             outn (sym->offset - stkp);
             newline ();
             outl ("dad \tsp");
-            return HL_REG;
+            return REGA;
         }
     }
 }
@@ -265,12 +265,12 @@ void
 gen_get_indirect (char typeobj, int reg)
 {
     if (typeobj == CCHAR) {
-        if (reg & DE_REG) {
+        if (reg & REGB) {
             gen_swap ();
         }
         gen_call ("ccgchar");
     } else if (typeobj == UCHAR) {
-        if (reg & DE_REG) {
+        if (reg & REGB) {
             gen_swap ();
         }
         //gen_call("cguchar"); 
@@ -278,7 +278,7 @@ gen_get_indirect (char typeobj, int reg)
         outl ("mvi \th,0");
     } else {                    //int 
         if (uflag) {
-            if (reg & HL_REG) {
+            if (reg & REGA) {
                 gen_swap ();
             }
             outl ("lhlx");
@@ -310,7 +310,7 @@ gen_load_1st ()
  */
 gen_push (int reg)
 {
-    if (reg & DE_REG) {
+    if (reg & REGB) {
         outl ("push\td");
         stkp = stkp - INTSIZE;
     } else {
@@ -491,7 +491,7 @@ gen_mul2 ()
  */
 gen_div2 ()
 {
-    gen_push (HL_REG);          // push primary in prep for gasr 
+    gen_push (REGA);          // push primary in prep for gasr 
     gen_load_1st ();
     outn (1);
     newline ();

@@ -161,7 +161,7 @@ gen_get_local (SYMBOL * sym)
         newline ();
         gen_call ("add_sp");
     }
-    return HL_REG;
+    return REGA;
 }
 
 // Pointer increment
@@ -272,11 +272,11 @@ void
 gen_get_indirect (char typeobj, int reg)
 {
     if (typeobj == CCHAR) {
-        if (reg & DE_REG)
+        if (reg & REGB)
             gen_swap ();
         gen_call ("ccgchar");
     } else if (typeobj == UCHAR) {
-        if (reg & DE_REG)
+        if (reg & REGB)
             gen_swap ();
         gen_call ("cguchar");
     } else
@@ -289,7 +289,7 @@ gen_get_indirect (char typeobj, int reg)
 
 gen_push (int reg)
 {
-    if (reg & DE_REG) {
+    if (reg & REGB) {
         outl ("push de");
         stkp = stkp - INTSIZE;
     } else {
@@ -471,7 +471,7 @@ gen_div2 ()
 {
     // push primary in prep for
     // gen_asr ().
-    gen_push (HL_REG);
+    gen_push (REGA);
     gen_load_1st ();
     outn (1);
     newline ();

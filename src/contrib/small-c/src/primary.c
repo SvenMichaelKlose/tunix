@@ -98,7 +98,7 @@ primary (LVALUE * lval)
                 if (symbol->identity != ARRAY && (symbol->identity != VARIABLE || symbol->type != STRUCT)) {
                     if (symbol->identity == POINTER)
                         lval->ptr_type = symbol->type;
-                    return FETCH | HL_REG;
+                    return FETCH | REGA;
                 }
                 gen_load_1st ();
                 outs (symbol->name);
@@ -303,14 +303,14 @@ callfunction (char *ptr)
     nargs = 0;
     blanks ();
     if (!ptr)
-        gen_push (HL_REG);
+        gen_push (REGA);
     while (!streq (line + lptr, ")")) {
         if (endst ())
             break;
         expression (NO);
         if (!ptr)
             gen_swap_stack ();
-        gen_push (HL_REG);
+        gen_push (REGA);
         nargs = nargs + INTSIZE;
         if (!match (","))
             break;

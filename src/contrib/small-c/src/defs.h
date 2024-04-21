@@ -192,8 +192,8 @@ WHILE *readswitch ();
 #define STSWITCH    10
 
 #define FETCH  1
-#define HL_REG 1<<1
-#define DE_REG 1<<2
+#define REGA 1<<1
+#define REGB 1<<2
 
 struct lvalue {
     // Symbol table address, or

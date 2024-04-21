@@ -76,7 +76,7 @@ rvalue (LVALUE * lval, int reg)
         gen_get_memory (lval->symbol);
     else
         gen_get_indirect (lval->indirect, reg);
-    return HL_REG;
+    return REGA;
 }
 
 ////////////

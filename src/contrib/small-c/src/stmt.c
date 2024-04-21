@@ -268,7 +268,7 @@ doswitch ()
     gen_load_1st ();
     gen_local (ws.body_tab);
     newline ();
-    gen_push (HL_REG);
+    gen_push (REGA);
     needbrack ("(");
     expression (YES);
     needbrack (")");

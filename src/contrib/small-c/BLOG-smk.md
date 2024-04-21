@@ -1,10 +1,9 @@
 Small C blog
 ============
 
-Informal narratives about the project by
-Sven Michael Klose <pixel@hugbox.org>
+Informal narratives about the project.
 
-# 2024-04-21 11:24
+# 2024-04-21 11:24 S.M. Klose
 
 New 'mkir' is generating the 'ir.h'
 file.  Goes well with the missing 'enum'
@@ -14,7 +13,7 @@ sleep wasn't a big deal.
 Started writing ca65 assembly macros to
 gain more insight.
 
-# 2024-04-21 06:48
+# 2024-04-21 06:48 S.M. Klose
 
 The code generator is now producing
 untested IR.  The output file is one
@@ -31,7 +30,7 @@ two registers and the top of the stack
 for sure.  More documentation will come
 out of that first.
 
-# 2024-04-21 01:34
+# 2024-04-21 01:34 S.M. Klose
 
 The first jobs have been finished to
 make the source accessible better.

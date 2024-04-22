@@ -343,8 +343,7 @@ add_local (char *sname, int identity,
         gen_data_segment ();
         def_local (k = getlabel ());
         gen_bss ();
-        outn (offset);
-        newline ();
+        outn (offset);  // TODO: Number of BSS bytes?
         gen_code_segment ();
         offset = k;
     }

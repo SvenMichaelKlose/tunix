@@ -65,7 +65,6 @@ primary (LVALUE * lval)
         } else
             error ("sizeof only on type or variable");
         needbrack (")");
-        newline ();
         lval->symbol = 0;
         lval->indirect = 0;
         return 0;

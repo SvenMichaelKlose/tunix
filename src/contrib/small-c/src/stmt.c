@@ -267,7 +267,6 @@ doswitch ()
     addwhile (&ws);
     gen_ldaci ();   // TODO!!!
     gen_local (ws.body_tab);
-    newline ();
     gen_push (REGA);
     needbrack ("(");
     expression (YES);
@@ -363,7 +362,6 @@ dumpsw (WHILE * ws)
                 outb (',');
                 gen_local (swstlab[j++]);
                 if (!i || j >= swstp) {
-                    newline ();
                     break;
                 }
                 outb (',');
@@ -373,6 +371,5 @@ dumpsw (WHILE * ws)
     gen_dataw ();
     gen_local (ws->incr_def);
     outs (",0");
-    newline ();
     gen_code_segment ();
 }

@@ -3,6 +3,29 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-22 01:14 S.M. Klose
+
+The is now a Makefile in the root
+directory for convenience.  New make
+target 'test' will run what's in new
+directory 'src/test/'.
+
+The test programs aren't run yet and
+there are plenty of options for 6502
+emulators on the command line.  We're
+using cc65 already, so why not sim65?
+(It'll have to be replaced on 8-bit
+platforms, due to its size.)
+
+Unless running 'make clean' you can
+also see the intermediate files that
+are generated before the final binaries
+drop out of the linker.
+
+So, the project can go on in small and
+comfortable increments as long as the
+tests pass.
+
 # 2024-04-22 22:52 S.M. Klose
 
 I've gathered some more version.  Please

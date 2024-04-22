@@ -21,10 +21,12 @@ initmac ()
 // code is generated.
 header ()
 {
+    outb (IR_FILEHEAD);
 }
 
 trailer ()
 {
+    outb (IR_FILETAIL);
 }
 
 //////////////
@@ -143,12 +145,12 @@ gen_global (char *n)
     out1s (IR_GLOBAL, n);
 }
 
-_gen_storage_decl (int do_import,
+_gen_storage_decl (int do_export,
                    char *s)
 {
-    out1s (do_import ?
-            IR_IMPORT :
-            IR_EXPORT,
+    out1s (do_export ?
+            IR_EXPORT :
+            IR_IMPORT,
            s);
 }
 

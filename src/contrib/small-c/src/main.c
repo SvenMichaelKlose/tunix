@@ -1,3 +1,5 @@
+// TODO: Output file name option '-o'.
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

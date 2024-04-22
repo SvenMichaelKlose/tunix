@@ -14,25 +14,26 @@ SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c prepro
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all: $(SCC)
-	./$(SCC) test/test.c
-	hexdump -Cv test/test.o
-	./ir2txt < test/test.o
+all: $(SCC) test/.passed
+
+test/.passed:
+	$(MAKE) -C test all
+
+clean:
+	rm -f $(OBJ) $(SCC) mkir mkir.o ir2txt ir2txt.o ir-codes.h
+	$(MAKE) -C test clean
 
 ir2txt:
 	$(CC) -o ir2txt $(CFLAGS) ir2txt.c
 
-mkir:
-	$(CC) -o mkir $(CFLAGS) mkir.c
-
 ir.h: mkir
 	./mkir > ir-codes.h
 
+mkir:
+	$(CC) -o mkir $(CFLAGS) mkir.c
+
 $(SCC): ir.h ir2txt $(OBJ)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
-
-clean:
-	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir2txt ir2txt.o ir-codes.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -13,6 +13,12 @@ regbh:  .res 1
 tmp1:   .res 2
 tmp2:   .res 2
 
+.macro vfilehead
+.endmacro
+
+.macro vfiletail
+.endmacro
+
 .macro vseg_code
     .code
 .endmacro

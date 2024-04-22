@@ -4,6 +4,8 @@ struct ircode {
 };
 
 struct ircode codes[] = {
+  {"FILEHEAD",  0},
+  {"FILETAIL",  0},
   {"SEG_CODE",  0},
   {"SEG_DATA",  0},
   {"DATAB",     'b'},

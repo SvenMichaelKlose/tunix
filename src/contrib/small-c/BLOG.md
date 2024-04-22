@@ -3,6 +3,44 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-22 22:52 S.M. Klose
+
+I've gathered some more version.  Please
+let me know if you know more and where
+to get them.  They might turn out to be
+a rich source for improvements and new
+ideas.
+
+smallc-v3.0r1.1-6809,68000,8080,vax is
+the one I started out with.  Good idea
+as it's multi-platform and I want it to
+stay that way.  Might one day reuse the
+targets.
+
+smallc-plus-v1.06a-TMS9900-99000 &
+smallc-plus-v1.0-z80-cpm know doubles
+and floats.  Oh yeah!  Not the most
+urging issue though. Target reuse might
+happen here as well.
+
+To "just"
+port smallc-bbc-v0.73-6502-selfhosting
+wouldn't work for the VIC (the ROM was
+also used on the BBC) and as I said I
+want the compiler to be as flexible as
+possible. You never know... the
+apocalypse is nearing... when you're
+desperate for compiling VAX code with
+only your VIC left. ;)
+
+smallc-byte-v1.0-8086-dos,
+smallc-v1.0-8086-cpm &
+smallc-v1.2-8086-dos-to-cpm also have
+targets for reuse.
+
+As a side thought: will use parametrized
+macros anyhow as we're cross-compiling.
+
 # 2024-04-22 14:23 S.M. Klose
 
 Oh dude.  Small-C has quite some

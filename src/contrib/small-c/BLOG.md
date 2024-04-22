@@ -3,6 +3,59 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-22 14:23 S.M. Klose
+
+Oh dude.  Small-C has quite some
+heritage tree.  Makes it hard to apply
+a version numbers.
+
+Groepaz (think VICE emulator) pointed me
+to the self-hosting BBC version of
+Small-C.  It has very, very useful
+additions that are dearly missing in our
+version:
+
+* Separate preprocessor: that's what any
+  8-bit version of Small-C requires, due
+  to memory constraints.
+* Parametrized macros: Macros with
+  arguments.  The classic tool to
+  improve readability without
+  sacrificing performance (as they come
+  with "inlining" by definition).
+* Hash tables for symbol storage:
+  A classic.  And one of those things
+  that shouldn't be there more than once
+  but it is.  The VIC version will use
+  "database" files.  I was thinking more
+  of b-tree indexes as they are more
+  all-purpose.  Won't work with a drive
+  that DOS not support random read/write
+  access, no matter what kind of index
+  is used.
+* Forward declarations and typed return
+  values: That's huge.
+
+Doabouts:
+
+* Using the BBC preprocessor instead
+  *should* be no problem.  The new
+  macro capabilities will lead to
+  another grand clean-up, changing the
+  face of the project.
+* Database files: I'll go for b-trees
+  just in case the VIC needs a database.
+  Wanted a lib for that a couple of
+  times already.
+* Type-checking: Yo. Nerd to see what
+  things look like when cleaned up with
+  macros.
+
+I'll put all versions of Small-C I have
+laying around into a single repository
+for preservation.  But as usual: no pro
+work without research.
+
 # 2024-04-22 00:02 S.M. Klose
 
 Generating IR codes has been updated big time and 'ir2txt'

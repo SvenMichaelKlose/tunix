@@ -1,5 +1,18 @@
 ; UNDER ACTIVE CONSTRUCTION!
 
+    .zeropage
+
+; IR machine registers
+rega:
+regal:  .res 1
+regah:  .res 1
+regb:
+regbl:  .res 1
+regbh:  .res 1
+
+tmp1:   .res 2
+tmp2:   .res 2
+
 .macro seg_code
     .code
 .endmacro
@@ -40,15 +53,50 @@ name:
 .endmacro
 
 .macro swap
-    pusha
-    pushb
-    popa
-    popb
+    mvb tmp1, rega
+    mvb tmp2, regb
+    mvb rega, tmp2
+    mvb regb, tmp1
 .endmacro
 
-#define IR_LDAL 13
-#define IR_LDA 14
-#define IR_LDB 15
+.macro ldaci v
+    stwi rega, v
+.endmacro
+
+.macro ldbci v
+    stwi regb, v
+.endmacro
+
+.macro ldbamc
+    ldy #0
+    lda (regb),y
+    sta regal
+.endmacro
+
+.macro ldbamuc
+    ldx #0
+    ldy #0
+    lda (regb),y
+    sta regal
+    bpl :+
+    dex
+:   stx regah
+.endmacro
+
+.macro ldbami
+    ldamc
+    iny
+    lda (regb),y
+    sta regah
+.endmacro
+
+.macro stac p
+    mvb p, regal
+.endmacrp
+
+.macro stai p
+    mvw p, rega
+.endmacrp
 
 ; A += sp
 .macro addsp
@@ -57,13 +105,13 @@ name:
     clc
     adc regal
     sta regal
-    bcc :+
-    inc regah
+    lda #1
+    adc regah
+    sta regah
 :
 .endmacro
 
 ; A += B
-; Fast version
 .macro adda
     lda regal
     clc
@@ -74,13 +122,7 @@ name:
     sta regah
 .endmacro
 
-; Slow version
-.macro adda
-    jsr _adda_
-.endmacro
-
 ; A -= B
-; Fast version
 .macro sub
     lda regal
     sec
@@ -164,9 +206,6 @@ name:
 :   sta regah
 .endm
 
-#define IR_STA 23
-#define IR_STAL 24
-
 .macro pusha
     lda regal
     pha
@@ -195,7 +234,21 @@ name:
     sta regbl
 .endmacro
 
-#define IR_SWAPSTACK 34
+; Swap primary with top of stack.
+.macro swapstack
+    pla
+    sta tmp1
+    pla
+    sta tmp1+1
+    lda regal
+    pha
+    lda regah
+    pha
+    lda tmp1
+    sta regal
+    lda tmp1+1
+    sta regah
+.endmacro
 
 .macro incs1
     tsx
@@ -308,11 +361,11 @@ name:
 .endmacro
 
 .macro lneg
-    ldy #1
+    ldy #$ff
     lda regal
     ora regah
     beq :+
-    dey
+    iny
 :   sty regal
     sty regah
 .endmacro
@@ -322,7 +375,6 @@ name:
     inca
 .endmacro
 
-#define IR_ASLA 50
 #define IR_MUL 57
 #define IR_DIV 58
 

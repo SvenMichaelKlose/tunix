@@ -50,12 +50,12 @@ endst ()
 
 needbrack (char *str)
 {
-    if (!match (str)) {
-        error ("missing bracket");
-        gen_comment ();
-        outs (str);
-        newline ();
-    }
+    if (match (str))
+        return;
+    error ("missing bracket");
+    gen_comment ();
+    outs (str);
+    newline ();
 }
 
 sstreq (char *str1)
@@ -85,7 +85,8 @@ streq (char str1[], char str2[])
 }
 
 // Compare zero-terminated string
-astreq (char str1[], char str2[], int len)
+astreq (char str1[], char str2[],
+        int len)
 {
     int k;
     k = 0;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 // Declare a static variable.
 // mtag: Tag of struct whose members are

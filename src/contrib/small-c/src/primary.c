@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir-codes.h"
 #include "ir.h"
 
 primary (LVALUE * lval)

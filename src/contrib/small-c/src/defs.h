@@ -62,17 +62,22 @@
 
 struct symbol {
     char name[NAMESIZE];
+
     // variable, array, pointer,
     // function 
     int identity;
+
     // char, int, uchar, unit 
     int type;
+
     // public, auto, extern, static
     // lstatic, defauto 
     int storage;
     int offset;
+
     // index of struct in tag table 
     int tagidx;
+
     // The size, in bytes, of a member
     // of a struct - only used for
     // member declarations.
@@ -108,9 +113,9 @@ struct tag_symbol {
 };
 #define TAG_SYMBOL struct tag_symbol
 
-/////////////////////////
-/// LOOP CONTROL FLOW ///
-/////////////////////////
+///////////////////
+/// BLOCK STACK ///
+///////////////////
 
 // "do"/"for"/"while"/"switch"
 // statement stack 
@@ -119,16 +124,22 @@ struct tag_symbol {
 struct while_rec {
     // symbol table address 
     int symbol_idx;
+
     // stack pointer 
     int stack_pointer;
+
     // type 
     int type;
+
     // case or test 
     int case_test;
+
     // continue label ? 
     int incr_def;
+
     // body of loop, switch ? 
     int body_tab;
+
     // exit label 
     int while_exit;
 };
@@ -143,13 +154,17 @@ struct while_rec {
 // "switch" label stack 
 #define SWSTSZ  100
 
-////////////////////
-/// PREPROCESSOR ///
-////////////////////
+////////////////
+/// LITERALS ///
+////////////////
 
 // literal pool 
 #define LITABSZ 5000
 #define LITMAX  LITABSZ-1
+
+////////////////////
+/// PREPROCESSOR ///
+////////////////////
 
 // input line 
 #define LINESIZE        150
@@ -173,6 +188,7 @@ extern char *inclib ();
 WHILE *readwhile ();
 WHILE *findwhile ();
 WHILE *readswitch ();
+
 #endif
 
 //////////////////
@@ -195,17 +211,26 @@ WHILE *readswitch ();
 #define REGA 1<<1
 #define REGB 1<<2
 
+///////////////
+/// LVALUES ///
+///////////////
+//
+// L-values** are expressions that refer
+// to a memory location and can appear
+// on the left-hand side of an
+// assignment statement.
+
 struct lvalue {
-    // Symbol table address, or
     // 0 for constant.
     SYMBOL *symbol;
-    // Type of indirect object,
+
     // 0 for static object.
     int indirect;
+
     // Type of pointer or array,
-    // 0 for other idents.
+    // 0 for static and others.
     int ptr_type;
-    // Tag symbol address,
+
     // 0 if not struct.
     TAG_SYMBOL *tagsym;
 };
@@ -238,9 +263,9 @@ void gen_put_memory (SYMBOL * sym);
 
 #endif
 
-////////////////////
-/// GLOBAL SCOPE ///
-////////////////////
+///////////////////////
+/// INITIALIZATIONS ///
+///////////////////////
 
 // Initialisation of global variables.
 #define INIT_TYPE       NAMESIZE

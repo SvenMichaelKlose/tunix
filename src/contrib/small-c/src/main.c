@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "defs.h"
 #include "data.h"
-#include "ir.h"
+#include "ir-codes.h"
 
 FILE *logFile = NULL;
 

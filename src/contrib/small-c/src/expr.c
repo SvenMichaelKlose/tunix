@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "ir.h"
 
 // Unsigned operand?
 nosign (LVALUE * is)

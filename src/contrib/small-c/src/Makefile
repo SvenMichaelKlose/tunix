@@ -16,6 +16,7 @@ OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 all: $(SCC)
 	./$(SCC) test/test.c
+	hexdump -Cv test/test.o
 	./ir2txt < test/test.o
 
 ir2txt:
@@ -25,13 +26,13 @@ mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
 
 ir.h: mkir
-	./mkir > ir.h
+	./mkir > ir-codes.h
 
 $(SCC): ir.h ir2txt $(OBJ)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
 
 clean:
-	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir2txt ir2txt.o ir.h
+	rm -f $(OBJ) $(SCC) ./test/test.s *~ */*~ mkir mkir.o ir2txt ir2txt.o ir-codes.h
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

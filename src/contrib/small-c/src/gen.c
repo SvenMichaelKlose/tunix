@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
-#include "ir.h"
+#include "ir-codes.h"
 
 //////////////
 /// OUTPUT ///

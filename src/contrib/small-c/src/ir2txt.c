@@ -35,6 +35,7 @@ main (int argc, char *argv[])
             puts ("ill\n");
             continue;
         }
+        putchar ('v');
         put_name (c);
         if (p = codes[c].param)
             putchar (' ');

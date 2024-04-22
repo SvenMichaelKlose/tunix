@@ -13,67 +13,64 @@ regbh:  .res 1
 tmp1:   .res 2
 tmp2:   .res 2
 
-.macro seg_code
+.macro vseg_code
     .code
 .endmacro
 
-.macro seg_data
+.macro vseg_data
     .data
 .endmacro
 
-.macro datab x
-    .byte x
+.macro vdatab v
+    .byte v
 .endmacro
 
-.macro dataw x
-    .word x
+.macro vdataw v
+    .word v
 .endmacro
 
-.macro bssb
+.macro vbssb
     .res 1
 .endmacro
 
-.macro defglobal name
+.macro vdefglobal name
 name:
 .endmacro
 
-.macro deflocal n
+.macro vdeflocal n
 @n:
 .endmacro
 
-#define IR_LOCAL 8
-#define IR_GLOBAL 9
-
-.macro import name
+.macro vimport name
 .import name
 .endmacro
 
-.macro export name
+.macro vexport name
 .export name
 .endmacro
 
-.macro swap
+.macro vswap
     mvb tmp1, rega
     mvb tmp2, regb
     mvb rega, tmp2
     mvb regb, tmp1
 .endmacro
 
-.macro ldaci v
+.macro vldaci v
     stwi rega, v
 .endmacro
 
-.macro ldbci v
+.macro vldbci v
     stwi regb, v
 .endmacro
 
-.macro ldbamc
+.macro vldbamc
     ldy #0
     lda (regb),y
     sta regal
 .endmacro
 
-.macro ldbamuc
+.macro vldbamuc
     ldx #0
     ldy #0
     lda (regb),y
@@ -83,23 +80,23 @@ name:
 :   stx regah
 .endmacro
 
-.macro ldbami
+.macro vldbami
     ldamc
     iny
     lda (regb),y
     sta regah
 .endmacro
 
-.macro stac p
+.macro vstac p
     mvb p, regal
-.endmacrp
+.endmacro
 
-.macro stai p
+.macro vstai p
     mvw p, rega
-.endmacrp
+.endmacro
 
 ; A += sp
-.macro addsp
+.macro vaddsp
     tsx
     txa
     clc
@@ -112,7 +109,7 @@ name:
 .endmacro
 
 ; A += B
-.macro adda
+.macro vadda
     lda regal
     clc
     adc regbl
@@ -123,7 +120,7 @@ name:
 .endmacro
 
 ; A -= B
-.macro sub
+.macro vsub
     lda regal
     sec
     sbc regbl
@@ -133,101 +130,101 @@ name:
     sta regah
 .endmacro
 
-.macro inca
+.macro vinca
     inc regal
     bne :+
     inc regah
 :
-.endm
+.endmacro
 
-.macro getchar
+.macro vgetchar
     ldy #0
     sta regah
     lda (regb),y
     lda regal
-.endm
+.endmacro
 
-.macro getuchar
+.macro vgetuchar
     ldy #0
     lda (regb),y
     sta regal
     bpl :+
     iny
 :   sty regah
-.endm
+.endmacro
 
-.macro getint
+.macro vgetint
     ldy #0
     lda (regb),y
     sta regal
     iny
     lda (regb),y
     sta regah
-.endm
+.endmacro
 
-.macro putchar
+.macro vputchar
     ldy #0
     lda regal
     sta (regb),y
-.endm
+.endmacro
 
-.macro putint
+.macro vputint
     ldy #0
     lda regal
     sta (regb),y
     iny
     lda regah
     sta (regb),y
-.endm
+.endmacro
 
-.macro deca
+.macro vdeca
     dec regal
     lda regal
     cmp #255
     bne :+
     dec regah
 :
-.endm
+.endmacro
 
-.macro decb
+.macro vdecb
     dec regbl
     lda regbl
     cmp #255
     bne :+
     dec regbh
 :
-.endm
+.endmacro
 
-.macro signext
+.macro vsignext
     ldy #0
     lda regal
     bpl :+
     dey
 :   sta regah
-.endm
+.endmacro
 
-.macro pusha
+.macro vpusha
     lda regal
     pha
     lda regah
     pha
 .endmacro
 
-.macro pushb
+.macro vpushb
     lda regbl
     pha
     lda regbh
     pha
 .endmacro
 
-.macro popa
+.macro vpopa
     pla
     sta regah
     pla
     sta regal
 .endmacro
 
-.macro popb
+.macro vpopb
     pla
     sta regbh
     pla
@@ -235,7 +232,7 @@ name:
 .endmacro
 
 ; Swap primary with top of stack.
-.macro swapstack
+.macro vswapstack
     pla
     sta tmp1
     pla
@@ -250,89 +247,95 @@ name:
     sta regah
 .endmacro
 
-.macro incs1
+.macro vincs1
     tsx
     inx
     txs
 .endmacro
 
-.macro incs2
+.macro vincs2
     tsx
     inx
     inx
     txs
 .endmacro
 
-.macro decs1
+.macro vdecs1
     tsx
     dex
     txs
 .endmacro
 
-.macro decs2
+.macro vdecs2
     tsx
     dex
     dex
     txs
 .endmacro
 
-#define IR_SPHL 39
+.macro vsphl ; TODO
+.endmacro
 
-.macro call global
+.macro vcall global
     jsr global
 .endmacro
 
-.macro callptr
+.macro vcallptr
     jsr __callptr   ; jmp (rega)
 .endmacro
 
-.macro ret
+.macro vret
     rts
 .endmacro
 
-.macro jmp local
-    jmp @local
+.macro vjump local
+    jump @local
 .endmacro
 
-.macro jmpnz local
+.macro vjumpnz local
     lda regal
     ora regah
     beq :+
-    jmp @local
+    jump @local
 :
 .endmacro
 
-.macro jmpz local
+.macro vjumpz local
     lda regal
     ora regah
     bne :+
-    jmp @local
+    jump @local
 :
 .endmacro
 
-#define IR_JMPCASE 46
-
-; A boolean is a boolean is a boolean.
-.macro bool
+.macro vjumpcase ; TODO
 .endmacro
 
-.macro asl
+; A boolean is a boolean is a boolean.
+.macro vbool
+    ; Do it any way.
+    lda regal
+    ora regal
+    sta regal
+.endmacro
+
+.macro vasl
     ldy regbl
 :   asl regal
     ror regah
     dey
     bne :-
-.endm
+.endmacro
 
-.macro lsr
+.macro vlsr
     ldy regbl
 :   lsr regah
     ror regal
     dey
     bne :-
-.endm
+.endmacro
 
-.macro asr
+.macro vasr
     ldy regbl
     ldx regah
 :   cpx #128
@@ -340,9 +343,9 @@ name:
     ror regal
     dey
     bne :-
-.endm
+.endmacro
 
-.macro compa
+.macro vcompa
     lda #$ff
     eor regal
     sta regal
@@ -351,7 +354,7 @@ name:
     sta regah
 .endmacro
 
-.macro compb
+.macro vcompb
     lda #$ff
     eor regbl
     sta regbl
@@ -360,7 +363,7 @@ name:
     sta regbh
 .endmacro
 
-.macro lneg
+.macro vlneg
     ldy #$ff
     lda regal
     ora regah
@@ -370,23 +373,25 @@ name:
     sty regah
 .endmacro
 
-.macro neg
+.macro vneg
     compa
     inca
 .endmacro
 
-#define IR_MUL 57
-#define IR_DIV 58
+.macro mul  ; TODO
+.endmacro
+.macro div  ; TODO
+.endmacro
 
-.macro umul
+.macro vumul
     jsr _umul_
 .endmacro
 
-.macro udiv
+.macro vudiv
     jsr _udiv_
 .endmacro
 
-.macro and
+.macro vand
     lda regal
     and regbl
     sta regal
@@ -395,7 +400,7 @@ name:
     sta regah
 .endmacro
 
-.macro or
+.macro vor
     lda regal
     ora regbl
     sta regal
@@ -404,7 +409,7 @@ name:
     sta regah
 .endmacro
 
-.macro xor
+.macro vxor
     lda regal
     eor regbl
     sta regal
@@ -413,7 +418,7 @@ name:
     sta regah
 .endmacro
 
-.macro eq
+.macro veq
     ldx #0
     lda regal
     stx regal
@@ -426,7 +431,7 @@ name:
 :   stx regal
 .endmacro
 
-.macro neq
+.macro vneq
     ldx #0
     lda regal
     stx regal
@@ -440,7 +445,7 @@ name:
 :   stx regal
 .endmacro
 
-.macro lt
+.macro vlt
     ldx #0
     lda regah
     stx regah
@@ -454,7 +459,7 @@ name:
 :   stx regal
 .endmacro
 
-.macro lte
+.macro vlte
     ldx #0
     lda regah
     stx regah
@@ -469,12 +474,18 @@ name:
 :   stx regal
 .endmacro
 
-#define IR_GT 69
-#define IR_GTE 70
-#define IR_ULT 71
-#define IR_ULTE 72
-#define IR_UGT 73
-#define IR_UGTE 74
+.macro vgt  ; TODO
+.endmacro
+.macro vgte  ; TODO
+.endmacro
+.macro vult  ; TODO
+.endmacro
+.macro vulte  ; TODO
+.endmacro
+.macro vugt  ; TODO
+.endmacro
+.macro vugte  ; TODO
+.endmacro
 
-.macro srcline str
+.macro vsrcline str
 .endmacro

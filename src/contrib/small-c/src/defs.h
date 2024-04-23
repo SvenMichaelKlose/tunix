@@ -81,6 +81,7 @@ struct symbol {
     // The size, in bytes, of a member
     // of a struct - only used for
     // member declarations.
+    // TODO: Clear up real usage.
     int struct_size;
 };
 #define SYMBOL struct symbol
@@ -88,9 +89,9 @@ struct symbol {
 #define NUMBER_OF_GLOBALS   100
 #define NUMBER_OF_LOCALS    20
 
-///////////////////
-/// STRUCT TAGS ///
-///////////////////
+////////////
+/// TAGS ///
+////////////
 
 #ifdef SMALL_C
 #define NULL_TAG 0
@@ -98,18 +99,19 @@ struct symbol {
 #define NULL_TAG (TAG_SYMBOL *)0
 #endif
 
-// Maximum number of members per struct.
+// Maximum number of members in all structs combined.
 #define NUMMEMB     30
 
-// Define the structure tag table
-// parameters.
+// Maximum number of tags.
+// TODO: Seems a little low.
 #define NUMTAG      10
 
+// For unions and structs.
 struct tag_symbol {
-    char name[NAMESIZE]; // Struct name.
-    int size;       // Bytes.
-    int member; // First member.
+    char name[NAMESIZE];
+    int size;
     int num_members;
+    int member; // First member.
 };
 #define TAG_SYMBOL struct tag_symbol
 
@@ -121,23 +123,19 @@ struct tag_symbol {
 // statement stack 
 #define WSTABSZ 20
 
-struct while_rec {
-    // symbol table address 
+// Actually for all loops.
+struct while_rec { // TODO: Rename.
     int symbol_idx;
-
-    // stack pointer 
     int stack_pointer;
-
-    // type 
     int type;
-
-    // case or test 
     int case_test;
 
     // continue label ? 
+    // TODO: What's this?
     int incr_def;
 
     // body of loop, switch ? 
+    // TODO: What's this?
     int body_tab;
 
     // exit label 
@@ -237,33 +235,6 @@ struct lvalue {
 #define LVALUE struct lvalue
 
 ///////////////////////
-/// CODE GENERATION ///
-///////////////////////
-
-#ifndef SMALLC
-
-// Output the variable symbol at scptr
-// as an extrn or a public.
-void gen_decl_var (SYMBOL * scptr);
-
-// Output function symbol at scptr as
-// an extrn or a public.
-void gen_decl_fun (SYMBOL * scptr);
-
-// Load static memory cell into the
-// primary register.
-void gen_get_memory (SYMBOL * sym);
-
-// Load object type indirect through the
-// primary into the primary register.
-void gen_get_indirect (char typeobj, int reg);
-
-// Write primary to static memory cell.
-void gen_put_memory (SYMBOL * sym);
-
-#endif
-
-///////////////////////
 /// INITIALIZATIONS ///
 ///////////////////////
 
@@ -278,6 +249,7 @@ struct initials_table {
     // length of data (array).
     int dim;
     // index of tag or zero.
+    // TOOD: Comment doesn't match name.
     int data_len;
 };
 

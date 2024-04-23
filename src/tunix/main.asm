@@ -1731,8 +1731,7 @@ r:  rts
     ;; Remove banks of parent from
     ;; child's lbank list.
     .macro unref_lbank procblk
-        lda procblk,x
-        jsr free_lbank_a
+        jsra free_lbank_a, {procblk,x}
     .endmacro
     unref_lbank proc_data
     unref_lbank proc_ram123
@@ -1935,8 +1934,7 @@ check_if_zombie:
     beq end_wait
     phx
     phy
-    ldx pid
-    jsr suspend
+    jsrx suspend, pid
     jsr schedule
     ply
     plx
@@ -1977,8 +1975,7 @@ reap_zombie:
 .export exit
 .proc exit
     mvb multitasking, #1
-    ldx pid
-    jsr zombify
+    jsrx zombify, pid
 .endproc
 
 ; Resume waiting process
@@ -2076,8 +2073,7 @@ prt:tya
 
     phx
     jsr print_comma
-    lda exit_codes,x
-    jsr print_decbyte
+    jsra print_decbyte, {exit_codes,x}
     plx
 
     jsr print_cr
@@ -2170,20 +2166,13 @@ items_proc_info:
     jsr print_cr
 
     jsr print_head
-    lda proc_data,x
-    jsr print_chb
-    lda proc_io23,x
-    jsr print_chb
-    lda proc_ram123,x
-    jsr print_chb
-    lda proc_blk1,x
-    jsr print_chb
-    lda proc_blk2,x
-    jsr print_chb
-    lda proc_blk3,x
-    jsr print_chb
-    lda proc_blk5,x
-    jsr print_chb
+    jsra print_chb, {proc_data,x}
+    jsra print_chb, {proc_io23,x}
+    jsra print_chb, {proc_ram123,x}
+    jsra print_chb, {proc_blk1,x}
+    jsra print_chb, {proc_blk2,x}
+    jsra print_chb, {proc_blk3,x}
+    jsra print_chb, {proc_blk5,x}
     jsr print_cr
 
     jsr print_head
@@ -2495,8 +2484,7 @@ msg_shutdown:
 
 .export proc0
 .proc proc0
-    ldx #0
-    jsr suspend
+    jsrx suspend, #0
     jsr schedule
     lda running
     bne proc0
@@ -2775,8 +2763,7 @@ syscall0 tunix_proc_list, proc_list
     lda #255
     cpy #3
     bne :+
-    lda filename+2
-:   jsr kill
+:   jsra kill, filename+2
     bcs :+
     jmp respond_ok
 :   jmp respond_error
@@ -2884,8 +2871,7 @@ read_byte:
     inc banks_ok
     ldx bnk
     lpush_x banks, free_bank
-    lda #'.'
-    jsr printbnk
+    jsra printbnk, #'.'
 
 next_bank:
     inc bnk
@@ -2901,8 +2887,7 @@ next_bank:
 
 uerror:
     inc banks_faulty
-    lda #'!'
-    jsr printbnk
+    jsra printbnk, #'!'
     jmp next_bank
 .endproc
 
@@ -2927,8 +2912,7 @@ print_free_ram_a:
     lda col
     cmp #16
     bne r
-    lda #13
-    jsr BSOUT
+    jsra BSOUT, #13
     mvb col, #0
 r:  rts
 .endproc
@@ -3048,8 +3032,7 @@ clr_lbanksb:
 
     ;; Fork process 0.
     inc pid
-    ldy #0
-    jsr machdep_fork
+    jsry machdep_fork, #0
     dec pid
 
     ; Move old BLK1 with new procdata
@@ -3059,14 +3042,12 @@ clr_lbanksb:
     mvb blk3, blk1
     mvb blk5, proc_blk1
     push blk2
-    lda speedcopy_blk3_to_blk5
-    jsr next_speedcopy
+    jsra next_speedcopy, speedcopy_blk3_to_blk5
     pop blk2
     mvb blk3, blk2
     mvb blk5, proc_blk2
     push blk2
-    lda speedcopy_blk3_to_blk5
-    jsr next_speedcopy
+    jsra next_speedcopy, speedcopy_blk3_to_blk5
     pop blk2
     pop blk5
     pop blk3

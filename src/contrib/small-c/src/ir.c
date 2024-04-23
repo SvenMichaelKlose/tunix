@@ -105,12 +105,12 @@ _popb () { outb (IR_POPB); }
 
 gen_code_segment ()
 {
-    outb (IR_SEG_CODE);
+    outb (IR_SEGCODE);
 }
 
 gen_data_segment ()
 {
-    outb (IR_SEG_DATA);
+    outb (IR_SEGDATA);
 }
 
 ////////////

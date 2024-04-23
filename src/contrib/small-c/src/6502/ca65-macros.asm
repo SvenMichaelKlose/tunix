@@ -19,11 +19,11 @@ tmp2:   .res 2
 .macro vfiletail
 .endmacro
 
-.macro vseg_code
+.macro vsegcode
     .code
 .endmacro
 
-.macro vseg_data
+.macro vsegdata
     .data
 .endmacro
 

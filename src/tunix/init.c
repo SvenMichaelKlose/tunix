@@ -37,6 +37,8 @@ test_alloc0 (char round)
         printf ("$%02x ", bank);
     }
     printf ("\n%d banks allocated.", i);
+    printf ("\nIntermediate process list:\n");
+    tunix_proc_list ();
 
     printf ("\n### Freeing.\n");
     for (mi = i, i = 0; i < mi; i++) {
@@ -155,6 +157,8 @@ test_forks (char maxprocs)
     char nprocs;
 
     printf ("# Forks\n");
+    printf ("Initial process list:\n");
+    tunix_proc_list ();
 
     for (nprocs = 0;
          nprocs < maxprocs;
@@ -165,7 +169,9 @@ test_forks (char maxprocs)
 void
 main (void)
 {
-    printf ("Doing userland test!\n");
+    printf ("Doing userland tests\n");
+    printf ("Initial process list:\n");
+    tunix_proc_list ();
 
     test_alloc ();
     test_forks (4);

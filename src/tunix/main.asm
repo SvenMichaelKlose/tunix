@@ -507,14 +507,14 @@ pending_signal:         .res 1
     bne to
 .endmacro
 
-.macro jsra to, val
-    lda val
-    jsr to
-.endmacro
-
 .macro jmpa to, val
     lda val
     jmp to
+.endmacro
+
+.macro jsra to, val
+    lda val
+    jsr to
 .endmacro
 
 .macro jsrx to, val
@@ -636,10 +636,9 @@ pending_signal:         .res 1
     bne :+
     mvb first, {fw,x}
     jmp :++
-:   ; Link previous
-    lda bw,x
+    ; Link previous
+:   ldy bw,x
     beq :+
-    tay
     mvb {fw,y}, {fw,x}
     ; Link next
 :   ldy fw,x
@@ -658,10 +657,9 @@ pending_signal:         .res 1
     bne :+
     mvb first, {fw,y}
     jmp :++
-:   ; Link previous
-    lda bw,y
+    ; Link previous
+:   ldx bw,y
     beq :+
-    tax
     mvb {fw,x}, {fw,y}
     ; Link next
 :   ldx fw,y
@@ -750,21 +748,23 @@ pending_signal:         .res 1
     dmove_x procs, procsb, sleeping, running
 .endmacro
 
-;; Processes waiting for others to exit.
+; Make zombie a free process.
+.macro reap_zombie_x
+    dmove_x procs, procsb, zombie, free_proc
+.endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; WAITING LIST MACROS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Allocate local slot in waiting list.
 .macro alloc_waiting_y
     dalloc_y waiting, waitingb, free_wait, first_waiting
 .endmacro
 
-; Remove process from waiting list.
+; Remove slot from waiting list.
 .macro free_waiting_y
     dmove_y waiting, waitingb, first_waiting,free_wait
-.endmacro
-
-; Make zombie a free process.
-.macro reap_zombie_x
-    dmove_x procs, procsb, zombie, free_proc
 .endmacro
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -791,9 +791,9 @@ pending_signal:         .res 1
 ;;; PROCESS BANK MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;;;;;;;;;;;;;;;;;;;;
-;;; SHADOW RAM123 ;;;
-;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS DATA BANK (on RAM123) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_procdata_x
     push ram123
@@ -809,9 +809,9 @@ pending_signal:         .res 1
     pop ram123
 .endmacro
 
-;;;;;;;;;;;;;;;
-;;; CONTEXT ;;;
-;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; CONTEXT (PROCESS DATA & IO) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_context_x
     push io23
@@ -823,6 +823,10 @@ pending_signal:         .res 1
     leave_procdata
     pop io23
 .endmacro
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; PROCESS BANKS (non-kernel) ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 .macro enter_banks_x
     push ram123
@@ -843,9 +847,9 @@ pending_signal:         .res 1
 
     .segment "LIB"
 
-;;;;;;;;;;;;;
-;;; ZPLIB ;;;
-;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;
+;;; ZERO PAGE LIB ;;;
+;;;;;;;;;;;;;;;;;;;;;
 
 ; Init s, d and c with values at XA.
 .export sset
@@ -1108,8 +1112,7 @@ r:  plx
 .export print_cr
 .proc print_cr
     phx
-    lda #13
-    jsr BSOUT
+    jsra BSOUT, #13
     plx
     rts
 .endproc
@@ -1117,8 +1120,7 @@ r:  plx
 .export print_comma
 .proc print_comma
     phx
-    lda #','
-    jsr BSOUT
+    jsra BSOUT, #','
     plx
     rts
 .endproc
@@ -1151,8 +1153,7 @@ r:  plx
     sta tmp1
     phx
     ldx tmp1
-    lda #0
-    jsr PRTFIX
+    jsra PRTFIX, #0
     plx
     rts
 .endproc
@@ -1185,8 +1186,7 @@ r:  plx
 .export print_hexbyte
 .proc print_hexbyte
     pha
-    lda #'$'
-    jsr BSOUT
+    jsra BSOUT, #'$'
     pla
     pha
     lsr
@@ -1215,10 +1215,8 @@ r:  plx
     sta tmp1
     pushw zp2
     phx
-    lda #','
-    jsr BSOUT
-    lda tmp1
-    jsr print_hexbyte
+    jsra BSOUT, #','
+    jsra print_hexbyte, tmp1
     plx
     popw zp2
     rts
@@ -1231,10 +1229,8 @@ r:  plx
     sta tmp1
     pushw zp2
     phx
-    lda #','
-    jsr BSOUT
-    lda tmp1
-    jsr print_decbyte
+    jsra BSOUT, #','
+    jsra print_decbyte, tmp1
     plx
     popw zp2
     rts
@@ -1295,8 +1291,7 @@ n:  ply
 .proc free_lbank_a
     sta tmp1
     phy
-    ldy tmp1
-    jsr free_lbank
+    jsry free_lbank, tmp1
     ply
     rts
 .endproc
@@ -1373,14 +1368,12 @@ items_mem_info:
     jsr print_cr
 
     jsr print_head
-    lda #FIRST_BANK
-    ldx #0
+    ldax #FIRST_BANK
     jsr print_cv
     jsr print_cr
 
     jsr print_head
-    lda banks_faulty
-    ldx #0
+    ldax banks_faulty
     jsr print_cv
     jsr print_cr
 
@@ -1547,8 +1540,7 @@ vec_io23_to_blk5:
 
 .macro save_internal_ram_to_blk5
     push blk2
-    lda speedcopy_lowmem_to_blk5
-    jsr next_speedcopy
+    jsra next_speedcopy, speedcopy_lowmem_to_blk5
     pop blk2
     smemcpyax vec_screen_to_blk5
     smemcpyax vec_color_to_blk5
@@ -1604,8 +1596,7 @@ vec_io23_to_blk5:
     ; Copy parent's into child's.
     mvb blk3, tmp2 ; (Parent's procdata)
     stx blk5
-    lda speedcopy_blk3_to_blk5
-    jsr next_speedcopy
+    jsra next_speedcopy, speedcopy_blk3_to_blk5
     mvb blk2, tunix_blk2
     ; Finish up IO23.
     pop io23 ; Bank in IO23.
@@ -1649,8 +1640,7 @@ banks_complete:
         ldx tmp1 ; parent
         mvb blk3, {procblk,x}
         mvb blk5, {procblk,y}
-        lda speedcopy_blk3_to_blk5
-        jsr next_speedcopy
+        jsra next_speedcopy, speedcopy_blk3_to_blk5
         mvb blk2, tunix_blk2
     .endmacro
     copy_blk_y proc_ram123
@@ -2044,7 +2034,7 @@ prt:tya
     phx
     jsr print_comma
     enter_procdata_x
-    ldaxi first_lbank
+    ldaxi lbanks
     jsry list_length, first_lbank
     leave_procdata
     txa
@@ -2054,7 +2044,7 @@ prt:tya
     phx
     jsr print_comma
     enter_procdata_x
-    ldaxi first_lfn
+    ldaxi lfns
     jsry list_length, first_lfn
     leave_procdata
     txa
@@ -2076,8 +2066,7 @@ prt:tya
     jsra print_decbyte, {exit_codes,x}
     plx
 
-    jsr print_cr
-    rts
+    jmp print_cr
 .endproc
 
     .segment "KERNELDATA"
@@ -2130,8 +2119,7 @@ l3: jsr proc_list_item
     lloop_x procs, l3
 :
 
-    ldx #0
-    jsr proc_list_item
+    jsrx proc_list_item, #0
 
     popw zp2
     clc
@@ -2457,8 +2445,7 @@ r:  rts
 .export tunix_register
 .proc tunix_register
     ldy SA
-    lda filename+2
-    ldx filename+3
+    ldax filename+2
     jsr register
     bcs r
     txa

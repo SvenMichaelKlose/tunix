@@ -28,18 +28,17 @@ compiler.
 # Run On Low Memory
 
 The tables for symbols, tags, members
-and initial values are stored in
+and initial values will be stored in
 btree-indexed database files.  They
 are cached record-wise.
 
 # Run On the Commodore VIC-20
 
-This will required a new run-time
+This will require a new run-time
 library.  That can be generalized for
 all Commodore 8-bit machines.
 
 # Become self-hosting
 
-Rewind the latest syntactical updates
-but keep it compilable on modern systems
-as well.
+Replace the preprocessor with the BBC
+version to get macros with parameters.

@@ -1,4 +1,5 @@
 Small-C v3.2 Testing Procedures
 ===============================
 
-Under construction.
+The 'test' and 'all' target for 'make'
+will launch all tests in src/tests/.

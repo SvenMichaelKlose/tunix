@@ -568,4 +568,3 @@ al 00000A .ptr1
 al 000006 .regsave
 al 000004 .sreg
 al 000002 .sp
-break ._debug

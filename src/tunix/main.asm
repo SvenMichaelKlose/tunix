@@ -1288,11 +1288,11 @@ r:  rts
 .endproc
 
 items_mem_info:
-  .byte "TOTAL", 0
-  .byte "USED", 0
   .byte "FREE", 0
+  .byte "USED", 0
   .byte "RESERVED", 0
   .byte "FAULTY", 0
+  .byte "TOTAL", 0
   .byte "BANKSIZE,8192", 0
   .byte 0
 
@@ -1302,10 +1302,9 @@ items_mem_info:
     stwi zp2, items_mem_info
 
     jsr print_head
-    lda banks_ok
-    clc
-    adc #FIRST_BANK
-    ldx #0
+    ldaxi banks
+    jsry list_length, free_bank
+    txa
     jsr print_cv
     jsr print_cr
 
@@ -1316,13 +1315,6 @@ items_mem_info:
     lda banks_ok
     sec
     sbc tmp1
-    jsr print_cv
-    jsr print_cr
-
-    jsr print_head
-    ldaxi banks
-    jsry list_length, free_bank
-    txa
     jsr print_cv
     jsr print_cr
 
@@ -1338,6 +1330,16 @@ items_mem_info:
     jsr print_cv
     jsr print_cr
 
+    ; Total
+    jsr print_head
+    lda banks_ok
+    clc
+    adc #FIRST_BANK
+    ldx #0
+    jsr print_cv
+    jsr print_cr
+
+    ; Bank size (in head)
     jsr print_head
     jsr print_cr
 
@@ -3034,6 +3036,8 @@ clr_lbanksb:
     cmp #0
     beq :+
     jmp proc0
+
+:   jsr lib_proc_list
 
     ; Welcome messages with free RAM.
 :   ldayi txt_welcome

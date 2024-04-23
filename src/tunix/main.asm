@@ -432,14 +432,14 @@ pending_signal:         .res 1
     pop to
 .endmacro
 
-.macro save_regs
+.macro store_regs
     sta reg_a
     stx reg_x
     sty reg_y
 .endmacro
 
-.macro save_regs_and_flags
-    save_regs
+.macro store_regs_and_flags
+    store_regs
     php
     pla
     sta flags
@@ -1218,8 +1218,8 @@ r:  plx
 
 ; Allocate bank
 ; Returns:
-;  Z: Out of memory.
-;  X: Bank #
+;  X & A: Bank #, 0 if out of memory.
+;  Z: 0: Out of memory.
 .export balloc
 .proc balloc
     phy
@@ -1253,6 +1253,7 @@ n:  ply
 ; X: Bank #
 .export bfree
 .proc bfree
+    ; TODO: Check lbank ownership.
     dec bank_refs,x
     bmi invalid_bank
     bne :+
@@ -1277,6 +1278,7 @@ err_invalid_bank:
 ; Free all banks of current process.
 .export free_lbanks
 .proc free_lbanks
+    ; TODO: Check lbank ownership.
     ldx first_lbank
     beq r
 :   lda lbanks,x
@@ -1849,7 +1851,7 @@ end_wait:
     free_waiting_y
     ldy first_waiting
     leave_procdata
-    cpy #0
+    tya ; (cpy #0)
     beq reap_zombie
 
     phx
@@ -1907,7 +1909,6 @@ r:  jmp schedule
     lda proc_flags,x
     beq invalid_pid
     jsr zombify
-    jsr resume_waiting
     clc
     rts
 invalid_pid:
@@ -2625,7 +2626,6 @@ g:  jmp tunix_general
 .export tunix_balloc
 .proc tunix_balloc
     jsr balloc
-    txa
     beq :+
     jmp respond
 :   jmp respond_error
@@ -3374,7 +3374,7 @@ r:  rts
 .export call_driver3
 .proc call_driver3
     jsr $fffe
-    save_regs_and_flags
+    store_regs_and_flags
     pop blk1
     rts
 .endproc
@@ -3417,7 +3417,7 @@ grow_baby:
 
 .export tunix_enter
 .proc tunix_enter
-    save_regs
+    store_regs
 .endproc
 
 ; Map in RAM123 and BLK1.
@@ -3439,7 +3439,7 @@ fnord: .res 2
 
 .export open
 .proc open
-    save_regs
+    store_regs
 
     ;; Move filename + pointer to IO23.
     ldy FNLEN
@@ -3512,7 +3512,7 @@ blkiohandler save, #IDX_SAVE
 .export kernal_block2
 .proc kernal_block2
     jsr $ffff
-    save_regs_and_flags
+    store_regs_and_flags
     leave_banks
     load_regs
     rts

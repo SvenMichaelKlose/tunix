@@ -1,31 +1,27 @@
 TUNIX Road Map
 ==============
 
-# User Release
+# 1. Release (Console Switcher)
 
 Introducing virtual consoles and a task
 switcher.
 
-[@] Virtual CBM console
-[@] exec() syscall
-[@] Boot ROM (selection) & installer
+# 2. Enhancement
 
-# Updates
+Screen & stack moves with speed code.
+Replace kill/wait() by version with
+signals.
 
-[ ] Screen & stack moves with speed
-    code.
-[ ] Replace kill/wait() by version with
-    signals.
-
-# Coder Release
+# 3. Coder Release
 
 Introducing pipelines.
 
-[ ] Per-process device configuration
+[ ] Per-process device configuration.
 [ ] Quiet info syscalls, not printing
     what should be responed.
+[ ] Processes without screen switches.
 
-# Wanted
+# 4. Performance Improvements
 
 [ ] Syscall to free parts of address
     space.

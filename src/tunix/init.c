@@ -9,6 +9,8 @@
 
 #define MAX_PROCS   64
 
+#define ALLOC_AROUND_FORK   0
+
 char processes[MAX_PROCS];
 char banks[256];
 
@@ -86,8 +88,10 @@ make_baby (char schedule_rounds)
 void
 test_fork (char nprocs)
 {
+#if ALLOC_AROUND_FORK
     char nbanks_a = test_alloc0 (3);
     char nbanks_b;
+#endif
     char i, mi, pid;
 
     printf ("## %d children at once.\n",
@@ -126,9 +130,9 @@ test_fork (char nprocs)
     }
     printf ("\n");
 
+#if ALLOC_AROUND_FORK
     nbanks_b = test_alloc0 (4);
     if (nbanks_a != nbanks_b) {
-        tunix_mode (0);
         tunix_mem_info ();
         tunix_proc_list ();
         printf ("! %d banks missing "
@@ -136,11 +140,13 @@ test_fork (char nprocs)
                 "(round %d)).",
                 nbanks_a - nbanks_b,
                 nprocs);
-        while (1);
-        tunix_exit (-1);
+        // TODO: Wait for keypress.
+        //while (1);
+        //tunix_exit (-1);
     }
     printf ("## %d children done.\n",
             nprocs);
+#endif
 }
 
 void

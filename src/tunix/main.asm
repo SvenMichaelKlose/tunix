@@ -995,6 +995,53 @@ y0: inc sh
     bne :- ; (jmp)
 .endproc
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; SOFT SEGMENTATION FAULT CHECKS ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Make or validate 8-bit CRC checksum.
+; s: Start of block
+; c: Size of block
+; A: : 0 to make CRC or CRC to validate.
+; Returns:
+;  A/Z = 0 if CRC has been validated.
+.export crc8
+.proc crc8
+    sta tmp1+1
+    ldx cl
+    dex
+    dec ch
+    ldy #0
+    beq t ; (jmp)
+l:  lda (s),y
+    sta tmp1
+    ; Make CRC checksum
+    lda tmp1+1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    rol tmp1
+    eor tmp1
+    sta tmp1+1
+    iny
+t:  dex
+    bne l
+    dec ch
+    bne l
+    lda tmp1+1
+    rts
+.endproc
+
 ;;;;;;;;;;;;;;;;;;
 ;;; LIST UTILS ;;;
 ;;;;;;;;;;;;;;;;;;

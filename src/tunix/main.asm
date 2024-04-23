@@ -1815,6 +1815,35 @@ put_on_zombie_list:
     rts
 .endproc
 
+; Take process off waiting list.
+; X: Process waiting for.
+; Y: Slot in waiting list.
+; Returns:
+;  A & Y: Slot of next in waiting list
+;         or 0 (with zero flag true.)
+.export free_waiting
+.proc free_waiting
+    enter_procdata_x
+    free_waiting_y
+    ldy first_waiting
+    leave_procdata
+    tya ; (cpy #0)
+    rts
+.endproc
+
+; X: Process waiting for.
+; Returns:
+;  Y: Slot in waiting list.
+.export alloc_waiting
+.proc alloc_waiting
+    enter_procdata_x
+    alloc_waiting_y
+    mvb {waiting_pid,y}, pid
+    leave_procdata
+    ; TODO: Check if out of memory.
+    rts
+.endproc
+
 ; Wait for process to exit
 ; X: Process ID
 ; Returns:
@@ -1823,11 +1852,7 @@ put_on_zombie_list:
 .proc wait
     lda proc_flags,x
     beq invalid_pid
-
-    enter_procdata_x
-    alloc_waiting_y
-    mvb {waiting_pid,y}, pid
-    leave_procdata
+    jsr alloc_waiting
 
 check_if_zombie:
     lda proc_flags,x
@@ -1847,16 +1872,12 @@ invalid_pid:
     rts
 
 end_wait:
-    enter_procdata_x
-    free_waiting_y
-    ldy first_waiting
-    leave_procdata
-    tya ; (cpy #0)
+    jsr free_waiting
     beq reap_zombie
-
     phx
     jsr resume_waiting
     plx
+
 return_code:
     lda exit_codes,x
     clc

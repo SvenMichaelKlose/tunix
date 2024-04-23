@@ -28,6 +28,7 @@ targets are disabled.
 
 * [Language Reference](doc/language.md)
 * [Adding New Targets](doc/target.md)
+* [IR Code Reference](doc/ir.md)
 
 # External Resources
 

@@ -1701,6 +1701,15 @@ r:  rts
 :   rts
 .endproc
 
+.export update_forked_data
+.proc update_forked_data
+    enter_procdata_y
+    jsr unref_parent_banks
+    jsr increment_glfn_refs
+    leave_procdata
+:   rts
+.endproc
+
 ; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
@@ -1718,13 +1727,10 @@ r:  rts
     jsr machdep_fork
     plx     ; Parent's ID.
     bcs e
+
     cpx pid ; Real ID.
     bne child
-
-    enter_procdata_y
-    jsr unref_parent_banks
-    jsr increment_glfn_refs
-    leave_procdata
+    jsr update_forked_data
 
 r:  tya
     clc
@@ -1786,20 +1792,24 @@ not_to_resume:
     rts
 .endproc
 
+.proc proc_free_resources
+    phx
+    enter_context_x
+    jsr free_lfns
+    jsr free_lbanks
+    leave_context
+    jsr free_iopages
+    jsr free_drivers
+    plx
+    rts
+.endproc
+
 ; Free all resources of a process and
 ; turn it into a zombie.
 ; X: Process ID.
 .export zombify
 .proc zombify
-    ;; Free resources.
-    phx
-    enter_context_x
-    jsr free_lfns
-    jsr free_lbanks
-    jsr free_iopages
-    jsr free_drivers
-    leave_context
-    plx
+    jsr proc_free_resources
 
     ;; Remove process from running or
     ;; sleeping list.

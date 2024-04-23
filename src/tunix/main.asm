@@ -1833,6 +1833,19 @@ put_on_zombie_list:
 
 ; X: Process waiting for.
 ; Returns:
+;  A & Y: Slot in waiting list.
+.export get_waiting
+.proc get_waiting
+    enter_procdata_x
+    ldy first_waiting
+    ldx waiting_pid,y
+    leave_procdata
+    tya ; (cpy #0)
+    rts
+.endproc
+
+; X: Process waiting for.
+; Returns:
 ;  Y: Slot in waiting list.
 .export alloc_waiting
 .proc alloc_waiting
@@ -1911,14 +1924,10 @@ reap_zombie:
 .export resume_waiting
 .proc resume_waiting
     mvb multitasking, #1
-    enter_procdata_x
-    ldy first_waiting
-    ldx waiting_pid,y
-    leave_procdata
-    tya ; (cpy #0)
+    jsr get_waiting
     beq r
-    jsr resume
-r:  jmp schedule
+    jmp resume
+r:  rts
 .endproc
 
 ; Kill process with exit code in A.

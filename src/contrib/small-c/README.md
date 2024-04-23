@@ -27,8 +27,11 @@ targets are disabled.
 * [Testing](TESTING.md)
 
 * [Language Reference](doc/language.md)
+
 * [Adding New Targets](doc/target.md)
 * [IR Code Reference](doc/ir.md)
+
+* [Tags Explained](doc/tag.md)
 
 # External Resources
 

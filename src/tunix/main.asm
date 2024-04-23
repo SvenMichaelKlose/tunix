@@ -1034,6 +1034,8 @@ l:  lda (s),y
     eor tmp1
     sta tmp1+1
     iny
+    bne t
+    inc sh
 t:  dex
     bne l
     dec ch

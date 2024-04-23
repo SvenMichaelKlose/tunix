@@ -50,7 +50,7 @@ v = \*\*p;  // No!
 
 ## Arrays
 
-Array contain any number of elements of
+Arrays contain any number of elements of
 the same type and must have a known size
 at declaration time.  Arrays can have
 only one dimension only.

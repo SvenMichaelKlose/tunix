@@ -7,9 +7,9 @@
 
 #define INITVIC     0xe5c3
 
-#define MAX_PROCS   64
+#define MAX_PROCS   32
 
-#define ALLOC_AROUND_FORK   0
+#define ALLOC_AROUND_FORK   1
 
 char processes[MAX_PROCS];
 char banks[256];
@@ -174,8 +174,8 @@ main (void)
     tunix_proc_list ();
 
     test_alloc ();
-    test_forks (4);
-    test_forks (4);
+    test_forks (MAX_PROCS);
+    test_forks (MAX_PROCS);
 
     printf ("Welcome to TUNIX!");
 }

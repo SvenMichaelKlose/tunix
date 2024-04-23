@@ -1757,7 +1757,6 @@ r:  rts
 ;    0 for the child.
 .export fork
 .proc fork
-    ;; Allocate slot.
     alloc_proc_running_y
     cpy #0
     beq no_more_procs
@@ -1780,6 +1779,7 @@ r:  tya
 e:  cpx pid ; Real ID.
     bne child
     dmove_y procs, procsb, running, free_proc
+    mvb {proc_flags,y}, 0
 
 no_more_procs:
     lda #255

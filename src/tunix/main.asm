@@ -223,6 +223,9 @@ tmp2:   .res 2
 tmp3:   .res 2
 ptr1:   .res 2
 
+; TODO: Check what that +1 thing with
+; array sizes was about.
+
 ;;; Speed code banks
 speedcopy_blk3_to_blk5:   .res 1
 speedcopy_blk5_to_lowmem: .res 1
@@ -231,9 +234,9 @@ speedcopy_lowmem_to_blk5: .res 1
 ;;; Extended memory banks
 banks_ok:       .res 1
 banks_faulty:   .res 1
-banks:          .res MAX_BANKS
+banks:          .res MAX_BANKS + 1
 free_bank:      .res 1
-bank_refs:      .res MAX_BANKS
+bank_refs:      .res MAX_BANKS + 1
 
 ;;; IO pages
 iopages:        .res MAX_IOPAGES + 1
@@ -248,6 +251,7 @@ iopage_page:    .res MAX_IOPAGES + 1
 ;; Free list
 glfns:          .res MAX_LFNS
 glfn_refs:      .res MAX_LFNS
+free_glfn:      .res 1
 ;; Last parameters to OPEN.
 glfn_drv:       .res MAX_LFNS
 glfn_dev:       .res MAX_LFNS
@@ -284,6 +288,7 @@ drv_pid:        .res MAX_DRVS + 1
 drv_dev:        .res MAX_DRVS + 1
 drv_vl:         .res MAX_DRVS + 1
 drv_vh:         .res MAX_DRVS + 1
+free_drv:       .res 1
 
 ;;; Drivers assigned to devices.
 dev_drv:        .res MAX_DEVS
@@ -1107,8 +1112,7 @@ r:  plx
 .proc print_decword
     sta tmp1
     txa
-    lda tmp1
-    jmp PRTFIX
+    jmpa PRTFIX, tmp1
 .endproc
 
 .export print_decbyte_x8
@@ -1125,8 +1129,7 @@ r:  plx
     rol
     rol tmp1
     tax
-    lda tmp1
-    jmp PRTFIX
+    jmpa PRTFIX, tmp1
 .endproc
 
 ; Print '$' and hexadecimal byte in A.
@@ -1641,7 +1644,7 @@ out_of_memory:
     lpush_x lfns, first_lfn
     ; Allocate GLFN.
     phx
-    lpop_x glfns, glfns
+    lpop_x glfns, free_glfn
     inc glfn_refs,x
     ; Link GLFN to LFN.
     stx tmp1
@@ -1658,7 +1661,7 @@ out_of_memory:
 :   ldx lfn_glfn,y
     dec glfn_refs,x
     bne :+  ; (Still used.)
-    lpush_x glfns, glfns
+    lpush_x glfns, free_glfn
 :   lloop_y lfns, :--
 r:  rts
 .endproc
@@ -2368,15 +2371,16 @@ not_there:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Free drivers of process.
-free_drivers:
+free_drivers: ; TODO: Deque instead of list.
+rts
     ldx pid
-    ldy drvs
+    ;ldy first_drv
     beq r
 l:  lda drv_pid,y
     cmp pid
     bne n
     tax
-    lpush_x drvs, drvs
+    lpush_x drvs, free_drv
     ; Set device to KERNAL.
     lda drv_dev,y
     tax
@@ -2394,8 +2398,8 @@ r:  rts
     stax zp1
 
     ;; Get slot.
-    lpop_x drvs, drvs
-    beq :+
+    lpop_x drvs, free_drv
+    beq r
 
     ;; Populate slot.
     mvb {drv_pid,x}, pid
@@ -2408,7 +2412,7 @@ r:  rts
     txa
     sta dev_drv,y
 
-:   rts
+r:  rts
 .endproc
 
 ; "DR"
@@ -2418,10 +2422,10 @@ r:  rts
     lda filename+2
     ldx filename+3
     jsr register
-    bcs :+
+    bcs r
     txa
     jmp respond
-:   jmp respond_error
+r:  jmp respond_error
 .endproc
 
 
@@ -2685,8 +2689,7 @@ syscall0 tunix_mem_info, mem_info
     lda FNLEN
     cmp #1
     bne :+
-    lda pid
-    jmp respond1
+    jmpa respond1, pid
 :   lda filename+1
     cmp #'F'
     beq tunix_fork
@@ -2967,11 +2970,11 @@ clr_lbanksb:
     bne @l
     ;; Finish up.
     lda #1
+    sta free_glfn
     sta free_proc
     sta free_wait
     sta free_iopage
-    sta glfns
-    sta drvs
+    sta free_drv
     rts
 .endproc
 

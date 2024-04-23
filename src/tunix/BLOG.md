@@ -1,6 +1,30 @@
 TUNIX blog
 ==========
 
+# 2024-04-23 16:08
+
+Although one of the main things on my
+agenda with this project is to improve
+my bad debugging skills.
+
+Some procdata seems to get destroyed.
+Either by a bug in the list/deque macros
+or by whatever else that has gone rogue.
+The basic deque tests could use some
+more checks to really cover all details.
+
+To detect off-scope memory writes I was
+just thinking of a checksummer with
+sitchable configuratios that contain
+the memory area location and sizem and
+the valid checksum for that area.  When
+leaving a particular code section the
+checksum can be created and checked for
+validity when the section, (the only one
+responsible for modifying that area) is
+entered again.  When developing on a
+TUNIX this is invaluable.
+
 # 2024-04-21 16:59
 
 It just appeared to me that having a

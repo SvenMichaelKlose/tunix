@@ -312,9 +312,11 @@ memory management, loadable drivers, and
 system calls via a unique file device
 mechanism, where commands are sent by
 opening a file with a specific name on
-device #31.
+device #31, opening the system to all
+programming languages that support
+regular file I/O.
 
-How TUNIX Helps:
+The differences TUNIX makes:
 
 * Extended Functionality:
   It significantly extends the VIC-20's
@@ -355,7 +357,7 @@ How TUNIX Helps:
 TUNIX should include a Linux-compatible
 terminal emulator with additional
 graphics and DOM-tree manipulation for
-document rendering so the applications
+document rendering, so the applications
 it should provide can range from basic
 utilities to more complex software,
 leveraging these unique features.  Here
@@ -430,6 +432,8 @@ are some applications suited for TUNIX:
   software but should offer essential
   tools for pixel art, drawing, and
   basic image manipulation.
+  Displaying by cat'ing them might be
+  an idea.
 * Programming IDE:
   An Integrated Development Environment
   (IDE) tailored for the VIC-20
@@ -455,12 +459,13 @@ are some applications suited for TUNIX:
   puzzle games, text adventures, and
   simple arcade games.  These can
   showcase both the terminal's
-  capabilities and the graphical
+  capabilities and its graphical
   interface.
 
   However, all existing games as of 2024
   can be used alongside TUNIX as none of
-  them ulitizes the UltiMem yet.
+  them ulitizes the UltiMem yet and the
+  banks the use are not used by TUNIX.
 
 Developing these applications for TUNIX
 would not only showcase its unique
@@ -567,7 +572,7 @@ for education and empowerment, a view
 that greatly influenced the development
 and proliferation of personal computing.
 
-## ANSI-C (cc65)
+## ANSI-C (cc65 & Small-Cng)
 
 The philosophy of the C programming
 language emphasizes simplicity,
@@ -588,6 +593,8 @@ widespread use in developing operating
 systems, embedded systems, and high-
 performance applications.
 
+## The cc65 compiler suite
+
 The cc65 compiler suite used with INGLE
 is a comprehensive toolchain for
 developing software for 6502-based
@@ -596,14 +603,6 @@ assembler, linker, and a set of
 libraries.  Here’s how cc65 helps in
 developing applications for TUNIX:
 
-* C Language Support:
-  Allows developers to write
-  applications in C, a high-level
-  language, which is easier to manage
-  compared to assembly language.  This
-  can significantly speed up the
-  development process and make code
-  more maintainable.
 * Cross-platform Development:
   Since cc65 runs on modern platforms,
   developers can write, compile and
@@ -668,6 +667,12 @@ creation of more complex and efficient
 applications, and fosters a vibrant
 development community around this retro
 computing platform.
+
+## C Programming With Small-C
+
+A self-hosting port of the Small-C
+compiler is on its way, but it will
+not replace cc65 anytime soon.
 
 ## FORTH (VFORTH)
 

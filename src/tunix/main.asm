@@ -264,10 +264,10 @@ free_proc:      .res 1
 running:        .res 1
 sleeping:       .res 1
 zombie:         .res 1
-PROC_BABY       = 16
-PROC_ZOMBIE     = 32
-PROC_RUNNING    = 64
-PROC_SLEEPING   = 128
+PROC_BABY       = $10
+PROC_ZOMBIE     = $20
+PROC_RUNNING    = $40
+PROC_SLEEPING   = $80
 proc_flags:     .res MAX_PROCS
 exit_codes:     .res MAX_PROCS
 ;; Current banks.
@@ -1861,7 +1861,7 @@ not_to_resume:
 :   drm_x procs, procsb, sleeping
 
 put_on_zombie_list:
-    lpush_x procs, zombie
+    dpush_x procs, procsb, zombie
     mvb {proc_flags,x}, #PROC_ZOMBIE
     rts
 .endproc
@@ -3343,19 +3343,20 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     ldx pid
     lda procs,x
     and #PROC_RUNNING | PROC_BABY
-    bne :++
+    bne ok
 
     ;; Restart list.
     ; Check if proc 0 is running.
     lda proc_flags + 0
-    cmp #PROC_RUNNING
-    bne :+  ; No...
+    cmp #PROC_RUNNING ; (never a baby)
+    bne :+
     lda #0
-    beq :++ ; (jmp)
-    ; Use regular first running.
+    beq ok ; (jmp)
+    ; Use first running.
 :   lda running
 
-:   cmp pid
+    ; Switch.
+ok: cmp pid
     beq r ; (Don't switch to self.)
     tay
     push ram123
@@ -3371,7 +3372,14 @@ iohandler bkout2, DFLTO, IDX_BKOUT
     pop ram123
 
 r:  rts
+
+ouch:
+    sta tmp1
+    error err_first_not_running
 .endproc
+
+err_first_not_running:
+    .byte "FIRST NOT RUNNING.", 0
 
 ; Switch internal RAM and IO23 only(!).
 ;

@@ -1,4 +1,5 @@
 #include <lib/tunix/tunix.h>
+#include <stdlib.h>
 #include <conio.h>
 #include <stdio.h>
 #include <errno.h>
@@ -103,7 +104,7 @@ test_fork (char nprocs)
         tunix_mode (0);
         printf ("Forking %d.\n", i + 1);
         tunix_mode (1);
-        pid = make_baby (0);
+        pid = make_baby (rand () % nprocs + 1);
         if (pid < 1)
             break;
         processes[i] = pid;
@@ -124,7 +125,6 @@ test_fork (char nprocs)
         printf ("Waiting for $%02x.\n",
                 pid);
         tunix_mode (1);
-        //if (nprocs == 2 && i == 0) debug ();
         tunix_wait (pid);
         tunix_mode (0);
         printf ("$%02x exited.\n", pid);
@@ -143,8 +143,8 @@ test_fork (char nprocs)
                 nbanks_a - nbanks_b,
                 nprocs);
         // TODO: Wait for keypress.
-        //while (1);
-        //tunix_exit (-1);
+        while (1);
+        tunix_exit (-1);
     }
     printf ("## %d children done.\n",
             nprocs);

@@ -228,7 +228,6 @@ al 000500 .first_lbank
 al 0007C3 .first_lfn
 al 0005C2 .first_waiting
 al 0099BE .flags
-al 0026C0 .fnord
 al 002679 .fork
 al 003AC6 .free_bank
 al 003B52 .free_iopage

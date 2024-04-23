@@ -5,13 +5,11 @@ This is a retargetable one-pass compiler
 for a subset of the C programming
 language.
 
-This particular ersion aims to add
+This particular version aims to add
 documentation, as well as self-hosting
-on 6502-CPU platforms.
-
-Currently the MOS 6502 target is under
-construction.  Therefore the other
-targets are disabled.
+on 6502-CPU platforms with a more
+flexible support for adding new stages
+and stages.
 
 * [Blog](BLOG.md)
 

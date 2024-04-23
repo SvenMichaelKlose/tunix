@@ -124,7 +124,7 @@ scale_const (int type, int otag,
         *size += *size;
         break;
     case STRUCT:
-        *size *= tag_table[otag].size;
+        *size *= tags[otag].size;
         break;
     default:
         break;

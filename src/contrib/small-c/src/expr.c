@@ -703,7 +703,7 @@ hier11 (LVALUE * lval)
             expression (YES);
             needbrack ("]");
             gen_mul_const (ptr->type,
-                          tag_table[ptr->tagidx].size);
+                          tags[ptr->tag].size);
             gen_add (NULL, NULL);
             //lval->symbol = 0; 
             lval->indirect = ptr->type;
@@ -746,7 +746,7 @@ hier11 (LVALUE * lval)
             lval->ptr_type = 0;
             lval->tagsym = NULL_TAG;
             if (ptr->type == STRUCT) {
-                lval->tagsym = &tag_table[ptr->tagidx];
+                lval->tagsym = &tags[ptr->tag];
             }
             if (ptr->identity == POINTER) {
                 lval->indirect = CINT;

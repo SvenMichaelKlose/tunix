@@ -45,7 +45,7 @@ primary (LVALUE * lval)
             if (match ("*"))
                 outn (INTSIZE);
             else
-                outn (tag_table[otag].size);
+                outn (tags[otag].size);
         } else if (symname (sname)) {
             if (((symbol_table_idx = find_local (sname)) > -1)
                 || ((symbol_table_idx = find_global (sname)) > -1)) {
@@ -57,7 +57,7 @@ primary (LVALUE * lval)
                     || symbol->identity == POINTER)
                     offset *= INTSIZE;
                 else if (symbol->type == STRUCT)
-                    offset *= tag_table[symbol->tagidx].size;
+                    offset *= tags[symbol->tag].size;
                 outn (offset);
             } else {
                 error ("sizeof undeclared variable");
@@ -77,7 +77,7 @@ primary (LVALUE * lval)
             lval->symbol = symbol;
             lval->indirect = symbol->type;
             if (symbol->type == STRUCT)
-                lval->tagsym = &tag_table[symbol->tagidx];
+                lval->tagsym = &tags[symbol->tag];
             if (symbol->identity == ARRAY ||
                 (symbol->identity == VARIABLE
                  && symbol->type == STRUCT)) {
@@ -96,7 +96,7 @@ primary (LVALUE * lval)
                 lval->symbol = symbol;
                 lval->indirect = 0;
                 if (symbol->type == STRUCT)
-                    lval->tagsym = &tag_table[symbol->tagidx];
+                    lval->tagsym = &tags[symbol->tag];
                 if (symbol->identity != ARRAY
                     && (symbol->identity != VARIABLE
                         || symbol->type != STRUCT)) {

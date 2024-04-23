@@ -50,9 +50,9 @@ add_data_initials (char *symbol_name, int type, int value,
         // added.
         int index =
             initials_table[initials_idx].dim %
-            tag->number_of_members;
+            tag->num_members;
         int member_type =
-            member_table[tag->member_idx + index].type;
+            members[tag->member + index].type;
         // add it recursively.
         add_data_initials (symbol_name, member_type, value, 0);
     } else {
@@ -96,17 +96,17 @@ get_item_at (char *symbol_name,
                          + (unsigned char) initials_data_table[initials_data_idx + position + 1];
         } else if (initials_table[initials_idx].type == STRUCT) {
             // Find number of members.
-            int number_of_members = tag->number_of_members;
+            int num_members = tag->num_members;
             // Point behind the last.
             // full struct.
-            int index = (position / number_of_members) * tag->size;
+            int index = (position / num_members) * tag->size;
             // Move to required member.
-            for (i = 0; i < (position % number_of_members); i++) {
-                type = member_table[tag->member_idx + i].type;
+            for (i = 0; i < (position % num_members); i++) {
+                type = members[tag->member + i].type;
                 index += (type & CCHAR) ? 1 : INTSIZE;
             }
             // Get value.
-            type = member_table[tag->member_idx + i].type;
+            type = members[tag->member + i].type;
             result = (type & CCHAR) ?
                 initials_data_table[initials_data_idx + index] :
                 (initials_data_table [initials_data_idx + index] << 8)

@@ -22,14 +22,14 @@ char mline[LINESIZE];
 int lptr, mptr;
 
 // start of structure tag table 
-TAG_SYMBOL tag_table[NUMTAG];
+TAG_SYMBOL tags[NUMTAG];
 // ptr to next entry 
-int tag_table_index;
+int tag;
 
 // structure member table 
-SYMBOL member_table[NUMMEMB];
+SYMBOL members[NUMMEMB];
 // ptr to next member 
-int member_table_index;
+int member;
 
 // miscellaneous storage 
 int nxtlab,

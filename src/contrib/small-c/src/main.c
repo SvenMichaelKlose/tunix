@@ -98,7 +98,7 @@ compile (char *file)
         global_table_index = 0;
         local_table_index = NUMBER_OF_GLOBALS;
         while_table_index = 0;
-        tag_table_index = 0;
+        tag = 0;
         inclsp =
             iflevel =
             skiplevel =
@@ -267,7 +267,7 @@ dumpglbs ()
                             gen_datab ();
                         if (i < list_size) {
                             // dump data 
-                            outw (get_item_at (symbol->name, i, &tag_table [symbol-> tagidx]));
+                            outw (get_item_at (symbol->name, i, &tags [symbol-> tag]));
                         } else
                             // Dump zero, no more data available.
                             outw (0);
@@ -286,12 +286,12 @@ dumpglbs ()
 // Dump struct data.
 dump_struct (SYMBOL * symbol, int position)
 {
-    int i, number_of_members, value;
-    number_of_members = tag_table[symbol->tagidx].number_of_members;
+    int i, num_members, value;
+    num_members = tags[symbol->tag].num_members;
     newline ();
-    for (i = 0; i < number_of_members; i++) {
+    for (i = 0; i < num_members; i++) {
         // i is the index of current member, get type 
-        SYMBOL member = member_table[tag_table[symbol->tagidx].  member_idx + i];
+        SYMBOL member = members[tags[symbol->tag].  member + i];
         // Array members need proper
         // storage space (the compiler
         // currently doesn't allow
@@ -310,7 +310,7 @@ dump_struct (SYMBOL * symbol, int position)
                 gen_datab ();
             if (position < get_size (symbol->name)) {
                 // dump data
-                value = get_item_at (symbol->name, position * number_of_members + i, &tag_table[symbol-> tagidx]);
+                value = get_item_at (symbol->name, position * num_members + i, &tags[symbol-> tag]);
                 outw (value);
             } else {
                 // Dump zero, no more

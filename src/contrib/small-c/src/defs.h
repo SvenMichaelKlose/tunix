@@ -76,7 +76,7 @@ struct symbol {
     int offset;
 
     // index of struct in tag table 
-    int tagidx;
+    int tag;
 
     // The size, in bytes, of a member
     // of a struct - only used for
@@ -108,8 +108,8 @@ struct symbol {
 struct tag_symbol {
     char name[NAMESIZE]; // Struct name.
     int size;       // Bytes.
-    int member_idx; // First member.
-    int number_of_members;
+    int member; // First member.
+    int num_members;
 };
 #define TAG_SYMBOL struct tag_symbol
 

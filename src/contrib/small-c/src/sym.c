@@ -41,7 +41,7 @@ declare_global (int type, int storage,
                 identity = initials (sname, type, identity, dim, otag);
                 add_global (sname, identity, type, (!dim ? -1 : dim), storage);
                 if (type == STRUCT)
-                    symbol_table[current_symbol_table_idx].tagidx = otag;
+                    symbol_table[current_symbol_table_idx].tag = otag;
                 break;
             } else if (is_struct) {
                 // structure member, mtag->size is offset 
@@ -91,13 +91,13 @@ initials (char *symbol_name, int type,
                 && type == STRUCT) {
                 // aggregate is structure or pointer to structure 
                 dim = 0;
-                struct_init (&tag_table[otag], symbol_name);
+                struct_init (&tags[otag], symbol_name);
             } else {
                 while ((dim > 0) || (dim_unknown)) {
                     if (identity == ARRAY && type == STRUCT) {
                         // array of struct 
                         needbrack ("{");
-                        struct_init (&tag_table[otag],
+                        struct_init (&tags[otag],
                                      symbol_name);
                         --dim;
                         needbrack ("}");
@@ -127,16 +127,16 @@ struct_init (TAG_SYMBOL * tag,
              char *symbol_name)
 {
     int dim;
-    int member_idx;
+    int member;
 
-    member_idx = tag->member_idx;
-    while (member_idx < tag->member_idx + tag->number_of_members) {
+    member = tag->member;
+    while (member < tag->member + tag->num_members) {
         init (symbol_name,
-              member_table[tag->member_idx + member_idx].type,
-              member_table[tag->member_idx + member_idx].identity, &dim, tag);
-        ++member_idx;
+              members[tag->member + member].type,
+              members[tag->member + member].identity, &dim, tag);
+        ++member;
         if (!match (",")
-            && (member_idx != (tag->member_idx + tag->number_of_members))) {
+            && (member != (tag->member + tag->num_members))) {
             error ("struct initialisaton out of data");
             break;
         }
@@ -203,7 +203,7 @@ declare_local (int typ, int stclass,
                     if (typ & CINT) {
                         k = k * INTSIZE;
                     } else if (typ == STRUCT) {
-                        k = k * tag_table[otag].size;
+                        k = k * tags[otag].size;
                     }
                 } else {
                     j = POINTER;
@@ -219,7 +219,7 @@ declare_local (int typ, int stclass,
                         k = 1;
                         break;
                     case STRUCT:
-                        k = tag_table[otag].size;
+                        k = tags[otag].size;
                         break;
                     default:
                         k = INTSIZE;
@@ -228,16 +228,16 @@ declare_local (int typ, int stclass,
             }
             if (stclass != LSTATIC) {
                 stkp = gen_modify_stack (stkp - k);
-                // local structs need their tagidx set 
+                // local structs need their tag set 
                 current_symbol_table_idx =
                     add_local (sname, j, typ, stkp, AUTO);
                 if (typ == STRUCT)
-                    symbol_table[current_symbol_table_idx].tagidx = otag;
+                    symbol_table[current_symbol_table_idx].tag = otag;
             } else {
-                // local structs need their tagidx set 
+                // local structs need their tag set 
                 current_symbol_table_idx = add_local (sname, j, typ, k, LSTATIC);
                 if (typ == STRUCT)
-                    symbol_table[current_symbol_table_idx].  tagidx = otag;
+                    symbol_table[current_symbol_table_idx].  tag = otag;
             }
             break;
         }

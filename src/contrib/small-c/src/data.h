@@ -58,14 +58,14 @@ extern int errfile;
 ///////////////
 
 // start of structure tag table 
-extern TAG_SYMBOL tag_table[NUMTAG];
+extern TAG_SYMBOL tags[NUMTAG];
 // ptr to next entry 
-extern int tag_table_index;
+extern int tag;
 
 // structure member table 
-extern SYMBOL member_table[NUMMEMB];
+extern SYMBOL members[NUMMEMB];
 // ptr to next member< 
-extern int member_table_index;
+extern int member;
 
 // miscellaneous storage 
 extern int nxtlab,

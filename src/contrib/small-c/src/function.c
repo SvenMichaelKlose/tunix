@@ -127,7 +127,7 @@ getarg (int t)
                 address =
                     argtop - symbol_table[argptr].offset;
                 symbol_table[argptr].offset = address;
-                // set tagidx for struct arguments 
+                // set tag for struct arguments 
                 if (t == STRUCT) {
                     if (j != POINTER) {
                         // because each argument takes exactly two bytes on the
@@ -135,7 +135,7 @@ getarg (int t)
                         error
                             ("only struct pointers, not structs, can be passed to functions");
                     }
-                    symbol_table[argptr].tagidx = otag;
+                    symbol_table[argptr].tag = otag;
                 }
             } else
                 error ("expecting argument name");
@@ -198,7 +198,7 @@ doLocalAnsiArgument (int type)
             argptr = add_local (symbol_name, identity, type, 0, AUTO);
             argstk = argstk + INTSIZE;
             ptr = local_table_index;
-            // if argument is a struct, properly set the argument's tagidx.
+            // if argument is a struct, properly set the argument's tag.
             if (type == STRUCT) {
                 if (identity != POINTER) {
                     // Because each argument takes exactly two bytes
@@ -206,7 +206,7 @@ doLocalAnsiArgument (int type)
                     error
                         ("only struct pointers, not structs, can be passed to functions");
                 }
-                symbol_table[argptr].tagidx = otag;
+                symbol_table[argptr].tag = otag;
             }
             // modify stack offset as we push more params 
             while (ptr != NUMBER_OF_GLOBALS) {

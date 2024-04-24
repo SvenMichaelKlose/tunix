@@ -52,23 +52,21 @@ do_local_declares (int stclass)
     // Tag of struct object being
     // declared.
     int otag;
-    // TRUE for struct definition, zero
-    // for union.
-    int sflag;
+    int is_struct;
     char sname[NAMESIZE];
     blanks ();
-    if ((sflag = amatch ("struct", 6))
+    if ((is_struct = amatch ("struct", 6))
         || amatch ("union", 5)) {
         if (!symname (sname))
             illname ();
         if ((otag = find_tag (sname)) == -1)
-            otag = define_struct (sname, stclass, sflag);
+            otag = define_struct (sname, stclass, is_struct);
         declare_local (STRUCT, stclass, otag);
-    } else if (type = get_type ()) {
+    } else if (type = get_type ())
         declare_local (type, stclass, -1);
-    } else if (stclass == LSTATIC || stclass == DEFAUTO) {
+    else if (stclass == LSTATIC || stclass == DEFAUTO)
         declare_local (CINT, stclass, -1);
-    } else
+    else
         return 0;
     need_semicolon ();
     return 1;

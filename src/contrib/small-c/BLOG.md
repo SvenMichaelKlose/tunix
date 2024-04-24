@@ -3,7 +3,22 @@ Small C blog
 
 Informal narratives about the project.
 
-# 2024-04-22 01:14 S.M. Klose
+# 2024-04-24 05:20 S.M. Klose
+
+Cleaned up a good lot.  IT's gotta look
+like like kindergarten stuff.
+
+It actually looks like this version of
+Small-C supports local variables in all
+blocks, including loops and switches.
+That'd be neat!  Will get checked in
+the tests.
+
+Need to think up some interface to get
+the maximum out of a that file database
+engine.
+
+# 2024-04-23 01:14 S.M. Klose
 
 The is now a Makefile in the root
 directory for convenience.  New make

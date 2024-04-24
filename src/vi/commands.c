@@ -214,23 +214,17 @@ cmd_write_file ()
     } else if (linebuf_length > 2)
         set_filename (&linebuf[2], linebuf_length);
 
-    fn = malloc (strlen (filename) + 7);
-    sprintf (fn, "%S,S,W", filename);
+    fn = malloc (strlen (filename) + 9);
+    sprintf (fn, "@:%S,S,W", filename);
     err = cbm_open (3, 8, 3, fn);
     free (fn);
     if (err) {
-        fn = malloc (strlen (filename) + 9);
-        sprintf (fn, "@:%S,S,W", filename);
-        err = cbm_open (3, 8, 3, fn);
-        free (fn);
-        if (err) {
-            gotoxy (0, 23);
-            term_puts ("Cannot write file '");
-            term_puts (fn);
-            term_puts ("'.\n\r");
-            wait_keypress ();
-            return;
-        }
+        gotoxy (0, 23);
+        term_puts ("Cannot write file '");
+        term_puts (fn);
+        term_puts ("'.\n\r");
+        wait_keypress ();
+        return;
     }
 
     screen_set_status ("Writing...");

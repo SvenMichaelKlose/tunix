@@ -2,7 +2,7 @@
 #include "defs.h"
 #include "data.h"
 
-error (char msg)
+error (char * msg)
 {
     FILE *tempfile;
 

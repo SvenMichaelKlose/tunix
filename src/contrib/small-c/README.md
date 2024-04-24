@@ -11,7 +11,7 @@ on 6502-CPU platforms with a more
 flexible support for adding new stages
 and stages.
 
-* [Licensing](LICENSE.md)
+* [Licensing](LICENSE)
 * [Roadmap](ROADMAP.md)
 * [Changelog](CHANGELOG.md)
 * [To Do](TODO.xit)

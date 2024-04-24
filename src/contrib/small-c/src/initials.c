@@ -23,22 +23,18 @@ find_symbol_initials (char *symbol_name)
          initials_idx++) {
         if (initials_idx >= NUMBER_OF_GLOBALS)
             error ("initials table overrun");
-
         if (astreq (symbol_name, &initials_table[initials_idx].name, NAMEMAX)) {
             result = 1;
             break;
-        } else {
-            // Move to next symbol
-            // count position in data
-            // array.
+        } else
             initials_data_idx += initials_table[initials_idx].data_len;
-        }
     }
     return result;
 }
 
 // Add data to symbol in table.
-add_data_initials (char *symbol_name, int type, int value,
+add_data_initials (char *symbol_name,
+                   int type, int value,
                    TAG_SYMBOL * tag)
 {
     int position;
@@ -48,11 +44,8 @@ add_data_initials (char *symbol_name, int type, int value,
         // Find number of members, dim
         // is total number of values
         // added.
-        int index =
-            initials_table[initials_idx].dim %
-            tag->num_members;
-        int member_type =
-            members[tag->first_member + index].type;
+        int index = initials_table[initials_idx].dim % tag->num_members;
+        int member_type = members[tag->first_member + index].type;
         // add it recursively.
         add_data_initials (symbol_name, member_type, value, 0);
     } else {
@@ -61,9 +54,7 @@ add_data_initials (char *symbol_name, int type, int value,
             initials_data_table[initials_data_idx + position] = 0xff & value;
             initials_table[initials_idx].data_len += 1;
         } else if (type & CINT) {
-
             initials_data_table[initials_data_idx + position] = (0xff00 & value) >> 8;
-
             initials_data_table[initials_data_idx + position + 1] = 0xff & value;
             initials_table[initials_idx].data_len += INTSIZE;
         }
@@ -95,11 +86,10 @@ get_item_at (char *symbol_name,
             result = (initials_data_table[initials_data_idx + position] << 8)
                          + (unsigned char) initials_data_table[initials_data_idx + position + 1];
         } else if (initials_table[initials_idx].type == STRUCT) {
-            // Find number of members.
             int num_members = tag->num_members;
             // Point behind the last.
             // full struct.
-            int index = (position / num_members) * tag->size;
+            int index = position / num_members * tag->size;
             // Move to required member.
             for (i = 0; i < (position % num_members); i++) {
                 type = members[tag->first_member + i].type;

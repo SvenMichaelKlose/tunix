@@ -29,7 +29,7 @@ dosizeof (LVALUE * lval)
         if (!symname (sname))
             illname ();
         if ((otag = find_tag (sname)) == -1)
-            error ("struct tag undefined");
+            error ("sizeof(): struct tag undefined");
         // Write out struct size, or INTSIZE
         // if struct pointer .
         outn (match ("*") ?
@@ -40,7 +40,7 @@ dosizeof (LVALUE * lval)
             || ((symbol_table_idx = find_global (sname)) > -1)) {
             symbol = &symbol_table[symbol_table_idx];
             if (symbol->storage == LSTATIC)
-                error ("sizeof local static");
+                error ("sizeof(): local static");
             offset = symbol->offset;
             if (symbol->type & CINT
                 || symbol->identity == POINTER)
@@ -48,92 +48,106 @@ dosizeof (LVALUE * lval)
             else if (symbol->type == STRUCT)
                 offset *= tags[symbol->tag].size;
             outn (offset);
-        } else {
-            error ("sizeof undeclared variable");
-            outn (0);
-        }
+        } else
+            error ("sizeof(): undeclared variable");
     } else
-        error ("sizeof only on type or variable");
+        error ("sizeof(): only on type or variable");
     needbrack (")");
     lval->symbol = 0;
     lval->indirect = 0;
     return 0;
 }
 
+primary_local (LVALUE *lval, SYMBOL *symbol)
+{
+    int reg;
+    reg = gen_get_local (symbol);
+    lval->symbol = symbol;
+    lval->indirect = symbol->type;
+    if (symbol->type == STRUCT)
+        lval->tagsym = &tags[symbol->tag];
+    if (symbol->identity == ARRAY ||
+        (symbol->identity == VARIABLE
+         && symbol->type == STRUCT)) {
+        lval->ptr_type = symbol->type;
+        return reg;
+    }
+    if (symbol->identity == POINTER) {
+        lval->indirect = CINT;
+        lval->ptr_type = symbol->type;
+    }
+    return FETCH | reg;
+}
+
+primary_global (LVALUE *lval, SYMBOL *symbol)
+{
+    lval->symbol = symbol;
+    lval->indirect = 0;
+    if (symbol->type == STRUCT)
+        lval->tagsym = &tags[symbol->tag];
+    if (symbol->identity != ARRAY
+        && (symbol->identity != VARIABLE
+            || symbol->type != STRUCT)) {
+        if (symbol->identity == POINTER)
+            lval->ptr_type = symbol->type;
+        return FETCH | REGA;
+    }
+    gen_ldaci (symbol->name);
+    lval->indirect = symbol->type;
+    lval->ptr_type = symbol->type;
+    return 0;
+}
+
+primary_function (LVALUE *lval, SYMBOL *symbol)
+{
+    int symbol_table_idx;
+    symbol = &symbol_table[
+        add_global (sname, FUNCTION, CINT, 0, PUBLIC)
+    ];
+    lval->symbol = symbol;
+    lval->indirect = 0;
+    return 0;
+}
+  
 primary (LVALUE * lval)
 {
-    int num[1], k, symbol_table_idx, offset, reg, otag;
+    int num[1]; // XXX Oh, dude! Did the first version know pointers? (smk)
+    int reg, symbol_table_idx;
     SYMBOL *symbol;
-
     lval->ptr_type = 0;
     lval->tagsym = 0;
-
     if (match ("(")) {
-        k = hier1 (lval);
+        reg = hier1 (lval);
         needbrack (")");
-        return k;
+        return reg;
     }
     if (amatch ("sizeof", 6)) 
         return dosizeof (lval);
     if (symname (sname)) {
         if ((symbol_table_idx = find_local (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
-            reg = gen_get_local (symbol);
-            lval->symbol = symbol;
-            lval->indirect = symbol->type;
-            if (symbol->type == STRUCT)
-                lval->tagsym = &tags[symbol->tag];
-            if (symbol->identity == ARRAY ||
-                (symbol->identity == VARIABLE
-                 && symbol->type == STRUCT)) {
-                lval->ptr_type = symbol->type;
-                return reg;
-            }
-            if (symbol->identity == POINTER) {
-                lval->indirect = CINT;
-                lval->ptr_type = symbol->type;
-            }
-            return FETCH | reg;
+            return primary_local (lval, symbol);
         }
         if ((symbol_table_idx = find_global (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];
-            if (symbol->identity != FUNCTION) {
-                lval->symbol = symbol;
-                lval->indirect = 0;
-                if (symbol->type == STRUCT)
-                    lval->tagsym = &tags[symbol->tag];
-                if (symbol->identity != ARRAY
-                    && (symbol->identity != VARIABLE
-                        || symbol->type != STRUCT)) {
-                    if (symbol->identity == POINTER)
-                        lval->ptr_type = symbol->type;
-                    return FETCH | REGA;
-                }
-                gen_ldaci (symbol->name);
-                lval->indirect = symbol->type;
-                lval->ptr_type = symbol->type;
-                return 0;
-            }
+            if (symbol->identity != FUNCTION)
+                return primary_global (lval, symbol);
         }
         blanks ();
         if (ch () != '(')
             error ("undeclared variable");
-        symbol_table_idx = add_global (sname, FUNCTION, CINT, 0, PUBLIC);
-        symbol = &symbol_table[symbol_table_idx];
-        lval->symbol = symbol;
-        lval->indirect = 0;
-        return 0;
+        return primary_function (lval, symbol);
+
     }
     if (constant (num)) {
         lval->symbol = 0;
         lval->indirect = 0;
         return 0;
-    } else {
-        error ("invalid expression");
-        gen_ldaci (0);
-        junk ();
-        return 0;
     }
+    error ("invalid expression");
+    gen_ldaci (0);
+    junk ();
+    return 0;
 }
 
 // true if val1 -> int pointer or int
@@ -197,7 +211,9 @@ number (int val[])
     if (!numeric (c = ch ()))
         return 0;
     if (match ("0x") || match ("0X"))
-        while (numeric (c = ch ()) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+        while (numeric (c = ch ())
+               || (c >= 'a' && c <= 'f')
+               || (c >= 'A' && c <= 'F')) {
             inbyte ();
             k = k * 16 + (numeric (c) ? (c - '0') : ((c & 07) + 9));
     } else {

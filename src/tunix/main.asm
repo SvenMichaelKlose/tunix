@@ -1332,7 +1332,6 @@ err_invalid_bank:
     pha
     jsr bfree
     plx
-    lda lbanks,x
     bne :-
 r:  rts
 .endproc

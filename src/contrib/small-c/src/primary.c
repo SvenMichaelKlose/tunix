@@ -135,7 +135,7 @@ primary (LVALUE * lval)
         }
         blanks ();
         if (ch () != '(')
-            error ("undeclared variable");
+            return error ("undeclared variable");
         return primary_function (lval, symbol);
 
     }
@@ -144,10 +144,9 @@ primary (LVALUE * lval)
         lval->indirect = 0;
         return 0;
     }
-    error ("invalid expression");
     gen_ldaci (0);
     junk ();
-    return 0;
+    return error ("invalid expression");
 }
 
 // true if val1 -> int pointer or int

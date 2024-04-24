@@ -104,10 +104,8 @@ fix_include_name ()
     for (p = line + lptr; *p;)
         *ibp++ = *p++;
     c2 = *(--p);
-    if (c1 == '"' ? (c2 != '"') : (c2 != '>')) {
-        error ("incorrect delimiter");
-        return NULL;
-    }
+    if (c1 == '"' ? (c2 != '"') : (c2 != '>'))
+        return error ("incorrect delimiter");
     *(--ibp) = 0;
     fp = NULL;
     if (c1 == '<' || !(fp = fopen (buf, "r"))) {
@@ -274,10 +272,8 @@ cpp ()
             keepch (ch ());
             gch ();
             while (ch () != '"') {
-                if (!ch ()) {
-                    error ("missing quote");
-                    break;
-                }
+                if (!ch ())
+                    return error ("missing quote");
                 if (ch () == '\\')
                     keepch (gch ());
                 keepch (gch ());
@@ -288,10 +284,8 @@ cpp ()
             keepch ('\'');
             gch ();
             while (ch () != '\'') {
-                if (!ch ()) {
-                    error ("missing apostrophe");
-                    break;
-                }
+                if (!ch ())
+                    return error ("missing apostrophe");
                 if (ch () == '\\')
                     keepch (gch ());
                 keepch (gch ());
@@ -349,7 +343,7 @@ cpp ()
     }
     keepch (0);
     if (mptr >= MPMAX)
-        error ("line too long");
+        return error ("line too long");
     lptr = mptr = 0;
     while (line[lptr++] = mline[mptr++]);
     lptr = 0;

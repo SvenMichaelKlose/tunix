@@ -12,15 +12,15 @@ error (char * msg)
     output = tempfile;
     doerror (msg);
     errcnt++;
+    return 0;
 }
 
 doerror (char *msg)
 {
     int k;
     // print actual source filename 
-    if (finame[inclsp]) {
+    if (finame[inclsp])
         outs (finame[inclsp]);
-    }
     outs (":");
     // print source line number 
     outn (srcln[inclsp]);
@@ -33,13 +33,11 @@ doerror (char *msg)
     outs (line);
     newline ();
     k = 0;
-    while (k < lptr) {
-        if (line[k] == 9)
+    while (k < lptr)
+        if (line[k++] == 9)
             print_tab ();
         else
             outb (' ');
-        k++;
-    }
     outb ('^');
     newline ();
 }

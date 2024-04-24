@@ -124,7 +124,7 @@ getarg (int t)
                     symbol_table[argptr].tag = otag;
                 }
             } else
-                error ("expecting argument name");
+                error ("expected argument name");
         }
         argstk = argstk - INTSIZE;
         if (endst ())

@@ -32,10 +32,8 @@ add_member (char *sname, char identity,
 {
     char   *buffer_ptr;
     SYMBOL *symbol;
-    if (++member >= NUMMEMB) {
-        error ("member table overflow");
-        return 0;
-    }
+    if (++member >= NUMMEMB)
+        return error ("member table overflow");
     symbol = &members[member];
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
@@ -52,10 +50,8 @@ define_struct (char *sname, int storage,
     char *s;
 
     // Allocate info.
-    if (tag >= NUMTAG) {
-        error ("struct table overflow");
-        return 0;
-    }
+    if (tag >= NUMTAG)
+        return error ("struct table overflow");
     symbol = &tags[tag];
 
     // Populate info.

@@ -130,10 +130,8 @@ struct_init (TAG_SYMBOL * tag,
               tag);
         ++member;
         if (!match (",")
-            && (member != (first_member + nmembers))) {
-            error ("struct initialisation incomplete");
-            break;
-        }
+            && (member != (first_member + nmembers)))
+            return error ("struct initialisation incomplete");
     }
 }
 
@@ -145,11 +143,11 @@ init (char *symbol_name, int type,
 {
     int value, number_of_chars;
     if (identity == POINTER)
-        error ("cannot assign to pointer"); // TODO
+        return error ("cannot assign to pointer"); // TODO
     if (quoted_string (&value)) {
         if (identity == VARIABLE
             || !(type & CCHAR))
-            error ("found string: must assign to char pointer or array");
+            return error ("found string: must assign to char pointer or array");
         number_of_chars = litptr - value;
         *dim = *dim - number_of_chars;
         while (number_of_chars > 0) {
@@ -289,10 +287,8 @@ add_global (char *sname, int identity,
     char *buffer_ptr;
     if ((current_symbol_table_idx = find_global (sname)) > -1)
         return current_symbol_table_idx;
-    if (global_table_index >= NUMBER_OF_GLOBALS) {
-        error ("global symbol table overflow");
-        return 0;
-    }
+    if (global_table_index >= NUMBER_OF_GLOBALS)
+        return error ("global symbol table overflow");
     current_symbol_table_idx = global_table_index;
     symbol = &symbol_table[current_symbol_table_idx];
     buffer_ptr = symbol->name;
@@ -316,10 +312,8 @@ add_local (char *sname, int identity,
 
     if ((current_symbol_table_idx = find_local (sname)) > -1)
         return current_symbol_table_idx;
-    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
-        error ("local symbol table overflow");
-        return 0;
-    }
+    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS)
+        return error ("local symbol table overflow");
     current_symbol_table_idx = local_table_index;
     symbol = &symbol_table[current_symbol_table_idx];
     buffer_ptr = symbol->name;

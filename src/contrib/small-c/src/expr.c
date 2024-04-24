@@ -161,10 +161,8 @@ hier1a (LVALUE * lval)
         gen_jump (lab2 = getlabel ());
         def_local (lab1);
         blanks ();
-        if (!match (":")) {
-            error ("missing colon");
-            return 0;
-        }
+        if (!match (":"))
+            return error ("missing colon");
         k = hier1b (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
@@ -679,10 +677,9 @@ hier11 (LVALUE * lval)
         FOREVER {
             if (match ("[")) {
                 if (!ptr) {
-                    error ("can't subscript");
                     junk ();
                     needbrack ("]");
-                    return 0;
+                    return error ("can't subscript");
                 } else if (ptr->identity == POINTER) {
                     k = rvalue (lval, k);
                 } else if (ptr->identity != ARRAY) {

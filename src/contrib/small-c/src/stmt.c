@@ -197,10 +197,8 @@ dodo ()
     addwhile (&ws);
     def_local (ws.body_tab);
     statement (NO);
-    if (!match ("while")) {
-        error ("missing while");
-        return;
-    }
+    if (!match ("while"))
+        return error ("missing while");
     def_local (ws.case_test);
     test (ws.body_tab, TRUE);
     def_local (ws.while_exit);

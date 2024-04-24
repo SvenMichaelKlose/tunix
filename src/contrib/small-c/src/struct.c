@@ -18,40 +18,31 @@ SYMBOL *
 find_member (TAG_SYMBOL * tag, char *sname)
 {
     int member;
-    for (member = tag->member;
-         member < tag->member + tag->num_members;
+    for (member = tag->first_member;
+         member < tag->first_member + tag->num_members;
          member++)
         if (!strcmp (members[member].name, sname))
             return &members[member];
     return 0;
 }
 
+SYMBOL *
 add_member (char *sname, char identity,
-            char type, int offset,
-            int storage_class,
-            int member_size)
+            char type, int struct_size)
 {
-    char *buffer_ptr;
-
-    // Allocate entry in member table.
+    char   *buffer_ptr;
     SYMBOL *symbol;
-    if (member >= NUMMEMB) {
+    if (++member >= NUMMEMB) {
         error ("member table overflow");
         return 0;
     }
     symbol = &members[member];
-
-    // Populate info.
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
     symbol->identity = identity;
     symbol->type = type;
-    symbol->storage = storage_class;
-    symbol->offset = offset;
-    symbol->struct_size = member_size;
-
-    // Step to next free member.
-    member++;
+    symbol->struct_size = struct_size;
+    return symbol;
 }
 
 define_struct (char *sname, int storage,
@@ -71,14 +62,14 @@ define_struct (char *sname, int storage,
     s = symbol->name;
     while (alphanumeric (*s++ = *sname++));
     symbol->size = 0;
-    symbol->member = member;
+    symbol->first_member = member - 1;
 
     // Process members.
     needbrack ("{");
     do {
         do_declarations (storage, symbol, is_struct);
     } while (!match ("}"));
-    symbol->num_members = member - symbol->member;
+    symbol->num_members = member - symbol->first_member + 1;
 
     // Step to next free tag.
     return tag++;

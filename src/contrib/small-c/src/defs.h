@@ -99,19 +99,19 @@ struct symbol {
 #define NULL_TAG (TAG_SYMBOL *)0
 #endif
 
-// Maximum number of members in all structs combined.
+// Maximum number of members in all
+// structs and unions combined.
 #define NUMMEMB     30
 
 // Maximum number of tags.
-// TODO: Seems a little low.
 #define NUMTAG      10
 
-// For unions and structs.
+// Symbol add-on for unions and structs.
 struct tag_symbol {
     char name[NAMESIZE];
     int size;
     int num_members;
-    int member; // First member.
+    int first_member;
 };
 #define TAG_SYMBOL struct tag_symbol
 

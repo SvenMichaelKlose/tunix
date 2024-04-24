@@ -94,50 +94,52 @@ compile (char *file)
     strcpy (finame[0], file);
     // reset source line counter 
     srcln[0] = 0;
-    if (file == NULL || filename_typeof (file) == 'c') {
-        global_table_index = 0;
-        local_table_index = NUMBER_OF_GLOBALS;
-        while_table_index = 0;
-        tag = 0;
-        inclsp =
-            iflevel =
-            skiplevel =
-            swstp = litptr = stkp = errcnt = ncmp = lastst =
-            0;
-        input2 = NULL;
-        cmode = 1;
-        glbflag = 1;
-        nxtlab = 0;
-        litlab = getlabel ();
-        defmac ("SMALLC 1");
-        defmac ("short int");
-        rglobal_table_index = global_table_index;
-        initmac ();
-        if (!file)
-            input = stdin;
-        else if (!openin (file))
-            return;
-        if (!file)
-            output = stdout;
-        else if (!openout ())
-            return;
-        header ();
-        gen_code_segment ();
-        parse ();
-        fclose (input);
-        gen_data_segment ();
-        dumplits ();
-        dumpglbs ();
-        errorsummary ();
-        trailer ();
-        fclose (output);
-        pl ("");
-        errs = errs || errfile;
-    } else {
-        oputs ("Don't understand file ");
+    if (file && filename_typeof (file) != 'c') {
+        oputs ("File name with postfix '.c' expected.");
         oputs (file);
         errs = 1;
+        return;
     }
+
+    global_table_index = 0;
+    local_table_index = NUMBER_OF_GLOBALS;
+    while_table_index = 0;
+    tag = 0;
+    member = -1;
+    inclsp =
+        iflevel =
+        skiplevel =
+        swstp = litptr = stkp = errcnt = ncmp = lastst =
+        0;
+    input2 = NULL;
+    cmode = 1;
+    glbflag = 1;
+    nxtlab = 0;
+    litlab = getlabel ();
+    defmac ("SMALLC 1");
+    defmac ("short int");
+    rglobal_table_index = global_table_index;
+    initmac ();
+    if (!file)
+        input = stdin;
+    else if (!openin (file))
+        return;
+    if (!file)
+        output = stdout;
+    else if (!openout ())
+        return;
+    header ();
+    gen_code_segment ();
+    parse ();
+    fclose (input);
+    gen_data_segment ();
+    dumplits ();
+    dumpglbs ();
+    errorsummary ();
+    trailer ();
+    fclose (output);
+    pl ("");
+    errs = errs || errfile;
 }
 
 frontend_version ()
@@ -291,7 +293,7 @@ dump_struct (SYMBOL * symbol, int position)
     newline ();
     for (i = 0; i < num_members; i++) {
         // i is the index of current member, get type 
-        SYMBOL member = members[tags[symbol->tag].  member + i];
+        SYMBOL member = members[tags[symbol->tag].first_member + i];
         // Array members need proper
         // storage space (the compiler
         // currently doesn't allow

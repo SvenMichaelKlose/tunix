@@ -52,7 +52,7 @@ add_data_initials (char *symbol_name, int type, int value,
             initials_table[initials_idx].dim %
             tag->num_members;
         int member_type =
-            members[tag->member + index].type;
+            members[tag->first_member + index].type;
         // add it recursively.
         add_data_initials (symbol_name, member_type, value, 0);
     } else {
@@ -102,11 +102,11 @@ get_item_at (char *symbol_name,
             int index = (position / num_members) * tag->size;
             // Move to required member.
             for (i = 0; i < (position % num_members); i++) {
-                type = members[tag->member + i].type;
+                type = members[tag->first_member + i].type;
                 index += (type & CCHAR) ? 1 : INTSIZE;
             }
             // Get value.
-            type = members[tag->member + i].type;
+            type = members[tag->first_member + i].type;
             result = (type & CCHAR) ?
                 initials_data_table[initials_data_idx + index] :
                 (initials_data_table [initials_data_idx + index] << 8)

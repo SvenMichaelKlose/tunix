@@ -19,6 +19,7 @@ declare_global (int type, int storage,
 {
     int dim, identity;
     char sname[NAMESIZE];
+    SYMBOL *symbol;
 
     FOREVER {
         FOREVER {
@@ -44,21 +45,19 @@ declare_global (int type, int storage,
                 if (type == STRUCT)
                     symbol_table[current_symbol_table_idx].tag = otag;
                 break;
-            } if (is_struct) {
-                // structure member, mtag->size is offset 
-                add_member (sname, identity, type, mtag->size, storage, (type & CINT) ? dim * INTSIZE : dim);
-                // store (correctly scaled) size of member in tag table entry 
-                if (identity == POINTER)
-                    type = CINT;
-                scale_const (type, otag, &dim);
+            }
+            symbol = add_member (sname, identity, type, storage,
+                                 type & CINT ? dim * INTSIZE : dim);
+            // store (correctly scaled) size of member.
+            if (identity == POINTER)
+                type = CINT;
+            scale_const (type, otag, &dim);
+            if (is_struct) {
+                symbol->offset = mtag->size;
+                symbol->struct_size = (type & CINT) ? dim * INTSIZE : dim;
                 mtag->size += dim;
             } else {
-                // union member, offset is always zero 
-                add_member (sname, identity, type, 0, storage, (type & CINT) ? dim * INTSIZE : dim);
-                // store maximum member size in tag table entry 
-                if (identity == POINTER)
-                    type = CINT;
-                scale_const (type, otag, &dim);
+                symbol->offset = 0;
                 if (mtag->size < dim)
                     mtag->size = dim;
             }
@@ -116,20 +115,22 @@ initials (char *symbol_name, int type,
     return identity;
 }
 
-// Initialise structure.
 struct_init (TAG_SYMBOL * tag,
              char *symbol_name)
 {
-    int dim, member;
-
-    member = tag->member;
-    while (member < tag->member + tag->num_members) {
+    int dummy_dim;
+    int member, nmembers, first_member;
+    member = first_member = tag->first_member;
+    nmembers = tag->num_members;
+    while (member < first_member + nmembers) {
         init (symbol_name,
-              members[tag->member + member].type,
-              members[tag->member + member].identity, &dim, tag);
+              members[first_member + member].type,
+              members[first_member + member].identity,
+              &dummy_dim,
+              tag);
         ++member;
         if (!match (",")
-            && (member != (tag->member + tag->num_members))) {
+            && (member != (first_member + nmembers))) {
             error ("struct initialisation incomplete");
             break;
         }

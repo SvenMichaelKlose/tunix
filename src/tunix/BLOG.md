@@ -1,6 +1,15 @@
 TUNIX blog
 ==========
 
+# 2024-04-24 02:34
+
+Can mass fork, but only up to 12
+processes.  There're isues with memory
+allocation.  Am happy enough with how
+it got at this time of day.
+
+Good night!
+
 # 2024-04-23 16:08
 
 Although one of the main things on my

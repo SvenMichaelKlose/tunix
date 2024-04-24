@@ -10,7 +10,7 @@
 
 #define MAX_PROCS   32
 
-#define ALLOC_AROUND_FORK   1
+#define ALLOC_AROUND_FORK   0
 
 char processes[MAX_PROCS];
 char banks[256];
@@ -24,8 +24,7 @@ debug (void)
 char
 test_alloc0 (char round)
 {
-    int i, mi;
-    char bank;
+    char i, mi, bank;
 
     printf ("## (Round %d.)\n", round);
 
@@ -38,17 +37,19 @@ test_alloc0 (char round)
         printf ("$%02x ", bank);
     }
     printf ("\n%d banks allocated.", i);
-    printf ("\nIntermediate process list:\n");
+    printf ("\nIntermediate status:\n");
     tunix_proc_list ();
+    tunix_mem_info ();
 
     printf ("\n### Freeing.\n");
-    for (mi = i, i = 0; i < mi; i++) {
+    mi = i;
+    for (i = 0; i < mi; i++) {
         bank = banks[i];
         printf ("$%02x ", bank);
         tunix_free (bank);
     }
 
-    printf ("\n## Done.\n");
+    printf ("\n## Done. Max %d banks.\n", mi);
     return mi;
 }
 
@@ -99,12 +100,14 @@ test_fork (char nprocs)
 
     printf ("## %d children at once.\n",
             nprocs);
+    tunix_mem_info ();
 
     for (i = 0; i < nprocs; i++) {
         tunix_mode (0);
         printf ("Forking %d.\n", i + 1);
         tunix_mode (1);
         pid = make_baby (rand () % nprocs + 1);
+        tunix_mem_info ();
         if (pid < 1)
             break;
         processes[i] = pid;
@@ -148,6 +151,7 @@ test_fork (char nprocs)
     }
     printf ("## %d children done.\n",
             nprocs);
+    tunix_mem_info ();
 #endif
 }
 
@@ -157,8 +161,9 @@ test_forks (char maxprocs)
     char nprocs;
 
     printf ("# Forks\n");
-    printf ("Initial process list:\n");
+    printf ("Initial status:\n");
     tunix_proc_list ();
+    tunix_mem_info ();
 
     for (nprocs = 0;
          nprocs < maxprocs;
@@ -172,6 +177,7 @@ main (void)
     printf ("Doing userland tests\n");
     printf ("Initial process list:\n");
     tunix_proc_list ();
+    tunix_mem_info ();
 
     test_alloc ();
     test_forks (MAX_PROCS);

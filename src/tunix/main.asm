@@ -1283,8 +1283,10 @@ n:  ply
 
 .export free_lbank
 .proc free_lbank
+    cpy #0
+    beq r
     free_lbank_y
-    rts
+r:  rts
 .endproc
 
 .export free_lbank_a
@@ -1748,7 +1750,7 @@ r:  rts
     jsr unref_parent_banks
     jsr increment_glfn_refs
     leave_procdata
-:   rts
+    rts
 .endproc
 
 ; Fork current process.

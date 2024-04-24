@@ -5,14 +5,10 @@
 
 find_tag (char *sname)
 {
-    int index;
-
-    index = 0;
-    while (index < tag) {
-        if (astreq (sname, tags[index].name, NAMEMAX))
-            return index;
-        ++index;
-    }
+    int i;
+    for (i = 0; i < tag; i++)
+        if (astreq (sname, tags[i].name, NAMEMAX))
+            return i;
     return -1;
 }
 
@@ -22,13 +18,11 @@ SYMBOL *
 find_member (TAG_SYMBOL * tag, char *sname)
 {
     int member;
-
-    member = tag->member;
-    while (member < tag->member + tag->num_members) {
+    for (member = tag->member;
+         member < tag->member + tag->num_members;
+         member++)
         if (!strcmp (members[member].name, sname))
             return &members[member];
-        member++;
-    }
     return 0;
 }
 
@@ -46,18 +40,17 @@ add_member (char *sname, char identity,
         return 0;
     }
     symbol = &members[member];
-    // Copy over name.
+
+    // Populate info.
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
-    // Save type info.
     symbol->identity = identity;
     symbol->type = type;
     symbol->storage = storage_class;
     symbol->offset = offset;
-    // TODO: Rename struct_size to compound_size.
     symbol->struct_size = member_size;
 
-    // Step to free entry for next member.
+    // Step to next free member.
     member++;
 }
 
@@ -73,24 +66,20 @@ define_struct (char *sname, int storage,
         return 0;
     }
     symbol = &tags[tag];
-    // Copy over name.
+
+    // Populate info.
     s = symbol->name;
     while (alphanumeric (*s++ = *sname++));
-    // TODO: Not sure if this means something.
     symbol->size = 0;
-    // Set index of first member in
-    // member table.
     symbol->member = member;
 
     // Process members.
     needbrack ("{");
     do {
-        do_declarations (storage,
-                         &tags[tag],
-                         is_struct);
+        do_declarations (storage, symbol, is_struct);
     } while (!match ("}"));
-
-    // Step to next free tag for next struct.
     symbol->num_members = member - symbol->member;
+
+    // Step to next free tag.
     return tag++;
 }

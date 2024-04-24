@@ -4,13 +4,14 @@
 #include "ir.h"
 
 // Declare a static variable.
-// mtag: Tag of struct whose members are
-//       being declared, or 0.
-// otag: Tag of struct object being
-//       declared.  Only used with mtag.
 // is_struct:
 //       Tells if mtag is a struct or
 //       union or no meaning.
+// mtag: Tag of struct whose members are
+//       being declared, or 0.
+//       (parent struct).
+// otag: Tag of struct object being
+//       declared.  Only used with mtag.
 declare_global (int type, int storage,
                 TAG_SYMBOL * mtag,
                 int otag,
@@ -43,7 +44,7 @@ declare_global (int type, int storage,
                 if (type == STRUCT)
                     symbol_table[current_symbol_table_idx].tag = otag;
                 break;
-            } else if (is_struct) {
+            } if (is_struct) {
                 // structure member, mtag->size is offset 
                 add_member (sname, identity, type, mtag->size, storage, (type & CINT) ? dim * INTSIZE : dim);
                 // store (correctly scaled) size of member in tag table entry 
@@ -79,9 +80,8 @@ initials (char *symbol_name, int type,
     if (!dim)
         dim_unknown = 1;
     if (!(type & CCHAR) && !(type & CINT)
-        && !(type == STRUCT)) {
+        && !(type == STRUCT))
         error ("unsupported storage size");
-    }
     if (match ("=")) {
         // an array or struct 
         if (match ("{")) {
@@ -97,17 +97,11 @@ initials (char *symbol_name, int type,
                     if (identity == ARRAY && type == STRUCT) {
                         // array of struct 
                         needbrack ("{");
-                        struct_init (&tags[otag],
-                                     symbol_name);
+                        struct_init (&tags[otag], symbol_name);
                         --dim;
                         needbrack ("}");
-                    } else {
-                        if (init
-                            (symbol_name, type, identity,
-                             &dim, 0)) {
-                            dim_unknown++;
-                        }
-                    }
+                    } else if (init (symbol_name, type, identity, &dim, 0))
+                        dim_unknown++;
                     if (!match (","))
                         break;
                 }
@@ -126,8 +120,7 @@ initials (char *symbol_name, int type,
 struct_init (TAG_SYMBOL * tag,
              char *symbol_name)
 {
-    int dim;
-    int member;
+    int dim, member;
 
     member = tag->member;
     while (member < tag->member + tag->num_members) {
@@ -137,7 +130,7 @@ struct_init (TAG_SYMBOL * tag,
         ++member;
         if (!match (",")
             && (member != (tag->member + tag->num_members))) {
-            error ("struct initialisaton out of data");
+            error ("struct initialisation incomplete");
             break;
         }
     }
@@ -151,7 +144,7 @@ init (char *symbol_name, int type,
 {
     int value, number_of_chars;
     if (identity == POINTER)
-        error ("cannot assign to pointer");
+        error ("cannot assign to pointer"); // TODO
     if (quoted_string (&value)) {
         if (identity == VARIABLE
             || !(type & CCHAR))
@@ -188,10 +181,9 @@ declare_local (int typ, int stclass,
         FOREVER {
             if (endst ())
                 return;
-            if (match ("*"))
-                j = POINTER;
-            else
-                j = VARIABLE;
+            j = match ("*") ?
+                POINTER :
+                VARIABLE;
             if (!symname (sname))
                 illname ();
             if (-1 != find_local (sname))
@@ -200,19 +192,18 @@ declare_local (int typ, int stclass,
                 k = needsub ();
                 if (k) {
                     j = ARRAY;
-                    if (typ & CINT) {
-                        k = k * INTSIZE;
-                    } else if (typ == STRUCT) {
-                        k = k * tags[otag].size;
-                    }
+                    if (typ & CINT)
+                        k *= INTSIZE;
+                    else if (typ == STRUCT)
+                        k *= tags[otag].size;
                 } else {
                     j = POINTER;
                     k = INTSIZE;
                 }
             } else {
-                if (j == POINTER) {
+                if (j == POINTER)
                     k = INTSIZE;
-                } else {
+                else {
                     switch (typ) {
                     case CCHAR:
                     case UCHAR:
@@ -228,17 +219,12 @@ declare_local (int typ, int stclass,
             }
             if (stclass != LSTATIC) {
                 stkp = gen_modify_stack (stkp - k);
-                // local structs need their tag set 
-                current_symbol_table_idx =
-                    add_local (sname, j, typ, stkp, AUTO);
-                if (typ == STRUCT)
-                    symbol_table[current_symbol_table_idx].tag = otag;
-            } else {
-                // local structs need their tag set 
+                current_symbol_table_idx = add_local (sname, j, typ, stkp, AUTO);
+            } else
                 current_symbol_table_idx = add_local (sname, j, typ, k, LSTATIC);
-                if (typ == STRUCT)
-                    symbol_table[current_symbol_table_idx].  tag = otag;
-            }
+            // local structs need their tag set 
+            if (typ == STRUCT)
+                symbol_table[current_symbol_table_idx].tag = otag;
             break;
         }
         if (!match (","))

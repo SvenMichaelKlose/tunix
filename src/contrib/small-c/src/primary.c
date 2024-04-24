@@ -4,9 +4,64 @@
 #include "ir-codes.h"
 #include "ir.h"
 
+char sname[NAMESIZE];
+
+dosizeof (LVALUE * lval)
+{
+    int otag, offset, symbol_table_idx;
+    SYMBOL *symbol;
+    needbrack ("(");
+    outb (IR_LDACI);
+    if (amatch ("int", 3)
+        || amatch ("unsigned int", 12)
+        || amatch ("unsigned", 8)) {
+        blanks ();
+        // Pointers and ints are both INTSIZE.
+        match ("*");
+        outn (INTSIZE);
+    } else if (amatch ("char", 4)
+               || amatch ("unsigned char", 13)) {
+        // If sizeof a char pointer, output INTSIZE.
+        outn (match ("*") ?
+                INTSIZE :
+                1);
+    } else if (amatch ("struct", 6)) {
+        if (!symname (sname))
+            illname ();
+        if ((otag = find_tag (sname)) == -1)
+            error ("struct tag undefined");
+        // Write out struct size, or INTSIZE
+        // if struct pointer .
+        outn (match ("*") ?
+                INTSIZE :
+                tags[otag].size);
+    } else if (symname (sname)) {
+        if (((symbol_table_idx = find_local (sname)) > -1)
+            || ((symbol_table_idx = find_global (sname)) > -1)) {
+            symbol = &symbol_table[symbol_table_idx];
+            if (symbol->storage == LSTATIC)
+                error ("sizeof local static");
+            offset = symbol->offset;
+            if (symbol->type & CINT
+                || symbol->identity == POINTER)
+                offset *= INTSIZE;
+            else if (symbol->type == STRUCT)
+                offset *= tags[symbol->tag].size;
+            outn (offset);
+        } else {
+            error ("sizeof undeclared variable");
+            outn (0);
+        }
+    } else
+        error ("sizeof only on type or variable");
+    needbrack (")");
+    lval->symbol = 0;
+    lval->indirect = 0;
+    return 0;
+}
+
 primary (LVALUE * lval)
 {
-    char sname[NAMESIZE];
     int num[1], k, symbol_table_idx, offset, reg, otag;
     SYMBOL *symbol;
 
@@ -18,58 +73,8 @@ primary (LVALUE * lval)
         needbrack (")");
         return k;
     }
-    if (amatch ("sizeof", 6)) {
-        needbrack ("(");
-        outb (IR_LDACI);
-        if (amatch ("int", 3)
-            || amatch ("unsigned int", 12)
-            || amatch ("unsigned", 8)) {
-            blanks ();
-            // Pointers and ints are both INTSIZE.
-            match ("*");
-            outn (INTSIZE);
-        } else if (amatch ("char", 4)
-                   || amatch ("unsigned char", 13)) {
-            // If sizeof a char pointer, output INTSIZE.
-            if (match ("*"))
-                outn (INTSIZE);
-            else
-                outn (1);
-        } else if (amatch ("struct", 6)) {
-            if (!symname (sname))
-                illname ();
-            if ((otag = find_tag (sname)) == -1)
-                error ("struct tag undefined");
-            // Write out struct size, or INTSIZE
-            // if struct pointer .
-            if (match ("*"))
-                outn (INTSIZE);
-            else
-                outn (tags[otag].size);
-        } else if (symname (sname)) {
-            if (((symbol_table_idx = find_local (sname)) > -1)
-                || ((symbol_table_idx = find_global (sname)) > -1)) {
-                symbol = &symbol_table[symbol_table_idx];
-                if (symbol->storage == LSTATIC)
-                    error ("sizeof local static");
-                offset = symbol->offset;
-                if (symbol->type & CINT
-                    || symbol->identity == POINTER)
-                    offset *= INTSIZE;
-                else if (symbol->type == STRUCT)
-                    offset *= tags[symbol->tag].size;
-                outn (offset);
-            } else {
-                error ("sizeof undeclared variable");
-                outn (0);
-            }
-        } else
-            error ("sizeof only on type or variable");
-        needbrack (")");
-        lval->symbol = 0;
-        lval->indirect = 0;
-        return 0;
-    }
+    if (amatch ("sizeof", 6)) 
+        return dosizeof (lval);
     if (symname (sname)) {
         if ((symbol_table_idx = find_local (sname)) > -1) {
             symbol = &symbol_table[symbol_table_idx];

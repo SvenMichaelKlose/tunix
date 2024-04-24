@@ -102,25 +102,22 @@ hier1 (LVALUE * lval)
                 gen_mul ();
                 break;
             case '/':
-                if (nosign (lval) || nosign (lval2)) {
+                if (nosign (lval) || nosign (lval2))
                     gen_udiv ();
-                } else {
+                else
                     gen_div ();
-                }
                 break;
             case '%':
-                if (nosign (lval) || nosign (lval2)) {
+                if (nosign (lval) || nosign (lval2))
                     gen_umod ();
-                } else {
+                else
                     gen_mod ();
-                }
                 break;
             case '>':
-                if (nosign (lval)) {
+                if (nosign (lval))
                     gen_lsr ();
-                } else {
+                else
                     gen_asr ();
-                }
                 break;
             case '<':
                 gen_asl ();
@@ -137,8 +134,8 @@ hier1 (LVALUE * lval)
             }
             store (lval);
             return 0;
-        } else
-            return k;
+        }
+        return k;
     }
 }
 
@@ -154,7 +151,9 @@ hier1a (LVALUE * lval)
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
-    FOREVER if (match ("?")) {
+    FOREVER {
+        if (!match ("?"))
+            return 0;
         gen_test_jump (lab1 = getlabel (), FALSE);
         k = hier1b (lval2);
         if (k & FETCH)
@@ -170,8 +169,7 @@ hier1a (LVALUE * lval)
         if (k & FETCH)
             k = rvalue (lval2, k);
         def_local (lab2);
-    } else
-        return 0;
+    }
 }
 
 // "||"
@@ -186,15 +184,16 @@ hier1b (LVALUE * lval)
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
-    FOREVER if (match ("||")) {
+    FOREVER {
+        if (!match ("||"))
+            return 0;
         gen_test_jump (lab = getlabel (), TRUE);
         k = hier1c (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
         def_local (lab);
         gen_tobool ();
-    } else
-        return 0;
+    }
 }
 
 // "&&"
@@ -209,15 +208,16 @@ hier1c (LVALUE * lval)
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
-    FOREVER if (match ("&&")) {
+    FOREVER {
+        if (!match ("&&"))
+            return 0;
         gen_test_jump (lab = getlabel (), FALSE);
         k = hier2 (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
         def_local (lab);
         gen_tobool ();
-    } else
-        return 0;
+    }
 }
 
 // "|"
@@ -404,7 +404,6 @@ hier6 (LVALUE * lval)
             return 0;
         blanks ();
     }
-
 }
 
 // "<<" and ">>"
@@ -428,11 +427,10 @@ hier7 (LVALUE * lval)
             k = hier8 (lval2);
             if (k & FETCH)
                 k = rvalue (lval2, k);
-            if (nosign (lval)) {
+            if (nosign (lval))
                 gen_lsr ();
-            } else {
+            else
                 gen_asr ();
-            }
         } else if (sstreq ("<<") && !sstreq ("<<=")) {
             inbyte ();
             inbyte ();
@@ -445,7 +443,6 @@ hier7 (LVALUE * lval)
             return 0;
         blanks ();
     }
-
 }
 
 // "+" and "-"
@@ -469,11 +466,10 @@ hier8 (LVALUE * lval)
             if (k & FETCH)
                 k = rvalue (lval2, k);
             // if left is pointer and right is int, scale right 
-            if (dbltest (lval, lval2)) {
+            if (dbltest (lval, lval2))
                 gen_mul_const (lval->ptr_type,
                               lval->tagsym ? lval->tagsym->
                               size : INTSIZE);
-            }
             // will scale left if right int pointer and left int 
             gen_add (lval, lval2);
             result (lval, lval2);
@@ -486,17 +482,15 @@ hier8 (LVALUE * lval)
                pointer - pointer, thus,
                in first case, int is scaled up,
                in second, result is scaled down. */
-            if (dbltest (lval, lval2)) {
+            if (dbltest (lval, lval2))
                 gen_mul_const (lval->ptr_type,
                               lval->tagsym ? lval->tagsym->
                               size : INTSIZE);
-            }
             gen_sub ();
             // if both pointers, scale result 
             if (lval->ptr_type & CINT
-                && lval2->ptr_type & CINT) {
+                && lval2->ptr_type & CINT)
                 gen_div2 ();   // divide by intsize 
-            }
             result (lval, lval2);
         } else
             return 0;
@@ -530,25 +524,22 @@ hier9 (LVALUE * lval)
             k = hier10 (lval2);
             if (k & FETCH)
                 k = rvalue (lval2, k);
-            if (nosign (lval) || nosign (lval2)) {
+            if (nosign (lval) || nosign (lval2))
                 gen_udiv ();
-            } else {
+            else
                 gen_div ();
-            }
         } else if (match ("%")) {
             gen_push (k);
             k = hier10 (lval2);
             if (k & FETCH)
                 k = rvalue (lval2, k);
-            if (nosign (lval) || nosign (lval2)) {
+            if (nosign (lval) || nosign (lval2))
                 gen_umod ();
-            } else {
+            else
                 gen_mod ();
-            }
         } else
             return 0;
     }
-
 }
 
 // "++", "--" and unary "-"
@@ -668,7 +659,6 @@ hier10 (LVALUE * lval)
         } else
             return k;
     }
-
 }
 
 // Array subscript
@@ -687,84 +677,80 @@ hier11 (LVALUE * lval)
         || (ch () == '-'
             && nch () == '>'))
         FOREVER {
-        if (match ("[")) {
-            if (!ptr) {
-                error ("can't subscript");
-                junk ();
+            if (match ("[")) {
+                if (!ptr) {
+                    error ("can't subscript");
+                    junk ();
+                    needbrack ("]");
+                    return 0;
+                } else if (ptr->identity == POINTER) {
+                    k = rvalue (lval, k);
+                } else if (ptr->identity != ARRAY) {
+                    error ("can't subscript");
+                    k = 0;
+                }
+                gen_push (k);
+                expression (YES);
                 needbrack ("]");
-                return 0;
-            } else if (ptr->identity == POINTER) {
-                k = rvalue (lval, k);
-            } else if (ptr->identity != ARRAY) {
-                error ("can't subscript");
-                k = 0;
-            }
-            gen_push (k);
-            expression (YES);
-            needbrack ("]");
-            gen_mul_const (ptr->type,
-                          tags[ptr->tag].size);
-            gen_add (NULL, NULL);
-            //lval->symbol = 0; 
-            lval->indirect = ptr->type;
-            lval->ptr_type = 0;
-            k = FETCH | REGA;
-        } else if (match ("(")) {
-            if (!ptr) {
-                callfunction (0);
-            } else if (ptr->identity != FUNCTION) {
-                k = rvalue (lval, k);
-                callfunction (0);
-            } else {
-                callfunction (ptr);
-            }
-            lval->symbol = 0;
-            k = 0;
-        } else if ((direct = match (".")) || match ("->")) {
-            if (!lval->tagsym) {
-                error ("can't take member");
-                junk ();
-                return 0;
-            }
-            if (!symname (sname) ||
-                (!(ptr = find_member (lval->tagsym, sname)))) {
-                error ("unknown member");
-                junk ();
-                return 0;
-            }
-            if ((k & FETCH) && !direct)
-                k = rvalue (lval, k);
-            if (k == REGB)
-                gen_swap ();
-
-            // move pointer from struct begin to struct member 
-
-            gen_add_const (ptr->offset);
-            lval->symbol = ptr;
-            // lval->indirect = lval->val_type = ptr->type 
-            lval->indirect = ptr->type;
-            lval->ptr_type = 0;
-            lval->tagsym = NULL_TAG;
-            if (ptr->type == STRUCT) {
-                lval->tagsym = &tags[ptr->tag];
-            }
-            if (ptr->identity == POINTER) {
-                lval->indirect = CINT;
-                lval->ptr_type = ptr->type;
-                //lval->val_type = CINT; 
-            }
-            if (ptr->identity == ARRAY ||
-                (ptr->type == STRUCT
-                 && ptr->identity == VARIABLE)) {
-                // array or struct 
-                lval->ptr_type = ptr->type;
-                //lval->val_type = CINT; 
-                k = 0;
-            } else {
+                gen_mul_const (ptr->type,
+                              tags[ptr->tag].size);
+                gen_add (NULL, NULL);
+                //lval->symbol = 0; 
+                lval->indirect = ptr->type;
+                lval->ptr_type = 0;
                 k = FETCH | REGA;
-            }
-        } else
-            return k;
+            } else if (match ("(")) {
+                if (!ptr)
+                    callfunction (0);
+                else if (ptr->identity != FUNCTION) {
+                    k = rvalue (lval, k);
+                    callfunction (0);
+                } else
+                    callfunction (ptr);
+                lval->symbol = 0;
+                k = 0;
+            } else if ((direct = match (".")) || match ("->")) {
+                if (!lval->tagsym) {
+                    error ("can't take member");
+                    junk ();
+                    return 0;
+                }
+                if (!symname (sname) ||
+                    (!(ptr = find_member (lval->tagsym, sname)))) {
+                    error ("unknown member");
+                    junk ();
+                    return 0;
+                }
+                if ((k & FETCH) && !direct)
+                    k = rvalue (lval, k);
+                if (k == REGB)
+                    gen_swap ();
+
+                // move pointer from struct begin to struct member 
+                gen_add_const (ptr->offset);
+                lval->symbol = ptr;
+                // lval->indirect = lval->val_type = ptr->type 
+                lval->indirect = ptr->type;
+                lval->ptr_type = 0;
+                lval->tagsym = NULL_TAG;
+                if (ptr->type == STRUCT)
+                    lval->tagsym = &tags[ptr->tag];
+                if (ptr->identity == POINTER) {
+                    lval->indirect = CINT;
+                    lval->ptr_type = ptr->type;
+                    //lval->val_type = CINT; 
+                }
+                if (ptr->identity == ARRAY ||
+                    (ptr->type == STRUCT
+                     && ptr->identity == VARIABLE)) {
+                    // array or struct 
+                    lval->ptr_type = ptr->type;
+                    //lval->val_type = CINT; 
+                    k = 0;
+                } else
+                    k = FETCH | REGA;
+            } else
+                return k;
         }
     if (!ptr)
         return k;

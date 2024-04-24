@@ -1,6 +1,3 @@
-.SUFFIXES:      .o .c .c~ .h .h~
-.PRECIOUS:      scclib.a
-
 TARGDIR = /home/notebook/Public/work/smallCextended/lib
 INCDIR = "./include/"
 

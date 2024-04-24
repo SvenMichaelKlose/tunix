@@ -1,4 +1,4 @@
-; UNDER ACTIVE CONSTRUCTION!
+.include "../6502/convenience.mac"
 
     .zeropage
 
@@ -125,6 +125,17 @@ name:
     sta regah
 .endmacro
 
+; B += A
+.macro vaddb
+    lda regbl
+    clc
+    adc regal
+    sta regbl
+    lda regbh
+    adc regal
+    sta regbh
+.endmacro
+
 ; A -= B
 .macro vsub
     lda regal
@@ -143,14 +154,14 @@ name:
 :
 .endmacro
 
-.macro vgetchar
+.macro vgetc
     ldy #0
     sta regah
     lda (regb),y
     lda regal
 .endmacro
 
-.macro vgetuchar
+.macro vgetuc
     ldy #0
     lda (regb),y
     sta regal
@@ -159,7 +170,7 @@ name:
 :   sty regah
 .endmacro
 
-.macro vgetint
+.macro vgeti
     ldy #0
     lda (regb),y
     sta regal
@@ -168,13 +179,13 @@ name:
     sta regah
 .endmacro
 
-.macro vputchar
+.macro vputc
     ldy #0
     lda regal
     sta (regb),y
 .endmacro
 
-.macro vputint
+.macro vputi
     ldy #0
     lda regal
     sta (regb),y

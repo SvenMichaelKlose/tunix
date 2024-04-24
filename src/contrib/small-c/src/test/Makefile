@@ -6,7 +6,8 @@ CA65 = ca65
 LD65 = ld65
 
 SRC = \
-	test-empty-fun.c
+	test-empty-fun.c \
+	test-add1.c
 
 PRGS = $(addsuffix .prg, $(basename $(SRC)))
 

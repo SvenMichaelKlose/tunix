@@ -8,7 +8,7 @@ int argtop;
 // Called from parse(), this routine
 // tries to make a function out of what
 // follows.
-// Modified version by  P.L. Woods.
+// Modified version by P.L. Woods.
 newfunc ()
 {
     char n[NAMESIZE];
@@ -20,15 +20,16 @@ newfunc ()
         kill ();
         return;
     }
+    // Reuse symbol entry, if it's a function.
     if ((idx = find_global (n)) > -1) {
-        if (symbol_table[idx].identity != FUNCTION)
-            multidef (n);
-        else if (symbol_table[idx].offset == FUNCTION)
+        if (symbol_table[idx].identity != FUNCTION
+            || symbol_table[idx].offset == FUNCTION)
             multidef (n);
         else
             symbol_table[idx].offset = FUNCTION;
     } else
         add_global (n, FUNCTION, CINT, FUNCTION, PUBLIC);
+
     if (!match ("("))
         error ("missing open paren");
     def_global (n);
@@ -50,10 +51,9 @@ newfunc ()
                 junk ();
             }
             blanks ();
-            if (!streq (line + lptr, ")")) {
-                if (!match (","))
-                    error ("expected comma");
-            }
+            if (!streq (line + lptr, ")")
+                && !match (","))
+                error ("expected comma");
             if (endst ())
                 break;
         }
@@ -93,25 +93,15 @@ getarg (int t)
     FOREVER {
         if (!argstk)
             return;
-        // If a struct is being passed,
-        // its tag must be read in
-        // before checking if it is a
-        // pointer.
         if (t == STRUCT) {
-            if (!symname (n)) {
-                // Make sure tag doesn't
-                // contain odd symbols,
-                // etc.
+            if (!symname (n))
                 illname ();
-            }
-            // struct tag undefined 
             if ((otag = find_tag (n)) == -1)
                 error ("struct tag undefined");
         }
-        if (match ("*"))
-            j = POINTER;
-        else
-            j = VARIABLE;
+        j = match ("*") ?
+                POINTER :
+                VARIABLE;
         if (!(legalname = symname (n)))
             illname ();
         if (match ("[")) {
@@ -129,12 +119,8 @@ getarg (int t)
                 symbol_table[argptr].offset = address;
                 // set tag for struct arguments 
                 if (t == STRUCT) {
-                    if (j != POINTER) {
-                        // because each argument takes exactly two bytes on the
-                        // stack, whole structs can't be passed to functions */
-                        error
-                            ("only struct pointers, not structs, can be passed to functions");
-                    }
+                    if (j != POINTER)
+                        error ("only struct pointers, not structs, can be passed to functions");
                     symbol_table[argptr].tag = otag;
                 }
             } else
@@ -159,9 +145,9 @@ doAnsiArguments ()
     argtop = argstk;
     argstk = 0;
     FOREVER {
-        if (type) {
+        if (type)
             doLocalAnsiArgument (type);
-        } else {
+        else {
             error ("wrong number args");
             break;
         }
@@ -187,25 +173,20 @@ doLocalAnsiArgument (int type)
         if ((otag = find_tag (symbol_name)) == -1)
             error ("struct tag undefined");
     }
-    if (match ("*"))
-        identity = POINTER;
-    else
-        identity = VARIABLE;
+    identity = match ("*") ?
+        POINTER :
+        VARIABLE;
     if (symname (symbol_name)) {
-        if (find_local (symbol_name) > -1) {
+        if (find_local (symbol_name) > -1)
             multidef (symbol_name);
-        } else {
+        else {
             argptr = add_local (symbol_name, identity, type, 0, AUTO);
             argstk = argstk + INTSIZE;
             ptr = local_table_index;
             // if argument is a struct, properly set the argument's tag.
             if (type == STRUCT) {
-                if (identity != POINTER) {
-                    // Because each argument takes exactly two bytes
-                    // on the stack, whole structs can't be passed to functions.
-                    error
-                        ("only struct pointers, not structs, can be passed to functions");
-                }
+                if (identity != POINTER)
+                    error ("only struct pointers, not structs, can be passed to functions");
                 symbol_table[argptr].tag = otag;
             }
             // modify stack offset as we push more params 
@@ -221,11 +202,9 @@ doLocalAnsiArgument (int type)
         junk ();
     }
     if (match ("[")) {
-        while (inbyte () != ']') {
-            if (endst ()) {
+        while (inbyte () != ']')
+            if (endst ())
                 break;
-            }
-        }
         identity = POINTER;
         symbol_table[argptr].identity = identity;
     }

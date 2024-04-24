@@ -83,11 +83,10 @@ readline ()
         // increment source line number
         // of actual file 
         srcln[inclsp]++;
-        if (k <= 0)
-            if (input2 != NULL) {
-                input2 = inclstk[--inclsp];
-                fclose (unit);
-            }
+        if (k <= 0 && input2 != NULL) {
+            input2 = inclstk[--inclsp];
+            fclose (unit);
+        }
         // Write source line as comment.
         if (lptr) {
             if (ctext & cmode)

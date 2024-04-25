@@ -99,10 +99,9 @@ primary_global (LVALUE *lval, SYMBOL *symbol)
     return 0;
 }
 
-primary_function (LVALUE *lval, SYMBOL *symbol)
+primary_function (LVALUE *lval, char *sname)
 {
-    symbol = add_global (sname, FUNCTION, CINT, 0, PUBLIC);
-    lval->symbol = symbol;
+    lval->symbol = add_global (sname, FUNCTION, CINT, 0, PUBLIC);
     lval->indirect = 0;
     return 0;
 }
@@ -134,7 +133,7 @@ primary (LVALUE * lval)
         blanks ();
         if (ch () != '(')
             return error ("undeclared variable");
-        return primary_function (lval, symbol);
+        return primary_function (lval, sname);
 
     }
     if (constant (num)) {

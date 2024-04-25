@@ -3,6 +3,7 @@
 #include "data.h"
 #include "ir-codes.h"
 #include "ir.h"
+#include "sym.h"
 
 char sname[NAMESIZE];
 

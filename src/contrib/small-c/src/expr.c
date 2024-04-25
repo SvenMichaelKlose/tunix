@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "data.h"
 #include "ir.h"
+#include "sym.h"
 
 // Unsigned operand?
 nosign (LVALUE * is)

@@ -17,7 +17,7 @@ test/.passed:
 	$(MAKE) -C test all
 
 clean:
-	rm -f $(OBJ) $(SCC) mkir mkir.o ir2txt ir2txt.o ir-codes.h
+	rm -f $(OBJ) $(SCC) mkir mkir.o ir2txt ir2txt.o ir-codes.h ctok ctok.o
 	$(MAKE) -C test clean
 
 ir2txt:
@@ -29,8 +29,10 @@ ir.h: mkir
 mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
 
-$(SCC): ir.h ir2txt $(OBJ)
+$(SCC): ir.h ir2txt ctok $(OBJ)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
+
+ctok: ctok.o
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

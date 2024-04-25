@@ -3,6 +3,30 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-25 22:58 S.M. Klose
+
+I've added some tokenizer I've asked out
+of chatGPT a couple of days ago and its
+not recommended.  Writing it oneself
+would have been quicker.  I felt the
+need for it then reading the expression
+parser and saw just too much repetition.
+This compiler could actually be much
+smaller.
+
+I was a little bit surprised about the
+gcc compiler not complaining about
+unintended casts from 'SYMBOL\*' to
+'int'.  Return and argument type
+checking *must* be added to this version
+of Small-C or countless years of life
+time will be lost for nothing.  That
+said all the code around needs to go
+through gcc without a single warning or
+time is wasted.  Playing around and
+getting through the code was inspiring
+though.
+
 # 2024-04-24 05:20 S.M. Klose
 
 Cleaned up a good lot.  IT's gotta look

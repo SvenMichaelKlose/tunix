@@ -101,10 +101,7 @@ primary_global (LVALUE *lval, SYMBOL *symbol)
 
 primary_function (LVALUE *lval, SYMBOL *symbol)
 {
-    int symbol_table_idx;
-    symbol = &symbol_table[
-        add_global (sname, FUNCTION, CINT, 0, PUBLIC)
-    ];
+    symbol = add_global (sname, FUNCTION, CINT, 0, PUBLIC);
     lval->symbol = symbol;
     lval->indirect = 0;
     return 0;

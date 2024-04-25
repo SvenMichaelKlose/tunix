@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "defs.h"
 #include "data.h"
 #include "ir.h"
@@ -18,10 +19,9 @@ declare_global (int type, int storage,
                 int otag,
                 int is_struct)
 {
-    int dim, identity;
-    char sname[NAMESIZE];
-    SYMBOL *symbol;
-
+    int     dim, identity;
+    char    sname[NAMESIZE];
+    SYMBOL  *symbol;
     FOREVER {
         FOREVER {
             if (endst ())
@@ -42,9 +42,9 @@ declare_global (int type, int storage,
             if (!mtag) {
                 // Real variable, not a struct/union member.
                 identity = initials (sname, type, identity, dim, otag);
-                add_global (sname, identity, type, (!dim ? -1 : dim), storage);
+                symbol = add_global (sname, identity, type, (!dim ? -1 : dim), storage);
                 if (type == STRUCT)
-                    symbol_table[current_symbol_table_idx].tag = otag;
+                    symbol->tag = otag;
                 break;
             }
             symbol = add_member (sname, identity, type, storage,
@@ -119,8 +119,8 @@ initials (char *symbol_name, int type,
 struct_init (TAG_SYMBOL * tag,
              char *symbol_name)
 {
-    int dummy_dim;
-    int member, nmembers, first_member;
+    int dummy_dim, member;
+    int nmembers, first_member;
     member = first_member = tag->first_member;
     nmembers = tag->num_members;
     while (member < first_member + nmembers) {
@@ -174,9 +174,8 @@ init (char *symbol_name, int type,
 declare_local (int typ, int stclass,
                int otag)
 {
-    int k, j;
+    int  k, j;
     char sname[NAMESIZE];
-
     FOREVER {
         FOREVER {
             if (endst ())
@@ -236,7 +235,6 @@ declare_local (int typ, int stclass,
 needsub ()
 {
     int num[1];
-
     if (match ("]"))
         return 0;
     if (!number (num)) {
@@ -252,14 +250,14 @@ needsub ()
 }
 
 // Find global symbol.
+SYMBOL *
 find_global (char *sname)
 {
     int idx;
-
     idx = 0;
     while (idx < global_table_index) {
         if (astreq (sname, symbol_table[idx].name, NAMEMAX))
-            return idx;
+            return &symbol_table[idx];
         idx++;
     }
     return -1;
@@ -269,7 +267,6 @@ find_global (char *sname)
 find_local (char *sname)
 {
     int idx;
-
     idx = local_table_index;
     while (idx >= NUMBER_OF_GLOBALS) {
         idx--;
@@ -280,26 +277,25 @@ find_local (char *sname)
 }
 
 // Add global symbol.
+SYMBOL *
 add_global (char *sname, int identity,
             int type, int offset,
             int storage)
 {
     SYMBOL *symbol;
     char *buffer_ptr;
-    if ((current_symbol_table_idx = find_global (sname)) > -1)
-        return current_symbol_table_idx;
+    if ((symbol = find_global (sname)) > -1)
+        return symbol;
     if (global_table_index >= NUMBER_OF_GLOBALS)
         return error ("global symbol table overflow");
-    current_symbol_table_idx = global_table_index;
-    symbol = &symbol_table[current_symbol_table_idx];
+    symbol = &symbol_table[global_table_index++];
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
     symbol->identity = identity;
     symbol->type = type;
     symbol->storage = storage;
     symbol->offset = offset;
-    global_table_index++;
-    return current_symbol_table_idx;
+    return symbol;
 }
 
 // Add new symbol to local table.
@@ -307,10 +303,9 @@ add_local (char *sname, int identity,
            int type, int offset,
            int storage_class)
 {
-    int k;
-    SYMBOL *symbol;
-    char *buffer_ptr;
-
+    int     k;
+    SYMBOL  *symbol;
+    char    *buffer_ptr;
     if ((current_symbol_table_idx = find_local (sname)) > -1)
         return current_symbol_table_idx;
     if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS)
@@ -340,7 +335,6 @@ add_local (char *sname, int identity,
 symname (char *sname)
 {
     int k;
-
     blanks ();
     if (!alpha (ch ()))
         return 0;

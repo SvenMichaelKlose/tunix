@@ -111,7 +111,6 @@ name:
     lda #1
     adc regah
     sta regah
-:
 .endmacro
 
 ; A += B

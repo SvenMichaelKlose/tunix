@@ -46,6 +46,7 @@ typedef struct _symbol {
     ptr    value;
     ptr    bind;
     uchar  len;
+    uchar  name;
 } symbol;
 
 //#pragma bss-name (push, "ZEROPAGE")
@@ -96,7 +97,8 @@ make_cons (ptr car, ptr cdr)
 ptr __fastcall__
 make_number (int x)
 {
-    number * n = alloc (sizeof (number), TYPE_NUMBER);
+    number * n = alloc (sizeof (number),
+                        TYPE_NUMBER);
     n->value = x;
     return n;
 }
@@ -104,12 +106,15 @@ make_number (int x)
 void * __fastcall__
 lookup_symbol (char * str, uchar len)
 {
-    char * h = (char *) HEAP_START;
+    symbol * s = alloc (sizeof (symbol),
+                        TYPE_SYMBOL);
 
-    while (*h) {
-        if (h[1] == TYPE_SYMBOL && h[6] == len && !memcmp (&h[7], str, len))
-            return h;
-        h += *h;
+    while (s->size) {
+        if (s->type == TYPE_SYMBOL
+            && s->len == len
+            && !memcmp (&s->name, str, len))
+            return s;
+        s = (symbol *) &s->name + len;
     }
 
     return NULL;
@@ -122,7 +127,8 @@ make_symbol (char * str, uchar len)
     if (s)
         return s;
 
-    s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
+    s = alloc (sizeof (symbol) + len,
+               TYPE_SYMBOL);
     s->value = s;
     s->bind = nil;
     s->len = len;
@@ -166,8 +172,10 @@ skip_spaces ()
 {
     while (!eof ()) {
         if (in () == ';') {
-            while (!eof () && in () >= ' ');
-            while (!eof () && in () < ' ');
+            while (!eof ()
+                   && in () >= ' ');
+            while (!eof ()
+                   && in () < ' ');
             putback ();
             continue;
         }
@@ -220,7 +228,8 @@ read_number ()
 {
     char * p = token;
 
-    while (!eof () && isdigit (in ()))
+    while (!eof ()
+           && isdigit (in ()))
         *p++ = c;
     *p = 0;
     putback ();
@@ -230,7 +239,9 @@ read_number ()
 bool __fastcall__
 our_isalpha (char c)
 {
-    return !isspace (c) && c != '(' && c != ')';
+    return !isspace (c)
+           && c != '('
+           && c != ')';
 }
 
 ptr
@@ -238,7 +249,8 @@ read_symbol ()
 {
     char * p = token;
 
-    while (!eof () && our_isalpha (in ()))
+    while (!eof ()
+           && our_isalpha (in ()))
         *p++ = c;
     putback ();
     return make_symbol (token, p - token);
@@ -269,7 +281,6 @@ void
 out_number (int n)
 {
     int a;
-
     if (n > 9) {
         a = n / 10;
         n -= 10 * a;
@@ -330,7 +341,6 @@ void
 print (ptr x)
 {
     uchar type = PTRTYPE(x);
-
     if (type & TYPE_CONS)
         print_list ((cons *) x);
     else if (type & TYPE_NUMBER)
@@ -401,16 +411,14 @@ main (int argc, char * argv[])
     ptr env;
     struct builtin * b = builtins;
     symbol * s;
-
-    (void) argc;
-    (void) argv;
+    (void) argc, (void) argv;
 
     term_init ();
 
     heap = (void *) HEAP_START;
     heap[0] = 0;
     nil = make_symbol ("nil", 3);
-    t = make_symbol ("t", 3);
+    t   = make_symbol ("t", 3);
     while (b->name) {
         s = make_symbol (b->name, strlen (b->name));
         s->type |= TYPE_BUILTIN;
@@ -420,6 +428,7 @@ main (int argc, char * argv[])
 
     do_putback = false;
     cbm_open (3, 8, 3, "ENV.LISP");
+    // TODO: Error checking (smk).
     cbm_k_chkin (3);
     while (env = read ()) {
         print (env);
@@ -428,6 +437,6 @@ main (int argc, char * argv[])
     cbm_k_close (3);
 
     term_puts ("\n\rBye!\n\r");
-    while (1);
+    while (1); // Gone with TUNIX.
     return 0;
 }

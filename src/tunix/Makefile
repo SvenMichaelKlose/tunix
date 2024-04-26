@@ -32,5 +32,5 @@ $(PROGRAM_init): $(SOURCES_init:.c=.o)
 	$(LD) -Ln $(PROGRAM_init).lbl -m $(PROGRAM_init).map --dbgfile $(PROGRAM_init).dbg -C $(CC65_HOME)/share/cc65/cfg/vic20-32k.cfg -o $@ $^ ../lib/tunix/libtunix.a $(CC65_HOME)/share/cc65/lib/vic20.lib
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map $(PROGRAM).dbg $(CRUNSHED)
+	rm -f $(ASMSOURCES:.asm=.o) $(CSOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map $(PROGRAM).dbg $(CRUNSHED)
 	rm -f $(SOURCES_init:.c=.o) $(PROGRAM_init) $(PROGRAM_init).lbl $(PROGRAM_init).map $(PROGRAM_init).dbg $(CRUNSHED_init)

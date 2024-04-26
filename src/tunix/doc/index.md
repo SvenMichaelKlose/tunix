@@ -1,6 +1,6 @@
 ---
 title: "TUNIX"
-author: "Sven Michael Klose"
+author: "perating system manual"
 date: "2024-04-20"
 lang: "en"
 titlepage: true

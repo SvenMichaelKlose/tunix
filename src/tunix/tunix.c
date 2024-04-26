@@ -1,14 +1,147 @@
 // A schematic C implementation of
 // essential TUNIX functions.
 
-// Switch to other reason if it's time.
+typedef unsigned char uchar;
+typedef uchar procid_t;
+typedef uchar waitid_t;
+typedef uchar fn_t;
+
+struct fn {
+    fn_t next;
+    fn_t prev;
+};
+struct fn gfns[MAX_FN];
+
+struct bank {
+    fn_t      next;
+    fn_t      prev;
+    bankref_t ref;
+};
+struct bank banks[MAX_BANK];
+
+struct proc {
+    uchar     flags;
+    procid_t  next;
+    procid_t  prev;
+    struct wait {
+        waitid_t  next;
+        waitid_t  prev;
+        procid_t  pid;
+    } waiting[MAX_WAITING];
+    waitid_t     first_waiting;
+    struct bank  lbanks[MAX_BANK];
+    struct fn    lfns[MAX_FN];
+    fn_t         lfn_glfn[MAX_FN];
+} procs[MAX_PROCS];
+procid_t pid;
+procid_t running;
+procid_t sleeping;
+procid_t zombie;
+
 void
 schedule ()
 {
-    // Machine-dependent.
+    procid_t next = proc->next;
+    if (!next
+        && (next = running)
+        && !IS_RUNNING(next))
+        next = 0;
+    if (next != pid)
+        machdep_switch (next);
+}
+
+// Wannabe version.  Original still has
+// machdep code in it.
+char
+fork (void)
+{
+    char cpid = ALLOC_PROC_RUNNING();
+    if (!cpid)
+        return -1;
+    machdep_fork (cpid);
+    if (pid != cpid) {
+        update_procdata (cid);
+        procs[cpid].flags = PROC_RUNNING;
+        return cpid;
+    }
+    machdep_fork_init_child ();
+    return 0;
+}
+
+int
+suspend (char x)
+{
+    if (!IS_RUNNING(procs[x]))
+        return ERROR;
+    MV_RUNNING_SLEEPING(x);
+    return OK;
+}
+
+int
+resume (char x)
+{
+    if (!IS_SLEEPING(procs[x]))
+        return ERROR;
+    MV_SLEEPING_RUNNING(x);
+    return OK;
+}
+
+void
+free_proc_resources (procid_t id)
+{
+    free_lfns (id);
+    bproc_free (id);
+    free_iopages (id);
+    free_drivers (id);
+}
+
+void
+zombify (procid_t id)
+{
+    if (!proc[id]->flags)
+        panic ();
+    free_proc_resources (id);
+    if (PROC_IS_RUNNING(id))
+        DRM(procs, running, id);
+    else
+        DRM(procs, sleeping, id);
+    LPUSH(procs, zombie, id);
+    proc[id].flags = PROC_ZOMBIE;
+}
+
+void
+resume_waiting (procid_t id)
+{
+    char w = procs[id].first_wait;
+    if (w)
+        resume (w);
 }
 
 char
+lfn_to_glfn (fn_t x)
+{
+    fn_t glfn;
+    if (glfn = lfn_glfn[x])
+        return glfn;
+    LPUSH(lfns, first_lfn, x);
+    LPOP(glfn, glfns, free_glfn);
+    glfn_refs[glfn]++;
+    return lfn_glfn[x] = glfn;
+}
+
+void
+free_lfns (void)
+{
+    fn_t glfn;
+    fn_t y;
+    DOLIST(y, lfns, first_lfn) {
+        glfn = lfn_glfn[y];
+        if (!--glfn_refs[glfn])
+            LPUSH(glfns, first_glfn, glfn);
+    }
+}
+
+bank_t
 balloc (void)
 {
     char b = LPOP(banks);
@@ -21,20 +154,22 @@ balloc (void)
 }
 
 void
-free_lbank (char b)
+free_lbank (bank_t b)
 {
     DRM(lbanks, first_bank);
 }
 
-void
-bfree (char b)
+int
+bfree (bank_t b)
 {
-    if (!bank_ref[b]) {
-        __CARRY__ = 1;
-    } else {
+    if (!lbanks_ref[b])
+        return ERROR;
+    free_lbank (b);
+    if (!bank_ref[b])
+        panic ();
+    if (!--bank_ref[b])
         LPUSH(banks, free_bank, b);
-        DRM(lbanks, first_lbank, b);
-    }
+    return OK;
 }
 
 void
@@ -43,141 +178,4 @@ bprocfree (void)
     char i;
     DOLIST(i, lbanks, first_lbank)
         bfree (i);
-}
-
-char
-lfn_to_glfn (char x)
-{
-    char glfn, a;
-    if (a = lfn_glfn[x])
-        return a;
-    LPUSH(lfns, first_lfn, x);
-    LPOP(glfn, glfns, glfns);
-    glfn_refs[glfn]++;
-    return lfn_glfn[x] = glfn;
-}
-
-void
-free_lfns (void)
-{
-    char glfn;
-    char y;
-    DOLIST(y, lfns, first_lfn) {
-        glfn = lfn_glfn[y];
-        if (!--glfn_refs[glfn])
-            LPUSH(glfns, glfns, glfn);
-    }
-}
-
-// Wannabe version.  Original still has
-// machdep code in it.
-char
-fork (void)
-{
-    char npid = ALLOC_PROC_RUNNING();
-    if (!npid) {
-        __CARRY__ = 1;
-        return -1;
-    }
-    machdep_fork (npid);
-    if (pid != npid) {
-        procs[npid].flags = PROC_RUNNING;
-        increment_lfn_refs (nid);
-    } else {
-        // Map in child banks.
-    }
-}
-
-void
-suspend (char x)
-{
-    if (procs[x].flags <= 0)
-        ERROR();
-    MV_RUNNING_SLEEPING(x);
-}
-
-void
-resume (char x)
-{
-    if (procs[x].flags >= 0)
-        ERROR();
-    MV_SLEEPING_RUNNING(x);
-}
-
-void
-zombify (char id)
-{
-    if (!proc[id])
-        ERROR();
-    free_lfns (id);
-    bproc_free (id);
-    free_iopages (id);
-    free_drivers (id);
-    if (PROC_IS_RUNNING(id))
-        DRM(procs, running, id);
-    else
-        DRM(procs, sleeping, id);
-    LPUSH(procs, zombie, id);
-    proc[id].flags = PROC_ZOMBIE;
-}
-
-void
-resume_waiting (id)
-{
-    char w;
-    if (w = procs[id].first_wait)
-        resume (procs[id].waiting[w]);
-    schedule ();
-}
-
-char
-wait (char id)
-{
-    char w;
-
-    if (!proc[id])
-        ERROR();
-
-    ALLOC_WAITING(id, w);
-    procs[id].waiting[w].pid = pid;
-
-    if (!proc_flags[id])
-        guru_meditation ();
-    if (PROC_IS_ZOMBIE(id)) {
-        do {
-            suspend (id);
-            schedule ();
-        } while (PROC_IS_ZOMBIE(id));
-    }
-    return end_wait (id, w);
-}
-
-char
-end_wait (char id, char w)
-{
-    char f;
-    RM_WAITING(id, w);
-    if (f = procs[id].first_wait) {
-        resume (procs[id].waiting[f].pid);
-        return exit_codes[id];
-    }
-    RM_ZOMBIE(id);
-    procs[id].flags = 0;
-    return exit_codes[id];
-}
-
-void
-exit (char code)
-{
-    kill (pid, code);
-}
-
-void
-kill (char id, char code)
-{
-    exit_codes[id] = code;
-    if (!procs[id].flags)
-        ERROR();
-    zombify (id);
-    resume_waiting ();
 }

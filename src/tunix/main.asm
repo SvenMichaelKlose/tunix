@@ -1236,6 +1236,12 @@ r:  plx
     rts
 .endproc
 
+.export print_cvcr
+.proc print_cvcr
+    jsr print_cv
+    jmp print_cr
+.endproc
+
 ; Print string at zp2 and step over the
 ; terminating 0.
 .export print_head
@@ -1275,7 +1281,7 @@ r:  plx
     cpx #0
     beq n  ; Oops…
     alloc_lbank_x
-    inc bank_refs,x
+    inc bank_refs,x ; (Set to 1.)
 n:  ply
     txa
     rts
@@ -1356,8 +1362,7 @@ items_mem_info:
     ldaxi banks
     jsry list_length, free_bank
     txa
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     jsr print_head
     ldaxi banks
@@ -1366,18 +1371,15 @@ items_mem_info:
     lda banks_ok
     sec
     sbc tmp1
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     jsr print_head
     ldax #FIRST_BANK
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     jsr print_head
     ldax banks_faulty
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     ; Total
     jsr print_head
@@ -1385,8 +1387,7 @@ items_mem_info:
     clc
     adc #FIRST_BANK
     ldx #0
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     ; Bank size (in head)
     jsr print_head
@@ -2152,8 +2153,7 @@ items_proc_info:
     jsr print_head
     lda tmp2
     tax
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     jsr print_head
     jsra print_chb, {proc_data,x}
@@ -2172,8 +2172,7 @@ items_proc_info:
     ldaxi lbanks
     jsry list_length, first_lbank
     txa
-    jsr print_cv
-    jsr print_cr
+    jsr print_cvcr
 
     popw zp2
     clc

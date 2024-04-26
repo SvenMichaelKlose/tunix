@@ -1,9 +1,22 @@
-TUNIX
-=====
-
-„Tu nix!“ (German for "Do nothing!").
+---
+title: "TUNIX"
+author: "Sven Michael Klose"
+date: "2024-04-20"
+lang: "en"
+titlepage: true
+titlepage-color: "389fff"
+titlepage-text-color: "ffffff"
+header-left: "TUNIX operating system manual"
+footer-left: "UNDER CONSTRUCTION"
+toc: true
+footnodes-pretty: true
+book: true
+classoption: [oneside]
+...
 
 # What is TUNIX?
+
+It is UNDER CONSTRUCTION.
 
 TUNIX is a KERNAL extension for the
 Commodore VIC-20 with UltiMem expansion
@@ -101,7 +114,7 @@ by automatically generated speed code.
   number of times to spare end-of-
   loop tests and conditional jumps.  The
   backdraw is that the code is highly-
-  specialized and can gain enormous
+  specialized and can gain impractical
   sizes.  Copying an 8K memory block
   takes about 48K of speed code but is
   several magnitudes faster than a
@@ -922,13 +935,13 @@ anywhere except in the IO23 area.
 1. "TOTAL": Number of banks.
 5. "BANKSIZE": Size of a bank in bytes.
 
-## "MA": Allocate a bank
+### "MA": Allocate a bank
 
 Allocates a bank and returns its ID.
 Returns with an error when out of
 memory.
 
-## "MF": Free a bank
+### "MF": Free a bank
 
 Secondary address: bank ID.
 
@@ -1057,8 +1070,6 @@ target process provides a handler for
 the signal type.  The signal is
 discarded on delivery when the handler
 is missing.
-
-## System Calls
 
 ### "SSp": Send signal to process
 

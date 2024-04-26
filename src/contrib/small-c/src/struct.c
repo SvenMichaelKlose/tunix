@@ -2,6 +2,7 @@
 #include <string.h>
 #include "defs.h"
 #include "data.h"
+#include "struct.h"
 
 find_tag (char *sname)
 {

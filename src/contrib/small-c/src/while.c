@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "while.h"
 
 addwhile (WHILE * ptr)
 {

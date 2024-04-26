@@ -4,6 +4,7 @@
 #include "ir-codes.h"
 #include "ir.h"
 #include "sym.h"
+#include "primary.h"
 
 char sname[NAMESIZE];
 

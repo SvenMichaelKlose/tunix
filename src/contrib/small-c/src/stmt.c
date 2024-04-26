@@ -2,6 +2,7 @@
 #include "defs.h"
 #include "data.h"
 #include "ir.h"
+#include "stmt.h"
 
 // Statement parser
 // Called whenever syntax requires a

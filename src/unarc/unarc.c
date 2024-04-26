@@ -5,30 +5,30 @@
 #define BUFFER_SIZE 1024
 
 char buffer[BUFFER_SIZE];
-char *ifname;
 FILE *in;
 char ofname[256];
 
 int
-extract_file (int ntotal)
+extract_file (int size)
 {
-    FILE *out = fopen (ofname, "wb");
+    FILE *out = fopen (ofname, "w");
     int len;
 
-    printf ("Extracting file '%s' ");
+    printf ("Extracting file '%s' (%d bytes) ", ofname, size);
     if (!out) {
         perror ("Failed to create output file");
         return -1;
     }
-    while (ntotal
+    while (size
            && (len = fread (buffer,
                             1,
-                            ntotal > BUFFER_SIZE ?
+                            size > BUFFER_SIZE ?
                                 BUFFER_SIZE :
-                                ntotal,
+                                size,
                             in)) > 0) {
         fwrite (buffer, 1, len, out);
-        ntotal -= len;
+        putchar ('.');
+        size -= len;
     }
     fclose (out);
     printf ("OK\n");
@@ -45,13 +45,13 @@ main (int argc, char *argv[])
         return -1;
     }
 
-    in = fopen (argv[1], "rb");
+    in = fopen (argv[1], "r");
     if (!in) {
         perror ("Failed to open file.");
         return -1;
     }
 
-    while (n = fscanf (in, ">>> %255s %d\n", ofname, &filesize)) {
+    while (n = fscanf (in, ">>> %s %d\n", ofname, &filesize)) {
         if (n == EOF)
             break;
         if (n != 2) {

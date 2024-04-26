@@ -27,8 +27,8 @@ loadable drivers and recover-on-reset.
 
 The Commodore KERNAL is essentially the
 operating system of Commodore 8-bit
-computers, such as the Commodore
-PET, VIC, C64 and so on.  It plays a
+computers, such as the Commodore PET,
+VIC, C64 and so on.  It plays a
 foundational role in making the
 Commodore computers versatile and
 user-friendly.  It's what allowed
@@ -43,49 +43,48 @@ defined the Commodore experience.
 It's basic functions are:
 
 * Input/Output (I/O) Management: The
-  KERNAL is responsible for handling all
-  the communication between the
-  computer’s hardware components, like
-  the keyboard, screen, disk drives, and
-  printers.  Whenever you press a key or
-  a program wants to display something
-  on the screen, the KERNAL is the
-  intermediary that makes that happen.
+KERNAL is responsible for handling all
+the communication between the computer’s
+hardware components, like the keyboard,
+screen, disk drives, and printers.
+Whenever you press a key or a program
+wants to display something on the
+screen, the KERNAL is the intermediary
+that makes that happen.
 
 * File Management: It provides the
-  functionality for reading, writing,
-  and managing files on disk.  This
-  includes opening files, saving data,
-  and listing directory contents.  It's
-  like the librarian that knows where
-  every book is placed and helps you to
-  find or store them.
+functionality for reading, writing, and
+managing files on disk.  This includes
+opening files, saving data, and listing
+directory contents.  It's like the
+librarian that knows where every book is
+placed and helps you to find or store
+them.
 
 * Memory Management: The KERNAL also
-  plays a crucial role in managing the
-  computer's memory, deciding which
-  parts of the memory are used for what
-  purpose.  Think of it as organizing
-  your desk space efficiently so you can
-  work without clutter.
+plays a crucial role in managing the
+computer's memory, deciding which parts
+of the memory are used for what purpose.
+Think of it as organizing your desk
+space efficiently so you can work
+without clutter.
 
 * Device Management: Commodore computers
-  could connect to various external
-  devices, such as printers, modems, or
-  external disk drives.  The KERNAL
-  includes routines (set sequences of
-  instructions) for managing these
-  devices seamlessly, allowing software
-  to use them without needing to know
-  the nitty-gritty details of how they
-  work.
+could connect to various external
+devices, such as printers, modems, or
+external disk drives.  The KERNAL
+includes routines (set sequences of
+instructions) for managing these devices
+seamlessly, allowing software to use
+them without needing to know the
+nitty-gritty details of how they work.
 
 * Error Handling: When something goes
-  wrong, like trying to read a file that
-  doesn't exist, the KERNAL steps in to
-  handle the error, often providing
-  messages to the user or software about
-  what went wrong.
+wrong, like trying to read a file that
+doesn't exist, the KERNAL steps in to
+handle the error, often providing
+messages to the user or software about
+what went wrong.
 
 ## Memory
 
@@ -101,30 +100,28 @@ guessed.)
 Jim Brain's UltiMem expansion makes the
 TUNIX project possible in the first
 place.  Thanks to it, most process
-switching can be done in hardware and
-by automatically generated speed code.
+switching can be done in hardware and by
+automatically generated speed code.
 [^speed-code]
 
-[^speed-code]:
-  Speed code is devoid of instructions
-  that test or take turns.  E.g. instead
-  of looping over the same piece of code
-  again and again, speed code
-  instructions are repeated a fixed
-  number of times to spare end-of-
-  loop tests and conditional jumps.  The
-  backdraw is that the code is highly-
-  specialized and can gain impractical
-  sizes.  Copying an 8K memory block
-  takes about 48K of speed code but is
-  several magnitudes faster than a
-  regular copy loop, saving the TUNIX
-  day.
+[^speed-code]: Speed code is devoid of
+instructions that test or take turns.
+E.g. instead of looping over the same
+piece of code again and again, speed
+code instructions are repeated a fixed
+number of times to spare end-of- loop
+tests and conditional jumps.  The
+backdraw is that the code is highly-
+specialized and can gain impractical
+sizes.  Copying an 8K memory block takes
+about 48K of speed code but is several
+magnitudes faster than a regular copy
+loop, saving the TUNIX day.
 
 TUNIX isn't optimized for performance
-but for simplicity and robustness.
-The following sections cover some
-essential timings in more detail.
+but for simplicity and robustness.  The
+following sections cover some essential
+timings in more detail.
 
 ### System calls
 
@@ -148,18 +145,17 @@ Time-consuming task switches aren't much
 of a factor as native apps are not
 multi-tasking and only run when they are
 connected to an active console.  TUNIX
-apps can still run alongside unless
-that has been disabled (e.g. to run
-programs that take over the machine, to
-get the maximum performance out of the
-machine).
+apps can still run alongside unless that
+has been disabled (e.g. to run programs
+that take over the machine, to get the
+maximum performance out of the machine).
 
 ### I/O
 
 Calling a driver takes 0.27ms.  This
 leaves us with at least 17.7s overhead
 for transmitting or receiving 64K
-characters via device drivers.
+    characters via device drivers.
 
 The TUNIX system call driver's overhead
 is parsing and dispatching commands.
@@ -179,83 +175,79 @@ hardware, all within the context of a
 community-driven project:
 
 * Understanding Operating Systems:
-  TUNIX introduces Unix-like
-  functionalities to a platform that was
-  not originally designed for such
-  complexity.  This offers learners a
-  unique opportunity to understand the
-  components of an operating system,
-  such as multitasking, memory
-  management, and file systems, in a
-  simplified and accessible environment.
+TUNIX introduces Unix-like
+functionalities to a platform that was
+not originally designed for such
+complexity.  This offers learners a
+unique opportunity to understand the
+components of an operating system, such
+as multitasking, memory management, and
+file systems, in a simplified and
+accessible environment.
 * Programming Fundamentals:
-  The project’s development and its
-  support for programming in
-  environments like BASIC, ANSI-C, and
-  potentially others provide a practical
-  context for learning programming
-  fundamentals.  It allows students to
-  experience the development cycle, from
-  writing and debugging code to
-  integrating with an operating system.
+The project’s development and its
+support for programming in environments
+like BASIC, ANSI-C, and potentially
+others provide a practical context for
+learning programming fundamentals.  It
+allows students to experience the
+development cycle, from writing and
+debugging code to integrating with an
+operating system.
 * Historical Insights:
-  By enhancing a vintage computing
-  platform, TUNIX provides insights
-  into the evolution of computing
-  technology, offering a hands-on
-  history lesson.  It shows how
-  limitations of early computers were
-  overcome and how these systems laid
-  the groundwork for modern computing
-  paradigms.
+By enhancing a vintage computing
+platform, TUNIX provides insights into
+the evolution of computing technology,
+offering a hands-on history lesson.  It
+shows how limitations of early computers
+were overcome and how these systems laid
+the groundwork for modern computing
+paradigms.
 * Principles of Unix:
-  The Unix philosophy emphasizes
-  simplicity, modularity, and
-  reusability. TUNIX makes these
-  principles tangible for learners,
-  allowing them to explore how small,
-  focused programs can work together to
-  perform complex tasks.  This can
-  deepen understanding of software
-  design and architecture.
+The Unix philosophy emphasizes
+simplicity, modularity, and reusability.
+TUNIX makes these principles tangible
+for learners, allowing them to explore
+    how small, focused programs can work
+    together to perform complex tasks.
+    This can deepen understanding of
+    software design and architecture.
 * Low-Level Computing Concepts:
-  TUNIX offers exposure to low-level
-  computing concepts, including assembly
-  language programming and direct
-  hardware interaction, within a
-  controlled and understandable
-  environment.  This can demystify how
-  software interfaces with hardware, an
-  important area of computer science
-  education.
+TUNIX offers exposure to low-level
+computing concepts, including assembly
+language programming and direct hardware
+interaction, within a controlled and
+understandable environment.  This can
+demystify how software interfaces with
+hardware, an important area of computer
+science education.
 * Problem Solving and Innovation:
-  Given the VIC-20’s hardware
-  limitations, TUNIX challenges
-  developers and learners to think
-  creatively about resource management,
-  optimization, and functionality
-  implementation.  This can foster
-  problem-solving skills and innovative
-  thinking, valuable competencies in any
-  technical field.
-* Collaboration and Open Source Contribution:
-  If structured as an open-source
-  project, TUNIX provides a platform for
-  collaborative learning and
-  contribution.  Participants can learn
-  from each other, share knowledge, and
-  contribute to a collective project,
-  gaining experience in version control,
-  code review, and documentation in the
-  process.
+Given the VIC-20’s hardware limitations,
+TUNIX challenges developers and learners
+to think creatively about resource
+management, optimization, and
+functionality implementation.  This can
+foster problem-solving skills and
+innovative thinking, valuable
+competencies in any technical field.
+* Collaboration and Open Source
+* Contribution:
+If structured as an open-source project,
+TUNIX provides a platform for
+collaborative learning and contribution.
+Participants can learn from each other,
+share knowledge, and contribute to a
+collective project, gaining experience
+in version control, code review, and
+documentation in the process.
 * Cross-Disciplinary Learning:
-  TUNIX bridges computer science with
-  electrical engineering, history, and
-  even elements of graphic design and
-  user experience.  This multidiscipli-
-  nary approach can appeal to a wide
-  range of learners, encouraging cross-
-  pollination of ideas and techniques.
+TUNIX bridges computer science with
+electrical engineering, history, and
+even elements of graphic design and user
+experience.  This multidiscipli- nary
+approach can appeal to a wide range of
+learners, encouraging cross- pollination
+of ideas and techniques.
 
 # Installing TUNIX
 
@@ -263,8 +255,8 @@ TUNIX can recover-on-reset.  Whenever a
 process hangs up the system, it can be
 killed by pressing the reset button of
 the UltiMem expansion and TUNIX will
-continue with the other processes.
-It requires the TUNIX boot loader to be
+continue with the other processes.  It
+requires the TUNIX boot loader to be
 installed on the UltiMem ROM, which is
 highly recommended to regular users.
 
@@ -296,9 +288,7 @@ preferred interface.  To start TUNIX
 with the default init program, launch it
 with:
 
-~~~BASIC
-LOAD"TUNIX\*INIT",8
-~~~
+~~~BASIC LOAD"TUNIX\*INIT",8 ~~~
 
 ## The Init Process
 
@@ -333,13 +323,13 @@ point, no matter what the rest of the
 driver was written in.
 
 The number one set of programming tools
-for TUNIX is
-[the cc65 compiler suite](https://www.cc65.org)
-for 6502/6518-CPU platforms.  It comes
-with an ANSI-C compiler, assembler and
-linker, a Unix-like standard C library,
-exhaustive documentation, and a vibrant
-community.
+for TUNIX is [the cc65 compiler
+    suite](https://www.cc65.org) for
+    6502/6518-CPU platforms.  It comes
+    with an ANSI-C compiler, assembler
+    and linker, a Unix-like standard C
+    library, exhaustive documentation,
+    and a vibrant community.
 
 ## No Standard I/O File Handles
 
@@ -365,15 +355,15 @@ with the slightly different behaviour of
 TUNIX to support a multi-tasking envi-
 ronment better.
 
-All I/O call performance is reduced
-by about 1ms per operation in addtion to
+All I/O call performance is reduced by
+about 1ms per operation in addtion to
 the operation itself.
 
 ## General behaviour
 
 Functions that return with an error code
 do so with the carry flag set and an
-error code in the accumulator (A).
+    error code in the accumulator (A).
 
 Pointers passed in Y and X registers
 have the low byte in the X register and
@@ -384,10 +374,10 @@ respectively.
 
 This routine is used to set the filename
 for the OPEN, SAVE, or LOAD system
-calls.  A pointer to the filename is
-expected in the YX register pair (X is
-the low byte) and the length of the in
-A.
+    calls.  A pointer to the filename is
+    expected in the YX register pair (X
+    is the low byte) and the length of
+    the in A.
 
 SETNAM never returns with an error.
 
@@ -399,25 +389,18 @@ address (Y) for OPEN, LOAD or SAVE.
 
 The logical file numner (or LFN for
 short) used with OPEN will be translated
-to the device number by CHKIN/CKOUT
-for BASIN, BSOUT or GETIN.
+to the device number by CHKIN/CKOUT for
+BASIN, BSOUT or GETIN.
 
 The device number may range from 0 to
 255 (30 with standard KERNAL I/O). These
 are the commonly used device numbers:
 
-~~~
-0:     Keyboard
-1:     Tape
-2:     RS-232
-3:     Screen
-4+5:   Printers
-6+7:   Plotters
-8-12:  Disk drives
-13-30: user defined
---
-31:    TUNIX system calls
-~~~
+~~~ 0:     Keyboard 1:     Tape 2:
+RS-232 3:     Screen 4+5:   Printers
+6+7:   Plotters 8-12:  Disk drives
+13-30: user defined -- 31:    TUNIX
+system calls ~~~
 
 The secondary (SA) is sent to IEC
 devices.  The c1541 DOS uses it to
@@ -432,13 +415,13 @@ SETLFS never returns with an error.
 
 OPEN assigns the device and SA to the
 LFN that was specified when calling
-SETLFS.  A filename must have been
-set using SETNAM.
+SETLFS.  A filename must have been set
+using SETNAM.
 
 The LFN of a successfully opened file
-can be used with CHKIN and CKOUT to
-set the input and output device for
-BASIN, BSOUT and GETIN.
+can be used with CHKIN and CKOUT to set
+the input and output device for BASIN,
+BSOUT and GETIN.
 
 TUNIX copies the filename to the IO area
 (255 byte maximum) and translates the
@@ -448,14 +431,13 @@ OPEN clears the STATUS byte.  On error,
 it returns with the carry flag set and
 one of these codes in A:
 
-* 1: Too many files.
-* 2: File already open.
-* 4: File not found. Tape device only.
-* 5: Device not present.
-* 6: Not an input file.
-     Also if logical file number is 0.
+* 1: Too many files.  2: File already
+* open.  4: File not found. Tape device
+* only.  5: Device not present.  6: Not
+* an input file.
+Also if logical file number is 0.
 * 9: Illegal device number.
-     Also if tape buffer is below $0200.
+Also if tape buffer is below $0200.
 
 ## CHKIN - Set input device by LFN.
 
@@ -467,8 +449,7 @@ called.
 One of these error codes may be
 returned:
 
-* 3: file not open
-* 5: device not present
+* 3: file not open 5: device not present
 * 6: file is not an input file
 
 ## CKOUT - Set output device by LFN.
@@ -481,8 +462,7 @@ called.
 One of these error codes may be
 returned:
 
-* 3: file not open
-* 5: device not present
+* 3: file not open 5: device not present
 * 7: file is not an output file
 
 ## BASIN - Input character from channel
@@ -676,10 +656,10 @@ if (!id)
 
 Some functions either return a list of
 key/value pairs or a table.  Both are
-lines of comma-separated values.
-Tables are headed with a list of column
-names.  Key/value lists always have the
-keys in the first column.
+lines of comma-separated values.  Tables
+are headed with a list of column names.
+Key/value lists always have the keys in
+the first column.
 
 Column names and keys are composed of
 upper case ASCII letters.
@@ -772,11 +752,10 @@ keys:
 Enables or disables task-switching for
 the current process.  It is disabled if
 the seconday address of the system call
-is 0.  That shoud be done sparingly in
-a multi-tasking environment.
-Switches are scheduled before system
-calls return and are highly
-unpredictable.
+is 0.  That shoud be done sparingly in a
+multi-tasking environment.  Switches are
+scheduled before system calls return and
+are highly unpredictable.
 
 Processes that did not free the screen
 will have that switched in for the time
@@ -858,16 +837,15 @@ none was set.
 
 ### "PF": Fork
 
-Makes a copy of the current process
-with a new ID that is returned to the
-parent.  For the child an ID of 0 is
-returned.  Open files are shared
-by both processes and be closed by
-both.
+Makes a copy of the current process with
+a new ID that is returned to the parent.
+For the child an ID of 0 is returned.
+Open files are shared by both processes
+and be closed by both.
 
 Extended memory banks are inherited but
-not those that were banked in when
-the fork was initiated.
+not those that were banked in when the
+fork was initiated.
 
 ### "PEname and args": Execute
 
@@ -885,7 +863,7 @@ code.  All resources are freed but it
 remains on the process list until its
 parent exits or returns from a wait()
 for the exit code and its waiting list
-is empty (see wait()).
+    is empty (see wait()).
 
 ### "PW": Wait
 
@@ -908,8 +886,8 @@ to make the process leave the system.
 Secondary address: process ID.
 
 Moves process to the sleeping list so
-that it won't be executed after the
-next switch.
+that it won't be executed after the next
+switch.
 
 ### "PR": Resume
 
@@ -965,16 +943,17 @@ only banks in BLK1 of the process that
 registered the driver to make up for the
 low hardware performance.  The context
 of TUNIX is still that of the calling
-process.  The driver must make sure
-that used zeropage locations are
-restored upon return to the caller.
+process.  The driver must make sure that
+used zeropage locations are restored
+upon return to the caller.
 
 Also, TUNIX translates logical file
 numbers to global logical file numners
 (GLFNs), so they won't collide with
 those used by other processes unless
-they got shared after a fork.
-An LFN is always translated to the same GLFN until the process exits.
+they got shared after a fork.  An LFN is
+always translated to the same GLFN until
+the process exits.
 
 ### "DL": Driver list
 
@@ -1044,14 +1023,14 @@ secondary address.
 
 ## Signals
 
-Signals are asynchronuous calls of
-other processes' functions.  These
-functions, called _handlers_,
-can be _registered_ by _signal type_ (a
-byte value) or default handlers are
-called instead when a signal is
-_delivered_.  The exact handler to call
-is determined at the time it is sent.
+Signals are asynchronuous calls of other
+processes' functions.  These functions,
+called _handlers_, can be _registered_
+by _signal type_ (a byte value) or
+default handlers are called instead when
+a signal is _delivered_.  The exact
+handler to call is determined at the
+time it is sent.
 
 Signal type values can be chosen freely
 as long as they are not used by TUNIX
@@ -1101,23 +1080,30 @@ banks are tracked in deque
 ## Task Switching
 
 There are two functions in TUNIX that
-perform a task switch: fork\_raw() and
-switch().  fork\_raw() copies the current
-process in its whole, including the
-stack and it's pointer.  When the new
-process is being switched to, it returns
-from fork\_raw() like it's parent but
-with its parent's ID on the stack.
-That way fork() can tell if it deals
-with a returning parent or child.
+perform a task switch: machdep\_fork()
+and switch().  machdep\_fork() copies
+the current process in its whole,
+including the stack and it's pointer.
+When the new process is being switched
+to, it returns from fork\_raw() like its
+parent but with its parent's ID on the
+stack.  That way fork() can tell if it
+deals with a returning parent or child.
 
 switch() just exchanges the address
-space and thus the stack to contiue with
-the next process.
+space and thus the stack to contiue
+with the next process.
 
 On the VIC-20 low memory must be copied
 twice for a task switch as the UltiMem
 expansion cannot access internal memory.
+
+## Scheduler
+
+The running list is circular.  Each
+process takes its turn in random order.
+When the process list is empty, process
+0 is executed, no matter in what state.
 
 ## Banking: Managing Pieces Of Address Space
 
@@ -1137,48 +1123,39 @@ within drivers impossible, as they are
 working in the caller's context but in
 their own address spaces.  Calling I/O
 would overwrite the process' bank
-configuration with the driver's set,
-and desaster would be inevitable.
+configuration with the driver's set, and
+desaster would be inevitable.
 
 To get around this, the bank number of
 BLK1 is pushed on the stack and popped
 off on return.  Other blocks are
 preserved the same way just in time.
 
-# Process Creation
+# Process Creation (fork)
 
 A completey new process is created once
 when TUNIX starts: process 0.  From then
 on, running processes are created by the
-fork() system call only.  The fork()
-system call duplicates the running
-process and returns the ID of the new
-process called a 'child process', or
-'child' for short.
+fork() system call only. by duplicating
+the running process.  fork() returns the
+ID of the new process called 'child
+process'.
 
 Forking an already existing process
 spares initializations as the whole of
-the program is copied as well as inter-
-process communication overhead as both
-processes have all information required
-to run.  Merely shared resources need
-some updates.
-
-To fork a process its whole address
-space is copied into a new set of banks
-and the GLFN reference counts are
-incremented to reflect the cloned list
-of LFNs.  Also, the processs is assigned
-a new ID.
+the program is copied and has all
+information required to run.  Merely
+shared resources need updated reference
+counts.
 
 A freshly forked process that did not
 yet run is called a 'baby process' (a
 notion unique to TUNIX).  Before it
-returns from fork(), the duplicated
-bank configuration on the stack, which
-is restored in all cases, is overwritten
-by the new banks and the child is marked
-as being a regular, running process.
+returns from fork(), the duplicated bank
+configuration on the stack, is
+overridden by the new banks and the
+child is marked as being a regular,
+running process.
 
 # Drivers
 

@@ -10,7 +10,7 @@
 
 #define MAX_PROCS   32
 
-#define ALLOC_AROUND_FORK   0
+#define ALLOC_AROUND_FORK   1
 
 char processes[MAX_PROCS];
 char banks[256];

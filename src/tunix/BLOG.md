@@ -1,7 +1,12 @@
 TUNIX blog
 ==========
 
-# 2024-04-24 02:34
+# 2024-04-26 23:16 (smk)
+
+Added ownership checks of extended
+memory banks but nothing new so far.
+
+# 2024-04-24 02:34 (smk)
 
 Can mass fork, but only up to 12
 processes.  There're isues with memory
@@ -10,7 +15,7 @@ it got at this time of day.
 
 Good night!
 
-# 2024-04-23 16:08
+# 2024-04-23 16:08 (smk)
 
 Although one of the main things on my
 agenda with this project is to improve
@@ -34,7 +39,7 @@ responsible for modifying that area) is
 entered again.  When developing on a
 TUNIX this is invaluable.
 
-# 2024-04-21 16:59
+# 2024-04-21 16:59 (smk)
 
 It just appeared to me that having a
 separate kernal stack might be too much

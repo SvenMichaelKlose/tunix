@@ -234,9 +234,9 @@ speedcopy_lowmem_to_blk5: .res 1
 ;;; Extended memory banks
 banks_ok:       .res 1
 banks_faulty:   .res 1
-banks:          .res MAX_BANKS + 1
+banks:          .res MAX_BANKS
 free_bank:      .res 1
-bank_refs:      .res MAX_BANKS + 1
+bank_refs:      .res MAX_BANKS
 
 ;;; IO pages
 iopages:        .res MAX_IOPAGES + 1
@@ -340,6 +340,7 @@ saved_vic:      .res 16
 ; Deque of used ones.
 lbanks:         .res MAX_BANKS
 lbanksb:        .res MAX_BANKS
+lbank_flags:    .res MAX_BANKS
 first_lbank:    .res 1
 
 ;; Process info
@@ -530,17 +531,6 @@ pending_signal:         .res 1
 ;;;;;;;;;;;;;;;;;;;
 ;;; LIST MACROS ;;;
 ;;;;;;;;;;;;;;;;;;;
-;
-; Macros for singly-linked lists.
-; 'lpop*' and 'lloop_*' also work with
-; deques.
-;
-; There may be either multiple lists or
-; deques in one set of arrays.
-
-;; Pop from front of list.
-; Ensure that lists aren't empty before
-; use.
 
 .macro lpop_x list, free
     ldx free
@@ -1280,8 +1270,9 @@ r:  plx
     alloc_bank_x
     cpx #0
     beq n  ; Oops…
+    mvb {lbank_flags,x}, #1
     alloc_lbank_x
-    inc bank_refs,x ; (Set to 1.)
+    mvb {bank_refs,x}, #1
 n:  ply
     txa
     rts
@@ -1292,6 +1283,8 @@ n:  ply
     cpy #0
     beq r
     free_lbank_y
+    lda #0
+    sta lbank_flags,y
 r:  rts
 .endproc
 
@@ -1308,19 +1301,18 @@ r:  rts
 ; X: Bank #
 .export bfree
 .proc bfree
-    ; TODO: Check lbank ownership.
+    lda lbank_flags,x
+    beq invalid_bank
     dec bank_refs,x
     bmi invalid_bank
     bne :+
     free_bank_x
 :   free_lbank_x
+    mvb {lbank_flags,x}, #0
     clc
     rts
 invalid_bank:
-    error err_invalid_bank
-    inc bank_refs,x
-    sec
-    rts
+    jmp guru_meditation
 .endproc
 
     .segment "KERNELDATA"
@@ -1596,6 +1588,7 @@ vec_io23_to_blk5:
     sta ram123 ; Bank in procdata.
     sta proc_data,y
     alloc_lbank_x
+    mvb {lbank_flags,x}, #1
     ; Copy parent's into child's.
     mvb blk3, tmp2 ; (Parent's procdata)
     stx blk5
@@ -1605,6 +1598,7 @@ vec_io23_to_blk5:
     pop io23 ; Bank in IO23.
     tax
     alloc_lbank_x
+    mvb {lbank_flags,x}, #1
     ; Set child ID and stack pointer.
     sty pid
     mvb stack, tmp2+1
@@ -1842,8 +1836,8 @@ not_to_resume:
     jsr free_lfns
     jsr free_lbanks
     leave_context
-    jsr free_iopages
-    jsr free_drivers
+    ;jsr free_iopages
+    ;jsr free_drivers
     plx
     rts
 .endproc

@@ -1,6 +1,6 @@
 ---
 title: "TUNIX"
-author: "perating system manual"
+author: "operating system manual"
 date: "2024-04-20"
 lang: "en"
 titlepage: true

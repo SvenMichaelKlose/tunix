@@ -10,6 +10,7 @@ SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c prepro
       primary.c stmt.c sym.c while.c struct.c ir.c
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
+TOK = $(addsuffix .tok, $(basename $(SRC)))
 
 all: $(SCC) test/.passed
 
@@ -29,10 +30,13 @@ ir.h: mkir
 mkir:
 	$(CC) -o mkir $(CFLAGS) mkir.c
 
-$(SCC): ir.h ir2txt ctok $(OBJ)
+$(SCC): ir.h ir2txt ctok $(OBJ) $(TOK)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
 
 ctok: ctok.o
+
+%.tok : %.c
+	./ctok $< $@
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

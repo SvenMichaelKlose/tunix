@@ -52,7 +52,7 @@ tokenize ()
 
     while (!feof (in)) {
         c = fgetc (in);
-        putchar (c);
+        //putchar (c);
         if (!i) {
             if (c == '"') {
                 while (1) {

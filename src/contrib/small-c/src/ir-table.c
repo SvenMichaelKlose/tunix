@@ -1,3 +1,6 @@
+// Central definition of IR byte codes.
+// Used by 'mkir' and 'ir2txt'.
+
 struct ircode {
     char *name;
     char param;

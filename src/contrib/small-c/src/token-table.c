@@ -1,14 +1,14 @@
 
 struct token {
     char * name;
-    char * str;
+    char * match;
 } tokens[] = {
     {"VOID",    "void"},
     {"CHAR",    "char"},
     {"INT",     "int"},
     {"RETURN",  "return"},
     {"IF",      "if"},
-    {"ELSE",    "else",
+    {"ELSE",    "else"},
     {"WHILE",   "while"},
     {"FOR",     "for"},
     {"BREAK",   "break"},
@@ -67,8 +67,9 @@ struct token {
     {"OBRACKET","["},
     {"CBRACKET","]"},
     {"OBRACE",  "{"},
-    {"CBRACCE", "}"}
-    {"COMMA",   ","}
-    {"COLON",   ":"}
+    {"CBRACE",  "}"},
+    {"COMMA",   ","},
+    {"DOT",     "."},
+    {"COLON",   ":"},
     {"SEMICOLON", ";"}
 };

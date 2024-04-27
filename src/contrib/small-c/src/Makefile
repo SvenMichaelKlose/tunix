@@ -18,22 +18,25 @@ test/.passed:
 	$(MAKE) -C test all
 
 clean:
-	rm -f $(OBJ) $(SCC) mkir mkir.o ir2txt ir2txt.o ir-codes.h ctok ctok.o
+	rm -f $(TOK) $(OBJ) $(SCC) mkir mkir.o ir2txt ir2txt.o ir-codes.h ctok ctok.o mktok mtok.o token.h
 	$(MAKE) -C test clean
 
-ir2txt:
-	$(CC) -o ir2txt $(CFLAGS) ir2txt.c
-
-ir.h: mkir
-	./mkir > ir-codes.h
-
-mkir:
-	$(CC) -o mkir $(CFLAGS) mkir.c
-
-$(SCC): ir.h ir2txt ctok $(OBJ) $(TOK)
+$(SCC): ir-codes.h ir2txt token.h ctok $(OBJ) $(TOK)
 	$(CC) -o $(SCC) $(CFLAGS) $(OBJ)
 
+ir2txt: ir2txt.o
+
+token.h: mktok
+	./mktok > $@
+
+ir-codes.h: mkir
+	./mkir > $@
+
+mkir: mkir.o
+
 ctok: ctok.o
+
+mktok: mktok.o
 
 %.tok : %.c
 	./ctok $< $@

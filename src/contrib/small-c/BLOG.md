@@ -3,6 +3,21 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-26 16:20 S.M. Klose
+
+Added C headers to rule out hidden bugs
+and removed some oddities along the way.
+Saves hours of debugging a weak second.
+
+The token table generator is now
+buddying up with the tokenizer.  And to
+no surprise: it needs tests, too.  It is
+not required yet.  The Makefile even
+broke and has to be run twice.  Will be
+on my own until correct code is
+generated anyhow so messing around on
+the Git master branch is OK for now.
+
 # 2024-04-25 22:58 S.M. Klose
 
 I've added some tokenizer I've asked out

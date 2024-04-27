@@ -3,18 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-const char *keywords[] = {
-    "int", "return", "void", "if",
-    "else", "while", "for", "break",
-    "continue", "char", "do", "switch",
-    "default", "case", "enum",
-    "struct", "typedef", "union",
-    "const", "sizeof", "float",
-    "double", "short", "long",
-    "unsigned", "signed", "static",
-    "volatile", "goto", "register",
-    "extern", "auto", NULL
-};
+#include "token-table.c"
 
 FILE * in;
 FILE * out;
@@ -24,10 +13,11 @@ char
 is_keyword (char len)
 {
     unsigned char i, l;
+    int ntok = sizeof (tokens) / sizeof (struct token);
 
-    for (i = 0; keywords[i] != NULL; i++) {
-        l = strlen (keywords[i]);
-        if (l == len && memcmp (keywords[i], buffer, len) == 0)
+    for (i = 0; i < ntok; i++) {
+        l = strlen (tokens[i].match);
+        if (l == len && memcmp (tokens[i].match, buffer, len) == 0)
             return i + 1;
     }
     return 0;
@@ -52,7 +42,6 @@ tokenize ()
 
     while (!feof (in)) {
         c = fgetc (in);
-        //putchar (c);
         if (!i) {
             if (c == '"') {
                 while (1) {
@@ -82,7 +71,6 @@ tokenize ()
         }
         if (i) {
             buffer[i] = 0;
-            fprintf (stderr, "%s\n", buffer);
             if (k = is_keyword (i))
                 fputc ('0' + k - 1, out);
             else

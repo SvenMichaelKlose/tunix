@@ -7,6 +7,7 @@ extern int hier1 (LVALUE * lval); // ? : expression
 extern int hier1a (LVALUE * lval); // "||"
 extern int hier1b (LVALUE * lval); // "&&"
 extern int hier1c (LVALUE * lval); // "|"
+extern int hier1d (char, LVALUE * lval, int); // "|"
 extern int hier2 (LVALUE * lval); // "^"
 extern int hier3 (LVALUE * lval); // "&"
 extern int hier4 (LVALUE * lval); // "==" and "!="

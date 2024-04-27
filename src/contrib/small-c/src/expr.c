@@ -87,86 +87,20 @@ hier1 (LVALUE * lval)
         rvalue_on_fetch (lval2, hier1 (lval2));
         store (lval);
         return 0;
-    } else {
-        fc = ch ();
-        if (match ("-=") ||
-            match ("+=") ||
-            match ("*=") ||
-            match ("/=") ||
-            match ("%=") ||
-            match (">>=") ||
-            match ("<<=") ||
-            match ("&=") || match ("^=") || match ("|=")) {
-            if (!(k & FETCH)) {
-                needlval ();
-                return 0;
-            }
-            if (lval->indirect)
-                gen_push (k);
-            k = rvalue (lval, k);
-            push_and_rvalue_on_fetch (k, lval2, hier1);
-            switch (fc) {
-            case '-':{
-                    if (dbltest (lval, lval2)) {
-                        gen_mul_const (lval->ptr_type,
-                                      lval->tagsym ? lval->
-                                      tagsym->
-                                      size : INTSIZE);
-                    }
-                    gen_sub ();
-                    result (lval, lval2);
-                    break;
-                }
-            case '+':{
-                    if (dbltest (lval, lval2)) {
-                        gen_mul_const (lval->ptr_type,
-                                      lval->tagsym ? lval->
-                                      tagsym->
-                                      size : INTSIZE);
-                    }
-                    gen_add (lval, lval2);
-                    result (lval, lval2);
-                    break;
-                }
-            case '*':
-                gen_mul ();
-                break;
-            case '/':
-                if (nosign (lval) || nosign (lval2))
-                    gen_udiv ();
-                else
-                    gen_div ();
-                break;
-            case '%':
-                if (nosign (lval) || nosign (lval2))
-                    gen_umod ();
-                else
-                    gen_mod ();
-                break;
-            case '>':
-                if (nosign (lval))
-                    gen_lsr ();
-                else
-                    gen_asr ();
-                break;
-            case '<':
-                gen_asl ();
-                break;
-            case '&':
-                gen_and ();
-                break;
-            case '^':
-                gen_xor ();
-                break;
-            case '|':
-                gen_or ();
-                break;
-            }
-            store (lval);
-            return 0;
-        }
-        return k;
     }
+    fc = ch ();
+    if (match ("-=")
+        || match ("+=")
+        || match ("*=")
+        || match ("/=")
+        || match ("%=")
+        || match (">>=")
+        || match ("<<=")
+        || match ("&=")
+        || match ("^=")
+        || match ("|="))
+        return hier1d (fc, lval, k);
+   return k;
 }
 
 // ? : expression
@@ -242,6 +176,77 @@ hier1c (LVALUE * lval)
     }
 }
 
+int
+hier1d (char fc, LVALUE * lval, int k)
+{
+    LVALUE lval2[1];
+    if (!(k & FETCH)) {
+        needlval ();
+        return 0;
+    }
+    if (lval->indirect)
+        gen_push (k);
+    k = rvalue (lval, k);
+    push_and_rvalue_on_fetch (k, lval2, hier1);
+    switch (fc) {
+    case '-':
+        if (dbltest (lval, lval2)) {
+            gen_mul_const (lval->ptr_type,
+                          lval->tagsym ? lval->
+                          tagsym->
+                          size : INTSIZE);
+        }
+        gen_sub ();
+        result (lval, lval2);
+        break;
+    case '+':
+        if (dbltest (lval, lval2)) {
+            gen_mul_const (lval->ptr_type,
+                          lval->tagsym ? lval->
+                          tagsym->
+                          size : INTSIZE);
+        }
+        gen_add (lval, lval2);
+        result (lval, lval2);
+        break;
+    case '*':
+        gen_mul ();
+        break;
+    case '/':
+        if (nosign (lval) || nosign (lval2))
+            gen_udiv ();
+        else
+            gen_div ();
+        break;
+    case '%':
+        if (nosign (lval) || nosign (lval2))
+            gen_umod ();
+        else
+            gen_mod ();
+        break;
+    case '>':
+        if (nosign (lval))
+            gen_lsr ();
+        else
+            gen_asr ();
+        break;
+    case '<':
+        gen_asl ();
+        break;
+    case '&':
+        gen_and ();
+        break;
+    case '^':
+        gen_xor ();
+        break;
+    case '|':
+        gen_or ();
+        break;
+    }
+    store (lval);
+    return 0;
+}
+ 
 // "|"
 int
 hier2 (LVALUE * lval)

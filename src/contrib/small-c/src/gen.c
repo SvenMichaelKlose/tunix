@@ -5,6 +5,7 @@
 #include "ir.h"
 #include "expr.h"
 #include "lex.h"
+#include "primary.h"
 #include "gen.h"
 
 //////////////
@@ -162,7 +163,7 @@ gen_divide (LVALUE * a, LVALUE * b)
 }
 
 void
-gen_modulo (LVALUE * a, LVALUE * b)
+gen_modulo (LVALUE *a, LVALUE *b)
 {
     if (nosign (a) || nosign (b))
         gen_umod ();
@@ -171,10 +172,28 @@ gen_modulo (LVALUE * a, LVALUE * b)
 }
 
 void
-gen_ashiftr (LVALUE * lval)
+gen_ashiftr (LVALUE *lval)
 {
     if (nosign (lval))
         gen_lsr ();
     else
         gen_asr ();
+}
+
+int
+ptrsize (LVALUE *lval)
+{
+   return lval->tagsym ?
+        lval->tagsym->size :
+        INTSIZE;
+}
+
+void
+gen_scaled_ptrop (void (*gen) (LVALUE *, LVALUE *),
+                  LVALUE *a, LVALUE *b)
+{
+    if (dbltest (a, b))
+        gen_mul_const (a->ptr_type, ptrsize (a));
+    if (gen)
+        gen (a, b);
 }

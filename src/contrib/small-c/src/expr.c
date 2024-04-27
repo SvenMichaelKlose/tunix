@@ -187,21 +187,12 @@ hier1d (char fc, LVALUE * lval, int k)
     push_and_rvalue_on_fetch (k, lval2, hier1);
     switch (fc) {
     case '-':
-        if (dbltest (lval, lval2))
-            gen_mul_const (lval->ptr_type,
-                           lval->tagsym ?
-                                lval->tagsym->size :
-                                INTSIZE);
+        gen_scaled_ptrop (NULL, lval, lval2);
         gen_sub ();
         result (lval, lval2);
         break;
     case '+':
-        if (dbltest (lval, lval2))
-            gen_mul_const (lval->ptr_type,
-                           lval->tagsym ?
-                               lval->tagsym->size :
-                               INTSIZE);
-        gen_add (lval, lval2);
+        gen_scaled_ptrop (gen_add, lval, lval2);
         result (lval, lval2);
         break;
     case '*':
@@ -431,26 +422,14 @@ hier8 (LVALUE * lval)
     FOREVER {
         if (match ("+")) {
             push_and_rvalue_on_fetch (k, lval2, hier9);
-            // if left is pointer and right is int, scale right 
             if (dbltest (lval, lval2))
-                gen_mul_const (lval->ptr_type,
-                              lval->tagsym ? lval->tagsym->
-                              size : INTSIZE);
-            // will scale left if right int pointer and left int 
+                gen_mul_const (lval->ptr_type, ptrsize (lval));
             gen_add (lval, lval2);
             result (lval, lval2);
         } else if (match ("-")) {
             push_and_rvalue_on_fetch (k, lval2, hier9);
-            /* if dbl, can only be: pointer - int, or
-               pointer - pointer, thus,
-               in first case, int is scaled up,
-               in second, result is scaled down. */
-            if (dbltest (lval, lval2))
-                gen_mul_const (lval->ptr_type,
-                              lval->tagsym ? lval->tagsym->
-                              size : INTSIZE);
+            gen_scaled_ptrop (NULL, lval, lval2);
             gen_sub ();
-            // if both pointers, scale result 
             if (lval->ptr_type & CINT
                 && lval2->ptr_type & CINT)
                 gen_div2 ();   // divide by intsize 
@@ -638,8 +617,7 @@ hier11 (LVALUE * lval)
                 gen_push (k);
                 expression (YES);
                 needbrack ("]");
-                gen_mul_const (symbol->type,
-                              tags[symbol->tag].size);
+                gen_mul_const (symbol->type, tags[symbol->tag].size);
                 gen_add (NULL, NULL);
                 lval->indirect = symbol->type;
                 lval->ptr_type = 0;

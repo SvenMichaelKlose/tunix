@@ -3,6 +3,12 @@
 #include "defs.h"
 #include "data.h"
 #include "ir.h"
+#include "gen.h"
+#include "io.h"
+#include "lex.h"
+#include "primary.h"
+#include "initials.h"
+#include "struct.h"
 #include "sym.h"
 
 // Declare a static variable.
@@ -14,6 +20,7 @@
 //       (parent struct).
 // otag: Tag of struct object being
 //       declared.  Only used with mtag.
+void
 declare_global (int type, int storage,
                 TAG_SYMBOL * mtag,
                 int otag,
@@ -32,7 +39,7 @@ declare_global (int type, int storage,
                 VARIABLE;
             if (!symname (sname))
                 illname ();
-            if (find_global (sname) > -1)
+            if (find_global (sname))
                 multidef (sname);
             if (match ("[")) {
                 dim = needsub ();
@@ -42,12 +49,13 @@ declare_global (int type, int storage,
             if (!mtag) {
                 // Real variable, not a struct/union member.
                 identity = initials (sname, type, identity, dim, otag);
-                symbol = add_global (sname, identity, type, (!dim ? -1 : dim), storage);
+                symbol = add_global (sname, identity, type,
+                                     (!dim ? -1 : dim), storage);
                 if (type == STRUCT)
                     symbol->tag = otag;
                 break;
             }
-            symbol = add_member (sname, identity, type, storage,
+            symbol = add_member (sname, identity, type,
                                  type & CINT ? dim * INTSIZE : dim);
             // store (correctly scaled) size of member.
             if (identity == POINTER)
@@ -70,6 +78,7 @@ declare_global (int type, int storage,
 
 // Initialize global objects.
 // Returns 1 if variable is initialized.
+int
 initials (char *symbol_name, int type,
           int identity, int dim,
           int otag)
@@ -80,8 +89,10 @@ initials (char *symbol_name, int type,
     if (!dim)
         dim_unknown = 1;
     if (!(type & CCHAR) && !(type & CINT)
-        && !(type == STRUCT))
-        error ("unsupported storage size");
+        && !(type == STRUCT)) {
+        perror ("unsupported storage size");
+        return 0;
+    }
     if (match ("=")) {
         // an array or struct 
         if (match ("{")) {
@@ -116,6 +127,7 @@ initials (char *symbol_name, int type,
     return identity;
 }
 
+void
 struct_init (TAG_SYMBOL * tag,
              char *symbol_name)
 {
@@ -129,26 +141,33 @@ struct_init (TAG_SYMBOL * tag,
               members[first_member + member].identity,
               &dummy_dim,
               tag);
-        ++member;
+        member++;
         if (!match (",")
-            && (member != (first_member + nmembers)))
-            return error ("struct initialisation incomplete");
+            && (member != (first_member + nmembers))) {
+            perror ("struct initialisation incomplete");
+            return;
+        }
     }
 }
 
 // Evaluate one initializer,
 // add data to table.
+int
 init (char *symbol_name, int type,
       int identity, int *dim,
       TAG_SYMBOL * tag)
 {
     int value, number_of_chars;
-    if (identity == POINTER)
-        return error ("cannot assign to pointer"); // TODO
+    if (identity == POINTER) {
+        perror ("cannot assign to pointer");
+        return 0;
+    }
     if (quoted_string (&value)) {
         if (identity == VARIABLE
-            || !(type & CCHAR))
-            return error ("found string: must assign to char pointer or array");
+            || !(type & CCHAR)) {
+            perror ("found string: must assign to char pointer or array");
+            return 0;
+        }
         number_of_chars = litptr - value;
         *dim = *dim - number_of_chars;
         while (number_of_chars > 0) {
@@ -171,6 +190,7 @@ init (char *symbol_name, int type,
 // modifies machine stack and adds
 // symbol table entry with appropriate
 // stack offset to find it again.
+void
 declare_local (int typ, int stclass,
                int otag)
 {
@@ -232,17 +252,18 @@ declare_local (int typ, int stclass,
 }
 
 // Get array size.
+int
 needsub ()
 {
     int num[1];
     if (match ("]"))
         return 0;
     if (!number (num)) {
-        error ("must be constant");
+        perror ("must be constant");
         num[0] = 1;
     }
     if (num[0] < 0) {
-        error ("negative size illegal");
+        perror ("negative size illegal");
         num[0] = (-num[0]);
     }
     needbrack ("]");
@@ -260,10 +281,11 @@ find_global (char *sname)
             return &symbol_table[idx];
         idx++;
     }
-    return -1;
+    return 0;
 }
 
 // Find local symbol.
+int
 find_local (char *sname)
 {
     int idx;
@@ -284,10 +306,12 @@ add_global (char *sname, int identity,
 {
     SYMBOL *symbol;
     char *buffer_ptr;
-    if ((symbol = find_global (sname)) > -1)
+    if (symbol = find_global (sname))
         return symbol;
-    if (global_table_index >= NUMBER_OF_GLOBALS)
-        return error ("global symbol table overflow");
+    if (global_table_index >= NUMBER_OF_GLOBALS) {
+        perror ("global symbol table overflow");
+        return NULL;
+    }
     symbol = &symbol_table[global_table_index++];
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
@@ -299,6 +323,7 @@ add_global (char *sname, int identity,
 }
 
 // Add new symbol to local table.
+int
 add_local (char *sname, int identity,
            int type, int offset,
            int storage_class)
@@ -308,8 +333,10 @@ add_local (char *sname, int identity,
     char    *buffer_ptr;
     if ((current_symbol_table_idx = find_local (sname)) > -1)
         return current_symbol_table_idx;
-    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS)
-        return error ("local symbol table overflow");
+    if (local_table_index >= NUMBER_OF_GLOBALS + NUMBER_OF_LOCALS) {
+        perror ("local symbol table overflow");
+        return 0;
+    }
     current_symbol_table_idx = local_table_index;
     symbol = &symbol_table[current_symbol_table_idx];
     buffer_ptr = symbol->name;
@@ -332,6 +359,7 @@ add_local (char *sname, int identity,
 
 // Test if next input string is legal
 // symbol name.
+int
 symname (char *sname)
 {
     int k;
@@ -345,14 +373,16 @@ symname (char *sname)
     return 1;
 }
 
+void
 illname ()
 {
-    error ("illegal symbol name");
+    perror ("illegal symbol name");
 }
 
+void
 multidef (char *symbol_name)
 {
-    error ("already defined");
+    perror ("already defined");
     gen_comment ();
     outs (symbol_name);
     newline ();

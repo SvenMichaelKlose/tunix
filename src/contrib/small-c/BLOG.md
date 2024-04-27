@@ -27,6 +27,17 @@ time is wasted.  Playing around and
 getting through the code was inspiring
 though.
 
+And the more I am thinking about it this
+also could use a parser generator.  Will
+peek into the Dragon Book to get an
+update on that picture.  There must be
+something short and snappy.
+
+And what would generating the bytecodes
+while traversing a syntax tree look
+like?  Smells like something compact and
+generic.  With a lispy heap.
+
 # 2024-04-24 05:20 S.M. Klose
 
 Cleaned up a good lot.  IT's gotta look

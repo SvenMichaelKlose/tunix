@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <string.h>
+#include <error.h>
+
 #include "defs.h"
 #include "data.h"
+#include "initials.h"
+#include "lex.h"
 
 // Add new symbol to table, initialise
 // begin position in data array.
+void
 add_symbol_initials (char *symbol_name,
                      char type)
 {
@@ -14,6 +19,7 @@ add_symbol_initials (char *symbol_name,
 
 // Find symbol in table, count position
 // in data array.
+int
 find_symbol_initials (char *symbol_name)
 {
     int result = 0;
@@ -22,8 +28,8 @@ find_symbol_initials (char *symbol_name)
          initials_table[initials_idx].type;
          initials_idx++) {
         if (initials_idx >= NUMBER_OF_GLOBALS)
-            error ("initials table overrun");
-        if (astreq (symbol_name, &initials_table[initials_idx].name, NAMEMAX)) {
+            perror ("initials table overrun");
+        if (astreq (symbol_name, (char *) &initials_table[initials_idx].name, NAMEMAX)) {
             result = 1;
             break;
         } else
@@ -33,6 +39,7 @@ find_symbol_initials (char *symbol_name)
 }
 
 // Add data to symbol in table.
+void
 add_data_initials (char *symbol_name,
                    int type, int value,
                    TAG_SYMBOL * tag)
@@ -64,6 +71,7 @@ add_data_initials (char *symbol_name,
 
 // Get number of data items for given
 // symbol.
+int
 get_size (char *symbol_name)
 {
     int result = 0;
@@ -73,6 +81,7 @@ get_size (char *symbol_name)
 }
 
 // Get item at position.
+int
 get_item_at (char *symbol_name,
              int position,
              TAG_SYMBOL * tag)

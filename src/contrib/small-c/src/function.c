@@ -2,6 +2,13 @@
 #include "defs.h"
 #include "data.h"
 #include "sym.h"
+#include "io.h"
+#include "ir.h"
+#include "struct.h"
+#include "stmt.h"
+#include "lex.h"
+#include "gen.h"
+#include "function.h"
 
 int argtop;
 
@@ -10,29 +17,31 @@ int argtop;
 // tries to make a function out of what
 // follows.
 // Modified version by P.L. Woods.
+void
 newfunc ()
 {
-    char n[NAMESIZE];
-    int idx, type;
+    char     n[NAMESIZE];
+    int      type;
+    SYMBOL * symbol;
     fexitlab = getlabel ();
 
     if (!symname (n)) {
-        error ("illegal function or declaration");
+        perror ("illegal function or declaration");
         kill ();
         return;
     }
     // Reuse symbol entry, if it's a function.
-    if ((idx = find_global (n)) > -1) {
-        if (symbol_table[idx].identity != FUNCTION
-            || symbol_table[idx].offset == FUNCTION)
+    if (symbol = find_global (n)) {
+        if (symbol->identity != FUNCTION
+            || symbol->offset == FUNCTION)
             multidef (n);
         else
-            symbol_table[idx].offset = FUNCTION;
+            symbol->offset = FUNCTION;
     } else
         add_global (n, FUNCTION, CINT, FUNCTION, PUBLIC);
 
     if (!match ("("))
-        error ("missing open paren");
+        perror ("missing open paren");
     def_global (n);
     local_table_index = NUMBER_OF_GLOBALS;      //locptr = STARTLOC; 
     argstk = 0;
@@ -48,13 +57,13 @@ newfunc ()
                     argstk = argstk + INTSIZE;
                 }
             } else {
-                error ("illegal argument name");
+                perror ("illegal argument name");
                 junk ();
             }
             blanks ();
             if (!streq (line + lptr, ")")
                 && !match (","))
-                error ("expected comma");
+                perror ("expected comma");
             if (endst ())
                 break;
         }
@@ -65,7 +74,7 @@ newfunc ()
                 getarg (type);
                 need_semicolon ();
             } else {
-                error ("wrong number args");
+                perror ("wrong number args");
                 break;
             }
         }
@@ -85,6 +94,7 @@ newfunc ()
 // (Completely rewritten version by P.L.
 // Woods.)
 // @param t argument type (char, int)
+void
 getarg (int t)
 {
     int j, legalname, address,
@@ -98,7 +108,7 @@ getarg (int t)
             if (!symname (n))
                 illname ();
             if ((otag = find_tag (n)) == -1)
-                error ("struct tag undefined");
+                perror ("struct tag undefined");
         }
         j = match ("*") ?
                 POINTER :
@@ -121,20 +131,21 @@ getarg (int t)
                 // set tag for struct arguments 
                 if (t == STRUCT) {
                     if (j != POINTER)
-                        error ("only struct pointers, not structs, can be passed to functions");
+                        perror ("only struct pointers, not structs, can be passed to functions");
                     symbol_table[argptr].tag = otag;
                 }
             } else
-                error ("expected argument name");
+                perror ("expected argument name");
         }
         argstk = argstk - INTSIZE;
         if (endst ())
             return;
         if (!match (","))
-            error ("expected comma");
+            perror ("expected comma");
     }
 }
 
+int
 doAnsiArguments ()
 {
     int type;
@@ -149,7 +160,7 @@ doAnsiArguments ()
         if (type)
             doLocalAnsiArgument (type);
         else {
-            error ("wrong number args");
+            perror ("wrong number args");
             break;
         }
         if (match (",")) {
@@ -159,8 +170,10 @@ doAnsiArguments ()
         if (match (")"))
             break;
     }
+    return 1;
 }
 
+void
 doLocalAnsiArgument (int type)
 {
     char symbol_name[NAMESIZE];
@@ -172,7 +185,7 @@ doLocalAnsiArgument (int type)
         if (!symname (symbol_name))
             illname ();
         if ((otag = find_tag (symbol_name)) == -1)
-            error ("struct tag undefined");
+            perror ("struct tag undefined");
     }
     identity = match ("*") ?
         POINTER :
@@ -187,7 +200,7 @@ doLocalAnsiArgument (int type)
             // if argument is a struct, properly set the argument's tag.
             if (type == STRUCT) {
                 if (identity != POINTER)
-                    error ("only struct pointers, not structs, can be passed to functions");
+                    perror ("only struct pointers, not structs, can be passed to functions");
                 symbol_table[argptr].tag = otag;
             }
             // modify stack offset as we push more params 
@@ -199,7 +212,7 @@ doLocalAnsiArgument (int type)
             }
         }
     } else {
-        error ("illegal argument name");
+        perror ("illegal argument name");
         junk ();
     }
     if (match ("[")) {

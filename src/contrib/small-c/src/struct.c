@@ -2,8 +2,11 @@
 #include <string.h>
 #include "defs.h"
 #include "data.h"
+#include "lex.h"
+#include "main.h"
 #include "struct.h"
 
+int
 find_tag (char *sname)
 {
     int i;
@@ -33,8 +36,10 @@ add_member (char *sname, char identity,
 {
     char   *buffer_ptr;
     SYMBOL *symbol;
-    if (++member >= NUMMEMB)
-        return error ("member table overflow");
+    if (++member >= NUMMEMB) { // XXX Weird preinc. (smk)
+        perror ("member table overflow");
+        return 0;
+    }
     symbol = &members[member];
     buffer_ptr = symbol->name;
     while (alphanumeric (*buffer_ptr++ = *sname++));
@@ -44,6 +49,7 @@ add_member (char *sname, char identity,
     return symbol;
 }
 
+int
 define_struct (char *sname, int storage,
                int is_struct)
 {
@@ -51,8 +57,10 @@ define_struct (char *sname, int storage,
     char *s;
 
     // Allocate info.
-    if (tag >= NUMTAG)
-        return error ("struct table overflow");
+    if (tag >= NUMTAG) {
+        perror ("struct table overflow");
+        return 0;
+    }
     symbol = &tags[tag];
 
     // Populate info.

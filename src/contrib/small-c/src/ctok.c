@@ -23,7 +23,7 @@ char buffer[256];
 char
 is_keyword (char len)
 {
-    char i, l;
+    unsigned char i, l;
 
     for (i = 0; keywords[i] != NULL; i++) {
         l = strlen (keywords[i]);
@@ -36,7 +36,7 @@ is_keyword (char len)
 void
 emit (char type, char i)
 {
-    char j;
+    unsigned char j;
 
     fputc (type, out);
     fputc (i, out);
@@ -48,7 +48,7 @@ void
 tokenize ()
 {
     char c, k;
-    char i = 0;
+    unsigned char i = 0;
 
     while (!feof (in)) {
         c = fgetc (in);

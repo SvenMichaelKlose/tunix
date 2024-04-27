@@ -105,7 +105,7 @@ import fnord
     sty regbh
 ~~~
 
-## LDACI, LDBCI symbol: Load address of symbol
+## LDACI, LDBCI symbol: Load constant
 
 ~~~
 ; 6502
@@ -116,6 +116,17 @@ vldaci:
     sta regah
 
 vldbci:
+    lda #<arg
+    sta regbl
+    lda #>arg
+    sta regbh
+~~~
+
+## LDACIG: Load address of symbol
+
+~~~
+; 6502
+vldacig:
     lda #<arg
     sta regbl
     lda #>arg

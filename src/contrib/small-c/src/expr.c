@@ -1,11 +1,19 @@
 #include <stdio.h>
+#include <error.h>
+
 #include "defs.h"
 #include "data.h"
+#include "io.h"
+#include "sym.h"
+#include "lex.h"
+#include "primary.h"
+#include "gen.h"
 #include "ir.h"
 #include "sym.h"
 #include "expr.h"
 
 // Unsigned operand?
+int
 nosign (LVALUE * is)
 {
     SYMBOL *ptr;
@@ -22,6 +30,7 @@ nosign (LVALUE * is)
 // type indirect object to fetch, else
 // 0 for static object lval.ptr_type -
 // type pointer or array, else 0.
+void
 expression (int comma)
 {
     LVALUE lval;
@@ -37,6 +46,7 @@ expression (int comma)
 }
 
 // Assignment
+int
 hier1 (LVALUE * lval)
 {
     int k;
@@ -76,7 +86,7 @@ hier1 (LVALUE * lval)
             gen_push (k);
             k = hier1 (lval2);
             if (k & FETCH)
-                k = rvalue (lval2);
+                k = rvalue (lval2, k);
             switch (fc) {
             case '-':{
                     if (dbltest (lval, lval2)) {
@@ -142,6 +152,7 @@ hier1 (LVALUE * lval)
 }
 
 // ? : expression
+int
 hier1a (LVALUE * lval)
 {
     int k, lab1, lab2;
@@ -163,8 +174,10 @@ hier1a (LVALUE * lval)
         gen_jump (lab2 = getlabel ());
         def_local (lab1);
         blanks ();
-        if (!match (":"))
-            return error ("missing colon");
+        if (!match (":")) {
+            perror ("missing colon");
+            return 0;
+        }
         k = hier1b (lval2);
         if (k & FETCH)
             k = rvalue (lval2, k);
@@ -173,6 +186,7 @@ hier1a (LVALUE * lval)
 }
 
 // "||"
+int
 hier1b (LVALUE * lval)
 {
     int k, lab;
@@ -197,6 +211,7 @@ hier1b (LVALUE * lval)
 }
 
 // "&&"
+int
 hier1c (LVALUE * lval)
 {
     int k, lab;
@@ -221,6 +236,7 @@ hier1c (LVALUE * lval)
 }
 
 // "|"
+int
 hier2 (LVALUE * lval)
 {
     int k;
@@ -251,6 +267,7 @@ hier2 (LVALUE * lval)
 }
 
 // "^"
+int
 hier3 (LVALUE * lval)
 {
     int k;
@@ -279,6 +296,7 @@ hier3 (LVALUE * lval)
 }
 
 // "&"
+int
 hier4 (LVALUE * lval)
 {
     int k;
@@ -310,6 +328,7 @@ hier4 (LVALUE * lval)
 }
 
 // "==" and "!="
+int
 hier5 (LVALUE * lval)
 {
     int k;
@@ -341,6 +360,7 @@ hier5 (LVALUE * lval)
 }
 
 // Comparison other than "==" and "!=".
+int
 hier6 (LVALUE * lval)
 {
     int k;
@@ -407,6 +427,7 @@ hier6 (LVALUE * lval)
 }
 
 // "<<" and ">>"
+int
 hier7 (LVALUE * lval)
 {
     int k;
@@ -414,8 +435,8 @@ hier7 (LVALUE * lval)
 
     k = hier8 (lval);
     blanks ();
-    if (!sstreq (">>") &&
-        !sstreq ("<<") || sstreq (">>=") || sstreq ("<<="))
+    if ((!sstreq (">>") && !sstreq ("<<"))
+        || sstreq (">>=") || sstreq ("<<="))
         return k;
     if (k & FETCH)
         k = rvalue (lval, k);
@@ -446,6 +467,7 @@ hier7 (LVALUE * lval)
 }
 
 // "+" and "-"
+int
 hier8 (LVALUE * lval)
 {
     int k;
@@ -453,8 +475,7 @@ hier8 (LVALUE * lval)
 
     k = hier9 (lval);
     blanks ();
-    if (ch () != '+'
-        && ch () != '-'
+    if ((ch () != '+' && ch () != '-')
         || nch () == '=')
         return k;
     if (k & FETCH)
@@ -498,6 +519,7 @@ hier8 (LVALUE * lval)
 }
 
 // "*", "/" and "%"
+int
 hier9 (LVALUE * lval)
 {
     int k;
@@ -543,6 +565,7 @@ hier9 (LVALUE * lval)
 }
 
 // "++", "--" and unary "-"
+int
 hier10 (LVALUE * lval)
 {
     int k;
@@ -616,7 +639,7 @@ hier10 (LVALUE * lval)
             // needed to load their
             // address.
             if (lval->symbol->type != STRUCT)
-                error ("illegal address");
+                perror ("illegal address");
             return 0;
         }
         ptr = lval->symbol;
@@ -627,7 +650,7 @@ hier10 (LVALUE * lval)
             return REGA;
         }
         // Global and non-array.
-        gen_ldaci ((ptr = lval->symbol)->name);
+        gen_ldacig ((ptr = lval->symbol)->name);
         lval->indirect = ptr->type;
         return REGA;
     } else {
@@ -662,6 +685,7 @@ hier10 (LVALUE * lval)
 }
 
 // Array subscript
+int
 hier11 (LVALUE * lval)
 {
     int direct, k;
@@ -681,11 +705,12 @@ hier11 (LVALUE * lval)
                 if (!ptr) {
                     junk ();
                     needbrack ("]");
-                    return error ("can't subscript");
+                    perror ("can't subscript");
+                    return 0;
                 } else if (ptr->identity == POINTER) {
                     k = rvalue (lval, k);
                 } else if (ptr->identity != ARRAY) {
-                    error ("can't subscript");
+                    perror ("can't subscript");
                     k = 0;
                 }
                 gen_push (k);
@@ -705,18 +730,19 @@ hier11 (LVALUE * lval)
                     k = rvalue (lval, k);
                     callfunction (0);
                 } else
-                    callfunction (ptr);
+                    callfunction (ptr->name);
                 lval->symbol = 0;
                 k = 0;
-            } else if ((direct = match (".")) || match ("->")) {
+            } else if ((direct = match ("."))
+                       || match ("->")) {
                 if (!lval->tagsym) {
-                    error ("can't take member");
+                    perror ("can't take member");
                     junk ();
                     return 0;
                 }
                 if (!symname (sname) ||
                     (!(ptr = find_member (lval->tagsym, sname)))) {
-                    error ("unknown member");
+                    perror ("unknown member");
                     junk ();
                     return 0;
                 }
@@ -739,9 +765,9 @@ hier11 (LVALUE * lval)
                     lval->ptr_type = ptr->type;
                     //lval->val_type = CINT; 
                 }
-                if (ptr->identity == ARRAY ||
-                    (ptr->type == STRUCT
-                     && ptr->identity == VARIABLE)) {
+                if (ptr->identity == ARRAY
+                    || (ptr->type == STRUCT
+                        && ptr->identity == VARIABLE)) {
                     // array or struct 
                     lval->ptr_type = ptr->type;
                     //lval->val_type = CINT; 
@@ -754,7 +780,7 @@ hier11 (LVALUE * lval)
     if (!ptr)
         return k;
     if (ptr->identity == FUNCTION) {
-        gen_ldaci (ptr);
+        gen_ldacig (ptr->name);
         return 0;
     }
     return k;

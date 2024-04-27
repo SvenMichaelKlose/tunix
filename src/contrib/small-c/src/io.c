@@ -2,7 +2,11 @@
 #include <string.h>
 #include "defs.h"
 #include "data.h"
+#include "preproc.h"
+#include "ir.h"
+#include "io.h"
 
+int
 openin (char *p)
 {
     strcpy (fname, p);
@@ -17,6 +21,7 @@ openin (char *p)
     return YES;
 }
 
+int
 openout ()
 {
     outfname (fname);
@@ -29,6 +34,7 @@ openout ()
 }
 
 // Make output name from input name.
+void
 outfname (char *s)
 {
     while (*s)
@@ -37,6 +43,7 @@ outfname (char *s)
 }
 
 // Terminate string at line feed.
+void
 fixname (char *s)
 {
     while (*s && *s++ != LF);
@@ -46,6 +53,7 @@ fixname (char *s)
 }
 
 // Check that filename is "*.c".
+int
 checkname (char *s)
 {
     while (*s)
@@ -57,12 +65,14 @@ checkname (char *s)
     return YES;
 }
 
+void
 kill ()
 {
     lptr = 0;
     line[lptr] = 0;
 }
 
+void
 readline ()
 {
     int k;
@@ -97,6 +107,7 @@ readline ()
     }
 }
 
+char
 inbyte ()
 {
     while (!ch ()) {
@@ -107,6 +118,7 @@ inbyte ()
     return gch ();
 }
 
+char
 inchar ()
 {
     if (!ch ())
@@ -118,6 +130,7 @@ inchar ()
 
 // Gets current char from input line and
 // moves to the next one.
+char
 gch ()
 {
     if (!ch ())
@@ -126,6 +139,7 @@ gch ()
 }
 
 // Next char.
+char
 nch ()
 {
     if (!ch ())
@@ -134,6 +148,7 @@ nch ()
 }
 
 // Current char.
+char
 ch ()
 {
     return line[lptr] & 127;
@@ -141,6 +156,7 @@ ch ()
 
 // Print a carriage return and a string
 // only to console.
+void
 pl (char *str)
 {
     int k;

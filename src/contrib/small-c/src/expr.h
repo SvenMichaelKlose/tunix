@@ -2,7 +2,7 @@
 #define _EXPR_H_
 
 extern int nosign (LVALUE * is);
-extern int expression (int comma); // Assignment
+extern void expression (int comma); // Assignment
 extern int hier1 (LVALUE * lval); // ? : expression
 extern int hier1a (LVALUE * lval); // "||"
 extern int hier1b (LVALUE * lval); // "&&"

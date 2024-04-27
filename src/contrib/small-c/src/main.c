@@ -6,6 +6,17 @@
 #include "defs.h"
 #include "data.h"
 #include "ir-codes.h"
+#include "io.h"
+#include "gen.h"
+#include "lex.h"
+#include "ir.h"
+#include "initials.h"
+#include "sym.h"
+#include "struct.h"
+#include "function.h"
+#include "stmt.h"
+#include "preproc.h"
+#include "main.h"
 
 FILE *logFile = NULL;
 
@@ -27,6 +38,7 @@ oputs (char *str)
     fputs (str, stderr);
 }
 
+int
 main (int argc, char *argv[])
 {
     char *param = NULL, *bp;
@@ -88,6 +100,7 @@ main (int argc, char *argv[])
 
 // Compile one file if filename is NULL
 // redirect do to stdin/stdout.
+void
 compile (char *file)
 {
     // copy actual filename to filename array.
@@ -142,11 +155,13 @@ compile (char *file)
     errs = errs || errfile;
 }
 
+void
 frontend_version ()
 {
     outs ("; Front End (3.2,24/04/21)");
 }
 
+void
 usage ()
 {
     oputs ("Usage: scc [-th] [-dSYM[=VALUE]] input-files\n"
@@ -164,6 +179,7 @@ usage ()
 // At this level, only static
 // declarations, defines, includes,
 // and function definitions are legal.
+void
 parse ()
 {
     while (!feof (input)) {
@@ -187,6 +203,7 @@ parse ()
 }
 
 // Parse top level declarations.
+int
 do_declarations (int stclass,
                  TAG_SYMBOL * mtag,
                  int is_struct)
@@ -211,20 +228,20 @@ do_declarations (int stclass,
             otag = define_struct (sname, stclass, sflag);
         declare_global (STRUCT, stclass, mtag, otag, is_struct);
     } else if (type = get_type ())
-        declare_global (type, stclass, mtag, NULL_TAG, is_struct);
+        declare_global (type, stclass, mtag, 0, is_struct);
     else if (stclass == PUBLIC)
         return 0;
     else
-        declare_global (CINT, stclass, mtag, NULL_TAG, is_struct);
+        declare_global (CINT, stclass, mtag, 0, is_struct);
     need_semicolon ();
     return 1;
 }
 
 // Dump ppol of literals.
+void
 dumplits ()
 {
-    int j, k;
-
+    int k;
     // TODO: Check what this achieves.
     if (!litptr)
         return;
@@ -237,9 +254,10 @@ dumplits ()
 }
 
 // Dump static variables.
+void
 dumpglbs ()
 {
-    int dim, i, list_size, line_count, value;
+    int dim, i, list_size, line_count;
 
     if (!glbflag)
         return;
@@ -286,6 +304,7 @@ dumpglbs ()
 }
 
 // Dump struct data.
+void
 dump_struct (SYMBOL * symbol, int position)
 {
     int i, num_members, value;
@@ -324,10 +343,11 @@ dump_struct (SYMBOL * symbol, int position)
     }
 }
 
+void
 errorsummary ()
 {
     if (ncmp)
-        error ("missing closing bracket");
+        perror ("missing closing bracket");
     return;
 
     // We're making IR code.
@@ -353,6 +373,7 @@ errorsummary ()
 // Test for C or similar filename, e.g.
 // xxxxx.x, tests the dot at end-1
 // postion.
+char
 filename_typeof (char *s)
 {
     s += strlen (s) - 2;

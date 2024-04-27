@@ -4,10 +4,60 @@
 #include "ir-codes.h"
 #include "ir.h"
 #include "sym.h"
+#include "expr.h"
+#include "lex.h"
+#include "io.h"
+#include "struct.h"
+#include "gen.h"
 #include "primary.h"
 
 char sname[NAMESIZE];
 
+int
+primary (LVALUE * lval)
+{
+    int num[1]; // XXX Oh, dude! Did the first version know pointers? (smk)
+    int reg, symbol_table_idx;
+    SYMBOL *symbol;
+    lval->ptr_type = 0;
+    lval->tagsym = 0;
+    if (match ("(")) {
+        reg = hier1 (lval);
+        needbrack (")");
+        return reg;
+    }
+    if (amatch ("sizeof", 6)) {
+        dosizeof (lval);
+        return 0;
+    }
+    if (symname (sname)) {
+        if ((symbol_table_idx = find_local (sname)) > -1) {
+            symbol = &symbol_table[symbol_table_idx];
+            return primary_local (lval, symbol);
+        }
+        if ((symbol = find_global (sname))
+            && symbol->identity != FUNCTION)
+            return primary_global (lval, symbol);
+        blanks ();
+        if (ch () != '(') {
+            perror ("undeclared variable");
+            return 0;
+        }
+        return primary_function (lval, sname);
+
+    }
+    if (constant (num)) {
+        lval->symbol = 0;
+        lval->indirect = 0;
+        return 0;
+    }
+    gen_ldaci (0);
+    junk ();
+    perror ("invalid expression");
+    return 0;
+}
+
+void
 dosizeof (LVALUE * lval)
 {
     int otag, offset, symbol_table_idx;
@@ -30,8 +80,10 @@ dosizeof (LVALUE * lval)
     } else if (amatch ("struct", 6)) {
         if (!symname (sname))
             illname ();
-        if ((otag = find_tag (sname)) == -1)
-            error ("sizeof(): struct tag undefined");
+        if ((otag = find_tag (sname)) == -1) {
+            perror ("sizeof(): struct tag undefined");
+            return;
+        }
         // Write out struct size, or INTSIZE
         // if struct pointer .
         outn (match ("*") ?
@@ -39,10 +91,13 @@ dosizeof (LVALUE * lval)
                 tags[otag].size);
     } else if (symname (sname)) {
         if (((symbol_table_idx = find_local (sname)) > -1)
-            || ((symbol_table_idx = find_global (sname)) > -1)) {
-            symbol = &symbol_table[symbol_table_idx];
-            if (symbol->storage == LSTATIC)
-                error ("sizeof(): local static");
+            || (symbol = find_global (sname))) {
+            if (symbol_table_idx > -1)
+                symbol = &symbol_table[symbol_table_idx];
+            if (symbol->storage == LSTATIC) {
+                perror ("sizeof(): local static");
+                return;
+            }
             offset = symbol->offset;
             if (symbol->type & CINT
                 || symbol->identity == POINTER)
@@ -50,20 +105,24 @@ dosizeof (LVALUE * lval)
             else if (symbol->type == STRUCT)
                 offset *= tags[symbol->tag].size;
             outn (offset);
-        } else
-            error ("sizeof(): undeclared variable");
-    } else
-        error ("sizeof(): only on type or variable");
+        } else {
+            perror ("sizeof(): undeclared variable");
+            return;
+        }
+    } else {
+        perror ("sizeof(): only on type or variable");
+        return;
+    }
     needbrack (")");
     lval->symbol = 0;
     lval->indirect = 0;
-    return 0;
 }
 
+int
 primary_local (LVALUE *lval, SYMBOL *symbol)
 {
     int reg;
-    reg = gen_get_local (symbol);
+    reg = gen_get_local (symbol->name);
     lval->symbol = symbol;
     lval->indirect = symbol->type;
     if (symbol->type == STRUCT)
@@ -81,6 +140,7 @@ primary_local (LVALUE *lval, SYMBOL *symbol)
     return FETCH | reg;
 }
 
+int
 primary_global (LVALUE *lval, SYMBOL *symbol)
 {
     lval->symbol = symbol;
@@ -94,61 +154,24 @@ primary_global (LVALUE *lval, SYMBOL *symbol)
             lval->ptr_type = symbol->type;
         return FETCH | REGA;
     }
-    gen_ldaci (symbol->name);
+    gen_ldacig (symbol->name);
     lval->indirect = symbol->type;
     lval->ptr_type = symbol->type;
     return 0;
 }
 
+int
 primary_function (LVALUE *lval, char *sname)
 {
     lval->symbol = add_global (sname, FUNCTION, CINT, 0, PUBLIC);
     lval->indirect = 0;
     return 0;
 }
-  
-primary (LVALUE * lval)
-{
-    int num[1]; // XXX Oh, dude! Did the first version know pointers? (smk)
-    int reg, symbol_table_idx;
-    SYMBOL *symbol;
-    lval->ptr_type = 0;
-    lval->tagsym = 0;
-    if (match ("(")) {
-        reg = hier1 (lval);
-        needbrack (")");
-        return reg;
-    }
-    if (amatch ("sizeof", 6)) 
-        return dosizeof (lval);
-    if (symname (sname)) {
-        if ((symbol_table_idx = find_local (sname)) > -1) {
-            symbol = &symbol_table[symbol_table_idx];
-            return primary_local (lval, symbol);
-        }
-        if ((symbol_table_idx = find_global (sname)) > -1) {
-            symbol = &symbol_table[symbol_table_idx];
-            if (symbol->identity != FUNCTION)
-                return primary_global (lval, symbol);
-        }
-        blanks ();
-        if (ch () != '(')
-            return error ("undeclared variable");
-        return primary_function (lval, sname);
-
-    }
-    if (constant (num)) {
-        lval->symbol = 0;
-        lval->indirect = 0;
-        return 0;
-    }
-    gen_ldaci (0);
-    junk ();
-    return error ("invalid expression");
-}
 
 // true if val1 -> int pointer or int
 // array and val2 not pointer or array.
+// TODO: better name (smk)
+int
 dbltest (LVALUE * val1, LVALUE * val2)
 {
     if (val1 == NULL)
@@ -164,6 +187,7 @@ dbltest (LVALUE * val1, LVALUE * val2)
 }
 
 // Determine type of binary operation.
+void
 result (LVALUE * lval, LVALUE * lval2)
 {
     if (lval->ptr_type && lval2->ptr_type)
@@ -175,6 +199,7 @@ result (LVALUE * lval, LVALUE * lval2)
     }
 }
 
+int
 constant (int val[])
 {
     if (number (val))
@@ -190,6 +215,7 @@ constant (int val[])
     return 1;
 }
 
+int
 number (int val[])
 {
     int k, minus, base;
@@ -232,6 +258,7 @@ number (int val[])
 // single quotes.
 // @param value returns the char found
 // @return 1 if we have, 0 otherwise
+int
 quoted_char (int *value)
 {
     int k;
@@ -255,6 +282,7 @@ quoted_char (int *value)
 // the string.
 // @return 1 if such string found,
 // 0 otherwise
+int
 quoted_string (int *position)
 {
     char c;
@@ -266,7 +294,7 @@ quoted_string (int *position)
         if (!ch ())
             break;
         if (litptr >= LITMAX) {
-            error ("string space exhausted");
+            perror ("string space exhausted");
             while (!match ("\""))
                 if (!gch ())
                     break;
@@ -282,6 +310,7 @@ quoted_string (int *position)
 
 // Decode special characters (preceeded
 // by back slashes).
+int
 spechar ()
 {
     char c;
@@ -305,26 +334,26 @@ spechar ()
     return c;
 }
 
-// Perform a function call.
+// Perform a function call to label or primary.
 // Called from hier11(), this routine
 // will either call the named function,
 // or if the supplied ptr is zero, will
 // call the contents of HL.
 // @param ptr name of the function.
 void
-callfunction (char *ptr)
+callfunction (char *fname)
 {
     int nargs;
 
     nargs = 0;
     blanks ();
-    if (!ptr)
+    if (!fname)
         gen_push (REGA);
     while (!streq (line + lptr, ")")) {
         if (endst ())
             break;
         expression (NO);
-        if (!ptr)
+        if (!fname)
             gen_swap_stack ();
         gen_push (REGA);
         nargs = nargs + INTSIZE;
@@ -332,14 +361,15 @@ callfunction (char *ptr)
             break;
     }
     needbrack (")");
-    if (ptr)
-        gen_call (ptr);
+    if (fname)
+        gen_call (fname);
     else
         callstk ();
     stkp = gen_modify_stack (stkp + nargs);
 }
 
+void
 needlval ()
 {
-    error ("must be lvalue");
+    perror ("must be lvalue");
 }

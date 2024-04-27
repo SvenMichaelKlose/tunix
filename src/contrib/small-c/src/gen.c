@@ -2,51 +2,62 @@
 #include "defs.h"
 #include "data.h"
 #include "ir-codes.h"
+#include "ir.h"
+#include "expr.h"
+#include "lex.h"
+#include "gen.h"
 
 //////////////
 /// OUTPUT ///
 //////////////
 
+char
 outb (char c)
 {
     fputc (c, output);
+    return c;
 }
 
+void
 outw (int v)
 {
     fputc (v & 255, output);
     fputc (v >> 8, output);
 }
 
-outs (char ptr[])
+void
+outs (char *s)
 {
-    int k;
-    k = 0;
-    while (outb (ptr[k++]));
+    while (outb (*s++));
 }
 
+void
 print_tab ()
 {
     outb ('\t');
 }
 
+void
 outtabs (char ptr[])
 {
     print_tab ();
     outs (ptr);
 }
 
+void
 newline ()
 {
     outb (LF);
 }
 
+void
 outl (char ptr[])
 {
     outtabs (ptr);
     newline ();
 }
 
+void
 outn (int number)
 {
     fprintf (output, "%d", number);
@@ -56,6 +67,7 @@ outn (int number)
 /// SOURCE ///
 //////////////
 
+void
 gen_srcline (char *n)
 {
     outb (IR_SRCLINE);
@@ -68,6 +80,7 @@ gen_srcline (char *n)
 //////////////
 
 // Return next available label number.
+int
 getlabel ()
 {
     return nxtlab++;
@@ -77,6 +90,7 @@ getlabel ()
 /// MEMORY LOCATIONS ///
 ////////////////////////
 
+void
 store (LVALUE * lval)
 {
     if (!lval->indirect)
@@ -85,6 +99,7 @@ store (LVALUE * lval)
         gen_put_indirect (lval->indirect);
 }
 
+int
 rvalue (LVALUE * lval, int reg)
 {
     if (lval->symbol && !lval->indirect)
@@ -103,6 +118,7 @@ rvalue (LVALUE * lval, int reg)
 // jump.
 // @param ft : false: test if false,
 //             true:  test if true
+void
 test (int label, int ft)
 {
     needbrack ("(");
@@ -115,6 +131,7 @@ test (int label, int ft)
 /// TYPE CONVERSION ///
 ///////////////////////
 
+void
 scale_const (int type, int otag,
              int *size)
 {

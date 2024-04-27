@@ -1,8 +1,16 @@
 #include <stdio.h>
 #include <string.h>
+#include <error.h>
+
 #include "defs.h"
 #include "data.h"
+#include "io.h"
+#include "gen.h"
+#include "lex.h"
+#include "sym.h"
+#include "preproc.h"
 
+char
 keepch (char c)
 {
     mline[mptr] = c;
@@ -11,6 +19,7 @@ keepch (char c)
     return c;
 }
 
+void
 toggle (char name, int onoff)
 {
     switch (name) {
@@ -20,6 +29,7 @@ toggle (char name, int onoff)
     }
 }
 
+char
 remove_one_line_comment (char c)
 {
     if (c == '/' && ch () == '/') {
@@ -29,6 +39,7 @@ remove_one_line_comment (char c)
     return c;
 }
 
+char
 putmac (char c)
 {
     macq[macptr] = c;
@@ -37,6 +48,7 @@ putmac (char c)
     return c;
 }
 
+void
 addmac ()
 {
     char sname[NAMESIZE];
@@ -49,7 +61,7 @@ addmac ()
         return;
     }
     if (mp = findmac (sname)) {
-        error ("Duplicate define");
+        perror ("Duplicate define");
         delmac (mp);
     }
     k = 0;
@@ -58,10 +70,11 @@ addmac ()
         gch ();
     while (putmac (remove_one_line_comment (gch ())));
     if (macptr >= MACMAX)
-        error ("macro table full");
+        perror ("macro table full");
 
 }
 
+void
 delmac (int mp)
 {
     // step over previous NULL. 
@@ -71,6 +84,7 @@ delmac (int mp)
         macq[mp--] = '%';
 }
 
+int
 findmac (char *sname)
 {
     int k;
@@ -104,9 +118,11 @@ fix_include_name ()
     for (p = line + lptr; *p;)
         *ibp++ = *p++;
     c2 = *(--p);
-    if (c1 == '"' ? (c2 != '"') : (c2 != '>'))
-        return error ("incorrect delimiter");
-    *(--ibp) = 0;
+    if (c1 == '"' && c2 != '"' || c2 != '>') {
+        perror ("incorrect delimiter");
+        return 0;
+    }
+    *--ibp = 0;
     fp = NULL;
     if (c1 == '<' || !(fp = fopen (buf, "r"))) {
         strcpy (buf2, DEFLIB);
@@ -121,9 +137,9 @@ fix_include_name ()
 }
 
 // Open include file.
+void
 doinclude ()
 {
-    char *p;
     FILE *inp2;
 
     blanks ();
@@ -133,10 +149,10 @@ doinclude ()
             input2 = inp2;
         } else {
             fclose (inp2);
-            error ("too many nested includes");
+            perror ("too many nested includes");
         }
     } else
-        error ("Could not open include file");
+        perror ("Could not open include file");
     kill ();
 }
 
@@ -144,6 +160,7 @@ doinclude ()
 // Enters mode where assembly language
 // statements are passed intact through
 // parser.
+void
 doasm ()
 {
     cmode = 0;
@@ -160,11 +177,13 @@ doasm ()
     cmode = 1;
 }
 
+void
 dodefine ()
 {
     addmac ();
 }
 
+void
 doundef ()
 {
     int mp;
@@ -181,6 +200,7 @@ doundef ()
     kill ();
 }
 
+void
 doifdef (int ifdef)
 {
     char sname[NAMESIZE];
@@ -195,11 +215,13 @@ doifdef (int ifdef)
         skiplevel = iflevel;
 }
 
+void
 noiferr ()
 {
-    error ("no matching #if...");
+    perror ("no matching #if...");
 }
 
+int
 ifline ()
 {
     FOREVER {
@@ -235,6 +257,7 @@ ifline ()
     }
 }
 
+void
 defmac (char *s)
 {
     kill ();
@@ -245,6 +268,7 @@ defmac (char *s)
 // Preprocess
 // Copies mline to line with special
 // treatment of preprocess cmds.
+int
 cpp ()
 {
     int k;
@@ -272,8 +296,10 @@ cpp ()
             keepch (ch ());
             gch ();
             while (ch () != '"') {
-                if (!ch ())
-                    return error ("missing quote");
+                if (!ch ()) {
+                    perror ("missing quote");
+                    return 0;
+                }
                 if (ch () == '\\')
                     keepch (gch ());
                 keepch (gch ());
@@ -284,8 +310,10 @@ cpp ()
             keepch ('\'');
             gch ();
             while (ch () != '\'') {
-                if (!ch ())
-                    return error ("missing apostrophe");
+                if (!ch ()) {
+                    perror ("missing apostrophe");
+                    return 0;
+                }
                 if (ch () == '\\')
                     keepch (gch ());
                 keepch (gch ());
@@ -342,14 +370,17 @@ cpp ()
             keepch (gch ());
     }
     keepch (0);
-    if (mptr >= MPMAX)
-        return error ("line too long");
+    if (mptr >= MPMAX) {
+        perror ("line too long");
+        return 9;
+    }
     lptr = mptr = 0;
     while (line[lptr++] = mline[mptr++]);
     lptr = 0;
     return cpped;
 }
 
+void
 preprocess ()
 {
     if (ifline ())

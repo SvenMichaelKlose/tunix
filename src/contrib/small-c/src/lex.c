@@ -1,7 +1,15 @@
 #include <stdio.h>
+#include <error.h>
+
 #include "defs.h"
 #include "data.h"
+#include "io.h"
+#include "preproc.h"
+#include "gen.h"
+#include "ir.h"
+#include "lex.h"
 
+char
 alpha (char c)
 {
     c = c & 127;
@@ -10,23 +18,27 @@ alpha (char c)
            || c == '_';
 }
 
+char
 numeric (char c)
 {
     c = c & 127;
     return c >= '0' && c <= '9';
 }
 
+char
 alphanumeric (char c)
 {
     return alpha (c) || numeric (c);
 }
 
+void
 need_semicolon ()
 {
     if (!match (";"))
-        error ("missing semicolon");
+        perror ("missing semicolon");
 }
 
+void
 junk ()
 {
     if (alphanumeric (inbyte ()))
@@ -41,6 +53,7 @@ junk ()
     blanks ();
 }
 
+int
 endst ()
 {
     blanks ();
@@ -48,16 +61,18 @@ endst ()
            || !ch ();
 }
 
+void
 needbrack (char *str)
 {
     if (match (str))
         return;
-    error ("missing bracket");
+    perror ("missing bracket");
     gen_comment ();
     outs (str);
     newline ();
 }
 
+int
 sstreq (char *str1)
 {
     return streq (line + lptr, str1);
@@ -71,7 +86,8 @@ sstreq (char *str1)
 // the a literal string, and returns the
 // substring length if a match occurs
 // and zero otherwise.
-streq (char str1[], char str2[])
+int
+streq (char *str1, char *str2)
 {
     int k;
 
@@ -85,6 +101,7 @@ streq (char str1[], char str2[])
 }
 
 // Compare zero-terminated string
+int
 astreq (char str1[], char str2[],
         int len)
 {
@@ -115,6 +132,7 @@ astreq (char str1[], char str2[],
 // returns false there is no
 // verification that all of the token
 // was matched.
+int
 match (char *lit)
 {
     int k;
@@ -134,6 +152,7 @@ match (char *lit)
 // guarantees that all of the token in
 // the source line is scanned in the
 // process.
+int
 amatch (char *lit, int len)
 {
     int k;
@@ -148,6 +167,7 @@ amatch (char *lit, int len)
     return 0;
 }
 
+void
 blanks ()
 {
     FOREVER {
@@ -167,6 +187,7 @@ blanks ()
 
 // Returns one of declaration types
 // CCHAR, CINT, UCHAR or UINT.
+int
 get_type ()
 {
     if (amatch ("register", 8)) {

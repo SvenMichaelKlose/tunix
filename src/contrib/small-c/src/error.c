@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include "defs.h"
 #include "data.h"
+#include "gen.h"
 
+/*
 error (char * msg)
 {
     FILE *tempfile;
@@ -14,7 +16,9 @@ error (char * msg)
     errcnt++;
     return 0;
 }
+*/
 
+void
 doerror (char *msg)
 {
     int k;

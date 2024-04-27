@@ -2,9 +2,11 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "ir-table.c"
 
+void
 put_name (int c)
 {
     int i, l;
@@ -15,6 +17,7 @@ put_name (int c)
         putchar (tolower (n[i]));
 }
 
+int
 main (int argc, char *argv[])
 {
     int c, imax, lo, hi;

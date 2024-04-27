@@ -1,6 +1,11 @@
 #ifndef _SYM_H_
 #define _SYM_H_
 
+extern void     illname        (void);
+extern void     multidef       (char *sname);
+extern int      needsub        (void);
+extern int      symname        (char *sname);
+extern int      getlabel       (void);
 extern int      find_local     (char *sname);
 extern SYMBOL * find_global    (char *sname);
 extern int      add_local      (char *sname, int identity, int type, int offset, int storage_class);

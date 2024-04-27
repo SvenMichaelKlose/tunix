@@ -20,9 +20,12 @@ struct ircode codes[] = {
 
   {"SWAP",      0},
 
-  // Load address of symbol.
+  // Load constant.
   {"LDACI",     'w'},
   {"LDBCI",     'w'},
+
+  // Load address of symbol.
+  {"LDACIG",    's'},
 
   // Load memory at symbol.
   {"LDAMC",     's'},
@@ -40,7 +43,7 @@ struct ircode codes[] = {
   {"GETI",      0},
 
   // Store primary register at address
-  // the secondary register.
+  // in the secondary.
   {"PUTC",      0},
   {"PUTI",      0},
 

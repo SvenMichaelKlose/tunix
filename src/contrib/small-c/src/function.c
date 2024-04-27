@@ -31,7 +31,7 @@ newfunc ()
         return;
     }
     // Reuse symbol entry, if it's a function.
-    if (symbol = find_global (n)) {
+    if ((symbol = find_global (n))) {
         if (symbol->identity != FUNCTION
             || symbol->offset == FUNCTION)
             multidef (n);
@@ -70,7 +70,7 @@ newfunc ()
         stkp = 0;
         argtop = argstk;
         while (argstk) {
-            if (type = get_type ()) {
+            if ((type = get_type ())) {
                 getarg (type);
                 need_semicolon ();
             } else {

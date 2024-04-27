@@ -306,7 +306,7 @@ add_global (char *sname, int identity,
 {
     SYMBOL *symbol;
     char *buffer_ptr;
-    if (symbol = find_global (sname))
+    if ((symbol = find_global (sname)))
         return symbol;
     if (global_table_index >= NUMBER_OF_GLOBALS) {
         perror ("global symbol table overflow");

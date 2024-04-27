@@ -552,7 +552,7 @@ hier10 (LVALUE * lval)
     } else if (ch () == '*' && nch () != '=') {
         inbyte ();
         k = rvalue_on_fetch (lval, hier10 (lval));
-        if (ptr = lval->symbol)
+        if ((ptr = lval->symbol))
             lval->indirect = ptr->type;
         else
             lval->indirect = CINT;

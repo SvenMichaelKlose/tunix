@@ -35,7 +35,7 @@ main (int argc, char *argv[])
         }
         putchar ('v');
         put_name (c);
-        if (p = codes[c].param)
+        if ((p = codes[c].param))
             putchar (' ');
         switch (p) {
         case 'b':   // byte
@@ -47,7 +47,7 @@ main (int argc, char *argv[])
             break;
         // global label string
         case 's':
-            while (c = getchar ())
+            while ((c = getchar ()))
                 putchar (c);
         }
         putchar (10);

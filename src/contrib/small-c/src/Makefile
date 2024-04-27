@@ -4,7 +4,7 @@ INCDIR = "./include/"
 SCC = scc
 
 INSTFLAGS = -DINCDIR=$(INCDIR)
-   CFLAGS = '$(INSTFLAGS)' -ggdb -g -Wall -Werror -Wno-error=parentheses
+   CFLAGS = '$(INSTFLAGS)' -ggdb -g -Wall -Werror
 
 SRC = initials.c data.c error.c expr.c function.c gen.c io.c lex.c main.c preproc.c \
       primary.c stmt.c sym.c while.c struct.c ir.c

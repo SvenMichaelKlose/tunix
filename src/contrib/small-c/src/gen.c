@@ -147,3 +147,12 @@ scale_const (int type, int otag,
         break;
     }
 }
+
+////////////////////
+/// ARITHMETHICS ///
+////////////////////
+
+void
+gen_multiply (LVALUE * a, LVALUE * b)
+{
+}

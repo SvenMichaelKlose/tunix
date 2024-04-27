@@ -13,8 +13,8 @@ char
 alpha (char c)
 {
     c = c & 127;
-    return c >= 'a' && c <= 'z'
-           || c >= 'A' && c <= 'Z'
+    return (c >= 'a' && c <= 'z')
+           || (c >= 'A' && c <= 'Z')
            || c == '_';
 }
 
@@ -137,7 +137,7 @@ match (char *lit)
 {
     int k;
     blanks ();
-    if (k = streq (line + lptr, lit)) {
+    if ((k = streq (line + lptr, lit))) {
         lptr = lptr + k;
         return 1;
     }
@@ -158,7 +158,7 @@ amatch (char *lit, int len)
     int k;
 
     blanks ();
-    if (k = astreq (line + lptr, lit, len)) {
+    if ((k = astreq (line + lptr, lit, len))) {
         lptr = lptr + k;
         while (alphanumeric (ch ()))
             inbyte ();

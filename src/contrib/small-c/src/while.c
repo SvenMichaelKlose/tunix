@@ -47,7 +47,7 @@ WHILE *
 readswitch ()
 {
     WHILE *ptr;
-    if (ptr = readwhile ())
+    if ((ptr = readwhile ()))
         if (ptr->type == WSSWITCH)
             return ptr;
     return 0;

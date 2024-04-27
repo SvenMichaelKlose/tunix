@@ -29,7 +29,7 @@
 int
 statement (int func)
 {
-    if (!(ch ()) & feof (input))
+    if (!ch () && feof (input))
         return 0;
     lastst = 0;
     if (func) {
@@ -78,9 +78,10 @@ do_local_declares (int stclass)
         if ((otag = find_tag (sname)) == -1)
             otag = define_struct (sname, stclass, is_struct);
         declare_local (STRUCT, stclass, otag);
-    } else if (type = get_type ())
+    } else if ((type = get_type ()))
         declare_local (type, stclass, -1);
-    else if (stclass == LSTATIC || stclass == DEFAUTO)
+    else if (stclass == LSTATIC
+             || stclass == DEFAUTO)
         declare_local (CINT, stclass, -1);
     else
         return 0;
@@ -327,7 +328,7 @@ dodefault ()
 {
     WHILE *ptr;
     int lab;
-    if (ptr = readswitch ()) {
+    if ((ptr = readswitch ())) {
         ptr->incr_def = lab = getlabel ();
         def_local (lab);
         if (!match (":"))
@@ -358,7 +359,7 @@ void
 docont ()
 {
     WHILE *ptr;
-    if (ptr = findwhile ()) {
+    if ((ptr = findwhile ())) {
         gen_modify_stack (ptr->stack_pointer);
         if (ptr->type == WSFOR)
             gen_jump (ptr->incr_def);

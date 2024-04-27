@@ -227,7 +227,7 @@ do_declarations (int stclass,
         if ((otag = find_tag (sname)) == -1)
             otag = define_struct (sname, stclass, sflag);
         declare_global (STRUCT, stclass, mtag, otag, is_struct);
-    } else if (type = get_type ())
+    } else if ((type = get_type ()))
         declare_global (type, stclass, mtag, 0, is_struct);
     else if (stclass == PUBLIC)
         return 0;

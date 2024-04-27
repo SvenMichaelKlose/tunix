@@ -60,13 +60,13 @@ addmac ()
         kill ();
         return;
     }
-    if (mp = findmac (sname)) {
+    if ((mp = findmac (sname))) {
         perror ("Duplicate define");
         delmac (mp);
     }
     k = 0;
     while (putmac (sname[k++]));
-    while (ch () == ' ' | ch () == 9)
+    while (ch () == ' ' || ch () == 9)
         gch ();
     while (putmac (remove_one_line_comment (gch ())));
     if (macptr >= MACMAX)
@@ -118,7 +118,7 @@ fix_include_name ()
     for (p = line + lptr; *p;)
         *ibp++ = *p++;
     c2 = *(--p);
-    if (c1 == '"' && c2 != '"' || c2 != '>') {
+    if ((c1 == '"' && c2 != '"') || c2 != '>') {
         perror ("incorrect delimiter");
         return 0;
     }
@@ -143,7 +143,7 @@ doinclude ()
     FILE *inp2;
 
     blanks ();
-    if (inp2 = fix_include_name ()) {
+    if ((inp2 = fix_include_name ())) {
         if (inclsp < INCLSIZ) {
             inclstk[inclsp++] = input2;
             input2 = inp2;
@@ -195,7 +195,7 @@ doundef ()
         return;
     }
 
-    if (mp = findmac (sname))
+    if ((mp = findmac (sname)))
         delmac (mp);
     kill ();
 }
@@ -324,7 +324,8 @@ cpp ()
                    && nch () == '*') {
             inchar ();
             inchar ();
-            while (!(((c = ch ()) == '*') && nch () == '/'))
+            while (!(((c = ch ()) == '*')
+                     && nch () == '/'))
                 if (c == '$') {
                     inchar ();
                     tog = TRUE;
@@ -346,7 +347,8 @@ cpp ()
                 }
             inchar ();
             inchar ();
-        } else if (ch () == '/' & nch () == '/') {
+        } else if (ch () == '/'
+                   && nch () == '/') {
             // one line comment 
             while (gch ());
         } else if (alphanumeric (ch ())) {
@@ -357,13 +359,13 @@ cpp ()
                 gch ();
             }
             sname[k] = 0;
-            if (k = findmac (sname)) {
+            if ((k = findmac (sname))) {
                 cpped = 1;
-                while (c = macq[k++])
+                while ((c = macq[k++]))
                     keepch (c);
             } else {
                 k = 0;
-                while (c = sname[k++])
+                while ((c = sname[k++]))
                     keepch (c);
             }
         } else
@@ -375,7 +377,7 @@ cpp ()
         return 9;
     }
     lptr = mptr = 0;
-    while (line[lptr++] = mline[mptr++]);
+    while ((line[lptr++] = mline[mptr++]));
     lptr = 0;
     return cpped;
 }

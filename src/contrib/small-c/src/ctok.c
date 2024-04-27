@@ -71,7 +71,7 @@ tokenize ()
         }
         if (i) {
             buffer[i] = 0;
-            if (k = is_keyword (i))
+            if ((k = is_keyword (i)))
                 fputc ('0' + k - 1, out);
             else
                 emit ('i', i);

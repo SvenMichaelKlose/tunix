@@ -18,11 +18,9 @@ nosign (LVALUE * is)
 {
     SYMBOL *ptr;
 
-    if (is->ptr_type
-        || ((ptr = is->symbol)
-            && (ptr->type & UNSIGNED)))
-        return 1;
-    return 0;
+    return is->ptr_type
+           || ((ptr = is->symbol)
+               && (ptr->type & UNSIGNED));
 }
 
 int
@@ -64,7 +62,6 @@ void
 expression (int comma)
 {
     LVALUE lval;
-
     do {
         rvalue_on_fetch (&lval, hier1 (&lval));
         if (!comma)
@@ -79,7 +76,6 @@ hier1 (LVALUE * lval)
     int k;
     LVALUE lval2[1];
     char fc;
-
     k = hier1a (lval);
     if (match ("=")) {
         if (!(k & FETCH)) {
@@ -396,7 +392,6 @@ hier6 (LVALUE * lval)
                         gen_gt);
         } else
             return 0;
-        blanks ();
     }
 }
 
@@ -427,7 +422,6 @@ hier7 (LVALUE * lval)
             binary (k, lval2, hier8, gen_asl);
         } else
             return 0;
-        blanks ();
     }
 }
 

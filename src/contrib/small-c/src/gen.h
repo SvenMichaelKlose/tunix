@@ -15,5 +15,8 @@ extern void store (LVALUE * lval);
 extern int  rvalue (LVALUE * lval, int reg);
 extern void test (int label, int ft);
 extern void scale_const (int type, int otag, int *size);
+extern void gen_divide (LVALUE *, LVALUE *);
+extern void gen_modulo (LVALUE *, LVALUE *);
+extern void gen_ashiftr (LVALUE *);
 
 #endif // #ifndef __GEN_H__

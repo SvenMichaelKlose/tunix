@@ -346,9 +346,7 @@ gen_swap_stack ()
 int
 gen_modify_stack (int newstkp)
 {
-    int k;
-
-    k = newstkp - stkp;
+    int k = newstkp - stkp;
     if (!k)
         return newstkp;
     if (k > 0) {

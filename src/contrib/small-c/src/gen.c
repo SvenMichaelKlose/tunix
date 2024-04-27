@@ -153,6 +153,28 @@ scale_const (int type, int otag,
 ////////////////////
 
 void
-gen_multiply (LVALUE * a, LVALUE * b)
+gen_divide (LVALUE * a, LVALUE * b)
 {
+    if (nosign (a) || nosign (b))
+        gen_udiv ();
+    else
+        gen_div ();
+}
+
+void
+gen_modulo (LVALUE * a, LVALUE * b)
+{
+    if (nosign (a) || nosign (b))
+        gen_umod ();
+    else
+        gen_mod ();
+}
+
+void
+gen_ashiftr (LVALUE * lval)
+{
+    if (nosign (lval))
+        gen_lsr ();
+    else
+        gen_asr ();
 }

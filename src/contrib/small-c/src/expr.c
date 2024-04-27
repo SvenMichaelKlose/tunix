@@ -17,7 +17,6 @@ int
 nosign (LVALUE * is)
 {
     SYMBOL *ptr;
-
     return is->ptr_type
            || ((ptr = is->symbol)
                && (ptr->type & UNSIGNED));
@@ -30,8 +29,6 @@ rvalue_on_fetch (LVALUE * lval, int k)
         rvalue (lval, k) :
         k;
 }
-
-typedef int (*lval_fun) (LVALUE *);
 
 int
 push_and_rvalue_on_fetch (int k,
@@ -190,22 +187,20 @@ hier1d (char fc, LVALUE * lval, int k)
     push_and_rvalue_on_fetch (k, lval2, hier1);
     switch (fc) {
     case '-':
-        if (dbltest (lval, lval2)) {
+        if (dbltest (lval, lval2))
             gen_mul_const (lval->ptr_type,
-                          lval->tagsym ? lval->
-                          tagsym->
-                          size : INTSIZE);
-        }
+                           lval->tagsym ?
+                                lval->tagsym->size :
+                                INTSIZE);
         gen_sub ();
         result (lval, lval2);
         break;
     case '+':
-        if (dbltest (lval, lval2)) {
+        if (dbltest (lval, lval2))
             gen_mul_const (lval->ptr_type,
-                          lval->tagsym ? lval->
-                          tagsym->
-                          size : INTSIZE);
-        }
+                           lval->tagsym ?
+                               lval->tagsym->size :
+                               INTSIZE);
         gen_add (lval, lval2);
         result (lval, lval2);
         break;
@@ -213,22 +208,12 @@ hier1d (char fc, LVALUE * lval, int k)
         gen_mul ();
         break;
     case '/':
-        if (nosign (lval) || nosign (lval2))
-            gen_udiv ();
-        else
-            gen_div ();
-        break;
+        gen_divide (lval, lval2);
     case '%':
-        if (nosign (lval) || nosign (lval2))
-            gen_umod ();
-        else
-            gen_mod ();
+        gen_modulo (lval, lval2);
         break;
     case '>':
-        if (nosign (lval))
-            gen_lsr ();
-        else
-            gen_asr ();
+        gen_ashiftr (lval);
         break;
     case '<':
         gen_asl ();
@@ -620,16 +605,17 @@ hier10 (LVALUE * lval)
     }
 }
 
-// Array subscript
+// Array subscript, function,
+// direct/indirect member
 int
 hier11 (LVALUE * lval)
 {
     int direct, k;
-    SYMBOL *ptr;
+    SYMBOL *symbol;
     char sname[NAMESIZE];
 
     k = primary (lval);
-    ptr = lval->symbol;
+    symbol = lval->symbol;
     blanks ();
     if (ch () == '['
         || ch () == '('
@@ -638,37 +624,36 @@ hier11 (LVALUE * lval)
             && nch () == '>'))
         FOREVER {
             if (match ("[")) {
-                if (!ptr) {
+                if (!symbol) {
                     junk ();
                     needbrack ("]");
                     perror ("can't subscript");
                     return 0;
-                } else if (ptr->identity == POINTER) {
+                } else if (symbol->identity == POINTER) {
                     k = rvalue (lval, k);
-                } else if (ptr->identity != ARRAY) {
+                } else if (symbol->identity != ARRAY) {
                     perror ("can't subscript");
                     k = 0;
                 }
                 gen_push (k);
                 expression (YES);
                 needbrack ("]");
-                gen_mul_const (ptr->type,
-                              tags[ptr->tag].size);
+                gen_mul_const (symbol->type,
+                              tags[symbol->tag].size);
                 gen_add (NULL, NULL);
-                //lval->symbol = 0; 
-                lval->indirect = ptr->type;
+                lval->indirect = symbol->type;
                 lval->ptr_type = 0;
-                k = FETCH | REGA;
+                return FETCH | REGA;
             } else if (match ("(")) {
-                if (!ptr)
+                if (!symbol)
                     callfunction (0);
-                else if (ptr->identity != FUNCTION) {
+                else if (symbol->identity != FUNCTION) {
                     rvalue (lval, k);
                     callfunction (0);
                 } else
-                    callfunction (ptr->name);
+                    callfunction (symbol->name);
                 lval->symbol = 0;
-                k = 0;
+                return 0;
             } else if ((direct = match ("."))
                        || match ("->")) {
                 if (!lval->tagsym) {
@@ -677,7 +662,7 @@ hier11 (LVALUE * lval)
                     return 0;
                 }
                 if (!symname (sname) ||
-                    (!(ptr = find_member (lval->tagsym, sname)))) {
+                    (!(symbol = find_member (lval->tagsym, sname)))) {
                     perror ("unknown member");
                     junk ();
                     return 0;
@@ -688,35 +673,31 @@ hier11 (LVALUE * lval)
                     gen_swap ();
 
                 // move pointer from struct begin to struct member 
-                gen_add_const (ptr->offset);
-                lval->symbol = ptr;
-                // lval->indirect = lval->val_type = ptr->type 
-                lval->indirect = ptr->type;
+                gen_add_const (symbol->offset);
+                lval->symbol = symbol;
+                lval->indirect = symbol->type;
                 lval->ptr_type = 0;
                 lval->tagsym = NULL_TAG;
-                if (ptr->type == STRUCT)
-                    lval->tagsym = &tags[ptr->tag];
-                if (ptr->identity == POINTER) {
+                if (symbol->type == STRUCT)
+                    lval->tagsym = &tags[symbol->tag];
+                if (symbol->identity == POINTER) {
                     lval->indirect = CINT;
-                    lval->ptr_type = ptr->type;
-                    //lval->val_type = CINT; 
+                    lval->ptr_type = symbol->type;
                 }
-                if (ptr->identity == ARRAY
-                    || (ptr->type == STRUCT
-                        && ptr->identity == VARIABLE)) {
-                    // array or struct 
-                    lval->ptr_type = ptr->type;
-                    //lval->val_type = CINT; 
+                if (symbol->identity == ARRAY
+                    || (symbol->type == STRUCT
+                        && symbol->identity == VARIABLE)) {
+                    lval->ptr_type = symbol->type;
                     k = 0;
                 } else
                     k = FETCH | REGA;
             } else
                 return k;
         }
-    if (!ptr)
+    if (!symbol)
         return k;
-    if (ptr->identity == FUNCTION) {
-        gen_ldacig (ptr->name);
+    if (symbol->identity == FUNCTION) {
+        gen_ldacig (symbol->name);
         return 0;
     }
     return k;

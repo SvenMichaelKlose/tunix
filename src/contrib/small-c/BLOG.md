@@ -3,6 +3,14 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-26 18:16 S.M. Klose
+
+The code of Small-C is a nerd trap, a
+magic attraction.  Could collapse quite
+some expression parsing into shared
+functions, using function pointers.
+And there can be done more.
+
 # 2024-04-26 16:20 S.M. Klose
 
 Added C headers to rule out hidden bugs

@@ -139,13 +139,11 @@ do_statement ()
 }
 
 // Compound statement
-// TODO: Remove arg.
+// TODO: Figure out arg and decls.
 void
 do_compound (int func)
 {
-    int decls;
-
-    decls = YES;
+    int decls = YES;
     ncmp++;
     while (!match ("}")) {
         if (feof (input))
@@ -232,7 +230,6 @@ dofor ()
 {
     WHILE ws;
     WHILE *pws;
-
     ws.symbol_idx = local_table_index;
     ws.stack_pointer = stkp;
     ws.type = WSFOR;
@@ -276,7 +273,6 @@ doswitch ()
 {
     WHILE ws;
     WHILE *ptr;
-
     ws.symbol_idx = local_table_index;
     ws.stack_pointer = stkp;
     ws.type = WSSWITCH;
@@ -308,7 +304,6 @@ void
 docase ()
 {
     int val;
-
     val = 0;
     if (readswitch ()) {
         if (!number (&val))
@@ -332,7 +327,6 @@ dodefault ()
 {
     WHILE *ptr;
     int lab;
-
     if (ptr = readswitch ()) {
         ptr->incr_def = lab = getlabel ();
         def_local (lab);
@@ -354,7 +348,6 @@ void
 dobreak ()
 {
     WHILE *ptr;
-
     if (!(ptr = readwhile ()))
         return;
     gen_modify_stack (ptr->stack_pointer);
@@ -365,14 +358,13 @@ void
 docont ()
 {
     WHILE *ptr;
-
-    if (!(ptr = findwhile ()))
-        return;
-    gen_modify_stack (ptr->stack_pointer);
-    if (ptr->type == WSFOR)
-        gen_jump (ptr->incr_def);
-    else
-        gen_jump (ptr->case_test);
+    if (ptr = findwhile ()) {
+        gen_modify_stack (ptr->stack_pointer);
+        if (ptr->type == WSFOR)
+            gen_jump (ptr->incr_def);
+        else
+            gen_jump (ptr->case_test);
+    }
 }
 
 // Dump switch table.
@@ -380,7 +372,6 @@ void
 dumpsw (WHILE * ws)
 {
     int i, j;
-
     gen_data_segment ();
     def_local (ws->body_tab);
     if (ws->case_test != swstp) {

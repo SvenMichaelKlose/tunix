@@ -42,6 +42,8 @@ add_member (char *sname, char identity,
     }
     symbol = &members[member];
     buffer_ptr = symbol->name;
+    // TODO: This seems to copy the char non-alphanumeric char as well.
+    // That might not be intended. (smk)
     while (alphanumeric (*buffer_ptr++ = *sname++));
     symbol->identity = identity;
     symbol->type = type;

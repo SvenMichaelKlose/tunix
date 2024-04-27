@@ -122,7 +122,7 @@ int
 primary_local (LVALUE *lval, SYMBOL *symbol)
 {
     int reg;
-    reg = gen_get_local (symbol->name);
+    reg = gen_get_local (symbol);
     lval->symbol = symbol;
     lval->indirect = symbol->type;
     if (symbol->type == STRUCT)

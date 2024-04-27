@@ -57,7 +57,7 @@ int
 endst ()
 {
     blanks ();
-    return streq (line + lptr, ";")
+    return streq (&line[lptr], ";")
            || !ch ();
 }
 
@@ -75,7 +75,7 @@ needbrack (char *str)
 int
 sstreq (char *str1)
 {
-    return streq (line + lptr, str1);
+    return streq (&line[lptr], str1);
 }
 
 // Indicates whether or not the current
@@ -137,8 +137,8 @@ match (char *lit)
 {
     int k;
     blanks ();
-    if ((k = streq (line + lptr, lit))) {
-        lptr = lptr + k;
+    if ((k = streq (&line[lptr], lit))) {
+        lptr += + k;
         return 1;
     }
     return 0;
@@ -158,8 +158,8 @@ amatch (char *lit, int len)
     int k;
 
     blanks ();
-    if ((k = astreq (line + lptr, lit, len))) {
-        lptr = lptr + k;
+    if ((k = astreq (&line[lptr], lit, len))) {
+        lptr += k;
         while (alphanumeric (ch ()))
             inbyte ();
         return 1;

@@ -135,23 +135,21 @@ gch ()
 {
     if (!ch ())
         return 0;
-    return line[lptr++] & 127;
+    return line[lptr++];
 }
 
 // Next char.
 char
 nch ()
 {
-    if (!ch ())
-        return 0;
-    return line[lptr + 1] & 127;
+    return ch () ? line[lptr + 1] : 0;
 }
 
 // Current char.
 char
 ch ()
 {
-    return line[lptr] & 127;
+    return line[lptr];
 }
 
 // Print a carriage return and a string
@@ -159,10 +157,6 @@ ch ()
 void
 pl (char *str)
 {
-    int k;
-
-    k = 0;
     putchar (LF);
-    while (str[k])
-        putchar (str[k++]);
+    puts (str);
 }

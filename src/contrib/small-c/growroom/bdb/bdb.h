@@ -14,20 +14,26 @@ typedef struct _bnode {
 
 #ifdef CACHE
 typedef struct _cnode {
-    int  id;
+    dbid_t  id;
     // Deque
-    int  next;
-    int  prev;
-    char data[1];
+    cnode   *next;
+    cnode   *prev;
+    cnode   *knext;
+    cnode   *kprev;
+    cnode   *inext;
+    cnode   *iprev;
+    char    data[1];
 } cnode;
+
+cnode * cnode_root;
 #endif // #ifdef CACHE
 
 typedef struct _bdb bdb;
 typedef struct _bdb {
     dbid_t next_free;
-    int (*test)  (bdb *db, void *rec, void *key);
-    int (*read)  (bdb *db, dbid_t ofs, void *r, size_t size);
-    int (*write) (bdb *db, dbid_t ofs, void *r, size_t size);
+    int (*compare)  (bdb *db, void *rec, void *key);
+    int (*read)     (bdb *db, dbid_t ofs, void *r, size_t size);
+    int (*write)    (bdb *db, dbid_t ofs, void *r, size_t size);
 } bdb;
 
 dbid_t  bdb_alloc (bdb *db, void *data, size_t size);

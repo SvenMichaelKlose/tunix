@@ -15,11 +15,11 @@ typedef struct _symbol {
 } symbol;
 
 int
-symdb_test (bdb *db, void *rec, void *key)
+symdb_compare (bdb *db, void *rec, void *key)
 {
     symbol *s = rec;
     (void) db;
-    printf ("Testing \"%s\"/\"%s\".\n",
+    printf ("Comparing \"%s\" & \"%s\".\n",
             (char *) key, s->name);
     return strcmp (s->name, key);
 }
@@ -72,9 +72,9 @@ void
 symdb_init (void)
 {
     symdb.next_free = 0;
-    symdb.read  = symdb_read;
-    symdb.write = symdb_write;
-    symdb.test  = symdb_test;
+    symdb.read    = symdb_read;
+    symdb.write   = symdb_write;
+    symdb.compare = symdb_compare;
 }
 
 ///////////
@@ -103,7 +103,7 @@ main (int argc, char *argv[])
     s = bdb_map (&symdb, id);
     printf ("Got symbol \"%s\".\n", s->name);
 
-    s = find_symbol ("Teezeit");
+    s = find_symbol ("Homecoming");
     if (s)
         printf ("Got symbol \"%s\".\n", s->name);
     return 0;

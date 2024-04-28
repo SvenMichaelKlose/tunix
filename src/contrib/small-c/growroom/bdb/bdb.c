@@ -93,17 +93,24 @@ bdb_add (bdb *db, void *key, void *v, size_t size)
     dbid_t id = 0;
     dbid_t oid = 0;
     for (;;) {
+        // Map node into memory.
         if (!(n = bdb_map_node (db, id)))
             return bdb_alloc (db, v, size);
+
+        // Decide which to child to travel down.
         oid = id;
-        if (db->test (db, &n->data, key) < 0) {
+        if (db->compare (db, &n->data, key) < 0) {
+            // Go left.
             if (!(id = n->left)) {
+                // New left child.
                 n->left = bdb_alloc (db, v, size);
                 bdb_write_bnode (db, oid, n);
                 return n->left;
             }
         } else
+            // Go right.
             if (!(id = n->right)) {
+                // New right child.
                 n->right = bdb_alloc (db, v, size);
                 bdb_write_bnode (db, oid, n);
                 return n->right;
@@ -118,14 +125,19 @@ bdb_find (bdb *db, void *key)
     dbid_t id = 0;
     int c;
     for (;;) {
+        // Map node into memory.
         if (!(n = bdb_map_node (db, id)))
             perror ("Internal error. Node not mapped.");
-        if (!(c = db->test (db, &n->data, key)))
-            return id;
+
+        // Decide to which child to travel down.
+        if (!(c = db->compare (db, &n->data, key)))
+            return id;  // Match!
         if (c < 0) {
+            // Go left.
             if (!(id = n->left))
                 return NOTFOUND;
         } else
+            // Go right.
             if (!(id = n->right))
                 return NOTFOUND;
     }

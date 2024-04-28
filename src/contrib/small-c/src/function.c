@@ -10,6 +10,7 @@
 #include "gen.h"
 #include "function.h"
 
+int argstk;
 int argtop;
 
 // Begin a function.
@@ -43,7 +44,7 @@ newfunc ()
     if (!match ("("))
         perror ("missing open paren");
     def_global (n);
-    local_table_index = NUMBER_OF_GLOBALS;      //locptr = STARTLOC; 
+    local_table_index = NUMBER_OF_GLOBALS;
     argstk = 0;
     // ANSI style argument declaration 
     if (!doAnsiArguments ()) {
@@ -84,7 +85,7 @@ newfunc ()
     gen_modify_stack (0);
     gen_ret ();
     stkp = 0;
-    local_table_index = NUMBER_OF_GLOBALS;      //locptr = STARTLOC; 
+    local_table_index = NUMBER_OF_GLOBALS;
 }
 
 // Declare argument types.
@@ -97,8 +98,8 @@ newfunc ()
 void
 getarg (int t)
 {
-    int j, legalname, address,
-        argptr, otag;
+    int j, legalname, address;
+    int argptr, otag;
     char n[NAMESIZE];
 
     FOREVER {
@@ -125,10 +126,8 @@ getarg (int t)
             if ((argptr = find_local (n)) > -1) {
                 symbol_table[argptr].identity = j;
                 symbol_table[argptr].type = t;
-                address =
-                    argtop - symbol_table[argptr].offset;
+                address = argtop - symbol_table[argptr].offset;
                 symbol_table[argptr].offset = address;
-                // set tag for struct arguments 
                 if (t == STRUCT) {
                     if (j != POINTER)
                         perror ("only struct pointers, not structs, can be passed to functions");
@@ -148,8 +147,7 @@ getarg (int t)
 int
 doAnsiArguments ()
 {
-    int type;
-    type = get_type ();
+    int type = get_type ();
     if (!type)
         // No type detected, revert back
         // to K&R style 
@@ -178,9 +176,6 @@ doLocalAnsiArgument (int type)
 {
     char symbol_name[NAMESIZE];
     int identity, address, argptr, ptr, otag;
-    // If a struct is being passed, its
-    // tag must be read in before
-    // checking if it is a pointer.
     if (type == STRUCT) {
         if (!symname (symbol_name))
             illname ();
@@ -197,18 +192,16 @@ doLocalAnsiArgument (int type)
             argptr = add_local (symbol_name, identity, type, 0, AUTO);
             argstk = argstk + INTSIZE;
             ptr = local_table_index;
-            // if argument is a struct, properly set the argument's tag.
             if (type == STRUCT) {
                 if (identity != POINTER)
-                    perror ("only struct pointers, not structs, can be passed to functions");
+                    perror ("only struct pointers, not structs, "
+                            "can be passed to functions");
                 symbol_table[argptr].tag = otag;
             }
-            // modify stack offset as we push more params 
             while (ptr != NUMBER_OF_GLOBALS) {
                 ptr = ptr - 1;
                 address = symbol_table[ptr].offset;
-                symbol_table[ptr].offset =
-                    address + INTSIZE;
+                symbol_table[ptr].offset = address + INTSIZE;
             }
         }
     } else {

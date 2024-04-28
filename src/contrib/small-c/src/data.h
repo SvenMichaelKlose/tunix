@@ -69,7 +69,7 @@ extern int member;
 
 // miscellaneous storage 
 extern int nxtlab,
-    litlab, stkp, argstk, ncmp, errcnt,
+    litlab, stkp, ncmp, errcnt,
     glbflag, ctext, cmode, lastst;
 
 extern char quote[];

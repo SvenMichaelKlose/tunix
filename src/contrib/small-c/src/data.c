@@ -35,7 +35,7 @@ int member;
 int nxtlab,
     litlab,
     stkp,
-    argstk, ncmp, errcnt, glbflag, ctext, cmode, lastst;
+    ncmp, errcnt, glbflag, ctext, cmode, lastst;
 
 FILE *input, *input2, *output;
 FILE *inclstk[INCLSIZ];

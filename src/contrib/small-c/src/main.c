@@ -42,7 +42,7 @@ int
 main (int argc, char *argv[])
 {
     char *param = NULL, *bp;
-    int smacptr, i;
+    int i;
     macptr = 0;
     ctext = 0;
     errs = 0;
@@ -83,18 +83,10 @@ main (int argc, char *argv[])
             break;
     }
 
-    // command line defined macros -d 
-    smacptr = macptr;
-
-    if (!param)
+    if (!param || i < argc - 1)
         usage ();
-
-    for (; i < argc; i++) {
-        param = argv[i];
-        errfile = 0;
-        macptr = smacptr;
-        compile (param);
-    }
+    errfile = 0;
+    compile (param);
     exit (!!errs);
 }
 
@@ -164,13 +156,13 @@ frontend_version ()
 void
 usage ()
 {
-    oputs ("Usage: scc [-th] [-dSYM[=VALUE]] input-files\n"
+    oputs ("Usage: scc [-th] [-dSYM[=VALUE]] input-file\n"
            "-d: Define macro.\n"
            "-t: Include C source in .o files.\n"
            "-h: Print this message and exit.\n"
-           "input-files: Use standard I/O if none\n"
-           "    have been specified.  Names must\n"
-           "    end on suffix '.c'.  Output files\n"
+           "input-file: Use standard I/O if none\n"
+           "    has been specified.  Name must\n"
+           "    end on suffix '.c'.  Output file\n"
            "    will have suffix '.o'.\n");
     exit (1);
 }

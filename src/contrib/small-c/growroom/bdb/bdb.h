@@ -25,7 +25,7 @@ typedef struct _cnode {
 typedef struct _bdb bdb;
 typedef struct _bdb {
     dbid_t next_free;
-    int (*test)  (void *rec, void *key);
+    int (*test)  (bdb *db, void *rec, void *key);
     int (*read)  (bdb *db, dbid_t ofs, void *r, size_t size);
     int (*write) (bdb *db, dbid_t ofs, void *r, size_t size);
 } bdb;
@@ -33,7 +33,7 @@ typedef struct _bdb {
 dbid_t  bdb_alloc (bdb *db, void *data, size_t size);
 void *  bdb_map (bdb *db, int id);
 int     bdb_add (bdb *db, void *key, void *data, size_t size);
-dbid_t  bdb_lookup (bdb *db, void *key);
+dbid_t  bdb_find (bdb *db, void *key);
 int     bdb_remove (bdb *db, dbid_t id);
 
 #endif // #ifndef __BDB_H__

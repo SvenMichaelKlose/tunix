@@ -15,9 +15,12 @@ typedef struct _symbol {
 } symbol;
 
 int
-symdb_test (void *rec, void *key)
+symdb_test (bdb *db, void *rec, void *key)
 {
     symbol *s = rec;
+    (void) db;
+    printf ("Testing \"%s\"/\"%s\".\n",
+            (char *) key, s->name);
     return strcmp (s->name, key);
 }
 
@@ -27,25 +30,51 @@ int
 symdb_write (bdb *db, dbid_t ofs, void *r, size_t size)
 {
     if (!storage)
-        storage = fopen ("symbol.db", "rw");
+        if (!(storage = fopen ("symbol.db", "w+")))
+            perror ("Cannot open BDB file for writing.");
     fseek (storage, ofs, SEEK_SET);
-    return fwrite (r, size, 1, storage);
+    return fwrite (r, 1, size, storage);
 }
 
 int
 symdb_read (bdb *db, dbid_t ofs, void *r, size_t size)
 {
+    if (!storage)
+        if (!(storage = fopen ("symbol.db", "w+")))
+            perror ("Cannot open BDB file for reading.");
     fseek (storage, ofs, SEEK_SET);
-    return fread (storage, size, 1, r);
+    return fread (r, 1, size, storage);
 }
 
 bdb symdb;
 
 int
-add_symbol (symbol *s)
+add_symbol (char *name, int value)
 {
-    size_t size = sizeof (symbol) + strlen (s->name);
-    return bdb_add (&symdb, s->name, s, size);
+    size_t size = sizeof (symbol) + strlen (name);
+    symbol *s = malloc (size);
+    printf ("Adding symbol \"%s\".\n", name);
+    strcpy (s->name, name);
+    s->value = value;
+    return bdb_add (&symdb, name, s, size);
+}
+
+symbol *
+find_symbol (char *name)
+{
+    dbid_t id = bdb_find (&symdb, name);
+    if (id >= 0)
+        return bdb_map (&symdb, id);
+    return NULL;
+}
+
+void
+symdb_init (void)
+{
+    symdb.next_free = 0;
+    symdb.read  = symdb_read;
+    symdb.write = symdb_write;
+    symdb.test  = symdb_test;
 }
 
 ///////////
@@ -57,8 +86,25 @@ main (int argc, char *argv[])
 {
     (void) argc;
     (void) argv;
-    symdb.read  = symdb_read;
-    symdb.write = symdb_write;
-    symdb.test  = symdb_test;
+    dbid_t id;
+    symbol * s;
+    char **n;
+
+    symdb_init ();
+
+    char *names[] = {
+        "Coziness", "Fireplace", "Warmth", "Comfort", "Blanket",
+        "Teatime", "Homecoming", "Family time", "Relaxation", "VIC-20",
+        NULL
+    };
+    for (n = names; *n; n++)
+        id = add_symbol (*n, strlen (*n));
+
+    s = bdb_map (&symdb, id);
+    printf ("Got symbol \"%s\".\n", s->name);
+
+    s = find_symbol ("Teezeit");
+    if (s)
+        printf ("Got symbol \"%s\".\n", s->name);
     return 0;
 }

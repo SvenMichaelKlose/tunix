@@ -1,0 +1,17 @@
+PROGRAM = bdb
+SRC = bdb.c main.c
+INCDIR = "./include/"
+CFLAGS = -ggdb -g -Wall -Werror
+
+OBJ = $(addsuffix .o, $(basename $(SRC)))
+
+all: $(PROGRAM)
+
+clean:
+	rm -f $(OBJ) $(PROGRAM)
+
+$(PROGRAM): $(OBJ)
+	$(CC) -o $(PROGRAM) $(CFLAGS) $(OBJ)
+
+%.o : %.c
+	$(CC) $(CFLAGS) -c $< -o $@

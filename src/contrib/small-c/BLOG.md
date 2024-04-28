@@ -3,6 +3,21 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-04-28 20:41 S.M. Klose
+
+Sandwiched between toothache and party
+people I brought some rough code for a
+b-tree indexed database to compile in
+the [growroom](growroom).  It'll be the
+foundation of handling the amount of
+data that piles up when Small-C is to
+compile larger apps like itself.
+
+The cache will be interesting as it'll
+need a key and ID index and a LRU list.
+But the low-level stuff needs testing
+first.
+
 # 2024-04-26 18:16 S.M. Klose
 
 The code of Small-C is a nerd trap, a

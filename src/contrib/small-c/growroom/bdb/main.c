@@ -47,8 +47,7 @@ int
 symdb_read (bdb *db, dbid_t ofs, void *r, size_t size)
 {
     if (!storage)
-        if (!(storage = fopen ("symbol.db", "w+")))
-            perror ("Cannot open BDB file for reading.");
+        return 0;
     fseek (storage, ofs, SEEK_SET);
     return fread (r, 1, size, storage);
 }

@@ -104,7 +104,7 @@ void
 cache_insert_id (bdb *db, cnode *cn)
 {
     dbid_t  key = cache_idhash (cn->id);
-    cnode   *n = db->cache_root_ids;
+    cnode   *n  = db->cache_root_ids;
     cnode   *on;
 
     // Add first node.
@@ -134,7 +134,7 @@ void
 cache_insert_key (bdb *db, cnode *cn)
 {
     void    *key = db->data2key (cn->data);
-    cnode   *n = db->cache_root_keys;
+    cnode   *n   = db->cache_root_keys;
     cnode   *on;
 
     // Add first node.
@@ -164,7 +164,7 @@ cnode *
 cache_find_id (bdb *db, dbid_t id)
 {
     dbid_t  key = cache_idhash (id);
-    cnode   *n = db->cache_root_ids;
+    cnode   *n  = db->cache_root_ids;
 
     // Empty tree, nothing to find.
     if (!n)

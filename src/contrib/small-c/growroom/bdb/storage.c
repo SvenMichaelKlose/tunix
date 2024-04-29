@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <string.h>
 #include <stdio.h>
 
 #include "bdb.h"

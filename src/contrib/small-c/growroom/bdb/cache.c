@@ -1,8 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "bdb.h"
 #include "storage.h"

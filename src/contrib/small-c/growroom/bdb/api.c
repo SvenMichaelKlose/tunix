@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <stdlib.h>
-#include <strings.h>
-#include <string.h>
 #include <stdio.h>
 
 #include "bdb.h"
@@ -11,7 +9,7 @@
 dbid_t
 bdb_add (bdb *db, void *key, void *data, size_t size)
 {
-    // Allocate ID and space on storage for later if needed.
+    // Allocate ID and space on storage.
     dbid_t id = storage_alloc_id (db, size);
 
     // Add record to cache and update index.

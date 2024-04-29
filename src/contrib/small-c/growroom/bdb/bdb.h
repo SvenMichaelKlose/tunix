@@ -6,36 +6,6 @@
 
 typedef unsigned int dbid_t;
 
-typedef struct _bnode {
-    dbid_t  left;
-    dbid_t  right;
-    char    data[1];
-} bnode;
-
-typedef struct _cnode cnode;
-typedef struct _cnode {
-    // Offset on secondary storage.
-    dbid_t  id;
-    size_t  size;
-    #define CNODE_HAS_BNODE     1
-    char    flags;
-
-    // LRU deque
-    cnode   *next;
-    cnode   *prev;
-
-    // Key b-tree
-    cnode   *kleft;
-    cnode   *kright;
-
-    // ID b-tree
-    cnode   *ileft;
-    cnode   *iright;
-
-    // malloc()'ed data
-    void    *data;
-} cnode;
-
 typedef struct _bdb bdb;
 typedef struct _bdb {
     dbid_t next_free;

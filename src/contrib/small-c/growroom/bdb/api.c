@@ -45,7 +45,7 @@ bdb_map (bdb *db, int id)
         cn = cache_add_storage (db, id);
     else
         // Found.  Make it the most-recently used.
-        cache_make_mru (cn);
+        cache_make_mru (db, cn);
 
     // Return record pointer.
     return cn->data;

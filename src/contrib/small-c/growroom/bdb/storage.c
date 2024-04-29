@@ -79,7 +79,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
         printf ("storage_map(): No root node.\n");
         return NULL;  // Missing root node.
     }
-    *size = nsize - sizeof (snode) + 1;
+    *size = nsize - snode_size (0);
 
     // Allocate memory for node & data.
     if (!(n = malloc (nsize)))

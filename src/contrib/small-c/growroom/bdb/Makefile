@@ -1,7 +1,7 @@
 PROGRAM = bdb
 SRC = api.c cache.c storage.c main.c
 INCDIR = "./include/"
-CFLAGS = -ggdb -g -Wall -Werror
+CFLAGS = -ggdb -g -O0 -Wall -Werror
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 

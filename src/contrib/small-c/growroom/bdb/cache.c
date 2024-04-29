@@ -10,98 +10,45 @@
 
 int num_cached = 0;
 
-// Least/most-recently used.
-cnode * cache_first;
-cnode * cache_last;
-
-cnode * cache_root_keys;
-cnode * cache_root_ids;
-
 // Add node as most-recently used.
 void
-cache_push_mru (cnode *cn)
+cache_push_mru (bdb *db, cnode *cn)
 {
     cn->prev = NULL;
-    cn->next = cache_first;
-    cache_first = cn;
-    if (!cache_last)
-        cache_last = cn;
+    cn->next = db->cache_first;
+    db->cache_first = cn;
+    if (!db->cache_last)
+        db->cache_last = cn;
 }
 
 // Pop least-recently used.
 cnode *
-cache_pop_lru ()
+cache_pop_lru (bdb *db)
 {
-    cnode * cn = cache_last;
+    cnode * cn = db->cache_last;
     if (cn)
-        cache_last = cn->prev;
+        db->cache_last = cn->prev;
     return cn;
 }
 
 void
-cache_remove_lru (cnode *cn)
+cache_remove_lru (bdb *db, cnode *cn)
 {
     if (cn->prev)
         cn->prev->next = cn->next;
     else
-        cache_first = cn->next;
+        db->cache_first = cn->next;
     if (cn->next)
         cn->next->prev = cn->prev;
-    if (cn == cache_last)
-        cache_last = cn->prev;
+    if (cn == db->cache_last)
+        db->cache_last = cn->prev;
 }
 
 void
-cache_make_mru (cnode *cn)
+cache_make_mru (bdb *db, cnode *cn)
 {
-    cache_remove_lru (cn);
-    cache_push_mru (cn);
-}
-
-void
-cache_remove (cnode *cn)
-{
-    cache_remove_lru (cn);
-    //cache_remove_id (cn);
-    //cache_remove_key (cn);
-    free (cn);
-}
-
-cnode *
-cache_alloc (bdb *db, dbid_t id, void *data, size_t size)
-{
-    cnode *cn;
-
-    // When out of cache...
-    if (num_cached > 256) {
-        // ...get least-recently used cnode...
-        cn = cache_pop_lru (db);
-
-        // Insert into b-tree if new on storage.
-        if (!(cn->flags & CNODE_HAS_BNODE))
-            storage_insert_key (db, db->data2key (cn->data), cn->id);
-
-        // Init/update record data.
-        storage_write_data (db, cn->id, cn->data, cn->size);
-
-        // Remove record from cache.
-        cache_remove (cn);
-    } else
-        num_cached++;
-
-    // Allocate and clear cnode.
-    cn = malloc (sizeof (cnode));
-    bzero (cn, sizeof (cnode));
-
-    // Copy over record info and data.
-    cn->id   = id;
-    cn->size = size;
-    cn->data = malloc (size);
-    memcpy (cn->data, data, size);
-
-    // Add to LRU list as most-recently used.
-    cache_push_mru (cn);
-    return cn;
+    cache_remove_lru (db, cn);
+    cache_push_mru (db, cn);
 }
 
 dbid_t
@@ -116,11 +63,11 @@ void
 cache_insert_id (bdb *db, cnode *cn)
 {
     dbid_t  key = cache_idhash (cn->id);
-    cnode   *n = cache_root_ids;
+    cnode   *n = db->cache_root_ids;
     cnode   *on;
 
     if (!n) {
-        cache_root_ids = cn;
+        db->cache_root_ids = cn;
         return;
     }
     for (;;) {
@@ -142,11 +89,11 @@ void
 cache_insert_key (bdb *db, cnode *cn)
 {
     void    *key = db->data2key (cn->data);
-    cnode   *n = cache_root_keys;
+    cnode   *n = db->cache_root_keys;
     cnode   *on;
 
     if (!n) {
-        cache_root_keys = cn;
+        db->cache_root_keys = cn;
         return;
     }
     for (;;) {
@@ -168,7 +115,7 @@ cnode *
 cache_find_id (bdb *db, dbid_t id)
 {
     dbid_t  key = cache_idhash (id);
-    cnode   *n = cache_root_ids;
+    cnode   *n = db->cache_root_ids;
 
     if (!n)
         return NULL;
@@ -187,7 +134,7 @@ cache_find_id (bdb *db, dbid_t id)
 cnode *
 cache_find_key (bdb *db, void *key)
 {
-    cnode *n = cache_root_keys;
+    cnode *n = db->cache_root_keys;
     int c;
 
     if (!n)
@@ -204,8 +151,57 @@ cache_find_key (bdb *db, void *key)
     }
 }
 
+void
+cache_remove (bdb *db, cnode *cn)
+{
+    cache_remove_lru (db, cn);
+    //cache_remove_id (db, cn);
+    //cache_remove_key (db, cn);
+    free (cn);
+}
+
 cnode *
-cache_map (bdb *db, dbid_t id)
+cache_alloc (bdb *db, dbid_t id, void *data, size_t size)
+{
+    cnode *cn;
+
+    // When out of cache...
+    if (num_cached > 256) {
+        // ...get least-recently used cnode...
+        cn = cache_pop_lru (db);
+
+        // Insert into b-tree if new on storage.
+        if (!(cn->flags & CNODE_HAS_BNODE))
+            storage_insert_key (db, db->data2key (cn->data), cn->id);
+
+        // Init/update record data.
+        storage_write_data (db, cn->id, cn->data, cn->size);
+
+        // Remove record from cache.
+        cache_remove (db, cn);
+    } else
+        num_cached++;
+
+    // Allocate and clear cnode.
+    cn = malloc (sizeof (cnode));
+    bzero (cn, sizeof (cnode));
+
+    // Copy over record info and data.
+    cn->id   = id;
+    cn->size = size;
+    cn->data = malloc (size);
+    memcpy (cn->data, data, size);
+
+    // Add to LRU list as most-recently used.
+    cache_push_mru (db, cn);
+    cache_insert_key (db, cn);
+    cache_insert_id (db, cn);
+    return cn;
+}
+
+
+cnode *
+cache_add_storage (bdb *db, dbid_t id)
 {
     snode  *bn;
     cnode  *cn;

@@ -66,8 +66,10 @@ storage_map (size_t *size, bdb *db, dbid_t id)
 
     // Read size of node.
     nread = db->read (db, id, &nsize, sizeof (size_t));
-    if (!id && !nread)
+    if (!id && !nread) {
+        printf ("storage_map(): No root node.\n");
         return NULL;  // Missing root node.
+    }
     *size = nsize - sizeof (snode);
 
     // Allocate memory for node & data.
@@ -135,7 +137,7 @@ storage_find (bdb *db, void *key)
     for (;;) {
         // Map node into memory.
         if (!(n = storage_map (&unused_size, db, id)))
-            perror ("Internal error. Node not mapped.");
+            return NOTFOUND;
 
         // Decide to which child to travel.
         if (!(c = db->compare (db, &n->data, key)))

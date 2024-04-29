@@ -6,6 +6,7 @@
 
 typedef unsigned int dbid_t;
 
+typedef struct _cnode cnode;
 typedef struct _bdb bdb;
 typedef struct _bdb {
     dbid_t next_free;
@@ -23,6 +24,14 @@ typedef struct _bdb {
 
     // Return key in record.
     void *(*data2key) (void *rec);
+
+    // Least/most-recently used.
+    cnode * cache_first;
+    cnode * cache_last;
+
+    // Index b-tree roots.
+    cnode * cache_root_keys;
+    cnode * cache_root_ids;
 } bdb;
 
 dbid_t  bdb_alloc (bdb *db, void *data, size_t size);

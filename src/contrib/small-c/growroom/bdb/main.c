@@ -69,7 +69,7 @@ symbol *
 find_symbol (char *name)
 {
     dbid_t id = bdb_find (&symdb, name);
-    if (id >= 0)
+    if (id != NOTFOUND)
         return bdb_map (&symdb, id);
     return NULL;
 }
@@ -96,6 +96,7 @@ main (int argc, char *argv[])
     dbid_t id;
     symbol * s;
     char **n;
+    char *name = "Homecoming";
 
     symdb_init ();
 
@@ -110,8 +111,10 @@ main (int argc, char *argv[])
     s = bdb_map (&symdb, id);
     printf ("Got symbol \"%s\".\n", s->name);
 
-    s = find_symbol ("Homecoming");
+    s = find_symbol (name);
     if (s)
         printf ("Got symbol \"%s\".\n", s->name);
+    else
+        printf ("Symbol \"%s\" not found.\n", name);
     return 0;
 }

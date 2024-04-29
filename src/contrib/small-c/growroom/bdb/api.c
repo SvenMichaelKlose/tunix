@@ -5,8 +5,8 @@
 #include <stdio.h>
 
 #include "bdb.h"
-#include "storage.h"
 #include "cache.h"
+#include "storage.h"
 
 dbid_t
 bdb_add (bdb *db, void *key, void *data, size_t size)
@@ -24,6 +24,7 @@ bdb_add (bdb *db, void *key, void *data, size_t size)
     return id;
 }
 
+// Find record by key.
 dbid_t
 bdb_find (bdb *db, void *key)
 {
@@ -33,17 +34,17 @@ bdb_find (bdb *db, void *key)
         storage_find (db, key);
 }
 
-// Map record to memory.
+// Map record by ID.
 void *
 bdb_map (bdb *db, int id)
 {
     // Search for ID in cache.
     cnode *cn = cache_find_id (db, id);
     if (!cn)
-        // Map in from storage.
-        cn = cache_map (db, id);
+        // Not found.  Fetch from storage.
+        cn = cache_add_storage (db, id);
     else
-        // Make most-recently used.
+        // Found.  Make it the most-recently used.
         cache_make_mru (cn);
 
     // Return record pointer.

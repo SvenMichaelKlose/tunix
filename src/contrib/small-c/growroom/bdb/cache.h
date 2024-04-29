@@ -25,13 +25,13 @@ typedef struct _cnode {
     void    *data;
 } cnode;
 
-extern cnode * cache_alloc      (bdb *, dbid_t, void *data, size_t);
-extern void    cache_insert_id  (bdb *, cnode *);
-extern void    cache_insert_key (bdb *, cnode *);
-extern cnode * cache_find_id    (bdb *, dbid_t);
-extern cnode * cache_find_key   (bdb *, void *key);
-extern cnode * cache_map        (bdb *, dbid_t);
-extern void    cache_make_mru   (cnode *);
+extern cnode * cache_alloc       (bdb *, dbid_t, void *data, size_t);
+extern void    cache_insert_id   (bdb *, cnode *);
+extern void    cache_insert_key  (bdb *, cnode *);
+extern cnode * cache_find_id     (bdb *, dbid_t);
+extern cnode * cache_find_key    (bdb *, void *key);
+extern cnode * cache_add_storage (bdb *, dbid_t);
+extern void    cache_make_mru    (bdb *, cnode *);
 
 /*
 extern void cache_push_mru (cnode *cn);

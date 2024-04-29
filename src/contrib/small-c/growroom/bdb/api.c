@@ -11,11 +11,11 @@
 dbid_t
 bdb_add (bdb *db, void *key, void *data, size_t size)
 {
-    // Allocate ID (and space on storage).
+    // Allocate ID and space on storage for later if needed.
     dbid_t id = storage_alloc_id (db, size);
 
-    // Add record to cache.
-    if (!cache_alloc (db, id, data, size))
+    // Add record to cache and update index.
+    if (!cache_add (db, id, data, size))
         perror ("bdb_add(): Cannot allocate storage.");
 
     return id;
@@ -32,6 +32,7 @@ bdb_find (bdb *db, void *key)
 }
 
 // Map record by ID.
+// The record must exist.
 void *
 bdb_map (bdb *db, int id)
 {

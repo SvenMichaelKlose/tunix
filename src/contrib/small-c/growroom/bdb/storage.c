@@ -7,23 +7,23 @@
 #include "bdb.h"
 #include "storage.h"
 
-// Write head of snode only.
-void
-storage_write_snode (bdb *db, dbid_t id, snode * n)
+size_t
+snode_size (size_t data_size)
 {
-    size_t nwritten = db->write (db, id + sizeof (size_t), n, sizeof (snode));
-    if (nwritten != sizeof (snode))
-        perror ("Error writing data.");
+    // Add header (- 1 char of data declaration)
+    // and record size.
+    return sizeof (snode) + data_size - 1;
 }
 
-// Allocate ID for new record.
+// Allocate ID (and space) for new record.
 dbid_t
 storage_alloc_id (bdb *db, size_t size)
 {
+    // An ID is basically an offset into the storage.
     dbid_t id = db->next_free;
 
     // Make space for size, snode and data.
-    db->next_free += size + sizeof (snode) + sizeof (size_t);
+    db->next_free += snode_size (size) + sizeof (size_t);
     return id;
 }
 
@@ -31,16 +31,25 @@ storage_alloc_id (bdb *db, size_t size)
 bool
 storage_write_size (bdb *db, dbid_t id, size_t size)
 {
-    size_t nsize = sizeof (snode) + size;
+    size_t nsize = snode_size (size);
     size_t nwritten = db->write (db, id, &nsize, sizeof (size_t));
     return nwritten != sizeof (size_t);
+}
+
+// Write head of snode only to storage.
+void
+storage_write_snode (bdb *db, dbid_t id, snode * n)
+{
+    size_t nwritten = db->write (db, id + sizeof (size_t), n, snode_size (0));
+    if (nwritten != snode_size (0))
+        perror ("Error writing data.");
 }
 
 // Write data after snode to storage.
 bool
 storage_write_data (bdb *db, dbid_t id, void * data, size_t size)
 {
-    size_t nsize = sizeof (size_t) + sizeof (snode);
+    size_t nsize = sizeof (size_t) + snode_size (0);
     size_t nwritten = db->write (db, nsize, data, size);
     return nwritten != nsize;
 }
@@ -70,7 +79,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
         printf ("storage_map(): No root node.\n");
         return NULL;  // Missing root node.
     }
-    *size = nsize - sizeof (snode);
+    *size = nsize - sizeof (snode) + 1;
 
     // Allocate memory for node & data.
     if (!(n = malloc (nsize)))

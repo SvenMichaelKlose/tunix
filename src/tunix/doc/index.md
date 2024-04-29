@@ -1,12 +1,12 @@
 ---
 title: "TUNIX"
-author: "operating system manual"
+author: "Operating System Manual"
 date: "2024-04-20"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
-header-left: "TUNIX operating system manual"
+header-left: "TUNIX Operating System Manual"
 footer-left: "UNDER CONSTRUCTION"
 toc: true
 footnodes-pretty: true
@@ -18,81 +18,78 @@ classoption: [oneside]
 
 It is UNDER CONSTRUCTION.
 
-TUNIX is a KERNAL extension for the
-Commodore VIC-20 with UltiMem expansion
-that adds pre-emptive multi-tasking,
+TUNIX is a Unix-like KERNAL extension
+for the Commodore VIC-20 with UltiMem
+expansion which adds pre-emptive
+multi-tasking (currently cooperative),
 loadable drivers and recover-on-reset.
 
-## The Commodore KERNAL
+TUNIX performs very simple process,
+memory and device management.  It could
+be a C program of about 500 lines in
+size.  A schematic C version has been
+added for documentation ('src/tunix.c').
+Perhaps it'll even be used for real one
+day but it would be rather slow.
 
-The Commodore KERNAL is essentially the
-operating system of Commodore 8-bit
-computers, such as the Commodore PET,
-VIC, C64 and so on.  It plays a
-foundational role in making the
-Commodore computers versatile and
-user-friendly.  It's what allowed
-programmers to create a vast array of
-software, from simple text editors to
-complex games, without having to start
-from scratch every time.  This operating
-system layer facilitated the explosion
-of creative and useful applications that
-defined the Commodore experience.
+The running version, written in ten
+times as much assembly language, has
+highly optimized data structures to make
+most use of the UltiMem's banking
+architecture without sacrificing
+simplicity.
 
-It's basic functions are:
+Except for the IO23 area, all address
+space is available to a program.
+Exented memory can be allocated but it
+is highly recommended to not touch it
+at all and use a RAM disk or real drive
+instead.
 
-* Input/Output (I/O) Management: The
-KERNAL is responsible for handling all
-the communication between the computer’s
-hardware components, like the keyboard,
-screen, disk drives, and printers.
-Whenever you press a key or a program
-wants to display something on the
-screen, the KERNAL is the intermediary
-that makes that happen.
+## Process management
 
-* File Management: It provides the
-functionality for reading, writing, and
-managing files on disk.  This includes
-opening files, saving data, and listing
-directory contents.  It's like the
-librarian that knows where every book is
-placed and helps you to find or store
-them.
+Running processes are scheduled
+round-robin and switched on system call
+return.  That works surprisingly well
+with character-oriented I/O.
+Pre-emptive multitasking is hoped to
+follow.
 
-* Memory Management: The KERNAL also
-plays a crucial role in managing the
-computer's memory, deciding which parts
-of the memory are used for what purpose.
-Think of it as organizing your desk
-space efficiently so you can work
-without clutter.
+Processes can kill others and wait for
+their exit codes.  Waiting takes place
+on FIFO lists.  Before an exit code is
+returned, the next waiting process is
+woken up.
 
-* Device Management: Commodore computers
-could connect to various external
-devices, such as printers, modems, or
-external disk drives.  The KERNAL
-includes routines (set sequences of
-instructions) for managing these devices
-seamlessly, allowing software to use
-them without needing to know the
-nitty-gritty details of how they work.
+When the system runs out multiple
+processes, process 0 is shutting down
+the system.
 
-* Error Handling: When something goes
-wrong, like trying to read a file that
-doesn't exist, the KERNAL steps in to
-handle the error, often providing
-messages to the user or software about
-what went wrong.
+## Drivers
 
-## Memory
+Programs can register a new set of
+vectors that can be applied to any
+device of a process.  The device/driver
+configuration is forked like all other
+resources.  A driver assignment cannot
+be undone.  A driver registration cannot
+be undone until all processes with
+assignments got killed.
 
-Except for the IO23 area, which is
-reserved for TUNIX and drivers, all
-address space is available to programs.
+## Extended Memory (Consumption)
 
-## Performance
+The rather large 8K-size RAM banks are
+kept in a singly-linked list and are
+also tracked per-process.  A bank is
+released as soon it has been
+unreferenced by all.
+
+Every process occupies six banks (48K).
+The kernel uses two and eight are
+reserved for loading non-TUNIX apps
+designed for the UltiMem expansion.
+
+## Raw Performance
 
 (The time spans mentioned here have been
 guessed.)
@@ -116,12 +113,7 @@ specialized and can gain impractical
 sizes.  Copying an 8K memory block takes
 about 48K of speed code but is several
 magnitudes faster than a regular copy
-loop, saving the TUNIX day.
-
-TUNIX isn't optimized for performance
-but for simplicity and robustness.  The
-following sections cover some essential
-timings in more detail.
+loop.
 
 ### System calls
 
@@ -155,165 +147,48 @@ maximum performance out of the machine).
 Calling a driver takes 0.27ms.  This
 leaves us with at least 17.7s overhead
 for transmitting or receiving 64K
-    characters via device drivers.
+characters via device drivers.
 
 The TUNIX system call driver's overhead
 is parsing and dispatching commands.
 Resource allocation and deallocation
 uses fast deque operations at constant
 execution times.
+All I/O call performance is reduced by
+about 1ms per operation in addtion to
+the operation itself.
 
-## Educational Purpose
+## Improved Performance
 
-By providing a platform that is both
-historically interesting and technically
-challenging, TUNIX encourages the
-exploration of computing principles,
-hands-on learning, and the joy of
-bringing new capabilities to old
-hardware, all within the context of a
-community-driven project:
+I/O performance can be improved using
+line- or block-oriented caches and
+block-wise read and write support at
+driver level.
 
-* Understanding Operating Systems:
-TUNIX introduces Unix-like
-functionalities to a platform that was
-not originally designed for such
-complexity.  This offers learners a
-unique opportunity to understand the
-components of an operating system, such
-as multitasking, memory management, and
-file systems, in a simplified and
-accessible environment.
-* Programming Fundamentals:
-The project’s development and its
-support for programming in environments
-like BASIC, ANSI-C, and potentially
-others provide a practical context for
-learning programming fundamentals.  It
-allows students to experience the
-development cycle, from writing and
-debugging code to integrating with an
-operating system.
-* Historical Insights:
-By enhancing a vintage computing
-platform, TUNIX provides insights into
-the evolution of computing technology,
-offering a hands-on history lesson.  It
-shows how limitations of early computers
-were overcome and how these systems laid
-the groundwork for modern computing
-paradigms.
-* Principles of Unix:
-The Unix philosophy emphasizes
-simplicity, modularity, and reusability.
-TUNIX makes these principles tangible
-for learners, allowing them to explore
-    how small, focused programs can work
-    together to perform complex tasks.
-    This can deepen understanding of
-    software design and architecture.
-* Low-Level Computing Concepts:
-TUNIX offers exposure to low-level
-computing concepts, including assembly
-language programming and direct hardware
-interaction, within a controlled and
-understandable environment.  This can
-demystify how software interfaces with
-hardware, an important area of computer
-science education.
-* Problem Solving and Innovation:
-Given the VIC-20’s hardware limitations,
-TUNIX challenges developers and learners
-to think creatively about resource
-management, optimization, and
-functionality implementation.  This can
-foster problem-solving skills and
-innovative thinking, valuable
-competencies in any technical field.
-* Collaboration and Open Source
-* Contribution:
-If structured as an open-source project,
-TUNIX provides a platform for
-collaborative learning and contribution.
-Participants can learn from each other,
-share knowledge, and contribute to a
-collective project, gaining experience
-in version control, code review, and
-documentation in the process.
-* Cross-Disciplinary Learning:
-TUNIX bridges computer science with
-electrical engineering, history, and
-even elements of graphic design and user
-experience.  This multidiscipli- nary
-approach can appeal to a wide range of
-learners, encouraging cross- pollination
-of ideas and techniques.
+## Outlook
 
-# Installing TUNIX
+With tuned applications TUNIX could
+handle up to 32 processes at the same
+time.  Text and data banks could be
+cached and/or reused instead of being
+loaded again.  Also excluding low
+memory areas from task switches could
+provide further performance boosts.
 
-TUNIX can recover-on-reset.  Whenever a
-process hangs up the system, it can be
-killed by pressing the reset button of
-the UltiMem expansion and TUNIX will
-continue with the other processes.  It
-requires the TUNIX boot loader to be
-installed on the UltiMem ROM, which is
-highly recommended to regular users.
+# Installation
 
-An already installed boot ROMs can be
-relocated within the first 64K of the
-UltiMem Flash ROM and booted instead of
-TUNIX by pressing the SHIFT key during
-reset.  It can also be launched from
-within TUNIX.
+TUNIX can not yet be installed.
 
 # Running TUNIX
 
 After starting the TUNIX program it'll
 entertain you with some diagnostic
 messages and boot an instance of BASIC
-with process ID 1.  Now you can load
-drivers or run apps in addition to
-native ones.  
+with process ID 1 and run self-tests
+that will crash on you after a minute or
+two.
 
-Plain TUNIX is not very practical. By
-appending an asterisk "\*" and the name
-and arguments of another program to its
-load name, TUNIX can be instructed to
-load and run that as the init process.
-
-The init process should be loading the
-desired drivers and launch the user's
-preferred interface.  To start TUNIX
-with the default init program, launch it
-with:
-
-~~~BASIC LOAD"TUNIX\*INIT",8 ~~~
-
-## The Init Process
-
-The init process loads filenames of apps
-to launch from file INIT.CFG, line by
-line, and goes to sleep.
-
-## Using The Console
-
-Pressing and releasing the C= & SHIFT
-key alone opens the console menu.  Ten
-slots are available and can be selected
-by pressing their number.  'C' creates a
-new BASIC instance in a slot.  'M'
-followed by a number moves it to another
-slot and 'X' empties a slot.
-
-Each slot also has a memory and device
-configuration.  You may for example
-select the TUNIX 40x24 char terminal, or
-simulate an unexpanded VIC.  Wanted
-drivers must be loaded in one of the
-slots.
-
-# Programming For TUNIX
+# Developing Applications
 
 TUNIX can be used with any programming
 language that supports regular file I/O.
@@ -322,48 +197,47 @@ require using assembly language at some
 point, no matter what the rest of the
 driver was written in.
 
+## cc65
+
 The number one set of programming tools
-for TUNIX is [the cc65 compiler
-    suite](https://www.cc65.org) for
-    6502/6518-CPU platforms.  It comes
-    with an ANSI-C compiler, assembler
-    and linker, a Unix-like standard C
-    library, exhaustive documentation,
-    and a vibrant community.
+for TUNIX is
+[the cc65 compiler suite](https://www.cc65.org) for 6502/6518-CPU platforms.  It
+comes with an ANSI-C compiler, assembler
+and linker, a Unix-like standard C
+library, exhaustive documentation, and a
+vibrant community.
 
-## No Standard I/O File Handles
+## Differences Between KERNAL and UNIX I/O
 
-Unlike Unixoids the KERNAL does not
+Unlike Unixoids, the KERNAL does not
 provide default LFNs for standard I/O.
-Instead, apps reset the current LFN-
-derived device pair (aka "channels") to
-the keyboard and screen device using the
-CLRCN system call.  To make up for this,
-driver LFNDEV connects LFNs to devices,
+Instead, apps reset a the selected
+input/oupt +device+ pair (aka
+"channels") to the keyboard and screen
+device with help of the CLRCN system
+call.  To make up for this, driver
+LFNDEV connects LFNs to devices,
 so a process' standard I/O can be
 pipelined.
 
 To get around resetting the channel pair
 you may decide to OPEN device #0 and #3
-to have LFNs for CHKIN and CKOUT.
+to have LFNs for CHKIN and CKOUT.  The
+cc65 standard C library does that on
+start-up already.
 
-# CBM & TUNIX KERNAL I/O
+# KERNAL I/O Behaviour
 
 This section describes the behaviour of
 the original KERNAL functions, along
 with the slightly different behaviour of
-TUNIX to support a multi-tasking envi-
-ronment better.
+TUNIX to support multi-tasking better.
 
-All I/O call performance is reduced by
-about 1ms per operation in addtion to
-the operation itself.
-
-## General behaviour
+## Calling Conventions
 
 Functions that return with an error code
 do so with the carry flag set and an
-    error code in the accumulator (A).
+error code in the accumulator (A).
 
 Pointers passed in Y and X registers
 have the low byte in the X register and
@@ -374,10 +248,10 @@ respectively.
 
 This routine is used to set the filename
 for the OPEN, SAVE, or LOAD system
-    calls.  A pointer to the filename is
-    expected in the YX register pair (X
-    is the low byte) and the length of
-    the in A.
+calls.  A pointer to the filename is
+expected in the YX register pair (X
+is the low byte) and the length of
+the in A.
 
 SETNAM never returns with an error.
 
@@ -596,9 +470,9 @@ if the carry flag is set:
 * 9: Illegal device number.
      Also if tape buffer is below $0200.
 
-# System Calls
+# System Call Device
 
-## Doing System Calls
+## Calling Convention
 
 System calls are performed via opening
 a file on device #31.  The first
@@ -645,11 +519,11 @@ values:
 open (31, 31, 0, "PF");
 chkin (31);
 err = basin ();
-if (err)
-    error ();
-id = basin ();
-if (!id)
-    child_stuff ();
+if (!err) {
+    id = basin ();
+    if (!id)
+        child_stuff ();
+}
 ~~~
 
 ## Returned Lists And Tables
@@ -691,9 +565,9 @@ ID,PID,NAME
 3,0,"SOMETHING ""COOL"""
 ~~~
 
-## Code Examples
+## Code Example Notation
 
-Lower case letters in system call file-
+Lower case letters in system call file
 name examples are byte values.  Letters
 in brackets are optional.
 
@@ -1048,7 +922,8 @@ on the queue.  It is not checked if the
 target process provides a handler for
 the signal type.  The signal is
 discarded on delivery when the handler
-is missing.
+is missing, so handlers can be dropped
+anytime.
 
 ### "SSp": Send signal to process
 
@@ -1105,7 +980,7 @@ process takes its turn in random order.
 When the process list is empty, process
 0 is executed, no matter in what state.
 
-## Banking: Managing Pieces Of Address Space
+## Banking Scheme
 
 TUNIX occupies the IO23 area to be
 around for all processes.  BLK1 holds
@@ -1131,7 +1006,7 @@ BLK1 is pushed on the stack and popped
 off on return.  Other blocks are
 preserved the same way just in time.
 
-# Process Creation (fork)
+## Process Creation (fork)
 
 A completey new process is created once
 when TUNIX starts: process 0.  From then
@@ -1159,14 +1034,16 @@ running process.
 
 # Drivers
 
-## Signal polling
-
-Some programming lanugages can not
-implement signal handlers.  A driver
-could allow to read incoming signals.
-
 ## FIFO
 
 For inter-process communication.
+Probably the most basic driver for
+TUNIX.  Whatever is written to a device
+is coming out again in the same order.
+Writers have to wait when the buffer is
+full, readers when it is empty.
 
 ## RAM disk
+
+A RAM disk is essential for good system
+performance.

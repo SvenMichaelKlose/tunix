@@ -799,21 +799,6 @@ pending_signal:         .res 1
     pop ram123
 .endmacro
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; CONTEXT (PROCESS DATA & IO) ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-.macro enter_context_x
-    push io23
-    mvb io23, {proc_io23,x}
-    enter_procdata_x
-.endmacro
-
-.macro leave_context
-    leave_procdata
-    pop io23
-.endmacro
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; PROCESS BANKS (non-kernel) ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1325,7 +1310,6 @@ err_invalid_bank:
 ; Free all banks of current process.
 .export free_lbanks
 .proc free_lbanks
-    ; TODO: Check lbank ownership.
     ldx first_lbank
     beq r
 :   lda lbanks,x
@@ -1342,7 +1326,6 @@ items_mem_info:
   .byte "RESERVED", 0
   .byte "FAULTY", 0
   .byte "TOTAL", 0
-  .byte "BANKSIZE,8192", 0
   .byte 0
 
 .export mem_info
@@ -1380,10 +1363,6 @@ items_mem_info:
     adc #FIRST_BANK
     ldx #0
     jsr print_cvcr
-
-    ; Bank size (in head)
-    jsr print_head
-    jsr print_cr
 
     popw zp2
     clc
@@ -1586,7 +1565,9 @@ vec_io23_to_blk5:
     inc bank_refs,x
     txa
     sta ram123 ; Bank in procdata.
+    ; (CHILD PROCDATA FROM HERE ON)
     sta proc_data,y
+    ; Register local bank for child.
     alloc_lbank_x
     mvb {lbank_flags,x}, #1
     ; Copy parent's into child's.
@@ -1594,16 +1575,20 @@ vec_io23_to_blk5:
     stx blk5
     jsra next_speedcopy, speedcopy_blk3_to_blk5
     mvb blk2, tunix_blk2
-    ; Finish up IO23.
+
+    ;; Finish up IO23.
     pop io23 ; Bank in IO23.
+    ; CHILD CONTEXT FROM HERE ON
+    ; Register local bank for child.
     tax
     alloc_lbank_x
     mvb {lbank_flags,x}, #1
-    ; Set child ID and stack pointer.
+
+    ;; Set child ID and stack pointer.
     sty pid
     mvb stack, tmp2+1
 
-    ;; Clone remaining banks.
+    ;;; Clone remaining banks.
     .macro alloc_blk_y procblk
         jsr balloc
         sta procblk,y
@@ -1662,6 +1647,8 @@ out_of_memory:
     bcs r ; (jmp)
 .endproc
 
+.assert * < $4000, error, "machdep_fork() outside BLK1."
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; LOGICAL FILE NUMBERS ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1713,12 +1700,17 @@ r:  rts
 ; banked in for TUNIX, holds additional
 ; per-process data.
 
-.export unref_parent_banks
-.proc unref_parent_banks
-    ;; Remove banks of parent from
-    ;; child's lbank list.
+; Free banks of a process in its procdata.
+; X: Process ID
+.export unref_proc_lbanks
+.proc unref_proc_lbanks
+    enter_procdata_x
+
     .macro unref_lbank procblk
-        jsra free_lbank_a, {procblk,x}
+        lda procblk,x
+        beq :+
+        jsr free_lbank_a
+:
     .endmacro
     unref_lbank proc_data
     unref_lbank proc_ram123
@@ -1727,6 +1719,8 @@ r:  rts
     unref_lbank proc_blk2
     unref_lbank proc_blk3
     unref_lbank proc_blk5
+
+    leave_procdata
     rts
 .endproc
 
@@ -1739,15 +1733,6 @@ r:  rts
 :   rts
 .endproc
 
-.export update_forked_data
-.proc update_forked_data
-    enter_procdata_y
-    jsr unref_parent_banks
-    jsr increment_glfn_refs
-    leave_procdata
-    rts
-.endproc
-
 ; Fork current process.
 ; Returns:
 ; A: New process ID for the parent and
@@ -1757,24 +1742,36 @@ r:  rts
     alloc_proc_running_y
     cpy #0
     beq no_more_procs
+    ; Tell tunix_leave() to map in the
+    ; new banks of the child.
     mvb {proc_flags,y}, #PROC_BABY
 
     ldx pid
     phx
     jsr machdep_fork
     plx     ; Parent's ID.
-    bcs e
-
-    cpx pid ; Real ID.
+    php
+    cpx pid
     bne child
-    jsr update_forked_data
+    plp
+    bcs out_of_memory
 
-r:  tya
+    ; Remove procdata banks of parent
+    ; from child's bookkeeping (lbanks).
+    jsr unref_proc_lbanks
+
+    ; Increment GLFN references as the
+    ; LFNs are cloned already.
+    jsr increment_glfn_refs
+
+    tya
     clc
     rts
 
-e:  cpx pid ; Real ID.
-    bne child
+    ; Error in machdep_fork(). Resources
+    ; have been freed, so just remove
+    ; the slot from the running list.
+out_of_memory:
     dmove_y procs, procsb, running, free_proc
     mvb {proc_flags,y}, 0
 
@@ -1784,10 +1781,13 @@ no_more_procs:
     rts
 
 child:
+    plp
+
     ; Map in rest of child's banks for
     ; the first time.  RAM123, BLK1 and
     ; BLK2 will be mapped in by
-    ; tunix_leave().
+    ; tunix_leave() because of process
+    ; status PROC_BABY.
     mvb ram123, {proc_data,y}
     mvb io23, {proc_io23,y}
     mvb blk3, {proc_blk3,y}
@@ -1820,22 +1820,22 @@ already_sleeping:
 .export resume
 .proc resume
     lda proc_flags,x
-    bpl not_to_resume
+    bpl not_sleeping
     mv_sleeping_running_x
     mvb {proc_flags,x}, #PROC_RUNNING
     clc
     rts
-not_to_resume:
+not_sleeping:
     sec
     rts
 .endproc
 
 .proc proc_free_resources
     phx
-    enter_context_x
+    enter_procdata_x
     jsr free_lfns
     jsr free_lbanks
-    leave_context
+    leave_procdata
     ;jsr free_iopages
     ;jsr free_drivers
     plx
@@ -2826,6 +2826,7 @@ write_byte:
     sta col
     sta banks_ok
     sta banks_faulty
+    sta free_bank
     mvb bnk, #FIRST_BANK
 
 start_bank_read:
@@ -2990,18 +2991,18 @@ clr_lbanksb:
     sta free_wait
     sta free_iopage
     sta free_drv
+    mvb free_bank, #FIRST_BANK
     rts
 .endproc
 
 .export make_proc0
 .proc make_proc0
-    ;;; Make init process 0.
     print txt_starting_multitasking
     inc multitasking
-    ;; Make holograhic process to fork.
+    ;; Make holograhic process.
     ; Unlink from free list.
-    mvb procs, #0 ; (Running alone.)
-    ; Fill in banks for process 0.
+    mvb procs, #0
+    ; Copy bank config to process #1.
     mvb proc_ram123+1, ram123
     sta proc_data+1
     mvb proc_io23+1, io23
@@ -3012,13 +3013,11 @@ clr_lbanksb:
     mvb proc_blk3+1, blk3
     mvb proc_blk5+1, blk5
 
-    ;; Fork process 0.
-    inc pid
+    inc pid ; (Copy from process #1.)
     jsry machdep_fork, #0
     dec pid
 
-    ; Move old BLK1 with new procdata
-    ; to new.
+    ; Copy kernel to new banks.
     push blk3
     push blk5
     mvb blk3, blk1
@@ -3055,10 +3054,10 @@ clr_lbanksb:
 .proc register_syscall_driver
     print txt_starting_syscalls
     smemcpyax vec_backup_kernal
-    mvw old_load, old_kernal_vectors + IDX_LOAD
-    mvw old_save, old_kernal_vectors + IDX_SAVE
-    stwi old_kernal_vectors + IDX_LOAD, kernal_load
-    stwi old_kernal_vectors + IDX_SAVE, kernal_save
+    mvw old_load, old_kernal_vectors+IDX_LOAD
+    mvw old_save, old_kernal_vectors+IDX_SAVE
+    stwi old_kernal_vectors+IDX_LOAD, kernal_load
+    stwi old_kernal_vectors+IDX_SAVE, kernal_save
     smemcpyax vec_tunix_kernal ; Replace
 
     ;; Make devices default to KERNAL.
@@ -3093,9 +3092,10 @@ clr_lbanksb:
     jmp proc0
 
 :   jsr lib_proc_list
+    jsr lib_proc_info
 
     ; Welcome messages with free RAM.
-:   ldayi txt_welcome
+    ldayi txt_welcome
     jsr PRTSTR
     ldaxi banks
     jsry list_length, free_bank

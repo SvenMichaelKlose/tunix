@@ -134,6 +134,8 @@ test_fork (char nprocs)
         tunix_mode (1);
     }
     printf ("\n");
+    tunix_proc_info (tunix_getpid ());
+    tunix_mem_info ();
 
 #if ALLOC_AROUND_FORK
     nbanks_b = test_alloc0 (4);
@@ -151,7 +153,6 @@ test_fork (char nprocs)
     }
     printf ("## %d children done.\n",
             nprocs);
-    tunix_mem_info ();
 #endif
 }
 

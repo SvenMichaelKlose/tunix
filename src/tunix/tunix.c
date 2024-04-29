@@ -19,6 +19,14 @@ struct bank {
 };
 struct bank banks[MAX_BANK];
 
+struct driver {
+    driverid_t  next;
+    driverid_t  prev;
+    procid_t    pid;
+    void *      vectors[32];
+};
+struct driver drivers[MAX_DRIVER];
+
 struct proc {
     uchar     flags;
     procid_t  next;
@@ -32,6 +40,8 @@ struct proc {
     struct bank  lbanks[MAX_BANK];
     struct fn    lfns[MAX_FN];
     fn_t         lfn_glfn[MAX_FN];
+    driverid_t   devices[MAX_DEV];
+    
 } procs[MAX_PROCS];
 procid_t pid;
 procid_t running;

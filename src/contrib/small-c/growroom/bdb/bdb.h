@@ -12,34 +12,52 @@ typedef struct _bnode {
     char    data[1];
 } bnode;
 
-#ifdef CACHE
+typedef struct _cnode cnode;
 typedef struct _cnode {
+    // Offset on secondary storage.
     dbid_t  id;
-    // Deque
+    size_t  size;
+    #define CNODE_HAS_BNODE     1
+    char    flags;
+
+    // LRU deque
     cnode   *next;
     cnode   *prev;
-    cnode   *knext;
-    cnode   *kprev;
-    cnode   *inext;
-    cnode   *iprev;
-    char    data[1];
-} cnode;
 
-cnode * cnode_root;
-#endif // #ifdef CACHE
+    // Key b-tree
+    cnode   *kleft;
+    cnode   *kright;
+
+    // ID b-tree
+    cnode   *ileft;
+    cnode   *iright;
+
+    // malloc()'ed data
+    void    *data;
+} cnode;
 
 typedef struct _bdb bdb;
 typedef struct _bdb {
     dbid_t next_free;
-    int (*compare)  (bdb *db, void *rec, void *key);
-    int (*read)     (bdb *db, dbid_t ofs, void *r, size_t size);
-    int (*write)    (bdb *db, dbid_t ofs, void *r, size_t size);
+
+    // Compare key in 'rec' to 'key'.
+    // Return 0: match, < 0; "less than", > 0 "greater than"
+    // (Use strcmp()/strncmp() on string keys.)
+    int  (*compare)  (bdb *db, void *rec, void *key);
+
+    // Plain read from storage.
+    int  (*read)     (bdb *db, dbid_t ofs, void *rec, size_t size);
+
+    // Plain write to storage.
+    int  (*write)    (bdb *db, dbid_t ofs, void *rec, size_t size);
+
+    // Return key in record.
+    void *(*data2key) (void *rec);
 } bdb;
 
 dbid_t  bdb_alloc (bdb *db, void *data, size_t size);
-void *  bdb_map (bdb *db, int id);
-int     bdb_add (bdb *db, void *key, void *data, size_t size);
-dbid_t  bdb_find (bdb *db, void *key);
-int     bdb_remove (bdb *db, dbid_t id);
+void *  bdb_map   (bdb *db, int id);
+dbid_t  bdb_add   (bdb *db, void *key, void *data, size_t size);
+dbid_t  bdb_find  (bdb *db, void *key);
 
 #endif // #ifndef __BDB_H__

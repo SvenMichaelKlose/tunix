@@ -42,10 +42,15 @@ storage.  The bits of an ID are reversed
 in order to generate a key that forces
 the btree to be balanced.
 The downside of the b-tree cache is its
-demand for memory (16 bytes per record).
+additional demand for memory for each
+node.
 
 # Brute search cache
 
-This one scans through the LRU list with
-no index and very useful if the number
-of records in memory is low on average.
+The API often does a b-tree search for
+a key, followed by a look-up by ID,
+which is also a b-tree search.  A brute
+force searcu through the first,
+most-recently used records makes up for
+that, allowing the database code to be
+much cleaner.

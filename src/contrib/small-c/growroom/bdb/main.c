@@ -24,6 +24,13 @@ symdb_compare (bdb *db, void *rec, void *key)
     return strcmp (s->name, key);
 }
 
+void *
+symdb_data2key (void *rec)
+{
+    symbol *s = rec;
+    return &s->name;
+}
+
 FILE * storage = NULL;
 
 int
@@ -75,6 +82,7 @@ symdb_init (void)
     symdb.read    = symdb_read;
     symdb.write   = symdb_write;
     symdb.compare = symdb_compare;
+    symdb.data2key = symdb_data2key;
 }
 
 ///////////

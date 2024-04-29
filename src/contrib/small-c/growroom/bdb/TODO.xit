@@ -1,0 +1,9 @@
+[@] Debug what's there.
+[@] Tests, tests, tests.
+[ ] B-tree node removal
+[ ] Primary cache searching head of LRU list.
+
+Ideas
+[ ] Cache flush for file reuse.
+[ ] Limit cache to 255 records, held in array,
+    for byte links.

@@ -15,11 +15,8 @@ bdb_add (bdb *db, void *key, void *data, size_t size)
     dbid_t id = storage_alloc_id (db, size);
 
     // Add record to cache.
-    cnode *cn = cache_alloc (db, id, data, size);
-
-    // Index cached record.
-    cache_insert_key (db, cn);
-    cache_insert_id (db, cn);
+    if (!cache_alloc (db, id, data, size))
+        perror ("bdb_add(): Cannot allocate storage.");
 
     return id;
 }
@@ -42,7 +39,7 @@ bdb_map (bdb *db, int id)
     cnode *cn = cache_find_id (db, id);
     if (!cn)
         // Not found.  Fetch from storage.
-        cn = cache_add_storage (db, id);
+        cn = cache_add_stored (db, id);
     else
         // Found.  Make it the most-recently used.
         cache_make_mru (db, cn);

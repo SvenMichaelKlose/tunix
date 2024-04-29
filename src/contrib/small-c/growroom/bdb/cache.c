@@ -31,6 +31,7 @@ cache_pop_lru (bdb *db)
     return cn;
 }
 
+// Remove from LRU list.
 void
 cache_remove_lru (bdb *db, cnode *cn)
 {
@@ -44,6 +45,7 @@ cache_remove_lru (bdb *db, cnode *cn)
         db->cache_last = cn->prev;
 }
 
+// Move to front of LRU list (most-recent).
 void
 cache_make_mru (bdb *db, cnode *cn)
 {
@@ -59,6 +61,7 @@ cache_idhash (dbid_t id)
     return id;
 }
 
+// Insert node into ID index.
 void
 cache_insert_id (bdb *db, cnode *cn)
 {
@@ -85,6 +88,7 @@ cache_insert_id (bdb *db, cnode *cn)
     }
 }
 
+// Insert node into key index.
 void
 cache_insert_key (bdb *db, cnode *cn)
 {
@@ -111,6 +115,7 @@ cache_insert_key (bdb *db, cnode *cn)
     }
 }
 
+// Find by ID.
 cnode *
 cache_find_id (bdb *db, dbid_t id)
 {
@@ -131,6 +136,7 @@ cache_find_id (bdb *db, dbid_t id)
     }
 }
 
+// Find by key.
 cnode *
 cache_find_key (bdb *db, void *key)
 {
@@ -151,6 +157,7 @@ cache_find_key (bdb *db, void *key)
     }
 }
 
+// Remove from cache.
 void
 cache_remove (bdb *db, cnode *cn)
 {
@@ -160,6 +167,7 @@ cache_remove (bdb *db, cnode *cn)
     free (cn);
 }
 
+// Allocate cnode for existing record.
 cnode *
 cache_alloc (bdb *db, dbid_t id, void *data, size_t size)
 {
@@ -171,7 +179,7 @@ cache_alloc (bdb *db, dbid_t id, void *data, size_t size)
         cn = cache_pop_lru (db);
 
         // Insert into b-tree if new on storage.
-        if (!(cn->flags & CNODE_HAS_BNODE))
+        if (!(cn->flags & HAS_STORAGE))
             storage_insert_key (db, db->data2key (cn->data), cn->id);
 
         // Init/update record data.
@@ -199,9 +207,8 @@ cache_alloc (bdb *db, dbid_t id, void *data, size_t size)
     return cn;
 }
 
-
 cnode *
-cache_add_storage (bdb *db, dbid_t id)
+cache_add_stored (bdb *db, dbid_t id)
 {
     snode  *bn;
     cnode  *cn;

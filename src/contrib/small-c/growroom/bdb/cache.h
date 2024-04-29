@@ -6,8 +6,10 @@ typedef struct _cnode {
     // Offset on secondary storage.
     dbid_t  id;
     size_t  size;
-    #define CNODE_HAS_BNODE     1
     char    flags;
+    // Indicate that record is stored.
+    #define HAS_STORAGE     1
+    #define IS_LOCKED       128 // TODO: bdb_lock()
 
     // LRU deque
     cnode   *next;
@@ -30,7 +32,7 @@ extern void    cache_insert_id   (bdb *, cnode *);
 extern void    cache_insert_key  (bdb *, cnode *);
 extern cnode * cache_find_id     (bdb *, dbid_t);
 extern cnode * cache_find_key    (bdb *, void *key);
-extern cnode * cache_add_storage (bdb *, dbid_t);
+extern cnode * cache_add_stored  (bdb *, dbid_t);
 extern void    cache_make_mru    (bdb *, cnode *);
 
 /*

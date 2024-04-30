@@ -2004,8 +2004,10 @@ reap_zombie:
 ; A: Exit code
 .export exit
 .proc exit
-    mvb multitasking, #1
-    jsrx zombify, pid
+    ldx pid
+    sta exit_codes,x
+    jsr zombify
+    ; (jmp resume_waiting)
 .endproc
 
 ; Resume waiting process
@@ -2812,8 +2814,8 @@ col:            .res 1
 
     .segment "KERNEL"
 
-.export init_ultimem
-.proc init_ultimem
+.export init_banks
+.proc init_banks
     ; Unhide UltiMem registers
     lda $9f55
     lda $9faa
@@ -3044,7 +3046,11 @@ clr_lbanksb:
     jsry machdep_fork, #0
     dec pid
 
-    ; Copy kernel to new banks.
+    ; Copy kernel (BLK1+BLK2) to new
+    ; banks again to preserve
+    ; bookkeeping of machdep_fork().
+    ; No need to narrow it down to
+    ; particular areas and more robust.
     push blk3
     push blk5
     mvb blk3, blk1
@@ -3060,16 +3066,20 @@ clr_lbanksb:
     pop blk5
     pop blk3
 
-    ; Continue with forked banks.
+    ; Map in forked banks.
     mvb blk1, proc_blk1
     mvb blk2, proc_blk2
-    mvb proc_flags, #PROC_RUNNING
     mvb io23, proc_io23
-    mvb tunix_blk1, proc_blk1
-    mvb tunix_blk2, proc_blk2
     mvb ram123, proc_data
     mvb blk3, proc_blk3
     mvb blk5, proc_blk5
+
+    ; Memorize kernel banks for I/O.
+    mvb tunix_blk1, proc_blk1
+    mvb tunix_blk2, proc_blk2
+
+    ; Now have a running process 0.
+    mvb proc_flags, #PROC_RUNNING
 
     ; Remove lbank entries forever.
     sbzeroax clr_lbanks
@@ -3077,8 +3087,8 @@ clr_lbanksb:
     rts
 .endproc
 
-.export register_syscall_driver
-.proc register_syscall_driver
+.export init_syscalls
+.proc init_syscalls
     print txt_starting_syscalls
     smemcpyax vec_backup_kernal
     mvw old_load, old_kernal_vectors+IDX_LOAD
@@ -3099,20 +3109,42 @@ clr_lbanksb:
 
 .export boot
 .proc boot
+    ; Set default KERNAL vectors.
     jsr FRESTOR
+
+    ; Say hello.
     print txt_tunix
+
+    ; Copy code to IO23 bank.
     smemcpyax vec_localcode_reloc
+
+    ; Clear all uninitialized data.
     jsr clear_bss_segments
+
+    ; Make linked lists and deques.
     jsr init_data
-    jsr init_ultimem
+
+    ; Test Ultimem and make bank lists.
+    jsr init_banks
+
+    ; Generate unrolled copy code doing
+    ; BLK3 to BLK5 and internal RAM and
+    ; VIC to BLK5.  Required to fork()
+    ; and switch().
     jsr gen_speedcodes
+
+    ; Make init process of ID 0.
     jsr make_proc0
-    jsr register_syscall_driver
+
+    ; Take over KERNAL I/O vectors and
+    ; register syscall device #31.
+    jsr init_syscalls
+
 .ifdef EARLY_TESTS
     jsr tests
 .endif ; .ifdef EARLY_TESTS
 
-    print txt_init
+    ; Make new process to run BASIC.
     jsr lib_fork
     cmp #0
     beq :+
@@ -3135,7 +3167,7 @@ clr_lbanksb:
 .ifdef START_INIT
     jsr start_init
 .endif
-    ;jmp get_ready
+    ; (jmp get_ready)
 .endproc
 
 .export get_ready
@@ -3146,9 +3178,9 @@ clr_lbanksb:
     jmp READY
 .endproc
 
+; BASIC cold start.
 .export basic_cold_init
 .proc basic_cold_init
-    ;; BASIC cold start.
     ldayi $e437
     jsr PRTSTR
     jsr INITVCTRS
@@ -3190,8 +3222,6 @@ txt_starting_multitasking:
   .byte "STARTING MULTITASKING.", 13, 0
 txt_starting_syscalls:
   .byte "STARTING SYSCALLS.", 13, 0
-txt_init:
-  .byte "STARTING INIT.", 13, 0
 
 tunix_vectors:
 .word open, close, chkin, ckout, clrchn
@@ -3789,6 +3819,8 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
     ; Move it back to free procs.
 :   drm_x procs, procsb, running
     dpush_x procs, procsb, free_proc
+
+.if 0
     jsr clear_lbanks
     ldx #1
     alloc_lbank_x
@@ -3843,6 +3875,7 @@ FREE_BANKS_AFTER_INIT = MAX_BANKS - FIRST_BANK - 7 - 7 - 3
 :   lda first_lbank
     beq :+
     error err_first_lbank_not_0
+.endif
 
 :   rts
 .endproc

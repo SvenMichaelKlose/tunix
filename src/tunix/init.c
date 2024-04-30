@@ -198,14 +198,14 @@ fnord (void)
     tunix_wait (cid);
     tunix_proc_info (tunix_getpid ());
 
-    while (1);
+    getchar ();
     tunix_exit (0);
 }
 
 void
 main (void)
 {
-fnord ();
+//fnord ();
     printf ("Doing userland tests\n");
     printf ("Initial process list:\n");
     tunix_proc_list ();

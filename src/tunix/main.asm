@@ -330,6 +330,9 @@ flags:          .res 1
 stack:          .res 1
 saved_vic:      .res 16
 
+;; Syscall driver responses
+is_fresh_line:  .res 1
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Additional local bank ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1087,6 +1090,8 @@ r:  plx
 .export print_cr
 .proc print_cr
     phx
+    lda #1
+    sta is_fresh_line
     jsra BSOUT, #13
     plx
     rts
@@ -1095,10 +1100,25 @@ r:  plx
 .export print_comma
 .proc print_comma
     phx
+    lda is_fresh_line
+    bne :+
     jsra BSOUT, #','
+:   lda #0
+    sta is_fresh_line
     plx
     rts
 .endproc
+
+.macro print_start_headers first
+    pushw zp2
+    stwi zp2, first
+    lda #1
+    sta is_fresh_line
+.endmacro
+
+.macro print_end_headers
+    popw zp2
+.endmacro
 
 .export outa
 .proc outa
@@ -1190,7 +1210,7 @@ r:  plx
     sta tmp1
     pushw zp2
     phx
-    jsra BSOUT, #','
+    jsr print_comma
     jsra print_hexbyte, tmp1
     plx
     popw zp2
@@ -1204,7 +1224,7 @@ r:  plx
     sta tmp1
     pushw zp2
     phx
-    jsra BSOUT, #','
+    jsr print_comma
     jsra print_decbyte, tmp1
     plx
     popw zp2
@@ -1219,8 +1239,8 @@ r:  plx
 
 ; Print string at zp2 and step over the
 ; terminating 0.
-.export print_head
-.proc print_head
+.export print_header
+.proc print_header
     phx
     jsr printstr
     incw zp2
@@ -1240,6 +1260,17 @@ r:  plx
     jsr print_cr
 :
 .endmacro
+
+.export print_header_list
+.proc print_header_list
+:   ldy #0
+    lda (zp2),y
+    beq r
+    jsr print_header
+    jsr print_comma
+    jmp :-
+r:  jmp print_cr
+.endproc
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EXTENDED MEMORY ;;;
@@ -1330,16 +1361,15 @@ items_mem_info:
 
 .export mem_info
 .proc mem_info
-    pushw zp2
-    stwi zp2, items_mem_info
+    print_start_headers items_mem_info
 
-    jsr print_head
+    jsr print_header
     ldaxi banks
     jsry list_length, free_bank
     txa
     jsr print_cvcr
 
-    jsr print_head
+    jsr print_header
     ldaxi banks
     jsry list_length, free_bank
     stx tmp1
@@ -1348,23 +1378,23 @@ items_mem_info:
     sbc tmp1
     jsr print_cvcr
 
-    jsr print_head
+    jsr print_header
     ldax #FIRST_BANK
     jsr print_cvcr
 
-    jsr print_head
+    jsr print_header
     ldax banks_faulty
     jsr print_cvcr
 
     ; Total
-    jsr print_head
+    jsr print_header
     lda banks_ok
     clc
     adc #FIRST_BANK
     ldx #0
     jsr print_cvcr
 
-    popw zp2
+    print_end_headers
     clc
     rts
 no_proc:
@@ -2011,6 +2041,26 @@ invalid_pid:
 
     .segment "KERNEL"
 
+; YA: list
+.export _print_procdatax_list_length
+.proc _print_procdatax_list_length
+    jsr print_comma
+    enter_procdata_x
+    ldaxi lfns
+    jsry list_length, first_lfn
+    leave_procdata
+    txa
+    jmp print_decbyte
+.endproc
+
+.macro print_procdatax_list_length list, first
+    phx
+    mvw tmp1, list
+    mvb tmp2, first
+    jsr _print_procdatax_list_length
+    plx
+.endmacro
+
 .export proc_list_item
 .proc proc_list_item
     phx
@@ -2041,35 +2091,9 @@ prt:tya
     jsr BSOUT
     plx
 
-    phx
-    jsr print_comma
-    enter_procdata_x
-    ldaxi lbanks
-    jsry list_length, first_lbank
-    leave_procdata
-    txa
-    jsr print_decbyte
-    plx
-
-    phx
-    jsr print_comma
-    enter_procdata_x
-    ldaxi lfns
-    jsry list_length, first_lfn
-    leave_procdata
-    txa
-    jsr print_decbyte
-    plx
-
-    phx
-    jsr print_comma
-    enter_procdata_x
-    ldaxi waiting
-    jsry list_length, first_waiting
-    leave_procdata
-    txa
-    jsr print_decbyte
-    plx
+    print_procdatax_list_length lbanks,  first_lbank
+    print_procdatax_list_length lfns,    first_lfn
+    print_procdatax_list_length waiting, first_waiting
 
     phx
     jsr print_comma
@@ -2092,46 +2116,31 @@ items_proc_list:
 
     .segment "KERNEL"
 
+.export proc_list_items
+.proc proc_list_items
+    txa ; (cpx #0)
+    beq r
+l:  jsr proc_list_item
+    lloop_x procs, l
+r:  rts
+.endproc
+
 ; Print process list
 ; X: process ID
 .export proc_list
 .proc proc_list
-    pushw zp2
-    stwi zp2, items_proc_list
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_comma
-    jsr print_head
-    jsr print_cr
+    print_start_headers items_proc_list
+    jsr print_header_list
 
     ldx running
-    beq :+
-l1: jsr proc_list_item
-    lloop_x procs, l1
-:
-
+    jsr proc_list_items
     ldx sleeping
-    beq :+
-l2: jsr proc_list_item
-    lloop_x procs, l2
-:
-
+    jsr proc_list_items
     ldx zombie
-    beq :+
-l3: jsr proc_list_item
-    lloop_x procs, l3
-:
-
+    jsr proc_list_items
     jsrx proc_list_item, #0
 
-    popw zp2
+    print_end_headers
     clc
     rts
 .endproc
@@ -2149,22 +2158,25 @@ items_proc_info:
 ; X: process ID
 .export proc_info
 .proc proc_info
+    ; Skip invalid PIDs.
     lda proc_flags,x
     bne :+
     jmp no_proc
 
+    ; Init header printing.
 :   stx tmp2
-    pushw zp2
-    stwi zp2, items_proc_info
+    print_start_headers items_proc_info
 
-    jsr print_head
+    ; Print process ID.
+    jsr print_header
     lda tmp2
     tax
     jsr print_cvcr
 
-    jsr print_head
-    jsra print_chb, {proc_data,x}
+    ; Line up memory banks.
+    jsr print_header
     jsra print_chb, {proc_io23,x}
+    jsra print_chb, {proc_data,x}
     jsra print_chb, {proc_ram123,x}
     jsra print_chb, {proc_blk1,x}
     jsra print_chb, {proc_blk2,x}
@@ -2172,16 +2184,18 @@ items_proc_info:
     jsra print_chb, {proc_blk5,x}
     jsr print_cr
 
-    jsr print_head
+    ; Print list of LFNs.
+    jsr print_header
     print_csv lfns, first_lfn
 
-    jsr print_head
+    ; Print list of extended memory banks.
+    jsr print_header
     ldaxi lbanks
     jsry list_length, first_lbank
     txa
     jsr print_cvcr
 
-    popw zp2
+    print_end_headers
     clc
     rts
 no_proc:

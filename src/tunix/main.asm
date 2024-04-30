@@ -202,9 +202,9 @@ zp2:    .res 2
 .export banks, free_bank
 .export bank_refs, iopages, iopagesb
 .export free_iopage, first_iopage
-.export iopage_pid, iopage_page, glfns
-.export glfn_dev
-.export glfn_refs, glfn_drv, procs
+.export iopage_pid, iopage_page, gfns
+.export gfn_dev
+.export gfn_refs, gfn_drv, procs
 .export procsb, free_proc, running
 .export sleeping, zombie, proc_flags
 .export exit_codes, proc_ram123
@@ -249,13 +249,13 @@ iopage_page:    .res MAX_IOPAGES + 1
 ;;; Global logical file numbers
 ;;; Shared by fork()ed processes.
 ;; Free list
-glfns:          .res MAX_LFNS
-glfn_refs:      .res MAX_LFNS
-free_glfn:      .res 1
+gfns:          .res MAX_LFNS
+gfn_refs:      .res MAX_LFNS
+free_gfn:      .res 1
 ;; Last parameters to OPEN.
-glfn_drv:       .res MAX_LFNS
-glfn_dev:       .res MAX_LFNS
-glfn_sa:        .res MAX_LFNS
+gfn_drv:       .res MAX_LFNS
+gfn_dev:       .res MAX_LFNS
+gfn_sa:        .res MAX_LFNS
 
 ;;; Processes
 procs:          .res MAX_PROCS
@@ -308,7 +308,7 @@ old_kernal_vectors:
 .export tunix_blk1
 .export tunix_blk2, lbanks, lbanksb
 .export first_lbank, lfns, lfnsb
-.export lfn_glfn, first_lfn, waiting
+.export lfn_gfn, first_lfn, waiting
 .export waitingb, waiting_pid, free_wait
 .export first_waiting, pid, reg_a, reg_x
 .export reg_y, stack, flags, saved_vic
@@ -355,7 +355,7 @@ first_waiting:  .res 1
 lfns:           .res MAX_LFNS
 lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
-lfn_glfn:       .res MAX_LFNS
+lfn_gfn:       .res MAX_LFNS
 
 .ifdef BLEEDING_EDGE
 
@@ -1655,36 +1655,49 @@ out_of_memory:
 
     .segment "KERNEL"
 
-; Translate local to global LFN.
+; Translate LFN to GFN.
 ; Creates missing ones.
-; X: LFN
-.export lfn_to_glfn
-.proc lfn_to_glfn
+; A: LFN
+.export lfn_to_gfn
+.proc lfn_to_gfn
     tax
-    lda lfn_glfn,x
-    bne :+  ; Use existing...
+
+    ; Use existing...
+    lda lfn_gfn,x
+    bne :+
+
     ; Get LFN slot.
     lpush_x lfns, first_lfn
-    ; Allocate GLFN.
+
+    ; Allocate GFN.
     phx
-    lpop_x glfns, free_glfn
-    inc glfn_refs,x
-    ; Link GLFN to LFN.
+    lpop_x gfns, free_gfn
+    inc gfn_refs,x
+
+    ; Link GFN to LFN.
     stx tmp1
     plx
-    mvb {lfn_glfn,x}, tmp1
+    mvb {lfn_gfn,x}, tmp1
+
 :   rts
 .endproc
 
 ;; Free all LFNs of the current process.
 .export free_lfns
 .proc free_lfns
+    ; Get first.
     ldy first_lfn
     beq r
-:   ldx lfn_glfn,y
-    dec glfn_refs,x
+
+    ; Decrement GFN ref count.
+:   ldx lfn_gfn,y
+    dec gfn_refs,x
+
+    ; Free GFN if unreferenced.
     bne :+  ; (Still used.)
-    lpush_x glfns, free_glfn
+    lpush_x gfns, free_gfn
+
+    ; Jump to next.
 :   lloop_y lfns, :--
 r:  rts
 .endproc
@@ -1724,11 +1737,11 @@ r:  rts
     rts
 .endproc
 
-.export increment_glfn_refs
-.proc increment_glfn_refs
+.export increment_gfn_refs
+.proc increment_gfn_refs
     ldx first_lfn
     beq :++
-:   inc glfn_refs,x
+:   inc gfn_refs,x
     lloop_x lfns, :-
 :   rts
 .endproc
@@ -1760,9 +1773,9 @@ r:  rts
     ; from child's bookkeeping (lbanks).
     jsr unref_proc_lbanks
 
-    ; Increment GLFN references as the
+    ; Increment GFN references as the
     ; LFNs are cloned already.
-    jsr increment_glfn_refs
+    jsr increment_gfn_refs
 
     tya
     clc
@@ -2969,7 +2982,7 @@ clr_lbanksb:
 :   txa
     clc
     adc #1
-    sta glfns,x
+    sta gfns,x
     sta lfns,x
     cpx #MAX_PROCS - 1
     bcs :+
@@ -2986,7 +2999,7 @@ clr_lbanksb:
     bne @l
     ;; Finish up.
     lda #1
-    sta free_glfn
+    sta free_gfn
     sta free_proc
     sta free_wait
     sta free_iopage
@@ -3181,9 +3194,9 @@ tunix_vectors:
 
     .segment "KERNEL"
 
-.export call_glfn_driver
-.proc call_glfn_driver
-    ldy glfn_drv,x
+.export call_gfn_driver
+.proc call_gfn_driver
+    ldy gfn_drv,x
 .endproc
 
 ; Call driver
@@ -3221,13 +3234,13 @@ h:  lda $ffff
 .proc open2
     stwi FNADR, filename
     push LFN
-    jsr lfn_to_glfn
+    jsr lfn_to_gfn
     sta LFN
     tax
-    mvb {glfn_sa,x}, SA
-    mvb {glfn_dev,x}, DEV
+    mvb {gfn_sa,x}, SA
+    mvb {gfn_dev,x}, DEV
     tay
-    mvb {glfn_drv,x}, {dev_drv,y}
+    mvb {gfn_drv,x}, {dev_drv,y}
     tay
     jsra call_driver, #IDX_OPEN
     pop LFN
@@ -3238,11 +3251,11 @@ h:  lda $ffff
 .export chkin2
 .proc chkin2
     ldx reg_x
-    lda lfn_glfn,x
+    lda lfn_gfn,x
     beq :+
     tax
-    mvb SA, {glfn_sa,x}
-    mvb DFLTN, {glfn_dev,x}
+    mvb SA, {gfn_sa,x}
+    mvb DFLTN, {gfn_dev,x}
     clc
     bcc :++
 :   sec
@@ -3255,11 +3268,11 @@ h:  lda $ffff
 .export ckout2
 .proc ckout2
     ldx reg_x
-    lda lfn_glfn,x
+    lda lfn_gfn,x
     beq :+
     tax
-    mvb SA, {glfn_sa,x}
-    mvb DFLTO, {glfn_dev,x}
+    mvb SA, {gfn_sa,x}
+    mvb DFLTO, {gfn_dev,x}
     clc
     bcc :++
 :   sec
@@ -3287,14 +3300,14 @@ iohandler bkout2, DFLTO, IDX_BKOUT
 
 .export close2
 .proc close2
-    jsr lfn_to_glfn
+    jsr lfn_to_gfn
     sta reg_a
-    mvb SA, {glfn_sa,x}
-    ldy glfn_drv,x
-    mvb {glfn_drv,x}, #0
+    mvb SA, {gfn_sa,x}
+    ldy gfn_drv,x
+    mvb {gfn_drv,x}, #0
     tya
     tax
-    jsra call_glfn_driver, #IDX_CLOSE
+    jsra call_gfn_driver, #IDX_CLOSE
     jmp tunix_leave
 .endproc
 
@@ -3647,8 +3660,8 @@ err_free_banks_after_init:
 err_free_banks_after_free:
   .byte "WRONG # OF BANKS AFTER "
   .byte "FREEING ONE AGAIN.", 0
-err_wrong_glfn_order:
-  .byte "WRONG GLFN ORDER.", 0
+err_wrong_gfn_order:
+  .byte "WRONG GFN ORDER.", 0
 err_wrong_deque_index:
   .byte "UNEXPECTED DEQUE INDEX OF "
   .byte "FIRST ALLOCATED ONE.", 0

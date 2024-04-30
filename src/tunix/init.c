@@ -173,8 +173,39 @@ test_forks (char maxprocs)
 }
 
 void
+fnord (void)
+{
+    char cid;
+    tunix_mode (1);
+    tunix_proc_info (tunix_getpid ());
+
+    cid = tunix_fork ();
+    if (!cid) {
+        tunix_proc_info (tunix_getpid ());
+        getchar ();
+        tunix_exit (0);
+    }
+    tunix_proc_info (tunix_getpid ());
+    tunix_wait (cid);
+    tunix_proc_info (tunix_getpid ());
+
+    cid = tunix_fork ();
+    if (!cid) {
+        tunix_proc_info (tunix_getpid ());
+        tunix_exit (0);
+    }
+    tunix_proc_info (tunix_getpid ());
+    tunix_wait (cid);
+    tunix_proc_info (tunix_getpid ());
+
+    while (1);
+    tunix_exit (0);
+}
+
+void
 main (void)
 {
+fnord ();
     printf ("Doing userland tests\n");
     printf ("Initial process list:\n");
     tunix_proc_list ();

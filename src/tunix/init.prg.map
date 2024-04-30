@@ -1,16 +1,16 @@
 Modules list:
 -------------
 init.o:
-    CODE              Offs=000000  Size=0003A5  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=00040E  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=0001C7  Align=00001  Fill=0000
     BSS               Offs=000000  Size=000120  Align=00001  Fill=0000
 ../lib/tunix/libtunix.a(main.o):
-    CODE              Offs=0003A5  Size=00013C  Align=00001  Fill=0000
+    CODE              Offs=00040E  Size=00013C  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000020  Align=00001  Fill=0000
 ../lib/tunix/libtunix.a(c-wrappers.o):
-    CODE              Offs=0004E1  Size=000006  Align=00001  Fill=0000
+    CODE              Offs=00054A  Size=000006  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_directerrno.o):
-    CODE              Offs=0004E7  Size=00000A  Align=00001  Fill=0000
+    CODE              Offs=000550  Size=00000A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_file.o):
     DATA              Offs=000020  Size=00001E  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_hextab.o):
@@ -18,24 +18,26 @@ init.o:
 /usr/local/share/cc65/lib/vic20.lib(_longminstr.o):
     RODATA            Offs=0001D7  Size=00000C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_mappederrno.o):
-    CODE              Offs=0004F1  Size=000010  Align=00001  Fill=0000
+    CODE              Offs=00055A  Size=000010  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_oserror.o):
     BSS               Offs=000120  Size=000001  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_printf.o):
-    CODE              Offs=000501  Size=0003A2  Align=00001  Fill=0000
+    CODE              Offs=00056A  Size=0003A2  Align=00001  Fill=0000
     BSS               Offs=000121  Size=00002B  Align=00001  Fill=0000
     DATA              Offs=00003E  Size=000003  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(_seterrno.o):
-    CODE              Offs=0008A3  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=00090C  Size=000009  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(addysp.o):
-    CODE              Offs=0008AC  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000915  Size=00000E  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(axlong.o):
-    CODE              Offs=0008BA  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000923  Size=00000D  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(callmain.o):
-    CODE              Offs=0008C7  Size=000017  Align=00001  Fill=0000
+    CODE              Offs=000930  Size=000017  Align=00001  Fill=0000
     DATA              Offs=000041  Size=000004  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(checkferror.o):
+    CODE              Offs=000947  Size=00000C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(condes.o):
-    CODE              Offs=0008DE  Size=00000C  Align=00001  Fill=0000
+    CODE              Offs=000953  Size=00000C  Align=00001  Fill=0000
     DATA              Offs=000045  Size=000025  Align=00001  Fill=0000
     ONCE              Offs=000000  Size=00000C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(crt0.o):
@@ -45,94 +47,105 @@ init.o:
 /usr/local/share/cc65/lib/vic20.lib(ctype.o):
     RODATA            Offs=0001E3  Size=00008B  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(ctypemask.o):
-    CODE              Offs=0008EA  Size=00001E  Align=00001  Fill=0000
+    CODE              Offs=00095F  Size=00001E  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(decsp1.o):
-    CODE              Offs=000908  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=00097D  Size=000009  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(decsp2.o):
-    CODE              Offs=000911  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000986  Size=00000D  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(decsp3.o):
-    CODE              Offs=00091E  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=000993  Size=00000D  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(decsp4.o):
-    CODE              Offs=00092B  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=0009A0  Size=00000D  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(decsp6.o):
-    CODE              Offs=000938  Size=00000D  Align=00001  Fill=0000
+    CODE              Offs=0009AD  Size=00000D  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(errno.o):
     BSS               Offs=00014D  Size=000002  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(exehdr.o):
     EXEHDR            Offs=000000  Size=00000C  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(fgetc.o):
+    CODE              Offs=0009BA  Size=00005F  Align=00001  Fill=0000
+    BSS               Offs=00014F  Size=000001  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(filedes.o):
-    CODE              Offs=000945  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000A19  Size=00000E  Align=00001  Fill=0000
     DATA              Offs=00006A  Size=000010  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(fwrite.o):
-    CODE              Offs=000953  Size=000079  Align=00001  Fill=0000
-    BSS               Offs=00014F  Size=000002  Align=00001  Fill=0000
+    CODE              Offs=000A27  Size=000079  Align=00001  Fill=0000
+    BSS               Offs=000150  Size=000002  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(getchar.o):
+    CODE              Offs=000AA0  Size=000009  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(incax1.o):
-    CODE              Offs=0009CC  Size=000007  Align=00001  Fill=0000
+    CODE              Offs=000AA9  Size=000007  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(incsp2.o):
-    CODE              Offs=0009D3  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000AB0  Size=000016  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(incsp3.o):
-    CODE              Offs=0009E9  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000AC6  Size=000005  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(incsp4.o):
-    CODE              Offs=0009EE  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000ACB  Size=000005  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(incsp6.o):
-    CODE              Offs=0009F3  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000AD0  Size=000005  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(kernal.o):
 /usr/local/share/cc65/lib/vic20.lib(ldaxsp.o):
-    CODE              Offs=0009F8  Size=000009  Align=00001  Fill=0000
+    CODE              Offs=000AD5  Size=000009  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(lneg.o):
-    CODE              Offs=000A01  Size=00001E  Align=00001  Fill=0000
+    CODE              Offs=000ADE  Size=00001E  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(loadaddr.o):
     LOADADDR          Offs=000000  Size=000002  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(lpush.o):
-    CODE              Offs=000A1F  Size=000021  Align=00001  Fill=0000
+    CODE              Offs=000AFC  Size=000021  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(ltoa.o):
-    CODE              Offs=000A40  Size=000095  Align=00001  Fill=0000
+    CODE              Offs=000B1D  Size=000095  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(mod.o):
-    CODE              Offs=000AD5  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000BB2  Size=000011  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(mul.o):
-    CODE              Offs=000AE6  Size=000045  Align=00001  Fill=0000
+    CODE              Offs=000BC3  Size=000045  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(mul8.o):
-    CODE              Offs=000B2B  Size=00003A  Align=00001  Fill=0000
+    CODE              Offs=000C08  Size=00003A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(negabs.o):
-    CODE              Offs=000B65  Size=000012  Align=00001  Fill=0000
+    CODE              Offs=000C42  Size=000012  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(oserror.o):
-    CODE              Offs=000B77  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000C54  Size=000016  Align=00001  Fill=0000
     RODATA            Offs=00026E  Size=00005A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(popptr1.o):
-    CODE              Offs=000B8D  Size=00000E  Align=00001  Fill=0000
+    CODE              Offs=000C6A  Size=00000E  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(printf.o):
-    CODE              Offs=000B9B  Size=000033  Align=00001  Fill=0000
-    BSS               Offs=000151  Size=000001  Align=00001  Fill=0000
+    CODE              Offs=000C78  Size=000033  Align=00001  Fill=0000
+    BSS               Offs=000152  Size=000001  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(push1.o):
-    CODE              Offs=000BCE  Size=000005  Align=00001  Fill=0000
+    CODE              Offs=000CAB  Size=000005  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(pusha.o):
-    CODE              Offs=000BD3  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000CB0  Size=000016  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(pushax.o):
-    CODE              Offs=000BE9  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000CC6  Size=00001A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(pushwsp.o):
-    CODE              Offs=000C03  Size=00001C  Align=00001  Fill=0000
+    CODE              Offs=000CE0  Size=00001C  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(rand.o):
-    CODE              Offs=000C1F  Size=000034  Align=00001  Fill=0000
+    CODE              Offs=000CFC  Size=000034  Align=00001  Fill=0000
     DATA              Offs=00007A  Size=000004  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(read.o):
+    CODE              Offs=000D30  Size=00007C  Align=00001  Fill=0000
+    BSS               Offs=000153  Size=000001  Align=00001  Fill=0000
+    ONCE              Offs=00000C  Size=00000C  Align=00001  Fill=0000
+/usr/local/share/cc65/lib/vic20.lib(returnFFFF.o):
+    CODE              Offs=000DAC  Size=000004  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(rwcommon.o):
-    CODE              Offs=000C53  Size=00001A  Align=00001  Fill=0000
+    CODE              Offs=000DB0  Size=00001A  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(shelp.o):
-    CODE              Offs=000C6D  Size=000020  Align=00001  Fill=0000
+    CODE              Offs=000DCA  Size=000020  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(status.o):
 /usr/local/share/cc65/lib/vic20.lib(strlen.o):
-    CODE              Offs=000C8D  Size=000016  Align=00001  Fill=0000
+    CODE              Offs=000DEA  Size=000016  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(strlower.o):
-    CODE              Offs=000CA3  Size=000027  Align=00001  Fill=0000
+    CODE              Offs=000E00  Size=000027  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(udiv.o):
-    CODE              Offs=000CCA  Size=00004F  Align=00001  Fill=0000
+    CODE              Offs=000E27  Size=00004F  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(vfprintf.o):
-    CODE              Offs=000D19  Size=000061  Align=00001  Fill=0000
+    CODE              Offs=000E76  Size=000061  Align=00001  Fill=0000
     DATA              Offs=00007E  Size=000008  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(write.o):
-    CODE              Offs=000D7A  Size=000052  Align=00001  Fill=0000
-    ONCE              Offs=00000C  Size=000011  Align=00001  Fill=0000
+    CODE              Offs=000ED7  Size=000052  Align=00001  Fill=0000
+    ONCE              Offs=000018  Size=000011  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(zerobss.o):
-    CODE              Offs=000DCC  Size=000023  Align=00001  Fill=0000
+    CODE              Offs=000F29  Size=000023  Align=00001  Fill=0000
 /usr/local/share/cc65/lib/vic20.lib(zeropage.o):
     ZEROPAGE          Offs=000000  Size=00001A  Align=00001  Fill=0000
 
@@ -145,155 +158,176 @@ ZEROPAGE              000002  00001B  00001A  00001
 LOADADDR              0011FF  001200  000002  00001
 EXEHDR                001201  00120C  00000C  00001
 STARTUP               00120D  001246  00003A  00001
-ONCE                  001247  001265  00001F  00001
-CODE                  001266  002054  000DEF  00001
-RODATA                002055  00231C  0002C8  00001
-DATA                  00231D  0023A2  000086  00001
-INIT                  0023A3  0023BC  00001A  00001
-BSS                   0023BD  00250E  000152  00001
+ONCE                  001247  001273  00002D  00001
+CODE                  001274  0021BF  000F4C  00001
+RODATA                0021C0  002487  0002C8  00001
+DATA                  002488  00250D  000086  00001
+INIT                  00250E  002527  00001A  00001
+BSS                   002528  00267B  000154  00001
 
 
 Exports list by name:
 ---------------------
-BSOUT                     00FFD2 RLA    CKOUT                     00FFC9 RLA    
+BASIN                     00FFCF RLA    BSOUT                     00FFD2 RLA    
+CHKIN                     00FFC6 RLA    CKOUT                     00FFC9 RLA    
 CLRCH                     00FFCC RLA    OPEN                      00FFC0 RLA    
 READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
-ST                        000090 RLZ    __BSS_RUN__               0023BD RLA    
-__BSS_SIZE__              000152 REA    __CONSTRUCTOR_COUNT__     000001 REA    
-__CONSTRUCTOR_TABLE__     001264 RLA    __DESTRUCTOR_COUNT__      000000 REA    
-__DESTRUCTOR_TABLE__      00231D RLA    __EXEHDR__                000001 REA    
+ST                        000090 RLZ    __BSS_RUN__               002528 RLA    
+__BSS_SIZE__              000154 REA    __CONSTRUCTOR_COUNT__     000002 REA    
+__CONSTRUCTOR_TABLE__     001270 RLA    __DESTRUCTOR_COUNT__      000000 REA    
+__DESTRUCTOR_TABLE__      002488 RLA    __EXEHDR__                000001 REA    
 __LOADADDR__              000001 REA    __MAIN_SIZE__             0065F3 REA    
 __MAIN_START__            00120D RLA    __STACKSIZE__             000800 REA    
-__STARTUP__               000001 REA    ___directerrno            00174D RLA    
-___errno                  00250A RLA    ___mappederrno            001757 RLA    
-___oserror                0024DD RLA    ___osmaperrno             001DDD RLA    
-___seterrno               001B09 RLA    __ctype                   002238 RLA    
-__ctypeidx                002243 RLA    __hextab                  00221C RLA    
-__longminstr              00222C RLA    __printf                  001858 RLA    
-_fwrite                   001BB9 RLA    _ltoa                     001CBE RLA    
-_main                     0015D4 RLA    _printf                   001E01 RLA    
-_rand                     001E91 RLA    _stdout                   002357 RLA    
-_strlen                   001EF3 RLA    _strlower                 001F09 RLA    
-_tunix_alloc              00162C REA    _tunix_exit               001687 REA    
-_tunix_fork               001675 REA    _tunix_free               00163E REA    
-_tunix_getpid             001663 REA    _tunix_mem_info           001651 REA    
-_tunix_mode               001619 REA    _tunix_proc_info          0016FC REA    
-_tunix_proc_list          0016E9 REA    _tunix_schedule           00160B REA    
-_tunix_wait               0016D6 REA    _ultoa                    001CFF RLA    
-_vfprintf                 001FB7 RLA    _write                    001FE0 RLA    
-addysp                    001B13 RLA    axlong                    001B20 RLA    
-axulong                   001B26 RLA    callmain                  001B2D RLA    
-ctypemaskdirect           001B54 RLA    decsp1                    001B6E RLA    
-decsp2                    001B77 RLA    decsp3                    001B84 RLA    
-decsp4                    001B91 RLA    decsp6                    001B9E RLA    
-donelib                   001B44 RLA    fdtab                     002387 RLA    
-incax1                    001C32 RLA    incsp2                    001C41 RLA    
-incsp3                    001C4F RLA    incsp4                    001C54 RLA    
-incsp6                    001C59 RLA    initlib                   001247 RLA    
-initstdout                001253  LAI   ldaxysp                   001C60 RLA    
-lib_alloc                 00162C RLA    lib_exit                  001687 RLA    
-lib_fork                  001675 RLA    lib_free                  00163E RLA    
-lib_getpid                001663 RLA    lib_iopage_alloc          00170F RLA    
-lib_iopage_commit         001721 RLA    lib_iopage_free           001734 RLA    
-lib_kill                  00169A RLA    lib_mem_info              001651 RLA    
-lib_mode                  001619 RLA    lib_proc_info             0016FC RLA    
-lib_proc_list             0016E9 RLA    lib_resume                0016C3 RLA    
-lib_schedule              00160B RLA    lib_suspend               0016B0 RLA    
-lib_wait                  0016D6 RLA    mul8x16                   001D93 RLA    
-mul8x16a                  001D9D RLA    negax                     001DCF RLA    
-negeax                    001C67 RLA    popax                     001C39 RLA    
-popptr1                   001DF3 RLA    popsargsudiv16            001ED3 RLA    
+__STARTUP__               000001 REA    ___directerrno            0017C4 RLA    
+___errno                  002675 RLA    ___mappederrno            0017CE RLA    
+___oserror                002648 RLA    ___osmaperrno             001EC8 RLA    
+___seterrno               001B80 RLA    __ctype                   0023A3 RLA    
+__ctypeidx                0023AE RLA    __hextab                  002387 RLA    
+__longminstr              002397 RLA    __printf                  0018CF RLA    
+_fgetc                    001C2E RLA    _fwrite                   001C9B RLA    
+_getchar                  001D14 RLA    _ltoa                     001DA9 RLA    
+_main                     001648 RLA    _printf                   001EEC RLA    
+_rand                     001F7C RLA    _read                     001FA4 RLA    
+_stdin                    0024C0 RLA    _stdout                   0024C2 RLA    
+_strlen                   00205E RLA    _strlower                 002074 RLA    
+_tunix_alloc              0016A3 REA    _tunix_exit               0016FE REA    
+_tunix_fork               0016EC REA    _tunix_free               0016B5 REA    
+_tunix_getpid             0016DA REA    _tunix_mem_info           0016C8 REA    
+_tunix_mode               001690 REA    _tunix_proc_info          001773 REA    
+_tunix_proc_list          001760 REA    _tunix_schedule           001682 REA    
+_tunix_wait               00174D REA    _ultoa                    001DEA RLA    
+_vfprintf                 002122 RLA    _write                    00214B RLA    
+addysp                    001B8A RLA    axlong                    001B97 RLA    
+axulong                   001B9D RLA    callmain                  001BA4 RLA    
+checkferror               001BBB RLA    ctypemaskdirect           001BD7 RLA    
+decsp1                    001BF1 RLA    decsp2                    001BFA RLA    
+decsp3                    001C07 RLA    decsp4                    001C14 RLA    
+decsp6                    001C21 RLA    donelib                   001BC7 RLA    
+fdtab                     0024F2 RLA    incax1                    001D1D RLA    
+incsp2                    001D2C RLA    incsp3                    001D3A RLA    
+incsp4                    001D3F RLA    incsp6                    001D44 RLA    
+initlib                   001247 RLA    initstdin                 001253  LAI   
+initstdout                00125F  LAI   ldaxysp                   001D4B RLA    
+lib_alloc                 0016A3 RLA    lib_exit                  0016FE RLA    
+lib_fork                  0016EC RLA    lib_free                  0016B5 RLA    
+lib_getpid                0016DA RLA    lib_iopage_alloc          001786 RLA    
+lib_iopage_commit         001798 RLA    lib_iopage_free           0017AB RLA    
+lib_kill                  001711 RLA    lib_mem_info              0016C8 RLA    
+lib_mode                  001690 RLA    lib_proc_info             001773 RLA    
+lib_proc_list             001760 RLA    lib_resume                00173A RLA    
+lib_schedule              001682 RLA    lib_suspend               001727 RLA    
+lib_wait                  00174D RLA    mul8x16                   001E7E RLA    
+mul8x16a                  001E88 RLA    negax                     001EBA RLA    
+negeax                    001D52 RLA    popax                     001D24 RLA    
+popptr1                   001EDE RLA    popsargsudiv16            00203E RLA    
 ptr1                      00000A RLZ    ptr2                      00000C RLZ    
 ptr3                      00000E RLZ    ptr4                      000010 RLZ    
-push1                     001E34 RLA    pusha                     001E3D RLA    
-pusha0                    001E51 RLA    pushax                    001E53 RLA    
-pusheax                   001C8E RLA    pushwysp                  001E6B RLA    
-regbank                   000016 RLZ    rwcommon                  001EB9 RLA    
-sp                        000002 RLZ    sreg                      000004 RLZ    
-tmp1                      000012 RLZ    tmp2                      000013 RLZ    
-tosmoda0                  001D3B RLA    tosudivax                 001F32 RLA    
-tosumulax                 001D4C RLA    udiv16                    001F41 RLA    
-zerobss                   002032 RLA    
+push1                     001F1F RLA    pusha                     001F28 RLA    
+pusha0                    001F3C RLA    pushax                    001F3E RLA    
+pusheax                   001D79 RLA    pushwysp                  001F56 RLA    
+regbank                   000016 RLZ    returnFFFF                002020 RLA    
+rwcommon                  002024 RLA    sp                        000002 RLZ    
+sreg                      000004 RLZ    tmp1                      000012 RLZ    
+tmp2                      000013 RLZ    tmp3                      000014 RLZ    
+tosmoda0                  001E26 RLA    tosudivax                 00209D RLA    
+tosumulax                 001E37 RLA    udiv16                    0020AC RLA    
+unittab                   0024FA RLA    zerobss                   00219D RLA    
+
 
 
 Exports list by value:
 ----------------------
-__DESTRUCTOR_COUNT__      000000 REA    __CONSTRUCTOR_COUNT__     000001 REA    
-__EXEHDR__                000001 REA    __LOADADDR__              000001 REA    
-__STARTUP__               000001 REA    sp                        000002 RLZ    
+__DESTRUCTOR_COUNT__      000000 REA    __EXEHDR__                000001 REA    
+__LOADADDR__              000001 REA    __STARTUP__               000001 REA    
+__CONSTRUCTOR_COUNT__     000002 REA    sp                        000002 RLZ    
 sreg                      000004 RLZ    ptr1                      00000A RLZ    
 ptr2                      00000C RLZ    ptr3                      00000E RLZ    
 ptr4                      000010 RLZ    tmp1                      000012 RLZ    
-tmp2                      000013 RLZ    regbank                   000016 RLZ    
-ST                        000090 RLZ    __BSS_SIZE__              000152 REA    
-__STACKSIZE__             000800 REA    __MAIN_START__            00120D RLA    
-initlib                   001247 RLA    initstdout                001253  LAI   
-__CONSTRUCTOR_TABLE__     001264 RLA    _main                     0015D4 RLA    
-_tunix_schedule           00160B REA    lib_schedule              00160B RLA    
-_tunix_mode               001619 REA    lib_mode                  001619 RLA    
-_tunix_alloc              00162C REA    lib_alloc                 00162C RLA    
-_tunix_free               00163E REA    lib_free                  00163E RLA    
-_tunix_mem_info           001651 REA    lib_mem_info              001651 RLA    
-_tunix_getpid             001663 REA    lib_getpid                001663 RLA    
-_tunix_fork               001675 REA    lib_fork                  001675 RLA    
-_tunix_exit               001687 REA    lib_exit                  001687 RLA    
-lib_kill                  00169A RLA    lib_suspend               0016B0 RLA    
-lib_resume                0016C3 RLA    _tunix_wait               0016D6 REA    
-lib_wait                  0016D6 RLA    _tunix_proc_list          0016E9 REA    
-lib_proc_list             0016E9 RLA    _tunix_proc_info          0016FC REA    
-lib_proc_info             0016FC RLA    lib_iopage_alloc          00170F RLA    
-lib_iopage_commit         001721 RLA    lib_iopage_free           001734 RLA    
-___directerrno            00174D RLA    ___mappederrno            001757 RLA    
-__printf                  001858 RLA    ___seterrno               001B09 RLA    
-addysp                    001B13 RLA    axlong                    001B20 RLA    
-axulong                   001B26 RLA    callmain                  001B2D RLA    
-donelib                   001B44 RLA    ctypemaskdirect           001B54 RLA    
-decsp1                    001B6E RLA    decsp2                    001B77 RLA    
-decsp3                    001B84 RLA    decsp4                    001B91 RLA    
-decsp6                    001B9E RLA    _fwrite                   001BB9 RLA    
-incax1                    001C32 RLA    popax                     001C39 RLA    
-incsp2                    001C41 RLA    incsp3                    001C4F RLA    
-incsp4                    001C54 RLA    incsp6                    001C59 RLA    
-ldaxysp                   001C60 RLA    negeax                    001C67 RLA    
-pusheax                   001C8E RLA    _ltoa                     001CBE RLA    
-_ultoa                    001CFF RLA    tosmoda0                  001D3B RLA    
-tosumulax                 001D4C RLA    mul8x16                   001D93 RLA    
-mul8x16a                  001D9D RLA    negax                     001DCF RLA    
-___osmaperrno             001DDD RLA    popptr1                   001DF3 RLA    
-_printf                   001E01 RLA    push1                     001E34 RLA    
-pusha                     001E3D RLA    pusha0                    001E51 RLA    
-pushax                    001E53 RLA    pushwysp                  001E6B RLA    
-_rand                     001E91 RLA    rwcommon                  001EB9 RLA    
-popsargsudiv16            001ED3 RLA    _strlen                   001EF3 RLA    
-_strlower                 001F09 RLA    tosudivax                 001F32 RLA    
-udiv16                    001F41 RLA    _vfprintf                 001FB7 RLA    
-_write                    001FE0 RLA    zerobss                   002032 RLA    
-__hextab                  00221C RLA    __longminstr              00222C RLA    
-__ctype                   002238 RLA    __ctypeidx                002243 RLA    
-__DESTRUCTOR_TABLE__      00231D RLA    _stdout                   002357 RLA    
-fdtab                     002387 RLA    __BSS_RUN__               0023BD RLA    
-___oserror                0024DD RLA    ___errno                  00250A RLA    
-__MAIN_SIZE__             0065F3 REA    READST                    00FFB7 RLA    
-SETLFS                    00FFBA RLA    OPEN                      00FFC0 RLA    
+tmp2                      000013 RLZ    tmp3                      000014 RLZ    
+regbank                   000016 RLZ    ST                        000090 RLZ    
+__BSS_SIZE__              000154 REA    __STACKSIZE__             000800 REA    
+__MAIN_START__            00120D RLA    initlib                   001247 RLA    
+initstdin                 001253  LAI   initstdout                00125F  LAI   
+__CONSTRUCTOR_TABLE__     001270 RLA    _main                     001648 RLA    
+_tunix_schedule           001682 REA    lib_schedule              001682 RLA    
+_tunix_mode               001690 REA    lib_mode                  001690 RLA    
+_tunix_alloc              0016A3 REA    lib_alloc                 0016A3 RLA    
+_tunix_free               0016B5 REA    lib_free                  0016B5 RLA    
+_tunix_mem_info           0016C8 REA    lib_mem_info              0016C8 RLA    
+_tunix_getpid             0016DA REA    lib_getpid                0016DA RLA    
+_tunix_fork               0016EC REA    lib_fork                  0016EC RLA    
+_tunix_exit               0016FE REA    lib_exit                  0016FE RLA    
+lib_kill                  001711 RLA    lib_suspend               001727 RLA    
+lib_resume                00173A RLA    _tunix_wait               00174D REA    
+lib_wait                  00174D RLA    _tunix_proc_list          001760 REA    
+lib_proc_list             001760 RLA    _tunix_proc_info          001773 REA    
+lib_proc_info             001773 RLA    lib_iopage_alloc          001786 RLA    
+lib_iopage_commit         001798 RLA    lib_iopage_free           0017AB RLA    
+___directerrno            0017C4 RLA    ___mappederrno            0017CE RLA    
+__printf                  0018CF RLA    ___seterrno               001B80 RLA    
+addysp                    001B8A RLA    axlong                    001B97 RLA    
+axulong                   001B9D RLA    callmain                  001BA4 RLA    
+checkferror               001BBB RLA    donelib                   001BC7 RLA    
+ctypemaskdirect           001BD7 RLA    decsp1                    001BF1 RLA    
+decsp2                    001BFA RLA    decsp3                    001C07 RLA    
+decsp4                    001C14 RLA    decsp6                    001C21 RLA    
+_fgetc                    001C2E RLA    _fwrite                   001C9B RLA    
+_getchar                  001D14 RLA    incax1                    001D1D RLA    
+popax                     001D24 RLA    incsp2                    001D2C RLA    
+incsp3                    001D3A RLA    incsp4                    001D3F RLA    
+incsp6                    001D44 RLA    ldaxysp                   001D4B RLA    
+negeax                    001D52 RLA    pusheax                   001D79 RLA    
+_ltoa                     001DA9 RLA    _ultoa                    001DEA RLA    
+tosmoda0                  001E26 RLA    tosumulax                 001E37 RLA    
+mul8x16                   001E7E RLA    mul8x16a                  001E88 RLA    
+negax                     001EBA RLA    ___osmaperrno             001EC8 RLA    
+popptr1                   001EDE RLA    _printf                   001EEC RLA    
+push1                     001F1F RLA    pusha                     001F28 RLA    
+pusha0                    001F3C RLA    pushax                    001F3E RLA    
+pushwysp                  001F56 RLA    _rand                     001F7C RLA    
+_read                     001FA4 RLA    returnFFFF                002020 RLA    
+rwcommon                  002024 RLA    popsargsudiv16            00203E RLA    
+_strlen                   00205E RLA    _strlower                 002074 RLA    
+tosudivax                 00209D RLA    udiv16                    0020AC RLA    
+_vfprintf                 002122 RLA    _write                    00214B RLA    
+zerobss                   00219D RLA    __hextab                  002387 RLA    
+__longminstr              002397 RLA    __ctype                   0023A3 RLA    
+__ctypeidx                0023AE RLA    __DESTRUCTOR_TABLE__      002488 RLA    
+_stdin                    0024C0 RLA    _stdout                   0024C2 RLA    
+fdtab                     0024F2 RLA    unittab                   0024FA RLA    
+__BSS_RUN__               002528 RLA    ___oserror                002648 RLA    
+___errno                  002675 RLA    __MAIN_SIZE__             0065F3 REA    
+READST                    00FFB7 RLA    SETLFS                    00FFBA RLA    
+OPEN                      00FFC0 RLA    CHKIN                     00FFC6 RLA    
 CKOUT                     00FFC9 RLA    CLRCH                     00FFCC RLA    
-BSOUT                     00FFD2 RLA    
+BASIN                     00FFCF RLA    BSOUT                     00FFD2 RLA    
+
 
 
 Imports list:
 -------------
+BASIN (kernal.o):
+    read.o                    cbm/cbm.inc:47
 BSOUT (kernal.o):
     write.o                   cbm/cbm.inc:49
+    read.o                    cbm/cbm.inc:49
     crt0.o                    vic20/crt0.s:10
+CHKIN (kernal.o):
+    read.o                    cbm/cbm.inc:44
 CKOUT (kernal.o):
     write.o                   cbm/cbm.inc:45
 CLRCH (kernal.o):
     write.o                   cbm/cbm.inc:46
+    read.o                    cbm/cbm.inc:46
 OPEN (kernal.o):
     write.o                   cbm/cbm.inc:35
+    read.o                    cbm/cbm.inc:35
 READST (kernal.o):
     write.o                   cbm/cbm.inc:32
+    read.o                    cbm/cbm.inc:32
 SETLFS (kernal.o):
     write.o                   cbm/cbm.inc:33
+    read.o                    cbm/cbm.inc:33
 ST (status.o):
     crt0.o                    vic20/crt0.s:13
 __BSS_RUN__ ([linker generated]):
@@ -323,14 +357,17 @@ __STARTUP__ (crt0.o):
     init.o                    init.s:13
 ___directerrno (_directerrno.o):
     write.o                   /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:10
+    read.o                    /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:10
 ___errno (errno.o):
     _seterrno.o               /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:7
 ___mappederrno (_mappederrno.o):
     write.o                   /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:10
+    read.o                    /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:10
 ___oserror (_oserror.o):
     _mappederrno.o            /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:7
     _directerrno.o            /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:7
     write.o                   /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:7
+    read.o                    /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:7
 ___osmaperrno (oserror.o):
     _mappederrno.o            /home/pixel/Desktop/3rd-party/lang/cc65/asminc/errno.inc:8
 ___seterrno (_seterrno.o):
@@ -347,16 +384,24 @@ __longminstr (_longminstr.o):
     ltoa.o                    common/ltoa.s:10
 __printf (_printf.o):
     vfprintf.o                common/vfprintf.s:10
+_fgetc (fgetc.o):
+    getchar.o                 ../libwrk/vic20/getchar.s:17
 _fwrite (fwrite.o):
     vfprintf.o                common/vfprintf.s:10
+_getchar (getchar.o):
+    init.o                    init.s:26
 _ltoa (ltoa.o):
     _printf.o                 common/_printf.s:12
 _main (init.o):
     callmain.o                runtime/callmain.s:11
 _printf (printf.o):
-    init.o                    init.s:26
+    init.o                    init.s:27
 _rand (rand.o):
     init.o                    init.s:25
+_read (read.o):
+    fgetc.o                   common/fgetc.s:8
+_stdin (_file.o):
+    getchar.o                 ../libwrk/vic20/getchar.s:16
 _stdout (_file.o):
     printf.o                  common/printf.s:8
 _strlen (strlen.o):
@@ -403,37 +448,42 @@ axulong (axlong.o):
     _printf.o                 common/_printf.s:11
 callmain (callmain.o):
     crt0.o                    vic20/crt0.s:9
+checkferror (checkferror.o):
+    fgetc.o                   common/fgetc.s:8
 ctypemaskdirect (ctypemask.o):
     strlower.o                common/strlower.s:14
 decsp1 (decsp1.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
+    init.o                    init.s:673
 decsp2 (decsp2.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 decsp3 (decsp3.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 decsp4 (decsp4.o):
     lpush.o                   runtime/lpush.s:12
-    init.o                    init.s:618
+    init.o                    init.s:673
 decsp6 (decsp6.o):
     _printf.o                 common/_printf.s:11
 donelib (condes.o):
     crt0.o                    vic20/crt0.s:7
 fdtab (filedes.o):
     write.o                   cbm/filedes.inc:7
+    read.o                    cbm/filedes.inc:7
 incax1 (incax1.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 incsp2 (incsp2.o):
     popptr1.o                 runtime/popptr1.s:8
-    init.o                    init.s:618
-    init.o                    init.s:618
+    fgetc.o                   common/fgetc.s:9
+    init.o                    init.s:673
+    init.o                    init.s:673
 incsp3 (incsp3.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 incsp4 (incsp4.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 incsp6 (incsp6.o):
     fwrite.o                  common/fwrite.s:11
     vfprintf.o                common/vfprintf.s:9
-    init.o                    init.s:618
+    init.o                    init.s:673
 initlib (condes.o):
     crt0.o                    vic20/crt0.s:7
 ldaxysp (ldaxsp.o):
@@ -492,17 +542,21 @@ popptr1 (popptr1.o):
     mul8.o                    runtime/mul8.s:9
     mul.o                     runtime/mul.s:9
     ltoa.o                    common/ltoa.s:9
+    fgetc.o                   common/fgetc.s:9
     udiv.o                    runtime/udiv.s:9
 popsargsudiv16 (shelp.o):
     mod.o                     runtime/mod.s:11
 ptr1 (zeropage.o):
+    checkferror.o             common/checkferror.s:12
     write.o                   cbm/write.s:11
     strlower.o                common/strlower.s:13
+    read.o                    cbm/read.s:13
     popptr1.o                 runtime/popptr1.s:9
     mul8.o                    runtime/mul8.s:10
     mul.o                     runtime/mul.s:10
     ltoa.o                    common/ltoa.s:11
     fwrite.o                  common/fwrite.s:14
+    fgetc.o                   common/fgetc.s:10
     _printf.o                 /home/pixel/Desktop/3rd-party/lang/cc65/asminc/zeropage.inc:12
     zerobss.o                 common/zerobss.s:9
     vfprintf.o                common/vfprintf.s:11
@@ -510,14 +564,16 @@ ptr1 (zeropage.o):
     shelp.o                   runtime/shelp.s:12
     printf.o                  common/printf.s:9
 ptr2 (zeropage.o):
-    rwcommon.o                cbm/rwcommon.s:10
     write.o                   cbm/write.s:11
     strlower.o                common/strlower.s:13
+    rwcommon.o                cbm/rwcommon.s:10
+    read.o                    cbm/read.s:13
     ltoa.o                    common/ltoa.s:11
     _printf.o                 /home/pixel/Desktop/3rd-party/lang/cc65/asminc/zeropage.inc:12
 ptr3 (zeropage.o):
-    rwcommon.o                cbm/rwcommon.s:10
     write.o                   cbm/write.s:11
+    rwcommon.o                cbm/rwcommon.s:10
+    read.o                    cbm/read.s:13
     ltoa.o                    common/ltoa.s:11
 ptr4 (zeropage.o):
     strlen.o                  common/strlen.s:12
@@ -529,26 +585,28 @@ push1 (push1.o):
     _printf.o                 common/_printf.s:11
     vfprintf.o                common/vfprintf.s:9
 pusha (pusha.o):
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
 pusha0 (pushax.o):
     push1.o                   runtime/push1.s:8
     fwrite.o                  common/fwrite.s:11
-    init.o                    init.s:618
-    init.o                    init.s:618
+    fgetc.o                   common/fgetc.s:9
+    init.o                    init.s:673
+    init.o                    init.s:673
 pushax (pushax.o):
     fwrite.o                  common/fwrite.s:11
+    fgetc.o                   common/fgetc.s:9
     callmain.o                runtime/callmain.s:11
     _printf.o                 common/_printf.s:11
     printf.o                  common/printf.s:8
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
-    init.o                    init.s:618
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
+    init.o                    init.s:673
 pusheax (lpush.o):
     _printf.o                 common/_printf.s:11
 pushwysp (pushwsp.o):
@@ -556,8 +614,11 @@ pushwysp (pushwsp.o):
     vfprintf.o                common/vfprintf.s:9
 regbank (zeropage.o):
     _printf.o                 /home/pixel/Desktop/3rd-party/lang/cc65/asminc/zeropage.inc:14
+returnFFFF (returnFFFF.o):
+    fgetc.o                   common/fgetc.s:9
 rwcommon (rwcommon.o):
     write.o                   cbm/write.s:10
+    read.o                    cbm/read.s:11
 sp (zeropage.o):
     pushwsp.o                 runtime/pushwsp.s:8
     popptr1.o                 runtime/popptr1.s:9
@@ -586,6 +647,7 @@ sreg (zeropage.o):
     udiv.o                    runtime/udiv.s:10
     mod.o                     runtime/mod.s:12
 tmp1 (zeropage.o):
+    read.o                    cbm/read.s:13
     mul.o                     runtime/mul.s:10
     ltoa.o                    common/ltoa.s:11
     _printf.o                 /home/pixel/Desktop/3rd-party/lang/cc65/asminc/zeropage.inc:13
@@ -593,15 +655,20 @@ tmp1 (zeropage.o):
     mod.o                     runtime/mod.s:12
 tmp2 (zeropage.o):
     rwcommon.o                cbm/rwcommon.s:10
+    read.o                    cbm/read.s:13
     shelp.o                   runtime/shelp.s:12
+tmp3 (zeropage.o):
+    read.o                    cbm/read.s:13
 tosmoda0 (mod.o):
-    init.o                    init.s:618
+    init.o                    init.s:673
 tosudivax (udiv.o):
     fwrite.o                  common/fwrite.s:12
 tosumulax (mul.o):
     fwrite.o                  common/fwrite.s:12
 udiv16 (udiv.o):
     shelp.o                   runtime/shelp.s:11
+unittab (filedes.o):
+    read.o                    cbm/filedes.inc:8
 zerobss (zerobss.o):
     crt0.o                    vic20/crt0.s:8
 

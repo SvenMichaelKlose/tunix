@@ -1087,39 +1087,6 @@ r:  plx
     popw zp2
 .endmacro
 
-.export print_cr
-.proc print_cr
-    phx
-    lda #1
-    sta is_fresh_line
-    jsra BSOUT, #13
-    plx
-    rts
-.endproc
-
-.export print_comma
-.proc print_comma
-    phx
-    lda is_fresh_line
-    bne :+
-    jsra BSOUT, #','
-:   lda #0
-    sta is_fresh_line
-    plx
-    rts
-.endproc
-
-.macro print_start_headers first
-    pushw zp2
-    stwi zp2, first
-    lda #1
-    sta is_fresh_line
-.endmacro
-
-.macro print_end_headers
-    popw zp2
-.endmacro
-
 .export outa
 .proc outa
     ldy #0
@@ -1142,6 +1109,28 @@ r:  plx
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SYSTEM CALL RETURN DATA ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+.export print_comma
+.proc print_comma
+    phx
+    lda is_fresh_line
+    bne :+
+    jsra BSOUT, #','
+:   lda #0
+    sta is_fresh_line
+    plx
+    rts
+.endproc
+
+.export print_cr
+.proc print_cr
+    phx
+    lda #1
+    sta is_fresh_line
+    jsra BSOUT, #13
+    plx
+    rts
+.endproc
 
 .export print_decbyte
 .proc print_decbyte
@@ -1237,6 +1226,17 @@ r:  plx
     jmp print_cr
 .endproc
 
+.macro print_start_headers first
+    pushw zp2
+    stwi zp2, first
+    lda #1
+    sta is_fresh_line
+.endmacro
+
+.macro print_end_headers
+    popw zp2
+.endmacro
+
 ; Print string at zp2 and step over the
 ; terminating 0.
 .export print_header
@@ -1249,7 +1249,7 @@ r:  plx
 .endproc
 
 ; Print list indexes as CSV line.
-.macro print_csv list, first
+.macro print_list_indexes list, first
     ldx first
     beq :++
     txa
@@ -2186,7 +2186,7 @@ items_proc_info:
 
     ; Print list of LFNs.
     jsr print_header
-    print_csv lfns, first_lfn
+    print_list_indexes lfns, first_lfn
 
     ; Print list of extended memory banks.
     jsr print_header

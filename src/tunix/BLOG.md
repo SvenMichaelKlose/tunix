@@ -1,6 +1,21 @@
 TUNIX blog
 ==========
 
+# 2024-04-30 19:41 (smk)
+
+Cleaned up the syscall request code a
+bit.  The CSV format seems to be just
+right for BASIC programs but binary
+formats would also be appreciated.
+
+I'm little brain-dead because of my
+speed-head neighbours but I've found
+some awesome ear plugs in the shop.
+This will be interesting to watch.
+
+There's still a weird memory bank bug.
+To be handled tomorrow... 8)
+
 # 2024-04-26 23:16 (smk)
 
 Added ownership checks of extended

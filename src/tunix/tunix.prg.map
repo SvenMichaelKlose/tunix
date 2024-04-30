@@ -7,8 +7,8 @@ main.o:
     GLOBALBSS         Offs=000000  Size=00097F  Align=00001  Fill=0000
     LOCALBSS          Offs=000000  Size=00011E  Align=00001  Fill=0000
     LOCALBSS2         Offs=000000  Size=0007D0  Align=00001  Fill=0000
-    LIB               Offs=000000  Size=0001C6  Align=00001  Fill=0000
-    KERNEL            Offs=000000  Size=000FB9  Align=00001  Fill=0000
+    LIB               Offs=000000  Size=0001A3  Align=00001  Fill=0000
+    KERNEL            Offs=000000  Size=000FDC  Align=00001  Fill=0000
     KERNELDATA        Offs=000000  Size=000454  Align=00001  Fill=0000
     MACHDEPDATA       Offs=000000  Size=0001E7  Align=00001  Fill=0000
     LOCALCODE         Offs=000000  Size=0001B3  Align=00001  Fill=0000
@@ -141,8 +141,8 @@ EXEHDR                001201  00120C  00000C  00001
 STARTUP               002000  002039  00003A  00001
 ONCE                  00203A  0020C3  00008A  00001
 PRGSTART              0020C4  0020C7  000004  00001
-LIB                   0020C8  00228D  0001C6  00001
-KERNEL                00228E  003246  000FB9  00001
+LIB                   0020C8  00226A  0001A3  00001
+KERNEL                00226B  003246  000FDC  00001
 KERNELDATA            003247  00369A  000454  00001
 MACHDEPDATA           00369B  003881  0001E7  00001
 RODATA                003882  003993  000112  00001

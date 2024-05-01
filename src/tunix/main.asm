@@ -3140,6 +3140,9 @@ clr_lbanksb:
     ; register syscall device #31.
     jsr init_syscalls
 
+    ; Run very basic tests.  More are
+    ; done in userland for developers'
+    ; convenience.
 .ifdef EARLY_TESTS
     jsr tests
 .endif ; .ifdef EARLY_TESTS

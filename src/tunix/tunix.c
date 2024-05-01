@@ -36,14 +36,23 @@ struct proc {
         waitid_t  prev;
         procid_t  pid;
     } waiting[MAX_WAITING];
-    waitid_t     first_waiting;
-    struct bank  lbanks[MAX_BANK];
-    struct fn    lfns[MAX_FN];
-    fn_t         lfn_glfn[MAX_FN];
-    driverid_t   devices[MAX_DEV];
+    waitid_t       first_waiting;
+    struct bank    lbanks[MAX_BANK];
+    struct fn      lfns[MAX_FN];
+    fn_t           lfn_glfn[MAX_FN];
+    driverid_t     devices[MAX_DEV];
     
+    sighdl_t       signal_handlers[MAX_HANDLERS];
+    sigid_t        pending_signals[MAX_HANDLERS];
+    struct signal  signals;
 } procs[MAX_PROCS];
+
 procid_t pid;
+
+///////////////////
+// Process lists //
+///////////////////
+
 procid_t running;
 procid_t sleeping;
 procid_t zombie;
@@ -100,9 +109,9 @@ void
 free_proc_resources (procid_t id)
 {
     free_lfns (id);
-    bproc_free (id);
-    free_iopages (id);
     free_drivers (id);
+    free_iopages (id);
+    free_lbanks (id);
 }
 
 void

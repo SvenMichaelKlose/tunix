@@ -23,7 +23,10 @@ bdb_add (bdb *db, void *key, void *data, size_t size)
 dbid_t
 bdb_find (bdb *db, void *key)
 {
+    // First check the cache.
     cnode * cn = cache_find_key (db, key);
+
+    // Return found or find on storage.
     return cn ?
         cn->id :
         storage_find (db, key);

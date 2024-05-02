@@ -20,7 +20,7 @@ cache_push_mru (bdb *db, cnode *cn)
         db->cache_last = cn;
 }
 
-// Pop least-recently used.
+// Pop least-recently used off LRU list.
 cnode *
 cache_pop_lru (bdb *db)
 {
@@ -194,7 +194,7 @@ cache_find_key (bdb *db, void *key)
         return NULL;
 
     for (;;) {
-        // Test an return if match.
+        // Test and return if match.
         if (!(c = db->compare (db, n->data, key)))
             return n;
 
@@ -236,7 +236,7 @@ cache_store_lru (bdb *db)
     cache_remove (db, cn);
 }
 
-// Add record to cache only.
+// Add new record to cache.
 cnode *
 cache_add (bdb *db, dbid_t id, void *data, size_t size)
 {
@@ -244,6 +244,7 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
 
     // When out of cache...
     if (num_cached > 256)
+        // Move least-recently used record to storage.
         cache_store_lru (db);
     else
         num_cached++;
@@ -260,7 +261,11 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
 
     // Add to LRU list as most-recently used.
     cache_push_mru (db, cn);
+
+    // Add to key index.
     cache_insert_key (db, cn);
+
+    // Add to ID index.
     cache_insert_id (db, cn);
     return cn;
 }

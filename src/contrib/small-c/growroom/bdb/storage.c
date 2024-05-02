@@ -52,18 +52,6 @@ storage_write_data (bdb *db, dbid_t id, void * data, size_t size)
     return nwritten != nsize;
 }
 
-// Allocate new record on storage.
-dbid_t
-storage_alloc (bdb *db, void * data, size_t size)
-{
-    dbid_t id = storage_alloc_id (db, size);
-    if (!storage_write_size (db, id, size))
-        perror ("Error writing snode size.");
-    if (!storage_write_data (db, id, data, size))
-        perror ("Error writing snode data.");
-    return id;
-}
-
 void *
 storage_map (size_t *size, bdb *db, dbid_t id)
 {
@@ -123,14 +111,6 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
                 return;
             }
     }
-}
-
-dbid_t
-storage_add (bdb *db, void *key, void *data, size_t size)
-{
-    dbid_t id = storage_alloc (db, data, size);
-    storage_insert_key (db, key, id);
-    return id;
 }
 
 dbid_t

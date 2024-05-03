@@ -1,6 +1,6 @@
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bdb.h"
@@ -8,6 +8,12 @@
 #include "cache.h"
 
 int num_cached = 0;
+
+cnode *
+cnode_alloc (void)
+{
+    return calloc (1, sizeof (cnode));
+}
 
 // Add node as most-recently used.
 void
@@ -63,6 +69,7 @@ cache_make_mru (bdb *db, cnode *cn)
     cache_push_mru (db, cn);
 }
 
+// Reverse order of bits in byte.
 char
 bit_reverse (char x)
 {
@@ -91,7 +98,7 @@ cache_idhash (dbid_t id)
     // Signed divide to avoid sticky bits.
     id = (dbid_t) ((signed) id / sizeof (int));
 
-    // Reverse order of bits.
+    // Reverse order of bits and bytes.
     for (i = 0; i < nbytes; i++)
         np[nbytes - 1 - i] = bit_reverse (ip[i]);
 
@@ -114,7 +121,7 @@ cache_insert_id (bdb *db, cnode *cn)
 
     // Travel down binary tree.
     for (;;) {
-        on = cn;
+        on = n;
         if (cache_idhash (n->id) < key) {
             if (!(n = n->ileft)) {
                 on->ileft = cn;
@@ -144,7 +151,7 @@ cache_insert_key (bdb *db, cnode *cn)
 
     // Travel down binary tree.
     for (;;) {
-        on = cn;
+        on = n;
         if (db->compare (db, n->data, key) < 0) {
             if (!(n = n->kleft)) {
                 on->kleft = cn;
@@ -236,6 +243,21 @@ cache_store_lru (bdb *db)
     cache_remove (db, cn);
 }
 
+// Fetch record from storage and add it to the cache.
+cnode *
+cache_add_stored (bdb *db, dbid_t id)
+{
+    snode  *bn;
+    size_t size;
+
+    // Map from secondary storage.
+    if (!(bn = storage_map (&size, db, id)))
+        return NULL;
+
+    // Allocate a new cnode + data memory.
+    return cache_add (db, id, &bn->data, size);
+}
+
 // Add new record to cache.
 cnode *
 cache_add (bdb *db, dbid_t id, void *data, size_t size)
@@ -249,9 +271,8 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
     else
         num_cached++;
 
-    // Allocate and clear cnode.
-    cn = malloc (sizeof (cnode));
-    bzero (cn, sizeof (cnode));
+    // Allocate cnode.
+    cn = cnode_alloc ();
 
     // Copy over record info and data.
     cn->id   = id;
@@ -267,20 +288,6 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
 
     // Add to ID index.
     cache_insert_id (db, cn);
+
     return cn;
-}
-
-// Fetch record from storage and add it to the cache.
-cnode *
-cache_add_stored (bdb *db, dbid_t id)
-{
-    snode  *bn;
-    size_t size;
-
-    // Map from secondary storage.
-    if (!(bn = storage_map (&size, db, id)))
-        return NULL;
-
-    // Allocate a new cnode + data memory.
-    return cache_add (db, id, &bn->data, size);
 }

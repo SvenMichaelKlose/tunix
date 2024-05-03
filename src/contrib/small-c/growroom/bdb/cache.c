@@ -225,9 +225,9 @@ cache_store_lru (bdb *db)
     // Get least-recently used record.
     cnode *cn = cache_pop_lru (db);
 
-    // Insert into b-tree if new on storage.
+    // Add node to storage if not there.
     if (!(cn->flags & HAS_STORAGE))
-        storage_insert_key (db, db->data2key (cn->data), cn->id);
+        storage_add (db, cn->id, cn->data, cn->size);
 
     // Write record data.  Updates happen here, too.
     storage_write_data (db, cn->id, cn->data, cn->size);

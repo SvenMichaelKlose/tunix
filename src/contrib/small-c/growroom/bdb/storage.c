@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "bdb.h"
 #include "storage.h"
@@ -111,6 +112,24 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
                 return;
             }
     }
+}
+
+// Add record to storage (without index).
+void
+storage_add (bdb *db, dbid_t id, void *data, size_t size)
+{
+    // Make clear snode.
+    snode sn;
+    bzero (&sn, snode_size (0));
+
+    // Write size of snode + record.
+    storage_write_size (db, id, size);
+
+    // Write the snode.
+    storage_write_snode (db, id, &sn);
+
+    // Link to parent node in b-tree.
+    storage_insert_key (db, db->data2key (data), id);
 }
 
 dbid_t

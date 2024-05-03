@@ -1,6 +1,10 @@
 #ifndef __BDB_H__
 #define __BDB_H__
 
+#ifndef BDB_MAX_CACHED
+#define BDB_MAX_CACHED 255
+#endif
+
 #define ERROR       -1
 #define NOTFOUND    -1
 

@@ -1,5 +1,5 @@
 PROGRAM = bdb
-SRC = api.c cache.c storage.c main.c
+SRC = api.c cache.c main.c storage.c symbol.c
 INCDIR = "./include/"
 CFLAGS = -ggdb -g -O0 -Wall -Werror
 

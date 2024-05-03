@@ -114,11 +114,11 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
     }
 }
 
-// Add record to storage (without index).
+// Add record to storage.
 void
 storage_add (bdb *db, dbid_t id, void *data, size_t size)
 {
-    // Make clear snode.
+    // Make clean snode.
     snode sn;
     bzero (&sn, snode_size (0));
 

@@ -1,7 +1,7 @@
 [@] Debug what's there.
 [@] Tests, tests, tests.
-[ ] B-tree node removal
 [ ] Primary cache searching head of LRU list.
+[ ] B-tree node removal
 
 Ideas
 [ ] Cache flush for file reuse.

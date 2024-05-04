@@ -7,8 +7,6 @@
 #include "storage.h"
 #include "cache.h"
 
-int num_cached = 0;
-
 cnode *
 cnode_alloc (void)
 {
@@ -26,35 +24,35 @@ cache_push_mru (bdb *db, cnode *cn)
         db->cache_last = cn;
 }
 
+// Remove from LRU list.
+void
+cache_remove_lru (bdb *db, cnode *cn)
+{
+    // Update previous node or the
+    // pointer to the first node in the
+    // list (nost-recently used).
+    if (cn->prev)
+        cn->prev->next = cn->next;
+    else
+        db->cache_first = cn->next;
+
+    // Update next node or the pointer
+    // to the last node in the list.
+    // (least-recently used).
+    if (cn->next)
+        cn->next->prev = cn->prev;
+    else
+        db->cache_last = cn->prev;
+}
+
 // Pop least-recently used off LRU list.
 cnode *
 cache_pop_lru (bdb *db)
 {
     cnode * cn = db->cache_last;
     if (cn)
-        db->cache_last = cn->prev;
+        cache_remove_lru (db, cn);
     return cn;
-}
-
-// Remove from LRU list.
-void
-cache_remove_lru (bdb *db, cnode *cn)
-{
-    // Update link in previous node or
-    // the pointer to the first node
-    // (which is most-recently used).
-    if (cn->prev)
-        cn->prev->next = cn->next;
-    else
-        db->cache_first = cn->next;
-
-    // Update link in next node or the
-    // pointer to the last node (which
-    // is the least-recently used one).
-    if (cn->next)
-        cn->next->prev = cn->prev;
-    else
-        db->cache_last = cn->prev;
 }
 
 // Move to front of LRU list (most-recent).
@@ -89,6 +87,8 @@ bit_reverse (char x)
 dbid_t
 cache_idhash (dbid_t id)
 {
+    return id;
+/*
     dbid_t new;
     char * ip = (char *) &id;
     char * np = (char *) &new;
@@ -103,6 +103,7 @@ cache_idhash (dbid_t id)
         np[nbytes - 1 - i] = bit_reverse (ip[i]);
 
     return new;
+*/
 }
 
 // Insert node into ID index.
@@ -225,12 +226,38 @@ cache_remove (bdb *db, cnode *cn)
     free (cn);
 }
 
+// Fetch record from storage and add it to the cache.
+cnode *
+cache_add_stored (bdb *db, dbid_t id)
+{
+    snode  *bn;
+    cnode  *cn;
+    size_t size;
+
+    // Map from secondary storage.
+    if (!(bn = storage_map (&size, db, id)))
+        return NULL;
+
+    // Allocate a new cnode + data memory.
+    cn = cache_add (db, id, &bn->data, size);
+
+    // Tell that it's on storage already.
+    cn->flags |= HAS_STORAGE;
+
+    return cn;
+}
+
+
 // Move least-recently used record to storage.
 void
 cache_store_lru (bdb *db)
 {
+    printf ("cache_store_lru ()\n");
+
     // Get least-recently used record.
     cnode *cn = cache_pop_lru (db);
+    if (!cn)
+        perror ("cache_store_lru() called without cached records.");
 
     // Add node to storage if not there.
     if (!(cn->flags & HAS_STORAGE))
@@ -243,21 +270,6 @@ cache_store_lru (bdb *db)
     cache_remove (db, cn);
 }
 
-// Fetch record from storage and add it to the cache.
-cnode *
-cache_add_stored (bdb *db, dbid_t id)
-{
-    snode  *bn;
-    size_t size;
-
-    // Map from secondary storage.
-    if (!(bn = storage_map (&size, db, id)))
-        return NULL;
-
-    // Allocate a new cnode + data memory.
-    return cache_add (db, id, &bn->data, size);
-}
-
 // Add new record to cache.
 cnode *
 cache_add (bdb *db, dbid_t id, void *data, size_t size)
@@ -265,11 +277,11 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
     cnode *cn;
 
     // When out of cache...
-    if (num_cached > 256)
+    if (db->num_cached == BDB_MAX_CACHED)
         // Move least-recently used record to storage.
         cache_store_lru (db);
     else
-        num_cached++;
+        db->num_cached++;
 
     // Allocate cnode.
     cn = cnode_alloc ();
@@ -290,4 +302,13 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
     cache_insert_id (db, cn);
 
     return cn;
+}
+
+void
+cache_flush (bdb *db)
+{
+    printf ("cache-flush() %d records.\n",
+            db->num_cached);
+    while (db->num_cached--)
+        cache_store_lru (db);
 }

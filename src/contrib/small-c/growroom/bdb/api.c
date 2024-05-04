@@ -49,3 +49,9 @@ bdb_map (bdb *db, int id)
     // Return record pointer.
     return cn->data;
 }
+
+void
+bdb_close (bdb *db)
+{
+    cache_flush (db);
+}

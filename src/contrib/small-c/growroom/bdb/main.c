@@ -19,12 +19,13 @@ main (int argc, char *argv[])
     symbol_init ();
 
     char *names[] = {
-        "Coziness", "Fireplace", "Warmth", "Comfort", "Blanket",
+        "Coziness", "Fireplace", "Warmth", NULL, "Comfort", "Blanket",
         "Teatime", "Homecoming", "Family time", "Relaxation", "VIC-20",
         NULL
     };
-    for (n = names; *n; n++)
-        id = add_symbol (*n, strlen (*n));
+    //for (int i = 0; i < 30; i++)
+        for (n = names; *n; n++)
+            id = add_symbol (*n, strlen (*n));
 
     s = bdb_map (&symdb, id);
     printf ("Got symbol \"%s\".\n", s->name);
@@ -34,5 +35,8 @@ main (int argc, char *argv[])
         printf ("Got symbol \"%s\".\n", s->name);
     else
         printf ("Symbol \"%s\" not found.\n", name);
+
+    symbol_close ();
+
     return 0;
 }

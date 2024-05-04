@@ -13,7 +13,9 @@ typedef unsigned int dbid_t;
 typedef struct _cnode cnode;
 typedef struct _bdb bdb;
 typedef struct _bdb {
-    dbid_t next_free;
+    // Storage allocation (growing).
+    dbid_t   next_free;
+    dbid_t   filled;
 
     // Compare key in 'rec' to 'key'.
     // Return 0: match, < 0; "less than", > 0 "greater than"
@@ -32,6 +34,7 @@ typedef struct _bdb {
     // Least/most-recently used.
     cnode * cache_first;
     cnode * cache_last;
+    unsigned num_cached;
 
     // Index b-tree roots.
     cnode * cache_root_keys;
@@ -42,5 +45,6 @@ dbid_t  bdb_alloc (bdb *db, void *data, size_t size);
 void *  bdb_map   (bdb *db, int id);
 dbid_t  bdb_add   (bdb *db, void *key, void *data, size_t size);
 dbid_t  bdb_find  (bdb *db, void *key);
+void    bdb_close (bdb *db);
 
 #endif // #ifndef __BDB_H__

@@ -60,24 +60,30 @@ storage_map (size_t *size, bdb *db, dbid_t id)
     size_t nsize;
     size_t nread;
 
+    // Do nothing for the first record,
+    // which is the root node of the
+    // b-tree.
+    if (id >= db->filled)
+        return NULL;
+
     // Read size of node.
-    nread = db->read (db, id, &nsize, sizeof (size_t));
-    if (!id && !nread) {
-        printf ("storage_map(): No root node.\n");
-        return NULL;  // Missing root node.
-    }
+    if (!db->read (db, id, &nsize, sizeof (size_t)))
+        perror ("storage_map(): Error reading record size.");
+
+    // Save record size for caller.
     *size = nsize - snode_size (0);
 
     // Allocate memory for node & data.
     if (!(n = malloc (nsize)))
-        return NULL;
+        perror ("storage_map(): Out of memory.");
 
     // Read node & data.
     nread = db->read (db, id + sizeof (size_t), n, nsize);
     if (nread != nsize)
         perror ("storage_map(): Reading data failed.");
 
-    return n;
+    db->filled += sizeof (size_t) + nsize;
+    return &n->data;
 }
 
 void
@@ -125,8 +131,11 @@ storage_add (bdb *db, dbid_t id, void *data, size_t size)
     // Write size of snode + record.
     storage_write_size (db, id, size);
 
-    // Write the snode.
+    // Write snode.
     storage_write_snode (db, id, &sn);
+
+    // Write record.
+    storage_write_data (db, id, data, size);
 
     // Link to parent node in b-tree.
     storage_insert_key (db, db->data2key (data), id);

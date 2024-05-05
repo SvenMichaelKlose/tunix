@@ -17,19 +17,23 @@ COMMONOBJ = $(COMMONSOURCES:.c=.o)
 
 all: $(PROGRAMS) test
 
-test:
+test: .passed
+
+.passed:
 	@for i in $(PROGRAMS); do \
 	    echo $$i; \
-	    ./$$i; \
+	    ./$$i || exit; \
 	done
+	$(TOUCH) .passed
 
 $(PROGRAMS): $(COMMONOBJ)
 
 clean:
-	rm -f $(COMMONOBJ) $(PROGRAMS:.c=.o) $(PROGRAMS) symbol.bdb
+	$(RM) $(COMMONOBJ) $(PROGRAMS:.c=.o) $(PROGRAMS) symbol.bdb .passed
 
 %: %.o $(COMMONOBJ)
 	$(CC) -o $@ $(CFLAGS) $<
 
 %.o: %.c
+	$(RM) .passed
 	$(CC) $(CFLAGS) -c $< -o $@

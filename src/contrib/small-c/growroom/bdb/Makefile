@@ -4,9 +4,11 @@ CFLAGS = -ggdb -g -O0 -Wall -Werror -DTESTS
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all: $(PROGRAM)
+all: $(PROGRAM) test
 
-test:
+test: test/.passed
+
+test/.passed:
 	$(MAKE) -C test all UNITY_ROOT="$(UNITY_ROOT)"
 
 clean:

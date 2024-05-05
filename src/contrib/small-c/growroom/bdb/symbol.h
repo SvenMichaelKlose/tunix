@@ -8,7 +8,7 @@ typedef struct _symbol {
 
 extern bdb symdb;
 
-extern int      add_symbol   (char *name, int value);
+extern dbid_t   add_symbol   (char *name, int value);
 extern symbol * find_symbol  (char *name);
 extern void     symbol_init  (void);
 extern void     symbol_close (void);

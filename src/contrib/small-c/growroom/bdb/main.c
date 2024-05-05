@@ -18,11 +18,11 @@ symbol_tests (void)
     symbol_init ();
 
     char *names[] = {
-        "Coziness", "Fireplace", "Warmth", NULL, "Comfort", "Blanket",
+        "Coziness", "Fireplace", "Warmth", "Comfort", "Blanket",
         "Teatime", "Homecoming", "Family time", "Relaxation", "VIC-20",
         NULL
     };
-    //for (int i = 0; i < 30; i++)
+    for (int i = 0; i < 30; i++)
         for (n = names; *n; n++)
             id = add_symbol (*n, strlen (*n));
 

@@ -53,7 +53,7 @@ symdb_read (bdb *db, dbid_t ofs, void *data, size_t size)
 
 bdb symdb;
 
-int
+dbid_t
 add_symbol (char *name, int value)
 {
     size_t size = sizeof (symbol) + strlen (name);
@@ -77,10 +77,10 @@ void
 symbol_init ()
 {
     symdb.next_free = 0;
-    symdb.read     = symdb_read;
-    symdb.write    = symdb_write;
-    symdb.compare  = symdb_compare;
-    symdb.data2key = symdb_data2key;
+    symdb.read      = symdb_read;
+    symdb.write     = symdb_write;
+    symdb.compare   = symdb_compare;
+    symdb.data2key  = symdb_data2key;
 }
 
 void

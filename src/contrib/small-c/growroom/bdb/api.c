@@ -35,7 +35,7 @@ bdb_find (bdb *db, void *key)
 // Map record by ID.
 // The record must exist.
 void *
-bdb_map (bdb *db, int id)
+bdb_map (bdb *db, dbid_t id)
 {
     // Search for ID in cache.
     cnode *cn = cache_find_id (db, id);

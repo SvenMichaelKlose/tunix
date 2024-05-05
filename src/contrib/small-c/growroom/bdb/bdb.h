@@ -40,10 +40,9 @@ typedef struct _bdb {
     cnode * cache_root_ids;
 } bdb;
 
-dbid_t  bdb_alloc (bdb *db, void *data, size_t size);
-void *  bdb_map   (bdb *db, int id);
-dbid_t  bdb_add   (bdb *db, void *key, void *data, size_t size);
-dbid_t  bdb_find  (bdb *db, void *key);
-void    bdb_close (bdb *db);
+dbid_t  bdb_add   (bdb *, void *key, void *data, size_t);
+dbid_t  bdb_find  (bdb *, void *key);
+void *  bdb_map   (bdb *, dbid_t);
+void    bdb_close (bdb *);
 
 #endif // #ifndef __BDB_H__

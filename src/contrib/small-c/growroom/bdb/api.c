@@ -14,7 +14,7 @@ bdb_add (bdb *db, void *key, void *data, size_t size)
 
     // Add record to cache and update index.
     if (!cache_add (db, id, data, size))
-        perror ("bdb_add(): Cannot allocate storage.");
+        return ERROR;
 
     return id;
 }

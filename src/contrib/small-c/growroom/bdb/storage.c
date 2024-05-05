@@ -37,7 +37,7 @@ storage_write_size (bdb *db, dbid_t id, size_t size)
 
 // Write head of snode only to storage.
 void
-storage_write_snode (bdb *db, dbid_t id, snode * n)
+storage_write_snode (bdb *db, dbid_t id, snode *n)
 {
     size_t nwritten = db->write (db, id + sizeof (size_t), n, snode_size (0));
     if (nwritten != snode_size (0))
@@ -46,10 +46,10 @@ storage_write_snode (bdb *db, dbid_t id, snode * n)
 
 // Write data after snode to storage.
 bool
-storage_write_data (bdb *db, dbid_t id, void * data, size_t size)
+storage_write_data (bdb *db, dbid_t id, void *data, size_t size)
 {
     size_t nsize = sizeof (size_t) + snode_size (0);
-    size_t nwritten = db->write (db, nsize, data, size);
+    size_t nwritten = db->write (db, id, data, size);
     return nwritten != nsize;
 }
 

@@ -285,7 +285,8 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
         db->num_cached++;
 
     // Allocate cnode.
-    cn = cnode_alloc ();
+    if (!(cn = cnode_alloc ()))
+        return NULL;
 
     // Copy over record info and data.
     cn->id   = id;

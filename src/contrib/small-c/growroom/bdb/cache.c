@@ -18,6 +18,8 @@ void
 cache_push_mru (bdb *db, cnode *cn)
 {
     cn->prev = NULL;
+    if (db->cache_first)
+        db->cache_first->prev = cn;
     cn->next = db->cache_first;
     db->cache_first = cn;
     if (!db->cache_last)
@@ -247,7 +249,6 @@ cache_add_stored (bdb *db, dbid_t id)
     return cn;
 }
 
-
 // Move least-recently used record to storage.
 void
 cache_store_lru (bdb *db)
@@ -312,3 +313,65 @@ cache_flush (bdb *db)
     while (db->num_cached--)
         cache_store_lru (db);
 }
+
+#ifdef TESTS
+
+bdb testdb;
+
+void
+cache_tests ()
+{
+    cnode *cn = cnode_alloc ();
+    cnode *cn2 = cnode_alloc ();
+    bdb *db = &testdb;
+
+    printf ("# Cache list tests.\n");
+
+    if (db->cache_first)
+        perror ("There should be no first.");
+    if (db->cache_last)
+        perror ("There should be no last.");
+
+    printf ("Adding first to list.\n");
+    cache_push_mru (db, cn);
+    if (db->cache_first != cn)
+        perror ("Not the first in LRU.");
+    if (db->cache_last != cn)
+        perror ("Not the last in LRU.");
+    if (cn->next)
+        perror ("First must not have a next.");
+    if (cn->prev)
+        perror ("First must not have a prev.");
+
+    printf ("Adding second to list.\n");
+    cache_push_mru (db, cn2);
+    if (db->cache_first != cn2)
+        perror ("Not the first in LRU.");
+    if (db->cache_last == cn2)
+        perror ("Must not be the last in LRU.");
+    if (cn->next)
+        perror ("First must not have a next.");
+    if (cn->prev != cn2)
+        perror ("First must point back to second.");
+    if (cn2->prev)
+        perror ("Second must not have a prev.");
+    if (cn2->next != cn)
+        perror ("Second must point to first.");
+
+    printf ("Taking LRU from list.\n");
+    if (cache_pop_lru (db) != cn)
+        perror ("Not the first record.\n");
+
+    printf ("Taking LRU from list.\n");
+    if (cache_pop_lru (db) != cn2)
+        perror ("Not the second record.\n");
+
+    if (db->cache_first)
+        perror ("There must be no first any more.");
+    if (db->cache_last)
+        perror ("There must be no last any more.");
+
+    printf ("# Cache list tests OK.\n\n");
+}
+
+#endif // #ifdef TESTS

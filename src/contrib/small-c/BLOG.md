@@ -3,6 +3,19 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-05-05 01:05 S.M. Klose
+
+Lots of stress made it hard to sit down
+and focus.  Added most basic tests to
+the "Bielefeld DB" and they paid out.
+
+# 2024-05-03 13:56 S.M. Klose
+
+For whatever reason I ended up doing
+most of the database code.  There's
+something magic to it.  Taken away by
+writing test code in a minute. ;)
+
 # 2024-04-28 20:41 S.M. Klose
 
 Sandwiched between toothache and party

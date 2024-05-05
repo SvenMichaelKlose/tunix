@@ -1,21 +1,44 @@
 Bielefeld DB
 ============
 
-This is a key/value database library.
+This is a key/value database library and
+every Unixoid operating system should
+have one.  In traditional Unices it is
+the "Berkeley DB" but this one is a lot
+simpler and intended to be used on tiny
+computers with no fancy memory
+management.
 
-* Light-weight, written in ANSI-C.
-* Embedded;  for use in applications.
+Features:
+
+* Light-weight; written in ANSI-C.
+* Embedded; for use in applications.
 * Simple API.
-* Records of variable length and any
-  format.  Nust contain their keys.
+* Records of variable lengths and any
+  format.  Must contain their keys.
 * Fast; using b-trees and LRU lists.
-* Storage to free main memory (e.g. file
-  or extended memory).
-* High-performance, indexed access to
-  records in memory and storage.
-* Long-term storage.
-* Stackless b-tree operations.
-* Maximum number of records, storage and
-  record size in bytes is 64K, 2G or
-  more, depending on compile-time
-  options.
+* Secondary storage to free main memory.
+* Long-term storage
+
+Operations:
+
+* Add record
+* Find record
+* Map record
+* Get next/previous record ordered
+* Empty cache to storage
+
+Limitations:
+
+* IDs of mapped records are not
+  validated (on storage level).
+* Records cannot be removed from
+  storage.  It continues growing.
+* Maximum number of records and storage
+  size is defined at compile-time.
+* One index per database only.
+
+Future enhancements:
+
+* ID validation for testing at least by
+  adding ID databases.

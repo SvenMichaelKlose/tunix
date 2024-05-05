@@ -44,4 +44,8 @@ extern cnode * cache_find_key    (bdb *, void *key);
 extern void    cache_make_mru    (bdb *, cnode *);
 extern void    cache_flush       (bdb *);
 
+#ifdef TESTS
+extern void cache_tests (void);
+#endif // #ifdef TESTS
+
 #endif // #ifndef __CACHE_H__

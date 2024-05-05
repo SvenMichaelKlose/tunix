@@ -1,14 +1,14 @@
 PROGRAM = bdb
 SRC = api.c cache.c main.c storage.c symbol.c
 INCDIR = "./include/"
-CFLAGS = -ggdb -g -O0 -Wall -Werror
+CFLAGS = -ggdb -g -O0 -Wall -Werror -DTESTS
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
 all: $(PROGRAM)
 
 clean:
-	rm -f $(OBJ) $(PROGRAM)
+	rm -f $(OBJ) $(PROGRAM) symbol.bdb
 
 $(PROGRAM): $(OBJ)
 	$(CC) -o $(PROGRAM) $(CFLAGS) $(OBJ)

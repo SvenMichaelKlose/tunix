@@ -4,13 +4,12 @@
 #include <strings.h>
 
 #include "bdb.h"
+#include "cache.h"
 #include "symbol.h"
 
-int
-main (int argc, char *argv[])
+void
+symbol_tests (void)
 {
-    (void) argc;
-    (void) argv;
     dbid_t id;
     symbol * s;
     char **n;
@@ -37,6 +36,16 @@ main (int argc, char *argv[])
         printf ("Symbol \"%s\" not found.\n", name);
 
     symbol_close ();
+}
+
+int
+main (int argc, char *argv[])
+{
+    (void) argc;
+    (void) argv;
+
+    cache_tests ();
+    symbol_tests ();
 
     return 0;
 }

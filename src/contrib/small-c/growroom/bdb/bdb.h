@@ -31,12 +31,11 @@ typedef struct _bdb {
     // Return key in record.
     void *(*data2key) (void *rec);
 
-    // Least/most-recently used.
-    cnode * cache_first;
-    cnode * cache_last;
+    cnode * cache_mru;
+    cnode * cache_lru;
     unsigned num_cached;
 
-    // Index b-tree roots.
+    // Cache b-tree roots.
     cnode * cache_root_keys;
     cnode * cache_root_ids;
 } bdb;

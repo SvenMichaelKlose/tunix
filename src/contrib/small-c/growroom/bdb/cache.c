@@ -18,12 +18,12 @@ void
 cache_push_mru (bdb *db, cnode *cn)
 {
     cn->prev = NULL;
-    if (db->cache_first)
-        db->cache_first->prev = cn;
-    cn->next = db->cache_first;
-    db->cache_first = cn;
-    if (!db->cache_last)
-        db->cache_last = cn;
+    if (db->cache_mru)
+        db->cache_mru->prev = cn;
+    cn->next = db->cache_mru;
+    db->cache_mru = cn;
+    if (!db->cache_lru)
+        db->cache_lru = cn;
 }
 
 // Remove from LRU list.
@@ -36,7 +36,7 @@ cache_remove_lru (bdb *db, cnode *cn)
     if (cn->prev)
         cn->prev->next = cn->next;
     else
-        db->cache_first = cn->next;
+        db->cache_mru = cn->next;
 
     // Update next node or the pointer
     // to the last node in the list.
@@ -44,14 +44,14 @@ cache_remove_lru (bdb *db, cnode *cn)
     if (cn->next)
         cn->next->prev = cn->prev;
     else
-        db->cache_last = cn->prev;
+        db->cache_lru = cn->prev;
 }
 
 // Pop least-recently used off LRU list.
 cnode *
 cache_pop_lru (bdb *db)
 {
-    cnode * cn = db->cache_last;
+    cnode * cn = db->cache_lru;
     if (cn)
         cache_remove_lru (db, cn);
     return cn;
@@ -328,16 +328,16 @@ cache_tests ()
 
     printf ("# Cache list tests.\n");
 
-    if (db->cache_first)
+    if (db->cache_mru)
         perror ("There should be no first.");
-    if (db->cache_last)
+    if (db->cache_lru)
         perror ("There should be no last.");
 
     printf ("Adding first to list.\n");
     cache_push_mru (db, cn);
-    if (db->cache_first != cn)
+    if (db->cache_mru != cn)
         perror ("Not the first in LRU.");
-    if (db->cache_last != cn)
+    if (db->cache_lru != cn)
         perror ("Not the last in LRU.");
     if (cn->next)
         perror ("First must not have a next.");
@@ -346,9 +346,9 @@ cache_tests ()
 
     printf ("Adding second to list.\n");
     cache_push_mru (db, cn2);
-    if (db->cache_first != cn2)
+    if (db->cache_mru != cn2)
         perror ("Not the first in LRU.");
-    if (db->cache_last == cn2)
+    if (db->cache_lru == cn2)
         perror ("Must not be the last in LRU.");
     if (cn->next)
         perror ("First must not have a next.");
@@ -367,9 +367,9 @@ cache_tests ()
     if (cache_pop_lru (db) != cn2)
         perror ("Not the second record.\n");
 
-    if (db->cache_first)
+    if (db->cache_mru)
         perror ("There must be no first any more.");
-    if (db->cache_last)
+    if (db->cache_lru)
         perror ("There must be no last any more.");
 
     printf ("# Cache list tests OK.\n\n");

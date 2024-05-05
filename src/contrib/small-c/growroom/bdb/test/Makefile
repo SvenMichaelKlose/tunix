@@ -21,10 +21,10 @@ test: .passed
 
 .passed:
 	@for i in $(PROGRAMS); do \
-	    echo $$i; \
-	    ./$$i || exit; \
+	    echo "Running test '$$i'."; \
+	    (./$$i || exit); \
 	done
-	$(TOUCH) .passed
+	touch .passed
 
 $(PROGRAMS): $(COMMONOBJ)
 

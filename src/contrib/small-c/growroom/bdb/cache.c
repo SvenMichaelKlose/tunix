@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <err.h>
 
 #include "bdb.h"
 #include "storage.h"
@@ -114,11 +115,12 @@ cache_insert_id (bdb *db, cnode *cn)
 {
     dbid_t  key = cache_idhash (cn->id);
     cnode   *n  = db->cache_root_ids;
-    cnode   *on;
+    cnode   *on = (void *) -1;
 
     // Add first node.
     if (!n) {
         db->cache_root_ids = cn;
+        cn->iparent = NULL;
         return;
     }
 
@@ -128,14 +130,36 @@ cache_insert_id (bdb *db, cnode *cn)
         if (cache_idhash (n->id) < key) {
             if (!(n = n->ileft)) {
                 on->ileft = cn;
-                return;
+                break;
             }
         } else
             if (!(n = n->iright)) {
                 on->iright = cn;
-                return;
+                break;
             }
     }
+    cn->iparent = on;
+}
+
+void
+cache_remove_id (bdb *db, cnode *cn)
+{
+    cnode * p = cn->iparent;
+
+    // Unlink from parent.
+    if (p) {
+        if (p->ileft == cn)
+            p->ileft = NULL;
+        else
+            p->iright = NULL;
+    } else
+        db->cache_root_ids = NULL;
+
+    // Re-insert child nodes.
+    if (cn->ileft)
+        cache_insert_key (db, cn->ileft);
+    if (cn->iright)
+        cache_insert_key (db, cn->iright);
 }
 
 // Insert node into key index.
@@ -144,28 +168,53 @@ cache_insert_key (bdb *db, cnode *cn)
 {
     void    *key = db->data2key (cn->data);
     cnode   *n   = db->cache_root_keys;
-    cnode   *on;
+    cnode   *on = (void *) -1;
 
     // Add first node.
     if (!n) {
         db->cache_root_keys = cn;
+        cn->kparent = NULL;
         return;
     }
 
     // Travel down binary tree.
     for (;;) {
+        if (on == n)
+            err (EXIT_FAILURE, "cache_insert_key(): endless loop");
         on = n;
         if (db->compare (db, n->data, key) < 0) {
             if (!(n = n->kleft)) {
                 on->kleft = cn;
-                return;
+                break;
             }
         } else
             if (!(n = n->kright)) {
                 on->kright = cn;
-                return;
+                break;
             }
     }
+    cn->kparent = on;
+}
+
+void
+cache_remove_key (bdb *db, cnode *cn)
+{
+    cnode * p = cn->kparent;
+
+    // Unlink from parent.
+    if (p) {
+        if (p->kleft == cn)
+            p->kleft = NULL;
+        else
+            p->kright = NULL;
+    } else
+        db->cache_root_keys = NULL;
+
+    // Re-insert child nodes.
+    if (cn->kleft)
+        cache_insert_key (db, cn->kleft);
+    if (cn->kright)
+        cache_insert_key (db, cn->kright);
 }
 
 // Find by ID.
@@ -223,8 +272,9 @@ void
 cache_remove (bdb *db, cnode *cn)
 {
     cache_remove_lru (db, cn);
-    //cache_remove_id (db, cn);
-    //cache_remove_key (db, cn);
+    cache_remove_id (db, cn);
+    cache_remove_key (db, cn);
+    free (cn->data);
     free (cn);
 }
 
@@ -314,65 +364,3 @@ cache_flush (bdb *db)
     while (db->num_cached--)
         cache_store_lru (db);
 }
-
-#ifdef TESTS
-
-bdb testdb;
-
-void
-cache_tests ()
-{
-    cnode *cn = cnode_alloc ();
-    cnode *cn2 = cnode_alloc ();
-    bdb *db = &testdb;
-
-    printf ("# Cache list tests.\n");
-
-    if (db->cache_mru)
-        perror ("There should be no first.");
-    if (db->cache_lru)
-        perror ("There should be no last.");
-
-    printf ("Adding first to list.\n");
-    cache_push_mru (db, cn);
-    if (db->cache_mru != cn)
-        perror ("Not the first in LRU.");
-    if (db->cache_lru != cn)
-        perror ("Not the last in LRU.");
-    if (cn->next)
-        perror ("First must not have a next.");
-    if (cn->prev)
-        perror ("First must not have a prev.");
-
-    printf ("Adding second to list.\n");
-    cache_push_mru (db, cn2);
-    if (db->cache_mru != cn2)
-        perror ("Not the first in LRU.");
-    if (db->cache_lru == cn2)
-        perror ("Must not be the last in LRU.");
-    if (cn->next)
-        perror ("First must not have a next.");
-    if (cn->prev != cn2)
-        perror ("First must point back to second.");
-    if (cn2->prev)
-        perror ("Second must not have a prev.");
-    if (cn2->next != cn)
-        perror ("Second must point to first.");
-
-    printf ("Taking LRU from list.\n");
-    if (cache_pop_lru (db) != cn)
-        perror ("Not the first record.\n");
-
-    printf ("Taking LRU from list.\n");
-    if (cache_pop_lru (db) != cn2)
-        perror ("Not the second record.\n");
-
-    if (db->cache_mru)
-        perror ("There must be no first any more.");
-    if (db->cache_lru)
-        perror ("There must be no last any more.");
-
-    printf ("# Cache list tests OK.\n\n");
-}
-
-#endif // #ifdef TESTS

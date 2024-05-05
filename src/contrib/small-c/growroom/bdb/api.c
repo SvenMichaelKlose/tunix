@@ -13,10 +13,9 @@ bdb_add (bdb *db, void *key, void *data, size_t size)
     dbid_t id = storage_alloc_id (db, size);
 
     // Add record to cache and update index.
-    if (!cache_add (db, id, data, size))
-        return ERROR;
-
-    return id;
+    return cache_add (db, id, data, size) ?
+        id :
+        ERROR;
 }
 
 // Find record by key.

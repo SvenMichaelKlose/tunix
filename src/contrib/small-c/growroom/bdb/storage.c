@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <err.h>
 
 #include "bdb.h"
 #include "storage.h"
@@ -99,8 +100,11 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
         if (!(n = storage_map (&unused_size, db, id)))
             return; // Root node.
 
-        // Decide which to child to travel.
+        if (oid == id)
+            err (EXIT_FAILURE, "storage_insert_key(): endless loop");
         oid = id;  // Save for update.
+
+        // Decide which to child to travel.
         if (db->compare (db, &n->data, key) < 0) {
             // Go left.
             if (!(id = n->left)) {
@@ -146,6 +150,7 @@ storage_find (bdb *db, void *key)
 {
     snode *n;
     dbid_t id = 0;
+    dbid_t oid = -1;
     int c;
     size_t unused_size;
 
@@ -153,6 +158,10 @@ storage_find (bdb *db, void *key)
         // Map node into memory.
         if (!(n = storage_map (&unused_size, db, id)))
             return NOTFOUND;
+
+        if (oid == id)
+            err (EXIT_FAILURE, "storage_find(): endless loop");
+        oid = id;
 
         // Decide to which child to travel.
         if (!(c = db->compare (db, &n->data, key)))

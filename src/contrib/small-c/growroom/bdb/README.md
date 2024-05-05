@@ -42,3 +42,5 @@ Future enhancements:
 
 * ID validation for testing at least by
   adding ID databases.
+* List-only cache without b-trees.
+* Using no keys at all.

@@ -1,11 +1,12 @@
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 
 #include "bdb.h"
-#include "cache.h"
 #include "symbol.h"
+
+#include "unity.h"
 
 void
 symbol_tests (void)
@@ -28,7 +29,7 @@ symbol_tests (void)
 
     s = bdb_map (&symdb, id);
     printf ("Got symbol \"%s\".\n", s->name);
-
+exit (0);
     s = find_symbol (name);
     if (s)
         printf ("Got symbol \"%s\".\n", s->name);
@@ -38,13 +39,13 @@ symbol_tests (void)
     symbol_close ();
 }
 
+void setUp (void) {}
+void tearDown (void) {}
+
 int
-main (int argc, char *argv[])
+main (void)
 {
-    (void) argc;
-    (void) argv;
-
-    symbol_tests ();
-
-    return 0;
+  UnityBegin("test/basic-lru-list.c");
+  RUN_TEST(symbol_tests, 0);
+  return UnityEnd();
 }

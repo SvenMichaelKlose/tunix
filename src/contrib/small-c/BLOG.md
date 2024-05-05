@@ -3,6 +3,15 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-05-06 19:26 S.M. Klose
+
+Now automated unit tests can be added in
+a jiff with help of the
+[Unity testing framework](https://github.com/ThrowTheSwitch/Unity)
+which I like very much for hitting the
+spot.  It should be part of the TUNIX
+system.
+
 # 2024-05-05 01:05 S.M. Klose
 
 Lots of stress made it hard to sit down

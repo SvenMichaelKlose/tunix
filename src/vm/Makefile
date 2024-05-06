@@ -2,7 +2,8 @@ PROGRAM=rom
 ASMSOURCES= rom.asm
 
 ifndef TV
-$(error Please set TV=PAL or TV=NTSC)
+$(warn Please set TV=PAL or TV=NTSC)
+TV=NTSC
 endif
 
 # TODO: Not using default Makefile because the rom shouldn't be exomized. (smk)

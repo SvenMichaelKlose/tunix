@@ -5,11 +5,11 @@ SOURCES= \
 	keyboard.c \
 	screen.c
 LIBRARIES= \
-    ../lib/text/libtext.a \
-    ../lib/lineedit/liblineedit.a \
-	../lib/term/libterm.a \
-    ../lib/gfx/libgfx.a \
-    ../lib/blit/libblit.a \
-    ../lib/ingle/libingle.a
+    $(TUNIX_LIB)/text/libtext.a \
+    $(TUNIX_LIB)/lineedit/liblineedit.a \
+	$(TUNIX_LIB)/term/libterm.a \
+    $(TUNIX_LIB)/gfx/libgfx.a \
+    $(TUNIX_LIB)/blit/libblit.a \
+    $(TUNIX_LIB)/ingle/libingle.a
 
 include ../Makefile.native

@@ -5,18 +5,25 @@ PROGRAM_PLAIN=$(PROGRAM).prg
 ARCHIVE?=   $(PROGRAM).zip
 ARCHIVE_FILES?=README.md $(PROGRAM)
 
+ifndef NO_STDLIB
+LIBRARIES+=$(CC65_LIB)/vic20.lib
+endif
+
 all: $(LIBRARY) $(ARCHIVE)
 
 $(ARCHIVE): $(PROGRAM)
 	zip $(ARCHIVE) $(ARCHIVE_FILES)
 
 $(PROGRAM): $(PROGRAM_PLAIN)
+ifndef NO_EXOMIZER
 	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 $(PROGRAM_PLAIN) -o $(PROGRAM)
+else
+	cp $(PROGRAM_PLAIN) $(PROGRAM)
+endif
 
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(LD) -C $(LD65CFG) -Ln $(PROGRAM).lbl -o $@ $^ \
-        $(LIBRARIES) \
-		$(CC65_LIB)/vic20.lib
+        $(LIBRARIES)
 
 $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) a $@ $^

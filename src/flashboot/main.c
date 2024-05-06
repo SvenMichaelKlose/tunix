@@ -5,7 +5,7 @@
 
 typedef unsigned char uchar;
 
-#include <lib/ultimem/ultimem.h>
+#include <ultimem/ultimem.h>
 #define BLK3_START  ((void *) 0x6000)
 #define BLK4_START  ((void *) 0x8000)
 

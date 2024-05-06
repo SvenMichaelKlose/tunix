@@ -2,22 +2,10 @@ PROGRAM=flashboot.bin
 ASMSOURCES=rom-info.asm start.asm
 #ASMSOURCES=alloc.asm api.asm copy-bank.asm launch.asm main.asm save-state.asm rom-info.asm prgend.asm
 SOURCES=main.c
-
-include ../Makefile.rules
-
-%.o: %.asm
-	$(AS) -o $@ $<
-
-%.o: %.c
-	$(CC) -c -I.. $(CFLAGS) -o $@ $<
-
-all: $(PROGRAM)
-
-$(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) --config rom.cfg -m $(PROGRAM).map -Ln $(PROGRAM).lbl -o $@ $^ \
+LIBRARIES= \
     $(TUNIX_LIB)/directory-list/libdirectory-list.a \
-    $(TUNIX_LIB)/ultimem/libultimem.a \
-    $(CC65_LIB)/vic20.lib
+    $(TUNIX_LIB)/ultimem/libultimem.a
+LD65CFG=vic.cfg
+NO_EXOMIZER=1
 
-clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).map $(PROGRAM).lbl ultifs.bin desktop.bin
+include ../Makefile.native

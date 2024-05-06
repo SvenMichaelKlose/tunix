@@ -25,46 +25,9 @@ gcbm_closedir ()
     cbm_closedir (2);
 }
 
-/* For future directory support.
-char __fastcall__
-gcbm_enterdir (char * name)
-{
-    sprintf (message_buffer, "CD/%S/", name);
-    cbm_open (15, 8, 15, message_buffer);
-    cbm_read (15, message_buffer, 63);
-    cbm_close (15);
-
-    return 0;
-}
-
-void
-gcbm_leavedir ()
-{
-}
-*/
-
-char __fastcall__
-gcbm_open (char * name, char mode)
-{
-    return cbm_open (2, 8, mode, name);
-}
-
-int __fastcall__
-gcbm_read (void * data, unsigned size)
-{
-    if (cbm_k_readst ())    /* cbm_read() returns 1 on end-of-file. */
-        return 0;
-    return cbm_read (2, data, size);
-}
-
-void
-gcbm_close ()
-{
-    cbm_close (2);
-}
-
+// Free directory list.
 void __fastcall__
-fsb_free (struct dirent * d)
+free_directory_list (struct dirent * d)
 {
     struct dirent * n;
 
@@ -78,27 +41,36 @@ fsb_free (struct dirent * d)
 }
 
 struct dirent * __fastcall__
-make_directory_list ()
+make_directory_list (unsigned *num_items)
 {
     struct dirent * first_dirent = NULL;
     struct dirent * last_dirent = NULL;
     struct dirent * d;
-    unsigned len = 0;
 
+    *num_items = 0;
     gcbm_opendir ();
     while (1) {
         if (gcbm_readdir (&dirent))
             break;
+
+        // Self or parent directory.
         if (dirent.type == CBM_T_HEADER || dirent.name[0] == '.' || (dirent.type == CBM_T_DIR && (!strcmp (".", dirent.name) || !strcmp ("..", dirent.name))))
             continue;
-        len++;
+
+        // Update number of items.
+        (*num_items)++;
+
+        // Allocate dirent...
         d = malloc (sizeof (struct dirent));
+
+        // ...and link it to the previous one.
         if (last_dirent)
             last_dirent->next = d;
         else
             first_dirent = d;
         last_dirent = d;
 
+        // Copy size, type and name.
         d->size = dirent.size;
         d->type = dirent.type;
         memcpy (&d->name, &dirent.name, 17);

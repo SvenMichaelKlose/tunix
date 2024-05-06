@@ -8,7 +8,7 @@ struct dirent {
     struct dirent * next;
 };
 
-extern struct dirent * __fastcall__ make_directory_list ();
+extern struct dirent * __fastcall__ make_directory_list (unsigned *);
 extern void            __fastcall__ free_directory_list (struct dirent *);
 
 #endif // #define __DIRECTORY_LIST_H__

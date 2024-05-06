@@ -1,7 +1,7 @@
 .import _ultimem_unhide
 
 ; Just start BASIC.
-START_BASIC = 1
+;START_BASIC = 1
 
 ; The RAM bank to copy this ROM to,
 ; before executing the cc65 binary in

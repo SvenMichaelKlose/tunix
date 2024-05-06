@@ -3,11 +3,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <lib/ingle/cc65-charmap.h>
-#include <lib/lineedit/liblineedit.h>
-#include <lib/text/line.h>
-#include <lib/text/motion.h>
-#include <lib/term/libterm.h>
+#include <ingle/cc65-charmap.h>
+#include <lineedit/liblineedit.h>
+#include <text/line.h>
+#include <text/motion.h>
+#include <term/libterm.h>
 
 
 line *    first_line;

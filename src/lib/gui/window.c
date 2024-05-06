@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <lib/ultimem/ultimem.h>
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/obj.h>
-#include <lib/gui/layout-ops.h>
-#include <lib/gui/event.h>
-#include <lib/gui/window.h>
-#include <lib/gui/message.h>
-#include <lib/gui/frame.h>
+#include <ultimem/ultimem.h>
+#include <gfx/libgfx.h>
+#include <gui/obj.h>
+#include <gui/layout-ops.h>
+#include <gui/event.h>
+#include <gui/window.h>
+#include <gui/message.h>
+#include <gui/frame.h>
 
 #define WINDOW_TITLE_HEIGHT     11
 

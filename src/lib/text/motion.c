@@ -1,12 +1,12 @@
-#include <lib/ingle/cc65-charmap.h>
+#include <ingle/cc65-charmap.h>
 
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include <lib/lineedit/liblineedit.h>
-#include <lib/term/libterm.h>
+#include <lineedit/liblineedit.h>
+#include <term/libterm.h>
 
 #include "line.h"
 #include "motion.h"

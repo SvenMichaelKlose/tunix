@@ -1,11 +1,11 @@
 #include <stdlib.h>
 
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/obj.h>
-#include <lib/gui/event.h>
-#include <lib/gui/layout-ops.h>
-#include <lib/gui/message.h>
-#include <lib/gui/box.h>
+#include <gfx/libgfx.h>
+#include <gui/obj.h>
+#include <gui/event.h>
+#include <gui/layout-ops.h>
+#include <gui/message.h>
+#include <gui/box.h>
 
 void __fastcall__ draw_box (struct obj *);
 

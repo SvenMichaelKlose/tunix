@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <conio.h>
 
-#include <lib/term/libterm.h>
+#include <term/libterm.h>
 
 void
 gotoxy (unsigned char x, unsigned char y)

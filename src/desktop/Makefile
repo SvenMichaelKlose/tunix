@@ -14,7 +14,7 @@ include ../Makefile.rules
 	$(AS) -o $@ $<
 
 %.o: %.c
-	$(CC) --register-space 19 -O -c $(CFLAGS) -I $(CC65_INCLUDE) -I.. -o $@ $<
+	$(CC) --register-space 19 -O -c $(CFLAGS) -I$(CC65_INCLUDE) -I$(TUNIX_LIB) -o $@ $<
 
 all: $(PROGRAM)
 	$(AS) -o charset-4x8.o charset-4x8-light.asm

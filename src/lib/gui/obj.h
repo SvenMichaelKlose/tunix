@@ -1,8 +1,8 @@
 #ifndef OBJ_H
 #define OBJ_H
 
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/event.h>
+#include <gfx/libgfx.h>
+#include <gui/event.h>
 
 typedef unsigned char uchar;
 

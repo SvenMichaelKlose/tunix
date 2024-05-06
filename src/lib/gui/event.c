@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <lib/ultimem/ultimem.h>
-#include <lib/gui/obj.h>
-#include <lib/gui/event.h>
+#include <ultimem/ultimem.h>
+#include <gui/obj.h>
+#include <gui/event.h>
 
 struct queued_event {
     struct queued_event *  next;

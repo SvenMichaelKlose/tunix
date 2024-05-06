@@ -1,15 +1,15 @@
-#include <lib/ingle/cc65-charmap.h>
+#include <ingle/cc65-charmap.h>
 
 #include <cbm.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/obj.h>
-#include <lib/gui/event.h>
-#include <lib/gui/inputline.h>
-#include <lib/gui/layout-ops.h>
-#include <lib/gui/message.h>
+#include <gfx/libgfx.h>
+#include <gui/obj.h>
+#include <gui/event.h>
+#include <gui/inputline.h>
+#include <gui/layout-ops.h>
+#include <gui/message.h>
 
 #define MAX_INPUTLINE_LENGTH    256
 

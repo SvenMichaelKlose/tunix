@@ -5,8 +5,7 @@ PROGRAM_PLAIN=$(PROGRAM).prg
 ARCHIVE?=   $(PROGRAM).zip
 ARCHIVE_FILES?=README.md $(PROGRAM)
 
-all: $(ARCHIVE)
-	@echo "Making program: " $(PROGRAM)
+all: $(LIBRARY) $(ARCHIVE)
 
 $(ARCHIVE): $(PROGRAM)
 	zip $(ARCHIVE) $(ARCHIVE_FILES)
@@ -19,10 +18,16 @@ $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
         $(LIBRARIES) \
 		$(CC65_LIB)/vic20.lib
 
+$(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
+	$(AR) a $@ $^
+
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN)
 	rm -f $(PROGRAM) $(PROGRAM).dbg $(PROGRAM).lbl $(PROGRAM).map
-	rm -f $(ARCHIVE)
+	rm -f $(LIBRARY) $(ARCHIVE) $(C1541_IMAGE)
+
+c1541image:
+	c1541 -format "$(PROGRAM),01" d64 $(C1541_IMAGE) -write $(C1541_IMAGE_FILES) # TODO (smk)
 
 %.o: %.asm
 	$(AS) $(ASFLAGS) -o $@ $<

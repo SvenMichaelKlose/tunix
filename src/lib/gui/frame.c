@@ -1,10 +1,10 @@
 #include <stdlib.h>
 
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/obj.h>
-#include <lib/gui/frame.h>
-#include <lib/gui/layout-ops.h>
-#include <lib/gui/message.h>
+#include <gfx/libgfx.h>
+#include <gui/obj.h>
+#include <gui/frame.h>
+#include <gui/layout-ops.h>
+#include <gui/message.h>
 
 void __fastcall__ draw_frame (struct obj *);
 

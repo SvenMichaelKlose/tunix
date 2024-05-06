@@ -1,4 +1,5 @@
 SUBDIRS= \
+    lib \
     cbm-console \
     flashboot \
     fstest \

@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <lib/ultimem/ultimem.h>
-#include <lib/gfx/libgfx.h>
-#include <lib/gui/error.h>
-#include <lib/gui/obj.h>
+#include <ultimem/ultimem.h>
+#include <gfx/libgfx.h>
+#include <gui/error.h>
+#include <gui/obj.h>
 
 void *
 alloc_obj (size_t size, struct obj_ops * ops)

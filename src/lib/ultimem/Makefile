@@ -1,5 +1,5 @@
 LIBRARY=libultimem.a
-SOURCES_asm= \
+ASMSOURCES= \
     burn.asm \
     bank-offset.asm \
     c-copy.asm \
@@ -9,20 +9,5 @@ SOURCES_asm= \
     erase.asm \
     readwrite.asm \
     unhide.asm
-SOURCES=
 
-include ../../Makefile.rules
-
-%.o: %.asm
-	$(AS) -g -o $@ $<
-
-%.o: %.c
-	$(CC) -O -c $(CFLAGS) -I../ingle/ -o $@ $<
-
-all: $(LIBRARY)
-
-$(LIBRARY): $(SOURCES_asm:.asm=.o) $(SOURCES:.c=.o)
-	$(AR) a $@ $^
-
-clean:
-	rm -f $(SOURCES:.c=.o) $(SOURCES_asm:.asm=.o) $(LIBRARY)
+include ../../Makefile.native

@@ -2,10 +2,8 @@
 
 #include "linebuf.h"
 
-
 char        linebuf[MAX_LINE_LENGTH + 1];
 unsigned    linebuf_length;
-
 
 void
 linebuf_clear ()

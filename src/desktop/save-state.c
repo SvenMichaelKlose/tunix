@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include <lib/ingle/ingle.h>
+#include <ingle/ingle.h>
 
 #include "desktop.h"
 

@@ -3,15 +3,4 @@ ASMSOURCES= \
     main.asm \
     c-wrappers.asm
 
-include ../../Makefile.rules
-
-%.o: %.asm
-	$(AS) -g -I$(CA65_INCLUDE) -o $@ $<
-
-$(LIBRARY): $(ASMSOURCES:.asm=.o)
-	$(AR) a $@ $^
-
-all: $(LIBRARY)
-
-clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(CSOURCES:.asm=.o) $(LIBRARY)
+include ../../Makefile.native

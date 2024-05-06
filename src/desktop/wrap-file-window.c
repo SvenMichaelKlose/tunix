@@ -1,7 +1,7 @@
 #include <cbm.h>
 
-#include <lib/ultimem/ultimem.h>
-#include <lib/gui/obj.h>
+#include <ultimem/ultimem.h>
+#include <gui/obj.h>
 
 #include "file-window.h"
 

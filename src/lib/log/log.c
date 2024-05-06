@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <lib/ultimem/ultimem.h>
+#include <ultimem/ultimem.h>
 
 #include "liblog.h"
 

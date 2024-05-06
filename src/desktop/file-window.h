@@ -1,7 +1,7 @@
 #ifndef FILE_WINDOW_H
 #define FILE_WINDOW_H
 
-#include <lib/gui/window.h>
+#include <gui/window.h>
 
 #define FILE_WINDOW_BANK    7
 

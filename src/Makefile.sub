@@ -6,19 +6,17 @@ SUBDIRS ?= $(shell find . -mindepth 1 -maxdepth 1 -type d)
 all: $(SUBDIRS)
 
 .PHONY: test
-target: $(addprefix target-,$(SUBDIRS))
+test: $(addprefix test-,$(SUBDIRS))
 
-.PHONY: $(SUBDIRS) $(addprefix test-,$(SUBDIRS))
+.PHONY: $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@
 
 test-%:
 	$(MAKE) -C $* test
 
-# Clean target to clean all subdirectories
 .PHONY: clean
 clean: $(addprefix clean-,$(SUBDIRS))
 
 clean-%:
 	$(MAKE) -C $* clean
-

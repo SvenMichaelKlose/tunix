@@ -753,7 +753,7 @@ void import_directory (upos bparent, char * name, int indent)
     if (!(dir = opendir (name)))
         return;
 
-    while (entry = readdir (dir)) {
+    while ((entry = readdir (dir))) {
         char path[1024];
         if (!strcmp (entry->d_name, ".") || !strcmp (entry->d_name, ".."))
             continue;

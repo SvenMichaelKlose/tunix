@@ -1,6 +1,4 @@
-INGLEROOT?=`pwd`
-
-all: world mkfs image c1541
+all: world mkfs ultimem_image c1541_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
@@ -12,12 +10,12 @@ mkfs:
 	@echo "# Making host mkfs."
 	$(MAKE) -C mkfs all
 
-image:
+ultimem_image:
 	@echo "# Making UltiMem ROM image."
 	./mkfs/mkfs.ultifs ingle.img n l src/flashboot/flashboot.bin w
 	./mkfs/mkfs.ultifs image n l src/flashboot/flashboot.bin i compiled W
 
-c1541:
+c1541_image:
 	@echo "# Making c1541 disk image."
 	mkdir -p bin
 	cp src/fstest/fstest bin/

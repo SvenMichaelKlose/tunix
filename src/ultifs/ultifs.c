@@ -21,7 +21,7 @@ typedef unsigned char uchar;
 #else
     #pragma code-name ("ULTIFS")
     #include <cbm.h>
-    #include <lib/ultimem/ultimem.h>
+    #include <ultimem/ultimem.h>
     uchar * store = (void *) 0xa000u;
     #define cc65register    register
 #endif

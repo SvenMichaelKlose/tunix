@@ -5,6 +5,7 @@ ifndef TV
 $(error Please set TV=PAL or TV=NTSC)
 endif
 
+# TODO: Not using default Makefile because the rom shouldn't be exomized. (smk)
 include ../Makefile.rules
 
 %.o: %.asm

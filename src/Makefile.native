@@ -1,0 +1,31 @@
+THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+include $(THIS_DIR)/Makefile.rules
+
+PROGRAM_PLAIN=$(PROGRAM).prg
+ARCHIVE?=   $(PROGRAM).zip
+ARCHIVE_FILES?=README.md $(PROGRAM)
+
+all: $(ARCHIVE)
+	@echo "Making program: " $(PROGRAM)
+
+$(ARCHIVE): $(PROGRAM)
+	zip $(ARCHIVE) $(ARCHIVE_FILES)
+
+$(PROGRAM): $(PROGRAM_PLAIN)
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 $(PROGRAM_PLAIN) -o $(PROGRAM)
+
+$(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
+	$(LD) -C $(LD65CFG) -Ln $(PROGRAM).lbl -o $@ $^ \
+        $(LIBRARIES) \
+		$(CC65_LIB)/vic20.lib
+
+clean:
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN)
+	rm -f $(PROGRAM) $(PROGRAM).dbg $(PROGRAM).lbl $(PROGRAM).map
+	rm -f $(ARCHIVE)
+
+%.o: %.asm
+	$(AS) $(ASFLAGS) -o $@ $<
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<

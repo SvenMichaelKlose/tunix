@@ -6,7 +6,7 @@ ASMSOURCES= \
 include ../../Makefile.rules
 
 %.o: %.asm
-	$(AS) -g -o $@ $<
+	$(AS) -g -I$(CA65_INCLUDE) -o $@ $<
 
 $(LIBRARY): $(ASMSOURCES:.asm=.o)
 	$(AR) a $@ $^

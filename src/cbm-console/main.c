@@ -1,6 +1,7 @@
 // TUNIX virtual console
 
-#include <lib/tunix/tunix.h>
+#include <tunix/tunix.h>
+
 #include <conio.h>
 #include <stdlib.h>
 #include <stdio.h>

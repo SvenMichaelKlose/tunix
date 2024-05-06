@@ -1,19 +1,11 @@
 PROGRAM=lisp
 SOURCES= \
 	main.c
+LIBRARIES= \
+    $(TUNIX_LIB)/term/libterm.a \
+    $(TUNIX_LIB)/gfx/libgfx.a \
+    $(TUNIX_LIB)/blit/libblit.a \
+    $(TUNIX_LIB)/ingle/libingle.a \
+    $(TUNIX_LIB)/ultimem/libultimem.a
 
-include ../Makefile.rules
-
-%.o: %.asm
-	$(AS) -o $@ $<
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) -I../lib/ -o $@ $<
-
-all: $(PROGRAM)
-
-$(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C vic.cfg -Ln $(PROGRAM).lbl -o $@ $^ ../lib/term/libterm.a ../lib/gfx/libgfx.a ../lib/blit/libblit.a ../lib/ingle/libingle.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib
-
-clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl
+include ../Makefile.native

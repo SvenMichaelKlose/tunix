@@ -11,20 +11,10 @@ ASMSOURCES= \
 	dispatcher.asm \
 	zeropage.asm \
 	wedge-secondary.asm
+LIBRARIES= \
+    $(TUNIX_LIB)/ultimem/libultimem.a \
+    $(TUNIX_LIB)/posix/libposix.a \
+    $(TUNIX_LIB)/log/liblog.a
+LD65CFG=vic.cfg
 
-include ../Makefile.rules
-
-%.o: %.asm
-	$(AS) -o $@ $<
-
-%.o: %.c
-	$(CC) -c $(CFLAGS) -Oi -DTEST -o $@ -I../ $<
-
-all: $(PROGRAM)
-	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 ultifs.prg -o ultifs
-
-$(PROGRAM): $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o)
-	$(LD) $(LDFLAGS) -C vic.cfg -o $@ $^ ../lib/ultimem/libultimem.a ../lib/posix/libposix.a ../lib/log/liblog.a $(CC65_HOME)/share/cc65/lib/vic20.lib
-
-clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map $(PROGRAM).dbg ultifs
+include ../Makefile.native

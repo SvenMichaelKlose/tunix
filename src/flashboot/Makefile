@@ -14,7 +14,10 @@ include ../Makefile.rules
 all: $(PROGRAM)
 
 $(PROGRAM): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) --config rom.cfg -m $(PROGRAM).map -Ln $(PROGRAM).lbl -o $@ $^ ../lib/directory-list/libdirectory-list.a ../lib/ultimem/libultimem.a $(CC65_HOME)/share/cc65/lib/vic20.lib
+	$(LD) --config rom.cfg -m $(PROGRAM).map -Ln $(PROGRAM).lbl -o $@ $^ \
+    $(TUNIX_LIB)/directory-list/libdirectory-list.a \
+    $(TUNIX_LIB)/ultimem/libultimem.a \
+    $(CC65_LIB)/vic20.lib
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).map $(PROGRAM).lbl ultifs.bin desktop.bin

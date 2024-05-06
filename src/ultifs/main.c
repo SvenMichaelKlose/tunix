@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <lib/ultimem/ultimem.h>
-#include <lib/log/liblog.h>
+#include <ultimem/ultimem.h>
+#include <log/liblog.h>
 
 #include "ultifs.h"
 

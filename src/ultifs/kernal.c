@@ -1,6 +1,6 @@
 #pragma code-name ("ULTIFS")
 
-#include <lib/ingle/cc65-charmap.h>
+#include <ingle/cc65-charmap.h>
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -12,9 +12,9 @@
 #include <dirent.h>
 #include <cbm.h>
 
-#include <lib/log/liblog.h>
-#include <lib/ultimem/ultimem.h>
-#include <lib/posix/string.h>
+#include <log/liblog.h>
+#include <ultimem/ultimem.h>
+#include <posix/string.h>
 
 #include "ultifs.h"
 #include "kernal.h"

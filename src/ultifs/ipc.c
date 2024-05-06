@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 
-#include <lib/ingle/cc65-charmap.h>
-#include <lib/ultimem/ultimem.h>
+#include <ingle/cc65-charmap.h>
+#include <ultimem/ultimem.h>
 
 #include "ultifs.h"
 #include "kernal.h"

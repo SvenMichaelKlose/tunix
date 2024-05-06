@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <lib/ingle/cc65-charmap.h>
-#include <lib/term/libterm.h>
-#include <lib/lineedit/liblineedit.h>
-#include <lib/text/line.h>
+#include <ingle/cc65-charmap.h>
+#include <term/libterm.h>
+#include <lineedit/liblineedit.h>
+#include <text/line.h>
 
 #include "screen.h"
 

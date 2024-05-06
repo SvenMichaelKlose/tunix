@@ -17,6 +17,7 @@ all:
 	$(MAKE) -C lib/lineedit all
 	$(MAKE) -C lib/log all
 	$(MAKE) -C lib/text all
+	$(MAKE) -C lib/tunix all
 	$(MAKE) -C lib/gui all
 	$(MAKE) -C cbm-console all
 	$(MAKE) -C flashboot all
@@ -49,6 +50,7 @@ clean:
 	$(MAKE) -C lib/lineedit clean
 	$(MAKE) -C lib/log clean
 	$(MAKE) -C lib/text clean
+	$(MAKE) -C lib/tunix clean
 	$(MAKE) -C lib/gui clean
 	$(MAKE) -C cbm-console clean
 	$(MAKE) -C flashboot clean

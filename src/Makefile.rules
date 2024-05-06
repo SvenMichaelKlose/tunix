@@ -1,14 +1,25 @@
-CC65_HOME ?= /usr/local
-CC65_INCLUDE = $(CC65_HOME)/share/cc65/include/
-CA65_INCLUDE = $(CC65_HOME)/share/cc65/asminc/
-AS      = $(CC65_HOME)/bin/ca65
-CC      = $(CC65_HOME)/bin/cl65
-AR      = $(CC65_HOME)/bin/ar65
-LD      = $(CC65_HOME)/bin/ld65
-ASFLAGS = -I$(CA65_INCLUDE)
-CFLAGS  = -O -Or -Os -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
-#CFLAGS  = -r -I/usr/local/share/cc65/include/ -Werror -Wa -I/usr/local/share/cc65/asminc/
-LDFLAGS = -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
+THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
+CC65_ROOT    = /usr/local/
+CC65_BIN     ?= $(CC65_ROOT)/bin/
+CC65_SHARE   ?= $(CC65_ROOT)/share/cc65/
+CA65_INCLUDE  = $(CC65_SHARE)/asminc/
+CC65_INCLUDE  = $(CC65_SHARE)/include/
+CC65_LIB      = $(CC65_SHARE)/lib/
+CC65_CFG      = $(CC65_SHARE)/cfg/
+
+TUNIX_LIB = $(THIS_DIR)/lib/
+
+AR      = $(CC65_BIN)/ar65
+AS      = $(CC65_BIN)/ca65
+CC      = $(CC65_BIN)/cl65
+LD      = $(CC65_BIN)/ld65
+
+ASFLAGS   = -I$(CA65_INCLUDE)
+CFLAGS    = -I$(CC65_INCLUDE) -Werror -Wa -I$(CA65_INCLUDE)
+COPTFLAGS = -O -Or -Os
+LDFLAGS   = -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
+LD65CFG  ?= $(THIS_DIR)/../cfg/ld65/vic20.cfg
 
 EXOMIZER ?= exomizer-2.0.10
 EXOMIZER_FLAGS ?= -B -n

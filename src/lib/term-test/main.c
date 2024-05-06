@@ -5,8 +5,8 @@
 
 #include <cbm.h>
 
-#include <lib/ingle/cc65-charmap.h>
-#include <lib/term/libterm.h>
+#include <ingle/cc65-charmap.h>
+#include <term/libterm.h>
 
 char teststr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-*/";
 

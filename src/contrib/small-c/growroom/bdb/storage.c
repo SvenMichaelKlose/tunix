@@ -154,14 +154,18 @@ storage_find (bdb *db, void *key)
 
     for (;;) {
         if (!(n = storage_map (&unused_size, db, id)))
-            return NOTFOUND;
-        if (!(c = db->compare (db, &n->data, key)))
+            break;
+        if (!(c = db->compare (db, &n->data, key))) {
+            free (n);
             return id;
+        }
         if (c < 0) {
             if (!(id = n->left))
-                return NOTFOUND;
+                break;
         } else
             if (!(id = n->right))
-                return NOTFOUND;
+                break;
     }
+    free (n);
+    return NOTFOUND;
 }

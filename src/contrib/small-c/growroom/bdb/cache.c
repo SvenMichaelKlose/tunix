@@ -62,11 +62,7 @@ cache_pop_lru (bdb *db)
 void
 cache_make_mru (bdb *db, cnode *cn)
 {
-    // Remove from wherever node is in the list.
     cache_list_remove (db, cn);
-
-    // Push it onto the front of the list
-    // (most-recently used).
     cache_push_mru (db, cn);
 }
 
@@ -110,6 +106,7 @@ cache_id2key (dbid_t id)
 }
 
 // Insert node into ID index.
+// https://en.wikipedia.org/wiki/Binary_search_tree
 void
 cache_insert_id (bdb *db, cnode *cn)
 {
@@ -124,7 +121,6 @@ cache_insert_id (bdb *db, cnode *cn)
         return;
     }
 
-    // Travel down binary tree.
     for (;;) {
         on = n;
         if (cache_id2key (n->id) < key) {
@@ -155,7 +151,7 @@ cache_index_remove_id (bdb *db, cnode *cn)
     } else
         db->cache_root_ids = NULL;
 
-    // Re-insert child nodes.
+    // Re-insert children.
     if (cn->ileft)
         cache_insert_id (db, cn->ileft);
     if (cn->iright)
@@ -163,6 +159,7 @@ cache_index_remove_id (bdb *db, cnode *cn)
 }
 
 // Insert node into key index.
+// https://en.wikipedia.org/wiki/Binary_search_tree
 void
 cache_insert_key (bdb *db, cnode *cn)
 {
@@ -177,7 +174,6 @@ cache_insert_key (bdb *db, cnode *cn)
         return;
     }
 
-    // Travel down binary tree.
     for (;;) {
         if (on == n)
             err (EXIT_FAILURE, "cache_insert_key(): endless loop");
@@ -210,7 +206,7 @@ cache_index_remove_key (bdb *db, cnode *cn)
     } else
         db->cache_root_keys = NULL;
 
-    // Re-insert child nodes.
+    // Re-insert children.
     if (cn->kleft)
         cache_insert_key (db, cn->kleft);
     if (cn->kright)
@@ -248,16 +244,13 @@ cache_find_key (bdb *db, void *key)
     cnode *n = db->cache_root_keys;
     int c;
 
-    // Empty tree, nothing to find.
     if (!n)
         return NULL;
 
     for (;;) {
-        // Test and return if match.
         if (!(c = db->compare (db, n->data, key)))
             return n;
 
-        // Travel down the tree.
         if (c < 0) {
             if (!(n = n->kleft))
                 return NULL;

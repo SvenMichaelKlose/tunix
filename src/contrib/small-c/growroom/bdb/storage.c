@@ -59,7 +59,8 @@ size_t
 storage_read_size (bdb *db, dbid_t id)
 {
     size_t nsize;
-    if (!db->read (db, id, &nsize, sizeof (size_t)))
+    size_t nread = db->read (db, id, &nsize, sizeof (size_t));
+    if (nread != sizeof (size_t))
         perror ("storage_map(): Error reading record size.");
     return nsize - snode_size (0);
 }
@@ -82,6 +83,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
         return NULL;
 
     *size = storage_read_size (db, id);
+    printf ("%lx\n", *size);
     if (!(n = malloc (snode_size (*size))))
         perror ("storage_map(): Out of memory.");
     storage_read_snode_and_data (db, id, n, *size);
@@ -89,6 +91,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
     return &n->data;
 }
 
+// https://en.wikipedia.org/wiki/Binary_search_tree
 void
 storage_insert_key (bdb *db, void *key, dbid_t recid)
 {

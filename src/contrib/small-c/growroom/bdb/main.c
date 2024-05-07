@@ -42,10 +42,8 @@ bdb_iter keyiter = {
 void
 symbol_tests (void)
 {
-    dbid_t id;
     symbol * s;
     char **n;
-    char *name = "Homecoming";
     FILE * dot;
 
     symbol_init ();
@@ -58,16 +56,13 @@ symbol_tests (void)
     };
     for (int i = 0; i < 1; i++)
         for (n = names; *n; n++)
-            id = add_symbol (names[rand () % (sizeof (names) / sizeof (char *) - 1)], strlen (*n));
+            add_symbol (names[rand () % (sizeof (names) / sizeof (char *) - 1)], strlen (*n));
 
-    s = bdb_map (&symdb, id);
-    printf ("Got symbol \"%s\".\n", s->name);
-
-    s = find_symbol (name);
-    if (s)
-        printf ("Got symbol \"%s\".\n", s->name);
-    else
-        printf ("Symbol \"%s\" not found.\n", name);
+    for (n = names; *n; n++) {
+        printf ("Finding symbol \"%s\".\n", *n);
+        if (!(s = find_symbol (*n)))
+            printf ("Symbol \"%s\" not found.\n", *n);
+    }
 
     dot = fopen ("symbol.dot", "w");
     tree2dot (dot, &keyiter, symdb.cache_root_keys);

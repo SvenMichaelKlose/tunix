@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,8 @@
 #include "bdb.h"
 #include "storage.h"
 #include "cache.h"
+
+#include "symbol.h"
 
 cnode *
 cnode_alloc (void)
@@ -269,30 +272,13 @@ cache_remove (bdb *db, cnode *cn)
     free (cn);
 }
 
-// Fetch record from storage and add it to the cache.
-cnode *
-cache_add_stored (bdb *db, dbid_t id)
-{
-    snode  *sn;
-    size_t size;
-    cnode  *cn;
-
-    if ((sn = storage_map (&size, db, id))) {
-        cn = cache_add (db, id, &sn->data, size);
-        cn->flags |= HAS_STORAGE;
-        return cn;
-    }
-    return NULL;
-}
-
 // Move least-recently used record to storage.
 void
 cache_swap_out_lru (bdb *db)
 {
     // Get least-recently used record.
     cnode *cn = cache_pop_lru (db);
-    if (!cn)
-        perror ("cache_swap_out_lru() called without cached records.");
+    assert(cn);
 
     // Update data or write new storage record.
     if (cn->flags & HAS_STORAGE)
@@ -300,7 +286,6 @@ cache_swap_out_lru (bdb *db)
     else
         storage_add (db, cn->id, cn->data, cn->size);
 
-    // Remove record from cache.
     cache_remove (db, cn);
 }
 
@@ -310,14 +295,12 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
 {
     cnode *cn;
 
-    // When out of cache...
+    // Swap out if it's time.
     if (db->num_cached == BDB_MAX_CACHED)
-        // Move least-recently used record to storage.
         cache_swap_out_lru (db);
     else
         db->num_cached++;
 
-    // Allocate cnode.
     if (!(cn = cnode_alloc ()))
         return NULL;
 
@@ -327,13 +310,8 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
     cn->data = malloc (size);
     memcpy (cn->data, data, size);
 
-    // Add to LRU list as most-recently used.
     cache_push_mru (db, cn);
-
-    // Add to key index.
     cache_insert_key (db, cn);
-
-    // Add to ID index.
     cache_insert_id (db, cn);
 
     return cn;
@@ -344,4 +322,23 @@ cache_flush (bdb *db)
 {
     while (db->num_cached--)
         cache_swap_out_lru (db);
+}
+
+// Fetch record from storage and add it to the cache.
+cnode *
+cache_add_stored (bdb *db, dbid_t id)
+{
+    snode  *sn;
+    size_t size;
+    cnode  *cn;
+
+    printf ("add_stored_map() %d\n", id);
+    if ((sn = storage_map (&size, db, id))) {
+        cn = cache_add (db, id, &sn->data, size);
+    printf ("In %d,%s\n", id, ((symbol *) cn->data)->name);
+        cn->flags |= HAS_STORAGE;
+        free (sn);
+        return cn;
+    }
+    return NULL;
 }

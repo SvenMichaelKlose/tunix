@@ -78,12 +78,12 @@ storage_read_snode_and_data (bdb *db, dbid_t id, snode *n, size_t data_size)
         err (EXIT_FAILURE, "storage_map(): Reading data failed.");
 }
 
-void *
+snode *
 storage_map (size_t *size, bdb *db, dbid_t id)
 {
     snode * n;
 
-    // Handle unwritten root node).
+    // Handle cache-only root node.
     if (id >= db->filled)
         return NULL;
 
@@ -91,7 +91,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
     n = malloc (snode_size (*size));
     storage_read_snode_and_data (db, id, n, *size);
 
-    return &n->data;
+    return n;
 }
 
 // https://en.wikipedia.org/wiki/Binary_search_tree
@@ -113,15 +113,17 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
             if (!(id = n->left)) {
                 n->left = recid;
                 storage_write_snode (db, oid, n);
-                return;
+                break;
             }
         } else
             if (!(id = n->right)) {
                 n->right = recid;
                 storage_write_snode (db, oid, n);
-                return;
+                break;
             }
+        free (n);
     }
+    free (n);
 }
 
 // Add record to storage.

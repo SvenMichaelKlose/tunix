@@ -2,7 +2,7 @@
 #define __BDB_H__
 
 #ifndef BDB_MAX_CACHED
-#define BDB_MAX_CACHED 255
+#define BDB_MAX_CACHED 128
 #endif
 
 #define ERROR       -1

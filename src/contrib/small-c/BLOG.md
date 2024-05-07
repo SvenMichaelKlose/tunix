@@ -3,6 +3,32 @@ Small C blog
 
 Informal narratives about the project.
 
+# 2024-05-07 21:29 S.M. Klose
+
+I was highly unmotivated in matters of
+writing tests because it's all getting
+more like in the movie IDIOCRACY, which
+I can only recommend watching.
+
+Only a few tests made the Bielefeld DB
+look much more stable and one can also
+have nice Graphiviz-generated images
+to check on the cache.  That brought the
+issue of needing iterators for all sorts
+of trees that are already there (key
+index on storage, key and ID index in
+memory).  The result is a large tree of
+about 1000 most-used English words which
+would do nicely for a retro computing
+spell checker.
+
+Now for testing the transitions from
+cache to storage and back and we're done
+with the inital version of "Bielefeld
+DB".  To make it useful for the command
+line, I planned something with CSV and
+argument lists.
+
 # 2024-05-06 19:26 S.M. Klose
 
 Now automated unit tests can be added in

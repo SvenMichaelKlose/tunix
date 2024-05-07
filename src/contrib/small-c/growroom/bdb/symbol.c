@@ -12,8 +12,10 @@ int
 symdb_compare (bdb *db, void *rec, void *key)
 {
     symbol *s = rec;
+    int rel;
     (void) db;
-    return strcmp (s->name, key);
+    rel = strcmp (key, s->name);
+    return rel;
 }
 
 void *

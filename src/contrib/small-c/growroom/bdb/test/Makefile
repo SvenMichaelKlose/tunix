@@ -2,7 +2,10 @@ ifndef $(UNITY_ROOT)
     $(warn UNITY_ROOT is not set. git@github.com:ThrowTheSwitch/Unity.git)
 endif
 
-PROGRAMS = basic-lru-list symbol
+PROGRAMS = \
+	basic-lru-list \
+	cnode-inserts \
+	symbol
 COMMONSOURCES = \
 	../api.c \
 	../cache.c \

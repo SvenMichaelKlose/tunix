@@ -25,7 +25,7 @@ test: .passed
 .passed:
 	@for i in $(PROGRAMS); do \
 	    echo "Running test '$$i'."; \
-	    (./$$i || exit); \
+	    (./$$i && exit); \
 	done
 	touch .passed
 

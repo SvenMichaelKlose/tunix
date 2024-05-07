@@ -2,6 +2,7 @@
 #define __STORAGE_H__
 
 typedef struct _snode {
+    // https://en.wikipedia.org/wiki/Binary_search_tree
     dbid_t  left;
     dbid_t  right;
     char    data[1];

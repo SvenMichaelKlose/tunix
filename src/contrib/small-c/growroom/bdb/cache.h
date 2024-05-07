@@ -9,6 +9,7 @@
 //  * ID index btree
 //  * key index btree
 //
+// See also: https://en.wikipedia.org/wiki/Binary_search_tree
 typedef struct _cnode cnode;
 typedef struct _cnode {
     // Offset on secondary storage.

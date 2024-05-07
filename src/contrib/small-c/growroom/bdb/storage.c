@@ -10,20 +10,21 @@
 size_t
 snode_size (size_t data_size)
 {
-    // Add header (- 1 char of data declaration)
-    // and record size.
-    return sizeof (snode) + data_size - 1;
+    return (sizeof (snode) - 1) + data_size;
+}
+
+size_t
+storage_size (size_t data_size)
+{
+    return sizeof (size_t) + data_size;
 }
 
 // Allocate ID (and space) for new record.
 dbid_t
 storage_alloc_id (bdb *db, size_t size)
 {
-    // An ID is basically an offset into the storage.
     dbid_t id = db->next_free;
-
-    // Make space for size, snode and data.
-    db->next_free += snode_size (size) + sizeof (size_t);
+    db->next_free += storage_size (size);
     return id;
 }
 
@@ -49,41 +50,42 @@ storage_write_snode (bdb *db, dbid_t id, snode *n)
 bool
 storage_write_data (bdb *db, dbid_t id, void *data, size_t size)
 {
-    size_t nsize = sizeof (size_t) + snode_size (0);
+    size_t nsize = storage_size (0);
     size_t nwritten = db->write (db, id, data, size);
     return nwritten != nsize;
+}
+
+size_t
+storage_read_size (bdb *db, dbid_t id)
+{
+    size_t nsize;
+    if (!db->read (db, id, &nsize, sizeof (size_t)))
+        perror ("storage_map(): Error reading record size.");
+    return nsize - snode_size (0);
+}
+
+void
+storage_read_snode_and_data (bdb *db, dbid_t id, snode *n, size_t data_size)
+{
+    size_t nread = db->read (db, id + sizeof (size_t), n, snode_size (data_size));
+    if (nread != snode_size (data_size))
+        perror ("storage_map(): Reading data failed.");
 }
 
 void *
 storage_map (size_t *size, bdb *db, dbid_t id)
 {
     snode * n;
-    size_t nsize;
-    size_t nread;
 
-    // Do nothing for the first record,
-    // which is the root node of the
-    // b-tree.
+    // Handle unwritten root node).
     if (id >= db->filled)
         return NULL;
 
-    // Read size of node.
-    if (!db->read (db, id, &nsize, sizeof (size_t)))
-        perror ("storage_map(): Error reading record size.");
-
-    // Save record size for caller.
-    *size = nsize - snode_size (0);
-
-    // Allocate memory for node & data.
-    if (!(n = malloc (nsize)))
+    *size = storage_read_size (db, id);
+    if (!(n = malloc (snode_size (*size))))
         perror ("storage_map(): Out of memory.");
+    storage_read_snode_and_data (db, id, n, *size);
 
-    // Read node & data.
-    nread = db->read (db, id + sizeof (size_t), n, nsize);
-    if (nread != nsize)
-        perror ("storage_map(): Reading data failed.");
-
-    db->filled += sizeof (size_t) + nsize;
     return &n->data;
 }
 
@@ -96,27 +98,21 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
     size_t  unused_size;
 
     for (;;) {
-        // Map node into memory.
         if (!(n = storage_map (&unused_size, db, id)))
             return; // Root node.
 
         if (oid == id)
             err (EXIT_FAILURE, "storage_insert_key(): endless loop");
-        oid = id;  // Save for update.
+        oid = id;
 
-        // Decide which to child to travel.
         if (db->compare (db, &n->data, key) < 0) {
-            // Go left.
             if (!(id = n->left)) {
-                // Set left child.
                 n->left = recid;
                 storage_write_snode (db, oid, n);
                 return;
             }
         } else
-            // Go right.
             if (!(id = n->right)) {
-                // Set right child.
                 n->right = recid;
                 storage_write_snode (db, oid, n);
                 return;
@@ -128,21 +124,15 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
 void
 storage_add (bdb *db, dbid_t id, void *data, size_t size)
 {
-    // Make clean snode.
     snode sn;
     bzero (&sn, snode_size (0));
 
-    // Write size of snode + record.
-    storage_write_size (db, id, size);
-
-    // Write snode.
+    storage_write_size  (db, id, size);
     storage_write_snode (db, id, &sn);
+    storage_write_data  (db, id, data, size);
+    storage_insert_key  (db, db->data2key (data), id);
 
-    // Write record.
-    storage_write_data (db, id, data, size);
-
-    // Link to parent node in b-tree.
-    storage_insert_key (db, db->data2key (data), id);
+    db->filled = id + storage_size (size);
 }
 
 dbid_t
@@ -155,7 +145,6 @@ storage_find (bdb *db, void *key)
     size_t unused_size;
 
     for (;;) {
-        // Map node into memory.
         if (!(n = storage_map (&unused_size, db, id)))
             return NOTFOUND;
 
@@ -163,15 +152,13 @@ storage_find (bdb *db, void *key)
             err (EXIT_FAILURE, "storage_find(): endless loop");
         oid = id;
 
-        // Decide to which child to travel.
         if (!(c = db->compare (db, &n->data, key)))
-            return id;  // Match!
+            return id;
+
         if (c < 0) {
-            // Go left.
             if (!(id = n->left))
                 return NOTFOUND;
         } else
-            // Go right.
             if (!(id = n->right))
                 return NOTFOUND;
     }

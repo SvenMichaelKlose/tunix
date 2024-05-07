@@ -16,4 +16,8 @@ extern void *  storage_map        (size_t *, bdb *, dbid_t);
 extern void    storage_add        (bdb *, dbid_t id, void *data, size_t);
 extern dbid_t  storage_find       (bdb *, void *key);
 
+#ifdef TESTS
+extern size_t snode_size (size_t);
+#endif // #ifdef TESTS
+
 #endif // #ifndef __STORAGE_H__

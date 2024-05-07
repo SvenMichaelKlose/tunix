@@ -17,7 +17,7 @@ snode_size (size_t data_size)
 size_t
 storage_size (size_t data_size)
 {
-    return sizeof (size_t) + data_size;
+    return sizeof (size_t) + snode_size (data_size);
 }
 
 // Allocate ID (and space) for new record.
@@ -46,7 +46,7 @@ storage_write_snode (bdb *db, dbid_t id, snode *n)
 {
     size_t nwritten = db->write (db, id + sizeof (size_t), n, snode_size (0));
     if (nwritten != snode_size (0))
-        perror ("Error writing data.");
+        err (EXIT_FAILURE, "Error writing data.");
 }
 
 // Write data after snode to storage.
@@ -66,7 +66,7 @@ storage_read_size (bdb *db, dbid_t id)
     assert(db->read);
     nread = db->read (db, id, &nsize, sizeof (size_t));
     if (nread != sizeof (size_t))
-        perror ("storage_map(): Error reading record size.");
+        err (EXIT_FAILURE, "storage_map(): Error reading record size.");
     return nsize - snode_size (0);
 }
 
@@ -75,7 +75,7 @@ storage_read_snode_and_data (bdb *db, dbid_t id, snode *n, size_t data_size)
 {
     size_t nread = db->read (db, id + sizeof (size_t), n, snode_size (data_size));
     if (nread != snode_size (data_size))
-        perror ("storage_map(): Reading data failed.");
+        err (EXIT_FAILURE, "storage_map(): Reading data failed.");
 }
 
 void *
@@ -88,9 +88,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
         return NULL;
 
     *size = storage_read_size (db, id);
-    printf ("%lx\n", *size);
-    if (!(n = malloc (snode_size (*size))))
-        perror ("storage_map(): Out of memory.");
+    n = malloc (snode_size (*size));
     storage_read_snode_and_data (db, id, n, *size);
 
     return &n->data;
@@ -109,8 +107,6 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
         if (!(n = storage_map (&unused_size, db, id)))
             return; // Root node.
 
-        if (oid == id)
-            err (EXIT_FAILURE, "storage_insert_key(): endless loop");
         oid = id;
 
         if (db->compare (db, &n->data, key) < 0) {
@@ -151,21 +147,14 @@ storage_find (bdb *db, void *key)
 {
     snode  *n;
     dbid_t id = 0;
-    dbid_t oid = -1;
     int    c;
     size_t unused_size;
 
     for (;;) {
         if (!(n = storage_map (&unused_size, db, id)))
             return NOTFOUND;
-
-        if (oid == id)
-            err (EXIT_FAILURE, "storage_find(): endless loop");
-        oid = id;
-
         if (!(c = db->compare (db, &n->data, key)))
             return id;
-
         if (c < 0) {
             if (!(id = n->left))
                 return NOTFOUND;

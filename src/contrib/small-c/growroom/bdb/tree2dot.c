@@ -5,28 +5,30 @@
 #include "tree2dot.h"
 
 void
-tree2dot_node (FILE *out, cnode *n)
+tree2dot_node (FILE *out, bdb_iter *iter, void *n)
 {
+    char * label;
     if (!n)
         return;
 
-    fprintf (out, "n%x;\n", n->id);
-    if (n->kleft) {
-        fprintf (out, "n%x -> n%x [label=\"l\"];\n", n->id, n->kleft->id);
-        tree2dot_node (out, n->kleft);
+    label = iter->string (n);
+    fprintf (out, "n%x [label=\"%s\"];\n", iter->id (n), label);
+    if (iter->left (n)) {
+        fprintf (out, "n%x -> n%x [label=\"L\"];\n", iter->id (n), iter->id (iter->left (n)));
+        tree2dot_node (out, iter, iter->left (n));
     }
-    if (n->kright) {
-        fprintf (out, "n%x -> n%x [label=\"r\"];\n", n->id, n->kright->id);
-        tree2dot_node (out, n->kright);
+    if (iter->right (n)) {
+        fprintf (out, "n%x -> n%x [label=\"R\"];\n", iter->id (n), iter->id (iter->right (n)));
+        tree2dot_node (out, iter, iter->right (n));
     }
 }
 
 void
-tree2dot (FILE *out, cnode *n)
+tree2dot (FILE *out, bdb_iter *iter, void *n)
 {
     fprintf (out, "digraph BinaryTree {\n"
                   "node [shape=circle, style=filled, color=lightblue, fontcolor=black, fontsize=12];\n"
                   "edge [arrowsize=0.8];\n");
-    tree2dot_node (out, n);
+    tree2dot_node (out, iter, n);
     fprintf (out, "}\n");
 }

@@ -52,4 +52,11 @@ void    bdb_close (bdb *);
 extern int bdb_file_write (bdb *, dbid_t file_offset, void *data, size_t);
 extern int bdb_file_read  (bdb *, dbid_t file_offset, void *data, size_t);
 
+typedef struct _bdb_iter {
+    dbid_t (*id)     (void *);
+    void * (*left)   (void *);
+    void * (*right)  (void *);
+    char * (*string) (void *);
+} bdb_iter;
+
 #endif // #ifndef __BDB_H__

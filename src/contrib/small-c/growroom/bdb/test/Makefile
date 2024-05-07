@@ -3,6 +3,7 @@ ifndef $(UNITY_ROOT)
 endif
 
 PROGRAMS = \
+	storage-layout \
 	basic-lru-list \
 	cnode-inserts \
 	symbol
@@ -14,9 +15,11 @@ COMMONSOURCES = \
 	../symbol.c \
 	$(UNITY_ROOT)/unity.c
 
-CFLAGS = -ggdb -g -O0 -Wall -Werror \
+COPTFLAGS = -ggdb -g -O0
+CFLAGS = -Wall -Werror \
 	-I. -I.. -I$(UNITY_ROOT) \
 	-DTESTS
+
 COMMONOBJ = $(COMMONSOURCES:.c=.o)
 
 all: $(PROGRAMS) test
@@ -36,8 +39,8 @@ clean:
 	$(RM) $(COMMONOBJ) $(PROGRAMS:.c=.o) $(PROGRAMS) symbol.bdb .passed
 
 %: %.o $(COMMONOBJ)
-	$(CC) -o $@ $(CFLAGS) $<
+	$(CC) -o $@ $(CFLAGS) $(COPTFLAGS) $<
 
 %.o: %.c
 	$(RM) .passed
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) -o $@ $(CFLAGS) $(COPTFLAGS) -c $<

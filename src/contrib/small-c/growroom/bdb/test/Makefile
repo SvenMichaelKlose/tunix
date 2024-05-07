@@ -9,6 +9,7 @@ PROGRAMS = \
 COMMONSOURCES = \
 	../api.c \
 	../cache.c \
+	../file-storage.c \
 	../storage.c \
 	../symbol.c \
 	$(UNITY_ROOT)/unity.c

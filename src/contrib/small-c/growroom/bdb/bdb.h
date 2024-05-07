@@ -14,6 +14,7 @@ typedef struct _cnode cnode;
 typedef struct _bdb bdb;
 typedef struct _bdb {
     // Storage allocation (growing).
+    void     *storage;  // E.g. (FILE *).
     dbid_t   next_free;
     dbid_t   filled;
 
@@ -44,5 +45,8 @@ dbid_t  bdb_add   (bdb *, void *key, void *data, size_t);
 dbid_t  bdb_find  (bdb *, void *key);
 void *  bdb_map   (bdb *, dbid_t);
 void    bdb_close (bdb *);
+
+extern int bdb_file_write (bdb *, dbid_t file_offset, void *data, size_t);
+extern int bdb_file_read  (bdb *, dbid_t file_offset, void *data, size_t);
 
 #endif // #ifndef __BDB_H__

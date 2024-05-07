@@ -1,5 +1,5 @@
 PROGRAM = bdb
-SRC = api.c cache.c main.c storage.c symbol.c
+SRC = api.c cache.c file-storage.c main.c storage.c symbol.c
 CFLAGS = -ggdb -g -O0 -Wall -Werror -DTESTS
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))

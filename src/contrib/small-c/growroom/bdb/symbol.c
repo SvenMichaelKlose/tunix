@@ -23,30 +23,6 @@ symdb_data2key (void *rec)
     return &s->name;
 }
 
-FILE * storage = NULL;
-
-int
-symdb_write (bdb *db, dbid_t ofs, void *data, size_t size)
-{
-    char * filename = "symbol.bdb";
-    if (!storage)
-        if (!(storage = fopen (filename, "w+")))
-            perror ("Cannot open file '%s' for writing.");
-    if (fseek (storage, ofs, SEEK_SET) < 0)
-        perror ("symdb_write(): cannot seek.");
-    return fwrite (data, 1, size, storage);
-}
-
-int
-symdb_read (bdb *db, dbid_t ofs, void *data, size_t size)
-{
-    if (!storage)
-        return 0;
-    if (fseek (storage, ofs, SEEK_SET) < 0)
-        perror ("symdb_read(): cannot seek.");
-    return fread (data, 1, size, storage);
-}
-
 bdb symdb;
 
 dbid_t
@@ -72,8 +48,8 @@ void
 symbol_init ()
 {
     symdb.next_free = 0;
-    symdb.read      = symdb_read;
-    symdb.write     = symdb_write;
+    symdb.read      = bdb_file_read;
+    symdb.write     = bdb_file_write;
     symdb.compare   = symdb_compare;
     symdb.data2key  = symdb_data2key;
 }

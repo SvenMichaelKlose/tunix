@@ -36,7 +36,7 @@ test: .passed
 $(PROGRAMS): $(COMMONOBJ)
 
 clean:
-	$(RM) $(COMMONOBJ) $(PROGRAMS:.c=.o) $(PROGRAMS) symbol.bdb .passed
+	$(RM) $(COMMONOBJ) $(PROGRAMS:.c=.o) $(PROGRAMS) $(PROGRAMS:=.bdb) .passed
 
 %: %.o $(COMMONOBJ)
 	$(CC) -o $@ $(CFLAGS) $(COPTFLAGS) $<

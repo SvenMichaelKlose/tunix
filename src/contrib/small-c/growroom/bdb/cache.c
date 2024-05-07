@@ -175,8 +175,6 @@ cache_insert_key (bdb *db, cnode *cn)
     }
 
     for (;;) {
-        if (on == n)
-            err (EXIT_FAILURE, "cache_insert_key(): endless loop");
         on = n;
         if (db->compare (db, n->data, key) < 0) {
             if (!(n = n->kleft)) {

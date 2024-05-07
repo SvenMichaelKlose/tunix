@@ -1,4 +1,4 @@
-all: world mkfs ultimem_image c1541_image
+all: world mkfs/mkfs.ultifs ultimem_image c1541_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
@@ -6,7 +6,7 @@ world:
 	@echo "# Making world."
 	$(MAKE) -C src all
 
-mkfs:
+mkfs/mkfs.ultifs:
 	@echo "# Making host mkfs."
 	$(MAKE) -C mkfs all
 

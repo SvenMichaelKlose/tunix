@@ -1,6 +1,7 @@
 PROGRAM = bdb
 SRC = api.c cache.c file-storage.c main.c storage.c symbol.c
-CFLAGS = -ggdb -g -O0 -Wall -Werror -DTESTS
+CFLAGS = -Wall -Werror -DTESTS
+COPTFLAGS = -ggdb -g -O0
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
@@ -19,4 +20,4 @@ $(PROGRAM): $(OBJ)
 	$(CC) -o $(PROGRAM) $(CFLAGS) $(OBJ)
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(COPTFLAGS) -c $< -o $@

@@ -180,14 +180,14 @@ _gen_storage_decl (int do_export,
 }
 
 void
-gen_decl_var (SYMBOL * s)
+gen_decl_var (SYMBOL *s)
 {
     if (symbol_table[current_symbol_table_idx].storage != STATIC)
         _gen_storage_decl (s->storage == EXTERN, s->name);
 }
 
 void
-gen_decl_fun (SYMBOL * s)
+gen_decl_fun (SYMBOL *s)
 {
     if (s->storage != STATIC)
         _gen_storage_decl (s->offset == FUNCTION, s->name);
@@ -200,7 +200,7 @@ gen_decl_fun (SYMBOL * s)
 void gen_swap () { outb (IR_SWAP); }
 
 int
-gen_get_local (SYMBOL * sym)
+gen_get_local (SYMBOL *sym)
 {
     if (sym->storage == LSTATIC)
         gen_ldaci (sym->offset);
@@ -213,7 +213,7 @@ gen_get_local (SYMBOL * sym)
 
 // Pointer increment
 void
-gen_ptrinc (LVALUE * lval)
+gen_ptrinc (LVALUE *lval)
 {
     switch (lval->ptr_type) {
     case STRUCT:
@@ -230,7 +230,7 @@ gen_ptrinc (LVALUE * lval)
 
 // Pointer decrement
 void
-gen_ptrdec (LVALUE * lval)
+gen_ptrdec (LVALUE *lval)
 {
     _deca ();
     switch (lval->ptr_type) {
@@ -255,7 +255,7 @@ gen_ptrdec (LVALUE * lval)
 // Load memory cell at symbol into
 // primary.
 void
-gen_get_memory (SYMBOL * sym)
+gen_get_memory (SYMBOL *sym)
 {
     if (sym->identity != POINTER
         && sym->type == CCHAR) {
@@ -269,7 +269,7 @@ gen_get_memory (SYMBOL * sym)
 }
 
 void
-gen_put_memory (SYMBOL * sym)
+gen_put_memory (SYMBOL *sym)
 {
     if (sym->identity != POINTER
         && (sym->type & CCHAR)) {

@@ -79,7 +79,7 @@ bit_reverse (char x)
     char mask = 1 << 7;
     for (i = 0; i < 8; i++) {
         new <<= 1;
-        new |= x & mask ? 1 : 0;
+        new |= (x & mask) ? 1 : 0;
         mask >>= 1;
     }
     return new;
@@ -298,8 +298,6 @@ cache_add_stored (bdb *db, dbid_t id)
 void
 cache_swap_out_lru (bdb *db)
 {
-    printf ("cache_swap_out_lru ()\n");
-
     // Get least-recently used record.
     cnode *cn = cache_pop_lru (db);
     if (!cn)
@@ -353,8 +351,6 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
 void
 cache_flush (bdb *db)
 {
-    printf ("cache-flush() %d records.\n",
-            db->num_cached);
     while (db->num_cached--)
         cache_swap_out_lru (db);
 }

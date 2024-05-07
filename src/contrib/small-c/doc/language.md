@@ -1,5 +1,5 @@
-Small C Language Referrence
-===========================
+Small C Language Reference
+==========================
 
 # Comments
 
@@ -19,7 +19,7 @@ Signed or unsigned chars and ints are
 supported.  Shorts are the same as
 ints.
 
-Variacle declarations cannot
+Variable declarations cannot
 have initializers with expressions in
 them.
 
@@ -39,7 +39,7 @@ unsigned int   ii;
 
 Pointers are always assumed to be of
 size 'int' and can be dereferenced only
-once withon an expression.
+once within an expression.
 
 ~~~C
 v = \*p;
@@ -140,7 +140,7 @@ extern char global_state;
 The must be no forward-declarations and
 the return type or argument types do not
 matter at call-time.  The return value
-may be ommitted entirely.  It can also
+may be omitted entirely.  It can also
 be declared 'void' alongside the other
 data types.
 

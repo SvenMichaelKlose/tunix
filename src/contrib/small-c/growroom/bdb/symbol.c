@@ -48,6 +48,7 @@ void
 symbol_init ()
 {
     symdb.next_free = 0;
+    symdb.storage   = "symbol.bdb";
     symdb.read      = bdb_file_read;
     symdb.write     = bdb_file_write;
     symdb.compare   = symdb_compare;

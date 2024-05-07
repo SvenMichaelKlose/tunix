@@ -13,6 +13,9 @@ typedef unsigned int dbid_t;
 typedef struct _cnode cnode;
 typedef struct _bdb bdb;
 typedef struct _bdb {
+    char     flags;
+    #define HAS_OPEN_STORAGE    1
+
     // Storage allocation (growing).
     void     *storage;  // E.g. (FILE *).
     dbid_t   next_free;

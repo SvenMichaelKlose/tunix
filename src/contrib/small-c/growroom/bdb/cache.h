@@ -53,10 +53,10 @@ extern void    cache_remove_lru (bdb *, cnode *);
 extern cnode * cache_pop_lru (bdb *);
 extern char    bit_reverse (char);
 extern dbid_t  cache_idhash (dbid_t);
-extern void    cache_remove_id (bdb *, cnode *);
-extern void    cache_remove_key (bdb *, cnode *);
+extern void    cache_index_remove_id (bdb *, cnode *);
+extern void    cache_index_remove_key (bdb *, cnode *);
 extern void    cache_remove (bdb *, cnode *);
-extern void    cache_store_lru (bdb *);
+extern void    cache_swap_out_lru (bdb *);
 #endif // #ifdef TESTS
 
 #endif // #ifndef __CACHE_H__

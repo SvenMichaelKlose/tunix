@@ -74,7 +74,7 @@ test_cnode_inserts (void)
                         "Second isn't left child of ID root.");
 
     printf ("! Removing first child.\n");
-    cache_remove_id (db, child1);
+    cache_index_remove_id (db, child1);
     TEST_ASSERT_MESSAGE(db->cache_root_ids,
                         "Root node missing.");
     TEST_ASSERT_MESSAGE(db->cache_root_ids == root,

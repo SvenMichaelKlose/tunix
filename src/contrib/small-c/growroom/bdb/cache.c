@@ -310,11 +310,10 @@ cache_store_lru (bdb *db)
     if (!cn)
         perror ("cache_store_lru() called without cached records.");
 
+    // Update data or write new storage record.
     if (cn->flags & HAS_STORAGE)
-        // Update record data.
         storage_write_data (db, cn->id, cn->data, cn->size);
     else
-        // Add to storage.
         storage_add (db, cn->id, cn->data, cn->size);
 
     // Remove record from cache.

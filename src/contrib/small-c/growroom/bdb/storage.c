@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,7 +34,9 @@ bool
 storage_write_size (bdb *db, dbid_t id, size_t size)
 {
     size_t nsize = snode_size (size);
-    size_t nwritten = db->write (db, id, &nsize, sizeof (size_t));
+    size_t nwritten;
+    assert (db->write);
+    nwritten = db->write (db, id, &nsize, sizeof (size_t));
     return nwritten != sizeof (size_t);
 }
 
@@ -51,7 +54,7 @@ bool
 storage_write_data (bdb *db, dbid_t id, void *data, size_t size)
 {
     size_t nsize = storage_size (0);
-    size_t nwritten = db->write (db, id, data, size);
+    size_t nwritten = db->write (db, id + storage_size (0), data, size);
     return nwritten != nsize;
 }
 
@@ -59,7 +62,9 @@ size_t
 storage_read_size (bdb *db, dbid_t id)
 {
     size_t nsize;
-    size_t nread = db->read (db, id, &nsize, sizeof (size_t));
+    size_t nread;
+    assert(db->read);
+    nread = db->read (db, id, &nsize, sizeof (size_t));
     if (nread != sizeof (size_t))
         perror ("storage_map(): Error reading record size.");
     return nsize - snode_size (0);
@@ -127,6 +132,7 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
 void
 storage_add (bdb *db, dbid_t id, void *data, size_t size)
 {
+    dbid_t next_id = id + storage_size (size);
     snode sn;
     bzero (&sn, snode_size (0));
 
@@ -135,16 +141,18 @@ storage_add (bdb *db, dbid_t id, void *data, size_t size)
     storage_write_data  (db, id, data, size);
     storage_insert_key  (db, db->data2key (data), id);
 
-    db->filled = id + storage_size (size);
+    // Keep track of storage size.
+    if (db->filled < next_id )
+        db->filled = id + storage_size (size);
 }
 
 dbid_t
 storage_find (bdb *db, void *key)
 {
-    snode *n;
+    snode  *n;
     dbid_t id = 0;
     dbid_t oid = -1;
-    int c;
+    int    c;
     size_t unused_size;
 
     for (;;) {

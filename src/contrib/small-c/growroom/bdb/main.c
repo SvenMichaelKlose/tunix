@@ -6,6 +6,7 @@
 #include "bdb.h"
 #include "cache.h"
 #include "symbol.h"
+#include "tree2dot.h"
 
 void
 symbol_tests (void)
@@ -14,6 +15,7 @@ symbol_tests (void)
     symbol * s;
     char **n;
     char *name = "Homecoming";
+    FILE * dot;
 
     symbol_init ();
 
@@ -35,6 +37,9 @@ symbol_tests (void)
     else
         printf ("Symbol \"%s\" not found.\n", name);
 
+    dot = fopen ("symbol.dot", "w");
+    tree2dot (dot, symdb.cache_root_keys);
+    fclose (dot);
     symbol_close ();
 }
 

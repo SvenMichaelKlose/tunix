@@ -1,5 +1,5 @@
 PROGRAM = bdb
-SRC = api.c cache.c file-storage.c main.c storage.c symbol.c
+SRC = api.c cache.c file-storage.c tree2dot.c main.c storage.c symbol.c
 CFLAGS = -Wall -Werror -DTESTS
 COPTFLAGS = -ggdb -g -O0
 

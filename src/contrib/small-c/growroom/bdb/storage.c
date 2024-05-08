@@ -84,7 +84,7 @@ storage_map (size_t *size, bdb *db, dbid_t id)
     snode * n;
 
     // Handle cache-only root node.
-    if (id >= db->filled)
+    if (id >= db->storage_size)
         return NULL;
 
     *size = storage_read_size (db, id);
@@ -127,6 +127,7 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
 }
 
 // Add record to storage.
+// 'id' must be from storage_alloc_id().
 void
 storage_add (bdb *db, dbid_t id, void *data, size_t size)
 {
@@ -140,8 +141,8 @@ storage_add (bdb *db, dbid_t id, void *data, size_t size)
     storage_insert_key  (db, db->data2key (data), id);
 
     // Keep track of storage size.
-    if (db->filled < next_id )
-        db->filled = id + storage_size (size);
+    if (db->storage_size < next_id)
+        db->storage_size = next_id;
 }
 
 dbid_t

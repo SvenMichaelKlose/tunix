@@ -19,7 +19,7 @@ typedef struct _bdb {
     // Storage allocation (growing).
     void     *storage;  // E.g. (FILE *).
     dbid_t   next_free;
-    dbid_t   filled;
+    dbid_t   storage_size;
 
     // Compare key in 'rec' to 'key'.
     // Return 0: match, < 0; "less than", > 0 "greater than"

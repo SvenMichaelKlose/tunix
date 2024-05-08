@@ -79,6 +79,7 @@ main (int argc, char * argv[])
     lispptr env;
     struct builtin * b = builtins;
     symbol * s;
+    int i;
     (void) argc, (void) argv;
 
     term_init ();
@@ -91,6 +92,7 @@ main (int argc, char * argv[])
         b++;
     }
 
+for (i = 0; i < 2; i++) {
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error checking (smk).
     cbm_k_chkin (3);
@@ -99,6 +101,7 @@ main (int argc, char * argv[])
         term_puts ("\n\r");
     }
     cbm_k_close (3);
+}
 
     term_puts ("\n\rBye!\n\r");
     while (1); // Gone with TUNIX.

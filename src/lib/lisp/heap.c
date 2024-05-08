@@ -48,7 +48,7 @@ alloc (uchar size, uchar type)
     heap[0] = size;
     heap[1] = type;
     heap += size;
-    heap[0] = 0;    // Mark end of heap.
+    heap[0] = 0;    // Mark end of heap (size field).
     return r;
 }
 
@@ -72,7 +72,7 @@ lisp_make_number (int x)
 void * __fastcall__
 lookup_symbol (char * str, uchar len)
 {
-    symbol * s = alloc (sizeof (symbol), TYPE_SYMBOL);
+    symbol * s = (void *) HEAP_START;
 
     while (s->size) {
         if (s->type == TYPE_SYMBOL
@@ -88,10 +88,9 @@ lookup_symbol (char * str, uchar len)
 lispptr __fastcall__
 lisp_make_symbol (char * str, uchar len)
 {
-    symbol * s = lookup_symbol (str, len);
-    if (s)
+    symbol * s;
+    if ((s = lookup_symbol (str, len)))
         return s;
-
     s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     s->value = s;
     s->bind = nil;
@@ -106,6 +105,6 @@ lisp_init ()
     heap = (void *) HEAP_START;
     heap[0] = 0;
     nil = lisp_make_symbol ("nil", 3);
-    t   = lisp_make_symbol ("t", 3);
+    t   = lisp_make_symbol ("t", 2);
     do_putback = false;
 }

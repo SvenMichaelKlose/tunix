@@ -6,6 +6,9 @@ world:
 	@echo "# Making world."
 	$(MAKE) -C src all
 
+test:
+	$(MAKE) -C src test
+
 mkfs/mkfs.ultifs:
 	@echo "# Making host mkfs."
 	$(MAKE) -C mkfs all

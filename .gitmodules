@@ -4,3 +4,6 @@
 [submodule "src/contrib/Unity"]
 	path = src/contrib/unity
 	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "src/contrib/cregex"]
+	path = src/contrib/cregex
+	url = git@github.com:jserv/cregex.git

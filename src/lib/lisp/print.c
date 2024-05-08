@@ -18,8 +18,6 @@
 #include "io.h"
 #include "liblisp.h"
 
-void print (lispptr x);
-
 void
 print_list (cons * c)
 {
@@ -31,10 +29,10 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        print (c->car);
+        lisp_print (c->car);
         if (c->cdr != nil && !CONSP(c->cdr)) {
             outs (" . ");
-            print (c->cdr);
+            lisp_print (c->cdr);
             break;
         }
         c = c->cdr;

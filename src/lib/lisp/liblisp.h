@@ -37,13 +37,22 @@ typedef struct _symbol {
     uchar   name;
 } symbol;
 
+#ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
 extern lispptr nil;
 extern lispptr t;
+#ifdef __CC65__
+#pragma zpsym ("nil")
+#pragma zpsym ("t")
+#pragma bss-name (pop)
+#endif
 
-lispptr __fastcall__ make_cons (lispptr car, lispptr cdr);
-lispptr __fastcall__ make_number (int x);
-lispptr __fastcall__ make_symbol (char * str, uchar len);
-lispptr              read (void);
-void                 print (lispptr x);
+lispptr __fastcall__ lisp_make_cons (lispptr car, lispptr cdr);
+lispptr __fastcall__ lisp_make_number (int x);
+lispptr __fastcall__ lisp_make_symbol (char * str, uchar len);
+lispptr              lisp_read (void);
+void                 lisp_print (lispptr x);
+void                 lisp_init (void);
 
 #endif // #ifndef __LIBLISP_H__

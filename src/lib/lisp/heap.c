@@ -32,6 +32,15 @@ lispptr       t;
 #pragma bss-name (pop)
 #endif
 
+#ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
+extern char      do_putback;
+#ifdef __CC65__
+#pragma zpsym ("do_putback")
+#pragma bss-name (pop)
+#endif
+
 lispptr __fastcall__
 alloc (uchar size, uchar type)
 {
@@ -94,6 +103,9 @@ lisp_make_symbol (char * str, uchar len)
 void
 lisp_init ()
 {
+    heap = (void *) HEAP_START;
+    heap[0] = 0;
     nil = lisp_make_symbol ("nil", 3);
     t   = lisp_make_symbol ("t", 3);
+    do_putback = false;
 }

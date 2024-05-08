@@ -33,10 +33,10 @@ read_list ()
         if (eof ())
             error ("Missing closing bracket.");
         if (in () == '.')
-            c = read ();
+            c = lisp_read ();
         else {
             putback ();
-            c = make_cons (read (), nil);
+            c = lisp_make_cons (lisp_read (), nil);
         }
         if (last)
             last->cdr = c;
@@ -54,7 +54,7 @@ read_number ()
         *p = ch ();
     *p = 0;
     putback ();
-    return make_number (atoi (token));
+    return lisp_make_number (atoi (token));
 }
 
 bool __fastcall__
@@ -70,7 +70,7 @@ read_symbol ()
     for (p = token; !eof () && our_isalpha (in ()); p++)
         *p = ch ();
     putback ();
-    return make_symbol (token, p - token);
+    return lisp_make_symbol (token, p - token);
 }
 
 lispptr

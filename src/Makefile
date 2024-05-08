@@ -1,4 +1,5 @@
 SUBDIRS= \
+    contrib \
     lib \
     sys \
     drv \

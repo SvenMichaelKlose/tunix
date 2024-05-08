@@ -1,0 +1,7 @@
+Building
+========
+
+~~~sh
+git submodule update --init --recursive
+make all
+~~~

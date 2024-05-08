@@ -21,5 +21,5 @@ COPTFLAGS = -O -Or -Os
 LDFLAGS   = -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
 LD65CFG  ?= $(THIS_DIR)/../cfg/ld65/vic20.cfg
 
-EXOMIZER ?= exomizer-2.0.10
+EXOMIZER ?= $(THIS_DIR)/contrib/exomizer-3.0.2/src/exomizer
 EXOMIZER_FLAGS ?= -B -n

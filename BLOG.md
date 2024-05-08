@@ -1,6 +1,12 @@
 TUNIX blog
 ==========
 
+# 2024-05-08 16:48 (smk)
+
+exomizer-3.0.2 and oscar64 have been added.  Will try to do
+an oscar64-compiled kernel and exomizer is used all over the
+place anyhow.
+
 # 2024-05-08 01:18 (smk)
 
 A lot of work on the kernel hasn't been blogged about.

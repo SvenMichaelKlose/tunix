@@ -1,5 +1,8 @@
 LIBRARY=liblisp.a
 SOURCES= \
-	main.c
+	heap.c \
+	io.c \
+	print.c \
+	read.c
 
 include ../../Makefile.native

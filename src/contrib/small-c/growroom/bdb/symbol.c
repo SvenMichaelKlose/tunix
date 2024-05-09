@@ -58,7 +58,7 @@ symbol_init ()
 }
 
 void
-symbol_close ()
+symbol_flush ()
 {
-    bdb_close (&symdb);
+    bdb_flush (&symdb);
 }

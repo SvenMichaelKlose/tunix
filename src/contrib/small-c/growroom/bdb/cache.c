@@ -332,10 +332,8 @@ cache_add_stored (bdb *db, dbid_t id)
     size_t size;
     cnode  *cn;
 
-    printf ("add_stored_map() %d\n", id);
     if ((sn = storage_map (&size, db, id))) {
-        cn = cache_add (db, id, &sn->data, size);
-    printf ("In %d,%s\n", id, ((symbol *) cn->data)->name);
+        cn = cache_add (db, id, sn->data, size);
         cn->flags |= HAS_STORAGE;
         free (sn);
         return cn;

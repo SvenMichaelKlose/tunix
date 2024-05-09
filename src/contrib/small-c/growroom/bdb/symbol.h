@@ -11,6 +11,6 @@ extern bdb symdb;
 extern dbid_t   add_symbol   (char *name, int value);
 extern symbol * find_symbol  (char *name);
 extern void     symbol_init  (void);
-extern void     symbol_close (void);
+extern void     symbol_flush (void);
 
 #endif // #define __BDB_SYMBOL_H__

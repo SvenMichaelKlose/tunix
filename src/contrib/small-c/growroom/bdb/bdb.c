@@ -36,7 +36,7 @@ bdb_map (bdb *db, dbid_t id)
 }
 
 void
-bdb_close (bdb *db)
+bdb_flush (bdb *db)
 {
     cache_flush (db);
 }

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 #include <err.h>
 
@@ -11,7 +12,7 @@
 size_t
 snode_size (size_t data_size)
 {
-    return (sizeof (snode) - 1) + data_size;
+    return offsetof (snode, data) + data_size;
 }
 
 size_t
@@ -49,6 +50,14 @@ storage_write_snode (bdb *db, dbid_t id, snode *n)
         err (EXIT_FAILURE, "Error writing data.");
 }
 
+void
+storage_write_virgin_snode (bdb *db, dbid_t id)
+{
+    snode sn;
+    bzero (&sn, snode_size (0));
+    storage_write_snode (db, id, &sn);
+}
+
 // Write data after snode to storage.
 bool
 storage_write_data (bdb *db, dbid_t id, void *data, size_t size)
@@ -83,7 +92,6 @@ storage_map (size_t *size, bdb *db, dbid_t id)
 {
     snode * n;
 
-    // Handle cache-only root node.
     if (id >= db->storage_size)
         return NULL;
 
@@ -109,7 +117,7 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
 
         oid = id;
 
-        if (db->compare (db, &n->data, key) < 0) {
+        if (db->compare (db, n->data, key) < 0) {
             if (!(id = n->left)) {
                 n->left = recid;
                 storage_write_snode (db, oid, n);
@@ -131,16 +139,13 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
 void
 storage_add (bdb *db, dbid_t id, void *data, size_t size)
 {
-    dbid_t next_id = id + storage_size (size);
-    snode sn;
-    bzero (&sn, snode_size (0));
+    dbid_t next_id;
 
     storage_write_size  (db, id, size);
-    storage_write_snode (db, id, &sn);
+    storage_write_virgin_snode (db, id);
     storage_write_data  (db, id, data, size);
     storage_insert_key  (db, db->data2key (data), id);
-
-    // Keep track of storage size.
+    next_id = id + storage_size (size);
     if (db->storage_size < next_id)
         db->storage_size = next_id;
 }
@@ -156,7 +161,7 @@ storage_find (bdb *db, void *key)
     for (;;) {
         if (!(n = storage_map (&unused_size, db, id)))
             break;
-        if (!(c = db->compare (db, &n->data, key))) {
+        if (!(c = db->compare (db, n->data, key))) {
             free (n);
             return id;
         }

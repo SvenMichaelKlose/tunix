@@ -17,33 +17,6 @@
 #include <term/libterm.h>
 #include <lisp/liblisp.h>
 
-/*
-cons *
-get_list_arg ()
-{
-    if (NOTP(args))
-        error ("Arguments missing.");
-    arg1 = ((cons *) args)->car;
-    if (NOTP(arg1))
-        return nil;
-    if (!CONSP(arg1))
-        error ("List expected.");
-    return arg1;
-}
-*/
-
-lispptr
-builtin_car ()
-{
-    return 0; //return get_list_arg ()->car;
-}
-
-lispptr
-builtin_cdr ()
-{
-    return 0; //return get_list_arg ()->cdr;
-}
-
 struct builtin {
     char * name;
     void * func;
@@ -51,7 +24,7 @@ struct builtin {
     { "?", NULL },
     { "block", NULL },
     { ".", NULL },
-    { "car", builtin_car },
+    { "car", NULL },
     { "cdr", NULL },
     { "rplaca", NULL },
     { "rplacd", NULL },
@@ -73,13 +46,22 @@ struct builtin {
     { NULL, NULL }
 };
 
+/*
+lispptr
+apply (lispptr fun, lispptr args)
+{
+    bind_args (LISPFUN_ARGS(fun), eval_list (args));
+    eval_body (LISPFUN_BODY(fun));
+    unbind_args (LISPFUN_ARGS(fun));
+}
+*/
+
 int
 main (int argc, char * argv[])
 {
     lispptr env;
     struct builtin * b = builtins;
     symbol * s;
-    int i;
     (void) argc, (void) argv;
 
     term_init ();
@@ -92,7 +74,6 @@ main (int argc, char * argv[])
         b++;
     }
 
-for (i = 0; i < 2; i++) {
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error checking (smk).
     cbm_k_chkin (3);
@@ -101,7 +82,6 @@ for (i = 0; i < 2; i++) {
         term_puts ("\n\r");
     }
     cbm_k_close (3);
-}
 
     term_puts ("\n\rBye!\n\r");
     while (1); // Gone with TUNIX.

@@ -1,87 +1,83 @@
-; random lisp expressions taken
-; from somewhere else.
+(fn length (x)
+  (? x
+     (+ 1 (length (cdr x)))
+     0))
 
-(define length
-    (lambda (t)
-        (if t
-            (+ 1 (length (cdr t)))
-            0)))
-(define append1
-    (lambda (s t)
-        (if s
-            (cons (car s) (append1 (cdr s) t))
-            t)))
-(define append
-    (lambda (t . args)
-        (if args
-            (append1 t (append . args))
-            t)))
-(define nthcdr
-    (lambda (t n)
-        (if (eq? n 0)
-            t
-            (nthcdr (cdr t) (- n 1)))))
-(define nth (lambda (t n) (car (nthcdr t n))))
-(define rev1
-    (lambda (r t)
-        (if t
-            (rev1 (cons (car t) r) (cdr t))
-            r)))
-(define reverse (lambda (t) (rev1 () t)))
-(define member
-    (lambda (x t)
-        (if t
-            (if (equal? x (car t))
-                t
-                (member x (cdr t)))
-            t)))
-(define filter
-    (lambda (f t)
-        (if t
-            (if (f (car t))
-                (cons (car t) (filter f (cdr t)))
-                (filter f (cdr t)))
-            ())))
-(define all?
-    (lambda (f t)
-        (if t
-            (and
-                (f (car t))
-                (all? f (cdr t)))
-            #t)))
-(define any?
-    (lambda (f t)
-        (if t
-            (or
-                (f (car t))
-                (any? f (cdr t)))
-            ())))
-(define mapcar
-    (lambda (f t)
-        (if t
-            (cons (f (car t)) (mapcar f (cdr t)))
-            ())))
-(define map
-    (lambda (f . args)
-        (if (any? null? args)
-            ()
-            (let*
-                (x (mapcar car args))
-                (t (mapcar cdr args))
-                (cons (f . x) (map f . t))))))
-(define zip (lambda args (map list . args)))
-(define seq
-    (lambda (n m)
-        (if (< n m)
-            (cons n (seq (+ n 1) m))
-            ())))
-(define seqby
-    (lambda (n m k)
-        (if (< 0 (* k (- m n)))
-            (cons n (seqby (+ n k) m k))
-            ())))
-(define range
-    (lambda (n m . args)
-        (if args
-            (seqby n m (car args))
-            (seq n m))))
+(fn append1 (s x)
+  (? s
+     (cons (car s) (append1 (cdr s) x))
+     x))
+
+(fn append (x . args)
+  (? args
+     (append1 x (append . args))
+     x))
+
+(fn nthcdr (x n)
+  (? (eq? n 0)
+     x
+     (nthcdr (cdr x) (- n 1))))
+
+(fn nth (x n)
+  (car (nthcdr x n)))
+
+(fn rev1 (r x)
+  (? x
+     (rev1 (cons (car x) r) (cdr x))
+     r))
+
+(fn reverse (x)
+  (rev1 () x))
+
+(fn member (x x)
+  (? x
+     (? (equal? x (car x))
+        x
+        (member x (cdr x)))
+     x))
+
+(fn filter (f x)
+  (? x
+     (? (f (car x))
+        (cons (car x) (filter f (cdr x)))
+        (filter f (cdr x)))))
+
+(fn all? (f x)
+  (? x
+     (& (f (car x))
+        (all? f (cdr x)))
+     t))
+
+(fn any? (f x)
+ (? x
+    (| (f (car x))
+       (any? f (cdr x)))))
+
+(fn mapcar (f x)
+  (? x
+     (cons (f (car x))
+           (mapcar f (cdr x)))))
+
+(fn map (f . args)
+  (? (not (any? null? args))
+     (let*
+       (x (mapcar car args))
+       (y (mapcar cdr args))
+       (cons (f . x)
+             (map f . y)))))
+
+(fn zip args
+  (map list . args))
+
+(fn seq (n m)
+  (? (< n m)
+     (cons n (seq (+ n 1) m))))
+
+(fn seqby (n m k)
+  (? (< 0 (* k (- m n)))
+     (cons n (seqby (+ n k) m k))))
+
+(fn range (n m . args)
+  (? args
+     (seqby n m (car args))
+     (seq n m)))

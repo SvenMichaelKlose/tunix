@@ -1,6 +1,4 @@
-ifndef $(UNITY_ROOT)
-    $(warn UNITY_ROOT is not set. git@github.com:ThrowTheSwitch/Unity.git)
-endif
+UNITY_SRC = ../../../contrib/unity/src
 
 PROGRAMS = \
 	storage-layout \
@@ -13,11 +11,11 @@ COMMONSOURCES = \
 	../file-storage.c \
 	../storage.c \
 	../symbol.c \
-	$(UNITY_ROOT)/unity.c
+	$(UNITY_SRC)/unity.c
 
 COPTFLAGS = -ggdb -g -O0
 CFLAGS = -Wall -Werror \
-	-I. -I.. -I$(UNITY_ROOT) \
+	-I. -I.. -I$(UNITY_SRC) \
 	-DTESTS
 
 COMMONOBJ = $(COMMONSOURCES:.c=.o)

@@ -5,16 +5,16 @@ COPTFLAGS = -ggdb -g -O0
 
 OBJ = $(addsuffix .o, $(basename $(SRC)))
 
-all: $(PROGRAM) test
+all: $(PROGRAM)
 
 test: test/.passed
 
 test/.passed:
-	$(MAKE) -C test all UNITY_ROOT="$(UNITY_ROOT)"
+	$(MAKE) -C test all
 
 clean:
-	rm -f $(OBJ) $(PROGRAM) symbol.bdb
-	$(MAKE) -C test clean UNITY_ROOT="$(UNITY_ROOT)"
+	rm -f $(OBJ) $(PROGRAM)
+	$(MAKE) -C test clean
 
 $(PROGRAM): $(OBJ)
 	$(CC) -o $(PROGRAM) $(CFLAGS) $(OBJ)

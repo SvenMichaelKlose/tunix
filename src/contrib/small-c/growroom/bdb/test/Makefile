@@ -8,7 +8,7 @@ PROGRAMS = \
 	cnode-inserts \
 	symbol
 COMMONSOURCES = \
-	../api.c \
+	../bdb.c \
 	../cache.c \
 	../file-storage.c \
 	../storage.c \
@@ -30,6 +30,9 @@ test: .passed
 	@for i in $(PROGRAMS); do \
 	    echo "Running test '$$i'."; \
 	    (./$$i && exit); \
+	    if [ $$? -ne 0 ]; then \
+	        echo "Tests failed!"; exit 1; \
+	    fi \
 	done
 	touch .passed
 

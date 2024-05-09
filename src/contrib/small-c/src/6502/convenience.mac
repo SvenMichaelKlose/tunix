@@ -1,0 +1,146 @@
+;;;;;;;;;;;;;;
+;;; MACROS ;;;
+;;;;;;;;;;;;;;
+;
+; Convenience macros to dampen down
+; repetition.
+
+.macro mvb to, from
+    lda from
+    sta to
+.endmacro
+
+.macro mvw to, from
+    mvb to, from
+    mvb to+1, from+1
+.endmacro
+
+.macro phx
+    txa
+    pha
+.endmacro
+
+.macro phy
+    tya
+    pha
+.endmacro
+
+.macro plx
+    pla
+    tax
+.endmacro
+
+.macro ply
+    pla
+    tay
+.endmacro
+
+.macro push from
+    lda from
+    pha
+.endmacro
+
+.macro pop to
+    pla
+    sta to
+.endmacro
+
+.macro pushw from
+    push from
+    push from+1
+.endmacro
+
+.macro popw to
+    pop to+1
+    pop to
+.endmacro
+
+.macro store_regs
+    sta reg_a
+    stx reg_x
+    sty reg_y
+.endmacro
+
+.macro store_regs_and_flags
+    store_regs
+    php
+    pla
+    sta flags
+.endmacro
+
+.macro load_regs
+    lda reg_a
+    ldx reg_x
+    ldy reg_y
+.endmacro
+
+.macro ldax from
+    lda from
+    ldx from+1
+.endmacro
+
+.macro ldaxi val
+    lda #<(val)
+    ldx #>(val)
+.endmacro
+
+.macro ldayi val
+    lda #<(val)
+    ldy #>(val)
+.endmacro
+
+.macro stax to
+    sta to
+    stx to+1
+.endmacro
+
+.macro stay to
+    sta to
+    sty to+1
+.endmacro
+
+.macro stwi to, val
+    mvb to, #<(val)
+    mvb to+1, #>(val)
+.endmacro
+
+.macro incw at
+    inc at
+    bne :+
+    inc at+1
+:
+.endmacro
+
+.macro qdecw at
+    dec at
+    bne :+
+    dec at+1
+:
+.endmacro
+
+.macro jqdecw at, to
+    dec at
+    bne to
+    dec at+1
+    bne to
+.endmacro
+
+.macro jmpa to, val
+    lda val
+    jmp to
+.endmacro
+
+.macro jsra to, val
+    lda val
+    jsr to
+.endmacro
+
+.macro jsrx to, val
+    ldx val
+    jsr to
+.endmacro
+
+.macro jsry to, val
+    ldy val
+    jsr to
+.endmacro

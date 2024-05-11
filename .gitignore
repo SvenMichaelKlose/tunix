@@ -1,0 +1,7 @@
+*.o
+*.lbl
+*.map
+*.dbg
+*.zip
+*.prg
+*.a

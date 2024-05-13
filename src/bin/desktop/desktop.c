@@ -36,13 +36,8 @@
 //
 
 char txt_help[] =
-    "INGLE is graphical user interface for the "
-    "VIC with Ultimem expansion.  It provides "
-    "a ROM file system with a collection of "
-    "programs on it already.\n"
-    "\n"
-    "For more information please check \n"
-    "http://sleepingelephant.com/denial/\n"
+    "INGLE is graphical user interface for "
+    "TUNIX."
     "\n"
     "Desktop commands:\n"
     "\n"
@@ -60,8 +55,8 @@ char txt_help[] =
 
 struct textview_content {
     struct obj  obj;
-    char        * data;
-    char        * ptr;
+    char *      data;
+    char *      ptr;
     unsigned    size;
 };
 
@@ -165,15 +160,17 @@ make_textview_content ()
 }
 
 struct obj * __fastcall__
-make_textview (char * data, unsigned size, char * title, gpos x, gpos y, gpos w, gpos h)
+make_textview (char * data, unsigned size, char * title,
+               gpos x, gpos y, gpos w, gpos h)
 {
     struct textview_content * content = make_textview_content ();
-	struct window * win = make_window (title, (struct obj *) content, textview_event_handler);
+	struct window * win = make_window (title, OBJ(content),
+                                       textview_event_handler);
 
     content->data = data;
     content->ptr = data;
     content->size = size;
-	set_obj_position_and_size (OBJ(win), x, y, w, h);
+	set_obj_frame (OBJ(win), x, y, w, h);
 
     return OBJ(win);
 }
@@ -183,7 +180,7 @@ make_textview (char * data, unsigned size, char * title, gpos x, gpos y, gpos w,
 //
 
 struct obj * desktop;
-struct obj * focussed_window;
+struct window * focussed_window;
 char do_shutdown = 0;
 
 void
@@ -225,7 +222,8 @@ struct obj_ops desktop_obj_ops = {
 void
 show_free_memory ()
 {
-    sprintf (message_buffer, "%U/%UB RAM free.", _heapmemavail (), _heapmaxavail ());
+    sprintf (message_buffer, "%U/%UB RAM free.",
+             _heapmemavail (), _heapmaxavail ());
     print_message (message_buffer);
 }
 
@@ -237,11 +235,15 @@ toggle_fullscreen ()
     w->flags ^= W_FULLSCREEN;
 
     if (w->flags & W_FULLSCREEN) {
-        set_obj_position_and_size (focussed_window, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+        set_obj_frame (focussed_window,
+                                   0, 0,
+                                   DESKTOP_WIDTH, DESKTOP_HEIGHT);
         layout_obj (focussed_window);
         draw_obj (focussed_window);
     } else {
-        set_obj_position_and_size (focussed_window, w->user_x, w->user_y, w->user_w, w->user_h);
+        set_obj_frame (focussed_window,
+                                   w->user_x, w->user_y,
+                                   w->user_w, w->user_h);
         layout_obj (desktop);
         draw_obj (desktop);
     }
@@ -252,9 +254,10 @@ blur_windows ()
 {
     struct obj * i = desktop->node.children;
 
-    WINDOW(focussed_window)->flags &= ~W_HAS_FOCUS;
-    if (focussed_window && !(focussed_window->node.flags & OBJ_NODE_INVISIBLE))
-        window_draw_title (WINDOW(focussed_window));
+    focussed_window->flags &= ~W_HAS_FOCUS;
+    if (focussed_window
+         && !(focussed_window->obj.node.flags & OBJ_NODE_INVISIBLE))
+        window_draw_title (focussed_window);
 
     while (i) {
         WINDOW(i)->flags &= ~W_HAS_FOCUS;
@@ -265,8 +268,8 @@ blur_windows ()
 void
 focus_next_window ()
 {
-    struct obj *     next = desktop->node.children;
-    struct obj *     f = focussed_window;
+    struct obj * next = desktop->node.children;
+    struct obj * f = OBJ(focussed_window);
 
     if (!next || !next->node.next)
         return;
@@ -277,7 +280,7 @@ focus_next_window ()
     f->node.next = next;
     next->node.next = NULL;
     next->node.flags &= ~OBJ_NODE_INVISIBLE;
-    focussed_window = next;
+    focussed_window = WINDOW(next);
 
     WINDOW(next)->flags |= W_HAS_FOCUS;
     draw_obj (focussed_window);
@@ -299,10 +302,15 @@ void __fastcall__
 append_window (struct obj * win, char is_fullscreen)
 {
     blur_windows ();
-    focussed_window = append_obj (desktop, win);
-    WINDOW(focussed_window)->flags |= W_HAS_FOCUS | (is_fullscreen ? W_FULLSCREEN : 0);
+    focussed_window = WINDOW(append_obj (desktop, win));
+    if (W_HAS_FOCUS | (is_fullscreen))
+        focussed_window->flags |= W_FULLSCREEN;
+    else
+        focussed_window->flags |= 0;
     if (is_fullscreen)
-        set_obj_position_and_size (win, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+        set_obj_frame (win,
+                                   0, 0,
+                                   DESKTOP_WIDTH, DESKTOP_HEIGHT);
     layout_obj (focussed_window);
     draw_obj (focussed_window);
 }
@@ -311,7 +319,10 @@ void
 show_help ()
 {
     blur_windows ();
-    append_window (make_textview (txt_help, sizeof (txt_help), "Help", 0, DESKTOP_HEIGHT / 4, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2), true);
+    append_window (make_textview (txt_help, sizeof (txt_help), "Help",
+                                  0, DESKTOP_HEIGHT / 4,
+                                  DESKTOP_WIDTH, DESKTOP_HEIGHT / 2),
+                   true);
     print_message ("Welcome to INGLE!");
 }
 
@@ -322,7 +333,7 @@ send_key_event (char key)
 
     e->type = EVT_KEYPRESS;
     e->data_char = key;
-    send_event (focussed_window, e);
+    send_event (OBJ(focussed_window), e);
     free (e);
 }
 
@@ -389,13 +400,18 @@ start_desktop ()
 {
     desktop = OBJ(make_box (pattern_woven));
     desktop->ops = &desktop_obj_ops;
-    set_obj_position_and_size (desktop, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
+    set_obj_frame (desktop,
+                               0, 0,
+                               DESKTOP_WIDTH, DESKTOP_HEIGHT);
 
     print_message ("Press '?' for help.");
     layout_obj (desktop);
     draw_obj (desktop);
 
-    append_window (w_make_file_window (&cbm_drive_ops, "#8", 0, DESKTOP_HEIGHT / 2, DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1), false);
+    append_window (w_make_file_window (&cbm_drive_ops, "#8",
+                                       0, DESKTOP_HEIGHT / 2,
+                                       DESKTOP_WIDTH, DESKTOP_HEIGHT / 2 + 1),
+                   false);
 
     desktop_loop ();
 }

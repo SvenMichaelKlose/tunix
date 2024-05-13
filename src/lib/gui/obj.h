@@ -56,7 +56,7 @@ extern void * __fastcall__ alloc_obj                 (size_t size, struct obj_op
 extern void   __fastcall__ free_obj                  (struct obj *);
 extern void   __fastcall__ set_obj_size              (struct obj *, gsize w, gsize h);
 extern void   __fastcall__ set_obj_position          (struct obj *, gpos x, gpos y);
-extern void   __fastcall__ set_obj_position_and_size (struct obj *, gpos x, gpos y, gsize w, gsize h);
+extern void   __fastcall__ set_obj_frame (void *, gpos x, gpos y, gsize w, gsize h);
 
 // Append new object to list of children.
 // Returns appended object.
@@ -72,10 +72,10 @@ extern void __fastcall__ copy_obj_ops (struct obj_ops * dest, struct obj_ops * s
 // Assign new obj_ops structure to object.
 extern void __fastcall__ set_obj_ops (struct obj *, struct obj_ops *);
 
-extern void __fastcall__ draw_obj          (struct obj *);
+extern void __fastcall__ draw_obj          (void *);
 extern void __fastcall__ draw_obj_children (struct obj *);
 
-extern void __fastcall__ layout_obj          (struct obj *);
+extern void __fastcall__ layout_obj          (void *);
 extern void __fastcall__ layout_obj_children (struct obj *);
 
 // Set libgfx clipping and offset region to area of object.

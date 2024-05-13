@@ -80,7 +80,7 @@ layout_row (uchar * column_sizes, gsize h, struct obj * row)
         if (i == MAX_TABLE_COLUMNS)
             break;
 
-        set_obj_position_and_size (c, x, 0, column_sizes[i], h);
+        set_obj_frame (c, x, 0, column_sizes[i], h);
         x += column_sizes[i];
         c = c->node.next;
         i++;

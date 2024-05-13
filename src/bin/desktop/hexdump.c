@@ -163,7 +163,7 @@ make_hexdump (char * data, unsigned len, char * title, gpos x, gpos y, gpos w, g
     content->data = data;
     content->len = len;
     win->flags |= W_FULLSCREEN;
-	set_obj_position_and_size (OBJ(win), x, y, w, h);
+	set_obj_frame (OBJ(win), x, y, w, h);
 
     return OBJ(win);
 }

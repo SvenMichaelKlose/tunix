@@ -1,3 +1,4 @@
+// TODO: Use liblineedit. (smk)
 #include <ingle/cc65-charmap.h>
 
 #include <cbm.h>

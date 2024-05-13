@@ -6,7 +6,7 @@
 #define DESKTOP_BANK    1
 
 extern struct obj * desktop;
-extern struct obj * focussed_window;
+extern struct window * focussed_window;
 
 void start_desktop (void);
 void desktop_loop (void);

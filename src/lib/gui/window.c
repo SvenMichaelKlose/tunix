@@ -51,7 +51,7 @@ struct obj_ops window_content_ops = {
 void
 window_set_position_and_size (struct window * win, gpos x, gpos y, gsize w, gsize h)
 {
-    set_obj_position_and_size ((struct obj *) win, x, y, w, h);
+    set_obj_frame ((struct obj *) win, x, y, w, h);
     win->user_x = x;
     win->user_y = y;
     win->user_w = w;
@@ -179,9 +179,9 @@ layout_window_content_frame (struct obj * o)
     gpos h = o->rect.h;
 
     if (win->flags & W_FULLSCREEN)
-        set_obj_position_and_size (o->node.children, 0, WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
+        set_obj_frame (o->node.children, 0, WINDOW_TITLE_HEIGHT - 1, w, h - WINDOW_TITLE_HEIGHT + 1);
     else
-        set_obj_position_and_size (o->node.children, 1, WINDOW_TITLE_HEIGHT, w - 2, h - WINDOW_TITLE_HEIGHT - 1);
+        set_obj_frame (o->node.children, 1, WINDOW_TITLE_HEIGHT, w - 2, h - WINDOW_TITLE_HEIGHT - 1);
 
     layout_obj_children (o);
 }

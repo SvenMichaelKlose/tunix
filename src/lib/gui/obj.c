@@ -108,9 +108,9 @@ set_obj_position (struct obj * o, gpos x, gpos y)
 }
 
 void __fastcall__
-set_obj_position_and_size (struct obj * o, gpos x, gpos y, gsize w, gsize h)
+set_obj_frame (void * o, gpos x, gpos y, gsize w, gsize h)
 {
-    struct rect * r = &o->rect;
+    struct rect * r = &OBJ(o)->rect;
 
     r->x = x;
     r->y = y;
@@ -131,15 +131,16 @@ set_obj_ops (struct obj * x, struct obj_ops * o)
 }
 
 void __fastcall__
-draw_obj (struct obj * x)
+draw_obj (void * x)
 {
+    struct obj * o = OBJ(x);
     unsigned short oldbank = *ULTIMEM_BLK1;
 
-    if (x->node.flags & OBJ_NODE_INVISIBLE)
+    if (o->node.flags & OBJ_NODE_INVISIBLE)
         return;
 
-    *ULTIMEM_BLK1 = x->ops->draw_bank;
-    x->ops->draw (x);
+    *ULTIMEM_BLK1 = o->ops->draw_bank;
+    o->ops->draw (o);
     *ULTIMEM_BLK1 = oldbank;
 }
 
@@ -154,12 +155,13 @@ draw_obj_children (struct obj * x)
 }
 
 void __fastcall__
-layout_obj (struct obj * x)
+layout_obj (void * x)
 {
+    struct obj * o = OBJ(x);
     unsigned short oldbank = *ULTIMEM_BLK1;
 
-    *ULTIMEM_BLK1 = x->ops->layout_bank;
-    x->ops->layout (x);
+    *ULTIMEM_BLK1 = o->ops->layout_bank;
+    o->ops->layout (o);
     *ULTIMEM_BLK1 = oldbank;
 }
 

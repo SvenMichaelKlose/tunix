@@ -1,3 +1,3 @@
-SUBDIRS=cbm-console desktop lisp vi vm
+SUBDIRS=cbm-console csv2html desktop lisp vi vm
 
 include ../Makefile.subdir

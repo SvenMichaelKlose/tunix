@@ -1,10 +1,6 @@
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(THIS_DIR)/Makefile.config
 
-PROGRAM_PLAIN  = $(PROGRAM).prg
-ARCHIVE?       = $(PROGRAM).zip
-ARCHIVE_FILES? = README.md $(PROGRAM)
-
 all: $(LIBRARY) $(ARCHIVE)
 
 $(ARCHIVE): $(PROGRAM)

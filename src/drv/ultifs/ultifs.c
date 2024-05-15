@@ -701,6 +701,12 @@ ultifs_mount ()
 
 #ifndef __CC65__
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <error.h>
+#include <errno.h>
+
 void
 mkfs ()
 {
@@ -727,6 +733,8 @@ load_file (upos dir, char * name, char * pathname)
 #endif
     
     f = fopen (pathname, "rb");
+    if (!f)
+        error (EXIT_FAILURE, errno, "Can't exomize file '%s'.", pathname);
     fseek (f, 0, SEEK_END);
     size = ftell (f);
     b = bfile_create (dir, name, CBM_T_PRG);
@@ -739,10 +747,6 @@ load_file (upos dir, char * name, char * pathname)
     free (data);
     bfile_close (b);
 }
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
 
 void import_directory (upos bparent, char * name, int indent)
 {
@@ -800,6 +804,8 @@ void
 load (char * pathname)
 {
     FILE * f = fopen (pathname, "rb");
+    if (!f)
+        error (EXIT_FAILURE, errno, "Can't load boot file '%s'.", pathname);
     fread (store, 65536, 1, f);
     fclose (f);
     printf ("Loaded boot file '%s'.\n", pathname);
@@ -809,6 +815,8 @@ void
 write_image (char make_truncated)
 {
     FILE * img = fopen (image_name, "w");
+    if (!img)
+        error (EXIT_FAILURE, errno, "Can't write image '%s'.", image_name);
     fwrite (store, make_truncated ? last_free : STORE_SIZE, 1, img);
     fclose (img);
 }

@@ -1,10 +1,7 @@
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(THIS_DIR)/Makefile.config
 
-all: $(LIBRARY) $(ARCHIVE)
-
-$(ARCHIVE): $(PROGRAM)
-	zip $(ARCHIVE) $(ARCHIVE_FILES)
+all: $(LIBRARY) $(PROGRAM)
 
 $(PROGRAM): $(PROGRAM_PLAIN)
 ifndef NO_EXOMIZER

@@ -201,12 +201,9 @@ line_join ()
 void
 line_clear ()
 {
-    line * l = first_line;
-
-    while (l) {
-        free (l->data);
-        free (l);
-        l = l->next;
+    for (; first_line; first_line = first_line->next) {
+        free (first_line->data);
+        free (first_line);
     }
 
     line_init ();

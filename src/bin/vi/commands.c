@@ -61,7 +61,7 @@ cmd_enter ()
     line * current_line = line_get (linenr);
 
     if (xpos == current_line->length)
-        line_insert_after ();       // TODO: Remove?
+        line_insert_after ();
     else
         line_split ();
     move_down ();
@@ -274,7 +274,6 @@ cmd_read_file ()
     set_filename (&linebuf[2], linebuf_length);
 
     line_clear ();
-    free (first_line);
     current_line = first_line = NULL;
     num_lines = 0;
 

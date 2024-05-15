@@ -1,6 +1,15 @@
 TUNIX blog
 ==========
 
+# 2024-05-14 20:11 (smk)
+
+Small-C has been merged in, but you won't recognize it any
+more soon: with the plan to use a Lisp interpreter to
+generate C compiler code, it'll be a whole new compiler.
+Am not feeling very good about writing an interpreter or
+compiler again unless there's plan with medium resolution
+and snappy time spans.
+
 # 2024-05-08 16:48 (smk)
 
 exomizer-3.0.2 and oscar64 have been added.  Will try to do

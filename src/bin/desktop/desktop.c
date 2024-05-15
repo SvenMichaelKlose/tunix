@@ -289,12 +289,10 @@ focus_next_window ()
 void
 hide_windows ()
 {
-    struct obj * i = desktop->node.children;
+    struct obj * i;
 
-    while (i) {
+    for (i = desktop->node.children; i; i = i->node.next)
         i->node.flags |= OBJ_NODE_INVISIBLE;
-        i = i->node.next;
-    }
     draw_obj (desktop);
 }
 
@@ -308,9 +306,7 @@ append_window (struct obj * win, char is_fullscreen)
     else
         focussed_window->flags |= 0;
     if (is_fullscreen)
-        set_obj_frame (win,
-                                   0, 0,
-                                   DESKTOP_WIDTH, DESKTOP_HEIGHT);
+        set_obj_frame (win, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
     layout_obj (focussed_window);
     draw_obj (focussed_window);
 }
@@ -400,9 +396,7 @@ start_desktop ()
 {
     desktop = OBJ(make_box (pattern_woven));
     desktop->ops = &desktop_obj_ops;
-    set_obj_frame (desktop,
-                               0, 0,
-                               DESKTOP_WIDTH, DESKTOP_HEIGHT);
+    set_obj_frame (desktop, 0, 0, DESKTOP_WIDTH, DESKTOP_HEIGHT);
 
     print_message ("Press '?' for help.");
     layout_obj (desktop);

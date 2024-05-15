@@ -28,10 +28,8 @@ file_delete ()
     DRM(files, free_file);
 
     // Free pages.
-    n = file->pages;
-    for (i = 0; i < n; i++)
-        if (p = file->pages[i])
-            LPUSH(pages, free_page, p);
+    for (i = file->pages; *i; i++)
+        LPUSH(pages, free_page, *p);
 }
 
 void

@@ -1,3 +1,3 @@
 SUBDIRS=ultifs
 
-include ../Makefile.sub
+include ../Makefile.subdir

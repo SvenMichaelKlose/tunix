@@ -3,7 +3,7 @@ SOURCES= \
     word.asm \
     dword.asm
 
-include ../../Makefile.rules
+include ../../Makefile.config
 
 %.o: %.asm
 	$(AS) -g -o $@ $<

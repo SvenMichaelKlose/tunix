@@ -2,4 +2,4 @@ LIBRARY=libposix.a
 ASMSOURCES= \
     strnlen.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

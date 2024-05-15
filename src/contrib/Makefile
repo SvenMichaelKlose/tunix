@@ -1,4 +1,10 @@
-all: exomizer-3.0.2/src/exomizer cregex obj/oscar64
+SUBDIRS = exomizer-3.0.2/src/exomizer cregex
+
+ifdef HAVE_OSCAR64
+SUBDIRS += obj/oscar64
+endif
+
+all: $(SUBDIRS)
 
 exomizer-3.0.2/src/exomizer:
 	cd exomizer-3.0.2/src && $(MAKE)
@@ -8,14 +14,14 @@ obj/oscar64:
 	mkdir -p oscar64/build
 	cd oscar64/build && $(MAKE) -f ../make/makefile
 
+.passed-oscar64:
+	cd oscar64/autotest && $(MAKE)
+	touch .passed-oscar64
+
 cregex:
 	$(MAKE) -C cregex
 
 test: .passed-oscar64 .passed-unity .passed-cregex
-
-.passed-oscar64:
-	cd oscar64/autotest && $(MAKE)
-	touch .passed-oscar64
 
 .passed-unity:
 	cd unity/test && $(MAKE) test

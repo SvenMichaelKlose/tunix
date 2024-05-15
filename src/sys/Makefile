@@ -1,3 +1,3 @@
 SUBDIRS=boot kernel
 
-include ../Makefile.sub
+include ../Makefile.subdir

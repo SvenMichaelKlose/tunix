@@ -9,4 +9,4 @@ LIBRARIES= \
     $(TUNIX_LIB)/ingle/libingle.a \
     $(TUNIX_LIB)/ultimem/libultimem.a
 
-include ../../Makefile.native
+include ../../Makefile.build

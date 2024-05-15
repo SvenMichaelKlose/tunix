@@ -9,4 +9,4 @@ $(warn Please set TV=PAL or TV=NTSC)
 TV=NTSC
 endif
 
-include ../../Makefile.native
+include ../../Makefile.build

@@ -5,4 +5,4 @@ SOURCES= \
 	print.c \
 	read.c
 
-include ../../Makefile.native
+include ../../Makefile.build

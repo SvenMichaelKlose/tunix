@@ -1,0 +1,20 @@
+THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+include $(THIS_DIR)/Makefile.config
+
+PROGRAM_PLAIN  = $(PROGRAM).prg
+ARCHIVE?       = $(PROGRAM).zip
+ARCHIVE_FILES? = README.md $(PROGRAM)
+
+all: $(LIBRARY) $(ARCHIVE)
+
+$(ARCHIVE): $(PROGRAM)
+	zip $(ARCHIVE) $(ARCHIVE_FILES)
+
+$(PROGRAM): $(PROGRAM_PLAIN)
+ifndef NO_EXOMIZER
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 $(PROGRAM_PLAIN) -o $(PROGRAM)
+else
+	cp $(PROGRAM_PLAIN) $(PROGRAM)
+endif
+
+include $(THIS_DIR)/Makefile.build.$(TARGETCC)

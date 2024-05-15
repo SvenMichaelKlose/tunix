@@ -1,7 +1,7 @@
 PROGRAM=sjload
 ASMSOURCES=main.asm
 
-include ../Makefile.rules
+include ../Makefile.config
 
 %.o: %.asm
 	$(AS) -o $@ $<

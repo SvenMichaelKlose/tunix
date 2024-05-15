@@ -13,4 +13,4 @@ SOURCES= \
     obj.c \
     window.c
 
-include ../../Makefile.native
+include ../../Makefile.build

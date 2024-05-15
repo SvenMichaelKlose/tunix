@@ -3,4 +3,4 @@ SOURCES= \
     linebuf.c \
     main.c
 
-include ../../Makefile.native
+include ../../Makefile.build

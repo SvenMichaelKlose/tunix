@@ -10,4 +10,4 @@ ASMSOURCES= \
     readwrite.asm \
     unhide.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

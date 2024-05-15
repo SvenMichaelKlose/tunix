@@ -1,6 +1,11 @@
 TUNIX blog
 ==========
 
+# 2024-05-14
+
+Am adding support for multiple host and target compilers.
+This will be interesting.
+
 # 2024-05-14 20:11 (smk)
 
 Small-C has been merged in, but you won't recognize it any

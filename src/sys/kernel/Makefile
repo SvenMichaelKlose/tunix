@@ -9,7 +9,7 @@ CSOURCES= \
 SOURCES_init= \
 	init.c
 
-include ../../Makefile.rules
+include ../../Makefile.config
 
 %.o: %.asm
 	$(AS) $(ASFLAGS) -I$(CA65_INCLUDE) -o $@ $<

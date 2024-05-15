@@ -6,4 +6,4 @@ SUBDIRS= \
     sbin \
     bin
 
-include Makefile.sub
+include Makefile.subdir

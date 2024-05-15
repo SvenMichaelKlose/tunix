@@ -4,4 +4,4 @@ ASMSOURCES= \
     keyboard.asm \
     putchar-fixed-4x4.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

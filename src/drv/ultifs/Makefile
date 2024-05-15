@@ -17,4 +17,4 @@ LIBRARIES= \
     $(TUNIX_LIB)/log/liblog.a
 LD65CFG=vic.cfg
 
-include ../../Makefile.native
+include ../../Makefile.build

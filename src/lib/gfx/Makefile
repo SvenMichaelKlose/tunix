@@ -27,4 +27,4 @@ ASMSOURCES= \
     vic-settings.inc.asm \
     zeropage.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

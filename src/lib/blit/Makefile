@@ -5,4 +5,4 @@ ASMSOURCES= \
     moveram.asm \
     memmove.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

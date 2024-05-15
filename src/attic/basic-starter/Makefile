@@ -4,7 +4,7 @@ SOURCES= \
 
 PROGRAM=basic-starter.bin
 
-include ../Makefile.rules
+include ../Makefile.config
 
 %.o: %.asm
 	$(AS) -o $@ $<

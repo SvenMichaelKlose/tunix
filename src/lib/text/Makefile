@@ -3,4 +3,4 @@ SOURCES= \
     line.c \
     motion.c
 
-include ../../Makefile.native
+include ../../Makefile.build

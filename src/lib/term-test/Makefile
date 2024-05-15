@@ -7,4 +7,4 @@ LIBRARIES= \
     $(TUNIX_LIB)/blit/libblit.a \
     $(TUNIX_LIB)/ingle/libingle.a
 
-include ../../Makefile.native
+include ../../Makefile.build

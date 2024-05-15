@@ -7,4 +7,4 @@ LIBRARIES= \
 LD65CFG=vic.cfg
 NO_EXOMIZER=1
 
-include ../../Makefile.native
+include ../../Makefile.build

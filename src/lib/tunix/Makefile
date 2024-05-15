@@ -3,4 +3,4 @@ ASMSOURCES= \
     main.asm \
     c-wrappers.asm
 
-include ../../Makefile.native
+include ../../Makefile.build

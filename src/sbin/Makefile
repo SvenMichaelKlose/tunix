@@ -1,3 +1,3 @@
 SUBDIRS=fstest ultiburn ultidump ultitest
 
-include ../Makefile.sub
+include ../Makefile.subdir

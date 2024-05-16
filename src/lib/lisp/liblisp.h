@@ -8,33 +8,32 @@ typedef unsigned char uchar;
 
 #define TYPE_CONS     1
 #define TYPE_NUMBER   2
-#define TYPE_SYMBOL   4
-#define TYPE_BUILTIN  8
+#define TYPE_SYMBOL   3
+#define TYPE_BUILTIN  4
 
-#define PTRTYPE(x)  (((char *) x)[1])
-#define CONSP(x)    (PTRTYPE(x) & TYPE_CONS)
 #define NOTP(x)     (x == nil)
+#define PTRTYPE(x)  (*(char *) x)
+#define CONSP(x)    (PTRTYPE(x) == TYPE_CONS)
+#define ATOM(x)     (PTRTYPE(x) != TYPE_CONS)
+#define NUMBERP(x)  (PTRTYPE(x) == TYPE_NUMBER)
+#define SYMBOLP(x)  (PTRTYPE(x) == TYPE_SYMBOL)
+#define BUILTINP(x) (PTRTYPE(x) == TYPE_BUILTIN)
 
 typedef struct _cons {
-    uchar    size;
-    uchar    type;
-    lispptr  car;
-    lispptr  cdr;
+    uchar   type;
+    lispptr car;
+    lispptr cdr;
 } cons;
 
 typedef struct _number {
-    uchar   size;
     uchar   type;
     int     value;
 } number;
 
 typedef struct _symbol {
-    uchar   size;
     uchar   type;
     lispptr value;
-    lispptr bind;
     uchar   len;
-    uchar   name;
 } symbol;
 
 #ifdef __CC65__

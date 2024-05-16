@@ -35,19 +35,28 @@ void
 sweep ()
 {
     uchar  c;
+    lispptr * l;
     s = d = (char *) heap_start;
     xlat  = heap_end;
     while (*s) {
         c = OBJSIZE(s);
         if (!MARKED(s)) {
-            // Log deleted object;
-            *--xlat = (unsigned) s & 255;
-            *--xlat = (unsigned) s >> 8; 
-            *--xlat = c;
+            l = (lispptr *) (xlat + sizeof (lispptr) + sizeof (uchar));
+            // Enlarge previous gap.
+            if (xlat != heap_end && ((char *) *l) + c == s)
+                *xlat += c;
+            else {
+                l = (lispptr *) xlat;
+                // Log gap position and size.
+                *--l = (lispptr) s;
+                xlat = (char *) l;
+                *--xlat = c;
 
-            // Interrupt sweep if xlat table is full.
-            if (xlat <= minxlat)
-                return; // Will re-run after relocations.
+                // Interrupt sweep if xlat table is full.
+                if (xlat <= minxlat)
+                    return;
+            }
+            s += c;
         } else
             while (c--)
                 *d++ = *s++;

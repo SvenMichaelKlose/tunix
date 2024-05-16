@@ -1,4 +1,4 @@
-PROGRAM=ultifs.prg
+PROGRAM=ultifs
 SOURCES= \
 	alloc.c \
 	ipc.c \

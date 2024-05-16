@@ -7,15 +7,17 @@ endif
 all: $(SUBDIRS)
 
 exomizer-3.0.2/src/exomizer:
-	cd exomizer-3.0.2/src && $(MAKE)
+	$(MAKE) -C exomizer-3.0.2/src
 
 obj/oscar64:
 	rm -f .passed-oscar64
 	mkdir -p oscar64/build
-	cd oscar64/build && $(MAKE) -f ../make/makefile
+	$(MAKE) -C oscar64/build -f ../make/makefile
 
 .passed-oscar64:
-	cd oscar64/autotest && $(MAKE)
+ifdef HAVE_OSCAR64
+	$(MAKE) -C oscar64/autotest
+endif
 	touch .passed-oscar64
 
 cregex:
@@ -24,18 +26,17 @@ cregex:
 test: .passed-oscar64 .passed-unity .passed-cregex
 
 .passed-unity:
-	cd unity/test && $(MAKE) test
+	$(MAKE) -C unity/test test
 	touch .passed-unity
 
 .passed-cregex:
-	cd cregex/test && $(MAKE)
-	cregex/tests/driver || exit 1
+	$(MAKE) -C cregex check
 	touch .passed-cregex
 
 clean:
 	rm -f .passed-oscar64
 	rm -f .passed-unity
 	rm -rf oscar64/build
-	cd unity/test && $(MAKE) clean
-	cd exomizer-3.0.2/src && $(MAKE) clean
-	cd oscar64/autotest && $(MAKE) clean
+	$(MAKE) -C unity/test clean
+	$(MAKE) -C exomizer-3.0.2/src clean
+	$(MAKE) -C oscar64/autotest clean

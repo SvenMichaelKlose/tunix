@@ -3,8 +3,7 @@ LIBRARIES += $(CC65_LIB)/vic20.lib
 endif
 
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) -C $(LD65CFG) -Ln $(PROGRAM).lbl -o $@ $^ \
-        $(LIBRARIES)
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBRARIES)
 
 $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) a $@ $^
@@ -21,4 +20,4 @@ c1541image:
 	$(AS) $(ASFLAGS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<
+	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<

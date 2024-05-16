@@ -11,3 +11,6 @@ else
 endif
 
 include $(THIS_DIR)/Makefile.build.$(TARGETCC)
+
+test:
+	@echo "No test to be done."

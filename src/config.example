@@ -1,0 +1,2 @@
+# Build oscar64 compiler.
+#HAVE_OSCAR64 = 1

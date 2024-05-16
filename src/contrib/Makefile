@@ -1,3 +1,5 @@
+include ../Makefile.config
+
 SUBDIRS = exomizer-3.0.2/src/exomizer cregex
 
 ifdef HAVE_OSCAR64

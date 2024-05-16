@@ -55,12 +55,12 @@ print_symbol (symbol * s)
 void
 lisp_print (lispptr x)
 {
-    uchar type = PTRTYPE(x);
+    uchar type = TYPE(x);
     if (type == TYPE_CONS)
         print_list ((cons *) x);
     else if (type == TYPE_NUMBER)
         print_number ((number *) x);
-    else if (type == TYPE_SYMBOL || type == TYPE_BUILTIN)
+    else if (PTRTYPE(x) & TYPE_NAMED)
         print_symbol ((symbol *) x);
     else
         error ("Unknown object type.");

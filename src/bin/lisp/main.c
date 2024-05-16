@@ -62,47 +62,80 @@ struct builtin {
     { NULL, NULL }
 };
 
-/*
+lispptr * stack;
+
+#define PUSH(x)     (*--stack = (lispptr) x)
+#define POP(x)      (x = *++stack)
+#define PUSHSIZE(x) PUSH(x)
+#define POPSIZE(x)  (x = (unsigned) *++stack)
+
 lispptr
-apply (lispptr fun, lispptr args)
+eval (lispptr x)
 {
-    lispptr argdef = LISPFUN_ARGS(fun);
+    return x;
+}
+
+lispptr
+eval_list (lispptr x)
+{
+    return x;
+}
+
+lispptr
+eval_body (lispptr x)
+{
+    return x;
+}
+
+// Function call
+//
+// 'fun' is a cons with the argument definition in CAR and
+// body expressions in CDR.
+lispptr
+apply (lispptr fun, lispptr args, bool do_eval)
+{
+    lispptr argdef = FUNARGS(fun);
     lispptr ad;
     lispptr av;
     lispptr name;
-    unsigned stsize = 0;
+    lispptr rest;
+    lispptr value;
+    unsigned stsize;
 
     // Push argument symbol values onto the stack.
-    for (ad = argdef, av = args;
+    for (ad = argdef, av = args, stsize = 0;
          ad != nil && av != nil;
          ad = CDR(ad), av = CDR(av)) {
         stsize++;
 
         // Rest of argument list. (consing)
-        if (LISPATOM(ad)) {
-            LISPPUSH(ad);
-            LISPPUSH(SYMBOL_VALUE(ad));
-            SETQ_SYMBOL_VALUE(ad, eval_list (av));
+        if (ATOM(ad)) {
+            PUSH(ad);
+            PUSH(SYMBOL_VALUE(ad));
+            rest = do_eval ? eval_list (av) : av;
+            SET_SYMBOL_VALUE(ad, rest);
             break;
         }
 
         name = CAR(ad);
-        LISPPUSH(name);
-        LISPPUSH(SYMBOL_VALUE(name));
-        SETQ_SYMBOL_VALUE(name, eval (CAR(av)));
+        PUSH(name);
+        PUSH(SYMBOL_VALUE(name));
+        value = do_eval ? eval (CAR(av)) : CAR(av);
+        SET_SYMBOL_VALUE(name, value);
     }
 
-    LISPPUSH(stsize);
-    eval_body (LISPFUN_BODY(fun));
-    LISPPOP(stsize);
+    PUSHSIZE(stsize);
+    value = eval_body (FUNBODY(fun));
+    POPSIZE(stsize);
 
     // Pop argument symbol values from the stack.
     while (stsize--) {
-        LISPPOP(name);
-        LISPPOP(SYMBOL_VALUE(name));
+        POP(name);
+        POP(SYMBOL_VALUE(name));
     }
+
+    return value;
 }
-*/
 
 int
 main (int argc, char * argv[])
@@ -110,7 +143,6 @@ main (int argc, char * argv[])
     lispptr env;
     struct builtin * b = builtins;
     symbol * s;
-    unsigned i;
     (void) argc, (void) argv;
 
     term_init ();
@@ -123,17 +155,15 @@ main (int argc, char * argv[])
         b++;
     }
 
-for (i = 0; i < 6; i++) {
     term_puts ("Loading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error checking (smk).
     cbm_k_chkin (3);
     while (env = lisp_read ()) {
-        //lisp_print (env);
-        //term_puts ("\n\r");
+        lisp_print (env);
+        term_puts ("\n\r");
     }
     cbm_k_close (3);
-}
 
     term_puts ("\n\rBye!\n\r");
     while (1); // Gone with TUNIX.

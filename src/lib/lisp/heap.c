@@ -87,7 +87,7 @@ lookup_symbol (char * str, uchar len)
 
     // Check all objects until end of heap.
     while ((type = *s)) {
-        if (type == TYPE_SYMBOL || type == TYPE_BUILTIN) {
+        if (type & TYPE_NAMED) {
             sym = (symbol *) s;
 
             // Return match.

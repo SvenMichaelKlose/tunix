@@ -52,7 +52,7 @@ print_symbol (symbol * s)
     term_putsn ((char *) &s->len + 1, s->len);
 }
 
-void
+lispptr
 lisp_print (lispptr x)
 {
     uchar type = TYPE(x);
@@ -64,4 +64,5 @@ lisp_print (lispptr x)
         print_symbol ((symbol *) x);
     else
         error ("Unknown object type.");
+    return x;
 }

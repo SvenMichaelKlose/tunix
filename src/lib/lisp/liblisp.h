@@ -3,12 +3,14 @@
 
 #define HEAP_START  0x5000
 
-typedef void * lispptr;
 typedef unsigned char uchar;
+typedef void * lispptr;
+typedef lispptr (*builtin_fun) (lispptr);
 
 #define TYPE_NAMED    64
 #define TYPE_MARKED   128
-#define TYPE_MASK     7
+#define MASK_MARKED   127
+#define TYPE_MASK     (7 + TYPE_NAMED)
 #define TYPE_CONS     1
 #define TYPE_NUMBER   2
 #define TYPE_SYMBOL   (3 | TYPE_NAMED)
@@ -33,25 +35,39 @@ typedef struct _symbol {
 
 extern uchar lisp_sizes[];
 
+extern lispptr universe;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr nil;
 extern lispptr t;
+extern char * heap_start;
+extern char * heap_free;
+extern char * heap_end;
 #ifdef __CC65__
 #pragma zpsym ("nil")
 #pragma zpsym ("t")
+#pragma zpsym ("heap_start")
+#pragma zpsym ("heap_free")
+#pragma zpsym ("heap_end")
 #pragma bss-name (pop)
 #endif
 
-#define CAR(x)       (((cons *) x)->car)
-#define CDR(x)       (((cons *) x)->cdr)
-#define RPLACA(v, x) (x->car = v)
-#define RPLACD(v, x) (x->cdr = v)
+#define MARKED(x)  (PTRTYPE(x) & TYPE_MARKED)
+#define MARK(x)    (PTRTYPE(x) |= TYPE_MARKED)
+
+#define CONS(x)      ((cons *) x)
+#define CAR(x)       (CONS(x)->car)
+#define CDR(x)       (CONS(x)->cdr)
+#define LIST_CAR(x)  (NOT(CAR(x)) ? x : CAR(x))
+#define LIST_CDR(x)  (NOT(CDR(x)) ? x : CDR(x))
+#define RPLACA(v, x) (CAR(x) = v)
+#define RPLACD(v, x) (CDR(x) = v)
 
 #define NOT(x)      (x == nil)
 #define PTRTYPE(x)  (*(char *) x)
-#define TYPE(x)     (*(char *) x & TYPE_MASK)
+#define TYPE(x)     ((*(char *) x) & TYPE_MASK)
 #define CONSP(x)    (TYPE(x) == TYPE_CONS)
 #define ATOM(x)     (TYPE(x) != TYPE_CONS)
 #define LISTP(x)    (NOT(x) || CONSP(x))
@@ -63,20 +79,28 @@ extern lispptr t;
         lisp_sizes[*(char *)x] + ((symbol *)x)->len : \
         lisp_sizes[*(char *)x])
 
-#define NUMBER_VALUE(n)        (((number *) n)->value)
-#define SET_NUMBER_VALUE(n, x) (((number *) n)->value = x)
+#define NUMBER(n)              ((number *) n)
+#define NUMBER_VALUE(n)        (NUMBER(n)->value)
+#define SET_NUMBER_VALUE(n, x) (NUMBER(n)->value = x)
 
-#define SYMBOL_VALUE(s)        (((symbol *) s)->value)
-#define SET_SYMBOL_VALUE(s, x) (((symbol *) s)->value = x)
+#define SYMBOL(s)              ((symbol *) s)
+#define SYMBOL_VALUE(s)        (SYMBOL(s)->value)
+#define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
 
 #define FUNBODY(x)      CAR(x)
 #define FUNARGS(x)      CDR(x)
 
-lispptr __fastcall__ lisp_make_cons (lispptr car, lispptr cdr);
-lispptr __fastcall__ lisp_make_number (int x);
-lispptr __fastcall__ lisp_make_symbol (char * str, uchar len);
-lispptr              lisp_read (void);
-void                 lisp_print (lispptr x);
-void                 lisp_init (void);
+extern lispptr __fastcall__ lisp_make_cons (lispptr, lispptr);
+extern lispptr __fastcall__ lisp_make_number (int);
+extern lispptr __fastcall__ lisp_make_symbol (char *, uchar len);
+extern lispptr lisp_read (void);
+extern lispptr lisp_print (lispptr);
+
+extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
+extern lispptr eval      (lispptr);
+extern lispptr eval_list (lispptr);
+extern lispptr eval_body (lispptr);
+
+extern void    lisp_init (void);
 
 #endif // #ifndef __LIBLISP_H__

@@ -18,17 +18,22 @@
 #include <stdlib.h>
 
 #include "liblisp.h"
+#include "io.h"
+
+lispptr universe;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-char *    heap;
-symbol *  s;
+char *    heap_start;
+char *    heap_free;
+char *    heap_end;
 lispptr       nil;
 lispptr       t;
 #ifdef __CC65__
-#pragma zpsym ("heap");
-#pragma zpsym ("s");
+#pragma zpsym ("heap_start");
+#pragma zpsym ("heap_free");
+#pragma zpsym ("heap_end");
 #pragma zpsym ("nil")
 #pragma zpsym ("t")
 #pragma bss-name (pop)
@@ -37,7 +42,7 @@ lispptr       t;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern char      do_putback;
+extern char do_putback;
 #ifdef __CC65__
 #pragma zpsym ("do_putback")
 #pragma bss-name (pop)
@@ -47,10 +52,10 @@ extern char      do_putback;
 lispptr __fastcall__
 alloc (uchar size, uchar type)
 {
-    char * r = heap;
+    char * r = heap_free;
     *r = type;
-    heap += size;
-    *heap = 0;  // New end of heap.
+    heap_free += size;
+    *heap_free = 0;
     return r;
 }
 
@@ -81,7 +86,7 @@ char sizes[] = {
 void * __fastcall__
 lookup_symbol (char * str, uchar len)
 {
-    char *    s = (char *) HEAP_START;
+    char *    s = (char *) heap_start;
     char      type;
     symbol *  sym;
 
@@ -101,7 +106,7 @@ lookup_symbol (char * str, uchar len)
         }
 
         // Jump over current object.
-        s += sizes[*s];
+        s += sizes[TYPE(s)];
     }
 
     return NULL;
@@ -127,13 +132,19 @@ lisp_make_symbol (char * str, uchar len)
 void
 lisp_init ()
 {
-    // Empty heap.
-    heap = (char *) HEAP_START;
-    *heap = 0;
+    // Init heap.
+    size_t heap_size = _heapmaxavail ();
+    heap_start = heap_free = malloc (heap_size);
+    if (!heap_start) {
+        outs ("Out of memory.");
+        while (1);
+    }
+    *heap_free = 0;
+    heap_end = &heap_start[heap_size];
 
     // Make truth.
-    nil = lisp_make_symbol ("nil", 3);
-    t   = lisp_make_symbol ("t", 1);
+    universe = nil = lisp_make_symbol ("nil", 3);
+    t = lisp_make_symbol ("t", 1);
 
     // Init input.
     do_putback = false;

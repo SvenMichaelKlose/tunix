@@ -1,5 +1,11 @@
 (print 1)
 (+ 1 1)
+(- 1 1)
+(* 23 42)
+(/ 23 5)
+(% 23 5)
+(++ 2)
+(-- 2)
 (quote x)
 (setq myfun (quote ((x) (print x))))
 myfun

@@ -197,7 +197,7 @@ bi_arith_arg (lispptr x, char * msg)
 {
     if (!CONSP(x)
         || !NUMBERP(arg1 = eval (CAR(x)))
-        || !NOT(CONSP(CDR(x))))
+        || !NOT(CDR(x)))
         bierror (msg);
 }
 

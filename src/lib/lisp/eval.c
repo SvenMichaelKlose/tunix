@@ -112,6 +112,16 @@ apply (lispptr fun, lispptr args, bool do_eval)
         value = do_eval ? eval (CAR(av)) : CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
+    if (!NOT(ad)) {
+        term_puts ("Argument(s) missing: ");
+        lisp_print (ad);
+        while (1);
+    }
+    if (!NOT(av)) {
+        term_puts ("Too many arguments: ");
+        lisp_print (av);
+        while (1);
+    }
 
     value = eval_body (FUNBODY(fun));
 

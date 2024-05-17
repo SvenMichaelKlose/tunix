@@ -16,9 +16,18 @@
 #include <lisp/liblisp.h>
 #include <lisp/io.h>
 
+#ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
+#ifdef __CC65__
+#pragma zpsym ("arg1")
+#pragma zpsym ("arg2c")
+#pragma zpsym ("arg2")
+#pragma bss-name (pop)
+#endif
 
 void
 bierror (char * msg)
@@ -78,13 +87,13 @@ bi_symbolp (lispptr x)
 }
 
 lispptr FASTCALL
-bi_set (lispptr x)
+bi_setq (lispptr x)
 {
-    if (!CONSP(arg1 = LIST_CAR(x))
+    if (!CONSP(x)
         || !CONSP(arg2c = LIST_CDR(x))
-        || !SYMBOLP(arg1)
+        || !SYMBOLP(arg1 = CAR(x))
         || !NOT(CDR(arg2c)))
-        bierror ("(set sym x)");
+        bierror ("(setq sym x)");
     SET_SYMBOL_VALUE(arg1, arg2 = CAR(arg2c));
     return arg2;
 }
@@ -421,7 +430,7 @@ struct builtin builtins[] = {
     { "atom",       bi_atom },
 
     { "symbol?",      bi_symbolp },
-    { "set",          bi_set },
+    { "setq",         bi_setq },
     { "symbol-value", bi_symbol_value },
 
     { "cons?",      bi_consp },

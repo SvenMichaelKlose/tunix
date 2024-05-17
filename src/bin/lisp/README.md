@@ -37,7 +37,7 @@ definition and the CDR holding the body.
 
 Symbols have a name up to 255 bytes in length and a value.
 
-### (set symbol x): Set symbol value
+### (setq symbol x): Set symbol value
 ### (symbol-value symbol x)
 
 ## Conses

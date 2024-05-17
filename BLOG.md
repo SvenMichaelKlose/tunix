@@ -1,6 +1,19 @@
 TUNIX blog
 ==========
 
+# 2024-05-17
+
+Going on with the Lisp interpretr is more and more looking
+like a good idea.  There's no reason for the interpreter to
+cons (create lists cells that need cleaning up), a
+compacting garbage collector can take multiple turns until
+completion, and byte numbers can be stored in pointers,
+preventing GC runs to occur overly oftern.  Also, the tail
+of the call stack can be swapped out and there's still READ
+and PRINT (and the Bielefeld DB) to shoot records to outer
+space.  The one-block heap can be saved/loaded as an image
+and new built-in functions added easily.  Now we're talking.
+
 # 2024-05-14
 
 Am adding support for multiple host and target compilers.

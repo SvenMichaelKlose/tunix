@@ -1,9 +1,8 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-#define HEAP_START  0x5000
-
 typedef unsigned char uchar;
+
 typedef void * lispptr;
 typedef lispptr (*builtin_fun) (lispptr);
 
@@ -59,10 +58,12 @@ extern char * heap_end;
 #pragma bss-name (pop)
 #endif
 
-#define MARKED(x)  (PTRTYPE(x) & TYPE_MARKED)
-#define MARK(x)    (PTRTYPE(x) |= TYPE_MARKED)
+#define MARKED(x)   (PTRTYPE(x) & TYPE_MARKED)
+#define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
 
-#define CONS(x)      ((cons *) x)
+#define NOT(x)      (nil == (lispptr) (x))
+
+#define CONS(x)      ((cons *) (x))
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
 #define LIST_CAR(x)  (NOT(CAR(x)) ? x : CAR(x))
@@ -70,25 +71,25 @@ extern char * heap_end;
 #define RPLACA(v, x) (CAR(x) = v)
 #define RPLACD(v, x) (CDR(x) = v)
 
-#define NOT(x)      (x == nil)
-#define PTRTYPE(x)  (*(char *) x)
-#define TYPE(x)     ((*(char *) x) & TYPE_MASK)
-#define CONSP(x)    (TYPE(x) == TYPE_CONS)
-#define ATOM(x)     (TYPE(x) != TYPE_CONS)
-#define LISTP(x)    (NOT(x) || CONSP(x))
-#define NUMBERP(x)  (TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)  (TYPE(x) == TYPE_SYMBOL)
-#define BUILTINP(x) (TYPE(x) == TYPE_BUILTIN)
+#define BOOL(x)      ((x) ? t : nil)
+#define PTRTYPE(x)   (*((char *) (x)))
+#define TYPE(x)      (PTRTYPE(x) & TYPE_MASK)
+#define CONSP(x)     (TYPE(x) == TYPE_CONS)
+#define ATOM(x)      (TYPE(x) != TYPE_CONS)
+#define LISTP(x)     (NOT(x) || CONSP(x))
+#define NUMBERP(x)   (TYPE(x) == TYPE_NUMBER)
+#define SYMBOLP(x)   (TYPE(x) == TYPE_SYMBOL)
+#define BUILTINP(x)  (TYPE(x) == TYPE_BUILTIN)
 #define OBJSIZE(x) \
     ((PTRTYPE(x) & TYPE_NAMED) ? \
-        lisp_sizes[*(char *)x] + ((symbol *)x)->len : \
+        lisp_sizes[*(char *)x] + ((symbol *) x)->len : \
         lisp_sizes[*(char *)x])
 
-#define NUMBER(n)              ((number *) n)
+#define NUMBER(n)              ((number *) (n))
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)
 #define SET_NUMBER_VALUE(n, x) (NUMBER(n)->value = x)
 
-#define SYMBOL(s)              ((symbol *) s)
+#define SYMBOL(s)              ((symbol *) (s))
 #define SYMBOL_VALUE(s)        (SYMBOL(s)->value)
 #define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
 

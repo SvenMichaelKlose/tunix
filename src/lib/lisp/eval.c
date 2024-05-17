@@ -67,7 +67,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
     lispptr ad;
     lispptr av;
     lispptr name;
-    //lispptr rest;
+    lispptr rest;
     lispptr value;
     builtin_fun bfun;
     unsigned stsize;
@@ -96,15 +96,13 @@ apply (lispptr fun, lispptr args, bool do_eval)
         stsize++;
 
         // Rest of argument list. (consing)
-        /*
         if (ATOM(ad)) {
-            PUSH(ad);
-            PUSH(SYMBOL_VALUE(ad));
+            *--stack = ad;
+            *--stack = SYMBOL_VALUE(ad);
             rest = do_eval ? eval_list (av) : av;
             SET_SYMBOL_VALUE(ad, rest);
             break;
         }
-        */
 
         name = CAR(ad);
         *--stack = SYMBOL_VALUE(name);

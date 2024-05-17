@@ -102,16 +102,16 @@ extern char * heap_end;
 #define FUNBODY(x)      CAR(x)
 #define FUNARGS(x)      CDR(x)
 
-extern lispptr __fastcall__ lisp_make_cons (lispptr, lispptr);
-extern lispptr __fastcall__ lisp_make_number (int);
-extern lispptr __fastcall__ lisp_make_symbol (char *, uchar len);
+extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
+extern lispptr FASTCALL lisp_make_number (int);
+extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
 extern lispptr lisp_print (lispptr);
 
-extern lispptr eval_list (lispptr x);
-extern lispptr eval_body (lispptr x);
+extern lispptr eval_list (lispptr);
+extern lispptr eval_body (lispptr);
 extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
-extern lispptr eval (lispptr x);
+extern lispptr eval (lispptr);
 
 extern void    lisp_init (void);
 extern void    add_builtins (struct builtin *);

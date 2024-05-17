@@ -1,3 +1,5 @@
+#include <ingle/cc65-charmap.h>
+
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
@@ -72,14 +74,15 @@ apply (lispptr fun, lispptr args, bool do_eval)
         bfun = (builtin_fun) SYMBOL_VALUE(fun);
         if (!bfun) {
             lisp_print (fun);
-            term_puts (": built-in not implemented.\n\r");
+            term_puts (": built-in missing.\n\r");
             while (1);
         }
         return bfun (args);
     }
 
     if (!CONSP(fun)) {
-        term_puts ("Function expected.");
+        term_puts ("Function expected, not ");
+        lisp_print (fun);
         while (1);
     }
 
@@ -132,5 +135,5 @@ eval (lispptr x)
         return x;
     fun = eval (CAR(x));
     args = CDR(x);
-    return apply (fun, args, false);
+    return apply (fun, args, true);
 }

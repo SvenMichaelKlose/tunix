@@ -21,10 +21,7 @@ bi_print (lispptr x)
     return lisp_print (LIST_CAR(x));
 }
 
-struct builtin {
-    char *       name;
-    builtin_fun  func;
-} builtins[] = {
+struct builtin builtins[] = {
     { "?", NULL },
     { "&", NULL },
     { "|", NULL },
@@ -69,35 +66,27 @@ struct builtin {
 int
 main (int argc, char * argv[])
 {
-    lispptr env;
-    struct builtin * b = builtins;
-    symbol * s;
+    lispptr x;
     (void) argc, (void) argv;
 
     term_init ();
     lisp_init ();
-
-    while (b->name) {
-        s = lisp_make_symbol (b->name, strlen (b->name));
-        s->type = TYPE_BUILTIN;
-        s->value = b->func;
-        b++;
-    }
+    add_builtins (builtins);
 
     term_puts ("Loading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error check.
     cbm_k_chkin (3);
-    while (env = lisp_read ()) {
-        lisp_print (env);
+    while (x = lisp_read ()) {
+        lisp_print (x);
         term_puts ("\n\r");
-        env = eval (env);
+        x = eval (x);
         term_puts ("\n\r");
-        lisp_print (env);
+        lisp_print (x);
     }
     cbm_k_close (3);
 
     term_puts ("\n\rBye!\n\r");
-    while (1); // Gone with TUNIX.
+    while (1); // Gone with terminal compiled in.
     return 0;
 }

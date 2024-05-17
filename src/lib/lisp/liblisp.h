@@ -33,6 +33,11 @@ typedef struct _symbol {
     uchar   len;
 } symbol;
 
+struct builtin {
+    char *       name;
+    builtin_fun  func;
+};
+
 extern uchar lisp_sizes[];
 
 extern lispptr universe;
@@ -102,5 +107,6 @@ extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
 extern lispptr eval (lispptr x);
 
 extern void    lisp_init (void);
+extern void    add_builtins (struct builtin *);
 
 #endif // #ifndef __LIBLISP_H__

@@ -1,3 +1,4 @@
+src/config
 *.o
 *.lbl
 *.map

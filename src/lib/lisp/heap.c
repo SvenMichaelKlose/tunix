@@ -1,8 +1,3 @@
-// Object heap
-//
-// There is no garbage collection.  The heap is growing
-// upwards.
-
 #ifdef __CC65__
 #ifndef __CBM__
 #define __CBM__

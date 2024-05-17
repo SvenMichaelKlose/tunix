@@ -3,8 +3,14 @@
 
 typedef unsigned char uchar;
 
+#ifdef CC65
+#define FASTCALL    __fastcall__
+#else
+#define FASTCALL
+#endif
+
 typedef void * lispptr;
-typedef lispptr (*builtin_fun) (lispptr);
+typedef lispptr FASTCALL (*builtin_fun) (lispptr);
 
 #define TYPE_NAMED    64
 #define TYPE_MARKED   128

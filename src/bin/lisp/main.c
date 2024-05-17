@@ -280,6 +280,67 @@ bi_apply (lispptr x)
     return lisp_make_cons(CAR(x), arg2);
 }
 
+lispptr return_tag;
+lispptr go_tag;
+
+lispptr
+bi_block (lispptr x)
+{
+    lispptr res;
+    lispptr p;
+    lispptr tag;
+
+    if (!CONSP(x)
+        || !ATOM(arg1 = CAR(x))
+        || !NOT(arg2c = CDR(x))
+        || !NOT(CDR(arg2c)))
+        bierror ("(block name . exprs)");
+
+    for (p = arg2; !NOT(p); p = LIST_CDR(p)) {
+        res = eval (CAR(p));
+        if (CONSP(res)) {
+            // Handle RETURN.
+            if (CAR(res) == return_tag) {
+                if (arg1 == CAR(CDR(res)))
+                    return CDR(CDR(res));
+                return res;
+            }
+            // Handle GO.
+            if (CAR(res) == go_tag) {
+                // Search tag in body.
+                tag = CAR(CDR(res));
+                for (p = arg2; !NOT(p); p = LIST_CDR(p)) {
+                    if (CAR(p) == tag) {
+                        p = CDR(p);
+                        break;
+                    }
+                }
+                return res;
+            }
+        }
+    }
+    return res;
+}
+
+lispptr
+bi_return (lispptr x)
+{
+    if (!CONSP(x))
+        bierror ("(return obj [name])");
+    // TODO: Re-use list.
+    return lisp_make_cons (return_tag, lisp_make_cons (CAR(x), LIST_CAR(arg2c)));
+}
+
+lispptr
+bi_go (lispptr x)
+{
+    if (!CONSP(x)
+        || !NOT((CDR(x))))
+        bierror ("(go tag)");
+    // TODO: Re-use cons.
+    return lisp_make_cons (go_tag, CAR(x));
+}
+
 lispptr
 bi_read (lispptr x)
 {
@@ -295,62 +356,63 @@ bi_print (lispptr x)
 }
 
 struct builtin builtins[] = {
-    { "apply", bi_apply },
-    { "eval", bi_eval },
-    { "?", NULL },
-    { "&", NULL },
-    { "|", NULL },
-    { "block", NULL },
-    { "return", NULL },
+    { "apply",      bi_apply },
+    { "eval",       bi_eval },
+    { "?",          NULL },
+    { "&",          NULL },
+    { "|",          NULL },
+    { "block",      bi_block },
+    { "return",     bi_return },
+    { "go",         bi_go },
 
-    { "not", bi_not },
-    { "eq", bi_eq },
-    { "atom", bi_atom },
+    { "not",        bi_not },
+    { "eq",         bi_eq },
+    { "atom",       bi_atom },
 
-    { "symbol?", bi_symbolp },
-    { "set", bi_set },
+    { "symbol?",    bi_symbolp },
+    { "set",        bi_set },
 
-    { "cons?", bi_consp },
-    { "cons", bi_cons },
-    { "car", bi_car },
-    { "cdr", bi_cdr },
-    { "rplaca", bi_rplaca },
-    { "rplacd", bi_rplacd },
+    { "cons?",      bi_consp },
+    { "cons",       bi_cons },
+    { "car",        bi_car },
+    { "cdr",        bi_cdr },
+    { "rplaca",     bi_rplaca },
+    { "rplacd",     bi_rplacd },
 
-    { "quote", bi_quote },
-    { "backquote", NULL },
+    { "quote",      bi_quote },
+    { "backquote",  NULL },
     { "quasiquote", NULL },
     { "quasiquote-splice", NULL },
 
-    { "number?", bi_numberp },
+    { "number?",    bi_numberp },
 
-    { "==", bi_equal },
-    { ">", bi_gt },
-    { "<", bi_lt },
-    { ">=", bi_gte },
-    { "<=", bi_lte },
+    { "==",         bi_equal },
+    { ">",          bi_gt },
+    { "<",          bi_lt },
+    { ">=",         bi_gte },
+    { "<=",         bi_lte },
 
-    { "+", bi_add },
-    { "-", bi_sub },
-    { "*", bi_mul },
-    { "/", bi_div },
-    { "%", bi_mod },
-    { "++", bi_inc },
-    { "--", bi_dec },
+    { "+",          bi_add },
+    { "-",          bi_sub },
+    { "*",          bi_mul },
+    { "/",          bi_div },
+    { "%",          bi_mod },
+    { "++",         bi_inc },
+    { "--",         bi_dec },
 
-    { "bit-and", NULL },
-    { "bit-or", NULL },
-    { "bit-xor", NULL },
-    { "bit-neg", NULL },
-    { ">>", NULL },
-    { "<<", NULL },
+    { "bit-and",    NULL },
+    { "bit-or",     NULL },
+    { "bit-xor",    NULL },
+    { "bit-neg",    NULL },
+    { ">>",         NULL },
+    { "<<",         NULL },
 
-    { "peek", NULL },
-    { "poke", NULL },
-    { "sys", NULL },
+    { "peek",       NULL },
+    { "poke",       NULL },
+    { "sys",        NULL },
 
-    { "read", bi_read },
-    { "print", bi_print },
+    { "read",       bi_read },
+    { "print",      bi_print },
 
     { NULL, NULL }
 };
@@ -363,6 +425,8 @@ main (int argc, char * argv[])
 
     term_init ();
     lisp_init ();
+    return_tag = lisp_make_symbol ("%R", 2);
+    go_tag = lisp_make_symbol ("%G", 2);
     add_builtins (builtins);
 
     term_puts ("Loading ENV.LISP...\n\r");

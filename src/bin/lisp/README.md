@@ -52,28 +52,28 @@ Symbols have a name up to 255 bytes in length and a value.
 
 ## Numbers
 ### Comparison
-#### (== a b)
-#### (> a b)
-#### (< a b)
-#### (>= a b)
-#### (<= a b)
+#### (== n n)
+#### (> n n)
+#### (< n n)
+#### (>= n n)
+#### (<= n n)
 
 ### Arithmetics
-#### (+ a b)
-#### (- a b)
-#### (* a b)
-#### (/ a b)
-#### (% a b)
-#### (++ x)
-#### (-- x)
+#### (+ n n...)
+#### (- n n...)
+#### (\* n n...)
+#### (/ n n...)
+#### (% n n...)
+#### (++ n)
+#### (-- n)
 
 ### Bit manipulation
-#### (bit-and a b)
-#### (bit-or a b)
-#### (bit-xor a b)
-#### (bit-neg a b)
-#### (>> a nbits)
-#### (<< a nbits)
+#### (bit-and n n)
+#### (bit-or n n)
+#### (bit-xor n n)
+#### (bit-neg n)
+#### (>> n nbits)
+#### (<< n nbits)
 
 ## I/O
 ### (read)

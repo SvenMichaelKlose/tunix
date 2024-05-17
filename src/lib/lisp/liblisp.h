@@ -72,8 +72,8 @@ extern char * heap_end;
 #define CONS(x)      ((cons *) (x))
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
-#define LIST_CAR(x)  (NOT(CAR(x)) ? x : CAR(x))
-#define LIST_CDR(x)  (NOT(CDR(x)) ? x : CDR(x))
+#define LIST_CAR(x)  (NOT(x) ? x : CAR(x))
+#define LIST_CDR(x)  (NOT(x) ? x : CDR(x))
 #define RPLACA(v, x) (CAR(x) = v)
 #define RPLACD(v, x) (CDR(x) = v)
 

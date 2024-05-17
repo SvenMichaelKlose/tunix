@@ -90,6 +90,16 @@ bi_set (lispptr x)
 }
 
 lispptr FASTCALL
+bi_symbol_value (lispptr x)
+{
+    if (!CONSP(x)
+        || !NOT((CDR(x)))
+        || !SYMBOLP(arg1 = CAR(x)))
+        bierror ("(symbol-value symbol)");
+    return SYMBOL_VALUE(x);
+}
+
+lispptr FASTCALL
 bi_quote (lispptr x)
 {
     bi_1arg (x, "(quote obj)");
@@ -411,8 +421,9 @@ struct builtin builtins[] = {
     { "eq",         bi_eq },
     { "atom",       bi_atom },
 
-    { "symbol?",    bi_symbolp },
-    { "set",        bi_set },
+    { "symbol?",      bi_symbolp },
+    { "set",          bi_set },
+    { "symbol-value", bi_symbol_value },
 
     { "cons?",      bi_consp },
     { "cons",       bi_cons },

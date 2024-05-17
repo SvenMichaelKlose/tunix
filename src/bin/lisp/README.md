@@ -10,15 +10,85 @@ The interpreter knows these data types:
 * cons
 * symbol (0-255 char name)
 * string (1-256 chars)
-* array (256 objects max.)
 * builtin
 
 Functions are conses with the CAR holding the argument
 definition and the CDR holding the body.
 
-# Futue extensions
+# Built-in functions
+
+## Evaluation and flow control
+### (apply fun . args)
+### (eval x)
+### (? cond expr [cond expr/default])
+### (& x...)
+### (| x...)
+### (block name x...), (return x block-name), (go tag)
+
+## Predicates
+### (not x)
+### (eq x)
+### (atom x)
+### (cons? x)
+### (symbol? x)
+### (number? x)
+
+## Symbols
+
+Symbols have a name up to 255 bytes in length and a value.
+
+### (set symbol x): Set symbol value
+### (symbol-value symbol x)
+
+## Conses
+### (car lst)
+### (cdr lst)
+### (rplaca x lst)
+### (rplacd x lst)
+
+## Quoting
+### (quote x)
+### (backquote x), (quasiquote x), (quasiquote-splice x)
+
+## Numbers
+### Comparison
+#### (== a b)
+#### (> a b)
+#### (< a b)
+#### (>= a b)
+#### (<= a b)
+
+### Arithmetics
+#### (+ a b)
+#### (- a b)
+#### (* a b)
+#### (/ a b)
+#### (% a b)
+#### (++ x)
+#### (-- x)
+
+### Bit manipulation
+#### (bit-and a b)
+#### (bit-or a b)
+#### (bit-xor a b)
+#### (bit-neg a b)
+#### (>> a nbits)
+#### (<< a nbits)
+
+## I/O
+### (read)
+### (print x)
+
+## Low level
+### (peek addr)
+### (poke addr byte)
+### (sys addr)
+
+# Future extensions
 
 Numbers from 1 to 255 are pointer-encoded and do not
 require garbage collection.
 
-# Tail of call stack swapped to disk
+Swap tail of call stack to secondary storage.
+
+Type array (256 objects maximum).

@@ -9,11 +9,18 @@
 #include <term/libterm.h>
 #include <lisp/liblisp.h>
 
+#ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
 lispptr * stack;
+#ifdef __CC65__
+#pragma zpsym ("stack")
+#pragma bss-name (pop)
+#endif
 
-#define PUSH(x)     (*--stack = (lispptr) x)
+#define PUSH(x)     (*--stack = x)
 #define POP(x)      (x = *++stack)
-#define PUSHSIZE(x) PUSH(x)
+#define PUSHSIZE(x) PUSH((lispptr) x)
 #define POPSIZE(x)  (x = (unsigned) *++stack)
 
 // Evaluate list to list of return values.
@@ -65,7 +72,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
     lispptr ad;
     lispptr av;
     lispptr name;
-    lispptr rest;
+    //lispptr rest;
     lispptr value;
     builtin_fun bfun;
     unsigned stsize;
@@ -94,6 +101,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
         stsize++;
 
         // Rest of argument list. (consing)
+        /*
         if (ATOM(ad)) {
             PUSH(ad);
             PUSH(SYMBOL_VALUE(ad));
@@ -101,23 +109,26 @@ apply (lispptr fun, lispptr args, bool do_eval)
             SET_SYMBOL_VALUE(ad, rest);
             break;
         }
+        */
 
         name = CAR(ad);
-        PUSH(name);
-        PUSH(SYMBOL_VALUE(name));
+        //PUSH(name);
+        //PUSH(SYMBOL_VALUE(name));
         value = do_eval ? eval (CAR(av)) : CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
 
-    PUSHSIZE(stsize);
+    //PUSHSIZE(stsize);
     value = eval_body (FUNBODY(fun));
-    POPSIZE(stsize);
+    //POPSIZE(stsize);
 
     // Pop argument symbol values from the stack.
+    /*
     while (stsize--) {
         POP(name);
         POP(SYMBOL_VALUE(name));
     }
+    */
 
     return value;
 }

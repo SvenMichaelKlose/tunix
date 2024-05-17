@@ -127,11 +127,20 @@ lisp_make_symbol (char * str, uchar len)
 void
 lisp_init ()
 {
+    size_t heap_size;
+
+    // Init stack.
+    stack = malloc (STACK_SIZE);
+    if (!stack) {
+        outs ("Out of memory for stack.");
+        while (1);
+    }
+
     // Init heap.
-    size_t heap_size = _heapmaxavail ();
+    heap_size = _heapmaxavail ();
     heap_start = heap_free = malloc (heap_size);
     if (!heap_start) {
-        outs ("Out of memory.");
+        outs ("Out of memory for heap.");
         while (1);
     }
     *heap_free = 0;

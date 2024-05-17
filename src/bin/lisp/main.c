@@ -30,6 +30,11 @@ lispptr arg2;
 #endif
 
 void
+fnord (void)
+{
+}
+
+void
 bierror (char * msg)
 {
     outs ("ERROR: ");
@@ -44,7 +49,7 @@ bi_1arg (lispptr x, char * msg)
     if (!CONSP(x)
         || !NOT(CDR(x)))
         bierror (msg);
-    arg1 = CAR(x);
+    arg1 = eval (CAR(x));
 }
 
 void FASTCALL
@@ -54,8 +59,8 @@ bi_2args (lispptr x, char * msg)
         || NOT(CONSP(arg2c = CDR(x)))
         || !NOT(CDR(arg2c)))
         bierror (msg);
-    arg1 = CAR(x);
-    arg2 = CAR(arg2c);
+    arg1 = eval (CAR(x));
+    arg2 = eval (CAR(arg2c));
 }
 
 lispptr FASTCALL
@@ -94,7 +99,7 @@ bi_setq (lispptr x)
         || !SYMBOLP(arg1 = CAR(x))
         || !NOT(CDR(arg2c)))
         bierror ("(setq sym x)");
-    SET_SYMBOL_VALUE(arg1, arg2 = CAR(arg2c));
+    SET_SYMBOL_VALUE(arg1, arg2 = eval (CAR(arg2c)));
     return arg2;
 }
 
@@ -103,16 +108,18 @@ bi_symbol_value (lispptr x)
 {
     if (!CONSP(x)
         || !NOT((CDR(x)))
-        || !SYMBOLP(arg1 = CAR(x)))
+        || !SYMBOLP(arg1 = eval (CAR(x))))
         bierror ("(symbol-value symbol)");
-    return SYMBOL_VALUE(x);
+    return SYMBOL_VALUE(arg1);
 }
 
 lispptr FASTCALL
 bi_quote (lispptr x)
 {
-    bi_1arg (x, "(quote x)");
-    return arg1;
+    if (!CONSP(x)
+        || !NOT(CDR(x)))
+        bierror ("(quote x)");
+    return CAR(x);
 }
 
 lispptr FASTCALL
@@ -134,7 +141,7 @@ cxr_args (lispptr x, char * msg)
 {
     if (!CONSP(x)
         || !NOT((CDR(x)))
-        || !LISTP(arg1 = CAR(x)))
+        || !LISTP(arg1 = eval (CAR(x))))
         bierror (msg);
 }
 
@@ -155,8 +162,10 @@ bi_cdr (lispptr x)
 void
 rplac_args (lispptr x, char * msg)
 {
-    if (!CONSP(x)
-        || !NOT(arg2c = CDR(x))
+    if (!CONSP(x))
+        bierror (msg);
+    arg1 = eval (CAR(x));
+    if (!NOT(arg2c = eval (CDR(x)))
         || !NOT(CDR(arg2c))
         || !CONSP(arg2 = CAR(arg2c)))
         bierror (msg);
@@ -187,7 +196,7 @@ void FASTCALL
 bi_arith_arg (lispptr x, char * msg)
 {
     if (!CONSP(x)
-        || !NUMBERP(arg1 = CAR(x))
+        || !NUMBERP(arg1 = eval (CAR(x)))
         || !NOT(CONSP(CDR(x))))
         bierror (msg);
 }
@@ -207,7 +216,7 @@ void FASTCALL
 bi_arith_many (lispptr x, char * msg)
 {
     if (!CONSP(x)
-        || !NUMBERP(arg1 = CAR(x))
+        || !NUMBERP(arg1 = eval (CAR(x)))
         || NOT(arg2c = CDR(x)))
         bierror (msg);
 }
@@ -256,12 +265,13 @@ fun_name (lispptr x) \
 { \
     static char * msg = err; \
     int v; \
+    lispptr n; \
     bi_arith_many (x, err); \
     v = NUMBER_VALUE(arg1); \
     DOLIST(x, arg2c) { \
-        if (!NUMBERP(CAR(x))) \
+        if (!NUMBERP(n = eval (CAR(x)))) \
             bierror (msg); \
-        v op NUMBER_VALUE(CAR(x)); \
+        v op NUMBER_VALUE(n); \
     } \
     return lisp_make_number (v); \
 }
@@ -289,10 +299,8 @@ bi_dec (lispptr x)
 lispptr FASTCALL
 bi_eval (lispptr x)
 {
-    if (!CONSP(x)
-        || !NOT((CDR(x))))
-        bierror ("(eval x)");
-    return eval (CAR(x));
+    bi_1arg (x, "(eval x)");
+    return eval (arg1);
 }
 
 lispptr FASTCALL
@@ -353,7 +361,7 @@ bi_return (lispptr x)
     if (!CONSP(x))
         bierror ("(return x [name])");
     // TODO: Re-use list.
-    return lisp_make_cons (return_tag, lisp_make_cons (CAR(x), LIST_CAR(LIST_CDR(x))));
+    return lisp_make_cons (return_tag, lisp_make_cons (eval (CAR(x)), eval (LIST_CAR(LIST_CDR(x)))));
 }
 
 lispptr FASTCALL
@@ -387,7 +395,7 @@ lispptr FASTCALL
 bi_and (lispptr x)
 {
     DOLIST(x, x)
-        if (NOT(CAR(x)))
+        if (NOT(eval (CAR(x))))
             return nil;
     return t;
 }
@@ -396,7 +404,7 @@ lispptr FASTCALL
 bi_or (lispptr x)
 {
     DOLIST(x, x)
-        if (!NOT(CAR(x)))
+        if (!NOT(eval (CAR(x))))
             return t;
     return nil;
 }
@@ -412,7 +420,8 @@ bi_read (lispptr x)
 lispptr FASTCALL
 bi_print (lispptr x)
 {
-    return lisp_print (LIST_CAR(x));
+    bi_1arg (x, "(print x)");
+    return lisp_print (arg1);
 }
 
 struct builtin builtins[] = {

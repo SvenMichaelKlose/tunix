@@ -1,6 +1,8 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+#define STACK_SIZE  1024
+
 typedef unsigned char uchar;
 
 #ifdef CC65
@@ -55,12 +57,14 @@ extern lispptr t;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
+extern lispptr * stack;
 #ifdef __CC65__
 #pragma zpsym ("nil")
 #pragma zpsym ("t")
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
+#pragma zpsym ("stack")
 #pragma bss-name (pop)
 #endif
 
@@ -99,8 +103,8 @@ extern char * heap_end;
 #define SYMBOL_VALUE(s)        (SYMBOL(s)->value)
 #define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
 
-#define FUNBODY(x)      CAR(x)
-#define FUNARGS(x)      CDR(x)
+#define FUNARGS(x)      CAR(x)
+#define FUNBODY(x)      CDR(x)
 
 extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
 extern lispptr FASTCALL lisp_make_number (int);

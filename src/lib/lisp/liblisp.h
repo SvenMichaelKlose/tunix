@@ -96,10 +96,10 @@ extern lispptr __fastcall__ lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
 extern lispptr lisp_print (lispptr);
 
+extern lispptr eval_list (lispptr x);
+extern lispptr eval_body (lispptr x);
 extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
-extern lispptr eval      (lispptr);
-extern lispptr eval_list (lispptr);
-extern lispptr eval_body (lispptr);
+extern lispptr eval (lispptr x);
 
 extern void    lisp_init (void);
 

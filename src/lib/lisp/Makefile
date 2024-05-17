@@ -1,5 +1,6 @@
 LIBRARY=liblisp.a
 SOURCES= \
+	eval.c \
 	gc.c \
 	heap.c \
 	io.c \

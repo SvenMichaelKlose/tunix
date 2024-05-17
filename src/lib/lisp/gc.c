@@ -44,10 +44,10 @@ sweep ()
             l = (lispptr *) (xlat + sizeof (lispptr) + sizeof (uchar));
             // Enlarge previous gap.
             if (xlat != heap_end && ((char *) *l) + c == s)
-                *xlat += c;
+                *(xlat + 1) += c;
             else {
-                l = (lispptr *) xlat;
                 // Log gap position and size.
+                l = (lispptr *) xlat;
                 *--l = (lispptr) s;
                 xlat = (char *) l;
                 *--xlat = c;

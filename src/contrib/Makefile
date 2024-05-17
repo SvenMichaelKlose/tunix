@@ -36,6 +36,7 @@ test: .passed-oscar64 .passed-unity .passed-cregex
 	touch .passed-cregex
 
 clean:
+	rm -f .passed-cregex
 	rm -f .passed-oscar64
 	rm -f .passed-unity
 	rm -rf oscar64/build

@@ -128,13 +128,16 @@ void
 lisp_init ()
 {
     size_t heap_size;
+    char * tmp;
 
     // Init stack.
-    stack = malloc (STACK_SIZE);
-    if (!stack) {
+    tmp = malloc (STACK_SIZE);
+    if (!tmp) {
         outs ("Out of memory for stack.");
         while (1);
     }
+    tmp += STACK_SIZE;
+    stack = (lispptr *) tmp;
 
     // Init heap.
     heap_size = _heapmaxavail ();

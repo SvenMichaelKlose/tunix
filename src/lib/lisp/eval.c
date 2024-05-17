@@ -18,11 +18,6 @@ lispptr * stack;
 #pragma bss-name (pop)
 #endif
 
-#define PUSH(x)     (*--stack = x)
-#define POP(x)      (x = *++stack)
-#define PUSHSIZE(x) PUSH((lispptr) x)
-#define POPSIZE(x)  (x = (unsigned) *++stack)
-
 // Evaluate list to list of return values.
 lispptr
 eval_list (lispptr x)
@@ -112,23 +107,19 @@ apply (lispptr fun, lispptr args, bool do_eval)
         */
 
         name = CAR(ad);
-        //PUSH(name);
-        //PUSH(SYMBOL_VALUE(name));
+        *--stack = SYMBOL_VALUE(name);
+        *--stack = name;
         value = do_eval ? eval (CAR(av)) : CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
 
-    //PUSHSIZE(stsize);
     value = eval_body (FUNBODY(fun));
-    //POPSIZE(stsize);
 
     // Pop argument symbol values from the stack.
-    /*
     while (stsize--) {
-        POP(name);
-        POP(SYMBOL_VALUE(name));
+        name = *++stack;
+        SET_SYMBOL_VALUE(name, *++stack);
     }
-    */
 
     return value;
 }

@@ -15,6 +15,12 @@ The interpreter knows these data types:
 Functions are conses with the CAR holding the argument
 definition and the CDR holding the body.
 
+# Consing
+
+The interpreter will cons:
+
+* Rest arguments to functions (by eval_list()).
+
 # Built-in functions
 
 ## Evaluation and flow control
@@ -92,3 +98,7 @@ require garbage collection.
 Swap tail of call stack to secondary storage.
 
 Type array (256 objects maximum).
+
+Compressed cons (special type) with CDR pointing to previous
+cons (which may also be compressed already, so there is a
+variable number of bytes to step down).

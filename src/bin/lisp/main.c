@@ -377,13 +377,13 @@ bi_if (lispptr x)
 {
     if (!CONSP(x)
         || NOT(CONSP(arg2c = CDR(x)))
-        || !NOT(CDR(arg2c)))
+        || NOT(CDR(arg2c)))
         bierror ("(? cond x [cond x/default])");
     while (!NOT(x)) {
         arg1 = CAR(x);
         if (NOT(arg2c = CDR(x)))
             return eval (arg1);
-        if (eval (arg1))
+        if (!NOT(eval (arg1)))
             return eval (CAR(arg2c));
         x = CDR(arg2c);
     }

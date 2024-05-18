@@ -10,3 +10,5 @@
 (setq myfun (quote ((x) (print x))))
 myfun
 (myfun 49)
+(? t 1 2)
+(? nil 1 2)

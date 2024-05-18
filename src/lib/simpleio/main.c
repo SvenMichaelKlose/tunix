@@ -2,8 +2,6 @@
 #ifndef __CBM__
 #define __CBM__
 #endif
-
-#include <ingle/cc65-charmap.h>
 #include <cbm.h>
 #endif
 
@@ -16,22 +14,41 @@
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-char      c;
-char      do_putback;
+char c;
+char do_putback;
 #ifdef __CC65__
 #pragma zpsym ("c")
 #pragma zpsym ("do_putback")
 #pragma bss-name (pop)
 #endif
 
+#define UPCASE_A  65
+#define UPCASE_Z  90
+#define LOCASE_A  97
+#define LOCASE_Z 122
+#define ISUPPER(c) (c >= UPCASE_A && c <= UPCASE_Z)
+#define ISLOWER(c) (c >= LOCASE_A && c <= LOCASE_Z)
+#define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
+#define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
+
 char
-raw_eof ()
+reverse_case (char c)
+{
+    if (ISUPPER(c))
+        return TOLOWER(c);
+    if (ISLOWER(c))
+        return TOUPPER(c);
+    return c;
+}
+
+char
+raw_eof (void)
 {
     return cbm_k_readst () & 0x40;
 }
 
 char
-raw_in ()
+raw_in (void)
 {
     return cbm_k_basin ();
 }
@@ -39,11 +56,11 @@ raw_in ()
 void
 raw_out (char c)
 {
-    cbm_k_bsout (c);
+    cbm_k_bsout (reverse_case (c));
 }
 
 void
-raw_start_error ()
+raw_start_error (void)
 {
     cbm_k_clrch ();
 }
@@ -81,13 +98,12 @@ void
 skip_spaces ()
 {
     while (!eof ()) {
+        // Skip comment until end of line.
         if (in () == ';') {
-            while (!eof () && in () >= ' ');
-            while (!eof () && in () < ' ');
+            while (!eof () && in () >= ' ')
+            while (!eof () && in () < ' ' && ch ());
             putback ();
-            continue;
-        }
-        if (!isspace (c)) {
+        } else if (!isspace (c)) {
             putback ();
             return;
         }

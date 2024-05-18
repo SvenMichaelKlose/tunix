@@ -9,9 +9,7 @@ $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) a $@ $^
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN)
-	rm -f $(PROGRAM) $(PROGRAM).dbg $(PROGRAM).lbl $(PROGRAM).map
-	rm -f $(LIBRARY) $(C1541_IMAGE)
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(PROGRAM).dbg $(PROGRAM).lbl $(PROGRAM).map $(LIBRARY) $(C1541_IMAGE)
 
 c1541image:
 	c1541 -format "$(PROGRAM),01" d64 $(C1541_IMAGE) -write $(C1541_IMAGE_FILES) # TODO (smk)

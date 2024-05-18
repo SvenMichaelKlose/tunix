@@ -13,9 +13,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <term/libterm.h>
+#include <simpleio/libsimpleio.h>
 
-#include "io.h"
 #include "liblisp.h"
 
 void
@@ -49,7 +48,7 @@ print_number (number * n)
 void
 print_symbol (symbol * s)
 {
-    term_putsn ((char *) &s->len + 1, s->len);
+    outsn ((char *) &s->len + 1, s->len);
 }
 
 lispptr

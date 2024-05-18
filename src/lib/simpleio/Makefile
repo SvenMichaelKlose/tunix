@@ -1,4 +1,4 @@
-LIBRARY=libquickio.a
+LIBRARY=libsimpleio.a
 SOURCES= \
 	main.c
 

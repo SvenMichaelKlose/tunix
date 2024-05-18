@@ -4,7 +4,6 @@
 #endif
 
 #include <ingle/cc65-charmap.h>
-#include <term/libterm.h>
 #include <cbm.h>
 #endif
 
@@ -13,8 +12,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <simpleio/libsimpleio.h>
+
 #include "liblisp.h"
-#include "io.h"
 
 lispptr universe;
 
@@ -58,7 +58,7 @@ objsize (char * x)
     uchar type = *x & 7; // TODO: constant
     unsigned s;
     if (type > TYPE_MAX) {
-        term_puts ("No size for type ");
+        errouts ("No size for type ");
         out_number (type);
         while (1);
     }

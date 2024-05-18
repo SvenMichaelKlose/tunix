@@ -1,13 +1,14 @@
+#include <ingle/cc65-charmap.h>
+
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <term/libterm.h>
+#include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
-#include "io.h"
 
 char token[256];
 

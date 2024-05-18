@@ -6,8 +6,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <term/libterm.h>
 #include <lisp/liblisp.h>
+#include <simpleio/libsimpleio.h>
 
 char * stack_start;
 
@@ -83,14 +83,14 @@ apply (lispptr fun, lispptr args, bool do_eval)
         bfun = (builtin_fun) SYMBOL_VALUE(fun);
         if (!bfun) {
             lisp_print (fun);
-            term_puts (": built-in missing.\n\r");
+            errouts (": built-in missing.\n\r");
             while (1);
         }
         return bfun (args);
     }
 
     if (!CONSP(fun)) {
-        term_puts ("Function expected, not ");
+        errouts ("Function expected, not ");
         lisp_print (fun);
         while (1);
     }
@@ -127,12 +127,12 @@ apply (lispptr fun, lispptr args, bool do_eval)
         SET_SYMBOL_VALUE(name, value);
     }
     if (!NOT(ad)) {
-        term_puts ("Argument(s) missing: ");
+        errouts ("Argument(s) missing: ");
         lisp_print (ad);
         while (1);
     }
     if (!NOT(av)) {
-        term_puts ("Too many arguments: ");
+        errouts ("Too many arguments: ");
         lisp_print (av);
         while (1);
     }

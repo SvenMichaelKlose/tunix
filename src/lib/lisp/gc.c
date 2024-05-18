@@ -1,9 +1,10 @@
 #include <ingle/cc65-charmap.h>
-#include <term/libterm.h>
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
 
@@ -38,8 +39,6 @@ char * d;   // Destination
 char * xlat;
 char * minxlat;
 
-#include "io.h"
-
 // Copy marked objects over deleted ones.
 // Make list of addresses of deleted objects and their size
 // for the pointer relocation pass.
@@ -53,7 +52,7 @@ sweep ()
     minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
         if (s >= heap_end) {
-            term_puts ("Sweep accross heap end.");
+            errouts ("Sweep accross heap end.");
             while (1);
         }
         c = objsize (s);
@@ -85,7 +84,7 @@ sweep ()
     *d = 0;
     heap_free = d;
     sweep_completed = true;
-    term_puts ("Sweep complete.\n\r");
+    errouts ("Sweep complete.\n\r");
 }
 
 // Sum up number of bytes freed before address to relocate
@@ -121,7 +120,7 @@ relocate (void)
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }
-    term_puts ("Relocation complete.\n\r");
+    errouts ("Relocation complete.\n\r");
 }
 
 void
@@ -137,9 +136,9 @@ gc (void)
     sweep_completed = false;
     s = d = heap_start;  // Relocation source + dest.
     do {
-        term_puts ("sweep\n\r");
+        errouts ("sweep\n\r");
         sweep ();
-        term_puts ("relocate\n\r");
+        errouts ("relocate\n\r");
         relocate ();
     } while (!sweep_completed);
 }

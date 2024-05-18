@@ -4,7 +4,6 @@ SOURCES= \
 	eval.c \
 	gc.c \
 	heap.c \
-	io.c \
 	print.c \
 	read.c
 

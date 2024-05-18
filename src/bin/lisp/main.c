@@ -3,6 +3,7 @@
 #endif
 
 #include <ingle/cc65-charmap.h>
+#include <cbm.h>
 
 #include <ctype.h>
 #include <string.h>
@@ -10,11 +11,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <cbm.h>
+#include <simpleio/libsimpleio.h>
 
-#include <term/libterm.h>
 #include <lisp/liblisp.h>
-#include <lisp/io.h>
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -34,13 +33,21 @@ fnord (void)
 {
 }
 
+extern void error (char * msg);
+
 void
-bierror (char * msg)
+error (char * msg)
 {
-    outs ("ERROR: ");
+    errouts ("ERROR: ");
     outs (msg);
     outs ("\n\r");
     while (1);
+}
+
+void
+bierror (char * msg)
+{
+    bierror (msg);
 }
 
 void FASTCALL
@@ -493,33 +500,23 @@ main (int argc, char * argv[])
     lispptr x;
     (void) argc, (void) argv;
 
-    term_init ();
     lisp_init ();
     return_tag = lisp_make_symbol ("%R", 2);
     go_tag = lisp_make_symbol ("%G", 2);
     add_builtins (builtins);
     lisp_print (universe);
-    gc ();
-    lisp_print (universe);
 
-    term_puts ("\n\rLoading ENV.LISP...\n\r");
+    outs ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error check.
     cbm_k_chkin (3);
     while (x = lisp_read ()) {
-        term_puts ("; ");
-        lisp_print (x);
-        term_puts ("\n\r");
         x = eval (x);
         lisp_print (x);
-        term_puts ("\n\r");
-        term_puts ("GC");
-        gc ();
-        term_puts ("\n\r");
     }
     cbm_k_close (3);
 
-    term_puts ("\n\rBye!\n\r");
+    outs ("\n\rBye!\n\r");
     while (1); // Gone with terminal compiled in.
     return 0;
 }

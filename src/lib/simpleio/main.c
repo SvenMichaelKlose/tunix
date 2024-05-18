@@ -8,14 +8,10 @@
 #endif
 
 #include <ctype.h>
-#include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 
-#include <term/libterm.h>
-
-#include "liblisp.h"
+#include "libsimpleio.h"
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -28,18 +24,34 @@ char      do_putback;
 #pragma bss-name (pop)
 #endif
 
-void
-error (char * str)
+char
+raw_eof ()
 {
-    term_puts ("ERROR: ");
-    term_puts (str);
-    while (1);
+    return cbm_k_readst () & 0x40;
+}
+
+char
+raw_in ()
+{
+    return cbm_k_basin ();
+}
+
+void
+raw_out (char c)
+{
+    cbm_k_bsout (c);
+}
+
+void
+raw_start_error ()
+{
+    cbm_k_ckout (3);
 }
 
 char
 eof ()
 {
-    return cbm_k_readst () & 0x40;
+    return raw_eof ();
 }
 
 char
@@ -49,7 +61,7 @@ in ()
         do_putback = false;
         return c;
     }
-    c = cbm_k_basin ();
+    c = raw_in ();
     return c;
 }
 
@@ -70,10 +82,8 @@ skip_spaces ()
 {
     while (!eof ()) {
         if (in () == ';') {
-            while (!eof ()
-                   && in () >= ' ');
-            while (!eof ()
-                   && in () < ' ');
+            while (!eof () && in () >= ' ');
+            while (!eof () && in () < ' ');
             putback ();
             continue;
         }
@@ -87,7 +97,7 @@ skip_spaces ()
 void
 out (char c)
 {
-    term_put (c);
+    raw_out (c);
 }
 
 void
@@ -105,11 +115,22 @@ out_number (int n)
 void
 outs (char * s)
 {
-    term_puts (s);
+    char c;
+    while (c = *s++)
+        out (c);
 }
 
 void
 outsn (char * s, char len)
 {
-    term_putsn (s, len);
+    while (len--)
+        out (*s++);
+}
+
+void
+errouts (char * str)
+{
+    raw_start_error ();
+    outs ("ERROR: ");
+    outs (str);
 }

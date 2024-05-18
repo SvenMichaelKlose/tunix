@@ -11,5 +11,6 @@ extern void out (char);
 extern void out_number (int);
 extern void outs (char *);
 extern void outsn (char *, char len);
+extern void errouts (char *);
 
 #endif // #ifndef __LIBLISP_IO_H__

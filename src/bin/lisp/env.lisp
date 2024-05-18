@@ -7,7 +7,9 @@
 (++ 2)
 (-- 2)
 (quote x)
-(setq myfun (quote ((x) (print x))))
+(fn myfun (x)
+  (print x))
+(fn fnord (x))
 myfun
 (myfun 49)
 (? t 1 2)

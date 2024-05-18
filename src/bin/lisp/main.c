@@ -11,7 +11,6 @@
 #include <stdlib.h>
 
 #include <simpleio/libsimpleio.h>
-
 #include <lisp/liblisp.h>
 
 #ifdef __CC65__
@@ -491,9 +490,24 @@ bi_print (lispptr x)
     return lisp_print (arg1);
 }
 
+lispptr FASTCALL
+bi_fn (lispptr x)
+{
+    if (!CONSP(x)
+        || !SYMBOLP(arg1 = CAR(x))
+        || !CONSP(arg2c = CDR(x)))
+        bierror ("(fn name obj)");
+    universe = lisp_make_cons (arg1, universe);
+    SET_SYMBOL_VALUE(arg1, arg2c);
+    return nil;
+}
+
 struct builtin builtins[] = {
+    { "quote",      bi_quote },
+
     { "apply",      bi_apply },
     { "eval",       bi_eval },
+
     { "?",          bi_if },
     { "&",          bi_and },
     { "|",          bi_or },
@@ -504,24 +518,18 @@ struct builtin builtins[] = {
     { "not",        bi_not },
     { "eq",         bi_eq },
     { "atom",       bi_atom },
+    { "cons?",      bi_consp },
+    { "number?",    bi_numberp },
+    { "symbol?",    bi_symbolp },
 
-    { "symbol?",      bi_symbolp },
     { "setq",         bi_setq },
     { "symbol-value", bi_symbol_value },
 
-    { "cons?",      bi_consp },
     { "cons",       bi_cons },
     { "car",        bi_car },
     { "cdr",        bi_cdr },
     { "rplaca",     bi_rplaca },
     { "rplacd",     bi_rplacd },
-
-    { "quote",      bi_quote },
-    { "backquote",  NULL },
-    { "quasiquote", NULL },
-    { "quasiquote-splice", NULL },
-
-    { "number?",    bi_numberp },
 
     { "==",         bi_equal },
     { ">",          bi_gt },
@@ -551,6 +559,8 @@ struct builtin builtins[] = {
     { "read",       bi_read },
     { "print",      bi_print },
 
+    { "fn",         bi_fn },
+
     { NULL, NULL }
 };
 
@@ -568,6 +578,7 @@ void
 load_environment (void)
 {
     lispptr x;
+    int i;
 
     outs ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
@@ -578,6 +589,12 @@ load_environment (void)
         outs ("\n\r");
         x = eval (x);
         lisp_print (x);
+        for (i = 0; i < 100; i++) {
+            lisp_make_number (i);
+            lisp_make_cons (t, t);
+            lisp_make_symbol ((char *) i, i);
+        }
+        gc ();
         outs ("\n\r");
     }
     cbm_k_close (3);

@@ -84,7 +84,6 @@ sweep ()
     *d = 0;
     heap_free = d;
     sweep_completed = true;
-    errouts ("Sweep complete.\n\r");
 }
 
 // Sum up number of bytes freed before address to relocate
@@ -120,12 +119,12 @@ relocate (void)
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }
-    errouts ("Relocation complete.\n\r");
 }
 
 void
 gc (void)
 {
+    out ('.');
     // Remove flag from all objects.
     unmark ();
 
@@ -136,9 +135,8 @@ gc (void)
     sweep_completed = false;
     s = d = heap_start;  // Relocation source + dest.
     do {
-        errouts ("sweep\n\r");
         sweep ();
-        errouts ("relocate\n\r");
         relocate ();
     } while (!sweep_completed);
+    out ('.');
 }

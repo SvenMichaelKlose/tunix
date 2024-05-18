@@ -1,10 +1,10 @@
 TUNIX Lisp interpreter
 ======================
 
-This is an extensible interpreter with mark-and-sweep
-garbage collection.
+This is an interpreter with mark-and-sweep garbage
+collection.
 
-The interpreter knows these data types:
+# Data types
 
 * number (16 bit)
 * cons
@@ -15,13 +15,10 @@ The interpreter knows these data types:
 Functions are conses with the CAR holding the argument
 definition and the CDR holding the body.
 
-# Consing
-
-The interpreter will cons:
-
-* Rest arguments to functions (by eval_list()).
-
 # Built-in functions
+
+## Quoting
+### (quote x)
 
 ## Evaluation and flow control
 ### (apply fun . args)
@@ -51,10 +48,6 @@ Symbols have a name up to 255 bytes in length and a value.
 ### (cdr lst)
 ### (rplaca x lst)
 ### (rplacd x lst)
-
-## Quoting
-### (quote x)
-### (backquote x), (quasiquote x), (quasiquote-splice x)
 
 ## Numbers
 ### Comparison
@@ -95,7 +88,7 @@ Symbols have a name up to 255 bytes in length and a value.
 Numbers from 1 to 255 are pointer-encoded and do not
 require garbage collection.
 
-Swap tail of call stack to secondary storage.
+Swap tail of call stack with secondary storage.
 
 Type array (256 objects maximum).
 

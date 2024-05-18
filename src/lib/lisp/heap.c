@@ -153,16 +153,14 @@ void
 lisp_init ()
 {
     size_t heap_size;
-    char * tmp;
 
     // Init stack.
-    tmp = malloc (STACK_SIZE);
-    if (!tmp) {
+    stack_start = malloc (STACK_SIZE);
+    if (!stack_start) {
         outs ("Out of memory for stack.");
         while (1);
     }
-    tmp += STACK_SIZE;
-    stack = (lispptr *) tmp;
+    stack = stack_start;
 
     // Init heap.
     heap_size = _heapmaxavail ();
@@ -172,7 +170,7 @@ lisp_init ()
         while (1);
     }
     *heap_free = 0;
-    heap_end = &heap_start[heap_size];
+    heap_end = heap_start + heap_size;
 
     // Make truth.
     nil = lisp_make_symbol ("nil", 3);

@@ -37,6 +37,7 @@ struct builtin {
 };
 
 extern lispptr universe;
+extern char * stack_start;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -46,7 +47,7 @@ extern lispptr t;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
-extern lispptr * stack;
+extern char * stack;
 #ifdef __CC65__
 #pragma zpsym ("nil")
 #pragma zpsym ("t")

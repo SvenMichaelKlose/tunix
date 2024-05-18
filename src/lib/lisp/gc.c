@@ -1,8 +1,9 @@
+#include <ingle/cc65-charmap.h>
+#include <term/libterm.h>
+
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
-
-#include <term/libterm.h>
 
 #include "liblisp.h"
 
@@ -51,6 +52,10 @@ sweep ()
     xlat  = heap_end;
     minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
+        if (s >= heap_end) {
+            term_puts ("Sweep accross heap end.");
+            while (1);
+        }
         c = objsize (s);
         if (!MARKED(s)) {
             // Get address of previous relocation info.
@@ -80,6 +85,7 @@ sweep ()
     *d = 0;
     heap_free = d;
     sweep_completed = true;
+    term_puts ("Sweep complete.\n\r");
 }
 
 // Sum up number of bytes freed before address to relocate
@@ -115,6 +121,7 @@ relocate (void)
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }
+    term_puts ("Relocation complete.\n\r");
 }
 
 void

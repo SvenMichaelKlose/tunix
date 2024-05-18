@@ -9,10 +9,12 @@
 #include <term/libterm.h>
 #include <lisp/liblisp.h>
 
+char * stack_start;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-lispptr * stack;
+char * stack;
 #ifdef __CC65__
 #pragma zpsym ("stack")
 #pragma bss-name (pop)
@@ -63,7 +65,6 @@ eval_body (lispptr x)
 lispptr
 apply (lispptr fun, lispptr args, bool do_eval)
 {
-    lispptr argdef = FUNARGS(fun);
     lispptr ad;
     lispptr av;
     lispptr name;
@@ -89,24 +90,29 @@ apply (lispptr fun, lispptr args, bool do_eval)
     }
 
     // Push argument symbol values onto the stack.
-    argdef = FUNARGS(fun);
-    for (ad = argdef, av = args, stsize = 0;
+    for (ad = FUNARGS(fun), av = args, stsize = 0;
          ad != nil && av != nil;
          ad = CDR(ad), av = CDR(av)) {
         stsize++;
 
         // Rest of argument list. (consing)
         if (ATOM(ad)) {
-            *--stack = ad;
-            *--stack = SYMBOL_VALUE(ad);
+            stack -= sizeof (lispptr);
+            *(lispptr *) stack = SYMBOL_VALUE(ad);
+            stack -= sizeof (lispptr);
+            *(lispptr *) stack = ad;
+
             rest = do_eval ? eval_list (av) : av;
             SET_SYMBOL_VALUE(ad, rest);
             break;
         }
 
         name = CAR(ad);
-        *--stack = SYMBOL_VALUE(name);
-        *--stack = name;
+        stack -= sizeof (lispptr);
+        *(lispptr *) stack = SYMBOL_VALUE(name);
+        stack -= sizeof (lispptr);
+        *(lispptr *) stack = name;
+
         value = do_eval ? eval (CAR(av)) : CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
@@ -125,8 +131,10 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     // Pop argument symbol values from the stack.
     while (stsize--) {
-        name = *++stack;
-        SET_SYMBOL_VALUE(name, *++stack);
+        name = *(lispptr *) stack;
+        stack += sizeof (lispptr);
+        SET_SYMBOL_VALUE(name, *(lispptr *) stack);
+        stack += sizeof (lispptr);
     }
 
     return value;

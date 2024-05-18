@@ -298,6 +298,48 @@ bi_dec (lispptr x)
 }
 
 lispptr FASTCALL
+bi_bit_and (lispptr x)
+{
+    bi_arith_args (x, "(bit-and n n)");
+    return lisp_make_number (NUMBER_VALUE(arg1) & NUMBER_VALUE(arg2));
+}
+
+lispptr FASTCALL
+bi_bit_or (lispptr x)
+{
+    bi_arith_args (x, "(bit-or n n)");
+    return lisp_make_number (NUMBER_VALUE(arg1) | NUMBER_VALUE(arg2));
+}
+
+lispptr FASTCALL
+bi_bit_xor (lispptr x)
+{
+    bi_arith_args (x, "(bit-xor n n)");
+    return lisp_make_number (NUMBER_VALUE(arg1) ^ NUMBER_VALUE(arg2));
+}
+
+lispptr FASTCALL
+bi_bit_neg (lispptr x)
+{
+    bi_arith_arg (x, "(bit-neg n)");
+    return lisp_make_number (~NUMBER_VALUE(arg1));
+}
+
+lispptr FASTCALL
+bi_shift_left (lispptr x)
+{
+    bi_arith_args (x, "(<< n nbits)");
+    return lisp_make_number (NUMBER_VALUE(arg1) << NUMBER_VALUE(arg2));
+}
+
+lispptr FASTCALL
+bi_shift_right (lispptr x)
+{
+    bi_arith_args (x, "(>> n nbits)");
+    return lisp_make_number (NUMBER_VALUE(arg1) >> NUMBER_VALUE(arg2));
+}
+
+lispptr FASTCALL
 bi_eval (lispptr x)
 {
     bi_1arg (x, "(eval x)");
@@ -311,7 +353,7 @@ bi_apply (lispptr x)
         || NOT(arg2c = CDR(x))
         || !NOT(CDR(arg2c)))
         bierror ("(apply fun . args)");
-    return lisp_make_cons(CAR(x), arg2);
+    return apply (CAR(x), arg2c, true);
 }
 
 lispptr return_tag;
@@ -339,6 +381,7 @@ bi_block (lispptr x)
                     return CDR(CDR(res));
                 return res;
             }
+
             // Handle GO.
             if (CAR(res) == go_tag) {
                 // Search tag in body.
@@ -471,12 +514,12 @@ struct builtin builtins[] = {
     { "++",         bi_inc },
     { "--",         bi_dec },
 
-    { "bit-and",    NULL },
-    { "bit-or",     NULL },
-    { "bit-xor",    NULL },
-    { "bit-neg",    NULL },
-    { ">>",         NULL },
-    { "<<",         NULL },
+    { "bit-and",    bi_bit_and },
+    { "bit-or",     bi_bit_or },
+    { "bit-xor",    bi_bit_xor },
+    { "bit-neg",    bi_bit_neg },
+    { "<<",         bi_shift_left },
+    { ">>",         bi_shift_right },
 
     { "peek",       NULL },
     { "poke",       NULL },
@@ -488,17 +531,20 @@ struct builtin builtins[] = {
     { NULL, NULL }
 };
 
-int
-main (int argc, char * argv[])
+void
+init_builtins (void)
 {
-    lispptr x;
-    (void) argc, (void) argv;
-
-    lisp_init ();
     return_tag = lisp_make_symbol ("%R", 2);
     go_tag = lisp_make_symbol ("%G", 2);
+    universe = lisp_make_cons (return_tag, universe);
+    universe = lisp_make_cons (go_tag, universe);
     add_builtins (builtins);
-    lisp_print (universe);
+}
+
+void
+load_environment (void)
+{
+    lispptr x;
 
     outs ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
@@ -512,8 +558,17 @@ main (int argc, char * argv[])
         outs ("\n\r");
     }
     cbm_k_close (3);
+    cbm_k_clrch ();
+}
 
-    outs ("\n\rBye!\n\r");
-    while (1); // Gone with terminal compiled in.
+int
+main (int argc, char * argv[])
+{
+    (void) argc, (void) argv;
+
+    lisp_init ();
+    init_builtins ();
+    load_environment ();
+
     return 0;
 }

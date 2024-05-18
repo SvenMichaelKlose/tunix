@@ -15,8 +15,20 @@ char * stack_start;
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 char * stack;
+lispptr ad;
+lispptr av;
+lispptr name;
+lispptr rest;
+lispptr value;
+builtin_fun bfun;
 #ifdef __CC65__
 #pragma zpsym ("stack")
+#pragma zpsym ("ad")
+#pragma zpsym ("av")
+#pragma zpsym ("name")
+#pragma zpsym ("rest")
+#pragma zpsym ("value")
+#pragma zpsym ("bfun")
 #pragma bss-name (pop)
 #endif
 
@@ -65,12 +77,6 @@ eval_body (lispptr x)
 lispptr
 apply (lispptr fun, lispptr args, bool do_eval)
 {
-    lispptr ad;
-    lispptr av;
-    lispptr name;
-    lispptr rest;
-    lispptr value;
-    builtin_fun bfun;
     unsigned stsize;
 
     if (BUILTINP(fun)) {
@@ -97,22 +103,26 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
         // Rest of argument list. (consing)
         if (ATOM(ad)) {
+            // Push argument symbol value on stack.
             stack -= sizeof (lispptr);
             *(lispptr *) stack = SYMBOL_VALUE(ad);
             stack -= sizeof (lispptr);
             *(lispptr *) stack = ad;
 
+            // Assign rest of arguments to argument symbol.
             rest = do_eval ? eval_list (av) : av;
             SET_SYMBOL_VALUE(ad, rest);
             break;
         }
 
+        // Push argument symbol value on stack.
         name = CAR(ad);
         stack -= sizeof (lispptr);
         *(lispptr *) stack = SYMBOL_VALUE(name);
         stack -= sizeof (lispptr);
         *(lispptr *) stack = name;
 
+        // Assign new value to argument symbol.
         value = do_eval ? eval (CAR(av)) : CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }

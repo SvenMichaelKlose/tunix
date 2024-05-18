@@ -27,11 +27,6 @@ lispptr arg2;
 #pragma bss-name (pop)
 #endif
 
-void
-fnord (void)
-{
-}
-
 extern void error (char * msg);
 
 void
@@ -510,8 +505,11 @@ main (int argc, char * argv[])
     // TODO: Error check.
     cbm_k_chkin (3);
     while (x = lisp_read ()) {
+        lisp_print (x);
+        outs ("\n\r");
         x = eval (x);
         lisp_print (x);
+        outs ("\n\r");
     }
     cbm_k_close (3);
 

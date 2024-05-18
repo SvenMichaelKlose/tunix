@@ -2,7 +2,6 @@
 #define __CBM__
 #endif
 
-#include <ingle/cc65-charmap.h>
 #include <cbm.h>
 
 #include <ctype.h>

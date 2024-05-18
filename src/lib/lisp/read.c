@@ -1,5 +1,3 @@
-#include <ingle/cc65-charmap.h>
-
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>

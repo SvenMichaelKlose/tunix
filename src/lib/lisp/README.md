@@ -1,5 +1,5 @@
-Lisp heap
-=========
+Lisp heap & interpreter
+=======================
 
 # SYNOPSIS
 
@@ -7,60 +7,31 @@ Lisp heap
 
 # DESCRIPTION
 
-`liblisp` is a Lisp heap library.  It provides basic Lisp
+`liblisp` is a Lisp library.  It provides basic Lisp
 data structures and operations in C that would come across
-as READ and PRINT function is Lisp.
-
-The heap has no garbace collection and is growing upwards.
+as READ and PRINT function is Lisp.  Additionally, Lisp
+code can be interpreted using user-defined built-in
+functions.
 
 # DATA TYPES
 
 Conses, long integer numbers and symbols are supported.
-For each tye a C data structure is declared.
-See 'liblisp.h'.
+Please see 'liblisp.h' for the wildly changing details.
 
-# MACROS
+# GARBAGE COLLECTION
 
-* `PTRTYPE(x)`: Retrieves the type of the Lisp object `x`.
-* `CONSP(x)`: Checks if `x` is a cons cell.
-* `NOTP(x)`: Checks if `x` is NIL.
+A compacting mark-and-sweep GC is used, so the heap can
+be loaded and saved in one block.  The sweep phase can take
+multiple turns if there is little space left for relocation
+info.
 
-# FUNCTIONS
+# MAYBE: LIST COMPRESSION
 
-* `lispptr lisp_read (void)`:
-  Reads expression from the terminal.
-* `lispptr lisp_print (lispptr)`:
-  Prints expression to the terminal.
-* `lispptr make_cons (lispptr car, lispptr cdr)`:
-  Creates a new cons cell with `car` and `cdr` values.
-
-  ```c
-  lispptr my_cons = make_cons (my_car, my_cdr);
-  ```
-* `lispptr make_number (long value)`:
-  Creates a numeric Lisp object with the specified `value`.
-
-  ```c
-  lispptr num = make_number (42);
-  ```
-* `lispptr make_symbol (const char *name)`:
-  Creates a symbol with the specified `name`.
-
-  ```c
-  lispptr sym = make_symbol ("example");
-  ```
-
-# EXAMPLES
-
-```c
-#include <liblisp.h>
-
-void
-main ()
-{
-    lisp_print (lisp_read ());
-}
-```
+A new cons linked to the previously created one is
+compressed to take only three bytes instead of five.  Its
+CDR is immutable.  This is very effective with recursive
+list assembly.
+A compressing GC sweep may also be an option.
 
 # SEE ALSO
 

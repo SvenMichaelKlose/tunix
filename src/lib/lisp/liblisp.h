@@ -14,15 +14,6 @@ typedef unsigned char uchar;
 typedef void * lispptr;
 typedef lispptr FASTCALL (*builtin_fun) (lispptr);
 
-#define TYPE_NAMED    64
-#define TYPE_MARKED   128
-#define MASK_MARKED   127
-#define TYPE_MASK     (7 + TYPE_NAMED)
-#define TYPE_CONS     1
-#define TYPE_NUMBER   2
-#define TYPE_SYMBOL   (3 | TYPE_NAMED)
-#define TYPE_BUILTIN  (4 | TYPE_NAMED)
-
 typedef struct _cons {
     uchar   type;
     lispptr car;
@@ -45,8 +36,6 @@ struct builtin {
     builtin_fun  func;
 };
 
-extern uchar lisp_sizes[];
-
 extern lispptr universe;
 
 #ifdef __CC65__
@@ -68,8 +57,21 @@ extern lispptr * stack;
 #pragma bss-name (pop)
 #endif
 
+#define TYPE_NAMED    64
+#define TYPE_MARKED   128
+#define TYPE_MASK     (7 | TYPE_NAMED)
+#define TYPE_CONS     1
+#define TYPE_NUMBER   2
+#define TYPE_SYMBOL   (3 | TYPE_NAMED)
+#define TYPE_BUILTIN  (4 | TYPE_NAMED)
+#define TYPE_MAX      4
+
+#define PTRTYPE(x)  (*((char *) (x)))
+#define TYPE(x)     (PTRTYPE(x) & TYPE_MASK)
+
 #define MARKED(x)   (PTRTYPE(x) & TYPE_MARKED)
 #define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
+#define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
 
 #define NOT(x)      (nil == (lispptr) (x))
 
@@ -82,18 +84,12 @@ extern lispptr * stack;
 #define RPLACD(v, x) (CDR(x) = v)
 
 #define BOOL(x)      ((x) ? t : nil)
-#define PTRTYPE(x)   (*((char *) (x)))
-#define TYPE(x)      (PTRTYPE(x) & TYPE_MASK)
 #define CONSP(x)     (TYPE(x) == TYPE_CONS)
 #define ATOM(x)      (TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (NOT(x) || CONSP(x))
 #define NUMBERP(x)   (TYPE(x) == TYPE_NUMBER)
 #define SYMBOLP(x)   (TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  (TYPE(x) == TYPE_BUILTIN)
-#define OBJSIZE(x) \
-    ((PTRTYPE(x) & TYPE_NAMED) ? \
-        lisp_sizes[*(char *)x] + ((symbol *) x)->len : \
-        lisp_sizes[*(char *)x])
 
 #define NUMBER(n)              ((number *) (n))
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)
@@ -116,6 +112,10 @@ extern lispptr eval_list (lispptr);
 extern lispptr eval_body (lispptr);
 extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
 extern lispptr eval (lispptr);
+
+extern void    gc (void);
+
+extern unsigned objsize (char *);
 
 extern void    lisp_init (void);
 extern void    add_builtins (struct builtin *);

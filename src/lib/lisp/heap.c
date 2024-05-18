@@ -4,6 +4,7 @@
 #endif
 
 #include <ingle/cc65-charmap.h>
+#include <term/libterm.h>
 #include <cbm.h>
 #endif
 
@@ -42,6 +43,30 @@ extern char do_putback;
 #pragma zpsym ("do_putback")
 #pragma bss-name (pop)
 #endif
+
+unsigned lisp_sizes[] = {
+    0,
+    sizeof (cons),
+    sizeof (number),
+    sizeof (symbol),
+    sizeof (symbol)
+};
+
+unsigned
+objsize (char * x)
+{
+    uchar type = *x & 7; // TODO: constant
+    unsigned s;
+    if (type > TYPE_MAX) {
+        term_puts ("No size for type ");
+        out_number (type);
+        while (1);
+    }
+    s = lisp_sizes[type];
+    if (*x & TYPE_NAMED)
+        return s + SYMBOL(x)->len;
+    return s;
+}
 
 // Allocate vanilla object.
 lispptr __fastcall__
@@ -150,8 +175,9 @@ lisp_init ()
     heap_end = &heap_start[heap_size];
 
     // Make truth.
-    universe = nil = lisp_make_symbol ("nil", 3);
-    t = lisp_make_symbol ("t", 1);
+    nil = lisp_make_symbol ("nil", 3);
+    t   = lisp_make_symbol ("t", 1);
+    universe = lisp_make_cons (t, nil);
 
     // Init input.
     do_putback = false;

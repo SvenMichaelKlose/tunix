@@ -498,8 +498,11 @@ main (int argc, char * argv[])
     return_tag = lisp_make_symbol ("%R", 2);
     go_tag = lisp_make_symbol ("%G", 2);
     add_builtins (builtins);
+    lisp_print (universe);
+    gc ();
+    lisp_print (universe);
 
-    term_puts ("Loading ENV.LISP...\n\r");
+    term_puts ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
     // TODO: Error check.
     cbm_k_chkin (3);
@@ -509,6 +512,9 @@ main (int argc, char * argv[])
         term_puts ("\n\r");
         x = eval (x);
         lisp_print (x);
+        term_puts ("\n\r");
+        term_puts ("GC");
+        gc ();
         term_puts ("\n\r");
     }
     cbm_k_close (3);

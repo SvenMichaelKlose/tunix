@@ -2,13 +2,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <term/libterm.h>
+
 #include "liblisp.h"
+
+void
+unmark (void)
+{
+    char * p;
+    for (p = heap_start; UNMARK(p); p += objsize (p));
+}
 
 // Trace objects and mark them.
 void
 mark (lispptr x)
 {
-    if (MARKED(x)) {
+    if (!MARKED(x)) {
         MARK(x);
         if (CONSP(x)) {
             // Loop over list.
@@ -28,34 +37,41 @@ char * d;   // Destination
 char * xlat;
 char * minxlat;
 
+#include "io.h"
+
 // Copy marked objects over deleted ones.
 // Make list of addresses of deleted objects and their size
 // for the pointer relocation pass.
 void
 sweep ()
 {
-    uchar  c;
-    lispptr * l;
-    s = d = (char *) heap_start;
+    unsigned c;
+    //char * l;
+
     xlat  = heap_end;
+    minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
-        c = OBJSIZE(s);
+        c = objsize (s);
         if (!MARKED(s)) {
-            l = (lispptr *) (xlat + sizeof (lispptr) + sizeof (uchar));
+            // Get address of previous relocation info.
+/*
+            l = xlat + sizeof (lispptr) + sizeof (unsigned);
+
             // Enlarge previous gap.
-            if (xlat != heap_end && ((char *) *l) + c == s)
-                *(xlat + 1) += c;
+            if (xlat != heap_end && l == s)
+                *(unsigned *) (xlat + 1) += c;
             else {
+*/
                 // Log gap position and size.
-                l = (lispptr *) xlat;
-                *--l = (lispptr) s;
-                xlat = (char *) l;
-                *--xlat = c;
+                xlat -= sizeof (lispptr);
+                *(lispptr *) xlat = s;
+                xlat -= sizeof (unsigned);
+                *(unsigned *) xlat = c;
 
                 // Interrupt sweep if xlat table is full.
                 if (xlat <= minxlat)
                     return;
-            }
+            //}
             s += c;
         } else
             while (c--)
@@ -69,48 +85,54 @@ sweep ()
 // Sum up number of bytes freed before address to relocate
 // and subtract it.
 lispptr
-relocate_ptr (lispptr x)
+relocate_ptr (char * x)
 {
     char * p;
-    lispptr * l;
+    char * l;
     size_t rel = 0;
     for (p = heap_end; p != xlat;) {
-        l = (lispptr *) p;
-        if (*--l > x)
-            return (char *) x - rel;
-        p = (char *) l;
-        rel += *--p;
+        p -= sizeof (char *);
+        l = *(char **) p;
+        if (l > x)
+            break;
+        p -= sizeof (unsigned);
+        rel += *(unsigned *) p;
     }
-    return (char *) x - rel;
+    return x - rel;
 }
 
 void
 relocate (void)
 {
     char * p;
-    for (p = heap_start; *p; p += OBJSIZE(p)) {
+    for (p = heap_start; *p; p += objsize (p)) {
         if (p == s)
-            p = d;
-        if (SYMBOLP(p))
-            SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
-        else if (CONSP(p)) {
+            p = d; // Jump over copy gap.
+
+        if (CONSP(p)) {
             RPLACA(relocate_ptr (CAR(p)), p);
             RPLACD(relocate_ptr (CDR(p)), p);
-        }
+        } else if (SYMBOLP(p))
+            SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }
 }
 
 void
-gc ()
+gc (void)
 {
-    // Calculate lowest address of xlat table.
-    minxlat = heap_free + sizeof (char *) + sizeof (char);
+    // Remove flag from all objects.
+    unmark ();
 
+    // Trace objects.
     mark (universe);
+
+    // Remove and relocate.
     sweep_completed = false;
-    s = d = heap_start;  // Relocation pointers.
-    while (!sweep_completed) {
+    s = d = heap_start;  // Relocation source + dest.
+    do {
+        term_puts ("sweep\n\r");
         sweep ();
+        term_puts ("relocate\n\r");
         relocate ();
-    }
+    } while (!sweep_completed);
 }

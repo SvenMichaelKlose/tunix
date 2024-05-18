@@ -8,15 +8,8 @@
 
 #include "liblisp.h"
 
-void
-unmark (void)
-{
-    char * p;
-    for (p = heap_start; UNMARK(p); p += objsize (p));
-}
-
 // Trace objects and mark them.
-void
+void FASTCALL
 mark (lispptr x)
 {
     if (!MARKED(x)) {
@@ -33,11 +26,28 @@ mark (lispptr x)
     }
 }
 
+#ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
 bool   sweep_completed;
 char * s;   // Source
 char * d;   // Destination
+char * p;
+char * r;
 char * xlat;
 char * minxlat;
+size_t rel;
+#ifdef __CC65__
+#pragma zpsym ("sweep_completed")
+#pragma zpsym ("s")
+#pragma zpsym ("d")
+#pragma zpsym ("p")
+#pragma zpsym ("r")
+#pragma zpsym ("xlat")
+#pragma zpsym ("minxlat")
+#pragma zpsym ("rel")
+#pragma bss-name (pop)
+#endif
 
 // Copy marked objects over deleted ones.
 // Make list of addresses of deleted objects and their size
@@ -51,19 +61,19 @@ sweep ()
     xlat  = heap_end;
     minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
-        if (s >= heap_end) {
-            errouts ("Sweep accross heap end.");
-            while (1);
-        }
         c = objsize (s);
-        if (!MARKED(s)) {
+        if (MARKED(s)) {
+            *d++ = *s++ & ~TYPE_MARKED;
+            while (--c)
+                *d++ = *s++;
+        } else {
             // Get address of previous relocation info.
 /*
             l = xlat + sizeof (lispptr) + sizeof (unsigned);
 
             // Enlarge previous gap.
             if (xlat != heap_end && l == s)
-                *(unsigned *) (xlat + 1) += c;
+                *(unsigned *) xlat += c;
             else {
 */
                 // Log gap position and size.
@@ -77,9 +87,7 @@ sweep ()
                     return;
             //}
             s += c;
-        } else
-            while (c--)
-                *d++ = *s++;
+        }
     }
     *d = 0;
     heap_free = d;
@@ -88,19 +96,16 @@ sweep ()
 
 // Sum up number of bytes freed before address to relocate
 // and subtract it.
-lispptr
+lispptr FASTCALL
 relocate_ptr (char * x)
 {
-    char * p;
-    char * l;
-    size_t rel = 0;
-    for (p = heap_end; p != xlat;) {
-        p -= sizeof (char *);
-        l = *(char **) p;
-        if (l > x)
+    rel = 0;
+    for (r = heap_end; r != xlat;) {
+        r -= sizeof (lispptr);
+        if (*(char **) r > x)
             break;
-        p -= sizeof (unsigned);
-        rel += *(unsigned *) p;
+        r -= sizeof (unsigned);
+        rel += *(unsigned *) r;
     }
     return x - rel;
 }
@@ -108,10 +113,9 @@ relocate_ptr (char * x)
 void
 relocate (void)
 {
-    char * p;
     for (p = heap_start; *p; p += objsize (p)) {
         if (p == s)
-            p = d; // Jump over copy gap.
+            p = d; // Jump over sweep gap.
 
         if (CONSP(p)) {
             RPLACA(relocate_ptr (CAR(p)), p);
@@ -124,10 +128,6 @@ relocate (void)
 void
 gc (void)
 {
-    out ('.');
-    // Remove flag from all objects.
-    unmark ();
-
     // Trace objects.
     mark (universe);
 
@@ -138,5 +138,4 @@ gc (void)
         sweep ();
         relocate ();
     } while (!sweep_completed);
-    out ('.');
 }

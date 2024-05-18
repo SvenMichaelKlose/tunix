@@ -136,7 +136,7 @@ bi_cons (lispptr x)
     return lisp_make_cons(arg1, arg2);
 }
 
-void
+void FASTCALL
 cxr_args (lispptr x, char * msg)
 {
     if (!CONSP(x)
@@ -159,7 +159,7 @@ bi_cdr (lispptr x)
     return LIST_CDR(arg1);
 }
 
-void
+void FASTCALL
 rplac_args (lispptr x, char * msg)
 {
     if (!CONSP(x))
@@ -497,7 +497,7 @@ bi_fn (lispptr x)
         || !SYMBOLP(arg1 = CAR(x))
         || !CONSP(arg2c = CDR(x)))
         bierror ("(fn name obj)");
-    universe = lisp_make_cons (arg1, universe);
+    EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2c);
     return nil;
 }
@@ -569,8 +569,8 @@ init_builtins (void)
 {
     return_tag = lisp_make_symbol ("%R", 2);
     go_tag = lisp_make_symbol ("%G", 2);
-    universe = lisp_make_cons (return_tag, universe);
-    universe = lisp_make_cons (go_tag, universe);
+    EXPAND_UNIVERSE(return_tag);
+    EXPAND_UNIVERSE(go_tag);
     add_builtins (builtins);
 }
 
@@ -578,7 +578,14 @@ void
 load_environment (void)
 {
     lispptr x;
+    /*
     int i;
+        for (i = 0; i < 10; i++) {
+            EXPAND_UNIVERSE(lisp_make_number (i));
+            EXPAND_UNIVERSE(lisp_make_cons (t, t));
+            EXPAND_UNIVERSE(lisp_make_symbol ((char *) i, i));
+        }
+    */
 
     outs ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");
@@ -589,12 +596,6 @@ load_environment (void)
         outs ("\n\r");
         x = eval (x);
         lisp_print (x);
-        for (i = 0; i < 100; i++) {
-            lisp_make_number (i);
-            lisp_make_cons (t, t);
-            lisp_make_symbol ((char *) i, i);
-        }
-        gc ();
         outs ("\n\r");
     }
     cbm_k_close (3);

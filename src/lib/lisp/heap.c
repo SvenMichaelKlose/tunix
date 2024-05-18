@@ -175,7 +175,7 @@ lisp_init ()
     // Make truth.
     nil = lisp_make_symbol ("nil", 3);
     t   = lisp_make_symbol ("t", 1);
-    universe = lisp_make_cons (t, nil);
+    EXPAND_UNIVERSE(t);
 
     // Init input.
     do_putback = false;

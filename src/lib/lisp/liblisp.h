@@ -58,6 +58,9 @@ extern char * stack;
 #pragma bss-name (pop)
 #endif
 
+#define EXPAND_UNIVERSE(x) \
+    (universe = lisp_make_cons (x, universe))
+
 #define TYPE_NAMED    64
 #define TYPE_MARKED   128
 #define TYPE_MASK     (7 | TYPE_NAMED)

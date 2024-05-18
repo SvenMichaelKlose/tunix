@@ -45,7 +45,7 @@ raw_out (char c)
 void
 raw_start_error ()
 {
-    cbm_k_ckout (3);
+    cbm_k_clrch ();
 }
 
 char

@@ -152,15 +152,11 @@ apply (lispptr fun, lispptr args, bool do_eval)
 lispptr
 eval (lispptr x)
 {
-    symbol * fun;
-    lispptr  args;
     if (BUILTINP(x))
         return x;
     if (SYMBOLP(x))
         return SYMBOL_VALUE(x);
     if (ATOM(x))
         return x;
-    fun = eval (CAR(x));
-    args = CDR(x);
-    return apply (fun, args, true);
+    return apply (eval (CAR(x)), CDR(x), true);
 }

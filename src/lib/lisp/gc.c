@@ -15,7 +15,6 @@ mark (lispptr x)
     if (!MARKED(x)) {
         MARK(x);
         if (CONSP(x)) {
-            // Loop over list.
             while (CONSP(x)) {
                 mark (CAR(x));
                 x = CDR(x);
@@ -32,6 +31,7 @@ mark (lispptr x)
 bool   sweep_completed;
 char * s;   // Source
 char * d;   // Destination
+unsigned n;
 char * p;
 char * r;
 char * xlat;
@@ -41,6 +41,7 @@ size_t rel;
 #pragma zpsym ("sweep_completed")
 #pragma zpsym ("s")
 #pragma zpsym ("d")
+#pragma zpsym ("n")
 #pragma zpsym ("p")
 #pragma zpsym ("r")
 #pragma zpsym ("xlat")
@@ -55,38 +56,26 @@ size_t rel;
 void
 sweep ()
 {
-    unsigned c;
-    //char * l;
-
     xlat  = heap_end;
     minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
-        c = objsize (s);
+        n = objsize (s);
         if (MARKED(s)) {
             *d++ = *s++ & ~TYPE_MARKED;
-            while (--c)
+            while (--n)
                 *d++ = *s++;
         } else {
-            // Get address of previous relocation info.
-/*
-            l = xlat + sizeof (lispptr) + sizeof (unsigned);
+            // Log gap position and size.
+            xlat -= sizeof (lispptr);
+            *(lispptr *) xlat = s;
+            xlat -= sizeof (unsigned);
+            *(unsigned *) xlat = n;
 
-            // Enlarge previous gap.
-            if (xlat != heap_end && l == s)
-                *(unsigned *) xlat += c;
-            else {
-*/
-                // Log gap position and size.
-                xlat -= sizeof (lispptr);
-                *(lispptr *) xlat = s;
-                xlat -= sizeof (unsigned);
-                *(unsigned *) xlat = c;
+            // Interrupt sweep if xlat table is full.
+            if (xlat <= minxlat)
+                return;
 
-                // Interrupt sweep if xlat table is full.
-                if (xlat <= minxlat)
-                    return;
-            //}
-            s += c;
+            s += n;
         }
     }
     *d = 0;
@@ -94,8 +83,6 @@ sweep ()
     sweep_completed = true;
 }
 
-// Sum up number of bytes freed before address to relocate
-// and subtract it.
 lispptr FASTCALL
 relocate_ptr (char * x)
 {
@@ -130,7 +117,7 @@ gc (void)
 {
     // Trace objects.
     mark (universe);
-    for (p = stack; p != stack_end; p -= sizeof (lispptr))
+    for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 
     // Remove and relocate.

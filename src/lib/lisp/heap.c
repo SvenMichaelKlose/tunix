@@ -73,9 +73,11 @@ lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
     char * r = heap_free;
-    *r = type;
+
+    *heap_free = type;
     heap_free += size;
     *heap_free = 0;
+
     return r;
 }
 
@@ -154,7 +156,7 @@ lisp_init ()
         while (1);
     }
     stack_end = stack_start + STACK_SIZE;
-    stack = stack_start;
+    stack = stack_end;
 
     // Init heap.
     heap_size = _heapmaxavail ();

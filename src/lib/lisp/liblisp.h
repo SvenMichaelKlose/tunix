@@ -48,6 +48,7 @@ extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
 extern char * stack;
+extern char * stack_end;
 #ifdef __CC65__
 #pragma zpsym ("nil")
 #pragma zpsym ("t")
@@ -55,6 +56,7 @@ extern char * stack;
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
 #pragma zpsym ("stack")
+#pragma zpsym ("stack_end")
 #pragma bss-name (pop)
 #endif
 

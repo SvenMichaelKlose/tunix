@@ -52,7 +52,7 @@ unsigned lisp_sizes[] = {
     sizeof (symbol)
 };
 
-unsigned
+unsigned FASTCALL
 objsize (char * x)
 {
     uchar type = *x & 7; // TODO: constant
@@ -69,7 +69,7 @@ objsize (char * x)
 }
 
 // Allocate vanilla object.
-lispptr __fastcall__
+lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
     char * r = heap_free;
@@ -79,7 +79,7 @@ alloc (uchar size, uchar type)
     return r;
 }
 
-lispptr __fastcall__
+lispptr FASTCALL
 lisp_make_cons (lispptr car, lispptr cdr)
 {
     cons * c = alloc (sizeof (cons), TYPE_CONS);
@@ -88,7 +88,7 @@ lisp_make_cons (lispptr car, lispptr cdr)
     return c;
 }
 
-lispptr __fastcall__
+lispptr FASTCALL
 lisp_make_number (int x)
 {
     number * n = alloc (sizeof (number), TYPE_NUMBER);
@@ -96,14 +96,7 @@ lisp_make_number (int x)
     return n;
 }
 
-char sizes[] = {
-    0,
-    sizeof (cons),
-    sizeof (number),
-    sizeof (symbol)
-};
-
-void * __fastcall__
+void * FASTCALL
 lookup_symbol (char * str, uchar len)
 {
     char *    s = (char *) heap_start;
@@ -126,7 +119,7 @@ lookup_symbol (char * str, uchar len)
         }
 
         // Jump over current object.
-        s += sizes[TYPE(s)];
+        s += objsize (s);
     }
 
     return NULL;
@@ -160,6 +153,7 @@ lisp_init ()
         outs ("Out of memory for stack.");
         while (1);
     }
+    stack_end = stack_start + STACK_SIZE;
     stack = stack_start;
 
     // Init heap.
@@ -175,6 +169,7 @@ lisp_init ()
     // Make truth.
     nil = lisp_make_symbol ("nil", 3);
     t   = lisp_make_symbol ("t", 1);
+    universe = nil;
     EXPAND_UNIVERSE(t);
 
     // Init input.

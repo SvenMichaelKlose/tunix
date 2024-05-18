@@ -578,14 +578,6 @@ void
 load_environment (void)
 {
     lispptr x;
-    /*
-    int i;
-        for (i = 0; i < 10; i++) {
-            EXPAND_UNIVERSE(lisp_make_number (i));
-            EXPAND_UNIVERSE(lisp_make_cons (t, t));
-            EXPAND_UNIVERSE(lisp_make_symbol ((char *) i, i));
-        }
-    */
 
     outs ("\n\rLoading ENV.LISP...\n\r");
     cbm_open (3, 8, 3, "ENV.LISP");

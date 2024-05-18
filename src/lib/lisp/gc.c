@@ -130,6 +130,8 @@ gc (void)
 {
     // Trace objects.
     mark (universe);
+    for (p = stack; p != stack_end; p -= sizeof (lispptr))
+        mark (*(lispptr *) p);
 
     // Remove and relocate.
     sweep_completed = false;

@@ -12,6 +12,7 @@ char * stack_start;
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 char * stack;
+char * stack_end;
 lispptr ad;
 lispptr av;
 lispptr name;
@@ -20,6 +21,7 @@ lispptr value;
 builtin_fun bfun;
 #ifdef __CC65__
 #pragma zpsym ("stack")
+#pragma zpsym ("stack_end")
 #pragma zpsym ("ad")
 #pragma zpsym ("av")
 #pragma zpsym ("name")

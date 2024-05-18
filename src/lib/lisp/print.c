@@ -16,6 +16,8 @@
 
 #include "liblisp.h"
 
+extern void error (char * msg);
+
 void
 print_list (cons * c)
 {

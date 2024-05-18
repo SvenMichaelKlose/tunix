@@ -8,6 +8,8 @@
 
 #include "liblisp.h"
 
+extern void error (char * msg);
+
 char token[256];
 
 lispptr

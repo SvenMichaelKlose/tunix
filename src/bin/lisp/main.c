@@ -502,6 +502,14 @@ bi_fn (lispptr x)
     return nil;
 }
 
+lispptr FASTCALL
+bi_gc (lispptr x)
+{
+    (void) x;
+    gc ();
+    return nil;
+}
+
 struct builtin builtins[] = {
     { "quote",      bi_quote },
 
@@ -560,6 +568,7 @@ struct builtin builtins[] = {
     { "print",      bi_print },
 
     { "fn",         bi_fn },
+    { "gc",         bi_gc },
 
     { NULL, NULL }
 };

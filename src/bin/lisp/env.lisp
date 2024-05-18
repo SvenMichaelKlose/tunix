@@ -14,3 +14,7 @@ myfun
 (myfun 49)
 (? t 1 2)
 (? nil 1 2)
+(gc)
+myfun
+(myfun 128)
+ok

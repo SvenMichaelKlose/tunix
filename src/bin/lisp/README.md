@@ -83,6 +83,12 @@ Symbols have a name up to 255 bytes in length and a value.
 ### (poke addr byte)
 ### (sys addr)
 
+## Special
+### (fn name args body...)
+
+## Miscellaneous
+### (gc)
+
 # Future extensions
 
 Numbers from 1 to 255 are pointer-encoded and do not

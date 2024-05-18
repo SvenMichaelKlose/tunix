@@ -1,10 +1,7 @@
 #include <ingle/cc65-charmap.h>
 
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
+#include <stdbool.h>
 
 #include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>

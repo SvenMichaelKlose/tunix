@@ -340,6 +340,29 @@ bi_shift_right (lispptr x)
 }
 
 lispptr FASTCALL
+bi_peek (lispptr x)
+{
+    bi_arith_arg (x, "(peek addr)");
+    return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
+}
+
+lispptr FASTCALL
+bi_poke (lispptr x)
+{
+    bi_arith_args (x, "(poke addr b)");
+    *(char *) NUMBER_VALUE(arg1) = NUMBER_VALUE(arg2);
+    return arg2;
+}
+
+lispptr FASTCALL
+bi_sys (lispptr x)
+{
+    bi_arith_arg (x, "(sys addr)");
+    ((void (*) (void)) NUMBER_VALUE(arg1)) ();
+    return nil;
+}
+
+lispptr FASTCALL
 bi_eval (lispptr x)
 {
     bi_1arg (x, "(eval x)");
@@ -521,9 +544,9 @@ struct builtin builtins[] = {
     { "<<",         bi_shift_left },
     { ">>",         bi_shift_right },
 
-    { "peek",       NULL },
-    { "poke",       NULL },
-    { "sys",        NULL },
+    { "peek",       bi_peek },
+    { "poke",       bi_poke },
+    { "sys",        bi_sys },
 
     { "read",       bi_read },
     { "print",      bi_print },

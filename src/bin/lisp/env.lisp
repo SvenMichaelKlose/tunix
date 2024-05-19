@@ -1,5 +1,4 @@
-;(? (== nil nil) ;(== 49 49)
-;(print (quote error)))
+; Random hodgepodge.
 (print 1)
 (+ 1 1)
 (- 1 1)
@@ -13,11 +12,10 @@
   (print x))
 (fn fnord (x))
 myfun
-;(== 49 (myfun 49))
-;(? (not (== 49 (myfun 49)))
-;   (print (quote error)))
+(? t 1)
 (? t 1 2)
 (? nil 1 2)
+(? nil 1 t 2)
 (gc)
 myfun
 (myfun 128)
@@ -27,5 +25,20 @@ myfun
      (+ 1 (length (cdr x)))
      0))
 (length some-list)
+(eval (quote (+ 2 3)))
 (gc)
+(& nil nil)
+(& nil t)
+(& t nil)
+(& t t)
+(| nil nil)
+(| nil t)
+(| t nil)
+(| t t)
+(block nil
+  (print 1)
+  (go jmp)
+  (print 2)
+  jmp
+  (print 3))
 ok

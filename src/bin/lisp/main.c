@@ -390,20 +390,22 @@ lispptr go_tag;
 lispptr FASTCALL
 bi_block (lispptr x)
 {
-    lispptr res;
+    lispptr res = nil;
     lispptr p;
     lispptr tag;
+    bool    tag_found;
 
     if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x))
-        || !NOT(arg2c = CDR(x))
-        || !NOT(CDR(arg2c)))
+        || !SYMBOLP(arg1 = CAR(x)))
         bierror ("(block name . exprs)");
+    arg2c = CDR(x);
 
-    DOLIST(p, arg2) {
+    DOLIST(p, arg2c) {
+        PUSH(arg2c);
         PUSH(p);
         res = eval (CAR(p));
         POP(p);
+        POP(arg2c);
         if (CONSP(res)) {
             // Handle RETURN.
             if (CAR(res) == return_tag) {
@@ -416,13 +418,16 @@ bi_block (lispptr x)
             if (CAR(res) == go_tag) {
                 // Search tag in body.
                 tag = CAR(CDR(res));
-                for (p = arg2; !NOT(p); p = LIST_CDR(p)) {
+                res = nil;
+                tag_found = false;
+                for (p = arg2c; !NOT(p); p = LIST_CDR(p)) {
                     if (CAR(p) == tag) {
-                        p = CDR(p);
+                        tag_found = true;
                         break;
                     }
                 }
-                return res;
+                if (!tag_found)
+                    error ("Tag not found.");
             }
         }
     }
@@ -457,8 +462,7 @@ lispptr FASTCALL
 bi_if (lispptr x)
 {
     if (!CONSP(x)
-        || NOT(CONSP(arg2c = CDR(x)))
-        || NOT(CDR(arg2c)))
+        || NOT(CONSP(arg2c = CDR(x))))
         bierror ("(? cond x [cond x/default])");
     while (!NOT(x)) {
         arg1 = CAR(x);

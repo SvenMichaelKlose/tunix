@@ -147,6 +147,5 @@ void
 errouts (char * str)
 {
     raw_start_error ();
-    outs ("ERROR: ");
     outs (str);
 }

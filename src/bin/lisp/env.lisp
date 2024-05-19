@@ -14,7 +14,9 @@ myfun
 (myfun 49)
 (? t 1 2)
 (? nil 1 2)
-(gc)
+;(gc)
 myfun
 (myfun 128)
+;(gc)
+(var some-list (quote (1 2 3 4)))
 ok

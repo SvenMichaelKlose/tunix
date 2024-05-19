@@ -503,6 +503,19 @@ bi_fn (lispptr x)
 }
 
 lispptr FASTCALL
+bi_var (lispptr x)
+{
+    if (!CONSP(x)
+        || !SYMBOLP(arg1 = CAR(x))
+        || NOT(CONSP(arg2c = CDR(x)))
+        || !NOT(CDR(arg2c)))
+        bierror ("(var name obj)");
+    EXPAND_UNIVERSE(arg1);
+    SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
+    return nil;
+}
+
+lispptr FASTCALL
 bi_gc (lispptr x)
 {
     (void) x;
@@ -568,6 +581,7 @@ struct builtin builtins[] = {
     { "print",      bi_print },
 
     { "fn",         bi_fn },
+    { "var",        bi_var },
     { "gc",         bi_gc },
 
     { NULL, NULL }

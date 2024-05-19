@@ -60,7 +60,9 @@ bi_2args (lispptr x, char * msg)
         || !NOT(CDR(arg2c)))
         bierror (msg);
     arg1 = eval (CAR(x));
+    PUSH(arg1);
     arg2 = eval (CAR(arg2c));
+    POP(arg1);
 }
 
 lispptr FASTCALL
@@ -165,10 +167,12 @@ rplac_args (lispptr x, char * msg)
     if (!CONSP(x))
         bierror (msg);
     arg1 = eval (CAR(x));
+    PUSH(arg1);
     if (!NOT(arg2c = eval (CDR(x)))
         || !NOT(CDR(arg2c))
         || !CONSP(arg2 = CAR(arg2c)))
         bierror (msg);
+    POP(arg1);
 }
 
 lispptr FASTCALL
@@ -269,8 +273,10 @@ fun_name (lispptr x) \
     bi_arith_many (x, err); \
     v = NUMBER_VALUE(arg1); \
     DOLIST(x, arg2c) { \
+        PUSH(x); \
         if (!NUMBERP(n = eval (CAR(x)))) \
             bierror (msg); \
+        POP(x); \
         v op NUMBER_VALUE(n); \
     } \
     return lisp_make_number (v); \
@@ -395,7 +401,9 @@ bi_block (lispptr x)
         bierror ("(block name . exprs)");
 
     DOLIST(p, arg2) {
+        PUSH(p);
         res = eval (CAR(p));
+        POP(p);
         if (CONSP(res)) {
             // Handle RETURN.
             if (CAR(res) == return_tag) {
@@ -427,7 +435,12 @@ bi_return (lispptr x)
     if (!CONSP(x))
         bierror ("(return x [name])");
     // TODO: Re-use list.
-    return lisp_make_cons (return_tag, lisp_make_cons (eval (CAR(x)), eval (LIST_CAR(LIST_CDR(x)))));
+    arg1 = eval (CAR(x));
+    PUSH(arg1);
+    arg2 = eval (LIST_CAR(LIST_CDR(x)));
+    POP(arg1);
+    arg1 = lisp_make_cons (arg1, arg2);
+    return lisp_make_cons (return_tag, arg1);
 }
 
 lispptr FASTCALL
@@ -465,18 +478,28 @@ bi_if (lispptr x)
 lispptr FASTCALL
 bi_and (lispptr x)
 {
-    DOLIST(x, x)
-        if (NOT(eval (CAR(x))))
+    DOLIST(x, x) {
+        PUSH(x);
+        if (NOT(eval (CAR(x)))) {
+            POP(x);
             return nil;
+        }
+        POP(x);
+    }
     return t;
 }
 
 lispptr FASTCALL
 bi_or (lispptr x)
 {
-    DOLIST(x, x)
-        if (!NOT(eval (CAR(x))))
+    DOLIST(x, x) {
+        PUSH(x);
+        if (!NOT(eval (CAR(x)))) {
+            POP(x);
             return t;
+        }
+        POP(x);
+    }
     return nil;
 }
 

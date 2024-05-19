@@ -32,7 +32,7 @@ char * r;
 char * xlat;
 char * last_sweeped;
 char * minxlat;
-size_t rel;
+size_t gap;
 #ifdef __CC65__
 #pragma zpsym ("sweep_completed")
 #pragma zpsym ("s")
@@ -42,13 +42,13 @@ size_t rel;
 #pragma zpsym ("r")
 #pragma zpsym ("xlat")
 #pragma zpsym ("minxlat")
-#pragma zpsym ("rel")
+#pragma zpsym ("gap")
 #pragma bss-name (pop)
 #endif
 
-// Copy marked objects over deleted ones.
-// Make list of addresses of deleted objects and their size
-// for the pointer relocation pass.
+// Copy marked objects over deleted ones and make a
+// relocation table containing the addresses and sizes of
+// the deleted objects.
 void
 sweep ()
 {
@@ -84,23 +84,27 @@ sweep ()
     sweep_completed = true;
 }
 
+// Sum up gap sizes in relocation table up to the pointer
+// and subtract that from the pointer.
 lispptr FASTCALL
 relocate_ptr (char * x)
 {
-    rel = 0;
+    gap = 0;
     for (r = heap_end; r != xlat;) {
         r -= sizeof (lispptr);
         if (*(char **) r > x)
             break;
         r -= sizeof (unsigned);
-        rel += *(unsigned *) r;
+        gap += *(unsigned *) r;
     }
-    return x - rel;
+    return x - gap;
 }
 
+// Relocate pointers on heap and stack.
 void
 relocate (void)
 {
+    universe = relocate_ptr (universe);
     for (p = heap_start; *p; p += objsize (p)) {
         if (p == s)
             p = d; // Jump over sweep gap.

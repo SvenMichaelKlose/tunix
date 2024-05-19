@@ -40,7 +40,7 @@ error (char * msg)
 void
 bierror (char * msg)
 {
-    bierror (msg);
+    error (msg);
 }
 
 void FASTCALL

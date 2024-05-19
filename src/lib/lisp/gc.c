@@ -8,19 +8,14 @@
 
 #include "liblisp.h"
 
-// Trace objects and mark them.
+// Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)
 {
     if (!MARKED(x)) {
-        MARK(x);
-        if (CONSP(x)) {
-            while (CONSP(x)) {
-                mark (CAR(x));
-                x = CDR(x);
-                MARK(x);
-            }
-        } else if (SYMBOLP(x))
+        for (MARK(x); CONSP(x); MARK(x = CDR(x)))
+            mark (CAR(x));
+        if (SYMBOLP(x))
             mark (SYMBOL_VALUE(x));
     }
 }
@@ -116,6 +111,8 @@ relocate (void)
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }
+    for (p = stack; p != stack_end; p += sizeof (lispptr))
+        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }
 
 void

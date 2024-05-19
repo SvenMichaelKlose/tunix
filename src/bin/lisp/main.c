@@ -438,6 +438,8 @@ bi_go (lispptr x)
     return lisp_make_cons (go_tag, arg1);
 }
 
+lispptr tmp;
+
 lispptr FASTCALL
 bi_if (lispptr x)
 {
@@ -449,7 +451,10 @@ bi_if (lispptr x)
         arg1 = CAR(x);
         if (NOT(arg2c = CDR(x)))
             return eval (arg1);
-        if (!NOT(eval (arg1)))
+        PUSH(arg2c);
+        tmp = eval (arg1);
+        POP(arg2c);
+        if (!NOT(tmp))
             return eval (CAR(arg2c));
         x = CDR(arg2c);
     }
@@ -609,9 +614,13 @@ load_environment (void)
     while (x = lisp_read ()) {
         lisp_print (x);
         outs ("\n\r");
+        //lisp_print (x);
+        //outs ("\n\r");
         x = eval (x);
         lisp_print (x);
         outs ("\n\r");
+        //lisp_print (x);
+        //outs ("\n\r");
     }
     cbm_k_close (3);
     cbm_k_clrch ();

@@ -1,3 +1,5 @@
+;(? (== nil nil) ;(== 49 49)
+;(print (quote error)))
 (print 1)
 (+ 1 1)
 (- 1 1)
@@ -11,7 +13,9 @@
   (print x))
 (fn fnord (x))
 myfun
-(myfun 49)
+;(== 49 (myfun 49))
+;(? (not (== 49 (myfun 49)))
+;   (print (quote error)))
 (? t 1 2)
 (? nil 1 2)
 (gc)

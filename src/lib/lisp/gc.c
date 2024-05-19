@@ -61,10 +61,11 @@ sweep ()
             while (--n)
                 *d++ = *s++;
         } else {
-            if (0) { //last_sweeped == d) {
+            if (last_sweeped == d) {
                 *(unsigned *) xlat += n;
             } else {
                 last_sweeped = d;
+
                 // Log gap position and size.
                 xlat -= sizeof (lispptr);
                 *(lispptr *) xlat = s;

@@ -14,9 +14,12 @@ myfun
 (myfun 49)
 (? t 1 2)
 (? nil 1 2)
-;(gc)
 myfun
 (myfun 128)
-;(gc)
 (var some-list (quote (1 2 3 4)))
+(fn length (x)
+  (? (cons? x)
+     (+ 1 (length (cdr x)))
+     0))
+(length some-list)
 ok

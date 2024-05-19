@@ -61,7 +61,11 @@ extern char * stack_end;
 #endif
 
 #define EXPAND_UNIVERSE(x) \
-    (universe = lisp_make_cons (x, universe))
+    do { \
+        PUSH(x); \
+        universe = lisp_make_cons (x, universe); \
+        POP(x); \
+    } while (0)
 #define PUSH(x) \
     do { \
         stack -= sizeof (lispptr); \

@@ -507,7 +507,7 @@ bi_gc (lispptr x)
 {
     (void) x;
     gc ();
-    return nil;
+    return lisp_make_number (heap_end - heap_free);
 }
 
 struct builtin builtins[] = {

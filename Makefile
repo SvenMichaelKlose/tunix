@@ -28,7 +28,8 @@ c1541_image:
 	cp src/bin/vi/vi bin/
 	cp src/bin/lisp/README.md bin/lisp.md
 	cp src/bin/lisp/lisp bin/
-	c1541 -format "tunix,01" d64 tunix.d64 -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md -write bin/lisp -write bin/lisp.md
+	cp src/bin/lisp/env.lisp bin/
+	c1541 -format "tunix,01" d64 tunix.d64 -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md -write bin/lisp -write bin/env.lisp -write bin/lisp.md
 
 clean:
 	@echo "# Cleaning all."

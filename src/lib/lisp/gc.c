@@ -35,6 +35,7 @@ unsigned n;
 char * p;
 char * r;
 char * xlat;
+char * last_sweeped;
 char * minxlat;
 size_t rel;
 #ifdef __CC65__
@@ -65,15 +66,20 @@ sweep ()
             while (--n)
                 *d++ = *s++;
         } else {
-            // Log gap position and size.
-            xlat -= sizeof (lispptr);
-            *(lispptr *) xlat = s;
-            xlat -= sizeof (unsigned);
-            *(unsigned *) xlat = n;
+            if (last_sweeped == d) {
+                *(unsigned *) xlat += n;
+            } else {
+                last_sweeped = d;
+                // Log gap position and size.
+                xlat -= sizeof (lispptr);
+                *(lispptr *) xlat = s;
+                xlat -= sizeof (unsigned);
+                *(unsigned *) xlat = n;
 
-            // Interrupt sweep if xlat table is full.
-            if (xlat <= minxlat)
-                return;
+                // Interrupt sweep if xlat table is full.
+                if (xlat <= minxlat)
+                    return;
+            }
 
             s += n;
         }
@@ -121,6 +127,7 @@ gc (void)
         mark (*(lispptr *) p);
 
     // Remove and relocate.
+    last_sweeped = NULL;
     sweep_completed = false;
     s = d = heap_start;  // Relocation source + dest.
     do {

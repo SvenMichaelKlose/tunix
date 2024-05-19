@@ -117,7 +117,11 @@ apply (lispptr fun, lispptr args, bool do_eval)
         if (do_eval) {
             PUSH(ad);
             PUSH(av);
+            PUSH(name);
+            PUSH(fun);
             value = eval (CAR(av));
+            POP(fun);
+            POP(name);
             POP(av);
             POP(ad);
         } else

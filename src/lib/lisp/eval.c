@@ -35,25 +35,16 @@ builtin_fun bfun;
 lispptr
 eval_list (lispptr x)
 {
-    cons *  start = NULL;
-    cons *  last  = NULL;
-    cons *  c;
-    lispptr v;
+    lispptr va;
+    lispptr vd;
 
     if (ATOM(x))
         return x;
-    while (CONSP(x)) {
-        v = eval (CAR(x));
-        c = lisp_make_cons (v, nil);
-        if (!start)
-            start = c;
-        if (last) {
-            RPLACD(c, last);
-            last = c;
-        }
-        x = CDR(x);
-    }
-    return start;
+    va = eval (CAR(x));
+    PUSH(va);
+    vd = eval_list (CDR(x));
+    POP(va);
+    return lisp_make_cons (va, vd);
 }
 
 // Evalue list of expressions and return value of last.
@@ -64,8 +55,11 @@ eval_body (lispptr x)
 
     if (ATOM(x))
         return x;
-    for (; CONSP(x); x = CDR(x))
+    for (; CONSP(x); x = CDR(x)) {
+        PUSH(x);
         v = eval (CAR(x));
+        POP(x);
+    }
     return v;
 }
 
@@ -80,11 +74,6 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     if (BUILTINP(fun)) {
         bfun = (builtin_fun) SYMBOL_VALUE(fun);
-        if (!bfun) {
-            lisp_print (fun);
-            errouts (": built-in missing.\n\r");
-            while (1);
-        }
         return bfun (args);
     }
 
@@ -103,26 +92,36 @@ apply (lispptr fun, lispptr args, bool do_eval)
         // Rest of argument list. (consing)
         if (ATOM(ad)) {
             // Push argument symbol value on stack.
-            stack -= sizeof (lispptr);
-            *(lispptr *) stack = SYMBOL_VALUE(ad);
-            stack -= sizeof (lispptr);
-            *(lispptr *) stack = ad;
+            PUSH(SYMBOL_VALUE(ad));
+            PUSH(ad);
 
             // Assign rest of arguments to argument symbol.
-            rest = do_eval ? eval_list (av) : av;
+            if (do_eval) {
+                PUSH(ad);
+                PUSH(av);
+                value = eval (av);
+                POP(av);
+                POP(ad);
+            } else
+                value = av;
             SET_SYMBOL_VALUE(ad, rest);
             break;
         }
 
         // Push argument symbol value on stack.
         name = CAR(ad);
-        stack -= sizeof (lispptr);
-        *(lispptr *) stack = SYMBOL_VALUE(name);
-        stack -= sizeof (lispptr);
-        *(lispptr *) stack = name;
+        PUSH(SYMBOL_VALUE(name));
+        PUSH(name);
 
         // Assign new value to argument symbol.
-        value = do_eval ? eval (CAR(av)) : CAR(av);
+        if (do_eval) {
+            PUSH(ad);
+            PUSH(av);
+            value = eval (CAR(av));
+            POP(av);
+            POP(ad);
+        } else
+            value = CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
     if (!NOT(ad)) {
@@ -140,10 +139,8 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     // Pop argument symbol values from the stack.
     while (stsize--) {
-        name = *(lispptr *) stack;
-        stack += sizeof (lispptr);
-        SET_SYMBOL_VALUE(name, *(lispptr *) stack);
-        stack += sizeof (lispptr);
+        POP(name);
+        POP(SYMBOL_VALUE(name));
     }
 
     return value;
@@ -152,11 +149,16 @@ apply (lispptr fun, lispptr args, bool do_eval)
 lispptr
 eval (lispptr x)
 {
+    lispptr arg1;
+
     if (BUILTINP(x))
         return x;
     if (SYMBOLP(x))
         return SYMBOL_VALUE(x);
     if (ATOM(x))
         return x;
-    return apply (eval (CAR(x)), CDR(x), true);
+    PUSH(x);
+    arg1 = eval (CAR(x));
+    POP(x);
+    return apply (arg1, CDR(x), true);
 }

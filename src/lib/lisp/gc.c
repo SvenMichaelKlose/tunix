@@ -61,7 +61,7 @@ sweep ()
             while (--n)
                 *d++ = *s++;
         } else {
-            if (last_sweeped == d) {
+            if (0) { //last_sweeped == d) {
                 *(unsigned *) xlat += n;
             } else {
                 last_sweeped = d;

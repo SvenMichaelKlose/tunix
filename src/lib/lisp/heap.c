@@ -16,6 +16,8 @@
 
 #include "liblisp.h"
 
+extern void error (char * msg);
+
 lispptr universe;
 
 #ifdef __CC65__
@@ -68,12 +70,24 @@ objsize (char * x)
     return s;
 }
 
+#define MIN_RELOC_TABLE_SIZE \
+    (sizeof (lispptr) + sizeof (unsigned))
+#define NEEDS_GC() \
+    (heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE)
+
 // Allocate vanilla object.
 lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
-    char * r = heap_free;
+    char * r;
 
+    if (NEEDS_GC()) {
+        gc ();
+        if (NEEDS_GC())
+            error ("Out of heap.");
+    }
+
+    r = heap_free;
     *heap_free = type;
     heap_free += size;
     *heap_free = 0;

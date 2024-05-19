@@ -14,6 +14,7 @@ myfun
 (myfun 49)
 (? t 1 2)
 (? nil 1 2)
+(gc)
 myfun
 (myfun 128)
 (var some-list (quote (1 2 3 4)))
@@ -22,4 +23,5 @@ myfun
      (+ 1 (length (cdr x)))
      0))
 (length some-list)
+(gc)
 ok

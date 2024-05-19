@@ -62,6 +62,16 @@ extern char * stack_end;
 
 #define EXPAND_UNIVERSE(x) \
     (universe = lisp_make_cons (x, universe))
+#define PUSH(x) \
+    do { \
+        stack -= sizeof (lispptr); \
+        *(lispptr *) stack = x; \
+    } while (0)
+#define POP(x) \
+    do { \
+        x = *(lispptr *) stack; \
+        stack += sizeof (lispptr); \
+    } while (0)
 
 #define TYPE_NAMED    64
 #define TYPE_MARKED   128

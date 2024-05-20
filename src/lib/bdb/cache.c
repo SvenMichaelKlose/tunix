@@ -74,8 +74,8 @@ char
 bit_reverse (char x)
 {
     int i;
-    char new;
-    char mask = 1 << 7;
+    char new = 1;
+    char mask = (char) (1 << 7);
     for (i = 0; i < 8; i++) {
         new <<= 1;
         new |= (x & mask) ? 1 : 0;

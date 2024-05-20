@@ -543,7 +543,9 @@ bi_var (lispptr x)
         || !NOT(CDR(arg2c)))
         bierror ("(var name obj)");
     EXPAND_UNIVERSE(arg1);
+    PUSH(arg1);
     SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
+    POP(arg1);
     return nil;
 }
 

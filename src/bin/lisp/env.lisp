@@ -41,4 +41,5 @@ myfun
   (print 2)
   jmp
   (print 3))
+(gc)
 ok

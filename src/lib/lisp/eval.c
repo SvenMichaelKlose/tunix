@@ -85,7 +85,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     // Push argument symbol values onto the stack.
     for (ad = FUNARGS(fun), av = args, stsize = 0;
-         ad != nil && av != nil;
+         ad && av;
          ad = CDR(ad), av = CDR(av)) {
         stsize++;
 
@@ -128,12 +128,12 @@ apply (lispptr fun, lispptr args, bool do_eval)
             value = CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
-    if (!NOT(ad)) {
+    if (ad) {
         errouts ("Argument(s) missing: ");
         lisp_print (ad);
         while (1);
     }
-    if (!NOT(av)) {
+    if (av) {
         errouts ("Too many arguments: ");
         lisp_print (av);
         while (1);

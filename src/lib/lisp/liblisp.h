@@ -42,7 +42,6 @@ extern char * stack_start;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern lispptr nil;
 extern lispptr t;
 extern char * heap_start;
 extern char * heap_free;
@@ -50,7 +49,6 @@ extern char * heap_end;
 extern char * stack;
 extern char * stack_end;
 #ifdef __CC65__
-#pragma zpsym ("nil")
 #pragma zpsym ("t")
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
@@ -59,6 +57,8 @@ extern char * stack_end;
 #pragma zpsym ("stack_end")
 #pragma bss-name (pop)
 #endif
+
+#define nil 0
 
 #define EXPAND_UNIVERSE(x) \
     do { \
@@ -93,20 +93,18 @@ extern char * stack_end;
 #define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
 
-#define NOT(x)      (nil == (lispptr) (x))
-
 #define CONS(x)      ((cons *) (x))
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
-#define LIST_CAR(x)  (NOT(x) ? x : CAR(x))
-#define LIST_CDR(x)  (NOT(x) ? x : CDR(x))
+#define LIST_CAR(x)  (!(x) ? x : CAR(x))
+#define LIST_CDR(x)  (!(x) ? x : CDR(x))
 #define RPLACA(v, x) (CAR(x) = v)
 #define RPLACD(v, x) (CDR(x) = v)
 
 #define BOOL(x)      ((x) ? t : nil)
 #define CONSP(x)     (TYPE(x) == TYPE_CONS)
 #define ATOM(x)      (TYPE(x) != TYPE_CONS)
-#define LISTP(x)     (NOT(x) || CONSP(x))
+#define LISTP(x)     (!(x) || CONSP(x))
 #define NUMBERP(x)   (TYPE(x) == TYPE_NUMBER)
 #define SYMBOLP(x)   (TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  (TYPE(x) == TYPE_BUILTIN)

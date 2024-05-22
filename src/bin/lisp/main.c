@@ -44,20 +44,20 @@ bierror (char * msg)
 }
 
 void FASTCALL
-bi_1arg (lispptr x, char * msg)
+ensure_one_arg (lispptr x, char * msg)
 {
     if (!CONSP(x)
-        || !NOT(CDR(x)))
+        || CDR(x))
         bierror (msg);
     arg1 = eval (CAR(x));
 }
 
 void FASTCALL
-bi_2args (lispptr x, char * msg)
+ensure_two_args (lispptr x, char * msg)
 {
     if (!CONSP(x)
-        || NOT(CONSP(arg2c = CDR(x)))
-        || !NOT(CDR(arg2c)))
+        || !CONSP(arg2c = CDR(x))
+        || CDR(arg2c))
         bierror (msg);
     arg1 = eval (CAR(x));
     PUSH(arg1);
@@ -65,31 +65,85 @@ bi_2args (lispptr x, char * msg)
     POP(arg1);
 }
 
+void FASTCALL
+ensure_one_number (lispptr x, char * msg)
+{
+    if (!CONSP(x)
+        || !NUMBERP(arg1 = eval (CAR(x)))
+        || CDR(x))
+        bierror (msg);
+}
+
+void FASTCALL
+ensure_two_numbers (lispptr x, char * msg)
+{
+    if (!CONSP(x)
+        || !NUMBERP(arg1 = CAR(x))
+        || !(arg2c = CDR(x))
+        || !NUMBERP(arg2 = CAR(arg2c))
+        || CDR(arg2c))
+        bierror (msg);
+}
+
+void FASTCALL
+ensure_numbers (lispptr x, char * msg)
+{
+    if (!CONSP(x)
+        || !NUMBERP(arg1 = eval (CAR(x)))
+        || !(arg2c = CDR(x)))
+        bierror (msg);
+}
+
+void FASTCALL
+cons_getter_args (lispptr x, char * msg)
+{
+    if (!CONSP(x)
+        || CDR(x)
+        || !LISTP(arg1 = eval (CAR(x))))
+        bierror (msg);
+}
+
+void FASTCALL
+cons_setter_args (lispptr x, char * msg)
+{
+    if (!CONSP(x))
+        bierror (msg);
+    arg1 = eval (CAR(x));
+    PUSH(arg1);
+    if ((arg2c = eval (CDR(x)))
+        || CDR(arg2c)
+        || !CONSP(arg2 = CAR(arg2c)))
+        bierror (msg);
+    POP(arg1);
+}
+
+
+
 lispptr FASTCALL
 bi_eq (lispptr x)
 {
-    bi_2args (x, "(eq x x)");
+    ensure_two_args (x, "(eq x x)");
     return arg1 == arg2 ? t : nil;
 }
 
 lispptr FASTCALL
 bi_not (lispptr x)
 {
-    bi_1arg (x, "(not x)");
-    return NOT(arg1) ? t : nil;
+    ensure_one_arg (x, "(not x)");
+    return !arg1 ? t : nil;
 }
 
 lispptr FASTCALL
 bi_atom (lispptr x)
 {
-    bi_1arg (x, "(atom x)");
+    ensure_one_arg (x, "(atom x)");
     return CONSP(arg1) ? nil : t;
 }
 
 lispptr FASTCALL
 bi_symbolp (lispptr x)
 {
-    bi_1arg (x, "(symbol? x)");
+    ensure_one_arg (x, "(symbol? x)");
     return SYMBOLP(arg1) ? t : nil;
 }
 
@@ -99,7 +153,7 @@ bi_setq (lispptr x)
     if (!CONSP(x)
         || !CONSP(arg2c = LIST_CDR(x))
         || !SYMBOLP(arg1 = CAR(x))
-        || !NOT(CDR(arg2c)))
+        || CDR(arg2c))
         bierror ("(setq sym x)");
     SET_SYMBOL_VALUE(arg1, arg2 = eval (CAR(arg2c)));
     return arg2;
@@ -109,7 +163,7 @@ lispptr FASTCALL
 bi_symbol_value (lispptr x)
 {
     if (!CONSP(x)
-        || !NOT((CDR(x)))
+        || (CDR(x))
         || !SYMBOLP(arg1 = eval (CAR(x))))
         bierror ("(symbol-value symbol)");
     return SYMBOL_VALUE(arg1);
@@ -119,7 +173,7 @@ lispptr FASTCALL
 bi_quote (lispptr x)
 {
     if (!CONSP(x)
-        || !NOT(CDR(x)))
+        || CDR(x))
         bierror ("(quote x)");
     return CAR(x);
 }
@@ -127,141 +181,89 @@ bi_quote (lispptr x)
 lispptr FASTCALL
 bi_consp (lispptr x)
 {
-    bi_1arg (x, "(cons? x)");
+    ensure_one_arg (x, "(cons? x)");
     return CONSP(arg1) ? t : nil;
 }
 
 lispptr FASTCALL
 bi_cons (lispptr x)
 {
-    bi_2args (x, "(cons x x)");
+    ensure_two_args (x, "(cons x x)");
     return lisp_make_cons(arg1, arg2);
-}
-
-void FASTCALL
-cxr_args (lispptr x, char * msg)
-{
-    if (!CONSP(x)
-        || !NOT((CDR(x)))
-        || !LISTP(arg1 = eval (CAR(x))))
-        bierror (msg);
 }
 
 lispptr FASTCALL
 bi_car (lispptr x)
 {
-    cxr_args (x, "(car lst)");
+    cons_getter_args (x, "(car lst)");
     return LIST_CAR(arg1);
 }
 
 lispptr FASTCALL
 bi_cdr (lispptr x)
 {
-    cxr_args (x, "(cdr lst)");
+    cons_getter_args (x, "(cdr lst)");
     return LIST_CDR(arg1);
-}
-
-void FASTCALL
-rplac_args (lispptr x, char * msg)
-{
-    if (!CONSP(x))
-        bierror (msg);
-    arg1 = eval (CAR(x));
-    PUSH(arg1);
-    if (!NOT(arg2c = eval (CDR(x)))
-        || !NOT(CDR(arg2c))
-        || !CONSP(arg2 = CAR(arg2c)))
-        bierror (msg);
-    POP(arg1);
 }
 
 lispptr FASTCALL
 bi_rplaca (lispptr x)
 {
-    rplac_args (x, "(rplaca x cons)");
+    cons_setter_args (x, "(rplaca x cons)");
     return RPLACA(arg1, arg2);
 }
 
 lispptr FASTCALL
 bi_rplacd (lispptr x)
 {
-    rplac_args (x, "(rplacd x cons)");
+    cons_setter_args (x, "(rplacd x cons)");
     return RPLACD(arg1, arg2);
 }
 
 lispptr FASTCALL
 bi_numberp (lispptr x)
 {
-    bi_1arg (x, "(number? x)");
+    ensure_one_arg (x, "(number? x)");
     return NUMBERP(CAR(x)) ? t : nil;
-}
-
-void FASTCALL
-bi_arith_arg (lispptr x, char * msg)
-{
-    if (!CONSP(x)
-        || !NUMBERP(arg1 = eval (CAR(x)))
-        || !NOT(CDR(x)))
-        bierror (msg);
-}
-
-void FASTCALL
-bi_arith_args (lispptr x, char * msg)
-{
-    if (!CONSP(x)
-        || !NUMBERP(arg1 = CAR(x))
-        || NOT(arg2c = CDR(x))
-        || !NUMBERP(arg2 = CAR(arg2c))
-        || !NOT(CDR(arg2c)))
-        bierror (msg);
-}
-
-void FASTCALL
-bi_arith_many (lispptr x, char * msg)
-{
-    if (!CONSP(x)
-        || !NUMBERP(arg1 = eval (CAR(x)))
-        || NOT(arg2c = CDR(x)))
-        bierror (msg);
 }
 
 lispptr FASTCALL
 bi_equal (lispptr x)
 {
-    bi_arith_args (x, "(== n n)");
+    ensure_two_numbers (x, "(== n n)");
     return BOOL(NUMBER_VALUE(arg1) == NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_lt (lispptr x)
 {
-    bi_arith_args (x, "(< n n)");
+    ensure_two_numbers (x, "(< n n)");
     return BOOL(NUMBER_VALUE(arg1) < NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_lte (lispptr x)
 {
-    bi_arith_args (x, "(<= n n)");
+    ensure_two_numbers (x, "(<= n n)");
     return BOOL(NUMBER_VALUE(arg1) <= NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_gt (lispptr x)
 {
-    bi_arith_args (x, "(> n n)");
+    ensure_two_numbers (x, "(> n n)");
     return BOOL(NUMBER_VALUE(arg1) > NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_gte (lispptr x)
 {
-    bi_arith_args (x, "(>= n n)");
+    ensure_two_numbers (x, "(>= n n)");
     return BOOL(NUMBER_VALUE(arg1) >= NUMBER_VALUE(arg2));
 }
 
 #define DOLIST(x, init) \
-    for (x = init; !NOT(x); x = LIST_CDR(x))
+    for (x = init; x; x = LIST_CDR(x))
 
 #define DEFARITH(fun_name, op, err) \
 lispptr FASTCALL \
@@ -270,7 +272,7 @@ fun_name (lispptr x) \
     static char * msg = err; \
     int v; \
     lispptr n; \
-    bi_arith_many (x, err); \
+    ensure_numbers (x, err); \
     v = NUMBER_VALUE(arg1); \
     DOLIST(x, arg2c) { \
         PUSH(x); \
@@ -291,70 +293,70 @@ DEFARITH(bi_mod, %=, "(% n n...)");
 lispptr FASTCALL
 bi_inc (lispptr x)
 {
-    bi_arith_arg (x, "(++ n)");
+    ensure_one_number (x, "(++ n)");
     return lisp_make_number (NUMBER_VALUE(arg1) + 1);
 }
 
 lispptr FASTCALL
 bi_dec (lispptr x)
 {
-    bi_arith_arg (x, "(-- n)");
+    ensure_one_number (x, "(-- n)");
     return lisp_make_number (NUMBER_VALUE(arg1) - 1);
 }
 
 lispptr FASTCALL
 bi_bit_and (lispptr x)
 {
-    bi_arith_args (x, "(bit-and n n)");
+    ensure_two_numbers (x, "(bit-and n n)");
     return lisp_make_number (NUMBER_VALUE(arg1) & NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_bit_or (lispptr x)
 {
-    bi_arith_args (x, "(bit-or n n)");
+    ensure_two_numbers (x, "(bit-or n n)");
     return lisp_make_number (NUMBER_VALUE(arg1) | NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_bit_xor (lispptr x)
 {
-    bi_arith_args (x, "(bit-xor n n)");
+    ensure_two_numbers (x, "(bit-xor n n)");
     return lisp_make_number (NUMBER_VALUE(arg1) ^ NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_bit_neg (lispptr x)
 {
-    bi_arith_arg (x, "(bit-neg n)");
+    ensure_one_number (x, "(bit-neg n)");
     return lisp_make_number (~NUMBER_VALUE(arg1));
 }
 
 lispptr FASTCALL
 bi_shift_left (lispptr x)
 {
-    bi_arith_args (x, "(<< n nbits)");
+    ensure_two_numbers (x, "(<< n nbits)");
     return lisp_make_number (NUMBER_VALUE(arg1) << NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_shift_right (lispptr x)
 {
-    bi_arith_args (x, "(>> n nbits)");
+    ensure_two_numbers (x, "(>> n nbits)");
     return lisp_make_number (NUMBER_VALUE(arg1) >> NUMBER_VALUE(arg2));
 }
 
 lispptr FASTCALL
 bi_peek (lispptr x)
 {
-    bi_arith_arg (x, "(peek addr)");
+    ensure_one_number (x, "(peek addr)");
     return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
 }
 
 lispptr FASTCALL
 bi_poke (lispptr x)
 {
-    bi_arith_args (x, "(poke addr b)");
+    ensure_two_numbers (x, "(poke addr b)");
     *(char *) NUMBER_VALUE(arg1) = NUMBER_VALUE(arg2);
     return arg2;
 }
@@ -362,7 +364,7 @@ bi_poke (lispptr x)
 lispptr FASTCALL
 bi_sys (lispptr x)
 {
-    bi_arith_arg (x, "(sys addr)");
+    ensure_one_number (x, "(sys addr)");
     ((void (*) (void)) NUMBER_VALUE(arg1)) ();
     return nil;
 }
@@ -370,7 +372,7 @@ bi_sys (lispptr x)
 lispptr FASTCALL
 bi_eval (lispptr x)
 {
-    bi_1arg (x, "(eval x)");
+    ensure_one_arg (x, "(eval x)");
     return eval (arg1);
 }
 
@@ -378,8 +380,8 @@ lispptr FASTCALL
 bi_apply (lispptr x)
 {
     if (!CONSP(x)
-        || NOT(arg2c = CDR(x))
-        || !NOT(CDR(arg2c)))
+        || !(arg2c = CDR(x))
+        || CDR(arg2c))
         bierror ("(apply fun . args)");
     return apply (CAR(x), arg2c, true);
 }
@@ -395,8 +397,7 @@ bi_block (lispptr x)
     lispptr tag;
     bool    tag_found;
 
-    if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x)))
+    if (!CONSP(x) || !SYMBOLP(arg1 = CAR(x)))
         bierror ("(block name . exprs)");
     arg2c = CDR(x);
 
@@ -420,7 +421,7 @@ bi_block (lispptr x)
                 tag = CAR(CDR(res));
                 res = nil;
                 tag_found = false;
-                for (p = arg2c; !NOT(p); p = LIST_CDR(p)) {
+                for (p = arg2c; p; p = LIST_CDR(p)) {
                     if (CAR(p) == tag) {
                         tag_found = true;
                         break;
@@ -451,7 +452,7 @@ bi_return (lispptr x)
 lispptr FASTCALL
 bi_go (lispptr x)
 {
-    bi_1arg (x, "(go tag)");
+    ensure_one_arg (x, "(go tag)");
     // TODO: Re-use cons.
     return lisp_make_cons (go_tag, arg1);
 }
@@ -461,17 +462,16 @@ lispptr tmp;
 lispptr FASTCALL
 bi_if (lispptr x)
 {
-    if (!CONSP(x)
-        || NOT(CONSP(arg2c = CDR(x))))
+    if (!CONSP(x) || !CONSP(arg2c = CDR(x)))
         bierror ("(? cond x [cond x/default])");
-    while (!NOT(x)) {
+    while (x) {
         arg1 = CAR(x);
-        if (NOT(arg2c = CDR(x)))
+        if (!(arg2c = CDR(x)))
             return eval (arg1);
         PUSH(arg2c);
         tmp = eval (arg1);
         POP(arg2c);
-        if (!NOT(tmp))
+        if (tmp)
             return eval (CAR(arg2c));
         x = CDR(arg2c);
     }
@@ -484,7 +484,7 @@ bi_and (lispptr x)
 {
     DOLIST(x, x) {
         PUSH(x);
-        if (NOT(eval (CAR(x)))) {
+        if (!eval (CAR(x))) {
             POP(x);
             return nil;
         }
@@ -498,7 +498,7 @@ bi_or (lispptr x)
 {
     DOLIST(x, x) {
         PUSH(x);
-        if (!NOT(eval (CAR(x)))) {
+        if (eval (CAR(x))) {
             POP(x);
             return t;
         }
@@ -510,7 +510,7 @@ bi_or (lispptr x)
 lispptr FASTCALL
 bi_read (lispptr x)
 {
-    if (!NOT(x))
+    if (x)
         bierror ("(read)");
     return lisp_read ();
 }
@@ -518,7 +518,7 @@ bi_read (lispptr x)
 lispptr FASTCALL
 bi_print (lispptr x)
 {
-    bi_1arg (x, "(print x)");
+    ensure_one_arg (x, "(print x)");
     return lisp_print (arg1);
 }
 
@@ -539,8 +539,8 @@ bi_var (lispptr x)
 {
     if (!CONSP(x)
         || !SYMBOLP(arg1 = CAR(x))
-        || NOT(CONSP(arg2c = CDR(x)))
-        || !NOT(CDR(arg2c)))
+        || !CONSP(arg2c = CDR(x))
+        || CDR(arg2c))
         bierror ("(var name obj)");
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);

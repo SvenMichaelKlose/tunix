@@ -26,13 +26,11 @@ lispptr universe;
 char *    heap_start;
 char *    heap_free;
 char *    heap_end;
-lispptr       nil;
 lispptr       t;
 #ifdef __CC65__
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");
-#pragma zpsym ("nil")
 #pragma zpsym ("t")
 #pragma bss-name (pop)
 #endif
@@ -183,9 +181,8 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     // Make truth.
-    nil = lisp_make_symbol ("nil", 3);
-    t   = lisp_make_symbol ("t", 1);
     universe = nil;
+    t   = lisp_make_symbol ("t", 1);
     EXPAND_UNIVERSE(t);
 
     // Init input.

@@ -22,13 +22,13 @@ print_list (cons * c)
     bool first = true;
 
     out ('(');
-    while (c != nil) {
+    while (c) {
         if (!first)
             out (' ');
         else
             first = false;
         lisp_print (c->car);
-        if (c->cdr != nil && !CONSP(c->cdr)) {
+        if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
             lisp_print (c->cdr);
             break;
@@ -53,7 +53,13 @@ print_symbol (symbol * s)
 lispptr
 lisp_print (lispptr x)
 {
-    uchar type = TYPE(x);
+    uchar type;
+
+    if (!x) {
+        outs ("nil");
+        return nil;
+    }
+    type = TYPE(x);
     if (type == TYPE_CONS)
         print_list ((cons *) x);
     else if (type == TYPE_NUMBER)

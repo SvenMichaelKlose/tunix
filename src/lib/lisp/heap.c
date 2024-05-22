@@ -23,10 +23,11 @@ lispptr universe;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+lispptr t;
+lispptr quote;
 char *    heap_start;
 char *    heap_free;
 char *    heap_end;
-lispptr       t;
 #ifdef __CC65__
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
@@ -180,10 +181,11 @@ lisp_init ()
     *heap_free = 0;
     heap_end = heap_start + heap_size;
 
-    // Make truth.
     universe = nil;
-    t   = lisp_make_symbol ("t", 1);
+    t     = lisp_make_symbol ("t", 1);
+    quote = lisp_make_symbol ("quote", 5);
     EXPAND_UNIVERSE(t);
+    EXPAND_UNIVERSE(quote);
 
     // Init input.
     do_putback = false;

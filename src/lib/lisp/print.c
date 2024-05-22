@@ -21,6 +21,12 @@ print_list (cons * c)
 {
     bool first = true;
 
+    if (CAR(c) == quote && CDR(c)) {
+        out ('\'');
+        lisp_print (CAR(CDR(c)));
+        return;
+    }
+
     out ('(');
     while (c) {
         if (!first)

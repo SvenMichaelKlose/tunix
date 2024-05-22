@@ -43,6 +43,7 @@ extern char * stack_start;
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr t;
+extern lispptr quote;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
@@ -50,6 +51,7 @@ extern char * stack;
 extern char * stack_end;
 #ifdef __CC65__
 #pragma zpsym ("t")
+#pragma zpsym ("quote")
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")

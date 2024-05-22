@@ -75,6 +75,16 @@ read_symbol ()
 }
 
 lispptr
+read_quoted (lispptr which)
+{
+    lispptr tmp;
+
+    in ();
+    tmp = lisp_make_cons (lisp_read (), nil);
+    return lisp_make_cons (which, tmp);
+}
+
+lispptr
 lisp_read ()
 {
     skip_spaces ();
@@ -82,6 +92,8 @@ lisp_read ()
         return NULL;
     in ();
     putback ();
+    if (ch () == '\'')
+        return read_quoted (quote);
     if (ch () == '(')
         return read_list ();
     if (isdigit (ch ()))

@@ -25,6 +25,11 @@ be loaded and saved in one block.  The sweep phase can take
 multiple turns if there is little space left for relocation
 info.
 
+# COMPILE-TIME OPTIONS
+
+GC_STRESS if defined, invokes the garbage collector before
+returning from APPLY.
+
 # MAYBE: LIST COMPRESSION
 
 A new cons linked to the previously created one is

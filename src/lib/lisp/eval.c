@@ -147,6 +147,12 @@ apply (lispptr fun, lispptr args, bool do_eval)
         POP(SYMBOL_VALUE(name));
     }
 
+#ifdef GC_STRESS
+    PUSH(value);
+    gc ();
+    POP(value);
+#endif
+
     return value;
 }
 

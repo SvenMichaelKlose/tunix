@@ -13,7 +13,8 @@ compacting mark-and-sweep garbage collector.
 | number (16 bit)  | 3        |
 | builtin function | 2 to 257 |
 
-Symbols are case-sensitive and can have a length of 0.
+Symbols are case-sensitive, although printed in upper case
+in this manual, and can have a length of 0.
 
 Functions are lists starting with an argument definition
 followed by statements.
@@ -28,6 +29,8 @@ followed by statements.
 
 ## Quoting
 ### (quote x)
+
+Short form "'x" is supported by READ.
 
 ## Evaluation and flow control
 ### (apply fun . args)
@@ -118,12 +121,8 @@ universe by 'name'.
 
 # Future extensions
 
-Numbers from 1 to 255 are pointer-encoded and do not
-require garbage collection.
-
-Swap tail of call stack with secondary storage.
-
 Type array (256 objects maximum).
+Swap tail of call stack with secondary storage.
 
 Compressed cons (special type) with CDR pointing to previous
 cons (which may also be compressed already, so there is a

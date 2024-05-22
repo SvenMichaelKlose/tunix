@@ -8,6 +8,8 @@
 (++ 2)
 (-- 2)
 (quote x)
+'x
+(exit 0)
 (fn myfun (x)
   (print x))
 (fn fnord (x))

@@ -1,19 +1,28 @@
 TUNIX Lisp interpreter
 ======================
 
-This is an interpreter with mark-and-sweep garbage
-collection.
+This is a Lisp interpreter for home computers with
+compacting mark-and-sweep garbage collector.
 
-# Data types
+# Data types and heap memory consumption
 
-* number (16 bit)
-* cons
-* symbol (0-255 char name)
-* string (1-256 chars)
-* builtin
+| Type             | Bytes    |
+|------------------|----------|
+| cons             | 5        |
+| symbol           | 2 to 257 |
+| number (16 bit)  | 3        |
+| builtin function | 2 to 257 |
 
-Functions are conses with the CAR holding the argument
-definition and the CDR holding the body.
+Symbols are case-sensitive and can have a length of 0.
+
+Functions are lists starting with an argument definition
+followed by statements.
+
+~~~
+(fn make-adder (x)
+  '((a)
+     (+ a ,x)))
+~~~
 
 # Built-in functions
 

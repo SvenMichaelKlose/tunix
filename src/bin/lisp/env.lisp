@@ -9,7 +9,6 @@
 (-- 2)
 (quote x)
 'x
-(exit 0)
 (fn myfun (x)
   (print x))
 (fn fnord (x))
@@ -28,7 +27,6 @@ myfun
      0))
 (length some-list)
 (eval (quote (+ 2 3)))
-(gc)
 (& nil nil)
 (& nil t)
 (& t nil)
@@ -43,5 +41,6 @@ myfun
   (print 2)
   jmp
   (print 3))
-(gc)
+(print 65)
+(princ 65)
 ok

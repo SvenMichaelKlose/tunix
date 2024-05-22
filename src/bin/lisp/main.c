@@ -523,6 +523,19 @@ bi_print (lispptr x)
 }
 
 lispptr FASTCALL
+bi_princ (lispptr x)
+{
+    ensure_one_arg (x, "(princ x)");
+    if (NUMBERP(arg1))
+        out (NUMBER_VALUE(arg1));
+    else if (SYMBOLP(arg1))
+        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
+    else
+        lisp_print (arg1);
+    return nil;
+}
+
+lispptr FASTCALL
 bi_fn (lispptr x)
 {
     if (!CONSP(x)
@@ -622,6 +635,7 @@ struct builtin builtins[] = {
 
     { "read",       bi_read },
     { "print",      bi_print },
+    { "princ",      bi_princ },
 
     { "fn",         bi_fn },
     { "var",        bi_var },

@@ -28,7 +28,7 @@ typedef struct _number {
 typedef struct _symbol {
     uchar   type;
     lispptr value;
-    uchar   len;
+    uchar   length;
 } symbol;
 
 struct builtin {
@@ -117,6 +117,9 @@ extern char * stack_end;
 
 #define SYMBOL(s)              ((symbol *) (s))
 #define SYMBOL_VALUE(s)        (SYMBOL(s)->value)
+#define SYMBOL_LENGTH(s)       (SYMBOL(s)->length)
+#define SYMBOL_NAME(s) \
+    ((char *) s + sizeof (symbol))
 #define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
 
 #define FUNARGS(x)      CAR(x)
@@ -126,7 +129,7 @@ extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
 extern lispptr FASTCALL lisp_make_number (int);
 extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
-extern lispptr lisp_print (lispptr);
+extern lispptr FASTCALL lisp_print (lispptr);
 
 extern lispptr eval_list (lispptr);
 extern lispptr eval_body (lispptr);

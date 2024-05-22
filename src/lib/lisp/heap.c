@@ -65,7 +65,7 @@ objsize (char * x)
     }
     s = lisp_sizes[type];
     if (*x & TYPE_NAMED)
-        return s + SYMBOL(x)->len;
+        return s + SYMBOL_LENGTH(x);
     return s;
 }
 
@@ -124,12 +124,12 @@ lookup_symbol (char * str, uchar len)
             sym = (symbol *) s;
 
             // Return match.
-            if (sym->len == len
+            if (SYMBOL_LENGTH(sym) == len
                 && !memcmp (s + sizeof (symbol), str, len))
                 return s;
 
             // Jump over symbol + name.
-            s += sizeof (symbol) + sym->len;
+            s += sizeof (symbol) + SYMBOL_LENGTH(sym);
             continue;
         }
 
@@ -152,7 +152,7 @@ lisp_make_symbol (char * str, uchar len)
     // Alloc new.
     s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     s->value = s;
-    s->len = len;
+    s->length = len;
     memcpy ((char *) s + sizeof (symbol), str, len);
     return s;
 }

@@ -16,14 +16,16 @@
 
 extern void error (char * msg);
 
-void
+void print (lispptr);
+
+void FASTCALL
 print_list (cons * c)
 {
     bool first = true;
 
     if (CAR(c) == quote && CDR(c)) {
         out ('\'');
-        lisp_print (CAR(CDR(c)));
+        print (CAR(CDR(c)));
         return;
     }
 
@@ -33,10 +35,10 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        lisp_print (c->car);
+        print (c->car);
         if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
-            lisp_print (c->cdr);
+            print (c->cdr);
             break;
         }
         c = c->cdr;
@@ -44,26 +46,28 @@ print_list (cons * c)
     out (')');
 }
 
-void
+void FASTCALL
 print_number (number * n)
 {
     out_number (n->value);
+    out (' ');
+}
+
+void FASTCALL
+print_symbol (symbol * s)
+{
+    outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
+    out (' ');
 }
 
 void
-print_symbol (symbol * s)
-{
-    outsn ((char *) &s->len + 1, s->len);
-}
-
-lispptr
-lisp_print (lispptr x)
+print (lispptr x)
 {
     uchar type;
 
     if (!x) {
         outs ("nil");
-        return nil;
+        return;
     }
     type = TYPE(x);
     if (type == TYPE_CONS)
@@ -74,5 +78,12 @@ lisp_print (lispptr x)
         print_symbol ((symbol *) x);
     else
         error ("Unknown object type.");
+}
+
+lispptr FASTCALL
+lisp_print (lispptr x)
+{
+    print (x);
+    out ('\n');
     return x;
 }

@@ -89,6 +89,9 @@ Symbols have a name up to 255 bytes in length and a value.
 ## I/O
 ### (read)
 ### (print x)
+### (princ x)
+
+Prints character instead of number.
 
 ## Low level
 ### (peek addr)

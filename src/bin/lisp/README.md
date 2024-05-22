@@ -113,7 +113,8 @@ result to the symbol value of 'name' and expands the
 universe by 'name'.
 
 ## Miscellaneous
-### (gc)
+### (gc) - Free unused objects
+### (exit n) - Exit Lisp with code
 
 # Future extensions
 

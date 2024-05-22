@@ -475,7 +475,7 @@ bi_if (lispptr x)
             return eval (CAR(arg2c));
         x = CDR(arg2c);
     }
-    // NOTREACHED, I hope...
+    /* NOTREACHED */
     bierror ("?: default missing.");
 }
 
@@ -557,6 +557,15 @@ bi_gc (lispptr x)
     return lisp_make_number (heap_end - heap_free);
 }
 
+lispptr FASTCALL
+bi_exit (lispptr x)
+{
+    ensure_one_number (x, "(exit n)");
+    exit (NUMBER_VALUE(arg1));
+    /* NOTREACHED */
+    return nil;
+}
+
 struct builtin builtins[] = {
     { "quote",      bi_quote },
 
@@ -617,6 +626,8 @@ struct builtin builtins[] = {
     { "fn",         bi_fn },
     { "var",        bi_var },
     { "gc",         bi_gc },
+
+    { "exit",       bi_exit },
 
     { NULL, NULL }
 };

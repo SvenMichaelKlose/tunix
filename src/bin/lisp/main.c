@@ -643,13 +643,9 @@ load_environment (void)
     while (x = lisp_read ()) {
         lisp_print (x);
         outs ("\n\r");
-        //lisp_print (x);
-        //outs ("\n\r");
         x = eval (x);
         lisp_print (x);
         outs ("\n\r");
-        //lisp_print (x);
-        //outs ("\n\r");
     }
     cbm_k_close (3);
     cbm_k_clrch ();

@@ -1,6 +1,8 @@
 #ifndef __LIBLISP_IO_H__
 #define __LIBLISP_IO_H__
 
+extern char last_out;
+
 extern char eof (void);
 extern char in (void);
 extern char ch (void);

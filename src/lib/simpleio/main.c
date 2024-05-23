@@ -16,9 +16,11 @@
 #endif
 char c;
 char do_putback;
+char last_out;
 #ifdef __CC65__
 #pragma zpsym ("c")
 #pragma zpsym ("do_putback")
+#pragma zpsym ("last_out")
 #pragma bss-name (pop)
 #endif
 
@@ -56,7 +58,7 @@ raw_in (void)
 void
 raw_out (char c)
 {
-    cbm_k_bsout (reverse_case (c));
+    cbm_k_bsout (reverse_case (last_out = c));
 }
 
 void

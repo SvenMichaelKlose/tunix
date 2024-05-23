@@ -43,6 +43,15 @@ bierror (char * msg)
     error (msg);
 }
 
+int
+length (lispptr * x)
+{
+    int len = 0;
+    for(; x; x = CDR(x))
+        len++;
+    return len;
+}
+
 void FASTCALL
 ensure_one_arg (lispptr x, char * msg)
 {
@@ -165,6 +174,24 @@ bi_symbol_value (lispptr x)
         || !SYMBOLP(arg1 = eval (CAR(x))))
         bierror ("(symbol-value symbol)");
     return SYMBOL_VALUE(arg1);
+}
+
+lispptr FASTCALL
+bi_string (lispptr x)
+{
+    int len;
+    lispptr s;
+    char * p;
+    ensure_one_arg (x, "(string nlst)");
+    len = length (arg1);
+    s = lisp_alloc_symbol (buffer, len);
+    p = SYMBOL_NAME(s);
+    for (; arg1; arg1 = CDR(arg1)) {
+        if (!NUMBERP(CAR(arg1)))
+            bierror ("(string nlst)");
+        *p++ = NUMBER_VALUE(CAR(arg1));
+    }
+    return s;
 }
 
 lispptr FASTCALL
@@ -599,6 +626,7 @@ struct builtin builtins[] = {
 
     { "setq",         bi_setq },
     { "symbol-value", bi_symbol_value },
+    { "string",       bi_string },
 
     { "cons",       bi_cons },
     { "car",        bi_car },

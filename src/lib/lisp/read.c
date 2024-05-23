@@ -10,8 +10,6 @@
 
 extern void error (char * msg);
 
-char token[256];
-
 lispptr
 read_list ()
 {
@@ -47,12 +45,12 @@ read_list ()
 lispptr
 read_number ()
 {
-    char * p = token;
-    for (p = token; !eof () && isdigit (in ()); p++)
+    char * p = buffer;
+    for (p = buffer; !eof () && isdigit (in ()); p++)
         *p = ch ();
     *p = 0;
     putback ();
-    return lisp_make_number (atoi (token));
+    return lisp_make_number (atoi (buffer));
 }
 
 bool __fastcall__
@@ -65,22 +63,22 @@ lispptr
 read_symbol ()
 {
     char * p;
-    for (p = token; !eof () && our_isalpha (in ()); p++)
+    for (p = buffer; !eof () && our_isalpha (in ()); p++)
         *p = ch ();
     putback ();
-    return lisp_make_symbol (token, p - token);
+    return lisp_make_symbol (buffer, p - buffer);
 }
 
 lispptr
 read_string ()
 {
     char * p;
-    for (p = token; !eof () && in () != '"'; p++)
+    for (p = buffer; !eof () && in () != '"'; p++)
         if (ch () == '\\')
             *p = in ();
         else
             *p = ch ();
-    return lisp_make_symbol (token, p - token);
+    return lisp_make_symbol (buffer, p - buffer);
 }
 
 lispptr

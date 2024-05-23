@@ -17,7 +17,6 @@ myfun
 (? t 1 2)
 (? nil 1 2)
 (? nil 1 t 2)
-(gc)
 myfun
 (myfun 128)
 (var some-list (quote (1 2 3 4)))
@@ -44,5 +43,6 @@ myfun
 (print 65)
 (princ 65)
 (princ "Hello world!")
+(print (string '(65 66 67)))
 (gc)
 ok

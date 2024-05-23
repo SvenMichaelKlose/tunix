@@ -53,7 +53,8 @@ Short form "'x" is supported by READ.
 Symbols have a name up to 255 bytes in length and a value.
 
 ### (setq symbol x): Set symbol value
-### (symbol-value symbol x); Get symbol value
+### (symbol-value symbol x): Get symbol value
+### (string number-list): Make symbol from char list.
 
 ## Conses
 ### (car lst)

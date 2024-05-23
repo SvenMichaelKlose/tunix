@@ -6,7 +6,7 @@
 #include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
 
-#define GC_STRESS
+//#define GC_STRESS
 
 char * stack_start;
 

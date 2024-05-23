@@ -8,6 +8,8 @@
 
 #include "liblisp.h"
 
+#define VERBOSE_GC
+
 // Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)
@@ -123,6 +125,10 @@ relocate (void)
 void
 gc (void)
 {
+#ifdef VERBOSE_GC
+    char * tmp = heap_free;
+#endif
+
     // Trace objects.
     mark (universe);
     for (p = stack; p != stack_end; p += sizeof (lispptr))
@@ -136,4 +142,9 @@ gc (void)
         sweep ();
         relocate ();
     } while (!sweep_completed);
+
+#ifdef VERBOSE_GC
+    out_number ((int) (tmp - heap_free));
+    outs (" bytes freed.\n\r");
+#endif
 }

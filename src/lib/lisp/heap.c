@@ -18,8 +18,6 @@
 
 extern void error (char * msg);
 
-lispptr universe;
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -44,6 +42,9 @@ extern char do_putback;
 #pragma zpsym ("do_putback")
 #pragma bss-name (pop)
 #endif
+
+lispptr universe;
+char buffer[256];
 
 unsigned lisp_sizes[] = {
     0,

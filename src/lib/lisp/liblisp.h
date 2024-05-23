@@ -1,7 +1,9 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-#define STACK_SIZE  1024
+#ifndef STACK_SIZE
+#define STACK_SIZE  256
+#endif
 
 typedef unsigned char uchar;
 
@@ -38,6 +40,7 @@ struct builtin {
 
 extern lispptr universe;
 extern char * stack_start;
+extern char buffer[256];
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")

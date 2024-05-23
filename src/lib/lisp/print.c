@@ -7,6 +7,7 @@
 #include <cbm.h>
 #endif
 
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -17,6 +18,15 @@
 extern void error (char * msg);
 
 void print (lispptr);
+
+void
+space (void)
+{
+    if (last_out != '('
+        && last_out != ')'
+        && last_out > ' ')
+        out (' ');
+}
 
 void FASTCALL
 print_list (cons * c)
@@ -49,15 +59,15 @@ print_list (cons * c)
 void FASTCALL
 print_number (number * n)
 {
+    space ();
     out_number (n->value);
-    out (' ');
 }
 
 void FASTCALL
 print_symbol (symbol * s)
 {
+    space ();
     outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
-    out (' ');
 }
 
 void

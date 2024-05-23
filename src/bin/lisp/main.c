@@ -117,8 +117,6 @@ cons_setter_args (lispptr x, char * msg)
     POP(arg1);
 }
 
-
-
 lispptr FASTCALL
 bi_eq (lispptr x)
 {
@@ -681,7 +679,8 @@ main (int argc, char * argv[])
 {
     (void) argc, (void) argv;
 
-    lisp_init ();
+    if (!lisp_init ())
+        error ("No memory.");
     init_builtins ();
     load_environment ();
 

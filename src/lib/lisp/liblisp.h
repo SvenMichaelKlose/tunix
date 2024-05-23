@@ -140,7 +140,7 @@ extern void    gc (void);
 
 extern unsigned objsize (char *);
 
-extern void    lisp_init (void);
+extern bool    lisp_init (void);
 extern void    add_builtins (struct builtin *);
 
 #endif // #ifndef __LIBLISP_H__

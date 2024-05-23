@@ -43,4 +43,5 @@ myfun
   (print 3))
 (print 65)
 (princ 65)
+(gc)
 ok

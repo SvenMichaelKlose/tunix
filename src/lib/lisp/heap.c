@@ -157,27 +157,23 @@ lisp_make_symbol (char * str, uchar len)
     return s;
 }
 
-void
+bool
 lisp_init ()
 {
     size_t heap_size;
 
     // Init stack.
     stack_start = malloc (STACK_SIZE);
-    if (!stack_start) {
-        outs ("Out of memory for stack.");
-        while (1);
-    }
+    if (!stack_start)
+        return false;
     stack_end = stack_start + STACK_SIZE;
     stack = stack_end;
 
     // Init heap.
     heap_size = _heapmaxavail ();
     heap_start = heap_free = malloc (heap_size);
-    if (!heap_start) {
-        outs ("Out of memory for heap.");
-        while (1);
-    }
+    if (!heap_start)
+        return false;
     *heap_free = 0;
     heap_end = heap_start + heap_size;
 
@@ -189,4 +185,6 @@ lisp_init ()
 
     // Init input.
     do_putback = false;
+
+    return true;
 }

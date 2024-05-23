@@ -1,6 +1,19 @@
 TUNIX blog
 ==========
 
+# 2024-05-23
+
+The Lisp interpreter's GC passes stress tests, the scariest
+checkpoint. :)  NIL and 0 are now equal which is an unusual
+thing with Lisps.  I don't know any dialect going down that
+road so it might be dangerous.  It's less code and a bit
+faster.  Strings are required and they are already there in
+the shape of symbols.  Having strings without a symbol value
+would add overhead and eat away on heap size.  The CBM
+KERNAL way of doing I/O looks like a good match for this.
+With a REPL no-one should be offended.  It's play time with
+funny demo/testing code. <:)
+
 # 2024-05-17
 
 Going on with the Lisp interpretr is more and more looking

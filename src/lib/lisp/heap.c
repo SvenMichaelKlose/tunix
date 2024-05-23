@@ -140,20 +140,22 @@ lookup_symbol (char * str, uchar len)
     return NULL;
 }
 
-lispptr __fastcall__
-lisp_make_symbol (char * str, uchar len)
+lispptr FASTCALL
+lisp_alloc_symbol (char * str, uchar len)
 {
-    symbol * s;
-
-    // Return existing.
-    if ((s = lookup_symbol (str, len)))
-        return s;
-
-    // Alloc new.
-    s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
+    symbol * s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     s->value = s;
     s->length = len;
     memcpy ((char *) s + sizeof (symbol), str, len);
+    return s;
+}
+
+lispptr FASTCALL
+lisp_make_symbol (char * str, uchar len)
+{
+    symbol * s = lookup_symbol (str, len);
+    if (!s)
+        return lisp_alloc_symbol (str, len);
     return s;
 }
 

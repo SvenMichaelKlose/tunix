@@ -19,9 +19,6 @@ read_list ()
     cons * start;
     cons * last = NULL;
 
-    if (in () != '(')
-        error ("List expected.");
-
     while (1) {
         skip_spaces ();
         if (eof ())
@@ -75,11 +72,22 @@ read_symbol ()
 }
 
 lispptr
+read_string ()
+{
+    char * p;
+    for (p = token; !eof () && in () != '"'; p++)
+        if (ch () == '\\')
+            *p = in ();
+        else
+            *p = ch ();
+    return lisp_make_symbol (token, p - token);
+}
+
+lispptr
 read_quoted (lispptr which)
 {
     lispptr tmp;
 
-    in ();
     tmp = lisp_make_cons (lisp_read (), nil);
     return lisp_make_cons (which, tmp);
 }
@@ -91,11 +99,13 @@ lisp_read ()
     if (eof ())
         return NULL;
     in ();
-    putback ();
-    if (ch () == '\'')
-        return read_quoted (quote);
     if (ch () == '(')
         return read_list ();
+    if (ch () == '\'')
+        return read_quoted (quote);
+    if (ch () == '"')
+        return read_string ();
+    putback ();
     if (isdigit (ch ()))
         return read_number ();
     return read_symbol ();

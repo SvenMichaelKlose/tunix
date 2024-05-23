@@ -63,10 +63,44 @@ print_number (number * n)
     out_number (n->value);
 }
 
+bool
+needs_quotes (symbol * s)
+{
+    char * p = SYMBOL_NAME(s);
+    char len = SYMBOL_LENGTH(s);
+    char c;
+    for (; len--; p++) {
+        c = *p;
+        if (c == '"' || c == ' ' || c == '(' || c == ')')
+            return true;
+    }
+    return false;
+}
+
+void
+print_quoted_symbol (symbol * s)
+{
+    char * p = SYMBOL_NAME(s);
+    char len = SYMBOL_LENGTH(s);
+    char c;
+    out ('"');
+    for (; len--; p++) {
+        c = *p;
+        if (c == '"')
+            out ('\\');
+        out (c);
+    }
+    out ('"');
+}
+
 void FASTCALL
 print_symbol (symbol * s)
 {
     space ();
+    if (needs_quotes (s)) {
+        print_quoted_symbol (s);
+        return;
+    }
     outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
 }
 

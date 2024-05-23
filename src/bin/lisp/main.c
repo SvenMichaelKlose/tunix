@@ -207,14 +207,14 @@ bi_cdr (lispptr x)
 lispptr FASTCALL
 bi_rplaca (lispptr x)
 {
-    cons_setter_args (x, "(rplaca x cons)");
+    cons_setter_args (x, "(rplaca x c)");
     return RPLACA(arg1, arg2);
 }
 
 lispptr FASTCALL
 bi_rplacd (lispptr x)
 {
-    cons_setter_args (x, "(rplacd x cons)");
+    cons_setter_args (x, "(rplacd x c)");
     return RPLACD(arg1, arg2);
 }
 
@@ -530,7 +530,7 @@ bi_princ (lispptr x)
         outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
     else
         lisp_print (arg1);
-    return nil;
+    return arg1;
 }
 
 lispptr FASTCALL

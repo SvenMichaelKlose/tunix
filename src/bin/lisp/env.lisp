@@ -43,5 +43,6 @@ myfun
   (print 3))
 (print 65)
 (princ 65)
+(princ "Hello world!")
 (gc)
 ok

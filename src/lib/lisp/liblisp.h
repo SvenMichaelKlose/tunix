@@ -127,6 +127,7 @@ extern char * stack_end;
 
 extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
 extern lispptr FASTCALL lisp_make_number (int);
+extern lispptr FASTCALL lisp_alloc_symbol (char *, uchar len);
 extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
 extern lispptr FASTCALL lisp_print (lispptr);

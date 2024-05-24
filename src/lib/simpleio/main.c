@@ -67,7 +67,7 @@ raw_err (void)
 char
 raw_in (void)
 {
-    return cbm_k_basin ();
+    return cbm_k_getin ();
 }
 
 void

@@ -28,7 +28,7 @@ char * msg;
 lispptr quote;
 lispptr return_tag;
 lispptr go_tag;
-lispptr tmp;
+extern lispptr tmp;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("arg1")

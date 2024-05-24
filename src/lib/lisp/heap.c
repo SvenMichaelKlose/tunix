@@ -22,14 +22,24 @@ extern void error (char * msg);
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr t;
+lispptr tmp;
 char * heap_start;
 char * heap_free;
 char * heap_end;
+char * h;
+char * ptr;
+char   type;
+symbol *  sym;
 #ifdef __CC65__
 #pragma zpsym ("t")
+#pragma zpsym ("tmp")
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");
+#pragma zpsym ("h");
+#pragma zpsym ("ptr");
+#pragma zpsym ("type");
+#pragma zpsym ("sym");
 #pragma bss-name (pop)
 #endif
 
@@ -78,63 +88,63 @@ objsize (char * x)
 lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
-    char * r;
-
     if (NEEDS_GC()) {
         gc ();
         if (NEEDS_GC())
             error ("Out of heap.");
     }
 
-    r = heap_free;
+    h = heap_free;
     *heap_free = type;
     heap_free += size;
     *heap_free = 0;
 
-    return r;
+    return h;
 }
 
 lispptr FASTCALL
 lisp_make_cons (lispptr car, lispptr cdr)
 {
-    cons * c = alloc (sizeof (cons), TYPE_CONS);
-    c->car = car;
-    c->cdr = cdr;
-    return c;
+    PUSH(car);
+    PUSH(cdr);
+    tmp = alloc (sizeof (cons), TYPE_CONS);
+    POP(cdr);
+    POP(car);
+    CONS(tmp)->car = car;
+    CONS(tmp)->cdr = cdr;
+    return tmp;
 }
 
 lispptr FASTCALL
 lisp_make_number (int x)
 {
-    number * n = alloc (sizeof (number), TYPE_NUMBER);
-    n->value = x;
-    return n;
+    tmp = alloc (sizeof (number), TYPE_NUMBER);
+    NUMBER(tmp)->value = x;
+    return tmp;
 }
 
 void * FASTCALL
 lookup_symbol (char * str, uchar len)
 {
-    char *    s = (char *) heap_start;
-    char      type;
-    symbol *  sym;
+    ptr = (char *) heap_start;
 
     // Check all objects until end of heap.
-    while ((type = *s)) {
+    while ((type = *ptr)) {
         if (type & TYPE_NAMED) {
-            sym = (symbol *) s;
+            sym = (symbol *) ptr;
 
             // Return match.
             if (SYMBOL_LENGTH(sym) == len
-                && !memcmp (s + sizeof (symbol), str, len))
-                return s;
+                && !memcmp (ptr + sizeof (symbol), str, len))
+                return ptr;
 
             // Jump over symbol + name.
-            s += sizeof (symbol) + SYMBOL_LENGTH(sym);
+            ptr += sizeof (symbol) + SYMBOL_LENGTH(sym);
             continue;
         }
 
         // Jump over current object.
-        s += objsize (s);
+        ptr += objsize (ptr);
     }
 
     return NULL;
@@ -143,20 +153,20 @@ lookup_symbol (char * str, uchar len)
 lispptr FASTCALL
 lisp_alloc_symbol (char * str, uchar len)
 {
-    symbol * s = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
-    s->value = s;
-    s->length = len;
-    memcpy ((char *) s + sizeof (symbol), str, len);
-    return s;
+    tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
+    SYMBOL(tmp)->value = tmp;
+    SYMBOL(tmp)->length = len;
+    memcpy ((char *) tmp + sizeof (symbol), str, len);
+    return tmp;
 }
 
 lispptr FASTCALL
 lisp_make_symbol (char * str, uchar len)
 {
-    symbol * s = lookup_symbol (str, len);
-    if (!s)
+    tmp = lookup_symbol (str, len);
+    if (!tmp)
         return lisp_alloc_symbol (str, len);
-    return s;
+    return tmp;
 }
 
 bool

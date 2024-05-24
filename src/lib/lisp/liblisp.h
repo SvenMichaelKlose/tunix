@@ -39,6 +39,8 @@ struct builtin {
 };
 
 extern lispptr universe;
+extern lispptr stdin;
+extern lispptr stdout;
 extern char * stack_start;
 extern char buffer[256];
 
@@ -137,8 +139,8 @@ extern lispptr FASTCALL lisp_print (lispptr);
 
 extern lispptr eval_list (lispptr);
 extern lispptr eval_body (lispptr);
-extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
 extern lispptr eval (lispptr);
+extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
 
 extern void    gc (void);
 

@@ -3,16 +3,25 @@ TUNIX blog
 
 # 2024-05-23
 
+A set of CBM KERNAL-inspired I/O functions have been added
+but I got stuck for today.  READs and PRINTs with the
+Bielefeld DB would be lovely.
+
+20K heap look easy to get with an optimized linker config
+and relocation before interpreter start.
+
+# 2024-05-23
+
 The Lisp interpreter's GC passes stress tests, the scariest
 checkpoint. :)  NIL and 0 are now equal which is an unusual
 thing with Lisps.  I don't know any dialect going down that
 road so it might be dangerous.  It's less code and a bit
 faster.  Strings are required and they are already there in
 the shape of symbols.  Having strings without a symbol value
-would add overhead and eat away on heap size.  The CBM
-KERNAL way of doing I/O looks like a good match for this.
-With a REPL no-one should be offended.  It's play time with
-funny demo/testing code. <:)
+would add overhead and that would eat away heap size instead
+of saving some.  The CBM KERNAL way of doing I/O looks like
+a good match for this.  With a REPL no-one should be
+offended.  It's play time with funny demo/testing code. <:)
 
 # 2024-05-17
 

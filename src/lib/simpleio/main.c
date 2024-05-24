@@ -1,15 +1,22 @@
 #ifdef __CC65__
+
 #ifndef __CBM__
 #define __CBM__
 #endif
+
 #include <cbm.h>
-#endif
+#include <ingle/cc65-charmap.h>
+
+#endif // #ifdef __CC65__
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
 #include "libsimpleio.h"
+
+char fnin = STDIN;
+char fnout = STDOUT;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -50,6 +57,12 @@ raw_eof (void)
 }
 
 char
+raw_err (void)
+{
+    return raw_eof ();
+}
+
+char
 raw_in (void)
 {
     return cbm_k_basin ();
@@ -58,7 +71,9 @@ raw_in (void)
 void
 raw_out (char c)
 {
-    cbm_k_bsout (reverse_case (last_out = c));
+    if (fnout == STDOUT)
+        c = reverse_case (c);
+    cbm_k_bsout (c);
 }
 
 void
@@ -67,10 +82,62 @@ raw_start_error (void)
     cbm_k_clrch ();
 }
 
+void
+reset (void)
+{
+    //cbm_k_clrch ();
+    if (fnin != STDIN)
+        cbm_k_chkin (fnin);
+    if (fnout != STDOUT)
+        cbm_k_ckout (fnout);
+}
+
+void
+raw_setin (char c)
+{
+    if (c == STDIN)
+        reset ();
+    else 
+        cbm_k_chkin (fnin);
+}
+
+void
+raw_setout (char c)
+{
+    if (c == STDOUT)
+        reset ();
+    else 
+        cbm_k_ckout (fnout);
+}
+
+void
+setin (char c)
+{
+    //if (fnin != c) {
+        fnin = c;
+        raw_setin (c);
+    //}
+}
+
+void
+setout (char c)
+{
+    //if (fnout != c) {
+        fnout = c;
+        raw_setout (c);
+    //}
+}
+
 char
 eof ()
 {
     return raw_eof ();
+}
+
+char
+err ()
+{
+    return raw_err ();
 }
 
 char
@@ -115,6 +182,7 @@ skip_spaces ()
 void
 out (char c)
 {
+    last_out = c;
     raw_out (c);
 }
 
@@ -143,6 +211,13 @@ outsn (char * s, char len)
 {
     while (len--)
         out (*s++);
+}
+
+void
+terpri (void)
+{
+    if (last_out >= ' ')
+        outs ("\n\r");
 }
 
 void

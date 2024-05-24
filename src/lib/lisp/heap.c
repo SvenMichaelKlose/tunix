@@ -23,9 +23,9 @@ extern void error (char * msg);
 #endif
 lispptr t;
 lispptr quote;
-char *    heap_start;
-char *    heap_free;
-char *    heap_end;
+char * heap_start;
+char * heap_free;
+char * heap_end;
 #ifdef __CC65__
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
@@ -181,10 +181,8 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     universe = nil;
-    t     = lisp_make_symbol ("t", 1);
-    quote = lisp_make_symbol ("quote", 5);
+    t      = lisp_make_symbol ("t", 1);
     EXPAND_UNIVERSE(t);
-    EXPAND_UNIVERSE(quote);
 
     // Init input.
     do_putback = false;

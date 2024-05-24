@@ -19,10 +19,18 @@
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
+lispptr stdin;
+lispptr stdout;
+lispptr lisp_fnin;
+lispptr lisp_fnout;
 #ifdef __CC65__
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
+#pragma zpsym ("stdin")
+#pragma zpsym ("stdout")
+#pragma zpsym ("lisp_fnin")
+#pragma zpsym ("lisp_fnout")
 #pragma bss-name (pop)
 #endif
 
@@ -59,6 +67,14 @@ ensure_one_arg (lispptr x, char * msg)
         || CDR(x))
         bierror (msg);
     arg1 = eval (CAR(x));
+}
+
+void FASTCALL
+ensure_number_arg (lispptr x, char * msg)
+{
+    ensure_one_arg (x, msg);
+    if (!NUMBERP(arg1))
+        bierror (msg);
 }
 
 void FASTCALL
@@ -182,11 +198,12 @@ bi_string (lispptr x)
     int len;
     lispptr s;
     char * p;
+
     ensure_one_arg (x, "(string nlst)");
     len = length (arg1);
     s = lisp_alloc_symbol (buffer, len);
-    p = SYMBOL_NAME(s);
-    for (; arg1; arg1 = CDR(arg1)) {
+
+    for (p = SYMBOL_NAME(s); arg1; arg1 = CDR(arg1)) {
         if (!NUMBERP(CAR(arg1)))
             bierror ("(string nlst)");
         *p++ = NUMBER_VALUE(CAR(arg1));
@@ -548,19 +565,6 @@ bi_print (lispptr x)
 }
 
 lispptr FASTCALL
-bi_princ (lispptr x)
-{
-    ensure_one_arg (x, "(princ x)");
-    if (NUMBERP(arg1))
-        out (NUMBER_VALUE(arg1));
-    else if (SYMBOLP(arg1))
-        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
-    else
-        lisp_print (arg1);
-    return arg1;
-}
-
-lispptr FASTCALL
 bi_fn (lispptr x)
 {
     if (!CONSP(x)
@@ -601,6 +605,101 @@ bi_exit (lispptr x)
     ensure_one_number (x, "(exit n)");
     exit (NUMBER_VALUE(arg1));
     /* NOTREACHED */
+    return nil;
+}
+
+lispptr FASTCALL
+bi_err (lispptr x)
+{
+    if (x)
+        bierror ("(err)");
+    return lisp_make_number (err ());
+}
+
+lispptr FASTCALL
+bi_eof (lispptr x)
+{
+    if (x)
+        bierror ("(eof)");
+    return BOOL(eof ());
+}
+
+lispptr FASTCALL
+bi_open (lispptr x)
+{
+    int fn;
+    ensure_two_args (x, "(open fn s)");
+    if (!NUMBERP(arg1))
+        bierror ("(open fn s)");
+    if (!SYMBOLP(arg2))
+        bierror ("(open fn s)");
+    fn = NUMBER_VALUE(arg1);
+    cbm_open (fn, 8, fn, SYMBOL_NAME(arg2));
+    return lisp_make_number (cbm_k_readst ());
+}
+
+lispptr FASTCALL
+bi_setin (lispptr x)
+{
+    ensure_number_arg (x, "(setin fn)");
+    setin (NUMBER_VALUE(arg1));
+    SET_SYMBOL_VALUE(lisp_fnin, arg1);
+    return arg1;
+}
+
+lispptr FASTCALL
+bi_setout (lispptr x)
+{
+    ensure_number_arg (x, "(setout fn)");
+    setout (NUMBER_VALUE(arg1));
+    SET_SYMBOL_VALUE(lisp_fnout, arg1);
+    return arg1;
+}
+
+lispptr FASTCALL
+bi_in (lispptr x)
+{
+    if (x)
+        bierror ("(in)");
+    return lisp_make_number (in ());
+}
+
+lispptr FASTCALL
+bi_putback (lispptr x)
+{
+    if (x)
+        bierror ("(putback)");
+    putback ();
+    return nil;
+}
+
+lispptr FASTCALL
+bi_out (lispptr x)
+{
+    ensure_one_arg (x, "(out n/s)");
+    if (NUMBERP(arg1))
+        out (NUMBER_VALUE(arg1));
+    else if (SYMBOLP(arg1))
+        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
+    else
+        lisp_print (arg1);
+    return arg1;
+}
+
+lispptr FASTCALL
+bi_terpri (lispptr x)
+{
+    if (x)
+        bierror ("(terpri)");
+    outs ("\n\r");
+    return nil;
+}
+
+lispptr FASTCALL
+bi_close (lispptr x)
+{
+    ensure_number_arg (x, "(close fn)");
+    cbm_k_close (NUMBER_VALUE(x));
     return nil;
 }
 
@@ -661,7 +760,16 @@ struct builtin builtins[] = {
 
     { "read",       bi_read },
     { "print",      bi_print },
-    { "princ",      bi_princ },
+    { "open",       bi_open },
+    { "err",        bi_err },
+    { "eof",        bi_eof },
+    { "in",         bi_in },
+    { "out",        bi_out },
+    { "terpri",     bi_terpri },
+    { "setin",      bi_setin },
+    { "setout",     bi_setout },
+    { "putback",    bi_putback },
+    { "close",      bi_close },
 
     { "fn",         bi_fn },
     { "var",        bi_var },
@@ -687,29 +795,48 @@ load_environment (void)
 {
     lispptr x;
 
-    outs ("\n\rLoading ENV.LISP...\n\r");
-    cbm_open (3, 8, 3, "ENV.LISP");
-    // TODO: Error check.
-    cbm_k_chkin (3);
+    //bi_setout (lisp_make_cons (lisp_make_number (STDOUT), nil));
+    //bi_setin (lisp_make_cons (lisp_make_number (STDIN), nil));
+    //cbm_open (8, 8, 8, "ENV.LISP");
+    //bi_setin (lisp_make_cons (lisp_make_number (8), nil));
     while (x = lisp_read ()) {
-        lisp_print (x);
-        outs ("\n\r");
+        lisp_print (x); terpri ();
         x = eval (x);
-        lisp_print (x);
-        outs ("\n\r");
+        lisp_print (x); terpri ();
     }
-    cbm_k_close (3);
-    cbm_k_clrch ();
+    //cbm_k_clrch ();
+    //cbm_k_close (8);
 }
 
 int
 main (int argc, char * argv[])
 {
+    lispptr i;
+    lispptr o;
     (void) argc, (void) argv;
 
     if (!lisp_init ())
         error ("No memory.");
     init_builtins ();
+    EXPAND_UNIVERSE(quote);
+    quote      = lisp_make_symbol ("quote", 5);
+    stdin      = lisp_make_symbol ("stdin", 5);
+    stdout     = lisp_make_symbol ("stdout", 6);
+    lisp_fnin  = lisp_make_symbol ("fnin", 4);
+    lisp_fnout = lisp_make_symbol ("fnout", 5);
+    i = lisp_make_number (0);
+    o = lisp_make_number (3);
+    SET_SYMBOL_VALUE(stdin, i);
+    SET_SYMBOL_VALUE(stdout, o);
+    SET_SYMBOL_VALUE(lisp_fnin, i);
+    SET_SYMBOL_VALUE(lisp_fnout, o);
+    EXPAND_UNIVERSE(stdin);
+    EXPAND_UNIVERSE(stdout);
+    EXPAND_UNIVERSE(lisp_fnin);
+    EXPAND_UNIVERSE(lisp_fnout);
+
+    out_number (heap_end - heap_free);
+    outs (" bytes free.\n\r");
     load_environment ();
 
     return 0;

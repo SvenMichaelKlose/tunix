@@ -47,4 +47,4 @@ myfun
 (out 65)
 (out "Hello world!")
 (print (string '(65 66 67)))
-(gc)
+(exit)

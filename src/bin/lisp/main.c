@@ -29,6 +29,7 @@ lispptr quote;
 lispptr return_tag;
 lispptr go_tag;
 extern lispptr tmp;
+int len;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("arg1")
@@ -43,6 +44,7 @@ extern lispptr tmp;
 #pragma zpsym ("return_tag")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tmp")
+#pragma zpsym ("len")
 #pragma bss-name (pop)
 #endif
 
@@ -68,10 +70,22 @@ bierror ()
 int
 length (lispptr x)
 {
-    int len = 0;
-    for(; x; x = CDR(x))
+    len = 0;
+    for (; x; x = CDR(x))
         len++;
     return len;
+}
+
+void
+ensure_undefd_arg1 ()
+{
+    for (x = universe; x; x = CDR(x)) {
+        if (CAR(x) == arg1) {
+            lisp_print (arg1);
+            msg = " already defined.";
+            bierror ();
+        }
+    }
 }
 
 void
@@ -636,6 +650,7 @@ bi_fn (void)
         msg = "(fn name obj)";
         bierror ();
     }
+    ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2c);
     return nil;
@@ -651,6 +666,7 @@ bi_var (void)
         msg = "(var name obj)";
         bierror ();
     }
+    ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);
     SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
@@ -670,6 +686,7 @@ bi_exit (void)
 {
     msg = "(exit n)";
     ensure_one_number ();
+    while (1);
     exit (NUMBER_VALUE(arg1));
     /* NOTREACHED */
     return nil;
@@ -698,7 +715,7 @@ bi_eof (void)
 lispptr
 bi_open (void)
 {
-    int fn;
+    uchar fn;
     msg = "(open fn s)";
     ensure_two_args ();
     if (!NUMBERP(arg1)) {
@@ -959,6 +976,12 @@ main (int argc, char * argv[])
     out_number (heap_end - heap_free);
     outs (" bytes free.\n\r");
     load ("ENV.LISP");
+    while (0) {
+        outs ("* ");
+        lisp_print (eval (lisp_read ()));
+        terpri ();
+    }
 
+    while (1);
     return 0;
 }

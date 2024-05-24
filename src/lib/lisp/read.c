@@ -47,7 +47,7 @@ read_number ()
 {
     char * p = buffer;
     for (p = buffer; !eof () && isdigit (in ()); p++)
-        *p = ch ();
+        *p = last_in;
     *p = 0;
     putback ();
     return lisp_make_number (atoi (buffer));
@@ -64,7 +64,7 @@ read_symbol ()
 {
     char * p;
     for (p = buffer; !eof () && our_isalpha (in ()); p++)
-        *p = ch ();
+        *p = last_in;
     putback ();
     return lisp_make_symbol (buffer, p - buffer);
 }
@@ -74,10 +74,10 @@ read_string ()
 {
     char * p;
     for (p = buffer; !eof () && in () != '"'; p++)
-        if (ch () == '\\')
+        if (last_in == '\\')
             *p = in ();
         else
-            *p = ch ();
+            *p = last_in;
     return lisp_make_symbol (buffer, p - buffer);
 }
 
@@ -97,14 +97,14 @@ lisp_read ()
     if (eof ())
         return NULL;
     in ();
-    if (ch () == '(')
+    if (last_in == '(')
         return read_list ();
-    if (ch () == '\'')
+    if (last_in == '\'')
         return read_quoted (quote);
-    if (ch () == '"')
+    if (last_in == '"')
         return read_string ();
     putback ();
-    if (isdigit (ch ()))
+    if (isdigit (last_in))
         return read_number ();
     return read_symbol ();
 }

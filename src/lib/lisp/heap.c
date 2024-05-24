@@ -80,7 +80,7 @@ objsize (char * x)
 }
 
 #define MIN_RELOC_TABLE_SIZE \
-    (sizeof (lispptr) + sizeof (unsigned))
+    ((sizeof (lispptr) + sizeof (unsigned)) * 128)
 #define NEEDS_GC() \
     (heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE)
 

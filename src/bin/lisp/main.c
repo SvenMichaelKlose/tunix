@@ -17,6 +17,7 @@
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr x;
+extern lispptr value;
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
@@ -30,8 +31,12 @@ lispptr return_tag;
 lispptr go_tag;
 extern lispptr tmp;
 int len;
+lispptr b;
+lispptr tag;
+bool    tag_found;
 #ifdef __CC65__
 #pragma zpsym ("x")
+#pragma zpsym ("value")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
@@ -45,8 +50,29 @@ int len;
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
+#pragma zpsym ("b")
+#pragma zpsym ("tag")
+#pragma zpsym ("tag_found")
 #pragma bss-name (pop)
 #endif
+
+lispptr FASTCALL
+lisp_car (lispptr x)
+{
+    return CONS(x)->car;
+}
+
+lispptr FASTCALL
+lisp_cdr (lispptr x)
+{
+    return CONS(x)->cdr;
+}
+
+bool FASTCALL
+lisp_consp (lispptr x)
+{
+    return TYPE(x) == TYPE_CONS;
+}
 
 char load_fn = 10;
 
@@ -129,20 +155,17 @@ ensure_two_args (void)
 void
 ensure_one_number (void)
 {
-    if (!CONSP(x)
-        || !NUMBERP(arg1 = eval (CAR(x)))
-        || CDR(x))
+    ensure_one_arg ();
+    if (!NUMBERP(arg1))
         bierror ();
 }
 
 void
 ensure_two_numbers (void)
 {
-    if (!CONSP(x)
-        || !NUMBERP(arg1 = CAR(x))
-        || !(arg2c = CDR(x))
-        || !NUMBERP(arg2 = CAR(arg2c))
-        || CDR(arg2c))
+    ensure_two_args ();
+    if (!NUMBERP(arg1)
+        || !NUMBERP(arg2))
         bierror ();
 }
 
@@ -158,22 +181,16 @@ ensure_numbers (void)
 void
 cons_getter_args (void)
 {
-    if (!CONSP(x)
-        || CDR(x)
-        || !LISTP(arg1 = eval (CAR(x))))
+    ensure_one_arg ();
+    if (!LISTP(arg1))
         bierror ();
 }
 
 void
 cons_setter_args (void)
 {
-    if (!CONSP(x))
-        bierror ();
-    arg1 = eval (CAR(x));
-    PUSH(arg1);
-    if ((arg2c = eval (CDR(x)))
-        || CDR(arg2c)
-        || !CONSP(arg2 = CAR(arg2c)))
+    ensure_two_args ();
+    if (!CONSP(arg2))
         bierror ();
     POP(arg1);
 }
@@ -502,40 +519,35 @@ bi_apply (void)
 lispptr
 bi_block (void)
 {
-    lispptr res = nil;
-    lispptr p;
-    lispptr tag;
-    bool    tag_found;
-
     if (!CONSP(x) || !SYMBOLP(arg1 = CAR(x))) {
         msg = "(block name . exprs)";
         bierror ();
     }
     arg2c = CDR(x);
 
-    DOLIST(p, arg2c) {
+    DOLIST(b, arg2c) {
         PUSH(arg2c);
-        PUSH(p);
-        res = eval (CAR(p));
-        POP(p);
+        PUSH(b);
+        value = eval (CAR(b));
+        POP(b);
         POP(arg2c);
-        if (CONSP(res)) {
-            tmp = CAR(res);
+        if (CONSP(value)) {
+            tmp = CAR(value);
             // Handle RETURN.
             if (tmp == return_tag) {
-                if (arg1 == CAR(CDR(res)))
-                    return CDR(CDR(res));
-                return res;
+                if (arg1 == CAR(CDR(value)))
+                    return CDR(CDR(value));
+                return value;
             }
 
             // Handle GO.
             if (tmp == go_tag) {
                 // Search tag in body.
-                tag = CAR(CDR(res));
-                res = nil;
+                tag = CAR(CDR(value));
+                value = nil;
                 tag_found = false;
-                for (p = arg2c; p; p = LIST_CDR(p)) {
-                    if (CAR(p) == tag) {
+                for (b = arg2c; b; b = LIST_CDR(b)) {
+                    if (CAR(b) == tag) {
                         tag_found = true;
                         break;
                     }
@@ -545,7 +557,7 @@ bi_block (void)
             }
         }
     }
-    return res;
+    return value;
 }
 
 lispptr
@@ -973,8 +985,6 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(lisp_fnin);
     EXPAND_UNIVERSE(lisp_fnout);
 
-    out_number (heap_end - heap_free);
-    outs (" bytes free.\n\r");
     load ("ENV.LISP");
     while (0) {
         outs ("* ");

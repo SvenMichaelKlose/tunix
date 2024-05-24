@@ -107,6 +107,9 @@ relocate_ptr (char * x)
 void
 relocate (void)
 {
+#ifdef VERBOSE_GC
+    out ('R');
+#endif
     universe = relocate_ptr (universe);
     for (p = heap_start; *p; p += objsize (p)) {
         if (p == s)
@@ -127,6 +130,7 @@ gc (void)
 {
 #ifdef VERBOSE_GC
     char * tmp = heap_free;
+    out ('!');
 #endif
 
     // Trace objects.
@@ -139,6 +143,9 @@ gc (void)
     sweep_completed = false;
     s = d = heap_start;  // Relocation source + dest.
     do {
+#ifdef VERBOSE_GC
+        out ('-');
+#endif
         sweep ();
         relocate ();
     } while (!sweep_completed);

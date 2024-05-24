@@ -13,21 +13,21 @@ char * stack_start;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+lispptr x;
 char * stack;
 char * stack_end;
 lispptr ad;
 lispptr av;
 lispptr name;
-lispptr rest;
 lispptr value;
 builtin_fun bfun;
 #ifdef __CC65__
+#pragma zpsym ("x")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma zpsym ("ad")
 #pragma zpsym ("av")
 #pragma zpsym ("name")
-#pragma zpsym ("rest")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
 #pragma bss-name (pop)
@@ -49,7 +49,7 @@ eval_list (lispptr x)
     return lisp_make_cons (va, vd);
 }
 
-// Evalue list of expressions and return value of last.
+// Evaluate list of expressions and return value of last.
 lispptr
 eval_body (lispptr x)
 {
@@ -76,7 +76,8 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     if (BUILTINP(fun)) {
         bfun = (builtin_fun) SYMBOL_VALUE(fun);
-        return bfun (args);
+        x = args;
+        return bfun ();
     }
 
     if (!CONSP(fun)) {
@@ -93,7 +94,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
         // Rest of argument list. (consing)
         if (ATOM(ad)) {
-            // Push argument symbol value on stack.
+            // Save argument symbol value.
             PUSH(SYMBOL_VALUE(ad));
             PUSH(ad);
 
@@ -106,11 +107,11 @@ apply (lispptr fun, lispptr args, bool do_eval)
                 POP(ad);
             } else
                 value = av;
-            SET_SYMBOL_VALUE(ad, rest);
+            SET_SYMBOL_VALUE(ad, value);
             break;
         }
 
-        // Push argument symbol value on stack.
+        // Save argument symbol value.
         name = CAR(ad);
         PUSH(SYMBOL_VALUE(name));
         PUSH(name);
@@ -143,7 +144,7 @@ apply (lispptr fun, lispptr args, bool do_eval)
 
     value = eval_body (FUNBODY(fun));
 
-    // Pop argument symbol values from the stack.
+    // Restore argument symbol values.
     while (stsize--) {
         POP(name);
         POP(SYMBOL_VALUE(name));

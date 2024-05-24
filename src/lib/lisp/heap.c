@@ -22,15 +22,14 @@ extern void error (char * msg);
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr t;
-lispptr quote;
 char * heap_start;
 char * heap_free;
 char * heap_end;
 #ifdef __CC65__
+#pragma zpsym ("t")
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");
-#pragma zpsym ("t")
 #pragma bss-name (pop)
 #endif
 

@@ -14,7 +14,7 @@ typedef unsigned char uchar;
 #endif
 
 typedef void * lispptr;
-typedef lispptr FASTCALL (*builtin_fun) (lispptr);
+typedef lispptr (*builtin_fun) (void);
 
 typedef struct _cons {
     uchar   type;

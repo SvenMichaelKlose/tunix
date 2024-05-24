@@ -7,8 +7,12 @@
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+extern char fnin;
+extern char fnout;
 extern char last_out;   // Last output char.
 #ifdef __CC65__
+#pragma zpsym ("fnin")
+#pragma zpsym ("fnout")
 #pragma zpsym ("last_out")
 #pragma bss-name (pop)
 #endif

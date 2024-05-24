@@ -1,4 +1,7 @@
-; Random hodgepodge.
+(print stdin)
+(terpri)
+(print stdout)
+(terpri)
 (print 1)
 (+ 1 1)
 (- 1 1)
@@ -41,8 +44,7 @@ myfun
   jmp
   (print 3))
 (print 65)
-(princ 65)
-(princ "Hello world!")
+(out 65)
+(out "Hello world!")
 (print (string '(65 66 67)))
 (gc)
-ok

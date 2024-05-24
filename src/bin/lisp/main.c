@@ -34,6 +34,8 @@ lispptr lisp_fnout;
 #pragma bss-name (pop)
 #endif
 
+char load_fn = 10;
+
 extern void error (char * msg);
 
 void
@@ -74,6 +76,14 @@ ensure_number_arg (lispptr x, char * msg)
 {
     ensure_one_arg (x, msg);
     if (!NUMBERP(arg1))
+        bierror (msg);
+}
+
+void FASTCALL
+ensure_symbol_arg (lispptr x, char * msg)
+{
+    ensure_one_arg (x, msg);
+    if (!SYMBOLP(arg1))
         bierror (msg);
 }
 
@@ -185,10 +195,7 @@ bi_setq (lispptr x)
 lispptr FASTCALL
 bi_symbol_value (lispptr x)
 {
-    if (!CONSP(x)
-        || (CDR(x))
-        || !SYMBOLP(arg1 = eval (CAR(x))))
-        bierror ("(symbol-value symbol)");
+    ensure_symbol_arg (x, "(symbol-value symbol)");
     return SYMBOL_VALUE(arg1);
 }
 
@@ -208,6 +215,7 @@ bi_string (lispptr x)
             bierror ("(string nlst)");
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
+    *p++ = 0;
     return s;
 }
 
@@ -635,7 +643,7 @@ bi_open (lispptr x)
         bierror ("(open fn s)");
     fn = NUMBER_VALUE(arg1);
     cbm_open (fn, 8, fn, SYMBOL_NAME(arg2));
-    return lisp_make_number (cbm_k_readst ());
+    return lisp_make_number (err ());
 }
 
 lispptr FASTCALL
@@ -652,6 +660,8 @@ bi_setout (lispptr x)
 {
     ensure_number_arg (x, "(setout fn)");
     setout (NUMBER_VALUE(arg1));
+    if (err ())
+        error ("setout: illegal fn.");
     SET_SYMBOL_VALUE(lisp_fnout, arg1);
     return arg1;
 }
@@ -699,8 +709,49 @@ lispptr FASTCALL
 bi_close (lispptr x)
 {
     ensure_number_arg (x, "(close fn)");
+    cbm_k_clrch ();
     cbm_k_close (NUMBER_VALUE(x));
     return nil;
+}
+
+void
+load (char * pathname)
+{
+    lispptr x;
+    int i = fnin;
+
+    cbm_open (load_fn, 8, load_fn, pathname);
+    if (err ()) {
+        errouts ("Cannot open file ");
+        error (pathname);
+    }
+    bi_setin (lisp_make_cons (lisp_make_number (load_fn), nil));
+    load_fn++;
+
+    while (x = lisp_read ()) {
+        lisp_print (x); terpri ();
+        x = eval (x);
+        lisp_print (x); terpri ();
+    }
+
+    cbm_k_clrch ();
+    cbm_k_close (8);
+    load_fn--;
+    bi_setin (lisp_make_cons (lisp_make_number (i), nil));
+}
+
+lispptr FASTCALL
+bi_load (lispptr x)
+{
+    uchar len;
+    ensure_symbol_arg (x, "(load s)");
+
+    len = SYMBOL_LENGTH(arg1);
+    memcpy (buffer, SYMBOL_NAME(arg1), len);
+    buffer[len] = 0;
+
+    load (buffer);
+    return arg1;
 }
 
 struct builtin builtins[] = {
@@ -770,6 +821,7 @@ struct builtin builtins[] = {
     { "setout",     bi_setout },
     { "putback",    bi_putback },
     { "close",      bi_close },
+    { "load",       bi_load },
 
     { "fn",         bi_fn },
     { "var",        bi_var },
@@ -784,28 +836,10 @@ void
 init_builtins (void)
 {
     return_tag = lisp_make_symbol ("%R", 2);
-    go_tag = lisp_make_symbol ("%G", 2);
+    go_tag     = lisp_make_symbol ("%G", 2);
     EXPAND_UNIVERSE(return_tag);
     EXPAND_UNIVERSE(go_tag);
     add_builtins (builtins);
-}
-
-void
-load_environment (void)
-{
-    lispptr x;
-
-    //bi_setout (lisp_make_cons (lisp_make_number (STDOUT), nil));
-    //bi_setin (lisp_make_cons (lisp_make_number (STDIN), nil));
-    //cbm_open (8, 8, 8, "ENV.LISP");
-    //bi_setin (lisp_make_cons (lisp_make_number (8), nil));
-    while (x = lisp_read ()) {
-        lisp_print (x); terpri ();
-        x = eval (x);
-        lisp_print (x); terpri ();
-    }
-    //cbm_k_clrch ();
-    //cbm_k_close (8);
 }
 
 int
@@ -817,15 +851,22 @@ main (int argc, char * argv[])
 
     if (!lisp_init ())
         error ("No memory.");
+
     init_builtins ();
-    EXPAND_UNIVERSE(quote);
+
+    // Prepare QUOTE.
     quote      = lisp_make_symbol ("quote", 5);
+    EXPAND_UNIVERSE(quote);
+
+    // Set up I/O streams.
     stdin      = lisp_make_symbol ("stdin", 5);
     stdout     = lisp_make_symbol ("stdout", 6);
     lisp_fnin  = lisp_make_symbol ("fnin", 4);
     lisp_fnout = lisp_make_symbol ("fnout", 5);
-    i = lisp_make_number (0);
-    o = lisp_make_number (3);
+    fnin = STDIN;
+    fnout = STDOUT;
+    i = lisp_make_number (STDIN);
+    o = lisp_make_number (STDOUT);
     SET_SYMBOL_VALUE(stdin, i);
     SET_SYMBOL_VALUE(stdout, o);
     SET_SYMBOL_VALUE(lisp_fnin, i);
@@ -837,7 +878,7 @@ main (int argc, char * argv[])
 
     out_number (heap_end - heap_free);
     outs (" bytes free.\n\r");
-    load_environment ();
+    load ("ENV.LISP");
 
     return 0;
 }

@@ -15,18 +15,20 @@
 
 #include "libsimpleio.h"
 
-char fnin = STDIN;
-char fnout = STDOUT;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-char c;
+char fnin;
+char fnout;
 char do_putback;
+char last_in;
 char last_out;
 #ifdef __CC65__
-#pragma zpsym ("c")
+#pragma zpsym ("fnin")
+#pragma zpsym ("fnout")
 #pragma zpsym ("do_putback")
+#pragma zpsym ("last_in")
 #pragma zpsym ("last_out")
 #pragma bss-name (pop)
 #endif
@@ -77,15 +79,9 @@ raw_out (char c)
 }
 
 void
-raw_start_error (void)
-{
-    cbm_k_clrch ();
-}
-
-void
 reset (void)
 {
-    //cbm_k_clrch ();
+    cbm_k_clrch ();
     if (fnin != STDIN)
         cbm_k_chkin (fnin);
     if (fnout != STDOUT)
@@ -113,19 +109,19 @@ raw_setout (char c)
 void
 setin (char c)
 {
-    //if (fnin != c) {
+    if (fnin != c) {
         fnin = c;
         raw_setin (c);
-    //}
+    }
 }
 
 void
 setout (char c)
 {
-    //if (fnout != c) {
+    if (fnout != c) {
         fnout = c;
         raw_setout (c);
-    //}
+    }
 }
 
 char
@@ -143,18 +139,17 @@ err ()
 char
 in ()
 {
-    if (do_putback) {
+    if (do_putback)
         do_putback = false;
-        return c;
-    }
-    c = raw_in ();
-    return c;
+    else
+        last_in = raw_in ();
+    return last_in;
 }
 
 char
 ch ()
 {
-    return c;
+    return last_in;
 }
 
 void
@@ -172,7 +167,7 @@ skip_spaces ()
             while (!eof () && in () >= ' ')
             while (!eof () && in () < ' ' && ch ());
             putback ();
-        } else if (!isspace (c)) {
+        } else if (!isspace (last_in)) {
             putback ();
             return;
         }
@@ -216,13 +211,12 @@ outsn (char * s, char len)
 void
 terpri (void)
 {
-    if (last_out >= ' ')
-        outs ("\n\r");
+    outs ("\n\r");
 }
 
 void
 errouts (char * str)
 {
-    raw_start_error ();
+    setout (STDOUT);
     outs (str);
 }

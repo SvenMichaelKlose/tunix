@@ -215,6 +215,13 @@ terpri (void)
 }
 
 void
+fresh_line (void)
+{
+    if (last_in >= ' ')
+        outs ("\n\r");
+}
+
+void
 errouts (char * str)
 {
     setout (STDOUT);

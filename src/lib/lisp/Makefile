@@ -6,6 +6,6 @@ SOURCES= \
 	heap.c \
 	print.c \
 	read.c
-COPTFLAGS=-O -Or
+#COPTFLAGS=-O -Or
 
 include ../../Makefile.build

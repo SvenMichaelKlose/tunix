@@ -36,7 +36,6 @@ c1541_image:
 	mkdir -p bin
 	cp src/bin/lisp/README.md bin/lisp.md
 	cp src/bin/lisp/lisp bin/
-	cp src/bin/lisp/lisp.prg bin/
 	cp src/bin/lisp/env.lisp bin/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn bin/
@@ -46,7 +45,7 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/vi bin/
 endif
 ifeq ($(filter $(TARGET), atarixl vic20),)
-	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp.prg -write bin/env.lisp -write bin/lisp.md
+	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp -write bin/env.lisp -write bin/lisp.md
 endif
 ifeq ($(TARGET), vic20)
 	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp -write bin/env.lisp -write bin/lisp.md -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md

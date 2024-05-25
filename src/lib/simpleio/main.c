@@ -67,7 +67,10 @@ raw_err (void)
 char
 raw_in (void)
 {
-    return cbm_k_basin ();
+    last_in = cbm_k_basin ();
+    if (fnin == STDIN)
+        last_in = reverse_case (last_in);
+    return last_in;
 }
 
 void
@@ -79,31 +82,15 @@ raw_out (char c)
 }
 
 void
-reset (void)
-{
-    cbm_k_clrch ();
-    if (fnin != STDIN)
-        cbm_k_chkin (fnin);
-    if (fnout != STDOUT)
-        cbm_k_ckout (fnout);
-}
-
-void
 raw_setin (char c)
 {
-    if (c == STDIN)
-        reset ();
-    else 
-        cbm_k_chkin (fnin);
+    cbm_k_chkin (c);
 }
 
 void
 raw_setout (char c)
 {
-    if (c == STDOUT)
-        reset ();
-    else 
-        cbm_k_ckout (fnout);
+    cbm_k_ckout (c);
 }
 
 void
@@ -120,6 +107,7 @@ setout (char c)
 {
     if (fnout != c) {
         fnout = c;
+        last_out = ' ';
         raw_setout (c);
     }
 }
@@ -165,7 +153,7 @@ skip_spaces ()
         // Skip comment until end of line.
         if (in () == ';') {
             while (!eof () && in () >= ' ')
-            while (!eof () && in () < ' ' && ch ());
+            while (!eof () && in () < ' ' && last_in);
             putback ();
         } else if (!isspace (last_in)) {
             putback ();
@@ -229,12 +217,8 @@ terpri (void)
 void
 fresh_line (void)
 {
-    if (last_in >= ' ')
-#if TARGET == c128
-        out ('\n');
-#else
-        outs ("\n\r");
-#endif
+    if (last_out >= ' ')
+        terpri ();
 }
 
 void

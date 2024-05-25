@@ -986,6 +986,8 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(quote);
 
     // Set up I/O streams.
+    cbm_open (0, 0, 0, NULL);
+    cbm_open (3, 3, 3, NULL);
     stdin      = lisp_make_symbol ("stdin", 5);
     stdout     = lisp_make_symbol ("stdout", 6);
     lisp_fnin  = lisp_make_symbol ("fnin", 4);
@@ -1004,10 +1006,12 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(lisp_fnout);
 
     load ("ENV.LISP");
-    while (0) {
+    while (1) {
         outs ("* ");
-        lisp_print (eval (lisp_read ()));
-        terpri ();
+        x = lisp_read ();
+        fresh_line ();
+        lisp_print (eval (x));
+        fresh_line ();
     }
 
     while (1);

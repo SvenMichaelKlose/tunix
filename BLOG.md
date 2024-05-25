@@ -1,6 +1,12 @@
 TUNIX blog
 ==========
 
+# 2024-05-25: Build for c128, c64, pet, plus4 and vic20
+
+Thanks to cc65 this was a no-brainer.  The pet Lisp isn't
+working though.  I'm also a little bit lost with buggy
+built-in file I/O functions.
+
 # 2024-05-24: Lisp performance fears
 
 cc65-vic performance has been improved by using lots of

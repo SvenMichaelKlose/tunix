@@ -56,7 +56,7 @@ read_number ()
 bool __fastcall__
 our_isalpha (char c)
 {
-    return !isspace (c) && c != '(' && c != ')';
+    return !isspace (c) && c != '(' && c != ')' && c != ';';
 }
 
 lispptr
@@ -97,6 +97,15 @@ lisp_read ()
     if (eof ())
         return NULL;
     in ();
+    if (last_in == ';')  {
+        while (in () >= ' ')
+            if (eof ())
+                return nil;
+        while (in () < ' ')
+            if (eof ())
+                return nil;
+        putback ();
+    }
     if (last_in == '(')
         return read_list ();
     if (last_in == '\'')

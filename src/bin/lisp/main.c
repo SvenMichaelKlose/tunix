@@ -60,6 +60,8 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
+#ifdef SLOW
+
 lispptr FASTCALL
 lisp_car (lispptr x)
 {
@@ -77,6 +79,8 @@ lisp_consp (lispptr x)
 {
     return TYPE(x) == TYPE_CONS;
 }
+
+#endif
 
 char load_fn = 10;
 

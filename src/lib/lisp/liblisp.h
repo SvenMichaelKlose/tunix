@@ -101,21 +101,31 @@ extern char * stack_end;
 #define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
 
 #define CONS(x)      ((cons *) (x))
-//#define CAR(x)       (CONS(x)->car)
+
+#ifdef SLOW
+
 #define CAR(x)       (lisp_car (x))
-//#define CDR(x)       (CONS(x)->cdr)
 #define CDR(x)       (lisp_cdr (x))
+#define CONSP(x)     (lisp_consp (x))
 extern lispptr FASTCALL lisp_car (lispptr);
 extern lispptr FASTCALL lisp_cdr (lispptr);
+extern bool FASTCALL lisp_consp (lispptr);
+
+#else // #ifdef SLOW
+
+#define CAR(x)       (CONS(x)->car)
+#define CDR(x)       (CONS(x)->cdr)
+#define CONSP(x)     (TYPE(x) == TYPE_CONS)
+
+#endif // #ifdef SLOW
+
 #define LIST_CAR(x)  (!(x) ? x : CAR(x))
 #define LIST_CDR(x)  (!(x) ? x : CDR(x))
 #define RPLACA(v, x) (CONS(x)->car = v)
 #define RPLACD(v, x) (CONS(x)->cdr = v)
 
 #define BOOL(x)      ((x) ? t : nil)
-//#define CONSP(x)     (TYPE(x) == TYPE_CONS)
-#define CONSP(x)     (lisp_consp (x))
-extern bool FASTCALL lisp_consp (lispptr);
+
 #define ATOM(x)      (TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (!(x) || CONSP(x))
 #define NUMBERP(x)   (TYPE(x) == TYPE_NUMBER)

@@ -11,7 +11,7 @@
 
 (fn block-test (c)
   (out "Looping ")
-  (out c)
+  (print c)
   (out " times...")
   (terpri)
   (block nil

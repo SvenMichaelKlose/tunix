@@ -1013,7 +1013,9 @@ main (int argc, char * argv[])
         outs ("* ");
         x = lisp_read ();
         fresh_line ();
-        lisp_print (eval (x));
+        x = eval (x);
+        fresh_line ();
+        lisp_print (x);
         fresh_line ();
     }
 

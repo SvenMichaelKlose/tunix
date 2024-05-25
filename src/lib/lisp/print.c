@@ -129,6 +129,5 @@ lispptr FASTCALL
 lisp_print (lispptr x)
 {
     print (x);
-    terpri ();
     return x;
 }

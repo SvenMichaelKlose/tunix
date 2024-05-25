@@ -174,6 +174,8 @@ lisp_init ()
 {
     size_t heap_size;
 
+    lisp_break = false;
+
     // Init stack.
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)

@@ -55,6 +55,7 @@ extern char * heap_end;
 extern lispptr args;
 extern char * stack;
 extern char * stack_end;
+extern bool lisp_break; // Tell evaluator to cancel.
 #ifdef __CC65__
 #pragma zpsym ("t")
 #pragma zpsym ("quote")
@@ -64,6 +65,7 @@ extern char * stack_end;
 #pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
+#pragma zpsym ("lisp_break")
 #pragma bss-name (pop)
 #endif
 

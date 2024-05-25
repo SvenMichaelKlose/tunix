@@ -89,10 +89,10 @@ extern void error (char * msg);
 void
 error (char * msg)
 {
+    lisp_break = true;
     errouts ("ERROR: ");
     outs (msg);
     terpri ();
-    while (1);
 }
 
 void
@@ -544,6 +544,8 @@ bi_block (void)
     arg2c = CDR(x);
 
     DOLIST(b, arg2c) {
+        if (lisp_break)
+            return nil;
         PUSH(arg2c);
         PUSH(b);
         value = eval (CAR(b));
@@ -856,7 +858,7 @@ load (char * pathname)
     bi_setin ();
     load_fn++;
 
-    while (x = lisp_read ())
+    while (!lisp_break && (x = lisp_read ()))
         eval (x);
 
     load_fn--;
@@ -1007,6 +1009,7 @@ main (int argc, char * argv[])
 
     load ("ENV.LISP");
     while (1) {
+        lisp_break = false;
         outs ("* ");
         x = lisp_read ();
         fresh_line ();

@@ -22,6 +22,7 @@ lispptr av;
 lispptr name;
 lispptr value;
 builtin_fun bfun;
+bool lisp_break;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("args")
@@ -32,6 +33,7 @@ builtin_fun bfun;
 #pragma zpsym ("name")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
+#pragma zpsym ("lisp_break")
 #pragma bss-name (pop)
 #endif
 
@@ -42,6 +44,8 @@ eval_list (lispptr x)
     lispptr va;
     lispptr vd;
 
+    if (lisp_break)
+        return nil;
     if (ATOM(x))
         return x;
     va = eval (CAR(x));
@@ -60,6 +64,8 @@ eval_body (lispptr x)
     if (ATOM(x))
         return x;
     for (; CONSP(x); x = CDR(x)) {
+        if (lisp_break)
+            return nil;
         PUSH(x);
         v = eval (CAR(x));
         POP(x);
@@ -85,7 +91,8 @@ apply (lispptr fun, bool do_eval)
     if (!CONSP(fun)) {
         errouts ("Function expected, not ");
         lisp_print (fun);
-        while (1);
+        lisp_break = true;
+        return nil;
     }
 
     // Push argument symbol values onto the stack.
@@ -133,15 +140,16 @@ apply (lispptr fun, bool do_eval)
             value = CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
-    if (ad) {
-        errouts ("Argument(s) missing: ");
-        lisp_print (ad);
-        while (1);
-    }
-    if (av) {
-        errouts ("Too many arguments: ");
-        lisp_print (av);
-        while (1);
+    if (ad || av) {
+        if (ad) {
+            errouts ("Argument(s) missing: ");
+            lisp_print (ad);
+        } else {
+            errouts ("Too many arguments: ");
+            lisp_print (av);
+        }
+        lisp_break = true;
+        return nil;
     }
 
     value = eval_body (FUNBODY(fun));

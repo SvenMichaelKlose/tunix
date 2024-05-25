@@ -56,6 +56,10 @@ bool    tag_found;
 #pragma bss-name (pop)
 #endif
 
+lispptr go_expr;
+lispptr return_expr;
+lispptr return_args;
+
 lispptr FASTCALL
 lisp_car (lispptr x)
 {
@@ -533,12 +537,6 @@ bi_block (void)
         POP(arg2c);
         if (CONSP(value)) {
             tmp = CAR(value);
-            // Handle RETURN.
-            if (tmp == return_tag) {
-                if (arg1 == CAR(CDR(value)))
-                    return CDR(CDR(value));
-                return value;
-            }
 
             // Handle GO.
             if (tmp == go_tag) {
@@ -554,6 +552,13 @@ bi_block (void)
                 }
                 if (!tag_found)
                     error ("Tag not found.");
+            }
+
+            // Handle RETURN.
+            if (tmp == return_tag) {
+                if (arg1 == CAR(CDR(value)))
+                    return CDR(CDR(value));
+                return value;
             }
         }
     }
@@ -572,8 +577,9 @@ bi_return (void)
     PUSH(arg1);
     arg2 = eval (LIST_CAR(LIST_CDR(x)));
     POP(arg1);
-    arg1 = lisp_make_cons (arg1, arg2);
-    return lisp_make_cons (return_tag, arg1);
+    RPLACA(return_args, arg1);
+    RPLACD(return_args, arg2);
+    return return_expr;
 }
 
 lispptr
@@ -581,8 +587,8 @@ bi_go (void)
 {
     msg = "(go tag)";
     ensure_one_arg ();
-    // TODO: Re-use cons.
-    return lisp_make_cons (go_tag, arg1);
+    RPLACD(arg1, go_expr);
+    return go_expr;
 }
 
 lispptr
@@ -944,10 +950,15 @@ struct builtin builtins[] = {
 void
 init_builtins (void)
 {
-    return_tag = lisp_make_symbol ("%R", 2);
-    go_tag     = lisp_make_symbol ("%G", 2);
-    EXPAND_UNIVERSE(return_tag);
-    EXPAND_UNIVERSE(go_tag);
+    return_tag  = lisp_make_symbol ("%R", 2);
+    return_args = lisp_make_cons (nil, nil);
+    return_expr = lisp_make_cons (return_tag, return_args);
+    EXPAND_UNIVERSE(return_expr);
+
+    go_tag  = lisp_make_symbol ("%G", 2);
+    go_expr = lisp_make_cons (go_tag, nil);
+    EXPAND_UNIVERSE(go_expr);
+
     add_builtins (builtins);
 }
 

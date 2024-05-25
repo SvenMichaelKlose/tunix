@@ -1,3 +1,5 @@
+; TUNIX-Lisp
+
 (print stdin)
 (terpri)
 (print stdout)
@@ -47,16 +49,19 @@ myfun
 (out 65)
 (out "Hello world!")(terpri)
 (print (string '(65 66 67)))(terpri)
-(out "Looping...")(terpri)
+
 (var c 10000)
-(block nil
-  (print 1)
-  (go jmp)
-  (print 2)
-  jmp
-  (setq c (-- c))
-  (? (== 0 (% c 100))
-     (& (print c) (terpri)))
-  (? (not (== c 0))
-     (go jmp)))
+
+(fn block-test ()
+  (out "Looping...")(terpri)
+  (block nil
+    tag
+    (setq c (-- c))
+    (? (== 0 (% c 100))
+       (& (print c) (terpri)))
+    (? (not (== c 0))
+       (go 'tag))))
+
+(block-test)
+
 (gc)

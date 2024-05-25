@@ -111,6 +111,15 @@ length (lispptr x)
 }
 
 void
+name_to_buffer (lispptr s)
+{
+    uchar len;
+    len = SYMBOL_LENGTH(s);
+    memcpy (buffer, SYMBOL_NAME(s), len);
+    buffer[len] = 0;
+}
+
+void
 ensure_undefd_arg1 ()
 {
     for (x = universe; x; x = CDR(x)) {
@@ -521,7 +530,8 @@ bi_apply (void)
         msg = "(apply fun . args)";
         bierror ();
     }
-    return apply (CAR(x), arg2c, true);
+    args = arg2c;
+    return apply (CAR(x), true);
 }
 
 lispptr
@@ -749,7 +759,8 @@ bi_open (void)
         bierror ();
     }
     fn = NUMBER_VALUE(arg1);
-    cbm_open (fn, 8, fn, SYMBOL_NAME(arg2));
+    name_to_buffer (arg2);
+    cbm_open (fn, 8, fn, buffer);
     return lisp_make_number (err ());
 }
 
@@ -861,14 +872,9 @@ load (char * pathname)
 lispptr
 bi_load (void)
 {
-    uchar len;
     msg = "(load s)";
     ensure_symbol_arg ();
-
-    len = SYMBOL_LENGTH(arg1);
-    memcpy (buffer, SYMBOL_NAME(arg1), len);
-    buffer[len] = 0;
-
+    name_to_buffer (arg1);
     load (buffer);
     return nil;
 }

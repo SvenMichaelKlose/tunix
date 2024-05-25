@@ -52,6 +52,7 @@ extern lispptr quote;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
+extern lispptr args;
 extern char * stack;
 extern char * stack_end;
 #ifdef __CC65__
@@ -60,6 +61,7 @@ extern char * stack_end;
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
+#pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma bss-name (pop)
@@ -156,7 +158,8 @@ extern lispptr FASTCALL lisp_print (lispptr);
 extern lispptr eval_list (lispptr);
 extern lispptr eval_body (lispptr);
 extern lispptr eval (lispptr);
-extern lispptr apply (lispptr fun, lispptr args, bool do_eval);
+// TODO: Does not belong here.
+extern lispptr apply (lispptr fun, bool do_eval);
 
 extern void    gc (void);
 

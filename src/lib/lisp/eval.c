@@ -14,6 +14,7 @@ char * stack_start;
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr x;
+lispptr args;
 char * stack;
 char * stack_end;
 lispptr ad;
@@ -23,6 +24,7 @@ lispptr value;
 builtin_fun bfun;
 #ifdef __CC65__
 #pragma zpsym ("x")
+#pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma zpsym ("ad")
@@ -70,7 +72,7 @@ eval_body (lispptr x)
 // 'fun' is a cons with the argument definition in CAR and
 // body expressions in CDR.
 lispptr
-apply (lispptr fun, lispptr args, bool do_eval)
+apply (lispptr fun, bool do_eval)
 {
     unsigned stsize;
 
@@ -173,5 +175,6 @@ eval (lispptr x)
     PUSH(x);
     arg1 = eval (CAR(x));
     POP(x);
-    return apply (arg1, CDR(x), true);
+    args = CDR(x);
+    return apply (arg1, true);
 }

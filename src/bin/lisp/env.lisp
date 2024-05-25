@@ -50,7 +50,7 @@ myfun
 (out "Hello world!")(terpri)
 (print (string '(65 66 67)))(terpri)
 
-(var c 10000)
+(var c 1000)
 
 (fn block-test ()
   (out "Looping...")(terpri)
@@ -62,6 +62,12 @@ myfun
     (? (not (== c 0))
        (go 'tag))))
 
-(block-test)
+;(block-test)
+
+(open 4 "@:GEN,S,W")
+(setout 4)
+(print "test")
+(close 4)
+(setout stdout)
 
 (gc)

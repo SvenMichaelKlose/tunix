@@ -31,6 +31,7 @@ extern void skip_spaces (void);
 
 extern void out (char c);
 extern void out_number (int);
+extern void outnu (unsigned);
 extern void outs (char *);
 extern void outsn (char *, char len);
 extern void terpri (void);

@@ -152,7 +152,7 @@ gc (void)
 
 #ifdef VERBOSE_GC
     outs (": ");
-    out_number ((int) (tmp - heap_free));
+    outnu ((unsigned) (tmp - heap_free));
     outs (" bytes freed.\n\r");
 #endif
 }

@@ -1,3 +1,7 @@
-SUBDIRS=cbm-console csv2html desktop lisp vi vm
+SUBDIRS = csv2html lisp
+
+ifeq ($(TARGET), vic20)
+SUBDIRS += cbm-console desktop vi vm
+endif
 
 include ../Makefile.subdir

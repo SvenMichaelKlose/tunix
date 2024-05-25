@@ -4,7 +4,6 @@ SOURCES= \
 LIBRARIES= \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
-#COPTFLAGS=-O -Or
-LD65CFG=vic20.cfg
+LD65CFG=$(CC65_TARGET).cfg
 
 include ../../Makefile.build

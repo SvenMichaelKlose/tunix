@@ -67,7 +67,7 @@ raw_err (void)
 char
 raw_in (void)
 {
-    return cbm_k_getin ();
+    return cbm_k_basin ();
 }
 
 void
@@ -182,6 +182,18 @@ out (char c)
 }
 
 void
+outnu (unsigned n)
+{
+    unsigned a;
+    if (n > 9) {
+        a = n / 10;
+        n -= 10 * a;
+        outnu (a);
+    }
+    out ('0' + n);
+}
+
+void
 out_number (int n)
 {
     int a;
@@ -218,7 +230,11 @@ void
 fresh_line (void)
 {
     if (last_in >= ' ')
+#if TARGET == c128
+        out ('\n');
+#else
         outs ("\n\r");
+#endif
 }
 
 void

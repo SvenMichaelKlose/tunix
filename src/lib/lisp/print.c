@@ -24,6 +24,7 @@ space (void)
 {
     if (last_out != '('
         && last_out != ')'
+        && last_out != '\''
         && last_out > ' ')
         out (' ');
 }
@@ -128,6 +129,6 @@ lispptr FASTCALL
 lisp_print (lispptr x)
 {
     print (x);
-    out ('\n');
+    terpri ();
     return x;
 }

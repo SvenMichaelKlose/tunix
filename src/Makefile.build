@@ -3,9 +3,40 @@ include $(THIS_DIR)/Makefile.config
 
 all: $(LIBRARY) $(PROGRAM)
 
+ifeq ($(TARGET), apple2)
+EXOMIZER_TARGET = 0xa2
+endif
+ifeq ($(TARGET), atarixl)
+EXOMIZER_TARGET = 0xa8
+endif
+ifeq ($(TARGET), bbc)
+EXOMIZER_TARGET = 64
+endif
+ifeq ($(TARGET), c128)
+EXOMIZER_TARGET = 128
+endif
+ifeq ($(TARGET), c16)
+EXOMIZER_TARGET = 16
+endif
+ifeq ($(TARGET), c64)
+EXOMIZER_TARGET = 64
+endif
+ifeq ($(TARGET), pet)
+EXOMIZER_TARGET = 4032
+endif
+ifeq ($(TARGET), plus4)
+EXOMIZER_TARGET = 4
+endif
+ifeq ($(TARGET), telestrat)
+EXOMIZER_TARGET = 1
+endif
+ifeq ($(TARGET), vic20)
+EXOMIZER_TARGET = 52
+endif
+
 $(PROGRAM): $(PROGRAM_PLAIN)
 ifndef NO_EXOMIZER
-	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t 52 $(PROGRAM_PLAIN) -o $(PROGRAM)
+	$(EXOMIZER) sfx basic $(EXOMIZER_FLAGS) -t $(EXOMIZER_TARGET) $(PROGRAM_PLAIN) -o $(PROGRAM)
 else
 	cp $(PROGRAM_PLAIN) $(PROGRAM)
 endif

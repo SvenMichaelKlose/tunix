@@ -1,3 +1,9 @@
-SUBDIRS=bdb blit blit_test conio directory-list gfx gui ingle keyboard lineedit lisp log posix simpleio term term-test text tunix ultifs ultimem zp
+include ../config
+
+SUBDIRS += bdb blit conio directory-list ingle lineedit lisp log posix simpleio text tunix zp
+
+ifeq ($(TARGET), vic20)
+SUBDIRS += gfx gui keyboard term term-test text ultifs ultimem
+endif
 
 include ../Makefile.subdir

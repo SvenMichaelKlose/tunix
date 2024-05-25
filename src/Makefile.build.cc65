@@ -1,5 +1,5 @@
 ifndef NO_STDLIB
-LIBRARIES += $(CC65_LIB)/vic20.lib
+LIBRARIES += $(CC65_LIB)/$(CC65_TARGET).lib
 endif
 
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)

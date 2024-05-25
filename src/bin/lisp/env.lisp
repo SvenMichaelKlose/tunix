@@ -58,7 +58,7 @@ myfun
     tag
     (setq c (-- c))
     (? (== 0 (% c 100))
-       (& (print c) (terpri)))
+       (print c))
     (? (not (== c 0))
        (go 'tag))))
 

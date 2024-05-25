@@ -91,7 +91,7 @@ error (char * msg)
 {
     errouts ("ERROR: ");
     outs (msg);
-    outs ("\n\r");
+    terpri ();
     while (1);
 }
 
@@ -817,7 +817,7 @@ bi_terpri (void)
         msg = "(terpri)";
         bierror ();
     }
-    outs ("\n\r");
+    terpri ();
     return nil;
 }
 
@@ -846,9 +846,9 @@ load (char * pathname)
     load_fn++;
 
     while (x = lisp_read ()) {
-        lisp_print (x); terpri ();
+        lisp_print (x);
         x = eval (x);
-        lisp_print (x); terpri ();
+        lisp_print (x);
     }
 
     load_fn--;

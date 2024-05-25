@@ -84,9 +84,7 @@ read_string ()
 lispptr
 read_quoted (lispptr which)
 {
-    lispptr tmp;
-
-    tmp = lisp_make_cons (lisp_read (), nil);
+    lispptr tmp = lisp_make_cons (lisp_read (), nil);
     return lisp_make_cons (which, tmp);
 }
 
@@ -95,7 +93,7 @@ lisp_read ()
 {
     skip_spaces ();
     if (eof ())
-        return NULL;
+        return nil;
     in ();
     if (last_in == ';')  {
         while (in () >= ' ')

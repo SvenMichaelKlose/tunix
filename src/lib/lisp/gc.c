@@ -130,7 +130,7 @@ gc (void)
 {
 #ifdef VERBOSE_GC
     char * tmp = heap_free;
-    out ('!');
+    out ('M');
 #endif
 
     // Trace objects.
@@ -144,13 +144,14 @@ gc (void)
     s = d = heap_start;  // Relocation source + dest.
     do {
 #ifdef VERBOSE_GC
-        out ('-');
+        out ('S');
 #endif
         sweep ();
         relocate ();
     } while (!sweep_completed);
 
 #ifdef VERBOSE_GC
+    outs (": ");
     out_number ((int) (tmp - heap_free));
     outs (" bytes freed.\n\r");
 #endif

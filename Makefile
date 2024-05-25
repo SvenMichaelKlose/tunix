@@ -34,6 +34,10 @@ endif
 c1541_image:
 	@echo "# Making c1541 disk image."
 	mkdir -p bin
+	cp src/bin/lisp/README.md bin/lisp.md
+	cp src/bin/lisp/lisp bin/
+	cp src/bin/lisp/lisp.prg bin/
+	cp src/bin/lisp/env.lisp bin/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn bin/
 	cp src/sbin/ultidump/ultidump bin/
@@ -41,15 +45,11 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/README.md bin/vi.md
 	cp src/bin/vi/vi bin/
 endif
-	cp src/bin/lisp/README.md bin/lisp.md
-	cp src/bin/lisp/lisp bin/
-	cp src/bin/lisp/lisp.prg bin/
-	cp src/bin/lisp/env.lisp bin/
 ifeq ($(filter $(TARGET), atarixl vic20),)
 	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp.prg -write bin/env.lisp -write bin/lisp.md
 endif
 ifeq ($(TARGET), vic20)
-	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md -write bin/lisp -write bin/env.lisp -write bin/lisp.md
+	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp -write bin/env.lisp -write bin/lisp.md -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
 endif
 
 clean:

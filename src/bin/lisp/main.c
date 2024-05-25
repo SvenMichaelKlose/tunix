@@ -856,11 +856,8 @@ load (char * pathname)
     bi_setin ();
     load_fn++;
 
-    while (x = lisp_read ()) {
-        lisp_print (x);
-        x = eval (x);
-        lisp_print (x);
-    }
+    while (x = lisp_read ())
+        eval (x);
 
     load_fn--;
     cbm_k_clrch ();

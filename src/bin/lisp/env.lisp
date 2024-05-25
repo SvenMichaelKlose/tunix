@@ -9,10 +9,11 @@
      (+ 1 (length (cdr x)))
      0))
 
-(var c 400)
-
-(fn block-test ()
-  (out "Looping...")(terpri)
+(fn block-test (c)
+  (out "Looping ")
+  (out c)
+  (out " times...")
+  (terpri)
   (block nil
     tag
     (setq c (-- c))

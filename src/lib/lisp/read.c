@@ -25,7 +25,6 @@ read_list ()
             return start;
         putback ();
 
-        skip_spaces ();
         if (eof ())
             error ("Closing paren?");
         PUSH(start);
@@ -118,6 +117,7 @@ lisp_read ()
         return nil;
     }
     putback ();
+    // TODO: Negative numbers.
     if (isdigit (last_in))
         return read_number ();
     return read_symbol ();

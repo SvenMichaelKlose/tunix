@@ -100,7 +100,7 @@ apply (bool do_eval)
                 PUSH(av);
                 PUSH(arg1);
                 x = av;
-                value = eval ();
+                value = eval_list ();
                 POP(arg1);
                 POP(av);
                 POP(ad);

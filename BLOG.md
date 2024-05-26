@@ -5,6 +5,8 @@ TUNIX blog
 
 eval() is not calling itself any more to evaluate arguments
 or function bodies.  That's a third less CPU stack use.
+Also '?' delegates evaluation of the last expression to the
+evaluator loop.
 
 # 2024-05-26 04:00: Lisp REPL
 

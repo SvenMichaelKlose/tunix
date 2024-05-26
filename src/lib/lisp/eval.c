@@ -185,6 +185,7 @@ arg_last:
     // Eavluate body.
 start_body:
     x = FUNBODY(arg1);
+
 do_body:
     if (!x || lisp_break)
         goto done_body;
@@ -203,12 +204,14 @@ done_body:
         POP(name);
         POP(SYMBOL_VALUE(name));
     }
+#ifndef NDEBUG
     if (c != TAG_DONE) {
         errouts ("Internal error: ");
         out_number (c);
         outs (": 0 expected after restoring arguments.");
         while (1);
     }
+#endif // #ifndef NDEBUG
 
 got_value:
     if (value == delayed_eval)
@@ -221,10 +224,12 @@ got_value:
             goto next_in_body;
         if (c == TAG_ARG_LAST)
             goto arg_last;
+//#ifndef NDEBUG
         errouts ("Internal error: ");
         out_number (c);
         outs (": Unknown eval tag.");
         while (1);
+//#endif // #ifndef NDEBUG
     }
     return value;
 }

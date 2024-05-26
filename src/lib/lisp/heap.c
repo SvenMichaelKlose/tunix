@@ -66,13 +66,15 @@ unsigned lisp_sizes[] = {
 unsigned FASTCALL
 objsize (char * x)
 {
-    uchar type = *x & 7; // TODO: constant
+    uchar type = *x & 7; // TODO: named constant
     unsigned s;
+#ifndef NDEBUG
     if (type > TYPE_MAX) {
         errouts ("No size for type ");
         out_number (type);
         while (1);
     }
+#endif // #ifndef NDEBUG
     s = lisp_sizes[type];
     if (*x & TYPE_NAMED)
         return s + SYMBOL_LENGTH(x);

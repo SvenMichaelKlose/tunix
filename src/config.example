@@ -1,2 +1,6 @@
 # Build oscar64 compiler.
 #HAVE_OSCAR64 = 1
+
+# Do not compile in code for debugging.  Usually leads to
+# noticeably smaller and faster code.
+#NDEBUG = 1

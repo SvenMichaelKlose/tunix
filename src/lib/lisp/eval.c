@@ -139,8 +139,7 @@ apply (bool do_eval)
         return nil;
     }
 
-    x = FUNBODY(arg1);
-    for (; CONSP(x); x = CDR(x)) {
+    for (x = FUNBODY(arg1); CONSP(x); x = CDR(x)) {
         if (lisp_break)
             break;
         PUSH(x);
@@ -172,9 +171,8 @@ eval (lispptr x)
         POP(x);
         args = CDR(x);
         return apply (true);
-    } else if (BUILTINP(x))
-        return x;
-    else if (SYMBOLP(x))
+    }
+    if (SYMBOLP(x))
         return SYMBOL_VALUE(x);
     return x;
 }

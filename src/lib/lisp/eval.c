@@ -22,6 +22,7 @@ lispptr defs;
 lispptr value;
 builtin_fun bfun;
 lispptr va;
+lispptr delayed_eval;
 bool lisp_break;
 uchar c;
 #ifdef __CC65__
@@ -36,6 +37,7 @@ uchar c;
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
+#pragma zpsym ("delayed_eval")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("c")
 #pragma bss-name (pop)
@@ -209,6 +211,8 @@ done_body:
     }
 
 got_value:
+    if (value == delayed_eval)
+        goto do_eval;
     POP_TAG(c);
     if (c != TAG_DONE) {
         if (c == TAG_ARG_NEXT)

@@ -140,6 +140,7 @@ gc (void)
     mark (return_value);
     mark (go_sym);
     mark (go_tag);
+    mark (delayed_eval);
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 

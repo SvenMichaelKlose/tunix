@@ -64,6 +64,7 @@ extern lispptr return_value;
 extern lispptr return_name;
 extern lispptr go_sym;
 extern lispptr go_tag;
+extern lispptr delayed_eval;
 #ifdef __CC65__
 #pragma zpsym ("t")
 #pragma zpsym ("quote")

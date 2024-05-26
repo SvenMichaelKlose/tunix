@@ -644,15 +644,16 @@ bi_if (void)
         arg1 = CAR(x);
         if (!(arg2c = CDR(x))) {
             x = arg1;
-            return eval ();
+            return delayed_eval;
         }
+
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
         if (tmp) {
             x = CAR(arg2c);
-            return eval ();
+            return delayed_eval;
         }
         x = CDR(arg2c);
     }

@@ -676,57 +676,6 @@ bi_print (void)
 }
 
 lispptr
-bi_fn (void)
-{
-    if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x))
-        || !CONSP(arg2c = CDR(x))) {
-        msg = "(fn name obj)";
-        bierror ();
-    }
-    ensure_undefd_arg1 ();
-    EXPAND_UNIVERSE(arg1);
-    SET_SYMBOL_VALUE(arg1, arg2c);
-    return nil;
-}
-
-lispptr
-bi_var (void)
-{
-    if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x))
-        || !CONSP(arg2c = CDR(x))
-        || CDR(arg2c)) {
-        msg = "(var name obj)";
-        bierror ();
-    }
-    ensure_undefd_arg1 ();
-    EXPAND_UNIVERSE(arg1);
-    PUSH(arg1);
-    SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
-    POP(arg1);
-    return nil;
-}
-
-lispptr
-bi_gc (void)
-{
-    gc ();
-    return lisp_make_number (heap_end - heap_free);
-}
-
-lispptr
-bi_exit (void)
-{
-    msg = "(exit n)";
-    ensure_one_number ();
-    while (1);
-    exit (NUMBER_VALUE(arg1));
-    /* NOTREACHED */
-    return nil;
-}
-
-lispptr
 bi_err (void)
 {
     if (x) {
@@ -878,6 +827,68 @@ bi_load (void)
     return nil;
 }
 
+lispptr
+bi_fn (void)
+{
+    if (!CONSP(x)
+        || !SYMBOLP(arg1 = CAR(x))
+        || !CONSP(arg2c = CDR(x))) {
+        msg = "(fn name obj)";
+        bierror ();
+    }
+    ensure_undefd_arg1 ();
+    EXPAND_UNIVERSE(arg1);
+    SET_SYMBOL_VALUE(arg1, arg2c);
+    return nil;
+}
+
+lispptr
+bi_var (void)
+{
+    if (!CONSP(x)
+        || !SYMBOLP(arg1 = CAR(x))
+        || !CONSP(arg2c = CDR(x))
+        || CDR(arg2c)) {
+        msg = "(var name obj)";
+        bierror ();
+    }
+    ensure_undefd_arg1 ();
+    EXPAND_UNIVERSE(arg1);
+    PUSH(arg1);
+    SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
+    POP(arg1);
+    return nil;
+}
+
+lispptr
+bi_universe (void)
+{
+    if (x) {
+        msg = "(universe)";
+        bierror ();
+    }
+    return universe;
+}
+
+lispptr
+bi_gc (void)
+{
+    gc ();
+    return lisp_make_number (heap_end - heap_free);
+}
+
+lispptr
+bi_exit (void)
+{
+    msg = "(exit n)";
+    ensure_one_number ();
+    while (1);
+    exit (NUMBER_VALUE(arg1));
+    /* NOTREACHED */
+    return nil;
+}
+
+
 struct builtin builtins[] = {
     { "quote",      bi_quote },
 
@@ -949,8 +960,8 @@ struct builtin builtins[] = {
 
     { "fn",         bi_fn },
     { "var",        bi_var },
+    { "universe",   bi_universe },
     { "gc",         bi_gc },
-
     { "exit",       bi_exit },
 
     { NULL, NULL }

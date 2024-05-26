@@ -295,7 +295,7 @@ integers.
 
 Calls machine code function at 'addr'.
 
-## Special
+## Special forms
 
 ### (fn name args body...)
 
@@ -315,6 +315,11 @@ the universe by 'name'.
 Used to define variables.  Evaluates 'obj', assigns the
 result to the symbol value of 'name' and expands the
 universe by 'name'.
+
+### (universe)
+
+Returns the list of global definitions added by 'fn' or
+'var'.
 
 ## Miscellaneous
 

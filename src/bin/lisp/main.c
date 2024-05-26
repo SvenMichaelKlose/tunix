@@ -137,7 +137,8 @@ ensure_one_arg (void)
     if (!CONSP(x)
         || CDR(x))
         bierror ();
-    arg1 = eval (CAR(x));
+    x = CAR(x);
+    arg1 = eval ();
 }
 
 void
@@ -163,9 +164,13 @@ ensure_two_args (void)
         || !CONSP(arg2c = CDR(x))
         || CDR(arg2c))
         bierror ();
-    arg1 = eval (CAR(x));
+    x = CAR(x);
+    PUSH(arg2c);
+    arg1 = eval ();
+    POP(arg2c);
     PUSH(arg1);
-    arg2 = eval (CAR(arg2c));
+    x = CAR(arg2c);
+    arg2 = eval ();
     POP(arg1);
 }
 
@@ -190,8 +195,13 @@ void
 ensure_numbers (void)
 {
     if (!CONSP(x)
-        || !NUMBERP(arg1 = eval (CAR(x)))
         || !(arg2c = CDR(x)))
+        bierror ();
+    x = CAR(x);
+    PUSH(arg2c);
+    arg1 = eval ();
+    POP(arg2c);
+    if (!NUMBERP(arg1))
         bierror ();
 }
 
@@ -254,7 +264,11 @@ bi_setq (void)
         msg = "(setq sym x)";
         bierror ();
     }
-    SET_SYMBOL_VALUE(arg1, arg2 = eval (CAR(arg2c)));
+    x = CAR(arg2c);
+    PUSH(arg1);
+    arg2 = eval ();
+    POP(arg1);
+    SET_SYMBOL_VALUE(arg1, arg2);
     return arg2;
 }
 
@@ -406,7 +420,8 @@ fun_name (void) \
     v = NUMBER_VALUE(arg1); \
     TYPESAFE_DOLIST(x, arg2c) { \
         PUSH(x); \
-        if (!NUMBERP(tmp = eval (CAR(x)))) \
+        x = CAR(x); \
+        if (!NUMBERP(tmp = eval ())) \
             bierror (); \
         POP(x); \
         v op NUMBER_VALUE(tmp); \
@@ -515,7 +530,8 @@ bi_eval (void)
 {
     msg = "(eval x)";
     ensure_one_arg ();
-    return eval (arg1);
+    x = arg1;
+    return eval ();
 }
 
 lispptr
@@ -546,7 +562,8 @@ bi_block (void)
             return nil;
         PUSH(arg2c);
         PUSH(b);
-        value = eval (CAR(b));
+        x = CAR(b);
+        value = eval ();
         POP(b);
         POP(arg2c);
         if (CONSP(value)) {
@@ -587,9 +604,13 @@ bi_return (void)
         bierror ();
     }
     // TODO: Re-use list.
-    arg1 = eval (CAR(x));
+    PUSH(x);
+    x = CAR(x);
+    arg1 = eval ();
+    POP(x);
     PUSH(arg1);
-    arg2 = eval (LIST_CAR(LIST_CDR(x)));
+    x = LIST_CAR(LIST_CDR(x));
+    arg2 = eval ();
     POP(arg1);
     RPLACA(return_args, arg1);
     RPLACD(return_args, arg2);
@@ -615,13 +636,18 @@ bi_if (void)
     }
     while (x) {
         arg1 = CAR(x);
-        if (!(arg2c = CDR(x)))
-            return eval (arg1);
+        if (!(arg2c = CDR(x))) {
+            x = arg1;
+            return eval ();
+        }
         PUSH(arg2c);
-        tmp = eval (arg1);
+        x = arg1;
+        tmp = eval ();
         POP(arg2c);
-        if (tmp)
-            return eval (CAR(arg2c));
+        if (tmp) {
+            x = CAR(arg2c);
+            return eval ();
+        }
         x = CDR(arg2c);
     }
     /* NOTREACHED */
@@ -630,15 +656,16 @@ bi_if (void)
 lispptr
 bi_and (void)
 {
+    value = nil;
     DOLIST(x, x) {
         PUSH(x);
-        if (!eval (CAR(x))) {
-            POP(x);
-            return nil;
-        }
+        x = CAR(x);
+        value = eval ();
         POP(x);
+        if (!value)
+            return nil;
     }
-    return t;
+    return value;
 }
 
 lispptr
@@ -646,10 +673,11 @@ bi_or (void)
 {
     DOLIST(x, x) {
         PUSH(x);
-        if (eval (CAR(x))) {
-            POP(x);
-            return t;
-        }
+        x = CAR(x);
+        value = eval ();
+        POP(x);
+        if (value)
+            return value;
         POP(x);
     }
     return nil;
@@ -806,7 +834,7 @@ load (char * pathname)
     load_fn++;
 
     while (!lisp_break && (x = lisp_read ()))
-        eval (x);
+        eval ();
 
     load_fn--;
     cbm_k_clrch ();
@@ -853,7 +881,10 @@ bi_var (void)
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);
-    SET_SYMBOL_VALUE(arg1, eval (CAR(arg2c)));
+    PUSH(arg2c);
+    x = CAR(arg2c);
+    SET_SYMBOL_VALUE(arg1, eval ());
+    POP(arg2c);
     POP(arg1);
     return nil;
 }
@@ -1022,7 +1053,7 @@ main (int argc, char * argv[])
         outs ("* ");
         x = lisp_read ();
         fresh_line ();
-        x = eval (x);
+        x = eval ();
         fresh_line ();
         lisp_print (x);
         fresh_line ();

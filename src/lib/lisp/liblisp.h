@@ -164,11 +164,9 @@ extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
 extern lispptr FASTCALL lisp_print (lispptr);
 
-//extern lispptr eval_list (lispptr);
-//extern lispptr eval_body (lispptr);
-extern lispptr eval (lispptr);
-// TODO: Does not belong here.
-extern lispptr apply (bool do_eval);
+// Arguments in global 'x'.
+extern lispptr eval (void);
+extern lispptr apply (bool do_eval); // TODO: Does not belong here.
 
 extern void    gc (void);
 

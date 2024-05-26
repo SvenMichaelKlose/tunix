@@ -10,8 +10,9 @@
      0))
 
 (fn member (n x)
-  (& x (| (& (eq n (car x)) x)
-          (member n (cdr x)))))
+  (? x
+     (or (and (eq n (car x)) x)
+         (member n (cdr x)))))
 
 (fn make-count (n)
   (? (not (== 0 n))
@@ -36,4 +37,3 @@
   (out "test")
   (close 4)
   (setout stdout))
-(block-test 10000)

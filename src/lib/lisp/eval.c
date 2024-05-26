@@ -50,7 +50,8 @@ eval_list (void)
     if (ATOM(x))
         return x;
     PUSH(x);
-    va = eval (CAR(x));
+    x = CAR(x);
+    va = eval ();
     POP(x);
     PUSH(va);
     x = CDR(x);
@@ -98,7 +99,8 @@ apply (bool do_eval)
                 PUSH(ad);
                 PUSH(av);
                 PUSH(arg1);
-                value = eval (av);
+                x = av;
+                value = eval ();
                 POP(arg1);
                 POP(av);
                 POP(ad);
@@ -118,7 +120,8 @@ apply (bool do_eval)
             PUSH(ad);
             PUSH(av);
             PUSH(arg1);
-            value = eval (CAR(av));
+            x = CAR(av);
+            value = eval ();
             POP(arg1);
             POP(av);
             POP(ad);
@@ -144,7 +147,8 @@ apply (bool do_eval)
         if (lisp_break)
             break;
         PUSH(x);
-        value = eval (CAR(x));
+        x = CAR(x);
+        value = eval ();
         POP(x);
     }
 
@@ -164,11 +168,12 @@ apply (bool do_eval)
 }
 
 lispptr
-eval (lispptr x)
+eval ()
 {
     if (CONSP(x)) {
         PUSH(x);
-        arg1 = eval (CAR(x));
+        x = CAR(x);
+        arg1 = eval ();
         POP(x);
         args = CDR(x);
         return apply (true);

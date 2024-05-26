@@ -5,7 +5,8 @@ TUNIX blog
 
 The CPU stack size is spoiling everything.  With a few
 improvements that already happened the feared 'block-test'
-now completes in 2.5min instead of 3.
+now completes in 1:40min instead of 3:00min and half CPU
+stack is occupied in comparison.
 
 # 2024-05-25: Lisp REPL
 

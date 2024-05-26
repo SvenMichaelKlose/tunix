@@ -57,6 +57,12 @@ extern char * stack;
 extern char * stack_end;
 extern bool lisp_break; // Tell evaluator to cancel.
 extern lispptr arg1;
+
+extern lispptr return_sym;
+extern lispptr return_value;
+extern lispptr return_name;
+extern lispptr go_sym;
+extern lispptr go_tag;
 #ifdef __CC65__
 #pragma zpsym ("t")
 #pragma zpsym ("quote")

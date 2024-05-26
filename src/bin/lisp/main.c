@@ -27,7 +27,10 @@ lispptr lisp_fnin;
 lispptr lisp_fnout;
 char * msg;
 lispptr quote;
-lispptr return_tag;
+lispptr return_sym;
+lispptr return_name;
+lispptr return_value;
+lispptr go_sym;
 lispptr go_tag;
 extern lispptr tmp;
 int len;
@@ -46,7 +49,10 @@ bool    tag_found;
 #pragma zpsym ("lisp_fnout")
 #pragma zpsym ("msg")
 #pragma zpsym ("quote")
-#pragma zpsym ("return_tag")
+#pragma zpsym ("return_sym")
+#pragma zpsym ("return_name")
+#pragma zpsym ("return_value")
+#pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
@@ -560,37 +566,41 @@ bi_block (void)
     DOLIST(b, arg2c) {
         if (lisp_break)
             return nil;
+
+        PUSH(arg1);
         PUSH(arg2c);
         PUSH(b);
         x = CAR(b);
         value = eval ();
         POP(b);
         POP(arg2c);
-        if (CONSP(value)) {
-            tmp = CAR(value);
+        POP(arg1);
 
-            // Handle GO.
-            if (tmp == go_tag) {
-                // Search tag in body.
-                tag = CAR(CDR(value));
-                value = nil;
-                tag_found = false;
-                TYPESAFE_DOLIST(b, arg2c) {
-                    if (CAR(b) == tag) {
-                        tag_found = true;
-                        break;
-                    }
+        // Handle GO.
+        if (value == go_sym) {
+            // Search tag in body.
+            value = nil;
+            tag_found = false;
+            TYPESAFE_DOLIST(b, arg2c) {
+                if (CAR(b) == go_tag) {
+                    tag_found = true;
+                    break;
                 }
-                if (!tag_found)
-                    error ("Tag not found.");
             }
+            if (!tag_found) {
+                error ("Tag not found.");
+                return nil;
+            }
+        }
 
-            // Handle RETURN.
-            if (tmp == return_tag) {
-                if (arg1 == CAR(CDR(value)))
-                    return CDR(CDR(value));
-                return value;
+        // Handle RETURN.
+        if (value == return_sym) {
+            if (arg1 == return_name) {
+                tmp = return_value;
+                return_value = nil;
+                return tmp;
             }
+            return value;
         }
     }
     return value;
@@ -606,15 +616,11 @@ bi_return (void)
     // TODO: Re-use list.
     PUSH(x);
     x = CAR(x);
-    arg1 = eval ();
+    return_value = eval ();
     POP(x);
-    PUSH(arg1);
     x = LIST_CAR(LIST_CDR(x));
-    arg2 = eval ();
-    POP(arg1);
-    RPLACA(return_args, arg1);
-    RPLACD(return_args, arg2);
-    return return_expr;
+    return_name = eval ();
+    return return_sym;
 }
 
 lispptr
@@ -622,8 +628,8 @@ bi_go (void)
 {
     msg = "(go tag)";
     ensure_one_arg ();
-    RPLACD(arg1, go_expr);
-    return go_expr;
+    go_tag = arg1;
+    return go_sym;
 }
 
 lispptr
@@ -999,15 +1005,10 @@ struct builtin builtins[] = {
 void
 init_builtins (void)
 {
-    return_tag  = lisp_make_symbol ("%R", 2);
-    return_args = lisp_make_cons (nil, nil);
-    return_expr = lisp_make_cons (return_tag, return_args);
-    EXPAND_UNIVERSE(return_expr);
-
-    go_tag  = lisp_make_symbol ("%G", 2);
-    go_expr = lisp_make_cons (go_tag, nil);
-    EXPAND_UNIVERSE(go_expr);
-
+    return_sym  = lisp_make_symbol (NULL, 0);
+    go_sym      = lisp_make_symbol (NULL, 0);
+    EXPAND_UNIVERSE(return_sym);
+    EXPAND_UNIVERSE(go_sym);
     add_builtins (builtins);
 }
 

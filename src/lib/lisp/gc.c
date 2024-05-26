@@ -135,6 +135,11 @@ gc (void)
 
     // Trace objects.
     mark (universe);
+    mark (return_sym);
+    mark (return_name);
+    mark (return_value);
+    mark (go_sym);
+    mark (go_tag);
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 

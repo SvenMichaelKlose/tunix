@@ -8,6 +8,12 @@ improvements that already happened the feared 'block-test'
 now completes in 1:40min instead of 3:00min and half CPU
 stack is occupied in comparison.
 
+Next is to make eval() and apply() (which is more like
+'funcall') one and to put sizes and tags on the stack.
+Some built-ins could return the expressions they wanted
+to call eval() for before returning, using an anonymous
+symbol.
+
 # 2024-05-25: Lisp REPL
 
 File writes work, output formatting is cleaner and we have

@@ -37,3 +37,4 @@
   (out "test")
   (close 4)
   (setout stdout))
+(block-test 10000)

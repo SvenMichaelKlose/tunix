@@ -9,6 +9,14 @@
      (+ 1 (length (cdr x)))
      0))
 
+(fn member (n x)
+  (& x (| (& (eq n (car x)) x)
+          (member n (cdr x)))))
+
+(fn make-count (n)
+  (? (not (== 0 n))
+     (cons n (make-count (-- n)))))
+
 (fn block-test (c)
   (out "Looping ")
   (print c)
@@ -28,5 +36,3 @@
   (out "test")
   (close 4)
   (setout stdout))
-
-(gc)

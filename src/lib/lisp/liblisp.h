@@ -2,7 +2,7 @@
 #define __LIBLISP_H__
 
 #ifndef STACK_SIZE
-#define STACK_SIZE  256
+#define STACK_SIZE  1024
 #endif
 
 typedef unsigned char uchar;
@@ -56,6 +56,7 @@ extern lispptr args;
 extern char * stack;
 extern char * stack_end;
 extern bool lisp_break; // Tell evaluator to cancel.
+extern lispptr arg1;
 #ifdef __CC65__
 #pragma zpsym ("t")
 #pragma zpsym ("quote")
@@ -66,6 +67,7 @@ extern bool lisp_break; // Tell evaluator to cancel.
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma zpsym ("lisp_break")
+#pragma zpsym ("arg1")
 #pragma bss-name (pop)
 #endif
 
@@ -157,8 +159,8 @@ extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);
 extern lispptr FASTCALL lisp_print (lispptr);
 
-extern lispptr eval_list (lispptr);
-extern lispptr eval_body (lispptr);
+//extern lispptr eval_list (lispptr);
+//extern lispptr eval_body (lispptr);
 extern lispptr eval (lispptr);
 // TODO: Does not belong here.
 extern lispptr apply (lispptr fun, bool do_eval);

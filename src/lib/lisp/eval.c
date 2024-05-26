@@ -13,6 +13,7 @@ char * stack_start;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+extern lispptr tmp;
 lispptr x;
 lispptr args;
 char * stack;
@@ -22,6 +23,7 @@ lispptr av;
 lispptr name;
 lispptr value;
 builtin_fun bfun;
+lispptr va;
 bool lisp_break;
 #ifdef __CC65__
 #pragma zpsym ("x")
@@ -34,43 +36,26 @@ bool lisp_break;
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
 #pragma zpsym ("lisp_break")
+#pragma zpsym ("va")
 #pragma bss-name (pop)
 #endif
 
 // Evaluate list to list of return values.
 lispptr
-eval_list (lispptr x)
+eval_list (void)
 {
-    lispptr va;
-    lispptr vd;
-
     if (lisp_break)
         return nil;
     if (ATOM(x))
         return x;
+    PUSH(x);
     va = eval (CAR(x));
+    POP(x);
     PUSH(va);
-    vd = eval_list (CDR(x));
+    x = CDR(x);
+    tmp = eval_list ();
     POP(va);
-    return lisp_make_cons (va, vd);
-}
-
-// Evaluate list of expressions and return value of last.
-lispptr
-eval_body (lispptr x)
-{
-    lispptr v;
-
-    if (ATOM(x))
-        return x;
-    for (; CONSP(x); x = CDR(x)) {
-        if (lisp_break)
-            return nil;
-        PUSH(x);
-        v = eval (CAR(x));
-        POP(x);
-    }
-    return v;
+    return lisp_make_cons (va, tmp);
 }
 
 // Function call
@@ -111,7 +96,9 @@ apply (lispptr fun, bool do_eval)
             if (do_eval) {
                 PUSH(ad);
                 PUSH(av);
+                PUSH(fun);
                 value = eval (av);
+                POP(fun);
                 POP(av);
                 POP(ad);
             } else
@@ -152,7 +139,14 @@ apply (lispptr fun, bool do_eval)
         return nil;
     }
 
-    value = eval_body (FUNBODY(fun));
+    x = FUNBODY(fun);
+    for (; CONSP(x); x = CDR(x)) {
+        if (lisp_break)
+            break;
+        PUSH(x);
+        value = eval (CAR(x));
+        POP(x);
+    }
 
     // Restore argument symbol values.
     while (stsize--) {
@@ -172,8 +166,6 @@ apply (lispptr fun, bool do_eval)
 lispptr
 eval (lispptr x)
 {
-    lispptr arg1;
-
     if (BUILTINP(x))
         return x;
     if (SYMBOLP(x))

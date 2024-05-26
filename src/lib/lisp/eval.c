@@ -60,14 +60,23 @@ eval_list (void)
     return lisp_make_cons (va, tmp);
 }
 
-// Function call
-//
-// 'fun' is a cons with the argument definition in CAR and
-// body expressions in CDR.
 lispptr
-apply (bool do_eval)
+eval ()
 {
     unsigned stsize;
+    //bool do_eval = true;
+
+    if (ATOM(x)) {
+        if (SYMBOLP(x))
+            return SYMBOL_VALUE(x);
+        return x;
+    }
+
+    PUSH(x);
+    x = CAR(x);
+    arg1 = eval ();
+    POP(x);
+    args = CDR(x);
 
     if (BUILTINP(arg1)) {
         bfun = (builtin_fun) SYMBOL_VALUE(arg1);
@@ -95,7 +104,7 @@ apply (bool do_eval)
             PUSH(ad);
 
             // Assign rest of arguments to argument symbol.
-            if (do_eval) {
+            if (1) {
                 PUSH(ad);
                 PUSH(av);
                 PUSH(arg1);
@@ -104,8 +113,8 @@ apply (bool do_eval)
                 POP(arg1);
                 POP(av);
                 POP(ad);
-            } else
-                value = av;
+            } //else
+                //value = av;
             SET_SYMBOL_VALUE(ad, value);
             break;
         }
@@ -116,7 +125,7 @@ apply (bool do_eval)
         PUSH(name);
 
         // Assign new value to argument symbol.
-        if (do_eval) {
+        if (1) {
             PUSH(ad);
             PUSH(av);
             PUSH(arg1);
@@ -126,8 +135,8 @@ apply (bool do_eval)
             POP(av);
             POP(ad);
             name = CAR(ad);
-        } else
-            value = CAR(av);
+        } //else
+           // value = CAR(av);
         SET_SYMBOL_VALUE(name, value);
     }
     if (ad || av) {
@@ -165,20 +174,4 @@ apply (bool do_eval)
 #endif
 
     return value;
-}
-
-lispptr
-eval ()
-{
-    if (CONSP(x)) {
-        PUSH(x);
-        x = CAR(x);
-        arg1 = eval ();
-        POP(x);
-        args = CDR(x);
-        return apply (true);
-    }
-    if (SYMBOLP(x))
-        return SYMBOL_VALUE(x);
-    return x;
 }

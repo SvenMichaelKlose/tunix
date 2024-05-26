@@ -551,7 +551,7 @@ bi_apply (void)
     }
     args = arg2c;
     arg1 = CAR(x);
-    return apply (true);
+    return nil; //apply (true);
 }
 
 lispptr

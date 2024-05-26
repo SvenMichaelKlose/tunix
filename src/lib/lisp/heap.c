@@ -192,7 +192,7 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     universe = nil;
-    t      = lisp_make_symbol ("t", 1);
+    t = lisp_make_symbol ("t", 1);
     EXPAND_UNIVERSE(t);
 
     // Init input.

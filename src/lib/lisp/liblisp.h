@@ -74,6 +74,11 @@ extern lispptr go_tag;
 #pragma zpsym ("stack_end")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("arg1")
+#pragma zpsym ("return_name")
+#pragma zpsym ("return_value")
+#pragma zpsym ("return_name")
+#pragma zpsym ("go_sym")
+#pragma zpsym ("go_tag")
 #pragma bss-name (pop)
 #endif
 
@@ -172,7 +177,6 @@ extern lispptr FASTCALL lisp_print (lispptr);
 
 // Arguments in global 'x'.
 extern lispptr eval (void);
-extern lispptr apply (bool do_eval); // TODO: Does not belong here.
 
 extern void    gc (void);
 

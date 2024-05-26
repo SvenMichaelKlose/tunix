@@ -167,15 +167,15 @@ apply (bool do_eval)
 lispptr
 eval (lispptr x)
 {
-    if (BUILTINP(x))
+    if (CONSP(x)) {
+        PUSH(x);
+        arg1 = eval (CAR(x));
+        POP(x);
+        args = CDR(x);
+        return apply (true);
+    } else if (BUILTINP(x))
         return x;
-    if (SYMBOLP(x))
+    else if (SYMBOLP(x))
         return SYMBOL_VALUE(x);
-    if (ATOM(x))
-        return x;
-    PUSH(x);
-    arg1 = eval (CAR(x));
-    POP(x);
-    args = CDR(x);
-    return apply (true);
+    return x;
 }

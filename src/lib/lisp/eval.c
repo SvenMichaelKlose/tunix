@@ -6,8 +6,6 @@
 #include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
 
-//#define GC_STRESS
-
 char * stack_start;
 
 #ifdef __CC65__
@@ -18,26 +16,28 @@ lispptr x;
 lispptr args;
 char * stack;
 char * stack_end;
-lispptr value;
-lispptr ad;
-lispptr av;
+char * tagstack;
 lispptr name;
+lispptr defs;
 lispptr value;
 builtin_fun bfun;
 lispptr va;
 bool lisp_break;
+uchar c;
 #ifdef __CC65__
+#pragma zpsym ("tmp")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
-#pragma zpsym ("ad")
-#pragma zpsym ("av")
+#pragma zpsym ("tagstack")
 #pragma zpsym ("name")
+#pragma zpsym ("defs")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
-#pragma zpsym ("lisp_break")
 #pragma zpsym ("va")
+#pragma zpsym ("lisp_break")
+#pragma zpsym ("c")
 #pragma bss-name (pop)
 #endif
 
@@ -60,118 +60,174 @@ eval_list (void)
     return lisp_make_cons (va, tmp);
 }
 
-lispptr
-eval ()
-{
-    unsigned stsize;
-    //bool do_eval = true;
+#define PUSH_TAG(x)     (*--tagstack = (x))
+#define POP_TAG(x)     ((x) = *tagstack++)
 
+#define TAG_DONE            0
+#define TAG_ARG_NEXT        1
+#define TAG_ARG_LAST        2
+#define TAG_CONTINUE_BODY   3
+#define TAG_ARG             4
+
+lispptr
+eval0 (void)
+{
+do_eval:
+    // Evaluate atom.
     if (ATOM(x)) {
         if (SYMBOLP(x))
-            return SYMBOL_VALUE(x);
-        return x;
+            value = SYMBOL_VALUE(x);
+        else
+            value = x;
+        goto got_value;
     }
 
+    // Evaluate function argument.
     PUSH(x);
     x = CAR(x);
     arg1 = eval ();
     POP(x);
     args = CDR(x);
 
+    // Call built-in with unevaluated arguments.
     if (BUILTINP(arg1)) {
         bfun = (builtin_fun) SYMBOL_VALUE(arg1);
         x = args;
-        return bfun ();
+        value = bfun ();
+        goto got_value;
     }
 
+    // Complain if not a function.
     if (ATOM(arg1)) {
         errouts ("Function expected, not ");
         lisp_print (arg1);
         lisp_break = true;
-        return nil;
+        value = nil;
+        goto got_value;
     }
 
-    // Push argument symbol values onto the stack.
-    for (ad = FUNARGS(arg1), av = args, stsize = 0;
-         ad && av;
-         ad = CDR(ad), av = CDR(av)) {
-        stsize++;
+    // Argument list evaluation.
+    PUSH_TAG(TAG_DONE);
+    defs = FUNARGS(arg1);
+    if (!defs && !args)
+        goto start_body;
 
-        // Rest of argument list. (consing)
-        if (ATOM(ad)) {
-            // Save argument symbol value.
-            PUSH(SYMBOL_VALUE(ad));
-            PUSH(ad);
-
-            // Assign rest of arguments to argument symbol.
-            if (1) {
-                PUSH(ad);
-                PUSH(av);
-                PUSH(arg1);
-                x = av;
-                value = eval_list ();
-                POP(arg1);
-                POP(av);
-                POP(ad);
-            } //else
-                //value = av;
-            SET_SYMBOL_VALUE(ad, value);
-            break;
-        }
-
-        // Save argument symbol value.
-        name = CAR(ad);
-        PUSH(SYMBOL_VALUE(name));
-        PUSH(name);
-
-        // Assign new value to argument symbol.
-        if (1) {
-            PUSH(ad);
-            PUSH(av);
-            PUSH(arg1);
-            x = CAR(av);
-            value = eval ();
-            POP(arg1);
-            POP(av);
-            POP(ad);
-            name = CAR(ad);
-        } //else
-           // value = CAR(av);
-        SET_SYMBOL_VALUE(name, value);
-    }
-    if (ad || av) {
-        if (ad) {
+do_argument:
+    if (!defs || !args) {
+        if (defs) {
             errouts ("Argument(s) missing: ");
-            lisp_print (ad);
+            lisp_print (defs);
         } else {
             errouts ("Too many arguments: ");
-            lisp_print (av);
+            lisp_print (args);
         }
         lisp_break = true;
-        return nil;
+        value = nil;
+        goto got_value;
     }
+ 
+    // Rest of argument list. (consing)
+    if (ATOM(defs)) {
+        // Save old symbol value.
+        PUSH(SYMBOL_VALUE(defs));
+        PUSH(defs);
+        PUSH_TAG(TAG_ARG);
+
+        // Evaluate rest of arguments.
+        PUSH(defs);
+        PUSH(arg1);
+        x = args;
+        value = eval_list ();
+        POP(arg1);
+        POP(defs);
+
+        // Assign rest of arguments.
+        SET_SYMBOL_VALUE(defs, value);
+        goto start_body;
+    }
+
+    // Save argument symbol value.
+    name = CAR(defs);
+    PUSH(SYMBOL_VALUE(name));
+    PUSH(name);
+    PUSH_TAG(TAG_ARG);
+
+    PUSH(arg1);
+    if (CDR(defs) || CDR(args)) {
+        PUSH(defs);
+        PUSH(args);
+        PUSH_TAG(TAG_ARG_NEXT);
+    } else {
+        PUSH(defs);
+        PUSH_TAG(TAG_ARG_LAST);
+    }
+    x = CAR(args);
+    goto do_eval;
+
+next_arg:
+    POP(args);
+    POP(defs);
+    POP(arg1);
+    name = CAR(defs);
+    SET_SYMBOL_VALUE(name, value);
+    defs = CDR(defs);
+    args = CDR(args);
+    goto do_argument;
+
+arg_last:
+    POP(defs);
+    POP(arg1);
+    name = CAR(defs);
+    SET_SYMBOL_VALUE(name, value);
 
     // Eavluate body.
-    DOLIST(x, FUNBODY(arg1)) {
-        if (lisp_break)
-            break;
-        PUSH(x);
-        x = CAR(x);
-        value = eval ();
-        POP(x);
-    }
+start_body:
+    x = FUNBODY(arg1);
+do_body:
+    if (!x || lisp_break)
+        goto done_body;
+    PUSH(CDR(x));
+    PUSH_TAG(TAG_CONTINUE_BODY);
+    x = CAR(x);
+    goto do_eval;
 
+next_in_body:
+    POP(x);
+    goto do_body;
+
+done_body:
     // Restore argument symbol values.
-    while (stsize--) {
+    while (POP_TAG(c) == TAG_ARG) {
         POP(name);
         POP(SYMBOL_VALUE(name));
     }
+    if (c != TAG_DONE) {
+        errouts ("Internal error: ");
+        out_number (c);
+        outs (": 0 expected after restoring arguments.");
+        while (1);
+    }
 
-#ifdef GC_STRESS
-    PUSH(value);
-    gc ();
-    POP(value);
-#endif
-
+got_value:
+    POP_TAG(c);
+    if (c != TAG_DONE) {
+        if (c == TAG_ARG_NEXT)
+            goto next_arg;
+        if (c == TAG_CONTINUE_BODY)
+            goto next_in_body;
+        if (c == TAG_ARG_LAST)
+            goto arg_last;
+        errouts ("Internal error: ");
+        out_number (c);
+        outs (": Unknown eval tag.");
+        while (1);
+    }
     return value;
+}
+
+lispptr
+eval ()
+{
+    PUSH_TAG(TAG_DONE);
+    return eval0 ();
 }

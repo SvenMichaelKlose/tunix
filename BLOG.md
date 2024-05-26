@@ -1,7 +1,12 @@
 TUNIX blog
 ==========
 
-# 2024-05-26: Lisp REPL
+# 2024-05-26 22:00: Looping evaluator
+
+eval() is not calling itself any more to evaluate arguments
+or function bodies.  That's a third less CPU stack use.
+
+# 2024-05-26 04:00: Lisp REPL
 
 The CPU stack size is spoiling everything.  With a few
 improvements that already happened the feared 'block-test'

@@ -176,6 +176,9 @@ lisp_init ()
 
     lisp_break = false;
 
+    tagstack = malloc (512);
+    tagstack += 512;
+
     // Init stack.
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)

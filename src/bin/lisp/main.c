@@ -373,7 +373,7 @@ bi_numberp (void)
 {
     msg = "(number? x)";
     ensure_one_arg ();
-    return NUMBERP(CAR(x)) ? t : nil;
+    return NUMBERP(arg1) ? t : nil;
 }
 
 lispptr

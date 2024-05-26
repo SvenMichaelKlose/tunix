@@ -20,14 +20,14 @@ read_list ()
     while (1) {
         skip_spaces ();
         if (eof ())
-            error ("Missing closing bracket.");
+            error ("Closing paren?");
         if (in () == ')')
             return start;
         putback ();
 
         skip_spaces ();
         if (eof ())
-            error ("Missing closing bracket.");
+            error ("Closing paren?");
         if (in () == '.')
             c = lisp_read ();
         else {
@@ -110,6 +110,10 @@ lisp_read ()
         return read_quoted (quote);
     if (last_in == '"')
         return read_string ();
+    if (last_in == ')') {
+        error ("Unexpected closing paren.");
+        return nil;
+    }
     putback ();
     if (isdigit (last_in))
         return read_number ();

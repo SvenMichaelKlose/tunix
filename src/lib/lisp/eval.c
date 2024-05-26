@@ -117,13 +117,12 @@ apply (bool do_eval)
         if (do_eval) {
             PUSH(ad);
             PUSH(av);
-            PUSH(name);
             PUSH(arg1);
             value = eval (CAR(av));
             POP(arg1);
-            POP(name);
             POP(av);
             POP(ad);
+            name = CAR(ad);
         } else
             value = CAR(av);
         SET_SYMBOL_VALUE(name, value);

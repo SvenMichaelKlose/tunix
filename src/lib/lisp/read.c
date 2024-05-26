@@ -28,12 +28,14 @@ read_list ()
         skip_spaces ();
         if (eof ())
             error ("Closing paren?");
+        PUSH(last);
         if (in () == '.')
             c = lisp_read ();
         else {
             putback ();
             c = lisp_make_cons (lisp_read (), nil);
         }
+        POP(last);
         if (last)
             last->cdr = c;
         else

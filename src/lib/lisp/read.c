@@ -14,7 +14,7 @@ lispptr
 read_list ()
 {
     cons * c;
-    cons * start;
+    cons * start = NULL;
     cons * last = NULL;
 
     while (1) {
@@ -28,6 +28,7 @@ read_list ()
         skip_spaces ();
         if (eof ())
             error ("Closing paren?");
+        PUSH(start);
         PUSH(last);
         if (in () == '.')
             c = lisp_read ();
@@ -36,6 +37,7 @@ read_list ()
             c = lisp_make_cons (lisp_read (), nil);
         }
         POP(last);
+        POP(start);
         if (last)
             last->cdr = c;
         else
@@ -86,8 +88,7 @@ read_string ()
 lispptr
 read_quoted (lispptr which)
 {
-    lispptr tmp = lisp_make_cons (lisp_read (), nil);
-    return lisp_make_cons (which, tmp);
+    return lisp_make_cons (which, lisp_make_cons (lisp_read (), nil));
 }
 
 lispptr

@@ -90,6 +90,11 @@ extern lispptr arg1;
         stack += sizeof (lispptr); \
     } while (0)
 
+#define DOLIST(x, init) \
+    for (x = init; x; x = CDR(x))
+#define TYPESAFE_DOLIST(x, init) \
+    for (x = init; x; x = LIST_CDR(x))
+
 #define TYPE_NAMED    64
 #define TYPE_MARKED   128
 #define TYPE_MASK     (7 | TYPE_NAMED)

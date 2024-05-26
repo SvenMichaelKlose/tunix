@@ -105,7 +105,7 @@ int
 length (lispptr x)
 {
     len = 0;
-    for (; x; x = CDR(x))
+    DOLIST(x, x)
         len++;
     return len;
 }
@@ -122,7 +122,7 @@ name_to_buffer (lispptr s)
 void
 ensure_undefd_arg1 ()
 {
-    for (x = universe; x; x = CDR(x)) {
+    DOLIST(x, universe) {
         if (CAR(x) == arg1) {
             lisp_print (arg1);
             msg = " already defined.";
@@ -396,9 +396,6 @@ bi_gte (void)
     return BOOL(NUMBER_VALUE(arg1) >= NUMBER_VALUE(arg2));
 }
 
-#define DOLIST(x, init) \
-    for (x = init; x; x = LIST_CDR(x))
-
 #define DEFARITH(fun_name, op, err) \
 lispptr \
 fun_name (void) \
@@ -407,7 +404,7 @@ fun_name (void) \
     msg = err; \
     ensure_numbers (); \
     v = NUMBER_VALUE(arg1); \
-    DOLIST(x, arg2c) { \
+    TYPESAFE_DOLIST(x, arg2c) { \
         PUSH(x); \
         if (!NUMBERP(tmp = eval (CAR(x)))) \
             bierror (); \
@@ -561,7 +558,7 @@ bi_block (void)
                 tag = CAR(CDR(value));
                 value = nil;
                 tag_found = false;
-                for (b = arg2c; b; b = LIST_CDR(b)) {
+                TYPESAFE_DOLIST(b, arg2c) {
                     if (CAR(b) == tag) {
                         tag_found = true;
                         break;

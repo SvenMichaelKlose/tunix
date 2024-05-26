@@ -140,7 +140,7 @@ apply (bool do_eval)
     }
 
     // Eavluate body.
-    for (x = FUNBODY(arg1); CONSP(x); x = CDR(x)) {
+    DOLIST(x, FUNBODY(arg1)) {
         if (lisp_break)
             break;
         PUSH(x);

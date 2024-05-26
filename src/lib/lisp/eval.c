@@ -74,7 +74,7 @@ apply (bool do_eval)
         return bfun ();
     }
 
-    if (!CONSP(arg1)) {
+    if (ATOM(arg1)) {
         errouts ("Function expected, not ");
         lisp_print (arg1);
         lisp_break = true;
@@ -139,6 +139,7 @@ apply (bool do_eval)
         return nil;
     }
 
+    // Eavluate body.
     for (x = FUNBODY(arg1); CONSP(x); x = CDR(x)) {
         if (lisp_break)
             break;

@@ -163,7 +163,7 @@ extern lispptr FASTCALL lisp_print (lispptr);
 //extern lispptr eval_body (lispptr);
 extern lispptr eval (lispptr);
 // TODO: Does not belong here.
-extern lispptr apply (lispptr fun, bool do_eval);
+extern lispptr apply (bool do_eval);
 
 extern void    gc (void);
 

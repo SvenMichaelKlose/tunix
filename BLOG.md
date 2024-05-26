@@ -1,6 +1,17 @@
 TUNIX blog
 ==========
 
+# 2024-05-26: Lisp REPL
+
+The CPU stack size is spoiling everything.  With a few
+improvements that already happened the feared 'block-test'
+now completes in 2.5min instead of 3.
+
+# 2024-05-25: Lisp REPL
+
+File writes work, output formatting is cleaner and we have
+a REPL to start over.
+
 # 2024-05-25: Build for c128, c64, pet, plus4 and vic20
 
 Thanks to cc65 this was a no-brainer.  The pet Lisp isn't

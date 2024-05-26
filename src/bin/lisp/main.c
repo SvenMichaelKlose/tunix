@@ -531,7 +531,8 @@ bi_apply (void)
         bierror ();
     }
     args = arg2c;
-    return apply (CAR(x), true);
+    arg1 = CAR(x);
+    return apply (true);
 }
 
 lispptr

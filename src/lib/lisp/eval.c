@@ -18,6 +18,7 @@ lispptr x;
 lispptr args;
 char * stack;
 char * stack_end;
+lispptr value;
 lispptr ad;
 lispptr av;
 lispptr name;
@@ -63,25 +64,25 @@ eval_list (void)
 // 'fun' is a cons with the argument definition in CAR and
 // body expressions in CDR.
 lispptr
-apply (lispptr fun, bool do_eval)
+apply (bool do_eval)
 {
     unsigned stsize;
 
-    if (BUILTINP(fun)) {
-        bfun = (builtin_fun) SYMBOL_VALUE(fun);
+    if (BUILTINP(arg1)) {
+        bfun = (builtin_fun) SYMBOL_VALUE(arg1);
         x = args;
         return bfun ();
     }
 
-    if (!CONSP(fun)) {
+    if (!CONSP(arg1)) {
         errouts ("Function expected, not ");
-        lisp_print (fun);
+        lisp_print (arg1);
         lisp_break = true;
         return nil;
     }
 
     // Push argument symbol values onto the stack.
-    for (ad = FUNARGS(fun), av = args, stsize = 0;
+    for (ad = FUNARGS(arg1), av = args, stsize = 0;
          ad && av;
          ad = CDR(ad), av = CDR(av)) {
         stsize++;
@@ -96,9 +97,9 @@ apply (lispptr fun, bool do_eval)
             if (do_eval) {
                 PUSH(ad);
                 PUSH(av);
-                PUSH(fun);
+                PUSH(arg1);
                 value = eval (av);
-                POP(fun);
+                POP(arg1);
                 POP(av);
                 POP(ad);
             } else
@@ -117,9 +118,9 @@ apply (lispptr fun, bool do_eval)
             PUSH(ad);
             PUSH(av);
             PUSH(name);
-            PUSH(fun);
+            PUSH(arg1);
             value = eval (CAR(av));
-            POP(fun);
+            POP(arg1);
             POP(name);
             POP(av);
             POP(ad);
@@ -139,7 +140,7 @@ apply (lispptr fun, bool do_eval)
         return nil;
     }
 
-    x = FUNBODY(fun);
+    x = FUNBODY(arg1);
     for (; CONSP(x); x = CDR(x)) {
         if (lisp_break)
             break;
@@ -176,5 +177,5 @@ eval (lispptr x)
     arg1 = eval (CAR(x));
     POP(x);
     args = CDR(x);
-    return apply (arg1, true);
+    return apply (true);
 }

@@ -108,13 +108,15 @@ do_eval:
         goto got_value;
     }
 
-    // Argument list evaluation.
+    // Init argument list evaluation.
     PUSH_TAG(TAG_DONE);
     defs = FUNARGS(arg1);
     if (!defs && !args)
         goto start_body;
 
 do_argument:
+    // Error if lengths of argument list and definition
+    // don't match.
     if (!defs || !args) {
         if (defs) {
             errouts ("Argument(s) missing: ");
@@ -148,24 +150,23 @@ do_argument:
         goto start_body;
     }
 
-    // Save argument symbol value.
+    // Save old argument symbol value.
     name = CAR(defs);
     PUSH(SYMBOL_VALUE(name));
     PUSH(name);
     PUSH_TAG(TAG_ARG);
 
     PUSH(arg1);
+    PUSH(defs);
     if (CDR(defs) || CDR(args)) {
-        PUSH(defs);
         PUSH(args);
         PUSH_TAG(TAG_ARG_NEXT);
-    } else {
-        PUSH(defs);
+    } else
         PUSH_TAG(TAG_ARG_LAST);
-    }
     x = CAR(args);
     goto do_eval;
 
+    // Step to next argument.
 next_arg:
     POP(args);
     POP(defs);
@@ -176,6 +177,7 @@ next_arg:
     args = CDR(args);
     goto do_argument;
 
+    // Handle last argument.
 arg_last:
     POP(defs);
     POP(arg1);

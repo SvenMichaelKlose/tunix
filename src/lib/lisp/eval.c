@@ -25,6 +25,7 @@ lispptr va;
 lispptr delayed_eval;
 bool lisp_break;
 uchar c;
+extern char * msg;
 #ifdef __CC65__
 #pragma zpsym ("tmp")
 #pragma zpsym ("x")
@@ -40,8 +41,18 @@ uchar c;
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("c")
+#pragma zpsym ("msg")
 #pragma bss-name (pop)
 #endif
+
+extern void bierror (void);
+
+void
+bi_tcheck (lispptr x, uchar type)
+{
+    (void) x;
+    (void) type;
+}
 
 // Evaluate list to list of return values.
 lispptr
@@ -64,12 +75,26 @@ eval_list (void)
 
 #define PUSH_TAG(x)     (*--tagstack = (x))
 #define POP_TAG(x)     ((x) = *tagstack++)
+#define PUSH_TAGW(x) \
+    do { \
+        tagstack -= sizeof (lispptr); \
+        *(lispptr *) tagstack = x; \
+    } while (0)
+#define POP_TAGW(x) \
+    do { \
+        x = *(lispptr *) tagstack; \
+        tagstack += sizeof (lispptr); \
+    } while (0)
 
 #define TAG_DONE            0
-#define TAG_ARG_NEXT        1
-#define TAG_ARG_LAST        2
-#define TAG_CONTINUE_BODY   3
-#define TAG_ARG             4
+#define TAG_BARG_NEXT       1
+#define TAG_ARG_NEXT        2
+#define TAG_ARG_LAST        3
+#define TAG_CONTINUE_BODY   4
+#define TAG_ARG             5
+
+char * badef;
+lispptr * a;
 
 lispptr
 eval0 (void)
@@ -95,8 +120,46 @@ do_eval:
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
         x = args;
-        value = bfun->func ();
-        goto got_value;
+        badef = bfun->argdef;
+
+        // Call built-in with own argument handling.
+        if (!badef) {
+            value = bfun->func ();
+            goto got_value;
+        }
+
+        a = &arg1;
+
+do_builtin_arg:
+        c = *badef++;
+
+        if (!c) {
+            if (args) {
+                msg = "Too many arguments.";
+                bierror ();
+                goto got_value;
+            }
+            value = bfun->func ();
+            goto got_value;
+        }
+
+        if (args) {
+            msg = "Arguments missing.";
+            bierror ();
+            goto got_value;
+        }
+
+        // Quick deal with unevaluated argument.
+        if (c == '\\') {
+            *a = CAR(args);
+            args = CDR(args);
+            bi_tcheck (*a++, *badef++);
+            goto do_builtin_arg;
+        }
+        PUSH_TAGW(badef++);
+        PUSH_TAGW(args);
+        PUSH_TAG(TAG_BARG_NEXT);
+        bi_tcheck (*a++, *badef++);
     }
 
     // Complain if not a function.

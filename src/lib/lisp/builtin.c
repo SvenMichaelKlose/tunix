@@ -11,10 +11,10 @@ void
 add_builtins (struct builtin * b)
 {
     symbol * s;
-    for (;b->name; b++) {
+    for (; b->name; b++) {
         s = lisp_make_symbol (b->name, strlen (b->name));
         s->type = TYPE_BUILTIN;
-        s->value = b->func;
+        s->value = b;
         EXPAND_UNIVERSE(s);
     }
 }

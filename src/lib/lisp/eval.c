@@ -20,7 +20,7 @@ char * tagstack;
 lispptr name;
 lispptr defs;
 lispptr value;
-builtin_fun bfun;
+struct builtin * bfun;
 lispptr va;
 lispptr delayed_eval;
 bool lisp_break;
@@ -93,9 +93,9 @@ do_eval:
 
     // Call built-in with unevaluated arguments.
     if (BUILTINP(arg1)) {
-        bfun = (builtin_fun) SYMBOL_VALUE(arg1);
+        bfun = (struct builtin *) SYMBOL_VALUE(arg1);
         x = args;
-        value = bfun ();
+        value = bfun->func ();
         goto got_value;
     }
 
@@ -215,6 +215,7 @@ done_body:
     }
 #endif // #ifndef NDEBUG
 
+    // Dispatch value based on tag.
 got_value:
     if (value == delayed_eval)
         goto do_eval;

@@ -36,6 +36,7 @@ typedef struct _symbol {
 
 struct builtin {
     char *       name;
+    char *       argdef;
     builtin_fun  func;
 };
 
@@ -44,6 +45,7 @@ extern lispptr stdin;
 extern lispptr stdout;
 extern char * stack_start;
 extern char buffer[256];
+extern struct builtin builtins[];
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")

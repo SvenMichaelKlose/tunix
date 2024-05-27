@@ -52,6 +52,22 @@ bi_tcheck (lispptr x, uchar type)
 {
     (void) x;
     (void) type;
+    switch (type) {
+    case 'x':
+        return;
+    case 'n':
+        if (!NUMBERP(x)) {
+            msg = "Number expected.";
+            bierror ();
+            while (1);
+        }
+        return;
+    default:
+        outs ("Internal error: '");
+        out (type);
+        outs ("': unknown typedef");
+        while (1);
+    }
 }
 
 // Evaluate list to list of return values.
@@ -95,6 +111,7 @@ eval_list (void)
 
 char * badef;
 lispptr * a;
+uchar na;
 
 lispptr
 eval0 (void)
@@ -114,52 +131,75 @@ do_eval:
     x = CAR(x);
     arg1 = eval ();
     POP(x);
+
     args = CDR(x);
 
     // Call built-in with unevaluated arguments.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
         x = args;
-        badef = bfun->argdef;
 
         // Call built-in with own argument handling.
-        if (!badef) {
+        if (!(badef = bfun->argdef)) {
             value = bfun->func ();
             goto got_value;
         }
 
-        a = &arg1;
+        na = 0;
 
 do_builtin_arg:
-        c = *badef++;
+        c = *badef;
 
         if (!c) {
             if (args) {
-                msg = "Too many arguments.";
+                lisp_print (args);
+                msg = ": Too many args to builtin.";
                 bierror ();
+                while (1);
                 goto got_value;
+            }
+            while (na--) {
+                POP(tmp);
+                (&arg1)[na] = tmp;
             }
             value = bfun->func ();
             goto got_value;
         }
 
-        if (args) {
-            msg = "Arguments missing.";
+        if (!args) {
+            msg = "Missing args to builtin.";
             bierror ();
+            while (1);
             goto got_value;
         }
 
+        na++;
+
         // Quick deal with unevaluated argument.
         if (c == '\\') {
-            *a = CAR(args);
-            args = CDR(args);
-            bi_tcheck (*a++, *badef++);
-            goto do_builtin_arg;
+            badef++;
+            value = CAR(args);
+            goto save_builtin_arg_value;
         }
-        PUSH_TAGW(badef++);
-        PUSH_TAGW(args);
+
+        PUSH(args);
+        PUSH_TAGW(badef);
+        PUSH_TAG(na);
+
+        x = CAR(args);
         PUSH_TAG(TAG_BARG_NEXT);
-        bi_tcheck (*a++, *badef++);
+        goto do_eval;
+
+next_builtin_arg:
+        POP_TAG(na);
+        POP_TAGW(badef);
+        POP(args);
+
+save_builtin_arg_value:
+        bi_tcheck (value, *badef++);
+        PUSH(value);
+        args = CDR(args);
+        goto do_builtin_arg;
     }
 
     // Complain if not a function.
@@ -286,6 +326,8 @@ got_value:
     if (c != TAG_DONE) {
         if (c == TAG_ARG_NEXT)
             goto next_arg;
+        if (c == TAG_BARG_NEXT)
+            goto next_builtin_arg;
         if (c == TAG_CONTINUE_BODY)
             goto next_in_body;
         if (c == TAG_ARG_LAST)

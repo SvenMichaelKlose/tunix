@@ -59,8 +59,11 @@ extern lispptr args;
 extern char * stack;
 extern char * stack_end;
 extern char * tagstack;
+extern char * msg;
 extern bool lisp_break; // Tell evaluator to cancel.
 extern lispptr arg1;
+extern lispptr arg2;
+extern lispptr arg2c;
 
 extern lispptr return_sym;
 extern lispptr return_value;
@@ -78,8 +81,11 @@ extern lispptr delayed_eval;
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma zpsym ("tagstack")
+#pragma zpsym ("msg")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("arg1")
+#pragma zpsym ("arg2")
+#pragma zpsym ("arg2c")
 #pragma zpsym ("return_sym")
 #pragma zpsym ("return_value")
 #pragma zpsym ("return_name")

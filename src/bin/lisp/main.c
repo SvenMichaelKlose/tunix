@@ -19,8 +19,9 @@
 extern lispptr x;
 extern lispptr value;
 lispptr arg1;
-lispptr arg2c;
 lispptr arg2;
+lispptr arg2c;
+lispptr argrest;
 lispptr stdin;
 lispptr stdout;
 lispptr lisp_fnin;
@@ -89,8 +90,6 @@ lisp_consp (lispptr x)
 #endif
 
 char load_fn = 10;
-
-extern void error (char * msg);
 
 void
 error (char * msg)
@@ -181,7 +180,7 @@ ensure_two_args (void)
 }
 
 void
-ensure_one_number (void)
+ensure_number (void)
 {
     ensure_one_arg ();
     if (!NUMBERP(arg1))
@@ -198,7 +197,7 @@ ensure_two_numbers (void)
 }
 
 void
-ensure_numbers (void)
+ensure_first_is_number (void)
 {
     if (!CONSP(x)
         || !(arg2c = CDR(x)))
@@ -325,7 +324,7 @@ bi_consp (void)
 {
     msg = "(cons? x)";
     ensure_one_arg ();
-    return CONSP(arg1) ? t : nil;
+    return CONSP(arg1) ? arg1 : nil;
 }
 
 lispptr
@@ -333,7 +332,7 @@ bi_cons (void)
 {
     msg = "(cons x x)";
     ensure_two_args ();
-    return lisp_make_cons(arg1, arg2);
+    return lisp_make_cons (arg1, arg2);
 }
 
 lispptr
@@ -420,32 +419,20 @@ bi_gte (void)
 lispptr \
 fun_name (void) \
 { \
-    int v; \
-    msg = err; \
-    ensure_numbers (); \
-    v = NUMBER_VALUE(arg1); \
-    TYPESAFE_DOLIST(x, arg2c) { \
-        PUSH(x); \
-        x = CAR(x); \
-        if (!NUMBERP(tmp = eval ())) \
-            bierror (); \
-        POP(x); \
-        v op NUMBER_VALUE(tmp); \
-    } \
-    return lisp_make_number (v); \
+    return lisp_make_number (NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
 }
 
-DEFARITH(bi_add, +=, "(+ n n...)");
-DEFARITH(bi_sub, -=, "(- n n...)");
-DEFARITH(bi_mul, *=, "(* n n...)");
-DEFARITH(bi_div, /=, "(/ n n...)");
-DEFARITH(bi_mod, %=, "(% n n...)");
+DEFARITH(bi_add, +=, "(+ n n)");
+DEFARITH(bi_sub, -=, "(- n n)");
+DEFARITH(bi_mul, *=, "(* n n)");
+DEFARITH(bi_div, /=, "(/ n n)");
+DEFARITH(bi_mod, %=, "(% n n)");
 
 lispptr
 bi_inc (void)
 {
     msg = "(++ n)";
-    ensure_one_number ();
+    ensure_number ();
     return lisp_make_number (NUMBER_VALUE(arg1) + 1);
 }
 
@@ -453,7 +440,7 @@ lispptr
 bi_dec (void)
 {
     msg = "(-- n)";
-    ensure_one_number ();
+    ensure_number ();
     return lisp_make_number (NUMBER_VALUE(arg1) - 1);
 }
 
@@ -485,7 +472,7 @@ lispptr
 bi_bit_neg (void)
 {
     msg = "(bit-neg n)";
-    ensure_one_number ();
+    ensure_number ();
     return lisp_make_number (~NUMBER_VALUE(arg1));
 }
 
@@ -509,7 +496,7 @@ lispptr
 bi_peek (void)
 {
     msg = "(peek addr)";
-    ensure_one_number ();
+    ensure_number ();
     return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
 }
 
@@ -526,7 +513,7 @@ lispptr
 bi_sys (void)
 {
     msg = "(sys addr)";
-    ensure_one_number ();
+    ensure_number ();
     ((void (*) (void)) NUMBER_VALUE(arg1)) ();
     return nil;
 }
@@ -917,7 +904,7 @@ lispptr
 bi_exit (void)
 {
     msg = "(exit n)";
-    ensure_one_number ();
+    ensure_number ();
     while (1);
     exit (NUMBER_VALUE(arg1));
     /* NOTREACHED */
@@ -961,11 +948,11 @@ struct builtin builtins[] = {
     { ">=",         NULL, bi_gte },
     { "<=",         NULL, bi_lte },
 
-    { "+",          NULL, bi_add },
-    { "-",          NULL, bi_sub },
-    { "*",          NULL, bi_mul },
-    { "/",          NULL, bi_div },
-    { "%",          NULL, bi_mod },
+    { "+",          "nn", bi_add },
+    { "-",          "nn", bi_sub },
+    { "*",          "nn", bi_mul },
+    { "/",          "nn", bi_div },
+    { "%",          "nn", bi_mod },
     { "++",         NULL, bi_inc },
     { "--",         NULL, bi_dec },
 

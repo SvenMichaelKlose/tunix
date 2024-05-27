@@ -4,6 +4,7 @@
 #ifndef STACK_SIZE
 #define STACK_SIZE  1024
 #endif
+#define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;
 
@@ -82,6 +83,7 @@ extern lispptr delayed_eval;
 #pragma zpsym ("return_name")
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
+#pragma zpsym ("delayed_eval")
 #pragma bss-name (pop)
 #endif
 

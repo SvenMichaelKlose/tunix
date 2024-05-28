@@ -1,12 +1,69 @@
 TUNIX blog
 ==========
 
-# 2024-05-26 22:00: Looping evaluator
+# 2024-05-27: Looping evaluator
 
 eval() is not calling itself any more to evaluate arguments
 or function bodies.  That's a third less CPU stack use.
 Also '?' delegates evaluation of the last expression to the
-evaluator loop.
+evaluator loop.  A third "tag stack" has been introduced to
+jump around inside the evaluator instead of having it call
+itself and exhaust the CPU stack.
+
+Arguments to built-ins are now evaluated inside eval,
+reducing the number of native recursions by several
+magnitudes.  Format and type checking is done based on
+character string argument definitions.  They can still chose
+to handle arguments themselves.  I know that jumps are
+possible in C, as I emulated task switching in C for
+'tensix' quite some time ago, so even that could run
+stackless in a portable fashion.
+
+A couple of new optimizations come to mind.  eval() pushes
+argument names onto the GC stack, which is double
+information as the argument definitions are there already.
+Also, there shouldn't be an entry on the tag stack for each
+argument.  The number of arguments and their old values
+are required on it only.
+
+Built-ins should be optional, depending on the requirements.
+The environment should be passed a list of names of
+definitions that should be run.
+
+Written in 6502-CPU assembly the interpreter wouldn't be
+bigger than 5K and I'm curious what the Oscar64 compiler
+will make of it.
+
+There are features to want:
+
+* Macros.
+* Stepping debugger.  Had one in the tré interpreter.
+* Storing heap as image files.
+* Image file compression, e.g. to deliver apps with more
+  heap.
+* Calling functions in images.  Inter-process communication
+  would have to be done via I/O.
+* TUNIX-VI text editor integrated (or vice versa).
+
+Curious about:
+
+* Super-small version without inlined getters, setters and
+  predicates but function versions of them instead.  Very
+  much what is nowadays called "subroutine-threaded".
+  Also super-slow but might get it to run on 16K RAM
+  machines.
+* Sliceable GC to satisfy real-time demands.  This
+  interpreter is faster than CBM BASIC and being able to
+  play responsive games would be lovely.
+
+And things nice to have:
+
+* Loadable built-ins.
+* Bytecode compiler and interpreter (ported from tré).
+  Bytecodes allow for smaller programs as each cons
+  occupies five bytes already.
+
+What can I say?  This is highly motivating.
 
 # 2024-05-26 04:00: Lisp REPL
 

@@ -1,5 +1,5 @@
 # List of subdirectories containing their own Makefiles
-SUBDIRS ?= $(shell find . -mindepth 1 -maxdepth 1 -type d)
+SUBDIRS ?= $(shell ls -d)
 
 # Default target
 .PHONY: all

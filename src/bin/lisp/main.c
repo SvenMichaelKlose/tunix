@@ -169,10 +169,12 @@ ensure_two_args (void)
         || !CONSP(arg2c = CDR(x))
         || CDR(arg2c))
         bierror ();
-    x = CAR(x);
+
     PUSH(arg2c);
+    x = CAR(x);
     arg1 = eval ();
     POP(arg2c);
+
     PUSH(arg1);
     x = CAR(arg2c);
     arg2 = eval ();
@@ -232,7 +234,7 @@ bi_eq (void)
 {
     msg = "(eq x x)";
     ensure_two_args ();
-    return arg1 == arg2 ? t : nil;
+    return BOOL(arg1 == arg2);
 }
 
 lispptr
@@ -248,7 +250,7 @@ bi_atom (void)
 {
     msg = "(atom x)";
     ensure_one_arg ();
-    return CONSP(arg1) ? nil : t;
+    return BOOL(!CONSP(arg1));
 }
 
 lispptr
@@ -256,7 +258,7 @@ bi_symbolp (void)
 {
     msg = "(symbol? x)";
     ensure_one_arg ();
-    return SYMBOLP(arg1) ? t : nil;
+    return BOOL(SYMBOLP(arg1));
 }
 
 lispptr
@@ -324,7 +326,7 @@ bi_consp (void)
 {
     msg = "(cons? x)";
     ensure_one_arg ();
-    return CONSP(arg1) ? arg1 : nil;
+    return BOOL(CONSP(arg1));
 }
 
 lispptr
@@ -372,7 +374,7 @@ bi_numberp (void)
 {
     msg = "(number? x)";
     ensure_one_arg ();
-    return NUMBERP(arg1) ? t : nil;
+    return BOOL(NUMBERP(arg1));
 }
 
 lispptr

@@ -1,9 +1,7 @@
-#ifndef __CBM__
-#define __CBM__
-#endif
-
+#ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
+#endif
 
 #include <ctype.h>
 #include <string.h>
@@ -165,9 +163,11 @@ ensure_symbol_arg (void)
 void
 ensure_two_args (void)
 {
-    if (!CONSP(x)
-        || !CONSP(arg2c = CDR(x))
-        || CDR(arg2c))
+    if (!CONSP(x))
+        bierror ();
+    arg2c = CDR(x);
+    if (!CONSP(arg2c)
+         || CDR(arg2c))
         bierror ();
 
     PUSH(arg2c);
@@ -264,9 +264,13 @@ bi_symbolp (void)
 lispptr
 bi_setq (void)
 {
-    if (!CONSP(x)
-        || !CONSP(arg2c = LIST_CDR(x))
-        || !SYMBOLP(arg1 = CAR(x))
+    if (!CONSP(x))
+        bierror ();
+    arg2c = LIST_CDR(x);
+    if (!CONSP(arg2c))
+        bierror ();
+    arg1 = CAR(x);
+    if (!SYMBOLP(arg1)
         || CDR(arg2c)) {
         msg = "(setq sym x)";
         bierror ();
@@ -546,7 +550,11 @@ bi_apply (void)
 lispptr
 bi_block (void)
 {
-    if (!CONSP(x) || !SYMBOLP(arg1 = CAR(x))) {
+    msg = "(block name . exprs)";
+    if (!CONSP(x))
+        bierror ();
+    arg1 = CAR(x);
+    if (!SYMBOLP(arg1)) {
         msg = "(block name . exprs)";
         bierror ();
     }
@@ -733,7 +741,7 @@ bi_open (void)
     }
     fn = NUMBER_VALUE(arg1);
     name_to_buffer (arg2);
-    cbm_open (fn, 8, fn, buffer);
+    simpleio_open (fn, buffer, 'r');
     return lisp_make_number (err ());
 }
 
@@ -810,8 +818,7 @@ bi_close (void)
 {
     msg = "(close fn)";
     ensure_number_arg ();
-    cbm_k_clrch ();
-    cbm_k_close (NUMBER_VALUE(arg1));
+    simpleio_close (NUMBER_VALUE(arg1));
     return nil;
 }
 
@@ -820,7 +827,7 @@ load (char * pathname)
 {
     int oldin = fnin;
 
-    cbm_open (load_fn, 8, load_fn, pathname);
+    simpleio_open (load_fn, pathname, 'r');
     if (err ()) {
         errouts ("Cannot open file ");
         error (pathname);
@@ -833,8 +840,7 @@ load (char * pathname)
         eval ();
 
     load_fn--;
-    cbm_k_clrch ();
-    cbm_k_close (load_fn);
+    simpleio_close (load_fn);
     x = lisp_make_cons (lisp_make_number (oldin), nil);
     bi_setin ();
 }
@@ -852,12 +858,15 @@ bi_load (void)
 lispptr
 bi_fn (void)
 {
-    if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x))
-        || !CONSP(arg2c = CDR(x))) {
-        msg = "(fn name obj)";
+    msg = "(fn name obj)";
+    if (!CONSP(x))
         bierror ();
-    }
+    arg1 = CAR(x);
+    if (!SYMBOLP(arg1))
+        bierror ();
+    arg2c = CDR(x);
+    if (!CONSP(arg2c))
+        bierror ();
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2c);
@@ -867,13 +876,16 @@ bi_fn (void)
 lispptr
 bi_var (void)
 {
-    if (!CONSP(x)
-        || !SYMBOLP(arg1 = CAR(x))
-        || !CONSP(arg2c = CDR(x))
-        || CDR(arg2c)) {
-        msg = "(var name obj)";
+    msg = "(var name obj)";
+    if (!CONSP(x))
         bierror ();
-    }
+    arg1 = CAR(x);
+    if (!SYMBOLP(arg1))
+        bierror ();
+    arg2c = CDR(x);
+    if (!CONSP(arg2c)
+        || CDR(arg2c))
+        bierror ();
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);
@@ -921,8 +933,8 @@ struct builtin builtins[] = {
     { "eval",       NULL, bi_eval },
 
     { "?",          NULL, bi_if },
-    { "&",          NULL, bi_and },
-    { "|",          NULL, bi_or },
+    { "and",        NULL, bi_and },
+    { "or",         NULL, bi_or },
     { "block",      NULL, bi_block },
     { "return",     NULL, bi_return },
     { "go",         NULL, bi_go },
@@ -1009,6 +1021,7 @@ main (int argc, char * argv[])
     lispptr o;
     (void) argc, (void) argv;
 
+    simpleio_init ();
     if (!lisp_init ())
         error ("No memory.");
 
@@ -1018,9 +1031,6 @@ main (int argc, char * argv[])
     quote      = lisp_make_symbol ("quote", 5);
     EXPAND_UNIVERSE(quote);
 
-    // Set up I/O streams.
-    cbm_open (0, 0, 0, NULL);
-    cbm_open (3, 3, 3, NULL);
     stdin      = lisp_make_symbol ("stdin", 5);
     stdout     = lisp_make_symbol ("stdout", 6);
     lisp_fnin  = lisp_make_symbol ("fnin", 4);

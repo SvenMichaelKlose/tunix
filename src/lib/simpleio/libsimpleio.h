@@ -1,8 +1,21 @@
-#ifndef __LIBLISP_IO_H__
-#define __LIBLISP_IO_H__
+#ifndef __LIBSIMPLEIO_H__
+#define __LIBSIMPLEIO_H__
 
 #define STDIN  0
 #define STDOUT 3
+
+typedef char simpleio_chn_t;
+
+// Supplied by driver libraries.
+typedef struct _simpleio {
+    bool (*eof)    (void);
+    char (*err)    (void);
+    char (*in)     (void);
+    void (*out)    (char c);
+    void (*setin)  (simpleio_chn_t);
+    void (*setout) (simpleio_chn_t);
+    void (*close)  (simpleio_chn_t);
+} simpleio;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -21,11 +34,10 @@ extern char last_out; // Last output char.
 
 extern char eof (void);
 extern char err (void);
-extern void setin (char fn);
-extern void setout (char fn);
+extern void setin (simpleio_chn_t fn);
+extern void setout (simpleio_chn_t fn);
 
 extern char in (void);      // Read char.
-extern char ch (void);      // Last read char.
 extern void putback (void); // Put back char for in().
 extern void skip_spaces (void);
 
@@ -39,4 +51,9 @@ extern void fresh_line (void);
 
 extern void errouts (char *);
 
-#endif // #ifndef __LIBLISP_IO_H__
+extern void simpleio_open (simpleio_chn_t, char * pathname, char mode);
+extern void simpleio_close (simpleio_chn_t);
+extern void simpleio_init ();
+extern void simpleio_set (simpleio *);
+
+#endif // #ifndef __LIBSIMPLEIO_H__

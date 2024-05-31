@@ -1,9 +1,8 @@
 THIS_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(THIS_DIR)/Makefile.config
 
-VALID_TARGETS = c128 c64, pet, plus4, unix, vic20
 all: $(LIBRARY) $(PROGRAM)
-ifndef TARGET
+ifeq ($(filter $(TARGET),$(VALID_TARGETS)),)
     $(error No TARGET specified. Preferably specify one of $(VALID_TARGETS) in file 'src/config')
 endif
 
@@ -49,3 +48,8 @@ include $(THIS_DIR)/Makefile.build.$(TARGETCC)
 
 test:
 	@echo "No test to be done."
+
+allclean:
+	for i in $(VALID_TARGETS); do \
+		$(MAKE) -C . clean TARGET=$$i; \
+	done

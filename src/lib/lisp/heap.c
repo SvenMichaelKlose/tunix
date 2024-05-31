@@ -118,7 +118,7 @@ lisp_make_cons (lispptr car, lispptr cdr)
 }
 
 lispptr FASTCALL
-lisp_make_number (int x)
+lisp_make_number (lispnum_t x)
 {
     tmp = alloc (sizeof (number), TYPE_NUMBER);
     NUMBER(tmp)->value = x;
@@ -189,7 +189,11 @@ lisp_init ()
     stack = stack_end;
 
     // Init heap.
+#ifdef __CC65__
     heap_size = _heapmaxavail ();
+#else
+    heap_size = 64 * 1024;
+#endif
     heap_start = heap_free = malloc (heap_size);
     if (!heap_start)
         return false;

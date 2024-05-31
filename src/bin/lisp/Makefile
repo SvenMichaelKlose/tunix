@@ -1,9 +1,16 @@
-PROGRAM=lisp
-SOURCES= \
-	main.c
-LIBRARIES= \
+-include ../../config
+
+PROGRAM = lisp
+SOURCES = main.c
+LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
-LD65CFG=$(CC65_TARGET).cfg
+
+ifeq ($(TARGET), unix)
+LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
+else
+LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
+endif
+LD65CFG = $(CC65_TARGET).cfg
 
 include ../../Makefile.build

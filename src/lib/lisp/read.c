@@ -10,6 +10,12 @@
 
 extern void error (char * msg);
 
+bool FASTCALL
+our_isalpha (char c)
+{
+    return !isspace (c) && c != '(' && c != ')' && c != ';';
+}
+
 lispptr
 read_list ()
 {
@@ -54,12 +60,6 @@ read_number ()
     *p = 0;
     putback ();
     return lisp_make_number (atoi (buffer));
-}
-
-bool __fastcall__
-our_isalpha (char c)
-{
-    return !isspace (c) && c != '(' && c != ')' && c != ';';
 }
 
 lispptr

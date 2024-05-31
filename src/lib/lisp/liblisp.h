@@ -7,6 +7,7 @@
 #define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;
+typedef long lispnum_t;
 
 #ifdef CC65
 #define FASTCALL    __fastcall__
@@ -18,20 +19,20 @@ typedef void * lispptr;
 typedef lispptr (*builtin_fun) (void);
 
 typedef struct _cons {
-    uchar   type;
-    lispptr car;
-    lispptr cdr;
+    uchar    type;
+    lispptr  car;
+    lispptr  cdr;
 } cons;
 
 typedef struct _number {
-    uchar   type;
-    int     value;
+    uchar      type;
+    lispnum_t  value;
 } number;
 
 typedef struct _symbol {
-    uchar   type;
-    lispptr value;
-    uchar   length;
+    uchar    type;
+    lispptr  value;
+    uchar    length;
 } symbol;
 
 struct builtin {
@@ -161,11 +162,11 @@ extern bool FASTCALL lisp_consp (lispptr);
 
 #define BOOL(x)      ((x) ? t : nil)
 
-#define ATOM(x)      (TYPE(x) != TYPE_CONS)
+#define ATOM(x)      (!x || TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (!(x) || CONSP(x))
-#define NUMBERP(x)   (TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   (TYPE(x) == TYPE_SYMBOL)
-#define BUILTINP(x)  (TYPE(x) == TYPE_BUILTIN)
+#define NUMBERP(x)   (x && TYPE(x) == TYPE_NUMBER)
+#define SYMBOLP(x)   (x && TYPE(x) == TYPE_SYMBOL)
+#define BUILTINP(x)  (x && TYPE(x) == TYPE_BUILTIN)
 
 #define NUMBER(n)              ((number *) (n))
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)
@@ -182,7 +183,7 @@ extern bool FASTCALL lisp_consp (lispptr);
 #define FUNBODY(x)      CDR(x)
 
 extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
-extern lispptr FASTCALL lisp_make_number (int);
+extern lispptr FASTCALL lisp_make_number (lispnum_t);
 extern lispptr FASTCALL lisp_alloc_symbol (char *, uchar len);
 extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
 extern lispptr lisp_read (void);

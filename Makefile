@@ -1,4 +1,4 @@
-include src/config
+include src/Makefile.build
 
 all: world mkfs/mkfs.ultifs ultimem_image c1541_image
 	@echo "# Making all."
@@ -9,6 +9,7 @@ allworlds:
 	make clean all TARGET=c128
 	make clean all TARGET=pet
 	make clean all TARGET=plus4
+	make clean all TARGET=unix
 	make clean all TARGET=vic20
 
 world:
@@ -24,12 +25,18 @@ ifeq ($(TARGET), vic20)
 	$(MAKE) -C mkfs all
 endif
 
+ULTIMEM_IMG = tunix.img
+ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
+
 ultimem_image:
 ifeq ($(TARGET), vic20)
 	@echo "# Making UltiMem ROM image."
-	./mkfs/mkfs.ultifs tunix.img n l src/sys/boot/flashboot.bin w
-	./mkfs/mkfs.ultifs image n l src/sys/boot/flashboot.bin i compiled W
+	./mkfs/mkfs.ultifs $(ULTIMEM_IMG) n l src/sys/boot/flashboot.bin w
+	@echo "# Making trimmed UltiMem ROM image."
+	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
+
+D64_TUNIX_TOOLS = tunix-tools.$(TARGET).d64
 
 c1541_image:
 	@echo "# Making c1541 disk image."
@@ -44,15 +51,17 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/README.md bin/vi.md
 	cp src/bin/vi/vi bin/
 endif
-ifeq ($(filter $(TARGET), atarixl vic20),)
-	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp -write bin/env.lisp -write bin/lisp.md
-endif
-ifeq ($(TARGET), vic20)
-	c1541 -format "tunix,01" d64 tunix-tools.$(TARGET).d64 -write bin/lisp -write bin/env.lisp -write bin/lisp.md -write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
+ifneq (,$(TARGET), $(COMMODORE_TARGETS))
+	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/env.lisp -write bin/lisp.md #-write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
+else
+	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/env.lisp -write bin/lisp.md
 endif
 
 clean:
-	@echo "# Cleaning all."
+	@echo "# Cleaning for target $(TARGET)."
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
-	$(RM) -rf bin/ image tunix.d64 tunix.img tunix-tools.*.zip
+	$(RM) -rf bin/
+ifneq (,$(TARGET), $(COMMODORE_TARGETS))
+	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED) $(D64_TUNIX_TOOLS)
+endif

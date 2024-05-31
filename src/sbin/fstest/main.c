@@ -1,6 +1,9 @@
+#ifndef __CC65__
+#error Code is for cc65 only.
+#endif
+
 #include <cbm.h>
 #include <conio.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

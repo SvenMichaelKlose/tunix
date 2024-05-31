@@ -15,16 +15,17 @@
 
 #include "libsimpleio.h"
 
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-char fnin;
-char fnout;
+simpleio * io;
+simpleio_chn_t fnin;
+simpleio_chn_t fnout;
 char do_putback;
 char last_in;
 char last_out;
 #ifdef __CC65__
+#pragma zpsym ("io")
 #pragma zpsym ("fnin")
 #pragma zpsym ("fnout")
 #pragma zpsym ("do_putback")
@@ -33,95 +34,41 @@ char last_out;
 #pragma bss-name (pop)
 #endif
 
-#define UPCASE_A  65
-#define UPCASE_Z  90
-#define LOCASE_A  97
-#define LOCASE_Z 122
-#define ISUPPER(c) (c >= UPCASE_A && c <= UPCASE_Z)
-#define ISLOWER(c) (c >= LOCASE_A && c <= LOCASE_Z)
-#define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
-#define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
-
-char
-reverse_case (char c)
+void
+simpleio_close (simpleio_chn_t c)
 {
-    if (ISUPPER(c))
-        return TOLOWER(c);
-    if (ISLOWER(c))
-        return TOUPPER(c);
-    return c;
-}
-
-char
-raw_eof (void)
-{
-    return cbm_k_readst () & 0x40;
-}
-
-char
-raw_err (void)
-{
-    return raw_eof ();
-}
-
-char
-raw_in (void)
-{
-    last_in = cbm_k_basin ();
-    if (fnin == STDIN)
-        last_in = reverse_case (last_in);
-    return last_in;
+    io->close (c);
 }
 
 void
-raw_out (char c)
-{
-    if (fnout == STDOUT)
-        c = reverse_case (c);
-    cbm_k_bsout (c);
-}
-
-void
-raw_setin (char c)
-{
-    cbm_k_chkin (c);
-}
-
-void
-raw_setout (char c)
-{
-    cbm_k_ckout (c);
-}
-
-void
-setin (char c)
+setin (simpleio_chn_t c)
 {
     if (fnin != c) {
         fnin = c;
-        raw_setin (c);
+        io->setin (c);
     }
 }
 
 void
-setout (char c)
+setout (simpleio_chn_t c)
 {
     if (fnout != c) {
         fnout = c;
         last_out = ' ';
-        raw_setout (c);
+        io->setout (c);
     }
 }
 
 char
 eof ()
 {
-    return raw_eof ();
+    return io->eof ();
 }
 
 char
 err ()
 {
-    return raw_err ();
+    return io->err ();
 }
 
 char
@@ -130,13 +77,7 @@ in ()
     if (do_putback)
         do_putback = false;
     else
-        last_in = raw_in ();
-    return last_in;
-}
-
-char
-ch ()
-{
+        last_in = io->in ();
     return last_in;
 }
 
@@ -166,7 +107,7 @@ void
 out (char c)
 {
     last_out = c;
-    raw_out (c);
+    io->out (c);
 }
 
 void
@@ -226,4 +167,10 @@ errouts (char * str)
 {
     setout (STDOUT);
     outs (str);
+}
+
+void
+simpleio_set (simpleio * x)
+{
+    io = x;
 }

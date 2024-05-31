@@ -5,4 +5,4 @@ ASMSOURCES= \
     save-state.asm \
     zeropage.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

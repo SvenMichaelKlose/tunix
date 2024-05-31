@@ -1048,7 +1048,7 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(lisp_fnin);
     EXPAND_UNIVERSE(lisp_fnout);
 
-    load ("ENV.LISP");
+    load ("env.lisp");
     while (1) {
         lisp_break = false;
         outs ("* ");

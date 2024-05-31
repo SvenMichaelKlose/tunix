@@ -1,6 +1,5 @@
-LIBRARY=libsimpleio-stdlib.a
-SOURCES= \
-	main.c
-COPTFLAGS=-O
+LIBRARY = libsimpleio-stdlib.a
+SOURCES = main.c
+COPTFLAGS = -O
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

@@ -1,4 +1,4 @@
-include ../Makefile.config
+include ../mk/Makefile.config
 
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 SUBDIRS = fstest
@@ -9,5 +9,5 @@ SUBDIRS += ultiburn ultidump ultitest
 endif
 
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
-include ../Makefile.subdir
+include ../mk/Makefile.subdir
 endif

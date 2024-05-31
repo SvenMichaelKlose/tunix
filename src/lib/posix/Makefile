@@ -1,5 +1,4 @@
-LIBRARY=libposix.a
-ASMSOURCES= \
-    strnlen.asm
+LIBRARY = libposix.a
+ASMSOURCES = strnlen.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

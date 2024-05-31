@@ -1,4 +1,4 @@
-PROGRAM=test
-ASMSOURCES=main.asm
+PROGRAM = test
+ASMSOURCES = main.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

@@ -1,6 +1,6 @@
-LIBRARY=libtext.a
-SOURCES= \
+LIBRARY = libtext.a
+SOURCES = \
     line.c \
     motion.c
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

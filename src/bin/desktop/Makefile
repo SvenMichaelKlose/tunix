@@ -8,7 +8,7 @@ SOURCES= \
 ASMSOURCES= \
     prgend.asm
 
-include ../../Makefile.config
+include ../../mk/Makefile.config
 
 %.o: %.asm
 	$(AS) -o $@ $<

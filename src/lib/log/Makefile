@@ -1,5 +1,5 @@
-LIBRARY=liblog.a
-SOURCES= \
+LIBRARY = liblog.a
+SOURCES = \
     log.c
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

@@ -1,5 +1,5 @@
-LIBRARY=liblisp.a
-SOURCES= \
+LIBRARY = liblisp.a
+SOURCES = \
 	builtin.c \
 	eval.c \
 	gc.c \
@@ -8,4 +8,4 @@ SOURCES= \
 	read.c
 #COPTFLAGS=-O -Or
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

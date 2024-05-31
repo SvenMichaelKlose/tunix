@@ -1,7 +1,7 @@
-LIBRARY=libterm.a
-ASMSOURCES= \
+LIBRARY = libterm.a
+ASMSOURCES = \
     main.asm \
     keyboard.asm \
     putchar-fixed-4x4.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

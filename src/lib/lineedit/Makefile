@@ -1,6 +1,6 @@
-LIBRARY=liblineedit.a
-SOURCES= \
+LIBRARY = liblineedit.a
+SOURCES = \
     linebuf.c \
     main.c
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

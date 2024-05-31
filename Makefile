@@ -1,4 +1,4 @@
-include src/Makefile.build
+include src/mk/Makefile.build
 
 all: world mkfs/mkfs.ultifs ultimem_image c1541_image
 	@echo "# Making all."

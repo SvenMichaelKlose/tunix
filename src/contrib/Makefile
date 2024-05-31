@@ -1,4 +1,4 @@
-include ../Makefile.config
+include ../mk/Makefile.config
 
 SUBDIRS = exomizer-3.0.2/src/exomizer cregex
 

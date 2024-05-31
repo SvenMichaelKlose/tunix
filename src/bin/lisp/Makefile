@@ -13,4 +13,4 @@ LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
 endif
 LD65CFG = $(CC65_TARGET).cfg
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

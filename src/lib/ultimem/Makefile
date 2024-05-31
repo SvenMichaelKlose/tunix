@@ -1,5 +1,5 @@
-LIBRARY=libultimem.a
-ASMSOURCES= \
+LIBRARY = libultimem.a
+ASMSOURCES = \
     burn.asm \
     bank-offset.asm \
     c-copy.asm \
@@ -10,4 +10,4 @@ ASMSOURCES= \
     readwrite.asm \
     unhide.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

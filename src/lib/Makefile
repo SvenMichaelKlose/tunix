@@ -10,4 +10,4 @@ ifeq ($(TARGET), vic20)
 SUBDIRS += gfx gui keyboard term term-test ultifs ultimem
 endif
 
-include ../Makefile.subdir
+include ../mk/Makefile.subdir

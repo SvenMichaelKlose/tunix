@@ -1,16 +1,13 @@
-PROGRAM=tunix.prg
-CRUNSHED=tunix
-PROGRAM_init=init.prg
-CRUNSHED_init=init
-ASMSOURCES= \
-	main.asm
-CSOURCES= \
-	start.c
-SOURCES_init= \
-	init.c
-LD65CFG=vic.cfg
+PROGRAM = tunix.prg
+CRUNSHED = tunix
+PROGRAM_init = init.prg
+CRUNSHED_init = init
+ASMSOURCES = main.asm
+CSOURCES = start.c
+SOURCES_init = init.c
+LD65CFG = vic.cfg
 
-include ../../Makefile.config
+include ../../mk/Makefile.config
 
 %.o: %.asm
 	$(AS) $(ASFLAGS) -I$(CA65_INCLUDE) -o $@ $<

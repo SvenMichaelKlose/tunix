@@ -16,7 +16,7 @@ CC      = $(CC65_BIN)/cl65
 ASFLAGS    = -I$(CA65_INCLUDE)
 CFLAGS     = -c -I$(CC65_INCLUDE) -Werror -Wa -I$(CA65_INCLUDE) -DTARGET=$(TARGET)
 COPTFLAGS ?= -O -Or -Os
-LD65CFG   ?= $(THIS_DIR)/../cfg/ld65/$(CC65_TARGET).cfg
+LD65CFG   ?= $(THIS_DIR)/../../cfg/ld65/$(CC65_TARGET).cfg
 LDFLAGS    = -C $(LD65CFG) -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
 
 ifdef NDEBUG

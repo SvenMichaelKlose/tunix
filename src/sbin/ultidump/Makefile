@@ -1,5 +1,5 @@
-PROGRAM=ultidump
-ASMSOURCES=main.asm
-LIBRARIES=$(TUNIX_LIB)/ultimem/libultimem.a
+PROGRAM = ultidump
+ASMSOURCES = main.asm
+LIBRARIES = $(TUNIX_LIB)/ultimem/libultimem.a
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

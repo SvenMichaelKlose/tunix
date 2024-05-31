@@ -1,6 +1,6 @@
-LIBRARY=libtunix.a
-ASMSOURCES= \
+LIBRARY = libtunix.a
+ASMSOURCES = \
     main.asm \
     c-wrappers.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

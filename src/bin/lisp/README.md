@@ -45,6 +45,19 @@ followed by statements.  The LAMBDA tag is not supported.
      (+ a ,x)))
 ~~~
 
+Types are written in short form in this manual and
+internally as argument definitions of built-in functions
+(without spaces).
+
+| Code    | Type                |
+|---------|---------------------|
+| x       | anything            |
+| c       | cons                |
+| l       | list (cons or NIL)  |
+| n       | number              |
+| s       | symbol              |
+| +?      | any number of ?     |
+
 # Input/output
 
 Expressions can be read and written using built-in functions
@@ -52,7 +65,7 @@ READ and PRINT.
 
 Strings and chars have dedicated formats:
 
-| Type format            | Desciprtion                     |
+| Type format examples   | Description                     |
 |------------------------|---------------------------------|
 | (a . d)                | "Dotted pair"; a literal cons.  |
 | "string"               | String.  Escape is "\".         |
@@ -99,13 +112,28 @@ a Lisp file instead of using built-in LOAD:
     last-result))
 ~~~
 
-# Function reference
+# Built-in functions
+
+## Definitions
+
+| Form                   | Description                     |
+|------------------------|---------------------------------|
+| (fn name args . body)  | Define function.                |
+| (var name x)           | Define variable, evaluating X.  |
+
+## Top-level
+
+| Function    | Description                        |
+|-------------|------------------------------------|
+| (gc)        | Free unused objects.               |
+| (universe)  | Return list of permanent symbols.  |
+| (exit n)    | Exit interpreter with code.        |
 
 ## Evaluation and flow control
 
 ### (quote x)
 
-Return argument unevaluated.  Suppresses replacing symbols
+Returns argument unevaluated.  Suppresses replacing symbols
 by their values on evaluation.
 
 ~~~lisp
@@ -144,12 +172,12 @@ style elegantly. [sidekick: ADD EXAMPLE]
 Evaluates expression X and it's subexpressions as function
 calls.  Symbols are replaced by their values.
 
-### (? cond expr [cond expr/default])
+### (? x +x)
 
 Returns the second argument if the first one evaluates to
 non-NIL.  Otherwise the process is repeated starting with
-the third argument unless there is only one argument left
-which is then returned evaluated.
+the third argument, unless there is only one argument left
+which is then the default.
 
 ~~~lisp
 (? nil 1)     -> nil
@@ -161,7 +189,7 @@ which is then returned evaluated.
 
 ### (and +x)
 
-Evaluates all arguments until one evalutates to NIL.  The
+Evaluates all arguments unless one evalutates to NIL.  The
 value of the last evaluation is returned.
 
 ~~~lisp
@@ -171,14 +199,13 @@ value of the last evaluation is returned.
 
 ### (or +x)
 
-Evaluates all arguments until one evalutates to non-NIL.
+Evaluates all arguments unless one evalutates to non-NIL.
 The value of the last evaluation is returned.
 
 ~~~lisp
 (or 1 nil) -> 1
 (or nil 2) -> 2
 ~~~
-
 
 ### (block name . body), (return x block-name), (go tag)
 
@@ -315,18 +342,3 @@ Conses are value pairs.
 | (peek addr)       | Read byte from memory.          |
 | (poke addr byte)  | Write to memory.                |
 | (sys addr)        | Calls machine code subroutine.  |
-
-## Special forms
-
-| Form                   | Description                     |
-|------------------------|---------------------------------|
-| (fn name args . body)  | Define function.                |
-| (var name x)           | Define variable, evaluating X.  |
-
-## Miscellaneous
-
-| Function    | Description                        |
-|-------------|------------------------------------|
-| (gc)        | Free unused objects.               |
-| (universe)  | Return list of permanent symbols.  |
-| (exit n)    | Exit interpreter with code.        |

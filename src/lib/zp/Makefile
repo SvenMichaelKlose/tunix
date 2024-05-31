@@ -1,6 +1,6 @@
-LIBRARY=libzp.a
-ASMSOURCES= \
+LIBRARY = libzp.a
+ASMSOURCES = \
     word.asm \
     dword.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

@@ -1,4 +1,4 @@
-include Makefile.config
+include mk/Makefile.config
 
 SUBDIRS = contrib lib bin
 
@@ -10,4 +10,4 @@ ifeq ($(TARGET), vic20)
 SUBDIRS += drv sys
 endif
 
-include Makefile.subdir
+include mk/Makefile.subdir

@@ -1,6 +1,5 @@
-LIBRARY=libsimpleio-cbm.a
-SOURCES= \
-	main.c
-COPTFLAGS=-O
+LIBRARY = libsimpleio-cbm.a
+SOURCES = main.c
+COPTFLAGS = -O
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

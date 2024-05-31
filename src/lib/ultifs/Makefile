@@ -1,5 +1,4 @@
-LIBRARY=libultifs.a
-ASMSOURCES= \
-    ultifs.asm
+LIBRARY = libultifs.a
+ASMSOURCES = ultifs.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

@@ -1,8 +1,8 @@
-LIBRARY=libblit.a
-ASMSOURCES= \
+LIBRARY = libblit.a
+ASMSOURCES = \
     clrram.asm \
     cmp.asm \
     moveram.asm \
     memmove.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

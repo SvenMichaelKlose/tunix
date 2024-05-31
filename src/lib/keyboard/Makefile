@@ -1,5 +1,4 @@
-LIBRARY=libkeyboard.a
-ASMSOURCES= \
-    keyboard.asm
+LIBRARY = libkeyboard.a
+ASMSOURCES = keyboard.asm
 
-include ../../Makefile.build
+include ../../mk/Makefile.build

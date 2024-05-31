@@ -628,11 +628,12 @@ bi_go (void)
 lispptr
 bi_if (void)
 {
-    if (!CONSP(x)
-         || !CONSP(arg2c = CDR(x))) {
-        msg = "(? cond x [cond x/default])";
+    msg = "(? cond x [cond x/default])";
+    if (!CONSP(x))
         bierror ();
-    }
+    arg2c = CDR(x);
+    if (!CONSP(arg2c))
+        bierror ();
     while (x) {
         arg1 = CAR(x);
         if (!(arg2c = CDR(x))) {

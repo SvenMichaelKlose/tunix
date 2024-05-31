@@ -132,11 +132,11 @@ extern lispptr delayed_eval;
 #define PTRTYPE(x)  (*((char *) (x)))
 #define TYPE(x)     (PTRTYPE(x) & TYPE_MASK)
 
-#define MARKED(x)   (PTRTYPE(x) & TYPE_MARKED)
+#define MARKED(x)   (!x || PTRTYPE(x) & TYPE_MARKED)
 #define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
 
-#define CONS(x)      ((cons *) (x))
+#define CONS(x)     ((cons *) (x))
 
 #ifdef SLOW
 
@@ -151,7 +151,7 @@ extern bool FASTCALL lisp_consp (lispptr);
 
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
-#define CONSP(x)     (TYPE(x) == TYPE_CONS)
+#define CONSP(x)     (x && TYPE(x) == TYPE_CONS)
 
 #endif // #ifdef SLOW
 

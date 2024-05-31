@@ -14,9 +14,13 @@
 void FASTCALL
 mark (lispptr x)
 {
+    if (!x)
+        return;
     if (!MARKED(x)) {
-        for (MARK(x); CONSP(x); MARK(x = CDR(x)))
+        for (MARK(x); CONSP(x); x = CDR(x)) {
+            mark (x);
             mark (CAR(x));
+        }
         if (SYMBOLP(x))
             mark (SYMBOL_VALUE(x));
     }

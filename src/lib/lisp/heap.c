@@ -203,6 +203,8 @@ lisp_init ()
     universe = nil;
     t = lisp_make_symbol ("t", 1);
     EXPAND_UNIVERSE(t);
+    delayed_eval = lisp_make_symbol ("%E", 2);
+    EXPAND_UNIVERSE(delayed_eval);
 
     // Init input.
     do_putback = false;

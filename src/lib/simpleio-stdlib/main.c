@@ -37,8 +37,10 @@ raw_in (void)
 {
     int c = fgetc (handles[fnin]);
     last_in = c;
-    if (c < 0)
+    if (c < 0) {
+        perror ("read error");
         last_error = last_in;
+    }
     return last_in;
 }
 
@@ -87,4 +89,6 @@ void
 simpleio_init ()
 {
     simpleio_set (&vectors);
+    handles[STDIN] = stdin;
+    handles[STDOUT] = stdout;
 }

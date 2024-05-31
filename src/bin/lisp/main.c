@@ -20,8 +20,6 @@ lispptr arg1;
 lispptr arg2;
 lispptr arg2c;
 lispptr argrest;
-lispptr stdin;
-lispptr stdout;
 lispptr lisp_fnin;
 lispptr lisp_fnout;
 char * msg;
@@ -42,8 +40,6 @@ bool    tag_found;
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
-#pragma zpsym ("stdin")
-#pragma zpsym ("stdout")
 #pragma zpsym ("lisp_fnin")
 #pragma zpsym ("lisp_fnout")
 #pragma zpsym ("msg")
@@ -919,7 +915,9 @@ bi_exit (void)
 {
     msg = "(exit n)";
     ensure_number ();
+#ifdef __CC65__
     while (1);
+#endif
     exit (NUMBER_VALUE(arg1));
     /* NOTREACHED */
     return nil;
@@ -1019,6 +1017,8 @@ main (int argc, char * argv[])
 {
     lispptr i;
     lispptr o;
+    lispptr stdin;
+    lispptr stdout;
     (void) argc, (void) argv;
 
     simpleio_init ();

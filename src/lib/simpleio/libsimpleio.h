@@ -2,7 +2,11 @@
 #define __LIBSIMPLEIO_H__
 
 #define STDIN  0
-#define STDOUT 3
+#ifdef __CC65__
+    #define STDOUT 3
+#else
+    #define STDOUT 1
+#endif
 
 typedef char simpleio_chn_t;
 

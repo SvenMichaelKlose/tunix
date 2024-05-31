@@ -173,4 +173,5 @@ void
 simpleio_set (simpleio * x)
 {
     io = x;
+    do_putback = false;
 }

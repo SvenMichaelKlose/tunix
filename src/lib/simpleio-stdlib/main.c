@@ -37,10 +37,8 @@ raw_in (void)
 {
     int c = fgetc (handles[fnin]);
     last_in = c;
-    if (c < 0) {
-        perror ("read error");
-        last_error = last_in;
-    }
+    if (c < 0)
+        last_error = c;
     return last_in;
 }
 

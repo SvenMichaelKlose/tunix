@@ -54,7 +54,7 @@ setout (simpleio_chn_t c)
 {
     if (fnout != c) {
         fnout = c;
-        last_out = ' ';
+        last_out = 0;
         io->setout (c);
     }
 }
@@ -165,7 +165,7 @@ fresh_line (void)
 void
 errouts (char * str)
 {
-    setout (STDOUT);
+    setout (STDERR);
     outs (str);
 }
 

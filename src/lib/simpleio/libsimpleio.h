@@ -4,8 +4,10 @@
 #define STDIN  0
 #ifdef __CC65__
     #define STDOUT 3
+    #define STDERR 3
 #else
     #define STDOUT 1
+    #define STDERR 2
 #endif
 
 typedef char simpleio_chn_t;

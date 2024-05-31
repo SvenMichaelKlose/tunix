@@ -10,6 +10,7 @@
 #endif // #ifdef __CC65__
 
 #include <ctype.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -37,7 +38,11 @@ reverse_case (char c)
 void
 simpleio_open (simpleio_chn_t c, char * name, char mode)
 {
+    unsigned char i;
+    unsigned char len = strlen (name);
     (void) mode; // TODO
+    for (i = 0; i < len; i++)
+        name[i] = reverse_case (name[i]);
     cbm_open (c, 8, c, name);
 }
 

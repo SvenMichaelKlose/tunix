@@ -49,14 +49,16 @@ Types are written in short form in this manual and
 internally as argument definitions of built-in functions
 (without spaces).
 
-| Code    | Type                |
-|---------|---------------------|
-| x       | anything            |
-| c       | cons                |
-| l       | list (cons or NIL)  |
-| n       | number              |
-| s       | symbol              |
-| +?      | any number of ?     |
+| Code    | Type                                     |
+|---------|------------------------------------------|
+| x       | anything                                 |
+| c       | cons                                     |
+| l       | list (cons or NIL)                       |
+| n       | number                                   |
+| s       | symbol                                   |
+| +       | any number of following type (eg. "+n")  |
+| ?       | optional following type (eg. "?x")       |
+| '       | unevaluated following type (eg. "'+x")   |
 
 # Input/output
 
@@ -112,6 +114,23 @@ a Lisp file instead of using built-in LOAD:
     last-result))
 ~~~
 
+# Error handling
+
+When an error occurs, a message is printed along with the
+object that caused the error and you end up in the debugger
+REPL shell.  You can return with a new object as an argument
+to built-in function QUIT.  In top-level command mode it
+understands these commands:
+
+| Command  | Description                           |
+|----------|---------------------------------------|
+| RETURN   | Step inside evaluation.               |
+| SPACE    | Step over evaluation.                 |
+| b [fun]  | Set breakpoint on function.           |
+| b        | List all breakpoints by number.       |
+| d n      | Delete breakpoint by number.          |
+| (        | Start a Lisp expression to evaluate.  |
+
 # Built-in functions
 
 ## Definitions
@@ -125,8 +144,9 @@ a Lisp file instead of using built-in LOAD:
 
 | Function    | Description                        |
 |-------------|------------------------------------|
-| (gc)        | Free unused objects.               |
 | (universe)  | Return list of permanent symbols.  |
+| (gc)        | Free unused objects.               |
+| (quit ?x)   | Return from debugger REPL.         |
 | (exit n)    | Exit interpreter with code.        |
 
 ## Evaluation and flow control
@@ -259,10 +279,10 @@ returned.
 A symbol has a name up to 255 bytes in length and a value
 which initially is itself.
 
-| Function          | Description       |
-|-------------------|--------------------|
-| (= symbol x)      | Set symbol value.  |
-| (symbol-value s)  | Get symbol value.  |
+| Function   | Description        |
+|------------|--------------------|
+| (= s x)    | Set symbol value.  |
+| (value s)  | Get symbol value.  |
 
 ## Conses
 

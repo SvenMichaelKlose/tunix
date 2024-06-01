@@ -79,7 +79,7 @@ needs_quotes (symbol * s)
 }
 
 void
-print_quoted_symbol (symbol * s)
+print_quoted_string (symbol * s)
 {
     char * p = SYMBOL_NAME(s);
     char len = SYMBOL_LENGTH(s);
@@ -95,11 +95,11 @@ print_quoted_symbol (symbol * s)
 }
 
 void FASTCALL
-print_symbol (symbol * s)
+print_named (symbol * s)
 {
     space ();
     if (needs_quotes (s)) {
-        print_quoted_symbol (s);
+        print_quoted_string (s);
         return;
     }
     outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
@@ -120,7 +120,7 @@ print (lispptr x)
     else if (type == TYPE_NUMBER)
         print_number ((number *) x);
     else if (PTRTYPE(x) & TYPE_NAMED)
-        print_symbol ((symbol *) x);
+        print_named ((symbol *) x);
     else
         error ("Unknown object type.");
 }

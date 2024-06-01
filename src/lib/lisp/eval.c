@@ -6,7 +6,10 @@
 #include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
 
+extern void error (char *);
+
 void debug (void) { }
+
 char * stack_start;
 
 #ifdef __CC65__
@@ -48,14 +51,20 @@ extern char * msg;
 
 extern void bierror (void);
 
+// Type-check arguments to built-in function using their
+// character-based argument type list.
 void
 bi_tcheck (lispptr x, uchar type)
 {
     (void) x;
     (void) type;
     switch (type) {
+
+    // Any object.
     case 'x':
         return;
+
+    // Numbers.
     case 'n':
         if (!NUMBERP(x)) {
             msg = "Number expected.";
@@ -63,11 +72,13 @@ bi_tcheck (lispptr x, uchar type)
             while (1);
         }
         return;
+#ifndef NDEBUG
     default:
-        outs ("Internal error: '");
+        outs ("Developer error: '");
         out (type);
         outs ("': unknown typedef");
         while (1);
+#endif
     }
 }
 
@@ -124,7 +135,7 @@ do_eval:
         goto got_value;
     }
 
-    // Evaluate function argument.
+    // Evaluate function.
     PUSH(x);
     x = CAR(x);
     arg1 = eval ();
@@ -132,14 +143,14 @@ do_eval:
 
     args = CDR(x);
 
-    // Call built-in with unevaluated arguments.
+    // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
-        x = args;
 
         // Get built-in argument definition.
         if (!(badef = bfun->argdef)) {
             // No definition.  Call with unevaluated args.
+            x = args;
             value = bfun->func ();
             goto got_value;
         }
@@ -153,17 +164,18 @@ do_builtin_arg:
         if (!c) {
             // Complain if argument left.
             if (args) {
-                lisp_print (args);
-                msg = ": Too many args to builtin.";
+                msg = "Too many args to builtin:";
                 bierror ();
+                lisp_print (args);
                 while (1);
                 goto got_value;
             }
 
             // Pop evaluated to arg1 and arg2.
-            while (na--) {
-                POP(tmp);
-                (&arg1)[na] = tmp;
+            if (na--) {
+                POP(arg2);
+                if (na--)
+                    POP(arg1);
             }
 
             // And call the built-in...
@@ -212,7 +224,7 @@ save_builtin_arg_value:
 
         // Save evaluated value on the GC stack to move
         // it to 'arg1' and 'arg2' when finished with all
-        // arguments..
+        // arguments.
         PUSH(value);
 
         // Step to next argument.
@@ -220,11 +232,10 @@ save_builtin_arg_value:
         goto do_builtin_arg;
     }
 
-    // Complain if not a function.
+    // Complain if not a user-defined function.
     if (ATOM(arg1)) {
-        errouts ("Function expected, not ");
+        error ("Function expected, not: ");
         lisp_print (arg1);
-        lisp_break = true;
         value = nil;
         goto got_value;
     }

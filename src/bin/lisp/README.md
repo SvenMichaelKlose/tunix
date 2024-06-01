@@ -137,7 +137,7 @@ understands these commands:
 
 | Form                   | Description                     |
 |------------------------|---------------------------------|
-| (fn name args . body)  | Define function.                |
+| (fn name args +body)   | Define function.                |
 | (var name x)           | Define variable, evaluating X.  |
 
 ## Top-level
@@ -150,6 +150,19 @@ understands these commands:
 | (exit n)    | Exit interpreter with code.        |
 
 ## Evaluation and flow control
+
+| Function        | Description                            |
+|-----------------|----------------------------------------|
+| (quote 'x)      | Return argument unevaluated.           |
+| (apply f +x)    | Call function with list of arguments.  |
+| (funcall f +x)  | Call function with explicit arguments. |
+| (eval x)        | Evaluate expression.                   |
+| (? cond +x)     | Evaluate expression conditionally.     |
+| (& +x)          | Evaluate until NIL.                    |
+| (| +x)          | Evaluate until not NIL.                |
+| (block 's +x)   | Named block with expression list.      |
+| (return x ?'s)  | Return from named block with value.    |
+| (go 's)         | Jump to tag in named block.            |
 
 ### (quote x)
 
@@ -286,14 +299,18 @@ which initially is itself.
 
 ## Conses
 
-Conses are value pairs.
-
 | Function      | Description                          |
 |---------------|--------------------------------------|
 | (car l)       | Return first value of cons or nil.   |
 | (cdr l)       | Return second value of cons or nil.  |
-| (setcar c x)  | Set first value of cons.             |
-| (setcdr c x)  | Set second value of cons.            |
+| (setcar x c)  | Set first value of cons.             |
+| (setcdr x c)  | Set second value of cons.            |
+
+## Lists
+
+| Function      | Description                          |
+|---------------|--------------------------------------|
+| (@ f l)       | Filter list through function.        |
 
 ## Numbers
 

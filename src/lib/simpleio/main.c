@@ -152,7 +152,11 @@ outsn (char * s, char len)
 void
 terpri (void)
 {
+#ifdef __CC65__
     outs ("\n\r");
+#else
+    outs ("\n");
+#endif
 }
 
 void

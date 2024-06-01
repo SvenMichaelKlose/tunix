@@ -89,4 +89,5 @@ simpleio_init ()
     simpleio_set (&vectors);
     handles[STDIN] = stdin;
     handles[STDOUT] = stdout;
+    handles[STDERR] = stderr;
 }

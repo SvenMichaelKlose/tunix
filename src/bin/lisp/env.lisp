@@ -1,3 +1,5 @@
+(@ print '(1 2 3))
+
 (fn cadr (x)
   (car (cdr x)))
 
@@ -14,6 +16,13 @@
      (or (and (eq n (car x)) x)
          (member n (cdr x)))))
 
+(fn macroexpand x
+  (when x
+    (| (atom x)
+       (!? (macro? (car x))
+           (funcall ! (cdr x))
+           (@ macroexpand x)))))
+
 (fn make-count (n)
   (? (not (== 0 n))
      (cons n (make-count (-- n)))))
@@ -25,15 +34,10 @@
   (terpri)
   (block nil
     tag
-    (setq c (-- c))
+    (= c (-- c))
     (? (== 0 (% c 100))
        (print c))
     (? (not (== c 0))
-       (go 'tag))))
+       (go tag))))
 
-(fn test-file-write ()
-  (open 4 "@:GEN,S,W")
-  (setout 4)
-  (out "test")
-  (close 4)
-  (setout stdout))
+(block-test 10000)

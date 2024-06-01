@@ -89,7 +89,8 @@ void
 error (char * msg)
 {
     lisp_break = true;
-    errouts ("ERROR: ");
+    setout (STDERR);
+    outs ("ERROR: ");
     outs (msg);
     terpri ();
 }
@@ -98,6 +99,7 @@ void
 bierror ()
 {
     error (msg);
+while (1);
 }
 
 int
@@ -123,9 +125,9 @@ ensure_undefd_arg1 ()
 {
     DOLIST(x, universe) {
         if (CAR(x) == arg1) {
-            lisp_print (arg1);
-            msg = " already defined.";
+            msg = "Already defined:";
             bierror ();
+            lisp_print (arg1);
         }
     }
 }
@@ -287,6 +289,7 @@ bi_symbol_value (void)
     return SYMBOL_VALUE(arg1);
 }
 
+// Make char list from symbol name.
 lispptr
 bi_string (void)
 {
@@ -354,19 +357,19 @@ bi_cdr (void)
 }
 
 lispptr
-bi_rplaca (void)
+bi_setcar (void)
 {
-    msg = "(rplaca x c)";
+    msg = "(setcar x c)";
     cons_setter_args ();
-    return RPLACA(arg1, arg2);
+    return SETCAR(arg1, arg2);
 }
 
 lispptr
-bi_rplacd (void)
+bi_setcdr (void)
 {
-    msg = "(rplacd x c)";
+    msg = "(setcdr x c)";
     cons_setter_args ();
-    return RPLACD(arg1, arg2);
+    return SETCDR(arg1, arg2);
 }
 
 lispptr
@@ -428,7 +431,15 @@ DEFARITH(bi_add, +=, "(+ n n)");
 DEFARITH(bi_sub, -=, "(- n n)");
 DEFARITH(bi_mul, *=, "(* n n)");
 DEFARITH(bi_div, /=, "(/ n n)");
-DEFARITH(bi_mod, %=, "(% n n)");
+//DEFARITH(bi_mod, %=, "(% n n)");
+
+lispptr
+bi_mod (void)
+{
+    msg = "(% n n)";
+    ensure_two_numbers ();
+    return lisp_make_number (NUMBER_VALUE(arg1) % NUMBER_VALUE(arg2));
+}
 
 lispptr
 bi_inc (void)
@@ -620,8 +631,9 @@ lispptr
 bi_go (void)
 {
     msg = "(go tag)";
-    ensure_one_arg ();
-    go_tag = arg1;
+    if (!x || !CONSP(x) || CDR(x))
+        bierror ();
+    go_tag = CAR(x);
     return go_sym;
 }
 
@@ -924,6 +936,40 @@ bi_exit (void)
     return nil;
 }
 
+lispptr start;
+lispptr last;
+
+lispptr
+bi_filter (void)
+{
+    msg = "(@ f l)";
+    ensure_two_args ();
+    if (!arg2) {
+        bierror ();
+        return nil;
+    }
+    PUSH(arg1);
+    PUSH(arg2);
+    x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
+    start = last = lisp_make_cons (funcall (), nil);
+    POP(arg2);
+    POP(arg1);
+    PUSH(start);
+    DOLIST(arg2, CDR(arg2)) {
+        PUSH(arg1);
+        PUSH(arg2);
+        PUSH(last);
+        x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
+        tmp = lisp_make_cons (funcall (), nil);
+        POP(last);
+        SETCDR(last, tmp);
+        last = tmp;
+        POP(arg2);
+        POP(arg1);
+    }
+    POP(start);
+    return start;
+}
 
 struct builtin builtins[] = {
     { "quote",      NULL, bi_quote },
@@ -945,15 +991,15 @@ struct builtin builtins[] = {
     { "number?",    NULL, bi_numberp },
     { "symbol?",    NULL, bi_symbolp },
 
-    { "setq",         NULL, bi_setq },
-    { "symbol-value", NULL, bi_symbol_value },
-    { "string",       NULL, bi_string },
+    { "=",          NULL, bi_setq },
+    { "value",      NULL, bi_symbol_value },
+    { "string",     NULL, bi_string },
 
     { "cons",       NULL, bi_cons },
     { "car",        NULL, bi_car },
     { "cdr",        NULL, bi_cdr },
-    { "rplaca",     NULL, bi_rplaca },
-    { "rplacd",     NULL, bi_rplacd },
+    { "setcar",     NULL, bi_setcar },
+    { "setcdr",     NULL, bi_setcdr },
 
     { "==",         NULL, bi_equal },
     { ">",          NULL, bi_gt },
@@ -965,7 +1011,7 @@ struct builtin builtins[] = {
     { "-",          "nn", bi_sub },
     { "*",          "nn", bi_mul },
     { "/",          "nn", bi_div },
-    { "%",          "nn", bi_mod },
+    { "%",          NULL, bi_mod },
     { "++",         NULL, bi_inc },
     { "--",         NULL, bi_dec },
 
@@ -999,6 +1045,8 @@ struct builtin builtins[] = {
     { "universe",   NULL, bi_universe },
     { "gc",         NULL, bi_gc },
     { "exit",       NULL, bi_exit },
+
+    { "@",          NULL, bi_filter },
 
     { NULL, NULL }
 };

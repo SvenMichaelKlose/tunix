@@ -163,8 +163,8 @@ extern bool FASTCALL lisp_consp (lispptr);
 
 #define LIST_CAR(x)  (!(x) ? x : CAR(x))
 #define LIST_CDR(x)  (!(x) ? x : CDR(x))
-#define RPLACA(v, x) (CONS(x)->car = v)
-#define RPLACD(v, x) (CONS(x)->cdr = v)
+#define SETCAR(x, v) (CONS(x)->car = v)
+#define SETCDR(x, v) (CONS(x)->cdr = v)
 
 #define BOOL(x)      ((x) ? t : nil)
 
@@ -197,6 +197,7 @@ extern lispptr FASTCALL lisp_print (lispptr);
 
 // Arguments in global 'x'.
 extern lispptr eval (void);
+extern lispptr funcall (void);
 
 extern void    gc (void);
 

@@ -120,8 +120,8 @@ relocate (void)
             p = d; // Jump over sweep gap.
 
         if (CONSP(p)) {
-            RPLACA(relocate_ptr (CAR(p)), p);
-            RPLACD(relocate_ptr (CDR(p)), p);
+            SETCAR(p, relocate_ptr (CAR(p)));
+            SETCDR(p, relocate_ptr (CDR(p)));
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
     }

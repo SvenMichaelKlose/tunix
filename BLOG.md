@@ -1,6 +1,45 @@
 TUNIX blog
 ==========
 
+# 2024-05-01: UNIX target + hand brake
+
+I've added target 'unix' which made a bunch of protection
+faults bubble up.  The special case where a NULL pointer
+is symbol NIL is now dragging the Lisp interpreter's
+performance down as cc65 cannot optimize right where it is
+needed.  Now it's 2:40min instead of 1:45min for the
+BLOCK-TEST looping 10,000 times.  It might get better with
+the built-in argument expansion but hold your horses right
+there: it's time for test code growing an environment, a
+set of user-defined functions that make one's life a lot
+more desireable.  By the way: CBM BASIC takes 3:48 but it
+has no modulo operator which adds an addition and a
+subtraction.
+
+It takes enthusiastic attitude to go and write a compiler,
+that's for sure.  You might get stuck and never get far.
+You don't need the sensation of failure.  To then find out
+instead that it could be taught to kids.
+
+Let's prove that.
+
+I intend to use TUNIX Lisp to write a C compiler even if it
+takes hours to compile the kernel as long as the parts of it
+are dead simple.  elegant solutions will ensue.  I can feel
+it.  A tokenizer separating known strings and characters
+surrounding them takes less than 30 lines of code.  A parser
+can be as small but would take forever to finish.  Such
+version could still serve as a reference implementation for
+testing.  Naturally, testing comes first but I dearly miss
+macros already.  Adding a new type is always a bad idea.
+The last thing the interpreter needs is additional overhead.
+So, instead, the associative list \*MACROS\* is installed
+which holds all functions that serve as macros for the
+MACROEXPAND.
+
+That again brings me back to continuing with built-ins
+that won't grow the CPU stack.
+
 # 2024-05-27: Looping evaluator
 
 eval() is not calling itself any more to evaluate arguments
@@ -23,8 +62,8 @@ A couple of new optimizations come to mind.  eval() pushes
 argument names onto the GC stack, which is double
 information as the argument definitions are there already.
 Also, there shouldn't be an entry on the tag stack for each
-argument.  The number of arguments and their old values
-are required on it only.
+argument.  The number of arguments and their old values are
+required on it only.
 
 Built-ins should be optional, depending on the requirements.
 The environment should be passed a list of names of

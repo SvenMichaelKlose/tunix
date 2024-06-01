@@ -124,6 +124,7 @@ eval_list (void)
 char * badef;
 lispptr * a;
 uchar na;
+bool unevaluated;
 
 lispptr
 eval0 (void)
@@ -236,6 +237,7 @@ save_builtin_arg_value:
     if (ATOM(arg1)) {
         error ("Function expected, not: ");
         lisp_print (arg1);
+        terpri ();
         value = nil;
         goto got_value;
     }
@@ -270,13 +272,17 @@ do_argument:
         PUSH(defs);
         PUSH_TAG(TAG_ARG);
 
-        // Evaluate rest of arguments.
-        PUSH(defs);
-        PUSH(arg1);
-        x = args;
-        value = eval_list ();
-        POP(arg1);
-        POP(defs);
+        if (unevaluated) {
+            value = x;
+        } else {
+            // Evaluate rest of arguments.
+            PUSH(defs);
+            PUSH(arg1);
+            x = args;
+            value = eval_list ();
+            POP(arg1);
+            POP(defs);
+        }
 
         // Assign rest of arguments.
         SET_SYMBOL_VALUE(defs, value);
@@ -289,25 +295,29 @@ do_argument:
     PUSH(name);
     PUSH_TAG(TAG_ARG);
 
-    // Save variable on the GC stack.
-    PUSH(arg1);
-    PUSH(defs);
+    if (unevaluated) {
+        value = CAR(args);
+    } else {
+        // Save variable on the GC stack.
+        PUSH(arg1);
+        PUSH(defs);
 
-    // Prepare round of evaluation.
-    if (CDR(defs) || CDR(args)) {
-        PUSH(args);
-        PUSH_TAG(TAG_ARG_NEXT);
-    } else
-        PUSH_TAG(TAG_ARG_LAST);
-    x = CAR(args);
-    goto do_eval;
+        // Prepare round of evaluation.
+        if (CDR(defs) || CDR(args)) {
+            PUSH(args);
+            PUSH_TAG(TAG_ARG_NEXT);
+        } else
+            PUSH_TAG(TAG_ARG_LAST);
+        x = CAR(args);
+        goto do_eval;
 
-    // Step to next argument.
-next_arg:
-    // Restore variables.
-    POP(args);
-    POP(defs);
-    POP(arg1);
+        // Step to next argument.
+    next_arg:
+        // Restore variables.
+        POP(args);
+        POP(defs);
+        POP(arg1);
+    }
 
     // Replace argument symbol value with evaluated one.
     name = CAR(defs);
@@ -396,6 +406,15 @@ got_value:
 lispptr
 eval ()
 {
+    unevaluated = false;
+    PUSH_TAG(TAG_DONE);
+    return eval0 ();
+}
+
+lispptr
+funcall ()
+{
+    unevaluated = true;
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }

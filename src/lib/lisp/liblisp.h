@@ -2,7 +2,11 @@
 #define __LIBLISP_H__
 
 #ifndef STACK_SIZE
-#define STACK_SIZE  1024
+    #ifdef __CC65__
+        #define STACK_SIZE  1024
+    #else
+        #define STACK_SIZE  (64 * 1024)
+    #endif
 #endif
 #define MIN_RELOC_TABLE_ENTRIES  64
 
@@ -120,16 +124,18 @@ extern lispptr delayed_eval;
 #define TYPESAFE_DOLIST(x, init) \
     for (x = init; x; x = LIST_CDR(x))
 
-#define TYPE_NAMED    64
 #define TYPE_MARKED   128
+#define TYPE_NAMED    64
+
 #define TYPE_MASK     (7 | TYPE_NAMED)
+
 #define TYPE_CONS     1
 #define TYPE_NUMBER   2
 #define TYPE_SYMBOL   (3 | TYPE_NAMED)
 #define TYPE_BUILTIN  (4 | TYPE_NAMED)
 #define TYPE_MAX      4
 
-#define PTRTYPE(x)  (*((char *) (x)))
+#define PTRTYPE(x)  (*((char *) (x))) // TODO: Rename.
 #define TYPE(x)     (PTRTYPE(x) & TYPE_MASK)
 
 #define MARKED(x)   (!x || PTRTYPE(x) & TYPE_MARKED)
@@ -162,11 +168,11 @@ extern bool FASTCALL lisp_consp (lispptr);
 
 #define BOOL(x)      ((x) ? t : nil)
 
-#define ATOM(x)      (!x || TYPE(x) != TYPE_CONS)
+#define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (!(x) || CONSP(x))
-#define NUMBERP(x)   (x && TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   (x && TYPE(x) == TYPE_SYMBOL)
-#define BUILTINP(x)  (x && TYPE(x) == TYPE_BUILTIN)
+#define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
+#define SYMBOLP(x)   ((x) && TYPE(x) == TYPE_SYMBOL)
+#define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 
 #define NUMBER(n)              ((number *) (n))
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)

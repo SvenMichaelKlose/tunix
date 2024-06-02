@@ -4,11 +4,6 @@
 (fn cddr (x)
   (cdr (cdr x)))
 
-(fn length (x)
-  (? (cons? x)
-     (+ 1 (length (cdr x)))
-     0))
-
 (fn member (n x)
   (? x
      (or (and (eq n (car x)) x)
@@ -41,7 +36,7 @@
              (@ macroexpand (cdr x))))
      x))
 
-(print (macroexpand '(foo bar)))
+;(print (macroexpand '(foo bar)))
 
 (fn make-count (n)
   (? (not (== 0 n))

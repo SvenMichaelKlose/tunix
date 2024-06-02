@@ -61,6 +61,9 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
+lispptr start;
+lispptr lastc;
+
 #ifdef SLOW
 
 lispptr FASTCALL
@@ -104,6 +107,15 @@ bierror ()
 while (1);
 }
 
+void
+name_to_buffer (lispptr s)
+{
+    uchar len;
+    len = SYMBOL_LENGTH(s);
+    memcpy (buffer, SYMBOL_NAME(s), len);
+    buffer[len] = 0;
+}
+
 int
 length (lispptr x)
 {
@@ -113,13 +125,18 @@ length (lispptr x)
     return len;
 }
 
-void
-name_to_buffer (lispptr s)
+lispptr
+butlast (lispptr x)
 {
-    uchar len;
-    len = SYMBOL_LENGTH(s);
-    memcpy (buffer, SYMBOL_NAME(s), len);
-    buffer[len] = 0;
+    if (LIST_CDR(x))
+        return lisp_make_cons (CAR(x), butlast (CDR(x)));
+    return nil;
+}
+
+lispptr
+last (lispptr x)
+{
+    return LIST_CDR(x) ? last (CDR(x)) : x;
 }
 
 void
@@ -544,20 +561,6 @@ bi_eval (void)
 }
 
 lispptr
-butlast (lispptr x)
-{
-    if (LIST_CDR(x))
-        return lisp_make_cons (CAR(x), butlast (CDR(x)));
-    return nil;
-}
-
-lispptr
-last (lispptr x)
-{
-    return LIST_CDR(x) ? last (CDR(x)) : x;
-}
-
-lispptr
 bi_apply (void)
 {
     if (!CONSP(x)) {
@@ -973,8 +976,29 @@ bi_exit (void)
     return nil;
 }
 
-lispptr start;
-lispptr lastc;
+lispptr
+bi_length (void)
+{
+    msg = "(length l)";
+    ensure_one_arg ();
+    return lisp_make_number (length (arg1));
+}
+
+lispptr
+bi_butlast (void)
+{
+    msg = "(butlast l)";
+    ensure_one_arg ();
+    return butlast (arg1);
+}
+
+lispptr
+bi_last (void)
+{
+    msg = "(last l)";
+    ensure_one_arg ();
+    return last (arg1);
+}
 
 lispptr
 bi_filter (void)
@@ -1084,6 +1108,9 @@ struct builtin builtins[] = {
     { "exit",       NULL, bi_exit },
 
     { "@",          NULL, bi_filter },
+    { "butlast",    NULL, bi_butlast },
+    { "last",       NULL, bi_last },
+    { "length",     NULL, bi_length },
 
     { NULL, NULL }
 };

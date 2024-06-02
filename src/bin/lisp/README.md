@@ -317,9 +317,12 @@ of a singly-linked list.
 
 ## Lists
 
-| Function      | Description                          |
-|---------------|--------------------------------------|
-| (@ f l)       | Filter list through function.        |
+| Function     | Description                          |
+|--------------|--------------------------------------|
+| (length l)   | Return length of list.               |
+| (@ f l)      | Run list elements through function.  |
+| (butlast l)  | Copy list but not last element.      |
+| (last l)     | Return last cons with last element.  |
 
 ## Numbers
 

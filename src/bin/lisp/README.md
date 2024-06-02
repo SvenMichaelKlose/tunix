@@ -56,6 +56,8 @@ internally as argument definitions of built-in functions
 | l       | list (cons or NIL)                       |
 | n       | number                                   |
 | s       | symbol                                   |
+| a       | Memory address (positive number)         |
+| b       | Byte value                               |
 | +       | any number of following type (eg. "+n")  |
 | ?       | optional following type (eg. "?x")       |
 | '       | unevaluated following type (eg. "'+x")   |
@@ -158,8 +160,8 @@ understands these commands:
 | (funcall f +x)  | Call function with explicit arguments. |
 | (eval x)        | Evaluate expression.                   |
 | (? cond +x)     | Evaluate expression conditionally.     |
-| (& +x)          | Evaluate until NIL.                    |
-| (| +x)          | Evaluate until not NIL.                |
+| (and +x)        | Logical AND.  Evaluate until NIL.      |
+| (or +x)         | Logical OR.  Evaluate until not NIL.   |
 | (block 's +x)   | Named block with expression list.      |
 | (return x ?'s)  | Return from named block with value.    |
 | (go 's)         | Jump to tag in named block.            |
@@ -279,23 +281,25 @@ returned.
 
 ## Predicates
 
-| Function     | Description                   |
-|--------------|-------------------------------|
-| (not x)      | Test if object is 'nil'.      |
-| (atom x)     | Test if object is not a cons. |
-| (cons? x)    | Test if object is a cons.     |
-| (symbol? x)  | Test if object is a symbol.   |
-| (number? x)  | Test if object is a number.   |
+| Function     | Test if...             |
+|--------------|------------------------|
+| (not x)      | object is 'nil'.       |
+| (atom x)     | object is not a cons.  |
+| (cons? x)    | object is a cons.      |
+| (symbol? x)  | object is a symbol.    |
+| (number? x)  | object is a number.    |
+
+Predicates check objects for a particular property.
 
 ## Symbols
-
-A symbol has a name up to 255 bytes in length and a value
-which initially is itself.
 
 | Function   | Description        |
 |------------|--------------------|
 | (= s x)    | Set symbol value.  |
 | (value s)  | Get symbol value.  |
+
+A symbol has a name up to 255 bytes in length and a value
+which initially is itself.
 
 ## Conses
 
@@ -305,6 +309,11 @@ which initially is itself.
 | (cdr l)       | Return second value of cons or nil.  |
 | (setcar x c)  | Set first value of cons.             |
 | (setcdr x c)  | Set second value of cons.            |
+
+A 'cons' points to two other objects, called 'car' and
+'cdr' for historical reasons.  They could also be called
+'first' and 'second', or 'head' and 'tail' in the context
+of a singly-linked list.
 
 ## Lists
 
@@ -374,8 +383,111 @@ which initially is itself.
 
 ## Low-level system access
 
-| Function          | Description                     |
-|-------------------|---------------------------------|
-| (peek addr)       | Read byte from memory.          |
-| (poke addr byte)  | Write to memory.                |
-| (sys addr)        | Calls machine code subroutine.  |
+| Function    | Description                     |
+|-------------|---------------------------------|
+| (peek a)    | Read byte from memory.          |
+| (poke a b)  | Write to memory.                |
+| (sys a)     | Calls machine code subroutine.  |
+
+# Ideas for the future
+
+## QUASIQUOTEs with BACKQUOTE
+
+To insert generated code just in time without need for
+function or macro definitions.
+
+## User-defined error handling
+
+| Variable     | Description                  |
+|--------------|------------------------------|
+| \*onerror\*  | User-defined error handler.  |
+
+Called with error code and failing expression.  This can
+be used to load functions on demand:
+
+~~~lisp
+(fn onerror (n x)
+  (? (== n ,(get 'not-a-function
+                 (read-file "error-codes.lisp")))
+     ; Evaluate matching definition in environment file.
+     (with-open-file f "env.lisp"
+       (while (not (eof))
+              nil
+         (!= (read)
+           (when (and (cons? !)
+                      (or (eq (car x) 'var)
+                          (eq (car x) 'fn)))
+             (eval !)
+             (return +retry!+)))))))
+
+(= *onerror* 'onerror)
+~~~
+
+| Function    | Description                   |
+|-------------|-------------------------------|
+| (undef s)   | Remove symbol from universe.  |
+| (gc x)      | GC with another root object.  |
+
+On demand loading is more practical if one can get rid of
+definitions on the universe list.  UNDEF takes symbols off
+that list, so the definition will leave with the next GC if
+it is unused.
+
+GC could take an optional argument to specify another root
+but UNIVERSE to discard everything that is not part of an
+app.
+
+~~~lisp
+(gc 'appstart)
+; Put APPSTART back in th universe.
+(var appstart appstart)
+~~~
+
+Or one could save the current list of definitions and throw
+everything out that appeared later:
+
+~~~lisp
+(var *old-defs* (universe))
+(load "app.lisp")
+(gc *old-defs*)
+~~~
+
+## Macro expansion
+
+| Variable        | Description             |
+|-----------------|-------------------------|
+| \*expand\*      | Name of acro expander.  |
+
+Usually user-defined MACROEXPAND.
+
+## Bielefeld DB
+
+| Function        | Description                      |
+|-----------------|----------------------------------|
+| (db-open a)     ; Open database.                   |
+| (db-add s x)    ; Add expression with string key.  |
+| (db-find s)     ; Find ID by key.                  |
+| (db-read n)     ; READ by ID.                      |
+| (db-close n)    ; Open database.                   |
+| (undef s)       | Remove symbol from universe.     |
+
+Embedded database to the rescue the day for large data sets.
+
+## Defining built-ins
+
+| Function          | Description                   |
+|-------------------|-------------------------------|
+| (mkbuiltin a)     ; Add built-in function.        |
+
+Submit to your fantasy.
+
+## Compressed conses
+
+Conses which only store the CAR if the CDR is the next
+object on the heap.  This can be done at allocation time but
+would make the CDR of a compressed cons immutable.
+Immutable is "good".
+
+## Stack compression
+
+With hands off the CPU stack.

@@ -92,7 +92,9 @@ error (char * msg)
     setout (STDERR);
     outs ("ERROR: ");
     outs (msg);
+    lisp_print (x);
     terpri ();
+    lisp_repl ();
 }
 
 void
@@ -222,9 +224,10 @@ void
 cons_setter_args (void)
 {
     ensure_two_args ();
-    if (!CONSP(arg2))
+    if (CONSP(arg2))
+        POP(arg1);
+    else
         bierror ();
-    POP(arg1);
 }
 
 lispptr
@@ -240,7 +243,7 @@ bi_not (void)
 {
     msg = "(not x)";
     ensure_one_arg ();
-    return !arg1 ? t : nil;
+    return arg1 ? nil : t;
 }
 
 lispptr
@@ -248,7 +251,7 @@ bi_atom (void)
 {
     msg = "(atom x)";
     ensure_one_arg ();
-    return BOOL(!CONSP(arg1));
+    return CONSP(arg1) ? nil : arg1;
 }
 
 lispptr
@@ -256,7 +259,7 @@ bi_symbolp (void)
 {
     msg = "(symbol? x)";
     ensure_one_arg ();
-    return BOOL(SYMBOLP(arg1));
+    return SYMBOLP(arg1) ? arg1 : nil;
 }
 
 lispptr
@@ -377,7 +380,7 @@ bi_numberp (void)
 {
     msg = "(number? x)";
     ensure_one_arg ();
-    return BOOL(NUMBERP(arg1));
+    return NUMBERP(arg1) ? arg1 : nil;
 }
 
 lispptr
@@ -541,17 +544,51 @@ bi_eval (void)
 }
 
 lispptr
+butlast (lispptr x)
+{
+    if (LIST_CDR(x))
+        return lisp_make_cons (CAR(x), butlast (CDR(x)));
+    return nil;
+}
+
+lispptr
+last (lispptr x)
+{
+    return LIST_CDR(x) ? last (CDR(x)) : x;
+}
+
+lispptr
 bi_apply (void)
 {
-    if (!CONSP(x)
-        || !(arg2c = CDR(x))
-        || CDR(arg2c)) {
+    if (!CONSP(x)) {
         msg = "(apply fun . args)";
         bierror ();
     }
-    args = arg2c;
     arg1 = CAR(x);
-    return nil; //apply (true);
+    arg2c = CDR(x);
+    // Consing. Could be optimized away if moved to eval().
+    x = butlast (arg2c);
+    PUSH(arg1);
+    PUSH(arg2c);
+    args = eval_list ();
+    POP(arg2c);
+    POP(arg1);
+    x = last (arg2c);
+    PUSH(arg1);
+    PUSH(args);
+    tmp = eval_list ();
+    POP(args);
+    POP(arg1);
+    if (args) {
+        if (!LISTP(tmp)) {
+            msg = "Last argument must be a list.";
+            bierror ();
+        }
+        SETCDR(last (args), CAR(tmp));
+    } else
+        args = CAR(tmp);
+    x = lisp_make_cons (arg1, args);
+    return funcall ();
 }
 
 lispptr
@@ -937,7 +974,7 @@ bi_exit (void)
 }
 
 lispptr start;
-lispptr last;
+lispptr lastc;
 
 lispptr
 bi_filter (void)
@@ -951,19 +988,19 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
-    start = last = lisp_make_cons (funcall (), nil);
+    start = lastc = lisp_make_cons (eval (), nil);
     POP(arg2);
     POP(arg1);
     PUSH(start);
     DOLIST(arg2, CDR(arg2)) {
         PUSH(arg1);
         PUSH(arg2);
-        PUSH(last);
+        PUSH(lastc);
         x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
-        tmp = lisp_make_cons (funcall (), nil);
-        POP(last);
+        tmp = lisp_make_cons (eval (), nil);
+        POP(lastc);
         SETCDR(last, tmp);
-        last = tmp;
+        lastc = tmp;
         POP(arg2);
         POP(arg1);
     }
@@ -1061,6 +1098,24 @@ init_builtins (void)
     add_builtins (builtins);
 }
 
+lispptr
+lisp_repl ()
+{
+    while (1) {
+        lisp_break = false;
+        outs ("* ");
+        x = lisp_read ();
+        fresh_line ();
+        x = eval ();
+        if (lisp_break)
+            return x;
+        fresh_line ();
+        lisp_print (x);
+        fresh_line ();
+    }
+    return x;
+}
+
 int
 main (int argc, char * argv[])
 {
@@ -1098,17 +1153,7 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(lisp_fnout);
 
     load ("env.lisp");
-    while (1) {
-        lisp_break = false;
-        outs ("* ");
-        x = lisp_read ();
-        fresh_line ();
-        x = eval ();
-        fresh_line ();
-        lisp_print (x);
-        fresh_line ();
-    }
+    lisp_repl ();
 
-    while (1);
     return 0;
 }

@@ -197,12 +197,14 @@ extern lispptr FASTCALL lisp_print (lispptr);
 
 // Arguments in global 'x'.
 extern lispptr eval (void);
+extern lispptr eval_list (void);
 extern lispptr funcall (void);
 
 extern void    gc (void);
 
 extern unsigned objsize (char *);
 
+extern lispptr lisp_repl (void);
 extern bool    lisp_init (void);
 extern void    add_builtins (struct builtin *);
 

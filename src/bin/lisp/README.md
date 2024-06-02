@@ -289,7 +289,7 @@ returned.
 | (symbol? x)  | object is a symbol.    |
 | (number? x)  | object is a number.    |
 
-Predicates check objects for a particular property.
+All predicates except NOT return their argument.  NOT returns T instead.
 
 ## Symbols
 
@@ -459,6 +459,14 @@ everything out that appeared later:
 | \*expand\*      | Name of acro expander.  |
 
 Usually user-defined MACROEXPAND.
+
+## Directory access
+
+| Function       | Description                 |
+|----------------|-----------------------------|
+| (opendir n s)  | Open directory on channel.  |
+| (readdir n)    | READ directory info.        |
+| (mkdir s)      | Create directory.           |
 
 ## Bielefeld DB
 

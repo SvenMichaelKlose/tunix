@@ -233,7 +233,7 @@ save_builtin_arg_value:
         goto do_builtin_arg;
     }
 
-    // Complain if not a user-defined function.
+    // Ensure user-defined function.
     if (ATOM(arg1)) {
         error ("Function expected, not: ");
         lisp_print (arg1);
@@ -250,7 +250,7 @@ save_builtin_arg_value:
 
     // Evaluate arguments to user-defined function.
 do_argument:
-    // Error if lengths of argument list and definition
+    // Error if length of argument list and definition
     // don't match.
     if (!defs || !args) {
         if (defs) {

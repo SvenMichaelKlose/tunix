@@ -82,6 +82,15 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
+    // Cons
+    case 'c':
+        if (!CONSP(x)) {
+            msg = "Cons expected.";
+            bierror ();
+            while (1);
+        }
+        return;
+
     // Lists
     case 'l':
         if (!LISTP(x)) {
@@ -218,7 +227,7 @@ do_builtin_arg:
         na++;
 
         // Quick deal with unevaluated argument.
-        if (c == '\\') {
+        if (c == '\'') {
             badef++;
             value = CAR(args);
             goto save_builtin_arg_value;

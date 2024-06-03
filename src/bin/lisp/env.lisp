@@ -1,5 +1,22 @@
+(out "TUNIX Lisp v0.0.1")(terpri)
+(out "http://copei.de/tunix")(terpri)
+(terpri)
+(out "Type (universe) to see the list of defined symbols.")(terpri)
+(terpri)
+(out "Loading environment.")(terpri)
+(out "Please wait...")(terpri)
+
+(fn list x
+  x)
+
+(fn caar (x)
+  (car (car x)))
+
 (fn cadr (x)
   (car (cdr x)))
+
+(fn cdar (x)
+  (cdr (car x)))
 
 (fn cddr (x)
   (cdr (cdr x)))
@@ -30,13 +47,19 @@
          x
        (eq (car x) 'backquote)
          (macroexpand-bq x)
-       (macro? (car x))
-         (apply (car x) (cdr x))
-       (cons (car x)
-             (@ macroexpand (cdr x))))
+       (@ macroexpand 
+          (? (macro? (car x))
+             (macroexpand (apply (car x) (cdr x)))
+             x)))
      x))
 
-;(print (macroexpand '(foo bar)))
+(fn assoc (v x)
+  (? (cons? x)
+     (? (cons? (car x))
+        (? (eq v (caar x))
+           (cdar x)
+           (assoc v (cdr x)))
+        (error))))
 
 (fn make-count (n)
   (? (not (== 0 n))
@@ -55,4 +78,52 @@
     (? (not (== c 0))
        (go tag))))
 
-(block-test 10000)
+(fn progn body
+  ^(block t
+     ,@body))
+
+(fn let (n v . body)
+  (((g)
+     ^(((,n)
+         ,@body
+       ,v)))
+   (symbol)))
+
+(fn prog1 body
+  (with (g (symbol))
+    ^(((,g)
+        ,@(cdr body)
+        ,g)
+      (car body))))
+
+(fn when (x . body)
+  ^(? ,x
+      (progn
+        ,@body)))
+
+(fn unless (x . body)
+  ^(? (not ,x)
+      (progn
+        ,@body)))
+
+(fn while (cond result . body)
+  (let tag (symbol)
+    ^(block nil
+       (or ,cond
+           (return))
+       ,@body)))
+
+(fn dolist (iter . body)
+  (with (v   (car iter)
+         i   (cadr iter)
+         r   (cddr iter)
+         tag (symbol))
+    ^(let ,v ,i
+       (block nil
+         (or ,v (return ,(car r)))
+         ,tag
+         ,body
+         (= ,v (cdr v))
+         (go ,tag)))))
+
+(print (gc))(out " bytes free.")(terpri)

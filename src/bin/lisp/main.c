@@ -1128,7 +1128,7 @@ init_builtins (void)
 lispptr
 lisp_repl ()
 {
-    while (1) {
+    while (!eof ()) {
         lisp_break = false;
         outs ("* ");
         x = lisp_read ();

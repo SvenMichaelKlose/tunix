@@ -72,6 +72,25 @@ bi_tcheck (lispptr x, uchar type)
             while (1);
         }
         return;
+
+    // Symbols.
+    case 's':
+        if (!SYMBOLP(x)) {
+            msg = "Symbol expected.";
+            bierror ();
+            while (1);
+        }
+        return;
+
+    // Lists
+    case 'l':
+        if (!LISTP(x)) {
+            msg = "List expected.";
+            bierror ();
+            while (1);
+        }
+        return;
+
 #ifndef NDEBUG
     default:
         outs ("Developer error: '");
@@ -173,13 +192,15 @@ do_builtin_arg:
             }
 
             // Pop evaluated to arg1 and arg2.
-            if (na--) {
+            if (na == 1)
+                POP(arg1);
+            else if (na == 2) {
                 POP(arg2);
-                if (na--)
-                    POP(arg1);
+                POP(arg1);
             }
 
             // And call the built-in...
+            fresh_line ();
             value = bfun->func ();
             goto got_value;
         }
@@ -203,7 +224,7 @@ do_builtin_arg:
             goto save_builtin_arg_value;
         }
 
-        // Save variables on the stacks.
+        // Save evaulator state.
         PUSH(args);
         PUSH_TAGW(badef);
         PUSH_TAG(na);

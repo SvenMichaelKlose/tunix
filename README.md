@@ -2,6 +2,7 @@ The INGLE project
 =================
 
 * [Build instructions](BUILD.md)
+* [Development Blog](BLOG.md)
 
 This is an attempt to turn the Commodore
 VIC-20 into a serious work machine with
@@ -929,4 +930,3 @@ processing.
   guidelines on how users can
   contribute to TUNIX's development
   would foster community involvement.
-BLOG.md  BOOKS.md  BUILD.md  PLAN.md  README.md

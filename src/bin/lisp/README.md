@@ -137,10 +137,10 @@ understands these commands:
 
 ## Definitions
 
-| Form                   | Description                     |
-|------------------------|---------------------------------|
-| (fn name args +body)   | Define function.                |
-| (var name x)           | Define variable, evaluating X.  |
+| Form                     | Description       |
+|--------------------------|-------------------|
+| (fn 'name 'args '+body)  | Define function.  |
+| (var 'name x)            | Define variable.  |
 
 ## Top-level
 
@@ -256,10 +256,20 @@ has to match.  It is NIL, if not added to RETURN.
   'c) -> b
 ~~~
 
+Blocks of name NIL are used for loops.  For the purpose of
+just butting up expressions, use T instead to make RETURNs
+for name NIL drop through.
+
+~~~lisp
+(macro progn body
+  ^(block t ; We don't want to catch returns.
+     ,@body))
+~~~
+
 BLOCK also handles jumps initiated by GO.  A jump
 destination, the "tag", must be the same symbol passed to
 GO.  It must not be quoted.  It is an error if the tag
-cannot be found in any of the current blocks within a
+cannot be found in any of the parent blocks in the current
 function.  If no expression follows the tag, NIL is
 returned.
 
@@ -267,7 +277,7 @@ returned.
 ; Print "1" and "3".
 (block nil
   (print 1)
-  (go 'jump-destination)
+  (go jump-destination)
   (print 2)
   jump-destination
   (print 3))
@@ -275,19 +285,19 @@ returned.
 
 ## Equality
 
-| Function  | Description                       |
-|-----------|-----------------------------------|
-| (eq a b)  | Test if two objects are the same. |
+| Function  | Description                        |
+|-----------|------------------------------------|
+| (eq a b)  | Test if two objects are the same.  |
 
 ## Predicates
 
-| Function     | Test if...             |
-|--------------|------------------------|
-| (not x)      | object is 'nil'.       |
-| (atom x)     | object is not a cons.  |
-| (cons? x)    | object is a cons.      |
-| (symbol? x)  | object is a symbol.    |
-| (number? x)  | object is a number.    |
+| Function     | Test on...  |
+|--------------|-------------|
+| (not x)      | nil         |
+| (atom x)     | not a cons  |
+| (cons? x)    | cons        |
+| (symbol? x)  | symbol      |
+| (number? x)  | number      |
 
 All predicates except NOT return their argument.  NOT returns T instead.
 
@@ -295,7 +305,7 @@ All predicates except NOT return their argument.  NOT returns T instead.
 
 | Function   | Description        |
 |------------|--------------------|
-| (= s x)    | Set symbol value.  |
+| (= 's x)   | Set symbol value.  |
 | (value s)  | Get symbol value.  |
 
 A symbol has a name up to 255 bytes in length and a value
@@ -307,8 +317,8 @@ which initially is itself.
 |---------------|--------------------------------------|
 | (car l)       | Return first value of cons or nil.   |
 | (cdr l)       | Return second value of cons or nil.  |
-| (setcar x c)  | Set first value of cons.             |
-| (setcdr x c)  | Set second value of cons.            |
+| (setcar c x)  | Set first value of cons.             |
+| (setcdr c x)  | Set second value of cons.            |
 
 A 'cons' points to two other objects, called 'car' and
 'cdr' for historical reasons.  They could also be called
@@ -432,13 +442,12 @@ be used to load functions on demand:
 | (gc x)      | GC with another root object.  |
 
 On demand loading is more practical if one can get rid of
-definitions on the universe list.  UNDEF takes symbols off
-that list, so the definition will leave with the next GC if
-it is unused.
+definitions.  UNDEF takes symbols out of the universe, so
+the definition will leave with the next GC if it is unused.
 
 GC could take an optional argument to specify another root
-but UNIVERSE to discard everything that is not part of an
-app.
+than the universe to discard everything that is not part of
+an app.
 
 ~~~lisp
 (gc 'appstart)

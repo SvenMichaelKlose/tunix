@@ -4,3 +4,9 @@
 # Do not compile in code for debugging.  Usually leads to
 # noticeably smaller and faster code.
 #NDEBUG = 1
+
+# One of c126, c16 (32K), c64, pet, plus4, vic-20 or unix.
+# Targets c16 and pet need fixing.
+# Do a 'make allworlds' to get disk images for all Commodore
+# machines listed.
+TARGET = vic20

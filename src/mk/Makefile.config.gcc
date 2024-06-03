@@ -1,3 +1,4 @@
+CC			= gcc
 CFLAGS      = -c -Werror -DTARGET=$(TARGET) -I$(TUNIX_LIB)
 COPTFLAGS  ?= -O0 -g
 LDFLAGS     = -g

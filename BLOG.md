@@ -1,6 +1,13 @@
 TUNIX blog
 ==========
 
+# 2024-05-05: Lisp: Smaller and slower
+
+Most built-in functions now have an argument definition
+which reduced the code size by around 2K but performance
+dropped to 3:50min for the BLOCK-TEST.  A MAKE-COUNT upped to
+83 (from 39).  The stack size will shrink further.
+
 # 2024-05-01: UNIX target + hand brake
 
 I've added target 'unix' which made a bunch of protection

@@ -95,6 +95,15 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
+    // Lists
+    case 'f': // list (cons or nil)
+        if (!LISTP(x) && !BUILTINP(x)) {
+            msg = "Function expected.";
+            bierror ();
+            while (1);
+        }
+        return;
+
 #ifndef NDEBUG
     default:
         outs ("Developer error: '");
@@ -151,8 +160,10 @@ lispptr
 eval0 (void)
 {
 do_eval:
-    if (!x)
+    if (!x) {
+        value = nil;
         goto got_value;
+    }
 
     // Evaluate atom.
     if (ATOM(x)) {
@@ -180,9 +191,9 @@ do_eval:
             goto got_value;
         }
 
-// Call built-in with argument definition.  Pushes the evaluated
-// values onto the stack and pops them into arg1/arg2 before doing
-// the call.
+// Call built-in with argument definition.  Pushes the
+// evaluated values onto the stack and pops them into
+// arg1/arg2 before doing the call.
 
         na = 0;
 
@@ -234,6 +245,7 @@ do_builtin_arg:
         // Evaluate argument inline.
         PUSH(args);
         PUSH_TAGW(badef);
+        PUSH_TAGW(bfun);
         PUSH_TAG(na);
         x = CAR(args);
         PUSH_TAG(TAG_BARG_NEXT);
@@ -242,6 +254,7 @@ do_builtin_arg:
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
+        POP_TAGW(bfun);
         POP_TAGW(badef);
         POP(args);
 
@@ -249,8 +262,9 @@ save_builtin_arg_value:
         // Ensure the type is wanted.
         bi_tcheck (value, *badef++);
 
-        // Save evaluated value on the GC stack to move it to 'arg1'
-        // and 'arg2' when finished with all arguments.
+        // Save evaluated value on the GC stack to move it
+        // to 'arg1' and 'arg2' when finished with all
+        // arguments.
         PUSH(value);
 
         // Step to next argument.
@@ -258,16 +272,15 @@ save_builtin_arg_value:
         goto do_builtin_arg;
     }
 
-// Call user-defined function.  Saves argument names and their old
-// values on the stack and overwrites the names' symbol values with
-// evaluated ones.  The old values are popped off the stack when the
-// function body has been executed.
+// Call user-defined function.  Saves argument names and
+// their old values on the stack and overwrites the names'
+// symbol values with evaluated ones.  The old values are
+// popped off the stack when the function body has been
+// executed.
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         error ("Function expected, not: ");
-        lisp_print (arg1);
-        terpri ();
         value = nil;
         goto got_value;
     }
@@ -278,8 +291,7 @@ save_builtin_arg_value:
 
     // Evaluate arguments to user-defined function.
 do_argument:
-    // Error if length of argument list and definition
-    // don't match.
+    // End of arguments.
     if (!defs || !args) {
         if (defs) {
             errouts ("Argument(s) missing: ");
@@ -298,9 +310,9 @@ do_argument:
         PUSH(defs);
         PUSH_TAG(TAG_ARG);
 
-        if (unevaluated) {
+        if (unevaluated)
             value = x;
-        } else {
+        else {
             // Evaluate rest of arguments.
             PUSH(defs);
             PUSH(arg1);
@@ -321,12 +333,14 @@ do_argument:
     PUSH(name);
     PUSH_TAG(TAG_ARG);
 
-    if (unevaluated) {
+    if (unevaluated)
         value = CAR(args);
-    } else {
+    else {
+        // Save evaluator state.
         PUSH(arg1);
         PUSH(defs);
         PUSH(args);
+
         PUSH_TAG(TAG_ARG_NEXT);
         x = CAR(args);
         goto do_eval;
@@ -356,22 +370,21 @@ start_body:
 do_body:
     // Break if out of statements or other reason.
     if (!x || lisp_break)
-        goto done_body;
+        goto body_done;
 
     // Save rest of statements on the GC stack.
     PUSH(CDR(x));
 
-    // Prepare new round of evaluation.
+    // Evaluate statement.
     PUSH_TAG(TAG_CONTINUE_BODY);
     x = CAR(x);
     goto do_eval;
 
 next_in_body:
-    // Step to next statement.
     POP(x);
     goto do_body;
 
-done_body:
+body_done:
     // Restore argument symbol values.
     while (POP_TAG(c) == TAG_ARG) {
         POP(name);
@@ -382,7 +395,7 @@ done_body:
     if (c != TAG_DONE) {
         errouts ("Internal error: ");
         out_number (c);
-        outs (": 0 expected after restoring arguments.");
+        outs ("TAG_DONE expected.");
         while (1);
     }
 #endif // #ifndef NDEBUG

@@ -138,7 +138,7 @@ extern lispptr delayed_eval;
 #define PTRTYPE(x)  (*((char *) (x))) // TODO: Rename.
 #define TYPE(x)     (PTRTYPE(x) & TYPE_MASK)
 
-#define MARKED(x)   (!x || PTRTYPE(x) & TYPE_MARKED)
+#define MARKED(x)   (!(x) || PTRTYPE(x) & TYPE_MARKED)
 #define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
 
@@ -157,7 +157,7 @@ extern bool FASTCALL lisp_consp (lispptr);
 
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
-#define CONSP(x)     (x && TYPE(x) == TYPE_CONS)
+#define CONSP(x)     ((x) && TYPE(x) == TYPE_CONS)
 
 #endif // #ifdef SLOW
 
@@ -171,7 +171,7 @@ extern bool FASTCALL lisp_consp (lispptr);
 #define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (!(x) || CONSP(x))
 #define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   (!x || TYPE(x) == TYPE_SYMBOL)
+#define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 
 #define NUMBER(n)              ((number *) (n))

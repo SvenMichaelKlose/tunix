@@ -154,123 +154,23 @@ ensure_undefd_arg1 ()
     }
 }
 
-void
-ensure_one_arg (void)
-{
-    if (!CONSP(x)
-        || CDR(x))
-        bierror ();
-    x = CAR(x);
-    arg1 = eval ();
-}
-
-void
-ensure_number_arg (void)
-{
-    ensure_one_arg ();
-    if (!NUMBERP(arg1))
-        bierror ();
-}
-
-void
-ensure_symbol_arg (void)
-{
-    ensure_one_arg ();
-    if (!SYMBOLP(arg1))
-        bierror ();
-}
-
-void
-ensure_two_args (void)
-{
-    if (!CONSP(x))
-        bierror ();
-    arg2c = CDR(x);
-    if (!CONSP(arg2c)
-         || CDR(arg2c))
-        bierror ();
-
-    PUSH(arg2c);
-    x = CAR(x);
-    arg1 = eval ();
-    POP(arg2c);
-
-    PUSH(arg1);
-    x = CAR(arg2c);
-    arg2 = eval ();
-    POP(arg1);
-}
-
-void
-ensure_number (void)
-{
-    ensure_one_arg ();
-    if (!NUMBERP(arg1))
-        bierror ();
-}
-
-void
-ensure_two_numbers (void)
-{
-    ensure_two_args ();
-    if (!NUMBERP(arg1)
-        || !NUMBERP(arg2))
-        bierror ();
-}
-
-void
-ensure_first_is_number (void)
-{
-    if (!CONSP(x)
-        || !(arg2c = CDR(x)))
-        bierror ();
-    x = CAR(x);
-    PUSH(arg2c);
-    arg1 = eval ();
-    POP(arg2c);
-    if (!NUMBERP(arg1))
-        bierror ();
-}
-
-void
-cons_getter_args (void)
-{
-    ensure_one_arg ();
-    if (!LISTP(arg1))
-        bierror ();
-}
-
-void
-cons_setter_args (void)
-{
-    ensure_two_args ();
-    if (CONSP(arg2))
-        POP(arg1);
-    else
-        bierror ();
-}
-
 lispptr
 bi_eq (void)
 {
-    msg = "(eq x x)";
-    ensure_two_args ();
     return BOOL(arg1 == arg2);
 }
 
 lispptr
 bi_not (void)
 {
-    msg = "(not x)";
-    ensure_one_arg ();
     return arg1 ? nil : t;
 }
 
 lispptr
 bi_atom (void)
 {
-    msg = "(atom x)";
-    ensure_one_arg ();
+    if (!arg1)
+        return t;
     return CONSP(arg1) ? nil : arg1;
 }
 
@@ -285,21 +185,6 @@ bi_symbolp (void)
 lispptr
 bi_setq (void)
 {
-    if (!CONSP(x))
-        bierror ();
-    arg2c = LIST_CDR(x);
-    if (!CONSP(arg2c))
-        bierror ();
-    arg1 = CAR(x);
-    if (!SYMBOLP(arg1)
-        || CDR(arg2c)) {
-        msg = "(setq sym x)";
-        bierror ();
-    }
-    x = CAR(arg2c);
-    PUSH(arg1);
-    arg2 = eval ();
-    POP(arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg2;
 }
@@ -307,8 +192,6 @@ bi_setq (void)
 lispptr
 bi_symbol_value (void)
 {
-    msg = "(symbol-value symbol)";
-    ensure_symbol_arg ();
     return SYMBOL_VALUE(arg1);
 }
 
@@ -320,8 +203,6 @@ bi_string (void)
     lispptr s;
     char * p;
 
-    msg = "(string nlst)";
-    ensure_one_arg ();
     len = length (arg1);
     s = lisp_alloc_symbol (buffer, len);
 
@@ -351,40 +232,30 @@ bi_consp (void)
 lispptr
 bi_cons (void)
 {
-    msg = "(cons x x)";
-    ensure_two_args ();
     return lisp_make_cons (arg1, arg2);
 }
 
 lispptr
 bi_car (void)
 {
-    msg = "(car lst)";
-    cons_getter_args ();
     return LIST_CAR(arg1);
 }
 
 lispptr
 bi_cdr (void)
 {
-    msg = "(cdr lst)";
-    cons_getter_args ();
     return LIST_CDR(arg1);
 }
 
 lispptr
 bi_setcar (void)
 {
-    msg = "(setcar x c)";
-    cons_setter_args ();
     return SETCAR(arg1, arg2);
 }
 
 lispptr
 bi_setcdr (void)
 {
-    msg = "(setcdr x c)";
-    cons_setter_args ();
     return SETCDR(arg1, arg2);
 }
 
@@ -394,136 +265,65 @@ bi_numberp (void)
     return NUMBERP(arg1) ? arg1 : nil;
 }
 
-lispptr
-bi_number_equal (void)
-{
-    msg = "(== n n)";
-    ensure_two_numbers ();
-    return BOOL(NUMBER_VALUE(arg1) == NUMBER_VALUE(arg2));
+
+#define DEFCOND(fun_name, op) \
+lispptr \
+fun_name (void) \
+{ \
+    return BOOL(NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
 }
 
-lispptr
-bi_lt (void)
-{
-    msg = "(< n n)";
-    ensure_two_numbers ();
-    return BOOL(NUMBER_VALUE(arg1) < NUMBER_VALUE(arg2));
-}
+DEFCOND(bi_number_equal, ==);
+DEFCOND(bi_lt, <);
+DEFCOND(bi_lte, <=);
+DEFCOND(bi_gt, >);
+DEFCOND(bi_gte, >=);
 
-lispptr
-bi_lte (void)
-{
-    msg = "(<= n n)";
-    ensure_two_numbers ();
-    return BOOL(NUMBER_VALUE(arg1) <= NUMBER_VALUE(arg2));
-}
-
-lispptr
-bi_gt (void)
-{
-    msg = "(> n n)";
-    ensure_two_numbers ();
-    return BOOL(NUMBER_VALUE(arg1) > NUMBER_VALUE(arg2));
-}
-
-lispptr
-bi_gte (void)
-{
-    msg = "(>= n n)";
-    ensure_two_numbers ();
-    return BOOL(NUMBER_VALUE(arg1) >= NUMBER_VALUE(arg2));
-}
-
-#define DEFARITH(fun_name, op, err) \
+#define DEFOP(fun_name, op) \
 lispptr \
 fun_name (void) \
 { \
     return lisp_make_number (NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
 }
 
-DEFARITH(bi_add, +, "(+ n n)");
-DEFARITH(bi_sub, -, "(- n n)");
-DEFARITH(bi_mul, *, "(* n n)");
-DEFARITH(bi_div, /, "(/ n n)");
-DEFARITH(bi_mod, %, "(% n n)");
+DEFOP(bi_add, +);
+DEFOP(bi_sub, -);
+DEFOP(bi_mul, *);
+DEFOP(bi_div, /);
+DEFOP(bi_mod, %);
+DEFOP(bi_bit_and, &);
+DEFOP(bi_bit_or, |);
+DEFOP(bi_bit_xor, ^);
+DEFOP(bi_shift_left, <<);
+DEFOP(bi_shift_right, >>);
 
 lispptr
 bi_inc (void)
 {
-    msg = "(++ n)";
-    ensure_number ();
     return lisp_make_number (NUMBER_VALUE(arg1) + 1);
 }
 
 lispptr
 bi_dec (void)
 {
-    msg = "(-- n)";
-    ensure_number ();
     return lisp_make_number (NUMBER_VALUE(arg1) - 1);
-}
-
-lispptr
-bi_bit_and (void)
-{
-    msg = "(bit-and n n)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) & NUMBER_VALUE(arg2));
-}
-
-lispptr
-bi_bit_or (void)
-{
-    msg = "(bit-or n n)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) | NUMBER_VALUE(arg2));
-}
-
-lispptr
-bi_bit_xor (void)
-{
-    msg = "(bit-xor n n)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) ^ NUMBER_VALUE(arg2));
 }
 
 lispptr
 bi_bit_neg (void)
 {
-    msg = "(bit-neg n)";
-    ensure_number ();
     return lisp_make_number (~NUMBER_VALUE(arg1));
-}
-
-lispptr
-bi_shift_left (void)
-{
-    msg = "(<< n nbits)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) << NUMBER_VALUE(arg2));
-}
-
-lispptr
-bi_shift_right (void)
-{
-    msg = "(>> n nbits)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) >> NUMBER_VALUE(arg2));
 }
 
 lispptr
 bi_peek (void)
 {
-    msg = "(peek addr)";
-    ensure_number ();
     return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
 }
 
 lispptr
 bi_poke (void)
 {
-    msg = "(poke addr b)";
-    ensure_two_numbers ();
     *(char *) NUMBER_VALUE(arg1) = NUMBER_VALUE(arg2);
     return arg2;
 }
@@ -531,8 +331,6 @@ bi_poke (void)
 lispptr
 bi_sys (void)
 {
-    msg = "(sys addr)";
-    ensure_number ();
     ((void (*) (void)) NUMBER_VALUE(arg1)) ();
     return nil;
 }
@@ -720,10 +518,6 @@ bi_or (void)
 lispptr
 bi_read (void)
 {
-    if (x) {
-        msg = "(read)";
-        bierror ();
-    }
     return lisp_read ();
 }
 
@@ -748,18 +542,7 @@ bi_eof (void)
 lispptr
 bi_open (void)
 {
-    uchar fn;
-    msg = "(open fn s)";
-    ensure_two_args ();
-    if (!NUMBERP(arg1)) {
-        msg = "(open fn s)";
-        bierror ();
-    }
-    if (!SYMBOLP(arg2)) {
-        msg = "(open fn s)";
-        bierror ();
-    }
-    fn = NUMBER_VALUE(arg1);
+    uchar fn = NUMBER_VALUE(arg1);
     name_to_buffer (arg2);
     simpleio_open (fn, buffer, 'r');
     return lisp_make_number (err ());
@@ -768,8 +551,6 @@ bi_open (void)
 lispptr
 bi_setin (void)
 {
-    msg = "(setin fn)";
-    ensure_number_arg ();
     setin (NUMBER_VALUE(arg1));
     SET_SYMBOL_VALUE(lisp_fnin, arg1);
     return arg1;
@@ -778,8 +559,6 @@ bi_setin (void)
 lispptr
 bi_setout (void)
 {
-    msg = "(setout fn)";
-    ensure_number_arg ();
     setout (NUMBER_VALUE(arg1));
     if (err ())
         error ("setout: illegal fn.");
@@ -803,8 +582,6 @@ bi_putback (void)
 lispptr
 bi_out (void)
 {
-    msg = "(out n/s)";
-    ensure_one_arg ();
     if (!arg1)
         outs ("nil");
     else if (NUMBERP(arg1))
@@ -826,8 +603,6 @@ bi_terpri (void)
 lispptr
 bi_close (void)
 {
-    msg = "(close fn)";
-    ensure_number_arg ();
     simpleio_close (NUMBER_VALUE(arg1));
     return nil;
 }
@@ -842,7 +617,7 @@ load (char * pathname)
         errouts ("Cannot open file ");
         error (pathname);
     }
-    x = lisp_make_cons (lisp_make_number (load_fn), nil);
+    arg1 = lisp_make_number (load_fn);
     bi_setin ();
     load_fn++;
 
@@ -851,15 +626,13 @@ load (char * pathname)
 
     load_fn--;
     simpleio_close (load_fn);
-    x = lisp_make_cons (lisp_make_number (oldin), nil);
+    arg1 = lisp_make_number (oldin);
     bi_setin ();
 }
 
 lispptr
 bi_load (void)
 {
-    msg = "(load s)";
-    ensure_symbol_arg ();
     name_to_buffer (arg1);
     load (buffer);
     return nil;
@@ -923,8 +696,6 @@ bi_gc (void)
 lispptr
 bi_exit (void)
 {
-    msg = "(exit n)";
-    ensure_number ();
 #ifdef __CC65__
     while (1);
 #endif
@@ -936,36 +707,24 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    msg = "(length l)";
-    ensure_one_arg ();
     return lisp_make_number (length (arg1));
 }
 
 lispptr
 bi_butlast (void)
 {
-    msg = "(butlast l)";
-    ensure_one_arg ();
     return butlast (arg1);
 }
 
 lispptr
 bi_last (void)
 {
-    msg = "(last l)";
-    ensure_one_arg ();
     return last (arg1);
 }
 
 lispptr
 bi_filter (void)
 {
-    msg = "(@ f l)";
-    ensure_two_args ();
-    if (!arg2) {
-        bierror ();
-        return nil;
-    }
     PUSH(arg1);
     PUSH(arg2);
     x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
@@ -993,7 +752,7 @@ struct builtin builtins[] = {
     { "quote",      "'x", bi_quote },
 
     { "apply",      NULL, bi_apply },
-    { "eval",       "x", bi_eval },
+    { "eval",       "x",  bi_eval },
 
     { "?",          NULL, bi_if },
     { "and",        NULL, bi_and },
@@ -1002,72 +761,72 @@ struct builtin builtins[] = {
     { "return",     NULL, bi_return },
     { "go",         "'x", bi_go },
 
-    { "not",        NULL, bi_not },
-    { "eq",         NULL, bi_eq },
-    { "atom",       NULL, bi_atom },
-    { "cons?",      "x", bi_consp },
-    { "number?",    "x", bi_numberp },
-    { "symbol?",    "x", bi_symbolp },
+    { "not",        "x",  bi_not },
+    { "eq",         "xx", bi_eq },
+    { "atom",       "x",  bi_atom },
+    { "cons?",      "x",  bi_consp },
+    { "number?",    "x",  bi_numberp },
+    { "symbol?",    "x",  bi_symbolp },
 
-    { "=",          NULL, bi_setq },
-    { "value",      NULL, bi_symbol_value },
-    { "string",     NULL, bi_string },
+    { "=",          "'sx", bi_setq },
+    { "value",      "s",  bi_symbol_value },
+    { "string",     "l",  bi_string },
 
-    { "cons",       NULL, bi_cons },
-    { "car",        NULL, bi_car },
-    { "cdr",        NULL, bi_cdr },
-    { "setcar",     NULL, bi_setcar },
-    { "setcdr",     NULL, bi_setcdr },
+    { "cons",       "xx", bi_cons },
+    { "car",        "x",  bi_car },
+    { "cdr",        "x",  bi_cdr },
+    { "setcar",     "cx", bi_setcar },
+    { "setcdr",     "cx", bi_setcdr },
 
-    { "==",         NULL, bi_number_equal },
-    { ">",          NULL, bi_gt },
-    { "<",          NULL, bi_lt },
-    { ">=",         NULL, bi_gte },
-    { "<=",         NULL, bi_lte },
+    { "==",         "nn", bi_number_equal },
+    { ">",          "nn", bi_gt },
+    { "<",          "nn", bi_lt },
+    { ">=",         "nn", bi_gte },
+    { "<=",         "nn", bi_lte },
 
     { "+",          "nn", bi_add },
     { "-",          "nn", bi_sub },
     { "*",          "nn", bi_mul },
     { "/",          "nn", bi_div },
     { "%",          "nn", bi_mod },
-    { "++",         NULL, bi_inc },
-    { "--",         NULL, bi_dec },
+    { "++",         "n",  bi_inc },
+    { "--",         "n",  bi_dec },
 
-    { "bit-and",    NULL, bi_bit_and },
-    { "bit-or",     NULL, bi_bit_or },
-    { "bit-xor",    NULL, bi_bit_xor },
-    { "bit-neg",    NULL, bi_bit_neg },
-    { "<<",         NULL, bi_shift_left },
-    { ">>",         NULL, bi_shift_right },
+    { "bit-and",    "nn", bi_bit_and },
+    { "bit-or",     "nn", bi_bit_or },
+    { "bit-xor",    "nn", bi_bit_xor },
+    { "bit-neg",    "n",  bi_bit_neg },
+    { "<<",         "nn", bi_shift_left },
+    { ">>",         "nn", bi_shift_right },
 
-    { "peek",       NULL, bi_peek },
-    { "poke",       NULL, bi_poke },
-    { "sys",        NULL, bi_sys },
+    { "peek",       "n",  bi_peek },
+    { "poke",       "nn", bi_poke },
+    { "sys",        "n",  bi_sys },
 
-    { "read",       NULL, bi_read },
-    { "print",      "x", bi_print },
-    { "open",       NULL, bi_open },
-    { "err",        "", bi_err },
-    { "eof",        "", bi_eof },
-    { "in",         "", bi_in },
-    { "out",        NULL, bi_out },
-    { "terpri",     "", bi_terpri },
-    { "setin",      NULL, bi_setin },
-    { "setout",     NULL, bi_setout },
-    { "putback",    "", bi_putback },
-    { "close",      NULL, bi_close },
-    { "load",       NULL, bi_load },
+    { "read",       "",   bi_read },
+    { "print",      "x",  bi_print },
+    { "open",       "ns", bi_open },
+    { "err",        "",   bi_err },
+    { "eof",        "",   bi_eof },
+    { "in",         "",   bi_in },
+    { "out",        "x",  bi_out },
+    { "terpri",     "",   bi_terpri },
+    { "setin",      "n",  bi_setin },
+    { "setout",     "n",  bi_setout },
+    { "putback",    "",   bi_putback },
+    { "close",      "n",  bi_close },
+    { "load",       "s",  bi_load },
 
     { "fn",         NULL, bi_fn },
     { "var",        NULL, bi_var },
-    { "universe",   "", bi_universe },
-    { "gc",         "", bi_gc },
-    { "exit",       NULL, bi_exit },
+    { "universe",   "",   bi_universe },
+    { "gc",         "",   bi_gc },
+    { "exit",       "n",  bi_exit },
 
-    { "@",          NULL, bi_filter },
-    { "butlast",    NULL, bi_butlast },
-    { "last",       NULL, bi_last },
-    { "length",     NULL, bi_length },
+    { "length",     "l",  bi_length },
+    { "butlast",    "l",  bi_butlast },
+    { "last",       "l",  bi_last },
+    { "@",          "fl", bi_filter },
 
     { NULL, NULL }
 };

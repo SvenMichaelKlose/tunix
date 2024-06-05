@@ -3,7 +3,7 @@
 
 #ifndef STACK_SIZE
     #ifdef __CC65__
-        #define STACK_SIZE  1024
+        #define STACK_SIZE  2048
     #else
         #define STACK_SIZE  (64 * 1024)
     #endif
@@ -66,15 +66,15 @@ extern char * stack_end;
 extern char * tagstack;
 extern char * msg;
 extern bool lisp_break; // Tell evaluator to cancel.
+extern lispptr block_sym;
+extern lispptr return_sym;
+extern lispptr return_name;
+extern lispptr return_value;
+extern lispptr go_sym;
+extern lispptr go_tag;
 extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
-
-extern lispptr return_sym;
-extern lispptr return_value;
-extern lispptr return_name;
-extern lispptr go_sym;
-extern lispptr go_tag;
 extern lispptr delayed_eval;
 #ifdef __CC65__
 #pragma zpsym ("t")
@@ -91,6 +91,7 @@ extern lispptr delayed_eval;
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")
 #pragma zpsym ("arg2c")
+#pragma zpsym ("block_sym")
 #pragma zpsym ("return_sym")
 #pragma zpsym ("return_value")
 #pragma zpsym ("return_name")

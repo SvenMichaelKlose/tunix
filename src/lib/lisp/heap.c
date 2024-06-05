@@ -205,6 +205,12 @@ lisp_init ()
     EXPAND_UNIVERSE(t);
     delayed_eval = lisp_make_symbol ("%E", 2);
     EXPAND_UNIVERSE(delayed_eval);
+    block_sym   = lisp_make_symbol ("block", 5);
+    EXPAND_UNIVERSE(block_sym);
+    return_sym  = lisp_make_symbol (NULL, 0);
+    EXPAND_UNIVERSE(return_sym);
+    go_sym      = lisp_make_symbol (NULL, 0);
+    EXPAND_UNIVERSE(go_sym);
 
     // Init input.
     do_putback = false;

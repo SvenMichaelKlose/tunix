@@ -27,6 +27,13 @@ lispptr value;
 struct builtin * bfun;
 lispptr va;
 lispptr delayed_eval;
+lispptr block_sym;
+lispptr return_sym;
+lispptr return_name;
+lispptr return_value;
+lispptr go_sym;
+lispptr go_tag;
+bool tag_found;
 bool lisp_break;
 uchar c;
 extern char * msg;
@@ -43,6 +50,13 @@ extern char * msg;
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
 #pragma zpsym ("delayed_eval")
+#pragma zpsym ("block_sym")
+#pragma zpsym ("return_sym")
+#pragma zpsym ("return_name")
+#pragma zpsym ("return_value")
+#pragma zpsym ("go_sym")
+#pragma zpsym ("go_tag")
+#pragma zpsym ("tag_found")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("c")
 #pragma zpsym ("msg")
@@ -77,7 +91,6 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
-    // Cons
     case 'c': // cons
         if (!CONSP(x)) {
             msg = "Cons expected.";
@@ -86,7 +99,6 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
-    // Lists
     case 'l': // list (cons or nil)
         if (!LISTP(x)) {
             msg = "List expected.";
@@ -95,8 +107,7 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
-    // Lists
-    case 'f': // list (cons or nil)
+    case 'f': // function
         if (!LISTP(x) && !BUILTINP(x)) {
             msg = "Function expected.";
             bierror ();
@@ -150,7 +161,8 @@ eval_list (void)
 #define TAG_BARG_NEXT       1
 #define TAG_ARG_NEXT        2
 #define TAG_CONTINUE_BODY   3
-#define TAG_ARG             4
+#define TAG_CONTINUE_BLOCK  4
+#define TAG_ARG             5
 
 char * badef;
 uchar na;
@@ -176,6 +188,64 @@ do_eval:
     x = CAR(x);
     arg1 = eval ();
     POP(x);
+
+    // Do BLOCK.
+    if (arg1 == block_sym) {
+        x = CDR(x);
+        if (!CONSP(x)) {
+            msg = "No name.";
+            bierror ();
+        }
+        arg1 = CAR(x);
+
+        if (!SYMBOLP(arg1)) {
+            msg = "Name not a sym.";
+            bierror ();
+        }
+        arg2c = CDR(x);
+
+        value = nil;
+block_statement:
+        if (lisp_break)
+            goto got_value;
+        x = CDR(x);
+        if (!x)
+            goto got_value;
+        PUSH(arg1);
+        PUSH(arg2c);
+        PUSH(x);
+        x = CAR(x);
+        PUSH_TAG(TAG_CONTINUE_BLOCK);
+        goto do_eval;
+next_block_statement:
+        POP(x);
+        POP(arg2c);
+        POP(arg1);
+
+        // Handle GO.
+        if (value == go_sym) {
+            // Search tag in body.
+            value = nil;
+            tag_found = false;
+            TYPESAFE_DOLIST(x, arg2c)
+                if (CAR(x) == go_tag)
+                    goto block_statement;
+            if (!tag_found) {
+                error ("Tag not found.");
+                goto got_value;
+            }
+        }
+
+        if (value == return_sym) {
+            if (arg1 == return_name) {
+                value = return_value;
+                return_value = nil;
+                goto got_value;
+            }
+            goto got_value;
+        }
+        goto block_statement;
+    }
 
     args = CDR(x);
 
@@ -250,7 +320,6 @@ do_builtin_arg:
         x = CAR(args);
         PUSH_TAG(TAG_BARG_NEXT);
         goto do_eval;
-
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
@@ -344,7 +413,6 @@ do_argument:
         PUSH_TAG(TAG_ARG_NEXT);
         x = CAR(args);
         goto do_eval;
-
         // Step to next argument.
 next_arg:
         // Restore state.
@@ -379,8 +447,7 @@ do_body:
     PUSH_TAG(TAG_CONTINUE_BODY);
     x = CAR(x);
     goto do_eval;
-
-next_in_body:
+next_body_statement:
     POP(x);
     goto do_body;
 
@@ -412,7 +479,9 @@ got_value:
         case TAG_BARG_NEXT:
             goto next_builtin_arg;
         case TAG_CONTINUE_BODY:
-            goto next_in_body;
+            goto next_body_statement;
+        case TAG_CONTINUE_BLOCK:
+            goto next_block_statement;
         }
 #ifndef NDEBUG
         errouts ("Internal error: ");

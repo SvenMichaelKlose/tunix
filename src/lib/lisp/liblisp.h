@@ -8,6 +8,7 @@
         #define STACK_SIZE  (64 * 1024)
     #endif
 #endif
+#define TAGSTACK_SIZE  2048
 #define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;

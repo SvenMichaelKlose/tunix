@@ -277,8 +277,8 @@ bi_atom (void)
 lispptr
 bi_symbolp (void)
 {
-    msg = "(symbol? x)";
-    ensure_one_arg ();
+    if (!arg1)
+        return t;
     return SYMBOLP(arg1) ? arg1 : nil;
 }
 
@@ -345,8 +345,6 @@ bi_quote (void)
 lispptr
 bi_consp (void)
 {
-    msg = "(cons? x)";
-    ensure_one_arg ();
     return BOOL(CONSP(arg1));
 }
 
@@ -393,8 +391,6 @@ bi_setcdr (void)
 lispptr
 bi_numberp (void)
 {
-    msg = "(number? x)";
-    ensure_one_arg ();
     return NUMBERP(arg1) ? arg1 : nil;
 }
 
@@ -734,8 +730,6 @@ bi_read (void)
 lispptr
 bi_print (void)
 {
-    msg = "(print x)";
-    ensure_one_arg ();
     return lisp_print (arg1);
 }
 
@@ -811,7 +805,9 @@ bi_out (void)
 {
     msg = "(out n/s)";
     ensure_one_arg ();
-    if (NUMBERP(arg1))
+    if (!arg1)
+        outs ("nil");
+    else if (NUMBERP(arg1))
         out (NUMBER_VALUE(arg1));
     else if (SYMBOLP(arg1))
         outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
@@ -1009,9 +1005,9 @@ struct builtin builtins[] = {
     { "not",        NULL, bi_not },
     { "eq",         NULL, bi_eq },
     { "atom",       NULL, bi_atom },
-    { "cons?",      NULL, bi_consp },
-    { "number?",    NULL, bi_numberp },
-    { "symbol?",    NULL, bi_symbolp },
+    { "cons?",      "x", bi_consp },
+    { "number?",    "x", bi_numberp },
+    { "symbol?",    "x", bi_symbolp },
 
     { "=",          NULL, bi_setq },
     { "value",      NULL, bi_symbol_value },
@@ -1049,7 +1045,7 @@ struct builtin builtins[] = {
     { "sys",        NULL, bi_sys },
 
     { "read",       NULL, bi_read },
-    { "print",      NULL, bi_print },
+    { "print",      "x", bi_print },
     { "open",       NULL, bi_open },
     { "err",        "", bi_err },
     { "eof",        "", bi_eof },

@@ -94,7 +94,10 @@ error (char * msg)
     lisp_break = true;
     setout (STDERR);
     outs ("ERROR: ");
-    outs (msg);
+    if (msg) {
+        outs (msg);
+        msg = NULL;
+    }
     lisp_print (x);
     terpri ();
     lisp_repl ();
@@ -401,7 +404,7 @@ bi_numberp (void)
 }
 
 lispptr
-bi_equal (void)
+bi_number_equal (void)
 {
     msg = "(== n n)";
     ensure_two_numbers ();
@@ -447,19 +450,11 @@ fun_name (void) \
     return lisp_make_number (NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
 }
 
-DEFARITH(bi_add, +=, "(+ n n)");
-DEFARITH(bi_sub, -=, "(- n n)");
-DEFARITH(bi_mul, *=, "(* n n)");
-DEFARITH(bi_div, /=, "(/ n n)");
-//DEFARITH(bi_mod, %=, "(% n n)");
-
-lispptr
-bi_mod (void)
-{
-    msg = "(% n n)";
-    ensure_two_numbers ();
-    return lisp_make_number (NUMBER_VALUE(arg1) % NUMBER_VALUE(arg2));
-}
+DEFARITH(bi_add, +, "(+ n n)");
+DEFARITH(bi_sub, -, "(- n n)");
+DEFARITH(bi_mul, *, "(* n n)");
+DEFARITH(bi_div, /, "(/ n n)");
+DEFARITH(bi_mod, %, "(% n n)");
 
 lispptr
 bi_inc (void)
@@ -670,10 +665,7 @@ bi_return (void)
 lispptr
 bi_go (void)
 {
-    msg = "(go tag)";
-    if (!x || !CONSP(x) || CDR(x))
-        bierror ();
-    go_tag = CAR(x);
+    go_tag = arg1;
     return go_sym;
 }
 
@@ -757,20 +749,12 @@ bi_print (void)
 lispptr
 bi_err (void)
 {
-    if (x) {
-        msg = "(err)";
-        bierror ();
-    }
     return lisp_make_number (err ());
 }
 
 lispptr
 bi_eof (void)
 {
-    if (x) {
-        msg = "(eof)";
-        bierror ();
-    }
     return BOOL(eof ());
 }
 
@@ -819,20 +803,12 @@ bi_setout (void)
 lispptr
 bi_in (void)
 {
-    if (x) {
-        msg = "(in)";
-        bierror ();
-    }
     return lisp_make_number (in ());
 }
 
 lispptr
 bi_putback (void)
 {
-    if (x) {
-        msg = "(putback)";
-        bierror ();
-    }
     putback ();
     return nil;
 }
@@ -854,10 +830,6 @@ bi_out (void)
 lispptr
 bi_terpri (void)
 {
-    if (x) {
-        msg = "(terpri)";
-        bierror ();
-    }
     terpri ();
     return nil;
 }
@@ -949,10 +921,6 @@ bi_var (void)
 lispptr
 bi_universe (void)
 {
-    if (x) {
-        msg = "(universe)";
-        bierror ();
-    }
     return universe;
 }
 
@@ -1033,7 +1001,7 @@ bi_filter (void)
 }
 
 struct builtin builtins[] = {
-    { "quote",      NULL, bi_quote },
+    { "quote",      "'x", bi_quote },
 
     { "apply",      NULL, bi_apply },
     { "eval",       NULL, bi_eval },
@@ -1043,7 +1011,7 @@ struct builtin builtins[] = {
     { "or",         NULL, bi_or },
     { "block",      NULL, bi_block },
     { "return",     NULL, bi_return },
-    { "go",         NULL, bi_go },
+    { "go",         "'x", bi_go },
 
     { "not",        NULL, bi_not },
     { "eq",         NULL, bi_eq },
@@ -1062,7 +1030,7 @@ struct builtin builtins[] = {
     { "setcar",     NULL, bi_setcar },
     { "setcdr",     NULL, bi_setcdr },
 
-    { "==",         NULL, bi_equal },
+    { "==",         NULL, bi_number_equal },
     { ">",          NULL, bi_gt },
     { "<",          NULL, bi_lt },
     { ">=",         NULL, bi_gte },
@@ -1072,7 +1040,7 @@ struct builtin builtins[] = {
     { "-",          "nn", bi_sub },
     { "*",          "nn", bi_mul },
     { "/",          "nn", bi_div },
-    { "%",          NULL, bi_mod },
+    { "%",          "nn", bi_mod },
     { "++",         NULL, bi_inc },
     { "--",         NULL, bi_dec },
 
@@ -1090,21 +1058,21 @@ struct builtin builtins[] = {
     { "read",       NULL, bi_read },
     { "print",      NULL, bi_print },
     { "open",       NULL, bi_open },
-    { "err",        NULL, bi_err },
-    { "eof",        NULL, bi_eof },
-    { "in",         NULL, bi_in },
+    { "err",        "", bi_err },
+    { "eof",        "", bi_eof },
+    { "in",         "", bi_in },
     { "out",        NULL, bi_out },
-    { "terpri",     NULL, bi_terpri },
+    { "terpri",     "", bi_terpri },
     { "setin",      NULL, bi_setin },
     { "setout",     NULL, bi_setout },
-    { "putback",    NULL, bi_putback },
+    { "putback",    "", bi_putback },
     { "close",      NULL, bi_close },
     { "load",       NULL, bi_load },
 
     { "fn",         NULL, bi_fn },
     { "var",        NULL, bi_var },
-    { "universe",   NULL, bi_universe },
-    { "gc",         NULL, bi_gc },
+    { "universe",   "", bi_universe },
+    { "gc",         "", bi_gc },
     { "exit",       NULL, bi_exit },
 
     { "@",          NULL, bi_filter },

@@ -1,8 +1,3 @@
-(out "TUNIX Lisp v0.0.1")(terpri)
-(out "http://copei.de/tunix")(terpri)
-(terpri)
-(out "Type (universe) to see the list of defined symbols.")(terpri)
-(terpri)
 (out "Loading environment.")(terpri)
 (out "Please wait...")(terpri)
 

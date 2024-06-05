@@ -16,6 +16,7 @@ char * stack_start;
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr tmp;
+extern char * msg;
 lispptr x;
 lispptr args;
 char * stack;
@@ -36,9 +37,12 @@ lispptr go_tag;
 bool tag_found;
 bool lisp_break;
 uchar c;
-extern char * msg;
+char * badef;
+uchar na;
+bool unevaluated;
 #ifdef __CC65__
 #pragma zpsym ("tmp")
+#pragma zpsym ("msg")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
 #pragma zpsym ("stack")
@@ -59,7 +63,9 @@ extern char * msg;
 #pragma zpsym ("tag_found")
 #pragma zpsym ("lisp_break")
 #pragma zpsym ("c")
-#pragma zpsym ("msg")
+#pragma zpsym ("badef")
+#pragma zpsym ("na")
+#pragma zpsym ("unevaluated")
 #pragma bss-name (pop)
 #endif
 
@@ -163,10 +169,6 @@ eval_list (void)
 #define TAG_CONTINUE_BODY   3
 #define TAG_CONTINUE_BLOCK  4
 #define TAG_ARG             5
-
-char * badef;
-uchar na;
-bool unevaluated;
 
 lispptr
 eval0 (void)

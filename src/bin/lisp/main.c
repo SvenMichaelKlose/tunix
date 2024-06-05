@@ -24,16 +24,10 @@ lispptr lisp_fnin;
 lispptr lisp_fnout;
 char * msg;
 lispptr quote;
-lispptr return_sym;
-lispptr return_name;
-lispptr return_value;
-lispptr go_sym;
-lispptr go_tag;
 extern lispptr tmp;
 int len;
 lispptr b;
 lispptr tag;
-bool    tag_found;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("value")
@@ -44,16 +38,10 @@ bool    tag_found;
 #pragma zpsym ("lisp_fnout")
 #pragma zpsym ("msg")
 #pragma zpsym ("quote")
-#pragma zpsym ("return_sym")
-#pragma zpsym ("return_name")
-#pragma zpsym ("return_value")
-#pragma zpsym ("go_sym")
-#pragma zpsym ("go_tag")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
 #pragma zpsym ("b")
 #pragma zpsym ("tag")
-#pragma zpsym ("tag_found")
 #pragma bss-name (pop)
 #endif
 
@@ -374,62 +362,6 @@ bi_apply (void)
         args = CAR(tmp);
     x = lisp_make_cons (arg1, args);
     return funcall ();
-}
-
-lispptr
-bi_block (void)
-{
-    msg = "(block name . exprs)";
-    if (!CONSP(x))
-        bierror ();
-    arg1 = CAR(x);
-    if (!SYMBOLP(arg1)) {
-        msg = "(block name . exprs)";
-        bierror ();
-    }
-    arg2c = CDR(x);
-
-    DOLIST(b, arg2c) {
-        if (lisp_break)
-            return nil;
-
-        PUSH(arg1);
-        PUSH(arg2c);
-        PUSH(b);
-        x = CAR(b);
-        value = eval ();
-        POP(b);
-        POP(arg2c);
-        POP(arg1);
-
-        // Handle GO.
-        if (value == go_sym) {
-            // Search tag in body.
-            value = nil;
-            tag_found = false;
-            TYPESAFE_DOLIST(b, arg2c) {
-                if (CAR(b) == go_tag) {
-                    tag_found = true;
-                    break;
-                }
-            }
-            if (!tag_found) {
-                error ("Tag not found.");
-                return nil;
-            }
-        }
-
-        // Handle RETURN.
-        if (value == return_sym) {
-            if (arg1 == return_name) {
-                tmp = return_value;
-                return_value = nil;
-                return tmp;
-            }
-            return value;
-        }
-    }
-    return value;
 }
 
 lispptr
@@ -757,7 +689,6 @@ struct builtin builtins[] = {
     { "?",          NULL, bi_if },
     { "and",        NULL, bi_and },
     { "or",         NULL, bi_or },
-    { "block",      NULL, bi_block },
     { "return",     NULL, bi_return },
     { "go",         "'x", bi_go },
 
@@ -831,16 +762,6 @@ struct builtin builtins[] = {
     { NULL, NULL }
 };
 
-void
-init_builtins (void)
-{
-    return_sym  = lisp_make_symbol (NULL, 0);
-    go_sym      = lisp_make_symbol (NULL, 0);
-    EXPAND_UNIVERSE(return_sym);
-    EXPAND_UNIVERSE(go_sym);
-    add_builtins (builtins);
-}
-
 lispptr
 lisp_repl ()
 {
@@ -872,7 +793,7 @@ main (int argc, char * argv[])
     if (!lisp_init ())
         error ("No memory.");
 
-    init_builtins ();
+    add_builtins (builtins);
 
     // Prepare QUOTE.
     quote      = lisp_make_symbol ("quote", 5);

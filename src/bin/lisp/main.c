@@ -680,6 +680,12 @@ bi_filter (void)
     return start;
 }
 
+lispptr
+bi_debug (void)
+{
+    return nil;
+}
+
 struct builtin builtins[] = {
     { "quote",      "'x", bi_quote },
 
@@ -758,6 +764,8 @@ struct builtin builtins[] = {
     { "butlast",    "l",  bi_butlast },
     { "last",       "l",  bi_last },
     { "@",          "fl", bi_filter },
+
+    { "debug",      "",   bi_debug },
 
     { NULL, NULL }
 };

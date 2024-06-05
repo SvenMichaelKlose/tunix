@@ -8,8 +8,6 @@
 
 extern void error (char *);
 
-void debug (void) { }
-
 char * stack_start;
 
 #ifdef __CC65__

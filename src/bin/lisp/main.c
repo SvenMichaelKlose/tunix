@@ -339,12 +339,7 @@ bi_string (void)
 lispptr
 bi_quote (void)
 {
-    if (!CONSP(x)
-        || CDR(x)) {
-        msg = "(quote x)";
-        bierror ();
-    }
-    return CAR(x);
+    return arg1;
 }
 
 lispptr
@@ -549,8 +544,6 @@ bi_sys (void)
 lispptr
 bi_eval (void)
 {
-    msg = "(eval x)";
-    ensure_one_arg ();
     x = arg1;
     return eval ();
 }
@@ -1004,7 +997,7 @@ struct builtin builtins[] = {
     { "quote",      "'x", bi_quote },
 
     { "apply",      NULL, bi_apply },
-    { "eval",       NULL, bi_eval },
+    { "eval",       "x", bi_eval },
 
     { "?",          NULL, bi_if },
     { "and",        NULL, bi_and },

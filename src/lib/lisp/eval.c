@@ -145,9 +145,8 @@ eval_list (void)
 #define TAG_DONE            0
 #define TAG_BARG_NEXT       1
 #define TAG_ARG_NEXT        2
-#define TAG_ARG_LAST        3
-#define TAG_CONTINUE_BODY   4
-#define TAG_ARG             5
+#define TAG_CONTINUE_BODY   3
+#define TAG_ARG             4
 
 char * badef;
 lispptr * a;
@@ -184,6 +183,10 @@ do_eval:
             goto got_value;
         }
 
+// Call built-in with argument definition.  Pushes the evaluated
+// values onto the stack and pops them into arg1/arg2 before doing
+// the call.
+
         na = 0;
 
 do_builtin_arg:
@@ -200,7 +203,6 @@ do_builtin_arg:
                 goto got_value;
             }
 
-            // Pop evaluated to arg1 and arg2.
             if (na == 1)
                 POP(arg1);
             else if (na == 2) {
@@ -209,7 +211,6 @@ do_builtin_arg:
             }
 
             // And call the built-in...
-            fresh_line ();
             value = bfun->func ();
             goto got_value;
         }
@@ -233,12 +234,10 @@ do_builtin_arg:
             goto save_builtin_arg_value;
         }
 
-        // Save evaulator state.
+        // Evaluate argument inline.
         PUSH(args);
         PUSH_TAGW(badef);
         PUSH_TAG(na);
-
-        // Prepare evaluation and return.
         x = CAR(args);
         PUSH_TAG(TAG_BARG_NEXT);
         goto do_eval;
@@ -253,15 +252,19 @@ save_builtin_arg_value:
         // Ensure the type is wanted.
         bi_tcheck (value, *badef++);
 
-        // Save evaluated value on the GC stack to move
-        // it to 'arg1' and 'arg2' when finished with all
-        // arguments.
+        // Save evaluated value on the GC stack to move it to 'arg1'
+        // and 'arg2' when finished with all arguments.
         PUSH(value);
 
         // Step to next argument.
         args = CDR(args);
         goto do_builtin_arg;
     }
+
+// Call user-defined function.  Saves argument names and their old
+// values on the stack and overwrites the names' symbol values with
+// evaluated ones.  The old values are popped off the stack when the
+// function body has been executed.
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
@@ -275,8 +278,6 @@ save_builtin_arg_value:
     // Init argument list evaluation.
     PUSH_TAG(TAG_DONE);
     defs = FUNARGS(arg1);
-    if (!defs && !args)
-        goto start_body;
 
     // Evaluate arguments to user-defined function.
 do_argument:
@@ -286,13 +287,11 @@ do_argument:
         if (defs) {
             errouts ("Argument(s) missing: ");
             lisp_print (defs);
-        } else {
+        } else if (args) {
             errouts ("Too many arguments: ");
             lisp_print (args);
         }
-        lisp_break = true;
-        value = nil;
-        goto got_value;
+        goto start_body;
     }
  
     // Rest of argument list. (consing)
@@ -328,22 +327,16 @@ do_argument:
     if (unevaluated) {
         value = CAR(args);
     } else {
-        // Save variable on the GC stack.
         PUSH(arg1);
         PUSH(defs);
-
-        // Prepare round of evaluation.
-        if (CDR(defs) || CDR(args)) {
-            PUSH(args);
-            PUSH_TAG(TAG_ARG_NEXT);
-        } else
-            PUSH_TAG(TAG_ARG_LAST);
+        PUSH(args);
+        PUSH_TAG(TAG_ARG_NEXT);
         x = CAR(args);
         goto do_eval;
 
         // Step to next argument.
-    next_arg:
-        // Restore variables.
+next_arg:
+        // Restore state.
         POP(args);
         POP(defs);
         POP(arg1);
@@ -358,17 +351,7 @@ do_argument:
     args = CDR(args);
     goto do_argument;
 
-    // Handle last argument.
-arg_last:
-    // Restore variables.
-    POP(defs);
-    POP(arg1);
-
-    // Replace argument symbol value with evaluated one.
-    name = CAR(defs);
-    SET_SYMBOL_VALUE(name, value);
-
-    // Eavluate body.
+    // Evaluate body.
 start_body:
     x = FUNBODY(arg1);
 
@@ -420,8 +403,6 @@ got_value:
             goto next_builtin_arg;
         case TAG_CONTINUE_BODY:
             goto next_in_body;
-        case TAG_ARG_LAST:
-            goto arg_last;
         }
 #ifndef NDEBUG
         errouts ("Internal error: ");
@@ -436,15 +417,32 @@ got_value:
 lispptr
 eval ()
 {
+#ifndef NDEBUG
+    lispptr r;
+    char * old_tagstack = tagstack;
+#endif
     unevaluated = false;
     PUSH_TAG(TAG_DONE);
+#ifdef NDEBUG
     return eval0 ();
+#else
+    r = eval0 ();
+    if (old_tagstack != tagstack) {
+        setout (STDERR);
+        outs ("Internal error: tag stack: ");
+        out_number ((long) (old_tagstack - tagstack));
+        outs ("bytes off origin."); terpri ();
+        while (1);
+    }
+    return r;
+#endif // #ifdef NDEBUG
 }
 
 lispptr
 funcall ()
 {
     unevaluated = true;
+    // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }

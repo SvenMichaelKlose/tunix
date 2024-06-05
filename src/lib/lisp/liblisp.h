@@ -171,7 +171,7 @@ extern bool FASTCALL lisp_consp (lispptr);
 #define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
 #define LISTP(x)     (!(x) || CONSP(x))
 #define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   ((x) && TYPE(x) == TYPE_SYMBOL)
+#define SYMBOLP(x)   (!x || TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 
 #define NUMBER(n)              ((number *) (n))

@@ -51,21 +51,17 @@ extern char * msg;
 
 extern void bierror (void);
 
-// Type-check arguments to built-in function using their
-// character-based argument type list.
+// Type-check object.
 void
 bi_tcheck (lispptr x, uchar type)
 {
-    (void) x;
-    (void) type;
-    switch (type) {
+    (void) x, (void) type;
 
-    // Any object.
-    case 'x':
+    switch (type) {
+    case 'x': // anything
         return;
 
-    // Numbers.
-    case 'n':
+    case 'n': // number
         if (!NUMBERP(x)) {
             msg = "Number expected.";
             bierror ();
@@ -73,8 +69,7 @@ bi_tcheck (lispptr x, uchar type)
         }
         return;
 
-    // Symbols.
-    case 's':
+    case 's': // symbol
         if (!SYMBOLP(x)) {
             msg = "Symbol expected.";
             bierror ();
@@ -83,7 +78,7 @@ bi_tcheck (lispptr x, uchar type)
         return;
 
     // Cons
-    case 'c':
+    case 'c': // cons
         if (!CONSP(x)) {
             msg = "Cons expected.";
             bierror ();
@@ -92,7 +87,7 @@ bi_tcheck (lispptr x, uchar type)
         return;
 
     // Lists
-    case 'l':
+    case 'l': // list (cons or nil)
         if (!LISTP(x)) {
             msg = "List expected.";
             bierror ();
@@ -149,7 +144,6 @@ eval_list (void)
 #define TAG_ARG             4
 
 char * badef;
-lispptr * a;
 uchar na;
 bool unevaluated;
 
@@ -157,6 +151,9 @@ lispptr
 eval0 (void)
 {
 do_eval:
+    if (!x)
+        goto got_value;
+
     // Evaluate atom.
     if (ATOM(x)) {
         value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;

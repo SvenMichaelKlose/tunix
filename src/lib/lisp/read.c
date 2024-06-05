@@ -1,6 +1,7 @@
 #include <ingle/cc65-charmap.h>
 
 #include <ctype.h>
+#include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -66,9 +67,13 @@ lispptr
 read_symbol ()
 {
     char * p;
+    unsigned char len;
     for (p = buffer; !eof () && our_isalpha (in ()); p++)
         *p = last_in;
     putback ();
+    len = p - buffer;
+    if (len == 3 && !memcmp (buffer, "nil", 3))
+        return nil;
     return lisp_make_symbol (buffer, p - buffer);
 }
 

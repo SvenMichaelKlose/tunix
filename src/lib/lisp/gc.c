@@ -21,7 +21,7 @@ mark (lispptr x)
             mark (x);
             mark (CAR(x));
         }
-        if (SYMBOLP(x))
+        if (x && SYMBOLP(x))
             mark (SYMBOL_VALUE(x));
     }
 }

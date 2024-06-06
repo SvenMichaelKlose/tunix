@@ -166,7 +166,6 @@ eval_list (void)
 #define TAG_ARG_NEXT        2
 #define TAG_CONTINUE_BODY   3
 #define TAG_CONTINUE_BLOCK  4
-#define TAG_ARG             5
 
 lispptr
 eval0 (void)
@@ -174,13 +173,13 @@ eval0 (void)
 do_eval:
     if (!x) {
         value = nil;
-        goto got_value;
+        goto do_return;
     }
 
     // Evaluate atom.
     if (ATOM(x)) {
         value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
-        goto got_value;
+        goto do_return;
     }
 
     // Evaluate function.
@@ -207,10 +206,10 @@ do_eval:
         value = nil;
 block_statement:
         if (lisp_break)
-            goto got_value;
+            goto do_return;
         x = CDR(x);
         if (!x)
-            goto got_value;
+            goto do_return;
         PUSH(arg1);
         PUSH(arg2c);
         PUSH(x);
@@ -232,7 +231,7 @@ next_block_statement:
                     goto block_statement;
             if (!tag_found) {
                 error ("Tag not found.");
-                goto got_value;
+                goto do_return;
             }
         }
 
@@ -240,9 +239,9 @@ next_block_statement:
             if (arg1 == return_name) {
                 value = return_value;
                 return_value = nil;
-                goto got_value;
+                goto do_return;
             }
-            goto got_value;
+            goto do_return;
         }
         goto block_statement;
     }
@@ -259,7 +258,7 @@ next_block_statement:
             // No definition.  Call with unevaluated args.
             x = args;
             value = bfun->func ();
-            goto got_value;
+            goto do_return;
         }
 
 // Call built-in with argument definition.  Pushes the
@@ -280,7 +279,7 @@ do_builtin_arg:
                 bierror ();
                 lisp_print (args);
                 while (1);
-                goto got_value;
+                goto do_return;
             }
 
             if (na == 1)
@@ -293,14 +292,14 @@ do_builtin_arg:
             // And call the built-in...
             POP_TAGW(bfun);
             value = bfun->func ();
-            goto got_value;
+            goto do_return;
         }
 
         // Complain about missing argument.
         if (!args) {
             msg = "Missing args to builtin.";
             bierror ();
-            goto got_value;
+            goto do_return;
         }
 
         // Now be have the argument in the head of 'args'
@@ -352,12 +351,12 @@ save_builtin_arg_value:
     if (ATOM(arg1)) {
         error ("Function expected, not: ");
         value = nil;
-        goto got_value;
+        goto do_return;
     }
 
     // Init argument list evaluation.
-    PUSH_TAG(TAG_DONE);
     defs = FUNARGS(arg1);
+    na = 0;
 
     // Evaluate arguments to user-defined function.
 do_argument:
@@ -373,23 +372,25 @@ do_argument:
         goto start_body;
     }
  
+    na++;
+
     // Rest of argument list. (consing)
     if (ATOM(defs)) {
-        // Save old symbol value.
+        // Save old symbol value for return.
         PUSH(SYMBOL_VALUE(defs));
-        PUSH(defs);
-        PUSH_TAG(TAG_ARG);
 
         if (unevaluated)
             value = x;
         else {
             // Evaluate rest of arguments.
+            PUSH_TAG(na);
             PUSH(defs);
             PUSH(arg1);
             x = args;
             value = eval_list ();
             POP(arg1);
             POP(defs);
+            POP_TAG(na);
         }
 
         // Assign rest of arguments.
@@ -398,15 +399,13 @@ do_argument:
     }
 
     // Save old argument symbol value.
-    name = CAR(defs);
-    PUSH(SYMBOL_VALUE(name));
-    PUSH(name);
-    PUSH_TAG(TAG_ARG);
+    PUSH(SYMBOL_VALUE(CAR(defs)));
 
     if (unevaluated)
         value = CAR(args);
     else {
         // Save evaluator state.
+        PUSH_TAG(na);
         PUSH(arg1);
         PUSH(defs);
         PUSH(args);
@@ -420,11 +419,11 @@ next_arg:
         POP(args);
         POP(defs);
         POP(arg1);
+        POP_TAG(na);
     }
 
     // Replace argument symbol value with evaluated one.
-    name = CAR(defs);
-    SET_SYMBOL_VALUE(name, value);
+    SET_SYMBOL_VALUE(CAR(defs), value);
 
     // Step to next argument.
     defs = CDR(defs);
@@ -433,43 +432,40 @@ next_arg:
 
     // Evaluate body.
 start_body:
+    PUSH_TAG(na);
+    PUSH(FUNARGS(arg1));
     x = FUNBODY(arg1);
 
     // Evaluate body statement.
 do_body:
     // Break if out of statements or other reason.
     if (!x || lisp_break)
-        goto body_done;
+        goto restore_arguments;
 
     // Save rest of statements on the GC stack.
     PUSH(CDR(x));
 
     // Evaluate statement.
-    PUSH_TAG(TAG_CONTINUE_BODY);
     x = CAR(x);
+    PUSH_TAG(TAG_CONTINUE_BODY);
     goto do_eval;
 next_body_statement:
     POP(x);
     goto do_body;
 
-body_done:
+restore_arguments:
     // Restore argument symbol values.
-    while (POP_TAG(c) == TAG_ARG) {
-        POP(name);
-        POP(SYMBOL_VALUE(name));
+    POP(defs);
+    POP_TAG(na);
+    c = na;
+    while (c--) {
+        SET_SYMBOL_VALUE(CAR(defs), ((lispptr *)stack)[c]);
+        defs = CDR(defs);
     }
-
-#ifndef NDEBUG
-    if (c != TAG_DONE) {
-        errouts ("Internal error: ");
-        out_number (c);
-        outs ("TAG_DONE expected.");
-        while (1);
-    }
-#endif // #ifndef NDEBUG
+    stack += sizeof (lispptr) * na;
 
     // Dispatch value based on tag.
-got_value:
+do_return:
     if (value == delayed_eval)
         goto do_eval;
     POP_TAG(c);

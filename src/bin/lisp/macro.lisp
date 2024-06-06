@@ -1,3 +1,4 @@
+; Macros are regular functions that need to be listed here.
 (var *macros* nil)
 
 (fn macro? (s)
@@ -11,13 +12,22 @@
      (?
        (eq (car x) 'quote)
          x
-       (eq (car x) 'backquote)
+       (eq (car x) 'quasiquote)
          (macroexpand-unquote x)
        (@ macroexpand 
           (? (macro? (car x))
              (macroexpand (apply (car x) (cdr x)))
              x)))
      x))
+
+(fn copy (x)
+  (?
+    (atom x)
+      x
+    (cons? x)
+      (cons (car x) (cdr x))))
+
+(print (copy '(1 2 3 4)))
 
 (fn progn body
   $(block t
@@ -31,7 +41,7 @@
    (symbol)))
 
 (fn prog1 body
-  (with (g (symbol))
+  (let g (symbol)
     $(((,g)
         ,@(cdr body)
         ,g)

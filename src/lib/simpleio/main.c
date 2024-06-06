@@ -167,13 +167,6 @@ fresh_line (void)
 }
 
 void
-errouts (char * str)
-{
-    setout (STDERR);
-    outs (str);
-}
-
-void
 simpleio_set (simpleio * x)
 {
     io = x;

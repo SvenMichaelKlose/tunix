@@ -1,16 +1,4 @@
-(fn make-count (n)
-  (? (< 0 n)
-     (cons n (make-count (-- n)))))
-
-(fn block-test (c)
-  (out "Looping ")
-  (print c)
-  (out " times...")
-  (terpri)
-  (block nil
-    tag
-    (= c (-- c))
-    (? (== 0 (% c 100))
-       (print c))
-    (? (not (== c 0))
-       (go tag))))
+(load "test.lisp")
+(load "list.lisp")
+(load "macro.lisp")
+(print (gc))(out "B free.")(terpri)

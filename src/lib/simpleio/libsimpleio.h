@@ -55,8 +55,6 @@ extern void outsn (char *, char len);
 extern void terpri (void);
 extern void fresh_line (void);
 
-extern void errouts (char *);
-
 extern void simpleio_open (simpleio_chn_t, char * pathname, char mode);
 extern void simpleio_close (simpleio_chn_t);
 extern void simpleio_init ();

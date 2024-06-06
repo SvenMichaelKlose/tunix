@@ -70,7 +70,8 @@ objsize (char * x)
     unsigned s;
 #ifndef NDEBUG
     if (type > TYPE_MAX) {
-        errouts ("No size for type ");
+        setout (STDERR);
+        outs ("No size for type ");
         out_number (type);
         while (1);
     }

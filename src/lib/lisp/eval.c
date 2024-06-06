@@ -368,10 +368,12 @@ do_argument:
     // End of arguments.
     if (!defs || !args) {
         if (defs) {
-            errouts ("Argument(s) missing: ");
+            setout (STDERR);
+            outs ("Argument(s) missing: ");
             lisp_print (defs);
         } else if (args) {
-            errouts ("Too many arguments: ");
+            setout (STDERR);
+            outs ("Too many arguments: ");
             lisp_print (args);
         }
         goto start_body;
@@ -491,7 +493,8 @@ do_return:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        errouts ("Internal error: ");
+        setout (STDERR);
+        outs ("Internal error: ");
         out_number (c);
         outs (": Unknown eval tag.");
         while (1);

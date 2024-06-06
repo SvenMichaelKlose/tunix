@@ -28,9 +28,9 @@
 (fn find (x l)
   (? (list? l)
      (? x
-       (? (eq x (car l))
-          x
-          (find x (cdr l))))
+        (? (eq x (car l))
+           x
+           (find x (cdr l))))
      (error)))
 
 (fn assoc (v x)

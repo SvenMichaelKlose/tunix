@@ -58,7 +58,7 @@ lispptr return_args;
 lispptr start;
 lispptr lastc;
 
-char load_fn = 10;
+char load_fn = 12;
 
 void
 error (char * msg)
@@ -519,16 +519,18 @@ load (char * pathname)
 {
     int oldin = fnin;
 
+    outs ("Loading '"); outs (pathname); outs ("'."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
     if (err ()) {
-        errouts ("Cannot open file ");
+        setout (STDERR);
+        outs ("Cannot open file ");
         error (pathname);
     }
     arg1 = lisp_make_number (load_fn);
     bi_setin ();
     load_fn++;
 
-    while (!lisp_break && (x = lisp_read ()))
+    while ((x = lisp_read ()) && !(lisp_break || err ()))
         eval ();
 
     load_fn--;
@@ -569,10 +571,8 @@ bi_var (void)
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);
-    PUSH(arg2c);
-    x = CAR(arg2c);
+    x = CDR(arg1);
     SET_SYMBOL_VALUE(arg1, eval ());
-    POP(arg2c);
     POP(arg1);
     return nil;
 }
@@ -720,7 +720,7 @@ struct builtin builtins[] = {
     { "load",       "s",  bi_load },
 
     { "fn",         NULL, bi_fn },
-    { "var",        "sx", bi_var },
+    { "var",        "'sx", bi_var },
     { "universe",   "",   bi_universe },
     { "gc",         "",   bi_gc },
     { "exit",       "n",  bi_exit },

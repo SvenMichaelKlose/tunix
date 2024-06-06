@@ -7,6 +7,7 @@ all: world mkfs/mkfs.ultifs ultimem_image c1541_image
 allworlds:
 	make clean all TARGET=c64
 	make clean all TARGET=c128
+	make clean all TARGET=c16
 	make clean all TARGET=pet
 	make clean all TARGET=plus4
 	make clean all TARGET=unix

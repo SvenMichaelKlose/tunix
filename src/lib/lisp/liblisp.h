@@ -1,6 +1,13 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+// # Compile-time option SLOW
+//
+// **Use only when desperate for smaller code size!**
+// Use functions instead of expressions to save code space
+// at the expense of performance (almost halved).
+//#define SLOW
+
 #ifndef STACK_SIZE
     #ifdef __CC65__
         #define STACK_SIZE  2048
@@ -150,16 +157,31 @@ extern lispptr delayed_eval;
 
 #define CAR(x)       (lisp_car (x))
 #define CDR(x)       (lisp_cdr (x))
+#define ATOM(x)      (lisp_atom (x))
 #define CONSP(x)     (lisp_consp (x))
+#define LISTP(x)     (lisp_listp (x))
+#define NUMBERP(x)   (lisp_numberp (x))
+#define SYMBOLP(x)   (lisp_symbolp (x))
+#define BUILTINP(x)  (lisp_builtinp (x))
 extern lispptr FASTCALL lisp_car (lispptr);
 extern lispptr FASTCALL lisp_cdr (lispptr);
+extern bool FASTCALL lisp_atom (lispptr);
 extern bool FASTCALL lisp_consp (lispptr);
+extern bool FASTCALL lisp_listp (lispptr);
+extern bool FASTCALL lisp_numberp (lispptr);
+extern bool FASTCALL lisp_symbolp (lispptr);
+extern bool FASTCALL lisp_builtinp (lispptr);
 
 #else // #ifdef SLOW
 
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
+#define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
 #define CONSP(x)     ((x) && TYPE(x) == TYPE_CONS)
+#define LISTP(x)     (!(x) || TYPE(x) == TYPE_CONS)
+#define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
+#define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
+#define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 
 #endif // #ifdef SLOW
 
@@ -169,12 +191,6 @@ extern bool FASTCALL lisp_consp (lispptr);
 #define SETCDR(x, v) (CONS(x)->cdr = v)
 
 #define BOOL(x)      ((x) ? t : nil)
-
-#define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
-#define LISTP(x)     (!(x) || CONSP(x))
-#define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
-#define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 
 #define NUMBER(n)              ((number *) (n))
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)

@@ -5,7 +5,7 @@ SOURCES = \
 	gc.c \
 	heap.c \
 	print.c \
+	slow.c \
 	read.c
-#COPTFLAGS=-O -Or
 
 include ../../mk/Makefile.build

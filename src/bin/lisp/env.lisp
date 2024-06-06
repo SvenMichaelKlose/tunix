@@ -1,6 +1,16 @@
-(out "Loading environment.")(terpri)
-(out "Please wait...")(terpri)
-(load "test.lisp")
-(debug)
-(make-count 10)
-(print (gc))(out " bytes free.")(terpri)
+(fn make-count (n)
+  (? (< 0 n)
+     (cons n (make-count (-- n)))))
+
+(fn block-test (c)
+  (out "Looping ")
+  (print c)
+  (out " times...")
+  (terpri)
+  (block nil
+    tag
+    (= c (-- c))
+    (? (== 0 (% c 100))
+       (print c))
+    (? (not (== c 0))
+       (go tag))))

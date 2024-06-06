@@ -65,6 +65,9 @@ extern struct builtin builtins[];
 #endif
 extern lispptr t;
 extern lispptr quote;
+extern lispptr quasiquote;
+extern lispptr unquote;
+extern lispptr unquote_spliced;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
@@ -87,6 +90,9 @@ extern lispptr delayed_eval;
 #ifdef __CC65__
 #pragma zpsym ("t")
 #pragma zpsym ("quote")
+#pragma zpsym ("quasiquote")
+#pragma zpsym ("unquote")
+#pragma zpsym ("unquote_spliced")
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")

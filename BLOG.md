@@ -3,16 +3,12 @@ TUNIX blog
 
 # 2024-06-06: Apps?
 
-Compilers are huge.  Something practical and/or impressive
-beforehand?
+I've "fixed" the stack use when calling user-defined
+functions but that didn't save as much stack as I expected.
+For MAKE-COUNT it only reduces the size of the tag stack.
 
-The C compiler will need an assembler anyhow and its of
-use long before the bits and pieces of a compiler have
-come together.  Chances are that there'll be a Lisp
-compiler much earlier.  And that brings it back to
-generating bytecode to target many machines, so the
-assembler should be re-targetable.  Something to foolishly
-hack along.
+The abbreviations for QUASIQUOTE ("$"), UNQUOTE (",") and
+UNQUOTE-SPLICED (",@") have been added.
 
 # 2024-06-06: Lisp: Heavy Lifting
 

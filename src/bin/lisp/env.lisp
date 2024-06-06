@@ -14,5 +14,3 @@
        (print c))
     (? (not (== c 0))
        (go tag))))
-
-(block-test 10000)

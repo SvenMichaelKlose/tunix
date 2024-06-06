@@ -18,7 +18,7 @@ our_isalpha (char c)
 }
 
 lispptr
-read_list ()
+read_list (void)
 {
     cons * c;
     cons * start = NULL;
@@ -53,7 +53,7 @@ read_list ()
 }
 
 lispptr
-read_number ()
+read_number (void)
 {
     char * p = buffer;
     for (p = buffer; !eof () && isdigit (in ()); p++)
@@ -64,7 +64,7 @@ read_number ()
 }
 
 lispptr
-read_symbol ()
+read_symbol (void)
 {
     char * p;
     unsigned char len;
@@ -78,7 +78,7 @@ read_symbol ()
 }
 
 lispptr
-read_string ()
+read_string (void)
 {
     char * p;
     for (p = buffer; !eof () && in () != '"'; p++)
@@ -93,6 +93,15 @@ lispptr
 read_quoted (lispptr which)
 {
     return lisp_make_cons (which, lisp_make_cons (lisp_read (), nil));
+}
+
+lispptr
+read_unquoted (void)
+{
+    if (in () == '@')
+        return read_quoted (unquote_spliced);
+    putback ();
+    return read_quoted (unquote);
 }
 
 lispptr
@@ -113,10 +122,14 @@ lisp_read ()
     }
     if (last_in == '(')
         return read_list ();
-    if (last_in == '\'')
-        return read_quoted (quote);
     if (last_in == '"')
         return read_string ();
+    if (last_in == '\'')
+        return read_quoted (quote);
+    if (last_in == '$')
+        return read_quoted (quasiquote);
+    if (last_in == ',')
+        return read_unquoted ();
     if (last_in == ')') {
         error ("Unexpected closing paren.");
         return nil;

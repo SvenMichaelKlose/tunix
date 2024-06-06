@@ -24,6 +24,9 @@ lispptr lisp_fnin;
 lispptr lisp_fnout;
 char * msg;
 lispptr quote;
+lispptr quasiquote;
+lispptr unquote;
+lispptr unquote_spliced;
 extern lispptr tmp;
 int len;
 lispptr b;
@@ -38,6 +41,9 @@ lispptr tag;
 #pragma zpsym ("lisp_fnout")
 #pragma zpsym ("msg")
 #pragma zpsym ("quote")
+#pragma zpsym ("quasiquote")
+#pragma zpsym ("unquote")
+#pragma zpsym ("unquote_spliced")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
 #pragma zpsym ("b")
@@ -762,9 +768,15 @@ main (int argc, char * argv[])
 
     add_builtins (builtins);
 
-    // Prepare QUOTE.
-    quote      = lisp_make_symbol ("quote", 5);
+    // Prepare quoting.
+    quote           = lisp_make_symbol ("quote", 5);
     EXPAND_UNIVERSE(quote);
+    quasiquote      = lisp_make_symbol ("quasiquote", 10);
+    EXPAND_UNIVERSE(quasiquote);
+    unquote         = lisp_make_symbol ("unquote", 7);
+    EXPAND_UNIVERSE(unquote);
+    unquote_spliced = lisp_make_symbol ("unquote-spliced", 15);
+    EXPAND_UNIVERSE(unquote_spliced);
 
     stdin      = lisp_make_symbol ("stdin", 5);
     stdout     = lisp_make_symbol ("stdout", 6);

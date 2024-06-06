@@ -19,21 +19,46 @@ classoption: [oneside]
 This is a Lisp interpreter for home computers with dynamic
 scope and compacting mark-and-sweep garbage collector.
 
-# Data types
+# Memory usage
 
-| Data type               | Bytes used on heap  |
-|-------------------------|---------------------|
-| cons                    | 5                   |
-| number (16 bit signed)  | 3                   |
-| symbol (also string)    | 2-257               |
-| builtin function        | 2 to 257            |
+Lisp objects are stored on a growing
+heap.
+
+## Heap
+
++
+| Data type               | heap      |
+|-------------------------|-----------|
+| cons                    | 5         |
+| number (32 bit signed)  | 5         |
+| symbol (also string)    | 2-257     |
+| builtin function        | 2 to 257  |
+
+TUNIX Lisp uses an object stack and an additional raw stack
+alongside the CPU stack (and the C compiler's stack on
+6502-CPU targets) to keep track of function calls.  Calls of
+built-in functions take much less stack.
+
+## Stacks
+
+| Call type     | tag stack bytes | GC stack words |
+|---------------|-----------------|----------------|
+| built-in      | 2               | ?              |
+| user-defined  | 2               | args + 1       |
+
+## Consing
+
+APPLY copies all but the last argument.  FUNCALL copies all
+arguments.
+
+# Data types
 
 Symbols have an immutable, case-sensitive name of up to 255
 bytes in length and a value to which they evaluate. They
 can be converted to and from lists of char numbers to
 facilitate strings.
-For convenience, symbols are printed in upper case
-throughout this manual.
+**For convenience, symbols are printed in upper case
+throughout this manual.**
 
 Functions are lists starting with an argument definition
 followed by statements.  The LAMBDA tag is not supported.
@@ -45,9 +70,11 @@ followed by statements.  The LAMBDA tag is not supported.
      (+ a ,x)))
 ~~~
 
-Types are written in short form in this manual and
+## Argument type definitions (of built-ins)
+
+**Types are written in short form in this manual and
 internally as argument definitions of built-in functions
-(without spaces).
+(without spaces).**
 
 | Code    | Type                                     |
 |---------|------------------------------------------|
@@ -115,24 +142,6 @@ a Lisp file instead of using built-in LOAD:
       (eval expr))
     last-result))
 ~~~
-
-# Error handling
-
-When an error occurs, a message is printed along with the
-object that caused the error and you end up in the debugger
-REPL shell.  You can return with a new object as an argument
-to built-in function QUIT.  In top-level command mode it
-understands these commands:
-
-| Command  | Description                           |
-|----------|---------------------------------------|
-| RETURN   | Step inside evaluation.               |
-| SPACE    | Step over evaluation.                 |
-| b [fun]  | Set breakpoint on function.           |
-| b        | List all breakpoints by number.       |
-| d n      | Delete breakpoint by number.          |
-| (        | Start a Lisp expression to evaluate.  |
-
 # Built-in functions
 
 ## Definitions
@@ -252,7 +261,7 @@ has to match.  It is NIL, if not added to RETURN.
 ~~~lisp
 (block foo
   'a
-  (return 'b 'foo)
+  (return 'b foo)
   'c) -> b
 ~~~
 
@@ -471,6 +480,24 @@ everything out that appeared later:
 | \*expand\*      | Name of acro expander.  |
 
 Usually user-defined MACROEXPAND.
+
+## Error handling
+
+When an error occurs, a message is printed along with the
+object that caused the error and you end up in the debugger
+REPL shell.  You can return with a new object as an argument
+to built-in function QUIT.  In top-level command mode it
+understands these commands:
+
+| Command  | Description                           |
+|----------|---------------------------------------|
+| RETURN   | Step inside evaluation.               |
+| SPACE    | Step over evaluation.                 |
+| b [fun]  | Set breakpoint on function.           |
+| b        | List all breakpoints by number.       |
+| d n      | Delete breakpoint by number.          |
+| (        | Start a Lisp expression to evaluate.  |
+
 
 ## Directory access
 

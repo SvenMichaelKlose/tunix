@@ -252,9 +252,10 @@ next_block_statement:
     // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
+        badef = bfun->argdef;
 
-        // Get built-in argument definition.
-        if (!(badef = bfun->argdef)) {
+        // Built-in without argument-definition.
+        if (!badef) {
             // No definition.  Call with unevaluated args.
             x = args;
             value = bfun->func ();
@@ -266,6 +267,7 @@ next_block_statement:
 // arg1/arg2 before doing the call.
 
         na = 0;
+        PUSH_TAGW(bfun);
 
 do_builtin_arg:
         c = *badef;
@@ -289,6 +291,7 @@ do_builtin_arg:
             }
 
             // And call the built-in...
+            POP_TAGW(bfun);
             value = bfun->func ();
             goto got_value;
         }
@@ -315,7 +318,6 @@ do_builtin_arg:
         // Evaluate argument inline.
         PUSH(args);
         PUSH_TAGW(badef);
-        PUSH_TAGW(bfun);
         PUSH_TAG(na);
         x = CAR(args);
         PUSH_TAG(TAG_BARG_NEXT);
@@ -323,7 +325,6 @@ do_builtin_arg:
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
-        POP_TAGW(bfun);
         POP_TAGW(badef);
         POP(args);
 

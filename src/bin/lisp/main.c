@@ -52,28 +52,6 @@ lispptr return_args;
 lispptr start;
 lispptr lastc;
 
-#ifdef SLOW
-
-lispptr FASTCALL
-lisp_car (lispptr x)
-{
-    return CONS(x)->car;
-}
-
-lispptr FASTCALL
-lisp_cdr (lispptr x)
-{
-    return CONS(x)->cdr;
-}
-
-bool FASTCALL
-lisp_consp (lispptr x)
-{
-    return TYPE(x) == TYPE_CONS;
-}
-
-#endif
-
 char load_fn = 10;
 
 void

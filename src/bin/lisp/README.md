@@ -104,12 +104,12 @@ Strings and chars have dedicated formats:
 
 READ also supports abbreviated forms:
 
-| Form                   | Short form                    |
-|------------------------|-------------------------------|
-| (quote x)              | 'x                            |
-| (backquote x)          | ^x (caret for compatibility)  |
-| (quasiquote x)         | ,x                            |
-| (quasiquote-splice x)  | ,@x                           |
+| Form                | Short form  |
+|---------------------|-------------|
+| (quote x)           | 'x          |
+| (quasiquote x)      | $x          |
+| (unquote x)         | ,x          |
+| (unquote-splice x)  | ,@x         |
 
 I/O is performed via a pair of channels, one for input, the
 other for output.  STDIN and STDOUT contain the default

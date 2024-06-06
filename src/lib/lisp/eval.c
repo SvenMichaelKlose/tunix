@@ -459,6 +459,11 @@ restore_arguments:
     POP_TAG(na);
     c = na;
     while (c--) {
+        if (ATOM(defs)) {
+            if (defs)
+                SET_SYMBOL_VALUE(defs, ((lispptr *)stack)[c]);
+            break;
+        }
         SET_SYMBOL_VALUE(CAR(defs), ((lispptr *)stack)[c]);
         defs = CDR(defs);
     }

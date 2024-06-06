@@ -1,11 +1,30 @@
 TUNIX blog
 ==========
 
-# 2024-05-05: Lisp: Smaller and slower
+# 2024-06-06: Lisp: Heavy Lifting
+
+The BLOCK special form is now part of the evaluator so it
+won't affect the CPU stack any more.  32-bit numbers are
+heavy lifting to a CPU-6502 already too busy with handling
+pointers.  Luckily for us numbers aren't used so often in
+symbolic languages.
+
+Argument evaluation of user-defined functions actually
+wastes stack.  That's trivial to fix (no biting one's own
+butt to be expected).  So macros can come.  Rest arguments,
+EVAL, APPLY and FUNCALL need some special care in order to
+not use CPU stack.
+
+Symbol look-up times look like a show-stopper.  Literally.
+Latest when doing inter-process communication with READ and
+PRINT or on-demand loading (via user-defined error handler).
+At least known symbols should get a turbo.
+
+# 2024-06-05: Lisp: Smaller and slower
 
 Most built-in functions now have an argument definition
 which reduced the code size by around 2K but performance
-dropped to 3:50min for the BLOCK-TEST.  A MAKE-COUNT upped to
+dropped to 3:40min for the BLOCK-TEST.  A MAKE-COUNT upped to
 83 (from 39).  The stack size will shrink further.
 
 # 2024-05-01: UNIX target + hand brake

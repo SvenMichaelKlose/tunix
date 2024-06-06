@@ -290,24 +290,29 @@ do_builtin_arg:
             }
 
             // And call the built-in...
+call_builtin:
             POP_TAGW(bfun);
             value = bfun->func ();
             goto do_return;
         }
 
-        // Complain about missing argument.
-        if (!args) {
+        na++;
+
+        // Optional argument.
+        if (c == '?') {
+            c =*++badef;
+            if (!args) {
+                PUSH(nil);
+                goto call_builtin;
+            }
+        } else if (!args) {
+            // Complain about missing argument.
             msg = "Missing args to builtin.";
             bierror ();
             goto do_return;
         }
 
-        // Now be have the argument in the head of 'args'
-        // and its wanted type in *badef.  Increment the
-        // argument count.
-        na++;
-
-        // Quick deal with unevaluated argument.
+        // Deal with unevaluated argument.
         if (c == '\'') {
             badef++;
             value = CAR(args);

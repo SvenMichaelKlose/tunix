@@ -367,17 +367,8 @@ bi_apply (void)
 lispptr
 bi_return (void)
 {
-    if (!CONSP(x)) {
-        msg = "(return x [name])";
-        bierror ();
-    }
-    // TODO: Re-use list.
-    PUSH(x);
-    x = CAR(x);
-    return_value = eval ();
-    POP(x);
-    x = LIST_CAR(LIST_CDR(x));
-    return_name = eval ();
+    return_value = arg1;
+    return_name = arg2;
     return return_sym;
 }
 
@@ -591,16 +582,6 @@ bi_fn (void)
 lispptr
 bi_var (void)
 {
-    msg = "(var name obj)";
-    if (!CONSP(x))
-        bierror ();
-    arg1 = CAR(x);
-    if (!SYMBOLP(arg1))
-        bierror ();
-    arg2c = CDR(x);
-    if (!CONSP(arg2c)
-        || CDR(arg2c))
-        bierror ();
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
     PUSH(arg1);
@@ -695,7 +676,7 @@ struct builtin builtins[] = {
     { "?",          NULL, bi_if },
     { "and",        NULL, bi_and },
     { "or",         NULL, bi_or },
-    { "return",     NULL, bi_return },
+    { "return",     "x?s", bi_return },
     { "go",         "'x", bi_go },
 
     { "not",        "x",  bi_not },
@@ -755,7 +736,7 @@ struct builtin builtins[] = {
     { "load",       "s",  bi_load },
 
     { "fn",         NULL, bi_fn },
-    { "var",        NULL, bi_var },
+    { "var",        "sx", bi_var },
     { "universe",   "",   bi_universe },
     { "gc",         "",   bi_gc },
     { "exit",       "n",  bi_exit },

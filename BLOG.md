@@ -1,6 +1,19 @@
 TUNIX blog
 ==========
 
+# 2024-06-06: Apps?
+
+Compilers are huge.  Something practical and/or impressive
+beforehand?
+
+The C compiler will need an assembler anyhow and its of
+use long before the bits and pieces of a compiler have
+come together.  Chances are that there'll be a Lisp
+compiler much earlier.  And that brings it back to
+generating bytecode to target many machines, so the
+assembler should be re-targetable.  Something to foolishly
+hack along.
+
 # 2024-06-06: Lisp: Heavy Lifting
 
 The BLOCK special form is now part of the evaluator so it

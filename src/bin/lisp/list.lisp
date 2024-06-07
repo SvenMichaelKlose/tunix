@@ -17,6 +17,17 @@
 (fn cddr (x)
   (cdr (cdr x)))
 
+(fn copy (x)
+  (? (cons? x)
+     (cons (car x) (cdr x))
+     x))
+
+(fn carlist (x)
+  (@ car x))
+
+(fn cdrlist (x)
+  (@ cdr x))
+
 (fn member (n x)
   (? (list? x)
      (? x

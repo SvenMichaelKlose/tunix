@@ -2,7 +2,8 @@
 (var *macros* nil)
 
 (fn macro? (s)
-  (find s *macros*))
+  (and (symbol? s)
+       (find s *macros*)))
 
 (fn macroexpand-unquote (x)
   x)
@@ -20,25 +21,20 @@
              x)))
      x))
 
-(fn copy (x)
-  (?
-    (atom x)
-      x
-    (cons? x)
-      (cons (car x) (cdr x))))
-
-(print (copy '(1 2 3 4)))
-
-(fn progn body
-  $(block t
-     ,@body))
+;(print (macroexpand '(1 2 3 4)))
 
 (fn let (n v . body)
-  (((g)
-     $(((,n)
-         ,@body
-       ,v)))
-   (symbol)))
+  $(((,n)
+      ,@body
+    ,v)))
+
+(fn with (inits . body)
+  $(((,(carlist inits))
+      ,@body)
+    ,@(cdrlist inits)))
+
+(fn progn body
+  $(block t ,@body))
 
 (fn prog1 body
   (let g (symbol)
@@ -48,21 +44,18 @@
       ,(car body))))
 
 (fn when (x . body)
-  $(? ,x
-      (progn
-        ,@body)))
+  $(? ,x (progn ,@body)))
 
 (fn unless (x . body)
-  $(? (not ,x)
-      (progn
-        ,@body)))
+  $(? ,x nil (progn ,@body)))
 
 (fn while (cond result . body)
   (let tag (symbol)
     $(block nil
-       (or ,cond
-           (return))
-       ,@body)))
+       ,tag
+       (or ,cond (return))
+       ,@body
+       (go ,tag))))
 
 (fn dolist (iter . body)
   (with (v    (car iter)
@@ -74,5 +67,12 @@
          (or ,v (return ,(car r)))
          ,tag
          ,body
-         (= ,v (cdr v))
+         (= ,v (cdr ,v))
          (go ,tag)))))
+
+(fn push (v l)
+  (= ,l (cons ,v ,l)))
+
+(fn pop (l)
+  (prog1 (car l)
+    (= ,l (cdr ,l))))

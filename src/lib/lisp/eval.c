@@ -69,6 +69,14 @@ bool unevaluated;
 
 extern void bierror (void);
 
+void
+err_type (char * type, lispptr x)
+{
+    outs (type); outs (" expected. Got: ");
+    lisp_print (x); terpri ();
+    error (NULL);
+}
+
 // Type-check object.
 void
 bi_tcheck (lispptr x, uchar type)
@@ -80,48 +88,33 @@ bi_tcheck (lispptr x, uchar type)
         return;
 
     case 'n': // number
-        if (!NUMBERP(x)) {
-            msg = "Number expected.";
-            bierror ();
-            while (1);
-        }
+        if (!NUMBERP(x))
+            err_type ("Number", x);
         return;
 
     case 's': // symbol
-        if (!SYMBOLP(x)) {
-            msg = "Symbol expected.";
-            bierror ();
-            while (1);
-        }
+        if (!SYMBOLP(x))
+            err_type ("Symbol", x);
         return;
 
     case 'c': // cons
-        if (!CONSP(x)) {
-            msg = "Cons expected.";
-            bierror ();
-            while (1);
-        }
+        if (!CONSP(x))
+            err_type ("Cons", x);
         return;
 
     case 'l': // list (cons or nil)
-        if (!LISTP(x)) {
-            msg = "List expected.";
-            bierror ();
-            while (1);
-        }
+        if (!LISTP(x))
+            err_type ("List", x);
         return;
 
     case 'f': // function
-        if (!LISTP(x) && !BUILTINP(x)) {
-            msg = "Function expected.";
-            bierror ();
-            while (1);
-        }
+        if (!LISTP(x) && !BUILTINP(x))
+            err_type ("Function", x);
         return;
 
 #ifndef NDEBUG
     default:
-        outs ("Developer error: '");
+        setout (STDERR);
         out (type);
         outs ("': unknown typedef");
         while (1);
@@ -282,6 +275,7 @@ do_builtin_arg:
                 goto do_return;
             }
 
+set_arg_values:
             if (na == 1)
                 POP(arg1);
             else if (na == 2) {
@@ -290,7 +284,6 @@ do_builtin_arg:
             }
 
             // And call the built-in...
-call_builtin:
             POP_TAGW(bfun);
             value = bfun->func ();
             goto do_return;
@@ -300,10 +293,10 @@ call_builtin:
 
         // Optional argument.
         if (c == '?') {
-            c =*++badef;
+            c = *++badef;
             if (!args) {
                 PUSH(nil);
-                goto call_builtin;
+                goto set_arg_values;
             }
         } else if (!args) {
             // Complain about missing argument.
@@ -311,12 +304,25 @@ call_builtin:
             bierror ();
             goto do_return;
         }
-
-        // Deal with unevaluated argument.
         if (c == '\'') {
-            badef++;
-            value = CAR(args);
+            // Deal with unevaluated argument.
+            c = *++badef;
+            if (c == '+') {
+                PUSH(args);
+                goto set_arg_values;
+            } else
+                value = CAR(args);
             goto save_builtin_arg_value;
+        } if (c == '+') {
+            PUSH(args);
+            PUSH_TAG(na);
+            x = args;
+            value = eval_list ();
+            POP_TAG(na);
+            POP(args);
+
+            PUSH(value);
+            goto set_arg_values;
         }
 
         // Evaluate argument inline.
@@ -355,7 +361,7 @@ save_builtin_arg_value:
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         error ("Function expected, not: ");
-        value = nil;
+        lisp_print (arg1);
         goto do_return;
     }
 

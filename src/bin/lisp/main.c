@@ -237,7 +237,6 @@ bi_numberp (void)
     return NUMBERP(arg1) ? arg1 : nil;
 }
 
-
 #define DEFCOND(fun_name, op) \
 lispptr \
 fun_name (void) \
@@ -417,7 +416,6 @@ bi_or (void)
         POP(x);
         if (value)
             return value;
-        POP(x);
     }
     return nil;
 }
@@ -508,6 +506,13 @@ bi_terpri (void)
 }
 
 lispptr
+bi_fresh_line (void)
+{
+    fresh_line ();
+    return nil;
+}
+
+lispptr
 bi_close (void)
 {
     simpleio_close (NUMBER_VALUE(arg1));
@@ -519,7 +524,7 @@ load (char * pathname)
 {
     int oldin = fnin;
 
-    outs ("Loading '"); outs (pathname); outs ("'."); terpri ();
+    outs ("Loading \""); outs (pathname); outs ("\"."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
     if (err ()) {
         setout (STDERR);
@@ -530,8 +535,10 @@ load (char * pathname)
     bi_setin ();
     load_fn++;
 
-    while ((x = lisp_read ()) && !(lisp_break || err ()))
+    while ((x = lisp_read ()) && !(lisp_break || err ())) {
+        //lisp_print (x); terpri ();
         eval ();
+    }
 
     load_fn--;
     simpleio_close (load_fn);
@@ -550,18 +557,9 @@ bi_load (void)
 lispptr
 bi_fn (void)
 {
-    msg = "(fn name obj)";
-    if (!CONSP(x))
-        bierror ();
-    arg1 = CAR(x);
-    if (!SYMBOLP(arg1))
-        bierror ();
-    arg2c = CDR(x);
-    if (!CONSP(arg2c))
-        bierror ();
     ensure_undefd_arg1 ();
     EXPAND_UNIVERSE(arg1);
-    SET_SYMBOL_VALUE(arg1, arg2c);
+    SET_SYMBOL_VALUE(arg1, arg2);
     return nil;
 }
 
@@ -713,14 +711,15 @@ struct builtin builtins[] = {
     { "in",         "",   bi_in },
     { "out",        "x",  bi_out },
     { "terpri",     "",   bi_terpri },
+    { "fresh-line", "",   bi_fresh_line },
     { "setin",      "n",  bi_setin },
     { "setout",     "n",  bi_setout },
     { "putback",    "",   bi_putback },
     { "close",      "n",  bi_close },
     { "load",       "s",  bi_load },
 
-    { "fn",         NULL, bi_fn },
-    { "var",        "'sx", bi_var },
+    { "fn",         "'s'+", bi_fn },
+    { "var",        "'sx",  bi_var },
     { "universe",   "",   bi_universe },
     { "gc",         "",   bi_gc },
     { "exit",       "n",  bi_exit },

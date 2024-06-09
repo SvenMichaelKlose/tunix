@@ -1,31 +1,44 @@
-; Playground for developing macro expansion functions
+(var *macros* '(macro))
 
-; Macros are regular functions that need to be here to be
-; recognized my MACRO?.
-(var *macros* nil)
+; Define macro function.
+(fn macro (name . lfun)
+  (? (member name *macros*)
+     (error "Macro already there."))
+  (= *macros* (cons name *macros*))
+  $(fn ,name ,@lfun))
 
 (fn macro? (s)
   (and (symbol? s)
-       (member s *macros*)))
+       (print (member s *macros*))))
 
-(fn %macroexpand-unquote (x)
-  ; Do it ye lazy bugger!
-  x)
+(fn %requote (x which)
+  (cons (cons which (macroexpand (cdr (car x))))
+        (%unquote (cdr x))))
+
+(fn %unquote (x)
+  (?
+    (atom x)
+      x
+    (atom (car x))
+      (cons (car x) (%unquote (cdr x)))
+    (eq (caar x) 'unquote)
+      (%requote x 'unquote)
+    (eq (caar x) 'unquote-splice)
+      (%requote x 'unquote-splice)
+    (cons (%unquote (car x))
+          (%unquote (cdr x)))))
 
 (fn macroexpand (x)
-  (? (cons? x)
-     (?
-       (eq (car x) 'quote)
-         x
-       (eq (car x) 'quasiquote)
-         (%macroexpand-unquote x)
-       (@ macroexpand 
-          (? (macro? (car x))
-             (macroexpand (apply (car x) (cdr x)))
-             x)))
-     x))
-
-;(print (macroexpand '(1 2 3 4)))
+  (?
+    (atom x)
+      x
+    (eq (car x) 'quote)
+      x
+    (eq (car x) 'quasiquote)
+      (%unquote x)
+    (macro? (car x))
+      (macroexpand (apply (car x) (cdr x)))
+    (@ macroexpand x)))
 
 ; Introduce local variable.
 (fn let (n v . body)
@@ -84,9 +97,9 @@
 
 ; Destructively push onto stack.
 (fn push (v l)
-  (= ,l (cons ,v ,l)))
+  $(= ,l (cons ,v ,l)))
 
 ; Destructively pop from stack.
 (fn pop (l)
-  (prog1 (car l)
-    (= ,l (cdr ,l))))
+  $(prog1 (car l)
+     (= ,l (cdr ,l))))

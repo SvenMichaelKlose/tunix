@@ -346,6 +346,13 @@ bi_apply (void)
 }
 
 lispptr
+bi_funcall ()
+{
+    x = lisp_make_cons (arg1, args);
+    return funcall ();
+}
+
+lispptr
 bi_return (void)
 {
     return_value = arg1;
@@ -656,6 +663,7 @@ struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
     { "apply",      NULL,   bi_apply },
+    { "funcall",    "f+x",  bi_funcall },
     { "eval",       "x",    bi_eval },
 
     { "?",          NULL,   bi_if },

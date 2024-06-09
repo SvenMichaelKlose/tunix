@@ -114,16 +114,13 @@ last (lispptr x)
     return LIST_CDR(x) ? last (CDR(x)) : x;
 }
 
-void
-ensure_undefd_arg1 ()
+lispptr
+member (lispptr needle, lispptr haystack)
 {
-    DOLIST(x, universe) {
-        if (CAR(x) == arg1) {
-            msg = "Already defined:";
-            bierror ();
-            lisp_print (arg1);
-        }
-    }
+    DOLIST(x, haystack)
+        if (CAR(x) == needle)
+            return x;
+    return nil;
 }
 
 lispptr
@@ -167,7 +164,7 @@ bi_symbol_value (void)
     return SYMBOL_VALUE(arg1);
 }
 
-// Make char list from symbol name.
+// Make symbol from char list.
 lispptr
 bi_string (void)
 {
@@ -177,8 +174,9 @@ bi_string (void)
 
     len = length (arg1);
     s = lisp_alloc_symbol (buffer, len);
+    p = SYMBOL_NAME(s);
 
-    for (p = SYMBOL_NAME(s); arg1; arg1 = CDR(arg1)) {
+    DOLIST(arg1, arg1) {
         if (!NUMBERP(CAR(arg1))) {
             msg = "(string nlst)";
             bierror ();
@@ -421,12 +419,6 @@ bi_or (void)
 }
 
 lispptr
-bi_read (void)
-{
-    return lisp_read ();
-}
-
-lispptr
 bi_print (void)
 {
     return lisp_print (arg1);
@@ -526,16 +518,18 @@ load (char * pathname)
 
     outs ("Loading \""); outs (pathname); outs ("\"."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
+    arg1 = lisp_make_number (load_fn);
+    bi_setin ();
+    // TODO: Move to simpleio-cbm.
+    in (); putback ();
     if (err ()) {
         setout (STDERR);
         outs ("Cannot open file ");
         error (pathname);
     }
-    arg1 = lisp_make_number (load_fn);
-    bi_setin ();
     load_fn++;
 
-    while ((x = lisp_read ()) && !(lisp_break || err ())) {
+    while (!lisp_break && (x = lisp_read ())) {
         //lisp_print (x); terpri ();
         eval ();
     }
@@ -555,23 +549,15 @@ bi_load (void)
 }
 
 lispptr
-bi_fn (void)
+define (void)
 {
-    ensure_undefd_arg1 ();
+    if (member (arg1, universe)) {
+        msg = "Already defined:";
+        bierror ();
+        lisp_print (arg1);
+    }
     EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
-    return nil;
-}
-
-lispptr
-bi_var (void)
-{
-    ensure_undefd_arg1 ();
-    EXPAND_UNIVERSE(arg1);
-    PUSH(arg1);
-    x = CDR(arg1);
-    SET_SYMBOL_VALUE(arg1, eval ());
-    POP(arg1);
     return nil;
 }
 
@@ -618,6 +604,12 @@ bi_last (void)
 }
 
 lispptr
+bi_member (void)
+{
+    return member (arg1, arg2);
+}
+
+lispptr
 bi_filter (void)
 {
     PUSH(arg1);
@@ -650,86 +642,87 @@ bi_debug (void)
 }
 
 struct builtin builtins[] = {
-    { "quote",      "'x", bi_quote },
+    { "quote",      "'x",   bi_quote },
 
-    { "apply",      NULL, bi_apply },
-    { "eval",       "x",  bi_eval },
+    { "apply",      NULL,   bi_apply },
+    { "eval",       "x",    bi_eval },
 
-    { "?",          NULL, bi_if },
-    { "and",        NULL, bi_and },
-    { "or",         NULL, bi_or },
-    { "return",     "x?s", bi_return },
-    { "go",         "'x", bi_go },
+    { "?",          NULL,   bi_if },
+    { "and",        NULL,   bi_and },
+    { "or",         NULL,   bi_or },
+    { "return",     "x?s",  bi_return },
+    { "go",         "'x",   bi_go },
 
-    { "not",        "x",  bi_not },
-    { "eq",         "xx", bi_eq },
-    { "atom",       "x",  bi_atom },
-    { "cons?",      "x",  bi_consp },
-    { "number?",    "x",  bi_numberp },
-    { "symbol?",    "x",  bi_symbolp },
+    { "not",        "x",    bi_not },
+    { "eq",         "xx",   bi_eq },
+    { "atom",       "x",    bi_atom },
+    { "cons?",      "x",    bi_consp },
+    { "number?",    "x",    bi_numberp },
+    { "symbol?",    "x",    bi_symbolp },
 
-    { "=",          "'sx", bi_setq },
-    { "value",      "s",  bi_symbol_value },
-    { "string",     "l",  bi_string },
+    { "=",          "'sx",  bi_setq },
+    { "value",      "s",    bi_symbol_value },
+    { "string",     "l",    bi_string },
 
-    { "cons",       "xx", bi_cons },
-    { "car",        "x",  bi_car },
-    { "cdr",        "x",  bi_cdr },
-    { "setcar",     "cx", bi_setcar },
-    { "setcdr",     "cx", bi_setcdr },
+    { "cons",       "xx",   bi_cons },
+    { "car",        "x",    bi_car },
+    { "cdr",        "x",    bi_cdr },
+    { "setcar",     "cx",   bi_setcar },
+    { "setcdr",     "cx",   bi_setcdr },
 
-    { "==",         "nn", bi_number_equal },
-    { ">",          "nn", bi_gt },
-    { "<",          "nn", bi_lt },
-    { ">=",         "nn", bi_gte },
-    { "<=",         "nn", bi_lte },
+    { "==",         "nn",   bi_number_equal },
+    { ">",          "nn",   bi_gt },
+    { "<",          "nn",   bi_lt },
+    { ">=",         "nn",   bi_gte },
+    { "<=",         "nn",   bi_lte },
 
-    { "+",          "nn", bi_add },
-    { "-",          "nn", bi_sub },
-    { "*",          "nn", bi_mul },
-    { "/",          "nn", bi_div },
-    { "%",          "nn", bi_mod },
-    { "++",         "n",  bi_inc },
-    { "--",         "n",  bi_dec },
+    { "+",          "nn",   bi_add },
+    { "-",          "nn",   bi_sub },
+    { "*",          "nn",   bi_mul },
+    { "/",          "nn",   bi_div },
+    { "%",          "nn",   bi_mod },
+    { "++",         "n",    bi_inc },
+    { "--",         "n",    bi_dec },
 
-    { "bit-and",    "nn", bi_bit_and },
-    { "bit-or",     "nn", bi_bit_or },
-    { "bit-xor",    "nn", bi_bit_xor },
-    { "bit-neg",    "n",  bi_bit_neg },
-    { "<<",         "nn", bi_shift_left },
-    { ">>",         "nn", bi_shift_right },
+    { "bit-and",    "nn",   bi_bit_and },
+    { "bit-or",     "nn",   bi_bit_or },
+    { "bit-xor",    "nn",   bi_bit_xor },
+    { "bit-neg",    "n",    bi_bit_neg },
+    { "<<",         "nn",   bi_shift_left },
+    { ">>",         "nn",   bi_shift_right },
 
-    { "peek",       "n",  bi_peek },
-    { "poke",       "nn", bi_poke },
-    { "sys",        "n",  bi_sys },
+    { "peek",       "n",    bi_peek },
+    { "poke",       "nn",   bi_poke },
+    { "sys",        "n",    bi_sys },
 
-    { "read",       "",   bi_read },
-    { "print",      "x",  bi_print },
-    { "open",       "ns", bi_open },
-    { "err",        "",   bi_err },
-    { "eof",        "",   bi_eof },
-    { "in",         "",   bi_in },
-    { "out",        "x",  bi_out },
-    { "terpri",     "",   bi_terpri },
-    { "fresh-line", "",   bi_fresh_line },
-    { "setin",      "n",  bi_setin },
-    { "setout",     "n",  bi_setout },
-    { "putback",    "",   bi_putback },
-    { "close",      "n",  bi_close },
-    { "load",       "s",  bi_load },
+    { "read",       "",     lisp_read },
+    { "print",      "x",    bi_print },
+    { "open",       "ns",   bi_open },
+    { "err",        "",     bi_err },
+    { "eof",        "",     bi_eof },
+    { "in",         "",     bi_in },
+    { "out",        "x",    bi_out },
+    { "terpri",     "",     bi_terpri },
+    { "fresh-line", "",     bi_fresh_line },
+    { "setin",      "n",    bi_setin },
+    { "setout",     "n",    bi_setout },
+    { "putback",    "",     bi_putback },
+    { "close",      "n",    bi_close },
+    { "load",       "s",    bi_load },
 
-    { "fn",         "'s'+", bi_fn },
-    { "var",        "'sx",  bi_var },
-    { "universe",   "",   bi_universe },
-    { "gc",         "",   bi_gc },
-    { "exit",       "n",  bi_exit },
+    { "fn",         "'s'+", define },
+    { "var",        "'sx",  define },
+    { "universe",   "",     bi_universe },
+    { "gc",         "",     bi_gc },
+    { "exit",       "n",    bi_exit },
 
-    { "length",     "l",  bi_length },
-    { "butlast",    "l",  bi_butlast },
-    { "last",       "l",  bi_last },
-    { "@",          "fl", bi_filter },
+    { "length",     "l",    bi_length },
+    { "butlast",    "l",    bi_butlast },
+    { "last",       "l",    bi_last },
+    { "member",     "xl",   bi_member },
+    { "@",          "fl",   bi_filter },
 
-    { "debug",      "",   bi_debug },
+    { "debug",      "",     bi_debug },
 
     { NULL, NULL }
 };
@@ -737,18 +730,40 @@ struct builtin builtins[] = {
 lispptr
 lisp_repl ()
 {
+    int old_in = fnin;
+    int old_out = fnin;
+
+    setin (STDIN);
+    setout (STDOUT);
     while (!eof ()) {
         lisp_break = false;
+        if (err ()) {
+            setout (STDERR);
+            outs ("Cannot read from stdin.");
+            exit (0);
+        }
+
+        // Get user input via standard channels.
         outs ("* ");
         x = lisp_read ();
         fresh_line ();
+
+        // Evaluate expression on program channels.
+        setin (old_in);
+        setout (old_out);
         x = eval ();
         if (lisp_break)
-            return x;
+            break;
+
+        // Print result on standard out.
+        setin (STDIN);
+        setout (STDOUT);
         fresh_line ();
         lisp_print (x);
         fresh_line ();
     }
+    setin (old_in);
+    setout (old_out);
     return x;
 }
 

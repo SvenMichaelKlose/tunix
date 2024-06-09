@@ -28,14 +28,6 @@
 (fn cdrlist (x)
   (@ cdr x))
 
-(fn member (n x)
-  (? (list? x)
-     (? x
-        (or (? (eq n (car x))
-               x)
-            (member n (cdr x))))
-     (error)))
-
 (fn find (x l)
   (? (list? l)
      (? x

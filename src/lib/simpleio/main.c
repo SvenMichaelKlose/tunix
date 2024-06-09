@@ -111,7 +111,7 @@ out (char c)
 }
 
 void
-outnu (unsigned n)
+outnu (unsigned long n)
 {
     unsigned a;
     if (n > 9) {
@@ -123,9 +123,9 @@ outnu (unsigned n)
 }
 
 void
-out_number (int n)
+out_number (long n)
 {
-    int a;
+    long a;
     if (n > 9) {
         a = n / 10;
         n -= 10 * a;

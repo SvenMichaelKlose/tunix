@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -37,8 +38,10 @@ raw_in (void)
 {
     int c = fgetc (handles[fnin]);
     last_in = c;
-    if (c < 0)
+    if (errno) {
+        perror ("simpleio-stdlib::in()");
         last_error = c;
+    }
     return last_in;
 }
 
@@ -68,9 +71,11 @@ simpleio_open (simpleio_chn_t c, char * name, char mode)
     m[1] = 0;
     handles[c] = fopen (name, m);
     if (!handles[c]) {
-        perror ("Cannot open file.");
+        printf ("File '%s': ", name);
+        perror ("In simpleio::open()");
         exit (EXIT_FAILURE);
     }
+    last_error = 0;
 }
 
 simpleio vectors = {

@@ -512,29 +512,39 @@ bi_close (void)
 }
 
 void
+err_open (char * pathname)
+{
+        setout (STDERR);
+        outs ("Cannot open file ");
+        error (pathname);
+}
+
+void
 load (char * pathname)
 {
     int oldin = fnin;
 
     outs ("Loading \""); outs (pathname); outs ("\"."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
+    if (err ()) {
+        err_open (pathname);
+        return;
+    }
+
     arg1 = lisp_make_number (load_fn);
     bi_setin ();
-    // TODO: Move to simpleio-cbm.
-    in (); putback ();
     if (err ()) {
-        setout (STDERR);
-        outs ("Cannot open file ");
-        error (pathname);
+        err_open (pathname);
+        return;
     }
-    load_fn++;
 
+    load_fn++;
     while (!lisp_break && (x = lisp_read ())) {
         //lisp_print (x); terpri ();
         eval ();
     }
-
     load_fn--;
+
     simpleio_close (load_fn);
     arg1 = lisp_make_number (oldin);
     bi_setin ();

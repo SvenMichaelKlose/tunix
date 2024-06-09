@@ -1,11 +1,23 @@
 TUNIX blog
 ==========
 
-# 2024-06-06: Apps?
+# 2024-06-07: 1000 Miles
+
+Did a very long trip to collect retro items this week.
+I'm just tired and will be coding nonsense.  A set of tests
+is in order.  And I'm not motivated.
+
+As I've mentioned earlier code from the tré compiler could
+be reused.  But it's not ready for compiling C without
+type information.
+
+# 2024-06-06: Tag Stack Halved In Size
 
 I've "fixed" the stack use when calling user-defined
 functions but that didn't save as much stack as I expected.
 For MAKE-COUNT it only reduces the size of the tag stack.
+Argument definitions are used to restore symbol values on
+function return, together with the number of arguments.
 
 The abbreviations for QUASIQUOTE ("$"), UNQUOTE (",") and
 UNQUOTE-SPLICED (",@") have been added.

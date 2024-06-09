@@ -22,6 +22,12 @@
      (cons (car x) (cdr x))
      x))
 
+(fn equal (a b)
+  (? (and (cons? a)
+          (cons? b))
+     (equal (car x) (cdr x))
+     (eql a b)))
+
 (fn carlist (x)
   (@ car x))
 

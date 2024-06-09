@@ -45,6 +45,9 @@ c1541_image:
 	cp src/bin/lisp/README.md bin/lisp.md
 	cp src/bin/lisp/lisp bin/
 	cp src/bin/lisp/env.lisp bin/
+	cp src/bin/lisp/test.lisp bin/
+	cp src/bin/lisp/list.lisp bin/
+	cp src/bin/lisp/macro.lisp bin/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn bin/
 	cp src/sbin/ultidump/ultidump bin/
@@ -53,7 +56,7 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/vi bin/
 endif
 ifneq (,$(TARGET), $(COMMODORE_TARGETS))
-	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/env.lisp -write bin/lisp.md #-write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
+	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/env.lisp -write bin/test.lisp -write bin/macro.lisp -write bin/lisp.md #-write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
 else
 	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/env.lisp -write bin/lisp.md
 endif

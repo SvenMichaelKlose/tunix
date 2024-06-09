@@ -1,3 +1,5 @@
+; Essential tests before regular environment is loaded.
+
 (out "Tests.")(terpri)
 (out "ATOM")(terpri)
 (atom 1)
@@ -5,14 +7,20 @@
 (or nil t)
 (or t nil)
 
+; TODO: Test rest of built-ins.
+
+
 (fn make-count (n)
   (? (< 0 n)
      (cons n (make-count (-- n)))))
 
-(out "Recursion (MAKE-COUNT 200)")(terpri)
+; Not really a test.
+(out "Recursion")(terpri)
 (print (make-count 100))
 (fresh-line)
 
+; More of a speed test.
+; 2024-06-09: VIC-20, x10,000 = 3:40min
 (fn block-test (c)
   (out "Looping ")
   (print c)

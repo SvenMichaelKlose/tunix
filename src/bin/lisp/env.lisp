@@ -13,6 +13,7 @@
      (eq a b)))
 
 (load "list.lisp")
+(load "quasiquote.lisp")
 (load "macro.lisp")
 
 (print (gc))(out "B free.")(terpri)

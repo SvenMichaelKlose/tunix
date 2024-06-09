@@ -19,6 +19,9 @@
 (fn cddr (x)
   (cdr (cdr x)))
 
+(fn cadar (x)
+  (car (cdr (car x))))
+
 ; Copy tree.
 (fn copy (x)
   (? (cons? x)

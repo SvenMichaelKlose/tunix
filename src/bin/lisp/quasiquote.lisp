@@ -1,0 +1,15 @@
+(fn %qq (x)
+  (?
+    (atom x)
+      x
+    (or (atom (car x))
+        (eq (caar x) 'quote)
+        (eq (caar x) 'quasiquote))
+      (cons (car x)
+            (%qq (cdr x)))
+    (eq (caar x) 'unquote)
+      (cons (eval (macroexpand (cadar x)))
+            (%qq (cdr x)))
+    (eq (caar x) 'unquote-splice)
+      (append (eval (macroexpand (cadar x)))
+              (%qq (cdr x)))))

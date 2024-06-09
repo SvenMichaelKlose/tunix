@@ -1,4 +1,4 @@
-(var *macros* '(macro))
+(var *macros* '(macro progn))
 
 ; Define macro function.
 (fn macro (name . lfun)
@@ -37,7 +37,7 @@
     (eq (car x) 'quasiquote)
       (%unquote x)
     (macro? (car x))
-      (macroexpand (apply (car x) (cdr x)))
+      (macroexpand (apply (value (car x)) (cdr x)))
     (@ macroexpand x)))
 
 ; Introduce local variable.
@@ -63,6 +63,8 @@
 ; Return value of last expression.
 (fn progn body
   $(block t ,@body))
+
+(print (macroexpand '(progn some atoms)))
 
 ; Evaluate block when...
 (fn when (x . body)

@@ -191,11 +191,9 @@ do_eval:
         goto do_return;
     }
 
-    // Evaluate function.
-    PUSH(x);
-    x = CAR(x);
-    arg1 = eval ();
-    POP(x);
+    arg1 = CAR(x);
+    if (SYMBOLP(arg1))
+        arg1 = SYMBOL_VALUE(arg1);
 
     // Do BLOCK.
     if (arg1 == block_sym) {

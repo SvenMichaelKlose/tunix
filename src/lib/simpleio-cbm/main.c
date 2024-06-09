@@ -55,7 +55,7 @@ raw_eof (void)
 char
 raw_err (void)
 {
-    return raw_eof (); // TODO: Without mask.
+    return cbm_k_readst ();
 }
 
 char

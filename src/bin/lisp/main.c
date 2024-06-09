@@ -541,7 +541,7 @@ load (char * pathname)
     load_fn++;
     in (); putback ();
     while (!lisp_break && (x = lisp_read ())) {
-        lisp_print (x); terpri ();
+        //lisp_print (x); terpri ();
         eval ();
     }
     load_fn--;

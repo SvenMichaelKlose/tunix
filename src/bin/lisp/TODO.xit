@@ -1,0 +1,16 @@
+[@] Essential tests
+[@] Macro expansion
+[ ] Undefining universe elements (DELETE)
+[ ] User-defined error handler
+[ ] On-demand function loading
+[ ] On-demand macro loading
+[ ] Directory access
+[ ] exec()
+[ ] tré environment import
+[ ] Bielefeld DB API
+[ ] Recursion to loop conversion
+[ ] Tail call optimization
+[ ] Loading/saving/calling snapshots
+[ ] Compressed conses
+[ ] Snapshot optimization
+[?] Stack decompression via tags

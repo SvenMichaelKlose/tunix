@@ -85,7 +85,8 @@ objsize (char * x)
 #define MIN_RELOC_TABLE_SIZE \
     ((sizeof (lispptr) + sizeof (unsigned)) * MIN_RELOC_TABLE_ENTRIES)
 #define NEEDS_GC() \
-    (heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE)
+    ((heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE) \
+     || (stack_start > stack - 64)) // TODO: Reconsider.
 
 // Allocate vanilla object.
 lispptr FASTCALL

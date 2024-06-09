@@ -69,11 +69,27 @@ bool unevaluated;
 
 extern void bierror (void);
 
+char *
+typename (lispptr * x)
+{
+    if (CONSP(x))
+        return "cons";
+    if (SYMBOLP(x))
+        return "symbol";
+    if (BUILTINP(x))
+        return "built-in";
+#ifndef NDEBUG
+    return "unknown type (INTERNAL ERROR)";
+#else
+    return "number";
+#endif
+}
+
 void
 err_type (char * type, lispptr x)
 {
-    outs (type); outs (" expected. Got: ");
-    lisp_print (x); terpri ();
+    outs (type); outs (" expected. Got ");
+    outs (typename (x)); lisp_print (x); terpri ();
     error (NULL);
 }
 

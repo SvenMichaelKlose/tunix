@@ -15,9 +15,7 @@
      (cons n (make-count (-- n)))))
 
 ; Not really a test.
-(out "Recursion")(terpri)
 (print (make-count 100))
-(fresh-line)
 
 ; More of a speed test.
 ; 2024-06-09: VIC-20, x10,000 = 3:40min
@@ -34,6 +32,5 @@
     (? (not (== c 0))
        (go tag))))
 
-(out "Loop (BLOCK-TEST 1000)")(terpri)
-(block-test 300)
 (fresh-line)
+(block-test 300)

@@ -61,12 +61,13 @@ facilitate strings.
 throughout this manual.**
 
 Functions are lists starting with an argument definition
-followed by statements.  The LAMBDA tag is not supported.
+followed by statements.  The LAMBDA keyword is not
+supported.
 
 ~~~lisp
 ; Make a function that adds X to its argument.
 (fn make-adder (x)
-  ^((a)
+  $((a)
      (+ a ,x)))
 ~~~
 
@@ -532,9 +533,5 @@ Submit to your fantasy.
 
 Conses which only store the CAR if the CDR is the next
 object on the heap.  This can be done at allocation time but
-would make the CDR of a compressed cons immutable.
-Immutable is "good".
-
-## Stack compression
-
-With hands off the CPU stack.
+would make the CDR of a compressed cons immutable and add
+an extra check to each operation.

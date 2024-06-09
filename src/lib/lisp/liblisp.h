@@ -212,24 +212,24 @@ extern bool FASTCALL lisp_builtinp (lispptr);
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
 
-extern lispptr FASTCALL lisp_make_cons (lispptr, lispptr);
-extern lispptr FASTCALL lisp_make_number (lispnum_t);
-extern lispptr FASTCALL lisp_alloc_symbol (char *, uchar len);
-extern lispptr FASTCALL lisp_make_symbol (char *, uchar len);
-extern lispptr lisp_read (void);
-extern lispptr FASTCALL lisp_print (lispptr);
+extern lispptr  FASTCALL lisp_make_cons (lispptr, lispptr);
+extern lispptr  FASTCALL lisp_make_number (lispnum_t);
+extern lispptr  FASTCALL lisp_alloc_symbol (char *, uchar len);
+extern lispptr  FASTCALL lisp_make_symbol (char *, uchar len);
+extern lispptr  lisp_read (void);
+extern lispptr  FASTCALL lisp_print (lispptr);
 
 // Arguments in global 'x'.
-extern lispptr eval (void);
-extern lispptr eval_list (void);
-extern lispptr funcall (void);
+extern lispptr  eval (void);
+extern lispptr  eval_list (void);
+extern lispptr  funcall (void);
+extern void     FASTCALL error (char * msg);
 
-extern void    gc (void);
+extern void     gc (void);
+extern unsigned FASTCALL objsize (char *);
 
-extern unsigned objsize (char *);
-
-extern lispptr lisp_repl (void);
-extern bool    lisp_init (void);
-extern void    add_builtins (struct builtin *);
+extern lispptr  lisp_repl (void);
+extern bool     lisp_init (void);
+extern void     add_builtins (struct builtin *);
 
 #endif // #ifndef __LIBLISP_H__

@@ -60,7 +60,7 @@ lispptr lastc;
 
 char load_fn = 12;
 
-void
+void FASTCALL
 error (char * msg)
 {
     lisp_break = true;
@@ -82,7 +82,7 @@ bierror ()
 while (1);
 }
 
-void
+void FASTCALL
 name_to_buffer (lispptr s)
 {
     uchar len;
@@ -91,7 +91,7 @@ name_to_buffer (lispptr s)
     buffer[len] = 0;
 }
 
-int
+int FASTCALL
 length (lispptr x)
 {
     len = 0;
@@ -100,7 +100,7 @@ length (lispptr x)
     return len;
 }
 
-lispptr
+lispptr FASTCALL
 butlast (lispptr x)
 {
     if (LIST_CDR(x))
@@ -108,13 +108,13 @@ butlast (lispptr x)
     return nil;
 }
 
-lispptr
+lispptr FASTCALL
 last (lispptr x)
 {
     return LIST_CDR(x) ? last (CDR(x)) : x;
 }
 
-lispptr
+lispptr FASTCALL
 member (lispptr needle, lispptr haystack)
 {
     DOLIST(x, haystack)
@@ -346,7 +346,7 @@ bi_apply (void)
 }
 
 lispptr
-bi_funcall ()
+bi_funcall (void)
 {
     x = lisp_make_cons (arg1, args);
     return funcall ();
@@ -518,7 +518,7 @@ bi_close (void)
     return nil;
 }
 
-void
+void FASTCALL
 err_open (char * pathname)
 {
         setout (STDERR);
@@ -526,7 +526,7 @@ err_open (char * pathname)
         error (pathname);
 }
 
-void
+void FASTCALL
 load (char * pathname)
 {
     int oldin = fnin;

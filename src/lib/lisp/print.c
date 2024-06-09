@@ -15,8 +15,6 @@
 
 #include "liblisp.h"
 
-extern void error (char * msg);
-
 void print (lispptr);
 
 void

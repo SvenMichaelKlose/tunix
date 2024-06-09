@@ -6,8 +6,6 @@
 #include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
 
-extern void error (char *);
-
 char * stack_start;
 
 #ifdef __CC65__

@@ -9,8 +9,6 @@
 
 #include "liblisp.h"
 
-extern void error (char * msg);
-
 bool FASTCALL
 our_isalpha (char c)
 {

@@ -16,8 +16,6 @@
 
 #include "liblisp.h"
 
-extern void error (char * msg);
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif

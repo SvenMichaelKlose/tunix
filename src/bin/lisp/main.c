@@ -644,7 +644,7 @@ bi_filter (void)
         x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
         tmp = lisp_make_cons (eval (), nil);
         POP(lastc);
-        SETCDR(last, tmp);
+        SETCDR(lastc, tmp);
         lastc = tmp;
         POP(arg2);
         POP(arg1);

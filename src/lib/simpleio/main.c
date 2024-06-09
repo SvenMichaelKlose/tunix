@@ -93,8 +93,7 @@ skip_spaces ()
     while (!eof ()) {
         // Skip comment until end of line.
         if (in () == ';') {
-            while (!eof () && in () >= ' ')
-            while (!eof () && in () < ' ' && last_in);
+            while (!eof () && in () >= ' ');
             putback ();
         } else if (!isspace (last_in)) {
             putback ();

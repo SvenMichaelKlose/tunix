@@ -303,7 +303,7 @@ returned.
 
 | Function     | Test on...  |
 |--------------|-------------|
-| (not x)      | nil         |
+| (not x)      | NIL         |
 | (atom x)     | not a cons  |
 | (cons? x)    | cons        |
 | (symbol? x)  | symbol      |
@@ -325,24 +325,25 @@ which initially is itself.
 
 | Function      | Description                          |
 |---------------|--------------------------------------|
-| (car l)       | Return first value of cons or nil.   |
-| (cdr l)       | Return second value of cons or nil.  |
+| (car l)       | Return first value of cons or NIL.   |
+| (cdr l)       | Return second value of cons or NIL.  |
 | (setcar c x)  | Set first value of cons.             |
 | (setcdr c x)  | Set second value of cons.            |
 
 A 'cons' points to two other objects, called 'car' and
 'cdr' for historical reasons.  They could also be called
 'first' and 'second', or 'head' and 'tail' in the context
-of a singly-linked list.
+of singly-linked lists.
 
 ## Lists
 
-| Function     | Description                          |
-|--------------|--------------------------------------|
-| (length l)   | Return length of list.               |
-| (@ f l)      | Run list elements through function.  |
-| (butlast l)  | Copy list but not last element.      |
-| (last l)     | Return last cons with last element.  |
+| Function      | Description                          |
+|---------------|--------------------------------------|
+| (length l)    | Return length of list.               |
+| (@ f l)       | Run list items through function.     |
+| (butlast l)   | Copy list but not its last element.  |
+| (last l)      | Return last element.                 |
+| (member x l)  | Return element containing X.         |
 
 ## Numbers
 

@@ -147,10 +147,16 @@ a Lisp file instead of using built-in LOAD:
 
 ## Definitions
 
-| Form                     | Description       |
-|--------------------------|-------------------|
-| (fn 'name 'args '+body)  | Define function.  |
-| (var 'name x)            | Define variable.  |
+| Definition                    | Type          |
+|-------------------------------|---------------|
+| (fn 'name 'args '+body)       | function      |
+| (special 'name 'args '+body)  | special form  |
+| (var 'name x)                 | variable      |
+
+### Special form
+
+Special forms are functions that take their arguments
+unevaluated, like macros.
 
 ## Top-level
 
@@ -301,13 +307,15 @@ returned.
 
 ## Predicates
 
-| Function     | Test on...  |
-|--------------|-------------|
-| (not x)      | NIL         |
-| (atom x)     | not a cons  |
-| (cons? x)    | cons        |
-| (symbol? x)  | symbol      |
-| (number? x)  | number      |
+| Function      | Test on...         |
+|---------------|--------------------|
+| (not x)       | NIL                |
+| (atom x)      | not a cons         |
+| (cons? x)     | cons               |
+| (symbol? x)   | symbol             |
+| (number? x)   | number             |
+| (builtin? x)  | built-in function  |
+| (special? x)  | special form       |
 
 All predicates except NOT return their argument.  NOT returns T instead.
 
@@ -392,7 +400,7 @@ of singly-linked lists.
 | (setin channel)  | Set input channel.                  |
 | (setout channel) | Set output channel.                 |
 | (in)             | Read char.                          |
-| (out n/s/\*)     | Print char or plain symbol name.    |
+| (out x)          | Print char or plain symbol name.    |
 | (terpri)         | Step to next line.                  |
 | (fresh-line)     | Open line if not on a fresh one.    |
 | (close channel)  | Close a channel.                    |
@@ -413,12 +421,81 @@ of singly-linked lists.
 | (poke a b)  | Write to memory.                |
 | (sys a)     | Calls machine code subroutine.  |
 
+# Macros
+
+## Implementation
+
+| User-defined function  | Description          |
+|------------------------|----------------------|
+| (macroexpand x)        | Macro expander       |
+| (quasiquote x)         | Quasiquote expander  |
+
+If defined, MACROEXPAND is called by the REPL and the LOAD
+function to expand expressions before evaluating them.
+before EVALuating, if defined.  QUASIQUOTE is like a regular
+function but called with arguments unevaluated.
+
+# Environment
+
+The environment contains a widely accepted set of functions
+and macros known from most other implementations of the
+Lisp programming languages.
+
+| Function         | Desscription                   |
+|------------------|-------------------------------------|
+| (macro s a +b))  |
+| (macro? x)       |
+| (macroexpand x)  |
+
+| Macro            | Desscription                        |
+|------------------|-------------------------------------|
+| (let n init +b)  | Form block with local variable.
+| (with inits +b)  | Form block with local variables.
+
+| Macro              | Desscription                     |
+|--------------------|----------------------------------|
+| (prog1 +b)         |
+| (progn +b)         |
+| (when x +b)        |
+| (unless x +b)      |
+| (while (x x) +b)   |
+| (dolist (s x) +b)  |
+
+## Lists
+
+| Function     | Desscription                        |
+|--------------|-------------------------------------|
+| (list +x)    | Return argument list.               |
+| (list? x)    | Test if argument is NIL or a cons.  |
+| (c???r l)    | Nested CAR/CDR combinations.        |
+| (carlist l)  | Get first elements of lists.        |
+| (cdrlist l)  | Get rest elements of lists.         |
+| (copy x)     | Copy atom or tree (of conses).      |
+| (equal x x)  | Test if elements of tree are EQL.   |
+| (find x l)   | Find element X in list.             |
+| (assoc x l)  | Return list that start with X.      |
+
+## Stacks
+
+| Macro        | Desscription                        |
+|--------------|-------------------------------------|
+| (push x l)   | Destructively push onto stack L.    |
+| (pop l)      | Destructively from stack L.         |
+
+## Queues
+
+| Function       | Desscription                        |
+|----------------|-------------------------------------|
+| (make-queue)   |
+| (enqueue c x)  |
+
+## Sets
+## Associative lists
+## Strings
+## Structures
+## Binary trees
+
 # Ideas for the future
-
-## QUASIQUOTEs with BACKQUOTE
-
-To insert generated code just in time without need for
-function or macro definitions.
 
 ## User-defined error handling
 
@@ -475,14 +552,6 @@ everything out that appeared later:
 (gc *old-defs*)
 ~~~
 
-## Macro expansion
-
-| Variable        | Description             |
-|-----------------|-------------------------|
-| \*expand\*      | Name of acro expander.  |
-
-Usually user-defined MACROEXPAND.
-
 ## Error handling
 
 When an error occurs, a message is printed along with the
@@ -536,3 +605,4 @@ Conses which only store the CAR if the CDR is the next
 object on the heap.  This can be done at allocation time but
 would make the CDR of a compressed cons immutable and add
 an extra check to each operation.
+env.lisp:(fn eql (a b)

@@ -190,8 +190,10 @@ do_eval:
     }
 
     arg1 = CAR(x);
-    if (SYMBOLP(arg1))
+    if (SYMBOLP(arg1)) {
+        unevaluated = SPECIALP(arg1);
         arg1 = SYMBOL_VALUE(arg1);
+    }
 
     // Do BLOCK.
     if (arg1 == block_sym) {
@@ -457,6 +459,7 @@ next_arg:
 
     // Evaluate body.
 start_body:
+    unevaluated = false;
     PUSH_TAG(na);
     PUSH(FUNARGS(arg1));
     x = FUNBODY(arg1);

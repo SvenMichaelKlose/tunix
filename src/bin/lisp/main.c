@@ -152,6 +152,22 @@ bi_symbolp (void)
 }
 
 lispptr
+bi_builtinp (void)
+{
+    if (!arg1)
+        return t;
+    return BUILTINP(arg1) ? arg1 : nil;
+}
+
+lispptr
+bi_specialp (void)
+{
+    if (!arg1)
+        return t;
+    return SPECIALP(arg1) ? arg1 : nil;
+}
+
+lispptr
 bi_setq (void)
 {
     SET_SYMBOL_VALUE(arg1, arg2);
@@ -567,7 +583,7 @@ bi_load (void)
 }
 
 lispptr
-define (void)
+bi_define (void)
 {
     if (member (arg1, universe)) {
         msg = "Already defined:";
@@ -576,7 +592,15 @@ define (void)
     }
     EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
-    return nil;
+    return arg1;
+}
+
+lispptr
+bi_special (void)
+{
+    tmp = bi_define ();
+    PTRTYPE(tmp) |= TYPE_SPECIAL;
+    return tmp;
 }
 
 lispptr
@@ -678,6 +702,8 @@ struct builtin builtins[] = {
     { "cons?",      "x",    bi_consp },
     { "number?",    "x",    bi_numberp },
     { "symbol?",    "x",    bi_symbolp },
+    { "builtin?",   "x",    bi_builtinp },
+    { "special?",   "x",    bi_specialp },
 
     { "=",          "'sx",  bi_setq },
     { "value",      "s",    bi_symbol_value },
@@ -729,8 +755,9 @@ struct builtin builtins[] = {
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
 
-    { "fn",         "'s'+", define },
-    { "var",        "'sx",  define },
+    { "fn",         "'s'+", bi_define },
+    { "var",        "'sx",  bi_define },
+    { "special",    "'s'+", bi_special },
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
     { "exit",       "n",    bi_exit },

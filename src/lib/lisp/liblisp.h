@@ -141,6 +141,7 @@ extern lispptr delayed_eval;
 
 #define TYPE_MARKED   128
 #define TYPE_NAMED    64
+#define TYPE_SPECIAL  32    // User-defined function with no argument evaluation.
 
 #define TYPE_MASK     (7 | TYPE_NAMED)
 
@@ -169,6 +170,7 @@ extern lispptr delayed_eval;
 #define NUMBERP(x)   (lisp_numberp (x))
 #define SYMBOLP(x)   (lisp_symbolp (x))
 #define BUILTINP(x)  (lisp_builtinp (x))
+#define SPECIALP(x)  (lisp_specialp (x))
 extern lispptr FASTCALL lisp_car (lispptr);
 extern lispptr FASTCALL lisp_cdr (lispptr);
 extern bool FASTCALL lisp_atom (lispptr);
@@ -177,6 +179,7 @@ extern bool FASTCALL lisp_listp (lispptr);
 extern bool FASTCALL lisp_numberp (lispptr);
 extern bool FASTCALL lisp_symbolp (lispptr);
 extern bool FASTCALL lisp_builtinp (lispptr);
+extern bool FASTCALL lisp_specialp (lispptr);
 
 #else // #ifdef SLOW
 
@@ -188,6 +191,7 @@ extern bool FASTCALL lisp_builtinp (lispptr);
 #define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
 #define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
+#define SPECIALP(x)  (PTRTYPE(x) & TYPE_SPECIAL)
 
 #endif // #ifdef SLOW
 

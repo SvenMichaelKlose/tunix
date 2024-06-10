@@ -182,10 +182,10 @@ lisp_init ()
     tagstack += TAGSTACK_SIZE;
 
     // Init stack.
-    stack_start = malloc (STACK_SIZE);
-    if (!stack_start)
-        return false;
-    stack_end = stack_start + STACK_SIZE;
+    stack_start = (void *) 0x0400; //malloc (STACK_SIZE);
+    //if (!stack_start)
+        //return false;
+    stack_end = stack_start + 0x0c00; //STACK_SIZE;
     stack = stack_end;
 
     // Init heap.

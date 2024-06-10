@@ -586,11 +586,11 @@ lispptr
 bi_define (void)
 {
     if (member (arg1, universe)) {
-        msg = "Already defined:";
-        bierror ();
+        outs ("Redefining ");
         lisp_print (arg1);
-    }
-    EXPAND_UNIVERSE(arg1);
+        terpri ();
+    } else
+        EXPAND_UNIVERSE(arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }

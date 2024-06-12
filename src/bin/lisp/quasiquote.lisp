@@ -1,15 +1,27 @@
-(fn %qq (x)
+; Wrap expander in special form as it is recursive and needs
+; to call itself with arguments evaluated.
+(special quasiquote (qqx)
+  (%qq qqx))
+
+(fn %qq (qqx)
   (?
-    (atom x)
-      x
-    (or (atom (car x))
-        (eq (caar x) 'quote)
-        (eq (caar x) 'quasiquote))
-      (cons (car x)
-            (%qq (cdr x)))
-    (eq (caar x) 'unquote)
-      (cons (eval (macroexpand (cadar x)))
-            (%qq (cdr x)))
-    (eq (caar x) 'unquote-splice)
-      (append (eval (macroexpand (cadar x)))
-              (%qq (cdr x)))))
+    ; End of list.
+    (atom qqx)
+      qqx
+
+    ; Catch atoms to have to care about expressions only
+    ; afterwards.
+    (atom (car qqx))
+      (cons (car qqx) (%qq (cdr qqx)))
+
+    ; Replace UNQUOTE expression by its evaluated argument.
+    (eq (caar qqx) 'unquote)
+      (cons (eval (cadar qqx)) (%qq (cdr qqx)))
+
+    ; Insert evaluated arguments of UNQUOTE-SPLICE into
+    ; the list.
+    (eq (caar qqx) 'unquote-spliced)
+      (append (eval (cadar qqx)) (%qq (cdr qqx)))
+
+    ; Just copy then...
+    (cons (car qqx) (%qq (cdr qqx)))))

@@ -15,7 +15,7 @@
         #define STACK_SIZE  (64 * 1024)
     #endif
 #endif
-#define TAGSTACK_SIZE  2048
+#define TAGSTACK_SIZE  1024
 #define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;
@@ -76,7 +76,8 @@ extern char * stack;
 extern char * stack_end;
 extern char * tagstack;
 extern char * msg;
-extern bool lisp_break; // Tell evaluator to cancel.
+extern bool lisp_break;     // Return to REPL.
+extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 extern lispptr block_sym;
 extern lispptr return_sym;
 extern lispptr return_name;
@@ -102,6 +103,7 @@ extern lispptr delayed_eval;
 #pragma zpsym ("tagstack")
 #pragma zpsym ("msg")
 #pragma zpsym ("lisp_break")
+#pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")
 #pragma zpsym ("arg2c")
@@ -133,6 +135,25 @@ extern lispptr delayed_eval;
         x = *(lispptr *) stack; \
         stack += sizeof (lispptr); \
     } while (0)
+
+#define PUSH_TAG(x)     (*--tagstack = (x))
+#define POP_TAG(x)      ((x) = *tagstack++)
+#define PUSH_TAGW(x) \
+    do { \
+        tagstack -= sizeof (lispptr); \
+        *(lispptr *) tagstack = x; \
+    } while (0)
+#define POP_TAGW(x) \
+    do { \
+        x = *(lispptr *) tagstack; \
+        tagstack += sizeof (lispptr); \
+    } while (0)
+
+#define TAG_DONE            0
+#define TAG_BARG_NEXT       1
+#define TAG_ARG_NEXT        2
+#define TAG_CONTINUE_BODY   3
+#define TAG_CONTINUE_BLOCK  4
 
 #define DOLIST(x, init) \
     for (x = init; x; x = CDR(x))
@@ -191,7 +212,7 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
 #define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
-#define SPECIALP(x)  (PTRTYPE(x) & TYPE_SPECIAL)
+#define SPECIALP(x)  ((x) && PTRTYPE(x) & TYPE_SPECIAL)
 
 #endif // #ifdef SLOW
 
@@ -224,9 +245,11 @@ extern lispptr  lisp_read (void);
 extern lispptr  FASTCALL lisp_print (lispptr);
 
 // Arguments in global 'x'.
+extern lispptr  eval0 (void);
 extern lispptr  eval (void);
 extern lispptr  eval_list (void);
 extern lispptr  funcall (void);
+
 extern void     FASTCALL error (char * msg);
 
 extern void     gc (void);

@@ -92,8 +92,10 @@ alloc (uchar size, uchar type)
 {
     if (NEEDS_GC()) {
         gc ();
-        if (NEEDS_GC())
+        if (NEEDS_GC()) {
             error ("Out of heap.");
+            return nil;
+        }
     }
 
     h = heap_free;

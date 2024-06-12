@@ -155,25 +155,6 @@ eval_list (void)
     return lisp_make_cons (va, tmp);
 }
 
-#define PUSH_TAG(x)     (*--tagstack = (x))
-#define POP_TAG(x)      ((x) = *tagstack++)
-#define PUSH_TAGW(x) \
-    do { \
-        tagstack -= sizeof (lispptr); \
-        *(lispptr *) tagstack = x; \
-    } while (0)
-#define POP_TAGW(x) \
-    do { \
-        x = *(lispptr *) tagstack; \
-        tagstack += sizeof (lispptr); \
-    } while (0)
-
-#define TAG_DONE            0
-#define TAG_BARG_NEXT       1
-#define TAG_ARG_NEXT        2
-#define TAG_CONTINUE_BODY   3
-#define TAG_CONTINUE_BLOCK  4
-
 lispptr
 eval0 (void)
 {
@@ -195,7 +176,8 @@ do_eval:
         arg1 = SYMBOL_VALUE(arg1);
     }
 
-    // Do BLOCK.
+// Do BLOCK.
+
     if (arg1 == block_sym) {
         x = CDR(x);
         if (!CONSP(x)) {
@@ -386,19 +368,20 @@ save_builtin_arg_value:
     // Evaluate arguments to user-defined function.
 do_argument:
     // End of arguments.
-    if (!defs || !args) {
-        if (defs) {
-            setout (STDERR);
-            outs ("Argument(s) missing: ");
-            lisp_print (defs);
-        } else if (args) {
-            setout (STDERR);
-            outs ("Too many arguments: ");
-            lisp_print (args);
-        }
+    if (!args && !defs)
         goto start_body;
+    if (args && !defs) {
+        setout (STDERR);
+        outs ("Too many arguments: ");
+        lisp_print (args);
+        lisp_break = true;
+    } else if (!args && CONSP(defs)) {
+        setout (STDERR);
+        outs ("Argument(s) missing: ");
+        lisp_print (defs);
+        lisp_break = true;
     }
- 
+
     na++;
 
     // Rest of argument list. (consing)
@@ -407,7 +390,7 @@ do_argument:
         PUSH(SYMBOL_VALUE(defs));
 
         if (unevaluated)
-            value = x;
+            value = args;
         else {
             // Evaluate rest of arguments.
             PUSH_TAG(na);

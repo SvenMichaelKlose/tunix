@@ -28,6 +28,12 @@
      (cons (car x) (cdr x))
      x))
 
+(fn append (list1 . lists)
+  (? list1
+     (cons (car list1) (apply append (cdr list1) lists))
+     (? lists
+        (apply append lists))))
+
 ; Compare tree.
 (fn equal (a b)
   (? (and (cons? a)

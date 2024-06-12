@@ -165,6 +165,7 @@ unevaluated, like macros.
 | (universe)  | Return list of permanent symbols.  |
 | (gc)        | Free unused objects.               |
 | (quit ?x)   | Return from debugger REPL.         |
+| (quit)      | Leave current REPL/LOAD.           |
 | (exit n)    | Exit interpreter with code.        |
 
 ## Evaluation and flow control

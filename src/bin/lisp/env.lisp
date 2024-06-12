@@ -14,6 +14,7 @@
 
 (load "list.lisp")
 (load "quasiquote.lisp")
-(load "macro.lisp")
+(load "macroexpand.lisp")
+(load "macros.lisp")
 
 (print (gc))(out "B free.")(terpri)

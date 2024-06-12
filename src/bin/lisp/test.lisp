@@ -1,37 +1,54 @@
 (out "Tests.")(terpri)
 
 ; Poke built-ins.
-(out "ATOM")(terpri)
+(print 'atom)(terpri)
 (atom 1)
-(out "OR")(terpri)
+
+(print 'and)(terpri)
+(and nil (error))
+
+(print 'or)(terpri)
 (or nil t)
 (or t nil)
-(out "APPLY")(terpri)
-(print (apply print '(1)))(terpri)
-(out "FUNCALL")(terpri)
+(or t (error))
+
+(print 'copy-list)(terpri)
+(print (copy-list nil))
+(print (copy-list '(1)))
+(print (copy-list '(1 2 3)))
+
+(print 'apply)(terpri)
+(print (apply '(x x) '(1)))(terpri)
+(print (apply '(x x) '(1 2)))(terpri)
+(print (apply '(x x) 1 2 '(3 4)))(terpri)
+
+(print 'funcall)(terpri)
 (funcall print 1)(terpri)
 (funcall '((x) (print x)) 1)(terpri)
-(out "EVAL")(terpri)
+
+(print 'eval)(terpri)
 (eval '(print 1))
-(out "?")(terpri)
+
+(print '?)(terpri)
 (? t nil (error))
 (? nil (error) nil)
 (? nil (error) nil (error))
-(out "AND")(terpri)
-(and nil (error))
-(out "OR")(terpri)
-(or t (error))
-(out "NOT")(terpri)
+
+(print 'not)(terpri)
 (or (not nil) (error))
-(out "ATOM")(terpri)
+
+(print 'atom)(terpri)
 (? (atom nil) nil (error))
 (? (atom t) nil (error))
-(out "CONS?")(terpri)
+
+(print 'cons?)(terpri)
 (? (cons? '(1)) nil (error))
 (? (cons? 1) (error))
-(out "SYMBOL?")(terpri)
+
+(print 'symbol?)(terpri)
 (? (symbol? 'a) nil (error))
-(out "NUMBER?")(terpri)
+
+(print 'number?)(terpri)
 (? (number? 1) nil (error))
 (? (number? '(1)) (error))
 
@@ -43,6 +60,7 @@
 ; read print open err eof in out terpri fresh-line setin setout putback close load
 ; fn var universe gc exit
 ; length butlast last member @
+(terpri)
 
 (fn make-count (n)
   (? (< 0 n)

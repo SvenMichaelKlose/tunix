@@ -101,11 +101,36 @@ length (lispptr x)
 }
 
 lispptr FASTCALL
+copy_list (lispptr x, bool do_butlast)
+{
+    if (ATOM(x))
+        return x;
+    PUSH(x);
+    start = lastc = lisp_make_cons (CAR(x), nil);
+    POP(x);
+    PUSH(start);
+    DOLIST(x, CDR(x)) {
+        if (!ATOM(x)) {
+            if (do_butlast && !CDR(x))
+                break;
+            PUSH(lastc);
+            PUSH(x);
+            tmp = lisp_make_cons (CAR(x), nil);
+            POP(x);
+            POP(lastc);
+        } else
+            tmp = do_butlast ? nil : x;
+        SETCDR(lastc, tmp);
+        lastc = tmp;
+    }
+    POP(start);
+    return start;
+}
+
+lispptr FASTCALL
 butlast (lispptr x)
 {
-    if (LIST_CDR(x))
-        return lisp_make_cons (CAR(x), butlast (CDR(x)));
-    return nil;
+    return copy_list (x, true);
 }
 
 lispptr FASTCALL
@@ -154,16 +179,12 @@ bi_symbolp (void)
 lispptr
 bi_builtinp (void)
 {
-    if (!arg1)
-        return t;
     return BUILTINP(arg1) ? arg1 : nil;
 }
 
 lispptr
 bi_specialp (void)
 {
-    if (!arg1)
-        return t;
     return SPECIALP(arg1) ? arg1 : nil;
 }
 
@@ -189,7 +210,9 @@ bi_string (void)
     char * p;
 
     len = length (arg1);
+    PUSH(arg1);
     s = lisp_alloc_symbol (buffer, len);
+    POP(arg1);
     p = SYMBOL_NAME(s);
 
     DOLIST(arg1, arg1) {
@@ -301,6 +324,12 @@ bi_bit_neg (void)
 }
 
 lispptr
+bi_rawptr (void)
+{
+    return lisp_make_number ((long) arg1);
+}
+
+lispptr
 bi_peek (void)
 {
     return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
@@ -327,38 +356,30 @@ bi_eval (void)
     return eval ();
 }
 
+// Consing. Could be optimized away if moved to eval().
 lispptr
 bi_apply (void)
 {
-    if (!CONSP(x)) {
-        msg = "(apply fun . args)";
-        bierror ();
-    }
-    arg1 = CAR(x);
-    arg2c = CDR(x);
-    // Consing. Could be optimized away if moved to eval().
-    x = butlast (arg2c);
     PUSH(arg1);
-    PUSH(arg2c);
-    args = eval_list ();
-    POP(arg2c);
-    POP(arg1);
-    x = last (arg2c);
-    PUSH(arg1);
-    PUSH(args);
-    tmp = eval_list ();
-    POP(args);
-    POP(arg1);
+
+    PUSH(arg2);
+    args = copy_list (arg2, true);
+    POP(arg2);
+    tmp = CAR(last (arg2));
     if (args) {
         if (!LISTP(tmp)) {
             msg = "Last argument must be a list.";
             bierror ();
         }
-        SETCDR(last (args), CAR(tmp));
+        SETCDR(last (args), tmp);
     } else
-        args = CAR(tmp);
+        args = tmp;
+
+    POP(arg1);
     x = lisp_make_cons (arg1, args);
-    return funcall ();
+    unevaluated = true;
+    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    return eval0 ();
 }
 
 lispptr
@@ -537,9 +558,9 @@ bi_close (void)
 void FASTCALL
 err_open (char * pathname)
 {
-        setout (STDERR);
-        outs ("Cannot open file ");
-        error (pathname);
+    setout (STDERR);
+    outs ("Cannot open file ");
+    error (pathname);
 }
 
 void FASTCALL
@@ -617,6 +638,13 @@ bi_gc (void)
 }
 
 lispptr
+bi_quit (void)
+{
+    lisp_break = true;
+    return nil;
+}
+
+lispptr
 bi_exit (void)
 {
 #ifdef __CC65__
@@ -636,7 +664,7 @@ bi_length (void)
 lispptr
 bi_butlast (void)
 {
-    return butlast (arg1);
+    return copy_list (arg1, true);
 }
 
 lispptr
@@ -649,6 +677,12 @@ lispptr
 bi_member (void)
 {
     return member (arg1, arg2);
+}
+
+lispptr
+bi_copy_list (void)
+{
+    return copy_list (arg1, nil);
 }
 
 lispptr
@@ -686,7 +720,7 @@ bi_debug (void)
 struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
-    { "apply",      NULL,   bi_apply },
+    { "apply",      "f+x",  bi_apply },
     { "funcall",    "f+x",  bi_funcall },
     { "eval",       "x",    bi_eval },
 
@@ -736,6 +770,7 @@ struct builtin builtins[] = {
     { "<<",         "nn",   bi_shift_left },
     { ">>",         "nn",   bi_shift_right },
 
+    { "rawptr",     "x",    bi_rawptr },
     { "peek",       "n",    bi_peek },
     { "poke",       "nn",   bi_poke },
     { "sys",        "n",    bi_sys },
@@ -760,11 +795,13 @@ struct builtin builtins[] = {
     { "special",    "'s'+", bi_special },
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
+    { "quit",       "",     bi_quit },
     { "exit",       "n",    bi_exit },
 
-    { "length",     "l",    bi_length },
     { "butlast",    "l",    bi_butlast },
+    { "copy-list",  "l",    bi_copy_list },
     { "last",       "l",    bi_last },
+    { "length",     "l",    bi_length },
     { "member",     "xl",   bi_member },
     { "@",          "fl",   bi_filter },
 

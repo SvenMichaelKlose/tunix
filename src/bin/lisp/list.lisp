@@ -1,8 +1,10 @@
-; Return argument in a list.
 (fn list x
   x)
 
-; Test if list or end of list.
+(out "Testing LIST:")(terpri)
+(print (list))(terpri)
+(print (list 1 2 3))(terpri)
+
 (fn list? (x)
   (or (not x)
       (cons? x)))
@@ -22,47 +24,39 @@
 (fn cadar (x)
   (car (cdr (car x))))
 
-; Copy tree.
 (fn copy (x)
+  "Copy tree."
   (? (cons? x)
      (cons (car x) (cdr x))
      x))
 
-(fn append (list1 . lists)
-  (? list1
-     (cons (car list1) (apply append (cdr list1) lists))
-     (? lists
-        (apply append lists))))
+(fn append (first . rest)
+  "Copy and concatenate."
+  (?
+    first
+      (cons (car first)
+            (apply append (cdr first) rest))
+    rest
+      (apply append rest)))
 
-; Compare tree.
+(out "Testing APPEND:")(terpri)
+(print (append nil nil))(terpri)
+(print (append nil '(3 4)))(terpri)
+(print (append '(1 2) nil))(terpri)
+(print (append '(1 2) '(3 4)))(terpri)
+
 (fn equal (a b)
+  "Compare tree."
   (? (and (cons? a)
           (cons? b))
      (equal (car x) (cdr x))
      (eql a b)))
 
-; Get first elements of lists.
 (fn carlist (x)
   (@ car x))
 
-; Get rest elements of lists.
 (fn cdrlist (x)
   (@ cdr x))
 
-; Find element in list.
 (fn find (x l)
-  (? (list? l)
-     (? x
-        (? (eq x (car l))
-           x
-           (find x (cdr l))))
-     (error)))
-
-; Find in associative list (CAR is key, CDR is value).
-(fn assoc (v x)
-  (? (cons? x)
-     (? (cons? (car x))
-        (? (eq v (caar x))
-           x
-           (assoc v (cdr x)))
-        (error))))
+  (car (member x l)))

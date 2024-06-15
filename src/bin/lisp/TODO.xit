@@ -1,5 +1,5 @@
-[@] Essential tests
-[@] Macro expansion
+[x] Essential tests
+[x] Macro expansion
 [ ] Undefining universe elements (DELETE)
 [ ] User-defined error handler
 [ ] On-demand function loading

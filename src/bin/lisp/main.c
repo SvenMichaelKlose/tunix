@@ -151,13 +151,13 @@ member (lispptr needle, lispptr haystack)
 lispptr
 bi_eq (void)
 {
-    return BOOL(arg1 == arg2);
+    return BOOL(arg1 == arg2); // TOOD: Return arg1 if T.
 }
 
 lispptr
 bi_not (void)
 {
-    return arg1 ? nil : t;
+    return BOOL(!arg1);
 }
 
 lispptr
@@ -179,12 +179,16 @@ bi_symbolp (void)
 lispptr
 bi_builtinp (void)
 {
+    if (!arg1)
+        return nil;
     return BUILTINP(arg1) ? arg1 : nil;
 }
 
 lispptr
 bi_specialp (void)
 {
+    if (!arg1)
+        return nil;
     return SPECIALP(arg1) ? arg1 : nil;
 }
 

@@ -25,3 +25,7 @@
 
     ; Just copy then...
     (cons (car qqx) (%qq (cdr qqx)))))
+
+(out "Testing QUASIQUOTE:")(terpri)
+(print $(1 2 ,3 ,4))(terpri)
+(print $(1 2 ,@'(3 4)))(terpri)

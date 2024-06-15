@@ -1,0 +1,5 @@
+(fn eql (a b)
+  (? (and (number? a)
+          (number? b))
+     (== a b)
+     (eq a b)))

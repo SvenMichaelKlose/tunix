@@ -63,13 +63,16 @@ sweep ()
     while (*s) {
         n = objsize (s);
         if (MARKED(s)) {
+            // Copy object with mark bit cleared.
             *d++ = *s++ & ~TYPE_MARKED;
             while (--n)
                 *d++ = *s++;
         } else {
             if (last_sweeped == d) {
+                // Append gap to previous one.
                 *(unsigned *) xlat += n;
             } else {
+                // Make new entry in relocation table.
                 last_sweeped = d;
 
                 // Log gap position and size.

@@ -182,6 +182,7 @@ lisp_init ()
 
     tagstack = malloc (TAGSTACK_SIZE);
     tagstack += TAGSTACK_SIZE;
+    tagstack_end = tagstack;
 
     // Init stack.
     stack_start = (void *) 0x0400; //malloc (STACK_SIZE);

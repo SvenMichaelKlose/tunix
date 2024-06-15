@@ -17,6 +17,8 @@ lispptr x;
 lispptr args;
 char * stack;
 char * stack_end;
+char * tagstack_start;
+char * tagstack_end;
 char * tagstack;
 lispptr name;
 lispptr defs;
@@ -43,6 +45,8 @@ bool unevaluated;
 #pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
+#pragma zpsym ("tagstack_start")
+#pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("name")
 #pragma zpsym ("defs")
@@ -64,6 +68,26 @@ bool unevaluated;
 #pragma zpsym ("unevaluated")
 #pragma bss-name (pop)
 #endif
+
+void stack_overflow ()
+{
+    error ("Stack overflow");
+}
+
+void stack_underflow ()
+{
+    error ("Stack underflow");
+}
+
+void tagstack_overflow ()
+{
+    error ("Tag stack overflow");
+}
+
+void tagstack_underflow ()
+{
+    error ("Tag stack underflow");
+}
 
 extern void bierror (void);
 
@@ -159,6 +183,11 @@ lispptr
 eval0 (void)
 {
 do_eval:
+#ifdef GC_STRESS
+    PUSH(x);
+    gc ();
+    POP(x);
+#endif
     if (!x) {
         value = nil;
         goto do_return;
@@ -309,7 +338,8 @@ set_arg_values:
             } else
                 value = CAR(args);
             goto save_builtin_arg_value;
-        } if (c == '+') {
+        }
+        if (c == '+') {
             PUSH(args);
             PUSH_TAG(na);
             x = args;

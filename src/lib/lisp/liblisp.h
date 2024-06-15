@@ -1,6 +1,9 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+// Give that inappropriately happy developer a hard time.
+//#define GC_STRESS
+
 // # Compile-time option SLOW
 //
 // **Use only when desperate for smaller code size!**
@@ -74,6 +77,8 @@ extern char * heap_end;
 extern lispptr args;
 extern char * stack;
 extern char * stack_end;
+extern char * tagstack_start;
+extern char * tagstack_end;
 extern char * tagstack;
 extern char * msg;
 extern bool lisp_break;     // Return to REPL.
@@ -100,6 +105,8 @@ extern lispptr delayed_eval;
 #pragma zpsym ("args")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
+#pragma zpsym ("tagstack_start")
+#pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("msg")
 #pragma zpsym ("lisp_break")
@@ -127,24 +134,38 @@ extern lispptr delayed_eval;
     } while (0)
 #define PUSH(x) \
     do { \
+        if (stack == stack_start) \
+            stack_overflow (); \
         stack -= sizeof (lispptr); \
         *(lispptr *) stack = x; \
     } while (0)
 #define POP(x) \
     do { \
+        if (stack == stack_end) \
+            stack_underflow (); \
         x = *(lispptr *) stack; \
         stack += sizeof (lispptr); \
     } while (0)
 
-#define PUSH_TAG(x)     (*--tagstack = (x))
-#define POP_TAG(x)      ((x) = *tagstack++)
+#define PUSH_TAG(x) \
+    do { \
+        (*--tagstack = (x)); \
+    } while (0)
+#define POP_TAG(x) \
+    do { \
+        ((x) = *tagstack++); \
+    } while (0)
 #define PUSH_TAGW(x) \
     do { \
+        if (tagstack == tagstack_start) \
+            tagstack_overflow (); \
         tagstack -= sizeof (lispptr); \
         *(lispptr *) tagstack = x; \
     } while (0)
 #define POP_TAGW(x) \
     do { \
+        if (tagstack == tagstack_end) \
+            tagstack_underflow (); \
         x = *(lispptr *) tagstack; \
         tagstack += sizeof (lispptr); \
     } while (0)
@@ -236,6 +257,11 @@ extern bool FASTCALL lisp_specialp (lispptr);
 
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
+
+extern void  stack_overflow (void);
+extern void  stack_underflow (void);
+extern void  tagstack_overflow (void);
+extern void  tagstack_underflow (void);
 
 extern lispptr  FASTCALL lisp_make_cons (lispptr, lispptr);
 extern lispptr  FASTCALL lisp_make_number (lispnum_t);

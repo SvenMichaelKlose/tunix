@@ -105,12 +105,14 @@ copy_list (lispptr x, bool do_butlast)
 {
     if (ATOM(x))
         return x;
+    if (do_butlast && !CDR(x))
+        return nil;
     PUSH(x);
     start = lastc = lisp_make_cons (CAR(x), nil);
     POP(x);
     PUSH(start);
     DOLIST(x, CDR(x)) {
-        if (!ATOM(x)) {
+        if (CONSP(x)) {
             if (do_butlast && !CDR(x))
                 break;
             PUSH(lastc);
@@ -119,7 +121,7 @@ copy_list (lispptr x, bool do_butlast)
             POP(x);
             POP(lastc);
         } else
-            tmp = do_butlast ? nil : x;
+            tmp = x;
         SETCDR(lastc, tmp);
         lastc = tmp;
     }
@@ -205,20 +207,22 @@ bi_symbol_value (void)
     return SYMBOL_VALUE(arg1);
 }
 
-// Make symbol from char list.
+// Make symbol from character list.
 lispptr
-bi_string (void)
+bi_symbol (void)
 {
     int len;
     lispptr s;
     char * p;
 
+    // Allocate empty symbol of wanted length.
     len = length (arg1);
     PUSH(arg1);
     s = lisp_alloc_symbol (buffer, len);
     POP(arg1);
-    p = SYMBOL_NAME(s);
 
+    // Make symbol name from list.
+    p = SYMBOL_NAME(s);
     DOLIST(arg1, arg1) {
         if (!NUMBERP(CAR(arg1))) {
             msg = "(string nlst)";
@@ -226,7 +230,7 @@ bi_string (void)
         }
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
-    *p++ = 0;
+
     return s;
 }
 
@@ -389,7 +393,7 @@ bi_apply (void)
 lispptr
 bi_funcall (void)
 {
-    x = lisp_make_cons (arg1, args);
+    x = lisp_make_cons (arg1, arg2);
     return funcall ();
 }
 
@@ -411,9 +415,6 @@ bi_go (void)
 lispptr
 bi_if (void)
 {
-    msg = "(? cond x [cond x/default])";
-    if (!CONSP(x))
-        bierror ();
     arg2c = CDR(x);
     if (!CONSP(arg2c))
         bierror ();
@@ -506,7 +507,7 @@ bi_setout (void)
 {
     setout (NUMBER_VALUE(arg1));
     if (err ())
-        error ("setout: illegal fn.");
+        error ("fn!");
     SET_SYMBOL_VALUE(lisp_fnout, arg1);
     return arg1;
 }
@@ -563,7 +564,7 @@ void FASTCALL
 err_open (char * pathname)
 {
     setout (STDERR);
-    outs ("Cannot open file ");
+    outs ("file!");
     error (pathname);
 }
 
@@ -743,9 +744,9 @@ struct builtin builtins[] = {
     { "builtin?",   "x",    bi_builtinp },
     { "special?",   "x",    bi_specialp },
 
+    { "symbol",     "l",    bi_symbol },
     { "=",          "'sx",  bi_setq },
     { "value",      "s",    bi_symbol_value },
-    { "string",     "l",    bi_string },
 
     { "cons",       "xx",   bi_cons },
     { "car",        "x",    bi_car },

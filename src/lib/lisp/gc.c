@@ -8,8 +8,6 @@
 
 #include "liblisp.h"
 
-#define VERBOSE_GC
-
 // Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)

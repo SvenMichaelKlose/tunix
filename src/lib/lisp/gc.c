@@ -164,7 +164,7 @@ gc (void)
 #ifdef VERBOSE_GC
     outs (": ");
     outnu ((unsigned) (tmp - heap_free));
-    outs (" bytes freed.");
+    outs ("B freed.");
     terpri ();
 #endif
 }

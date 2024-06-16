@@ -9,3 +9,6 @@
 (macro progn body
   ;"Return value of last expression."
   $(block t ,@body))
+
+(print 'macroexpand)(terpri)
+(macroexpand '(progn (error "bodyeval")))

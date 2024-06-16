@@ -1,6 +1,17 @@
 TUNIX blog
 ==========
 
+# 2024-06-15: MACROEXPAND & QUASIQUOTE
+
+These are working and with a couple of standard,
+"user-defined" functions added we're running out of heap.
+
+
+Software projects get interrupted easily. 
+* No test arguments for equality.
+* Documentation strings and removing them after LOAD.
+* Re-def to abbreviated names.
+
 # 2024-06-07: 1000 Miles
 
 Did a very long trip to collect retro items this week.

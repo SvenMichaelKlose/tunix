@@ -622,11 +622,19 @@ everything out that appeared later:
 
 ## Error handling
 
-When an error occurs, a message is printed along with the
-object that caused the error and you end up in the debugger
-REPL shell.  You can return with a new object as an argument
-to built-in function QUIT.  In top-level command mode it
-understands these commands:
+In case of an error a flag is set that tells the current
+REPL that the evaluation failed.  The REPL then calls
+another REPL to get an alternative value.  That REPL then
+prints an error message along with the failing expression
+and evaluates all expressions read from standard in.
+If REPLs are nested because of further errors, the number
+of currently nested REPLs is printed before the prompt.
+QUIT will exit the current REPL with its argument as its
+result.
+
+During evaluation the I/O channels of the running program
+are assigned. (Fix with stdio macro?)
+
 
 | Command | Description                          |
 |---------|--------------------------------------|

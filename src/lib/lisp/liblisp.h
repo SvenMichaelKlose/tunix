@@ -67,6 +67,9 @@ extern lispptr stdout;
 extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
+extern lispptr last_error;
+extern char *  last_errstr;
+extern bool    debug_mode;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -86,7 +89,7 @@ extern char * tagstack_start;
 extern char * tagstack_end;
 extern char * tagstack;
 extern char * msg;
-extern bool lisp_break;     // Return to REPL.
+extern bool has_error;     // Return to REPL.
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 extern lispptr block_sym;
 extern lispptr return_sym;
@@ -114,7 +117,7 @@ extern lispptr delayed_eval;
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("msg")
-#pragma zpsym ("lisp_break")
+#pragma zpsym ("has_error")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")

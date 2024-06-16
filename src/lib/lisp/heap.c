@@ -178,20 +178,19 @@ lisp_init ()
 {
     size_t heap_size;
 
-    lisp_break = false;
-
+    // Make tag stack.
     tagstack = malloc (TAGSTACK_SIZE);
     tagstack += TAGSTACK_SIZE;
     tagstack_end = tagstack;
 
-    // Init stack.
+    // Make object stack.
     stack_start = (void *) 0x0400; //malloc (STACK_SIZE);
     //if (!stack_start)
         //return false;
     stack_end = stack_start + 0x0c00; //STACK_SIZE;
     stack = stack_end;
 
-    // Init heap.
+    // Make heap.
 #ifdef __CC65__
     heap_size = _heapmaxavail ();
 #else
@@ -203,6 +202,7 @@ lisp_init ()
     *heap_free = 0;
     heap_end = heap_start + heap_size;
 
+    // Make universe with essential symbols.
     universe = nil;
     t = lisp_make_symbol ("t", 1);
     EXPAND_UNIVERSE(t);
@@ -215,8 +215,14 @@ lisp_init ()
     go_sym      = lisp_make_symbol (NULL, 0);
     EXPAND_UNIVERSE(go_sym);
 
-    // Init input.
+    // Init input. TODO: Remove (pixel)
     do_putback = false;
+
+    // Clear error info.
+    debug_mode  = false;
+    has_error   = false;
+    last_errstr = NULL;
+    last_error  = nil;
 
     return true;
 }

@@ -10,7 +10,7 @@
 ;(load "alist.lisp")
 (load "prog.lisp")
 ;(load "stack.lisp")
-;(load "let.lisp")
+(load "let.lisp")
 ;(load "with.lisp")
 ;(load "whenunless.lisp")
 ;(load "while.lisp")

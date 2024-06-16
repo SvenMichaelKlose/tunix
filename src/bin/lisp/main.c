@@ -58,28 +58,19 @@ lispptr return_args;
 lispptr start;
 lispptr lastc;
 
+lispptr last_error;
+char *  last_errstr;
+bool    do_break_repl;
+char    num_repls;
+bool    debug_mode;
+
 char load_fn = 12;
 
 void FASTCALL
 error (char * msg)
 {
-    lisp_break = true;
-    setout (STDERR);
-    outs ("ERROR: ");
-    if (msg) {
-        outs (msg);
-        msg = NULL;
-    }
-    lisp_print (x);
-    terpri ();
-    lisp_repl ();
-}
-
-void
-bierror ()
-{
-    error (msg);
-while (1);
+    last_errstr = msg;
+    has_error = true;
 }
 
 void FASTCALL
@@ -225,8 +216,8 @@ bi_symbol (void)
     p = SYMBOL_NAME(s);
     DOLIST(arg1, arg1) {
         if (!NUMBERP(CAR(arg1))) {
-            msg = "(string nlst)";
-            bierror ();
+            error ("(string nlst)");
+            break;
         }
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
@@ -376,8 +367,9 @@ bi_apply (void)
     tmp = CAR(last (arg2));
     if (args) {
         if (!LISTP(tmp)) {
-            msg = "Last argument must be a list.";
-            bierror ();
+            error ("Last arg isn't list!");
+            POP(arg1);
+            return nil;
         }
         SETCDR(last (args), tmp);
     } else
@@ -394,7 +386,9 @@ lispptr
 bi_funcall (void)
 {
     x = lisp_make_cons (arg1, arg2);
-    return funcall ();
+    unevaluated = true;
+    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    return eval0 ();
 }
 
 lispptr
@@ -416,8 +410,6 @@ lispptr
 bi_if (void)
 {
     arg2c = CDR(x);
-    if (!CONSP(arg2c))
-        bierror ();
     while (x) {
         arg1 = CAR(x);
         if (!(arg2c = CDR(x))) {
@@ -589,8 +581,12 @@ load (char * pathname)
 
     load_fn++;
     in (); putback ();
-    while (!lisp_break && (x = lisp_read ())) {
-        //lisp_print (x); terpri ();
+    while (!eof ()) {
+        x = lisp_read ();
+        if (has_error)
+            x = lisp_repl ();
+        if (do_break_repl)
+            break;
         eval ();
     }
     load_fn--;
@@ -643,9 +639,16 @@ bi_gc (void)
 }
 
 lispptr
+bi_error (void)
+{
+    has_error = true;
+    return nil;
+}
+
+lispptr
 bi_quit (void)
 {
-    lisp_break = true;
+    do_break_repl = true;
     return nil;
 }
 
@@ -696,16 +699,21 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
-    start = lastc = lisp_make_cons (eval (), nil);
+    unevaluated = true;
+    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    start = lastc = lisp_make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
+
     PUSH(start);
     DOLIST(arg2, CDR(arg2)) {
         PUSH(arg1);
         PUSH(arg2);
         PUSH(lastc);
         x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
-        tmp = lisp_make_cons (eval (), nil);
+        unevaluated = true;
+        PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+        tmp = lisp_make_cons (eval0 (), nil);
         POP(lastc);
         SETCDR(lastc, tmp);
         lastc = tmp;
@@ -716,11 +724,14 @@ bi_filter (void)
     return start;
 }
 
+#ifndef NDEBUG
 lispptr
 bi_debug (void)
 {
+    debug_mode = true;
     return nil;
 }
+#endif
 
 struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
@@ -800,6 +811,7 @@ struct builtin builtins[] = {
     { "special",    "'s'+", bi_special },
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
+    { "error",      "?x",   bi_error },
     { "quit",       "",     bi_quit },
     { "exit",       "n",    bi_exit },
 
@@ -810,7 +822,9 @@ struct builtin builtins[] = {
     { "member",     "xl",   bi_member },
     { "@",          "fl",   bi_filter },
 
+#ifndef NDEBUG
     { "debug",      "",     bi_debug },
+#endif
 
     { NULL, NULL }
 };
@@ -818,21 +832,38 @@ struct builtin builtins[] = {
 lispptr
 lisp_repl ()
 {
+    // Save active I/O channel configuration.
     int old_in = fnin;
     int old_out = fnin;
 
+    num_repls++;
+
+    // Print waiting error message.
+    if (has_error) {
+        setout (STDERR);
+        terpri ();
+        outs ("Error: ");
+        terpri ();
+        if (last_errstr) {
+            outs (last_errstr);
+            terpri ();
+        }
+        lisp_print (last_error);
+        terpri ();
+        has_error = false;
+    }
+
+    // Read expresions from standard in until end of input
+    // or QUIT has been invoked.
     setin (STDIN);
     setout (STDOUT);
     while (!eof ()) {
-        lisp_break = false;
-        if (err ()) {
-            setout (STDERR);
-            outs ("Cannot read from stdin.");
-            exit (0);
-        }
-
-        // Get user input via standard channels.
+        // Print prompt with number of recursions.
+        if (num_repls)
+            out ('0' + num_repls);
         outs ("* ");
+
+        // Read an expression.
         x = lisp_read ();
         fresh_line ();
 
@@ -840,8 +871,14 @@ lisp_repl ()
         setin (old_in);
         setout (old_out);
         x = eval ();
-        if (lisp_break)
+        if (has_error)
+            x = lisp_repl ();
+
+        // Break on demand.
+        if (do_break_repl) {
+            do_break_repl = false;
             break;
+        }
 
         // Print result on standard out.
         setin (STDIN);
@@ -850,8 +887,12 @@ lisp_repl ()
         lisp_print (x);
         fresh_line ();
     }
+
+    // Restore former I/O channels.
     setin (old_in);
     setout (old_out);
+
+    num_repls--;
     return x;
 }
 
@@ -865,8 +906,10 @@ main (int argc, char * argv[])
     (void) argc, (void) argv;
 
     simpleio_init ();
-    if (!lisp_init ())
-        error ("No memory.");
+    if (!lisp_init ()) {
+        outs ("No memory.");
+        exit (EXIT_FAILURE);
+    }
 
     add_builtins (builtins);
 
@@ -898,7 +941,11 @@ main (int argc, char * argv[])
     EXPAND_UNIVERSE(lisp_fnout);
 
     load ("env.lisp");
+    do_break_repl = false;
+    num_repls = -1;
     lisp_repl ();
 
+    setout (STDOUT);
+    outs ("Bye!");
     return 0;
 }

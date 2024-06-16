@@ -33,7 +33,7 @@ lispptr return_value;
 lispptr go_sym;
 lispptr go_tag;
 bool tag_found;
-bool lisp_break;
+bool has_error;
 uchar c;
 char * badef;
 uchar na;
@@ -61,7 +61,7 @@ bool unevaluated;
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tag_found")
-#pragma zpsym ("lisp_break")
+#pragma zpsym ("has_error")
 #pragma zpsym ("c")
 #pragma zpsym ("badef")
 #pragma zpsym ("na")
@@ -69,27 +69,37 @@ bool unevaluated;
 #pragma bss-name (pop)
 #endif
 
+void
+internal_error (char * msg)
+{
+    setout (STDERR);
+    outs ("Ouch! ");
+    outs (msg);
+    terpri ();
+    lisp_print (last_error);
+    terpri ();
+    exit (EXIT_FAILURE);
+}
+
 void stack_overflow ()
 {
-    error ("Stack overflow");
+    internal_error ("Stack overflow");
 }
 
 void stack_underflow ()
 {
-    error ("Stack underflow");
+    internal_error ("Stack underflow");
 }
 
 void tagstack_overflow ()
 {
-    error ("Tag stack overflow");
+    internal_error ("Tag stack overflow");
 }
 
 void tagstack_underflow ()
 {
-    error ("Tag stack underflow");
+    internal_error ("Tag stack underflow");
 }
-
-extern void bierror (void);
 
 char *
 typename (lispptr * x)
@@ -161,10 +171,11 @@ bi_tcheck (lispptr x, uchar type)
 }
 
 // Evaluate list to list of return values.
+// TODO: Inline into eval0.
 lispptr
 eval_list (void)
 {
-    if (lisp_break)
+    if (has_error)
         return nil;
     if (ATOM(x))
         return x;
@@ -183,6 +194,9 @@ lispptr
 eval0 (void)
 {
 do_eval:
+#ifndef NDEBUG
+    last_error = x;
+#endif
 #ifdef VERBOSE_EVAL
     lisp_print (x); terpri ();
 #endif
@@ -212,22 +226,24 @@ do_eval:
 // Do BLOCK.
 
     if (arg1 == block_sym) {
-        x = CDR(x);
-        if (!CONSP(x)) {
-            msg = "No name.";
-            bierror ();
+        if (debug_mode)
+            while (1);
+        if (!CONSP(CDR(x))) {
+            error ("No name.");
+            goto do_return;
         }
+        x = CDR(x);
         arg1 = CAR(x);
 
         if (!SYMBOLP(arg1)) {
-            msg = "Name not a sym.";
-            bierror ();
+            error ("Name not a sym.");
+            goto do_return;
         }
         arg2c = CDR(x);
 
         value = nil;
 block_statement:
-        if (lisp_break)
+        if (has_error)
             goto do_return;
         x = CDR(x);
         if (!x)
@@ -297,10 +313,7 @@ do_builtin_arg:
         if (!c) {
             // Complain if argument left.
             if (args) {
-                msg = "Too many args to builtin:";
-                bierror ();
-                lisp_print (args);
-                while (1);
+                error ("Too many args to builtin:");
                 goto do_return;
             }
 
@@ -333,8 +346,7 @@ set_arg_values:
                 goto set_arg_values;
             }
         } else if (!args) { // Missing argument.
-            msg = "Missing args to builtin.";
-            bierror ();
+            error ("Missing args to builtin.");
             goto do_return;
         }
         if (c == '\'') {    // Unevaluated argument.
@@ -391,8 +403,7 @@ save_builtin_arg_value:
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        error ("Function expected, not: ");
-        lisp_print (arg1);
+        error ("Not a fun.");
         goto do_return;
     }
 
@@ -406,15 +417,11 @@ do_argument:
     if (!args && !defs)
         goto start_body;
     if (args && !defs) {
-        setout (STDERR);
-        outs ("Too many arguments: ");
-        lisp_print (args);
-        lisp_break = true;
+        error ("Too many args");
+        goto restore_arguments;
     } else if (!args && CONSP(defs)) {
-        setout (STDERR);
-        outs ("Argument(s) missing: ");
-        lisp_print (defs);
-        lisp_break = true;
+        error ("Args missing");
+        goto restore_arguments;
     }
 
     na++;
@@ -485,7 +492,7 @@ start_body:
     // Evaluate body statement.
 do_body:
     // Break if out of statements or other reason.
-    if (!x || lisp_break)
+    if (!x || has_error)
         goto restore_arguments;
 
     // Save rest of statements on the GC stack.
@@ -542,6 +549,7 @@ do_return:
         while (1);
 #endif // #ifndef NDEBUG
     }
+
     return value;
 }
 
@@ -562,7 +570,7 @@ eval ()
         setout (STDERR);
         outs ("Internal error: tag stack: ");
         out_number ((long) (old_tagstack - tagstack));
-        outs ("bytes off origin."); terpri ();
+        outs ("B off origin."); terpri ();
         while (1);
     }
     return r;
@@ -572,7 +580,7 @@ eval ()
 lispptr
 funcall ()
 {
-    unevaluated = false;
+    unevaluated = true;
     // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();

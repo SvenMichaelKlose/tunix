@@ -45,13 +45,6 @@
 (print (append '(1 2) nil))(terpri)
 (print (append '(1 2) '(3 4)))(terpri)
 
-(fn equal (a b)
-  "Compare tree."
-  (? (and (cons? a)
-          (cons? b))
-     (equal (car x) (cdr x))
-     (eql a b)))
-
 (fn carlist (x)
   (@ car x))
 

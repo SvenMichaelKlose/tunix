@@ -102,7 +102,7 @@ lexical scope.
      (+ a ,x)))
 ~~~
 
-## Argument type definitions.
+## Argument type descriptions (and definitions)
 
 Built-in functions have character-based argument type
 definitions.  They are also used, padded with spaces, to
@@ -171,6 +171,21 @@ a Lisp file instead of using built-in LOAD:
       (setin old-in)
       (= result (eval expr)))))
 ~~~
+
+# Error handling
+
+In case of an error a flag is set that tells the current
+REPL that the evaluation failed.  The REPL then calls
+another REPL to get an alternative value.  That REPL then
+prints an error message along with the failing expression
+and evaluates all expressions read from standard in.
+If REPLs are nested because of further errors, the number
+of currently nested REPLs is printed before the prompt.
+QUIT will exit the current REPL with its argument as its
+result.
+
+During evaluation the I/O channels of the running program
+are assigned. (Fix with stdio macro?)
 
 # Built-in functions
 
@@ -619,22 +634,6 @@ everything out that appeared later:
 (load "app.lisp")
 (gc *old-defs*)
 ~~~
-
-## Error handling
-
-In case of an error a flag is set that tells the current
-REPL that the evaluation failed.  The REPL then calls
-another REPL to get an alternative value.  That REPL then
-prints an error message along with the failing expression
-and evaluates all expressions read from standard in.
-If REPLs are nested because of further errors, the number
-of currently nested REPLs is printed before the prompt.
-QUIT will exit the current REPL with its argument as its
-result.
-
-During evaluation the I/O channels of the running program
-are assigned. (Fix with stdio macro?)
-
 
 | Command | Description                          |
 |---------|--------------------------------------|

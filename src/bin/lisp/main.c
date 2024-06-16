@@ -560,7 +560,6 @@ load (char * pathname)
 {
     int oldin = fnin;
 
-    outs ("Loading \""); outs (pathname); outs ("\"."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
     arg1 = lisp_make_number (load_fn);
     bi_setin ();
@@ -581,11 +580,11 @@ load (char * pathname)
             x = lisp_repl ();
         if (do_break_repl)
             break;
-#ifndef VERBOSE_LOAD
-        eval ();
-#else
+#ifdef VERBOSE_LOAD
         lisp_print (eval ());
         terpri ();
+#else
+        eval ();
 #endif
     }
     load_fn--;
@@ -599,6 +598,7 @@ err_open:
 lispptr
 bi_load (void)
 {
+    outs ("Loading "); lisp_print (arg1); terpri ();
     name_to_buffer (arg1);
     load (buffer);
     return nil;

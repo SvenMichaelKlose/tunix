@@ -15,7 +15,7 @@
 // **Use only when desperate for smaller code size!**
 // Use functions instead of expressions to save code space
 // at the expense of performance (almost halved).
-//#define SLOW
+#define SLOW
 
 #ifndef STACK_SIZE
     #ifdef __CC65__
@@ -24,7 +24,7 @@
         #define STACK_SIZE  (64 * 1024)
     #endif
 #endif
-#define TAGSTACK_SIZE  1024
+#define TAGSTACK_SIZE  512
 #define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;

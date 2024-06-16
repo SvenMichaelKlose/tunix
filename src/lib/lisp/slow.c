@@ -46,13 +46,21 @@ lisp_numberp (lispptr x)
 {
     return x && TYPE(x) == TYPE_NUMBER;
 }
+
 bool FASTCALL
 lisp_symbolp (lispptr x)
 {
     return !x || TYPE(x) == TYPE_SYMBOL;
 }
+
 bool FASTCALL
 lisp_builtinp (lispptr x)
 {
     return x && TYPE(x) == TYPE_BUILTIN;
+}
+
+bool FASTCALL
+lisp_specialp (lispptr x)
+{
+    return x && PTRTYPE(x) & TYPE_SPECIAL;
 }

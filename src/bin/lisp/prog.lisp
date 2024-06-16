@@ -1,5 +1,5 @@
 (macro prog1 body
-  "Return value of first expression."
+  ;"Return value of first expression."
   (let g (symbol)
     $(((,g)
         ,@(cdr body)
@@ -7,5 +7,5 @@
       ,(car body))))
 
 (macro progn body
-  "Return value of last expression."
+  ;"Return value of last expression."
   $(block t ,@body))

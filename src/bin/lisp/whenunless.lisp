@@ -1,7 +1,10 @@
 (macro when (cond . body)
-  "Evaluate block when..."
-  $(? ,x (progn ,@body)))
+  $(? ,cond
+      (progn
+        ,@body)))
 
-(macro unless (x . body)
-  "Evaluate block unless..."
-  $(? ,x nil (progn ,@body)))
+(macro unless (cond . body)
+  $(? ,cond
+      nil
+      (progn
+        ,@body)))

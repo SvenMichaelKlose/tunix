@@ -1,6 +1,5 @@
-(out "Tests.")(terpri)
+(var x nil)
 
-; Poke built-ins.
 (print 'atom)(terpri)
 (atom 1)
 
@@ -12,9 +11,9 @@
 (or nil t (error))
 
 (print 'copy-list)(terpri)
-(print (copy-list nil))
-(print (copy-list '(1)))
-(print (copy-list '(1 2 3)))
+(print (copy-list nil))(terpri)
+(print (copy-list '(1)))(terpri)
+(print (copy-list '(1 2 3)))(terpri)
 
 (print 'apply)(terpri)
 (print (apply '(x x) '(1)))(terpri)
@@ -26,7 +25,7 @@
 (funcall '((x) (print x)) 1)(terpri)
 
 (print 'eval)(terpri)
-(eval '(print 1))
+(eval '(print 1))(terpri)
 
 (print '?)(terpri)
 (? t nil (error))
@@ -65,7 +64,6 @@
 
 (print '=)(terpri)
 (= x 42)
-(print x)
 (or (== x 42) (error))
 (= x 23)
 (or (== x 23) (error))
@@ -73,9 +71,7 @@
 (print 'value)(terpri)
 (or (== (value 'x) 23) (error))
 
-string
-cons
-setcar setcdr
+; string cons setcar setcdr
 
 (print '>)(terpri)
 (or (> 42 23) (error))
@@ -112,10 +108,12 @@ setcar setcdr
 (or (== (bit-neg 42) (- 0 43)) (error))
 (print '<<)(terpri)
 (or (== (<< 42 1) 84) (error))
+; TODO: False error "Too many args to builtin: 1".
+; Should be 84.
+;(or (== (print (<< 42 1) 84)) (error))
 (print '>>)(terpri)
 (or (== (>> 23 1) 11) (error))
 
-; bit-and bit-or bit-xor bit-neg << >>
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
 ; fn var universe gc exit
@@ -141,3 +139,4 @@ setcar setcdr
 
 (print 'block)(terpri)
 (block-test 3)
+(terpri)

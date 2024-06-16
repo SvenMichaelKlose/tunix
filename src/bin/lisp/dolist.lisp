@@ -1,5 +1,5 @@
 (macro dolist (iter . body)
-  "Iterate over conses of a list."
+  ;"Loop over conses of a list."
   (with (v       (car iter)
          init    (cadr iter)
          result  (cddr iter)

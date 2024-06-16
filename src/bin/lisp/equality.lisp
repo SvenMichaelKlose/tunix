@@ -5,7 +5,7 @@
      (eq a b)))
 
 (fn equal (a b)
-  "Compare tree."
+  ;"Compare tree with EQL."
   (or (and (cons? a)
            (cons? b)
            (equal (car a) (car b))

@@ -1,7 +1,7 @@
 (var *macros* nil)
 
 (special macro (name . lfun)
-  "Define macro function."
+  ;"Define macro function."
   (? (member name *macros*)
      (error name))
   (print name)(terpri)
@@ -10,17 +10,17 @@
            ,@lfun)))
 
 (fn macro? (s)
-  "Test if symbol has a macro."
+  ;"Test if symbol has a macro."
   (and (symbol? s)
        (member s *macros*)))
 
 (fn %requote (x which)
-  "Put expression into an unquote."
+  ;"Put expression into an unquote."
   (cons (cons which (macroexpand (cdar x)))
         (%unquote (cdr x))))
 
 (fn %unquote (x)
-  "Expand unquotes in quasiquoted X."
+  ;"Expand unquotes in quasiquoted X."
   (?
     (atom x)
       x
@@ -34,7 +34,7 @@
           (%unquote (cdr x)))))
 
 (fn macroexpand (x)
-  "Expand *MACROS* in X."
+  ;"Expand *MACROS* in X."
   (?
     (atom x)
       x

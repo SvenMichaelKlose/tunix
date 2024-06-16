@@ -1,7 +1,7 @@
 (fn list x
   x)
 
-(out "Testing LIST:")(terpri)
+(print 'list)(terpri)
 (print (list))(terpri)
 (print (list 1 2 3))(terpri)
 
@@ -25,13 +25,13 @@
   (car (cdr (car x))))
 
 (fn copy (x)
-  "Copy tree."
+  ;"Copy tree."
   (? (cons? x)
      (cons (car x) (cdr x))
      x))
 
 (fn append (first . rest)
-  "Copy and concatenate."
+  ;"Copy and concatenate."
   (?
     first
       (cons (car first)
@@ -39,7 +39,7 @@
     rest
       (apply append rest)))
 
-(out "Testing APPEND:")(terpri)
+(print 'append)(terpri)
 (print (append nil nil))(terpri)
 (print (append nil '(3 4)))(terpri)
 (print (append '(1 2) nil))(terpri)

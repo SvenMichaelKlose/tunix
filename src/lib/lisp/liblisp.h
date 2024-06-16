@@ -1,8 +1,11 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-// Give that inappropriately happy developer a hard time.
+// Give inappropriately happy developers a hard time.
 //#define GC_STRESS
+// Print message if garbage collector takes action.
+#define VERBOSE_GC
+//#define VERBOSE_EVAL
 
 // # Compile-time option SLOW
 //

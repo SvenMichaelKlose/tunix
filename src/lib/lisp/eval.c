@@ -183,11 +183,15 @@ lispptr
 eval0 (void)
 {
 do_eval:
+#ifdef VERBOSE_EVAL
+    lisp_print (x); terpri ();
+#endif
 #ifdef GC_STRESS
     PUSH(x);
     gc ();
     POP(x);
 #endif
+
     if (!x) {
         value = nil;
         goto do_return;
@@ -307,6 +311,12 @@ set_arg_values:
                 POP(arg2);
                 POP(arg1);
             }
+#ifndef NDEBUG
+            else if (na > 2) {
+                error ("#bargs");
+                exit (-1);
+            }
+#endif
 
             // And call the built-in...
             POP_TAGW(bfun);
@@ -316,30 +326,27 @@ set_arg_values:
 
         na++;
 
-        // Optional argument.
-        if (c == '?') {
+        if (c == '?') {     // Optional argument.
             c = *++badef;
             if (!args) {
                 PUSH(nil);
                 goto set_arg_values;
             }
-        } else if (!args) {
-            // Complain about missing argument.
+        } else if (!args) { // Missing argument.
             msg = "Missing args to builtin.";
             bierror ();
             goto do_return;
         }
-        if (c == '\'') {
-            // Deal with unevaluated argument.
+        if (c == '\'') {    // Unevaluated argument.
             c = *++badef;
-            if (c == '+') {
+            if (c == '+') { // (Rest of arguments.)
                 PUSH(args);
                 goto set_arg_values;
             } else
                 value = CAR(args);
             goto save_builtin_arg_value;
         }
-        if (c == '+') {
+        if (c == '+') {     // Rest of arguments.
             PUSH(args);
             PUSH_TAG(na);
             x = args;
@@ -368,9 +375,7 @@ save_builtin_arg_value:
         // Ensure the type is wanted.
         bi_tcheck (value, *badef++);
 
-        // Save evaluated value on the GC stack to move it
-        // to 'arg1' and 'arg2' when finished with all
-        // arguments.
+        // Save for set_arg_values.
         PUSH(value);
 
         // Step to next argument.
@@ -514,6 +519,9 @@ restore_arguments:
 do_return:
     if (value == delayed_eval)
         goto do_eval;
+#ifdef VERBOSE_EVAL
+    outs ("-> "); lisp_print (value); terpri ();
+#endif
     POP_TAG(c);
     if (c != TAG_DONE) {
         switch (c) {
@@ -564,7 +572,7 @@ eval ()
 lispptr
 funcall ()
 {
-    unevaluated = true;
+    unevaluated = false;
     // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();

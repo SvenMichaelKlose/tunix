@@ -377,11 +377,11 @@ TODO: Impressive example where it's advantagous.
 
 ## Symbols
 
-| Function  | Description       |
-|-----------|-------------------|
-| (= 's x)  | Set symbol value. |
-| (value s) | Get symbol value. |
-
+| Function   | Description                           |
+|------------|---------------------------------------|
+| (symbol l) | Make symbol with name from char list. |
+| (= 's x)   | Set symbol value.                     |
+| (value s)  | Get symbol value.                     |
 
 ## Conses
 

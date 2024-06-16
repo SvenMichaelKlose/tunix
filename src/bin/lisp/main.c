@@ -69,6 +69,8 @@ char load_fn = 12;
 void FASTCALL
 error (char * msg)
 {
+    setin (STDIN);
+    setout (STDOUT);
     last_errstr = msg;
     has_error = true;
 }
@@ -553,35 +555,22 @@ bi_close (void)
 }
 
 void FASTCALL
-err_open (char * pathname)
-{
-    setout (STDERR);
-    outs ("file!");
-    error (pathname);
-}
-
-void FASTCALL
 load (char * pathname)
 {
     int oldin = fnin;
 
     outs ("Loading \""); outs (pathname); outs ("\"."); terpri ();
     simpleio_open (load_fn, pathname, 'r');
-    if (err ()) {
-        err_open (pathname);
-        return;
-    }
-
     arg1 = lisp_make_number (load_fn);
     bi_setin ();
     if (err ()) {
-        err_open (pathname);
-        return;
+        error (pathname);
+        goto err_open;
     }
 
     load_fn++;
     in (); putback ();
-    while (!eof ()) {
+    while (!err () && !eof ()) {
         x = lisp_read ();
         if (has_error)
             x = lisp_repl ();
@@ -592,6 +581,7 @@ load (char * pathname)
     load_fn--;
 
     simpleio_close (load_fn);
+err_open:
     arg1 = lisp_make_number (oldin);
     bi_setin ();
 }

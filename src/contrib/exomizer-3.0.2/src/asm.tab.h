@@ -1,8 +1,9 @@
-/* A Bison parser, made by GNU Bison 3.0.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015 Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -30,6 +31,10 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
 #ifndef YY_YY_ASM_TAB_H_INCLUDED
 # define YY_YY_ASM_TAB_H_INCLUDED
 /* Debug traces.  */
@@ -40,123 +45,127 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INCLUDE = 258,
-    IF = 259,
-    DEFINED = 260,
-    MACRO = 261,
-    MACRO_STRING = 262,
-    ORG = 263,
-    ERROR = 264,
-    ECHO1 = 265,
-    INCBIN = 266,
-    INCLEN = 267,
-    INCWORD = 268,
-    RES = 269,
-    WORD = 270,
-    BYTE = 271,
-    LDA = 272,
-    LDX = 273,
-    LDY = 274,
-    STA = 275,
-    STX = 276,
-    STY = 277,
-    AND = 278,
-    ORA = 279,
-    EOR = 280,
-    ADC = 281,
-    SBC = 282,
-    CMP = 283,
-    CPX = 284,
-    CPY = 285,
-    TSX = 286,
-    TXS = 287,
-    PHA = 288,
-    PLA = 289,
-    PHP = 290,
-    PLP = 291,
-    SEI = 292,
-    CLI = 293,
-    NOP = 294,
-    TYA = 295,
-    TAY = 296,
-    TXA = 297,
-    TAX = 298,
-    CLC = 299,
-    SEC = 300,
-    RTS = 301,
-    CLV = 302,
-    CLD = 303,
-    SED = 304,
-    JSR = 305,
-    JMP = 306,
-    BEQ = 307,
-    BNE = 308,
-    BCC = 309,
-    BCS = 310,
-    BPL = 311,
-    BMI = 312,
-    BVC = 313,
-    BVS = 314,
-    INX = 315,
-    DEX = 316,
-    INY = 317,
-    DEY = 318,
-    INC = 319,
-    DEC = 320,
-    LSR = 321,
-    ASL = 322,
-    ROR = 323,
-    ROL = 324,
-    BIT = 325,
-    SYMBOL = 326,
-    STRING = 327,
-    LAND = 328,
-    LOR = 329,
-    LNOT = 330,
-    LPAREN = 331,
-    RPAREN = 332,
-    COMMA = 333,
-    COLON = 334,
-    X = 335,
-    Y = 336,
-    HASH = 337,
-    PLUS = 338,
-    MINUS = 339,
-    MULT = 340,
-    DIV = 341,
-    MOD = 342,
-    LT = 343,
-    GT = 344,
-    EQ = 345,
-    NEQ = 346,
-    ASSIGN = 347,
-    GUESS = 348,
-    NUMBER = 349,
-    vNEG = 350,
-    LABEL = 351
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    INCLUDE = 258,                 /* INCLUDE  */
+    IF = 259,                      /* IF  */
+    DEFINED = 260,                 /* DEFINED  */
+    MACRO = 261,                   /* MACRO  */
+    MACRO_STRING = 262,            /* MACRO_STRING  */
+    ORG = 263,                     /* ORG  */
+    ERROR = 264,                   /* ERROR  */
+    ECHO1 = 265,                   /* ECHO1  */
+    INCBIN = 266,                  /* INCBIN  */
+    INCLEN = 267,                  /* INCLEN  */
+    INCWORD = 268,                 /* INCWORD  */
+    RES = 269,                     /* RES  */
+    WORD = 270,                    /* WORD  */
+    BYTE = 271,                    /* BYTE  */
+    LDA = 272,                     /* LDA  */
+    LDX = 273,                     /* LDX  */
+    LDY = 274,                     /* LDY  */
+    STA = 275,                     /* STA  */
+    STX = 276,                     /* STX  */
+    STY = 277,                     /* STY  */
+    AND = 278,                     /* AND  */
+    ORA = 279,                     /* ORA  */
+    EOR = 280,                     /* EOR  */
+    ADC = 281,                     /* ADC  */
+    SBC = 282,                     /* SBC  */
+    CMP = 283,                     /* CMP  */
+    CPX = 284,                     /* CPX  */
+    CPY = 285,                     /* CPY  */
+    TSX = 286,                     /* TSX  */
+    TXS = 287,                     /* TXS  */
+    PHA = 288,                     /* PHA  */
+    PLA = 289,                     /* PLA  */
+    PHP = 290,                     /* PHP  */
+    PLP = 291,                     /* PLP  */
+    SEI = 292,                     /* SEI  */
+    CLI = 293,                     /* CLI  */
+    NOP = 294,                     /* NOP  */
+    TYA = 295,                     /* TYA  */
+    TAY = 296,                     /* TAY  */
+    TXA = 297,                     /* TXA  */
+    TAX = 298,                     /* TAX  */
+    CLC = 299,                     /* CLC  */
+    SEC = 300,                     /* SEC  */
+    RTS = 301,                     /* RTS  */
+    CLV = 302,                     /* CLV  */
+    CLD = 303,                     /* CLD  */
+    SED = 304,                     /* SED  */
+    JSR = 305,                     /* JSR  */
+    JMP = 306,                     /* JMP  */
+    BEQ = 307,                     /* BEQ  */
+    BNE = 308,                     /* BNE  */
+    BCC = 309,                     /* BCC  */
+    BCS = 310,                     /* BCS  */
+    BPL = 311,                     /* BPL  */
+    BMI = 312,                     /* BMI  */
+    BVC = 313,                     /* BVC  */
+    BVS = 314,                     /* BVS  */
+    INX = 315,                     /* INX  */
+    DEX = 316,                     /* DEX  */
+    INY = 317,                     /* INY  */
+    DEY = 318,                     /* DEY  */
+    INC = 319,                     /* INC  */
+    DEC = 320,                     /* DEC  */
+    LSR = 321,                     /* LSR  */
+    ASL = 322,                     /* ASL  */
+    ROR = 323,                     /* ROR  */
+    ROL = 324,                     /* ROL  */
+    BIT = 325,                     /* BIT  */
+    SYMBOL = 326,                  /* SYMBOL  */
+    STRING = 327,                  /* STRING  */
+    LAND = 328,                    /* LAND  */
+    LOR = 329,                     /* LOR  */
+    LNOT = 330,                    /* LNOT  */
+    LPAREN = 331,                  /* LPAREN  */
+    RPAREN = 332,                  /* RPAREN  */
+    COMMA = 333,                   /* COMMA  */
+    COLON = 334,                   /* COLON  */
+    X = 335,                       /* X  */
+    Y = 336,                       /* Y  */
+    HASH = 337,                    /* HASH  */
+    PLUS = 338,                    /* PLUS  */
+    MINUS = 339,                   /* MINUS  */
+    MULT = 340,                    /* MULT  */
+    DIV = 341,                     /* DIV  */
+    MOD = 342,                     /* MOD  */
+    LT = 343,                      /* LT  */
+    GT = 344,                      /* GT  */
+    EQ = 345,                      /* EQ  */
+    NEQ = 346,                     /* NEQ  */
+    ASSIGN = 347,                  /* ASSIGN  */
+    GUESS = 348,                   /* GUESS  */
+    NUMBER = 349,                  /* NUMBER  */
+    vNEG = 350,                    /* vNEG  */
+    LABEL = 351                    /* LABEL  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-
 union YYSTYPE
 {
-#line 148 "asm.y" /* yacc.c:1909  */
+#line 148 "asm.y"
 
     i32 num;
     char *str;
     struct atom *atom;
     struct expr *expr;
 
-#line 158 "asm.tab.h" /* yacc.c:1909  */
-};
+#line 167 "asm.tab.h"
 
+};
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -165,6 +174,8 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
+
 int yyparse (void);
+
 
 #endif /* !YY_YY_ASM_TAB_H_INCLUDED  */

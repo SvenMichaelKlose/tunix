@@ -70,7 +70,7 @@ raw_in (void)
 void
 raw_out (char c)
 {
-    if (fnout == STDOUT)
+    if (fnout == STDOUT || fnout == STDERR)
         c = reverse_case (c);
     cbm_k_bsout (c);
 }

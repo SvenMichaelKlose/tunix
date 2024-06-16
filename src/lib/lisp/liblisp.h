@@ -8,6 +8,7 @@
 // Print message if garbage collector takes action.
 #define VERBOSE_GC
 //#define VERBOSE_EVAL
+//#define VERBOSE_LOAD
 
 // # Compile-time option SLOW
 //

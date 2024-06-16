@@ -133,32 +133,32 @@ bi_tcheck (lispptr x, uchar type)
 
     switch (type) {
     case 'x': // anything
-        return;
+        break;
 
     case 'n': // number
         if (!NUMBERP(x))
             err_type ("Number", x);
-        return;
+        break;
 
     case 's': // symbol
         if (!SYMBOLP(x))
             err_type ("Symbol", x);
-        return;
+        break;
 
     case 'c': // cons
         if (!CONSP(x))
             err_type ("Cons", x);
-        return;
+        break;
 
     case 'l': // list (cons or nil)
         if (!LISTP(x))
             err_type ("List", x);
-        return;
+        break;
 
     case 'f': // function
         if (!LISTP(x) && !BUILTINP(x))
             err_type ("Function", x);
-        return;
+        break;
 
 #ifndef NDEBUG
     default:
@@ -385,7 +385,20 @@ next_builtin_arg:
 
 save_builtin_arg_value:
         // Ensure the type is wanted.
-        bi_tcheck (value, *badef++);
+        bi_tcheck (value, *badef);
+#ifndef NDEBUG
+        while (has_error) {
+            PUSH(args);
+            PUSH_TAGW(badef);
+            PUSH_TAG(na);
+            value = lisp_repl ();
+            POP_TAG(na);
+            POP_TAGW(badef);
+            POP(args);
+            bi_tcheck (value, *badef);
+        }
+#endif
+        badef++;
 
         // Save for set_arg_values.
         PUSH(value);

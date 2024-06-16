@@ -11,9 +11,15 @@
      lst
      (cons x lst)))
 
+(quit)
+
 (macro set-op (name . body)
   $(fn ,name (a b)
      ,@body ))
+
+(set-op printab
+  (print a)
+  (print b))
 
 (set-op intersect
   ;"Elements that are in both lists."

@@ -58,6 +58,7 @@ lispptr return_args;
 lispptr start;
 lispptr lastc;
 
+lispptr last_repl_expr;
 lispptr last_error;
 char *  last_errstr;
 bool    do_break_repl;
@@ -70,7 +71,7 @@ void FASTCALL
 error (char * msg)
 {
     setin (STDIN);
-    setout (STDOUT);
+    setout (STDERR);
     last_errstr = msg;
     has_error = true;
 }
@@ -570,13 +571,22 @@ load (char * pathname)
 
     load_fn++;
     in (); putback ();
-    while (!err () && !eof ()) {
-        x = lisp_read ();
+    while (!eof ()) {
+        if (err ()) {
+            error (pathname);
+            goto err_open;
+        }
+        last_repl_expr = x = lisp_read ();
         if (has_error)
             x = lisp_repl ();
         if (do_break_repl)
             break;
+#ifndef VERBOSE_LOAD
         eval ();
+#else
+        lisp_print (eval ());
+        terpri ();
+#endif
     }
     load_fn--;
 
@@ -840,6 +850,9 @@ lisp_repl ()
         }
         lisp_print (last_error);
         terpri ();
+        outs ("in: ");
+        lisp_print (last_repl_expr);
+        terpri ();
         has_error = false;
     }
 
@@ -854,7 +867,7 @@ lisp_repl ()
         outs ("* ");
 
         // Read an expression.
-        x = lisp_read ();
+        last_repl_expr = x = lisp_read ();
         fresh_line ();
 
         // Evaluate expression on program channels.

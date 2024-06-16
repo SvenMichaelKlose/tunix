@@ -2,7 +2,8 @@
 (print (gc))(out "B free.")(terpri)
 
 (load "smoke-test.lisp")
-(load "eql.lisp")
+(load "equality.lisp")
+(load "test.lisp")
 (load "list.lisp")
 (load "quasiquote.lisp")
 (load "macroexpand.lisp")

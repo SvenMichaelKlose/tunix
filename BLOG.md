@@ -1,6 +1,26 @@
 TUNIX blog
 ==========
 
+# 2024-06-17: 1000 Miles
+
+Quasiquotes and macro expansion is working.  There is an
+error REPL and smoke tests now.  Countless bugs have been
+fixed and we're running out of heap.  LOAD should use the
+REPL loop.
+
+I don't want to release because I hate buggy software like
+\*\*\*\* at the moment and the tests cannot be complete if
+errors cannot be caught to check if they happen as
+expected.
+
+The interpreter's size and performance is becoming nasty.
+Something has to be done for the VIC to make use of the
+upper 8K RAM block.  Ways to increase size: fragmented heap
+and/or code overlays.  I hate all that overhead.  Looks like
+the c64 version is the fast path to progress.  Unfortunately
+the plus4 version goes disco and there are double newlines
+with the c128 version.
+
 # 2024-06-07: 1000 Miles
 
 Did a very long trip to collect retro items this week.

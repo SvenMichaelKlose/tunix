@@ -200,7 +200,12 @@ are assigned. (Fix with stdio macro?)
 
 ### (universe): Return list of permanent symbols.
 ### (gc): Free unused objects.
-### (quit ?x): Return from debugger REPL.
+
+### (quit ?x): Return from error REPL.
+
+Returns from the REPL with an alternative result for the one
+that caused the error.
+
 ### (exit n): Exit interpreter with exit code.
 
 ## Definitions

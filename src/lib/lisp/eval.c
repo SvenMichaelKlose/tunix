@@ -76,7 +76,7 @@ internal_error (char * msg)
     outs ("Ouch! ");
     outs (msg);
     terpri ();
-    lisp_print (last_error);
+    lisp_print (last_eval_expr);
     terpri ();
     exit (EXIT_FAILURE);
 }
@@ -195,7 +195,7 @@ eval0 (void)
 {
 do_eval:
 #ifndef NDEBUG
-    last_error = x;
+    last_eval_expr = x;
 #endif
 #ifdef VERBOSE_EVAL
     lisp_print (x); terpri ();

@@ -68,7 +68,7 @@ extern lispptr stdout;
 extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
-extern lispptr last_error;
+extern lispptr last_eval_expr;
 extern char *  last_errstr;
 extern bool    debug_mode;
 

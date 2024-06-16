@@ -125,7 +125,7 @@
      (cons n (make-count (-- n)))))
 
 (print 'Recursion)(terpri)
-(print (make-count 10))
+(print (make-count 10))(terpri)
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (fn block-test (c)

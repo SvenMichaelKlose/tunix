@@ -184,10 +184,15 @@ lisp_init ()
     tagstack_end = tagstack;
 
     // Make object stack.
-    stack_start = (void *) 0x0400; //malloc (STACK_SIZE);
-    //if (!stack_start)
-        //return false;
-    stack_end = stack_start + 0x0c00; //STACK_SIZE;
+#ifdef TARGET_VIC20
+    stack_start = (void *) 0x0400;
+    stack_end = stack_start + 0x0c00;
+#else
+    stack_start = malloc (STACK_SIZE);
+    if (!stack_start)
+        return false;
+    stack_end = stack_start + STACK_SIZE;
+#endif
     stack = stack_end;
 
     // Make heap.
@@ -203,9 +208,8 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     // Make universe with essential symbols.
-    universe = nil;
     t = lisp_make_symbol ("t", 1);
-    EXPAND_UNIVERSE(t);
+    universe = lisp_make_cons (t, nil);
     delayed_eval = lisp_make_symbol ("%E", 2);
     EXPAND_UNIVERSE(delayed_eval);
     block_sym   = lisp_make_symbol ("block", 5);
@@ -222,7 +226,7 @@ lisp_init ()
     debug_mode  = false;
     has_error   = false;
     last_errstr = NULL;
-    last_error  = nil;
+    last_eval_expr  = nil;
 
     return true;
 }

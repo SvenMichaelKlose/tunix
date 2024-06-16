@@ -59,7 +59,7 @@ lispptr start;
 lispptr lastc;
 
 lispptr last_repl_expr;
-lispptr last_error;
+lispptr last_eval_expr;
 char *  last_errstr;
 bool    do_break_repl;
 char    num_repls;
@@ -848,7 +848,7 @@ lisp_repl ()
             outs (last_errstr);
             terpri ();
         }
-        lisp_print (last_error);
+        lisp_print (last_eval_expr);
         terpri ();
         outs ("in: ");
         lisp_print (last_repl_expr);

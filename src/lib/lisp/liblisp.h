@@ -1,6 +1,8 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+#define MAX_SYMBOL  255
+
 // Give inappropriately happy developers a hard time.
 //#define GC_STRESS
 // Print message if garbage collector takes action.
@@ -63,7 +65,7 @@ extern lispptr universe;
 extern lispptr stdin;
 extern lispptr stdout;
 extern char * stack_start;
-extern char buffer[256];
+extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
 
 #ifdef __CC65__

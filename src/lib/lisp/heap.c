@@ -51,7 +51,7 @@ extern char do_putback;
 #endif
 
 lispptr universe;
-char buffer[256];
+char buffer[MAX_SYMBOL + 1];
 
 unsigned lisp_sizes[] = {
     0,
@@ -130,9 +130,8 @@ lisp_make_number (lispnum_t x)
 void * FASTCALL
 lookup_symbol (char * str, uchar len)
 {
+    // Loop over heap until match.
     ptr = (char *) heap_start;
-
-    // Check all objects until end of heap.
     while ((type = *ptr)) {
         if (type & TYPE_NAMED) {
             sym = (symbol *) ptr;
@@ -164,6 +163,7 @@ lisp_alloc_symbol (char * str, uchar len)
     return tmp;
 }
 
+// Find or create symbol.
 lispptr FASTCALL
 lisp_make_symbol (char * str, uchar len)
 {

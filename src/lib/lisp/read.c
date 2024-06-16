@@ -79,7 +79,9 @@ lispptr
 read_string (void)
 {
     char * p;
-    for (p = buffer; !eof () && in () != '"'; p++)
+    for (p = buffer;
+         p != &buffer[MAX_SYMBOL] && !eof () && in () != '"';
+         p++)
         if (last_in == '\\')
             *p = in ();
         else

@@ -9,11 +9,18 @@ git submodule update --init --recursive
 ~~~
 
 The build configuration is file in 'src/config'.  You can
-use 'src/config.example' as a template.  Working TARGETs
-are: 'c64', 'c128', 'plus4', 'vic20' and 'unix'.
+use 'src/config.example' as a template.  TARGETs are:
+'c128', 'c16', 'c64', 'plus4', 'vic20' and 'unix'.  Some
+may not work.  It may look like this:
 
-After you have created your config you can start building
-for your specified target right away:
+~~~
+TARGET = vic20
+NDEBUG = 1 # No extra checks.
+~~~
+
+After you have created your config build tools have to
+be made and the world for the desired target can be built.
+You can do than in one run:
 
 ~~~sh
 make all
@@ -22,7 +29,7 @@ make all
 Running the tests is also a good idea:
 
 ~~~sh
-make all test
+make test
 ~~~
 
 If you want to create disk images and archives for all
@@ -31,5 +38,3 @@ targets just do:
 ~~~sh
 make allworlds
 ~~~
-
-Enjoy!

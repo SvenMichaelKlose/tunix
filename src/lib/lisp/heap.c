@@ -191,14 +191,19 @@ lisp_init ()
     size_t heap_size;
 
     // Make tag stack.
-    tagstack = malloc (TAGSTACK_SIZE);
-    tagstack += TAGSTACK_SIZE;
+#ifdef TARGET_VIC20
+    tagstack_start = (void *) 0x0400;
+    tagstack = (void *) 0x0800;
+#else
+    tagstack_start = malloc (TAGSTACK_SIZE);
+    tagstack = tagstack_start + TAGSTACK_SIZE;
+#endif
     tagstack_end = tagstack;
 
     // Make object stack.
 #ifdef TARGET_VIC20
-    stack_start = (void *) 0x0400;
-    stack_end = stack_start + 0x0c00;
+    stack_start = (void *) 0x0800;
+    stack_end = (void *) 0x1000;
 #else
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)

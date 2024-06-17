@@ -5,13 +5,13 @@
 #define MAX_SYMBOL  255
 
 // Give inappropriately happy developers a hard time.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
 // Print current expression to eval().
-//#define VERBOSE_EVAL
+#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
@@ -308,12 +308,12 @@ extern void  tagstack_overflow (void);
 extern void  tagstack_underflow (void);
 
 extern void     FASTCALL expand_universe (lispptr);
-extern lispptr  FASTCALL lisp_make_cons (lispptr, lispptr);
-extern lispptr  FASTCALL lisp_make_number (lispnum_t);
-extern lispptr  FASTCALL lisp_alloc_symbol (char *, uchar len);
-extern lispptr  FASTCALL lisp_make_symbol (char *, uchar len);
-extern lispptr  lisp_read (void);
-extern lispptr  FASTCALL lisp_print (lispptr);
+extern lispptr  FASTCALL make_cons (lispptr, lispptr);
+extern lispptr  FASTCALL make_number (lispnum_t);
+extern lispptr  FASTCALL alloc_symbol (char *, uchar len);
+extern lispptr  FASTCALL make_symbol (char *, uchar len);
+extern lispptr  read (void);
+extern lispptr  FASTCALL print (lispptr);
 
 // Arguments in global 'x'.
 extern lispptr  eval0 (void);

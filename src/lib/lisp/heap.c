@@ -69,7 +69,7 @@ void FASTCALL
 expand_universe (lispptr x)
 {
     PUSH(x);
-    universe = lisp_make_cons (x, universe);
+    universe = make_cons (x, universe);
     POP(x);
 }
 
@@ -119,7 +119,7 @@ alloc (uchar size, uchar type)
 }
 
 lispptr FASTCALL
-lisp_make_cons (lispptr car, lispptr cdr)
+make_cons (lispptr car, lispptr cdr)
 {
     PUSH(car);
     PUSH(cdr);
@@ -132,7 +132,7 @@ lisp_make_cons (lispptr car, lispptr cdr)
 }
 
 lispptr FASTCALL
-lisp_make_number (lispnum_t x)
+make_number (lispnum_t x)
 {
     tmp = alloc (sizeof (number), TYPE_NUMBER);
     NUMBER(tmp)->value = x;
@@ -166,7 +166,7 @@ lookup_symbol (char * str, uchar len)
 }
 
 lispptr FASTCALL
-lisp_alloc_symbol (char * str, uchar len)
+alloc_symbol (char * str, uchar len)
 {
     tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     SYMBOL(tmp)->value = tmp;
@@ -177,11 +177,11 @@ lisp_alloc_symbol (char * str, uchar len)
 
 // Find or create symbol.
 lispptr FASTCALL
-lisp_make_symbol (char * str, uchar len)
+make_symbol (char * str, uchar len)
 {
     tmp = lookup_symbol (str, len);
     if (!tmp)
-        return lisp_alloc_symbol (str, len);
+        return alloc_symbol (str, len);
     return tmp;
 }
 
@@ -225,15 +225,15 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     // Make universe with essential symbols.
-    t = lisp_make_symbol ("t", 1);
-    universe = lisp_make_cons (t, nil);
-    delayed_eval = lisp_make_symbol ("%E", 2);
+    t = make_symbol ("t", 1);
+    universe = make_cons (t, nil);
+    delayed_eval = make_symbol ("%E", 2);
     expand_universe (delayed_eval);
-    block_sym   = lisp_make_symbol ("block", 5);
+    block_sym   = make_symbol ("block", 5);
     expand_universe (block_sym);
-    return_sym  = lisp_make_symbol (NULL, 0);
+    return_sym  = make_symbol (NULL, 0);
     expand_universe (return_sym);
-    go_sym      = lisp_make_symbol (NULL, 0);
+    go_sym      = make_symbol (NULL, 0);
     expand_universe (go_sym);
 
     // Init input. TODO: Remove (pixel)

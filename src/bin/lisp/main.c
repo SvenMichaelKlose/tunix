@@ -93,7 +93,7 @@ copy_list (lispptr x, bool do_butlast)
     if (do_butlast && !CDR(x))
         return nil;
     PUSH(x);
-    start = lastc = lisp_make_cons (CAR(x), nil);
+    start = lastc = make_cons (CAR(x), nil);
     POP(x);
     PUSH(start);
     DOLIST(x, CDR(x)) {
@@ -102,7 +102,7 @@ copy_list (lispptr x, bool do_butlast)
                 break;
             PUSH(lastc);
             PUSH(x);
-            tmp = lisp_make_cons (CAR(x), nil);
+            tmp = make_cons (CAR(x), nil);
             POP(x);
             POP(lastc);
         } else
@@ -203,7 +203,7 @@ bi_symbol (void)
     // Allocate empty symbol of wanted length.
     len = length (arg1);
     PUSH(arg1);
-    s = lisp_alloc_symbol (buffer, len);
+    s = alloc_symbol (buffer, len);
     POP(arg1);
 
     // Make symbol name from list.
@@ -234,7 +234,7 @@ bi_consp (void)
 lispptr
 bi_cons (void)
 {
-    return lisp_make_cons (arg1, arg2);
+    return make_cons (arg1, arg2);
 }
 
 lispptr
@@ -284,7 +284,7 @@ DEFCOND(bi_gte, >=);
 lispptr \
 fun_name (void) \
 { \
-    return lisp_make_number (NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
+    return make_number (NUMBER_VALUE(arg1) op NUMBER_VALUE(arg2)); \
 }
 
 DEFOP(bi_add, +);
@@ -301,31 +301,31 @@ DEFOP(bi_shift_right, >>);
 lispptr
 bi_inc (void)
 {
-    return lisp_make_number (NUMBER_VALUE(arg1) + 1);
+    return make_number (NUMBER_VALUE(arg1) + 1);
 }
 
 lispptr
 bi_dec (void)
 {
-    return lisp_make_number (NUMBER_VALUE(arg1) - 1);
+    return make_number (NUMBER_VALUE(arg1) - 1);
 }
 
 lispptr
 bi_bit_neg (void)
 {
-    return lisp_make_number (~NUMBER_VALUE(arg1));
+    return make_number (~NUMBER_VALUE(arg1));
 }
 
 lispptr
 bi_rawptr (void)
 {
-    return lisp_make_number ((long) arg1);
+    return make_number ((long) arg1);
 }
 
 lispptr
 bi_peek (void)
 {
-    return lisp_make_number (*(char *) NUMBER_VALUE(arg1));
+    return make_number (*(char *) NUMBER_VALUE(arg1));
 }
 
 lispptr
@@ -370,7 +370,7 @@ bi_apply (void)
         args = tmp;
 
     POP(arg1);
-    x = lisp_make_cons (arg1, args);
+    x = make_cons (arg1, args);
     unevaluated = true;
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
     return eval0 ();
@@ -379,7 +379,7 @@ bi_apply (void)
 lispptr
 bi_funcall (void)
 {
-    x = lisp_make_cons (arg1, arg2);
+    x = make_cons (arg1, arg2);
     unevaluated = true;
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
     return eval0 ();
@@ -456,13 +456,13 @@ bi_or (void)
 lispptr
 bi_print (void)
 {
-    return lisp_print (arg1);
+    return print (arg1);
 }
 
 lispptr
 bi_err (void)
 {
-    return lisp_make_number (err ());
+    return make_number (err ());
 }
 
 lispptr
@@ -477,7 +477,7 @@ bi_open (void)
     uchar fn = NUMBER_VALUE(arg1);
     name_to_buffer (arg2);
     simpleio_open (fn, buffer, 'r');
-    return lisp_make_number (err ());
+    return make_number (err ());
 }
 
 lispptr
@@ -501,7 +501,7 @@ bi_setout (void)
 lispptr
 bi_in (void)
 {
-    return lisp_make_number (in ());
+    return make_number (in ());
 }
 
 lispptr
@@ -521,7 +521,7 @@ bi_out (void)
     else if (SYMBOLP(arg1))
         outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
     else
-        lisp_print (arg1);
+        print (arg1);
     return arg1;
 }
 
@@ -552,7 +552,7 @@ load (char * pathname)
     int oldin = fnin;
 
     simpleio_open (load_fn, pathname, 'r');
-    arg1 = lisp_make_number (load_fn);
+    arg1 = make_number (load_fn);
     bi_setin ();
     if (err ()) {
         error (pathname);
@@ -566,13 +566,13 @@ load (char * pathname)
             error (pathname);
             goto err_open;
         }
-        last_repl_expr = x = lisp_read ();
+        last_repl_expr = x = read ();
         if (has_error)
             x = lisp_repl ();
         if (do_break_repl)
             break;
 #ifdef VERBOSE_LOAD
-        lisp_print (eval ());
+        print (eval ());
         terpri ();
 #else
         eval ();
@@ -582,14 +582,14 @@ load (char * pathname)
 
     simpleio_close (load_fn);
 err_open:
-    arg1 = lisp_make_number (oldin);
+    arg1 = make_number (oldin);
     bi_setin ();
 }
 
 lispptr
 bi_load (void)
 {
-    outs ("Loading "); lisp_print (arg1); terpri ();
+    outs ("Loading "); print (arg1); terpri ();
     name_to_buffer (arg1);
     load (buffer);
     return nil;
@@ -600,7 +600,7 @@ bi_define (void)
 {
     if (member (arg1, universe)) {
         outs ("Redefining ");
-        lisp_print (arg1);
+        print (arg1);
         terpri ();
     } else
         expand_universe (arg1);
@@ -626,7 +626,7 @@ lispptr
 bi_gc (void)
 {
     gc ();
-    return lisp_make_number (heap_end - heap_free);
+    return make_number (heap_end - heap_free);
 }
 
 lispptr
@@ -657,7 +657,7 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    return lisp_make_number (length (arg1));
+    return make_number (length (arg1));
 }
 
 lispptr
@@ -689,10 +689,10 @@ bi_filter (void)
 {
     PUSH(arg1);
     PUSH(arg2);
-    x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
+    x = make_cons (arg1, make_cons (CAR(arg2), nil));
     unevaluated = true;
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
-    start = lastc = lisp_make_cons (eval0 (), nil);
+    start = lastc = make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
 
@@ -701,10 +701,10 @@ bi_filter (void)
         PUSH(arg1);
         PUSH(arg2);
         PUSH(lastc);
-        x = lisp_make_cons (arg1, lisp_make_cons (CAR(arg2), nil));
+        x = make_cons (arg1, make_cons (CAR(arg2), nil));
         unevaluated = true;
         PUSH_TAG(TAG_DONE); // Tell to return from eval0().
-        tmp = lisp_make_cons (eval0 (), nil);
+        tmp = make_cons (eval0 (), nil);
         POP(lastc);
         SETCDR(lastc, tmp);
         lastc = tmp;
@@ -782,7 +782,7 @@ struct builtin builtins[] = {
     { "poke",       "nn",   bi_poke },
     { "sys",        "n",    bi_sys },
 
-    { "read",       "",     lisp_read },
+    { "read",       "",     read },
     { "print",      "x",    bi_print },
     { "open",       "ns",   bi_open },
     { "err",        "",     bi_err },
@@ -839,10 +839,10 @@ lisp_repl ()
             outs (last_errstr);
             terpri ();
         }
-        lisp_print (last_eval_expr);
+        print (last_eval_expr);
         terpri ();
         outs ("in: ");
-        lisp_print (last_repl_expr);
+        print (last_repl_expr);
         terpri ();
         has_error = false;
     }
@@ -858,7 +858,7 @@ lisp_repl ()
         outs ("* ");
 
         // Read an expression.
-        last_repl_expr = x = lisp_read ();
+        last_repl_expr = x = read ();
         fresh_line ();
 
         // Evaluate expression on program channels.
@@ -878,7 +878,7 @@ lisp_repl ()
         setin (STDIN);
         setout (STDOUT);
         fresh_line ();
-        lisp_print (x);
+        print (x);
         fresh_line ();
     }
 
@@ -908,23 +908,23 @@ main (int argc, char * argv[])
     add_builtins (builtins);
 
     // Prepare quoting.
-    quote           = lisp_make_symbol ("quote", 5);
+    quote           = make_symbol ("quote", 5);
     expand_universe (quote);
-    quasiquote      = lisp_make_symbol ("quasiquote", 10);
+    quasiquote      = make_symbol ("quasiquote", 10);
     expand_universe (quasiquote);
-    unquote         = lisp_make_symbol ("unquote", 7);
+    unquote         = make_symbol ("unquote", 7);
     expand_universe (unquote);
-    unquote_spliced = lisp_make_symbol ("unquote-spliced", 15);
+    unquote_spliced = make_symbol ("unquote-spliced", 15);
     expand_universe (unquote_spliced);
 
-    stdin      = lisp_make_symbol ("stdin", 5);
-    stdout     = lisp_make_symbol ("stdout", 6);
-    lisp_fnin  = lisp_make_symbol ("fnin", 4);
-    lisp_fnout = lisp_make_symbol ("fnout", 5);
+    stdin      = make_symbol ("stdin", 5);
+    stdout     = make_symbol ("stdout", 6);
+    lisp_fnin  = make_symbol ("fnin", 4);
+    lisp_fnout = make_symbol ("fnout", 5);
     fnin  = STDIN;
     fnout = STDOUT;
-    i = lisp_make_number (STDIN);
-    o = lisp_make_number (STDOUT);
+    i = make_number (STDIN);
+    o = make_number (STDOUT);
     SET_SYMBOL_VALUE(stdin, i);
     SET_SYMBOL_VALUE(stdout, o);
     SET_SYMBOL_VALUE(lisp_fnin, i);

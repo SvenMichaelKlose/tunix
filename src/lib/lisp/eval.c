@@ -76,7 +76,7 @@ internal_error (char * msg)
     outs ("Ouch! ");
     outs (msg);
     terpri ();
-    lisp_print (last_eval_expr);
+    print (last_eval_expr);
     terpri ();
     exit (EXIT_FAILURE);
 }
@@ -121,7 +121,7 @@ void
 err_type (char * type, lispptr x)
 {
     outs (type); outs (" expected. Got ");
-    outs (typename (x)); lisp_print (x); terpri ();
+    outs (typename (x)); print (x); terpri ();
     error (NULL);
 }
 
@@ -187,7 +187,7 @@ eval_list (void)
     x = CDR(x);
     tmp = eval_list ();
     POP(va);
-    return lisp_make_cons (va, tmp);
+    return make_cons (va, tmp);
 }
 
 lispptr
@@ -198,7 +198,7 @@ do_eval:
     last_eval_expr = x;
 #endif
 #ifdef VERBOSE_EVAL
-    lisp_print (x); terpri ();
+    print (x); terpri ();
 #endif
 #ifdef GC_STRESS
     PUSH(x);
@@ -540,7 +540,7 @@ do_return:
     if (value == delayed_eval)
         goto do_eval;
 #ifdef VERBOSE_EVAL
-    outs ("-> "); lisp_print (value); terpri ();
+    outs ("-> "); print (value); terpri ();
 #endif
     POP_TAG(c);
     if (c != TAG_DONE) {

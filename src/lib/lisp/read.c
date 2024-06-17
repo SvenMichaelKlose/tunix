@@ -35,10 +35,10 @@ read_list (void)
         PUSH(start);
         PUSH(last);
         if (in () == '.')
-            c = lisp_read ();
+            c = read ();
         else {
             putback ();
-            c = lisp_make_cons (lisp_read (), nil);
+            c = make_cons (read (), nil);
         }
         POP(last);
         POP(start);
@@ -58,7 +58,7 @@ read_number (void)
         *p = last_in;
     *p = 0;
     putback ();
-    return lisp_make_number (atoi (buffer));
+    return make_number (atoi (buffer));
 }
 
 lispptr
@@ -72,7 +72,7 @@ read_symbol (void)
     len = p - buffer;
     if (len == 3 && !memcmp (buffer, "nil", 3))
         return nil;
-    return lisp_make_symbol (buffer, p - buffer);
+    return make_symbol (buffer, p - buffer);
 }
 
 lispptr
@@ -86,13 +86,13 @@ read_string (void)
             *p = in ();
         else
             *p = last_in;
-    return lisp_make_symbol (buffer, p - buffer);
+    return make_symbol (buffer, p - buffer);
 }
 
 lispptr
 read_quoted (lispptr which)
 {
-    return lisp_make_cons (which, lisp_make_cons (lisp_read (), nil));
+    return make_cons (which, make_cons (read (), nil));
 }
 
 lispptr
@@ -105,7 +105,7 @@ read_unquoted (void)
 }
 
 lispptr
-lisp_read ()
+read ()
 {
     skip_spaces ();
     if (eof ())

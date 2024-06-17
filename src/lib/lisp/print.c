@@ -15,7 +15,7 @@
 
 #include "liblisp.h"
 
-void print (lispptr);
+void print0 (lispptr);
 
 void
 space (void)
@@ -34,7 +34,7 @@ print_list (cons * c)
 
     if (CAR(c) == quote && CDR(c)) {
         out ('\'');
-        print (CAR(CDR(c)));
+        print0 (CAR(CDR(c)));
         return;
     }
 
@@ -44,10 +44,10 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        print (c->car);
+        print0 (c->car);
         if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
-            print (c->cdr);
+            print0 (c->cdr);
             break;
         }
         c = c->cdr;
@@ -104,7 +104,7 @@ print_named (symbol * s)
 }
 
 void
-print (lispptr x)
+print0 (lispptr x)
 {
     uchar type;
 
@@ -124,8 +124,8 @@ print (lispptr x)
 }
 
 lispptr FASTCALL
-lisp_print (lispptr x)
+print (lispptr x)
 {
-    print (x);
+    print0 (x);
     return x;
 }

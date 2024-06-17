@@ -216,7 +216,7 @@ lisp_init ()
 #ifdef __CC65__
     heap_size = _heapmaxavail ();
 #else
-    heap_size = 64 * 1024;
+    heap_size = HEAP_SIZE;
 #endif
     heap_start = heap_free = malloc (heap_size);
     if (!heap_start)

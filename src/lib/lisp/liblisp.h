@@ -1,16 +1,17 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-// Maximum symbol length.  0 is supported.
+// Maximum symbol length.
 #define MAX_SYMBOL  255
 
 // Give inappropriately happy developers a hard time.
 #define GC_STRESS
+
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
 // Print current expression to eval().
-#define VERBOSE_EVAL
+//#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
@@ -26,15 +27,16 @@
 // moving them.
 #define STACK_CHECKS
 
-#ifndef STACK_SIZE
-    #ifdef __CC65__
-        #define STACK_SIZE  2048
-    #else
-        #define STACK_SIZE  (64 * 1024)
-    #endif
+#ifdef __CC65__
+    #define STACK_SIZE               2048
+    #define TAGSTACK_SIZE            512
+    #define MIN_RELOC_TABLE_ENTRIES  128
+#else
+    #define HEAP_SIZE                (1024 * 1024)
+    #define STACK_SIZE               (64 * 1024)
+    #define TAGSTACK_SIZE            (STACK_SIZE / 2)
+    #define MIN_RELOC_TABLE_ENTRIES  TAGSTACK_SIZE
 #endif
-#define TAGSTACK_SIZE  512
-#define MIN_RELOC_TABLE_ENTRIES  64
 
 typedef unsigned char uchar;
 typedef long lispnum_t;

@@ -1,6 +1,6 @@
 include mk/Makefile.config
 
-SUBDIRS = contrib lib bin
+SUBDIRS = lib bin
 
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 SUBDIRS += sbin
@@ -11,3 +11,12 @@ SUBDIRS += drv sys
 endif
 
 include mk/Makefile.subdir
+
+host:
+	$(MAKE) -C contrib
+
+hosttest:
+	$(MAKE) -C contrib test
+
+hostclean:
+	$(MAKE) -C contrib clean

@@ -1,6 +1,8 @@
 The INGLE project
 =================
 
+Shortcuts:
+
 * [Build instructions](BUILD.md)
 * [Development Blog](BLOG.md)
 

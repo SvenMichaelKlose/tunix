@@ -1,17 +1,26 @@
 include src/mk/Makefile.build
 
-all: world mkfs/mkfs.ultifs ultimem_image c1541_image
+all: host world mkfs/mkfs.ultifs ultimem_image c1541_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
+host:
+	$(MAKE) -C src host
+
+hosttest:
+	$(MAKE) -C src hosttest
+
+hostclean:
+	$(MAKE) -C src hostclean
+
 allworlds:
-	make clean all TARGET=c64
-	make clean all TARGET=c128
-	make clean all TARGET=c16
-	make clean all TARGET=pet
-	make clean all TARGET=plus4
-	make clean all TARGET=unix
-	make clean all TARGET=vic20
+	$(MAKE) clean all TARGET=c64
+	$(MAKE) clean all TARGET=c128
+	$(MAKE) clean all TARGET=c16
+	$(MAKE) clean all TARGET=pet
+	$(MAKE) clean all TARGET=plus4
+	$(MAKE) clean all TARGET=unix
+	$(MAKE) clean all TARGET=vic20
 
 world:
 	@echo "# Making $(TARGET) world."

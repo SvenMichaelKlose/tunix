@@ -1,7 +1,16 @@
 TUNIX blog
 ==========
 
-# 2024-06-17: 1000 Miles
+# 2024-06-18:
+
+Gained almost 11K heap on the VIC by not inlining.
+It's slow but the symbol has been sped up by several
+multitudes to READ is kind of fast now.
+
+There's something not OK with MACROEXPAND.  Will check
+later.
+
+# 2024-06-17:
 
 Quasiquotes and macro expansion is working.  There is an
 error REPL and smoke tests now.  Countless bugs have been
@@ -14,12 +23,9 @@ errors cannot be caught to check if they happen as
 expected.
 
 The interpreter's size and performance is becoming nasty.
-Something has to be done for the VIC to make use of the
-upper 8K RAM block.  Ways to increase size: fragmented heap
-and/or code overlays.  I hate all that overhead.  Looks like
-the c64 version is the fast path to progress.  Unfortunately
-the plus4 version goes disco and there are double newlines
-with the c128 version.
+A maximum of 8K address space should hold the interpreter.
+I'm too curious how far one can get with overlays and no
+memory expansion.
 
 # 2024-06-07: 1000 Miles
 

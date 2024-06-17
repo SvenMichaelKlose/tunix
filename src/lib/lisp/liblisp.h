@@ -214,11 +214,11 @@ extern lispptr       poptagw (void);
     } while (0)
 #endif // #ifdef SLOW
 
-#define TAG_DONE            0
-#define TAG_BARG_NEXT       1
-#define TAG_ARG_NEXT        2
-#define TAG_CONTINUE_BODY   3
-#define TAG_CONTINUE_BLOCK  4
+#define TAG_DONE                  0
+#define TAG_NEXT_BUILTIN_ARG      1
+#define TAG_NEXT_ARG              2
+#define TAG_NEXT_BODY_STATEMENT   3
+#define TAG_NEXT_BLOCK_STATEMENT  4
 
 #define DOLIST(x, init) \
     for (x = init; x; x = CDR(x))

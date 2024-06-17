@@ -252,7 +252,7 @@ block_statement:
         PUSH(arg2c);
         PUSH(x);
         x = CAR(x);
-        PUSH_TAG(TAG_CONTINUE_BLOCK);
+        PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
 next_block_statement:
         POP(x);
@@ -356,7 +356,7 @@ set_arg_values:
                 goto set_arg_values;
             } else
                 value = CAR(args);
-            goto save_builtin_arg_value;
+            goto save_arg_value;
         }
         if (c == '+') {     // Rest of arguments.
             PUSH(args);
@@ -375,7 +375,7 @@ set_arg_values:
         PUSH_TAGW(badef);
         PUSH_TAG(na);
         x = CAR(args);
-        PUSH_TAG(TAG_BARG_NEXT);
+        PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
         // Step to next argument.
 next_builtin_arg:
@@ -383,7 +383,8 @@ next_builtin_arg:
         POP_TAGW(badef);
         POP(args);
 
-save_builtin_arg_value:
+        // Save for set_arg_values.
+save_arg_value:
         // Ensure the type is wanted.
         bi_tcheck (value, *badef);
 #ifndef NDEBUGGER
@@ -400,7 +401,6 @@ save_builtin_arg_value:
 #endif
         badef++;
 
-        // Save for set_arg_values.
         PUSH(value);
 
         // Step to next argument.
@@ -475,7 +475,7 @@ do_argument:
         PUSH(defs);
         PUSH(args);
 
-        PUSH_TAG(TAG_ARG_NEXT);
+        PUSH_TAG(TAG_NEXT_ARG);
         x = CAR(args);
         goto do_eval;
         // Step to next argument.
@@ -513,7 +513,7 @@ do_body:
 
     // Evaluate statement.
     x = CAR(x);
-    PUSH_TAG(TAG_CONTINUE_BODY);
+    PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
 next_body_statement:
     POP(x);
@@ -545,13 +545,13 @@ do_return:
     POP_TAG(c);
     if (c != TAG_DONE) {
         switch (c) {
-        case TAG_ARG_NEXT:
+        case TAG_NEXT_ARG:
             goto next_arg;
-        case TAG_BARG_NEXT:
+        case TAG_NEXT_BUILTIN_ARG:
             goto next_builtin_arg;
-        case TAG_CONTINUE_BODY:
+        case TAG_NEXT_BODY_STATEMENT:
             goto next_body_statement;
-        case TAG_CONTINUE_BLOCK:
+        case TAG_NEXT_BLOCK_STATEMENT:
             goto next_block_statement;
         }
 #ifndef NDEBUG

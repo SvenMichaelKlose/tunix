@@ -598,12 +598,14 @@ bi_load (void)
 lispptr
 bi_define (void)
 {
-    if (member (arg1, universe)) {
+    if (member (arg1, universe))
         outs ("Redefining ");
-        print (arg1);
-        terpri ();
-    } else
+    else {
         expand_universe (arg1);
+        outs ("Defining ");
+    }
+    print (arg1);
+    terpri ();
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }

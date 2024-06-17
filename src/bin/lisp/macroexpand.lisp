@@ -4,7 +4,6 @@
   ;"Define macro function."
   (? (member name *macros*)
      (error name))
-  (print name)(terpri)
   (= *macros* (cons name *macros*))
   (eval $(fn ,name
            ,@lfun)))

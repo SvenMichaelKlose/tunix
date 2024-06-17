@@ -5,13 +5,13 @@
 #define MAX_SYMBOL  255
 
 // Give inappropriately happy developers a hard time.
-#define GC_STRESS
+//#define GC_STRESS
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
 // Print current expression to eval().
-#define VERBOSE_EVAL
+//#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
@@ -25,7 +25,8 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-#define STACK_CHECKS
+#define GCSTACK_CHECKS
+#define TAGSTACK_CHECKS
 
 #ifdef __CC65__
     #define STACK_SIZE               2048
@@ -146,25 +147,29 @@ extern lispptr unquote_spliced;
 
 #define nil 0
 
-#ifdef STACK_CHECKS
+#ifdef GCSTACK_CHECKS
 #define STACK_CHECK_OVERFLOW() \
         if (stack == stack_start) \
             stack_overflow ()
 #define STACK_CHECK_UNDERFLOW() \
         if (stack == stack_end) \
             stack_underflow ()
+#else // #ifdef GCSTACK_CHECKS
+#define STACK_CHECK_OVERFLOW()
+#define STACK_CHECK_UNDERFLOW()
+#endif // #ifdef GCSTACK_CHECKS
+
+#ifdef TAGSTACK_CHECKS
 #define TAGSTACK_CHECK_OVERFLOW() \
         if (tagstack == tagstack_start) \
             tagstack_overflow ()
 #define TAGSTACK_CHECK_UNDERFLOW() \
         if (tagstack == tagstack_end) \
             tagstack_underflow ()
-#else // #ifdef STACK_CHECKS
-#define STACK_CHECK_OVERFLOW()
-#define STACK_CHECK_UNDERFLOW()
+#else // #ifdef TAGSTACK_CHECKS
 #define TAGSTACK_CHECK_OVERFLOW()
 #define TAGSTACK_CHECK_UNDERFLOW()
-#endif // #ifdef STACK_CHECKS
+#endif // #ifdef TAGSTACK_CHECKS
 
 #ifdef SLOW
 #define PUSH(x)         pushgc (x)
@@ -247,7 +252,6 @@ extern lispptr       poptagw (void);
 #define CONS(x)     ((cons *) (x))
 
 #ifdef SLOW
-
 #define CAR(x)       (lisp_car (x))
 #define CDR(x)       (lisp_cdr (x))
 #define ATOM(x)      (lisp_atom (x))
@@ -266,9 +270,7 @@ extern bool FASTCALL lisp_numberp (lispptr);
 extern bool FASTCALL lisp_symbolp (lispptr);
 extern bool FASTCALL lisp_builtinp (lispptr);
 extern bool FASTCALL lisp_specialp (lispptr);
-
 #else // #ifdef SLOW
-
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
 #define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
@@ -278,7 +280,6 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
 #define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
 #define SPECIALP(x)  ((x) && PTRTYPE(x) & TYPE_SPECIAL)
-
 #endif // #ifdef SLOW
 
 #define LIST_CAR(x)  (!(x) ? x : CAR(x))

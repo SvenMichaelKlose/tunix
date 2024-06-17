@@ -226,8 +226,6 @@ do_eval:
 // Do BLOCK.
 
     if (arg1 == block_sym) {
-        if (debug_mode)
-            while (1);
         if (!CONSP(CDR(x))) {
             error ("No name.");
             goto do_return;
@@ -239,6 +237,8 @@ do_eval:
             error ("Name not a sym.");
             goto do_return;
         }
+
+        // Memorize start of expressions.
         arg2c = CDR(x);
 
         value = nil;
@@ -248,9 +248,9 @@ block_statement:
         x = CDR(x);
         if (!x)
             goto do_return;
-        PUSH(arg1);
-        PUSH(arg2c);
-        PUSH(x);
+        PUSH(arg1);     // Block name
+        PUSH(arg2c);    // Expressions
+        PUSH(x);        // Current expression
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
@@ -271,9 +271,7 @@ next_block_statement:
                 error ("Tag not found.");
                 goto do_return;
             }
-        }
-
-        if (value == return_sym) {
+        } else if (value == return_sym) {
             if (arg1 == return_name) {
                 value = return_value;
                 return_value = nil;

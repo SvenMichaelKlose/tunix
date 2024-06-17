@@ -70,12 +70,11 @@ simpleio_open (simpleio_chn_t c, char * name, char mode)
     m[0] = mode;
     m[1] = 0;
     handles[c] = fopen (name, m);
-    if (!handles[c]) {
-        printf ("File '%s': ", name);
-        perror ("In simpleio::open()");
-        exit (EXIT_FAILURE);
+    if (errno) {
+        fprintf (stderr, "'%s': ", name);
+        perror ("simpleio-stdlib::open()");
+        last_error = c;
     }
-    last_error = 0;
 }
 
 simpleio vectors = {

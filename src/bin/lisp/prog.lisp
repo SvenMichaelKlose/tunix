@@ -11,4 +11,5 @@
   $(block t ,@body))
 
 (print 'macroexpand)(terpri)
-(macroexpand '(progn (error "bodyeval")))
+(or (equal (macroexpand '(progn (error)))
+           '(block t (error))))

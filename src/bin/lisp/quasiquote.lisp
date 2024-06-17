@@ -9,8 +9,7 @@
     (atom qqx)
       qqx
 
-    ; Catch atoms to have to care about expressions only
-    ; afterwards.
+    ; Catch atoms.
     (atom (car qqx))
       (cons (car qqx) (%qq (cdr qqx)))
 
@@ -24,8 +23,15 @@
       (append (eval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Just copy then...
-    (cons (car qqx) (%qq (cdr qqx)))))
+    (cons (%qq (car qqx)) (%qq (cdr qqx)))))
 
 (print 'quasiquote)(terpri)
-(print $(1 2 ,3 ,4))(terpri)
-(print $(1 2 ,@'(3 4)))(terpri)
+(or (equal $(1 2 ,3 ,4)
+           '(1 2 3 4))
+    (error))
+(or (equal $(1 2 ,@'(3 4))
+           '(1 2 3 4))
+    (error))
+(or (equal $(((,1) ,@'(2)) ,3)
+           '(((1) 2) 3))
+    (error))

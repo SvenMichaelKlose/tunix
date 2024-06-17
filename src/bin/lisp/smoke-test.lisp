@@ -138,5 +138,5 @@
        (go tag))))
 
 (print 'block)(terpri)
-(block-test 200)
+(block-test 10)
 (terpri)

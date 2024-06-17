@@ -7,13 +7,14 @@
 (load "list.lisp")
 (load "quasiquote.lisp")
 (load "macroexpand.lisp")
+(load "prog.lisp")
 
 (out "Done loading.")(terpri)
 (out "MACROEXPAND is not executed automatically in the ")
 (out "REPL yet.")(terpri)
 
 (var *files*
-  '(prog.lisp let.lisp whenunless.lisp alist.lisp
+  '(let.lisp whenunless.lisp alist.lisp
     stack.lisp with.lisp while.lisp dolist.lisp set.lisp))
 (out "Files not loaded: ")(print *files*)(terpri)
 

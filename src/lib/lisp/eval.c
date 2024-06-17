@@ -111,7 +111,7 @@ typename (lispptr * x)
     if (BUILTINP(x))
         return "built-in";
 #ifndef NDEBUG
-    return "unknown type (INTERNAL ERROR)";
+    return "typerr";
 #else
     return "number";
 #endif
@@ -194,7 +194,7 @@ lispptr
 eval0 (void)
 {
 do_eval:
-#ifndef NDEBUG
+#ifndef NDEBUGGER
     last_eval_expr = x;
 #endif
 #ifdef VERBOSE_EVAL
@@ -386,7 +386,7 @@ next_builtin_arg:
 save_builtin_arg_value:
         // Ensure the type is wanted.
         bi_tcheck (value, *badef);
-#ifndef NDEBUG
+#ifndef NDEBUGGER
         while (has_error) {
             PUSH(args);
             PUSH_TAGW(badef);

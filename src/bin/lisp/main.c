@@ -17,55 +17,46 @@
 extern lispptr x;
 extern lispptr value;
 lispptr arg1;
-lispptr arg2;
 lispptr arg2c;
-lispptr argrest;
-lispptr lisp_fnin;
-lispptr lisp_fnout;
-char * msg;
-lispptr quote;
-lispptr quasiquote;
-lispptr unquote;
-lispptr unquote_spliced;
+lispptr arg2;
 extern lispptr tmp;
 int len;
-lispptr b;
-lispptr tag;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("value")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
-#pragma zpsym ("lisp_fnin")
-#pragma zpsym ("lisp_fnout")
-#pragma zpsym ("msg")
-#pragma zpsym ("quote")
-#pragma zpsym ("quasiquote")
-#pragma zpsym ("unquote")
-#pragma zpsym ("unquote_spliced")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
-#pragma zpsym ("b")
-#pragma zpsym ("tag")
 #pragma bss-name (pop)
 #endif
+
+// libsimpleio channels.
+char load_fn = 12;
+lispptr lisp_fnin;
+lispptr lisp_fnout;
+
+// For READ to make expressions of abbreviations.
+lispptr quote;
+lispptr quasiquote;
+lispptr unquote;
+lispptr unquote_spliced;
 
 lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
-lispptr start;
-lispptr lastc;
+// Building lists in loops.
+lispptr start;  // First cons.
+lispptr lastc;  // Last cons (to append to).
 
-lispptr last_repl_expr;
-lispptr last_eval_expr;
-char *  last_errstr;
-bool    do_break_repl;
-char    num_repls;
-bool    debug_mode;
-
-char load_fn = 12;
+lispptr last_repl_expr; // Read expression in REPL.
+lispptr last_eval_expr; // Expression to eval0().
+char *  last_errstr;    // Addiitonal.
+char    num_repls;      // Number of REPLs - 1.
+bool    debug_mode;     // Unused.  Set by DEBUG.
+bool    do_break_repl;  // Tells current REPL to return.
 
 void FASTCALL
 error (char * msg)

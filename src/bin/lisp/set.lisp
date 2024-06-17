@@ -11,40 +11,35 @@
      lst
      (cons x lst)))
 
-(quit)
+;(macro set-op (name . body)
+;  $(fn ,name (a b)
+;     ,@body ))
 
-(macro set-op (name . body)
-  $(fn ,name (a b)
-     ,@body ))
+;(set-op intersect
+;  ;"Elements that are in both lists."
+;  (and a b
+;       (? (member (car a) b)
+;          (cons (car a) (intersect (cdr a) b))
+;          (intersect (cdr a) b))))
 
-(set-op printab
-  (print a)
-  (print b))
+;(set-op set-difference
+;  ;"Elements in list b that are not in list a."
+;  (and b
+;       (? (member (car b) a)
+;          (set-difference a (cdr b))
+;          (cons (car b) (set-difference a (cdr b))))))
 
-(set-op intersect
-  ;"Elements that are in both lists."
-  (and a b
-       (? (member (car a) b)
-          (cons (car a) (intersect (cdr a) b))
-          (intersect (cdr a) b))))
+;(set-op union
+;  ;"Unique elements from both lists."
+;  (unique (append a b)))
 
-(set-op set-difference
-  ;"Elements in list b that are not in list a."
-  (and b
-       (? (member (car b) a)
-          (set-difference a (cdr b))
-          (cons (car b) (set-difference a (cdr b))))))
+;(set-op set-exclusive-or
+;  ;"Elements that are not in both lists."
+;  (!= (intersect a b)
+;    (append (remove-if $((x) (member x ,!)) a)
+;            (remove-if $((x) (member x ,!)) b))))
 
-(set-op union
-  ;"Unique elements from both lists."
-  (unique (append a b)))
+;(set-op subseq?
+;  ;"Check if list a is a subset of list b."
+;  (every $((x) (member x ,a)) b))
 
-(set-op set-exclusive-or
-  ;"Elements that are not in both lists."
-  (!= (intersect a b)
-    (append (remove-if $((x) (member x ,!)) a)
-            (remove-if $((x) (member x ,!)) b))))
-
-(set-op subseq?
-  ;"Check if list a is a subset of list b."
-  (every $((x) (member x ,a)) b))

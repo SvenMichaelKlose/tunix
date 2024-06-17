@@ -16,11 +16,14 @@
 
 #include "liblisp.h"
 
+lispptr t;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-lispptr t;
 lispptr tmp;
+lispptr tmp2;
+char tmpc;
 char * heap_start;
 char * heap_free;
 char * heap_end;
@@ -29,8 +32,9 @@ char * ptr;
 char   type;
 symbol *  sym;
 #ifdef __CC65__
-#pragma zpsym ("t")
 #pragma zpsym ("tmp")
+#pragma zpsym ("tmp2")
+#pragma zpsym ("tmpc")
 #pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");

@@ -1,13 +1,18 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+// Maximum symbol length.  0 is supported.
 #define MAX_SYMBOL  255
 
 // Give inappropriately happy developers a hard time.
-//#define GC_STRESS
+#define GC_STRESS
 // Print message if garbage collector takes action.
-#define VERBOSE_GC
-//#define VERBOSE_EVAL
+//#define VERBOSE_GC
+
+// Print current expression to eval().
+#define VERBOSE_EVAL
+
+// Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
 
 // # Compile-time option SLOW
@@ -16,6 +21,10 @@
 // Use functions instead of expressions to save code space
 // at the expense of performance (almost halved).
 #define SLOW
+
+// Do boundary checks of tag and GC stack pointers before
+// moving them.
+#define STACK_CHECKS
 
 #ifndef STACK_SIZE
     #ifdef __CC65__
@@ -75,11 +84,9 @@ extern bool    debug_mode;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern lispptr t;
-extern lispptr quote;
-extern lispptr quasiquote;
-extern lispptr unquote;
-extern lispptr unquote_spliced;
+extern lispptr tmp;
+extern lispptr tmp2;
+extern char tmpc;
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
@@ -89,7 +96,6 @@ extern char * stack_end;
 extern char * tagstack_start;
 extern char * tagstack_end;
 extern char * tagstack;
-extern char * msg;
 extern bool has_error;     // Return to REPL.
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 extern lispptr block_sym;
@@ -103,11 +109,9 @@ extern lispptr arg2;
 extern lispptr arg2c;
 extern lispptr delayed_eval;
 #ifdef __CC65__
-#pragma zpsym ("t")
-#pragma zpsym ("quote")
-#pragma zpsym ("quasiquote")
-#pragma zpsym ("unquote")
-#pragma zpsym ("unquote_spliced")
+#pragma zpsym ("tmp")
+#pragma zpsym ("tmp2")
+#pragma zpsym ("tmpc")
 #pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
@@ -117,7 +121,6 @@ extern lispptr delayed_eval;
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
-#pragma zpsym ("msg")
 #pragma zpsym ("has_error")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")
@@ -133,29 +136,60 @@ extern lispptr delayed_eval;
 #pragma bss-name (pop)
 #endif
 
+extern lispptr t;
+extern lispptr quote;
+extern lispptr quasiquote;
+extern lispptr unquote;
+extern lispptr unquote_spliced;
+
 #define nil 0
 
-#define EXPAND_UNIVERSE(x) \
-    do { \
-        PUSH(x); \
-        universe = lisp_make_cons (x, universe); \
-        POP(x); \
-    } while (0)
+#ifdef STACK_CHECKS
+#define STACK_CHECK_OVERFLOW() \
+        if (stack == stack_start) \
+            stack_overflow ()
+#define STACK_CHECK_UNDERFLOW() \
+        if (stack == stack_end) \
+            stack_underflow ()
+#define TAGSTACK_CHECK_OVERFLOW() \
+        if (tagstack == tagstack_start) \
+            tagstack_overflow ()
+#define TAGSTACK_CHECK_UNDERFLOW() \
+        if (tagstack == tagstack_end) \
+            tagstack_underflow ()
+#else // #ifdef STACK_CHECKS
+#define STACK_CHECK_OVERFLOW()
+#define STACK_CHECK_UNDERFLOW()
+#define TAGSTACK_CHECK_OVERFLOW()
+#define TAGSTACK_CHECK_UNDERFLOW()
+#endif // #ifdef STACK_CHECKS
+
+#ifdef SLOW
+#define PUSH(x)         pushgc (x)
+#define POP(x)          do { x = popgc (); } while (0)
+#define PUSH_TAG(x)     pushtag (x)
+#define POP_TAG(x)      do { x = poptag (); } while (0)
+#define PUSH_TAGW(x)    pushtagw (x)
+#define POP_TAGW(x)     do { x = poptagw (); } while (0)
+extern void FASTCALL pushgc (lispptr);
+extern lispptr       popgc (void);
+extern void FASTCALL pushtag (char);
+extern char          poptag (void);
+extern void FASTCALL pushtagw (lispptr);
+extern lispptr       poptagw (void);
+#else // #ifdef SLOW
 #define PUSH(x) \
     do { \
-        if (stack == stack_start) \
-            stack_overflow (); \
+        STACK_CHECK_OVERFLOW(); \
         stack -= sizeof (lispptr); \
         *(lispptr *) stack = x; \
     } while (0)
 #define POP(x) \
     do { \
-        if (stack == stack_end) \
-            stack_underflow (); \
+        STACK_CHECK_UNDERFLOW(); \
         x = *(lispptr *) stack; \
         stack += sizeof (lispptr); \
     } while (0)
-
 #define PUSH_TAG(x) \
     do { \
         (*--tagstack = (x)); \
@@ -166,17 +200,23 @@ extern lispptr delayed_eval;
     } while (0)
 #define PUSH_TAGW(x) \
     do { \
-        if (tagstack == tagstack_start) \
-            tagstack_overflow (); \
+        TAGSTACK_CHECK_OVERFLOW(); \
         tagstack -= sizeof (lispptr); \
         *(lispptr *) tagstack = x; \
     } while (0)
 #define POP_TAGW(x) \
     do { \
-        if (tagstack == tagstack_end) \
-            tagstack_underflow (); \
+        TAGSTACK_CHECK_UNDERFLOW(); \
         x = *(lispptr *) tagstack; \
         tagstack += sizeof (lispptr); \
+    } while (0)
+#endif // #ifdef SLOW
+
+#define EXPAND_UNIVERSE(x) \
+    do { \
+        PUSH(x); \
+        universe = lisp_make_cons (x, universe); \
+        POP(x); \
     } while (0)
 
 #define TAG_DONE            0

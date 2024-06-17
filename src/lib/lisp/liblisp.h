@@ -4,17 +4,20 @@
 // Maximum symbol length.
 #define MAX_SYMBOL  255
 
-// Give inappropriately happy developers a hard time.
-//#define GC_STRESS
-
 // Print message if garbage collector takes action.
 #define VERBOSE_GC
+
+// Give inappropriately happy developers a hard time.
+//#define GC_STRESS
 
 // Print current expression to eval().
 //#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
+
+// Extra checks in eval0().
+//#define DEBUG_EVAL
 
 // # Compile-time option SLOW
 //

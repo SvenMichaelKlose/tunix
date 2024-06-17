@@ -51,12 +51,13 @@ lispptr return_args;
 lispptr start;  // First cons.
 lispptr lastc;  // Last cons (to append to).
 
-lispptr last_repl_expr; // Read expression in REPL.
-lispptr last_eval_expr; // Expression to eval0().
-char *  last_errstr;    // Addiitonal.
-char    num_repls;      // Number of REPLs - 1.
-bool    debug_mode;     // Unused.  Set by DEBUG.
-bool    do_break_repl;  // Tells current REPL to return.
+lispptr last_repl_expr;  // Read expression in REPL.
+lispptr last_eval_expr;  // Expression to eval0().
+char *  last_errstr;     // Addiitonal.
+char    num_repls;       // Number of REPLs - 1.
+bool    debug_mode;      // Unused.  Set by DEBUG.
+bool    do_break_repl;   // Tells current REPL to return.
+bool    do_exit_program; // Return to top-level REPL.
 
 void FASTCALL
 error (char * msg)
@@ -642,17 +643,16 @@ lispptr
 bi_quit (void)
 {
     do_break_repl = true;
-    return nil;
+    return arg1;
 }
 
 lispptr
 bi_exit (void)
 {
-#ifdef __CC65__
-    while (1);
-#endif
-    exit (NUMBER_VALUE(arg1));
-    /* NOTREACHED */
+    if (arg1)
+        exit (NUMBER_VALUE(arg1));
+    else
+        do_exit_program = do_break_repl = true;
     return nil;
 }
 
@@ -805,8 +805,8 @@ struct builtin builtins[] = {
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
     { "error",      "?x",   bi_error },
-    { "quit",       "",     bi_quit },
-    { "exit",       "n",    bi_exit },
+    { "quit",       "x",    bi_quit },
+    { "exit",       "?n",   bi_exit },
 
     { "butlast",    "l",    bi_butlast },
     { "copy-list",  "l",    bi_copy_list },
@@ -872,8 +872,15 @@ lisp_repl ()
 
         // Break on demand.
         if (do_break_repl) {
+            if (!do_exit_program) {
+                do_break_repl = false;
+                break;
+            } else if (num_repls)
+                break;
+            outs ("Program exited.");
+            terpri ();
             do_break_repl = false;
-            break;
+            do_exit_program = false;
         }
 
         // Print result on standard out.

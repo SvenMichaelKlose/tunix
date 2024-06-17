@@ -110,16 +110,15 @@ typename (lispptr * x)
         return "symbol";
     if (BUILTINP(x))
         return "built-in";
-#ifndef NDEBUG
-    return "typerr";
-#else
-    return "number";
-#endif
+    if (NUMBERP(x))
+        return "number";
+    return "unknown type";
 }
 
 void
 err_type (char * type, lispptr x)
 {
+    setout (STDERR);
     outs (type); outs (" expected. Got ");
     outs (typename (x)); print (x); terpri ();
     error (NULL);
@@ -322,7 +321,7 @@ set_arg_values:
                 POP(arg2);
                 POP(arg1);
             }
-#ifndef NDEBUG
+#ifdef DEBUG_EVAL
             else if (na > 2) {
                 error ("#bargs");
                 exit (-1);

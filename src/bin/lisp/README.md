@@ -174,39 +174,44 @@ a Lisp file instead of using built-in LOAD:
 
 # Error handling
 
-In case of an error a flag is set that tells the current
-REPL that the evaluation failed.  The REPL then calls
-another REPL to get an alternative value.  That REPL then
-prints an error message along with the failing expression
-and evaluates all expressions read from standard in.
-If REPLs are nested because of further errors, the number
-of currently nested REPLs is printed before the prompt.
-QUIT will exit the current REPL with its argument as its
-result.
+In case of an error a new REPL is invoked so you can
+provide an alternative object for the one the failed.
+You can return the alternative value using QUIT or stop
+the program entirely by calling EXIT without arguments.
 
 During evaluation the I/O channels of the running program
-are assigned. (Fix with stdio macro?)
+are assigned.
 
 # Built-in functions
 
 ## Top-level
 
-| Function   | Description                       |
-|------------|-----------------------------------|
-| (universe) | Return list of permanent symbols. |
-| (gc)       | Free unused objects.              |
-| (quit ?x)  | Return from debugger REPL         |
-| (exit n)   | Exit interpreter with code.       |
+| Function   | Description                            |
+|------------|----------------------------------------|
+| (universe) | Return list of permanent symbols.      |
+| (gc)       | Free unused objects.                   |
+| (quit ?x)  | Return from debugger REPL              |
+| (exit ?n)  | Exit program or interpreter with code. |
 
 ### (universe): Return list of permanent symbols.
+
 ### (gc): Free unused objects.
+
+Triggers the garbage collector.  It marks all objects linked
+to the universe, compacts the heap and relocates all
+pointers.
 
 ### (quit ?x): Return from error REPL.
 
 Returns from the REPL with an alternative result for the one
 that caused the error.
 
-### (exit n): Exit interpreter with exit code.
+### (exit ?n): Exit program or interpreter with exit code.
+
+When called without arguments the program is stopped and
+control is returned to the top-level REPL.  When called
+with a number that number is the exit code for the
+interpreter which will terminate immediately.
 
 ## Definitions
 

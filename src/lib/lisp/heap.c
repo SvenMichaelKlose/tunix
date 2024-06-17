@@ -65,6 +65,14 @@ unsigned lisp_sizes[] = {
     sizeof (symbol)
 };
 
+void FASTCALL
+expand_universe (lispptr x)
+{
+    PUSH(x);
+    universe = lisp_make_cons (x, universe);
+    POP(x);
+}
+
 unsigned FASTCALL
 objsize (char * x)
 {
@@ -203,7 +211,7 @@ lisp_init ()
 #ifdef __CC65__
     heap_size = _heapmaxavail ();
 #else
-    heap_size = 32 * 1024;
+    heap_size = 64 * 1024;
 #endif
     heap_start = heap_free = malloc (heap_size);
     if (!heap_start)
@@ -215,13 +223,13 @@ lisp_init ()
     t = lisp_make_symbol ("t", 1);
     universe = lisp_make_cons (t, nil);
     delayed_eval = lisp_make_symbol ("%E", 2);
-    EXPAND_UNIVERSE(delayed_eval);
+    expand_universe (delayed_eval);
     block_sym   = lisp_make_symbol ("block", 5);
-    EXPAND_UNIVERSE(block_sym);
+    expand_universe (block_sym);
     return_sym  = lisp_make_symbol (NULL, 0);
-    EXPAND_UNIVERSE(return_sym);
+    expand_universe (return_sym);
     go_sym      = lisp_make_symbol (NULL, 0);
-    EXPAND_UNIVERSE(go_sym);
+    expand_universe (go_sym);
 
     // Init input. TODO: Remove (pixel)
     do_putback = false;

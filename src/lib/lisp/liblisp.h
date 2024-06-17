@@ -212,13 +212,6 @@ extern lispptr       poptagw (void);
     } while (0)
 #endif // #ifdef SLOW
 
-#define EXPAND_UNIVERSE(x) \
-    do { \
-        PUSH(x); \
-        universe = lisp_make_cons (x, universe); \
-        POP(x); \
-    } while (0)
-
 #define TAG_DONE            0
 #define TAG_BARG_NEXT       1
 #define TAG_ARG_NEXT        2
@@ -312,6 +305,7 @@ extern void  stack_underflow (void);
 extern void  tagstack_overflow (void);
 extern void  tagstack_underflow (void);
 
+extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL lisp_make_cons (lispptr, lispptr);
 extern lispptr  FASTCALL lisp_make_number (lispnum_t);
 extern lispptr  FASTCALL lisp_alloc_symbol (char *, uchar len);

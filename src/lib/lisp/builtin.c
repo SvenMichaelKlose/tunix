@@ -15,6 +15,6 @@ add_builtins (struct builtin * b)
         s = lisp_make_symbol (b->name, strlen (b->name));
         s->type = TYPE_BUILTIN;
         s->value = b;
-        EXPAND_UNIVERSE(s);
+        expand_universe (s);
     }
 }

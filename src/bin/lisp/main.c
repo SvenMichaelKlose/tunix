@@ -603,7 +603,7 @@ bi_define (void)
         lisp_print (arg1);
         terpri ();
     } else
-        EXPAND_UNIVERSE(arg1);
+        expand_universe (arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }
@@ -909,13 +909,13 @@ main (int argc, char * argv[])
 
     // Prepare quoting.
     quote           = lisp_make_symbol ("quote", 5);
-    EXPAND_UNIVERSE(quote);
+    expand_universe (quote);
     quasiquote      = lisp_make_symbol ("quasiquote", 10);
-    EXPAND_UNIVERSE(quasiquote);
+    expand_universe (quasiquote);
     unquote         = lisp_make_symbol ("unquote", 7);
-    EXPAND_UNIVERSE(unquote);
+    expand_universe (unquote);
     unquote_spliced = lisp_make_symbol ("unquote-spliced", 15);
-    EXPAND_UNIVERSE(unquote_spliced);
+    expand_universe (unquote_spliced);
 
     stdin      = lisp_make_symbol ("stdin", 5);
     stdout     = lisp_make_symbol ("stdout", 6);
@@ -929,10 +929,10 @@ main (int argc, char * argv[])
     SET_SYMBOL_VALUE(stdout, o);
     SET_SYMBOL_VALUE(lisp_fnin, i);
     SET_SYMBOL_VALUE(lisp_fnout, o);
-    EXPAND_UNIVERSE(stdin);
-    EXPAND_UNIVERSE(stdout);
-    EXPAND_UNIVERSE(lisp_fnin);
-    EXPAND_UNIVERSE(lisp_fnout);
+    expand_universe (stdin);
+    expand_universe (stdout);
+    expand_universe (lisp_fnin);
+    expand_universe (lisp_fnout);
 
     load ("env.lisp");
     do_break_repl = false;

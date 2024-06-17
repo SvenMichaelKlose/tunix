@@ -2,21 +2,19 @@
 (print (gc))(out "B free.")(terpri)
 
 (load "smoke-test.lisp")
-(gc)
 (load "equality.lisp")
 (load "test.lisp")
-(gc)
 (load "list.lisp")
 (load "quasiquote.lisp")
 (load "macroexpand.lisp")
-(load "prog.lisp")
-(load "let.lisp")
-;(load "whenunless.lisp")
-;(load "alist.lisp")
-;(load "stack.lisp")
-;(load "with.lisp")
-;(load "while.lisp")
-;(load "dolist.lisp")
-;(load "set.lisp")
+
+(out "Done loading.")(terpri)
+(out "MACROEXPAND is not executed automatically in the ")
+(out "REPL yet.")(terpri)
+
+(var *files*
+  '(prog.lisp let.lisp whenunless.lisp alist.lisp
+    stack.lisp with.lisp while.lisp dolist.lisp set.lisp))
+(out "Files not loaded: ")(print *files*)(terpri)
 
 (print (gc))(out "B free.")(terpri)

@@ -50,17 +50,26 @@ size_t gap;
 #pragma bss-name (pop)
 #endif
 
+lispptr last_kept_sym;
+
 // Copy marked objects over deleted ones and make a
 // relocation table containing the addresses and sizes of
 // the deleted objects.
 void
 sweep ()
 {
-    xlat  = heap_end;
-    minxlat = heap_free + sizeof (lispptr) * 2;
+    xlat = heap_end;
+    // Leave space for at least one relocation.
+    // TODO: Quit program: we're basically out of heap then.
+    //minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
         n = objsize (s);
         if (MARKED(s)) {
+            if ((*s & TYPE_NAMED) && SYMBOL_LENGTH(s)) {
+                SYMBOL_NEXT(last_kept_sym) = s;
+                last_kept_sym = d;
+            }
+
             // Copy object with mark bit cleared.
             *d++ = *s++ & ~TYPE_MARKED;
             while (--n)
@@ -78,10 +87,6 @@ sweep ()
                 *(lispptr *) xlat = s;
                 xlat -= sizeof (unsigned);
                 *(unsigned *) xlat = n;
-
-                // Interrupt sweep if xlat table is full.
-                if (xlat <= minxlat)
-                    return;
             }
 
             s += n;
@@ -90,6 +95,9 @@ sweep ()
     *d = 0;
     heap_free = d;
     sweep_completed = true;
+
+    SYMBOL_NEXT(last_kept_sym) = nil;
+    last_symbol = last_kept_sym;
 }
 
 // Sum up gap sizes in relocation table up to the pointer
@@ -123,8 +131,11 @@ relocate (void)
         if (CONSP(p)) {
             SETCAR(p, relocate_ptr (CAR(p)));
             SETCDR(p, relocate_ptr (CDR(p)));
-        } else if (SYMBOLP(p))
+        } else if (SYMBOLP(p)) {
+            if (SYMBOL_LENGTH(p))
+                SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
+        }
     }
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
@@ -153,13 +164,14 @@ gc (void)
     last_sweeped = NULL;
     sweep_completed = false;
     s = d = heap_start;  // Relocation source + dest.
-    do {
+    last_kept_sym = first_symbol;
+    //do {
 #ifdef VERBOSE_GC
         out ('S');
 #endif
         sweep ();
         relocate ();
-    } while (!sweep_completed);
+    //} while (!sweep_completed);
 
 #ifdef VERBOSE_GC
     outs (": ");

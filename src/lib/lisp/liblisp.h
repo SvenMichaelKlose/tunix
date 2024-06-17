@@ -8,7 +8,7 @@
 //#define GC_STRESS
 
 // Print message if garbage collector takes action.
-//#define VERBOSE_GC
+#define VERBOSE_GC
 
 // Print current expression to eval().
 //#define VERBOSE_EVAL
@@ -65,6 +65,7 @@ typedef struct _number {
 typedef struct _symbol {
     uchar    type;
     lispptr  value;
+    lispptr  next;
     uchar    length;
 } symbol;
 
@@ -83,6 +84,8 @@ extern struct builtin builtins[];
 extern lispptr last_eval_expr;
 extern char *  last_errstr;
 extern bool    debug_mode;
+extern lispptr first_symbol;
+extern lispptr last_symbol;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -293,11 +296,12 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define NUMBER_VALUE(n)        (NUMBER(n)->value)
 #define SET_NUMBER_VALUE(n, x) (NUMBER(n)->value = x)
 
-#define SYMBOL(s)              ((symbol *) (s))
-#define SYMBOL_VALUE(s)        (SYMBOL(s)->value)
-#define SYMBOL_LENGTH(s)       (SYMBOL(s)->length)
-#define SYMBOL_NAME(s) \
-    ((char *) s + sizeof (symbol))
+#define SYMBOL(s)           ((symbol *) (s))
+#define SYMBOL_NEXT(s)      (SYMBOL(s)->next)
+#define SYMBOL_VALUE(s)     (SYMBOL(s)->value)
+#define SYMBOL_LENGTH(s)    (SYMBOL(s)->length)
+#define SYMBOL_NAME(s)      ((char *) s + sizeof (symbol))
+#define SET_SYMBOL_NEXT(s, x)  (SYMBOL(s)->next = x)
 #define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
 
 #define FUNARGS(x)      CAR(x)

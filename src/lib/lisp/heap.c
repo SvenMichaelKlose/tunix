@@ -16,6 +16,9 @@
 
 #include "liblisp.h"
 
+lispptr first_symbol;
+lispptr last_symbol;
+
 lispptr t;
 
 #ifdef __CC65__
@@ -97,7 +100,7 @@ objsize (char * x)
 #define NEEDS_GC() \
     (heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE)
 
-// Allocate vanilla object.
+// Allocate object.
 lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
@@ -141,26 +144,10 @@ make_number (lispnum_t x)
 void * FASTCALL
 lookup_symbol (char * str, uchar len)
 {
-    // Loop over heap until match.
-    ptr = (char *) heap_start;
-    while ((type = *ptr)) {
-        if (type & TYPE_NAMED) {
-            sym = (symbol *) ptr;
-
-            // Return match.
-            if (SYMBOL_LENGTH(sym) == len
-                && !memcmp (ptr + sizeof (symbol), str, len))
-                return ptr;
-
-            // Jump over symbol + name.
-            ptr += sizeof (symbol) + SYMBOL_LENGTH(sym);
-            continue;
-        }
-
-        // Jump over current object.
-        ptr += objsize (ptr);
-    }
-
+    for (ptr = first_symbol; ptr; ptr = SYMBOL_NEXT(ptr))
+        if (SYMBOL_LENGTH(ptr) == len
+            && !memcmp (ptr + sizeof (symbol), str, len))
+            return ptr;
     return NULL;
 }
 
@@ -168,6 +155,11 @@ lispptr FASTCALL
 alloc_symbol (char * str, uchar len)
 {
     tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
+    if (len) {
+        SYMBOL_NEXT(last_symbol) = tmp;
+        last_symbol = tmp;
+    }
+    SYMBOL(tmp)->next = nil;
     SYMBOL(tmp)->value = tmp;
     SYMBOL(tmp)->length = len;
     memcpy ((char *) tmp + sizeof (symbol), str, len);
@@ -224,7 +216,8 @@ lisp_init ()
     heap_end = heap_start + heap_size;
 
     // Make universe with essential symbols.
-    t = make_symbol ("t", 1);
+    last_symbol = heap_free;
+    t = first_symbol = last_symbol = make_symbol ("t", 1);
     universe = make_cons (t, nil);
     delayed_eval = make_symbol ("%E", 2);
     expand_universe (delayed_eval);

@@ -85,12 +85,14 @@ popgc ()
 void FASTCALL
 pushtag (char x)
 {
+    TAGSTACK_CHECK_OVERFLOW();
     *--tagstack = x;
 }
 
 char
 poptag ()
 {
+    TAGSTACK_CHECK_UNDERFLOW();
     return *tagstack++;
 }
 

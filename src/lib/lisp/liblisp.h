@@ -5,7 +5,7 @@
 #define MAX_SYMBOL  255
 
 // Give inappropriately happy developers a hard time.
-#define GC_STRESS
+//#define GC_STRESS
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC

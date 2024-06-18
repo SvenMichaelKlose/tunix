@@ -651,7 +651,8 @@ lispptr
 bi_error (void)
 {
     last_errstr = "User error.";
-    last_eval_expr = arg1;
+    if (arg1)
+        last_eval_expr = arg1;
     has_error = ERROR_USER;
     return nil;
 }
@@ -659,10 +660,14 @@ bi_error (void)
 lispptr
 bi_stack (void)
 {
+    int i = 0;
     lispptr * p;
-    for (p = (void *) stack; p != (void *) stack_end; p++)
+    for (p = (void *) stack_end, p--; p != (void *) stack; p--) {
+        out_number (i++);
+        outs (": ");
         print (*p);
-    terpri ();
+        terpri ();
+    }
     return nil;
 }
 

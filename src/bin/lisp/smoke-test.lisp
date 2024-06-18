@@ -20,6 +20,9 @@
 (print (apply '(x x) '(1 2)))(terpri)
 (print (apply '(x x) 1 2 '(3 4)))(terpri)
 
+(print 'eval)(terpri)
+(eval ''(error))
+
 (print 'funcall)(terpri)
 (funcall print 1)(terpri)
 (funcall '((x) (print x)) 1)(terpri)
@@ -126,6 +129,7 @@
 
 (print 'Recursion)(terpri)
 (print (make-count 50))(terpri)
+(undef 'make-count)
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (fn block-test (c)
@@ -139,4 +143,5 @@
 
 (print 'block)(terpri)
 (block-test 10)
+(undef 'block-test)
 (terpri)

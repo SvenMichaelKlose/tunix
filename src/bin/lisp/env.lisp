@@ -2,8 +2,10 @@
 
 (load "smoke-test.lisp")
 (load "equality.lisp")
-(load "test.lisp")
 (load "list.lisp")
+(load "test.lisp")
 (load "quasiquote.lisp")
 (load "macroexpand.lisp")
 (load "prog.lisp")
+(load "let.lisp")
+(load "with.lisp")

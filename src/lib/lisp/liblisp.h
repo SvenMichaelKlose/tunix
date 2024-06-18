@@ -323,6 +323,7 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define ERROR_STALE_PAREN   9
 #define ERROR_CHANNEL       10
 #define ERROR_FILE          11
+#define ERROR_USER          12
 
 extern void  stack_overflow (void);
 extern void  stack_underflow (void);

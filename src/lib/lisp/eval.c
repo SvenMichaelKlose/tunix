@@ -210,17 +210,20 @@ do_eval:
 
     if (!x) {
         value = nil;
-        goto do_return;
+        goto do_return_atom;
     }
 
     // Evaluate atom.
     if (ATOM(x)) {
         value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
-        goto do_return;
+        goto do_return_atom;
     }
 
     // Expression. Get function from symbol.
     arg1 = CAR(x);
+#ifndef NDEBUG
+    PUSH(arg1);
+#endif
     if (arg1 && SYMBOLP(arg1)) {
         unevaluated = SPECIALP(arg1);
         arg1 = SYMBOL_VALUE(arg1);
@@ -539,14 +542,21 @@ restore_arguments:
     }
     stack += sizeof (lispptr) * na;
 
-    // Dispatch value based on tag.
 do_return:
+#ifndef NDEBUG
+    POP(tmp);
+#endif
+do_return_atom:
     unevaluated = false;
+
     if (value == delayed_eval)
         goto do_eval;
+
 #ifdef VERBOSE_EVAL
     outs ("<- "); print (value); terpri ();
 #endif
+
+    // Dispatch value based on tag.
     POP_TAG(c);
     if (c != TAG_DONE) {
         switch (c) {

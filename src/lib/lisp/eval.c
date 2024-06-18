@@ -200,7 +200,7 @@ do_eval:
     last_eval_expr = x;
 #endif
 #ifdef VERBOSE_EVAL
-    print (x); terpri ();
+    outs ("-> "); print (x); terpri ();
 #endif
 #ifdef GC_STRESS
     PUSH(x);
@@ -542,7 +542,7 @@ do_return:
     if (value == delayed_eval)
         goto do_eval;
 #ifdef VERBOSE_EVAL
-    outs ("-> "); print (value); terpri ();
+    outs ("<- "); print (value); terpri ();
 #endif
     POP_TAG(c);
     if (c != TAG_DONE) {

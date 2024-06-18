@@ -650,8 +650,19 @@ bi_gc (void)
 lispptr
 bi_error (void)
 {
+    last_errstr = "User error.";
     last_eval_expr = arg1;
-    has_error = true;
+    has_error = ERROR_USER;
+    return nil;
+}
+
+lispptr
+bi_stack (void)
+{
+    lispptr * p;
+    for (p = (void *) stack; p != (void *) stack_end; p++)
+        print (*p);
+    terpri ();
     return nil;
 }
 
@@ -822,6 +833,7 @@ struct builtin builtins[] = {
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
     { "error",      "?x",   bi_error },
+    { "stack",      "",     bi_stack },
     { "quit",       "x",    bi_quit },
     { "exit",       "?n",   bi_exit },
 
@@ -865,10 +877,10 @@ print (x);
 #endif
         setout (STDERR);
         terpri ();
-        outs ("In: ");
+        outs ("In REPL: ");
         print (last_repl_expr);
         terpri ();
-        outs ("Subexpr: ");
+        outs ("Eval: ");
         print (last_eval_expr);
         terpri ();
         outs ("Error (");

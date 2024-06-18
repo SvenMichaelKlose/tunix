@@ -124,7 +124,7 @@ err_type (char * type, lispptr x)
     p = strcpy (buffer, type);
     p = strcpy (p, " expected. Got ");
     p = strcpy (p, typename (x));
-    error (ERROR_TYPE, "buffer");
+    error (ERROR_TYPE, buffer);
 }
 
 // Type-check object.

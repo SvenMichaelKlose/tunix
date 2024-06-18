@@ -1,5 +1,6 @@
 #include <ingle/cc65-charmap.h>
 
+#include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -33,7 +34,7 @@ lispptr return_value;
 lispptr go_sym;
 lispptr go_tag;
 bool tag_found;
-bool has_error;
+char has_error;
 uchar c;
 char * badef;
 uchar na;
@@ -115,13 +116,15 @@ typename (lispptr * x)
     return "unknown type";
 }
 
+
 void
 err_type (char * type, lispptr x)
 {
-    setout (STDERR);
-    outs (type); outs (" expected. Got ");
-    outs (typename (x)); print (x); terpri ();
-    error (NULL);
+    char * p;
+    p = strcpy (buffer, type);
+    p = strcpy (p, " expected. Got ");
+    p = strcpy (p, typename (x));
+    error (ERROR_TYPE, buffer);
 }
 
 // Type-check object.
@@ -226,14 +229,14 @@ do_eval:
 
     if (arg1 == block_sym) {
         if (!CONSP(CDR(x))) {
-            error ("No name.");
+            error (ERROR_ARG_MISSING, "No name.");
             goto do_return;
         }
         x = CDR(x);
         arg1 = CAR(x);
 
         if (!SYMBOLP(arg1)) {
-            error ("Name not a sym.");
+            error (ERROR_TYPE, "Name not a sym.");
             goto do_return;
         }
 
@@ -267,7 +270,7 @@ next_block_statement:
                 if (CAR(x) == go_tag)
                     goto block_statement;
             if (!tag_found) {
-                error ("Tag not found.");
+                error (ERROR_TAG_MISSING, "Tag not found.");
                 goto do_return;
             }
         } else if (value == return_sym) {
@@ -310,7 +313,8 @@ do_builtin_arg:
         if (!c) {
             // Complain if argument left.
             if (args) {
-                error ("Too many args to builtin:");
+                error (ERROR_TOO_MANY_ARGS,
+                       "Too many args to builtin:");
                 goto do_return;
             }
 
@@ -323,7 +327,7 @@ set_arg_values:
             }
 #ifdef DEBUG_EVAL
             else if (na > 2) {
-                error ("#bargs");
+                internal_error ("#bargs");
                 exit (-1);
             }
 #endif
@@ -343,7 +347,8 @@ set_arg_values:
                 goto set_arg_values;
             }
         } else if (!args) { // Missing argument.
-            error ("Missing args to builtin.");
+            error (ERROR_ARG_MISSING,
+                   "Missing arg to builtin.");
             goto do_return;
         }
         if (c == '\'') {    // Unevaluated argument.
@@ -413,7 +418,7 @@ save_arg_value:
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        error ("Not a fun.");
+        error (ERROR_NOT_FUNCTION, "Not a fun.");
         goto do_return;
     }
 
@@ -427,10 +432,10 @@ do_argument:
     if (!args && !defs)
         goto start_body;
     if (args && !defs) {
-        error ("Too many args");
+        error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto restore_arguments;
     } else if (!args && CONSP(defs)) {
-        error ("Args missing");
+        error (ERROR_ARG_MISSING, "Arg missing");
         goto restore_arguments;
     }
 

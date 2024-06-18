@@ -19,11 +19,10 @@
 // Extra checks in eval0().
 //#define DEBUG_EVAL
 
-// # Compile-time option SLOW
-//
-// **Use only when desperate for smaller code size!**
-// Use functions instead of expressions to save code space
-// at the expense of performance (almost halved).
+// Disable calling user function ONERROR on errors.
+//#define NO_ONERROR
+
+// Inline less code, halvens performance.
 #define SLOW
 
 // Do boundary checks of tag and GC stack pointers before
@@ -105,7 +104,7 @@ extern char * stack_end;
 extern char * tagstack_start;
 extern char * tagstack_end;
 extern char * tagstack;
-extern bool has_error;     // Return to REPL.
+extern char has_error;
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 extern lispptr block_sym;
 extern lispptr return_sym;
@@ -310,6 +309,18 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
 
+#define ERROR_TYPE          1
+#define ERROR_ARG_MISSING   2
+#define ERROR_TAG_MISSING   3
+#define ERROR_TOO_MANY_ARGS 4
+#define ERROR_NOT_FUNCTION  5
+#define ERROR_OUT_OF_HEAP   6
+#define ERROR_UNKNOWN_TYPE  7
+#define ERROR_NO_PAREN      8
+#define ERROR_STALE_PAREN   9
+#define ERROR_CHANNEL       10
+#define ERROR_FILE          11
+
 extern void  stack_overflow (void);
 extern void  stack_underflow (void);
 extern void  tagstack_overflow (void);
@@ -329,7 +340,7 @@ extern lispptr  eval (void);
 extern lispptr  eval_list (void);
 extern lispptr  funcall (void);
 
-extern void     FASTCALL error (char * msg);
+extern void     FASTCALL error (char code, char * msg);
 
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);

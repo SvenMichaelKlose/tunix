@@ -47,6 +47,8 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
+lispptr onerror;
+
 // Building lists in loops.
 lispptr start;  // First cons.
 lispptr lastc;  // Last cons (to append to).
@@ -60,12 +62,12 @@ bool    do_break_repl;   // Tells current REPL to return.
 bool    do_exit_program; // Return to top-level REPL.
 
 void FASTCALL
-error (char * msg)
+error (char code, char * msg)
 {
     setin (STDIN);
     setout (STDERR);
     last_errstr = msg;
-    has_error = true;
+    has_error = code;
 }
 
 void FASTCALL
@@ -211,7 +213,7 @@ bi_symbol (void)
     p = SYMBOL_NAME(s);
     DOLIST(arg1, arg1) {
         if (!NUMBERP(CAR(arg1))) {
-            error ("(string nlst)");
+            error (ERROR_TYPE, "(string nlst)");
             break;
         }
         *p++ = NUMBER_VALUE(CAR(arg1));
@@ -362,7 +364,7 @@ bi_apply (void)
     tmp = CAR(last (arg2));
     if (args) {
         if (!LISTP(tmp)) {
-            error ("Last arg isn't list!");
+            error (ERROR_TYPE, "Last arg isn't list!");
             POP(arg1);
             return nil;
         }
@@ -494,7 +496,7 @@ bi_setout (void)
 {
     setout (NUMBER_VALUE(arg1));
     if (err ())
-        error ("fn!");
+        error (ERROR_CHANNEL, "fn!");
     SET_SYMBOL_VALUE(lisp_fnout, arg1);
     return arg1;
 }
@@ -556,7 +558,7 @@ load (char * pathname)
     arg1 = make_number (load_fn);
     bi_setin ();
     if (err ()) {
-        error (pathname);
+        error (ERROR_FILE, pathname);
         goto err_open;
     }
 
@@ -564,7 +566,7 @@ load (char * pathname)
     in (); putback ();
     while (!eof ()) {
         if (err ()) {
-            error (pathname);
+            error (ERROR_FILE, pathname);
             goto err_open;
         }
         last_repl_expr = x = read ();
@@ -833,14 +835,28 @@ lisp_repl ()
 
     // Print waiting error message.
     if (has_error) {
+#ifndef NO_ONERROR
+        if (CONSP(SYMBOL_VALUE(onerror))) {
+            x = make_cons (onerror, make_cons (make_number (has_error), make_cons (last_eval_expr, nil)));
+            PUSH(x);
+print (x);
+            x = funcall ();
+            POP(tmp);
+            // Accept value only if it is new.
+            if (!has_error && tmp != x)
+                goto done;
+            has_error = false;
+        }
+#endif
         setout (STDERR);
         terpri ();
-        outs ("Error: ");
-        terpri ();
-        if (last_errstr) {
+        outs ("Error (");
+        out_number (has_error);
+        outs ("): ");
+        if (last_errstr)
             outs (last_errstr);
-            terpri ();
-        }
+        terpri ();
+        outs ("of: ");
         print (last_eval_expr);
         terpri ();
         outs ("in: ");
@@ -891,6 +907,7 @@ lisp_repl ()
         fresh_line ();
     }
 
+done:
     // Restore former I/O channels.
     setin (old_in);
     setout (old_out);
@@ -942,6 +959,9 @@ main (int argc, char * argv[])
     expand_universe (stdout);
     expand_universe (lisp_fnin);
     expand_universe (lisp_fnout);
+
+    onerror = make_symbol ("onerror", 7);
+    expand_universe (onerror);
 
     load ("env.lisp");
     do_break_repl = false;

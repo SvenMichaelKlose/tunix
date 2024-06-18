@@ -107,7 +107,7 @@ alloc (uchar size, uchar type)
     if (NEEDS_GC()) {
         gc ();
         if (NEEDS_GC()) {
-            error ("Out of heap.");
+            error (ERROR_OUT_OF_HEAP, "Out of heap.");
             return nil;
         }
     }

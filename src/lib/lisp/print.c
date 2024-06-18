@@ -120,7 +120,7 @@ print0 (lispptr x)
     else if (PTRTYPE(x) & TYPE_NAMED)
         print_named ((symbol *) x);
     else
-        error ("Unknown object type.");
+        error (ERROR_UNKNOWN_TYPE, "Unknown object type.");
 }
 
 lispptr FASTCALL

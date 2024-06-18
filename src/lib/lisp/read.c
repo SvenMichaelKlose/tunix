@@ -15,6 +15,12 @@ our_isalpha (char c)
     return !isspace (c) && c != '(' && c != ')' && c != ';';
 }
 
+void
+missing_closing_paren (void)
+{
+    error (ERROR_NO_PAREN, "Missing ')'.");
+}
+
 lispptr
 read_list (void)
 {
@@ -25,13 +31,13 @@ read_list (void)
     while (1) {
         skip_spaces ();
         if (eof ())
-            error ("Closing paren?");
+            missing_closing_paren ();
         if (in () == ')')
             return start;
         putback ();
 
         if (eof ())
-            error ("Closing paren?");
+            missing_closing_paren ();
         PUSH(start);
         PUSH(last);
         if (in () == '.')
@@ -131,7 +137,7 @@ read ()
     if (last_in == ',')
         return read_unquoted ();
     if (last_in == ')') {
-        error ("Unexpected closing paren.");
+        error (ERROR_STALE_PAREN, "Unexpected ')'.");
         return nil;
     }
     putback ();

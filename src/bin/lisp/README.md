@@ -57,12 +57,12 @@ All objects are stored on a growing heap, so allocations are
 as fast as bumping the end-of-heap pointer plus boundary
 check to trigger the garbage collector.
 
-| Data type              | heap     |
-|------------------------|----------|
-| cons                   | 5        |
-| number (32 bit signed) | 5        |
-| symbol (also string)   | 2-257    |
-| builtin function       | 2 to 257 |
+| Data type              | heap  |
+|------------------------|-------|
+| cons                   | 5     |
+| number (32 bit signed) | 5     |
+| symbol (also string)   | 6-261 |
+| builtin function       | 6-261 |
 
 ## Stacks
 
@@ -81,15 +81,16 @@ for built-in functions during their evaluation.
 
 APPLY copies all arguments but the last one.
 
-# Data types
+# Functions
 
-Functions are lists headed with an argument definition,
-followed by a list of expressions.  The LAMBDA keyword is
-not around.  Anonymous functions need to be quoted instead.
+Functions are lists starting with an argument definition,
+followed by a list of expressions.  The result of the last
+expression is returned.  The LAMBDA keyword is not around.
+Anonymous functions need to be quoted instead:
 
 ~~~lisp
-; Add 1 to each number in list X.
-(@ '((x) (++ x)) x)
+; Add 1 to each number in list.
+(@ '((n) (++ n)) l)
 ~~~
 
 The QUASIQUOTE (short form "$") can be used to emulate
@@ -123,6 +124,8 @@ notate argument types in this manual most of the time.
 
 # Input/output
 
+## READ and PRINT
+
 Expressions can be read and written using built-in functions
 READ and PRINT.  Strings and chars have dedicated formats:
 
@@ -140,6 +143,8 @@ READ also supports abbreviations:
 | (quasiquote x)     | $x         |
 | (unquote x)        | ,x         |
 | (unquote-splice x) | ,@x        |
+
+## Input and output channel
 
 I/O is performed via a pair of channels, one for input, the
 other for output.  STDIN and STDOUT contain the default
@@ -172,15 +177,82 @@ a Lisp file instead of using built-in LOAD:
       (= result (eval expr)))))
 ~~~
 
+## Character-based I/O
+
 # Error handling
 
 In case of an error a new REPL is invoked so you can
 provide an alternative object for the one the failed.
+
+The error REPL first prints some information on the error.
+It has this format:
+
+~~~
+Error: <optional reason>
+<failed expression)
+(current REPL expression)
+<number of nested REPLs>*
+~~~
+
+And might look like this:
+
+~~~
+Error: Cons expected, got number.
+2
+(print (car 2))
+1*
+~~~
+
 You can return the alternative value using QUIT or stop
 the program entirely by calling EXIT without arguments.
 
 During evaluation the I/O channels of the running program
 are assigned.
+
+## User-defined error handler ONERROR
+
+| Function      | Description                 |
+|---------------|-----------------------------|
+| (onerror n x) | User-defined error handler. |
+
+When defined and pointing to a user-defined function,
+ONERROR is called with the error code and the erroraneous
+expression.  If it returns the failed expression, an
+error REPL will be launched.
+Errors happening inside ONERROR will also be caught.
+
+~~~lisp
+; SKETCH! UNTESTED!
+; Load missing functions on demand.
+(fn onerror (n x)
+  (? (== n ,(get 'not-a-function
+                 (read-file "error-codes.lisp")))
+     ; Evaluate matching definition in environment file.
+     (with-open-file f "env.lisp"
+       (while (not (eof))
+              nil
+         (!= (read)
+           (when (and (cons? !)
+                      (or (eq (car !) 'var)
+                          (eq (car !) 'fn))
+                      (eq (cadr !) (car x)))
+             (eval !)
+             (return x)))))))
+~~~
+
+| ID (ERR_...)    | Code | Description                    |
+|-----------------|------|--------------------------------|
+| TYPE            | 1    | Unexpected object type.        |
+| ARG\_MISSING    | 2    | One or more missing arguments. |
+| TAG\_MISSING    | 3    | BLOCK tag couldn't be found.   |
+| TOO\_MANY\_ARGS | 4    | Too many arguments.            |
+| NOT\_FUNCTION   | 5    | Object is not a function.      |
+| OUT\_OF\_HEAP   | 6    | Out of heap.  Cannot catch.    |
+| UNKNOWN\_TYPE   | 7    | Internal error.                |
+| NO\_PAREN       | 8    | ')' missing.                   |
+| STALE\_PAREN    | 9    | Unexpected ')'.                |
+| CHANNEL         | 10   | Cannot use channel.            |
+| FILE            | 11   | Error while OPENing a file.    |
 
 # Built-in functions
 
@@ -590,33 +662,6 @@ key and the rest is the value.
 
 # Ideas for the future
 
-## User-defined error handling
-
-| Variable    | Description                 |
-|-------------|-----------------------------|
-| \*onerror\* | User-defined error handler. |
-
-Called with error code and failing expression.  This can
-be used to load functions on demand:
-
-~~~lisp
-(fn onerror (n x)
-  (? (== n ,(get 'not-a-function
-                 (read-file "error-codes.lisp")))
-     ; Evaluate matching definition in environment file.
-     (with-open-file f "env.lisp"
-       (while (not (eof))
-              nil
-         (!= (read)
-           (when (and (cons? !)
-                      (or (eq (car x) 'var)
-                          (eq (car x) 'fn)))
-             (eval !)
-             (return +retry!+)))))))
-
-(= *onerror* 'onerror)
-~~~
-
 | Function  | Description                  |
 |-----------|------------------------------|
 | (undef s) | Remove symbol from universe. |
@@ -671,16 +716,15 @@ everything out that appeared later:
 | (db-add s x) | Add expression with string key. |
 | (db-find s)  | Find ID by key.                 |
 | (db-read n)  | READ by ID.                     |
-| (db-close n) | Open database.                  |
-| (undef s)    | Remove symbol from universe.    |
+| (db-close n) | Close database.                 |
 
 Embedded database to the rescue the day for large data sets.
 
 ## Defining built-ins
 
-| Function      | Description            |
-|---------------|------------------------|
-| (mkbuiltin a) | Add built-in function. |
+| Function        | Description            |
+|-----------------|------------------------|
+| (mkbuiltin s a) | Add built-in function. |
 
 Submit to your fantasy.
 

@@ -30,6 +30,9 @@
 #define GCSTACK_CHECKS
 #define TAGSTACK_CHECKS
 
+// Print 'x instead of (quote x).
+#define PRINT_SHORT_QUOTES
+
 #ifdef __CC65__
     #define STACK_SIZE               2048
     #define TAGSTACK_SIZE            512

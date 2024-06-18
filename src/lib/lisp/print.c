@@ -32,11 +32,13 @@ print_list (cons * c)
 {
     bool first = true;
 
+#ifdef PRINT_SHORT_QUOTES
     if (CAR(c) == quote && CDR(c)) {
         out ('\'');
         print0 (CAR(CDR(c)));
         return;
     }
+#endif
 
     out ('(');
     while (c) {

@@ -140,6 +140,20 @@ member (lispptr needle, lispptr haystack)
     return nil;
 }
 
+void
+make_call (lispptr args)
+{
+    x = make_cons (arg1, args);
+    unevaluated = true;
+    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+}
+
+void
+make_car_call (void)
+{
+    make_call (make_cons (CAR(arg2), nil));
+}
+
 lispptr
 bi_eq (void)
 {
@@ -377,18 +391,14 @@ bi_apply (void)
         args = tmp;
 
     POP(arg1);
-    x = make_cons (arg1, args);
-    unevaluated = true;
-    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    make_call (args);
     return eval0 ();
 }
 
 lispptr
 bi_funcall (void)
 {
-    x = make_cons (arg1, arg2);
-    unevaluated = true;
-    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    make_call (arg2);
     return eval0 ();
 }
 
@@ -723,9 +733,7 @@ bi_filter (void)
 {
     PUSH(arg1);
     PUSH(arg2);
-    x = make_cons (arg1, make_cons (CAR(arg2), nil));
-    unevaluated = true;
-    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    make_car_call ();
     start = lastc = make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
@@ -735,9 +743,7 @@ bi_filter (void)
         PUSH(arg1);
         PUSH(arg2);
         PUSH(lastc);
-        x = make_cons (arg1, make_cons (CAR(arg2), nil));
-        unevaluated = true;
-        PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+        make_car_call ();
         tmp = make_cons (eval0 (), nil);
         POP(lastc);
         SETCDR(lastc, tmp);

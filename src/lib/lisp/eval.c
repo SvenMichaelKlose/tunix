@@ -245,6 +245,7 @@ do_eval:
         arg2c = CDR(x);
 
         value = nil;
+        unevaluated = false;
 block_statement:
         if (has_error)
             goto do_return;
@@ -540,6 +541,7 @@ restore_arguments:
 
     // Dispatch value based on tag.
 do_return:
+    unevaluated = false;
     if (value == delayed_eval)
         goto do_eval;
 #ifdef VERBOSE_EVAL

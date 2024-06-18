@@ -219,8 +219,9 @@ do_eval:
         goto do_return;
     }
 
+    // Expression. Get function from symbol.
     arg1 = CAR(x);
-    if (SYMBOLP(arg1)) {
+    if (arg1 && SYMBOLP(arg1)) {
         unevaluated = SPECIALP(arg1);
         arg1 = SYMBOL_VALUE(arg1);
     }

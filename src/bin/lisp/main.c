@@ -89,7 +89,7 @@ length (lispptr x)
 }
 
 lispptr FASTCALL
-copy_list (lispptr x, bool do_butlast)
+copy_list (lispptr x, bool do_butlast, lispptr find)
 {
     if (ATOM(x))
         return x;
@@ -102,6 +102,8 @@ copy_list (lispptr x, bool do_butlast)
     DOLIST(x, CDR(x)) {
         if (CONSP(x)) {
             if (do_butlast && !CDR(x))
+                break;
+            if (find && find == CAR(x))
                 break;
             PUSH(lastc);
             PUSH(x);
@@ -120,7 +122,7 @@ copy_list (lispptr x, bool do_butlast)
 lispptr FASTCALL
 butlast (lispptr x)
 {
-    return copy_list (x, true);
+    return copy_list (x, true, nil);
 }
 
 lispptr FASTCALL
@@ -349,7 +351,9 @@ lispptr
 bi_eval (void)
 {
     x = arg1;
-    return eval ();
+    unevaluated = true;
+    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
+    return eval0 ();
 }
 
 // Consing. Could be optimized away if moved to eval().
@@ -359,7 +363,7 @@ bi_apply (void)
     PUSH(arg1);
 
     PUSH(arg2);
-    args = copy_list (arg2, true);
+    args = copy_list (arg2, true, nil);
     POP(arg2);
     tmp = CAR(last (arg2));
     if (args) {
@@ -622,6 +626,15 @@ bi_special (void)
 }
 
 lispptr
+bi_undef (void)
+{
+    // TODO: Make clearing the symbol value optional.
+    SET_SYMBOL_VALUE(arg1, arg1);
+    universe = copy_list (universe, false, arg1);
+    return nil;
+}
+
+lispptr
 bi_universe (void)
 {
     return universe;
@@ -637,6 +650,7 @@ bi_gc (void)
 lispptr
 bi_error (void)
 {
+    last_eval_expr = arg1;
     has_error = true;
     return nil;
 }
@@ -667,7 +681,7 @@ bi_length (void)
 lispptr
 bi_butlast (void)
 {
-    return copy_list (arg1, true);
+    return copy_list (arg1, true, nil);
 }
 
 lispptr
@@ -685,7 +699,7 @@ bi_member (void)
 lispptr
 bi_copy_list (void)
 {
-    return copy_list (arg1, nil);
+    return copy_list (arg1, false, nil);
 }
 
 lispptr
@@ -804,6 +818,7 @@ struct builtin builtins[] = {
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
     { "special",    "'s'+", bi_special },
+    { "undef",      "s",    bi_undef },
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
     { "error",      "?x",   bi_error },
@@ -850,17 +865,17 @@ print (x);
 #endif
         setout (STDERR);
         terpri ();
+        outs ("In: ");
+        print (last_repl_expr);
+        terpri ();
+        outs ("Subexpr: ");
+        print (last_eval_expr);
+        terpri ();
         outs ("Error (");
         out_number (has_error);
         outs ("): ");
         if (last_errstr)
             outs (last_errstr);
-        terpri ();
-        outs ("of: ");
-        print (last_eval_expr);
-        terpri ();
-        outs ("in: ");
-        print (last_repl_expr);
         terpri ();
         has_error = false;
     }

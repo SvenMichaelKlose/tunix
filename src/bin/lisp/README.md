@@ -287,11 +287,15 @@ interpreter which will terminate immediately.
 
 ## Definitions
 
-| Definition                   | Type         |
+| Form                         | Type         |
 |------------------------------|--------------|
 | (fn 'name 'args '+body)      | function     |
 | (special 'name 'args '+body) | special form |
 | (var 'name x)                | variable     |
+
+On demand loading is more practical if one can get rid of
+definitions.  UNDEF takes symbols out of the universe, so
+the definition will leave with the next GC if it is unused.
 
 ### Special form
 
@@ -664,12 +668,7 @@ key and the rest is the value.
 
 | Function  | Description                  |
 |-----------|------------------------------|
-| (undef s) | Remove symbol from universe. |
 | (gc x)    | GC with another root object. |
-
-On demand loading is more practical if one can get rid of
-definitions.  UNDEF takes symbols out of the universe, so
-the definition will leave with the next GC if it is unused.
 
 GC could take an optional argument to specify another root
 than the universe to discard everything that is not part of

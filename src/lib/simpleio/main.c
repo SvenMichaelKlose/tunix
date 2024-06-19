@@ -112,25 +112,19 @@ out (char c)
 void
 outnu (unsigned long n)
 {
-    unsigned a;
-    if (n > 9) {
-        a = n / 10;
-        n -= 10 * a;
-        outnu (a);
-    }
-    out ('0' + n);
+    if (n > 9)
+        outnu (n / 10);
+    out ('0' + n % 10);
 }
 
 void
 out_number (long n)
 {
-    long a;
-    if (n > 9) {
-        a = n / 10;
-        n -= 10 * a;
-        out_number (a);
+    if (n < 0) {
+        out ('-');
+        n *= -1;
     }
-    out ('0' + n);
+    outnu (n);
 }
 
 void

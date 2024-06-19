@@ -37,11 +37,9 @@ char
 raw_in (void)
 {
     int c = fgetc (handles[fnin]);
+    if (c == EOF)
+        c = 0;
     last_in = c;
-    if (errno) {
-        perror ("simpleio-stdlib::in()");
-        last_error = c;
-    }
     return last_in;
 }
 

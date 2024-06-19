@@ -7,7 +7,7 @@ titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
 header-left: "TUNIX Lisp"
-footer-left: "The Garbage-Collected Manual"
+footer-left: "The garbage-collected manual?"
 toc: true
 footnodes-pretty: true
 book: true
@@ -18,36 +18,45 @@ classoption: [oneside]
 
 This is a Lisp interpreter with dynamic scope and compacting
 mark-and-sweep garbage collector.  It is portably written in
-ANSI-C and designed for most effective memory utilization.
+ANSI-C and offers simplified I/O for small platforms.
+
+Platforms known to work apart from modern Unices are:
+
+* Commodore home computers
+
+| Machine           | Heap size      |
+|------------------------|-----------------|
+| Commodore C128
+| Commodore C16
+| Commodore C64
+| Commodore Plus4
+| Commodore VIC-20
 
 ## Differences to other dialects
 
-### Charset
+| Most other dialects    | TUNIX Lisp      |
+|------------------------|-----------------|
+| backquote sign '`'     | dollar sign '$' |
+| (RPLACA v l)           | (SETCAR l v)    |
+| (RPLACD v l)           | (SETCDR l v)    |
+| (SYMBOL-VALUE s)       | (VALUE s)       |
+| (FILTER f l)           | (@ f l)         |
+| (LAMBDA (args . body)) | (args . body)   |
+| #\\A                   | \\A             |
 
-TUNIX Lisp is intended to also run on machines with limited
-charsets.  Therefore the dollar sign is used instead of
-the backquote "`" to denote a QUASIOQUOTE expression.
+MEMBER and FIND compare with EQ instead of EQL.
 
-~~~lisp
-; Other dialects:
-`(value of x is ,x)
-
-; TUNIX
-$(value of x is ,x)
-~~~
-
-### Symbols are strings
+### Symbols
 
 Symbols have a name and a value and they also serve as
 strings that can be converted to and from character value
 lists.
 
-### SETCAR and SETCDR instead of RPLACA and RPLACD.
+~~~lisp
+(symbol '(\A \B \C)) -> "ABC"
+~~~
 
-These function names are more intuitive than the traditional
-ones.
-
-### VALUE instead of SYMBOL-VALUE
+There are no packages.
 
 # Memory consumption
 
@@ -62,7 +71,6 @@ check to trigger the garbage collector.
 | cons                   | 5     |
 | number (32 bit signed) | 5     |
 | symbol (also string)   | 6-261 |
-| builtin function       | 6-261 |
 
 ## Stacks
 
@@ -753,3 +761,8 @@ current evaluation failed and the REPL should be called for
 an alternative expression.  Therefore the evaluator checks
 'has\_error' whenever a result from an evaluation is
 expected.
+
+## Adding new built-in functions
+
+~~~C
+~~~

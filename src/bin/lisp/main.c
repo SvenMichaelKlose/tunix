@@ -737,6 +737,8 @@ bi_filter (void)
     start = lastc = make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
+    if (has_error)
+        return nil;
 
     PUSH(start);
     DOLIST(arg2, CDR(arg2)) {
@@ -745,6 +747,10 @@ bi_filter (void)
         PUSH(lastc);
         make_car_call ();
         tmp = make_cons (eval0 (), nil);
+        if (has_error) {
+            stack += 4 * sizeof (lispptr);
+            return nil;
+        }
         POP(lastc);
         SETCDR(lastc, tmp);
         lastc = tmp;

@@ -219,17 +219,19 @@ do_eval:
         goto do_return_atom;
     }
 
-    // Expression. Get function from symbol.
     arg1 = CAR(x);
 #ifndef NDEBUG
     PUSH(arg1);
 #endif
+
     if (arg1 && SYMBOLP(arg1)) {
         unevaluated = SPECIALP(arg1);
         arg1 = SYMBOL_VALUE(arg1);
     }
 
-// Do BLOCK.
+    /////////////////////////
+    /// BLOCK name . body ///
+    /////////////////////////
 
     if (arg1 == block_sym) {
         if (!CONSP(CDR(x))) {
@@ -289,6 +291,10 @@ next_block_statement:
 
     args = CDR(x);
 
+    ////////////////
+    /// BUILT-IN ///
+    ////////////////
+
     // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
@@ -302,9 +308,9 @@ next_block_statement:
             goto do_return;
         }
 
-// Call built-in with argument definition.  Pushes the
-// evaluated values onto the stack and pops them into
-// arg1/arg2 before doing the call.
+        // Call built-in with argument definition.  Pushes
+        // the evaluated values onto the stack and pops them
+        // into arg1/arg2 before doing the call.
 
         na = 0;
         PUSH_TAGW(bfun);
@@ -337,8 +343,7 @@ set_arg_values:
 
             // Call built-in.
             POP_TAGW(bfun);
-            if (!has_error)
-                value = bfun->func ();
+            value = has_error ? nil : bfun->func ();
             goto do_return;
         }
 
@@ -391,6 +396,10 @@ next_builtin_arg:
 
         // Save for set_arg_values.
 save_arg_value:
+        if (has_error) {
+            na--;
+            goto set_arg_values;
+        }
         // Ensure the type is wanted.
         bi_tcheck (value, *badef);
 #ifndef NDEBUGGER
@@ -414,11 +423,15 @@ save_arg_value:
         goto do_builtin_arg;
     }
 
-// Call user-defined function.  Saves argument names and
-// their old values on the stack and overwrites the names'
-// symbol values with evaluated ones.  The old values are
-// popped off the stack when the function body has been
-// executed.
+    ////////////////////
+    /// USER-DEFINED ///
+    ////////////////////
+
+    // Call user-defined function.  Saves argument names and
+    // their old values on the stack and overwrites the
+    // names' symbol values with evaluated ones.  The old
+    // values are popped off the stack when the function
+    // body has been executed.
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
@@ -430,30 +443,31 @@ save_arg_value:
     defs = FUNARGS(arg1);
     na = 0;
 
-    // Evaluate arguments to user-defined function.
+    // Evaluate argument.
 do_argument:
     // End of arguments.
     if (!args && !defs)
         goto start_body;
+
+    // Catch wrong number of arguments.
     if (args && !defs) {
         error (ERROR_TOO_MANY_ARGS, "Too many args");
-        goto restore_arguments;
+        goto start_body;
     } else if (!args && CONSP(defs)) {
         error (ERROR_ARG_MISSING, "Arg missing");
-        goto restore_arguments;
+        goto start_body;
     }
 
     na++;
 
     // Rest of argument list. (consing)
     if (ATOM(defs)) {
-        // Save old symbol value for return.
+        // Save old symbol value for restore_arguments.
         PUSH(SYMBOL_VALUE(defs));
 
         if (unevaluated)
             value = args;
         else {
-            // Evaluate rest of arguments.
             PUSH_TAG(na);
             PUSH(defs);
             PUSH(arg1);
@@ -462,12 +476,10 @@ do_argument:
             POP(arg1);
             POP(defs);
             POP_TAG(na);
-            if (has_error)
-                goto start_body;
         }
 
-        // Assign rest of arguments.
-        SET_SYMBOL_VALUE(defs, value);
+        if (!has_error)
+            SET_SYMBOL_VALUE(defs, value);
         goto start_body;
     }
 
@@ -494,7 +506,7 @@ next_arg:
         POP(arg1);
         POP_TAG(na);
         if (has_error)
-            goto set_arg_values;
+            goto start_body;
     }
 
     // Replace argument symbol value with evaluated one.
@@ -508,20 +520,14 @@ next_arg:
     // Evaluate body.
 start_body:
     unevaluated = false;
-    PUSH_TAG(na);
-    PUSH(FUNARGS(arg1));
-    x = FUNBODY(arg1);
+    PUSH_TAG(na);           // Number of arguments.
+    PUSH(FUNARGS(arg1));    // Argument definition.
 
-    // Evaluate body statement.
+    x = FUNBODY(arg1);
 do_body:
-    // Break if out of statements or other reason.
     if (!x || has_error)
         goto restore_arguments;
-
-    // Save rest of statements on the GC stack.
-    PUSH(CDR(x));
-
-    // Evaluate statement.
+    PUSH(CDR(x));   // Save next expression.
     x = CAR(x);
     PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
@@ -547,7 +553,7 @@ restore_arguments:
 
 do_return:
 #ifndef NDEBUG
-    POP(tmp);
+    stack += sizeof (lispptr);
 #endif
 do_return_atom:
     unevaluated = false;
@@ -600,8 +606,8 @@ eval ()
     if (old_tagstack != tagstack) {
         setout (STDERR);
         outs ("Internal error: tag stack: ");
-        out_number ((long) (old_tagstack - tagstack));
-        outs ("B off origin."); terpri ();
+        out_number ((lispnum_t) (tagstack - old_tagstack));
+        outs ("B off."); terpri ();
         while (1);
     }
     return r;

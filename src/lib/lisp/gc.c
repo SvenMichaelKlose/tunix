@@ -87,6 +87,11 @@ sweep ()
                 *(lispptr *) xlat = s;
                 xlat -= sizeof (unsigned);
                 *(unsigned *) xlat = n;
+
+#ifndef NDEBUG
+                if (xlat <= heap_free)
+                    internal_error ("No reloc.");
+#endif
             }
 
             s += n;

@@ -345,6 +345,7 @@ extern lispptr  eval_list (void);
 extern lispptr  funcall (void);
 
 extern void     FASTCALL error (char code, char * msg);
+extern void     FASTCALL internal_error (char * msg);
 
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);

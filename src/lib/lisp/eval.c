@@ -70,16 +70,12 @@ bool unevaluated;
 #pragma bss-name (pop)
 #endif
 
-void
+void FASTCALL
 internal_error (char * msg)
 {
-    setout (STDERR);
-    outs ("Ouch! ");
-    outs (msg);
-    terpri ();
-    print (last_eval_expr);
-    terpri ();
-    exit (EXIT_FAILURE);
+    badef = strcpy (buffer, "Internal. ");
+    strcpy (badef, msg);
+    error (-1, buffer);
 }
 
 void stack_overflow ()
@@ -337,7 +333,6 @@ set_arg_values:
 #ifdef DEBUG_EVAL
             else if (na > 2) {
                 internal_error ("#bargs");
-                exit (-1);
             }
 #endif
 

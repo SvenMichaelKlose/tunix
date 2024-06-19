@@ -269,7 +269,7 @@ next_block_statement:
             // Search tag in body.
             value = nil;
             tag_found = false;
-            TYPESAFE_DOLIST(x, arg2c)
+            DOLIST(x, arg2c)
                 if (CAR(x) == go_tag)
                     goto block_statement;
             if (!tag_found) {

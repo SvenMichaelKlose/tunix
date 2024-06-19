@@ -153,6 +153,8 @@ extern lispptr quasiquote;
 extern lispptr unquote;
 extern lispptr unquote_spliced;
 
+extern bool do_break_repl;
+
 #define nil 0
 
 #ifdef GCSTACK_CHECKS

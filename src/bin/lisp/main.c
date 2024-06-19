@@ -593,8 +593,6 @@ load (char * pathname)
         terpri ();
 #else
         eval ();
-        if (has_error)
-            x = lisp_repl ();
 #endif
     }
     load_fn--;
@@ -673,13 +671,16 @@ lispptr
 bi_stack (void)
 {
     int i = 0;
+    int old_out = fnout;
     lispptr * p;
+    setout (STDERR);
     for (p = (void *) stack_end, p--; p != (void *) stack; p--) {
         out_number (i++);
         outs (": ");
         print (*p);
         terpri ();
     }
+    setout (old_out);
     return nil;
 }
 
@@ -739,7 +740,7 @@ bi_filter (void)
     start = lastc = make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
-    if (has_error)
+    if (do_break_repl)
         return nil;
 
     PUSH(start);
@@ -749,7 +750,7 @@ bi_filter (void)
         PUSH(lastc);
         make_car_call ();
         tmp = make_cons (eval0 (), nil);
-        if (has_error) {
+        if (do_break_repl) {
             stack += 4 * sizeof (lispptr);
             return nil;
         }

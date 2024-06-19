@@ -173,7 +173,7 @@ bi_tcheck (lispptr x, uchar type)
 lispptr
 eval_list (void)
 {
-    if (has_error)
+    if (do_break_repl)
         return nil;
     if (ATOM(x))
         return x;
@@ -259,7 +259,7 @@ next_block_statement:
         POP(x);
         POP(arg2c);
         POP(arg1);
-        if (has_error)
+        if (do_break_repl)
             goto do_return;
 
         // Handle GO.
@@ -338,7 +338,7 @@ set_arg_values:
 
             // Call built-in.
             POP_TAGW(bfun);
-            value = has_error ? nil : bfun->func ();
+            value = do_break_repl ? nil : bfun->func ();
             goto do_return;
         }
 
@@ -391,14 +391,14 @@ next_builtin_arg:
 
         // Save for set_arg_values.
 save_arg_value:
-        if (has_error) {
+        if (do_break_repl) {
             na--;
             goto set_arg_values;
         }
         // Ensure the type is wanted.
         bi_tcheck (value, *badef);
 #ifndef NDEBUGGER
-        while (has_error) {
+        while (do_break_repl) {
             PUSH(args);
             PUSH_TAGW(badef);
             PUSH_TAG(na);
@@ -473,7 +473,7 @@ do_argument:
             POP_TAG(na);
         }
 
-        if (!has_error)
+        if (!do_break_repl)
             SET_SYMBOL_VALUE(defs, value);
         goto start_body;
     }
@@ -500,7 +500,7 @@ next_arg:
         POP(defs);
         POP(arg1);
         POP_TAG(na);
-        if (has_error)
+        if (do_break_repl)
             goto start_body;
     }
 
@@ -520,7 +520,7 @@ start_body:
 
     x = FUNBODY(arg1);
 do_body:
-    if (!x || has_error)
+    if (!x || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Save next expression.
     x = CAR(x);
@@ -552,6 +552,9 @@ do_return:
 #endif
 do_return_atom:
     unevaluated = false;
+
+    if (has_error)
+        value = lisp_repl ();
 
     if (value == delayed_eval)
         goto do_eval;

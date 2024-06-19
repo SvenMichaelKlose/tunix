@@ -244,14 +244,10 @@ do_eval:
             goto do_return;
         }
 
-        // Memorize start of expressions.
-        arg2c = CDR(x);
-
+        arg2c = CDR(x); // Start of expressions.
         value = nil;
         unevaluated = false;
 block_statement:
-        if (has_error)
-            goto do_return;
         x = CDR(x);
         if (!x)
             goto do_return;
@@ -265,6 +261,8 @@ next_block_statement:
         POP(x);
         POP(arg2c);
         POP(arg1);
+        if (has_error)
+            goto do_return;
 
         // Handle GO.
         if (value == go_sym) {
@@ -337,9 +335,10 @@ set_arg_values:
             }
 #endif
 
-            // And call the built-in...
+            // Call built-in.
             POP_TAGW(bfun);
-            value = bfun->func ();
+            if (!has_error)
+                value = bfun->func ();
             goto do_return;
         }
 
@@ -463,6 +462,8 @@ do_argument:
             POP(arg1);
             POP(defs);
             POP_TAG(na);
+            if (has_error)
+                goto start_body;
         }
 
         // Assign rest of arguments.
@@ -492,6 +493,8 @@ next_arg:
         POP(defs);
         POP(arg1);
         POP_TAG(na);
+        if (has_error)
+            goto set_arg_values;
     }
 
     // Replace argument symbol value with evaluated one.

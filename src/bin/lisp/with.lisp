@@ -1,7 +1,7 @@
 (macro with (inits . body)
   ;"Local symbol values."
-  $(((,(carlist inits))
-       ,@body)
+  $((,(carlist inits)
+     ,@body)
     ,@(carlist (cdrlist inits))))
 
 (print 'with)(terpri)

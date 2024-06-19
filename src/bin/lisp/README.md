@@ -734,3 +734,22 @@ object on the heap.  This can be done at allocation time but
 would make the CDR of a compressed cons immutable and add
 an extra check to each operation.
 env.lisp:(fn eql (a b)
+
+# Interpreter internals
+
+Random notes by now to keep things cleared up.
+
+## The evaluator
+
+The evaluator spans not only the code in file 'eval.c'.
+It includes anything that affects control flow like ?, AND
+and OR.
+
+## Breaking evalutation on errors
+
+Global 'char has\_error' contains the code of the recently
+issued error and serves as a flag to the evaluator that the
+current evaluation failed and the REPL should be called for
+an alternative expression.  Therefore the evaluator checks
+'has\_error' whenever a result from an evaluation is
+expected.

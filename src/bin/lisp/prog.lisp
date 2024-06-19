@@ -2,7 +2,7 @@
   ;"Return value of first expression."
   (let g (symbol)
     $(((,g)
-        ,@(cdr body)
+         ,@(cdr body)
         ,g)
       ,(car body))))
 

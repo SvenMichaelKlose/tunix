@@ -1,5 +1,4 @@
 (out "TUNIX Lisp (nightly)")(terpri)
-
 (load "smoke-test.lisp")
 (load "equality.lisp")
 (load "list.lisp")

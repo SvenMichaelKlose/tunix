@@ -876,10 +876,8 @@ lisp_repl ()
 #ifndef NO_ONERROR
         if (CONSP(SYMBOL_VALUE(onerror))) {
             x = make_cons (onerror, make_cons (make_number (has_error), make_cons (last_eval_expr, nil)));
-            PUSH(x);
 print (x);
             x = funcall ();
-            POP(tmp);
             // Accept value only if it is new.
             if (!has_error && tmp != x)
                 goto done;

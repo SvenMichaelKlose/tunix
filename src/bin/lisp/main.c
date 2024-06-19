@@ -64,8 +64,6 @@ bool    do_exit_program; // Return to top-level REPL.
 void FASTCALL
 error (char code, char * msg)
 {
-    setin (STDIN);
-    setout (STDERR);
     last_errstr = msg;
     has_error = code;
 }
@@ -432,13 +430,15 @@ bi_if (void)
         x = arg1;
         tmp = eval ();
         POP(arg2c);
+        if (has_error)
+            break;
         if (tmp) {
             x = CAR(arg2c);
             return delayed_eval;
         }
         x = CDR(arg2c);
     }
-    /* NOTREACHED */
+    return nil;
 }
 
 lispptr
@@ -450,7 +450,7 @@ bi_and (void)
         x = CAR(x);
         value = eval ();
         POP(x);
-        if (!value)
+        if (!value || has_error)
             return nil;
     }
     return value;
@@ -464,6 +464,8 @@ bi_or (void)
         x = CAR(x);
         value = eval ();
         POP(x);
+        if (has_error)
+            break;
         if (value)
             return value;
     }
@@ -584,8 +586,6 @@ load (char * pathname)
             goto err_open;
         }
         last_repl_expr = x = read ();
-        if (has_error)
-            x = lisp_repl ();
         if (do_break_repl)
             break;
 #ifdef VERBOSE_LOAD
@@ -593,6 +593,8 @@ load (char * pathname)
         terpri ();
 #else
         eval ();
+        if (has_error)
+            x = lisp_repl ();
 #endif
     }
     load_fn--;

@@ -75,19 +75,32 @@ bool unevaluated;
 lispptr
 eval_list (void)
 {
-    if (do_break_repl)
-        return nil;
     if (ATOM(x))
         return x;
     PUSH(x);
     x = CAR(x);
     va = eval ();
     POP(x);
-    PUSH(va);
-    x = CDR(x);
-    tmp = eval_list ();
-    POP(va);
-    return make_cons (va, tmp);
+    if (do_break_repl)
+        return nil;
+    start = lastc = make_cons (va, nil);
+    DOLIST(x, CDR(x)) {
+        if (ATOM(x)) {
+            SETCDR(lastc, x);
+            break;
+        }
+        PUSH(x);
+        PUSH(lastc);
+        x = CAR(x);
+        tmp = eval ();
+        POP(lastc);
+        SETCDR(lastc, make_cons (tmp, nil));
+        lastc = tmp;
+        POP(x);
+        if (do_break_repl)
+            return nil;
+    }
+    return start;
 }
 
 lispptr

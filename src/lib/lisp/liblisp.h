@@ -155,6 +155,9 @@ extern lispptr unquote_spliced;
 
 extern bool do_break_repl;
 
+extern lispptr start;
+extern lispptr lastc;
+
 #define nil 0
 
 #ifdef GCSTACK_CHECKS

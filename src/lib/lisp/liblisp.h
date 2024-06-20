@@ -107,6 +107,7 @@ extern char * stack_end;
 extern char * tagstack_start;
 extern char * tagstack_end;
 extern char * tagstack;
+extern char * badef;
 extern char has_error;
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 extern lispptr block_sym;
@@ -132,6 +133,7 @@ extern lispptr delayed_eval;
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
+#pragma zpsym ("badef")
 #pragma zpsym ("has_error")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")
@@ -327,11 +329,6 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define ERROR_FILE          11
 #define ERROR_USER          12
 
-extern void  stack_overflow (void);
-extern void  stack_underflow (void);
-extern void  tagstack_overflow (void);
-extern void  tagstack_underflow (void);
-
 extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL make_cons (lispptr, lispptr);
 extern lispptr  FASTCALL make_number (lispnum_t);
@@ -346,14 +343,20 @@ extern lispptr  eval (void);
 extern lispptr  eval_list (void);
 extern lispptr  funcall (void);
 
-extern void     FASTCALL error (char code, char * msg);
-extern void     FASTCALL internal_error (char * msg);
-
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);
 
 extern lispptr  lisp_repl (void);
 extern bool     lisp_init (void);
 extern void     add_builtins (struct builtin *);
+
+extern void   FASTCALL internal_error (char * msg);
+extern void   FASTCALL error          (char code, char * msg);
+extern void            stack_overflow (void);
+extern void            stack_underflow (void);
+extern void            tagstack_overflow (void);
+extern void            tagstack_underflow (void);
+extern char * FASTCALL typestr (lispptr * x);
+extern void   FASTCALL bi_tcheck (lispptr x, uchar type);
 
 #endif // #ifndef __LIBLISP_H__

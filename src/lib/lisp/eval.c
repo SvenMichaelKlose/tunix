@@ -332,6 +332,7 @@ save_arg_value:
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
+        last_eval_expr = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun.");
         goto do_return;
     }

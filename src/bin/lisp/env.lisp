@@ -5,6 +5,7 @@
 (load "test.lisp")
 (load "quasiquote.lisp")
 (load "macroexpand.lisp")
-(load "prog.lisp")
+(load "prog1.lisp")
+(load "progn.lisp")
 (load "let.lisp")
 (load "with.lisp")

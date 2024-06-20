@@ -267,6 +267,10 @@ set_arg_values:
             goto save_arg_value;
         }
         if (c == '+') {     // Rest of arguments.
+            if (unevaluated) {
+                value = args;
+                goto save_arg_value;
+            }
             PUSH(args);
             PUSH_TAG(na);
             x = args;
@@ -276,6 +280,11 @@ set_arg_values:
 
             PUSH(value);
             goto set_arg_values;
+        }
+
+        if (unevaluated) {
+            value = CAR(args);
+            goto save_arg_value;
         }
 
         // Evaluate argument inline.
@@ -292,12 +301,12 @@ next_builtin_arg:
         POP(args);
 
         // Save for set_arg_values.
-save_arg_value:
         if (do_break_repl) {
             na--;
             goto set_arg_values;
         }
-        // Ensure the type is wanted.
+
+save_arg_value:
         bi_tcheck (value, *badef);
 #ifndef NDEBUGGER
         while (do_break_repl) {

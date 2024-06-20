@@ -135,7 +135,7 @@
 
 (print 'Recursion)(terpri)
 (print (make-count 50))(terpri)
-(undef 'make-count)
+;(undef 'make-count)
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (fn block-test (c)
@@ -149,7 +149,7 @@
 
 (print 'block)(terpri)
 (block-test 10)
-(undef 'block-test)
+;(undef 'block-test)
 (terpri)
 
 (print 'gc-in-block)(terpri)

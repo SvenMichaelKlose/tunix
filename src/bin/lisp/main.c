@@ -86,6 +86,11 @@ copy_list (lispptr x, bool do_butlast, lispptr find)
         return x;
     if (do_butlast && !CDR(x))
         return nil;
+    while (find && find == CAR(x)) {
+        x = CDR(x);
+        if (ATOM(x))
+            return x;
+    }
     PUSH(x);
     start = lastc = make_cons (CAR(x), nil);
     POP(x);
@@ -94,13 +99,13 @@ copy_list (lispptr x, bool do_butlast, lispptr find)
         if (CONSP(x)) {
             if (do_butlast && !CDR(x))
                 break;
-            if (find && find == CAR(x))
-                break;
-            PUSH(lastc);
-            PUSH(x);
-            tmp = make_cons (CAR(x), nil);
-            POP(x);
-            POP(lastc);
+            if (!find || find != CAR(x)) {
+                PUSH(lastc);
+                PUSH(x);
+                tmp = make_cons (CAR(x), nil);
+                POP(x);
+                POP(lastc);
+            }
         } else
             tmp = x;
         SETCDR(lastc, tmp);
@@ -631,9 +636,13 @@ bi_special (void)
 lispptr
 bi_undef (void)
 {
-    // TODO: Make clearing the symbol value optional.
-    SET_SYMBOL_VALUE(arg1, arg1);
-    universe = copy_list (universe, false, arg1);
+#ifndef NAIVE
+    if (!arg1)
+        error (ERROR_TYPE, "non-NIL expected");
+#endif
+    outs ("Undefining "); print (arg1); terpri ();
+    SET_SYMBOL_VALUE(arg1, arg1); // TODO: Make optional.
+    universe = print (copy_list (universe, false, arg1));
     return nil;
 }
 

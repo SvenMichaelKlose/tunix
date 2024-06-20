@@ -641,7 +641,6 @@ bi_undef (void)
         error (ERROR_TYPE, "non-NIL expected");
 #endif
     outs ("Undefining "); print (arg1); terpri ();
-    SET_SYMBOL_VALUE(arg1, arg1); // TODO: Make optional.
     universe = print (copy_list (universe, false, arg1));
     return nil;
 }

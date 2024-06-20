@@ -36,7 +36,7 @@
 #ifdef __CC65__
     #define STACK_SIZE               2048
     #define TAGSTACK_SIZE            512
-    #define MIN_RELOC_TABLE_ENTRIES  128
+    #define MIN_RELOC_TABLE_ENTRIES  256
 #else
     #define HEAP_SIZE                (1024 * 1024)
     #define STACK_SIZE               (64 * 1024)

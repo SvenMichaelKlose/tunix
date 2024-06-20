@@ -82,12 +82,8 @@ objsize (char * x)
     uchar type = *x & 7; // TODO: named constant
     unsigned s;
 #ifndef NDEBUG
-    if (type > TYPE_MAX) {
-        setout (STDERR);
-        outs ("No size for type ");
-        out_number (type);
-        while (1);
-    }
+    if (type > TYPE_MAX)
+        internal_error ("Ill type");
 #endif // #ifndef NDEBUG
     s = lisp_sizes[type];
     if (*x & TYPE_NAMED)

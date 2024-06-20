@@ -4,8 +4,8 @@
      ,@body)
     ,@(carlist (cdrlist inits))))
 
-(print 'fn-with)(terpri)
-(print (with (carlist '((a 1) (b 2)))))
+(print 'fn-with-smoke-test)(terpri)
+(with (carlist '((a 1) (b 2))))
 
 (print 'with)(terpri)
 (or (equal (macroexpand '(with ((a 1)

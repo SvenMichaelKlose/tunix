@@ -1,11 +1,14 @@
+Initial release
 [x] Essential tests
 [x] Macro expansion
-[ ] Undefining universe elements (DELETE)
-[ ] User-defined error handler
+[@] User-defined error handler
+[@] Undefining symbols (UNDEF)
 [ ] On-demand function loading
 [ ] On-demand macro loading
 [ ] Directory access
 [ ] exec()
+
+Second release
 [ ] tré environment import
 [ ] Bielefeld DB API
 [ ] Recursion to loop conversion

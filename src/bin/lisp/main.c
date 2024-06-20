@@ -62,13 +62,6 @@ bool    do_break_repl;   // Tells current REPL to return.
 bool    do_exit_program; // Return to top-level REPL.
 
 void FASTCALL
-error (char code, char * msg)
-{
-    last_errstr = msg;
-    has_error = code;
-}
-
-void FASTCALL
 name_to_buffer (lispptr s)
 {
     uchar len;
@@ -893,17 +886,13 @@ print (x);
             has_error = false;
         }
 #endif
+
+        // Print error info.
         setout (STDERR);
         terpri ();
-        outs ("In REPL: ");
-        print (last_repl_expr);
-        terpri ();
-        outs ("Eval: ");
-        print (last_eval_expr);
-        terpri ();
-        outs ("Error (");
-        out_number (has_error);
-        outs ("): ");
+        outs ("In REPL: "); print (last_repl_expr); terpri ();
+        outs ("Eval: ");    print (last_eval_expr); terpri ();
+        outs ("Error #");   out_number (has_error); outs (": ");
         if (last_errstr)
             outs (last_errstr);
         terpri ();

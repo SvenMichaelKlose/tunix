@@ -1,0 +1,10 @@
+(fn rmdoc (l)
+  "Remove docstrings."
+  (dolist (i l)
+    (and (symbol? i)
+         (cons? (value i))
+         (((x)
+            (and (symbol? (car x))
+                 (cdr x)
+                 (=value i (cdr x))))
+          (cdr (value i))))))

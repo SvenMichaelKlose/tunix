@@ -1,0 +1,6 @@
+(fn onerror (type expr parent repl)
+  (= last-type type)
+  (= last-expr expr)
+  (= last-parent parent)
+  (= last-repl repl)
+  (return nil exception))

@@ -1,5 +1,8 @@
 (var x nil)
 
+(print 'gc)(terpri)
+(print (gc))(out "B free.")(terpri)
+
 (print 'atom)(terpri)
 (atom 1)
 
@@ -117,6 +120,9 @@
 (print '>>)(terpri)
 (or (== (>> 23 1) 11) (error))
 
+(print 'gc)(terpri)
+(print (gc))(out "B free.")(terpri)
+
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
 ; fn var universe gc exit
@@ -145,3 +151,7 @@
 (block-test 10)
 (undef 'block-test)
 (terpri)
+
+(print 'gc-in-block)(terpri)
+(block nil
+  (print (gc))(out "B free.")(terpri))

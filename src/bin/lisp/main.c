@@ -124,7 +124,10 @@ butlast (lispptr x)
 lispptr FASTCALL
 last (lispptr x)
 {
-    return LIST_CDR(x) ? last (CDR(x)) : x;
+    DOLIST(tmp2, x)
+        if (ATOM(CDR(tmp2)))
+            return tmp2;
+    return nil;
 }
 
 lispptr FASTCALL

@@ -482,6 +482,8 @@ bi_print (void)
 lispptr
 bi_err (void)
 {
+    if (!err ())
+        return nil;
     return make_number (err ());
 }
 

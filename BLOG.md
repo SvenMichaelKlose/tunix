@@ -1,14 +1,48 @@
 TUNIX blog
 ==========
 
+# 2024-06-20:
+
+Arguments to built-in functions have always been evaluated.
+Didn't really debug that issue but wrote tests until the
+problem had to prove itself.
+
+When debuggen, the stack dump is confusing at best.  A
+backtrace should be there instead.
+
+Also very important is single step debugging and displaying
+the current expression within the current function.
+
+# 2024-06-19:
+
+TUNIX Lisp should support the syntactical sugar of the tré
+compiler.  And the GC should be interruptible again.  The
+symbol chaining spoiled it, requiring a search for the next
+symbol on the heap if interrupted.  No-one wants to wait
+seconds for a GC to finish in real-time apps (whatever is
+real-time to the user).
+
 # 2024-06-18:
 
-Gained almost 11K heap on the VIC by not inlining.
-It's slow but the symbol has been sped up by several
-multitudes to READ is kind of fast now.
+Worked mostly on quasiquote, macroexpand, error REPL and
+writing tests.  Countless bugs have been fixed.  Also things
+have been cleaned up, although not to full satisfaction.
+(The REPL could also be the LOAD code.)
+Heap is almost 11K in total on a +35K VIC-20.
+I'm glad that there's no need for banking although that came
+at the cost of performance.
 
-There's something not OK with MACROEXPAND.  Will check
-later.
+READ is blazingly fast compared to before.  Named objects
+(symbols and built-ins with at least one character in their
+names) are lined up in a singly-linked list for look-ups
+that don't have to go over all other objects as well.
+I doubt that a hash table would make much of a difference
+for most applications.
+
+New built-in STACK dumps the objects on the GC stack and
+UNDEF clears and removes symbols from the universe list.
+ONERROR can be defined to catch errors.  That's great for
+testing if things go wrong as expected or on-demand loading.
 
 # 2024-06-17:
 

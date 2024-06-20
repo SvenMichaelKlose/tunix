@@ -955,8 +955,6 @@ main (int argc, char * argv[])
 {
     lispptr i;
     lispptr o;
-    lispptr stdin;
-    lispptr stdout;
     (void) argc, (void) argv;
 
     simpleio_init ();
@@ -977,21 +975,25 @@ main (int argc, char * argv[])
     unquote_spliced = make_symbol ("unquote-spliced", 15);
     expand_universe (unquote_spliced);
 
-    stdin      = make_symbol ("stdin", 5);
-    stdout     = make_symbol ("stdout", 6);
-    lisp_fnin  = make_symbol ("fnin", 4);
-    lisp_fnout = make_symbol ("fnout", 5);
     fnin  = STDIN;
     fnout = STDOUT;
     i = make_number (STDIN);
     o = make_number (STDOUT);
-    SET_SYMBOL_VALUE(stdin, i);
-    SET_SYMBOL_VALUE(stdout, o);
+
+    tmp  = make_symbol ("stdin", 5);
+    SET_SYMBOL_VALUE(tmp, i);
+    expand_universe (tmp);
+
+    tmp = make_symbol ("stdout", 6);
+    SET_SYMBOL_VALUE(tmp, o);
+    expand_universe (tmp);
+
+    lisp_fnin  = make_symbol ("fnin", 4);
     SET_SYMBOL_VALUE(lisp_fnin, i);
-    SET_SYMBOL_VALUE(lisp_fnout, o);
-    expand_universe (stdin);
-    expand_universe (stdout);
     expand_universe (lisp_fnin);
+
+    lisp_fnout = make_symbol ("fnout", 5);
+    SET_SYMBOL_VALUE(lisp_fnout, o);
     expand_universe (lisp_fnout);
 
     onerror = make_symbol ("onerror", 7);

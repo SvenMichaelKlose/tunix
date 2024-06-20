@@ -81,8 +81,6 @@ struct builtin {
 };
 
 extern lispptr universe;
-extern lispptr stdin;
-extern lispptr stdout;
 extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];

@@ -95,7 +95,7 @@ read_string (void)
     return make_symbol (buffer, p - buffer);
 }
 
-lispptr
+lispptr FASTCALL
 read_quoted (lispptr which)
 {
     return make_cons (which, make_cons (read (), nil));

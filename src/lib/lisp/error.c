@@ -22,27 +22,31 @@ internal_error (char * msg)
     error (-1, buffer);
 }
 
-void stack_overflow ()
+void
+stack_overflow ()
 {
     internal_error ("Stack overflow");
 }
 
-void stack_underflow ()
+void
+stack_underflow ()
 {
     internal_error ("Stack underflow");
 }
 
-void tagstack_overflow ()
+void
+tagstack_overflow ()
 {
     internal_error ("Tag stack overflow");
 }
 
-void tagstack_underflow ()
+void
+tagstack_underflow ()
 {
     internal_error ("Tag stack underflow");
 }
 
-char *
+char * FASTCALL
 typename (lispptr * x)
 {
     if (CONSP(x))
@@ -56,7 +60,7 @@ typename (lispptr * x)
     return "unknown type";
 }
 
-void
+void FASTCALL
 err_type (char * type, lispptr x)
 {
     char * p;
@@ -66,7 +70,7 @@ err_type (char * type, lispptr x)
     error (ERROR_TYPE, buffer);
 }
 
-void
+void FASTCALL
 bi_tcheck (lispptr x, uchar type)
 {
     (void) x, (void) type;

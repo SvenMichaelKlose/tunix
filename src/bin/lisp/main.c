@@ -139,7 +139,7 @@ member (lispptr needle, lispptr haystack)
     return nil;
 }
 
-void
+void FASTCALL
 make_call (lispptr args)
 {
     x = make_cons (arg1, args);
@@ -147,7 +147,7 @@ make_call (lispptr args)
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
 }
 
-void
+void FASTCALL
 make_car_call (void)
 {
     make_call (make_cons (CAR(arg2), nil));
@@ -589,6 +589,8 @@ load (char * pathname)
             goto err_open;
         }
         last_repl_expr = x = read ();
+        //print (last_repl_expr);
+        //terpri ();
         if (do_break_repl)
             break;
 #ifdef VERBOSE_LOAD

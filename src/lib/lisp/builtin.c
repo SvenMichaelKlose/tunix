@@ -7,7 +7,7 @@
 
 #include <lisp/liblisp.h>
 
-void
+void FASTCALL
 add_builtins (struct builtin * b)
 {
     symbol * s;

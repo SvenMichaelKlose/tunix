@@ -191,12 +191,12 @@ extern lispptr lastc;
 #define POP_TAG(x)      do { x = poptag (); } while (0)
 #define PUSH_TAGW(x)    pushtagw (x)
 #define POP_TAGW(x)     do { x = poptagw (); } while (0)
-extern void FASTCALL pushgc (lispptr);
-extern lispptr       popgc (void);
-extern void FASTCALL pushtag (char);
-extern char          poptag (void);
-extern void FASTCALL pushtagw (lispptr);
-extern lispptr       poptagw (void);
+extern void     FASTCALL pushgc (lispptr);
+extern lispptr           popgc (void);
+extern void     FASTCALL pushtag (char);
+extern char              poptag (void);
+extern void     FASTCALL pushtagw (lispptr);
+extern lispptr           poptagw (void);
 #else // #ifdef SLOW
 #define PUSH(x) \
     do { \
@@ -347,9 +347,9 @@ extern lispptr  funcall (void);
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);
 
-extern lispptr  lisp_repl (void);
-extern bool     lisp_init (void);
-extern void     add_builtins (struct builtin *);
+extern lispptr           lisp_repl (void);
+extern bool              lisp_init (void);
+extern void     FASTCALL add_builtins (struct builtin *);
 
 extern void   FASTCALL internal_error (char * msg);
 extern void   FASTCALL error          (char code, char * msg);

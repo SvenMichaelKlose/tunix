@@ -86,7 +86,7 @@ print_number (number * n)
     outnu (n->value);
 }
 
-bool
+bool FASTCALL
 needs_quotes (symbol * s)
 {
     char * p = SYMBOL_NAME(s);
@@ -100,7 +100,7 @@ needs_quotes (symbol * s)
     return false;
 }
 
-void
+void FASTCALL
 print_quoted_string (symbol * s)
 {
     char * p = SYMBOL_NAME(s);
@@ -127,7 +127,7 @@ print_named (symbol * s)
     outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
 }
 
-void
+void FASTCALL
 print0 (lispptr x)
 {
     uchar type;

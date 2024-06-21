@@ -131,19 +131,22 @@ relocate (void)
     out ('R');
 #endif
     universe = relocate_ptr (universe);
+
+    // Relocate elements on heap.
     for (p = heap_start; *p; p += objsize (p)) {
-        if (p == s)
-            p = d; // Jump over sweep gap.
+        //if (p == s)
+            //p = d; // Jump over sweep gap.
 
         if (CONSP(p)) {
             SETCAR(p, relocate_ptr (CAR(p)));
             SETCDR(p, relocate_ptr (CDR(p)));
-        } else if (SYMBOLP(p)) {
-            if (SYMBOL_LENGTH(p))
-                SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
+        } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
-        }
+        if ((*p & TYPE_NAMED) && SYMBOL_LENGTH(p))
+            SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
     }
+
+    // Relocate GC stack elements.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }

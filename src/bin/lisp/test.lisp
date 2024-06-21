@@ -31,20 +31,26 @@
   (out "Eval: ")(print ev)(terpri)
   (out "Continuing...")(terpri)
   (= *last-err* n)
-  nil)
+  (noerror))
 
 (fn terror (x)
   (= onerror nil)
-  (error x))
+  (error (or x '"error expected")))
 
 ; ERROR_TYPE          1
+(+ '"s" 1)
+(or (== *last-err* 5)
+    (terror))
+
 ; ERROR_ARG_MISSING   2
 ; ERROR_TAG_MISSING   3
 ; ERROR_TOO_MANY_ARGS 4
+
 ; ERROR_NOT_FUNCTION  5
 (not-a-function)
 (or (== *last-err* 5)
     (terror "(not-a-function) should be an error."))
+
 ; ERROR_OUT_OF_HEAP   6
 ; ERROR_UNKNOWN_TYPE  7
 ; ERROR_NO_PAREN      8

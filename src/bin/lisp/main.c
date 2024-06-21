@@ -60,6 +60,7 @@ char *  last_errstr;     // Addiitonal.
 char    num_repls;       // Number of REPLs - 1.
 bool    debug_mode;      // Unused.  Set by DEBUG.
 bool    do_break_repl;   // Tells current REPL to return.
+bool    do_continue_repl; // If do_break_repl, tell REPL to continue.
 bool    do_exit_program; // Return to top-level REPL.
 
 void FASTCALL
@@ -591,8 +592,13 @@ load (char * pathname)
         last_repl_expr = x = read ();
         //print (last_repl_expr);
         //terpri ();
-        if (do_break_repl)
+        if (do_break_repl) {
+            if (do_continue_repl) {
+                do_break_repl = do_continue_repl = false;
+                continue;
+            }
             break;
+        }
 #ifdef VERBOSE_LOAD
         print (eval ());
         terpri ();
@@ -672,6 +678,13 @@ bi_error (void)
     if (arg1)
         last_eval_expr = arg1;
     has_error = ERROR_USER;
+    return nil;
+}
+
+lispptr
+bi_noerror (void)
+{
+    do_break_repl = do_continue_repl = true;
     return nil;
 }
 
@@ -861,6 +874,7 @@ struct builtin builtins[] = {
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
     { "error",      "?x",   bi_error },
+    { "noerror",    "",     bi_noerror },
     { "stack",      "",     bi_stack },
     { "quit",       "x",    bi_quit },
     { "exit",       "?n",   bi_exit },
@@ -878,6 +892,15 @@ struct builtin builtins[] = {
 
     { NULL, NULL }
 };
+
+void
+setstd (void)
+{
+    arg1 = make_number (STDIN);
+    bi_setin ();
+    arg1 = make_number (STDOUT);
+    bi_setout ();
+}
 
 lispptr
 lisp_repl ()
@@ -914,8 +937,7 @@ lisp_repl ()
 
     // Read expresions from standard in until end of input
     // or QUIT has been invoked.
-    setin (STDIN);
-    setout (STDOUT);
+    setstd ();
     while (!eof ()) {
         // Print prompt with number of recursions.
         if (num_repls)
@@ -927,8 +949,10 @@ lisp_repl ()
         fresh_line ();
 
         // Evaluate expression on program channels.
-        setin (old_in);
-        setout (old_out);
+        arg1 = make_number (old_in);
+        bi_setin ();
+        arg1 = make_number (old_out);
+        bi_setout ();
         x = eval ();
         if (has_error)
             x = lisp_repl ();
@@ -938,8 +962,15 @@ lisp_repl ()
             if (!do_exit_program) {
                 do_break_repl = false;
                 break;
-            } else if (num_repls)
-                break;
+            } else {
+                if (do_continue_repl) {
+                    do_continue_repl = false;
+                    continue;
+                }
+                if (num_repls)
+                    break;
+            }
+            setstd ();
             outs ("Program exited.");
             terpri ();
             do_break_repl = false;
@@ -947,16 +978,17 @@ lisp_repl ()
         }
 
         // Print result on standard out.
-        setin (STDIN);
-        setout (STDOUT);
+        setstd ();
         fresh_line ();
         print (x);
         fresh_line ();
     }
 
     // Restore former I/O channels.
-    setin (old_in);
-    setout (old_out);
+    arg1 = make_number (old_in);
+    bi_setin ();
+    arg1 = make_number (old_out);
+    bi_setout ();
 
     num_repls--;
     return x;
@@ -1012,7 +1044,7 @@ main (int argc, char * argv[])
     expand_universe (onerror);
 
     load ("env.lisp");
-    do_break_repl = false;
+    do_break_repl = do_continue_repl = false;
     num_repls = -1;
     lisp_repl ();
 

@@ -193,50 +193,51 @@ In case of an error a new REPL is invoked so you can
 provide an alternative object for the one the failed.
 
 The error REPL first prints some information on the error.
-It has this format:
+It may look like this:
 
 ~~~
-Error: <optional reason>
-<failed expression)
-(current REPL expression)
-<number of nested REPLs>*
-~~~
-
-And might look like this:
-
-~~~
-Error: Cons expected, got number.
-2
-(print (car 2))
+* (fnords)
+In REPL: (fnords)
+Eval: fnords
+Error #5: Not a fun.
 1*
 ~~~
 
-You can return the alternative value using QUIT or stop
-the program entirely by calling EXIT without arguments.
+You may
+
+* return a correct alternative value using **QUIT**,
+* stop the program entirely using **EXIT** with no arguments
+  (which would exit the interpreter),
+* Continue with the current LOAD or REPL using **NOERROR**.
 
 During evaluation the I/O channels of the running program
 are assigned.
 
 ## User-defined error handler ONERROR
 
-| Function      | Description                 |
-|---------------|-----------------------------|
-| (onerror n x) | User-defined error handler. |
+| Function        | Description                           |
+|-----------------|---------------------------------------|
+| (onerror n x x) | User-defined error handler.           |
+| (noerror)       | Break and continue with LOAD or REPL. |
 
-When defined and pointing to a user-defined function,
-ONERROR is called with the error code and the erroraneous
-expression.  If it returns the failed expression, an
-error REPL will be launched.
-Errors happening inside ONERROR will also be caught.
+If defined, user-defined function ONERROR is called on
+errors, except internal ones.  Errors happening inside
+ONERROR will cause it to be called again.  The handler
+should return a correct replacement value (insted of QUIT)
+or issue a NOERROR.
+
+### Arguments to ONERROR
+
+ONERROR is called with the error code, the current REPL
+expression and the expression that caused the error.
 
 ~~~lisp
 ; SKETCH! UNTESTED!
 ; Load missing functions on demand.
-(fn onerror (n x)
-  (? (== n ,(get 'not-a-function
-                 (read-file "error-codes.lisp")))
+(fn onerror (n x x)
+  (? (== n 1) ; Not a function error.
      ; Evaluate matching definition in environment file.
-     (with-open-file f "env.lisp"
+     (with-infile f "env.lisp"
        (while (not (eof))
               nil
          (!= (read)
@@ -261,6 +262,7 @@ Errors happening inside ONERROR will also be caught.
 | STALE\_PAREN    | 9    | Unexpected ')'.                |
 | CHANNEL         | 10   | Cannot use channel.            |
 | FILE            | 11   | Error while OPENing a file.    |
+| USER            | 12   | User called ERROR.             |
 
 # Built-in functions
 

@@ -65,7 +65,7 @@ err_type (char * type, lispptr x)
 {
     char * p;
     p = strcpy (buffer, type);
-    p = strcpy (p, " expected. Got ");
+    p = strcpy (p, " wanted. Got ");
     p = strcpy (p, typename (x));
     error (ERROR_TYPE, buffer);
 }
@@ -81,22 +81,22 @@ bi_tcheck (lispptr x, uchar type)
 
     case 'n': // number
         if (!NUMBERP(x))
-            err_type ("Number", x);
+            err_type ("number", x);
         break;
 
     case 's': // symbol
         if (!SYMBOLP(x))
-            err_type ("Symbol", x);
+            err_type ("symbol", x);
         break;
 
     case 'c': // cons
         if (!CONSP(x))
-            err_type ("Cons", x);
+            err_type ("cons", x);
         break;
 
     case 'l': // list (cons or nil)
         if (!LISTP(x))
-            err_type ("List", x);
+            err_type ("list", x);
         break;
 
     case 'f': // function

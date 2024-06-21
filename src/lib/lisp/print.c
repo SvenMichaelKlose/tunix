@@ -31,6 +31,7 @@ void FASTCALL
 print_short (char * m, cons * c)
 {
     outs (m);
+    last_out = ' '; // Avoid output padding.
     print0 (CAR(CDR(c)));
 }
 

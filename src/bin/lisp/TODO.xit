@@ -1,9 +1,11 @@
 Initial release
 [x] Essential tests
 [x] Macro expansion
-[@] User-defined error handler
+[x] User-defined error handler
+[@] Testing errors
 [@] Undefining symbols (UNDEF)
-[ ] On-demand function loading
+[@] On-demand function loading
+[ ] Automatic file number with OPEN.
 [ ] On-demand macro loading
 [ ] Directory access
 [ ] exec()

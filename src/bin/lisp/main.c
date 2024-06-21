@@ -590,8 +590,6 @@ load (char * pathname)
             goto err_open;
         }
         last_repl_expr = x = read ();
-        //print (last_repl_expr);
-        //terpri ();
         if (do_break_repl) {
             if (do_continue_repl) {
                 do_break_repl = do_continue_repl = false;
@@ -654,7 +652,9 @@ bi_undef (void)
         error (ERROR_TYPE, "non-NIL expected");
 #endif
     outs ("Undefining "); print (arg1); terpri ();
-    universe = print (copy_list (universe, false, arg1));
+    PUSH(arg1);
+    universe = copy_list (universe, false, arg1);
+    POP(arg1);
     return nil;
 }
 

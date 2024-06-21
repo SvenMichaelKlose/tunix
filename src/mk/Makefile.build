@@ -50,7 +50,7 @@ include $(THIS_DIR)/Makefile.build.$(TARGETCC)
 test:
 	@echo "No test to be done."
 
-allclean:
+allclean: hostclean
 	for i in $(VALID_TARGETS); do \
 		$(MAKE) -C . clean TARGET=$$i; \
 	done

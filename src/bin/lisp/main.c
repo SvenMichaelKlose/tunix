@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
@@ -364,7 +365,6 @@ lispptr
 bi_eval (void)
 {
     x = arg1;
-    unevaluated = true;
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
     return eval0 ();
 }
@@ -882,23 +882,19 @@ struct builtin builtins[] = {
 lispptr
 lisp_repl ()
 {
-    // Save active I/O channel configuration.
+    // Save I/O channels.
     int old_in = fnin;
     int old_out = fnin;
-
-    num_repls++;
 
     // Print waiting error message.
     if (has_error) {
 #ifndef NO_ONERROR
         if (CONSP(SYMBOL_VALUE(onerror))) {
-            x = make_cons (onerror, make_cons (make_number (has_error), make_cons (last_eval_expr, nil)));
-print (x);
-            x = funcall ();
-            // Accept value only if it is new.
-            if (!has_error && tmp != x)
-                goto done;
+            x = make_cons (onerror, make_cons (make_number (has_error), make_cons (last_repl_expr, make_cons (last_eval_expr, nil))));
             has_error = false;
+            unevaluated = true;
+            PUSH_TAG(TAG_DONE);
+            return eval0 ();
         }
 #endif
 
@@ -913,6 +909,8 @@ print (x);
         terpri ();
         has_error = false;
     }
+
+    num_repls++;
 
     // Read expresions from standard in until end of input
     // or QUIT has been invoked.
@@ -956,7 +954,6 @@ print (x);
         fresh_line ();
     }
 
-done:
     // Restore former I/O channels.
     setin (old_in);
     setout (old_out);

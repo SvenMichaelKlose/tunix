@@ -136,7 +136,8 @@ do_eval:
 #endif
 
     if (arg1 && SYMBOLP(arg1)) {
-        unevaluated = SPECIALP(arg1);
+        if (SPECIALP(arg1))
+            unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
     }
 

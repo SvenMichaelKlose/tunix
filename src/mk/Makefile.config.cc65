@@ -26,3 +26,7 @@ endif
 ifeq ($(TARGET), vic20)
 CFLAGS += -DTARGET_VIC20
 endif
+
+ifeq ($(TARGET), c128)
+CFLAGS += -DTARGET_C128
+endif

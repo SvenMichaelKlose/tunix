@@ -28,15 +28,36 @@ space (void)
 }
 
 void FASTCALL
+print_short (char * m, cons * c)
+{
+    outs (m);
+    print0 (CAR(CDR(c)));
+}
+
+void FASTCALL
 print_list (cons * c)
 {
     bool first = true;
 
 #ifdef PRINT_SHORT_QUOTES
-    if (CAR(c) == quote && CDR(c)) {
-        out ('\'');
-        print0 (CAR(CDR(c)));
-        return;
+    if (CDR(c)) {
+        tmp = CAR(c);
+        if (tmp ==  quote) {
+            print_short ("'", c);
+            return;
+        }
+        if (tmp ==  quasiquote) {
+            print_short ("$", c);
+            return;
+        }
+        if (tmp ==  unquote) {
+            print_short (",", c);
+            return;
+        }
+        if (tmp ==  unquote_spliced) {
+            print_short (",@", c);
+            return;
+        }
     }
 #endif
 

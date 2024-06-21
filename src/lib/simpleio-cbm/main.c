@@ -92,8 +92,6 @@ raw_close (simpleio_chn_t c)
 {
     cbm_k_clrch ();
     cbm_k_close (c);
-    cbm_k_chkin (fnin);
-    cbm_k_ckout (fnout);
 }
 
 simpleio vectors = {

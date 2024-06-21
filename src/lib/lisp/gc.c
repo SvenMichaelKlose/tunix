@@ -15,12 +15,14 @@ mark (lispptr x)
     if (!x)
         return;
     if (!MARKED(x)) {
-        MARK(x);
+        if (x)
+            MARK(x);
         for (; CONSP(x); x = CDR(x)) {
             MARK(x);
             mark (CAR(x));
         }
-        MARK(x);
+        if (x)
+            MARK(x);
         if (x && SYMBOLP(x))
             mark (SYMBOL_VALUE(x));
     }

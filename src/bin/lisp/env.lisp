@@ -17,3 +17,7 @@
 (load "unless.lisp")
 (load "when.lisp")
 (load "while.lisp")
+(load "max.lisp")
+(load "nthcdr.lisp")
+(load "queue.lisp")
+(load "subseq.lisp")

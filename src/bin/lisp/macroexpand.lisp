@@ -35,9 +35,8 @@
 (fn macroexpand (x)
   ;"Expand *MACROS* in X."
   (?
-    (atom x)
-      x
-    (eq (car x) 'quote)
+    (or (atom x)
+        (eq (car x) 'quote))
       x
     (eq (car x) 'quasiquote)
       (%unquote x)

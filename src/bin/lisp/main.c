@@ -821,8 +821,8 @@ struct builtin builtins[] = {
     { "value",      "s",    bi_symbol_value },
 
     { "cons",       "xx",   bi_cons },
-    { "car",        "x",    bi_car },
-    { "cdr",        "x",    bi_cdr },
+    { "car",        "l",    bi_car },
+    { "cdr",        "l",    bi_cdr },
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
 

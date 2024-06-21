@@ -264,6 +264,8 @@ expression and the expression that caused the error.
 | FILE            | 11   | Error while OPENing a file.    |
 | USER            | 12   | User called ERROR.             |
 
+NOTE: The FILE code might be nonsense.
+
 # Built-in functions
 
 ## Top-level
@@ -272,7 +274,6 @@ expression and the expression that caused the error.
 |------------|----------------------------------------|
 | (universe) | Return list of permanent symbols.      |
 | (gc)       | Free unused objects.                   |
-| (quit ?x)  | Return from debugger REPL              |
 | (exit ?n)  | Exit program or interpreter with code. |
 
 ### (universe): Return list of permanent symbols.
@@ -591,6 +592,16 @@ of preference.
 | (peek a)   | Read byte from memory.         |
 | (poke a b) | Write to memory.               |
 | (sys a)    | Calls machine code subroutine. |
+
+## Error handling
+
+| Function        | Description                            |
+|-----------------|----------------------------------------|
+| (quit ?x)       | Return from debugger REPL              |
+| (exit)          | Stop program and go to top-level REPL. |
+| (error x)       | Issue a user error.                    |
+| (onerror n x x) | User-defined error handler.            |
+| (noerror)       | Break and continue with LOAD or REPL.  |
 
 # Macros
 

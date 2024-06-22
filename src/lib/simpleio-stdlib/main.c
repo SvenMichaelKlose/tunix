@@ -50,8 +50,15 @@ raw_out (char c)
 }
 
 void
-do_nothing (simpleio_chn_t c)
+raw_setin (simpleio_chn_t c)
 {
+    (void) c;
+}
+
+void
+raw_setout (simpleio_chn_t c)
+{
+    fflush (handles[fnout]);
     (void) c;
 }
 
@@ -80,8 +87,8 @@ simpleio vectors = {
     raw_err,
     raw_in,
     raw_out,
-    do_nothing,
-    do_nothing,
+    raw_setin,
+    raw_setout,
     raw_close
 };
 

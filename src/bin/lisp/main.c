@@ -172,7 +172,7 @@ bi_atom (void)
 {
     if (!arg1)
         return t;
-    return CONSP(arg1) ? nil : arg1;
+    return ATOM(arg1) ? arg1 : nil;
 }
 
 lispptr
@@ -515,8 +515,6 @@ lispptr
 bi_setout (void)
 {
     setout (NUMBER_VALUE(arg1));
-    if (err ())
-        error (ERROR_CHANNEL, "fn!");
     SET_SYMBOL_VALUE(lisp_fnout, arg1);
     return arg1;
 }

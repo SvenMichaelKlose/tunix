@@ -1,6 +1,28 @@
 TUNIX blog
 ==========
 
+# 2024-06-22: Compiler writing again?
+
+The remaining heap of the Lisp interpreter is getting too
+small to be useful for micro computers.  The small set of
+environment code costs about 6K.  There are several
+strategies to cope:
+
+* **Using another compiler**:  There is no industrial
+  strength compiler other than cc65.  Oscar64 and gcc-6502
+  bring on latest optimization technicques but aren't even
+  close to cc65's flexibility, ANSI-C compatibility  or
+  aren't production ready.  We don't want no surprises.
+* **Compressed lists**: The CDR of a cons can be left out if
+  the CDR object is immediately following on the heap.
+  This comes at a slight peformane penalty when accessing
+  conses but removes 40% space consumption (3B instead of
+  5B).  That makes CDRs of compressed conses immutable.
+* **Bytecode**: reduces a function call with two arguments
+  from 15B (without argument objects) to 4B with an extra
+  of 2B for each function used in general.  Many run-time
+  checks may also be ommitted.
+
 # 2024-06-20:
 
 Arguments to built-in functions have always been evaluated.
@@ -10,7 +32,7 @@ problem had to prove itself.
 When debuggen, the stack dump is confusing at best.  A
 backtrace should be there instead.
 
-Also very important is single step debugging and displaying
+Also very important is single-step debugging and displaying
 the current expression within the current function.
 
 # 2024-06-19:

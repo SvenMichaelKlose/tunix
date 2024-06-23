@@ -38,8 +38,8 @@
     #define TAGSTACK_SIZE            512
     #define MIN_RELOC_TABLE_ENTRIES  256
 #else
-    #define HEAP_SIZE                (1024 * 1024)
-    #define STACK_SIZE               (64 * 1024)
+    #define HEAP_SIZE                (16 * 1024 * 1024)
+    #define STACK_SIZE               (1024 * 1024)
     #define TAGSTACK_SIZE            (STACK_SIZE / 2)
     #define MIN_RELOC_TABLE_ENTRIES  TAGSTACK_SIZE
 #endif
@@ -351,8 +351,11 @@ extern lispptr           lisp_repl (void);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 
+extern lispptr FASTCALL copy_list (lispptr, bool do_butlast, lispptr needle);
+
 extern void   FASTCALL internal_error (char * msg);
 extern void   FASTCALL error          (char code, char * msg);
+extern void   FASTCALL err_type       (char * type, lispptr x);
 extern void            stack_overflow (void);
 extern void            stack_underflow (void);
 extern void            tagstack_overflow (void);

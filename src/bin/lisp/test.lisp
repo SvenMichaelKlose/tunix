@@ -86,3 +86,7 @@
     (terror "SETCDR of non-NIL atom should be an error."))
 
 (= onerror nil)
+
+(or (equal '(1 . 2)
+           (cons 1 2))
+    (error "Dotted pair not read OK."))

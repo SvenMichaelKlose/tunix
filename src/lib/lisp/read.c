@@ -18,7 +18,7 @@ our_isalpha (char c)
 void
 missing_closing_paren (void)
 {
-    error (ERROR_NO_PAREN, "Missing ')'.");
+    error (ERROR_NO_PAREN, "No ')'");
 }
 
 lispptr
@@ -117,27 +117,29 @@ read ()
     if (eof ())
         return nil;
     in ();
+    // Skip one-line comment.
     if (last_in == ';')  {
         while (in () >= ' ')
             if (eof ())
-                return nil;
+                return nil; // TODO: EOF object to set with eof(s).
         while (in () < ' ')
             if (eof ())
                 return nil;
         putback ();
     }
-    if (last_in == '(')
+    switch (last_in) {
+    case '(':
         return read_list ();
-    if (last_in == '"')
+    case '"':
         return read_string ();
-    if (last_in == '\'')
+    case '\'':
         return read_quoted (quote);
-    if (last_in == '$')
+    case '$':
         return read_quoted (quasiquote);
-    if (last_in == ',')
+    case ',':
         return read_unquoted ();
-    if (last_in == ')') {
-        error (ERROR_STALE_PAREN, "Unexpected ')'.");
+    case ')':
+        error (ERROR_STALE_PAREN, "Stale ')'");
         return nil;
     }
     putback ();

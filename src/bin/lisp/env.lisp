@@ -26,5 +26,5 @@
 (load "max.lisp")
 (load "nthcdr.lisp")
 (load "queue.lisp")
-(load "subseq.lisp")
-(load "group.lisp")
+;(load "subseq.lisp")
+;(load "group.lisp")

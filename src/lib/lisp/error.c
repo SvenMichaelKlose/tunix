@@ -17,7 +17,7 @@ error (char code, char * msg)
 void FASTCALL
 internal_error (char * msg)
 {
-    badef = strcpy (buffer, "Internal. ");
+    badef = stpcpy (buffer, "Internal. ");
     strcpy (badef, msg);
     error (-1, buffer);
 }
@@ -54,19 +54,19 @@ typename (lispptr * x)
     if (SYMBOLP(x))
         return "symbol";
     if (BUILTINP(x))
-        return "built-in";
+        return "builtin";
     if (NUMBERP(x))
         return "number";
-    return "unknown type";
+    return "DEADBEEF";
 }
 
 void FASTCALL
 err_type (char * type, lispptr x)
 {
     char * p;
-    p = strcpy (buffer, type);
-    p = strcpy (p, " wanted. Got ");
-    p = strcpy (p, typename (x));
+    p = stpcpy (buffer, typename (x));
+    p = stpcpy (p, " instead of ");
+    strcpy (p, type);
     error (ERROR_TYPE, buffer);
 }
 
@@ -76,39 +76,40 @@ bi_tcheck (lispptr x, uchar type)
     (void) x, (void) type;
 
     switch (type) {
-    case 'x': // anything
+    case 'x':
         break;
 
-    case 'n': // number
+    case 'n':
         if (!NUMBERP(x))
             err_type ("number", x);
         break;
 
-    case 's': // symbol
+    case 's':
         if (!SYMBOLP(x))
             err_type ("symbol", x);
         break;
 
-    case 'c': // cons
+    case 'c':
         if (!CONSP(x))
             err_type ("cons", x);
         break;
 
-    case 'l': // list (cons or nil)
+    case 'l':
         if (!LISTP(x))
             err_type ("list", x);
         break;
 
-    case 'f': // function
+    case 'f':
         if (!LISTP(x) && !BUILTINP(x))
-            err_type ("Function", x);
+            err_type ("function", x);
         break;
 
 #ifndef NDEBUG
     default:
         setout (STDERR);
+        out ('\'');
         out (type);
-        outs ("': unknown typedef");
+        outs ("': no typedef");
         while (1);
 #endif
     }

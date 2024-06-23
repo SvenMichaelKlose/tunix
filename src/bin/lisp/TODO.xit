@@ -2,13 +2,13 @@ Initial release
 [x] Essential tests
 [x] Macro expansion
 [x] User-defined error handler
-[@] Testing errors
+[x] Testing errors
 [@] Undefining symbols (UNDEF)
-[@] On-demand function loading
-[ ] Automatic file number with OPEN.
-[ ] On-demand macro loading
-[ ] Directory access
-[ ] exec()
+[@] On-demand function/macro loading
+[ ] Automatic file numbers with OPEN.
+[ ] OPEN for writes.
+[ ] OPENDIR, READDIR, CLOSEDIR.
+[ ] SYSTEM
 
 Second release
 [ ] tré environment import

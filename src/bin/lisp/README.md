@@ -54,6 +54,7 @@ lists.
 
 ~~~lisp
 (symbol '(\A \B \C)) -> "ABC"
+(symbol) -> Anonymous symbol that won't get re-used.
 ~~~
 
 There are no packages.
@@ -506,24 +507,31 @@ TODO: Impressive example where it's advantagous.
 
 A 'cons' points to two other objects, called 'car' and
 'cdr' for historical reasons.  They could also be called
-'first' and 'second', or 'head' and 'tail' in the context
-of singly-linked lists.
+'first' and 'second', 'first' and 'rest' or 'head' and
+'tail'.  However: they are just two object pointers
+packed together.
 
 ## Lists
+
+This functions are around because the interpreter needs them
+internally.
 
 | Function          | Description                         |
 |-------------------|-------------------------------------|
 | (length l)        | Return length of list.              |
 | (@ f l)           | Run list items through function.    |
 | (butlast l)       | Copy list but not its last element. |
-| (last l)          | Return last element.                |
+| (last l)          | Return last cons of list.           |
 | (member x l)      | Return element containing X.        |
-|!(member-if f x l) | Return element containing X.        |
+
+### (@ f l): Filter list by function
+
+Also handles dotted pairs, filtering the last atom if it is not NIL.
 
 ### (member x l): Return cons containing X.
 
-Uses EQ to test equality.  Use MEMBER-IF to pick a function
-of preference.
+Uses EQ as the predicate, instead of the usual EQL which
+compares number values instead of number identity.
 
 ## Numbers
 
@@ -615,8 +623,8 @@ of preference.
 
 If defined, MACROEXPAND is called by the REPL and the LOAD
 function to expand expressions before evaluating them.
-before EVALuating, if defined.  QUASIQUOTE is like a regular
-function but called with arguments unevaluated.
+before EVALuating, if defined.  QUASIQUOTE is a user-defined
+special form which takes its arguments unevaluated.
 
 # Environment
 
@@ -818,5 +826,3 @@ jmp
 Interruptible GC with lower threshold to keep space for
 critical operations is a bad idea as a GC has to complete
 at some point.
-
-

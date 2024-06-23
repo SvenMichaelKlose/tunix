@@ -223,6 +223,7 @@ bi_symbol (void)
     char * p;
 
     // Allocate empty symbol of wanted length.
+    arg1 = x ? CAR(x) : nil;
     len = length (arg1);
     PUSH(arg1);
     s = alloc_symbol (buffer, len);
@@ -830,7 +831,7 @@ struct builtin builtins[] = {
     { "builtin?",   "x",    bi_builtinp },
     { "special?",   "x",    bi_specialp },
 
-    { "symbol",     "l",    bi_symbol },
+    { "symbol",     "?l",    bi_symbol },
     { "=",          "'sx",  bi_setq },
     { "value",      "s",    bi_symbol_value },
 

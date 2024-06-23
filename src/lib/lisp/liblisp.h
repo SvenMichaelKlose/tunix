@@ -33,6 +33,9 @@
 // Print 'x instead of (quote x).
 #define PRINT_SHORT_QUOTES
 
+// Do not print anonymous symbols.
+#define NO_PRINT_ANONYMOUS
+
 #ifdef __CC65__
     #define STACK_SIZE               2048
     #define TAGSTACK_SIZE            512

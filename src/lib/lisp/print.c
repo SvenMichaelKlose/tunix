@@ -120,6 +120,12 @@ void FASTCALL
 print_named (symbol * s)
 {
     space ();
+#ifndef NO_PRINT_ANONYMOUS
+    if (!SYMBOL_LENGTH(s)) {
+        outs ("<?>");
+        return;
+    }
+#endif
     if (needs_quotes (s)) {
         print_quoted_string (s);
         return;

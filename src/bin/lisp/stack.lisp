@@ -1,6 +1,6 @@
-(macro push (l v)
+(macro push (x l)
   ;"Destructively push on stack."
-  $(= ,l (cons ,v ,l)))
+  $(= ,l (cons ,x ,l)))
 
 (macro pop (l)
   ;"Destructively pop from stack."

@@ -1,7 +1,7 @@
 ---
 title: "TUNIX Lisp"
 author: "The Garbage-Collected Manual(?)"
-date: "2024-04-20"
+date: "2024-06-24"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
@@ -22,15 +22,11 @@ ANSI-C and offers simplified I/O for small platforms.
 
 Platforms known to work apart from modern Unices are:
 
-* Commodore home computers
-
-| Machine           | Heap size      |
-|------------------------|-----------------|
-| Commodore C128
-| Commodore C16
-| Commodore C64
-| Commodore Plus4
-| Commodore VIC-20
+* Commodore C128
+* Commodore C16 (probably out of heap early)
+* Commodore C64
+* Commodore Plus4
+* Commodore VIC-20
 
 ## Differences to other dialects
 

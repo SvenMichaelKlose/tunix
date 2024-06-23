@@ -3,11 +3,21 @@
   (with ((v       (car iter))
          (init    (cadr iter))
          (result  (cddr iter))
+         (i       (symbol))
          (tag     (symbol)))
-    $(let ,v ,init
+    $(let ,i ,init
        (block nil
-         (or ,v (return ,(car result)))
          ,tag
+         (or ,i (return ,(car result)))
+         (= ,v (car ,i))
          ,@body
-         (= ,v (cdr ,v))
+         (= ,i (cdr ,i))
          (go ,tag)))))
+
+(print 'dolist)(terpri)
+(eval
+  (print
+    (macroexpand
+      '(dolist (i '(1 2 3))
+         (terpri)(out '"Item ")(print i)))))
+(terpri)

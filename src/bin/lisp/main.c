@@ -772,7 +772,7 @@ bi_filter (void)
         make_car_call ();
         tmp = make_cons (eval0 (), nil);
         if (do_break_repl) {
-            stack += 4 * sizeof (lispptr);
+            stack += 2 * sizeof (lispptr);
             return nil;
         }
         POP(lastc);
@@ -780,6 +780,17 @@ bi_filter (void)
         lastc = tmp;
         POP(arg2);
         POP(arg1);
+    }
+    if (arg2) {
+        PUSH(lastc);
+        make_call (make_cons (arg2, nil));
+        tmp = eval0 ();
+        if (do_break_repl) {
+            stack += 2 * sizeof (lispptr);
+            return nil;
+        }
+        POP(lastc);
+        SETCDR(lastc, tmp);
     }
     POP(start);
     return start;

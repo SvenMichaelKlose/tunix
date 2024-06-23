@@ -22,6 +22,19 @@
     (cons (%unquote (car x))
           (%unquote (cdr x)))))
 
+(special macro (name . lfun)
+  ;"Define macro function."
+  (? (member name *macros*)
+     (error name))
+  (= *macros* (cons name *macros*))
+  (eval (macroexpand $(fn ,name
+                        ,@lfun))))
+
+(fn macro? (s)
+  ;"Test if symbol is a macro."
+  (and (symbol? s)
+       (member s *macros*)))
+
 (fn macroexpand (x)
   ;"Expand *MACROS* in X."
   (?
@@ -34,18 +47,10 @@
       (macroexpand (apply (value (car x)) (cdr x)))
     (@ macroexpand x)))
 
-(special macro (name . lfun)
-  ;"Define macro function."
-  (? (member name *macros*)
-     (error name))
-  (= *macros* (cons name *macros*))
-  (eval (macroexpand $(fn ,name
-                        ,@lfun))))
-
-(fn macro? (s)
-  ;"Test if symbol has a macro."
-  (and (symbol? s)
-       (member s *macros*)))
+(print 'macroexpand-dotted-pair)(terpri)
+(or (equal (macroexpand '(v . body))
+           '(v . body))
+    (error (macroexpand '(v . body))))
 
 (print 'macroexpand-of-unquoted-list)(terpri)
 

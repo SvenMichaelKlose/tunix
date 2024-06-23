@@ -239,9 +239,9 @@ extern lispptr           poptagw (void);
 #define TAG_NEXT_BLOCK_STATEMENT  4
 
 #define DOLIST(x, init) \
-    for (x = init; x; x = CDR(x))
+    for (x = init; CONSP(x); x = CDR(x))
 #define TYPESAFE_DOLIST(x, init) \
-    for (x = init; x; x = LIST_CDR(x))
+    for (x = init; CONSP(x); x = LIST_CDR(x))
 
 #define TYPE_MARKED   128
 #define TYPE_NAMED    64

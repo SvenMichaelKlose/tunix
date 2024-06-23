@@ -155,3 +155,9 @@
 (print 'gc-in-block)(terpri)
 (block nil
   (print (gc))(out "B free.")(terpri))
+
+(print 'argument-restore)(terpri)
+(= x 42)
+(((x)) 23)
+(or (== x 42)
+    (error "Argument X not restored on return."))

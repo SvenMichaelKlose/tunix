@@ -7,7 +7,9 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#ifndef __CC65__
 #include <signal.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
@@ -788,6 +790,9 @@ lispptr
 bi_debug (void)
 {
     debug_mode = true;
+#ifndef __CC65__
+    raise (SIGTRAP);
+#endif
     return nil;
 }
 #endif

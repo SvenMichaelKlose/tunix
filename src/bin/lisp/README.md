@@ -602,6 +602,7 @@ of preference.
 | (error x)       | Issue a user error.                    |
 | (onerror n x x) | User-defined error handler.            |
 | (noerror)       | Break and continue with LOAD or REPL.  |
+| (debug)         | Raises a SIGTRAP signal for debugging. |
 
 # Macros
 
@@ -779,3 +780,43 @@ expected.
 
 ~~~C
 ~~~
+
+## Bytecode function object format
+
+A bytecode functions starts off like a regular symbol,
+with a type, length and value slot.  The length tells the
+number of bytes following the value.  The value points to a
+regular argument definition , e.g. '(first . rest)'.
+
+| Offset | Size  | Description                   |
+|--------|-------|-------------------------------|
+| 0      | 1     | Object TYPE_BCFUN             |
+| 1      | 1     | Total size - 3                |
+| 2      | 2     | Argument definition           |
+| 3      | 1     | Stack size / object list size |
+| 4      | 1     | Number of jump positions      |
+| 4      | 0-31  | Object list                   |
+| ?      | 0-31  | Jump positions                |
+| ?      | 1-220 | Byte codes                    |
+
+Constant objects are always referenced via the object list
+with a maximum of 16 entries (at least one).
+
+## Instruction format
+
+The highest bit of the first byte determines if the code is
+an assignment or a jump.  Jumps also contain an index into
+a code offset table.
+
+place place/obj [place/obj]...
+jmp
+
+%JNNttttt
+
+# Real-time applications
+
+Interruptible GC with lower threshold to keep space for
+critical operations is a bad idea as a GC has to complete
+at some point.
+
+

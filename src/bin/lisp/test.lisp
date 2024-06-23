@@ -1,3 +1,5 @@
+(= x 42)
+
 (print 'equal)(terpri)
 (or (equal '(1 2) '(1 2))
     (error))
@@ -26,7 +28,7 @@
 (var *last-err* nil)
 
 (fn onerror (n repl ev)
-  (out "onerror handler, errcode ")(print n)(terpri)
+  (out "ONERROR #")(print n)(terpri)
   (out "REPL: ")(print repl)(terpri)
   (out "Eval: ")(print ev)(terpri)
   (out "Continuing...")(terpri)
@@ -90,3 +92,6 @@
 (or (equal '(1 . 2)
            (cons 1 2))
     (error "Dotted pair not read OK."))
+
+(or (== x 42)
+    (error "X was modified globally."))

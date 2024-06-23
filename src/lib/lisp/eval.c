@@ -84,6 +84,7 @@ eval_list (void)
     if (do_break_repl)
         return nil;
     start = lastc = make_cons (va, nil);
+    PUSH(start);
     DOLIST(x, CDR(x)) {
         if (ATOM(x)) {
             SETCDR(lastc, x);
@@ -100,6 +101,7 @@ eval_list (void)
         if (do_break_repl)
             return nil;
     }
+    POP(start);
     return start;
 }
 

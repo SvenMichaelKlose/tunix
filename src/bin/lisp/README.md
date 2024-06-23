@@ -1,13 +1,13 @@
 ---
 title: "TUNIX Lisp"
-author: "The Garbage-Collected Manual"
+author: "The Garbage-Collected Manual(?)"
 date: "2024-04-20"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
 header-left: "TUNIX Lisp"
-footer-left: "The garbage-collected manual?"
+footer-left: "The garbage-collected manual(?)"
 toc: true
 footnodes-pretty: true
 book: true

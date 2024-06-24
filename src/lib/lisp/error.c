@@ -1,5 +1,6 @@
 #include <ingle/cc65-charmap.h>
 
+#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -26,9 +27,11 @@ stpcpy (char * dst, char * src)
 void FASTCALL
 internal_error (char * msg)
 {
-    badef = stpcpy (buffer, "Internal. ");
-    strcpy (badef, msg);
-    error (-1, buffer);
+    error (ERROR_INTERNAL, msg);
+    print_error_info ();
+#ifdef TARGET_UNIX
+    raise (SIGTRAP);
+#endif
 }
 
 void
@@ -122,4 +125,25 @@ bi_tcheck (lispptr x, uchar type)
         while (1);
 #endif
     }
+}
+
+void FASTCALL
+check_stacks (char * old_stack, char * old_tagstack)
+{
+    if (old_stack != stack)
+        internal_error ("stack");
+    if (old_tagstack != tagstack)
+        internal_error ("tagstack");
+}
+
+void
+print_error_info ()
+{
+    terpri ();
+    outs ("In REPL: "); print (last_repl_expr); terpri ();
+    outs ("Eval: ");    print (last_eval_expr); terpri ();
+    outs ("Error #");   out_number (has_error); outs (": ");
+    if (last_errstr)
+        outs (last_errstr);
+    terpri ();
 }

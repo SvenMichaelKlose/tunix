@@ -108,6 +108,11 @@ eval_list (void)
 lispptr
 eval0 (void)
 {
+#ifndef NDEBUG
+    char * old_stack    = stack;
+    char * old_tagstack = tagstack;
+#endif
+
 do_eval:
 #ifndef NO_DEBUGGERGER
     last_eval_expr = x;
@@ -248,11 +253,6 @@ set_arg_values:
                 POP(arg2);
                 POP(arg1);
             }
-#ifdef DEBUG_EVAL
-            else if (na > 2) {
-                internal_error ("#bargs");
-            }
-#endif
 
             // Call built-in.
             POP_TAGW(bfun);
@@ -291,6 +291,8 @@ set_arg_values:
             PUSH_TAG(na);
             x = args;
             value = eval_list ();
+            if (has_error)
+                value = lisp_repl (false);
             POP_TAG(na);
             POP(args);
 
@@ -316,7 +318,6 @@ next_builtin_arg:
         POP_TAGW(badef);
         POP(args);
 
-        // Save for set_arg_values.
         if (do_break_repl) {
             na--;
             goto set_arg_values;
@@ -324,23 +325,23 @@ next_builtin_arg:
 
 save_arg_value:
         bi_tcheck (value, *badef);
-#ifndef NO_DEBUGGERGER
-        while (do_break_repl) {
+        if (has_error) {
             PUSH(args);
             PUSH_TAGW(badef);
             PUSH_TAG(na);
-            value = lisp_repl ();
+            value = lisp_repl (false);
             POP_TAG(na);
             POP_TAGW(badef);
             POP(args);
-            bi_tcheck (value, *badef);
         }
-#endif
-        badef++;
-
+        if (do_break_repl) {
+            na--;
+            goto set_arg_values;
+        }
         PUSH(value);
 
         // Step to next argument.
+        badef++;
         args = CDR(args);
         goto do_builtin_arg;
     }
@@ -358,7 +359,7 @@ save_arg_value:
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         last_eval_expr = arg1;
-        error (ERROR_NOT_FUNCTION, "Not a fun.");
+        error (ERROR_NOT_FUNCTION, "Not a fun");
         goto do_return;
     }
 
@@ -478,11 +479,11 @@ do_return:
 #ifndef NO_DEBUGGER
     stack += sizeof (lispptr);
 #endif
+    if (has_error)
+        value = lisp_repl (false);
+
 do_return_atom:
     unevaluated = false;
-
-    if (has_error)
-        value = lisp_repl ();
 
     if (value == delayed_eval)
         goto do_eval;
@@ -506,34 +507,21 @@ do_return_atom:
         }
 #ifndef NDEBUG
         internal_error ("Alien tag");
-#endif // #ifndef NDEBUG
+#endif
     }
 
+#ifndef NDEBUG
+    check_stacks (old_stack, old_tagstack + 1);
+#endif
     return value;
 }
 
 lispptr
 eval ()
 {
-#ifndef NDEBUG
-    lispptr r;
-    char * old_tagstack = tagstack;
-#endif
     unevaluated = false;
     PUSH_TAG(TAG_DONE);
-#ifdef NDEBUG
     return eval0 ();
-#else
-    r = eval0 ();
-    if (old_tagstack != tagstack) {
-        setout (STDERR);
-        outs ("Internal error: tag stack: ");
-        out_number ((lispnum_t) (tagstack - old_tagstack));
-        outs ("B off."); terpri ();
-        while (1);
-    }
-    return r;
-#endif // #ifdef NDEBUG
 }
 
 lispptr

@@ -2,18 +2,19 @@
 #define __LIBLISP_H__
 
 #ifdef RELEASE
-#define NDEBUG
-#else // #ifdef NDEBUG
-#define GCSTACK_CHECKS
-#define TAGSTACK_CHECKS
-#define DEBUG_EVAL
+    #define NDEBUG
+#else
+    #define GCSTACK_CHECKS
+    #define TAGSTACK_CHECKS
+    #define DEBUG_EVAL
+    #define SLOW
 #endif // #ifdef RELEASE
 
 #ifdef TARGET_C16
-#define SLOW
+    #define SLOW
 #endif // #ifdef TARGET_C16
 #ifdef TARGET_VIC20
-#define SLOW
+    #define SLOW
 #endif // #ifdef TARGET_VIC20
 
 // Disable C compiler level debugging.
@@ -42,7 +43,7 @@
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR
 
-// Inline less code, halvens performance.
+// Inline less code, half performance.
 //#define SLOW
 
 // Do boundary checks of tag and GC stack pointers before
@@ -107,6 +108,7 @@ extern lispptr universe;
 extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
+extern lispptr last_repl_expr;
 extern lispptr last_eval_expr;
 extern char *  last_errstr;
 extern bool    debug_mode;
@@ -325,17 +327,17 @@ extern bool FASTCALL lisp_specialp (lispptr);
 
 #define BOOL(x)      ((x) ? t : nil)
 
-#define NUMBER(n)              ((number *) (n))
-#define NUMBER_VALUE(n)        (NUMBER(n)->value)
-#define SET_NUMBER_VALUE(n, x) (NUMBER(n)->value = x)
+#define NUMBER(n)               ((number *) (n))
+#define NUMBER_VALUE(n)         (NUMBER(n)->value)
+#define SET_NUMBER_VALUE(n, x)  (NUMBER(n)->value = x)
 
-#define SYMBOL(s)           ((symbol *) (s))
-#define SYMBOL_NEXT(s)      (SYMBOL(s)->next)
-#define SYMBOL_VALUE(s)     (SYMBOL(s)->value)
-#define SYMBOL_LENGTH(s)    (SYMBOL(s)->length)
-#define SYMBOL_NAME(s)      ((char *) s + sizeof (symbol))
-#define SET_SYMBOL_NEXT(s, x)  (SYMBOL(s)->next = x)
-#define SET_SYMBOL_VALUE(s, x) (SYMBOL(s)->value = x)
+#define SYMBOL(s)               ((symbol *) (s))
+#define SYMBOL_NEXT(s)          (SYMBOL(s)->next)
+#define SYMBOL_VALUE(s)         (SYMBOL(s)->value)
+#define SYMBOL_LENGTH(s)        (SYMBOL(s)->length)
+#define SYMBOL_NAME(s)          ((char *) s + sizeof (symbol))
+#define SET_SYMBOL_NEXT(s, x)   (SYMBOL(s)->next = x)
+#define SET_SYMBOL_VALUE(s, x)  (SYMBOL(s)->value = x)
 
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
@@ -352,6 +354,7 @@ extern bool FASTCALL lisp_specialp (lispptr);
 #define ERROR_CHANNEL       10
 #define ERROR_FILE          11
 #define ERROR_USER          12
+#define ERROR_INTERNAL      13
 
 extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL make_cons (lispptr, lispptr);
@@ -370,20 +373,22 @@ extern lispptr  funcall (void);
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);
 
-extern lispptr           lisp_repl (void);
+extern lispptr  FASTCALL lisp_repl (bool);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 
-extern lispptr FASTCALL copy_list (lispptr, bool do_butlast, lispptr excluded);
+extern lispptr  FASTCALL copy_list (lispptr, bool do_butlast, lispptr excluded);
 
-extern void   FASTCALL internal_error (char * msg);
-extern void   FASTCALL error          (char code, char * msg);
-extern void   FASTCALL err_type       (char * type, lispptr x);
-extern void            stack_overflow (void);
-extern void            stack_underflow (void);
-extern void            tagstack_overflow (void);
-extern void            tagstack_underflow (void);
-extern char * FASTCALL typestr (lispptr * x);
-extern void   FASTCALL bi_tcheck (lispptr x, uchar type);
+extern void     FASTCALL internal_error (char * msg);
+extern void     FASTCALL error          (char code, char * msg);
+extern void     FASTCALL err_type       (char * type, lispptr x);
+extern void              stack_overflow (void);
+extern void              stack_underflow (void);
+extern void              tagstack_overflow (void);
+extern void              tagstack_underflow (void);
+extern char *   FASTCALL typestr (lispptr * x);
+extern void     FASTCALL bi_tcheck (lispptr x, uchar type);
+extern void     FASTCALL check_stacks (char * old_stack, char * old_tagstack);
+extern void              print_error_info (void);
 
 #endif // #ifndef __LIBLISP_H__

@@ -1,4 +1,5 @@
-; TUNIX Lisp
+; TUNIX Lisp compiler
+;
 ; Break up nested function calls of a single expression into
 ; many ones to uniform list of instructions.
 ;

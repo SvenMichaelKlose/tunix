@@ -95,4 +95,4 @@
 (print 'macroexpand)(terpri)
 (or (equal (macroexpand '$(a ,(b) ,@(c)))
            '$(a ,(b) ,@(c)))
-    (error "%requote went wrong"))
+    (error '"%requote went wrong"))

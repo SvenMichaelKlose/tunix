@@ -7,4 +7,4 @@
   (print-file 'lambda.tmp (lambda-expand (read-file 'cmacros.tmp)))
   (print-file 'expex.tmp (expex (read-file 'lambda.tmp)))
   (print-file 'opt.tmp (optimize (read-file 'expex.tmp)))
-  (code-expand (read-file 'expex.tmp)))
+  (string (code-expand (read-file 'opt.tmp)) t)

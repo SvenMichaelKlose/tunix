@@ -109,7 +109,7 @@ lispptr
 eval0 (void)
 {
 do_eval:
-#ifndef NDEBUGGER
+#ifndef NO_DEBUGGERGER
     last_eval_expr = x;
 #endif
 #ifdef VERBOSE_EVAL
@@ -133,7 +133,7 @@ do_eval:
     }
 
     arg1 = CAR(x);
-#ifndef NDEBUG
+#ifndef NO_DEBUGGER
     PUSH(arg1);
 #endif
 
@@ -324,7 +324,7 @@ next_builtin_arg:
 
 save_arg_value:
         bi_tcheck (value, *badef);
-#ifndef NDEBUGGER
+#ifndef NO_DEBUGGERGER
         while (do_break_repl) {
             PUSH(args);
             PUSH_TAGW(badef);
@@ -475,7 +475,7 @@ restore_arguments:
     stack += sizeof (lispptr) * na;
 
 do_return:
-#ifndef NDEBUG
+#ifndef NO_DEBUGGER
     stack += sizeof (lispptr);
 #endif
 do_return_atom:
@@ -505,11 +505,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        setout (STDERR);
-        outs ("Internal error: ");
-        out_number (c);
-        outs (": Unknown eval tag.");
-        while (1);
+        internal_error ("Alien tag");
 #endif // #ifndef NDEBUG
     }
 

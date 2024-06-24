@@ -1,12 +1,14 @@
 # Build oscar64 compiler.
 #HAVE_OSCAR64 = 1
 
+# Make release version with NDEBUG and reduced verbosity.
+#RELEASE = 1
+
 # Do not compile in code for debugging.  Usually leads to
 # noticeably smaller and faster code.
 #NDEBUG = 1
 
-# One of c126, c16 (32K), c64, pet, plus4, vic-20 or unix.
-# Targets c16 and pet need fixing.
-# Do a 'make allworlds' to get disk images for all Commodore
-# machines listed.
+# One of 'c128', 'c16' (32K), 'c64', 'pet', 'plus4', 'vic20'
+# or 'unix'.  Target 'pet' needs fixing.
+# Always required.
 TARGET = vic20

@@ -1,11 +1,31 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+#ifdef RELEASE
+#define NDEBUG
+#else // #ifdef NDEBUG
+#define GCSTACK_CHECKS
+#define TAGSTACK_CHECKS
+#define DEBUG_EVAL
+#endif // #ifdef RELEASE
+
+#ifdef TARGET_C16
+#define SLOW
+#endif // #ifdef TARGET_C16
+#ifdef TARGET_VIC20
+#define SLOW
+#endif // #ifdef TARGET_VIC20
+
+// Disable C compiler level debugging.
+//#define NDEBUG
+
 // Maximum symbol length.
 #define MAX_SYMBOL  255
 
 // Print message if garbage collector takes action.
-#define VERBOSE_GC
+//#define VERBOSE_GC
+
+//#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
 //#define GC_STRESS
@@ -23,18 +43,18 @@
 //#define NO_ONERROR
 
 // Inline less code, halvens performance.
-#define SLOW
+//#define SLOW
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-#define GCSTACK_CHECKS
-#define TAGSTACK_CHECKS
+//#define GCSTACK_CHECKS
+//#define TAGSTACK_CHECKS
 
 // Print 'x instead of (quote x).
 #define PRINT_SHORT_QUOTES
 
 // Do not print anonymous symbols.
-#define NO_PRINT_ANONYMOUS
+//#define NO_PRINT_ANONYMOUS
 
 #ifdef __CC65__
     #define STACK_SIZE               2048
@@ -354,7 +374,7 @@ extern lispptr           lisp_repl (void);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 
-extern lispptr FASTCALL copy_list (lispptr, bool do_butlast, lispptr needle);
+extern lispptr FASTCALL copy_list (lispptr, bool do_butlast, lispptr excluded);
 
 extern void   FASTCALL internal_error (char * msg);
 extern void   FASTCALL error          (char code, char * msg);

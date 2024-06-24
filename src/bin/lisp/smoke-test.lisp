@@ -1,7 +1,7 @@
 (var x nil)
 
 (print 'gc)(terpri)
-(print (gc))(out "B free.")(terpri)
+(print (gc))(out '"B free.")(terpri)
 
 (print 'atom)(terpri)
 (atom 1)
@@ -121,7 +121,7 @@
 (or (== (>> 23 1) 11) (error))
 
 (print 'gc)(terpri)
-(print (gc))(out "B free.")(terpri)
+(print (gc))(out '"B free.")(terpri)
 
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
@@ -154,10 +154,10 @@
 
 (print 'gc-in-block)(terpri)
 (block nil
-  (print (gc))(out "B free.")(terpri))
+  (print (gc))(out '"B free.")(terpri))
 
 (print 'argument-restore)(terpri)
 (= x 42)
 (((x)) 23)
 (or (== x 42)
-    (error "Argument X not restored on return."))
+    (error '"Argument X not restored on return."))

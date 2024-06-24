@@ -38,4 +38,4 @@
 (= x '(n v . body))
 (or (equal $(fn ,x bla)
            '(fn (n v . body) bla))
-    (error "Error unquoting dotted pair"))
+    (error '"Error unquoting dotted pair"))

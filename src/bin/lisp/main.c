@@ -14,6 +14,10 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+#define COPY_LIST       0
+#define COPY_BUTLAST    1
+#define COPY_REMOVE     2
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -84,26 +88,27 @@ length (lispptr x)
 }
 
 lispptr FASTCALL
-copy_list (lispptr x, bool do_butlast, lispptr find)
+copy_list (lispptr x, char mode, lispptr needle)
 {
     if (ATOM(x))
         return x;
-    if (do_butlast && !CDR(x))
+    if (mode == COPY_BUTLAST && !CDR(x))
         return nil;
-    while (find && find == CAR(x)) {
-        x = CDR(x);
-        if (ATOM(x))
-            return x;
-    }
+    if (mode == COPY_REMOVE)
+        while (needle == CAR(x)) {
+            x = CDR(x);
+            if (ATOM(x))
+                return x;
+        }
     PUSH(x);
     start = lastc = make_cons (CAR(x), nil);
     POP(x);
     PUSH(start);
     DOLIST(x, CDR(x)) {
         if (CONSP(x)) {
-            if (do_butlast && !CDR(x))
+            if (mode == COPY_BUTLAST && !CDR(x))
                 break;
-            if (!find || find != CAR(x)) {
+            if (mode != COPY_REMOVE || needle != CAR(x)) {
                 PUSH(lastc);
                 PUSH(x);
                 tmp = make_cons (CAR(x), nil);
@@ -117,12 +122,6 @@ copy_list (lispptr x, bool do_butlast, lispptr find)
     }
     POP(start);
     return start;
-}
-
-lispptr FASTCALL
-butlast (lispptr x)
-{
-    return copy_list (x, true, nil);
 }
 
 lispptr FASTCALL
@@ -380,7 +379,7 @@ bi_apply (void)
     PUSH(arg1);
 
     PUSH(arg2);
-    args = copy_list (arg2, true, nil);
+    args = copy_list (arg2, COPY_BUTLAST, nil);
     POP(arg2);
     tmp = CAR(last (arg2));
     if (args) {
@@ -633,6 +632,8 @@ lisp_repl (bool do_file)
 
         // Read an expression.
         x = last_repl_expr = read ();
+        if (!do_file)
+            fresh_line ();
 
         // Evaluate expression on program channels.
         x = eval ();
@@ -663,7 +664,6 @@ lisp_repl (bool do_file)
         if (!do_file) {
             // Print result.
             setout (STDOUT);
-            fresh_line ();
             print (x);
             fresh_line ();
         }
@@ -743,7 +743,7 @@ bi_undef (void)
 #endif
     outs ("Undefining "); print (arg1); terpri ();
     PUSH(arg1);
-    universe = copy_list (universe, false, arg1);
+    universe = copy_list (universe, COPY_LIST, arg1);
     POP(arg1);
     return nil;
 }
@@ -821,7 +821,13 @@ bi_length (void)
 lispptr
 bi_butlast (void)
 {
-    return copy_list (arg1, true, nil);
+    return copy_list (arg1, COPY_BUTLAST, nil);
+}
+
+lispptr
+bi_copy_list (void)
+{
+    return copy_list (arg1, COPY_LIST, nil);
 }
 
 lispptr
@@ -837,9 +843,9 @@ bi_member (void)
 }
 
 lispptr
-bi_copy_list (void)
+bi_remove (void)
 {
-    return copy_list (arg1, false, nil);
+    return copy_list (arg2, COPY_REMOVE, arg1);
 }
 
 lispptr
@@ -988,6 +994,7 @@ struct builtin builtins[] = {
     { "last",       "l",    bi_last },
     { "length",     "l",    bi_length },
     { "member",     "xl",   bi_member },
+    { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
 #ifndef NDEBUG

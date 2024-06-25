@@ -515,10 +515,11 @@ internally.
 | Function          | Description                         |
 |-------------------|-------------------------------------|
 | (length l)        | Return length of list.              |
-| (@ f l)           | Run list items through function.    |
+| (@ f l)           | Run elements through function.      |
 | (butlast l)       | Copy list but not its last element. |
 | (last l)          | Return last cons of list.           |
-| (member x l)      | Return element containing X.        |
+| (member x l)      | Return list starting with X.        |
+| (remove x l)      | Copy list except element X.         |
 
 ### (@ f l): Filter list by function
 
@@ -526,8 +527,11 @@ Also handles dotted pairs, filtering the last atom if it is not NIL.
 
 ### (member x l): Return cons containing X.
 
-Uses EQ as the predicate, instead of the usual EQL which
-compares number values instead of number identity.
+Uses EQ as the predicate.
+
+### (remove x l): Copy list except element X.
+
+Uses EQ as the predicate.
 
 ## Numbers
 

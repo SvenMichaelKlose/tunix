@@ -31,7 +31,6 @@
   (out '"ONERROR #")(print n)(terpri)
   (out '"REPL: ")(print repl)(terpri)
   (out '"Eval: ")(print ev)(terpri)
-  (out '"Continuing...")(terpri)
   (= *last-err* n)
   (noerror))
 

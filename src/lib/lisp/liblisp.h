@@ -377,7 +377,7 @@ extern lispptr  FASTCALL lisp_repl (bool);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 
-extern lispptr  FASTCALL copy_list (lispptr, bool do_butlast, lispptr excluded);
+extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
 
 extern void     FASTCALL internal_error (char * msg);
 extern void     FASTCALL error          (char code, char * msg);

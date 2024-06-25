@@ -7,7 +7,6 @@
     #define GCSTACK_CHECKS
     #define TAGSTACK_CHECKS
     #define DEBUG_EVAL
-    #define SLOW
 #endif // #ifdef RELEASE
 
 #ifdef TARGET_C16
@@ -109,11 +108,28 @@ extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
 extern lispptr last_repl_expr;
-extern lispptr last_eval_expr;
+extern lispptr current_expr;
+extern lispptr current_toplevel;
 extern char *  last_errstr;
 extern bool    debug_mode;
 extern lispptr first_symbol;
 extern lispptr last_symbol;
+extern lispptr highlighting;
+
+extern lispptr t;
+extern lispptr quote;
+extern lispptr quasiquote;
+extern lispptr unquote;
+extern lispptr unquote_spliced;
+
+extern bool do_break_repl;
+
+extern lispptr start;
+extern lispptr lastc;
+
+extern lispptr debug_step;
+extern bool do_invoke_debugger;
+
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -171,17 +187,6 @@ extern lispptr delayed_eval;
 #pragma zpsym ("delayed_eval")
 #pragma bss-name (pop)
 #endif
-
-extern lispptr t;
-extern lispptr quote;
-extern lispptr quasiquote;
-extern lispptr unquote;
-extern lispptr unquote_spliced;
-
-extern bool do_break_repl;
-
-extern lispptr start;
-extern lispptr lastc;
 
 #define nil 0
 
@@ -362,6 +367,8 @@ extern lispptr  FASTCALL make_number (lispnum_t);
 extern lispptr  FASTCALL alloc_symbol (char *, uchar len);
 extern lispptr  FASTCALL make_symbol (char *, uchar len);
 extern lispptr  read (void);
+extern lispptr  read_symbol (void);
+extern lispptr  read_number (void);
 extern lispptr  FASTCALL print (lispptr);
 
 // Arguments in global 'x'.
@@ -376,6 +383,7 @@ extern unsigned FASTCALL objsize (char *);
 extern lispptr  FASTCALL lisp_repl (bool);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
+extern void              debugger (void);
 
 extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
 
@@ -390,5 +398,7 @@ extern char *   FASTCALL typestr (lispptr * x);
 extern void     FASTCALL bi_tcheck (lispptr x, uchar type);
 extern void     FASTCALL check_stacks (char * old_stack, char * old_tagstack);
 extern void              print_error_info (void);
+
+extern void              set_channels (simpleio_chn_t in, simpleio_chn_t out);
 
 #endif // #ifndef __LIBLISP_H__

@@ -17,7 +17,7 @@
     (eq (caar qqx) 'unquote)
       (cons (eval (cadar qqx)) (%qq (cdr qqx)))
 
-    ; Insert evaluated arguments of UNQUOTE-SPLICE into
+    ; Insert evaluated argument of UNQUOTE-SPLICE into
     ; the list.
     (eq (caar qqx) 'unquote-spliced)
       (append (eval (cadar qqx)) (%qq (cdr qqx)))

@@ -5,8 +5,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
+#include <lisp/liblisp.h>
+
+char * last_errstr;
 
 void FASTCALL
 error (char code, char * msg)
@@ -141,7 +143,7 @@ print_error_info ()
 {
     terpri ();
     outs ("In REPL: "); print (last_repl_expr); terpri ();
-    outs ("Eval: ");    print (last_eval_expr); terpri ();
+    outs ("Eval: ");    print (current_expr); terpri ();
     outs ("Error #");   out_number (has_error); outs (": ");
     if (last_errstr)
         outs (last_errstr);

@@ -4,10 +4,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include <lisp/liblisp.h>
 #include <simpleio/libsimpleio.h>
+#include <lisp/liblisp.h>
 
 char * stack_start;
+lispptr current_expr;
+lispptr current_toplevel;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -33,6 +35,8 @@ lispptr return_name;
 lispptr return_value;
 lispptr go_sym;
 lispptr go_tag;
+lispptr debug_step;
+bool do_invoke_debugger;
 bool tag_found;
 char has_error;
 uchar c;
@@ -114,8 +118,11 @@ eval0 (void)
 #endif
 
 do_eval:
-#ifndef NO_DEBUGGERGER
-    last_eval_expr = x;
+#ifndef NO_DEBUGGER
+    current_expr = x;
+    PUSH(current_expr);
+    if (debug_step == t || do_invoke_debugger)
+        debugger ();
 #endif
 #ifdef VERBOSE_EVAL
     outs ("-> "); print (x); terpri ();
@@ -358,7 +365,7 @@ save_arg_value:
 
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        last_eval_expr = arg1;
+        current_expr = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
         goto do_return;
     }
@@ -484,12 +491,20 @@ do_return:
 
 do_return_atom:
     unevaluated = false;
+#ifndef NO_DEBUGGER
+    POP(current_expr);
+#endif
 
     if (value == delayed_eval)
         goto do_eval;
 
 #ifdef VERBOSE_EVAL
     outs ("<- "); print (value); terpri ();
+#endif
+
+#ifndef NO_DEBUGGER
+    if (debug_step && debug_step == current_expr)
+        do_invoke_debugger = true;
 #endif
 
     // Dispatch value based on tag.

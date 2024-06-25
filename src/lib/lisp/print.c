@@ -15,6 +15,8 @@
 
 #include "liblisp.h"
 
+lispptr highlighting;
+
 void print0 (lispptr);
 
 void

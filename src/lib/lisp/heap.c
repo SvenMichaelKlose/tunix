@@ -231,7 +231,12 @@ lisp_init ()
     debug_mode  = false;
     has_error   = false;
     last_errstr = NULL;
-    last_eval_expr  = nil;
+    current_expr  = nil;
+
+#ifndef NO_DEBUGGER
+    do_invoke_debugger = false;
+    debug_step = nil;
+#endif
 
     return true;
 }

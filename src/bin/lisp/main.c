@@ -61,8 +61,6 @@ lispptr start;  // First cons.
 lispptr lastc;  // Last cons (to append to).
 
 lispptr last_repl_expr;  // Read expression in REPL.
-lispptr last_eval_expr;  // Expression to eval0().
-char *  last_errstr;     // Addiitonal.
 char    num_repls;       // Number of REPLs - 1.
 bool    debug_mode;      // Unused.  Set by DEBUG.
 bool    do_break_repl;   // Tells current REPL to return.
@@ -607,7 +605,7 @@ lisp_repl (bool do_file)
     if (has_error) {
 #ifndef NO_ONERROR
         if (CONSP(SYMBOL_VALUE(onerror))) {
-            x = make_cons (onerror, make_cons (make_number ((lispnum_t) has_error), make_cons (last_repl_expr, make_cons (last_eval_expr, nil))));
+            x = make_cons (onerror, make_cons (make_number ((lispnum_t) has_error), make_cons (last_repl_expr, make_cons (current_expr, nil))));
             has_error   = false;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
@@ -766,7 +764,7 @@ bi_error (void)
 {
     last_errstr = "User error";
     if (arg1)
-        last_eval_expr = arg1;
+        current_expr = arg1;
     has_error = ERROR_USER;
     return nil;
 }
@@ -904,6 +902,15 @@ bi_debug (void)
 }
 #endif
 
+#ifndef NO_DEBUGGER
+lispptr
+bi_debugger (void)
+{
+    debug_step = t;
+    return nil;
+}
+#endif
+
 struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
@@ -999,6 +1006,9 @@ struct builtin builtins[] = {
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
+#endif
+#ifndef NO_DEBUGGER
+    { "debugger",   "",     bi_debugger },
 #endif
 
     { NULL, NULL }

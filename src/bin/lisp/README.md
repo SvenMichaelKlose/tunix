@@ -1,7 +1,6 @@
 ---
 title: "TUNIX Lisp"
 author: "The Garbage-Collected Manual(?)"
-date: "2024-06-24"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
@@ -80,7 +79,7 @@ Alongside the CPU stack a separate garbage-collected GC
 stack holds function arguments. An additional raw stack
 holds return tags of byte size instead of full return
 addresses as well as raw pointers to argument definitions
-for built-in functions during their evaluation.
+of built-in functions during their evaluation.
 
 ## Hidden creation of list elements ("consing")
 
@@ -91,15 +90,43 @@ APPLY copies all arguments but the last one.
 Functions are lists starting with an argument definition,
 followed by a list of expressions.  The result of the last
 expression is returned.  The LAMBDA keyword is not around.
-Anonymous functions need to be quoted instead:
+
+~~~lisp
+((these are four arguments)
+  (expression)
+  (expression)
+  (last-expression-returning-value))
+
+; Function with no arguments
+(nil)
+~~~
+
+Local anonymous functions can be used right on the spot:
+
+~~~lisp
+; Introduce a local symbol value for X,
+; initialized with NIL.
+(((x)
+   (some-code-using x))
+ nil)
+~~~
+
+Anonymous functions as arguments need to be quoted:
 
 ~~~lisp
 ; Add 1 to each number in list.
 (@ '((n) (++ n)) l)
 ~~~
 
+Global functions can be defined with FN.
+
+~~~lisp
+(fn welcome ()
+  (out '"Hello World!")(terpri))
+~~~
+
 The QUASIQUOTE (short form "$") can be used to emulate
-lexical scope.
+lexical scope:
 
 ~~~lisp
 ; Make a function that adds X to its argument.
@@ -142,55 +169,57 @@ READ and PRINT.  Strings and chars have dedicated formats:
 
 READ also supports abbreviations:
 
-| Form               | Short form |
+| Expression         | Short form |
 |--------------------|------------|
 | (quote x)          | 'x         |
 | (quasiquote x)     | $x         |
 | (unquote x)        | ,x         |
 | (unquote-splice x) | ,@x        |
 
+## Catching I/O errors and state
+
+## Character-based I/O
+
 ## Input and output channel
 
-I/O is performed via a pair of channels, one for input, the
-other for output.  STDIN and STDOUT contain the default
-channel numbers for standard I/O.  Built-in functions SETIN
-and SETOUT set them.  The currently selected channels are
-stored in symbols FNIN and FNOUT.
+An input and an output channel can be switched between open
+streams separately using functions SETIN and SETOUT.
+Symbols STDIN and STDOUT contain the standard I/O channel
+numbers.
 
 ~~~lisp
-; This is done autmatically at start-up:
+; Switch to standard I/O channels.
 (setin stdin)
 (setout stdout)
 ~~~
 
-A new channel is created by OPEN and other functions,
-depending on features compiled into the interpreter.
-OPEN is generally used to open files.  Here's how to execute
-a Lisp file instead of using built-in LOAD:
+The currently active channels numbers are in symbols FNIN
+and FNOUT.
+
+New channels are created by OPEN to access files:
 
 ~~~lisp
 (fn user-defined-load (pathname)
   (with (old-in       fnin
          load-in      (open pathname)
-         last-result  nil
-         expr         nil)
-    (while (not (or (err) (eof)))
-           result
-      (setin load-in)
-      (= expr (read))
-      (setin old-in)
-      (= result (eval expr)))))
+         last-result  nil)
+    (setin load-in)
+    (while (not (eof))
+           (progn
+             (setin old-in)
+             last-result)
+      (= last-result (eval (read))))))
 ~~~
-
-## Character-based I/O
 
 # Error handling
 
 In case of an error a new REPL is invoked so you can
-provide an alternative object for the one the failed.
-
-The error REPL first prints some information on the error.
-It may look like this:
+provide an alternative object for the one that failed.
+The error REPL prints some information about the error
+before prompting for input.  It may look like this,
+displaying the current expression read by the REPL, the
+object whose evaluation caused the error as well as an
+error code and a message;
 
 ~~~
 * (fnords)
@@ -203,12 +232,11 @@ Error #5: Not a fun.
 You may
 
 * return a correct alternative value using **QUIT**,
-* stop the program entirely using **EXIT** with no arguments
-  (which would exit the interpreter),
-* Continue with the current LOAD or REPL using **NOERROR**.
+* stop the program entirely using **EXIT** without arguments
+* continue with the current LOAD or REPL using **NOERROR**.
 
 During evaluation the I/O channels of the running program
-are assigned.
+are used.
 
 ## User-defined error handler ONERROR
 
@@ -231,7 +259,7 @@ expression and the expression that caused the error.
 ~~~lisp
 ; SKETCH! UNTESTED!
 ; Load missing functions on demand.
-(fn onerror (n x x)
+(fn onerror (n repl ev)
   (? (== n 1) ; Not a function error.
      ; Evaluate matching definition in environment file.
      (with-infile f "env.lisp"
@@ -241,10 +269,12 @@ expression and the expression that caused the error.
            (when (and (cons? !)
                       (or (eq (car !) 'var)
                           (eq (car !) 'fn))
-                      (eq (cadr !) (car x)))
+                      (eq (cadr !) ev))
              (eval !)
              (return x)))))))
 ~~~
+
+### Error codes
 
 | ID (ERR_...)    | Code | Description                    |
 |-----------------|------|--------------------------------|
@@ -257,12 +287,15 @@ expression and the expression that caused the error.
 | UNKNOWN\_TYPE   | 7    | Internal error.                |
 | NO\_PAREN       | 8    | ')' missing.                   |
 | STALE\_PAREN    | 9    | Unexpected ')'.                |
-| CHANNEL         | 10   | Cannot use channel.            |
-| FILE            | 11   | Error while OPENing a file.    |
-| USER            | 12   | User called ERROR.             |
+| CHANNEL         | 10   | Channel not open.              |
+| USER            | 12   | ERROR function was called.     |
+| INTERNAL        | 13   | Internal interpreter error.    |
 
-NOTE: The FILE code might be nonsense.
+### Watch points
 
+~~~
+ww (member 'progn *macros*) *watchflag*
+~~~
 # Built-in functions
 
 ## Top-level
@@ -308,7 +341,7 @@ the definition will leave with the next GC if it is unused.
 ### Special form
 
 Special forms are functions that take their arguments
-unevaluated, like macros.
+unevaluated, e.g. QUASIQUOTE (see 'quasiquote.lisp').
 
 ## Evaluation and flow control
 
@@ -611,6 +644,7 @@ Uses EQ as the predicate.
 | (onerror n x x) | User-defined error handler.            |
 | (noerror)       | Break and continue with LOAD or REPL.  |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
+| (debugger)      | Invoke debugger with next instruction. |
 
 # Macros
 

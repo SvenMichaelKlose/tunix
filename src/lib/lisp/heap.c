@@ -84,7 +84,7 @@ objsize (char * x)
 #ifndef NDEBUG
     if (type > TYPE_MAX)
         internal_error ("Ill type");
-#endif // #ifndef NDEBUG
+#endif
     s = lisp_sizes[type];
     if (*x & TYPE_NAMED)
         return s + SYMBOL_LENGTH(x);

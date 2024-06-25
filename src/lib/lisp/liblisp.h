@@ -6,7 +6,7 @@
 #else
     #define GCSTACK_CHECKS
     #define TAGSTACK_CHECKS
-    #define DEBUG_EVAL
+    #define VERBOSE_GC
 #endif // #ifdef RELEASE
 
 #ifdef TARGET_C16
@@ -35,9 +35,6 @@
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
-
-// Extra checks in eval0().
-//#define DEBUG_EVAL
 
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR

@@ -147,7 +147,6 @@ do_eval:
     arg1 = CAR(x);
 #ifndef NO_DEBUGGER
     PUSH(current_toplevel);
-    PUSH(arg1);
 #endif
 
     if (arg1 && SYMBOLP(arg1)) {
@@ -155,7 +154,8 @@ do_eval:
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
 #ifndef NO_DEBUGGER
-        current_toplevel = arg1;
+        if (!unevaluated)
+            current_toplevel = x;
 #endif
     }
 
@@ -488,7 +488,6 @@ restore_arguments:
 
 do_return:
 #ifndef NO_DEBUGGER
-    stack += sizeof (lispptr);
     POP(current_toplevel);
 #endif
     if (has_error)

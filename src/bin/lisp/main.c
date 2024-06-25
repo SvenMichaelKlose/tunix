@@ -634,12 +634,23 @@ lisp_repl (bool do_file)
             fresh_line ();
 
         // Evaluate expression on program channels.
+#ifndef NO_DEBUFFER
+        PUSH(current_toplevel);
+        current_toplevel = x;
+#endif
         x = eval ();
         if (has_error) {
             x = lisp_repl (false);
-            if (do_break_repl)
+            if (do_break_repl) {
+#ifndef NO_DEBUFFER
+                POP(current_toplevel);
+#endif
                 break;
+            }
         }
+#ifndef NO_DEBUFFER
+        POP(current_toplevel);
+#endif
 
         // Break/continue on demand.
         if (do_break_repl) {

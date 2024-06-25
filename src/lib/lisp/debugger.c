@@ -39,15 +39,19 @@ debugger ()
     simpleio_chn_t oldout = fnout;
     set_channels (STDIN, STDOUT);
 
-    outs ("In debugger: ");
+    outs ("In debugger: "); terpri ();
     highlighting = current_expr;
-    //print (current_toplevel); terpri ();
+    print (current_toplevel); terpri ();
     print (current_expr); terpri ();
 
     do_invoke_debugger = false;
     debug_step = nil;
     while (!eof ()) {
-        outs ("] "); in (); out (last_in);
+        outs ("] ");
+        while (!eof () && in () < ' ');
+        if (eof ())
+            break;
+        out (last_in); terpri ();
         if (last_in == 's') {
             debug_step = t;
             break;

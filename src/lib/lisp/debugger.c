@@ -40,9 +40,10 @@ debugger ()
     set_channels (STDIN, STDOUT);
 
     outs ("In debugger: "); terpri ();
-    highlighting = current_expr;
+    highlighted = current_expr;
+    do_highlight = true;
     print (current_toplevel); terpri ();
-    print (current_expr); terpri ();
+    do_highlight = false;
 
     do_invoke_debugger = false;
     debug_step = nil;
@@ -51,7 +52,6 @@ debugger ()
         while (!eof () && in () < ' ');
         if (eof ())
             break;
-        out (last_in); terpri ();
         if (last_in == 's') {
             debug_step = t;
             break;

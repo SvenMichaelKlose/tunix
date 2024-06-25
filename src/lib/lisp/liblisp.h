@@ -111,7 +111,8 @@ extern char *  last_errstr;
 extern bool    debug_mode;
 extern lispptr first_symbol;
 extern lispptr last_symbol;
-extern lispptr highlighting;
+extern lispptr highlighted;
+extern bool    do_highlight;
 
 extern lispptr t;
 extern lispptr quote;

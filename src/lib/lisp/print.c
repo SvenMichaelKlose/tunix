@@ -15,7 +15,8 @@
 
 #include "liblisp.h"
 
-lispptr highlighting;
+lispptr highlighted;
+bool do_highlight;
 
 void print0 (lispptr);
 
@@ -136,13 +137,21 @@ print_named (symbol * s)
 }
 
 void FASTCALL
+print_highlighted (lispptr x)
+{
+    if (do_highlight && highlighted == x)
+        outs ("__");
+}
+
+void FASTCALL
 print0 (lispptr x)
 {
     uchar type;
 
+    print_highlighted (x);
     if (!x) {
         outs ("nil");
-        return;
+        goto done;
     }
     type = TYPE(x);
     if (type == TYPE_CONS)
@@ -153,6 +162,8 @@ print0 (lispptr x)
         print_named ((symbol *) x);
     else
         error (ERROR_UNKNOWN_TYPE, "Unknown object type.");
+done:
+    print_highlighted (x);
 }
 
 lispptr FASTCALL

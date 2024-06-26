@@ -132,10 +132,6 @@ extern bool do_exit_program;
 extern lispptr start;
 extern lispptr lastc;
 
-extern lispptr debug_step;
-extern bool do_invoke_debugger;
-
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -164,6 +160,8 @@ extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
 extern lispptr delayed_eval;
+extern lispptr debug_step;
+extern bool do_invoke_debugger;
 #ifdef __CC65__
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
@@ -190,6 +188,8 @@ extern lispptr delayed_eval;
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("delayed_eval")
+#pragma zpsym ("debug_step")
+#pragma zpsym ("do_invoke_debugger")
 #pragma bss-name (pop)
 #endif
 

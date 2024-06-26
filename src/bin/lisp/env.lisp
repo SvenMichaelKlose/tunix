@@ -13,9 +13,9 @@
 (load '"quasiquote.lisp")
 (load '"macroexpand.lisp")
 
+(load '"let.lisp")
 (load '"prog1.lisp")
 (load '"progn.lisp")
-(load '"let.lisp")
 (load '"with.lisp")
 (load '"alist.lisp")
 (load '"dolist.lisp")

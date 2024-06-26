@@ -1,8 +1,5 @@
 (macro prog1 body
   ;"Return value of first expression."
-  (((g)
-     $(((,g)
-          ,@(cdr body)
-          ,g)
-       ,(car body)))
-   (symbol)))
+  (let g (symbol)
+    $(let ,g ,(car body)
+       ,@(cdr body))))

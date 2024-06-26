@@ -60,7 +60,6 @@ lispptr onerror;
 lispptr start;  // First cons.
 lispptr lastc;  // Last cons (to append to).
 
-lispptr last_repl_expr;  // Read expression in REPL.
 char    num_repls;       // Number of REPLs - 1.
 bool    debug_mode;      // Unused.  Set by DEBUG.
 bool    do_break_repl;   // Tells current REPL to return.
@@ -582,9 +581,14 @@ is_stdout ()
     return fnout == STDOUT || fnout == STDERR;
 }
 
+char last_cmd;
+
 lispptr FASTCALL
-lisp_repl (bool do_file)
+lisp_repl (char mode)
 {
+#ifndef NO_DEBUGGER
+    char cmd;
+#endif
 #ifndef NDEBUG
     char * old_stack = stack;
     char * old_tagstack = tagstack;
@@ -592,20 +596,28 @@ lisp_repl (bool do_file)
     simpleio_chn_t this_in;
     simpleio_chn_t this_out;
 
-    if (!do_file)
+    // Update and save I/O channels.
+    if (mode != REPL_LOAD)
         set_channels (STDIN, STDOUT);
-
-    // Save I/O channels.
     this_in  = fnin;
     this_out = fnout;
 
+#ifndef NO_DEBUGGER
+    PUSH(current_toplevel);
+#endif
+
     num_repls++;
 
-    // Print waiting error message.
+    // Call error handler if defined.
     if (has_error) {
+#ifdef NO_DEBUGGER
+        print_code_position ();
+        exit (has_error);
+#endif
+
 #ifndef NO_ONERROR
         if (CONSP(SYMBOL_VALUE(onerror))) {
-            x = make_cons (onerror, make_cons (make_number ((lispnum_t) has_error), make_cons (last_repl_expr, make_cons (current_expr, nil))));
+            x = make_cons (onerror, make_cons (make_number ((lispnum_t) has_error), make_cons (current_toplevel, make_cons (current_expr, nil))));
             has_error   = false;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
@@ -613,55 +625,88 @@ lisp_repl (bool do_file)
             goto had_onerror;
         }
 #endif
-
-        has_error = false;
-        print_error_info ();
     }
 
-    // Read expresions from standard in until end of input
-    // or QUIT has been invoked.
+    // Read expresions from standard input until end
+    // or until QUIT has been invoked.
     while (!eof ()) {
-        if (!do_file) {
+        if (mode != REPL_LOAD) {
+#ifndef NO_DEBUGGER
+            if (mode == REPL_DEBUGGER)
+                print_code_position ();
+#endif
+
             // Print prompt with number of recursions.
             if (num_repls)
                 out ('0' + num_repls);
             outs ("* ");
         }
 
+#ifndef NO_DEBUGGER
         // Read an expression.
-        x = last_repl_expr = read ();
-        if (!do_file)
-            fresh_line ();
-
-        // Evaluate expression on program channels.
-#ifndef NO_DEBUFFER
-        PUSH(current_toplevel);
-        current_toplevel = x;
+        if (mode != REPL_DEBUGGER) {
 #endif
-        x = eval ();
-        if (has_error) {
-            x = lisp_repl (false);
-            if (do_break_repl) {
-#ifndef NO_DEBUFFER
-                POP(current_toplevel);
-#endif
+            x = read ();
+            if (mode != REPL_LOAD)
+                fresh_line ();
+#ifndef NO_DEBUGGER
+        } else {
+            cmd = 0;
+            if (in () == 10) {
+                cmd = last_cmd;
+                fresh_line ();
+            } else {
+                putback ();
+                x = read ();
+                fresh_line ();
+                if (SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
+                    cmd = SYMBOL_NAME(x)[0];
+            }
+            if (cmd == 'c') { // Contine
+                // Do not re-invoke debugger.
+                debug_step = nil;
+                break;
+            } else if (cmd == 's') { // Step
+                // Re-invoke before evaluating the next expression.
+                debug_step = t; // T for any expression.
+                last_cmd = cmd;
+                outs ("Step..."); terpri ();
+                break;
+            } else if (cmd == 'n') { // Next
+                // Re-invoke when done evaluating the current expression.
+                debug_step = current_expr;
+                last_cmd = cmd;
+                outs ("Next..."); terpri ();
                 break;
             }
         }
-#ifndef NO_DEBUFFER
-        POP(current_toplevel);
 #endif
 
-        // Break/continue on demand.
+        // Save and update top-level expression.
+#ifndef NO_DEBUGGER
+        current_toplevel = x;
+#endif
+
+        // Evaluate expression.
+        x = eval ();
+
+        // Call debugger on error.
+        if (has_error)
+            x = lisp_repl (REPL_DEBUGGER);
+
+        // Break or continue on demand.
         if (do_break_repl) {
+            // Ignore evaluation and contine with next expression.
             if (do_continue_repl) {
                 do_break_repl = do_continue_repl = false;
                 goto next;
             }
             if (do_exit_program) {
+                // Return from all child REPLs.
                 if (num_repls)
                     break;
             } else {
+                // Just break this REPL.
                 do_break_repl = false;
                 break;
             }
@@ -670,8 +715,8 @@ lisp_repl (bool do_file)
             setout (STDOUT); outs ("Program exited."); terpri ();
         }
 
-        if (!do_file) {
-            // Print result.
+        // Print result.
+        if (mode != REPL_LOAD) {
             setout (STDOUT);
             print (x);
             fresh_line ();
@@ -682,9 +727,16 @@ next:   set_channels (this_in, this_out);
 
 had_onerror:
     num_repls--;
+
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
 #endif
+
+    // Restore parent REPL's top-level expression.
+#ifndef NO_DEBUGGER
+    POP(current_toplevel);
+#endif
+
     return x;
 }
 
@@ -702,7 +754,7 @@ load (char * pathname)
     }
 
     load_fn++;
-    lisp_repl (true);
+    lisp_repl (REPL_LOAD);
     load_fn--;
 
     simpleio_close (load_fn);
@@ -1077,7 +1129,7 @@ main (int argc, char * argv[])
     load ("env.lisp");
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
-    lisp_repl (false);
+    lisp_repl (REPL_STD);
 
     setout (STDOUT);
     outs ("Bye!");

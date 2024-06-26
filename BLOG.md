@@ -1,6 +1,21 @@
 TUNIX blog
 ==========
 
+# 2024-06-25: Debuggeritis
+
+Added a stepping debugger and messed it up a bit merging it
+into the REPL, meaning that I'm just too tired to continue
+coding for the rest of the day.
+
+Looking at the tré compiler I'm not too happy with the state
+of the code which grew since 1st April 2005 and became a
+compiler in November 2008.  For what TUNIX Lisp needs - a
+very, very simple bytecode compiler - it can be rewritten
+from scratch and used as some inspiration to clean up tré.
+
+The wanted bytecode format is very compact but there is no
+sketch of an interpreter for it.
+
 # 2024-06-22: Compiler writing again?
 
 The remaining heap of the Lisp interpreter is getting too

@@ -1,7 +1,6 @@
 LIBRARY = liblisp.a
 SOURCES = \
 	builtin.c \
-	debugger.c \
 	error.c \
 	eval.c \
 	gc.c \

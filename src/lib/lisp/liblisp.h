@@ -64,6 +64,10 @@
     #define MIN_RELOC_TABLE_ENTRIES  TAGSTACK_SIZE
 #endif
 
+#if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
+#define NO_ONERROR
+#endif
+
 typedef unsigned char uchar;
 typedef long lispnum_t;
 
@@ -104,7 +108,6 @@ extern lispptr universe;
 extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
-extern lispptr last_repl_expr;
 extern lispptr current_expr;
 extern lispptr current_toplevel;
 extern char *  last_errstr;
@@ -304,13 +307,13 @@ extern lispptr           poptagw (void);
 #define SPECIALP(x)  (lisp_specialp (x))
 extern lispptr FASTCALL lisp_car (lispptr);
 extern lispptr FASTCALL lisp_cdr (lispptr);
-extern bool FASTCALL lisp_atom (lispptr);
-extern bool FASTCALL lisp_consp (lispptr);
-extern bool FASTCALL lisp_listp (lispptr);
-extern bool FASTCALL lisp_numberp (lispptr);
-extern bool FASTCALL lisp_symbolp (lispptr);
-extern bool FASTCALL lisp_builtinp (lispptr);
-extern bool FASTCALL lisp_specialp (lispptr);
+extern bool    FASTCALL lisp_atom (lispptr);
+extern bool    FASTCALL lisp_consp (lispptr);
+extern bool    FASTCALL lisp_listp (lispptr);
+extern bool    FASTCALL lisp_numberp (lispptr);
+extern bool    FASTCALL lisp_symbolp (lispptr);
+extern bool    FASTCALL lisp_builtinp (lispptr);
+extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
@@ -368,6 +371,7 @@ extern lispptr  read (void);
 extern lispptr  read_symbol (void);
 extern lispptr  read_number (void);
 extern lispptr  FASTCALL print (lispptr);
+extern lispptr  FASTCALL dprint (lispptr);
 
 // Arguments in global 'x'.
 extern lispptr  eval0 (void);
@@ -378,24 +382,27 @@ extern lispptr  funcall (void);
 extern void     gc (void);
 extern unsigned FASTCALL objsize (char *);
 
-extern lispptr  FASTCALL lisp_repl (bool);
+#define REPL_STD        0
+#define REPL_DEBUGGER   1
+#define REPL_LOAD       2
+extern lispptr  FASTCALL lisp_repl (char mode);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
-extern void              debugger (void);
+extern lispptr           debugger (void);
 
 extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
 
-extern void     FASTCALL internal_error (char * msg);
-extern void     FASTCALL error          (char code, char * msg);
-extern void     FASTCALL err_type       (char * type, lispptr x);
-extern void              stack_overflow (void);
-extern void              stack_underflow (void);
-extern void              tagstack_overflow (void);
+extern void     FASTCALL internal_error     (char * msg);
+extern void     FASTCALL error              (char code, char * msg);
+extern void     FASTCALL err_type           (char * type, lispptr x);
+extern void              stack_overflow     (void);
+extern void              stack_underflow    (void);
+extern void              tagstack_overflow  (void);
 extern void              tagstack_underflow (void);
-extern char *   FASTCALL typestr (lispptr * x);
-extern void     FASTCALL bi_tcheck (lispptr x, uchar type);
-extern void     FASTCALL check_stacks (char * old_stack, char * old_tagstack);
-extern void              print_error_info (void);
+extern char *   FASTCALL typestr            (lispptr * x);
+extern void     FASTCALL bi_tcheck          (lispptr x, uchar type);
+extern void     FASTCALL check_stacks       (char * old_stack, char * old_tagstack);
+extern void              print_code_position (void);
 
 extern void              set_channels (simpleio_chn_t in, simpleio_chn_t out);
 

@@ -172,3 +172,11 @@ print (lispptr x)
     print0 (x);
     return x;
 }
+
+lispptr FASTCALL
+dprint (lispptr x)
+{
+    print0 (x);
+    terpri ();
+    return x;
+}

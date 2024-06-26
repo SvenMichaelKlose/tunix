@@ -18,6 +18,9 @@ extern lispptr tmp;
 extern char * msg;
 lispptr x;
 lispptr args;
+lispptr arg1;
+lispptr arg2c;
+lispptr arg2;
 char * stack;
 char * stack_end;
 char * tagstack_start;
@@ -118,19 +121,21 @@ eval0 (void)
 #endif
 
 do_eval:
-#ifndef NO_DEBUGGER
-    current_expr = x;
-    PUSH(current_expr);
-    if (debug_step == t || do_invoke_debugger)
-        debugger ();
-#endif
 #ifdef VERBOSE_EVAL
     outs ("-> "); print (x); terpri ();
 #endif
+
 #ifdef GC_STRESS
     PUSH(x);
     gc ();
     POP(x);
+#endif
+
+#ifndef NO_DEBUGGER
+    current_expr = x;
+    PUSH(current_expr);
+    if (debug_step == t || do_invoke_debugger)
+        lisp_repl (REPL_DEBUGGER);
 #endif
 
     if (!x) {
@@ -303,7 +308,7 @@ set_arg_values:
             x = args;
             value = eval_list ();
             if (has_error)
-                value = lisp_repl (false);
+                value = lisp_repl (REPL_DEBUGGER);
             POP_TAG(na);
             POP(args);
 
@@ -340,7 +345,7 @@ save_arg_value:
             PUSH(args);
             PUSH_TAGW(badef);
             PUSH_TAG(na);
-            value = lisp_repl (false);
+            value = lisp_repl (REPL_DEBUGGER);
             POP_TAG(na);
             POP_TAGW(badef);
             POP(args);
@@ -491,7 +496,7 @@ do_return:
     POP(current_toplevel);
 #endif
     if (has_error)
-        value = lisp_repl (false);
+        value = lisp_repl (REPL_DEBUGGER);
 
 do_return_atom:
     unevaluated = false;

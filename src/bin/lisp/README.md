@@ -1,11 +1,11 @@
 ---
-title: "TUNIX Lisp"
+title: "((())) TUNIX Lisp"
 author: "The Garbage-Collected Manual(?)"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
-header-left: "TUNIX Lisp"
+header-left: "((())) TUNIX Lisp"
 footer-left: "The garbage-collected manual(?)"
 toc: true
 footnodes-pretty: true
@@ -143,16 +143,16 @@ notate argument types in this manual most of the time.
 
 | Code | Type                                    |
 |------|-----------------------------------------|
-| x    | anything                                |
-| c    | cons                                    |
-| l    | list (cons or NIL)                      |
-| n    | number                                  |
-| s    | symbol                                  |
-| a    | Memory address (positive number)        |
-| b    | Byte value                              |
-| +    | any number of following type (eg. "+n") |
-| ?    | optional following type (eg. "?x")      |
-| '    | unevaluated following type (eg. "'+x")  |
+|  x   | anything                                |
+|  c   | cons                                    |
+|  l   | list (cons or NIL)                      |
+|  n   | number                                  |
+|  s   | symbol                                  |
+|  a   | Memory address (positive number)        |
+|  b   | Byte value                              |
+|  +   | any number of following type (eg. "+n") |
+|  ?   | optional following type (eg. "?x")      |
+|  '   | unevaluated following type (eg. "'+x")  |
 
 # Input/output
 
@@ -213,30 +213,66 @@ New channels are created by OPEN to access files:
 
 # Error handling
 
-In case of an error a new REPL is invoked so you can
-provide an alternative object for the one that failed.
-The error REPL prints some information about the error
-before prompting for input.  It may look like this,
-displaying the current expression read by the REPL, the
-object whose evaluation caused the error as well as an
-error code and a message;
+The debugger is invoked if an error occurs and no
+user-defined function has been defined.  The debugger shows
+a description of the error, followed by the current
+top-level expression and the erroraneous expression
+highlighted inside it by triple underscores ('___').
 
 ~~~
 * (fnords)
-In REPL: (fnords)
-Eval: fnords
 Error #5: Not a fun.
+In : (___ fnords ___)
 1*
 ~~~
 
-You may
+The debugger takes commands like the regular REPL.
+Since an error occured the debugger will not continue with
+the current expressoin.  An alternative value has to be
+supplied instead with QUIT:
 
-* return a correct alternative value using **QUIT**,
-* stop the program entirely using **EXIT** without arguments
-* continue with the current LOAD or REPL using **NOERROR**.
+~~~
+* (fnords)
+Error #5: Not a fun.
+In : (___ fnords ___)
+1* (quit 'fords)
+~~~
 
-During evaluation the I/O channels of the running program
-are used.
+but until then you can execute any code you wish, using the
+I/O channels of the current program, not the standard I/O
+of the debugger.
+
+EXIT without arguments will stop the program entirely and
+return to the top-level REPL.  You can also break execution
+and continue with the next top-level REPL or LOAD expression
+by calling NOERROR.
+
+Unlike the REPL, the debugger also takes one-character
+commands (which the regular REPL would interpret as
+symbols) to continue through the code step by step.
+
+| Command | Description                            |
+|---------|----------------------------------------|
+| e       | Use previous result to fix the error.  |
+| s       | Execute subexpression of expression.   |
+| n       | Execute expression and subexpressions. |
+
+Stepping with 's' and 'n' cannot be used when the current
+expression is erroraneous.  Let's fix the previous example
+error using 'e' to step on:
+
+~~~
+* (fnords)
+Error #5: Not a fun.
+In: (or (___ fnords ___) (other))
+1* (identity e)
+content-of-symbol-e
+1* 'fords
+fords
+1* e
+In: (or (fnords) ___ (other) ___)
+1*
+~~~
 
 ## User-defined error handler ONERROR
 
@@ -291,11 +327,6 @@ expression and the expression that caused the error.
 | USER            | 12   | ERROR function was called.     |
 | INTERNAL        | 13   | Internal interpreter error.    |
 
-### Watch points
-
-~~~
-ww (member 'progn *macros*) *watchflag*
-~~~
 # Built-in functions
 
 ## Top-level
@@ -373,8 +404,6 @@ x         -> "What a day!"
 
 ### (apply fun . args): Apply function.
 
-TODO: Describe APPLY and FUNCALL elegantly.
-
 Calls function FUN.  The last argument in ARGS must be a
 list which is appended to the previous arguments.
 
@@ -386,9 +415,9 @@ list which is appended to the previous arguments.
 (apply list 1 2 '(3 4)) -> (1 2 3 4)
 ~~~
 
-### (funcall f +x): Call function with explicit arguments.
+### (funcall f +x): Call function.
 
-### (eval x): Evaluate expression
+### (eval x): Evaluate expression.
 
 Evaluates expression X and it's subexpressions.
 
@@ -730,6 +759,72 @@ key and the rest is the value.
 
 # Ideas for the future
 
+## Directory access
+
+| Function      | Description                |
+|---------------|----------------------------|
+| (opendir n s) | Open directory on channel. |
+| (readdir n)   | READ directory info.       |
+| (mkdir s)     | Create directory.          |
+
+## Bytecode function object format
+
+A bytecode functions starts off like a regular symbol,
+with a type, length and value slot.  The length tells the
+number of bytes following the value.  The value points to a
+regular argument definition , e.g. '(first . rest)'.
+
+| Offset | Size  | Description                   |
+|--------|-------|-------------------------------|
+| 0      | 1     | Object TYPE_BCFUN             |
+| 1      | 1     | Total size - 3                |
+| 2      | 2     | Argument definition           |
+| 3      | 1     | Stack size / object list size |
+| 4      | 1     | Number of jump positions      |
+| 4      | 0-31  | Object list                   |
+| ?      | 0-31  | Jump positions                |
+| ?      | 1-220 | Byte codes                    |
+
+Constant objects are always referenced via the object list
+with a maximum of 16 entries (at least one).
+
+## Instruction format
+
+The highest bit of the first byte determines if the code is
+an assignment or a jump.  Jumps also contain an index into
+a code offset table.
+
+Jump:
+%1JJIIIII
+
+* J: type
+* I: Index into target array
+
+Assigments have a destination on the stack, a function
+object, a number of arguments and the arguments.
+
+Return:
+%00000000
+
+Assignment:
+%0?DDDDDD FFFFFFFF
+
+* D: Destination on stack
+* F: Function (index into object array)
+
+Argument:
+%EPIIIIII
+
+* E: End of argument list flag
+* P: 0: stack place 1: object
+* I: Index into stack or object array
+
+# Real-time applications
+
+Interruptible GC with lower threshold to keep space for
+critical operations is a bad idea as a GC has to complete
+at some point.
+
 | Function  | Description                  |
 |-----------|------------------------------|
 | (gc x)    | GC with another root object. |
@@ -761,15 +856,6 @@ everything out that appeared later:
 | b       | List all breakpoints by number.      |
 | d n     | Delete breakpoint by number.         |
 | (       | Start a Lisp expression to evaluate. |
-
-
-## Directory access
-
-| Function      | Description                |
-|---------------|----------------------------|
-| (opendir n s) | Open directory on channel. |
-| (readdir n)   | READ directory info.       |
-| (mkdir s)     | Create directory.          |
 
 ## Bielefeld DB
 
@@ -822,41 +908,3 @@ expected.
 
 ~~~C
 ~~~
-
-## Bytecode function object format
-
-A bytecode functions starts off like a regular symbol,
-with a type, length and value slot.  The length tells the
-number of bytes following the value.  The value points to a
-regular argument definition , e.g. '(first . rest)'.
-
-| Offset | Size  | Description                   |
-|--------|-------|-------------------------------|
-| 0      | 1     | Object TYPE_BCFUN             |
-| 1      | 1     | Total size - 3                |
-| 2      | 2     | Argument definition           |
-| 3      | 1     | Stack size / object list size |
-| 4      | 1     | Number of jump positions      |
-| 4      | 0-31  | Object list                   |
-| ?      | 0-31  | Jump positions                |
-| ?      | 1-220 | Byte codes                    |
-
-Constant objects are always referenced via the object list
-with a maximum of 16 entries (at least one).
-
-## Instruction format
-
-The highest bit of the first byte determines if the code is
-an assignment or a jump.  Jumps also contain an index into
-a code offset table.
-
-place place/obj [place/obj]...
-jmp
-
-%JNNttttt
-
-# Real-time applications
-
-Interruptible GC with lower threshold to keep space for
-critical operations is a bad idea as a GC has to complete
-at some point.

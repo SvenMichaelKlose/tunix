@@ -30,7 +30,7 @@ void FASTCALL
 internal_error (char * msg)
 {
     error (ERROR_INTERNAL, msg);
-    print_error_info ();
+    print_code_position ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
 #endif
@@ -139,13 +139,20 @@ check_stacks (char * old_stack, char * old_tagstack)
 }
 
 void
-print_error_info ()
+print_code_position ()
 {
+    if (has_error) {
+        outs ("Error #");
+        out_number (has_error);
+        outs (": ");
+        if (last_errstr)
+            outs (last_errstr);
+        terpri ();
+    }
+    outs ("In: ");
     terpri ();
-    outs ("In REPL: "); print (last_repl_expr); terpri ();
-    outs ("Eval: ");    print (current_expr); terpri ();
-    outs ("Error #");   out_number (has_error); outs (": ");
-    if (last_errstr)
-        outs (last_errstr);
+    do_highlight = true;
+    print (current_toplevel);
+    do_highlight = false;
     terpri ();
 }

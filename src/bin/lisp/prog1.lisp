@@ -2,4 +2,10 @@
   ;"Return value of first expression."
   (let g (symbol)
     $(let ,g ,(car body)
-       ,@(cdr body))))
+       ,@(cdr body)
+       ,g)))
+
+(print 'prog1)(terpri)
+(or (equal (eval (macroexpand '(prog1 1 2 3)))
+           1)
+    (error (eval (macroexpand '(prog1 1 2 3)))))

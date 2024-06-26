@@ -19,10 +19,11 @@ This is a Lisp interpreter with dynamic scope and compacting
 mark-and-sweep garbage collector.  It is portably written in
 ANSI-C and offers simplified I/O for small platforms.
 
-Platforms known to work apart from modern Unices are:
+Using the cc65 compiler suite, this distribution of TUNIX
+Lisp can be made for the following platforms:
 
 * Commodore C128
-* Commodore C16 (probably out of heap early)
+* Commodore C16
 * Commodore C64
 * Commodore Plus4
 * Commodore VIC-20
@@ -32,8 +33,8 @@ Platforms known to work apart from modern Unices are:
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
 | backquote sign '`'     | dollar sign '$' |
-| (RPLACA v l)           | (SETCAR l v)    |
-| (RPLACD v l)           | (SETCDR l v)    |
+| (RPLACA c v)           | (SETCAR c v)    |
+| (RPLACD c v)           | (SETCDR c v)    |
 | (SYMBOL-VALUE s)       | (VALUE s)       |
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
@@ -54,9 +55,9 @@ lists.
 
 There are no packages.
 
-# Memory consumption
+## Memory consumption
 
-## Heap
+### Heap
 
 All objects are stored on a growing heap, so allocations are
 as fast as bumping the end-of-heap pointer plus boundary
@@ -68,7 +69,7 @@ check to trigger the garbage collector.
 | number (32 bit signed) | 5     |
 | symbol (also string)   | 6-261 |
 
-## Stacks
+### Stacks
 
 | Call type    | tag stack bytes | GC stack words |
 |--------------|-----------------|----------------|
@@ -78,12 +79,30 @@ check to trigger the garbage collector.
 Alongside the CPU stack a separate garbage-collected GC
 stack holds function arguments. An additional raw stack
 holds return tags of byte size instead of full return
-addresses as well as raw pointers to argument definitions
-of built-in functions during their evaluation.
+addresses as well as raw pointers to argument definitions of
+built-in functions during their evaluation.
 
-## Hidden creation of list elements ("consing")
+### Hidden creation of list elements ("consing")
 
 APPLY copies all arguments but the last one.
+
+# Definitions
+
+FN and VAR assign expressions to a symbol which is then
+added to the universe, a list of symbols the garbage
+collector is starting clean-ups with.  The difference
+between FN and VAR is that VAR evaluates its initialization
+argument.
+
+~~~lisp
+; Define permanent, named function.
+(fn welcome ()
+  (out '"Hello World!")
+  (terpri))
+
+; Define permanent, named variable.
+(var x nil)
+~~~
 
 # Functions
 
@@ -92,37 +111,41 @@ followed by a list of expressions.  The result of the last
 expression is returned.  The LAMBDA keyword is not around.
 
 ~~~lisp
-((these are four arguments)
-  (expression)
-  (expression)
-  (last-expression-returning-value))
-
-; Function with no arguments
+; Function with no arguments, returning symbol NIL.
 (nil)
+
+; Function with no arguments, returning number '3'.
+(nil
+  1
+  2
+  3)
+
+; Function returning its argument.
+((x)
+  x)
+
+; Functions returning their argument list.
+(x
+  x)
+((first . rest)
+  (cons first rest))
 ~~~
 
-Local anonymous functions can be used right on the spot:
+Anonymous functions can be used as the first element of an
+expression without quoting:
 
 ~~~lisp
-; Introduce a local symbol value for X,
-; initialized with NIL.
+; Print number '100'.
 (((x)
-   (some-code-using x))
- nil)
+   (print (+ 1 x)))
+ 99)
 ~~~
 
-Anonymous functions as arguments need to be quoted:
+Anonymous functions as arguments need to be quoted though:
 
 ~~~lisp
 ; Add 1 to each number in list.
 (@ '((n) (++ n)) l)
-~~~
-
-Global functions can be defined with FN.
-
-~~~lisp
-(fn welcome ()
-  (out '"Hello World!")(terpri))
 ~~~
 
 The QUASIQUOTE (short form "$") can be used to emulate
@@ -137,9 +160,10 @@ lexical scope:
 
 ## Argument type descriptions (and definitions)
 
-Built-in functions have character-based argument type
-definitions.  They are also used, padded with spaces, to
-notate argument types in this manual most of the time.
+Built-in functions have character-based typed definitions.
+They are also used, padded with spaces, to print argument
+types in this manual most of the time (not only for
+built-ins).
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -148,15 +172,17 @@ notate argument types in this manual most of the time.
 |  l   | list (cons or NIL)                      |
 |  n   | number                                  |
 |  s   | symbol                                  |
-|  a   | Memory address (positive number)        |
-|  b   | Byte value                              |
+|  a   | memory address (positive number)        |
+|  b   | byte value                              |
 |  +   | any number of following type (eg. "+n") |
 |  ?   | optional following type (eg. "?x")      |
 |  '   | unevaluated following type (eg. "'+x")  |
 
 # Input/output
 
-## READ and PRINT
+TUNIX Lisp provides I/O by the expression or character.
+
+## READing and PRINTing expressions
 
 Expressions can be read and written using built-in functions
 READ and PRINT.  Strings and chars have dedicated formats:
@@ -164,17 +190,17 @@ READ and PRINT.  Strings and chars have dedicated formats:
 | Type format examples | Description                    |
 |----------------------|--------------------------------|
 | (a . d)              | "Dotted pair"; a literal cons. |
-| "string"             | String.  Escape is "\".        |
+| "string"             | String.  Escape is "\\".       |
 | \\A                  | Character value.               |
 
-READ also supports abbreviations:
+Both also support abbreviations:
 
-| Expression         | Short form |
-|--------------------|------------|
-| (quote x)          | 'x         |
-| (quasiquote x)     | $x         |
-| (unquote x)        | ,x         |
-| (unquote-splice x) | ,@x        |
+| Expression         | Abbreviation |
+|--------------------|--------------|
+| (quote x)          | 'x           |
+| (quasiquote x)     | $x           |
+| (unquote x)        | ,x           |
+| (unquote-splice x) | ,@x          |
 
 ## Catching I/O errors and state
 
@@ -226,10 +252,10 @@ In : (___ fnords ___)
 1*
 ~~~
 
-The debugger takes commands like the regular REPL.
-Since an error occured the debugger will not continue with
-the current expressoin.  An alternative value has to be
-supplied instead with QUIT:
+The debugger takes commands like the regular REPL.  Since an
+error occured the debugger will not continue with the
+current expression.  An alternative value has to be supplied
+instead with QUIT:
 
 ~~~
 * (fnords)
@@ -239,27 +265,28 @@ In : (___ fnords ___)
 ~~~
 
 but until then you can execute any code you wish, using the
-I/O channels of the current program, not the standard I/O
-of the debugger.
+I/O channels of the current program, not the standard I/O of
+the debugger.
 
-EXIT without arguments will stop the program entirely and
-return to the top-level REPL.  You can also break execution
-and continue with the next top-level REPL or LOAD expression
-by calling NOERROR.
+EXIT without arguments will terminate the program and return
+to the top-level REPL.  You can also break execution and
+continue with the next top-level REPL or LOAD expression by
+calling NOERROR.
 
 Unlike the REPL, the debugger also takes one-character
-commands (which the regular REPL would interpret as
-symbols) to continue through the code step by step.
+commands (which the regular REPL would interpret as symbols)
+to continue through the code step by step.
 
 | Command | Description                            |
 |---------|----------------------------------------|
 | e       | Use previous result to fix the error.  |
+| c       | Continue program execution.            |
 | s       | Execute subexpression of expression.   |
 | n       | Execute expression and subexpressions. |
 
 Stepping with 's' and 'n' cannot be used when the current
-expression is erroraneous.  Let's fix the previous example
-error using 'e' to step on:
+expression is erroraneous without having been fixed using
+command 'e'.
 
 ~~~
 * (fnords)
@@ -329,7 +356,7 @@ expression and the expression that caused the error.
 
 # Built-in functions
 
-## Top-level
+## General
 
 | Function   | Description                            |
 |------------|----------------------------------------|
@@ -345,17 +372,12 @@ Triggers the garbage collector.  It marks all objects linked
 to the universe, compacts the heap and relocates all
 pointers.
 
-### (quit ?x): Return from error REPL.
-
-Returns from the REPL with an alternative result for the one
-that caused the error.
-
 ### (exit ?n): Exit program or interpreter with exit code.
 
 When called without arguments the program is stopped and
-control is returned to the top-level REPL.  When called
-with a number that number is the exit code for the
-interpreter which will terminate immediately.
+control is returned to the top-level REPL.  When called with
+a number that number is the exit code for the interpreter
+which will terminate immediately.
 
 ## Definitions
 
@@ -365,11 +387,12 @@ interpreter which will terminate immediately.
 | (special 'name 'args '+body) | special form |
 | (var 'name x)                | variable     |
 
-On demand loading is more practical if one can get rid of
-definitions.  UNDEF takes symbols out of the universe, so
-the definition will leave with the next GC if it is unused.
+### (fn 'name 'args '+body): Define permanent, named function.
 
-### Special form
+### (special 'name 'args '+body): Make special form.
+
+### (var 'name init): Define permanent, named
+variable.
 
 Special forms are functions that take their arguments
 unevaluated, e.g. QUASIQUOTE (see 'quasiquote.lisp').
@@ -467,9 +490,9 @@ The value of the last evaluation is returned.
 ### (block name . body), (return x block-name), (go tag)
 
 Evaluates the list of expressions in BODY, returning the
-value of the last unless a RETURN from the block has
-been initiated.  The name of the block passed to RETURN
-has to match.  It is NIL, if not specified.
+value of the last unless a RETURN from the block has been
+initiated.  The name of the block passed to RETURN has to
+match.  It is NIL, if not specified.
 
 ~~~lisp
 (block foo
@@ -546,6 +569,14 @@ instead of T when true.
 
 TODO: Impressive example where it's advantagous.
 
+### (not x): NIL
+### (atom x): not a cons
+### (cons? x): cons
+### (symbol? x): symbol
+### (number? x): number
+### (builtin? x): built-in function
+### (special? x): special form
+
 ## Symbols
 
 | Function   | Description                           |
@@ -553,6 +584,10 @@ TODO: Impressive example where it's advantagous.
 | (symbol l) | Make symbol with name from char list. |
 | (= 's x)   | Set symbol value.                     |
 | (value s)  | Get symbol value.                     |
+
+### (symbol l): Make symbol with name from char list.
+### (= 's x): Set symbol value.
+### (value s): Get symbol value.
 
 ## Conses
 
@@ -563,11 +598,15 @@ TODO: Impressive example where it's advantagous.
 | (setcar c x) | Set first value of cons.            |
 | (setcdr c x) | Set second value of cons.           |
 
-A 'cons' points to two other objects, called 'car' and
-'cdr' for historical reasons.  They could also be called
-'first' and 'second', 'first' and 'rest' or 'head' and
-'tail'.  However: they are just two object pointers
-packed together.
+A 'cons' points to two other objects, called 'car' and 'cdr'
+for historical reasons.  They could also be called 'first'
+and 'second', 'first' and 'rest' or 'head' and 'tail'.
+However: they are just two object pointers packed together.
+
+### (car l): Return first value of cons or NIL.
+### (cdr l): Return second value of cons or NIL.
+### (setcar c x): Set first value of cons.
+### (setcdr c x): Set second value of cons.
 
 ## Lists
 
@@ -583,9 +622,9 @@ internally.
 | (member x l)      | Return list starting with X.        |
 | (remove x l)      | Copy list except element X.         |
 
-### (@ f l): Filter list by function
-
-Also handles dotted pairs, filtering the last atom if it is not NIL.
+### (butlast l): Copy list but not its last element.
+### (last l): Return last cons of list.
+### (length l): Return length of list.
 
 ### (member x l): Return cons containing X.
 
@@ -594,6 +633,10 @@ Uses EQ as the predicate.
 ### (remove x l): Copy list except element X.
 
 Uses EQ as the predicate.
+
+### (@ f l): Filter list by function
+
+Also handles dotted pairs, filtering the last atom if it is not NIL.
 
 ## Numbers
 
@@ -632,21 +675,21 @@ Uses EQ as the predicate.
 
 ## I/O
 
-| Function         | Description                         |
-|------------------|-------------------------------------|
-| (read)           | Read expression.                    |
-| (print x)        | Print expression.                   |
-| (open pathname)  | Open file and return channel.       |
-| (err)            | Return number of last error or NIL. |
-| (eof)            | Tell if read reached end of file.   |
-| (setin channel)  | Set input channel.                  |
-| (setout channel) | Set output channel.                 |
-| (in)             | Read char.                          |
-| (out x)          | Print char or plain symbol name.    |
-| (terpri)         | Step to next line.                  |
-| (fresh-line)     | Open line if not on a fresh one.    |
-| (close channel)  | Close a channel.                    |
-| (load pathname)  | Load and evaluate file.             |
+| Function        | Description                         |
+|-----------------|-------------------------------------|
+| (read)          | Read expression.                    |
+| (print x)       | Print expression.                   |
+| (open pathname) | Open file and return channel.       |
+| (err)           | Return number of last error or NIL. |
+| (eof)           | Tell if read reached end of file.   |
+| (setin n)       | Set input channel.                  |
+| (setout n)      | Set output channel.                 |
+| (in)            | Read char.                          |
+| (out x)         | Print char or plain symbol name.    |
+| (terpri)        | Step to next line.                  |
+| (fresh-line)    | Open line if not on a fresh one.    |
+| (close n)       | Close a channel.                    |
+| (load pathname) | Load and evaluate file.             |
 
 | Variable | Description            |
 |----------|------------------------|
@@ -655,13 +698,31 @@ Uses EQ as the predicate.
 | fnin     | Input channel number.  |
 | fnout    | Output channel number. |
 
-## Low-level system access
+### (read): Read expression.
+### (print x): Print expression.
+### (open pathname): Open file and return channel.
+### (err): Return number of last error or NIL.
+### (eof): Tell if read reached end of file.
+### (setin channel): Set input channel.
+### (setout channel): Set output channel.
+### (in): Read char.
+### (out x): Print char or plain symbol name.
+### (terpri): Step to next line.
+### (fresh-line): Open line if not on a fresh one.
+### (close channel): Close a channel.
+### (load pathname): Load and evaluate file.
+
+## Raw machine access
 
 | Function   | Description                    |
 |------------|--------------------------------|
 | (peek a)   | Read byte from memory.         |
 | (poke a b) | Write to memory.               |
 | (sys a)    | Calls machine code subroutine. |
+
+### (peek a): Read byte from memory.
+### (poke a b): Write to memory.
+### (sys a): Calls machine code subroutine.
 
 ## Error handling
 
@@ -675,45 +736,73 @@ Uses EQ as the predicate.
 | (debug)         | Raises a SIGTRAP signal for debugging. |
 | (debugger)      | Invoke debugger with next instruction. |
 
-# Macros
+### (quit ?x): Return from debugger REPL.
+### (exit): Stop program and go to top-level REPL.
+### (error x): Issue a user error.
+### (onerror n x x): User-defined error handler.
+### (noerror): Break and continue with LOAD or REPL.
+### (debug): Raises a SIGTRAP signal for debugging.
+### (debugger): Invoke debugger with next instruction.
 
-## Implementation
+# Quasiquoting
 
-| User-defined function | Description         |
-|-----------------------|---------------------|
-| (macroexpand x)       | Macro expander      |
-| (quasiquote x)        | Quasiquote expander |
+| Form               |     | Description                  |
+|--------------------|-----|------------------------------|
+| (quote x)          | 'x  | Return X unevaluated.        |
+| (quasiquote x)     | $x  | Unevaluated if not unquoted. |
+| (unquote x)        | ,x  | Insert into QUASIQUOTE.      |
+| (unquote-splice x) | ,@x | Splice into QUASIQUOTE.      |
 
-If defined, MACROEXPAND is called by the REPL and the LOAD
-function to expand expressions before evaluating them.
-before EVALuating, if defined.  QUASIQUOTE is a user-defined
-special form which takes its arguments unevaluated.
+## (quote x) | 'x: Return X unevaluated.
+## (quasiquote x) | $x: Unevaluated if not unquoted.
+## (unquote x) | ,x: Insert into QUASIQUOTE.
+## (unquote-splice x) | ,@x: Splice into QUASIQUOTE.
+
+# Macro system
+
+| Function        | Desscription                    |
+|-----------------|---------------------------------|
+| (macro s a +b)) | Add macro function to *macros*. |
+| (macro? x)      | Test if symbol is in *macros*.  |
+| (macroexpand x) | Expand expression.              |
+
+## (macro s a +b)) | Add macro function to *macros*. |
+## (macro? x)      | Test if symbol is in *macros*.  |
+## (macroexpand x) | Expand expression.              |
 
 # Environment
 
 The environment contains a widely accepted set of functions
-and macros known from most other implementations of the
-Lisp programming languages.
+and macros known from most other implementations of the Lisp
+programming languages.
 
-| Function        | Desscription                   |
-|-----------------|-------------------------------------|
-| (macro s a +b)) |
-| (macro? x)      |
-| (macroexpand x) |
+## Local variables
 
 | Macro           | Desscription                        |
 |-----------------|-------------------------------------|
 | (let n init +b) | Form block with local variable.
 | (with inits +b) | Form block with local variables.
 
-| Macro             | Desscription                     |
-|-------------------|----------------------------------|
-| (prog1 +b)        |
-| (progn +b)        |
-| (when x +b)       |
-| (unless x +b)     |
-| (while (x x) +b)  |
-| (dolist (s x) +b) |
+### (let n init +b): Form block with local variable.
+### (with inits +b): Form block with local variables.
+
+## Control flow macros
+
+| Macro                | Desscription                     |
+|----------------------|----------------------------------|
+| (prog1 +b)           | Return result of first.          |
+| (progn +b)           | Return result of last.           |
+| (when cond +b)       | Evaluate if condition is true.   |
+| (unless cond +b)     | Evaluate if condition is false.  |
+| (while (cond x) +b)  | Loop while condiiton is true.    |
+| (dolist (i init) +b) | Loop over elements of a list.    |
+
+### (prog1 +b): Return result of first.
+### (progn +b): Return result of last.
+### (when cond +b): Evaluate if condition is true.
+### (unless cond +b): Evaluate if condition is false.
+### (while (cond x) +b): Loop while condiiton is true.
+### (dolist (i init) +b): Loop over elements of a list.
 
 ## Lists
 
@@ -728,44 +817,87 @@ Lisp programming languages.
 | (copy x)      | Copy tree.                          |
 | (find x l)    | Find element X in list.             |
 
+### (list +x): Return argument list.
+### (list? x): Test if argument is NIL or a cons.
+### (cadr l)...: Nested CAR/CDR combinations.
+### (carlist l): Get first elements of lists.
+### (cdrlist l): Get rest elements of lists.
+### (copy-list x): Copy only top-level list (if tree).
+### (copy x): Copy tree.
+### (find x l): Find element X in list.
+
 ## Stacks
 
 | Macro      | Desscription                     |
 |------------|----------------------------------|
 | (push x l) | Destructively push onto stack L. |
-| (pop l)    | Destructively from stack L.      |
+| (pop l)    | Destructively pop from stack L.  |
+
+### (push x l): Destructively push onto stack L.
+### (pop l): Destructively pop from stack L.
 
 ## Queues
 
-| Function       | Desscription                        |
-|----------------|-------------------------------------|
-|!(make-queue)   |
-|!(enqueue c x)  |
+| Function      | Desscription                 |
+|---------------|------------------------------|
+| (make-queue)  | Make queue.                  |
+| (enqueue c x) | Add object X to queue C.     |
+
+### (make-queue): Make queue.
+### (enqueue c x): Add object X to queue C.
 
 ## Sets
+
+| Function               | Desscription                   |
+|------------------------|--------------------------------|
+| (unique x)             | Make list a set.               |
+| (adjoin x set)         | Add element to set.            |
+| (intersect a b)        | Elements in both.              |
+| (set-difference a b)   | B elements that are not in A.  |
+| (union a b)            | Unique elements from both.     |
+| (set-exclusive-or a b) | Elements that are not in both. |
+| (subseq? a b)          | Test if A is subset of B.      |
+
+### (unique x): Make list a set.
+### (adjoin x set): Add element to set.
+### (intersect a b): Elements in both.
+### (set-difference a b): B elements that are not in A.
+### (union a b): Unique elements from both.
+### (set-exclusive-or a b): Elements that are not in both.
+### (subseq? a b): Test if A is subset of B,
 
 ## Associative lists
 
 | Function        | Desscription                       |
 |-----------------|------------------------------------|
-|!(acons alist c) | Add key/value to associative list. |
+| (acons alist c) | Add key/value to associative list. |
 | (assoc x l)     | Return list that start with X.     |
 
 A list of lists where the first element of each list is the
 key and the rest is the value.
 
-## Structures
-## Binary trees
+### (acons alist c): Add key/value to associative list.
+### (assoc x l): Return list that start with X.
 
 # Ideas for the future
 
 ## Directory access
 
-| Function      | Description                |
-|---------------|----------------------------|
-| (opendir n s) | Open directory on channel. |
-| (readdir n)   | READ directory info.       |
-| (mkdir s)     | Create directory.          |
+| Function      | Description                   |
+|---------------|-------------------------------|
+| (mkdir s)     | Create directory.             |
+| (opendir n s) | Open directory on channel.    |
+| (readdir n)   | Read directory info.          |
+| (writedir n)  | Write partial directory info. |
+
+### (mkdir s): Create directory.
+### (opendir n s): Open directory on channel.
+### (readdir n): READ directory info.
+### (writedir n): Write partial directory info.
+
+## Objects
+
+Using dot notation and SLOT-VALUE on associative lists.
 
 ## Bytecode function object format
 
@@ -781,14 +913,14 @@ regular argument definition , e.g. '(first . rest)'.
 | 2      | 2     | Argument definition           |
 | 3      | 1     | Stack size / object list size |
 | 4      | 1     | Number of jump positions      |
-| 4      | 0-31  | Object list                   |
-| ?      | 0-31  | Jump positions                |
-| ?      | 1-220 | Byte codes                    |
+| 4+     | ?     | Object list                   |
+| 4+     | ?     | Jump positions                |
+| 4+     | 1-220 | Byte codes                    |
 
 Constant objects are always referenced via the object list
 with a maximum of 16 entries (at least one).
 
-## Instruction format
+### Instruction format
 
 The highest bit of the first byte determines if the code is
 an assignment or a jump.  Jumps also contain an index into
@@ -819,11 +951,11 @@ Argument:
 * P: 0: stack place 1: object
 * I: Index into stack or object array
 
-# Real-time applications
+## Real-time applications
 
 Interruptible GC with lower threshold to keep space for
-critical operations is a bad idea as a GC has to complete
-at some point.
+critical operations is a bad idea as a GC has to complete at
+some point.
 
 | Function  | Description                  |
 |-----------|------------------------------|
@@ -848,15 +980,6 @@ everything out that appeared later:
 (gc *old-defs*)
 ~~~
 
-| Command | Description                          |
-|---------|--------------------------------------|
-| RETURN  | Step inside evaluation.              |
-| SPACE   | Step over evaluation.                |
-| b [fun] | Set breakpoint on function.          |
-| b       | List all breakpoints by number.      |
-| d n     | Delete breakpoint by number.         |
-| (       | Start a Lisp expression to evaluate. |
-
 ## Bielefeld DB
 
 | Function     | Description                     |
@@ -866,6 +989,12 @@ everything out that appeared later:
 | (db-find s)  | Find ID by key.                 |
 | (db-read n)  | READ by ID.                     |
 | (db-close n) | Close database.                 |
+
+### (db-open a): Open database.
+### (db-add s x): Add expression with string key.
+### (db-find s): Find ID by key.
+### (db-read n): READ by ID.
+### (db-close n): Close database.
 
 Embedded database to the rescue the day for large data sets.
 
@@ -883,28 +1012,3 @@ Conses which only store the CAR if the CDR is the next
 object on the heap.  This can be done at allocation time but
 would make the CDR of a compressed cons immutable and add
 an extra check to each operation.
-env.lisp:(fn eql (a b)
-
-# Interpreter internals
-
-Random notes by now to keep things cleared up.
-
-## The evaluator
-
-The evaluator spans not only the code in file 'eval.c'.
-It includes anything that affects control flow like ?, AND
-and OR.
-
-## Breaking evalutation on errors
-
-Global 'char has\_error' contains the code of the recently
-issued error and serves as a flag to the evaluator that the
-current evaluation failed and the REPL should be called for
-an alternative expression.  Therefore the evaluator checks
-'has\_error' whenever a result from an evaluation is
-expected.
-
-## Adding new built-in functions
-
-~~~C
-~~~

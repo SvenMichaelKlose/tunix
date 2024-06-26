@@ -18,5 +18,4 @@ c1541image:
 	$(AS) $(ASFLAGS) -o $@ $<
 
 %.o: %.c
-	rm -f $@
 	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<

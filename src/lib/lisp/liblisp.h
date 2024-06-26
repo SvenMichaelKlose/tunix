@@ -116,6 +116,7 @@ extern lispptr first_symbol;
 extern lispptr last_symbol;
 extern lispptr highlighted;
 extern bool    do_highlight;
+extern lispptr onerror_sym;
 
 extern lispptr t;
 extern lispptr quote;
@@ -123,7 +124,10 @@ extern lispptr quasiquote;
 extern lispptr unquote;
 extern lispptr unquote_spliced;
 
+extern char num_repls;
 extern bool do_break_repl;
+extern bool do_continue_repl;
+extern bool do_exit_program;
 
 extern lispptr start;
 extern lispptr lastc;
@@ -372,6 +376,9 @@ extern lispptr  read_symbol (void);
 extern lispptr  read_number (void);
 extern lispptr  FASTCALL print (lispptr);
 extern lispptr  FASTCALL dprint (lispptr);
+extern void     FASTCALL set_channels (simpleio_chn_t in, simpleio_chn_t out);
+extern lispptr  bi_setin (void);
+extern lispptr  bi_setout (void);
 
 // Arguments in global 'x'.
 extern lispptr  eval0 (void);
@@ -386,6 +393,7 @@ extern unsigned FASTCALL objsize (char *);
 #define REPL_DEBUGGER   1
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl (char mode);
+extern void     FASTCALL load (char * pathname);
 extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 extern lispptr           debugger (void);

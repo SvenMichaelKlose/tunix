@@ -24,7 +24,7 @@ lispptr t;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-lispptr tmp;
+extern lispptr tmp;
 lispptr tmp2;
 char tmpc;
 char * heap_start;

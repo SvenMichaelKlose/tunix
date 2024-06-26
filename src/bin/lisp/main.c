@@ -22,25 +22,26 @@
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr x;
+extern lispptr args;
+extern lispptr arg1;
+extern lispptr arg2c;
+extern lispptr arg2;
 extern lispptr value;
-lispptr arg1;
-lispptr arg2c;
-lispptr arg2;
 extern lispptr tmp;
 int len;
 #ifdef __CC65__
 #pragma zpsym ("x")
-#pragma zpsym ("value")
+#pragma zpsym ("args")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
+#pragma zpsym ("value")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
 #pragma bss-name (pop)
 #endif
 
 // libsimpleio channels.
-char load_fn = 12;
 lispptr lisp_fnin;
 lispptr lisp_fnout;
 
@@ -54,17 +55,20 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
-lispptr onerror;
-
 // Building lists in loops.
 lispptr start;  // First cons.
 lispptr lastc;  // Last cons (to append to).
 
-char    num_repls;       // Number of REPLs - 1.
-bool    debug_mode;      // Unused.  Set by DEBUG.
-bool    do_break_repl;   // Tells current REPL to return.
-bool    do_continue_repl; // If do_break_repl, tell REPL to continue.
-bool    do_exit_program; // Return to top-level REPL.
+bool debug_mode;      // Unused.  Set by DEBUG.
+
+void FASTCALL
+set_channels (simpleio_chn_t cin, simpleio_chn_t cout)
+{
+    arg1 = make_number (cin);
+    bi_setin ();
+    arg1 = make_number (cout);
+    bi_setout ();
+}
 
 void FASTCALL
 name_to_buffer (lispptr s)
@@ -566,203 +570,6 @@ bi_close (void)
     return nil;
 }
 
-void
-set_channels (simpleio_chn_t cin, simpleio_chn_t cout)
-{
-    arg1 = make_number (cin);
-    bi_setin ();
-    arg1 = make_number (cout);
-    bi_setout ();
-}
-
-bool
-is_stdout ()
-{
-    return fnout == STDOUT || fnout == STDERR;
-}
-
-char last_cmd;
-
-lispptr FASTCALL
-lisp_repl (char mode)
-{
-#ifndef NO_DEBUGGER
-    char cmd;
-#endif
-#ifndef NDEBUG
-    char * old_stack = stack;
-    char * old_tagstack = tagstack;
-#endif
-    simpleio_chn_t this_in;
-    simpleio_chn_t this_out;
-
-    // Update and save I/O channels.
-    if (mode != REPL_LOAD)
-        set_channels (STDIN, STDOUT);
-    this_in  = fnin;
-    this_out = fnout;
-
-#ifndef NO_DEBUGGER
-    PUSH(current_toplevel);
-#endif
-
-    num_repls++;
-
-    // Call error handler if defined.
-    if (has_error) {
-#ifdef NO_DEBUGGER
-        print_code_position ();
-        exit (has_error);
-#endif
-
-#ifndef NO_ONERROR
-        if (CONSP(SYMBOL_VALUE(onerror))) {
-            x = make_cons (onerror, make_cons (make_number ((lispnum_t) has_error), make_cons (current_toplevel, make_cons (current_expr, nil))));
-            has_error   = false;
-            unevaluated = true;
-            PUSH_TAG(TAG_DONE);
-            x = eval0 ();
-            goto had_onerror;
-        }
-#endif
-    }
-
-    // Read expresions from standard input until end
-    // or until QUIT has been invoked.
-    while (!eof ()) {
-        if (mode != REPL_LOAD) {
-#ifndef NO_DEBUGGER
-            if (mode == REPL_DEBUGGER)
-                print_code_position ();
-#endif
-
-            // Print prompt with number of recursions.
-            if (num_repls)
-                out ('0' + num_repls);
-            outs ("* ");
-        }
-
-#ifndef NO_DEBUGGER
-        // Read an expression.
-        if (mode != REPL_DEBUGGER) {
-#endif
-            x = read ();
-            if (mode != REPL_LOAD)
-                fresh_line ();
-#ifndef NO_DEBUGGER
-        } else {
-            cmd = 0;
-            if (in () == 10) {
-                cmd = last_cmd;
-                fresh_line ();
-            } else {
-                putback ();
-                x = read ();
-                fresh_line ();
-                if (SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
-                    cmd = SYMBOL_NAME(x)[0];
-            }
-            if (cmd == 'c') { // Contine
-                // Do not re-invoke debugger.
-                debug_step = nil;
-                break;
-            } else if (cmd == 's') { // Step
-                // Re-invoke before evaluating the next expression.
-                debug_step = t; // T for any expression.
-                last_cmd = cmd;
-                outs ("Step..."); terpri ();
-                break;
-            } else if (cmd == 'n') { // Next
-                // Re-invoke when done evaluating the current expression.
-                debug_step = current_expr;
-                last_cmd = cmd;
-                outs ("Next..."); terpri ();
-                break;
-            }
-        }
-#endif
-
-        // Save and update top-level expression.
-#ifndef NO_DEBUGGER
-        current_toplevel = x;
-#endif
-
-        // Evaluate expression.
-        x = eval ();
-
-        // Call debugger on error.
-        if (has_error)
-            x = lisp_repl (REPL_DEBUGGER);
-
-        // Break or continue on demand.
-        if (do_break_repl) {
-            // Ignore evaluation and contine with next expression.
-            if (do_continue_repl) {
-                do_break_repl = do_continue_repl = false;
-                goto next;
-            }
-            if (do_exit_program) {
-                // Return from all child REPLs.
-                if (num_repls)
-                    break;
-            } else {
-                // Just break this REPL.
-                do_break_repl = false;
-                break;
-            }
-            do_break_repl   = false;
-            do_exit_program = false;
-            setout (STDOUT); outs ("Program exited."); terpri ();
-        }
-
-        // Print result.
-        if (mode != REPL_LOAD) {
-            setout (STDOUT);
-            print (x);
-            fresh_line ();
-        }
-
-next:   set_channels (this_in, this_out);
-    }
-
-had_onerror:
-    num_repls--;
-
-#ifndef NDEBUG
-    check_stacks (old_stack, old_tagstack);
-#endif
-
-    // Restore parent REPL's top-level expression.
-#ifndef NO_DEBUGGER
-    POP(current_toplevel);
-#endif
-
-    return x;
-}
-
-void FASTCALL
-load (char * pathname)
-{
-    int oldin = fnin;
-
-    simpleio_open (load_fn, pathname, 'r');
-    arg1 = make_number (load_fn);
-    bi_setin ();
-    if (err ()) {
-        error (ERROR_FILE, pathname);
-        goto err_open;
-    }
-
-    load_fn++;
-    lisp_repl (REPL_LOAD);
-    load_fn--;
-
-    simpleio_close (load_fn);
-err_open:
-    arg1 = make_number (oldin);
-    bi_setin ();
-}
-
 lispptr
 bi_load (void)
 {
@@ -1123,8 +930,8 @@ main (int argc, char * argv[])
     SET_SYMBOL_VALUE(lisp_fnout, o);
     expand_universe (lisp_fnout);
 
-    onerror = make_symbol ("onerror", 7);
-    expand_universe (onerror);
+    onerror_sym = make_symbol ("onerror", 7);
+    expand_universe (onerror_sym);
 
     load ("env.lisp");
     do_break_repl = do_continue_repl = false;

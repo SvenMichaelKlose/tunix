@@ -14,13 +14,14 @@ lispptr current_toplevel;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern lispptr tmp;
 extern char * msg;
 lispptr x;
 lispptr args;
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
+lispptr tmp;
+lispptr value;
 char * stack;
 char * stack_end;
 char * tagstack_start;
@@ -51,6 +52,10 @@ bool unevaluated;
 #pragma zpsym ("msg")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
+#pragma zpsym ("arg1")
+#pragma zpsym ("arg2c")
+#pragma zpsym ("arg2")
+#pragma zpsym ("value")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
 #pragma zpsym ("tagstack_start")

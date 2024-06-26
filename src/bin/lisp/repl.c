@@ -177,13 +177,13 @@ next:   set_channels (this_in, this_out);
 had_onerror:
     num_repls--;
 
-#ifndef NDEBUG
-    check_stacks (old_stack, old_tagstack);
-#endif
-
     // Restore parent REPL's top-level expression.
 #ifndef NO_DEBUGGER
     POP(current_toplevel);
+#endif
+
+#ifndef NDEBUG
+    check_stacks (old_stack, old_tagstack);
 #endif
 
     return x;

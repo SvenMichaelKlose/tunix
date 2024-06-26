@@ -67,13 +67,14 @@ lisp_repl (char mode)
 #ifndef NO_ONERROR
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             x = make_cons (onerror_sym, make_cons (make_number ((lispnum_t) has_error), make_cons (current_toplevel, make_cons (current_expr, nil))));
-            has_error   = false;
+            has_error = false;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
-            goto had_onerror;
+            goto do_return;
         }
 #endif
+        has_error = false;
     }
 
     // Read expresions from standard input until end
@@ -81,6 +82,7 @@ lisp_repl (char mode)
     while (!eof ()) {
         if (mode != REPL_LOAD) {
 #ifndef NO_DEBUGGER
+            debug_step = nil;
             if (mode == REPL_DEBUGGER)
                 print_code_position ();
 #endif
@@ -101,32 +103,36 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
         } else {
             cmd = 0;
+            // Repeat last short command on ENTER.
             if (in () == 10) {
                 cmd = last_cmd;
                 fresh_line ();
             } else {
+                // Read expression, get short command char.
                 putback ();
                 x = read ();
                 fresh_line ();
                 if (SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
                     cmd = SYMBOL_NAME(x)[0];
             }
+
+            // Process short commands.
             if (cmd == 'c') { // Contine
                 // Do not re-invoke debugger.
                 debug_step = nil;
-                break;
+                goto do_return;
             } else if (cmd == 's') { // Step
                 // Re-invoke before evaluating the next expression.
                 debug_step = t; // T for any expression.
                 last_cmd = cmd;
                 outs ("Step..."); terpri ();
-                break;
+                goto do_return;
             } else if (cmd == 'n') { // Next
                 // Re-invoke when done evaluating the current expression.
                 debug_step = current_expr;
                 last_cmd = cmd;
                 outs ("Next..."); terpri ();
-                break;
+                goto do_return;
             }
         }
 #endif
@@ -174,7 +180,7 @@ lisp_repl (char mode)
 next:   set_channels (this_in, this_out);
     }
 
-had_onerror:
+do_return:
     num_repls--;
 
     // Restore parent REPL's top-level expression.

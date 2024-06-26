@@ -143,7 +143,7 @@ print_code_position ()
 {
     if (has_error) {
         outs ("Error #");
-        out_number (has_error);
+        outn (has_error);
         outs (": ");
         if (last_errstr)
             outs (last_errstr);

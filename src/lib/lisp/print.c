@@ -86,7 +86,7 @@ void FASTCALL
 print_number (number * n)
 {
     space ();
-    outnu (n->value);
+    outn (n->value);
 }
 
 bool FASTCALL

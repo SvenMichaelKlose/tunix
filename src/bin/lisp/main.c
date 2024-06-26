@@ -654,7 +654,7 @@ bi_stack (void)
     lispptr * p;
     setout (STDERR);
     for (p = (void *) stack_end, p--; p != (void *) stack; p--) {
-        out_number (i++);
+        outn (i++);
         outs (": ");
         print (*p);
         terpri ();

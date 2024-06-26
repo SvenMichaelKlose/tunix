@@ -48,8 +48,8 @@ extern void putback (void); // Put back char for in().
 extern void skip_spaces (void);
 
 extern void out (char c);
-extern void out_number (long);
 extern void outnu (unsigned long);
+extern void outn (long);
 extern void outs (char *);
 extern void outsn (char *, char len);
 extern void terpri (void);

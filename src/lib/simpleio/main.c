@@ -118,11 +118,11 @@ outnu (unsigned long n)
 }
 
 void
-out_number (long n)
+outn (long n)
 {
     if (n < 0) {
         out ('-');
-        n *= -1;
+        n = -n;
     }
     outnu (n);
 }

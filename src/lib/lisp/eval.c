@@ -42,7 +42,9 @@ lispptr go_tag;
 lispptr debug_step;
 bool do_invoke_debugger;
 bool tag_found;
+#ifndef NAIVE
 char has_error;
+#endif
 uchar c;
 char * badef;
 uchar na;
@@ -74,7 +76,9 @@ bool unevaluated;
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tag_found")
+#ifndef NAIVE
 #pragma zpsym ("has_error")
+#endif
 #pragma zpsym ("c")
 #pragma zpsym ("badef")
 #pragma zpsym ("na")
@@ -174,17 +178,21 @@ do_eval:
     /////////////////////////
 
     if (arg1 == block_sym) {
+#ifndef NAIVE
         if (!CONSP(CDR(x))) {
             error (ERROR_ARG_MISSING, "No name.");
             goto do_return;
         }
+#endif
         x = CDR(x);
         arg1 = CAR(x);
 
+#ifndef NAIVE
         if (!SYMBOLP(arg1)) {
             error (ERROR_TYPE, "Name not a sym.");
             goto do_return;
         }
+#endif
 
         arg2c = CDR(x); // Start of expressions.
         value = nil;
@@ -214,10 +222,12 @@ next_block_statement:
             DOLIST(x, arg2c)
                 if (CAR(x) == go_tag)
                     goto block_statement;
+#ifndef NAIVE
             if (!tag_found) {
                 error (ERROR_TAG_MISSING, "Tag not found.");
                 goto do_return;
             }
+#endif
         } else if (value == return_sym) {
             if (arg1 == return_name) {
                 value = return_value;
@@ -260,12 +270,14 @@ do_builtin_arg:
 
         // End of argument definition.
         if (!c) {
+#ifndef NAIVE
             // Complain if argument left.
             if (args) {
                 error (ERROR_TOO_MANY_ARGS,
                        "Too many args to builtin:");
                 goto do_return;
             }
+#endif
 
 set_arg_values:
             if (na == 1)
@@ -289,11 +301,14 @@ set_arg_values:
                 PUSH(nil);
                 goto set_arg_values;
             }
-        } else if (!args) { // Missing argument.
+        }
+#ifndef NAIVE
+        else if (!args) { // Missing argument.
             error (ERROR_ARG_MISSING,
                    "Missing arg to builtin.");
             goto do_return;
         }
+#endif
         if (c == '\'') {    // Unevaluated argument.
             c = *++badef;
             if (c == '+') { // (Rest of arguments.)
@@ -312,8 +327,10 @@ set_arg_values:
             PUSH_TAG(na);
             x = args;
             value = eval_list ();
+#ifndef NAIVE
             if (has_error)
                 value = lisp_repl (REPL_DEBUGGER);
+#endif
             POP_TAG(na);
             POP(args);
 
@@ -345,6 +362,7 @@ next_builtin_arg:
         }
 
 save_arg_value:
+#ifndef NAIVE
         bi_tcheck (value, *badef);
         if (has_error) {
             PUSH(args);
@@ -355,6 +373,7 @@ save_arg_value:
             POP_TAGW(badef);
             POP(args);
         }
+#endif
         if (do_break_repl) {
             na--;
             goto set_arg_values;
@@ -377,12 +396,14 @@ save_arg_value:
     // values are popped off the stack when the function
     // body has been executed.
 
+#ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         current_expr = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
         goto do_return;
     }
+#endif
 
     // Init argument list evaluation.
     defs = FUNARGS(arg1);
@@ -394,6 +415,7 @@ do_argument:
     if (!args && !defs)
         goto start_body;
 
+#ifndef NAIVE
     // Catch wrong number of arguments.
     if (args && !defs) {
         error (ERROR_TOO_MANY_ARGS, "Too many args");
@@ -402,6 +424,7 @@ do_argument:
         error (ERROR_ARG_MISSING, "Arg missing");
         goto start_body;
     }
+#endif
 
     na++;
 
@@ -500,8 +523,10 @@ do_return:
 #ifndef NO_DEBUGGER
     POP(current_toplevel);
 #endif
+#ifndef NAIVE
     if (has_error)
         value = lisp_repl (REPL_DEBUGGER);
+#endif
 
 do_return_atom:
     unevaluated = false;

@@ -15,7 +15,9 @@
 #include <lisp/liblisp.h>
 
 char    load_fn = 12;
+#ifndef NO_ONERROR
 lispptr onerror_sym;
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -58,6 +60,7 @@ lisp_repl (char mode)
     num_repls++;
 
     // Call error handler if defined.
+#ifndef NAIVE
     if (has_error) {
 #ifdef NO_DEBUGGER
         print_code_position ();
@@ -73,9 +76,10 @@ lisp_repl (char mode)
             x = eval0 ();
             goto do_return;
         }
-#endif
+#endif // #ifndef NO_ONERROR
         has_error = false;
     }
+#endif // #ifndef NAIVE
 
     // Read expresions from standard input until end
     // or until QUIT has been invoked.
@@ -146,8 +150,10 @@ lisp_repl (char mode)
         x = eval ();
 
         // Call debugger on error.
+#ifndef NAIVE
         if (has_error)
             x = lisp_repl (REPL_DEBUGGER);
+#endif
 
         // Break or continue on demand.
         if (do_break_repl) {
@@ -180,7 +186,9 @@ lisp_repl (char mode)
 next:   set_channels (this_in, this_out);
     }
 
+#ifndef NO_DEBUGGER
 do_return:
+#endif
     num_repls--;
 
     // Restore parent REPL's top-level expression.
@@ -203,17 +211,21 @@ load (char * pathname)
     simpleio_open (load_fn, pathname, 'r');
     arg1 = make_number (load_fn);
     bi_setin ();
+#ifndef NAIVE
     if (err ()) {
         error (ERROR_FILE, pathname);
         goto err_open;
     }
+#endif
 
     load_fn++;
     lisp_repl (REPL_LOAD);
     load_fn--;
 
     simpleio_close (load_fn);
+#ifndef NAIVE
 err_open:
+#endif
     arg1 = make_number (oldin);
     bi_setin ();
 }

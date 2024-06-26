@@ -232,10 +232,12 @@ bi_symbol (void)
     // Make symbol name from list.
     p = SYMBOL_NAME(s);
     DOLIST(arg1, arg1) {
+#ifndef NAIVE
         if (!NUMBERP(CAR(arg1))) {
             error (ERROR_TYPE, "(string nlst)");
             break;
         }
+#endif
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
 
@@ -384,11 +386,13 @@ bi_apply (void)
     POP(arg2);
     tmp = CAR(last (arg2));
     if (args) {
+#ifndef NAIVE
         if (!LISTP(tmp)) {
             error (ERROR_TYPE, "Last arg isn't list!");
             POP(arg1);
             return nil;
         }
+#endif
         SETCDR(last (args), tmp);
     } else
         args = tmp;
@@ -435,8 +439,10 @@ bi_if (void)
         x = arg1;
         tmp = eval ();
         POP(arg2c);
+#ifndef NAIVE
         if (has_error)
             break;
+#endif
         if (tmp) {
             x = CAR(arg2c);
             return delayed_eval;
@@ -455,7 +461,11 @@ bi_and (void)
         x = CAR(x);
         value = eval ();
         POP(x);
-        if (!value || has_error)
+#ifndef NAIVE
+        if (has_error)
+            return nil;
+#endif
+        if (!value)
             return nil;
     }
     return value;
@@ -469,8 +479,10 @@ bi_or (void)
         x = CAR(x);
         value = eval ();
         POP(x);
+#ifndef NAIVE
         if (has_error)
-            break;
+            return nil;
+#endif
         if (value)
             return value;
     }
@@ -629,6 +641,8 @@ bi_gc (void)
     return make_number (heap_end - heap_free);
 }
 
+#ifndef NAIVE
+
 lispptr
 bi_error (void)
 {
@@ -662,6 +676,7 @@ bi_stack (void)
     setout (old_out);
     return nil;
 }
+#endif // #ifndef NAIVE
 
 lispptr
 bi_quit (void)
@@ -860,9 +875,11 @@ struct builtin builtins[] = {
     { "undef",      "s",    bi_undef },
     { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
+#ifndef NAIVE
     { "error",      "?x",   bi_error },
     { "noerror",    "",     bi_noerror },
     { "stack",      "",     bi_stack },
+#endif
     { "quit",       "x",    bi_quit },
     { "exit",       "?n",   bi_exit },
 

@@ -53,6 +53,10 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
+// No error handling.
+// ~20% less code size with cc65.
+//#define NAIVE
+
 #ifdef __CC65__
     #define STACK_SIZE               2048
     #define TAGSTACK_SIZE            512
@@ -66,6 +70,13 @@
 
 #if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #define NO_ONERROR
+#endif
+
+#if defined(NAIVE) && !defined(NO_DEBUGGER)
+#define NO_DEBUGGER
+#endif
+#if defined(NAIVE) && !defined(NDEBUG)
+#define NDEBUG
 #endif
 
 typedef unsigned char uchar;

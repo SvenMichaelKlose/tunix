@@ -160,8 +160,10 @@ print0 (lispptr x)
         print_number ((number *) x);
     else if (PTRTYPE(x) & TYPE_NAMED)
         print_named ((symbol *) x);
+#ifndef NDEBUG
     else
         error (ERROR_UNKNOWN_TYPE, "Unknown object type.");
+#endif
 done:
     print_highlighted (x);
 }

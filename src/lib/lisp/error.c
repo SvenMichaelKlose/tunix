@@ -8,6 +8,8 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+#ifndef NAIVE
+
 char * last_errstr;
 
 void FASTCALL
@@ -156,3 +158,5 @@ print_code_position ()
     do_highlight = false;
     terpri ();
 }
+
+#endif // #ifndef NAIVE

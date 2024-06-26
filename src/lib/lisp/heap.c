@@ -102,10 +102,12 @@ alloc (uchar size, uchar type)
 {
     if (NEEDS_GC()) {
         gc ();
+#ifndef NAIVE
         if (NEEDS_GC()) {
             error (ERROR_OUT_OF_HEAP, "Out of heap.");
             return nil;
         }
+#endif
     }
 
     h = heap_free;
@@ -228,11 +230,12 @@ lisp_init ()
     do_putback = false;
 
     // Clear error info.
-    debug_mode  = false;
-    has_error   = false;
+#ifndef NAIVE
+    debug_mode = false;
+    has_error = false;
     last_errstr = NULL;
     current_expr  = nil;
-
+#endif
 #ifndef NO_DEBUGGER
     do_invoke_debugger = false;
     debug_step = nil;

@@ -15,11 +15,13 @@ our_isalpha (char c)
     return !isspace (c) && c != '(' && c != ')' && c != ';';
 }
 
+#ifndef NAIVE
 void
 missing_closing_paren (void)
 {
     error (ERROR_NO_PAREN, "No ')'");
 }
+#endif
 
 lispptr
 read_list (void)
@@ -30,14 +32,18 @@ read_list (void)
 
     while (1) {
         skip_spaces ();
+#ifndef NAIVE
         if (eof ())
             missing_closing_paren ();
+#endif
         if (in () == ')')
             return start;
         putback ();
 
+#ifndef NAIVE
         if (eof ())
             missing_closing_paren ();
+#endif
         PUSH(start);
         PUSH(last);
         if (in () == '.')
@@ -138,9 +144,11 @@ read ()
         return read_quoted (quasiquote);
     case ',':
         return read_unquoted ();
+#ifndef NAIVE
     case ')':
         error (ERROR_STALE_PAREN, "Stale ')'");
         return nil;
+#endif
     }
     putback ();
     // TODO: Negative numbers.

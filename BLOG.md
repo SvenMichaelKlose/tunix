@@ -1,11 +1,46 @@
 TUNIX blog
 ==========
 
+# 2024-06-26: No expression
+
+Current hit list of wanted features:
+
+## Processes
+
+Images that can be saved, continued, forked and swapped
+between.  Functions calls across images.
+
+## Bytecode
+
+Bytecode functions as planned are tight, relocateable and
+can be loaded on demand.
+
+## An editor
+
+There is a VI clone already but doing one in TUNIX Lisp
+feels like something else entirely.  A programmable editor
+would be beyond of what the VIC-VI could ever achieve with
+just C.  So I guess another replacement of a C app it is.
+But let's check the bottlenecks first.
+
+## An assembler/disassembler
+
+Sooner or later someone will want to pimp hot spots of their
+apps big time.  And now we'd like native data type
+declarations in our Lisp code to generate native code, which
+is very useful when crunshing numbers..
+
+## Real NIL object and dedicated type bits
+
+Have NIL object somewhere on zeropage and only check if the
+high byte of pointer is 0.  Dedicated type bits reduce type
+checks to a bit-wise AND.
+
 # 2024-06-25: Debuggeritis
 
-Added a stepping debugger and messed it up a bit merging it
-into the REPL, meaning that I'm just too tired to continue
-coding for the rest of the day.
+Added a stepping debugger and messed it up a bit while
+merging it into the REPL, meaning that I'm just too tired to
+continue coding for the rest of the day.
 
 Looking at the tré compiler I'm not too happy with the state
 of the code which grew since 1st April 2005 and became a

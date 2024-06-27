@@ -158,7 +158,7 @@ print0 (lispptr x)
         print_list ((cons *) x);
     else if (type == TYPE_NUMBER)
         print_number ((number *) x);
-    else if (PTRTYPE(x) & TYPE_NAMED)
+    else if (_NAMEDP(x))
         print_named ((symbol *) x);
 #ifndef NDEBUG
     else

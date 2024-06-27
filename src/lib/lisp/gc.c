@@ -23,7 +23,7 @@ mark (lispptr x)
         }
         if (x)
             MARK(x);
-        if (x && SYMBOLP(x))
+        if (SYMBOLP(x))
             mark (SYMBOL_VALUE(x));
     }
 }
@@ -69,7 +69,7 @@ sweep ()
     while (*s) {
         n = objsize (s);
         if (MARKED(s)) {
-            if ((*s & TYPE_NAMED) && SYMBOL_LENGTH(s)) {
+            if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
                 SYMBOL_NEXT(last_kept_sym) = s;
                 last_kept_sym = d;
             }
@@ -144,7 +144,7 @@ relocate (void)
             SETCDR(p, relocate_ptr (CDR(p)));
         } else if (SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
-        if ((*p & TYPE_NAMED) && SYMBOL_LENGTH(p))
+        if (_NAMEDP(p) && SYMBOL_LENGTH(p))
             SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
     }
 

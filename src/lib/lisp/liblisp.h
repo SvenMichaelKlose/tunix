@@ -341,6 +341,9 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #define SPECIALP(x)  ((x) && PTRTYPE(x) & TYPE_SPECIAL)
 #endif // #ifdef SLOW
 
+#define _NAMEDP(x)  (PTRTYPE(x) & TYPE_NAMED)
+#define NAMEDP(x)   ((x) && (PTRTYPE(x) & TYPE_NAMED))
+
 #define LIST_CAR(x)  (!(x) ? x : CAR(x))
 #define LIST_CDR(x)  (!(x) ? x : CDR(x))
 #define SETCAR(x, v) (CONS(x)->car = v)

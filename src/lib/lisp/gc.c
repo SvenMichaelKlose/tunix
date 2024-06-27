@@ -23,7 +23,7 @@ mark (lispptr x)
         }
         if (x)
             MARK(x);
-        if (x && SYMBOLP(x))
+        if (x && NAMEDP(x))
             mark (SYMBOL_VALUE(x));
     }
 }

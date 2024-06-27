@@ -14,10 +14,6 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#define COPY_LIST       0
-#define COPY_BUTLAST    1
-#define COPY_REMOVE     2
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -28,7 +24,6 @@ extern lispptr arg2c;
 extern lispptr arg2;
 extern lispptr value;
 extern lispptr tmp;
-int len;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("args")
@@ -37,7 +32,6 @@ int len;
 #pragma zpsym ("arg2")
 #pragma zpsym ("value")
 #pragma zpsym ("tmp")
-#pragma zpsym ("len")
 #pragma bss-name (pop)
 #endif
 
@@ -55,10 +49,6 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
-// Building lists in loops.
-lispptr start;  // First cons.
-lispptr lastc;  // Last cons (to append to).
-
 bool debug_mode;      // Unused.  Set by DEBUG.
 
 void FASTCALL
@@ -73,74 +63,10 @@ set_channels (simpleio_chn_t cin, simpleio_chn_t cout)
 void FASTCALL
 name_to_buffer (lispptr s)
 {
-    uchar len;
+    uchar len;  // TODO: tmpc
     len = SYMBOL_LENGTH(s);
     memcpy (buffer, SYMBOL_NAME(s), len);
     buffer[len] = 0;
-}
-
-int FASTCALL
-length (lispptr x)
-{
-    len = 0;
-    DOLIST(x, x)
-        len++;
-    return len;
-}
-
-lispptr FASTCALL
-copy_list (lispptr x, char mode, lispptr needle)
-{
-    if (ATOM(x))
-        return x;
-    if (mode == COPY_BUTLAST && !CDR(x))
-        return nil;
-    if (mode == COPY_REMOVE)
-        while (needle == CAR(x)) {
-            x = CDR(x);
-            if (ATOM(x))
-                return x;
-        }
-    PUSH(x);
-    start = lastc = make_cons (CAR(x), nil);
-    POP(x);
-    PUSH(start);
-    DOLIST(x, CDR(x)) {
-        if (CONSP(x)) {
-            if (mode == COPY_BUTLAST && !CDR(x))
-                break;
-            if (mode != COPY_REMOVE || needle != CAR(x)) {
-                PUSH(lastc);
-                PUSH(x);
-                tmp = make_cons (CAR(x), nil);
-                POP(x);
-                POP(lastc);
-            }
-        } else
-            tmp = x;
-        SETCDR(lastc, tmp);
-        lastc = tmp;
-    }
-    POP(start);
-    return start;
-}
-
-lispptr FASTCALL
-last (lispptr x)
-{
-    DOLIST(tmp2, x)
-        if (ATOM(CDR(tmp2)))
-            return tmp2;
-    return nil;
-}
-
-lispptr FASTCALL
-member (lispptr needle, lispptr haystack)
-{
-    DOLIST(x, haystack)
-        if (CAR(x) == needle)
-            return x;
-    return nil;
 }
 
 void FASTCALL
@@ -222,9 +148,13 @@ bi_symbol (void)
     lispptr s;
     char * p;
 
-    // Allocate empty symbol of wanted length.
+    // Get length.  Truncate at 255.
     arg1 = x ? CAR(x) : nil;
     len = length (arg1);
+    if (len > 255)
+        len = 255;
+
+    // Allocate empty symbol of wanted length.
     PUSH(arg1);
     s = alloc_symbol (buffer, len);
     POP(arg1);
@@ -738,42 +668,42 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();
-    start = lastc = make_cons (eval0 (), nil);
+    list_start = list_last = make_cons (eval0 (), nil);
     POP(arg2);
     POP(arg1);
     if (do_break_repl)
         return nil;
 
-    PUSH(start);
+    PUSH(list_start);
     DOLIST(arg2, CDR(arg2)) {
         PUSH(arg1);
         PUSH(arg2);
-        PUSH(lastc);
+        PUSH(list_last);
         make_car_call ();
         tmp = make_cons (eval0 (), nil);
         if (do_break_repl) {
             stack += 2 * sizeof (lispptr);
             return nil;
         }
-        POP(lastc);
-        SETCDR(lastc, tmp);
-        lastc = tmp;
+        POP(list_last);
+        SETCDR(list_last, tmp);
+        list_last = tmp;
         POP(arg2);
         POP(arg1);
     }
     if (arg2) {
-        PUSH(lastc);
+        PUSH(list_last);
         make_call (make_cons (arg2, nil));
         tmp = eval0 ();
         if (do_break_repl) {
             stack += 2 * sizeof (lispptr);
             return nil;
         }
-        POP(lastc);
-        SETCDR(lastc, tmp);
+        POP(list_last);
+        SETCDR(list_last, tmp);
     }
-    POP(start);
-    return start;
+    POP(list_start);
+    return list_start;
 }
 
 #ifndef NDEBUG

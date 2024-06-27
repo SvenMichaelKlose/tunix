@@ -99,26 +99,26 @@ eval_list (void)
     POP(x);
     if (do_break_repl)
         return nil;
-    start = lastc = make_cons (va, nil);
-    PUSH(start);
+    list_start = list_last = make_cons (va, nil);
+    PUSH(list_start);
     DOLIST(x, CDR(x)) {
         if (ATOM(x)) {
-            SETCDR(lastc, x);
+            SETCDR(list_last, x);
             break;
         }
         PUSH(x);
-        PUSH(lastc);
+        PUSH(list_last);
         x = CAR(x);
         tmp = eval ();
-        POP(lastc);
-        SETCDR(lastc, make_cons (tmp, nil));
-        lastc = tmp;
+        POP(list_last);
+        SETCDR(list_last, make_cons (tmp, nil));
+        list_last = tmp;
         POP(x);
         if (do_break_repl)
             return nil;
     }
-    POP(start);
-    return start;
+    POP(list_start);
+    return list_start;
 }
 
 lispptr

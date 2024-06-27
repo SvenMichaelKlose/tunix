@@ -141,8 +141,8 @@ extern bool do_break_repl;
 extern bool do_continue_repl;
 extern bool do_exit_program;
 
-extern lispptr start;
-extern lispptr lastc;
+extern lispptr list_start;
+extern lispptr list_last;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -418,7 +418,14 @@ extern bool              lisp_init (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 extern lispptr           debugger (void);
 
+#define COPY_LIST       0
+#define COPY_BUTLAST    1
+#define COPY_REMOVE     2
+extern int      FASTCALL length (lispptr);
 extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
+extern lispptr  FASTCALL butlast (lispptr);
+extern lispptr  FASTCALL last (lispptr);
+extern lispptr  FASTCALL member (lispptr needle, lispptr haystack);
 
 extern void     FASTCALL internal_error     (char * msg);
 extern void     FASTCALL error              (char code, char * msg);

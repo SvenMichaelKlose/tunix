@@ -3,6 +3,7 @@
 
 #ifdef RELEASE
     #define NDEBUG
+    #define VERBOSE_GC
 #else
     #define GCSTACK_CHECKS
     #define TAGSTACK_CHECKS
@@ -289,26 +290,34 @@ extern lispptr           poptagw (void);
 #define TYPESAFE_DOLIST(x, init) \
     for (x = init; CONSP(x); x = LIST_CDR(x))
 
-#define TYPE_MARKED   128
-#define TYPE_NAMED    64
-#define TYPE_SPECIAL  32    // User-defined function with no argument evaluation.
+#define TYPE_CONS       1
+#define TYPE_NUMBER     2
+#define TYPE_SYMBOL     4
+#define TYPE_BUILTIN    8
+#define TYPE_EXTENDED   16
+#define TYPE_MASK       31
+#define TYPE_MARKED     128
+#define TYPE_SPECIAL    (TYPE_SYMBOL | TYPE_EXTENDED)
 
-#define TYPE_MASK     (7 | TYPE_NAMED)
+#define TYPE(x)     (*((char *) (x))) // TODO: Rename.
+#define TYPEBITS(x) (TYPE(x) & TYPE_MASK)
 
-#define TYPE_CONS     1
-#define TYPE_NUMBER   2
-#define TYPE_SYMBOL   (3 | TYPE_NAMED)
-#define TYPE_BUILTIN  (4 | TYPE_NAMED)
-#define TYPE_MAX      4
-
-#define PTRTYPE(x)  (*((char *) (x))) // TODO: Rename.
-#define TYPE(x)     (PTRTYPE(x) & TYPE_MASK)
-
-#define MARKED(x)   (!(x) || PTRTYPE(x) & TYPE_MARKED)
-#define MARK(x)     (PTRTYPE(x) |= TYPE_MARKED)
-#define UNMARK(x)   (PTRTYPE(x) &= ~TYPE_MARKED)
+#define MARKED(x)   (!(x) || TYPE(x) & TYPE_MARKED)
+#define MARK(x)     (TYPE(x) |= TYPE_MARKED)
+#define UNMARK(x)   (TYPE(x) &= ~TYPE_MARKED)
 
 #define CONS(x)     ((cons *) (x))
+
+#define _ATOM(x)     (!(x) || !(TYPE(x) & TYPE_CONS))
+#define _CONSP(x)    ((x) && (TYPE(x) & TYPE_CONS))
+#define _SYMBOLP(x)  (!(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _BUILTINP(x) ((x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)  ((x) && (TYPE(x) & TYPE_NUMBER))
+#define _LISTP(x)    (!(x) || (TYPE(x) & TYPE_CONS))
+#define _SPECIALP(x) ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)  ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+
+#define EXTENDEDP(x) ((x) && (TYPE(x) & TYPE_EXTENDED))
 
 #ifdef SLOW
 #define CAR(x)       (lisp_car (x))
@@ -332,17 +341,14 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
 #define CAR(x)       (CONS(x)->car)
 #define CDR(x)       (CONS(x)->cdr)
-#define ATOM(x)      (!(x) || TYPE(x) != TYPE_CONS)
-#define CONSP(x)     ((x) && TYPE(x) == TYPE_CONS)
-#define LISTP(x)     (!(x) || TYPE(x) == TYPE_CONS)
-#define NUMBERP(x)   ((x) && TYPE(x) == TYPE_NUMBER)
-#define SYMBOLP(x)   (!(x) || TYPE(x) == TYPE_SYMBOL)
-#define BUILTINP(x)  ((x) && TYPE(x) == TYPE_BUILTIN)
-#define SPECIALP(x)  ((x) && PTRTYPE(x) & TYPE_SPECIAL)
+#define ATOM(x)      _ATOM(x)
+#define CONSP(x)     _CONSP(x)
+#define LISTP(x)     _LISTP(x)
+#define NUMBERP(x)   _NUMBERP(x)
+#define SYMBOLP(x)   _SYMBOLP(x)
+#define BUILTINP(x)  _BUILTINP(x)
+#define SPECIALP(x)  _SPECIALP(x)
 #endif // #ifdef SLOW
-
-#define _NAMEDP(x)  (PTRTYPE(x) & TYPE_NAMED)
-#define NAMEDP(x)   ((x) && (PTRTYPE(x) & TYPE_NAMED))
 
 #define LIST_CAR(x)  (!(x) ? x : CAR(x))
 #define LIST_CDR(x)  (!(x) ? x : CDR(x))

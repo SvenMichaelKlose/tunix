@@ -153,10 +153,10 @@ print0 (lispptr x)
         outs ("nil");
         goto done;
     }
-    type = TYPE(x);
-    if (type == TYPE_CONS)
+    type = TYPEBITS(x);
+    if (type & TYPE_CONS)
         print_list ((cons *) x);
-    else if (type == TYPE_NUMBER)
+    else if (type & TYPE_NUMBER)
         print_number ((number *) x);
     else if (_NAMEDP(x))
         print_named ((symbol *) x);

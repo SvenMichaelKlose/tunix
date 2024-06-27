@@ -26,43 +26,43 @@ lisp_cdr (lispptr x)
 bool FASTCALL
 lisp_consp (lispptr x)
 {
-    return x && TYPE(x) == TYPE_CONS;
+    return _CONSP(x);
 }
 
 bool FASTCALL
 lisp_atom (lispptr x)
 {
-    return !x || TYPE(x) != TYPE_CONS;
+    return _ATOM(x);
 }
 
 bool FASTCALL
 lisp_listp (lispptr x)
 {
-    return !x || TYPE(x) == TYPE_CONS;
+    return _LISTP(x);
 }
 
 bool FASTCALL
 lisp_numberp (lispptr x)
 {
-    return x && TYPE(x) == TYPE_NUMBER;
+    return _NUMBERP(x);
 }
 
 bool FASTCALL
 lisp_symbolp (lispptr x)
 {
-    return !x || TYPE(x) == TYPE_SYMBOL;
+    return _SYMBOLP(x);
 }
 
 bool FASTCALL
 lisp_builtinp (lispptr x)
 {
-    return x && TYPE(x) == TYPE_BUILTIN;
+    return _BUILTINP(x);
 }
 
 bool FASTCALL
 lisp_specialp (lispptr x)
 {
-    return x && PTRTYPE(x) & TYPE_SPECIAL;
+    return _SPECIALP(x);
 }
 
 void FASTCALL

@@ -385,6 +385,7 @@ bi_apply (void)
     args = copy_list (arg2, COPY_BUTLAST, nil);
     POP(arg2);
     tmp = CAR(last (arg2));
+
     if (args) {
 #ifndef NAIVE
         if (!LISTP(tmp)) {
@@ -610,7 +611,7 @@ lispptr
 bi_special (void)
 {
     tmp = bi_define ();
-    PTRTYPE(tmp) |= TYPE_SPECIAL;
+    TYPE(tmp) = TYPE_SPECIAL;
     return tmp;
 }
 

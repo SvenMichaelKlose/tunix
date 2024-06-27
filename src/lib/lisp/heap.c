@@ -60,13 +60,7 @@ extern char do_putback;
 lispptr universe;
 char buffer[MAX_SYMBOL + 1];
 
-unsigned lisp_sizes[] = {
-    0,
-    sizeof (cons),
-    sizeof (number),
-    sizeof (symbol),
-    sizeof (symbol)
-};
+uchar lisp_sizes[TYPE_EXTENDED * 2];
 
 void FASTCALL
 expand_universe (lispptr x)
@@ -79,14 +73,19 @@ expand_universe (lispptr x)
 unsigned FASTCALL
 objsize (char * x)
 {
-    uchar type = *x & 7; // TODO: named constant
-    unsigned s;
+    uchar s;
 #ifndef NDEBUG
-    if (type > TYPE_MAX)
+    if (TYPEBITS(x) >= TYPE_EXTENDED * 2)
         internal_error ("Ill type");
 #endif
-    s = lisp_sizes[type];
-    if (*x & TYPE_NAMED)
+    s = lisp_sizes[TYPEBITS(x)];
+#ifndef NDEBUG
+    if (!s) {
+        terpri (); outn (*x); terpri ();
+        internal_error ("0 size");
+    }
+#endif
+    if (_NAMEDP(x))
         return s + SYMBOL_LENGTH(x);
     return s;
 }
@@ -178,6 +177,15 @@ bool
 lisp_init ()
 {
     size_t heap_size;
+    uchar i;
+
+    for (i = 0; i < TYPE_EXTENDED * 2; i++)
+        lisp_sizes[i] = 0;
+    lisp_sizes[TYPE_CONS] = sizeof (cons);
+    lisp_sizes[TYPE_NUMBER] = sizeof (cons);
+    lisp_sizes[TYPE_SYMBOL] = sizeof (symbol);
+    lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
+    lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
     // Make tag stack.
 #ifdef TARGET_VIC20

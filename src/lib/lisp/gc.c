@@ -17,14 +17,15 @@ mark (lispptr x)
     if (!MARKED(x)) {
         if (x)
             MARK(x);
-        for (; CONSP(x); x = CDR(x)) {
+        for (; _CONSP(x); x = CDR(x)) {
             MARK(x);
             mark (CAR(x));
         }
-        if (x)
+        if (x) {
             MARK(x);
-        if (SYMBOLP(x))
-            mark (SYMBOL_VALUE(x));
+            if (_SYMBOLP(x))
+                mark (SYMBOL_VALUE(x));
+        }
     }
 }
 
@@ -139,10 +140,10 @@ relocate (void)
         //if (p == s)
             //p = d; // Jump over sweep gap.
 
-        if (CONSP(p)) {
+        if (_CONSP(p)) {
             SETCAR(p, relocate_ptr (CAR(p)));
             SETCDR(p, relocate_ptr (CDR(p)));
-        } else if (SYMBOLP(p))
+        } else if (_SYMBOLP(p))
             SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
         if (_NAMEDP(p) && SYMBOL_LENGTH(p))
             SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
@@ -161,14 +162,17 @@ gc (void)
     out ('M');
 #endif
 
-    // Trace objects.
+    // Trace root objects.
     mark (universe);
+    // TODO: %E belongs here, not in UNIVERSE.
     mark (return_sym);
     mark (return_name);
     mark (return_value);
     mark (go_sym);
     mark (go_tag);
     mark (delayed_eval);
+
+    // Trace object stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 

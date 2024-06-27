@@ -5,8 +5,8 @@ lang: "en"
 titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
-header-left: "((())) TUNIX Lisp"
-footer-left: "The garbage-collected manual(?)"
+header-left: "((())) TUNIX Lisp – The Garbage-Collected Manual"
+footer-left: ""
 toc: true
 footnodes-pretty: true
 book: true
@@ -35,6 +35,7 @@ Lisp can be made for the following platforms:
 | backquote sign '`'     | dollar sign '$' |
 | (RPLACA c v)           | (SETCAR c v)    |
 | (RPLACD c v)           | (SETCDR c v)    |
+| (MAKE-SYMBOL x)        | (SYMBOL l)      |
 | (SYMBOL-VALUE s)       | (VALUE s)       |
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
@@ -50,10 +51,8 @@ lists.
 
 ~~~lisp
 (symbol '(\A \B \C)) -> "ABC"
-(symbol) -> Anonymous symbol that won't get re-used.
+(symbol) ; Anonymous symbol that won't get re-used.
 ~~~
-
-There are no packages.
 
 ## Memory consumption
 

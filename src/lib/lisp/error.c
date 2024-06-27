@@ -35,6 +35,8 @@ internal_error (char * msg)
     print_code_position ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
+#else
+    while (1);
 #endif
 }
 

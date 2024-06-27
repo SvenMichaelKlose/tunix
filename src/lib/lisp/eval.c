@@ -163,8 +163,8 @@ do_eval:
     PUSH(current_toplevel);
 #endif
 
-    if (arg1 && SYMBOLP(arg1)) {
-        if (SPECIALP(arg1))
+    if (SYMBOLP(arg1)) {
+        if (EXTENDEDP(arg1))
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
 #ifndef NO_DEBUGGER

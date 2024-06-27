@@ -35,11 +35,10 @@ extern lispptr tmp;
 #pragma bss-name (pop)
 #endif
 
-// libsimpleio channels.
+// I/O channels
 lispptr lisp_fnin;
 lispptr lisp_fnout;
 
-// For READ to make expressions of abbreviations.
 lispptr quote;
 lispptr quasiquote;
 lispptr unquote;
@@ -49,39 +48,7 @@ lispptr go_expr;
 lispptr return_expr;
 lispptr return_args;
 
-bool debug_mode;      // Unused.  Set by DEBUG.
-
-void FASTCALL
-set_channels (simpleio_chn_t cin, simpleio_chn_t cout)
-{
-    arg1 = make_number (cin);
-    bi_setin ();
-    arg1 = make_number (cout);
-    bi_setout ();
-}
-
-void FASTCALL
-name_to_buffer (lispptr s)
-{
-    uchar len;  // TODO: tmpc
-    len = SYMBOL_LENGTH(s);
-    memcpy (buffer, SYMBOL_NAME(s), len);
-    buffer[len] = 0;
-}
-
-void FASTCALL
-make_call (lispptr args)
-{
-    x = make_cons (arg1, args);
-    unevaluated = true;
-    PUSH_TAG(TAG_DONE); // Tell to return from eval0().
-}
-
-void FASTCALL
-make_car_call (void)
-{
-    make_call (make_cons (CAR(arg2), nil));
-}
+bool debug_mode;  // Unused.  Set by bi_debug().
 
 lispptr
 bi_eq (void)

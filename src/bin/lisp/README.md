@@ -15,12 +15,22 @@ classoption: [oneside]
 
 # Overview
 
-This is a Lisp interpreter with dynamic scope and compacting
-mark-and-sweep garbage collector.  It is portably written in
-ANSI-C and offers simplified I/O for small platforms.
+This is a Lisp interpreter, portably written in ANSI-C.
+It offers:
+
+* Most effective memory usage through compacting
+  mark-and-sweep garbage collection.
+* Elegant and embeddable I/O interface.
+* Sweet syntactial sugar.
+* Quasi-quoting and macro expansion.
+* Supplementary, compressed stack to take load off the
+  CPU stack, supporting 6502-CPU architectures.
+
+See ROADMAP and TODO files for details on the status of this
+project.
 
 Using the cc65 compiler suite, this distribution of TUNIX
-Lisp can be made for the following platforms:
+Lisp is made for the following platforms:
 
 * Commodore C128
 * Commodore C16
@@ -898,58 +908,6 @@ key and the rest is the value.
 
 Using dot notation and SLOT-VALUE on associative lists.
 
-## Bytecode function object format
-
-A bytecode functions starts off like a regular symbol,
-with a type, length and value slot.  The length tells the
-number of bytes following the value.  The value points to a
-regular argument definition , e.g. '(first . rest)'.
-
-| Offset | Size  | Description                   |
-|--------|-------|-------------------------------|
-| 0      | 1     | Object TYPE_BCFUN             |
-| 1      | 1     | Total size - 3                |
-| 2      | 2     | Argument definition           |
-| 3      | 1     | Stack size / object list size |
-| 4      | 1     | Number of jump positions      |
-| 4+     | ?     | Object list                   |
-| 4+     | ?     | Jump positions                |
-| 4+     | 1-220 | Byte codes                    |
-
-Constant objects are always referenced via the object list
-with a maximum of 16 entries (at least one).
-
-### Instruction format
-
-The highest bit of the first byte determines if the code is
-an assignment or a jump.  Jumps also contain an index into
-a code offset table.
-
-Jump:
-%1JJIIIII
-
-* J: type
-* I: Index into target array
-
-Assigments have a destination on the stack, a function
-object, a number of arguments and the arguments.
-
-Return:
-%00000000
-
-Assignment:
-%0?DDDDDD FFFFFFFF
-
-* D: Destination on stack
-* F: Function (index into object array)
-
-Argument:
-%EPIIIIII
-
-* E: End of argument list flag
-* P: 0: stack place 1: object
-* I: Index into stack or object array
-
 ## Real-time applications
 
 Interruptible GC with lower threshold to keep space for
@@ -1011,3 +969,207 @@ Conses which only store the CAR if the CDR is the next
 object on the heap.  This can be done at allocation time but
 would make the CDR of a compressed cons immutable and add
 an extra check to each operation.
+
+# Compiler
+
+Interpretation is slow because:
+
+## Why compiling?
+
+Reasons for performance improvements:
+
+* Arguments are placed on the stack.
+* Arguments to known functions are expanded in advance.
+* Calls of known bytecode and built-in functions from within
+  bytecode functions require copying indexed pointers
+  to the object stack instead of saving, assigning and
+  restoring symbol values.
+
+Unknown functions are still colled via FUNCALL.
+
+The compiler is most simple, merely translating
+expressions to bytecodes which describe function calls
+and control flow.  A bytecode function may be up to
+255 bytes in size and is stored like a string.  Larger
+functions are split up.  Quoted function expressions will
+not be compiled.[^compile-anon-funs]
+
+[^compile-anon-funs]:
+  Compiling in such functions would require the LAMBDA
+  keyword to tell them apart from lists.
+
+## The target machine: Bytecode format
+
+A bytecode functions starts off like a regular symbol,
+with a type, length and value slot.  The length tells the
+number of bytes following the value.  The value points to a
+regular argument definition , e.g. '(first . rest)'.
+
+| Offset | Size  | Description                         |
+|--------|-------|-------------------------------------|
+| 0      | 1     | Object TYPE_BYTECODE                |
+| 1      | 1     | Total size - 3                      |
+| 2      | 2     | Argument definition                 |
+| 3      | 1     | Local stack size / object list size |
+| 4      | 1     | Code offset                         |
+| 4+     | ?     | Data                                |
+| 4+     | ?     | Raw data                            |
+| 4+     | 1-220 | Code                                |
+
+Constant objects are always referenced via the object list
+with a maximum of 16 entries (at least one).
+
+### Instruction format
+
+The highest bit of the first byte determines if the code is
+an assignment or a jump.  Jumps also contain an index into
+a code offset table.
+
+#### Jumps
+
+~~~
+1JJIIIII
+~~~
+
+* J: type
+* I: Index into target array
+
+#### Return from function
+
+~~~
+00000000
+~~~
+
+Assigments have a destination on the stack, a function
+object, a number of arguments and the arguments.
+
+#### Assignment:
+
+~~~
+0?DDDDDD FFFFFFFF
+~~~
+
+* D: Destination on stack
+* F: Function (index into object array)
+
+#### Argument:
+
+~~~
+EPIIIIII
+~~~
+
+* E: End of argument list flag
+* P: 0: stack place 1: object
+* I: Index into stack or object array
+
+## Passes
+
+With regular macros expanded five major passes compile
+function expressions to bytecode:
+
+* Compiler macro expansion
+* Quote expansion
+* Quasiuote expansion
+* Lambda expansion
+* Expression expansion
+* Optimization
+* Place expansion
+* Code expansion
+
+### Compiler macro expansion
+
+Expands control flow special forms (BLOCK, GO, RETURN, ?,
+AND, OR) to assembly-level jump and tag expressions.
+
+| Metacode     | Description                           |
+|--------------|---------------------------------------|
+| (%= d f +x)  | Call F with X and assign result to D. |
+| (%JMP n)     | Unconditional jump.                   |
+| (%JMP-NIL n) | Jump if %0 is NIL.                    |
+| (%JMP-T n)   | Jump if ~0 is not NIL.                |
+| (%TAG m).    | Jump destination.                     |
+
+#### Expansion of ?
+
+~~~lisp
+(? (a)
+   (b)
+   (c)
+
+(= %0 (a))
+(%jmp-nil 1)
+(= %0 (b))
+(%jmp 2)
+(%tag 1)
+(= %0 (c))
+(%tag 2)
+~~~
+
+#### Expansion of AND and/or OR
+
+#### Expansion of BLOCK
+
+The BLOCK expander need to expand child blocks first so
+that deeper RETURNs with a clashing name have precedence:
+
+~~~lisp
+(block nil
+  ...
+  (block nil
+    ...
+    (return nil)  ; Must return from the closer BLOCK NIL.
+    ...))
+~~~
+
+By translating deeper BLOCK's RETURN statements to metacode
+jumps, only unresolved RETURNs remain for parent BLOCKs.
+
+### Quote expansion
+
+Quotes are entries on the function's object list.
+
+### Quasiuote expansion
+
+QUASIQUOTEs need to be compiled into code using LIST and
+APPEND instead.
+
+### Lambda expansion
+
+Inlines anonymous functions.
+
+### Expression expansion
+
+Breaks up nested function calls into a list of single
+statement assignments.
+
+This expression
+~~~
+(fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
+~~~
+
+becomes this:
+
+~~~
+(%= %1 (fun3))
+(%= %2 (fun4))
+(%= %3 (fun2 %1 %2))
+(%= %4 (fun5))
+(%= %0 (fun1 %0 %3 %4))
+~~~
+
+### Optimization
+
+Basic compression of what the macro expansions generated,
+e.g. double instructions or chains of jumps created mainly
+by compiler macros.
+
+### Place expansion
+
+Here the argument symbols are replaced by %STACK or %OBJ
+expressions to denote places on the stack or on the
+function's object list for assembly.
+
+### Code expansion
+
+* Collecting object list.
+* Calculating jump destination offsets.

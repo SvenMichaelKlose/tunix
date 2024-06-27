@@ -1,0 +1,31 @@
+Generated data and code
+[@] Parse BNF and token definition.
+[ ] Validate that BNF is complete.
+[ ] Generate parser.
+
+[@] Separate tokens and surrounding chars.
+
+[ ] Encode numbers.
+[ ] Encode literal chars.
+[ ] Make database of identifiers.
+[ ] Make database of strings.
+[ ] Parse to BNF-shaped syntax tree.
+[ ] Clean up syntax tree.
+[ ] Make database of data definitions.
+[ ] Make type conversions.
+[ ] Fold constants.
+[ ] Consing recursion to enqueueing loop, including tail
+    call optimization.
+[ ] Tail call optimization.
+[ ] AST to SSA.
+[ ] Dupe removal.
+[ ] Constant propagation.
+[ ] Loop optimization.
+[ ] Remove unused.
+[ ] Instruction breakdown
+[ ] Dupe removal.
+[ ] Constant propagation.
+[ ] Loop optimization.
+[ ] Remove unused.
+[ ] Layout function stacks.
+[ ] SSA to IR

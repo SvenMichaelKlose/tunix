@@ -6,3 +6,8 @@ src/config
 *.zip
 *.prg
 *.a
+src/contrib/exomizer-3.0.2/src/deps
+src/contrib/exomizer-3.0.2/src/exobasic
+src/contrib/exomizer-3.0.2/src/exomizer
+src/contrib/exomizer-3.0.2/src/sfxdecr
+src/contrib/exomizer-3.0.2/src/sfxdecr.c

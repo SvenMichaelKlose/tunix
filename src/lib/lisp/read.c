@@ -94,10 +94,7 @@ read_string (void)
     for (p = buffer;
          p != &buffer[MAX_SYMBOL] && !eof () && in () != '"';
          p++)
-        if (last_in == '\\')
-            *p = in ();
-        else
-            *p = last_in;
+        *p = (last_in == '\\') ? in () : last_in;
     return make_symbol (buffer, p - buffer);
 }
 

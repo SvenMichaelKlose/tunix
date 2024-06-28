@@ -38,12 +38,12 @@ read_list (void)
 #endif
         if (in () == ')')
             return start;
-        putback ();
-
 #ifndef NAIVE
         if (eof ())
             missing_closing_paren ();
 #endif
+        putback ();
+
         PUSH(start);
         PUSH(last);
         if (in () == '.')

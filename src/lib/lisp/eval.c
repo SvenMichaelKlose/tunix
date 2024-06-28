@@ -147,14 +147,12 @@ do_eval:
         lisp_repl (REPL_DEBUGGER);
 #endif
 
-    if (!x) {
-        value = nil;
-        goto do_return_atom;
-    }
-
     // Evaluate atom.
     if (ATOM(x)) {
-        value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
+        if (x)
+            value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
+        else
+            value = nil;
         goto do_return_atom;
     }
 
@@ -163,7 +161,8 @@ do_eval:
     PUSH(current_toplevel);
 #endif
 
-    if (SYMBOLP(arg1)) {
+    // Get function from symbol.
+    if (arg1 && SYMBOLP(arg1)) {
         if (EXTENDEDP(arg1))
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
@@ -239,11 +238,11 @@ next_block_statement:
         goto block_statement;
     }
 
-    args = CDR(x);
-
     ////////////////
     /// BUILT-IN ///
     ////////////////
+
+    args = CDR(x);
 
     // Call built-in.
     if (BUILTINP(arg1)) {

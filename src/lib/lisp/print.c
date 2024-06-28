@@ -35,7 +35,7 @@ print_short (char * m, cons * c)
 {
     outs (m);
     last_out = ' '; // Avoid output padding.
-    print0 (CAR(CDR(c)));
+    print0 (LIST_CAR(LIST_CDR(c)));
 }
 
 void FASTCALL

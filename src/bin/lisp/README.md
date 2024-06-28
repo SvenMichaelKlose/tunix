@@ -40,6 +40,10 @@ Lisp is made for the following platforms:
 
 ## Differences to other dialects
 
+TUNIX Lisp is very much like any other dialect.  Here are
+some things that raise an eyebrow when seeing them the first
+time:
+
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
 | backquote sign '`'     | dollar sign '$' |
@@ -51,7 +55,29 @@ Lisp is made for the following platforms:
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
 
-MEMBER and FIND compare with EQ instead of EQL.
+The backquote cannot be used as an abbreviation for
+QUASIQUOTE or support for old machines would be messy.
+The dollar sign is also convenient to use and not needed
+by anything else.
+
+The MAKE- prefix is used less regularly.  Instead, maker
+functions should be understood as casting from one type
+(or nothing) to another.
+
+TUNIX also uses more functions with names that contain
+special characters to make them more brief and culturally
+independend.
+
+MEMBER and FIND compare with EQ instead of EQL (so numbers
+will not match by value) as these functions are used
+internally and require high preformance in order to not drag
+down the rest of the system.  Turn to NEMBER-IF or FIND-IF
+to use another predicate but EQ.
+
+LAMBDA is not around.  Function expressions are quoted when
+used as function arguments.  That makes compiling them to
+'native' function impossible, so the LAMBDA or FUNCTION
+(or FN) keyword has to come back.
 
 ### Symbols
 
@@ -888,91 +914,12 @@ key and the rest is the value.
 ### (acons alist c): Add key/value to associative list.
 ### (assoc x l): Return list that start with X.
 
-# Ideas for the future
-
-## Directory access
-
-| Function      | Description                   |
-|---------------|-------------------------------|
-| (mkdir s)     | Create directory.             |
-| (opendir n s) | Open directory on channel.    |
-| (readdir n)   | Read directory info.          |
-| (writedir n)  | Write partial directory info. |
-
-### (mkdir s): Create directory.
-### (opendir n s): Open directory on channel.
-### (readdir n): READ directory info.
-### (writedir n): Write partial directory info.
-
-## Objects
-
-Using dot notation and SLOT-VALUE on associative lists.
-
-## Real-time applications
-
-Interruptible GC with lower threshold to keep space for
-critical operations is a bad idea as a GC has to complete at
-some point.
-
-| Function  | Description                  |
-|-----------|------------------------------|
-| (gc x)    | GC with another root object. |
-
-GC could take an optional argument to specify another root
-than the universe to discard everything that is not part of
-an app.
-
-~~~lisp
-(gc 'appstart)
-; Put APPSTART back in the universe.
-(var appstart appstart)
-~~~
-
-Or one could save the current list of definitions and throw
-everything out that appeared later:
-
-~~~lisp
-(var *old-defs* (universe))
-(load "app.lisp")
-(gc *old-defs*)
-~~~
-
-## Bielefeld DB
-
-| Function     | Description                     |
-|--------------|---------------------------------|
-| (db-open a)  | Open database.                  |
-| (db-add s x) | Add expression with string key. |
-| (db-find s)  | Find ID by key.                 |
-| (db-read n)  | READ by ID.                     |
-| (db-close n) | Close database.                 |
-
-### (db-open a): Open database.
-### (db-add s x): Add expression with string key.
-### (db-find s): Find ID by key.
-### (db-read n): READ by ID.
-### (db-close n): Close database.
-
-Embedded database to the rescue the day for large data sets.
-
-## Defining built-ins
-
-| Function        | Description            |
-|-----------------|------------------------|
-| (mkbuiltin s a) | Add built-in function. |
-
-Submit to your fantasy.
-
-## Compressed conses
-
-Conses which only store the CAR if the CDR is the next
-object on the heap.  This can be done at allocation time but
-would make the CDR of a compressed cons immutable and add
-an extra check to each operation.
-
 # Compiler
 
-Interpretation is slow because:
+Interpretation is slow because of:
+
+* Parsing and checking arguments.
+* Saving and restoring symbol values.
 
 ## Why compiling?
 
@@ -989,10 +936,10 @@ Unknown functions are still colled via FUNCALL.
 
 The compiler is most simple, merely translating
 expressions to bytecodes which describe function calls
-and control flow.  A bytecode function may be up to
-255 bytes in size and is stored like a string.  Larger
-functions are split up.  Quoted function expressions will
-not be compiled.[^compile-anon-funs]
+and control flow.
+
+Quoted function expressions will not be
+compiled.[^compile-anon-funs]
 
 [^compile-anon-funs]:
   Compiling in such functions would require the LAMBDA
@@ -1124,6 +1071,40 @@ that deeper RETURNs with a clashing name have precedence:
 By translating deeper BLOCK's RETURN statements to metacode
 jumps, only unresolved RETURNs remain for parent BLOCKs.
 
+### Block folding
+
+BLOCKs have been expanded to %BLOCKs to hold the expressions
+together.  They are now spliced into each other to form a
+single expression list for each function.
+
+~~~lisp
+; Input code
+(when (do-thing? x)
+  (do-this)
+  (do-that))
+
+; After MACROEXPAND.
+(? (do-thing? x)
+   (block t
+     (do-this)
+     (do-that)))
+
+; After COMPILER-MACROEXPAND.
+(%= %0 (do-thing? x))
+(%jmp-nil 1)
+(%block
+  (%= %0 (do-this))
+  (%= %0 (do-that)))
+(%tag 1)
+
+; After BLOCK-FOLD.
+(%= %0 (do-thing? x))
+(%jmp-nil 1)
+(%= %0 (do-this))
+(%= %0 (do-that))
+(%tag 1)
+~~~
+
 ### Quote expansion
 
 Quotes are entries on the function's object list.
@@ -1173,3 +1154,92 @@ function's object list for assembly.
 
 * Collecting object list.
 * Calculating jump destination offsets.
+
+# Ideas for the future
+
+## More generic built-ins
+
+* '=' to also set the CAR of a cons.
+* '+' to also append lists.
+
+## Directory access
+
+| Function      | Description                   |
+|---------------|-------------------------------|
+| (mkdir s)     | Create directory.             |
+| (opendir n s) | Open directory on channel.    |
+| (readdir n)   | Read directory info.          |
+| (writedir n)  | Write partial directory info. |
+
+### (mkdir s): Create directory.
+### (opendir n s): Open directory on channel.
+### (readdir n): READ directory info.
+### (writedir n): Write partial directory info.
+
+## Objects
+
+Using dot notation and SLOT-VALUE on associative lists.
+
+## Real-time applications
+
+Interruptible GC with lower threshold to keep space for
+critical operations is a bad idea as a GC has to complete at
+some point.
+
+| Function  | Description                  |
+|-----------|------------------------------|
+| (gc x)    | GC with another root object. |
+
+GC could take an optional argument to specify another root
+than the universe to discard everything that is not part of
+an app.
+
+~~~lisp
+(gc 'appstart)
+; Put APPSTART back in the universe.
+(var appstart appstart)
+~~~
+
+Or one could save the current list of definitions and throw
+everything out that appeared later:
+
+~~~lisp
+(var *old-defs* (universe))
+(load "app.lisp")
+(gc *old-defs*)
+~~~
+
+## Bielefeld DB
+
+| Function     | Description                     |
+|--------------|---------------------------------|
+| (db-open a)  | Open database.                  |
+| (db-add s x) | Add expression with string key. |
+| (db-find s)  | Find ID by key.                 |
+| (db-read n)  | READ by ID.                     |
+| (db-close n) | Close database.                 |
+
+### (db-open a): Open database.
+### (db-add s x): Add expression with string key.
+### (db-find s): Find ID by key.
+### (db-read n): READ by ID.
+### (db-close n): Close database.
+
+Embedded database to the rescue the day for large data sets.
+
+## Defining built-ins
+
+| Function        | Description            |
+|-----------------|------------------------|
+| (mkbuiltin s a) | Add built-in function. |
+
+Submit to your fantasy.
+
+## Compressed conses
+
+Conses which only store the CAR if the CDR is the next
+object on the heap.  This can be done at allocation time but
+would make the CDR of a compressed cons immutable and add
+an extra check to each operation.
+
+

@@ -73,9 +73,13 @@ typename (lispptr * x)
         return "symbol";
     if (BUILTINP(x))
         return "builtin";
+#ifndef NDEBUG
     if (NUMBERP(x))
         return "number";
-    return "DEADBEEF";
+    return NULL;
+#else
+    return "number";
+#endif
 }
 
 void FASTCALL

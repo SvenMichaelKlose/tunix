@@ -58,6 +58,10 @@
 // ~20% less code size with cc65.
 //#define NAIVE
 
+// GC sweep: do not copy if object didn't move.
+// Adds extra code.
+#define SKIPPING_SWEEP
+
 #ifdef __CC65__
     #define STACK_SIZE               2048
     #define TAGSTACK_SIZE            512

@@ -69,10 +69,20 @@ sweep ()
                 last_kept_sym = d;
             }
 
-            // Copy object with mark bit cleared.
-            *d++ = *s++ & ~TYPE_MARKED;
-            while (--n)
-                *d++ = *s++;
+#ifdef SKIPPING_SWEEP
+            if (s == d) {
+                *d &= ~TYPE_MARKED;
+                s += n;
+                d = s;
+            } else {
+#endif
+                // Copy object with mark bit cleared.
+                *d++ = *s++ & ~TYPE_MARKED;
+                while (--n)
+                    *d++ = *s++;
+#ifdef SKIPPING_SWEEP
+            }
+#endif
         } else {
             if (last_sweeped == d) {
                 // Append gap to previous one.

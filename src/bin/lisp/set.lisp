@@ -5,11 +5,11 @@
        (unique (cdr x))
        (cons (car x) (unique (cdr x))))))
 
-(fn adjoin (x lst . args)
+(fn adjoin (x l . args)
   ;"Add an element to a set."
-  (? (apply member x lst args)
-     lst
-     (cons x lst)))
+  (? (apply member x l args)
+     l
+     (cons x l)))
 
 (macro set-op (name . body)
   $(fn ,name (a b)
@@ -35,9 +35,11 @@
 
 (eval (macroexpand '(set-op set-exclusive-or
   ;"Elements that are not in both lists."
-  (!= (intersect a b)
-    (append (remove-if $((x) (member x ,!)) a)
-            (remove-if $((x) (member x ,!)) b))))))
+  (with ((subset  (intersect a b))
+         (pred    $((x)
+                    (member x ,subset))))
+    (append (remove-if pred a)
+            (remove-if pred b))))))
 
 (eval (macroexpand '(set-op subseq?
   ;"Check if list a is a subset of list b."

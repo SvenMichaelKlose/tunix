@@ -1,6 +1,6 @@
 ---
 title: "((())) TUNIX Lisp"
-author: "The Garbage-Collected Manual(?)"
+author: "The Garbage-Collected Manual"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
@@ -16,27 +16,44 @@ classoption: [oneside]
 # Overview
 
 This is a Lisp interpreter, portably written in ANSI-C.
+
 It offers:
 
 * Most effective memory usage through compacting
-  mark-and-sweep garbage collection.
-* Elegant and embeddable I/O interface.
-* Sweet syntactial sugar.
-* Quasi-quoting and macro expansion.
-* Supplementary, compressed stack to take load off the
-  CPU stack, supporting 6502-CPU architectures.
+  mark-and-sweep garbage collection.[^gc]
+* Elegant and embeddable I/O interface.[^io]
+* Supplementary compressed stack.[^stack]
+* Sweet syntactial sugar.[^sugar]
+
+[^gc]: Planned to be made interruptible to some degree.
+[^io]: Instead of providing a file number for each I/O
+  operation an input and/or output channel must be selected
+  beforehand, bridging the gap between plain standard I/O
+  and multi-stream handling without making the API more
+  complex from the start.  Allows TUNIX Lisp to run in
+  extremely limited environments.
+[^stack]: Synchronized with the garbage-collected object
+  stack it holds byte tags instead of larger return
+  addresses and other temporary, raw data.  Also to support
+  architectures with limited CPU stack such as MOS-6502
+  CPUs.  This feature is deeply ingrained in the
+  interpreter's design.
+[^sugar]: Dot-notation of the tre compiler and top-level
+  quasi-quoting will be supported.  Dot-notation uses x. for
+  (car x), .x for (cdr x) and x.y for (slot-value x 'y).
+  For now there are short forms of quotes.
 
 See ROADMAP and TODO files for details on the status of this
 project.
 
-Using the cc65 compiler suite, this distribution of TUNIX
-Lisp is made for the following platforms:
+This distribution builds executables for these platforms
+using the cc65 C compiler suite:
 
 * Commodore C128
 * Commodore C16
 * Commodore C64
 * Commodore Plus4
-* Commodore VIC-20
+* Commodore VIC-20 (+27K)
 
 ## Differences to other dialects
 
@@ -79,7 +96,7 @@ used as function arguments.  That makes compiling them to
 'native' function impossible, so the LAMBDA or FUNCTION
 (or FN) keyword has to come back.
 
-### Symbols
+### Symbols are strings
 
 Symbols have a name and a value and they also serve as
 strings that can be converted to and from character value
@@ -96,7 +113,7 @@ lists.
 
 All objects are stored on a growing heap, so allocations are
 as fast as bumping the end-of-heap pointer plus boundary
-check to trigger the garbage collector.
+check to trigger the garbage collector just in time.
 
 | Data type              | heap  |
 |------------------------|-------|
@@ -106,20 +123,20 @@ check to trigger the garbage collector.
 
 ### Stacks
 
-| Call type    | tag stack bytes | GC stack words |
-|--------------|-----------------|----------------|
-| built-in     | 2               | ?              |
-| user-defined | 2               | args + 1       |
-
-Alongside the CPU stack a separate garbage-collected GC
-stack holds function arguments. An additional raw stack
+Alongside the CPU stack a separate garbage-collected object
+stack holds function arguments.  An additional raw stack
 holds return tags of byte size instead of full return
 addresses as well as raw pointers to argument definitions of
-built-in functions during their evaluation.
+built-in functions during evaluation.
 
 ### Hidden creation of list elements ("consing")
 
 APPLY copies all arguments but the last one.
+
+## Garbage Collection
+
+Garbage collection is triggered when running out of heap.
+Performance measurements have to be made.
 
 # Definitions
 
@@ -921,25 +938,32 @@ Interpretation is slow because of:
 * Parsing and checking arguments.
 * Saving and restoring symbol values.
 
-## Why compiling?
+## Compiling: Why?
 
-Reasons for performance improvements:
+Advantages:
 
-* Arguments are placed on the stack.
+* Arguments are placed on the stack where they don't need to
+  be cleaned up on function return.  With user-defined
+  functions, symbol values would need to be restored.
+  Unused stack space is NILled out before garbage
+  collection.
 * Arguments to known functions are expanded in advance.
-* Calls of known bytecode and built-in functions from within
-  bytecode functions require copying indexed pointers
-  to the object stack instead of saving, assigning and
-  restoring symbol values.
+  No need to parse argument definitions any more when
+  compiled functions call compiled functions or built-ins.
+* Jump destinations do not need to get looked up via
+  list searches.
+* Bytecode is about 70% smaller.
 
-Unknown functions are still colled via FUNCALL.
+Disadvantages:
+
+* No source-level debugging.
 
 The compiler is most simple, merely translating
 expressions to bytecodes which describe function calls
 and control flow.
 
-Quoted function expressions will not be
-compiled.[^compile-anon-funs]
+Quoted function expressions will not be compiled.
+[^compile-anon-funs]
 
 [^compile-anon-funs]:
   Compiling in such functions would require the LAMBDA
@@ -1011,50 +1035,59 @@ EPIIIIII
 
 ## Passes
 
-With regular macros expanded five major passes compile
-function expressions to bytecode:
+The compiler first translates the macro-expanded input into
+an assembly-style metacode made of assignments of function
+call return values and jumps.  Function information is also
+gathered for the following optimization and code generation
+passes.
 
+Transform to metacode:
 * Compiler macro expansion
+* Block folding
 * Quote expansion
 * Quasiuote expansion
+* Function collection
 * Lambda expansion
 * Expression expansion
+
+Cleaning up at least:
 * Optimization
+
+Code generation:
 * Place expansion
-* Code expansion
+* Code macro expansion
 
 ### Compiler macro expansion
 
 Expands control flow special forms (BLOCK, GO, RETURN, ?,
-AND, OR) to assembly-level jump and tag expressions.
+AND, OR) to these assembly-level jump and tag expressions:
 
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
 | (%= d f +x)  | Call F with X and assign result to D. |
-| (%JMP n)     | Unconditional jump.                   |
-| (%JMP-NIL n) | Jump if %0 is NIL.                    |
-| (%JMP-T n)   | Jump if ~0 is not NIL.                |
-| (%TAG m).    | Jump destination.                     |
+| (%JMP s)     | Unconditional jump.                   |
+| (%JMP-NIL s) | Jump if %0 is NIL.                    |
+| (%JMP-T s)   | Jump if ~0 is not NIL.                |
+| (%TAG s).    | Jump destination.                     |
 
-#### Expansion of ?
+Jump tags must be EQ.
+
+#### Expansion of ?, AND and OR
 
 ~~~lisp
 (? (a)
    (b)
    (c)
 
-(= %0 (a))
+(%= %0 a)
 (%jmp-nil 1)
-(= %0 (b))
+(%= %0 b)
 (%jmp 2)
-(%tag 1)
-(= %0 (c))
+(%= %0 c)
 (%tag 2)
 ~~~
 
-#### Expansion of AND and/or OR
-
-#### Expansion of BLOCK
+#### BLOCK expansion
 
 The BLOCK expander need to expand child blocks first so
 that deeper RETURNs with a clashing name have precedence:
@@ -1090,18 +1123,18 @@ single expression list for each function.
      (do-that)))
 
 ; After COMPILER-MACROEXPAND.
-(%= %0 (do-thing? x))
+(%= %0 do-thing? x)
 (%jmp-nil 1)
 (%block
-  (%= %0 (do-this))
-  (%= %0 (do-that)))
+  (%= %0 do-this)
+  (%= %0 do-that))
 (%tag 1)
 
 ; After BLOCK-FOLD.
-(%= %0 (do-thing? x))
+(%= %0 do-thing? x)
 (%jmp-nil 1)
-(%= %0 (do-this))
-(%= %0 (do-that))
+(%= %0 do-this)
+(%= %0 do-that)
 (%tag 1)
 ~~~
 
@@ -1114,39 +1147,74 @@ Quotes are entries on the function's object list.
 QUASIQUOTEs need to be compiled into code using LIST and
 APPEND instead.
 
+~~~lisp
+$(1 2 ,@x 4 5)
+
+(append '(1 2) x '(4 5))
+~~~
+
+### Function collection
+
+Creates function info objects with argument definitions.
+They are used by optimizing and code generating passes.
+
+### Argument renaming
+
+The following lambda-expansion might need to inline
+functions with argument names that are already in use.
+This pass solves that issue by renaming all arguments.
+[^bcdbgarg]
+
+[^bcdbgarg]: A map of the original names must be created if
+  debugging is in order.
+
 ### Lambda expansion
 
-Inlines anonymous functions.
+Inlines anonymous functions and introduces local variables
+by extending the FUNINFO of the top-level function,
+laying out the local stack frame.
 
 ### Expression expansion
 
 Breaks up nested function calls into a list of single
-statement assignments.
+statement assignments.  After this the return value of
+any expression is in variable %0.
 
 This expression
+
 ~~~
 (fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
 ~~~
 
-becomes this:
+becomes:
 
 ~~~
-(%= %1 (fun3))
-(%= %2 (fun4))
-(%= %3 (fun2 %1 %2))
-(%= %4 (fun5))
-(%= %0 (fun1 %0 %3 %4))
+(%= %1 fun3)
+(%= %2 fun4)
+(%= %3 fun2 %1 %2)
+(%= %4 fun5)
+(%= %0 fun1 %0 %3 %4)
 ~~~
+
+### Argument expansion
+
+Check arguments and turns rest arguments into consing
+expressions.
 
 ### Optimization
 
-Basic compression of what the macro expansions generated,
-e.g. double instructions or chains of jumps created mainly
-by compiler macros.
+Basic compression of what the macro expansions messed up
+at least,  Other simple optimizations would be removing
+assignments with no effect or chained jumps.
 
 ### Place expansion
 
-Here the argument symbols are replaced by %STACK or %OBJ
+| Expression  | Description                    |
+|-------------|--------------------------------|
+| (%S offset) | Offset into local stack frame. |
+| (%D offset) | Offset into function data.     |
+
+Here the argument symbols are replaced by %S or %O
 expressions to denote places on the stack or on the
 function's object list for assembly.
 
@@ -1157,10 +1225,30 @@ function's object list for assembly.
 
 # Ideas for the future
 
-## More generic built-ins
+## User-defined setters
 
-* '=' to also set the CAR of a cons.
-* '+' to also append lists.
+~~~lisp
+(setcar x v)
+(= (car x) v)
+~~~
+
+## Multi-purpose operators
+
+### '+' to also append lists
+
+~~~lisp
+; Same:
+(append a b)
+(+ a b)
+~~~
+
+## Objects
+
+Using SLOT-VALUE and abbreviating dot notation on
+associative lists.  ASSOC should be a built-in function to
+avoid performance issues.
+
+?: How about immutables?
 
 ## Directory access
 
@@ -1176,9 +1264,9 @@ function's object list for assembly.
 ### (readdir n): READ directory info.
 ### (writedir n): Write partial directory info.
 
-## Objects
+## Exceptions
 
-Using dot notation and SLOT-VALUE on associative lists.
+Catch stack.
 
 ## Real-time applications
 
@@ -1235,11 +1323,15 @@ Embedded database to the rescue the day for large data sets.
 
 Submit to your fantasy.
 
-## Compressed conses
+## Compressed lists
 
 Conses which only store the CAR if the CDR is the next
 object on the heap.  This can be done at allocation time but
-would make the CDR of a compressed cons immutable and add
-an extra check to each operation.
+would make the list's CDRs immutable.
 
+The disadvantage is that extra checks are required to access
+a CDR.
 
+## Wanted
+
+* Math lib for lists of decimals of arbitrary length.

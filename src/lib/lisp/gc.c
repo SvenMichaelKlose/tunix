@@ -12,11 +12,8 @@
 void FASTCALL
 mark (lispptr x)
 {
-    if (!x)
-        return;
-    if (!MARKED(x)) {
-        if (x)
-            MARK(x);
+    if (x && !MARKED(x)) {
+        MARK(x);
         for (; _CONSP(x); x = CDR(x)) {
             MARK(x);
             mark (CAR(x));
@@ -64,9 +61,6 @@ void
 sweep ()
 {
     xlat = heap_end;
-    // Leave space for at least one relocation.
-    // TODO: Quit program: we're basically out of heap then.
-    //minxlat = heap_free + sizeof (lispptr) * 2;
     while (*s) {
         n = objsize (s);
         if (MARKED(s)) {
@@ -111,7 +105,7 @@ sweep ()
 }
 
 // Sum up gap sizes in relocation table up to the pointer
-// and subtract that from the pointer.
+// and subtract it from the pointer.
 lispptr FASTCALL
 relocate_ptr (char * x)
 {
@@ -164,7 +158,6 @@ gc (void)
 
     // Trace root objects.
     mark (universe);
-    // TODO: %E belongs here, not in UNIVERSE.
     mark (return_sym);
     mark (return_name);
     mark (return_value);

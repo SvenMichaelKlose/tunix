@@ -182,7 +182,7 @@ lisp_init ()
     for (i = 0; i < TYPE_EXTENDED * 2; i++)
         lisp_sizes[i] = 0;
     lisp_sizes[TYPE_CONS] = sizeof (cons);
-    lisp_sizes[TYPE_NUMBER] = sizeof (cons);
+    lisp_sizes[TYPE_NUMBER] = sizeof (number);
     lisp_sizes[TYPE_SYMBOL] = sizeof (symbol);
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);

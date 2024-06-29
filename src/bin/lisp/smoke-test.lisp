@@ -135,7 +135,10 @@
 
 (print 'Recursion)(terpri)
 (print (make-count 50))(terpri)
-;(undef 'make-count)
+; TODO: (undef 'make-count)
+; Messes up the heap with the following GC although it
+; merely assignes a new copy of the universe list, leaving
+; the symbol alone.
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (fn block-test (c)

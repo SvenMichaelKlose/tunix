@@ -18,20 +18,10 @@
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr x;
-extern lispptr args;
-extern lispptr arg1;
-extern lispptr arg2c;
-extern lispptr arg2;
-extern lispptr value;
 extern lispptr tmp;
 int len;
 #ifdef __CC65__
 #pragma zpsym ("x")
-#pragma zpsym ("args")
-#pragma zpsym ("arg1")
-#pragma zpsym ("arg2c")
-#pragma zpsym ("arg2")
-#pragma zpsym ("value")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
 #pragma bss-name (pop)
@@ -98,8 +88,8 @@ last (lispptr x)
 lispptr FASTCALL
 member (lispptr needle, lispptr haystack)
 {
-    DOLIST(x, haystack)
-        if (CAR(x) == needle)
-            return x;
+    DOLIST(tmp, haystack)
+        if (CAR(tmp) == needle)
+            return tmp;
     return nil;
 }

@@ -1043,11 +1043,13 @@ passes.
 
 Transform to metacode:
 * Compiler macro expansion
-* Block folding
 * Quote expansion
 * Quasiuote expansion
+* Argument rename
 * Function collection
+* Scoping
 * Lambda expansion
+* Block folding
 * Expression expansion
 
 Cleaning up at least:
@@ -1332,6 +1334,21 @@ would make the list's CDRs immutable.
 The disadvantage is that extra checks are required to access
 a CDR.
 
+## Fragmented heap
+
+To support static memory allocation, e.g. for native code.
+
+## Processes
+
+Sharing the heap they forked off from.  With pipelining.
+
 ## Wanted
 
 * Math lib for lists of decimals of arbitrary length.
+
+## Shell syntax
+
+~~~
+; Run programs in current directory.
+@ sh files *
+~~~

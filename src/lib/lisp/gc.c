@@ -62,6 +62,10 @@ sweep ()
 {
     xlat = heap_end;
     while (*s) {
+#ifndef NDEBUG
+        if (s >= heap_end)
+            internal_error ("Sweep overflow");
+#endif
         n = objsize (s);
         if (MARKED(s)) {
             if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
@@ -141,6 +145,10 @@ relocate (void)
 
     // Relocate elements on heap.
     for (p = heap_start; *p; p += objsize (p)) {
+#ifndef NDEBUG
+        if (p >= heap_end)
+            internal_error ("Heap reloc overflow");
+#endif
         //if (p == s)
             //p = d; // Jump over sweep gap.
 

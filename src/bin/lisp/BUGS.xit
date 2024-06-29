@@ -1,3 +1,4 @@
 [ ] LOAD does not throw error if file does not exist.
 [ ] GC inconsistency. GC_STRESS does not run.
 [ ] Debugger steps broken.
+[ ] UNDEF is messing up the heap.  Hard to guess why.

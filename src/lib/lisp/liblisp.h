@@ -300,6 +300,8 @@ extern lispptr           poptagw (void);
 #define TYPE_BUILTIN    8
 #define TYPE_EXTENDED   16
 #define TYPE_MASK       31
+#define TYPE_UNUSED1    32
+#define TYPE_UNUSED2    64
 #define TYPE_MARKED     128
 #define TYPE_SPECIAL    (TYPE_SYMBOL | TYPE_EXTENDED)
 

@@ -1,6 +1,78 @@
 TUNIX blog
 ==========
 
+# 2024-06-28
+
+There have been great performance improvements thanks to the
+new type bit layout!  Even on the C16 and VIC-20 the gain is
+impressive but both are running out of heap.
+
+The current road map to a practical development environment:
+
+* Stress-tested garbage collection.
+* Fragmented heap.
+* Debugger working again
+ * Stepping.
+ * Breakpoints.
+ * Watchpoints.
+ * Memory dumps and editing.
+* Dot-notated CAR, CDR and SLOT-VALUE (x., .x, x.y).
+* Built-in ASSOC.
+* User defined setters (e.g. '(= x. v)).
+* SLOT-VALUE access to associative lists, used as objects.
+* Full file and directory support.
+* Environment snapshots.
+* Processes (shared heap, own stacks)
+* Client-server I/O.
+* Screen editing.
+* BielefeldDB-based function repository for on-demand
+  loading.
+* A bloody compiler and bytecode interpreter.
+
+As for as the compiler goes I should be close to having laid
+out the micro-passes.  Clearly, the optimizing middle-end
+will add another bunch.  They are required to clean up the
+mess the previous expansions leave behind.
+
+Where tré[^tre] is using classic STRUCTs, TUNIX Lisp will
+have associative lists accessed via SLOT-VALUE, leading to
+better readability.
+Note to self: tré should be doing that as well.
+
+[^tre]: [tré Lisp transpiler repository)(https://github.com/SvenMichaelKlose/tre/)
+
+So what about the C compiler?  We can savely assume that
+once typing has found its way into the TUNIX Lisp compiler,
+it can also be written in itself with a 6502-CPU back-end.
+But we want to stick with the C world and maybe add other
+languages later.
+
+With on-demand function loading and forgetting more than one
+app can reside on the heap.  With separate stacks there
+would be processes.
+I'm thinking stack objects on the heap.  And processes can
+run in their own symbol package.  That's where forks come
+into play because the common environment should be shared
+at least.
+
+Fragmented heaps would allow static memory allocations with
+very low memory waste and thus to including native code.
+Also new stack types could be introduced if fragments can be
+reallocated or even resized.  For example, a relocating
+pointer stack, which is not seen by the GC. seems to be a
+handy thing if raw data is supposed to be moving with
+garbage collection.
+
+The LAMBDA keyword must be introduced for functions as
+arguments.  They cannot be macro-expanded when quoted, but
+they need quasiquoting to capture variables which a macro
+could be compiling.
+
+It would be nice if there was some way to speed up garbage
+collection though.  It could be done with smaller maximum
+relocation table sizes to avoid longer pauses.  A copying
+GC is out of question.  There's some math to be done.
+
 # 2024-06-26: No expression
 
 Current hit list of wanted features:

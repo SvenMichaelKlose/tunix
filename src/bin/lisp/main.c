@@ -521,7 +521,7 @@ bi_undef (void)
 #endif
     outs ("Undefining "); print (arg1); terpri ();
     PUSH(arg1);
-    universe = copy_list (universe, COPY_LIST, arg1);
+    universe = copy_list (universe, COPY_REMOVE, arg1);
     POP(arg1);
     return nil;
 }

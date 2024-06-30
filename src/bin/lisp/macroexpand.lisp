@@ -1,8 +1,5 @@
 (var *macros* nil)
 
-(fn identity (x)
-  x)
-
 (fn %requote (x)
   ;"Put expression into an unquote."
   (cons (list (caar x) (macroexpand (cadar x)))
@@ -32,8 +29,8 @@
 
 (fn macro? (s)
   ;"Test if symbol is a macro."
-  (and (symbol? s)
-       (member s *macros*)))
+  (? (symbol? s)
+     (member s *macros*)))
 
 (fn macroexpand (x)
   ;"Expand *MACROS* in X."

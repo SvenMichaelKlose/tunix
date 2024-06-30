@@ -1225,6 +1225,74 @@ function's object list for assembly.
 * Collecting object list.
 * Calculating jump destination offsets.
 
+# Internals
+
+## Heap objects
+
+You can get the memory address of any object with RAWPTR.
+You can then use it to PEEK and POKE memory directly.
+
+On 32-bit and 64-bit architecture pointer and number are
+four or eight bytes in size.  The following tables show the
+layouts for 16-bit systems.
+
+All objects start with a type byte:
+
+| Bit | Description                        |
+|-----|------------------------------------|
+|  0  | Type bit for conses                |
+|  1  | Type bit for numbers               |
+|  2  | Type bit for symbols               |
+|  3  | Type bit for built-in functions    |
+|  4  | Extended type (for symbols)        |
+|  5  | Unused                             |
+|  6  | Unused                             |
+|  7  | Mark bit for garbage collection    |
+
+### Cons layout
+
+| Offset | Description         |
+|--------|---------------------|
+|   0    | Type info (value 1) |
+|   1-2  | CAR value           |
+|   3-4  | CDR value           |
+
+### Number layout
+
+| Offset | Description         |
+|--------|---------------------|
+|   0    | Type info (value 2) |
+|   1-4  | Long integer[^long] |
+
+[^long]: Will occupy eight bytes on 64-bit systems.
+
+### Symbol layout
+
+| Offset | Description                         |
+|--------|-------------------------------------|
+|   0    | Type info (value 4 or 20)           |
+|   1    | Name length (0-255)                 |
+|   2-3  | Pointer to next symbol for look-ups |
+|   4-x  | Name (if any)                       |
+
+Adding the extended type bit turn a symbol to a special
+form.  Arguments its function won't be evaluated then.
+
+### Built-in function layout
+
+Built-ins are symbols with a pointer to a descriptor of the
+built-in.  It contains an ASCIIZ pointer to the name,
+another to the character-based argument definition and the
+address of its implementation.
+
+| Offset | Description                         |
+|--------|-------------------------------------|
+|  0     | Type info (value 8)                 |
+|  1-2   | Symbol value                        |
+|  3-4   | Pointer to next symbol for look-ups |
+|  5     | Name length (0-255)                 |
+| (6-x)  | Name (if any)                       |
+
 # Ideas for the future
 
 ## User-defined setters
@@ -1345,10 +1413,3 @@ Sharing the heap they forked off from.  With pipelining.
 ## Wanted
 
 * Math lib for lists of decimals of arbitrary length.
-
-## Shell syntax
-
-~~~
-; Run programs in current directory.
-@ sh files *
-~~~

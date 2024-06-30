@@ -2,7 +2,6 @@
 #ifndef __CBM__
 #define __CBM__
 #endif
-
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
 #endif
@@ -16,10 +15,35 @@
 
 #include "liblisp.h"
 
-lispptr first_symbol;
-lispptr last_symbol;
+#define MIN_RELOC_TABLE_SIZE \
+    (MIN_RELOC_TABLE_ENTRIES * \
+     (sizeof (lispptr) + sizeof (unsigned)))
+#define NEEDS_GC()  (heap_free >= heap_end - size)
+
+// Heap memory areas  Must be consecutive!
+#ifdef FRAGMENTED_HEAP
+struct heap_fragment heaps[] = {
+    { NULL, NULL, NULL },
+
+    // Commodore VIC-20, BLK5
+#ifdef TARGET_VIC20
+    { (void *) 0xa000, (void *) 0xa000, (void *) 0xc000 },
+#endif
+
+    { NULL, NULL, NULL }  // End of heap list.
+};
+#endif // #ifdef FRAGMENTED_HEAP
 
 lispptr t;
+lispptr first_symbol;
+lispptr last_symbol;
+extern char * xlat_start;
+extern char * xlat_end;
+
+#ifdef FRAGMENTED_HEAP
+struct heap_fragment * heap;
+extern struct heap_fragment heaps[];
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -90,19 +114,15 @@ objsize (char * x)
     return s;
 }
 
-#define MIN_RELOC_TABLE_SIZE \
-    ((sizeof (lispptr) + sizeof (unsigned)) * MIN_RELOC_TABLE_ENTRIES)
-#define NEEDS_GC() \
-    (heap_free > heap_end - size - MIN_RELOC_TABLE_SIZE)
-
 // Allocate object.
 lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
     if (NEEDS_GC()) {
-        gc ();
 #ifndef NAIVE
-        if (NEEDS_GC()) {
+        gc ();
+#else
+        if (!gc ()) {
             error (ERROR_OUT_OF_HEAP, "Out of heap.");
             return nil;
         }
@@ -179,6 +199,7 @@ lisp_init ()
     size_t heap_size;
     uchar i;
 
+    // Make object size table.
     for (i = 0; i < TYPE_EXTENDED * 2; i++)
         lisp_sizes[i] = 0;
     lisp_sizes[TYPE_CONS] = sizeof (cons);
@@ -187,17 +208,20 @@ lisp_init ()
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
-    // Make tag stack.
+    // Allocate tag stack.
+    outs ("Tag stack size: "); outn (TAGSTACK_SIZE); terpri ();
 #ifdef TARGET_VIC20
     tagstack_start = (void *) 0x0400;
     tagstack = (void *) 0x0800;
-#else
+#endif
+#ifdef MALLOCD_TAGSTACK
     tagstack_start = malloc (TAGSTACK_SIZE);
     tagstack = tagstack_start + TAGSTACK_SIZE;
 #endif
     tagstack_end = tagstack;
 
-    // Make object stack.
+    // Allocate object stack.
+    outs ("Object stack size: "); outn (STACK_SIZE); terpri ();
 #ifdef TARGET_VIC20
     stack_start = (void *) 0x0800;
     stack_end = (void *) 0x1000;
@@ -209,23 +233,48 @@ lisp_init ()
 #endif
     stack = stack_end;
 
-    // Make heap.
+    // Allocate heap.
 #ifdef __CC65__
     heap_size = _heapmaxavail ();
 #else
     heap_size = HEAP_SIZE;
 #endif
-    heap_start = heap_free = malloc (heap_size);
-    if (!heap_start)
+    outs ("Heap size: "); outn (heap_size); terpri ();
+    if (!(heap_start = malloc (heap_size)))
         return false;
-    *heap_free = 0;
+    heap_free = heap_start;
     heap_end = heap_start + heap_size;
 
-    // Make universe with essential symbols.
+    // Take relocation table from heap.
+    outs ("Reloc table size: "); outn (STACK_SIZE); terpri ();
+    xlat_end = heap_end;
+    heap_end -= MIN_RELOC_TABLE_SIZE;
+    xlat_start = heap_end;
+
+#ifdef FRAGMENTED_HEAP
+    // Update descriptor of malloc()'ed heap.
+    heaps[0].start = heaps[0].free = heap_start;
+    heaps[0].end = heap_end;
+
+    // Mark ends of heaps.
+    for (heap = heaps; heap->start; heap++)
+        *(heap->free) = 0;
+
+    // Cause gc() before first allocation to switch to
+    // the first heap.
+    heap_free = heap_end;
+    heap = heaps;
+#else
+    // Mark end of heap.
+    *heap_free = 0;
+#endif
+
+    // Make universe.
     last_symbol = heap_free;
     t = first_symbol = last_symbol = make_symbol ("t", 1);
     universe = make_cons (t, nil);
 
+    // BLOCK-related symbols.
     go_tag = return_name = return_value = nil;
     return_sym   = make_symbol (NULL, 0);
     go_sym       = make_symbol (NULL, 0);
@@ -233,7 +282,7 @@ lisp_init ()
     block_sym    = make_symbol ("block", 5);
     expand_universe (block_sym);
 
-    // Init input. TODO: Remove (pixel)
+    // Init input. TODO: Move (pixel)
     do_putback = false;
 
     // Clear error info.

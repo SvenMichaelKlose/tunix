@@ -1,7 +1,14 @@
 TUNIX blog
 ==========
 
-# 2024-06-28
+# 2024-06-30
+
+The fragmented heap turned out to become a pool of heaps
+that get filled up one by one and get garbage collected
+together.
+
+
+# 2024-06-29
 
 There have been great performance improvements thanks to the
 new type bit layout!  Even on the C16 and VIC-20 the gain is

@@ -62,16 +62,56 @@
 // Adds extra code.
 #define SKIPPING_SWEEP
 
+// Multiple heaps.
+//#define FRAGMENTED_HEAP
+
+// Use malloc() to allocate the heap.
+#define MALLOCD_HEAP
+
+// Use malloc() to allocate the tag stack.
+// Will be taken from the heap otherwise.
+//#define MALLOCD_TAGSTACK
+
 #ifdef __CC65__
-    #define STACK_SIZE               2048
-    #define TAGSTACK_SIZE            512
-    #define MIN_RELOC_TABLE_ENTRIES  256
-#else
-    #define HEAP_SIZE                (16 * 1024 * 1024)
-    #define STACK_SIZE               (1024 * 1024)
-    #define TAGSTACK_SIZE            (STACK_SIZE / 2)
-    #define MIN_RELOC_TABLE_ENTRIES  TAGSTACK_SIZE
+#define MALLOCD_HEAP
 #endif
+
+#ifdef TARGET_C128
+#define HEAP_SIZE   (24 * 1024U)
+#endif
+
+#ifdef TARGET_C16
+#define HEAP_SIZE   (10 * 1024U)
+#endif
+
+#ifdef TARGET_C64
+#define HEAP_SIZE   (10 * 1024U)
+#endif
+
+#ifdef TARGET_PET
+#define HEAP_SIZE   (10 * 1024U)
+#endif
+
+#ifdef TARGET_PLUS4
+#define HEAP_SIZE   (32 * 1024U)
+#endif
+
+#ifdef TARGET_VIC20
+#define HEAP_SIZE   (32 * 1024U)
+#define FRAGMENTED_HEAP
+#endif
+
+#ifdef TARGET_UNIX
+#define HEAP_SIZE   (128 * 1024U)
+#endif
+
+#if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
+    #error "Please specify HEAP_SIZE with no MALLOCD_HEAP."
+#endif
+
+#define STACK_SIZE               (HEAP_SIZE / 64U)
+#define TAGSTACK_SIZE            (HEAP_SIZE / 64U)
+#define MIN_RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
 
 #if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #define NO_ONERROR
@@ -118,6 +158,12 @@ struct builtin {
     char *       name;
     char *       argdef;
     builtin_fun  func;
+};
+
+struct heap_fragment {
+    char *  start;
+    char *  free;
+    char *  end;
 };
 
 extern lispptr universe;

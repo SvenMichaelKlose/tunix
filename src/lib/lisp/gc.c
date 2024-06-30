@@ -84,6 +84,7 @@ sweep ()
 #ifdef FRAGMENTED_HEAP
     do {
         heap_start = heap->start;
+        heap_free = heap->free;
 #ifndef NDEBUG
         heap_end = heap->end;
 #endif
@@ -123,7 +124,7 @@ sweep ()
                     // Append gap to previous one.
                     *(unsigned *) xlat += n;
                 } else {
-                    // Make new entry in relocation table.
+                    // Memorize this latest gap.
                     last_sweeped = d;
 
                     // Log gap position and size.
@@ -147,6 +148,17 @@ sweep ()
         // Save free pointer.
 #ifdef FRAGMENTED_HEAP
         heap->free = d;
+
+        // Undo address shifting with negative gap entry
+        // in order to not affect the following heap's pointers.
+        xlat -= sizeof (lispptr);
+        *(lispptr *) xlat = heap_free - d;
+        xlat -= sizeof (unsigned);
+        *(unsigned *) xlat = 0;
+
+        // Interrupt sweep if relocation table is full.
+        if (xlat == xlat_start)
+            break;
     } while ((++heap)->start);
 #else
     // Save free pointer.

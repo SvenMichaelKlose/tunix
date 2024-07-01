@@ -75,7 +75,7 @@ simpleio_open (simpleio_chn_t c, char * name, char mode)
     m[0] = mode;
     m[1] = 0;
     handles[c] = fopen (name, m);
-    if (errno) {
+    if (!handles[c]) {
         fprintf (stderr, "'%s': ", name);
         perror ("simpleio-stdlib::open()");
         last_error = c;

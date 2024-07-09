@@ -187,8 +187,7 @@ alloc_symbol (char * str, uchar len)
 lispptr FASTCALL
 make_symbol (char * str, uchar len)
 {
-    tmp = lookup_symbol (str, len);
-    if (!tmp)
+    if (!(tmp = lookup_symbol (str, len)))
         return alloc_symbol (str, len);
     return tmp;
 }
@@ -209,7 +208,6 @@ lisp_init ()
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
     // Allocate tag stack.
-    outs ("Tag stack size: "); outn (TAGSTACK_SIZE); terpri ();
 #ifdef TARGET_VIC20
     tagstack_start = (void *) 0x0400;
     tagstack = (void *) 0x0800;
@@ -221,11 +219,11 @@ lisp_init ()
     tagstack_end = tagstack;
 
     // Allocate object stack.
-    outs ("Object stack size: "); outn (STACK_SIZE); terpri ();
 #ifdef TARGET_VIC20
     stack_start = (void *) 0x0800;
     stack_end = (void *) 0x1000;
-#else
+#endif
+#ifdef MALLOCD_STACK
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)
         return false;
@@ -239,14 +237,12 @@ lisp_init ()
 #else
     heap_size = HEAP_SIZE;
 #endif
-    outs ("Heap size: "); outn (heap_size); terpri ();
     if (!(heap_start = malloc (heap_size)))
         return false;
     heap_free = heap_start;
     heap_end = heap_start + heap_size;
 
     // Take relocation table from heap.
-    outs ("Reloc table size: "); outn (STACK_SIZE); terpri ();
     xlat_end = heap_end;
     heap_end -= MIN_RELOC_TABLE_SIZE;
     xlat_start = heap_end;

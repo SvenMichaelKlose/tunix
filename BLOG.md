@@ -1,12 +1,18 @@
 TUNIX blog
 ==========
 
+# 2024-06-06
+
+An involuntary break again.  That break is a welcome
+opportunity to set up more tests.  A basic pointer check
+should test if the object pointed to makes sense, so we can
+check validity all over the place.
+
 # 2024-06-30
 
 The fragmented heap turned out to become a pool of heaps
 that get filled up one by one and get garbage collected
 together.
-
 
 # 2024-06-29
 

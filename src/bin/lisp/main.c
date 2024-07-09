@@ -814,7 +814,7 @@ main (int argc, char * argv[])
 
     add_builtins (builtins);
 
-    // Prepare quoting.
+    // Make symbols for quoting.
     quote           = make_symbol ("quote", 5);
     expand_universe (quote);
     quasiquote      = make_symbol ("quasiquote", 10);
@@ -824,6 +824,7 @@ main (int argc, char * argv[])
     unquote_spliced = make_symbol ("unquote-spliced", 15);
     expand_universe (unquote_spliced);
 
+    // Make symbols to hold current I/O channel numbers.
     fnin  = STDIN;
     fnout = STDOUT;
     i = make_number (STDIN);

@@ -1,6 +1,7 @@
 ---
 title: "((())) TUNIX Lisp"
-author: "The Garbage-Collected Manual"
+subtitle: "The Garbage-Collected Manual"
+author: "Sven Michael Klose"
 lang: "en"
 titlepage: true
 titlepage-color: "389fff"
@@ -54,6 +55,7 @@ using the cc65 C compiler suite:
 * Commodore C64
 * Commodore Plus4
 * Commodore VIC-20 (+27K)
+* Whatever Unix you're compiling it on.
 
 ## Differences to other dialects
 
@@ -92,9 +94,9 @@ down the rest of the system.  Turn to NEMBER-IF or FIND-IF
 to use another predicate but EQ.
 
 LAMBDA is not around.  Function expressions are quoted when
-used as function arguments.  That makes compiling them to
-'native' function impossible, so the LAMBDA or FUNCTION
-(or FN) keyword has to come back.
+used as arguments to other functoins.  That makes compiling
+them to 'native' function impossible, so the LAMBDA or
+FUNCTION (or FN) keyword has to resurface.
 
 ### Symbols are strings
 
@@ -141,10 +143,9 @@ Performance measurements have to be made.
 # Definitions
 
 FN and VAR assign expressions to a symbol which is then
-added to the universe, a list of symbols the garbage
-collector is starting clean-ups with.  The difference
-between FN and VAR is that VAR evaluates its initialization
-argument.
+added to the universe (a list of symbols the garbage
+collector is starting off with).  The difference between FN
+and VAR is that VAR evaluates its initialization argument.
 
 ~~~lisp
 ; Define permanent, named function.
@@ -158,7 +159,7 @@ argument.
 
 # Functions
 
-Functions are lists starting with an argument definition,
+Functions are lists starting with an argument definition
 followed by a list of expressions.  The result of the last
 expression is returned.  The LAMBDA keyword is not around.
 
@@ -197,7 +198,7 @@ Anonymous functions as arguments need to be quoted though:
 
 ~~~lisp
 ; Add 1 to each number in list.
-(@ '((n) (++ n)) l)
+(@ '((n) (++ n)) '(l 2 3))
 ~~~
 
 The QUASIQUOTE (short form "$") can be used to emulate
@@ -212,10 +213,10 @@ lexical scope:
 
 ## Argument type descriptions (and definitions)
 
-Built-in functions have character-based typed definitions.
-They are also used, padded with spaces, to print argument
-types in this manual most of the time (not only for
-built-ins).
+Built-in functions have character-based and typed argument
+definitions.  They are also used, padded with spaces, to
+print argument types in this manual most of the time (not
+only for built-ins).
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -622,12 +623,34 @@ instead of T when true.
 TODO: Impressive example where it's advantagous.
 
 ### (not x): NIL
+
+Returns T on NIl and NIL otherwise.
+
 ### (atom x): not a cons
+
+Returns its argument if it's an atom, except for NIL for
+which T is returned.
+
 ### (cons? x): cons
+
+Returns its argument if it is a cons, NIL otherwise.
+
 ### (symbol? x): symbol
+
+Returns its argument if it is an atom.  T is returned for
+NIL.  And NIL is returned for conses.
+
 ### (number? x): number
+
+Returns its argument if it is a number or NIL otherwise.
+
 ### (builtin? x): built-in function
+
+Returns its argument if it is a built-in or NIL otherwise.
+
 ### (special? x): special form
+
+Returns its argument if it is a special form or NIL.
 
 ## Symbols
 
@@ -639,7 +662,10 @@ TODO: Impressive example where it's advantagous.
 
 ### (symbol l): Make symbol with name from char list.
 ### (= 's x): Set symbol value.
+
 ### (value s): Get symbol value.
+
+This is what evaluation is doing with symbols.
 
 ## Conses
 
@@ -675,20 +701,61 @@ internally.
 | (remove x l)      | Copy list except element X.         |
 
 ### (butlast l): Copy list but not its last element.
+
+~~~lisp
+(butlast '(1 2 3)) ; (1 2)
+~~~
+
 ### (last l): Return last cons of list.
+
+Return the last cons of a list, not the object it contains.
+
+~~~lisp
+(last '(1 2 3)) ; (3)
+~~~
+
 ### (length l): Return length of list.
+
+~~~lisp
+(length nil)        ; 0
+(length '(1 2 3)))  ; 3
+~~~
 
 ### (member x l): Return cons containing X.
 
-Uses EQ as the predicate.
+~~~lisp
+(member 'b '(a b c)) ; '(b c)
+~~~
+
+Uses EQ as the predicate, so numbers will most probably not
+be found..
+
+~~~lisp
+(member 2 '(1 2 3)) ; NIL
+~~~
+
+Use MEMBER-IF to use EQL with numbers.
 
 ### (remove x l): Copy list except element X.
 
-Uses EQ as the predicate.
+~~~lisp
+(remove 'b '(a b c)) ; '(a c)
+~~~
+
+Uses EQ as the predicate, so REMOVE-IF must be used together
+with EQL to match numbers.
 
 ### (@ f l): Filter list by function
 
+~~~lisp
+(@ ++ '(1 2 3)) ; (2 3 4)
+~~~
+
 Also handles dotted pairs, filtering the last atom if it is not NIL.
+
+~~~lisp
+(@ ++ '(1 2 . 3)) ; (2 3 . 4)
+~~~
 
 ## Numbers
 
@@ -711,8 +778,25 @@ Also handles dotted pairs, filtering the last atom if it is not NIL.
 | (\* n n) | Multiply numbers.                       |
 | (/ n n)  | Divide first number by rest of numbers. |
 | (% n n)  | Modulo of numbers.                      |
+
+These operators take two arguments instead of variadic
+lists.[^arith-future]
+
+[^arith-future]: To be changing in the future.
+
+### Increment/decrement
+
+| Function | Description                             |
+|----------|-----------------------------------------|
 | (++ n)   | Increment (add 1).                      |
 | (-- n)   | Decrement (take 1).                     |
+
+~~~lisp
+(var x 23)
+(++ x)      ; 24
+(-- x)      ; 22
+x           ; 23
+~~~
 
 ### Bit manipulation
 
@@ -752,9 +836,9 @@ Also handles dotted pairs, filtering the last atom if it is not NIL.
 
 ### (read): Read expression.
 ### (print x): Print expression.
-### (open pathname): Open file and return channel.
-### (err): Return number of last error or NIL.
-### (eof): Tell if read reached end of file.
+### (open pathname): Open file and channel.
+### (err): Return number of last I/O error or NIL.
+### (eof): Tell if last read reached end of file.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.
 ### (in): Read char.
@@ -766,15 +850,30 @@ Also handles dotted pairs, filtering the last atom if it is not NIL.
 
 ## Raw machine access
 
-| Function   | Description                    |
-|------------|--------------------------------|
-| (peek a)   | Read byte from memory.         |
-| (poke a b) | Write to memory.               |
-| (sys a)    | Calls machine code subroutine. |
+| Function   | Description                      |
+|------------|----------------------------------|
+| (rawptr x) | Get address of object in memory. |
+| (peek a)   | Read byte from memory.           |
+| (poke a b) | Write to memory.                 |
+| (sys a)    | Calls machine code subroutine.   |
 
+### (rawptr a): Read byte from memory.
 ### (peek a): Read byte from memory.
 ### (poke a b): Write to memory.
 ### (sys a): Calls machine code subroutine.
+
+### Example: Print memory dump
+
+~~~lisp
+(fn hexdump (from len)
+  (dotimes (j (max 1 (/ len 8)))
+    (let nrow (min len 8)
+      (dotimes (i (min len 8))
+        (outhex (peek from) 2)
+        (= from (++ from)))
+      (= len (- len nrow)))
+    (terpri)))
+~~~
 
 ## Error handling
 
@@ -818,9 +917,9 @@ Also handles dotted pairs, filtering the last atom if it is not NIL.
 | (macro? x)      | Test if symbol is in *macros*.  |
 | (macroexpand x) | Expand expression.              |
 
-## (macro s a +b)) | Add macro function to *macros*. |
-## (macro? x)      | Test if symbol is in *macros*.  |
-## (macroexpand x) | Expand expression.              |
+## (macro s a +b)): Add macro function to *macros*.
+## (macro? x): Test if symbol is in *macros*.
+## (macroexpand x): Expand expression.
 
 # Environment
 
@@ -878,6 +977,16 @@ programming languages.
 ### (copy x): Copy tree.
 ### (find x l): Find element X in list.
 
+## Loops
+
+| Macro                       | Desscription             |
+|-----------------------------|--------------------------|
+| (dolist (iter init) . body) | Loop over list elements. |
+| (dotimes (iter n) . body)   | Loop N times.            |
+
+### (dolist (iter init) . body): Loop over list elements.
+### (dotimes (iter n) . body): Loop N times.
+
 ## Stacks
 
 | Macro      | Desscription                     |
@@ -885,8 +994,25 @@ programming languages.
 | (push x l) | Destructively push onto stack L. |
 | (pop l)    | Destructively pop from stack L.  |
 
+Stacks are lists to which elements are pushed to or popped
+off the front.
+
 ### (push x l): Destructively push onto stack L.
+
+~~~lisp
+(var x '(2))
+(push 1 x) ; '(1 2)
+x ; '(1 2)
+~~~
+
 ### (pop l): Destructively pop from stack L.
+
+~~~lisp
+(var x '(1 2))
+(pop 1 x) ; '(1)
+x ; '(2)
+
+~~~
 
 ## Queues
 
@@ -943,38 +1069,32 @@ Interpretation is slow because of:
 Advantages:
 
 * Arguments are placed on the stack where they don't need to
-  be cleaned up on function return.  With user-defined
-  functions, symbol values would need to be restored.
-  Unused stack space is NILled out before garbage
-  collection.
+  be restored up on function return like it's the case with
+  user-defined functions.
 * Arguments to known functions are expanded in advance.
   No need to parse argument definitions any more when
-  compiled functions call compiled functions or built-ins.
+  compiled functions call other compiled or built-in
+  functions.
 * Jump destinations do not need to get looked up via
   list searches.
 * Bytecode is about 70% smaller.
 
 Disadvantages:
 
-* No source-level debugging.
+* No source-level debugging unless implemented.
 
-The compiler is most simple, merely translating
-expressions to bytecodes which describe function calls
-and control flow.
+The compiler is most simple, translating expressions to
+bytecodes that describe function calls and control flow.
 
 Quoted function expressions will not be compiled.
 [^compile-anon-funs]
 
 [^compile-anon-funs]:
   Compiling in such functions would require the LAMBDA
-  keyword to tell them apart from lists.
+  keyword (or another) to tell them apart from lists.
+  FUNCTION or FN are also good options for a keyword.
 
 ## The target machine: Bytecode format
-
-A bytecode functions starts off like a regular symbol,
-with a type, length and value slot.  The length tells the
-number of bytes following the value.  The value points to a
-regular argument definition , e.g. '(first . rest)'.
 
 | Offset | Size  | Description                         |
 |--------|-------|-------------------------------------|
@@ -983,12 +1103,19 @@ regular argument definition , e.g. '(first . rest)'.
 | 2      | 2     | Argument definition                 |
 | 3      | 1     | Local stack size / object list size |
 | 4      | 1     | Code offset                         |
-| 4+     | ?     | Data                                |
-| 4+     | ?     | Raw data                            |
-| 4+     | 1-220 | Code                                |
+| 5      | ?     | Data (garbage-collected objects)    |
+| <5     | ?     | Raw data                            |
+| <5     | 1-220 | Code                                |
 
-Constant objects are always referenced via the object list
-with a maximum of 16 entries (at least one).
+A bytecode function has a memory layout similar to that of
+a symbol, with a type, length and value slot.  The length
+tells the number of bytes following.  The value points to a
+regular argument definition list , e.g.  '(first . rest)'.
+Addtionally the size of the local stack frame, which is
+subtracted from the stack pointer upon function entry, is
+given, followed by the length of a GCed object list and the
+size of a raw data array which contains jump destination
+offsets.  All that is followed by the actual bytecode.
 
 ### Instruction format
 
@@ -1003,7 +1130,11 @@ a code offset table.
 ~~~
 
 * J: type
-* I: Index into target array
+ * 00: unconditional
+ * 01: If %0 is not NIL.
+ * 10: If %0 is NIL.
+ * 11: unused
+* I: Index into raw data table
 
 #### Return from function
 
@@ -1011,10 +1142,11 @@ a code offset table.
 00000000
 ~~~
 
-Assigments have a destination on the stack, a function
-object, a number of arguments and the arguments.
-
 #### Assignment:
+
+Assigments include a destination on the stack, a function
+object and the arguments which are either on the object list
+or on the stack..
 
 ~~~
 0?DDDDDD FFFFFFFF
@@ -1023,7 +1155,10 @@ object, a number of arguments and the arguments.
 * D: Destination on stack
 * F: Function (index into object array)
 
-#### Argument:
+#### Arguments:
+
+Arguments are either indexes into the object array or into
+the stack.
 
 ~~~
 EPIIIIII
@@ -1035,11 +1170,12 @@ EPIIIIII
 
 ## Passes
 
-The compiler first translates the macro-expanded input into
-an assembly-style metacode made of assignments of function
-call return values and jumps.  Function information is also
-gathered for the following optimization and code generation
-passes.
+The TUNIX compiler has a micro-pass architecture, requiring
+only workspace for the current pass.  It translates
+macro-expanded input into an assembly-style metacode made of
+assignments, jumps and jump tags.  Function information is
+also gathered for the following optimization and code
+generation passes.
 
 Transform to metacode:
 * Compiler macro expansion
@@ -1052,8 +1188,14 @@ Transform to metacode:
 * Block folding
 * Expression expansion
 
+After that transformation the resulting code has to be
+cleaned from macro artifacts.
+
 Cleaning up at least:
 * Optimization
+
+Finally the desired code can be generated.  It does not have
+to be bytecode.  It can be anything, e.g. assembly language.
 
 Code generation:
 * Place expansion
@@ -1103,14 +1245,17 @@ that deeper RETURNs with a clashing name have precedence:
     ...))
 ~~~
 
-By translating deeper BLOCK's RETURN statements to metacode
-jumps, only unresolved RETURNs remain for parent BLOCKs.
+By translating deeper BLOCKs' first, RETURN statements are
+resolved in the correct bottom-up order.
+
+The last expression of a BLOCK always assigns to %O which is
+synonymous for return values from then on.
 
 ### Block folding
 
 BLOCKs have been expanded to %BLOCKs to hold the expressions
-together.  They are now spliced into each other to form a
-single expression list for each function.
+together for this pass.  They are now spliced into each
+other to get a single expression list for each function.
 
 ~~~lisp
 ; Input code
@@ -1125,18 +1270,18 @@ single expression list for each function.
      (do-that)))
 
 ; After COMPILER-MACROEXPAND.
-(%= %0 do-thing? x)
+(%= %0 (do-thing? x))
 (%jmp-nil 1)
 (%block
-  (%= %0 do-this)
-  (%= %0 do-that))
+  (= %0 (do-this))
+  (= %0 (do-that)))
 (%tag 1)
 
 ; After BLOCK-FOLD.
-(%= %0 do-thing? x)
+(%= %0 (do-thing? x))
 (%jmp-nil 1)
-(%= %0 do-this)
-(%= %0 do-that)
+(do-this)
+(%= %0 (do-that))
 (%tag 1)
 ~~~
 
@@ -1146,19 +1291,30 @@ Quotes are entries on the function's object list.
 
 ### Quasiuote expansion
 
-QUASIQUOTEs need to be compiled into code using LIST and
+QUASIQUOTEs need to be compiled to code to apply LIST and
 APPEND instead.
 
 ~~~lisp
+; From:
 $(1 2 ,@x 4 5)
 
+; To:
 (append '(1 2) x '(4 5))
 ~~~
 
 ### Function collection
 
 Creates function info objects with argument definitions.
-They are used by optimizing and code generating passes.
+They are used by optimizing and code generating passes and,
+intially, are as simple as this:
+
+~~~lisp
+(fn funinfo ()
+ (@ list '(args)))
+~~~
+
+When extending the compiler, most things will revolve around
+this pittoresque, little thing as we'll see later.
 
 ### Argument renaming
 
@@ -1170,11 +1326,20 @@ This pass solves that issue by renaming all arguments.
 [^bcdbgarg]: A map of the original names must be created if
   debugging is in order.
 
+~~~lisp
+; TODO example of shadowed arguments that would clash on
+; a common list.
+~~~
+
 ### Lambda expansion
 
-Inlines anonymous functions and introduces local variables
-by extending the FUNINFO of the top-level function,
-laying out the local stack frame.
+Inlines anonymous functions and moves their arguments
+to the FUNINFO of the top-level function, which is laying
+out the local stack frame in the process.
+
+~~~lisp
+; TODO example of anonymous function first in expression.
+~~~
 
 ### Expression expansion
 
@@ -1200,14 +1365,14 @@ becomes:
 
 ### Argument expansion
 
-Check arguments and turns rest arguments into consing
+Checks arguments and turns rest arguments into consing
 expressions.
 
 ### Optimization
 
 Basic compression of what the macro expansions messed up
-at least,  Other simple optimizations would be removing
-assignments with no effect or chained jumps.
+at least,  like remove assignments with no effect or chained
+jumps.
 
 ### Place expansion
 
@@ -1216,23 +1381,24 @@ assignments with no effect or chained jumps.
 | (%S offset) | Offset into local stack frame. |
 | (%D offset) | Offset into function data.     |
 
-Here the argument symbols are replaced by %S or %O
-expressions to denote places on the stack or on the
-function's object list for assembly.
+Here the arguments are replaced by %S or %O expressions to
+denote places on the stack or on the function's object list.
 
 ### Code expansion
 
-* Collecting object list.
-* Calculating jump destination offsets.
+These are actually two passes:
+
+* Collecting objects.
+* Calculating jump destinations.
 
 # Internals
 
-## Heap objects
+## Heap object layouts
 
 You can get the memory address of any object with RAWPTR.
 You can then use it to PEEK and POKE memory directly.
 
-On 32-bit and 64-bit architecture pointer and number are
+On 32-bit and 64-bit architecture pointers and numbers are
 four or eight bytes in size.  The following tables show the
 layouts for 16-bit systems.
 
@@ -1249,7 +1415,7 @@ All objects start with a type byte:
 |  6  | Unused                             |
 |  7  | Mark bit for garbage collection    |
 
-### Cons layout
+### Cones
 
 | Offset | Description         |
 |--------|---------------------|
@@ -1257,7 +1423,7 @@ All objects start with a type byte:
 |   1-2  | CAR value           |
 |   3-4  | CDR value           |
 
-### Number layout
+### Numbers
 
 | Offset | Description         |
 |--------|---------------------|
@@ -1266,19 +1432,19 @@ All objects start with a type byte:
 
 [^long]: Will occupy eight bytes on 64-bit systems.
 
-### Symbol layout
+### Symbols
 
 | Offset | Description                         |
 |--------|-------------------------------------|
 |   0    | Type info (value 4 or 20)           |
 |   1    | Name length (0-255)                 |
 |   2-3  | Pointer to next symbol for look-ups |
-|   4-x  | Name (if any)                       |
+|   4-x  | Name (optional)                     |
 
 Adding the extended type bit turn a symbol to a special
 form.  Arguments its function won't be evaluated then.
 
-### Built-in function layout
+### Built-in functions
 
 Built-ins are symbols with a pointer to a descriptor of the
 built-in.  It contains an ASCIIZ pointer to the name,
@@ -1291,7 +1457,7 @@ address of its implementation.
 |  1-2   | Symbol value                        |
 |  3-4   | Pointer to next symbol for look-ups |
 |  5     | Name length (0-255)                 |
-| (6-x)  | Name (if any)                       |
+| (6-x)  | Name (optional)                     |
 
 # Ideas for the future
 

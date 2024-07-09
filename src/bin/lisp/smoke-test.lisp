@@ -1,7 +1,7 @@
 (var x nil)
 
 (print 'gc)(terpri)
-;(print (gc))(out '"B free.")(terpri)
+(print (gc))(out '"B free.")(terpri)
 
 (print 'atom)(terpri)
 (atom 1)
@@ -114,14 +114,14 @@
 (or (== (bit-neg 42) (- 0 43)) (error))
 (print '<<)(terpri)
 (or (== (<< 42 1) 84) (error))
-; TODO: False error "Too many args to builtin: 1".
-; Should be 84.
-;(or (== (print (<< 42 1) 84)) (error))
 (print '>>)(terpri)
 (or (== (>> 23 1) 11) (error))
+(print 'peek)(terpri)
+(or (== 1 (peek (rawptr (cons nil nil))))
+    (error))
 
 (print 'gc)(terpri)
-;(print (gc))(out '"B free.")(terpri)
+(print (gc))(out '"B free.")(terpri)
 
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
@@ -135,6 +135,7 @@
 
 (print 'Recursion)(terpri)
 (print (make-count 50))(terpri)
+
 ; TODO: (undef 'make-count)
 ; Messes up the heap with the following GC although it
 ; merely assignes a new copy of the universe list, leaving

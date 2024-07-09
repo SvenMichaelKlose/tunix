@@ -14,10 +14,10 @@
 (load '"quasiquote.lisp")
 (load '"macroexpand.lisp")
 
-; Required by a compiler.
 (load '"let.lisp")
 (load '"with.lisp")
 (load '"dolist.lisp")
+(load '"dotimes.lisp")
 (load '"prog1.lisp")
 (load '"progn.lisp")
 (load '"unless.lisp")
@@ -32,7 +32,6 @@
 (load '"subseq.lisp")
 (load '"group.lisp")
 
-(terpri)
 (out '"Cleaning up. Please wait...")(terpri)
 (print (gc))(out '"B free.")(terpri)
 ;(= x (macroexpand '(() (dolist (i '(1 2 3)) (print i)))))

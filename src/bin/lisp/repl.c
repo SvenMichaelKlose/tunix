@@ -77,7 +77,6 @@ lisp_repl (char mode)
             goto do_return;
         }
 #endif // #ifndef NO_ONERROR
-        has_error = false;
     }
 #endif // #ifndef NAIVE
 
@@ -90,6 +89,8 @@ lisp_repl (char mode)
             if (mode == REPL_DEBUGGER)
                 print_code_position ();
 #endif
+
+            has_error = false;
 
             // Print prompt with number of recursions.
             if (num_repls)

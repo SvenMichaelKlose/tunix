@@ -40,14 +40,20 @@ extern struct heap_fragment   heaps[];
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+unsigned n;
+
 char * s;   // Source
 char * d;   // Destination
-unsigned n;
+
+// Separate pointers for relocation to keep s & d intact
+// when a garbage collection has to be continued.  That
+// feature has been removed temporarily because.... forgot.
 char * p;
 char * r;
+
 char * xlat;
 char * last_sweeped; // For merging consecutive gaps.
-size_t gap;
+size_t gapsize;
 #ifdef __CC65__
 #pragma zpsym ("s")
 #pragma zpsym ("d")
@@ -55,7 +61,7 @@ size_t gap;
 #pragma zpsym ("p")
 #pragma zpsym ("r")
 #pragma zpsym ("xlat")
-#pragma zpsym ("gap")
+#pragma zpsym ("gapsize")
 #pragma bss-name (pop)
 #endif
 
@@ -121,7 +127,7 @@ sweep ()
 #endif
             } else {
                 if (last_sweeped == d) {
-                    // Append gap to previous one.
+                    // Enlarge immediate previous gap.
                     *(unsigned *) xlat += n;
                 } else {
                     // Memorize this latest gap.
@@ -134,8 +140,10 @@ sweep ()
                     *(unsigned *) xlat = n;
 
                     // Interrupt sweep if relocation table is full.
+#if 0
                     if (xlat == xlat_start)
                         break;
+#endif
                 }
 
                 s += n;
@@ -149,10 +157,10 @@ sweep ()
 #ifdef FRAGMENTED_HEAP
         heap->free = d;
 
-        // Undo address shifting with negative gap entry
-        // in order to not affect the following heap's pointers.
+        // Undo address shifting with negative gap entry in
+        // order to not affect the following heap's pointers.
         xlat -= sizeof (lispptr);
-        *(lispptr *) xlat = heap_free - d;
+        *(lispptr *) xlat = (lispptr) (heap_free - d);
         xlat -= sizeof (unsigned);
         *(unsigned *) xlat = 0;
 
@@ -177,15 +185,15 @@ sweep ()
 lispptr FASTCALL
 relocate_ptr (char * x)
 {
-    gap = 0;
+    gapsize = 0;
     for (r = xlat_end; r != xlat;) {
         r -= sizeof (lispptr);
         if (*(char **) r > x)
             break;
         r -= sizeof (unsigned);
-        gap += *(unsigned *) r;
+        gapsize += *(unsigned *) r;
     }
-    return x - gap;
+    return x - gapsize;
 }
 
 // Relocate pointers on heap and stack.

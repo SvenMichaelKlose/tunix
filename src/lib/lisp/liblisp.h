@@ -26,6 +26,8 @@
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
+// Real object at address 0 to get around addiitonal
+// pointer checks.  PLANNED!
 //#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
@@ -72,28 +74,36 @@
 // Will be taken from the heap otherwise.
 //#define MALLOCD_TAGSTACK
 
+// Use malloc() to allocate the object stack.
+//#define MALLOCD_STACK
+
 #ifdef __CC65__
-#define MALLOCD_HEAP
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_C128
 #define HEAP_SIZE   (24 * 1024U)
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_C16
 #define HEAP_SIZE   (10 * 1024U)
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_C64
 #define HEAP_SIZE   (10 * 1024U)
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_PET
 #define HEAP_SIZE   (10 * 1024U)
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_PLUS4
 #define HEAP_SIZE   (32 * 1024U)
+#define MALLOCD_STACK
 #endif
 
 #ifdef TARGET_VIC20
@@ -103,6 +113,8 @@
 
 #ifdef TARGET_UNIX
 #define HEAP_SIZE   (128 * 1024U)
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
@@ -360,14 +372,14 @@ extern lispptr           poptagw (void);
 
 #define CONS(x)     ((cons *) (x))
 
-#define _ATOM(x)     (!(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)    ((x) && (TYPE(x) & TYPE_CONS))
-#define _SYMBOLP(x)  (!(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x) ((x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)  ((x) && (TYPE(x) & TYPE_NUMBER))
-#define _LISTP(x)    (!(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x) ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)  ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _ATOM(x)        (!(x) || !(TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
+#define _SYMBOLP(x)     (!(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
+#define _LISTP(x)       (!(x) || (TYPE(x) & TYPE_CONS))
+#define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 
 #define EXTENDEDP(x) ((x) && (TYPE(x) & TYPE_EXTENDED))
 

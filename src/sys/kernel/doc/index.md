@@ -349,7 +349,11 @@ reads from device #0.
 When reading from the KERNAL keyboard,
 the input is buffered up to a length of
 80 before or a carriage return is typed.
-Meanwhile, the cursor is blinking.
+Meanwhile, the cursor is blinking.  BASIN
+also treats backspaces, removing the formerly
+input character when reading from the
+keyboard, which does not happen when
+reading from other devices.
 
 On error this routine returns with the
 carry flag set and additional flags in

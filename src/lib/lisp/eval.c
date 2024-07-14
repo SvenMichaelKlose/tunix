@@ -585,3 +585,14 @@ funcall ()
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }
+
+void
+init_eval ()
+{
+    go_tag = return_name = return_value = nil;
+    return_sym   = make_symbol (NULL, 0);
+    go_sym       = make_symbol (NULL, 0);
+    delayed_eval = make_symbol (NULL, 0);
+    block_sym    = make_symbol ("block", 5);
+    expand_universe (block_sym);
+}

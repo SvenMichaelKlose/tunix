@@ -230,3 +230,10 @@ err_open:
     arg1 = make_number (oldin);
     bi_setin ();
 }
+
+void
+init_repl ()
+{
+    do_break_repl = do_continue_repl = false;
+    num_repls = -1;
+}

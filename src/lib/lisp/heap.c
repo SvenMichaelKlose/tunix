@@ -193,7 +193,7 @@ make_symbol (char * str, uchar len)
 }
 
 bool
-lisp_init ()
+init_heap ()
 {
     size_t heap_size;
     uchar i;
@@ -269,14 +269,6 @@ lisp_init ()
     last_symbol = heap_free;
     t = first_symbol = last_symbol = make_symbol ("t", 1);
     universe = make_cons (t, nil);
-
-    // BLOCK-related symbols.
-    go_tag = return_name = return_value = nil;
-    return_sym   = make_symbol (NULL, 0);
-    go_sym       = make_symbol (NULL, 0);
-    delayed_eval = make_symbol (NULL, 0);
-    block_sym    = make_symbol ("block", 5);
-    expand_universe (block_sym);
 
     // Init input. TODO: Move (pixel)
     do_putback = false;

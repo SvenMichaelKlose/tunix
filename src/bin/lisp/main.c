@@ -799,21 +799,9 @@ struct builtin builtins[] = {
     { NULL, NULL }
 };
 
-int
-main (int argc, char * argv[])
+void
+init_quoting (void)
 {
-    lispptr i;
-    lispptr o;
-    (void) argc, (void) argv;
-
-    simpleio_init ();
-    if (!lisp_init ()) {
-        outs ("No memory.");
-        exit (EXIT_FAILURE);
-    }
-
-    add_builtins (builtins);
-
     // Make symbols for quoting.
     quote           = make_symbol ("quote", 5);
     expand_universe (quote);
@@ -823,6 +811,13 @@ main (int argc, char * argv[])
     expand_universe (unquote);
     unquote_spliced = make_symbol ("unquote-spliced", 15);
     expand_universe (unquote_spliced);
+}
+
+void
+init_io_symbols (void)
+{
+    lispptr i;
+    lispptr o;
 
     // Make symbols to hold current I/O channel numbers.
     fnin  = STDIN;
@@ -845,9 +840,23 @@ main (int argc, char * argv[])
     lisp_fnout = make_symbol ("fnout", 5);
     SET_SYMBOL_VALUE(lisp_fnout, o);
     expand_universe (lisp_fnout);
+}
 
-    onerror_sym = make_symbol ("onerror", 7);
-    expand_universe (onerror_sym);
+int
+main (int argc, char * argv[])
+{
+    (void) argc, (void) argv;
+
+    simpleio_init ();
+    if (!init_heap ()) {
+        outs ("No memory.");
+        exit (EXIT_FAILURE);
+    }
+    init_eval ();
+    add_builtins (builtins);
+    init_quoting ();
+    init_io_symbols ();
+    init_onerror ();
 
     load ("env.lisp");
     do_break_repl = do_continue_repl = false;

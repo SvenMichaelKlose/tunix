@@ -165,4 +165,11 @@ print_code_position ()
     terpri ();
 }
 
+void
+init_onerror ()
+{
+    onerror_sym = make_symbol ("onerror", 7);
+    expand_universe (onerror_sym);
+}
+
 #endif // #ifndef NAIVE

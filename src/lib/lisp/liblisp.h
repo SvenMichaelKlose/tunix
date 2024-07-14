@@ -478,7 +478,10 @@ extern unsigned FASTCALL objsize (char *);
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
 extern void     FASTCALL load         (char * pathname);
-extern bool              lisp_init    (void);
+extern bool              init_heap    (void);
+extern void              init_eval    (void);
+extern void              init_onerror (void);
+extern void              init_repl    (void);
 extern void     FASTCALL add_builtins (struct builtin *);
 extern lispptr           debugger     (void);
 

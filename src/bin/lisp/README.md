@@ -6,12 +6,9 @@ lang: "en"
 titlepage: true
 titlepage-color: "389fff"
 titlepage-text-color: "ffffff"
-header-left: "((())) TUNIX Lisp – The Garbage-Collected Manual"
-footer-left: ""
 toc: true
 footnodes-pretty: true
 book: true
-classoption: [oneside]
 ...
 
 # Overview
@@ -24,25 +21,23 @@ It offers:
   mark-and-sweep garbage collection.[^gc]
 * Elegant and embeddable I/O interface.[^io]
 * Supplementary compressed stack.[^stack]
-* Sweet syntactial sugar.[^sugar]
+* Syntactical sugar.[^sugar]
 
 [^gc]: Planned to be made interruptible to some degree.
 [^io]: Instead of providing a file number for each I/O
   operation an input and/or output channel must be selected
   beforehand, bridging the gap between plain standard I/O
   and multi-stream handling without making the API more
-  complex from the start.  Allows TUNIX Lisp to run in
-  extremely limited environments.
-[^stack]: Synchronized with the garbage-collected object
-  stack it holds byte tags instead of larger return
-  addresses and other temporary, raw data.  Also to support
-  architectures with limited CPU stack such as MOS-6502
-  CPUs.  This feature is deeply ingrained in the
-  interpreter's design.
+  complex from the start,  allowing the program to operate
+  in maximally constrained environments.
+[^stack]: It holds byte-sized tags instead of larger return
+  addresses.  Also to support architectures with limited CPU
+  stacks, like those with MOS-6502 CPUs.
 [^sugar]: Dot-notation of the tre compiler and top-level
-  quasi-quoting will be supported.  Dot-notation uses x. for
-  (car x), .x for (cdr x) and x.y for (slot-value x 'y).
-  For now there are short forms of quotes.
+  quasi-quoting will be supported.  Dot-notation uses "x."
+  for "(car x)", ".x" for "(cdr x)" and "x.y" for
+  "(slot-value x 'y)".  For now there are short forms of
+  quotes.
 
 See ROADMAP and TODO files for details on the status of this
 project.
@@ -59,9 +54,9 @@ using the cc65 C compiler suite:
 
 ## Differences to other dialects
 
-TUNIX Lisp is very much like any other dialect.  Here are
-some things that raise an eyebrow when seeing them the first
-time:
+The TUNIX Lisp dialect is very much like any other.  Here
+are some things that raise an eyebrow when seeing them the
+first time, but can be cleared up quickly:
 
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
@@ -75,9 +70,9 @@ time:
 | #\\A                   | \\A             |
 
 The backquote cannot be used as an abbreviation for
-QUASIQUOTE or support for old machines would be messy.
-The dollar sign is also convenient to use and not needed
-by anything else.
+QUASIQUOTE or support for old machines would be messy.  The
+dollar sign is also convenient to use and not needed by
+anything else.
 
 The MAKE- prefix is used less regularly.  Instead, maker
 functions should be understood as casting from one type
@@ -94,7 +89,7 @@ down the rest of the system.  Turn to NEMBER-IF or FIND-IF
 to use another predicate but EQ.
 
 LAMBDA is not around.  Function expressions are quoted when
-used as arguments to other functoins.  That makes compiling
+used as arguments to other functions.  That makes compiling
 them to 'native' function impossible, so the LAMBDA or
 FUNCTION (or FN) keyword has to resurface.
 
@@ -215,8 +210,8 @@ lexical scope:
 
 Built-in functions have character-based and typed argument
 definitions.  They are also used, padded with spaces, to
-print argument types in this manual most of the time (not
-only for built-ins).
+describe arguments in this manual for all kinds of
+functions, macros and special forms.
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -227,9 +222,14 @@ only for built-ins).
 |  s   | symbol                                  |
 |  a   | memory address (positive number)        |
 |  b   | byte value                              |
-|  +   | any number of following type (eg. "+n") |
-|  ?   | optional following type (eg. "?x")      |
-|  '   | unevaluated following type (eg. "'+x")  |
+
+They may also have prefixes:
+
+| Prefix | Description           |
+|--------|-----------------------|
+|   +X   | any number of type X  |
+|   ?X   | optional              |
+|   'X   | unevaluated           |
 
 # Input/output
 
@@ -246,7 +246,7 @@ READ and PRINT.  Strings and chars have dedicated formats:
 | "string"             | String.  Escape is "\\".       |
 | \\A                  | Character value.               |
 
-Both also support abbreviations:
+READ and PRINT also support abbreviations if compiled in:
 
 | Expression         | Abbreviation |
 |--------------------|--------------|
@@ -299,9 +299,9 @@ top-level expression and the erroraneous expression
 highlighted inside it by triple underscores ('___').
 
 ~~~
-* (fnords)
+* (not-a-fun)
 Error #5: Not a fun.
-In : (___ fnords ___)
+In : (___ not-a-fun ___)
 1*
 ~~~
 
@@ -311,10 +311,10 @@ current expression.  An alternative value has to be supplied
 instead with QUIT:
 
 ~~~
-* (fnords)
+* (not-a-fun)
 Error #5: Not a fun.
-In : (___ fnords ___)
-1* (quit 'fords)
+In : (___ not-a-fun ___)
+1* (quit 'a-fun)
 ~~~
 
 but until then you can execute any code you wish, using the
@@ -327,7 +327,7 @@ continue with the next top-level REPL or LOAD expression by
 calling NOERROR.
 
 Unlike the REPL, the debugger also takes one-character
-commands (which the regular REPL would interpret as symbols)
+commands which the regular REPL would interpret as symbols
 to continue through the code step by step.
 
 | Command | Description                            |
@@ -342,15 +342,15 @@ expression is erroraneous without having been fixed using
 command 'e'.
 
 ~~~
-* (fnords)
+* (not-a-fun)
 Error #5: Not a fun.
-In: (or (___ fnords ___) (other))
+In: (or (___ not-a-fun ___) (other))
 1* (identity e)
 content-of-symbol-e
-1* 'fords
-fords
+1* 'a-fun
+a-fun
 1* e
-In: (or (fnords) ___ (other) ___)
+In: (or (a-fun) ___ (other) ___)
 1*
 ~~~
 
@@ -522,7 +522,7 @@ which is then the default.
 
 ### (and +x)
 
-Evaluates all arguments in order unless one evalutates to
+Evaluates all arguments in order unless one evaluates to
 NIL.  The value of the last evaluation is returned.
 
 ~~~lisp
@@ -532,7 +532,7 @@ NIL.  The value of the last evaluation is returned.
 
 ### (or +x)
 
-Evaluates all arguments unless one evalutates to non-NIL.
+Evaluates all arguments unless one evaluates to non-NIL.
 The value of the last evaluation is returned.
 
 ~~~lisp
@@ -911,7 +911,7 @@ x           ; 23
 
 # Macro system
 
-| Function        | Desscription                    |
+| Function        | Description                     |
 |-----------------|---------------------------------|
 | (macro s a +b)) | Add macro function to *macros*. |
 | (macro? x)      | Test if symbol is in *macros*.  |
@@ -939,7 +939,7 @@ programming languages.
 
 ## Control flow macros
 
-| Macro                | Desscription                     |
+| Macro                | Description                      |
 |----------------------|----------------------------------|
 | (prog1 +b)           | Return result of first.          |
 | (progn +b)           | Return result of last.           |
@@ -957,7 +957,7 @@ programming languages.
 
 ## Lists
 
-| Function      | Desscription                        |
+| Function      | Description                         |
 |---------------|-------------------------------------|
 | (list +x)     | Return argument list.               |
 | (list? x)     | Test if argument is NIL or a cons.  |
@@ -979,7 +979,7 @@ programming languages.
 
 ## Loops
 
-| Macro                       | Desscription             |
+| Macro                       | Description              |
 |-----------------------------|--------------------------|
 | (dolist (iter init) . body) | Loop over list elements. |
 | (dotimes (iter n) . body)   | Loop N times.            |
@@ -989,7 +989,7 @@ programming languages.
 
 ## Stacks
 
-| Macro      | Desscription                     |
+| Macro      | Description                      |
 |------------|----------------------------------|
 | (push x l) | Destructively push onto stack L. |
 | (pop l)    | Destructively pop from stack L.  |
@@ -1016,7 +1016,7 @@ x ; '(2)
 
 ## Queues
 
-| Function      | Desscription                 |
+| Function      | Description                  |
 |---------------|------------------------------|
 | (make-queue)  | Make queue.                  |
 | (enqueue c x) | Add object X to queue C.     |
@@ -1026,7 +1026,7 @@ x ; '(2)
 
 ## Sets
 
-| Function               | Desscription                   |
+| Function               | Description                    |
 |------------------------|--------------------------------|
 | (unique x)             | Make list a set.               |
 | (adjoin x set)         | Add element to set.            |
@@ -1046,7 +1046,7 @@ x ; '(2)
 
 ## Associative lists
 
-| Function        | Desscription                       |
+| Function        | Description                        |
 |-----------------|------------------------------------|
 | (acons alist c) | Add key/value to associative list. |
 | (assoc x l)     | Return list that start with X.     |
@@ -1178,6 +1178,7 @@ also gathered for the following optimization and code
 generation passes.
 
 Transform to metacode:
+
 * Compiler macro expansion
 * Quote expansion
 * Quasiuote expansion
@@ -1192,12 +1193,14 @@ After that transformation the resulting code has to be
 cleaned from macro artifacts.
 
 Cleaning up at least:
+
 * Optimization
 
 Finally the desired code can be generated.  It does not have
 to be bytecode.  It can be anything, e.g. assembly language.
 
 Code generation:
+
 * Place expansion
 * Code macro expansion
 
@@ -1209,10 +1212,10 @@ AND, OR) to these assembly-level jump and tag expressions:
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
 | (%= d f +x)  | Call F with X and assign result to D. |
-| (%JMP s)     | Unconditional jump.                   |
-| (%JMP-NIL s) | Jump if %0 is NIL.                    |
-| (%JMP-T s)   | Jump if ~0 is not NIL.                |
-| (%TAG s).    | Jump destination.                     |
+| (%jmp s)     | Unconditional jump.                   |
+| (%jmp-nil s) | Jump if %0 is NIL.                    |
+| (%jmp-t s)   | Jump if %0 is not NIL.                |
+| (%tag s).    | Jump destination.                     |
 
 Jump tags must be EQ.
 
@@ -1227,6 +1230,7 @@ Jump tags must be EQ.
 (%jmp-nil 1)
 (%= %0 b)
 (%jmp 2)
+(%tag 1)
 (%= %0 c)
 (%tag 2)
 ~~~
@@ -1310,7 +1314,7 @@ intially, are as simple as this:
 
 ~~~lisp
 (fn funinfo ()
- (@ list '(args)))
+  (@ list '(args)))
 ~~~
 
 When extending the compiler, most things will revolve around
@@ -1579,3 +1583,141 @@ Sharing the heap they forked off from.  With pipelining.
 ## Wanted
 
 * Math lib for lists of decimals of arbitrary length.
+
+# Glossary
+
+### Anonymous Function
+
+A function without a name, often used as a parameter to
+higher-order functions.  These functions do not require
+quoting when used directly but must be quoted when passed
+as arguments.
+
+### Argument Definition
+
+The specification of parameters that a function, macro or
+special form takes.  Arguments can be defined with
+character codes indicating their types and may include
+prefixes for optional or unevaluated arguments.
+
+### Built-in Function
+
+A function that is implemented within the Lisp interpreter
+itself rather than being defined by the user.  These
+functions typically offer basic operations and access to
+system-level features.
+
+### Bytecode A form of intermediate code that is more
+abstract than machine code but less abstract than
+high-level source code.  TUNIX Lisp compiles functions into
+bytecode for efficient execution.
+
+### Car and Cdr
+
+Historical terms referring to the first and second elements
+of a cons cell, respectively. `car` returns the first
+element, and `cdr` returns the second element of a cons
+cell.
+
+### Channel
+
+An abstraction for input/output operations, allowing for
+switching between different streams of data.  Channels are
+managed using functions like `setin` and `setout`.
+
+### Cons Cell
+
+A fundamental data structure in Lisp, consisting of two
+parts: the `car` and the `cdr`.  Cons cells are used to
+build lists and other complex data structures.
+
+### Dot Notation
+
+A syntactical convenience in TUNIX Lisp for accessing
+elements of lists and objects.  For example, `x.y` is
+shorthand for `(slot-value x 'y)`.
+
+### Garbage Collection
+
+The process of automatically identifying and reclaiming
+memory that is no longer in use by the program.  TUNIX Lisp
+uses a compacting mark-and-sweep garbage collector.
+
+### Heap
+
+A region of memory used for dynamic allocation of objects.
+The heap grows as new objects are created, and garbage
+collection is triggered when memory runs low.
+
+### Interpreter
+
+A program that executes instructions written in a
+programming language without requiring them to be compiled
+into machine code.  TUNIX Lisp includes an interpreter for
+running Lisp code.
+
+### Lambda
+
+A keyword used in many Lisp dialects to define anonymous
+functions.  In TUNIX Lisp, the keyword is omitted, and
+function expressions are quoted instead.
+
+### List
+
+A sequence of elements, typically linked together using
+cons cells.  Lists are a primary data structure in Lisp and
+can be manipulated using various built-in functions.
+
+### Mark-and-Sweep
+
+A garbage collection algorithm that marks active objects
+and sweeps away those that are not reachable from the root
+set.  TUNIX Lisp uses a compacting version of this
+algorithm.
+
+### Quasiquote
+
+A feature that allows for partially quoted expressions,
+enabling easy construction of lists with evaluated and
+unevaluated parts.  In TUNIX Lisp, quasiquote is represented
+by the dollar sign `$`.
+
+### Procedure
+
+A general term that refers to any callable entity,
+including functions, macros, and special forms.  Procedures
+are fundamental building blocks in Lisp, allowing for
+modular and reusable code.
+
+### REPL (Read-Eval-Print Loop)
+
+An interactive programming environment that reads user
+input, evaluates it, prints the result, and then waits for
+more input.  The REPL is a key feature of the Lisp
+programming experience.
+
+### Special Form
+
+A construct that is evaluated in a unique way, often
+involving special syntax or behavior that cannot be
+replicated by regular functions.  Examples include `quote`,
+`?`, and `lambda`.
+
+### Symbol
+
+A basic data type in Lisp used to represent identifiers.
+Symbols can have names and values, and are often used as
+variable names.  In TUNIX Lisp symbols are also used as
+strings.
+
+### Universe
+
+The root set of all symbols known to the garbage collector.
+This list of symbols is where garbage collection begins,
+ensuring that all active objects are retained.
+
+### Variable
+
+An identifier associated with a value.  Variables can be
+defined using the `var` special form and can be assigned
+new values using the `=` function.

@@ -471,7 +471,7 @@ Returns argument unevaluated.  Suppresses replacing symbols
 by their values on evaluation.
 
 ~~~lisp
-; Define variable X, containing symbol string "What a day!".
+; Define variable X, containing the string "What a day!".
 (var x "What a day!")
 x         -> "What a day!"
 (quote x) -> x
@@ -480,8 +480,10 @@ x         -> "What a day!"
 
 ### (apply fun . args): Apply function.
 
-Calls function FUN.  The last argument in ARGS must be a
-list which is appended to the previous arguments.
+Calls function FUN.  Unlike the rather straightforward
+FUNCALL, which takes its arguments as provided, APPLY
+expects the last element of ARGS to be a list, which is
+then appended to the previous elements:
 
 ~~~lisp
 (fn list x
@@ -491,7 +493,16 @@ list which is appended to the previous arguments.
 (apply list 1 2 '(3 4)) -> (1 2 3 4)
 ~~~
 
+The reason for this is that it takes away the need to do
+that kind of concatenation oneself repeatedly, which would
+happen a lot otherwise.
+
 ### (funcall f +x): Call function.
+
+Basically calls function F with the list of arguments X.
+
+~~~lisp
+~~~
 
 ### (eval x): Evaluate expression.
 

@@ -14,6 +14,8 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+extern void test (void);
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -842,6 +844,8 @@ init_io_symbols (void)
     expand_universe (lisp_fnout);
 }
 
+extern void test (void);
+
 int
 main (int argc, char * argv[])
 {
@@ -852,6 +856,7 @@ main (int argc, char * argv[])
         outs ("No memory.");
         exit (EXIT_FAILURE);
     }
+    test ();
     init_eval ();
     add_builtins (builtins);
     init_quoting ();

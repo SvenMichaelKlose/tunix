@@ -1,6 +1,6 @@
 (macro dotimes (init . body)
-  (with ((i    init.)
-         (n    .init.)
+  (with ((i    (car init))
+         (n    (cadr init))
          (g    (symbol))
          (stag (symbol))
          (etag (symbol)))
@@ -8,6 +8,7 @@
        (block nil
          (= ,i ,g)
          stag
+         (= ,i (-- ,i))
          (? (<= ,i 0)
             (go etag))
          ,@body
@@ -15,4 +16,4 @@
          etag))))
 
 (print 'dotimes)(terpri)
-(dotimes (i 10) (print i))
+(eval (macroexpand '(dotimes (i 10) (print i))))

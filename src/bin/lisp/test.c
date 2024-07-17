@@ -31,23 +31,23 @@ cons * root_cons;
 void
 test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr o3, size_t s3)
 {
-    lispptr start = o1;
-    lispptr end = o2 + s3;
+    char *start = o1;
+    char *end = (char *) o2 + s3;
 
     printf (">>> Test: '%s'.\n", info);
-    printf ("Pos o1: %d\n", o1 - start);
+    printf ("Pos o1: %d\n", (char *) o1 - start);
     printf ("Sizeof o1: %d\n", s1);
-    printf ("Pos o2: %d\n", o2 - start);
-    assert(o1 + s1 == o2);
-    printf ("Pos o3: %d\n", o3 - start);
+    printf ("Pos o2: %d\n", (char *) o2 - start);
+    assert((char *) o1 + s1 == o2);
+    printf ("Pos o3: %d\n", (char *) o3 - start);
     printf ("Sizeof o3: %d\n", s3);
-    assert(o2 + s2 == o3);
+    assert((char *) o2 + s2 == o3);
     SETCAR(root_cons, o1);
     SETCDR(root_cons, o3);
     gc ();
-    if (((lispptr) heap_free - end))
-        printf ("Difference to expected pointer address: %d\n", (lispptr) heap_free - end);
-    assert((lispptr) heap_free == end);
+    if ((heap_free - end))
+        printf ("Difference to expected pointer address: %d\n", heap_free - end);
+    assert(heap_free == end);
     printf ("<<< Test '%s' passed.\n", info);
     SETCAR(root_cons, nil);
     SETCDR(root_cons, nil);

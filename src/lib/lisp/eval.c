@@ -247,7 +247,7 @@ next_block_statement:
     // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
-        badef = bfun->argdef;
+        badef = (char *) bfun->argdef;
 
         // Built-in without argument-definition.
         if (!badef) {

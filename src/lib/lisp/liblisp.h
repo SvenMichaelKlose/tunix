@@ -167,15 +167,15 @@ typedef struct _symbol {
 } symbol;
 
 struct builtin {
-    char *       name;
-    char *       argdef;
+    const char * name;
+    const char * argdef;
     builtin_fun  func;
 };
 
 struct heap_fragment {
-    char *  start;
-    char *  free;
-    char *  end;
+    char * start;
+    char * free;
+    char * end;
 };
 
 extern lispptr universe;

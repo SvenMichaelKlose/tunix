@@ -113,15 +113,19 @@
 
 #ifdef TARGET_UNIX
 #define HEAP_SIZE   (128 * 1024U)
+#define STACK_SIZE  (HEAP_SIZE / 16U)
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
-    #error "Please specify HEAP_SIZE with no MALLOCD_HEAP."
+    #error "Neither HEAP_SIZE or MALLOCD_HEAP defined."
 #endif
 
-#define STACK_SIZE               (HEAP_SIZE / 64U)
+#ifndef TARGET_UNIX
+#define STACK_SIZE  (HEAP_SIZE / 64U)
+#endif
+
 #define TAGSTACK_SIZE            (HEAP_SIZE / 64U)
 #define MIN_RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
 

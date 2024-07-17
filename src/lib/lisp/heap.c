@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -119,10 +120,9 @@ lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
     if (NEEDS_GC()) {
-#ifndef NAIVE
         gc ();
-#else
-        if (!gc ()) {
+#ifndef NAIVE
+        if (NEEDS_GC()) {
             error (ERROR_OUT_OF_HEAP, "Out of heap.");
             return nil;
         }

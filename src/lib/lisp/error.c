@@ -19,15 +19,6 @@ error (char code, char * msg)
     has_error = code;
 }
 
-#ifdef __CC65__
-char *
-stpcpy (char * dst, char * src)
-{
-    strcpy (dst, src);
-    return dst + strlen (src);
-}
-#endif
-
 void FASTCALL
 internal_error (char * msg)
 {

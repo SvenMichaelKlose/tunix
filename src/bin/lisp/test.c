@@ -1,3 +1,6 @@
+// TODO: Tests compiled separately to run each one in
+// a defined state.
+
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #endif
@@ -26,21 +29,29 @@ extern char * heap_free;
 cons * root_cons;
 
 void
-test_triplet (lispptr o1, size_t s1, lispptr o2, lispptr o3, size_t s3)
+test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr o3, size_t s3)
 {
     lispptr start = o1;
     lispptr end = o2 + s3;
 
+    printf (">>> Test: '%s'.\n", info);
     printf ("Pos o1: %d\n", o1 - start);
-    printf ("Pos o2: %d\n", o2 - start);
-    printf ("Pos o3: %d\n", o3 - start);
     printf ("Sizeof o1: %d\n", s1);
+    printf ("Pos o2: %d\n", o2 - start);
+    assert(o1 + s1 == o2);
+    printf ("Pos o3: %d\n", o3 - start);
     printf ("Sizeof o3: %d\n", s3);
+    assert(o2 + s2 == o3);
     SETCAR(root_cons, o1);
-    SETCAR(root_cons, o3);
+    SETCDR(root_cons, o3);
     gc ();
-    printf ("%d\n", (lispptr) heap_free - end);
+    if (((lispptr) heap_free - end))
+        printf ("Difference to expected pointer address: %d\n", (lispptr) heap_free - end);
     assert((lispptr) heap_free == end);
+    printf ("<<< Test '%s' passed.\n", info);
+    SETCAR(root_cons, nil);
+    SETCDR(root_cons, nil);
+    gc ();
 }
 
 void
@@ -67,27 +78,24 @@ test ()
     heap_fill = heap_free;
 
     // Again for each object: first add an object that is
-    // linked to the universe, then add the object that
-    // will be removed, followed by another object that is
-    // connected.
-    // TOOD: Permutate over all types for each of the
-    // three positions.
+    // linked to the universe, then add the object that is not
+    // linked to the root_cons and will be removed, followed by
+    // another object that is connected.
+    // TOOD: Permutate over all combinations of types for each
+    // of the three positions.
 
     o1 = make_cons (nil, nil);
     o2 = make_cons (nil, nil);
     o3 = make_cons (nil, nil);
-    test_triplet (o1, sizeof (cons), o2, o3, sizeof (cons));
-    outs ("Test 1 passed."); terpri ();
+    test_triplet ("conses", o1, sizeof (cons), o2, sizeof (cons), o3, sizeof (cons));
 
     o1 = make_number (1);
     o2 = make_number (2);
     o3 = make_number (3);
-    test_triplet (o1, sizeof (number), o2, o3, sizeof (number));
-    outs ("Test 2 passed."); terpri ();
+    test_triplet ("numbers", o1, sizeof (number), o2, sizeof (number), o3, sizeof (number));
 
-    o1 = make_symbol ("1", nil);
-    o2 = make_symbol ("2", nil);
-    o3 = make_symbol ("3", nil);
-    test_triplet (o1, sizeof (symbol) + 1, o2, o3, sizeof (symbol) + 1);
-    outs ("Test 3 passed."); terpri ();
+    o1 = make_symbol ("1", 1);
+    o2 = make_symbol ("2", 1);
+    o3 = make_symbol ("3", 1);
+    test_triplet ("symbols", o1, sizeof (symbol) + 1, o2, sizeof (symbol) + 1, o3, sizeof (symbol) + 1);
 }

@@ -267,7 +267,7 @@ extern bool do_invoke_debugger;
 #pragma bss-name (pop)
 #endif
 
-#define nil 0
+#define nil ((lispptr) 0)
 
 #ifdef GCSTACK_CHECKS
 #define STACK_CHECK_OVERFLOW() \

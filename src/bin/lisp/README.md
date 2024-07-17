@@ -69,24 +69,23 @@ first time, but can be cleared up quickly:
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
 
-The backquote cannot be used as an abbreviation for
-QUASIQUOTE or support for old machines would be messy.  The
-dollar sign is also convenient to use and not needed by
-anything else.
+Instead of the backquote (`) the dollar sign ($) is used
+as the abbreviation for QUASIQUOTE, because the backquote
+is not part of the charsets of old machines TUNIX Lisp
+intends to support.
 
-The MAKE- prefix is used less regularly.  Instead, maker
-functions should be understood as casting from one type
-(or nothing) to another.
+The MAKE- prefix is used less regularly.  Instead, it
+might be helpful to think of those function as casts
+from some type (or nothing).
 
 TUNIX also uses more functions with names that contain
 special characters to make them more brief and culturally
 independend.
 
-MEMBER and FIND compare with EQ instead of EQL (so numbers
-will not match by value) as these functions are used
-internally and require high preformance in order to not drag
-down the rest of the system.  Turn to NEMBER-IF or FIND-IF
-to use another predicate but EQ.
+MEMBER and FIND are comparing with EQ instead of EQL as these
+functions are used internally as well and need to be fast.
+You'll have to Use NEMBER-IF or FIND-IF together with EQL to
+match numbers by value.
 
 LAMBDA is not around.  Function expressions are quoted when
 used as arguments to other functions.  That makes compiling
@@ -109,8 +108,9 @@ lists.
 ### Heap
 
 All objects are stored on a growing heap, so allocations are
-as fast as bumping the end-of-heap pointer plus boundary
-check to trigger the garbage collector just in time.
+fast as they require only bumping up the end-of-heap pointer
+and a boundary check to trigger garbage collection when
+needed.
 
 | Data type              | heap  |
 |------------------------|-------|
@@ -156,7 +156,10 @@ and VAR is that VAR evaluates its initialization argument.
 
 Functions are lists starting with an argument definition
 followed by a list of expressions.  The result of the last
-expression is returned.  The LAMBDA keyword is not around.
+expression is returned.
+
+The LAMBDA keyword is not around at the moment but it has
+to be to make the compiler work.
 
 ~~~lisp
 ; Function with no arguments, returning symbol NIL.
@@ -210,8 +213,8 @@ lexical scope:
 
 Built-in functions have character-based and typed argument
 definitions.  They are also used, padded with spaces, to
-describe arguments in this manual for all kinds of
-functions, macros and special forms.
+describe arguments in this manual for all procedures
+(functions, macros and special forms).
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -240,11 +243,11 @@ TUNIX Lisp provides I/O by the expression or character.
 Expressions can be read and written using built-in functions
 READ and PRINT.  Strings and chars have dedicated formats:
 
-| Type format examples | Description                    |
-|----------------------|--------------------------------|
-| (a . d)              | "Dotted pair"; a literal cons. |
-| "string"             | String.  Escape is "\\".       |
-| \\A                  | Character value.               |
+| Type format examples | Description                     |
+|----------------------|---------------------------------|
+| (a . d)              | "dotted pair" (must be quoted), |
+| "string"             | String.  Escape is "\\".        |
+| \\A                  | Character value.                |
 
 READ and PRINT also support abbreviations if compiled in:
 
@@ -292,11 +295,12 @@ New channels are created by OPEN to access files:
 
 # Error handling
 
-The debugger is invoked if an error occurs and no
-user-defined function has been defined.  The debugger shows
-a description of the error, followed by the current
-top-level expression and the erroraneous expression
-highlighted inside it by triple underscores ('___').
+If an error occurs, the debugger is invoked by default.
+It shows a description of the error, followed by the current
+top-level expression, and the erroraneous expression
+emphasized inside it by triple underscores ('\_\_\_'), also
+by default to support most simple terminals.  Here is an
+example:
 
 ~~~
 * (not-a-fun)
@@ -305,7 +309,8 @@ In : (___ not-a-fun ___)
 1*
 ~~~
 
-The debugger takes commands like the regular REPL.  Since an
+The debugger takes commands like the regular REPL plus
+single character commands for convenience.  Since an
 error occured the debugger will not continue with the
 current expression.  An alternative value has to be supplied
 instead with QUIT:

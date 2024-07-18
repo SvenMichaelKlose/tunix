@@ -213,7 +213,7 @@ relocate (void)
         // Relocate elements on heap.
         for (p = heap_start; *p; p += objsize (p)) {
 #ifndef NDEBUG
-            if (p >= xlat_end)
+            if (p >= heap_end)
                 internal_error ("Heap reloc overflow");
 #endif
             if (_CONSP(p)) {

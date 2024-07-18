@@ -126,8 +126,8 @@
 #define STACK_SIZE  (HEAP_SIZE / 64U)
 #endif
 
-#define TAGSTACK_SIZE            (HEAP_SIZE / 64U)
-#define MIN_RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
+#define TAGSTACK_SIZE        (HEAP_SIZE / 64U)
+#define RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
 
 #if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #define NO_ONERROR

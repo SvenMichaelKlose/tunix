@@ -16,9 +16,7 @@
 
 #include "liblisp.h"
 
-#define MIN_RELOC_TABLE_SIZE \
-    (MIN_RELOC_TABLE_ENTRIES * \
-     (sizeof (lispptr) + sizeof (unsigned)))
+#define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (unsigned)))
 #define NEEDS_GC()  (heap_free >= heap_end - size)
 
 // Heap memory areas  Must be consecutive!
@@ -231,6 +229,12 @@ init_heap ()
 #endif
     stack = stack_end;
 
+    // Allocate relocation table.
+    xlat_start = malloc (RELOC_TABLE_SIZE);
+    if (!xlat_start)
+        return false;
+    xlat_end = xlat_start + RELOC_TABLE_SIZE;
+
     // Allocate heap.
 #ifdef __CC65__
     heap_size = _heapmaxavail ();
@@ -241,11 +245,6 @@ init_heap ()
         return false;
     heap_free = heap_start;
     heap_end = heap_start + heap_size;
-
-    // Take relocation table from heap.
-    xlat_end = heap_end;
-    heap_end -= MIN_RELOC_TABLE_SIZE;
-    xlat_start = heap_end;
 
 #ifdef FRAGMENTED_HEAP
     // Update descriptor of malloc()'ed heap.

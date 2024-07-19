@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#ifndef __CC65__
+#include <signal.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
@@ -22,13 +25,12 @@ error (char code, char * msg)
 void FASTCALL
 internal_error (char * msg)
 {
-    error (ERROR_INTERNAL, msg);
-    print_code_position ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
-#else
-    while (1);
 #endif
+    error (ERROR_INTERNAL, msg);
+    print_code_position ();
+    while (1);
 }
 
 void

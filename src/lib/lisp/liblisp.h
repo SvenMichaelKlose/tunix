@@ -31,13 +31,16 @@
 //#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Print current expression to eval().
-//#define VERBOSE_EVAL
+#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
+
+// Print objects traversed during GC sweep phase.
+#define DUMP_SWEEP
 
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR
@@ -116,6 +119,9 @@
 #define STACK_SIZE  (HEAP_SIZE / 16U)
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
+#ifndef NDEBUG
+    #define SLOW
+#endif
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
@@ -454,6 +460,12 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #define ERROR_USER          12
 #define ERROR_INTERNAL      13
 
+#ifdef NDEBUG
+    #define CHKPTR(x)
+#else
+    #define CHKPTR(x)   check_lispptr (x)
+#endif
+
 extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL make_cons (lispptr, lispptr);
 extern lispptr  FASTCALL make_number (lispnum_t);
@@ -509,6 +521,9 @@ extern char *   FASTCALL typestr             (lispptr * x);
 extern void     FASTCALL bi_tcheck           (lispptr x, uchar type);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
 extern void              print_code_position (void);
+
+extern void              check_lispptr       (char *);
+extern void              dump_lispptr        (char *);
 
 extern void     FASTCALL name_to_buffer (lispptr s);
 extern void     FASTCALL make_call      (lispptr args);

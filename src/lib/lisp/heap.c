@@ -93,6 +93,80 @@ expand_universe (lispptr x)
     POP(x);
 }
 
+#ifndef NDEBUG
+#ifdef TARGET_UNIX
+
+void
+dump_lispptr (char * x)
+{
+    printf ("%x %d: ", x, objsize (x));
+    if (!MARKED(x))
+        printf ("(unused) ");
+    CHKPTR(x);
+    if (!x) {
+        printf ("nil\n");
+        return;
+    }
+    switch (TYPEBITS(x)) {
+        case 0:
+            printf ("End of heap.\n");
+            break;
+        case TYPE_CONS:
+            printf ("cons %x, %x\n", CAR(x), CDR(x));
+            break;
+        case TYPE_NUMBER:
+            printf ("number %d\n", NUMBER_VALUE(x));
+            break;
+        case TYPE_SYMBOL:
+            printf ("symbol '");
+            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            printf ("' %d\n", SYMBOL_VALUE(x));
+            break;
+        case TYPE_BUILTIN:
+            printf ("built-in '");
+            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            printf ("' %d\n", SYMBOL_VALUE(x));
+            break;
+        case TYPE_SPECIAL:
+            printf ("special '");
+            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            printf ("' %d\n", SYMBOL_VALUE(x));
+            break;
+        default:
+            internal_error ("Illegal type");
+    }
+}
+
+void
+check_lispptr (char * x)
+{
+    if (!x)
+        return;
+#ifndef FRAGMENTED_HEAP
+    if (x < heap_start)
+        internal_error ("Pointer below heap.");
+    if (x >= heap_end)
+        internal_error ("Pointer above heap.");
+#endif
+    if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
+        internal_error ("Unused type bits set.");
+    switch (TYPEBITS(x)) {
+        case 0: // End of heap.
+        case TYPE_CONS:
+        case TYPE_NUMBER:
+        case TYPE_SYMBOL:
+        case TYPE_BUILTIN:
+        case TYPE_SPECIAL:
+            break;
+        default:
+            printf ("Ill type: %d in %d\n", TYPEBITS(x), x);
+            internal_error ("Illegal type");
+    }
+}
+
+#endif
+#endif
+
 unsigned FASTCALL
 objsize (char * x)
 {

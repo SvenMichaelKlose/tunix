@@ -8,16 +8,23 @@
 
 #include "liblisp.h"
 
+#ifdef DUMP_SWEEP
+#include <stdio.h>
+#endif
+
 // Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)
 {
+    CHKPTR(x);
     if (x && !MARKED(x)) {
         MARK(x);
         for (; _CONSP(x); x = CDR(x)) {
+            CHKPTR(x);
             MARK(x);
             mark (CAR(x));
         }
+        CHKPTR(x);
         if (x) {
             MARK(x);
             if (_SYMBOLP(x))
@@ -80,6 +87,9 @@ sweep ()
     out ('S');
 #endif
 
+    // Invalidate pointer to last sweeped object.
+    last_sweeped = nil;
+
     // Get start of symbol list.
     last_kept_sym = first_symbol;
 
@@ -97,7 +107,11 @@ sweep ()
 #endif
         // Sweep heap.
         s = d = heap_start;
+        CHKPTR(s);
         while (*s) {
+#ifdef DUMP_SWEEP
+            dump_lispptr (s);
+#endif
 #ifndef NDEBUG
             if (s >= heap_end)
                 internal_error ("Sweep overflow");
@@ -129,6 +143,9 @@ sweep ()
                 if (last_sweeped == d) {
                     // Enlarge immediate previous gap.
                     *(unsigned *) xlat += n;
+#ifdef DUMP_SWEEP
+                    printf ("Enlarged gap to %dB.\n", *(unsigned *) xlat);
+#endif
                 } else {
                     // Memorize this latest gap.
                     last_sweeped = d;
@@ -138,15 +155,18 @@ sweep ()
                     *(lispptr *) xlat = s;
                     xlat -= sizeof (unsigned);
                     *(unsigned *) xlat = n;
+#ifdef DUMP_SWEEP
+                    printf ("Created gap of %dB.\n", n);
+#endif
 
-                    // Interrupt sweep if relocation table is full.
-#if 0
+#ifndef NDEBUG
                     if (xlat == xlat_start)
-                        break;
+                        internal_error ("Relocation table overflow.");
 #endif
                 }
 
                 s += n;
+                CHKPTR(s);
             }
         }
 
@@ -164,11 +184,12 @@ sweep ()
         xlat -= sizeof (unsigned);
         *(unsigned *) xlat = 0;
 
-        // Interrupt sweep if relocation table is full.
+#ifndef NDEBUG
         if (xlat == xlat_start)
-            break;
+            internal_error ("Relocation table overflow.");
+#endif
     } while ((++heap)->start);
-#else
+#else // #ifdef FRAGMENTED_HEAP
     // Save free pointer.
     heap_free = d;
 #endif
@@ -212,6 +233,7 @@ relocate (void)
 #endif
         // Relocate elements on heap.
         for (p = heap_start; *p; p += objsize (p)) {
+            CHKPTR(p);
 #ifndef NDEBUG
             if (p >= heap_end)
                 internal_error ("Heap reloc overflow");

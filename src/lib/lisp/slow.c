@@ -14,60 +14,70 @@
 lispptr FASTCALL
 lisp_car (lispptr x)
 {
+    CHKPTR(x);
     return CONS(x)->car;
 }
 
 lispptr FASTCALL
 lisp_cdr (lispptr x)
 {
+    CHKPTR(x);
     return CONS(x)->cdr;
 }
 
 bool FASTCALL
 lisp_consp (lispptr x)
 {
+    CHKPTR(x);
     return _CONSP(x);
 }
 
 bool FASTCALL
 lisp_atom (lispptr x)
 {
+    CHKPTR(x);
     return _ATOM(x);
 }
 
 bool FASTCALL
 lisp_listp (lispptr x)
 {
+    CHKPTR(x);
     return _LISTP(x);
 }
 
 bool FASTCALL
 lisp_numberp (lispptr x)
 {
+    CHKPTR(x);
     return _NUMBERP(x);
 }
 
 bool FASTCALL
 lisp_symbolp (lispptr x)
 {
+    CHKPTR(x);
     return _SYMBOLP(x);
 }
 
 bool FASTCALL
 lisp_builtinp (lispptr x)
 {
+    CHKPTR(x);
     return _BUILTINP(x);
 }
 
 bool FASTCALL
 lisp_specialp (lispptr x)
 {
+    CHKPTR(x);
     return _SPECIALP(x);
 }
 
 void FASTCALL
 pushgc (lispptr x)
 {
+    CHKPTR(x);
     STACK_CHECK_OVERFLOW();
     stack -= sizeof (lispptr);
     *(lispptr *) stack = x;
@@ -78,6 +88,7 @@ popgc ()
 {
     STACK_CHECK_UNDERFLOW();
     tmp2 = *(lispptr *) stack;
+    CHKPTR(tmp2);
     stack += sizeof (lispptr);
     return tmp2;
 }
@@ -97,7 +108,7 @@ poptag ()
 }
 
 void FASTCALL
-pushtagw (lispptr x)
+pushtagw (lispptr x) // TODO: Never pass a lispptr!
 {
     TAGSTACK_CHECK_OVERFLOW();
     tagstack -= sizeof (lispptr);

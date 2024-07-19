@@ -31,16 +31,16 @@
 //#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
-#define GC_STRESS
+//#define GC_STRESS
 
 // Print current expression to eval().
-#define VERBOSE_EVAL
+//#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
 //#define VERBOSE_LOAD
 
 // Print objects traversed during GC sweep phase.
-#define DUMP_SWEEP
+//#define DUMP_SWEEP
 
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR
@@ -460,10 +460,10 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #define ERROR_USER          12
 #define ERROR_INTERNAL      13
 
-#ifdef NDEBUG
-    #define CHKPTR(x)
-#else
+#if !defined (NDEBUG) && defined (TARGET_UNIX)
     #define CHKPTR(x)   check_lispptr (x)
+#else
+    #define CHKPTR(x)
 #endif
 
 extern void     FASTCALL expand_universe (lispptr);

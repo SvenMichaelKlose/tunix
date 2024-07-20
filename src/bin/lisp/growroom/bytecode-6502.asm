@@ -5,7 +5,7 @@
 
     ; Make stack frame.
     lda stack
-    ldy #1
+    ldy #BCF_STACKSIZE
     sec
     sbc (bcp),y
     sta stack
@@ -14,30 +14,25 @@
 :
 
     ; Get offset into code.
-    iny
+    lda #BCF_CODEOFS
     lda (bcp),y ; # objects
-    clc
-    adc bcstacksize
-    asl
-    adc #4 ; Type, len & argdef
     adc bcp
-    sta bcc
+    sta bpc
     ldy bcp+1
     bcc :+
-    inc bcc+1
-:   sty bcc+1
+    iny
+:   sty bpc+1
 
     ; Get code.
 next:
     ldy #0
-    lda (bcc),y
+    lda (bpc),y
     beq return
-    inc bcc
+    inc bpc
     bcc :+
-    inc bcc+1
+    inc bpc+1
 :
     ; Get function object.
-    asl
     tay
     lda (bcp),y
     sta fun
@@ -46,7 +41,7 @@ next:
     sta fun+1
 
     ; Get value of function.
-    ldy #IDX_SYMBOL_VALUE
+    ldy #OFS_SYMBOL_VALUE
     lda (fun),y
     sta value
     iny
@@ -165,16 +160,16 @@ do_jmp:
     lda bcp
     clc
     adc (bcp),y
-    sta bcc
-    ldy bcc+1
+    sta bpc
+    ldy bpc+1
     bcc :+
     iny
-:   sta bcc+1
+:   sty bpc+1
     bne l   ; (jmp)
 
 next:
-    inc bcc
+    inc bpc
     bne l
-    inc bcc+1
+    inc bpc+1
     bne l
 .endproc

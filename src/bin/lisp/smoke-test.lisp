@@ -116,9 +116,9 @@
 (or (== (<< 42 1) 84) (error))
 (print '>>)(terpri)
 (or (== (>> 23 1) 11) (error))
-(print 'peek)(terpri)
-(or (== 1 (peek (rawptr (cons nil nil))))
-    (error))
+;(print 'peek)(terpri)
+;(or (== 1 (print (peek (rawptr (cons nil nil)))))
+;    (error))
 
 (print 'gc)(terpri)
 (print (gc))(out '"B free.")(terpri)

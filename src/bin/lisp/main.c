@@ -865,6 +865,10 @@ main (int argc, char * argv[])
     init_io_symbols ();
     init_onerror ();
 
+#ifdef GC_STRESS
+    do_gc_stress = true;
+#endif
+
     load ("env.lisp");
     do_break_repl = do_continue_repl = false;
     num_repls = -1;

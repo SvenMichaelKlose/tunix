@@ -134,18 +134,6 @@ do_eval:
     outs ("-> "); print (x); terpri ();
 #endif
 
-#ifdef GC_STRESS
-    PUSH(x);
-#ifndef NO_DEBUGGER
-    PUSH(current_toplevel);
-#endif
-    gc ();
-#ifndef NO_DEBUGGER
-    POP(current_toplevel);
-#endif
-    POP(x);
-#endif // #ifdef GC_STRESS
-
 #ifndef NO_DEBUGGER
     current_expr = x;
     PUSH(current_expr);

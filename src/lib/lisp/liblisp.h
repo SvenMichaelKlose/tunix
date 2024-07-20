@@ -1,22 +1,6 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-#ifdef RELEASE
-    #define NDEBUG
-    #define VERBOSE_GC
-#else
-    #define GCSTACK_CHECKS
-    #define TAGSTACK_CHECKS
-    #define VERBOSE_GC
-#endif // #ifdef RELEASE
-
-#ifdef TARGET_C16
-    #define SLOW
-#endif // #ifdef TARGET_C16
-#ifdef TARGET_VIC20
-    #define SLOW
-#endif // #ifdef TARGET_VIC20
-
 // Disable C compiler level debugging.
 //#define NDEBUG
 
@@ -26,21 +10,21 @@
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
-// Real object at address 0 to get around addiitonal
+// Real object 'nil' at address 0 to get around addiitonal
 // pointer checks.  PLANNED!
 //#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Print current expression to eval().
-//#define VERBOSE_EVAL
+#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
-//#define VERBOSE_LOAD
+#define VERBOSE_LOAD
 
 // Print objects traversed during GC sweep phase.
-//#define DUMP_SWEEP
+#define DUMP_SWEEP
 
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR
@@ -80,9 +64,12 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
-#ifdef __CC65__
-#define MALLOCD_STACK
-#endif
+#ifdef RELEASE
+    #define NDEBUG
+#else
+    #define GCSTACK_CHECKS
+    #define TAGSTACK_CHECKS
+#endif // #ifdef RELEASE
 
 #ifdef TARGET_C128
 #define HEAP_SIZE   (24 * 1024U)
@@ -92,6 +79,7 @@
 #ifdef TARGET_C16
 #define HEAP_SIZE   (10 * 1024U)
 #define MALLOCD_STACK
+#define SLOW
 #endif
 
 #ifdef TARGET_C64
@@ -112,6 +100,8 @@
 #ifdef TARGET_VIC20
 #define HEAP_SIZE   (32 * 1024U)
 #define FRAGMENTED_HEAP
+#define MALLOCD_STACK
+#define SLOW
 #endif
 
 #ifdef TARGET_UNIX
@@ -219,33 +209,43 @@ extern lispptr list_last;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+
 extern lispptr tmp;
 extern lispptr tmp2;
 extern char tmpc;
+
 extern char * heap_start;
 extern char * heap_free;
 extern char * heap_end;
-extern lispptr args;
+
 extern char * stack;
 extern char * stack_end;
+
 extern char * tagstack_start;
-extern char * tagstack_end;
 extern char * tagstack;
+extern char * tagstack_end;
+
+extern lispptr args;
+extern lispptr arg1;
+extern lispptr arg2;
+extern lispptr arg2c;
 extern char * badef;
-extern char has_error;
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
+
 extern lispptr block_sym;
 extern lispptr return_sym;
 extern lispptr return_name;
 extern lispptr return_value;
+
 extern lispptr go_sym;
 extern lispptr go_tag;
-extern lispptr arg1;
-extern lispptr arg2;
-extern lispptr arg2c;
+
 extern lispptr delayed_eval;
+
+extern char has_error;
 extern lispptr debug_step;
 extern bool do_invoke_debugger;
+
 #ifdef __CC65__
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
@@ -278,6 +278,10 @@ extern bool do_invoke_debugger;
 #endif
 
 #define nil ((lispptr) 0)
+
+#ifdef GC_STRESS
+extern bool do_gc_stress;
+#endif
 
 #ifdef GCSTACK_CHECKS
 #define STACK_CHECK_OVERFLOW() \
@@ -512,18 +516,20 @@ extern lispptr  FASTCALL member    (lispptr needle, lispptr haystack);
 
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL error               (char code, char * msg);
+// TODO: Typedef for objects' type byte.
 extern void     FASTCALL err_type            (char * type, lispptr x);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);
 extern void              tagstack_overflow   (void);
 extern void              tagstack_underflow  (void);
-extern char *   FASTCALL typestr             (lispptr * x);
-extern void     FASTCALL bi_tcheck           (lispptr x, uchar type);
+extern char *   FASTCALL typestr             (lispptr *);
+extern void     FASTCALL bi_tcheck           (lispptr, uchar type);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
 extern void              print_code_position (void);
 
 extern void              check_lispptr       (char *);
 extern void              dump_lispptr        (char *);
+extern void              dump_heap           (void);
 
 extern void     FASTCALL name_to_buffer (lispptr s);
 extern void     FASTCALL make_call      (lispptr args);

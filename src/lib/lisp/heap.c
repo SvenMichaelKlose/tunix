@@ -17,7 +17,11 @@
 #include "liblisp.h"
 
 #define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (unsigned)))
+#ifdef GC_STRESS
+#define NEEDS_GC()  do_gc_stress
+#else
 #define NEEDS_GC()  (heap_free >= heap_end - size)
+#endif
 
 // Heap memory areas  Must be consecutive!
 #ifdef FRAGMENTED_HEAP
@@ -82,8 +86,11 @@ extern char do_putback;
 
 lispptr universe;
 char buffer[MAX_SYMBOL + 1];
-
 uchar lisp_sizes[TYPE_EXTENDED * 2];
+
+#ifdef GC_STRESS
+bool do_gc_stress;
+#endif
 
 void FASTCALL
 expand_universe (lispptr x)
@@ -95,6 +102,33 @@ expand_universe (lispptr x)
 
 #ifndef NDEBUG
 #ifdef TARGET_UNIX
+
+void
+check_lispptr (char * x)
+{
+    if (!x)
+        return;
+#ifndef FRAGMENTED_HEAP
+    if (x < heap_start)
+        internal_error ("Pointer below heap.");
+    if (x >= heap_end)
+        internal_error ("Pointer above heap.");
+#endif
+    if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
+        internal_error ("Unused type bits set.");
+    switch (TYPEBITS(x)) {
+        case 0: // End of heap.
+        case TYPE_CONS:
+        case TYPE_NUMBER:
+        case TYPE_SYMBOL:
+        case TYPE_BUILTIN:
+        case TYPE_SPECIAL:
+            break;
+        default:
+            printf ("Ill type: %d in %d\n", TYPEBITS(x), x);
+            internal_error ("Illegal type");
+    }
+}
 
 void
 dump_lispptr (char * x)
@@ -138,29 +172,13 @@ dump_lispptr (char * x)
 }
 
 void
-check_lispptr (char * x)
+dump_heap ()
 {
-    if (!x)
-        return;
-#ifndef FRAGMENTED_HEAP
-    if (x < heap_start)
-        internal_error ("Pointer below heap.");
-    if (x >= heap_end)
-        internal_error ("Pointer above heap.");
-#endif
-    if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
-        internal_error ("Unused type bits set.");
-    switch (TYPEBITS(x)) {
-        case 0: // End of heap.
-        case TYPE_CONS:
-        case TYPE_NUMBER:
-        case TYPE_SYMBOL:
-        case TYPE_BUILTIN:
-        case TYPE_SPECIAL:
-            break;
-        default:
-            printf ("Ill type: %d in %d\n", TYPEBITS(x), x);
-            internal_error ("Illegal type");
+    char *s = heap_start;
+
+    while (*s) {
+        dump_lispptr (s);
+        s += objsize (s);
     }
 }
 
@@ -193,7 +211,7 @@ alloc (uchar size, uchar type)
 {
     if (NEEDS_GC()) {
         gc ();
-#ifndef NAIVE
+#if !defined(NAIVE) && !defined(GC_STRESS)
         if (NEEDS_GC()) {
             error (ERROR_OUT_OF_HEAP, "Out of heap.");
             return nil;
@@ -336,6 +354,11 @@ init_heap ()
 #else
     // Mark end of heap.
     *heap_free = 0;
+#endif
+
+#ifdef GC_STRESS
+    // We need to wait until inits are done.
+    do_gc_stress = false;
 #endif
 
     // Make universe.

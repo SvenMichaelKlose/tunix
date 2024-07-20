@@ -1,7 +1,7 @@
-(code jmpnil (p d)
+(code %jmp-nil (p d)
   (hbz)
   (beq d))
 
-(code jmpt (p d)
+(code %jmp-t (p d)
   (hbz)
   (bne d))

@@ -224,7 +224,10 @@ relocate (void)
 #ifdef VERBOSE_GC
     out ('R');
 #endif
-    universe = relocate_ptr (universe);
+    universe     = relocate_ptr (universe);
+    return_name  = relocate_ptr (return_name);
+    return_value = relocate_ptr (return_value);
+    go_tag       = relocate_ptr (go_tag);
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;

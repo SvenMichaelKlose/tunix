@@ -295,69 +295,31 @@ New channels are created by OPEN to access files:
 
 # Error handling
 
-If an error occurs, the debugger is invoked by default.
-It shows a description of the error, followed by the current
-top-level expression, and the erroraneous expression
-emphasized inside it by triple underscores ('\_\_\_'), also
-by default to support most simple terminals.  Here is an
-example:
+The debugger is invoked on error unless an error handler
+has been set to the symbol value of ONERROR.
+
+The debugger shows a description of the error, followed by
+the current top-level expression, and the erroraneous
+expression emphasized within it and the prompt, indicating
+wait for input.  Here's an example, triggering an error by
+trying to call the undefined function CAUSE-ERROR:
 
 ~~~
-* (not-a-fun)
+* (cause-error)
 Error #5: Not a fun.
-In : (___ not-a-fun ___)
+In : (>>> cause-error <<<)
 1*
 ~~~
 
 The debugger takes commands like the regular REPL plus
-single character commands for convenience.  Since an
-error occured the debugger will not continue with the
-current expression.  An alternative value has to be supplied
-instead with QUIT:
+single character commands for convenience:
 
-~~~
-* (not-a-fun)
-Error #5: Not a fun.
-In : (___ not-a-fun ___)
-1* (quit 'a-fun)
-~~~
-
-but until then you can execute any code you wish, using the
-I/O channels of the current program, not the standard I/O of
-the debugger.
-
-EXIT without arguments will terminate the program and return
-to the top-level REPL.  You can also break execution and
-continue with the next top-level REPL or LOAD expression by
-calling NOERROR.
-
-Unlike the REPL, the debugger also takes one-character
-commands which the regular REPL would interpret as symbols
-to continue through the code step by step.
-
-| Command | Description                            |
-|---------|----------------------------------------|
-| e       | Use previous result to fix the error.  |
-| c       | Continue program execution.            |
-| s       | Execute subexpression of expression.   |
-| n       | Execute expression and subexpressions. |
-
-Stepping with 's' and 'n' cannot be used when the current
-expression is erroraneous without having been fixed using
-command 'e'.
-
-~~~
-* (not-a-fun)
-Error #5: Not a fun.
-In: (or (___ not-a-fun ___) (other))
-1* (identity e)
-content-of-symbol-e
-1* 'a-fun
-a-fun
-1* e
-In: (or (a-fun) ___ (other) ___)
-1*
-~~~
+| Command | Description                              |
+|---------|------------------------------------------|
+| c       | Continue program execution.              |
+| s       | Execute subexpression of expression.     |
+| n       | Execute expression and subexpressions.   |
+| p s     | Print value of symbol 's'.               |
 
 ## User-defined error handler ONERROR
 

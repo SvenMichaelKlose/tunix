@@ -1284,7 +1284,7 @@ $(1 2 ,@x 4 5)
 (append '(1 2) x '(4 5))
 ~~~
 
-### Function collection
+### Function info collection
 
 Creates function info objects with argument definitions.
 They are used by optimizing and code generating passes and,

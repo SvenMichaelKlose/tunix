@@ -4,7 +4,7 @@
 // Disable C compiler level debugging.
 //#define NDEBUG
 
-// Maximum symbol length.
+// Maximum symbol name length.
 #define MAX_SYMBOL  255
 
 // Print message if garbage collector takes action.

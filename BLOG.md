@@ -1,7 +1,14 @@
 TUNIX blog
 ==========
 
-# 2024-06-06
+# 2024-07-17
+
+Had some time to fix a couple of things.  Very enjoyable.
+Will have to hunt down the reason why the GC stress test
+is failing – that's not so enjoyable when your neigbors
+cannot stop partying.  Criminal waste of welfare money.
+
+# 2024-07-06
 
 An involuntary break again.  That break is a welcome
 opportunity to set up more tests.  A basic pointer check

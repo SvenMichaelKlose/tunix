@@ -869,7 +869,10 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
-    load ("env.lisp");
+    load ("env-first.lisp");
+#if !defined(TARGET_VIC20) && !defined(TARGET_C16)
+    load ("env-rest.lisp");
+#endif
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
     lisp_repl (REPL_STD);

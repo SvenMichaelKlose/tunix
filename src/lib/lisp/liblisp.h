@@ -303,25 +303,37 @@ extern bool do_gc_stress;
 #define STACK_CHECK_OVERFLOW() \
         if (stack == stack_start) \
             stack_overflow ()
+#ifndef NDEBUG
 #define STACK_CHECK_UNDERFLOW() \
         if (stack == stack_end) \
             stack_underflow ()
-#else // #ifdef GCSTACK_CHECKS
-#define STACK_CHECK_OVERFLOW()
-#define STACK_CHECK_UNDERFLOW()
+#endif
 #endif // #ifdef GCSTACK_CHECKS
+
+#ifndef STACK_CHECK_OVERFLOW
+#define STACK_CHECK_OVERFLOW()
+#endif
+#ifndef STACK_CHECK_UNDERFLOW
+#define STACK_CHECK_UNDERFLOW()
+#endif
 
 #ifdef TAGSTACK_CHECKS
 #define TAGSTACK_CHECK_OVERFLOW() \
         if (tagstack == tagstack_start) \
             tagstack_overflow ()
+#ifndef NDEBUG
 #define TAGSTACK_CHECK_UNDERFLOW() \
         if (tagstack == tagstack_end) \
             tagstack_underflow ()
-#else // #ifdef TAGSTACK_CHECKS
-#define TAGSTACK_CHECK_OVERFLOW()
-#define TAGSTACK_CHECK_UNDERFLOW()
+#endif
 #endif // #ifdef TAGSTACK_CHECKS
+
+#ifndef TAGSTACK_CHECK_OVERFLOW
+#define TAGSTACK_CHECK_OVERFLOW()
+#endif
+#ifndef TAGSTACK_CHECK_UNDERFLOW
+#define TAGSTACK_CHECK_UNDERFLOW()
+#endif
 
 #ifdef SLOW
 #define PUSH(x)         pushgc (x)

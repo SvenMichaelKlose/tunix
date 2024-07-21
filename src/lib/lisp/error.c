@@ -29,7 +29,8 @@ internal_error (char * msg)
     raise (SIGTRAP);
 #endif
     error (ERROR_INTERNAL, msg);
-    print_code_position ();
+    outs (msg);
+    terpri ();
     while (1);
 }
 

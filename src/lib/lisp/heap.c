@@ -298,26 +298,24 @@ init_heap ()
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
     // Allocate tag stack.
-#ifdef TARGET_VIC20
-    tagstack_start = (void *) 0x0400;
-    tagstack = (void *) 0x0800;
-#endif
 #ifdef MALLOCD_TAGSTACK
     tagstack_start = malloc (TAGSTACK_SIZE);
     tagstack = tagstack_start + TAGSTACK_SIZE;
+#else
+    tagstack_start = (void *) TAGSTACK_START;
+    tagstack = (void *) TAGSTACK_END;
 #endif
     tagstack_end = tagstack;
 
     // Allocate object stack.
-#ifdef TARGET_VIC20
-    stack_start = (void *) 0x0800;
-    stack_end = (void *) 0x1000;
-#endif
 #ifdef MALLOCD_STACK
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)
         return false;
     stack_end = stack_start + STACK_SIZE;
+#else
+    stack_start = (void *) STACK_START;
+    stack_end = (void *) STACK_END;
 #endif
     stack = stack_end;
 

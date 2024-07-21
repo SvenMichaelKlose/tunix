@@ -35,8 +35,10 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-//#define GCSTACK_CHECKS
-//#define TAGSTACK_CHECKS
+#ifndef NAIVE
+#define GCSTACK_CHECKS
+#define TAGSTACK_CHECKS
+#endif
 
 // Print 'x instead of (quote x).
 #define PRINT_SHORT_QUOTES
@@ -67,64 +69,80 @@
 
 #ifdef RELEASE
     #define NDEBUG
-#else
-    #define GCSTACK_CHECKS
-    #define TAGSTACK_CHECKS
-#endif // #ifdef RELEASE
+#endif
 
 #ifdef TARGET_C128
-#define HEAP_SIZE   (24 * 1024U)
 #define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (24 * 1024U)
+#define STACK_SIZE           1024
+#define TAGSTACK_SIZE        1024
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_C16
-#define HEAP_SIZE   (10 * 1024U)
-#define MALLOCD_STACK
 #define SLOW
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (10 * 1024U)
+#define STACK_SIZE           1024
+#define TAGSTACK_SIZE        1024
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_C64
-#define HEAP_SIZE   (10 * 1024U)
 #define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (10 * 1024U)
+#define STACK_SIZE           1024
+#define TAGSTACK_SIZE        1024
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_PET
-#define HEAP_SIZE   (10 * 1024U)
 #define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (10 * 1024U)
+#define STACK_SIZE           1024
+#define TAGSTACK_SIZE        1024
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_PLUS4
-#define HEAP_SIZE   (32 * 1024U)
 #define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (32 * 1024U)
+#define STACK_SIZE           2048
+#define TAGSTACK_SIZE        2048
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_VIC20
-#define HEAP_SIZE   (32 * 1024U)
-#define FRAGMENTED_HEAP
 #define SLOW
-// Stack and tag stack are nailed to RAM123 area.
+#define FRAGMENTED_HEAP
+#define HEAP_SIZE            (32 * 1024U)
+#define STACK_START          0x0400
+#define STACK_END            0x0800
+#define TAGSTACK_START       0x0800
+#define TAGSTACK_END         0x1000
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_UNIX
-#define HEAP_SIZE   (128 * 1024U)
-#define STACK_SIZE  (HEAP_SIZE / 16U)
-#define MALLOCD_STACK
-#define MALLOCD_TAGSTACK
 #ifndef NDEBUG
     #define SLOW
 #endif
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define HEAP_SIZE            (128 * 1024U)
+#define STACK_SIZE           (HEAP_SIZE / 16U)
+#define TAGSTACK_SIZE        (HEAP_SIZE / 64U)
+#define RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
     #error "Neither HEAP_SIZE or MALLOCD_HEAP defined."
 #endif
-
-#ifndef TARGET_UNIX
-#define STACK_SIZE  (HEAP_SIZE / 64U)
-#endif
-
-#define TAGSTACK_SIZE        (HEAP_SIZE / 64U)
-#define RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
 
 #if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #define NO_ONERROR

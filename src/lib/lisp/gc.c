@@ -83,6 +83,10 @@ sweep ()
     struct heap_fragment * heap = heaps;
 #endif
 
+#ifdef DUMP_SWEEP
+    size_t total_removed = 0;
+#endif
+
 #ifdef VERBOSE_GC
     out ('S');
 #endif
@@ -144,7 +148,8 @@ sweep ()
                     // Enlarge immediate previous gap.
                     *(unsigned *) xlat += n;
 #ifdef DUMP_SWEEP
-                    printf ("Enlarged gap to %dB.\n", *(unsigned *) xlat);
+                    total_removed += n;
+                    printf ("Enlarged gap to %dB. Total removed: %dB\n", *(unsigned *) xlat, total_removed);
 #endif
                 } else {
                     // Memorize this latest gap.
@@ -156,7 +161,8 @@ sweep ()
                     xlat -= sizeof (unsigned);
                     *(unsigned *) xlat = n;
 #ifdef DUMP_SWEEP
-                    printf ("Created gap of %dB.\n", n);
+                    total_removed += n;
+                    printf ("Created gap of %dB. Total removed: %dB\n", n, total_removed);
 #endif
 
 #ifndef NDEBUG
@@ -217,17 +223,23 @@ relocate_ptr (char * x)
     return x - gapsize;
 }
 
-// Relocate pointers on heap and stack.
+// Relocate pointers on heap, stack, and in global vars.
 void
 relocate (void)
 {
 #ifdef VERBOSE_GC
     out ('R');
 #endif
-    universe     = relocate_ptr (universe);
-    return_name  = relocate_ptr (return_name);
-    return_value = relocate_ptr (return_value);
-    go_tag       = relocate_ptr (go_tag);
+
+    // Relocate global variables.
+    universe         = relocate_ptr (universe);
+    return_name      = relocate_ptr (return_name);
+    return_value     = relocate_ptr (return_value);
+    go_tag           = relocate_ptr (go_tag);
+#ifndef NO_DEBUGGER
+    current_expr     = relocate_ptr (current_expr);
+    current_toplevel = relocate_ptr (current_toplevel);
+#endif
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
@@ -253,7 +265,7 @@ relocate (void)
     } while ((++heap)->start);
 #endif
 
-    // Relocate GC stack elements.
+    // Relocate GC stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }

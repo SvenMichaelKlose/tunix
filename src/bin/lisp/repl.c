@@ -28,6 +28,7 @@ extern lispptr x;
 #pragma bss-name (pop)
 #endif
 
+lispptr current_toplevel;
 char    num_repls;        // Number of REPLs - 1.
 bool    do_break_repl;    // Tells current REPL to return.
 bool    do_continue_repl; // If do_break_repl, tell REPL to continue.
@@ -53,10 +54,6 @@ lisp_repl (char mode)
     this_in  = fnin;
     this_out = fnout;
 
-#ifndef NO_DEBUGGER
-    PUSH(current_toplevel);
-#endif
-
     num_repls++;
 
     // Call error handler if defined.
@@ -68,8 +65,18 @@ lisp_repl (char mode)
 #endif
 
 #ifndef NO_ONERROR
+        // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
-            x = make_cons (onerror_sym, make_cons (make_number ((lispnum_t) has_error), make_cons (current_toplevel, make_cons (current_expr, nil))));
+            // Make argument list.
+            tmp = make_cons (current_expr, nil);
+            tmp = make_cons (current_toplevel, tmp);
+            PUSH(tmp);
+            tmp2 = make_number ((lispnum_t) has_error);
+            POP(tmp);
+            tmp = make_cons (tmp2, tmp);
+            x = make_cons (onerror_sym, tmp);
+
+            // Call ONERROR.
             has_error = false;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
@@ -145,6 +152,7 @@ lisp_repl (char mode)
         // Save and update top-level expression.
 #ifndef NO_DEBUGGER
         current_toplevel = x;
+        PUSH(current_toplevel);
 #endif
 
         // Evaluate expression.
@@ -154,6 +162,9 @@ lisp_repl (char mode)
 #ifndef NAIVE
         if (has_error)
             x = lisp_repl (REPL_DEBUGGER);
+#endif
+#ifndef NO_DEBUGGER
+        POP(current_toplevel);
 #endif
 
         // Break or continue on demand.
@@ -191,11 +202,6 @@ next:   set_channels (this_in, this_out);
 do_return:
 #endif
     num_repls--;
-
-    // Restore parent REPL's top-level expression.
-#ifndef NO_DEBUGGER
-    POP(current_toplevel);
-#endif
 
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
@@ -236,4 +242,5 @@ init_repl ()
 {
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
+    current_toplevel = nil;
 }

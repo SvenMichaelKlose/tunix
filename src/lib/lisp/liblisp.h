@@ -8,23 +8,24 @@
 #define MAX_SYMBOL  255
 
 // Print message if garbage collector takes action.
-//#define VERBOSE_GC
+// (Keeping it defined until first stable release.)
+#define VERBOSE_GC
 
 // Real object 'nil' at address 0 to get around addiitonal
 // pointer checks.  PLANNED!
 //#define NULLOBJ
 
 // Give inappropriately happy developers a hard time.
-#define GC_STRESS
+//#define GC_STRESS
 
 // Print current expression to eval().
-#define VERBOSE_EVAL
+//#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
-#define VERBOSE_LOAD
+//#define VERBOSE_LOAD
 
 // Print objects traversed during GC sweep phase.
-#define DUMP_SWEEP
+//#define DUMP_SWEEP
 
 // Disable calling user function ONERROR on errors.
 //#define NO_ONERROR
@@ -100,8 +101,8 @@
 #ifdef TARGET_VIC20
 #define HEAP_SIZE   (32 * 1024U)
 #define FRAGMENTED_HEAP
-#define MALLOCD_STACK
 #define SLOW
+// Stack and tag stack are nailed to RAM123 area.
 #endif
 
 #ifdef TARGET_UNIX

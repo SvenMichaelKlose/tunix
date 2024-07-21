@@ -9,7 +9,6 @@
 
 char * stack_start;
 lispptr current_expr;
-lispptr current_toplevel;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -151,19 +150,12 @@ do_eval:
     }
 
     arg1 = CAR(x);
-#ifndef NO_DEBUGGER
-    PUSH(current_toplevel);
-#endif
 
     // Get function from symbol.
     if (arg1 && SYMBOLP(arg1)) {
         if (EXTENDEDP(arg1))
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
-#ifndef NO_DEBUGGER
-        if (!unevaluated)
-            current_toplevel = x;
-#endif
     }
 
     /////////////////////////
@@ -513,9 +505,6 @@ restore_arguments:
     stack += sizeof (lispptr) * na;
 
 do_return:
-#ifndef NO_DEBUGGER
-    POP(current_toplevel);
-#endif
 #ifndef NAIVE
     if (has_error)
         value = lisp_repl (REPL_DEBUGGER);

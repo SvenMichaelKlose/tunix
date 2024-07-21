@@ -72,9 +72,9 @@
 #endif
 
 #ifdef TARGET_C128
+#define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (24 * 1024U)
 #define STACK_SIZE           1024
 #define TAGSTACK_SIZE        1024
 #define RELOC_TABLE_ENTRIES  256
@@ -84,25 +84,24 @@
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (10 * 1024U)
 #define STACK_SIZE           1024
 #define TAGSTACK_SIZE        1024
 #define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_C64
+#define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (10 * 1024U)
 #define STACK_SIZE           1024
 #define TAGSTACK_SIZE        1024
 #define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_PET
+#define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (10 * 1024U)
 #define STACK_SIZE           1024
 #define TAGSTACK_SIZE        1024
 #define RELOC_TABLE_ENTRIES  256
@@ -111,7 +110,6 @@
 #ifdef TARGET_PLUS4
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (32 * 1024U)
 #define STACK_SIZE           2048
 #define TAGSTACK_SIZE        2048
 #define RELOC_TABLE_ENTRIES  256
@@ -119,8 +117,7 @@
 
 #ifdef TARGET_VIC20
 #define SLOW
-#define FRAGMENTED_HEAP
-#define HEAP_SIZE            (32 * 1024U)
+//#define FRAGMENTED_HEAP
 #define STACK_START          0x0400
 #define STACK_END            0x0800
 #define TAGSTACK_START       0x0800

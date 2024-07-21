@@ -87,10 +87,6 @@ sweep ()
     size_t total_removed = 0;
 #endif
 
-#ifdef VERBOSE_GC
-    out ('S');
-#endif
-
     // Invalidate pointer to last sweeped object.
     last_sweeped = nil;
 
@@ -108,7 +104,11 @@ sweep ()
 #ifndef NDEBUG
         heap_end = heap->end;
 #endif
+#endif // #ifdef FRAGMENTED_HEAP
+#ifdef VERBOSE_GC
+    out ('S');
 #endif
+
         // Sweep heap.
         s = d = heap_start;
         CHKPTR(s);
@@ -227,10 +227,6 @@ relocate_ptr (char * x)
 void
 relocate (void)
 {
-#ifdef VERBOSE_GC
-    out ('R');
-#endif
-
     // Relocate global variables.
     universe         = relocate_ptr (universe);
     return_name      = relocate_ptr (return_name);
@@ -246,6 +242,10 @@ relocate (void)
     do {
         heap_start = heap->start;
 #endif
+#ifdef VERBOSE_GC
+    out ('R');
+#endif
+
         // Relocate elements on heap.
         for (p = heap_start; *p; p += objsize (p)) {
             CHKPTR(p);

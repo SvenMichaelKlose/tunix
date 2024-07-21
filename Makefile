@@ -19,8 +19,8 @@ allworlds:
 	$(MAKE) clean all TARGET=c16
 	$(MAKE) clean all TARGET=pet
 	$(MAKE) clean all TARGET=plus4
-	$(MAKE) clean all TARGET=unix
 	$(MAKE) clean all TARGET=vic20
+	$(MAKE) clean all TARGET=unix
 
 world:
 	@echo "# Making $(TARGET) world."

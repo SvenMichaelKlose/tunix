@@ -153,8 +153,12 @@
 
 (print 'block)(terpri)
 (block-test 10)
-;(undef 'block-test)
 (terpri)
+
+(print 'undef)(terpri)
+(gc)
+(undef 'block-test)
+(gc)
 
 (print 'argument-restore)(terpri)
 (= x 42)

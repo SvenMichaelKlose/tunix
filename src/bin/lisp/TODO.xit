@@ -1,21 +1,23 @@
 Initial Release
-[x] Essential tests
-[x] Macro expansion
-[x] User-defined error handler
-[x] Testing errors
+[x] Essential tests.
+[x] Macro expansion.
+[x] User-defined error handler.
+[x] Testing errors.
 [x] Pass first complete GC stress test.
-[@] Undefining symbols (UNDEF)
-[@] On-demand function/macro loading
-[ ] Automatic file numbers with OPEN.
+[@] Undefining symbols (UNDEF).
+[@] On-demand function/macro loading.
+[@] Debugger.
+[@] Complete manual with examples.
+[ ] File numbers returned by OPEN.
 [ ] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
 [ ] SYSTEM (program invokation)
 
 Nice To Have
-[ ] Bielefeld DB API
-[ ] Loading/saving/calling snapshots
-[ ] Recursion to loop conversion
-[ ] Tail call optimization
-[ ] Snapshot optimization
-[?] Compressed conses
-[?] Stack decompression via tags
+[ ] Bielefeld DB API.
+[ ] Loading/saving/calling snapshots.
+[ ] Recursion to loop conversion.
+[ ] Tail call optimization.
+[ ] Snapshot optimization.
+[?] Compressed conses.
+[?] Stack decompression via tags.

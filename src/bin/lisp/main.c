@@ -46,10 +46,6 @@ lispptr quasiquote;
 lispptr unquote;
 lispptr unquote_spliced;
 
-lispptr go_expr;
-lispptr return_expr;
-lispptr return_args;
-
 bool debug_mode;  // Unused.  Set by bi_debug().
 
 lispptr

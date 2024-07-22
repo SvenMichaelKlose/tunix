@@ -12,6 +12,9 @@
 #include <stdio.h>
 #endif
 
+extern lispptr lisp_fnin;
+extern lispptr lisp_fnout;
+
 // Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)
@@ -229,12 +232,23 @@ relocate (void)
 {
     // Relocate global variables.
     universe         = relocate_ptr (universe);
+    delayed_eval     = relocate_ptr (delayed_eval);
+    block_sym        = relocate_ptr (block_sym);
+    quote            = relocate_ptr (quote);
+    quasiquote       = relocate_ptr (quasiquote);
+    unquote          = relocate_ptr (unquote);
+    unquote_spliced  = relocate_ptr (unquote_spliced);
     return_name      = relocate_ptr (return_name);
     return_value     = relocate_ptr (return_value);
+    go_sym           = relocate_ptr (go_sym);
     go_tag           = relocate_ptr (go_tag);
+    lisp_fnin        = relocate_ptr (lisp_fnin);
+    lisp_fnout       = relocate_ptr (lisp_fnout);
 #ifndef NO_DEBUGGER
     current_expr     = relocate_ptr (current_expr);
     current_toplevel = relocate_ptr (current_toplevel);
+    onerror_sym      = relocate_ptr (onerror_sym);
+    debug_step       = relocate_ptr (debug_step);
 #endif
 
 #ifdef FRAGMENTED_HEAP

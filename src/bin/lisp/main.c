@@ -533,8 +533,19 @@ bi_universe (void)
 lispptr
 bi_gc (void)
 {
+#ifdef FRAGMENTED_HEAP
+    struct heap_fragment * h;
+    size_t freed = 0;
+#endif
+
     gc ();
+#ifdef FRAGMENTED_HEAP
+    for (h = heaps; h->start; h++)
+        freed += h->end - h->free;
+    return make_number (freed);
+#else
     return make_number (heap_end - heap_free);
+#endif
 }
 
 #ifndef NAIVE
@@ -866,7 +877,7 @@ main (int argc, char * argv[])
 #endif
 
     load ("env-first.lisp");
-#if !defined(TARGET_VIC20) && !defined(TARGET_C16)
+#ifndef TARGET_C16
     load ("env-rest.lisp");
 #endif
     do_break_repl = do_continue_repl = false;

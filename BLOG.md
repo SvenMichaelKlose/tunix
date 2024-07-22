@@ -1,6 +1,19 @@
 TUNIX blog
 ==========
 
+# 2024-07-22
+
+The Lisp's garbage collector passed the stress test for the
+first time.  That's quite a milestone.  As long as it keeps
+passing, I can sleep a lot better.
+
+The UNDEF function causes trouble.  It copies all of the
+universe list, making the whole heap move the first
+time UNREF is used, except symbol 't'.  Some pointers still
+escape relocation.  It's not urgent.
+
+The best thing is: multiple heaps work!
+
 # 2024-07-17
 
 Had some time to fix a couple of things.  Very enjoyable.

@@ -45,7 +45,6 @@ extern char * xlat_end;
 
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment * heap;
-extern struct heap_fragment heaps[];
 #endif
 
 #ifdef __CC65__

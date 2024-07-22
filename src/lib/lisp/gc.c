@@ -75,6 +75,10 @@ size_t gapsize;
 #pragma bss-name (pop)
 #endif
 
+#ifdef FRAGMENTED_HEAP
+size_t total_removed;
+#endif
+
 // Copy marked objects over deleted ones and make a
 // relocation table containing the addresses and sizes of
 // the deleted objects.
@@ -84,10 +88,6 @@ sweep ()
     // Start with first heap.
 #ifdef FRAGMENTED_HEAP
     struct heap_fragment * heap = heaps;
-#endif
-
-#ifdef DUMP_SWEEP
-    size_t total_removed = 0;
 #endif
 
     // Invalidate pointer to last sweeped object.
@@ -102,6 +102,7 @@ sweep ()
     // Get heap pointers.
 #ifdef FRAGMENTED_HEAP
     do {
+        total_removed = 0;
         heap_start = heap->start;
         heap_free = heap->free;
 #ifndef NDEBUG
@@ -150,8 +151,10 @@ sweep ()
                 if (last_sweeped == d) {
                     // Enlarge immediate previous gap.
                     *(unsigned *) xlat += n;
-#ifdef DUMP_SWEEP
+#ifdef FRAGMENTED_HEAP
                     total_removed += n;
+#endif
+#ifdef DUMP_SWEEP
                     printf ("Enlarged gap to %dB. Total removed: %dB\n", *(unsigned *) xlat, total_removed);
 #endif
                 } else {
@@ -163,8 +166,10 @@ sweep ()
                     *(lispptr *) xlat = s;
                     xlat -= sizeof (unsigned);
                     *(unsigned *) xlat = n;
-#ifdef DUMP_SWEEP
+#ifdef FRAGMENTED_HEAP
                     total_removed += n;
+#endif
+#ifdef DUMP_SWEEP
                     printf ("Created gap of %dB. Total removed: %dB\n", n, total_removed);
 #endif
 
@@ -189,9 +194,12 @@ sweep ()
         // Undo address shifting with negative gap entry in
         // order to not affect the following heap's pointers.
         xlat -= sizeof (lispptr);
-        *(lispptr *) xlat = (lispptr) (heap_free - d);
+        *(lispptr *) xlat = s;
         xlat -= sizeof (unsigned);
-        *(unsigned *) xlat = 0;
+        *(unsigned *) xlat = -total_removed;
+#ifdef VERBOSE_GC
+        outn (total_removed); outs ("heap bytes freed."); terpri ();
+#endif
 
 #ifndef NDEBUG
         if (xlat == xlat_start)
@@ -298,12 +306,8 @@ switch_heap ()
 void
 gc (void)
 {
-#ifdef VERBOSE_GC
-    char * tmp;
-#endif
-
-    // Switch to next heap instead.
 #ifdef FRAGMENTED_HEAP
+    // Switch to next available heap.
     if (heap->start) {
 #ifdef VERBOSE_GC
         out ('N');
@@ -312,15 +316,13 @@ gc (void)
     }
 #endif
 
-    // No more heaps.  Switch to first.
 #ifdef FRAGMENTED_HEAP
+    // Start GC with first heap.
     heap = heaps;
     switch_heap ();
 #endif
 
-    // This won't work.  Sum with sweeps.
 #ifdef VERBOSE_GC
-    tmp = heap_free;
     out ('M');
 #endif
 
@@ -346,11 +348,7 @@ gc (void)
 next_heap:
     switch_heap ();
 #endif
-
 #ifdef VERBOSE_GC
-    outs (": ");
-    outn (tmp - heap_free);
-    outs ("B freed.");
     terpri ();
 #endif
 }

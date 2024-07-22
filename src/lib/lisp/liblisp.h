@@ -117,7 +117,7 @@
 
 #ifdef TARGET_VIC20
 #define SLOW
-//#define FRAGMENTED_HEAP
+#define FRAGMENTED_HEAP
 #define STACK_START          0x0400
 #define STACK_END            0x0800
 #define TAGSTACK_START       0x0800
@@ -229,6 +229,11 @@ extern lispptr list_last;
 extern lispptr tmp;
 extern lispptr tmp2;
 extern char tmpc;
+
+#ifdef FRAGMENTED_HEAP
+extern struct heap_fragment * heap;
+extern struct heap_fragment heaps[];
+#endif
 
 extern char * heap_start;
 extern char * heap_free;

@@ -162,7 +162,7 @@ print0 (lispptr x)
         print_named ((symbol *) x);
 #ifndef NDEBUG
     else
-        error (ERROR_UNKNOWN_TYPE, "Unknown object type.");
+        internal_error ("Unknown object type.");
 #endif
 done:
     print_highlighted (x);

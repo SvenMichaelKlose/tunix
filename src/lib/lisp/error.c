@@ -122,11 +122,7 @@ bi_tcheck (lispptr x, uchar type)
 
 #ifndef NDEBUG
     default:
-        setout (STDERR);
-        out ('\'');
-        out (type);
-        outs ("': no typedef");
-        while (1);
+        internal_error ("ill typedef");
 #endif
     }
 }

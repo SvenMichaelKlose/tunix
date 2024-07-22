@@ -182,23 +182,18 @@ dump_heap ()
     }
 }
 
-#endif
-#endif
+#endif // #ifdef TARGET_UNIX
+#endif // #ifndef NDEBUG
 
 unsigned FASTCALL
 objsize (char * x)
 {
     uchar s;
-#ifndef NDEBUG
-    if (TYPEBITS(x) >= TYPE_EXTENDED * 2)
-        internal_error ("Ill type");
-#endif
+    CHKPTR(x);
     s = lisp_sizes[TYPEBITS(x)];
 #ifndef NDEBUG
-    if (!s) {
-        terpri (); outn (*x); terpri ();
+    if (!s)
         internal_error ("0 size");
-    }
 #endif
     if (_NAMEDP(x))
         return s + SYMBOL_LENGTH(x);

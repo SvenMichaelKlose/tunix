@@ -124,7 +124,7 @@ lisp_repl (char mode)
                 putback ();
                 x = read ();
                 fresh_line ();
-                if (SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
+                if (x && SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
                     cmd = SYMBOL_NAME(x)[0];
             }
 

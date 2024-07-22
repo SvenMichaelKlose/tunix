@@ -1,24 +1,21 @@
-Hot!
-[ ] Basic clean-up (identifiers and file structure).
-
-Initial release
+Initial Release
 [x] Essential tests
 [x] Macro expansion
 [x] User-defined error handler
 [x] Testing errors
+[x] Pass first complete GC stress test.
 [@] Undefining symbols (UNDEF)
 [@] On-demand function/macro loading
 [ ] Automatic file numbers with OPEN.
 [ ] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
-[ ] SYSTEM
+[ ] SYSTEM (program invokation)
 
-Second release
-[ ] tré environment import
+Nice To Have
 [ ] Bielefeld DB API
+[ ] Loading/saving/calling snapshots
 [ ] Recursion to loop conversion
 [ ] Tail call optimization
-[ ] Loading/saving/calling snapshots
-[ ] Compressed conses
 [ ] Snapshot optimization
+[?] Compressed conses
 [?] Stack decompression via tags

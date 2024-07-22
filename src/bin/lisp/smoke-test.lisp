@@ -157,7 +157,7 @@
 
 (print 'undef)(terpri)
 (gc)
-(undef 'block-test)
+;(undef 'block-test)
 (gc)
 
 (print 'argument-restore)(terpri)

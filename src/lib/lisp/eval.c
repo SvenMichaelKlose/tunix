@@ -42,7 +42,7 @@ lispptr debug_step;
 bool do_invoke_debugger;
 bool tag_found;
 #ifndef NAIVE
-char has_error;
+char error_code;
 #endif
 uchar c;
 char * badef;
@@ -76,7 +76,7 @@ bool unevaluated;
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tag_found")
 #ifndef NAIVE
-#pragma zpsym ("has_error")
+#pragma zpsym ("error_code")
 #endif
 #pragma zpsym ("c")
 #pragma zpsym ("badef")
@@ -313,7 +313,7 @@ set_arg_values:
             x = args;
             value = eval_list ();
 #ifndef NAIVE
-            if (has_error)
+            if (error_code)
                 value = lisp_repl (REPL_DEBUGGER);
 #endif
             POP_TAG(na);
@@ -349,7 +349,7 @@ next_builtin_arg:
 save_arg_value:
 #ifndef NAIVE
         bi_tcheck (value, *badef);
-        if (has_error) {
+        if (error_code) {
             PUSH(args);
             PUSH_TAGW(badef);
             PUSH_TAG(na);
@@ -506,7 +506,7 @@ restore_arguments:
 
 do_return:
 #ifndef NAIVE
-    if (has_error)
+    if (error_code)
         value = lisp_repl (REPL_DEBUGGER);
 #endif
 

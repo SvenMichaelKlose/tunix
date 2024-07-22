@@ -336,7 +336,7 @@ bi_if (void)
         tmp = eval ();
         POP(arg2c);
 #ifndef NAIVE
-        if (has_error)
+        if (error_code)
             break;
 #endif
         if (tmp) {
@@ -358,7 +358,7 @@ bi_and (void)
         value = eval ();
         POP(x);
 #ifndef NAIVE
-        if (has_error)
+        if (error_code)
             return nil;
 #endif
         if (!value)
@@ -376,7 +376,7 @@ bi_or (void)
         value = eval ();
         POP(x);
 #ifndef NAIVE
-        if (has_error)
+        if (error_code)
             return nil;
 #endif
         if (value)
@@ -545,7 +545,7 @@ bi_error (void)
     last_errstr = "User error";
     if (arg1)
         current_expr = arg1;
-    has_error = ERROR_USER;
+    error_code = ERROR_USER;
     return nil;
 }
 

@@ -58,10 +58,10 @@ lisp_repl (char mode)
 
     // Call error handler if defined.
 #ifndef NAIVE
-    if (has_error) {
+    if (error_code) {
 #ifdef NO_DEBUGGER
         print_code_position ();
-        exit (has_error);
+        exit (error_code);
 #endif
 
 #ifndef NO_ONERROR
@@ -71,13 +71,13 @@ lisp_repl (char mode)
             tmp = make_cons (current_expr, nil);
             tmp = make_cons (current_toplevel, tmp);
             PUSH(tmp);
-            tmp2 = make_number ((lispnum_t) has_error);
+            tmp2 = make_number ((lispnum_t) error_code);
             POP(tmp);
             tmp = make_cons (tmp2, tmp);
             x = make_cons (onerror_sym, tmp);
 
             // Call ONERROR.
-            has_error = false;
+            error_code = 0;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
@@ -97,7 +97,7 @@ lisp_repl (char mode)
                 print_code_position ();
 #endif
 
-            has_error = false;
+            error_code = 0;
 
             // Print prompt with number of recursions.
             if (num_repls)
@@ -160,7 +160,7 @@ lisp_repl (char mode)
 
         // Call debugger on error.
 #ifndef NAIVE
-        if (has_error)
+        if (error_code)
             x = lisp_repl (REPL_DEBUGGER);
 #endif
 #ifndef NO_DEBUGGER

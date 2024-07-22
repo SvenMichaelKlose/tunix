@@ -258,7 +258,7 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
-extern char has_error;
+extern char error_code;
 extern lispptr debug_step;
 extern bool do_invoke_debugger;
 
@@ -276,7 +276,7 @@ extern bool do_invoke_debugger;
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("badef")
-#pragma zpsym ("has_error")
+#pragma zpsym ("error_code")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")

@@ -370,7 +370,7 @@ init_heap ()
     // Clear error info.
 #ifndef NAIVE
     debug_mode = false;
-    has_error = false;
+    error_code = false;
     last_errstr = NULL;
     current_expr  = nil;
 #endif

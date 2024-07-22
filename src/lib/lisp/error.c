@@ -19,7 +19,7 @@ void FASTCALL
 error (char code, char * msg)
 {
     last_errstr = msg;
-    has_error = code;
+    error_code = code;
 }
 
 void FASTCALL
@@ -143,9 +143,9 @@ check_stacks (char * old_stack, char * old_tagstack)
 void
 print_code_position ()
 {
-    if (has_error) {
+    if (error_code) {
         outs ("Error #");
-        outn (has_error);
+        outn (error_code);
         outs (": ");
         if (last_errstr)
             outs (last_errstr);

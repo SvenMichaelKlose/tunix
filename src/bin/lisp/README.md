@@ -1159,7 +1159,7 @@ Transform to metacode:
 
 * Compiler macro expansion
 * Quote expansion
-* Quasiuote expansion
+* Quasiquote expansion
 * Argument rename
 * Function collection
 * Scoping
@@ -1174,8 +1174,8 @@ Cleaning up at least:
 
 * Optimization
 
-Finally the desired code can be generated.  It does not have
-to be bytecode.  It can be anything, e.g. assembly language.
+Finally the desired code can be generated, e.g. byte code or
+assembly language.
 
 Code generation:
 

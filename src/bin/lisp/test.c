@@ -33,6 +33,9 @@ test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr 
 {
     char *start = o1;
     char *end = (char *) o2 + s3;
+#ifdef NDEBUG
+    (void) s2;
+#endif
 
     printf (">>> Test: '%s'.\n", info);
     printf ("Pos o1: %d\n", (char *) o1 - start);

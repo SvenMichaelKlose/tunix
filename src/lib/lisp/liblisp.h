@@ -67,10 +67,6 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
-#ifdef RELEASE
-    #define NDEBUG
-#endif
-
 #ifdef TARGET_C128
 #define SLOW
 #define MALLOCD_STACK

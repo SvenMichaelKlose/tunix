@@ -1,9 +1,6 @@
 # Build oscar64 compiler.
 #HAVE_OSCAR64 = 1
 
-# Make release version with NDEBUG and reduced verbosity.
-RELEASE = 1
-
 # Do not include extra checks to spot internal errors.
 #NDEBUG = 1
 

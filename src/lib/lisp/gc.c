@@ -198,7 +198,7 @@ sweep ()
         xlat -= sizeof (unsigned);
         *(unsigned *) xlat = -total_removed;
 #ifdef VERBOSE_GC
-        outn (total_removed); outs ("heap bytes freed."); terpri ();
+        outn (total_removed); outs (" heap bytes freed."); terpri ();
 #endif
 
 #ifndef NDEBUG

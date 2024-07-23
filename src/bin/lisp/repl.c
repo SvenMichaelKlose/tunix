@@ -99,7 +99,7 @@ lisp_repl (char mode)
 
             error_code = 0;
 
-            // Print prompt with number of recursions.
+            // Print prompt with number of nested REPLs.
             if (num_repls)
                 out ('0' + num_repls);
             outs ("* ");
@@ -112,6 +112,13 @@ lisp_repl (char mode)
             x = read ();
             if (mode != REPL_LOAD)
                 fresh_line ();
+
+            // Memorize new top-level expression.
+#ifndef NO_DEBUGGER
+            current_toplevel = x;
+            PUSH(current_toplevel);
+#endif
+
 #ifndef NO_DEBUGGER
         } else {
             cmd = 0;
@@ -149,12 +156,6 @@ lisp_repl (char mode)
         }
 #endif
 
-        // Save and update top-level expression.
-#ifndef NO_DEBUGGER
-        current_toplevel = x;
-        PUSH(current_toplevel);
-#endif
-
         // Evaluate expression.
         x = eval ();
 
@@ -171,11 +172,12 @@ lisp_repl (char mode)
         if (do_break_repl) {
             // Ignore evaluation and contine with next expression.
             if (do_continue_repl) {
-                do_break_repl = do_continue_repl = false;
+                do_break_repl = false;
+                do_continue_repl = false;
                 goto next;
             }
             if (do_exit_program) {
-                // Return from all child REPLs.
+                // Return from all nested REPLs.
                 if (num_repls)
                     break;
             } else {
@@ -240,7 +242,8 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl = do_continue_repl = false;
+    do_break_repl = false;
+    do_continue_repl = false;
     num_repls = -1;
     current_toplevel = nil;
 }

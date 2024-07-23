@@ -1,7 +1,7 @@
 -include ../../config
 
 PROGRAM = lisp
-SOURCES = main.c repl.c test.c
+SOURCES = main.c test.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a

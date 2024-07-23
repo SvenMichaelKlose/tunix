@@ -8,6 +8,7 @@ SOURCES = \
 	io.c \
 	list.c \
 	print.c \
+	repl.c \
 	slow.c \
 	read.c
 

@@ -15,7 +15,6 @@
 
 #include "liblisp.h"
 
-lispptr highlighted;
 bool do_highlight;
 
 void print0 (lispptr);
@@ -137,10 +136,10 @@ print_named (symbol * s)
 }
 
 void FASTCALL
-print_highlighted (lispptr x)
+print_highlighted (lispptr x, bool is_before)
 {
-    if (do_highlight && highlighted == x)
-        outs ("__");
+    if (do_highlight && current_expr == x)
+        outs (is_before ? ">>>" : "<<<");
 }
 
 void FASTCALL
@@ -148,7 +147,7 @@ print0 (lispptr x)
 {
     uchar type;
 
-    print_highlighted (x);
+    print_highlighted (x, true);
     if (!x) {
         outs ("nil");
         goto done;
@@ -165,7 +164,7 @@ print0 (lispptr x)
         internal_error ("Unknown object type.");
 #endif
 done:
-    print_highlighted (x);
+    print_highlighted (x, false);
 }
 
 lispptr FASTCALL
@@ -175,6 +174,7 @@ print (lispptr x)
     return x;
 }
 
+#ifndef NDEBUG
 lispptr FASTCALL
 dprint (lispptr x)
 {
@@ -182,3 +182,4 @@ dprint (lispptr x)
     terpri ();
     return x;
 }
+#endif

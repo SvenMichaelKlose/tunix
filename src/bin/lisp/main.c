@@ -63,33 +63,33 @@ bi_not (void)
 lispptr
 bi_atom (void)
 {
-    if (!arg1)
-        return t;
-    return ATOM(arg1) ? arg1 : nil;
+    if (arg1)
+        return ATOM(arg1) ? arg1 : nil;
+    return t;
 }
 
 lispptr
 bi_symbolp (void)
 {
-    if (!arg1)
-        return t;
-    return SYMBOLP(arg1) ? arg1 : nil;
+    if (arg1)
+        return SYMBOLP(arg1) ? arg1 : nil;
+    return t;
 }
 
 lispptr
 bi_builtinp (void)
 {
-    if (!arg1)
-        return nil;
-    return BUILTINP(arg1) ? arg1 : nil;
+    if (arg1)
+        return BUILTINP(arg1) ? arg1 : nil;
+    return nil;
 }
 
 lispptr
 bi_specialp (void)
 {
-    if (!arg1)
-        return nil;
-    return SPECIALP(arg1) ? arg1 : nil;
+    if (arg1)
+        return SPECIALP(arg1) ? arg1 : nil;
+    return nil;
 }
 
 lispptr
@@ -394,9 +394,9 @@ bi_print (void)
 lispptr
 bi_err (void)
 {
-    if (!err ())
-        return nil;
-    return make_number (err ());
+    if (err ())
+        return make_number (err ());
+    return nil;
 }
 
 lispptr

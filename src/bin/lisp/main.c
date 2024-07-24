@@ -41,12 +41,17 @@ extern lispptr tmp;
 lispptr lisp_fnin;
 lispptr lisp_fnout;
 
+// Symbols for quoting.
 lispptr quote;
 lispptr quasiquote;
 lispptr unquote;
 lispptr unquote_spliced;
 
-bool debug_mode;  // Unused.  Set by bi_debug().
+// Set by DEBUG (bi_debug()).
+// Used as breakpoint condition for host debugger.
+#ifndef NDEBUG
+bool debug_mode;
+#endif
 
 lispptr
 bi_eq (void)

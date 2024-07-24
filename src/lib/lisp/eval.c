@@ -179,7 +179,7 @@ do_eval:
         }
 #endif
 
-        arg2c = CDR(x); // Start of expressions.
+        arg2c = CDR(x); // Expression list
         value = nil;
         unevaluated = false;
 block_statement:
@@ -187,7 +187,7 @@ block_statement:
         if (!x)
             goto do_return;
         PUSH(arg1);     // Block name
-        PUSH(arg2c);    // Expressions
+        PUSH(arg2c);    // Expression list
         PUSH(x);        // Current expression
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
@@ -552,14 +552,17 @@ do_return_atom:
     return value;
 }
 
+// Call function with arguments unevaluated.
 lispptr
 eval ()
 {
     unevaluated = false;
+    // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }
 
+// Evaluate function call.
 lispptr
 funcall ()
 {

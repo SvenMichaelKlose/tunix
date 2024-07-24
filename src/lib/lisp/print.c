@@ -29,6 +29,7 @@ space (void)
         out (' ');
 }
 
+// Print abbreviation.
 void FASTCALL
 print_short (char * m, cons * c)
 {

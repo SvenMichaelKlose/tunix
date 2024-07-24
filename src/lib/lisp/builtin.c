@@ -31,6 +31,7 @@ extern lispptr tmp;
 #pragma bss-name (pop)
 #endif
 
+// Make objects for built-in procedures.
 void FASTCALL
 add_builtins (struct builtin * b)
 {
@@ -43,6 +44,7 @@ add_builtins (struct builtin * b)
     }
 }
 
+// Copy object name to 'buffer' and zero-terminate it.
 void FASTCALL
 name_to_buffer (lispptr s)
 {
@@ -52,6 +54,8 @@ name_to_buffer (lispptr s)
     buffer[len] = 0;
 }
 
+// Make expression calling procedure 'arg1' with 'args',
+// and prepare eval0() to return.
 void FASTCALL
 make_call (lispptr args)
 {
@@ -60,6 +64,8 @@ make_call (lispptr args)
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
 }
 
+// Make expression calling procedure 'arg1' with CAR(arg2) as the argument,
+// and prepare eval0() to return.
 void FASTCALL
 make_car_call (void)
 {

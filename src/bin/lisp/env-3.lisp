@@ -18,6 +18,3 @@
 
 (out '"Cleaning up. Please wait...")(terpri)
 (print (gc))(out '"B free.")(terpri)
-;(= x (macroexpand '(() (dolist (i '(1 2 3)) (print i)))))
-;(debugger)
-;(eval x)

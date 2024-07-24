@@ -91,6 +91,7 @@ uchar lisp_sizes[TYPE_EXTENDED * 2];
 bool do_gc_stress;
 #endif
 
+// Add object to root list of garbage collector.
 void FASTCALL
 expand_universe (lispptr x)
 {
@@ -102,19 +103,23 @@ expand_universe (lispptr x)
 #ifndef NDEBUG
 #ifdef TARGET_UNIX
 
+// Check if argument points to a valid object.
 void
 check_lispptr (char * x)
 {
     if (!x)
         return;
 #ifndef FRAGMENTED_HEAP
+    // Check object is if within the heap area.
     if (x < heap_start)
         internal_error ("Pointer below heap.");
     if (x >= heap_end)
         internal_error ("Pointer above heap.");
 #endif
+
     if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
         internal_error ("Unused type bits set.");
+
     switch (TYPEBITS(x)) {
         case 0: // End of heap.
         case TYPE_CONS:
@@ -129,6 +134,7 @@ check_lispptr (char * x)
     }
 }
 
+// Print object info.
 void
 dump_lispptr (char * x)
 {
@@ -170,11 +176,11 @@ dump_lispptr (char * x)
     }
 }
 
+// Print info of all objects.
 void
 dump_heap ()
 {
     char *s = heap_start;
-
     while (*s) {
         dump_lispptr (s);
         s += objsize (s);
@@ -184,6 +190,7 @@ dump_heap ()
 #endif // #ifdef TARGET_UNIX
 #endif // #ifndef NDEBUG
 
+// Get size of object in bytes.
 unsigned FASTCALL
 objsize (char * x)
 {
@@ -221,6 +228,7 @@ alloc (uchar size, uchar type)
     return h;
 }
 
+// Make list cell.
 lispptr FASTCALL
 make_cons (lispptr car, lispptr cdr)
 {
@@ -234,6 +242,7 @@ make_cons (lispptr car, lispptr cdr)
     return tmp;
 }
 
+// Make number object.
 lispptr FASTCALL
 make_number (lispnum_t x)
 {
@@ -242,9 +251,12 @@ make_number (lispnum_t x)
     return tmp;
 }
 
+// Look up symbol by name.
 void * FASTCALL
 lookup_symbol (char * str, uchar len)
 {
+    // Walk over singly-linked list of named symbols.
+    // (Anonymous symbols have no name.)
     for (ptr = first_symbol; ptr; ptr = SYMBOL_NEXT(ptr))
         if (SYMBOL_LENGTH(ptr) == len
             && !memcmp (ptr + sizeof (symbol), str, len))
@@ -252,6 +264,7 @@ lookup_symbol (char * str, uchar len)
     return NULL;
 }
 
+// Make symbol object.
 lispptr FASTCALL
 alloc_symbol (char * str, uchar len)
 {

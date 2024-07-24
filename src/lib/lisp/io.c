@@ -19,6 +19,7 @@ extern lispptr arg1;
 #pragma bss-name (pop)
 #endif
 
+// Set input/output channels.
 void FASTCALL
 set_channels (simpleio_chn_t cin, simpleio_chn_t cout)
 {

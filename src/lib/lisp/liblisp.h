@@ -559,7 +559,7 @@ extern void              tagstack_underflow  (void);
 extern char *   FASTCALL typestr             (lispptr *);
 extern void     FASTCALL bi_tcheck           (lispptr, uchar type);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
-extern void              print_code_position (void);
+extern void              print_error_info (void);
 
 extern void              check_lispptr       (char *);
 extern void              dump_lispptr        (char *);

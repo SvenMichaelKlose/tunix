@@ -15,6 +15,8 @@
 
 char * last_errstr;
 
+// Issue error, with code and message.
+// Causes call of ONERROR handler or debugger.
 void FASTCALL
 error (char code, char * msg)
 {
@@ -22,16 +24,15 @@ error (char code, char * msg)
     error_code = code;
 }
 
+// Print internal error message and exit.
 void FASTCALL
 internal_error (char * msg)
 {
+    outs (msg); terpri ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
 #endif
-    error (ERROR_INTERNAL, msg);
-    outs (msg);
-    terpri ();
-    while (1);
+    exit (ERROR_INTERNAL);
 }
 
 void
@@ -58,6 +59,7 @@ tagstack_underflow ()
     internal_error ("Tag stack underflow");
 }
 
+// Return type name of object.
 char * FASTCALL
 typename (lispptr * x)
 {
@@ -76,6 +78,7 @@ typename (lispptr * x)
 #endif
 }
 
+// Issue type error.
 void FASTCALL
 err_type (char * type, lispptr x)
 {
@@ -86,6 +89,7 @@ err_type (char * type, lispptr x)
     error (ERROR_TYPE, buffer);
 }
 
+// Type check object and issue error if it fails.
 void FASTCALL
 bi_tcheck (lispptr x, uchar type)
 {
@@ -127,6 +131,7 @@ bi_tcheck (lispptr x, uchar type)
     }
 }
 
+// Issue error if GC stack and tag stack pointers deviate from arguments.
 void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
 {
@@ -136,8 +141,9 @@ check_stacks (char * old_stack, char * old_tagstack)
         internal_error ("tagstack");
 }
 
+// Print error info.
 void
-print_code_position ()
+print_error_info ()
 {
     if (error_code) {
         outs ("Error #");

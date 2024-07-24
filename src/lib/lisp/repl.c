@@ -82,7 +82,7 @@ lisp_repl (char mode)
         }
 
 #ifdef NO_DEBUGGER
-        print_code_position ();
+        print_error_info ();
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;
@@ -99,7 +99,7 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
             debug_step = nil;
             if (mode == REPL_DEBUGGER)
-                print_code_position ();
+                print_error_info ();
 #endif
 
 #ifndef NAIVE
@@ -144,23 +144,25 @@ lisp_repl (char mode)
                     cmd = SYMBOL_NAME(x)[0];
             }
 
-            // Process short commands.
-            if (cmd == 'c') { // Contine
-                // Do not re-invoke debugger.
-                debug_step = nil;
-                goto do_return;
-            } else if (cmd == 's') { // Step
-                // Re-invoke before evaluating the next expression.
-                debug_step = t; // T for any expression.
-                last_cmd = cmd;
-                outs ("Step..."); terpri ();
-                goto do_return;
-            } else if (cmd == 'n') { // Next
-                // Re-invoke when done evaluating the current expression.
-                debug_step = current_expr;
-                last_cmd = cmd;
-                outs ("Next..."); terpri ();
-                goto do_return;
+            // Process short command.
+            switch (cmd) {
+                // Continue execution.
+                case 'c':
+                    debug_step = nil;
+                    goto do_return;
+
+                // Break on next eval0().
+                case 's':
+                    // Re-invoke before evaluating the next expression.
+                    debug_step = t;
+                    last_cmd = cmd;
+                    goto do_return;
+
+                // Break after current expression.
+                case 'n':
+                    debug_step = current_expr;
+                    last_cmd = cmd;
+                    goto do_return;
             }
         }
 #endif
@@ -185,12 +187,11 @@ lisp_repl (char mode)
                 do_continue_repl = false;
                 goto next;
             }
+            // Return from all nested REPLs.
             if (do_exit_program) {
-                // Return from all nested REPLs.
                 if (num_repls)
                     break;
             } else {
-                // Just break this REPL.
                 do_break_repl = false;
                 break;
             }

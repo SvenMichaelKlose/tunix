@@ -30,6 +30,7 @@ int len;
 lispptr list_start;
 lispptr list_last;
 
+// Get number of list elements.
 int FASTCALL
 length (lispptr x)
 {
@@ -76,6 +77,7 @@ copy_list (lispptr x, char mode, lispptr needle)
     return list_start;
 }
 
+// Get last cons of a list.
 lispptr FASTCALL
 last (lispptr x)
 {
@@ -85,10 +87,11 @@ last (lispptr x)
     return nil;
 }
 
+// Get cons of list containing 'needle'.
 lispptr FASTCALL
-member (lispptr needle, lispptr haystack)
+member (lispptr needle, lispptr x)
 {
-    DOLIST(tmp, haystack)
+    DOLIST(tmp, x)
         if (CAR(tmp) == needle)
             return tmp;
     return nil;

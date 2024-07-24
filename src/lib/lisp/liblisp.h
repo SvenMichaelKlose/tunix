@@ -155,13 +155,15 @@
 #endif
 #endif // #ifdef NAIVE
 
-typedef unsigned char uchar;
-typedef long lispnum_t;
+typedef unsigned char  uchar;
+typedef long           lispnum_t;
 
 #ifdef CC65
-#define FASTCALL    __fastcall__
+#define FASTCALL            __fastcall__
+#define HOST_DEBUGGER()
 #else
 #define FASTCALL
+#define HOST_DEBUGGER()     raise (SIGTRAP);
 #endif
 
 typedef void * lispptr;

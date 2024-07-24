@@ -77,6 +77,12 @@
 #endif
 
 #ifdef TARGET_C16
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
+#endif
+#ifndef NO_ONERROR
+    #define NO_ONERROR
+#endif
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK

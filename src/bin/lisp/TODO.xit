@@ -9,11 +9,12 @@ Initial release
 [ ] File numbers returned by OPEN.
 [ ] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
+[ ] TIME, TPS (time per second)
 [ ] SYSTEM (program invokation)
 
 App release
 [@] Undefining symbols (UNDEF).
-[@] On-demand function/macro loading.
+[ ] On-demand function/macro loading.
 
 Nice To Have
 [ ] Bielefeld DB API.

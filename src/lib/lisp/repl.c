@@ -30,12 +30,14 @@ extern lispptr x;
 #endif
 
 lispptr current_toplevel;
-char    num_repls;        // Number of REPLs - 1.
-bool    do_break_repl;    // Tells current REPL to return.
-bool    do_continue_repl; // If do_break_repl, tell REPL to continue.
-bool    do_exit_program;  // Return to top-level REPL.
+char    num_repls;          // REPL count.
+char    num_debugger_repls; // Debugger REPL count.
+bool    do_break_repl;      // Tells current REPL to return.
+bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
+bool    do_exit_program;    // Return to top-level REPL.
 #ifndef NO_DEBUGGER
-char    last_cmd;         // Last debugger short command.
+char    last_cmd;           // Last debugger short command.
+lispptr dbgx;               // Input debugger command.
 #endif
 
 lispptr FASTCALL
@@ -58,6 +60,10 @@ lisp_repl (char mode)
     this_out = fnout;
 
     num_repls++;
+#ifndef NO_DEBUGGER
+    if (mode == REPL_DEBUGGER)
+        num_debugger_repls++;
+#endif
 
     // Handle error in other ways than calling the debugger.
 #ifndef NAIVE
@@ -84,6 +90,7 @@ lisp_repl (char mode)
         }
 
 #ifdef NO_DEBUGGER
+        // Error not handled.  Exit program.
         print_error_info ();
         do_break_repl   = true;
         do_exit_program = true;
@@ -91,6 +98,7 @@ lisp_repl (char mode)
         goto do_return;
 #endif
 #endif // #ifndef NO_ONERROR
+
     }
 #endif // #ifndef NAIVE
 
@@ -109,8 +117,8 @@ lisp_repl (char mode)
 #endif
 
             // Print prompt with number of nested REPLs.
-            if (num_repls)
-                out ('0' + num_repls);
+            if (num_debugger_repls)
+                out ('0' + num_debugger_repls);
             outs ("* ");
         }
 
@@ -140,10 +148,10 @@ lisp_repl (char mode)
             } else {
                 // Read expression, get short command char.
                 putback ();
-                x = read ();
+                dbgx = read ();
                 fresh_line ();
-                if (x && SYMBOLP(x) && SYMBOL_LENGTH(x) == 1)
-                    cmd = SYMBOL_NAME(x)[0];
+                if (dbgx && SYMBOLP(dbgx) && SYMBOL_LENGTH(dbgx) == 1)
+                    cmd = SYMBOL_NAME(dbgx)[0];
             }
 
             // Process short command.
@@ -165,6 +173,9 @@ lisp_repl (char mode)
                     debug_step = current_expr;
                     last_cmd = cmd;
                     goto do_return;
+
+                default:
+                    x = dbgx;
             }
         }
 #endif
@@ -178,6 +189,9 @@ lisp_repl (char mode)
             x = lisp_repl (REPL_DEBUGGER);
 #endif
 #ifndef NO_DEBUGGER
+        if (mode != REPL_DEBUGGER)
+            POP(current_toplevel);
+#else
         POP(current_toplevel);
 #endif
 
@@ -220,6 +234,11 @@ do_return:
 
     // Track unnesting of this REPL.
     num_repls--;
+
+#ifndef NO_DEBUGGER
+    if (mode == REPL_DEBUGGER)
+        num_debugger_repls--;
+#endif
 
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
@@ -272,8 +291,11 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl    = false;
-    do_continue_repl = false;
-    num_repls        = -1;
+    do_break_repl      = false;
+    do_continue_repl   = false;
+    num_repls          = 0;
+#ifndef NO_DEBUGGER
+    num_debugger_repls = 0;
+#endif
     current_toplevel = nil;
 }

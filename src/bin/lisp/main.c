@@ -284,7 +284,7 @@ bi_apply (void)
     PUSH(arg2);
     args = copy_list (arg2, COPY_BUTLAST, nil);
     POP(arg2);
-    tmp = CAR(last (arg2));
+    tmp = LIST_CAR(last (arg2));
 
     if (args) {
 #ifndef NAIVE

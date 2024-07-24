@@ -29,9 +29,13 @@ extern lispptr x;
 #pragma bss-name (pop)
 #endif
 
+#ifndef NAIVE
 lispptr current_toplevel;
+#endif
 char    num_repls;          // REPL count.
+#ifndef NO_DEBUGGER
 char    num_debugger_repls; // Debugger REPL count.
+#endif
 bool    do_break_repl;      // Tells current REPL to return.
 bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
 bool    do_exit_program;    // Return to top-level REPL.
@@ -116,9 +120,11 @@ lisp_repl (char mode)
             error_code = 0;
 #endif
 
+#ifndef NO_DEBUGGER
             // Print prompt with number of nested REPLs.
             if (num_debugger_repls)
                 out ('0' + num_debugger_repls);
+#endif
             outs ("* ");
         }
 
@@ -130,14 +136,17 @@ lisp_repl (char mode)
             // Read from input.
             x = read ();
 
+#ifndef NAIVE
+            // Memorize new top-level expression.
+            current_toplevel = x;
+            PUSH(current_toplevel);
+#endif
+
             // Ensure fresh line if terminal input.
             if (mode != REPL_LOAD)
                 fresh_line ();
 
 #ifndef NO_DEBUGGER
-            // Memorize new top-level expression.
-            current_toplevel = x;
-            PUSH(current_toplevel);
         } else {
             cmd = 0;
 
@@ -187,11 +196,7 @@ lisp_repl (char mode)
         // Call debugger on error.
         if (error_code)
             x = lisp_repl (REPL_DEBUGGER);
-#endif
-#ifndef NO_DEBUGGER
-        if (mode != REPL_DEBUGGER)
-            POP(current_toplevel);
-#else
+
         POP(current_toplevel);
 #endif
 

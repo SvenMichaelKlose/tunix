@@ -153,6 +153,7 @@ print_error_info ()
             outs (last_errstr);
         terpri ();
     }
+    fresh_line ();
     outs ("In: ");
     terpri ();
     do_highlight = true;

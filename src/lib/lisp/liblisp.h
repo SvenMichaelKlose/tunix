@@ -144,6 +144,9 @@
 #if defined(NAIVE) && !defined(NO_DEBUGGER)
 #define NO_DEBUGGER
 #endif
+#if defined(NAIVE) && !defined(NO_ONERROR)
+#define NO_ONERROR
+#endif
 #if defined(NAIVE) && !defined(NDEBUG)
 #define NDEBUG
 #endif
@@ -246,7 +249,6 @@ extern lispptr args;
 extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
-extern char * badef;
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 
 extern lispptr block_sym;
@@ -276,7 +278,6 @@ extern bool do_invoke_debugger;
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
-#pragma zpsym ("badef")
 #pragma zpsym ("error_code")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("arg1")

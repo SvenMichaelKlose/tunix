@@ -19,6 +19,7 @@
 (print (copy-list '(1 2 3)))(terpri)
 
 (print 'apply)(terpri)
+(print (apply '(x x) nil))(terpri)
 (print (apply '(x x) '(1)))(terpri)
 (print (apply '(x x) '(1 2)))(terpri)
 (print (apply '(x x) 1 2 '(3 4)))(terpri)

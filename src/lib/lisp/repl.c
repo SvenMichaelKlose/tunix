@@ -15,6 +15,7 @@
 #include <lisp/liblisp.h>
 
 char    load_fn = 12;
+
 #ifndef NO_ONERROR
 lispptr onerror_sym;
 #endif
@@ -42,7 +43,7 @@ lisp_repl (char mode)
     char cmd;
 #endif
 #ifndef NDEBUG
-    char * old_stack = stack;
+    char * old_stack    = stack;
     char * old_tagstack = tagstack;
 #endif
     simpleio_chn_t this_in;
@@ -56,39 +57,43 @@ lisp_repl (char mode)
 
     num_repls++;
 
-    // Call error handler if defined.
+    // Handle error in other ways than calling the debugger.
 #ifndef NAIVE
     if (error_code) {
-#ifdef NO_DEBUGGER
-        print_code_position ();
-        exit (error_code);
-#endif
 
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Make argument list.
-            tmp = make_cons (current_expr, nil);
-            tmp = make_cons (current_toplevel, tmp);
+            x = make_cons (current_expr, nil);
+            tmp = make_cons (current_toplevel, x);
             PUSH(tmp);
-            tmp2 = make_number ((lispnum_t) error_code);
+            x = make_number ((lispnum_t) error_code);
             POP(tmp);
-            tmp = make_cons (tmp2, tmp);
-            x = make_cons (onerror_sym, tmp);
+            x = make_cons (x, tmp);
+            x = make_cons (onerror_sym, x);
 
             // Call ONERROR.
-            error_code = 0;
+            error_code  = 0;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
             goto do_return;
         }
+
+#ifdef NO_DEBUGGER
+        print_code_position ();
+        do_break_repl   = true;
+        do_exit_program = true;
+        error_code      = 0;
+        goto do_return;
+#endif
 #endif // #ifndef NO_ONERROR
     }
 #endif // #ifndef NAIVE
 
-    // Read expresions from standard input until end
-    // or until QUIT has been invoked.
+    // Read expresions from standard input until
+    // end or until QUIT has been invoked.
     while (!eof ()) {
         if (mode != REPL_LOAD) {
 #ifndef NO_DEBUGGER
@@ -111,19 +116,21 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
+
+            // Read from input.
             x = read ();
+
+            // Ensure fresh line if terminal input.
             if (mode != REPL_LOAD)
                 fresh_line ();
 
-            // Memorize new top-level expression.
 #ifndef NO_DEBUGGER
+            // Memorize new top-level expression.
             current_toplevel = x;
             PUSH(current_toplevel);
-#endif
-
-#ifndef NO_DEBUGGER
         } else {
             cmd = 0;
+
             // Repeat last short command on ENTER.
             if (in () == 10) {
                 cmd = last_cmd;
@@ -170,9 +177,9 @@ lisp_repl (char mode)
         POP(current_toplevel);
 #endif
 
-        // Break or continue on demand.
+        // Special result treatment.
         if (do_break_repl) {
-            // Ignore evaluation and contine with next expression.
+            // Ignore and continue with next expression.
             if (do_continue_repl) {
                 do_break_repl = false;
                 do_continue_repl = false;
@@ -199,12 +206,16 @@ lisp_repl (char mode)
             fresh_line ();
         }
 
-next:   set_channels (this_in, this_out);
+next:
+        // TODO: Check if required.  It should not be as nested
+        // REPLs must restore I/O channels on return.
+        set_channels (this_in, this_out);
     }
 
-#ifndef NO_DEBUGGER
+#if !defined(NO_DEBUGGER) || !defined(NO_ONERROR)
 do_return:
 #endif
+
     num_repls--;
 
 #ifndef NDEBUG
@@ -217,26 +228,40 @@ do_return:
 void FASTCALL
 load (char * pathname)
 {
+    // Memorize input channel.
     int oldin = fnin;
 
+    // Open file.
     simpleio_open (load_fn, pathname, 'r');
+
+    // Switch input channel to file.
     arg1 = make_number (load_fn);
     bi_setin ();
+
 #ifndef NAIVE
+    // Handle file error.
     if (err ()) {
         error (ERROR_FILE, pathname);
         goto err_open;
     }
 #endif
 
+    // Bump up file number for next LOAD.
     load_fn++;
+
+    // Read file.
     lisp_repl (REPL_LOAD);
+
+    // Back to former file number for next LOAD.
     load_fn--;
 
     simpleio_close (load_fn);
+
 #ifndef NAIVE
 err_open:
 #endif
+
+    // Restore former input channel.
     arg1 = make_number (oldin);
     bi_setin ();
 }
@@ -244,8 +269,8 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl = false;
+    do_break_repl    = false;
     do_continue_repl = false;
-    num_repls = -1;
+    num_repls        = -1;
     current_toplevel = nil;
 }

@@ -1,17 +1,19 @@
-Initial Release
+Initial release
 [x] Essential tests.
 [x] Macro expansion.
 [x] User-defined error handler.
 [x] Testing errors.
 [x] Pass first complete GC stress test.
-[@] Undefining symbols (UNDEF).
-[@] On-demand function/macro loading.
 [@] Debugger.
 [@] Complete manual with examples.
 [ ] File numbers returned by OPEN.
 [ ] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
 [ ] SYSTEM (program invokation)
+
+App release
+[@] Undefining symbols (UNDEF).
+[@] On-demand function/macro loading.
 
 Nice To Have
 [ ] Bielefeld DB API.

@@ -29,6 +29,17 @@ space (void)
         out (' ');
 }
 
+void FASTCALL
+print_highlighted (lispptr x)
+{
+    if (do_highlight && current_expr == x) {
+        outs (">>>");
+        print0 (x);
+        outs ("<<<");
+    } else
+        print0 (x);
+}
+
 // Print abbreviation.
 void FASTCALL
 print_short (char * m, cons * c)
@@ -46,19 +57,19 @@ print_list (cons * c)
 #ifdef PRINT_SHORT_QUOTES
     if (CDR(c)) {
         tmp = CAR(c);
-        if (tmp ==  quote) {
+        if (tmp == quote) {
             print_short ("'", c);
             return;
         }
-        if (tmp ==  quasiquote) {
+        if (tmp == quasiquote) {
             print_short ("$", c);
             return;
         }
-        if (tmp ==  unquote) {
+        if (tmp == unquote) {
             print_short (",", c);
             return;
         }
-        if (tmp ==  unquote_spliced) {
+        if (tmp == unquote_spliced) {
             print_short (",@", c);
             return;
         }
@@ -71,10 +82,10 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        print0 (c->car);
+        print_highlighted (c->car);
         if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
-            print0 (c->cdr);
+            print_highlighted (c->cdr);
             break;
         }
         c = c->cdr;
@@ -137,21 +148,13 @@ print_named (symbol * s)
 }
 
 void FASTCALL
-print_highlighted (lispptr x, bool is_before)
-{
-    if (do_highlight && current_expr == x)
-        outs (is_before ? ">>>" : "<<<");
-}
-
-void FASTCALL
 print0 (lispptr x)
 {
     uchar type;
 
-    print_highlighted (x, true);
     if (!x) {
         outs ("nil");
-        goto done;
+        return;
     }
     type = TYPEBITS(x);
     if (type & TYPE_CONS)
@@ -164,8 +167,6 @@ print0 (lispptr x)
     else
         internal_error ("Unknown object type.");
 #endif
-done:
-    print_highlighted (x, false);
 }
 
 lispptr FASTCALL

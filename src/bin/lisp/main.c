@@ -870,7 +870,9 @@ main (int argc, char * argv[])
     add_builtins (builtins);
     init_quoting ();
     init_io_symbols ();
+#ifndef NO_ONERROR
     init_onerror ();
+#endif
 
 #ifdef GC_STRESS
     do_gc_stress = true;

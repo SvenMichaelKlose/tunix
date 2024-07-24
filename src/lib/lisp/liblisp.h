@@ -71,8 +71,8 @@
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           1024
-#define TAGSTACK_SIZE        1024
+#define STACK_SIZE           768
+#define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
 #endif
 
@@ -86,8 +86,8 @@
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           1024
-#define TAGSTACK_SIZE        1024
+#define STACK_SIZE           768
+#define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  128
 #endif
 
@@ -95,8 +95,8 @@
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           1024
-#define TAGSTACK_SIZE        1024
+#define STACK_SIZE           768
+#define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
 #endif
 
@@ -104,16 +104,16 @@
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           1024
-#define TAGSTACK_SIZE        1024
+#define STACK_SIZE           768
+#define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_PLUS4
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           2048
-#define TAGSTACK_SIZE        2048
+#define STACK_SIZE           768
+#define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
 #endif
 

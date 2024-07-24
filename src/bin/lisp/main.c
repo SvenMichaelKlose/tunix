@@ -878,9 +878,14 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
-    load ("env-first.lisp");
+    load ("env-1.lisp");
+    load ("test.lisp");
+    load ("env-2.lisp");
+#ifndef NO_ONERROR
+    load ("test-onerror.lisp");
+#endif
 #ifndef TARGET_C16
-    load ("env-rest.lisp");
+    load ("env-3.lisp");
 #endif
     do_break_repl = do_continue_repl = false;
     num_repls = -1;

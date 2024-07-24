@@ -137,19 +137,17 @@
     #error "Neither HEAP_SIZE or MALLOCD_HEAP defined."
 #endif
 
-#if defined(NO_DEBUGGER) && !defined(NO_ONERROR)
-#define NO_ONERROR
-#endif
-
-#if defined(NAIVE) && !defined(NO_DEBUGGER)
+#ifdef NAIVE
+#ifndef NO_DEBUGGER
 #define NO_DEBUGGER
 #endif
-#if defined(NAIVE) && !defined(NO_ONERROR)
+#ifndef NO_ONERROR
 #define NO_ONERROR
 #endif
-#if defined(NAIVE) && !defined(NDEBUG)
+#ifndef NDEBUG
 #define NDEBUG
 #endif
+#endif // #ifdef NAIVE
 
 typedef unsigned char uchar;
 typedef long lispnum_t;

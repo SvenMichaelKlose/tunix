@@ -62,7 +62,7 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/vi bin/
 endif
 ifneq (,$(TARGET), $(COMMODORE_TARGETS))
-	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/lisp.md -write bin/alist.lisp -write bin/dolist.lisp -write bin/env-first.lisp -write bin/env-rest.lisp -write bin/equality.lisp -write bin/let.lisp -write bin/list.lisp -write bin/macroexpand.lisp -write bin/prog1.lisp -write bin/progn.lisp -write bin/quasiquote.lisp -write bin/set.lisp -write bin/smoke-test.lisp -write bin/stack.lisp -write bin/max.lisp -write bin/nthcdr.lisp -write bin/subseq.lisp -write bin/queue.lisp -write bin/group.lisp -write bin/test.lisp -write bin/when.lisp -write bin/unless.lisp -write bin/while.lisp -write bin/with.lisp #-write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
+	c1541 -format "tunix,01" d64 $(D64_TUNIX_TOOLS) -write bin/lisp -write bin/lisp.md -write bin/alist.lisp -write bin/dolist.lisp -write bin/env-1.lisp -write bin/env-2.lisp -write bin/env-3.lisp -write bin/equality.lisp -write bin/let.lisp -write bin/list.lisp -write bin/macroexpand.lisp -write bin/prog1.lisp -write bin/progn.lisp -write bin/quasiquote.lisp -write bin/set.lisp -write bin/smoke-test.lisp -write bin/stack.lisp -write bin/max.lisp -write bin/nthcdr.lisp -write bin/subseq.lisp -write bin/queue.lisp -write bin/group.lisp -write bin/test.lisp -write bin/test-onerror.lisp -write bin/when.lisp -write bin/unless.lisp -write bin/while.lisp -write bin/with.lisp #-write bin/ultiburn -write bin/ultidump -write bin/ultitest -write bin/vi -write bin/vi.md
 endif
 
 clean:

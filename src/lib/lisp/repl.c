@@ -34,7 +34,9 @@ char    num_repls;        // Number of REPLs - 1.
 bool    do_break_repl;    // Tells current REPL to return.
 bool    do_continue_repl; // If do_break_repl, tell REPL to continue.
 bool    do_exit_program;  // Return to top-level REPL.
+#ifndef NO_DEBUGGER
 char    last_cmd;         // Last debugger short command.
+#endif
 
 lispptr FASTCALL
 lisp_repl (char mode)
@@ -208,8 +210,7 @@ lisp_repl (char mode)
         }
 
 next:
-        // TODO: Check if required.  It should not be as nested
-        // REPLs must restore I/O channels on return.
+        // Restour channels of this REPL.
         set_channels (this_in, this_out);
     }
 
@@ -217,6 +218,7 @@ next:
 do_return:
 #endif
 
+    // Track unnesting of this REPL.
     num_repls--;
 
 #ifndef NDEBUG

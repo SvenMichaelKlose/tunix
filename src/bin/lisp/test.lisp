@@ -1,4 +1,3 @@
-(debugger)
 (= x 42)
 
 (print 'equal)(terpri)

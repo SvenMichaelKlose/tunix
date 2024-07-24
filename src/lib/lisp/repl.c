@@ -97,7 +97,9 @@ lisp_repl (char mode)
                 print_code_position ();
 #endif
 
+#ifndef NAIVE
             error_code = 0;
+#endif
 
             // Print prompt with number of nested REPLs.
             if (num_repls)
@@ -159,8 +161,8 @@ lisp_repl (char mode)
         // Evaluate expression.
         x = eval ();
 
-        // Call debugger on error.
 #ifndef NAIVE
+        // Call debugger on error.
         if (error_code)
             x = lisp_repl (REPL_DEBUGGER);
 #endif

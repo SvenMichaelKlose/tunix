@@ -1,2 +1,3 @@
 [ ] LOAD does not throw error if file does not exist.
 [ ] UNDEF: Some pointer(s) aren't relocated after GC.
+[ ] Fix build for the Commodore PET.

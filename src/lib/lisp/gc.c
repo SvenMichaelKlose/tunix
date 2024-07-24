@@ -12,6 +12,12 @@
 #include <stdio.h>
 #endif
 
+// Relocation table
+extern char * xlat_start;
+extern char * xlat_end;
+char * xlat_start;
+char * xlat_end;
+
 extern lispptr lisp_fnin;
 extern lispptr lisp_fnout;
 
@@ -36,10 +42,6 @@ mark (lispptr x)
     }
 }
 
-extern char * xlat_start;
-extern char * xlat_end;
-char * xlat_start;
-char * xlat_end;
 lispptr last_kept_sym;
 
 #ifdef FRAGMENTED_HEAP
@@ -115,8 +117,8 @@ sweep ()
 
         // Sweep heap.
         s = d = heap_start;
-        CHKPTR(s);
         while (*s) {
+            CHKPTR(s);
 #ifdef DUMP_SWEEP
             dump_lispptr (s);
 #endif
@@ -124,7 +126,9 @@ sweep ()
             if (s >= heap_end)
                 internal_error ("Sweep overflow");
 #endif
+
             n = objsize (s);
+
             if (MARKED(s)) {
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
@@ -148,8 +152,13 @@ sweep ()
                 }
 #endif
             } else {
+#ifndef NAIVE
+                if (xlat == xlat_start)
+                    internal_error ("Relocation table overflow.");
+#endif
+
                 if (last_sweeped == d) {
-                    // Enlarge immediate previous gap.
+                    // Merge with previous gap.
                     *(unsigned *) xlat += n;
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
@@ -172,23 +181,18 @@ sweep ()
 #ifdef DUMP_SWEEP
                     printf ("Created gap of %dB. Total removed: %dB\n", n, total_removed);
 #endif
-
-#ifndef NDEBUG
-                    if (xlat == xlat_start)
-                        internal_error ("Relocation table overflow.");
-#endif
                 }
 
+                // Step to next object.
                 s += n;
-                CHKPTR(s);
             }
         }
 
         // Mark end of heap.
         *d = 0;
 
-        // Save free pointer.
 #ifdef FRAGMENTED_HEAP
+        // Save free pointer.
         heap->free = d;
 
         // Undo address shifting with negative gap entry in
@@ -200,11 +204,6 @@ sweep ()
 #ifdef VERBOSE_GC
         outn (total_removed); outs (" heap bytes freed."); terpri ();
 #endif
-
-#ifndef NDEBUG
-        if (xlat == xlat_start)
-            internal_error ("Relocation table overflow.");
-#endif
     } while ((++heap)->start);
 #else // #ifdef FRAGMENTED_HEAP
     // Save free pointer.
@@ -214,15 +213,15 @@ sweep ()
     // End symbol list.
     SYMBOL_NEXT(last_kept_sym) = nil;
 
-    // Save last symbol for next allocation with name.
+    // Save last symbol for lookup_symbol().
     last_symbol = last_kept_sym;
 }
 
-// Sum up gap sizes in relocation table up to the pointer
-// and subtract it from the pointer.
+// Relocate object pointer.
 lispptr FASTCALL
 relocate_ptr (char * x)
 {
+    // Sum up gap sizes up to the pointer.
     gapsize = 0;
     for (r = xlat_end; r != xlat;) {
         r -= sizeof (lispptr);
@@ -231,10 +230,12 @@ relocate_ptr (char * x)
         r -= sizeof (unsigned);
         gapsize += *(unsigned *) r;
     }
+
+    // Subtract it from the pointer.
     return x - gapsize;
 }
 
-// Relocate pointers on heap, stack, and in global vars.
+// Relocate object pointers on heap, stack, and in global vars.
 void
 relocate (void)
 {
@@ -287,12 +288,13 @@ relocate (void)
     } while ((++heap)->start);
 #endif
 
-    // Relocate GC stack.
+    // Relocate GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }
 
 #ifdef FRAGMENTED_HEAP
+// Switch to 'heap'.
 void
 switch_heap ()
 {
@@ -303,11 +305,12 @@ switch_heap ()
 }
 #endif
 
+// Mark and sweep objects, and relocate object pointers.
 void
 gc (void)
 {
 #ifdef FRAGMENTED_HEAP
-    // Switch to next available heap.
+    // Switch to next heap if available.
     if (heap->start) {
 #ifdef VERBOSE_GC
         out ('N');
@@ -317,7 +320,7 @@ gc (void)
 #endif
 
 #ifdef FRAGMENTED_HEAP
-    // Start GC with first heap.
+    // Switch to first heap.
     heap = heaps;
     switch_heap ();
 #endif
@@ -335,20 +338,17 @@ gc (void)
     mark (go_tag);
     mark (delayed_eval);
 
-    // Mark object stack.
+    // Mark GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 
     sweep ();
     relocate ();
 
-    // Start over with first heap.
 #ifdef FRAGMENTED_HEAP
+    // Switch to first heap to allocate from there.
     heap = heaps;
 next_heap:
     switch_heap ();
-#endif
-#ifdef VERBOSE_GC
-    terpri ();
 #endif
 }

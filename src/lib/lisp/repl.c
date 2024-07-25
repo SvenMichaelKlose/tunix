@@ -69,10 +69,9 @@ lisp_repl (char mode)
         num_debugger_repls++;
 #endif
 
-    // Handle error in other ways than calling the debugger.
 #ifndef NAIVE
+    // Handle error in other ways than calling the debugger.
     if (error_code) {
-
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
@@ -112,16 +111,14 @@ lisp_repl (char mode)
         if (mode != REPL_LOAD) {
 #ifndef NO_DEBUGGER
             debug_step = nil;
-            if (mode == REPL_DEBUGGER)
+            if (mode == REPL_DEBUGGER) {
                 print_error_info ();
-#endif
-
-#ifndef NAIVE
-            error_code = 0;
+                error_code = 0;
+            }
 #endif
 
 #ifndef NO_DEBUGGER
-            // Print prompt with number of nested REPLs.
+            // Print nesting count of debugger REPLs.
             if (num_debugger_repls)
                 out ('0' + num_debugger_repls);
 #endif
@@ -133,16 +130,7 @@ lisp_repl (char mode)
         if (mode != REPL_DEBUGGER) {
 #endif
 
-            // Read from input.
             x = read ();
-
-#ifndef NAIVE
-            // Memorize new top-level expression.
-            current_toplevel = x;
-            PUSH(current_toplevel);
-#endif
-
-            // Ensure fresh line if terminal input.
             if (mode != REPL_LOAD)
                 fresh_line ();
 
@@ -189,36 +177,49 @@ lisp_repl (char mode)
         }
 #endif
 
+#ifndef NAIVE
+        // Memorize new top-level expression.
+        current_toplevel = x;
+        PUSH(current_toplevel);
+#endif
+
         // Evaluate expression.
         x = eval ();
 
 #ifndef NAIVE
         // Call debugger on error.
-        if (error_code)
+        if (error_code) {
+            current_toplevel = *(lispptr *) stack;
             x = lisp_repl (REPL_DEBUGGER);
+        }
 
-        POP(current_toplevel);
+        // Forget our expression.
+        stack += sizeof (lispptr);
+        current_toplevel = (lispptr) -1;
 #endif
 
-        // Special result treatment.
+        // Special treatment of results.
         if (do_break_repl) {
-            // Ignore and continue with next expression.
-            if (do_continue_repl) {
-                do_break_repl = false;
-                do_continue_repl = false;
+            // Ignore result and continue with next expression.
+            if (do_continue_repl)
                 goto next;
-            }
-            // Return from all nested REPLs.
+
+            // Exit program.
             if (do_exit_program) {
+                // First return from all nested REPLs.
                 if (num_repls)
                     break;
-            } else {
-                do_break_repl = false;
-                break;
+
+                // Print message.
+                setout (STDOUT);
+                outs ("Program exited."); terpri ();
+
+                goto next;
             }
-            do_break_repl   = false;
-            do_exit_program = false;
-            setout (STDOUT); outs ("Program exited."); terpri ();
+
+            // Break this REPL.
+            do_break_repl = false;
+            break;
         }
 
         // Print result.
@@ -229,7 +230,10 @@ lisp_repl (char mode)
         }
 
 next:
-        // Restour channels of this REPL.
+        do_break_repl    = false;
+        do_continue_repl = false;
+
+        // Restore I/O channels of this REPL.
         set_channels (this_in, this_out);
     }
 
@@ -282,6 +286,7 @@ load (char * pathname)
     // Back to former file number for next LOAD.
     load_fn--;
 
+    // Close file.
     simpleio_close (load_fn);
 
 #ifndef NAIVE

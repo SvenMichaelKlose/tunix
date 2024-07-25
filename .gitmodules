@@ -7,3 +7,6 @@
 [submodule "src/contrib/cregex"]
 	path = src/contrib/cregex
 	url = git@github.com:jserv/cregex.git
+[submodule "src/contrib/cc65"]
+	path = src/contrib/cc65
+	url = git@github.com:cc65/cc65.git

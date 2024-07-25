@@ -1,17 +1,17 @@
-CC65_ROOT    = /usr/local
+CC65_ROOT    = $(THIS_DIR)/../contrib/cc65
 CC65_BIN     ?= $(CC65_ROOT)/bin
 CC65_SHARE   ?= $(CC65_ROOT)/share/cc65
-CA65_INCLUDE  = $(CC65_SHARE)/asminc
-CC65_INCLUDE  = $(CC65_SHARE)/include
-CC65_LIB      = $(CC65_SHARE)/lib
-CC65_CFG      = $(CC65_SHARE)/cfg
+CA65_INCLUDE  = $(CC65_ROOT)/asminc
+CC65_INCLUDE  = $(CC65_ROOT)/include
+CC65_LIB      = $(CC65_ROOT)/lib
+CC65_CFG      = $(CC65_ROOT)/cfg
 
 CC65_TARGET  ?= $(TARGET)
 
-AR      = ar65
-LD      = ld65
-AS      = ca65
-CC      = cl65
+AR      = $(CC65_BIN)/ar65
+LD      = $(CC65_BIN)/ld65
+AS      = $(CC65_BIN)/ca65
+CC      = $(CC65_BIN)/cl65
 
 ASFLAGS    = -I$(CA65_INCLUDE)
 CFLAGS     = -c -I$(CC65_INCLUDE) -Werror -Wa -I$(CA65_INCLUDE)

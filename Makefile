@@ -13,7 +13,7 @@ hosttest:
 hostclean:
 	$(MAKE) -C src hostclean
 
-allworlds:
+allworlds: host
 	$(MAKE) clean all TARGET=c64
 	$(MAKE) clean all TARGET=c128
 	$(MAKE) clean all TARGET=c16

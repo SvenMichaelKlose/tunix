@@ -51,10 +51,11 @@ jobs:
     - name: Add MSYS2 to PATH
       run: echo "C:\\msys64\\mingw64\\bin" >> $env:GITHUB_PATH
 
-    - name: Install VICE Emulator
+    - name: Download and Install VICE
       run: |
-        choco install vice
-        echo "::add-path::C:\\Program Files\\VICE"
+        Invoke-WebRequest -Uri https://sourceforge.net/projects/vice-emu/files/latest/download -OutFile vice.zip
+        Expand-Archive -Path vice.zip -DestinationPath C:\Programs\VICE
+        echo "C:\Programs\VICE" >> $env:GITHUB_PATH
 
     - name: Create config file
       run: echo -e "TARGET=vic20\nNDEBUG=1" > src/config

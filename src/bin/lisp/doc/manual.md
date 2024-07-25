@@ -43,7 +43,9 @@ using the cc65 C compiler suite:
 * Commodore C64
 * Commodore Plus4
 * Commodore VIC-20 (+27K)
-* Whatever Unix you're compiling it on.
+
+It also compiles on regular Unixoids using the GNU compiler
+toolchain or compatibles.
 
 ## Differences to other dialects
 
@@ -67,14 +69,6 @@ as the abbreviation for QUASIQUOTE, because the backquote
 is not part of the charsets of old machines TUNIX Lisp
 intends to support.
 
-The MAKE- prefix is used less regularly.  Instead, it
-might be helpful to think of those function as casts
-from some type (or nothing).
-
-TUNIX also uses more functions with names that contain
-special characters to make them more brief and culturally
-independend.
-
 MEMBER and FIND are comparing with EQ instead of EQL as these
 functions are used internally as well and need to be fast.
 You'll have to Use NEMBER-IF or FIND-IF together with EQL to
@@ -82,17 +76,23 @@ match numbers by value.
 
 LAMBDA is not around.  Function expressions are quoted when
 used as arguments to other functions.  That makes compiling
-them to 'native' function impossible, so the LAMBDA or
-FUNCTION (or FN) keyword has to resurface.
+them to 'native' function impossible, so something similar
+will have to be included in later versions.
 
 ### Symbols are strings
 
 Symbols have a name and a value and they also serve as
-strings that can be converted to and from character value
-lists.
+strings.  They can be converted to and from character value
+lists:
 
 ~~~lisp
 (symbol '(\A \B \C)) -> "ABC"
+~~~
+
+Symbols may also be anonymous, containing no name at all.
+That's useful for macro functions.
+
+~~~lisp
 (symbol) ; Anonymous symbol that won't get re-used.
 ~~~
 
@@ -101,9 +101,9 @@ lists.
 ### Heap
 
 All objects are stored on a growing heap, so allocations are
-fast as they require only bumping up the end-of-heap pointer
-and a boundary check to trigger garbage collection when
-needed.
+fast as they require only bumping up the end-of-heap
+pointer, and a boundary check to trigger garbage collection
+when needed.
 
 | Data type              | heap  |
 |------------------------|-------|
@@ -116,7 +116,7 @@ needed.
 Alongside the CPU stack a separate garbage-collected object
 stack holds function arguments.  An additional raw stack
 holds return tags of byte size instead of full return
-addresses as well as raw pointers to argument definitions of
+addresse, and raw pointers to argument definitions of
 built-in functions during evaluation.
 
 ### Hidden creation of list elements ("consing")
@@ -286,7 +286,7 @@ New channels are created by OPEN to access files:
       (= last-result (eval (read))))))
 ~~~
 
-# Error handling
+# Debugging and advanced error handling
 
 The debugger is invoked on error unless an error handler
 has been set to the symbol value of ONERROR.
@@ -298,21 +298,22 @@ wait for input.  Here's an example, triggering an error by
 trying to call the undefined function CAUSE-ERROR:
 
 ~~~
-* (cause-error)
+* (some-undefined-function)
 Error #5: Not a fun.
-In : (>>> cause-error <<<)
+In :
+(>>> some-undefined-function <<<)
 1*
 ~~~
 
-The debugger takes commands like the regular REPL plus
+The debugger takes commands like the regular REPL, e.g.
+"(print x)" will print X in the current context, plus
 single character commands for convenience:
 
 | Command | Description                              |
 |---------|------------------------------------------|
 | c       | Continue program execution.              |
-| s       | Execute subexpression of expression.     |
-| n       | Execute expression and subexpressions.   |
-| p s     | Print value of symbol 's'.               |
+| s       | Step into user-defined procedure.        |
+| n       | Execute current expression in whole.     |
 
 ## User-defined error handler ONERROR
 
@@ -330,12 +331,17 @@ or issue a NOERROR.
 ### Arguments to ONERROR
 
 ONERROR is called with the error code, the current REPL
-expression and the expression that caused the error.
+expression or body of the user-defined function thas is
+evaluated, and the expression inside it is faulty.
 
 ~~~lisp
 ; SKETCH! UNTESTED!
 ; Load missing functions on demand.
-(fn onerror (n repl ev)
+(fn onerror (n repl x)
+  ; n:    Error code
+  ; repl: Top-level expression or
+  ;       body of user-defined function.
+  ; x:    The faulty expression in 'repl'.
   (? (== n 1) ; Not a function error.
      ; Evaluate matching definition in environment file.
      (with-infile f "env.lisp"
@@ -345,7 +351,7 @@ expression and the expression that caused the error.
            (when (and (cons? !)
                       (or (eq (car !) 'var)
                           (eq (car !) 'fn))
-                      (eq (cadr !) ev))
+                      (eq (cadr !) x))
              (eval !)
              (return x)))))))
 ~~~

@@ -1,0 +1,63 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up ZIP
+      run: sudo apt-get install -y zip
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+    - name: Define zip file name
+      id: define_zip_name
+      run: echo "ZIP_NAME=tunix-lisp.cbm.${{ env.VERSION }}.zip" >> $GITHUB_ENV
+
+    - name: Make PDF manual
+      id: make_pdf_manual
+      run: cd src/bin/lisp/doc && ./md2pdf.sh
+
+    - name: Copy PDF manual to root directory
+      id: copy_pdf_manual
+      run: cp src/bin/lisp/doc/manual.pdf tunix-lisp.pdf
+
+    - name: Copy Markdown manual to root directory
+      id: copy_markdown_manual
+      run: cp src/bin/lisp/doc/manual.md tunix-lisp.md
+
+    - name: Zip files
+      run: zip -r ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          TUNIX Lisp D64 images for the Commodore C128, C16, C64, Plus/4, and VIC-20, and manual in Markdown and PDF format.
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.ZIP_NAME }}
+        asset_name: ${{ env.ZIP_NAME }}
+        asset_content_type: application/zip

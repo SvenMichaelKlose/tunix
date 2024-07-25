@@ -17,7 +17,7 @@ obj/oscar64:
 	$(MAKE) -C oscar64/build -f ../make/makefile
 
 cc65/bin/cc65:
-	$(MAKE) -C cc65 all
+	$(MAKE) -C cc65
 
 cregex:
 	$(MAKE) -C cregex

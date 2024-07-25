@@ -52,6 +52,9 @@ jobs:
       id: copy_markdown_manual
       run: cp src/bin/lisp/doc/manual.md tunix-lisp.md
 
+    - name: Ensure output directory exists
+      run: mkdir -p $(dirname ${{ env.ZIP_NAME }})
+
     - name: Zip files
       run: zip -r ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
 

@@ -886,10 +886,14 @@ main (int argc, char * argv[])
 #endif
 
     load ("env-1.lisp");
+#ifndef NDEBUG
     load ("test.lisp");
+#endif
     load ("env-2.lisp");
+#ifndef NDEBUG
 #ifndef NO_ONERROR
     load ("test-onerror.lisp");
+#endif
 #endif
 #ifndef TARGET_C16
     load ("env-3.lisp");

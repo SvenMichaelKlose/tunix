@@ -1,26 +1,24 @@
-Initial release
-[x] Essential tests.
-[x] Macro expansion.
-[x] User-defined error handler.
-[x] Testing errors.
-[x] Pass first complete GC stress test.
-[@] Debugger.
-[@] Complete manual with examples.
+Base line: make it fun writing the compiler with it.
+
+Input/Output
 [ ] File numbers returned by OPEN.
 [ ] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
-[ ] TIME, TPS (time per second)
+
+Built-ins
 [ ] SYSTEM (program invokation)
+[ ] TIME returning "ticks".
+[ ] TPS constant containing ticks per second.
 
-App release
-[@] Undefining symbols (UNDEF).
-[ ] On-demand function/macro loading.
+Debugger
+[ ] Breakppoints.
+[ ] Conditional breakppoints.
+[ ] Watchpoints.
+[ ] Conditional watchpoints.
+[ ] Invoking debugger with Ctrl-C.
+[ ] Invoking debugger with RESTORE key on CBMs.
+[ ] Command to start stepping through REPL user input.
 
-Nice To Have
-[ ] Bielefeld DB API.
-[ ] Loading/saving/calling snapshots.
-[ ] Recursion to loop conversion.
-[ ] Tail call optimization.
-[ ] Snapshot optimization.
-[?] Compressed conses.
-[?] Stack decompression via tags.
+Manual
+[ ] Examples where appropriate.
+[ ] Reviewed phrasing.

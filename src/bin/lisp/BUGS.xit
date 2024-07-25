@@ -1,3 +1,8 @@
-[ ] LOAD does not throw error if file does not exist.
+[ ] LOAD: Issue error if file does not exist.
 [ ] UNDEF: Some pointer(s) aren't relocated after GC.
-[ ] Fix build for the Commodore PET.
+
+Debugger
+[ ] Fix 'n' for returning from user-defined function.
+
+Commodore PET
+[ ] Fix build.  RUN breaks with syntax error.

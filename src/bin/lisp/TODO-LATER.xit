@@ -1,0 +1,10 @@
+[ ] Loading/saving/calling snapshots.
+[ ] Bielefeld DB API.
+[ ] On-demand function/macro loading.
+[ ] Recursion to loop conversion.
+[ ] Tail call optimization.
+[ ] Snapshot optimization.
+
+Reducing Memory Usage
+[?] Compressed conses.
+[?] GC stack compression, utilizing tag stack.

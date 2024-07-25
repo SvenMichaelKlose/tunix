@@ -18,7 +18,7 @@
 // Give inappropriately happy developers a hard time.
 //#define GC_STRESS
 
-// Print current expression to eval().
+// Print expressions before evaluation.
 //#define VERBOSE_EVAL
 
 // Print LOADed expressions before evaluation.
@@ -204,6 +204,7 @@ extern char * stack_start;
 extern char buffer[MAX_SYMBOL + 1];
 extern struct builtin builtins[];
 extern lispptr current_expr;
+extern lispptr current_function;
 extern lispptr current_toplevel;
 extern char *  last_errstr;
 extern bool    debug_mode;
@@ -391,6 +392,8 @@ extern lispptr           poptagw (void);
     } while (0)
 #endif // #ifdef SLOW
 
+// TODO: Rename from TAG_* to EVAL0_* to make
+// their function more obvious outside eval0().
 #define TAG_DONE                  0
 #define TAG_NEXT_BUILTIN_ARG      1
 #define TAG_NEXT_ARG              2

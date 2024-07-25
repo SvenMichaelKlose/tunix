@@ -154,10 +154,25 @@ print_error_info ()
         terpri ();
     }
     fresh_line ();
-    outs ("In: ");
-    terpri ();
+    outs ("In");
     do_highlight = true;
-    print (current_toplevel);
+    if (current_function) {
+        outs (" function ");
+        if (SYMBOLP(current_function)) {
+            print (current_function);
+            out (' ');
+            print (FUNARGS(current_function));
+            outs (": ");
+            terpri ();
+            print (FUNBODY(current_function));
+        } else {
+            outs (": ");
+            print (current_function);
+        }
+    } else {
+        outs (": ");
+        print (current_toplevel);
+    }
     do_highlight = false;
     terpri ();
 }

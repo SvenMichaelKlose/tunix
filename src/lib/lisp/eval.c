@@ -9,6 +9,10 @@
 
 char * stack_start;
 lispptr current_expr;
+#ifndef NAIVE
+lispptr current_function;
+lispptr original_first;
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -150,6 +154,9 @@ do_eval:
     }
 
     arg1 = CAR(x);
+#ifndef NAIVE
+    original_first = arg1;
+#endif
 
     // Get function from symbol.
     if (arg1 && SYMBOLP(arg1)) {
@@ -424,8 +431,14 @@ do_argument:
             PUSH_TAG(na);
             PUSH(defs);
             PUSH(arg1);
+#ifndef NAIVE
+            PUSH(original_first);
+#endif
             x = args;
             value = eval_list ();
+#ifndef NAIVE
+            POP(original_first);
+#endif
             POP(arg1);
             POP(defs);
             POP_TAG(na);
@@ -447,6 +460,9 @@ do_argument:
         PUSH(arg1);
         PUSH(defs);
         PUSH(args);
+#ifndef NAIVE
+        PUSH(original_first);
+#endif
 
         PUSH_TAG(TAG_NEXT_ARG);
         x = CAR(args);
@@ -454,6 +470,9 @@ do_argument:
         // Step to next argument.
 next_arg:
         // Restore state.
+#ifndef NAIVE
+        POP(original_first);
+#endif
         POP(args);
         POP(defs);
         POP(arg1);
@@ -477,6 +496,10 @@ start_body:
     PUSH(FUNARGS(arg1));    // Argument definition.
 
     x = FUNBODY(arg1);
+#ifndef NAIVE
+    PUSH(current_function);
+    current_function = original_first;
+#endif
 do_body:
     if (!x || do_break_repl)
         goto restore_arguments;
@@ -489,6 +512,10 @@ next_body_statement:
     goto do_body;
 
 restore_arguments:
+#ifndef NAIVE
+    POP(current_function);
+#endif
+
     // Restore argument symbol values.
     POP(defs);
     POP_TAG(na);
@@ -581,4 +608,7 @@ init_eval ()
     delayed_eval = make_symbol (NULL, 0);
     block_sym    = make_symbol ("block", 5);
     expand_universe (block_sym);
+#ifndef NAIVE
+    current_function = nil;
+#endif
 }

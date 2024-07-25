@@ -39,10 +39,6 @@ char    num_debugger_repls; // Debugger REPL count.
 bool    do_break_repl;      // Tells current REPL to return.
 bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
 bool    do_exit_program;    // Return to top-level REPL.
-#ifndef NO_DEBUGGER
-char    last_cmd;           // Last debugger short command.
-lispptr dbgx;               // Input debugger command.
-#endif
 
 lispptr FASTCALL
 lisp_repl (char mode)
@@ -131,25 +127,16 @@ lisp_repl (char mode)
 #endif
 
             x = read ();
-            if (mode != REPL_LOAD)
+            if (mode != REPL_LOAD) {
+                in ();
                 fresh_line ();
+            }
 
 #ifndef NO_DEBUGGER
         } else {
-            cmd = 0;
-
-            // Repeat last short command on ENTER.
-            if (in () == 10) {
-                cmd = last_cmd;
-                fresh_line ();
-            } else {
-                // Read expression, get short command char.
-                putback ();
-                dbgx = read ();
-                fresh_line ();
-                if (dbgx && SYMBOLP(dbgx) && SYMBOL_LENGTH(dbgx) == 1)
-                    cmd = SYMBOL_NAME(dbgx)[0];
-            }
+            do {
+                cmd = in ();
+            } while (cmd > 0 && cmd < ' ');
 
             // Process short command.
             switch (cmd) {
@@ -158,22 +145,20 @@ lisp_repl (char mode)
                     debug_step = nil;
                     goto do_return;
 
-                // Break on next eval0().
+                // Break on next expression.
+                // Steps into functions.
                 case 's':
-                    // Re-invoke before evaluating the next expression.
                     debug_step = t;
-                    last_cmd = cmd;
                     goto do_return;
 
                 // Break after current expression.
+                // Steps over function calls.
                 case 'n':
                     debug_step = current_expr;
-                    last_cmd = cmd;
                     goto do_return;
 
                 // Print expression.
                 case 'p':
-                    outs ("?: ");
                     PUSH(x);
                     x = read ();
                     terpri ();
@@ -186,7 +171,12 @@ lisp_repl (char mode)
                     goto next;
 
                 default:
-                    x = dbgx;
+                    // Read expression to evaluate.
+                    putback ();
+                    x = read ();
+                    if (!x)
+                        goto next;
+                    fresh_line ();
             }
         }
 #endif
@@ -208,8 +198,7 @@ lisp_repl (char mode)
         }
 
         // Forget our expression.
-        stack += sizeof (lispptr);
-        current_toplevel = (lispptr) -1;
+        POP(current_toplevel);
 #endif
 
         // Special treatment of results.

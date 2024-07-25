@@ -1,0 +1,61 @@
+name: Build and Test on Multiple Platforms
+
+on: [push, pull_request]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up C Compiler
+      run: sudo apt-get install -y gcc make
+
+    - name: Build Project
+      run: make
+
+    - name: Run Tests
+      run: make test
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: >-
+          base-devel
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-make
+
+    - name: Add MSYS2 to PATH
+      run: echo "C:\\msys64\\mingw64\\bin" >> $env:GITHUB_PATH
+
+    - name: Build Project
+      run: mingw32-make
+
+    - name: Run Tests
+      run: mingw32-make test
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up C Compiler
+      run: brew install gcc make
+
+    - name: Build Project
+      run: make
+
+    - name: Run Tests
+      run: make test

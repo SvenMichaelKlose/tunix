@@ -18,7 +18,7 @@ jobs:
         submodules: true
 
     - name: Install prerequisites
-      run: sudo apt-get install -y gcc make vice texlive-latex-base texlive-latex-recommended texlive-latex-extra pandoc
+      run: sudo apt-get install -y gcc make vice texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc
 
     - name: Create config file
       run: echo -e "TARGET=vic20\nNDEBUG=1" > src/config

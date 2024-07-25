@@ -135,7 +135,7 @@
      (cons n (make-count (-- n)))))
 
 (print 'Recursion)(terpri)
-(print (make-count 50))(terpri)
+(print (make-count 10))(terpri)
 
 ; TODO: (undef 'make-count)
 ; Messes up the heap with the following GC although it

@@ -171,6 +171,20 @@ lisp_repl (char mode)
                     last_cmd = cmd;
                     goto do_return;
 
+                // Print expression.
+                case 'p':
+                    outs ("?: ");
+                    PUSH(x);
+                    x = read ();
+                    terpri ();
+                    PUSH_TAG(TAG_DONE);
+                    tmp = eval0 ();
+                    POP(x);
+                    outs ("Value: ");
+                    print (tmp);
+                    terpri ();
+                    goto next;
+
                 default:
                     x = dbgx;
             }

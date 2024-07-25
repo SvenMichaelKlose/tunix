@@ -71,8 +71,8 @@ jobs:
         release_name: Release ${{ github.ref }}
         body: |
           TUNIX Lisp D64 images for the Commodore C128, C16, C64, Plus/4, and VIC-20, and manual in Markdown and PDF format.
-        draft: false
-        prerelease: false
+        draft: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
+        prerelease: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
 
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1

@@ -15,9 +15,6 @@ jobs:
     - name: Set up C Compiler
       run: sudo apt-get install -y gcc make
 
-    - name: Install cc65
-      run: sudo apt-get install -y cc65
-
     - name: Install VICE Emulator
       run: sudo apt-get install -y vice
 
@@ -54,9 +51,6 @@ jobs:
     - name: Add MSYS2 to PATH
       run: echo "C:\\msys64\\mingw64\\bin" >> $env:GITHUB_PATH
 
-    - name: Install cc65
-      run: choco install cc65
-
     - name: Install VICE Emulator
       run: |
         choco install vice
@@ -82,9 +76,6 @@ jobs:
 
     - name: Set up C Compiler
       run: brew install gcc make
-
-    - name: Install cc65
-      run: brew install cc65
 
     - name: Install VICE Emulator
       run: brew install vice

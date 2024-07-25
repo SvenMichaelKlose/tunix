@@ -46,7 +46,7 @@ ifeq ($(TARGET), vic20)
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
 
-D64_TUNIX = tunix.$(TARGET).d64
+D64_TUNIX = tunix-lisp.$(TARGET).d64
 
 c1541_image:
 	@echo "# Making c1541 disk image."

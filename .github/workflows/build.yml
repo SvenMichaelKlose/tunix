@@ -13,8 +13,14 @@ jobs:
     - name: Set up C Compiler
       run: sudo apt-get install -y gcc make
 
+    - name: Install VICE Emulator
+      run: sudo apt-get install -y vice
+
+    - name: Create config file
+      run: echo "NDEBUG=1" > src/config
+
     - name: Build Project
-      run: make
+      run: make allworlds
 
     - name: Run Tests
       run: make test
@@ -38,8 +44,16 @@ jobs:
     - name: Add MSYS2 to PATH
       run: echo "C:\\msys64\\mingw64\\bin" >> $env:GITHUB_PATH
 
+    - name: Install VICE Emulator
+      run: |
+        choco install vice
+        echo "::add-path::C:\\Program Files\\VICE"
+
+    - name: Create config file
+      run: echo "NDEBUG=1" > src/config
+
     - name: Build Project
-      run: mingw32-make
+      run: mingw32-make allworlds
 
     - name: Run Tests
       run: mingw32-make test
@@ -54,8 +68,15 @@ jobs:
     - name: Set up C Compiler
       run: brew install gcc make
 
+    - name: Install VICE Emulator
+      run: brew install vice
+
+    - name: Create config file
+      run: echo "NDEBUG=1" > src/config
+
     - name: Build Project
-      run: make
+      run: make allworlds
 
     - name: Run Tests
       run: make test
+

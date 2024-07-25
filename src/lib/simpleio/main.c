@@ -131,7 +131,7 @@ void
 outs (char * s)
 {
     char c;
-    while (c = *s++)
+    while ((c = *s++))
         out (c);
 }
 

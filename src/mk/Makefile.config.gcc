@@ -1,5 +1,5 @@
 CC			= gcc
-CFLAGS      = -c -Werror -DTARGET=$(TARGET) -I$(TUNIX_LIB)
+CFLAGS      = -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
 COPTFLAGS  ?= -O0 -g
 LDFLAGS     = -g
 LD		    = gcc

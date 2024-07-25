@@ -38,18 +38,18 @@ test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr 
 #endif
 
     printf (">>> Test: '%s'.\n", info);
-    printf ("Pos o1: %d\n", (char *) o1 - start);
-    printf ("Sizeof o1: %d\n", s1);
-    printf ("Pos o2: %d\n", (char *) o2 - start);
+    printf ("Pos o1: %ld\n", (char *) o1 - start);
+    printf ("Sizeof o1: %ld\n", s1);
+    printf ("Pos o2: %ld\n", (char *) o2 - start);
     assert((char *) o1 + s1 == o2);
-    printf ("Pos o3: %d\n", (char *) o3 - start);
-    printf ("Sizeof o3: %d\n", s3);
+    printf ("Pos o3: %ld\n", (char *) o3 - start);
+    printf ("Sizeof o3: %ld\n", s3);
     assert((char *) o2 + s2 == o3);
     SETCAR(root_cons, o1);
     SETCDR(root_cons, o3);
     gc ();
     if ((heap_free - end))
-        printf ("Difference to expected pointer address: %d\n", heap_free - end);
+        printf ("Difference to expected pointer address: %ld\n", heap_free - end);
     assert(heap_free == end);
     printf ("<<< Test '%s' passed.\n", info);
     SETCAR(root_cons, nil);
@@ -60,13 +60,9 @@ test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr 
 void
 test ()
 {
-    char * heap_fill;
     lispptr o1;
     lispptr o2;
     lispptr o3;
-
-    // The universe only contains symbol T.
-    heap_fill = heap_free;
 
     // Add an object, then GC and check if it only contains
     // T like before.  Do that with a cons, a number and a
@@ -78,7 +74,6 @@ test ()
     // Make rooting cons for test objects.
     root_cons = make_cons (nil, nil);
     expand_universe (root_cons);
-    heap_fill = heap_free;
 
     // Again for each object: first add an object that is
     // linked to the universe, then add the object that is not

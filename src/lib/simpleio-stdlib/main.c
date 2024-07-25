@@ -24,7 +24,7 @@ char last_error;
 bool
 raw_eof (void)
 {
-    return feof (handles[fnin]);
+    return feof (handles[(int) fnin]);
 }
 
 char
@@ -36,7 +36,7 @@ raw_err (void)
 char
 raw_in (void)
 {
-    int c = fgetc (handles[fnin]);
+    int c = fgetc (handles[(int) fnin]);
     if (c == EOF)
         c = 0;
     last_in = c;
@@ -46,7 +46,7 @@ raw_in (void)
 void
 raw_out (char c)
 {
-    fputc (c, handles[fnout]);
+    fputc (c, handles[(int) fnout]);
 }
 
 void
@@ -58,14 +58,14 @@ raw_setin (simpleio_chn_t c)
 void
 raw_setout (simpleio_chn_t c)
 {
-    fflush (handles[fnout]);
+    fflush (handles[(int) fnout]);
     (void) c;
 }
 
 void
 raw_close (simpleio_chn_t c)
 {
-    fclose (handles[c]);
+    fclose (handles[(int) c]);
 }
 
 void
@@ -74,8 +74,8 @@ simpleio_open (simpleio_chn_t c, char * name, char mode)
     char m[2];
     m[0] = mode;
     m[1] = 0;
-    handles[c] = fopen (name, m);
-    if (!handles[c]) {
+    handles[(int) c] = fopen (name, m);
+    if (!handles[(int) c]) {
         fprintf (stderr, "'%s': ", name);
         perror ("simpleio-stdlib::open()");
         last_error = c;

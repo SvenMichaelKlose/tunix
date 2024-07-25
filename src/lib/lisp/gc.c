@@ -1,4 +1,6 @@
+#ifdef __CC65__
 #include <ingle/cc65-charmap.h>
+#endif
 
 #include <ctype.h>
 #include <stdbool.h>

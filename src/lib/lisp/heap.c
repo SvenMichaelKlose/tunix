@@ -129,7 +129,7 @@ check_lispptr (char * x)
         case TYPE_SPECIAL:
             break;
         default:
-            printf ("Ill type: %d in %d\n", TYPEBITS(x), x);
+            printf ("Ill type: %d in %s\n", TYPEBITS(x), x);
             internal_error ("Illegal type");
     }
 }
@@ -138,7 +138,7 @@ check_lispptr (char * x)
 void
 dump_lispptr (char * x)
 {
-    printf ("%x %d: ", x, objsize (x));
+    printf ("%s %d: ", x, objsize (x));
     if (!MARKED(x))
         printf ("(unused) ");
     CHKPTR(x);
@@ -151,25 +151,25 @@ dump_lispptr (char * x)
             printf ("End of heap.\n");
             break;
         case TYPE_CONS:
-            printf ("cons %x, %x\n", CAR(x), CDR(x));
+            printf ("cons %p, %p\n", CAR(x), CDR(x));
             break;
         case TYPE_NUMBER:
-            printf ("number %d\n", NUMBER_VALUE(x));
+            printf ("number %ld\n", NUMBER_VALUE(x));
             break;
         case TYPE_SYMBOL:
             printf ("symbol '");
             outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-            printf ("' %d\n", SYMBOL_VALUE(x));
+            printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         case TYPE_BUILTIN:
             printf ("built-in '");
             outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-            printf ("' %d\n", SYMBOL_VALUE(x));
+            printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         case TYPE_SPECIAL:
             printf ("special '");
             outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-            printf ("' %d\n", SYMBOL_VALUE(x));
+            printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         default:
             internal_error ("Illegal type");

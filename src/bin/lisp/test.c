@@ -60,6 +60,9 @@ test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr 
 void
 test ()
 {
+#ifndef NDEBUG
+    char * heap_fill = heap_free;
+#endif
     lispptr o1;
     lispptr o2;
     lispptr o3;

@@ -383,10 +383,6 @@ init_heap ()
     last_errstr = NULL;
     current_expr  = nil;
 #endif
-#ifndef NO_DEBUGGER
-    do_invoke_debugger = false;
-    debug_step = nil;
-#endif
 
     return true;
 }

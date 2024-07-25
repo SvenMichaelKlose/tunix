@@ -270,7 +270,6 @@ extern lispptr delayed_eval;
 
 extern char error_code;
 extern lispptr debug_step;
-extern bool do_invoke_debugger;
 
 #ifdef __CC65__
 #pragma zpsym ("tmp")
@@ -298,7 +297,6 @@ extern bool do_invoke_debugger;
 #pragma zpsym ("go_tag")
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("debug_step")
-#pragma zpsym ("do_invoke_debugger")
 #pragma bss-name (pop)
 #endif
 

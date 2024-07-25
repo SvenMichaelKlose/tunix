@@ -613,4 +613,8 @@ init_eval ()
 #ifndef NAIVE
     current_function = nil;
 #endif
+#ifndef NO_DEBUGGER
+    do_invoke_debugger = false;
+    debug_step = nil;
+#endif
 }

@@ -34,6 +34,7 @@ print_highlighted (lispptr x)
 {
     if (do_highlight && current_expr == x) {
         outs (">>>");
+        last_out = 0; // Avoid padding.
         print0 (x);
         outs ("<<<");
     } else

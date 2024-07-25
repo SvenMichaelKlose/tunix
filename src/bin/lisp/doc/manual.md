@@ -314,6 +314,7 @@ single character commands for convenience:
 | c       | Continue program execution.              |
 | s       | Step into user-defined procedure.        |
 | n       | Execute current expression in whole.     |
+| pX      | Evaluate and print expression X.         |
 
 ## User-defined error handler ONERROR
 

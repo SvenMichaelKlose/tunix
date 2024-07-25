@@ -8,10 +8,10 @@ CC65_CFG      = $(CC65_SHARE)/cfg
 
 CC65_TARGET  ?= $(TARGET)
 
-AR      = $(CC65_BIN)/ar65
-LD      = $(CC65_BIN)/ld65
-AS      = $(CC65_BIN)/ca65
-CC      = $(CC65_BIN)/cl65
+AR      = ar65
+LD      = ld65
+AS      = ca65
+CC      = cl65
 
 ASFLAGS    = -I$(CA65_INCLUDE)
 CFLAGS     = -c -I$(CC65_INCLUDE) -Werror -Wa -I$(CA65_INCLUDE)

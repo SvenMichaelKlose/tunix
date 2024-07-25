@@ -4,7 +4,7 @@
       ,@body)
     ,v))
 
-(print 'let)(terpri)
+(out "Testing LET...")(terpri)
 (or (equal (macroexpand '(let a 1
                            (+ 2 a)))
            '(((a)

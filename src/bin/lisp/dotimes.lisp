@@ -15,5 +15,8 @@
          (go stag)
          etag))))
 
-(print 'dotimes)(terpri)
-(eval (macroexpand '(dotimes (i 10) (print i))))
+(print "Testing DOTIMES...")(terpri)
+(eval
+  (macroexpand
+    '(dotimes (i 10)
+       (print i))))

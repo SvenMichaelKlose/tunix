@@ -1,7 +1,7 @@
 (fn list x
   x)
 
-(print 'list)(terpri)
+(out "Smoke-testing LIST..:")(terpri)
 (print (list))(terpri)
 (print (list 1 2 3))(terpri)
 
@@ -39,7 +39,7 @@
     rest
       (apply append rest)))
 
-(print 'append)(terpri)
+(out "Smoke-testing APPEND...")(terpri)
 (print (append nil nil))(terpri)
 (print (append nil '(3 4)))(terpri)
 (print (append '(1 2) nil))(terpri)

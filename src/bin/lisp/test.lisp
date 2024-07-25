@@ -1,11 +1,11 @@
 (debugger)
 (= x 42)
 
-(print 'equal)(terpri)
+(out "Testing EQUAL...")(terpri)
 (or (equal '(1 2) '(1 2))
     (error))
 
-(print 'apply)(terpri)
+(out "Testing APPLY...")(terpri)
 (or (equal (apply '(x x) '(1))
            '(1))
     (error))
@@ -16,7 +16,7 @@
            '(1 2 3 4))
     (error))
 
-(print 'eval)(terpri)
+(out "Testing EVAL...")(terpri)
 (or (equal (eval '(list 1 2 3))
            '(1 2 3))
     (error (eval '(list 1 2 3))))
@@ -26,7 +26,7 @@
 
 (or (equal '(1 . 2)
            (cons 1 2))
-    (error '"Dotted pair not read OK"))
+    (error "Dotted pair not read OK"))
 
 (or (== x 42)
-    (error '"X was modified globally"))
+    (error "X was modified globally"))

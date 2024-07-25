@@ -25,7 +25,7 @@
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))
 
-(print 'quasiquote)(terpri)
+(out "Testing QUASIQUOTE...")(terpri)
 (or (equal $(1 2 ,3 ,4)
            '(1 2 3 4))
     (error $(1 2 ,3 ,4)))
@@ -38,4 +38,4 @@
 (= x '(n v . body))
 (or (equal $(fn ,x bla)
            '(fn (n v . body) bla))
-    (error '"Error unquoting dotted pair"))
+    (error "Error unquoting dotted pair"))

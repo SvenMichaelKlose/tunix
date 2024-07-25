@@ -4,11 +4,7 @@
      ,@body)
     ,@(carlist (cdrlist inits))))
 
-(print 'fn-with-smoke-test)(terpri)
-(or (equal (with '((a 1) (b 2)) '(foo))
-           '(((a b) (foo)) 1 2)))
-
-(print 'with)(terpri)
+(out "Testing WITH...")(terpri)
 (or (equal (macroexpand '(with ((a 1)
                                 (b 2))
                            (print a)

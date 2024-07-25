@@ -9,7 +9,7 @@
            (> start len)
            (> actual-end len)
            (< start actual-end))
-       (error '"ill range")
+       (error "ill range")
        (with-queue q
          (= seq (nthcdr seq start))
          (dotimes (i sublen (queue-list q))

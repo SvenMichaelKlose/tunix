@@ -382,7 +382,7 @@ bi_or (void)
         POP(x);
 #ifndef NAIVE
         if (error_code)
-            return nil;
+            break;
 #endif
         if (value)
             return value;
@@ -396,6 +396,8 @@ bi_print (void)
     return print (arg1);
 }
 
+// Get last I/O error.
+// TODO: Rename to IOERR?
 lispptr
 bi_err (void)
 {

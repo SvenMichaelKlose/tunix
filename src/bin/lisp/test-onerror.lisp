@@ -2,11 +2,12 @@
 
 (var *last-err* nil)
 
-(fn onerror (n repl ev)
-  (out '"ONERROR #")(print n)(terpri)
-  (out '"REPL: ")(print repl)(terpri)
-  (out '"Eval: ")(print ev)(terpri)
-  (= *last-err* n)
+(fn onerror (code toplevel-expr faulty-expr)
+  (out '"ONERROR handler")(terpri)
+  (out '"Error code: ")(print code)(terpri)
+  (out '"REPL: ")(print toplevel-expr)(terpri)
+  (out '"Faulty: ")(print faulty-expr)(terpri)
+  (= *last-err* code)
   (noerror))
 
 (fn terror (x)

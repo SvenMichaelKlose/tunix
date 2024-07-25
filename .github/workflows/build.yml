@@ -9,6 +9,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        submodules: true  # Initialize submodules
 
     - name: Set up C Compiler
       run: sudo apt-get install -y gcc make
@@ -37,6 +39,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        submodules: true  # Initialize submodules
 
     - name: Set up MSYS2
       uses: msys2/setup-msys2@v2
@@ -73,6 +77,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        submodules: true  # Initialize submodules
 
     - name: Set up C Compiler
       run: brew install gcc make

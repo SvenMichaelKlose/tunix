@@ -161,12 +161,13 @@ print_error_info ()
     if (current_function) {
         outs (" function ");
         if (SYMBOLP(current_function)) {
+            tmp2 = SYMBOL_VALUE(current_function);
             print (current_function);
             out (' ');
-            print (FUNARGS(current_function));
+            print (FUNARGS(tmp2));
             outs (": ");
             terpri ();
-            print (FUNBODY(current_function));
+            print (FUNBODY(tmp2));
         } else {
             outs (": ");
             print (current_function);

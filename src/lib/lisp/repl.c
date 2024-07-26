@@ -142,23 +142,27 @@ lisp_repl (char mode)
             switch (cmd) {
                 // Continue execution.
                 case 'c':
+                    fresh_line ();
                     debug_step = nil;
                     goto do_return;
 
                 // Break on next expression.
                 // Steps into functions.
                 case 's':
+                    fresh_line ();
                     debug_step = t;
                     goto do_return;
 
                 // Break after current expression.
                 // Steps over function calls.
                 case 'n':
+                    fresh_line ();
                     debug_step = current_expr;
                     goto do_return;
 
                 // Print expression.
                 case 'p':
+                    fresh_line ();
                     PUSH(x);
                     x = read ();
                     terpri ();
@@ -173,8 +177,7 @@ lisp_repl (char mode)
                 default:
                     // Read expression to evaluate.
                     putback ();
-                    x = read ();
-                    if (!x)
+                    if (!(x = read ()))
                         goto next;
                     fresh_line ();
             }

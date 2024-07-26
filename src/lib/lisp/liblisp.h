@@ -4,6 +4,15 @@
 // Disable C compiler level debugging.
 //#define NDEBUG
 
+// Enable extra checks that'll probably not kick in.
+//#define PARANOID
+
+// Give inappropriately happy developers a hard time.
+//#define GC_STRESS
+
+// Disable all error handling.
+//#define NAIVE
+
 // Maximum symbol name length.
 #define MAX_SYMBOL  255
 
@@ -14,9 +23,6 @@
 // Real object 'nil' at address 0 to get around addiitonal
 // pointer checks.  PLANNED!
 //#define NULLOBJ
-
-// Give inappropriately happy developers a hard time.
-//#define GC_STRESS
 
 // Print expressions before evaluation.
 //#define VERBOSE_EVAL
@@ -35,10 +41,8 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-#ifndef NAIVE
-#define GCSTACK_CHECKS
-#define TAGSTACK_CHECKS
-#endif
+//#define GCSTACK_CHECKS
+//#define TAGSTACK_CHECKS
 
 // Print 'x instead of (quote x).
 #define PRINT_SHORT_QUOTES
@@ -49,13 +53,9 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
-// No error handling.
-// ~20% less code size with cc65.
-//#define NAIVE
-
 // GC sweep: do not copy if object didn't move.
 // Adds extra code.
-#define SKIPPING_SWEEP
+//#define SKIPPING_SWEEP
 
 // Multiple heaps.
 //#define FRAGMENTED_HEAP
@@ -73,9 +73,10 @@
 #ifdef TARGET_C128
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
+#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_C16
@@ -96,40 +97,45 @@
 #ifdef TARGET_C64
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
+#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_PET
 #define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
+#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_PLUS4
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
+#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  384
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_VIC20
 #define SLOW
 #define FRAGMENTED_HEAP
+#define SKIPPING_SWEEP
 #define STACK_START          0x0400
 #define STACK_END            0x0800
 #define TAGSTACK_START       0x0800
 #define TAGSTACK_END         0x1000
-#define RELOC_TABLE_ENTRIES  256
+#define RELOC_TABLE_ENTRIES  128
 #endif
 
 #ifdef TARGET_UNIX
 #ifndef NDEBUG
+    // For set breakpoints more conveniently.
     #define SLOW
 #endif
 #define MALLOCD_STACK
@@ -141,23 +147,23 @@
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
-    #error "Neither HEAP_SIZE or MALLOCD_HEAP defined."
+    #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."
 #endif
 
 #ifdef NAIVE
 #ifndef NO_DEBUGGER
-#define NO_DEBUGGER
+    #define NO_DEBUGGER
 #endif
 #ifndef NO_ONERROR
-#define NO_ONERROR
+    #define NO_ONERROR
 #endif
 #ifndef NDEBUG
-#define NDEBUG
+    #define NDEBUG
 #endif
+#else // #ifdef NAIVE
+#define GCSTACK_CHECKS
+#define TAGSTACK_CHECKS
 #endif // #ifdef NAIVE
-
-typedef unsigned char  uchar;
-typedef long           lispnum_t;
 
 #ifdef CC65
 #define FASTCALL            __fastcall__
@@ -167,8 +173,9 @@ typedef long           lispnum_t;
 #define HOST_DEBUGGER()     raise (SIGTRAP);
 #endif
 
-typedef void * lispptr;
-typedef lispptr (*builtin_fun) (void);
+typedef unsigned char  uchar;
+typedef long           lispnum_t;
+typedef void *         lispptr;
 
 typedef struct _cons {
     uchar    type;
@@ -188,11 +195,15 @@ typedef struct _symbol {
     uchar    length;
 } symbol;
 
+typedef lispptr (*builtin_fun) (void);
+
 struct builtin {
     const char * name;
     const char * argdef;
     builtin_fun  func;
 };
+
+extern struct builtin builtins[];
 
 struct heap_fragment {
     char * start;
@@ -201,9 +212,8 @@ struct heap_fragment {
 };
 
 extern lispptr universe;
-extern char * stack_start;
-extern char buffer[MAX_SYMBOL + 1];
-extern struct builtin builtins[];
+extern char *  stack_start;
+extern char    buffer[MAX_SYMBOL + 1];
 extern lispptr current_expr;
 extern lispptr current_function;
 extern lispptr current_toplevel;
@@ -226,6 +236,7 @@ extern bool do_break_repl;
 extern bool do_continue_repl;
 extern bool do_exit_program;
 
+// For copying lists with no recursions.
 extern lispptr list_start;
 extern lispptr list_last;
 
@@ -235,7 +246,7 @@ extern lispptr list_last;
 
 extern lispptr tmp;
 extern lispptr tmp2;
-extern char tmpc;
+extern char    tmpc;
 
 #ifdef FRAGMENTED_HEAP
 extern struct heap_fragment * heap;

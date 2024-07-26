@@ -44,6 +44,7 @@ mark (lispptr x)
     }
 }
 
+// End of singly-linked list of named symbols.
 lispptr last_kept_sym;
 
 #ifdef FRAGMENTED_HEAP
@@ -66,6 +67,7 @@ char * p;
 char * r;
 
 char * xlat;
+bool   xlat_full;
 char * last_sweeped; // For merging consecutive gaps.
 size_t gapsize;
 #ifdef __CC65__
@@ -75,6 +77,7 @@ size_t gapsize;
 #pragma zpsym ("p")
 #pragma zpsym ("r")
 #pragma zpsym ("xlat")
+#pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
 #pragma bss-name (pop)
 #endif
@@ -95,13 +98,15 @@ sweep ()
 #endif
 
     // Invalidate pointer to last sweeped object.
+    // Required to merge gaps.
     last_sweeped = nil;
 
-    // Get start of symbol list.
+    // Get start of singly-linked list of named symbols.
     last_kept_sym = first_symbol;
 
-    // Get start of relocation table.
-    xlat = xlat_end;
+    // Initialize relocation table.
+    xlat = xlat_end;    // Point to its start.
+    xlat_full = false;  // Mark it as not full.
 
     // Get heap pointers.
 #ifdef FRAGMENTED_HEAP
@@ -117,21 +122,23 @@ sweep ()
     out ('S');
 #endif
 
-        // Sweep heap.
+        // Sweep one heap.
         s = d = heap_start;
         while (*s) {
             CHKPTR(s);
 #ifdef DUMP_SWEEP
             dump_lispptr (s);
 #endif
-#ifndef NDEBUG
+#ifdef PARANOID
             if (s >= heap_end)
                 internal_error ("Sweep overflow");
 #endif
 
+            // Get size of object.
             n = objsize (s);
 
-            if (MARKED(s)) {
+            // Keep/copy marked object.
+            if (MARKED(s) || xlat_full) {
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
                     SYMBOL_NEXT(last_kept_sym) = s;
@@ -154,11 +161,7 @@ sweep ()
                 }
 #endif
             } else {
-#ifndef NAIVE
-                if (xlat == xlat_start)
-                    internal_error ("Relocation table overflow.");
-#endif
-
+                // Remove object.
                 if (last_sweeped == d) {
                     // Merge with previous gap.
                     *(unsigned *) xlat += n;
@@ -187,6 +190,11 @@ sweep ()
 
                 // Step to next object.
                 s += n;
+
+                // Flag relocation table being full and
+                // the rest of the objects won't be sweeped.
+                if (xlat == xlat_start)
+                    xlat_full = true;
             }
         }
 
@@ -321,6 +329,7 @@ gc (void)
     }
 #endif
 
+restart:
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap.
     heap = heaps;
@@ -347,6 +356,11 @@ gc (void)
 
     sweep ();
     relocate ();
+
+    // Restart if sweep was interrupted due
+    // to full relocation table.
+    if (xlat_full)
+        goto restart;
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap to allocate from there.

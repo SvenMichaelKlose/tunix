@@ -884,11 +884,14 @@ x           ; 23
 
 # Macro system
 
-| Function        | Description                     |
-|-----------------|---------------------------------|
-| (macro s a +b)) | Add macro function to *macros*. |
-| (macro? x)      | Test if symbol is in *macros*.  |
-| (macroexpand x) | Expand expression.              |
+Macros are expanded in the REPL if MACROEXPAND is holding a
+user-defined function.
+
+| Function        | Description                       |
+|-----------------|-----------------------------------|
+| (macro s a +b)) | Add macro function S to *macros*. |
+| (macro? x)      | Test if symbol is in *macros*.    |
+| (macroexpand x) | Expand expression.                |
 
 ## (macro s a +b)): Add macro function to *macros*.
 ## (macro? x): Test if symbol is in *macros*.

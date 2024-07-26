@@ -43,6 +43,9 @@
 // Print 'x instead of (quote x).
 #define PRINT_SHORT_QUOTES
 
+// Do not expand macros in REPL.
+//#define NO_MACROEXPAND
+
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 

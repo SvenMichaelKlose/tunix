@@ -18,6 +18,7 @@ char    load_fn = 12;
 
 #ifndef NO_ONERROR
 lispptr onerror_sym;
+lispptr macroexpand_sym;
 #endif
 
 #ifdef __CC65__
@@ -69,6 +70,7 @@ lisp_repl (char mode)
     // Handle error in other ways than calling the debugger.
     if (error_code) {
 #ifndef NO_ONERROR
+
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Make argument list.
@@ -188,6 +190,17 @@ lisp_repl (char mode)
         // Memorize new top-level expression.
         current_toplevel = x;
         PUSH(current_toplevel);
+#endif
+
+#ifndef NO_MACROEXPAND
+        // Call user-defined MACROEXPAND.
+        if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
+            x = make_cons (x, nil);
+            x = make_cons (macroexpand_sym, x);
+            unevaluated = true;
+            PUSH_TAG(TAG_DONE);
+            x = eval0 ();
+        }
 #endif
 
         // Evaluate expression.
@@ -314,4 +327,9 @@ init_repl ()
     num_debugger_repls = 0;
 #endif
     current_toplevel = nil;
+
+#ifndef NO_MACROEXPAND
+    macroexpand_sym = make_symbol ("macroexpand", 11);
+    expand_universe (macroexpand_sym);
+#endif
 }

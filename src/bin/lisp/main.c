@@ -880,6 +880,7 @@ main (int argc, char * argv[])
 #ifndef NO_ONERROR
     init_onerror ();
 #endif
+    init_repl ();
 
 #ifdef GC_STRESS
     do_gc_stress = true;

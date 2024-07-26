@@ -16,7 +16,5 @@
          etag))))
 
 (message "Testing DOTIMES...")
-(eval
-  (macroexpand
-    '(dotimes (i 10)
-       (print i))))
+(dotimes (i 10)
+  (print i))

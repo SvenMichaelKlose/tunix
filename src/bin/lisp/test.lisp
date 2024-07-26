@@ -27,6 +27,5 @@
            (cons 1 2))
     (error "Dotted pair not read OK"))
 
-(message "Testing global X changed...")
 (or (== x 42)
     (error "X was modified globally"))

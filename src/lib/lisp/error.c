@@ -157,26 +157,31 @@ print_error_info ()
     }
     fresh_line ();
     outs ("In");
-    do_highlight = true;
-    if (current_function) {
-        outs (" function ");
-        if (SYMBOLP(current_function)) {
-            tmp2 = SYMBOL_VALUE(current_function);
-            print (current_function);
-            out (' ');
-            print (FUNARGS(tmp2));
-            outs (": ");
-            terpri ();
-            print (FUNBODY(tmp2));
+    if (error_code == ERROR_USER) {
+        outs (": ");
+        print (current_expr);
+    } else {
+        do_highlight = true;
+        if (current_function) {
+            outs (" function ");
+            if (SYMBOLP(current_function)) {
+                tmp2 = SYMBOL_VALUE(current_function);
+                print (current_function);
+                out (' ');
+                print (FUNARGS(tmp2));
+                outs (": ");
+                terpri ();
+                print (FUNBODY(tmp2));
+            } else {
+                outs (": ");
+                print (current_function);
+            }
         } else {
             outs (": ");
-            print (current_function);
+            print (current_toplevel);
         }
-    } else {
-        outs (": ");
-        print (current_toplevel);
+        do_highlight = false;
     }
-    do_highlight = false;
     terpri ();
 }
 

@@ -14,7 +14,7 @@
          (= ,i (cdr ,i))
          (go ,tag)))))
 
-(out "Testing DOLIST...")(terpri)
+(message "Testing DOLIST...")
 (eval
   (print
     (macroexpand

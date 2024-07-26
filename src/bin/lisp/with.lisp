@@ -4,7 +4,7 @@
      ,@body)
     ,@(carlist (cdrlist inits))))
 
-(out "Testing WITH...")(terpri)
+(message "Testing WITH...")
 (or (equal (macroexpand '(with ((a 1)
                                 (b 2))
                            (print a)

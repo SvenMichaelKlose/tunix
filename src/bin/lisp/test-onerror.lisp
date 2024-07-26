@@ -1,4 +1,4 @@
-(out "Testing an ONERROR handler...")(terpri)
+(message "Testing an ONERROR handler...")
 
 (var *last-err* nil)
 

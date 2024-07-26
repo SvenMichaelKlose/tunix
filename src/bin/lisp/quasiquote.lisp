@@ -25,7 +25,7 @@
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))
 
-(out "Testing QUASIQUOTE...")(terpri)
+(message "Testing QUASIQUOTE...")
 (or (equal $(1 2 ,3 ,4)
            '(1 2 3 4))
     (error $(1 2 ,3 ,4)))

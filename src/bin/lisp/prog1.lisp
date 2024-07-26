@@ -5,7 +5,7 @@
        ,@(cdr body)
        ,g)))
 
-(out "Testing PROG1...")(terpri)
+(message "Testing PROG1...")
 (or (equal (eval (macroexpand '(prog1 1 2 3)))
            1)
     (error (eval (macroexpand '(prog1 1 2 3)))))

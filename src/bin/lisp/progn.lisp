@@ -2,6 +2,6 @@
   ;"Return value of last expression."
   $(block t ,@body))
 
-(out "Testing PROGN...")(terpri)
+(message "Testing PROGN...")
 (or (equal (macroexpand '(progn (error)))
            '(block t (error))))

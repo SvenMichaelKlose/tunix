@@ -44,39 +44,39 @@
       (macroexpand (apply (value (car x)) (cdr x)))
     (@ macroexpand x)))
 
-(out "Testing macro-expansion of dotted pair...")(terpri)
+(message "Testing macro-expansion of dotted pair...")
 (or (equal (macroexpand '(v . body))
            '(v . body))
     (error (macroexpand '(v . body))))
 
-(out "Testing macro-expansion of unquoted list...")(terpri)
+(message "Testing macro-expansion of unquoted list...")
 
-(out "(Part 1...)")(terpri)
+(message "(Part 1...)")
 (or (equal (macroexpand ',(a))
            ',(a))
     (error (macroexpand ',(a))))
 
-(out "(Part 2...)")(terpri)
+(message "(Part 2...)")
 (or (equal (macroexpand '(,(a)))
            '(,(a)))
     (error (macroexpand '(,(a)))))
 
-(out "(Part 3...)")(terpri)
+(message "(Part 3...)")
 (or (equal (macroexpand '((,(a))))
            '((,(a))))
     (error (macroexpand '((,(a))))))
 
-(out "(Part 4...)")(terpri)
+(message "(Part 4...)")
 (or (equal (list (macroexpand '((,(a)))))
            '(((,(a)))))
     (error (list (macroexpand '((,(a)))))))
 
-(out "(Part 5...)")(terpri)
+(message "(Part 5...)")
 (or (equal (list 2 (macroexpand '((,(a)))))
            '(2 ((,(a)))))
     (error (list 2 (macroexpand '((,(a)))))))
 
-(out "Testing %REQUOTE...")(terpri)
+(message "Testing %REQUOTE...")
 (or (equal (%requote '(,a))
            '(,a))
     (error (%requote '(,a))))
@@ -84,7 +84,7 @@
            '(,(a)))
     (error (%requote '(,(a)))))
 
-(out "Testing MACROEXPAND...")(terpri)
+(message "Testing MACROEXPAND...")
 (or (equal (macroexpand '$(a ,(b) ,@(c)))
            '$(a ,(b) ,@(c)))
     (error "%requote went wrong"))

@@ -1,0 +1,7 @@
+((()))
+(out "TUNIX Lisp (nightly)")(terpri)
+(fn message (x)
+  (out x)
+  (terpri))
+(fn identity (x)
+  x)

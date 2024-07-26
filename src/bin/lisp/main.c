@@ -886,6 +886,10 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
+    load ("env-0.lisp");
+#ifndef NDEBUG
+    load ("smoke-test.lisp");
+#endif
     load ("env-1.lisp");
 #ifndef NDEBUG
     load ("test.lisp");

@@ -1,9 +1,5 @@
 (var x nil)
 
-(fn message (x)
-  (out x)
-  (terpri))
-
 (message "Testing GC...")
 (print (gc))(out '"B free.")
 

@@ -1,7 +1,7 @@
 (fn list x
   x)
 
-(out "Smoke-testing LIST..:")(terpri)
+(out "Smoke-testing LIST...")(terpri)
 (print (list))(terpri)
 (print (list 1 2 3))(terpri)
 

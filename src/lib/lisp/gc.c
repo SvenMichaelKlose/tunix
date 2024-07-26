@@ -339,6 +339,7 @@ gc (void)
     mark (go_sym);
     mark (go_tag);
     mark (delayed_eval);
+    mark (current_expr);
 
     // Mark GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))

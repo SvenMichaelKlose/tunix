@@ -24,13 +24,15 @@ Features:
 * Lean I/O interface.[^io]
 * Supplementary compressed stack.[^stack]
 
-[^gc]: Planned to be made interruptible to some degree.
+[^gc]: Planned to be made interruptible to some degree,
+  optionally truly interruptible providing a copying garbage
+  collector.
 [^io]: Instead of providing a file number for each I/O
   operation an input and/or output channel must be selected
   beforehand, bridging the gap between plain standard I/O
   and multi-stream handling without making the API more
-  complex from the start,  allowing the program to operate
-  in maximally constrained environments.
+  complex from the start, supporting operation in maximally
+  constrained environments.
 [^stack]: It holds byte-sized tags instead of larger return
   addresses.  Also to support architectures with limited CPU
   stacks, like those with MOS-6502 CPUs.
@@ -44,8 +46,8 @@ using the cc65 C compiler suite:
 * Commodore Plus4
 * Commodore VIC-20 (+27K)
 
-It also compiles on regular Unixoids using the GNU compiler
-toolchain or compatibles.
+It also compiles on regular Unixoids, using the GNU compiler
+toolchain or compatible.
 
 ## Differences to other dialects
 
@@ -64,33 +66,31 @@ first time, but can be cleared up quickly:
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
 
-Instead of the backquote (`) the dollar sign ($) is used
-as the abbreviation for QUASIQUOTE, because the backquote
-is not part of the charsets of old machines TUNIX Lisp
-intends to support.
+Because the backquote (`) is not part of the charsets of old
+machines TUNIX Lisp intends to support, the dollar sign ($)
+is used as the abbreviation for QUASIQUOTE.
 
-MEMBER and FIND are comparing with EQ instead of EQL as these
-functions are used internally as well and need to be fast.
-You'll have to Use NEMBER-IF or FIND-IF together with EQL to
-match numbers by value.
+MEMBER and FIND are comparing with EQ instead of EQL as
+these functions are used internally as well and need to be
+fast.  Use NEMBER-IF or FIND-IF together with EQL to match
+numbers by value.
 
-LAMBDA is not around.  Function expressions are quoted when
-used as arguments to other functions.  That makes compiling
-them to 'native' function impossible, so something similar
-will have to be included in later versions.
+LAMBDA is not around yet.  Function expressions are quoted
+when used as arguments to other functions.  That makes
+compiling them to 'native' function impossible, so something
+similar will have to be in later versions.
 
 ### Symbols are strings
 
-Symbols have a name and a value and they also serve as
-strings.  They can be converted to and from character value
-lists:
+Symbols have a case-sensitive name and a value and they also
+serve as strings.  They can be converted to and from
+character value lists:
 
 ~~~lisp
 (symbol '(\A \B \C)) -> "ABC"
 ~~~
 
-Symbols may also be anonymous, containing no name at all.
-That's useful for macro functions.
+Symbols may also be anonymous, with no name at all.
 
 ~~~lisp
 (symbol) ; Anonymous symbol that won't get re-used.
@@ -100,35 +100,30 @@ That's useful for macro functions.
 
 ### Heap
 
-All objects are stored on a growing heap, so allocations are
-fast as they require only bumping up the end-of-heap
-pointer, and a boundary check to trigger garbage collection
-when needed.
+Object allocation is fast, requiring bumping up the pointer
+to the top of the growing heap, and a boundary check to
+trigger garbage collection when the heap is full.
 
 | Data type              | heap  |
 |------------------------|-------|
-| cons                   | 5     |
-| number (32 bit signed) | 5     |
-| symbol (also string)   | 6-261 |
+| cons                   |   5   |
+| number (32 bit signed) |   5   |
+| symbol (also string)   | 4-260 |
 
-### Stacks
+### CPU stack, object stack, and tag stack
 
 Alongside the CPU stack a separate garbage-collected object
-stack holds function arguments.  An additional raw stack
-holds return tags of byte size instead of full return
-addresse, and raw pointers to argument definitions of
-built-in functions during evaluation.
+stack holds function arguments and objects that need to be
+relocated during garbage collection.  An additional raw
+stack holds return tags of byte size instead of full return
+addresses, and raw pointers to built-in procedure's argument
+definitions.
 
-### Hidden creation of list elements ("consing")
+### Inevitable creation of list elements
 
 APPLY copies all arguments but the last one.
 
-## Garbage Collection
-
-Garbage collection is triggered when running out of heap.
-Performance measurements have to be made.
-
-# Definitions
+# Definiton of permanent symbols
 
 FN and VAR assign expressions to a symbol which is then
 added to the universe (a list of symbols the garbage

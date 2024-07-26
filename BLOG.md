@@ -1,6 +1,18 @@
 TUNIX blog
 ==========
 
+# 2024-07-26
+
+The Lisp interpreter's debugger is looking good.  The
+commands 's' (step), 'n' (next), 'c' (continue), and 'p'
+(print) work as expected.  The interface also does not seem
+to cause trouble.  Another prerelease could be done.
+
+For actual debugging breakpoints and fixing failing code on
+the spot need to be there.  To set, delete and list
+breakpoints, more commands are in order.  These are easy to
+implement.
+
 # 2024-07-22
 
 The Lisp's garbage collector passed the stress test for the

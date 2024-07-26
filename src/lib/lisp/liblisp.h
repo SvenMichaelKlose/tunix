@@ -68,7 +68,6 @@
 //#define MALLOCD_STACK
 
 #ifdef TARGET_C128
-#define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE           768
@@ -92,7 +91,6 @@
 #endif
 
 #ifdef TARGET_C64
-#define SLOW
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE           768

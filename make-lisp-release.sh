@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+DATE=`date +%f`
+make allworlds
+cd src/bin/lisp/doc && ./md2pdf.sh && cd -
+cp src/bin/lisp/doc/manual.pdf tunix-lisp.pdf
+cp src/bin/lisp/doc/manual.md tunix-lisp.md
+rm tunix-lisp.pet.d64
+rm tunix-lisp.unix.d64
+rm tunix.cbm.$DATE.zip
+zip -o tunix.cbm.$DATE.zip tunix-lisp.md tunix-lisp.pdf *.d64

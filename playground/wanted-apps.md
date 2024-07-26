@@ -1,3 +1,5 @@
+# Brainstorm of wanted applications
+
 * Audio
   * Sequencer
 * Compression

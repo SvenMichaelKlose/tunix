@@ -15,11 +15,11 @@ TUNIX shell
 
 # Doabouts
 
-The Lisp interpreter into a user-friendly
-command-line tool by adding an impertive input mode: Lines
-not starting with a parenthesis are treated like regular
-program invokation lines, starting with a programm name,
-followed by optional arguments.
+Turn the Lisp interpreter into a user-friendly command-line
+tool by adding an impertive input mode: Lines not starting
+with a parenthesis are treated like regular program
+invokation lines, starting with a programm name, followed by
+optional arguments.
 
 ~~~sh
 cat /etc/release

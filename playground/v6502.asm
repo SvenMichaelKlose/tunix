@@ -1,4 +1,4 @@
-;;; Virtual 6502 machine
+; Sketch of a virtual 6502 machine
 
     .zeropage
 

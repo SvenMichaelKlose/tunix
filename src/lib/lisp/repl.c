@@ -285,6 +285,12 @@ load (char * pathname)
 
     // Open file.
     simpleio_open (load_fn, pathname, 'r');
+    if (err ()) {
+        outs ("File error: ");
+        outs (pathname);
+        terpri ();
+        return;
+    }
 
     // Switch input channel to file.
     arg1 = make_number (load_fn);

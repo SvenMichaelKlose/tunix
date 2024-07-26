@@ -1,3 +1,3 @@
 #!/bin/sh
 
-xvic -ultimem ingle.img $@
+xvic -ultimem tunix.img $@

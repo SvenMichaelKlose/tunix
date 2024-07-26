@@ -18,6 +18,8 @@ char    load_fn = 12;
 
 #ifndef NO_ONERROR
 lispptr onerror_sym;
+#endif
+#ifndef NO_MACROEXPAND
 lispptr macroexpand_sym;
 #endif
 

@@ -76,7 +76,7 @@
 #define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  128
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_C16
@@ -91,7 +91,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  128
+#define RELOC_TABLE_ENTRIES  64
 #endif
 
 #ifdef TARGET_C64
@@ -100,7 +100,7 @@
 #define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  128
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_PET
@@ -119,7 +119,7 @@
 #define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  128
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_VIC20
@@ -130,7 +130,7 @@
 #define STACK_END            0x0800
 #define TAGSTACK_START       0x0800
 #define TAGSTACK_END         0x1000
-#define RELOC_TABLE_ENTRIES  128
+#define RELOC_TABLE_ENTRIES  256
 #endif
 
 #ifdef TARGET_UNIX

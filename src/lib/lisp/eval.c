@@ -142,8 +142,10 @@ do_eval:
 #ifndef NO_DEBUGGER
     current_expr = x;
     PUSH(current_expr);
-    if (debug_step == t || do_invoke_debugger)
+    if (debug_step == t || do_invoke_debugger) {
+        do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER);
+    }
 #endif
 
     // Evaluate atom.

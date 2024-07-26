@@ -115,7 +115,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define RELOC_TABLE_ENTRIES  384
 #endif
 
 #ifdef TARGET_VIC20

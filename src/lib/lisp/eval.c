@@ -246,18 +246,18 @@ next_block_statement:
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
         badef = (char *) bfun->argdef;
 
-        // Built-in without argument-definition.
+        // Built-in with no argument-definition.
+        // Call with arguments unevaluated.
         if (!badef) {
-            // No definition.  Call with unevaluated args.
             x = args;
             value = bfun->func ();
             goto do_return;
         }
 
-        // Call built-in with argument definition.  Pushes
-        // the evaluated values onto the stack and pops them
-        // into arg1/arg2 before doing the call.
-
+        // Call built-in with argument definition.
+        // Push evaluated values on the stack and pop them
+        // into arg1/arg2 before doing the call, depending
+        // on na.
         na = 0;
         PUSH_TAGW(bfun);
 
@@ -276,6 +276,8 @@ do_builtin_arg:
 #endif
 
 set_arg_values:
+            // Pop argument values from object stack into
+            // arg1 and arg2, depending on na.
             if (na == 1)
                 POP(arg1);
             else if (na == 2) {
@@ -291,30 +293,39 @@ set_arg_values:
 
         na++;
 
-        if (c == '?') {     // Optional argument.
+        // Optional argument.
+        if (c == '?') {
             c = *++badef;
+
+            // If not given, set NIL as its value.
             if (!args) {
                 PUSH(nil);
                 goto set_arg_values;
             }
         }
 #ifndef NAIVE
-        else if (!args) { // Missing argument.
+        // Missing argument error.
+        else if (!args) {
             error (ERROR_ARG_MISSING,
                    "Missing arg to builtin.");
             goto do_return;
         }
 #endif
-        if (c == '\'') {    // Unevaluated argument.
+        // Unevaluated argument.
+        if (c == '\'') {
             c = *++badef;
-            if (c == '+') { // (Rest of arguments.)
+
+            // (Rest of arguments.)
+            if (c == '+') {
                 PUSH(args);
                 goto set_arg_values;
             } else
                 value = CAR(args);
             goto save_arg_value;
         }
-        if (c == '+') {     // Rest of arguments.
+
+        // Rest of arguments.
+        if (c == '+') {
             if (unevaluated) {
                 value = args;
                 goto save_arg_value;
@@ -334,6 +345,7 @@ set_arg_values:
             goto set_arg_values;
         }
 
+        // Save argument if all must be unevaluated.
         if (unevaluated) {
             value = CAR(args);
             goto save_arg_value;
@@ -346,16 +358,15 @@ set_arg_values:
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
+
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
         POP_TAGW(badef);
         POP(args);
 
-        if (do_break_repl) {
-            na--;
-            goto set_arg_values;
-        }
+        if (do_break_repl)
+            goto break_builtin_call;
 
 save_arg_value:
 #ifndef NAIVE
@@ -370,16 +381,18 @@ save_arg_value:
             POP(args);
         }
 #endif
-        if (do_break_repl) {
-            na--;
-            goto set_arg_values;
-        }
+        if (do_break_repl)
+            goto break_builtin_call;
         PUSH(value);
 
         // Step to next argument.
         badef++;
         args = CDR(args);
         goto do_builtin_arg;
+
+break_builtin_call:
+        na--;
+        goto set_arg_values;
     }
 
     ////////////////////

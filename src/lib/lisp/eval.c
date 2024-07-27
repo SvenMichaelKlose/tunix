@@ -235,9 +235,9 @@ next_block_statement:
         goto block_statement;
     }
 
-    ////////////////
-    /// BUILT-IN ///
-    ////////////////
+    //////////////////////////
+    /// BUILT-IN PROCEDURE ///
+    //////////////////////////
 
     args = CDR(x);
 
@@ -395,15 +395,13 @@ break_builtin_call:
         goto set_arg_values;
     }
 
-    ////////////////////
-    /// USER-DEFINED ///
-    ////////////////////
+    //////////////////////////////
+    /// USER-DEFINED PROCEDURE ///
+    //////////////////////////////
 
-    // Call user-defined function.  Saves argument names and
-    // their old values on the stack and overwrites the
-    // names' symbol values with evaluated ones.  The old
-    // values are popped off the stack when the function
-    // body has been executed.
+    // Save argument names and their old values on the
+    // stack and overwrite the names' symbol values
+    // with evaluated ones.  Restore them on return.
 
 #ifndef NAIVE
     // Ensure user-defined function.
@@ -469,6 +467,7 @@ do_argument:
     // Save old argument symbol value.
     PUSH(SYMBOL_VALUE(CAR(defs)));
 
+    // Get argument value.
     if (unevaluated)
         value = CAR(args);
     else {
@@ -486,7 +485,7 @@ do_argument:
         goto do_eval;
         // Step to next argument.
 next_arg:
-        // Restore state.
+        // Restore evaluator state.
 #ifndef NAIVE
         POP(original_first);
 #endif

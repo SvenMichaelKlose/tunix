@@ -45,7 +45,7 @@
 //#define TAGSTACK_CHECKS
 
 // Print 'x instead of (quote x).
-#define PRINT_SHORT_QUOTES
+//#define PRINT_SHORT_QUOTES
 
 // Do not expand macros in REPL.
 //#define NO_MACROEXPAND
@@ -74,10 +74,11 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #ifdef TARGET_C16
@@ -100,10 +101,11 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #ifdef TARGET_PET
@@ -111,32 +113,35 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  128
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #ifdef TARGET_PLUS4
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define SKIPPING_SWEEP
 #define STACK_SIZE           768
 #define TAGSTACK_SIZE        512
 #define RELOC_TABLE_ENTRIES  256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #ifdef TARGET_VIC20
 #define SLOW
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
-#define SKIPPING_SWEEP
 #define STACK_START          0x0400
 #define STACK_END            0x0800
 #define TAGSTACK_START       0x0800
 #define TAGSTACK_END         0x1000
 #define RELOC_TABLE_ENTRIES  256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #ifdef TARGET_UNIX
@@ -151,6 +156,8 @@
 #define STACK_SIZE           (HEAP_SIZE / 16U)
 #define TAGSTACK_SIZE        (HEAP_SIZE / 64U)
 #define RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)

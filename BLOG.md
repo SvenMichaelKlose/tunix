@@ -12,9 +12,13 @@ For actual debugging breakpoints and fixing failing code on
 the spot need to be there.  To set, delete and list
 breakpoints, more commands are in order.  These are easy to
 implement.  It's a good idea to have user-defined breakpoint
-handling functions, I guess:
+handling functions, I guess.  The interpreter's code is far
+too big already.
 
-(brek
+Before that continues, I'll read all over the C code to make
+it look beatiful.  There're always coming good things out of
+doing so.  Including a good feeling about having created
+something nice.
 
 # 2024-07-22
 

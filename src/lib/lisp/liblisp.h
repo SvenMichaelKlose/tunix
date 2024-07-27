@@ -61,7 +61,7 @@
 //#define FRAGMENTED_HEAP
 
 // Use malloc() to allocate the heap.
-#define MALLOCD_HEAP
+//#define MALLOCD_HEAP
 
 // Use malloc() to allocate the tag stack.
 // Will be taken from the heap otherwise.
@@ -71,6 +71,7 @@
 //#define MALLOCD_STACK
 
 #ifdef TARGET_C128
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define SKIPPING_SWEEP
@@ -87,6 +88,7 @@
     #define NO_ONERROR
 #endif
 #define SLOW
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE           768
@@ -95,6 +97,7 @@
 #endif
 
 #ifdef TARGET_C64
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define SKIPPING_SWEEP
@@ -105,6 +108,7 @@
 
 #ifdef TARGET_PET
 #define SLOW
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define SKIPPING_SWEEP
@@ -114,6 +118,7 @@
 #endif
 
 #ifdef TARGET_PLUS4
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define SKIPPING_SWEEP
@@ -124,6 +129,7 @@
 
 #ifdef TARGET_VIC20
 #define SLOW
+#define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define SKIPPING_SWEEP
 #define STACK_START          0x0400
@@ -138,6 +144,7 @@
     // For set breakpoints more conveniently.
     #define SLOW
 #endif
+#define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define HEAP_SIZE            (128 * 1024U)

@@ -360,7 +360,6 @@ set_arg_values:
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
-
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
@@ -370,8 +369,10 @@ next_builtin_arg:
         if (do_break_repl)
             goto break_builtin_call;
 
+        // Typecheck and save argument value.
 save_arg_value:
 #ifndef NAIVE
+        // Typecheck,
         bi_tcheck (value, *builtin_argdef);
         if (error_code) {
             PUSH(args);
@@ -383,8 +384,12 @@ save_arg_value:
             POP(args);
         }
 #endif
+
+        // Break evaluation.
         if (do_break_repl)
             goto break_builtin_call;
+
+        // Save argument value.
         PUSH(value);
 
         // Step to next argument.
@@ -442,12 +447,13 @@ do_argument:
         // Save old symbol value for restore_arguments.
         PUSH(SYMBOL_VALUE(defs));
 
+        // Get argument value.
         if (unevaluated)
             value = args;
         else {
             PUSH_TAG(na);
             PUSH(defs);
-            PUSH(arg1);
+            PUSH(arg1); // Function
 #ifndef NAIVE
             PUSH(original_first);
 #endif
@@ -456,17 +462,19 @@ do_argument:
 #ifndef NAIVE
             POP(original_first);
 #endif
-            POP(arg1);
+            POP(arg1);  // Function
             POP(defs);
             POP_TAG(na);
         }
 
+        // Save argument value unless we need to fall through.
         if (!do_break_repl)
             SET_SYMBOL_VALUE(defs, value);
+
         goto start_body;
     }
 
-    // Save old argument symbol value.
+    // Regular argument.  Save its value.
     PUSH(SYMBOL_VALUE(CAR(defs)));
 
     // Get argument value.
@@ -475,7 +483,7 @@ do_argument:
     else {
         // Save evaluator state.
         PUSH_TAG(na);
-        PUSH(arg1);
+        PUSH(arg1); // Function
         PUSH(defs);
         PUSH(args);
 #ifndef NAIVE
@@ -493,7 +501,7 @@ next_arg:
 #endif
         POP(args);
         POP(defs);
-        POP(arg1);
+        POP(arg1);  // Function
         POP_TAG(na);
         if (do_break_repl)
             goto start_body;
@@ -509,34 +517,46 @@ next_arg:
 
     // Evaluate body.
 start_body:
+    // Reset inhibited evaluation of special form arguments.
     unevaluated = false;
+
+    // Store init info for restore_arguments.
     PUSH_TAG(na);           // Number of arguments.
     PUSH(FUNARGS(arg1));    // Argument definition.
 
+    // Get first body expression.
     x = FUNBODY(arg1);
+
 #ifndef NAIVE
+    // Save function symbol for debugger.
+    // TODO: Find out why this cannot be moved before init
+    //       info for restore_arguments.
     PUSH(current_function);
     current_function = original_first;
 #endif
-do_body:
+
+    // Evaluate body expression.
+continue_body:
     if (!x || do_break_repl)
         goto restore_arguments;
-    PUSH(CDR(x));   // Save next expression.
+    PUSH(CDR(x));   // Next expression.
     x = CAR(x);
     PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
 next_body_statement:
     POP(x);
-    goto do_body;
+    goto continue_body;
 
+    // Restore argument symbol values.
 restore_arguments:
 #ifndef NAIVE
+    // Restore name of parent function for debugger.
     POP(current_function);
 #endif
 
-    // Restore argument symbol values.
-    POP(defs);
-    POP_TAG(na);
+    // Get argument info.
+    POP(defs);    // Definition
+    POP_TAG(na);  // Number of arguments
     c = na;
     while (c--) {
         if (ATOM(defs)) {
@@ -561,6 +581,7 @@ do_return_atom:
     POP(current_expr);
 #endif
 
+    // Evaluate consequence of conditional.
     if (value == delayed_eval)
         goto do_eval;
 
@@ -569,11 +590,14 @@ do_return_atom:
 #endif
 
 #ifndef NO_DEBUGGER
+    // Debugger step over expression.
     if (debug_step && debug_step == current_expr)
+        // Inoke debugger before next evaluation.
         do_invoke_debugger = true;
 #endif
 
-    // Dispatch value based on tag.
+    // Continue evaluation.  Determine jump
+    // destination based on tag.
     POP_TAG(c);
     if (c != TAG_DONE) {
         switch (c) {
@@ -602,7 +626,6 @@ lispptr
 eval ()
 {
     unevaluated = false;
-    // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }
@@ -612,7 +635,6 @@ lispptr
 funcall ()
 {
     unevaluated = true;
-    // Tell to return from eval0().
     PUSH_TAG(TAG_DONE);
     return eval0 ();
 }

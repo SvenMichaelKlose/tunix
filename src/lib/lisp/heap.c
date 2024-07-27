@@ -138,7 +138,7 @@ check_lispptr (char * x)
 void
 dump_lispptr (char * x)
 {
-    printf ("%ld %d: ", (long) x, objsize (x));
+    printf ("%p %d: ", x, objsize (x));
     if (!MARKED(x))
         printf ("(unused) ");
     CHKPTR(x);

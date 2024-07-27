@@ -119,8 +119,10 @@ eval_list (void)
         SETCDR(list_last, make_cons (tmp, nil));
         list_last = tmp;
         POP(x);
-        if (do_break_repl)
+        if (do_break_repl) {
+            stack += sizeof (lispptr);
             return nil;
+        }
     }
     POP(list_start);
     return list_start;

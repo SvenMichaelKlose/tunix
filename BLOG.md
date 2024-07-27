@@ -11,7 +11,10 @@ to cause trouble.  Another prerelease could be done.
 For actual debugging breakpoints and fixing failing code on
 the spot need to be there.  To set, delete and list
 breakpoints, more commands are in order.  These are easy to
-implement.
+implement.  It's a good idea to have user-defined breakpoint
+handling functions, I guess:
+
+(brek
 
 # 2024-07-22
 

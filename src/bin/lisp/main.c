@@ -665,7 +665,7 @@ bi_filter (void)
         make_car_call ();
         tmp = make_cons (eval0 (), nil);
         if (do_break_repl) {
-            stack += 2 * sizeof (lispptr);
+            stack += 4 * sizeof (lispptr);
             return nil;
         }
         POP(list_last);

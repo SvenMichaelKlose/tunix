@@ -1,14 +1,26 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-/// Testing and debugging
+/// Diagnostics
 
-// Print objects traversed during GC sweep phase.
-//#define DUMP_SWEEP
+// Dump marked objects during sweep phase.
+//#define DUMP_MARKED
+
+// Dump sweeped objects during sweep phase.
+//#define DUMP_SWEEPED
+
+// Print expressions before evaluation.
+#define VERBOSE_EVAL
+
+// Print message if garbage collector takes action.
+//#define VERBOSE_GC
+
+
+/// Testing and debugging
 
 // Give inappropriately happy developers a hard time.
 // (Pre)releases require testing with this option set.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Aoid inlining of functions.
 // * Allows setting breakpoints.
@@ -17,12 +29,6 @@
 
 // Enable extra checks that'll probably not kick in.
 //#define PARANOID
-
-// Print expressions before evaluation.
-//#define VERBOSE_EVAL
-
-// Print message if garbage collector takes action.
-//#define VERBOSE_GC
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
@@ -72,8 +78,11 @@
 //#define VERBOSE_LOAD
 
 
+/// Type dimensions
+
 // Maximum symbol name length.
 //#define MAX_SYMBOL  255
+
 
 /// Memory allocation
 
@@ -200,8 +209,8 @@
     #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."
 #endif
 
-#if defined (NDEBUG) && defined (DUMP_SWEEP)
-    #error "NDEBUG and DUMP_SWEEP cannot be used together."
+#if defined (NDEBUG) && defined (DUMP_SWEEPED)
+    #error "NDEBUG and DUMP_SWEEPED cannot be used together."
 #endif
 
 #ifdef NAIVE

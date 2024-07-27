@@ -10,7 +10,7 @@
 
 #include "liblisp.h"
 
-#ifdef DUMP_SWEEP
+#ifdef DUMP_SWEEPED
 #include <stdio.h>
 #endif
 
@@ -108,6 +108,10 @@ sweep ()
     xlat = xlat_end;    // Point to its start.
     xlat_full = false;  // Mark it as not full.
 
+#if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
+    outs ("Sweep objects:"); terpri ();
+#endif
+
     // Get heap pointers.
 #ifdef FRAGMENTED_HEAP
     do {
@@ -126,9 +130,6 @@ sweep ()
         s = d = heap_start;
         while (*s) {
             CHKPTR(s);
-#ifdef DUMP_SWEEP
-            dump_lispptr (s);
-#endif
 #ifdef PARANOID
             if (s >= heap_end)
                 internal_error ("Sweep overflow");
@@ -139,6 +140,9 @@ sweep ()
 
             // Keep/copy marked object.
             if (MARKED(s) || xlat_full) {
+#ifdef DUMP_MARKED
+                dump_lispptr (s);
+#endif
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
                     SYMBOL_NEXT(last_kept_sym) = s;
@@ -161,6 +165,9 @@ sweep ()
                 }
 #endif
             } else {
+#ifdef DUMP_SWEEPED
+                dump_lispptr (s);
+#endif
                 // Remove object.
                 if (last_sweeped == d) {
                     // Merge with previous gap.
@@ -263,6 +270,7 @@ relocate (void)
     onerror_sym      = relocate_ptr (onerror_sym);
     debug_step       = relocate_ptr (debug_step);
 #endif
+    args = relocate_ptr (args);
     arg1 = relocate_ptr (arg1);
     arg2 = relocate_ptr (arg2);
 
@@ -345,6 +353,7 @@ restart:
     mark (go_tag);
     mark (delayed_eval);
     mark (current_expr);
+    mark (args);
     mark (arg1);
     mark (arg2);
 

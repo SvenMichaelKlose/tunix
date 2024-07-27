@@ -123,6 +123,33 @@ definitions.
 
 APPLY copies all arguments but the last one.
 
+# User interface: The READ/EVAL/PRINT-Loop (REPL)
+
+The REPL is the user interface.  It prompts you for input
+by printing an asterisk '\*' in its regular mode.  After
+reading an expression it is evaluated and the result of that
+evaluation is printing.  Then it starts over, prompting you
+for the next expression.  It also processes input from files
+and helps debugging by providing convenient one-character
+commands.  REPLs can be nested, e.g. when an error occured,
+a new REPL is launched in debug mode, where you can provide
+a replacement for a faulty expression, execute code step by
+step and examine symbols.
+
+Any REPL, no matter its mode, can be terminated using the
+built-in QUIT function, which takes a return value for the
+REPL as its argument.  It may become the return value of
+a LOAD function when loading a file, or the alternative
+return value of a faulty expression in debug mode.
+Built-in function IGNORE interrupts evaluation of the
+current expression read by the active REPL to start over
+with reading and evaluating the next one.
+
+Built-in function EXIT stops the program and returns to the
+topmost REPL.  When passed an exit code, EXIT terminates the
+interpreter to return to the operating system TUNIX Lisp is
+running on.
+
 # Definiton of permanent symbols
 
 FN and VAR assign expressions to a symbol which is then
@@ -316,13 +343,14 @@ single character commands for convenience:
 | Function        | Description                           |
 |-----------------|---------------------------------------|
 | (onerror n x x) | User-defined error handler.           |
-| (noerror)       | Break and continue with LOAD or REPL. |
+| (ignore)        | Break and continue with LOAD or REPL. |
 
 If defined, user-defined function ONERROR is called on
-errors, except internal ones.  Errors happening inside
+errors, except for internal ones which halt the interpreter
+to avoid unexpected behaviour.  Errors happening inside
 ONERROR will cause it to be called again.  The handler
-should return a correct replacement value (insted of QUIT)
-or issue a NOERROR.
+must return a correct replacement value insted of calling
+QUIT or use IGNORE.
 
 ### Arguments to ONERROR
 
@@ -856,7 +884,7 @@ x           ; 23
 | (exit)          | Stop program and go to top-level REPL. |
 | (error x)       | Issue a user error.                    |
 | (onerror n x x) | User-defined error handler.            |
-| (noerror)       | Break and continue with LOAD or REPL.  |
+| (ignore)        | Break and continue with LOAD or REPL.  |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
 | (debugger)      | Invoke debugger with next instruction. |
 
@@ -864,7 +892,7 @@ x           ; 23
 ### (exit): Stop program and go to top-level REPL.
 ### (error x): Issue a user error.
 ### (onerror n x x): User-defined error handler.
-### (noerror): Break and continue with LOAD or REPL.
+### (ignore): Break and continue with LOAD or REPL.
 ### (debug): Raises a SIGTRAP signal for debugging.
 ### (debugger): Invoke debugger with next instruction.
 
@@ -884,17 +912,54 @@ x           ; 23
 
 # Macro system
 
-Macros are expanded in the REPL if MACROEXPAND is holding a
-user-defined function.
+| Variable        | Description                 |
+|-----------------|-----------------------------|
+| \*macros\*      | Simple list of macro names. |
 
-| Function        | Description                       |
-|-----------------|-----------------------------------|
-| (macro s a +b)) | Add macro function S to *macros*. |
-| (macro? x)      | Test if symbol is in *macros*.    |
-| (macroexpand x) | Expand expression.                |
+| Function         | Description                     |
+|------------------|---------------------------------|
+| (macro s a ?+x)) | Add macro function to *macros*. |
+| (macro? x)       | Test if symbol is in *macros*.  |
+| (macroexpand x)  | Expand expression.              |
 
-## (macro s a +b)): Add macro function to *macros*.
-## (macro? x): Test if symbol is in *macros*.
+A macro is a special form which is replaced by the
+expression it returns during 'macro expansion'.  Macros are
+expanded in the REPL between READ and EVAL, if the value of
+MACROEXPAND is a user-defined function.
+
+Defined macros are kept in associative list \*MACROS\*.
+Predicate MACRO? checks if a symbol is a defined macro in
+that list.
+
+Macros are defined with special form MACRO:
+
+~~~lisp
+; Evalue list of expressions BODY and return the result
+; of the last.
+(macro progn body
+  $(block t
+     ,@body))
+~~~
+
+Macros can also be used inside other macros, so contructs of
+increasing complexity can be made from simpler components.
+
+~~~lisp
+; Evalute BODY if CONDITION is true.
+(macro when (condition . body)
+  $(? ,condition
+      (progn
+        ,@body)))
+
+## (macro s a +x)): Define macro.
+
+Special form, adding macro S with arguments A and body B to
+\*MACROS\*.
+
+## (macro? x): Test if symbol is in \*macros\*.
+
+Predicate to test if a symbol denotes a macro in \*MACROS\*.
+
 ## (macroexpand x): Expand expression.
 
 # Environment
@@ -907,11 +972,12 @@ programming languages.
 
 | Macro           | Desscription                        |
 |-----------------|-------------------------------------|
-| (let n init +b) | Form block with local variable.
-| (with inits +b) | Form block with local variables.
+| (let n init +b) | Block with one local variable.
+| (with inits +b) | Block with many local variables.
 
-### (let n init +b): Form block with local variable.
-### (with inits +b): Form block with local variables.
+### (let n init +b): Block with one local variable.
+
+### (with inits +b): Block with many local variables.
 
 ## Control flow macros
 
@@ -925,32 +991,44 @@ programming languages.
 | (dolist (i init) +b) | Loop over elements of a list.    |
 
 ### (prog1 +b): Return result of first.
+
 ### (progn +b): Return result of last.
+
 ### (when cond +b): Evaluate if condition is true.
+
 ### (unless cond +b): Evaluate if condition is false.
+
 ### (while (cond x) +b): Loop while condiiton is true.
+
 ### (dolist (i init) +b): Loop over elements of a list.
 
 ## Lists
 
 | Function      | Description                         |
 |---------------|-------------------------------------|
-| (list +x)     | Return argument list.               |
+| (list +x)     | Return list evaluated.              |
 | (list? x)     | Test if argument is NIL or a cons.  |
 | (cadr l)...   | Nested CAR/CDR combinations.        |
 | (carlist l)   | Get first elements of lists.        |
 | (cdrlist l)   | Get rest elements of lists.         |
-| (copy-list x) | Copy only top-level list (if tree). |
-| (copy x)      | Copy tree.                          |
+| (copy-list x) | Copy list.                          |
+| (copy x)      | Copy recursively.                   |
 | (find x l)    | Find element X in list.             |
 
-### (list +x): Return argument list.
+### (list +x): Return list evaluated.
+
 ### (list? x): Test if argument is NIL or a cons.
+
 ### (cadr l)...: Nested CAR/CDR combinations.
+
 ### (carlist l): Get first elements of lists.
+
 ### (cdrlist l): Get rest elements of lists.
-### (copy-list x): Copy only top-level list (if tree).
-### (copy x): Copy tree.
+
+### (copy-list x): Copy list.
+
+### (copy x): Copy recursively.
+
 ### (find x l): Find element X in list.
 
 ## Loops
@@ -961,6 +1039,7 @@ programming languages.
 | (dotimes (iter n) . body)   | Loop N times.            |
 
 ### (dolist (iter init) . body): Loop over list elements.
+
 ### (dotimes (iter n) . body): Loop N times.
 
 ## Stacks
@@ -998,6 +1077,7 @@ x ; '(2)
 | (enqueue c x) | Add object X to queue C.     |
 
 ### (make-queue): Make queue.
+
 ### (enqueue c x): Add object X to queue C.
 
 ## Sets
@@ -1013,11 +1093,17 @@ x ; '(2)
 | (subseq? a b)          | Test if A is subset of B.      |
 
 ### (unique x): Make list a set.
+
 ### (adjoin x set): Add element to set.
+
 ### (intersect a b): Elements in both.
+
 ### (set-difference a b): B elements that are not in A.
+
 ### (union a b): Unique elements from both.
+
 ### (set-exclusive-or a b): Elements that are not in both.
+
 ### (subseq? a b): Test if A is subset of B,
 
 ## Associative lists
@@ -1031,6 +1117,7 @@ A list of lists where the first element of each list is the
 key and the rest is the value.
 
 ### (acons alist c): Add key/value to associative list.
+
 ### (assoc x l): Return list that start with X.
 
 # Compiler

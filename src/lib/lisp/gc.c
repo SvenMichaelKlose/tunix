@@ -168,9 +168,6 @@ sweep ()
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
 #endif
-#ifdef DUMP_SWEEP
-                    printf ("Enlarged gap to %dB. Total removed: %dB\n", *(unsigned *) xlat, total_removed);
-#endif
                 } else {
                     // Memorize this latest gap.
                     last_sweeped = d;
@@ -182,9 +179,6 @@ sweep ()
                     *(unsigned *) xlat = n;
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
-#endif
-#ifdef DUMP_SWEEP
-                    printf ("Created gap of %dB. Total removed: %dB\n", n, total_removed);
 #endif
                 }
 
@@ -269,6 +263,8 @@ relocate (void)
     onerror_sym      = relocate_ptr (onerror_sym);
     debug_step       = relocate_ptr (debug_step);
 #endif
+    arg1 = relocate_ptr (arg1);
+    arg2 = relocate_ptr (arg2);
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
@@ -349,6 +345,8 @@ restart:
     mark (go_tag);
     mark (delayed_eval);
     mark (current_expr);
+    mark (arg1);
+    mark (arg2);
 
     // Mark GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))

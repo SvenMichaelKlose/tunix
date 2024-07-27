@@ -568,7 +568,7 @@ bi_error (void)
 }
 
 lispptr
-bi_noerror (void)
+bi_ignore (void)
 {
     do_break_repl = do_continue_repl = true;
     return nil;
@@ -791,7 +791,7 @@ struct builtin builtins[] = {
     { "gc",         "",     bi_gc },
 #ifndef NAIVE
     { "error",      "?x",   bi_error },
-    { "noerror",    "",     bi_noerror },
+    { "ignore",    "",      bi_ignore },
     { "stack",      "",     bi_stack },
 #endif
     { "quit",       "x",    bi_quit },

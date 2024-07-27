@@ -104,7 +104,9 @@ eval_list (void)
     POP(x);
     if (do_break_repl)
         return nil;
+    PUSH(x);
     list_start = list_last = make_cons (va, nil);
+    POP(x);
     PUSH(list_start);
     DOLIST(x, CDR(x)) {
         if (ATOM(x)) {

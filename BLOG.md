@@ -1,6 +1,13 @@
 TUNIX blog
 ==========
 
+# 2024-07-28
+
+It was just taking to long to find the bug in eval\_list()
+which spoiled the GC\_STRESS test.  Was a little scared
+because I didn't do it for too long.  Will add it into the
+new Github workflow.
+
 # 2024-07-26
 
 The Lisp interpreter's debugger is looking good.  The

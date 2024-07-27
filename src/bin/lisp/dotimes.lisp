@@ -1,19 +1,18 @@
 (macro dotimes (init . body)
   (with ((i    (car init))
          (n    (cadr init))
+         (r    (cddr init))
          (g    (symbol))
-         (stag (symbol))
-         (etag (symbol)))
+         (tag  (symbol)))
     $(let ,g ,n
        (block nil
          (= ,i ,g)
-         stag
+         ,tag
          (= ,i (-- ,i))
-         (? (<= ,i 0)
-            (go etag))
+         (? (< ,i 0)
+            (return ,(car r)))
          ,@body
-         (go stag)
-         etag))))
+         (go ,tag)))))
 
 (message "Testing DOTIMES...")
 (dotimes (i 10)

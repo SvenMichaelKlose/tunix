@@ -1,64 +1,86 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-// Disable C compiler level debugging.
-//#define NDEBUG
-
-// Enable extra checks that'll probably not kick in.
-//#define PARANOID
-
-// Give inappropriately happy developers a hard time.
-//#define GC_STRESS
-
-// Disable all error handling.
-//#define NAIVE
-
-// Maximum symbol name length.
-#define MAX_SYMBOL  255
-
-// Print message if garbage collector takes action.
-// (Keeping it defined until first stable release.)
-#define VERBOSE_GC
-
-// Real object 'nil' at address 0 to get around addiitonal
-// pointer checks.  PLANNED!
-//#define NULLOBJ
-
-// Print expressions before evaluation.
-//#define VERBOSE_EVAL
-
-// Print LOADed expressions before evaluation.
-//#define VERBOSE_LOAD
+/// Testing and debugging
 
 // Print objects traversed during GC sweep phase.
 //#define DUMP_SWEEP
 
-// Disable calling user function ONERROR on errors.
-//#define NO_ONERROR
+// Give inappropriately happy developers a hard time.
+// (Pre)releases require testing with this option set.
+//#define GC_STRESS
 
-// Inline less code, half performance.
+// Aoid inlining of functions.
+// * Allows setting breakpoints.
+// * Reduces code size for releases on small machines.
 //#define SLOW
+
+// Enable extra checks that'll probably not kick in.
+//#define PARANOID
+
+// Print expressions before evaluation.
+//#define VERBOSE_EVAL
+
+// Print message if garbage collector takes action.
+//#define VERBOSE_GC
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
 //#define GCSTACK_CHECKS
 //#define TAGSTACK_CHECKS
 
-// Print 'x instead of (quote x).
-//#define PRINT_SHORT_QUOTES
+
+/// Release
+
+// Disable C compiler level debugging.
+//#define NDEBUG
+
+// Disable all error handling.
+//#define NAIVE
+
+
+/// Disabling features
 
 // Do not expand macros in REPL.
+// Required to load all of the environment.
 //#define NO_MACROEXPAND
+
+// Disable calling user function ONERROR on errors.
+//#define NO_ONERROR
 
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
+
+
+/// Additional features
+
+// Multiple heaps.
+//#define FRAGMENTED_HEAP
+
+// Real object 'nil' at address 0 to get around addiitonal
+// pointer checks.  PLANNED!
+//#define NULLOBJ
+
+// Print 'x instead of (quote x).
+//#define PRINT_SHORT_QUOTES
 
 // GC sweep: do not copy if object didn't move.
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
-// Multiple heaps.
-//#define FRAGMENTED_HEAP
+// Print LOADed pathnames before evaluation.
+//#define VERBOSE_LOAD
+
+
+// Maximum symbol name length.
+//#define MAX_SYMBOL  255
+
+/// Memory allocation
+
+// Stack and table sizes.
+//#define STACK_SIZE          768
+//#define TAGSTACK_SIZE       512
+//#define RELOC_TABLE_ENTRIES 64
 
 // Use malloc() to allocate the heap.
 //#define MALLOCD_HEAP
@@ -70,17 +92,23 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
+
+/// Target configurations
+
+// Commodore C128
 #ifdef TARGET_C128
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           768
-#define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
+// Commodore C16
 #ifdef TARGET_C16
 #ifndef NO_DEBUGGER
     #define NO_DEBUGGER
@@ -92,76 +120,88 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           768
-#define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  64
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 64
+#define MAX_SYMBOL          255
 #endif
 
+// Commodore C64
 #ifdef TARGET_C64
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           768
-#define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
+// Commodore PET
 #ifdef TARGET_PET
 #define SLOW
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           768
-#define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  128
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
+// Commodore Plus/4
 #ifdef TARGET_PLUS4
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE           768
-#define TAGSTACK_SIZE        512
-#define RELOC_TABLE_ENTRIES  256
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
+// Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
 #define SLOW
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
-#define STACK_START          0x0400
-#define STACK_END            0x0800
-#define TAGSTACK_START       0x0800
-#define TAGSTACK_END         0x1000
-#define RELOC_TABLE_ENTRIES  256
+#define STACK_START         0x0400
+#define STACK_END           0x0800
+#define TAGSTACK_START      0x0800
+#define TAGSTACK_END        0x1000
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
+// Unixoids
 #ifdef TARGET_UNIX
-#ifndef NDEBUG
-    // For set breakpoints more conveniently.
-    #define SLOW
-#endif
+#define SLOW
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE            (128 * 1024U)
-#define STACK_SIZE           (HEAP_SIZE / 16U)
-#define TAGSTACK_SIZE        (HEAP_SIZE / 64U)
-#define RELOC_TABLE_ENTRIES  (HEAP_SIZE / 128U)
+#define HEAP_SIZE           (128 * 1024U)
+#define STACK_SIZE          (HEAP_SIZE / 16U)
+#define TAGSTACK_SIZE       (HEAP_SIZE / 64U)
+#define RELOC_TABLE_ENTRIES (HEAP_SIZE / 128U)
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL          255
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
     #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."
+#endif
+
+#if defined (NDEBUG) && defined (DUMP_SWEEP)
+    #error "NDEBUG and DUMP_SWEEP cannot be used together."
 #endif
 
 #ifdef NAIVE

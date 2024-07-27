@@ -51,7 +51,7 @@ bool tag_found;
 char error_code;
 #endif
 uchar c;
-char * badef;
+char * builtin_argdef;
 uchar na;
 bool unevaluated;
 #ifdef __CC65__
@@ -85,7 +85,7 @@ bool unevaluated;
 #pragma zpsym ("error_code")
 #endif
 #pragma zpsym ("c")
-#pragma zpsym ("badef")
+#pragma zpsym ("builtin_argdef")
 #pragma zpsym ("na")
 #pragma zpsym ("unevaluated")
 #pragma bss-name (pop)
@@ -246,11 +246,11 @@ next_block_statement:
     // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
-        badef = (char *) bfun->argdef;
+        builtin_argdef = (char *) bfun->argdef;
 
         // Built-in with no argument-definition.
         // Call with arguments unevaluated.
-        if (!badef) {
+        if (!builtin_argdef) {
             x = args;
             value = bfun->func ();
             goto do_return;
@@ -264,7 +264,7 @@ next_block_statement:
         PUSH_TAGW(bfun);
 
 do_builtin_arg:
-        c = *badef;
+        c = *builtin_argdef;
 
         // End of argument definition.
         if (!c) {
@@ -297,7 +297,7 @@ set_arg_values:
 
         // Optional argument.
         if (c == '?') {
-            c = *++badef;
+            c = *++builtin_argdef;
 
             // If not given, set NIL as its value.
             if (!args) {
@@ -315,7 +315,7 @@ set_arg_values:
 #endif
         // Unevaluated argument.
         if (c == '\'') {
-            c = *++badef;
+            c = *++builtin_argdef;
 
             // (Rest of arguments.)
             if (c == '+') {
@@ -355,7 +355,7 @@ set_arg_values:
 
         // Evaluate argument inline.
         PUSH(args);
-        PUSH_TAGW(badef);
+        PUSH_TAGW(builtin_argdef);
         PUSH_TAG(na);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
@@ -364,7 +364,7 @@ set_arg_values:
         // Step to next argument.
 next_builtin_arg:
         POP_TAG(na);
-        POP_TAGW(badef);
+        POP_TAGW(builtin_argdef);
         POP(args);
 
         if (do_break_repl)
@@ -372,14 +372,14 @@ next_builtin_arg:
 
 save_arg_value:
 #ifndef NAIVE
-        bi_tcheck (value, *badef);
+        bi_tcheck (value, *builtin_argdef);
         if (error_code) {
             PUSH(args);
-            PUSH_TAGW(badef);
+            PUSH_TAGW(builtin_argdef);
             PUSH_TAG(na);
             value = lisp_repl (REPL_DEBUGGER);
             POP_TAG(na);
-            POP_TAGW(badef);
+            POP_TAGW(builtin_argdef);
             POP(args);
         }
 #endif
@@ -388,7 +388,7 @@ save_arg_value:
         PUSH(value);
 
         // Step to next argument.
-        badef++;
+        builtin_argdef++;
         args = CDR(args);
         goto do_builtin_arg;
 

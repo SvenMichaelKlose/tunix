@@ -8,7 +8,7 @@
   (out "REPL: ")(print toplevel-expr)(terpri)
   (out "Faulty: ")(print faulty-expr)(terpri)
   (= *last-err* code)
-  (noerror))
+  (ignore))
 
 (fn terror (x)
   (= onerror nil)

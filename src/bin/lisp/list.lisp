@@ -3,6 +3,8 @@
 
 (out "Smoke-testing LIST...")(terpri)
 (print (list))(terpri)
+(print (list 1))(terpri)
+(print (list 1 2))(terpri)
 (print (list 1 2 3))(terpri)
 
 (fn list? (x)

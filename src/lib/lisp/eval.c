@@ -98,38 +98,61 @@ eval_list (void)
 {
     if (ATOM(x))
         return x;
+
+    // Evaluate first element.
     PUSH(x);
     PUSH_HIGHLIGHTED(x);
     x = CAR(x);
     va = eval ();
     POP_HIGHLIGHTED();
     POP(x);
+
     if (do_break_repl)
         return nil;
+
+    // Make first element of result list and put it on
+    // the object stack, so we don't have to worry about
+    // garbage collection for the rest of elements.
     PUSH(x);
     list_start = list_last = make_cons (va, nil);
     POP(x);
     PUSH(list_start);
+
+    // Evaluate rest of list.
     DOLIST(x, CDR(x)) {
+        // Evaluate CDR of dotted cons.
         if (ATOM(x)) {
             SETCDR(list_last, x);
             break;
         }
+
+        // Save current cons to object stack.
         PUSH(x);
+
+        // Evaluate CAR of cons.
         PUSH(list_last);
         PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         tmp = eval ();
         POP_HIGHLIGHTED();
         POP(list_last);
+
+        // Make new cons and append it to the end of the
+        // result list.
         SETCDR(list_last, make_cons (tmp, nil));
         list_last = tmp;
+
+        // Remember current cons.
         POP(x);
+
+        // Handle break, e.g. because of an error.
         if (do_break_repl) {
             stack += sizeof (lispptr);
             return nil;
         }
     }
+
+    // Return memorized start of result list.
     POP(list_start);
     return list_start;
 }

@@ -3,7 +3,44 @@ TUNIX blog
 
 # 2024-07-28
 
-It was just taking to long to find the bug in eval\_list()
+Added the workflow, cleaned up and made the thing ready for
+the CBM KERNALs' screen editor.  With an 80 char buffer it's
+useless for writing apps.
+
+Same kind of useless is the heap size on the C16 and VIC-20.
+There are several options to make them work better:
+
+* Use another compiler.  There's LLVM-MOS and OSCAR64.
+  gcc-6502 seems to be dead.  The Amsterdam Compiler Kit is
+  too old and has a weird build system which includes Lua.
+* Compile to assembly and use an own optimizer, just for
+  this.
+* Rewrite the thing in assembly.  Hell no!
+* Use init code areas as heap after startup.  That won't be
+  enough.  No testing required.
+* Use banking.  Not all targets support it.  The VIC-20
+  plus Ultimem expansion is the only CBM target that'd work
+  this like a charm.
+* Find repeating code and make new function.  Also not
+  knocking it off.
+* Use overlays.  Takes far too much time loading and saving
+  memory blocks.
+* Load on demand.  An index file would tell which files to
+  load.  It's safe to assume that drives like the 1541
+  won't be used, to there's no limitation to the number of
+  files that can be in the directory.  Otherwise:
+  BielefeldDB to the resue!
+
+And least interesting one:
+
+* Do not load all of the environemnt.  Doesn't solve the
+  problem of wanting to run a compiler.
+
+I just did it anyhow.
+
+# 2024-07-28
+
+It was just taking too long to find the bug in eval\_list()
 which spoiled the GC\_STRESS test.  Was a little scared
 because I didn't do it for too long.  Will add it into the
 new Github workflow.

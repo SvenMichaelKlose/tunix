@@ -26,12 +26,6 @@
 (fn cadar (x)
   (car (cdr (car x))))
 
-(fn copy (x)
-  ;"Copy tree."
-  (? (cons? x)
-     (cons (car x) (cdr x))
-     x))
-
 (fn append (first . rest)
   ;"Copy and concatenate."
   (?
@@ -52,6 +46,3 @@
 
 (fn cdrlist (x)
   (@ cdr x))
-
-(fn find (x l)
-  (car (member x l)))

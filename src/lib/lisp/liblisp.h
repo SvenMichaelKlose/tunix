@@ -384,6 +384,8 @@ extern lispptr debug_step;
 #pragma zpsym ("go_tag")
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("debug_step")
+#pragma zpsym ("list_start")
+#pragma zpsym ("list_last")
 #pragma bss-name (pop)
 #endif
 

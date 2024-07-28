@@ -19,16 +19,17 @@
 #endif
 extern lispptr x;
 extern lispptr tmp;
+lispptr list_start;
+lispptr list_last;
 int len;
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("tmp")
 #pragma zpsym ("len")
+#pragma zpsym ("list_start")
+#pragma zpsym ("list_last")
 #pragma bss-name (pop)
 #endif
-
-lispptr list_start;
-lispptr list_last;
 
 // Get number of list elements.
 int FASTCALL

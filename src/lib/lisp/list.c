@@ -19,9 +19,9 @@
 #endif
 extern lispptr x;
 extern lispptr tmp;
-lispptr list_start;
-lispptr list_last;
 int len;
+lispptr list_start; // Start of list.
+lispptr list_last;  // Last cons of list.
 #ifdef __CC65__
 #pragma zpsym ("x")
 #pragma zpsym ("tmp")

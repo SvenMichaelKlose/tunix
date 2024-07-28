@@ -336,10 +336,12 @@ bi_if (void)
             return delayed_eval;
         }
 
+        highlighted = arg2c;
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
+        highlighted = arg2c;
 #ifndef NAIVE
         if (error_code)
             break;
@@ -359,8 +361,10 @@ bi_and (void)
     value = nil;
     DOLIST(x, x) {
         PUSH(x);
+        PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         value = eval ();
+        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -377,8 +381,10 @@ bi_or (void)
 {
     DOLIST(x, x) {
         PUSH(x);
+        PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         value = eval ();
+        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -651,7 +657,9 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();
+    PUSH_HIGHLIGHTED(x);
     list_start = list_last = make_cons (eval0 (), nil);
+    POP_HIGHLIGHTED();
     POP(arg2);
     POP(arg1);
     if (do_break_repl)
@@ -663,7 +671,9 @@ bi_filter (void)
         PUSH(arg2);
         PUSH(list_last);
         make_car_call ();
+        PUSH_HIGHLIGHTED(x);
         tmp = make_cons (eval0 (), nil);
+        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += 4 * sizeof (lispptr);
             return nil;
@@ -677,7 +687,9 @@ bi_filter (void)
     if (arg2) {
         PUSH(list_last);
         make_call (make_cons (arg2, nil));
+        PUSH_HIGHLIGHTED(x);
         tmp = eval0 ();
+        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += 2 * sizeof (lispptr);
             return nil;

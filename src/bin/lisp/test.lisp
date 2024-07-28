@@ -1,3 +1,4 @@
+(debugger)
 (= x 42)
 
 (message "Testing EQUAL...")

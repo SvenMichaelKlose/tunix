@@ -16,6 +16,7 @@
 #include "liblisp.h"
 
 bool do_highlight;
+lispptr highlighted;
 
 void print0 (lispptr);
 
@@ -29,16 +30,19 @@ space (void)
         out (' ');
 }
 
+#define HIGHLIGHT_CAR       false
+#define HIGHLIGHT_CDR       true
+#define HIGHLIGHT_BEFORE    false
+#define HIGHLIGHT_AFTER     true
+
 void FASTCALL
-print_highlighted (lispptr x)
+print_highlighting (lispptr x, bool which, bool when)
 {
-    if (do_highlight && current_expr == x) {
-        outs (">>>");
-        last_out = 0; // Avoid padding.
-        print0 (x);
-        outs ("<<<");
-    } else
-        print0 (x);
+    if (!do_highlight)
+        return;
+    if ((which == HIGHLIGHT_CAR && LIST_CAR(highlighted) == x)
+        || LIST_CDR(highlighted) == x)
+        outs (when == HIGHLIGHT_BEFORE ? ">>>" : "<<<");
 }
 
 // Print abbreviation.
@@ -83,10 +87,14 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        print_highlighted (c->car);
+        print_highlighting (c, HIGHLIGHT_CAR, HIGHLIGHT_BEFORE);
+        print0 (c->car);
+        print_highlighting (c, HIGHLIGHT_CAR, HIGHLIGHT_AFTER);
         if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
-            print_highlighted (c->cdr);
+            print_highlighting (c, HIGHLIGHT_CDR, HIGHLIGHT_BEFORE);
+            print0 (c->cdr);
+            print_highlighting (c, HIGHLIGHT_CDR, HIGHLIGHT_AFTER);
             break;
         }
         c = c->cdr;

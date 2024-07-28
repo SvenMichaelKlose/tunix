@@ -236,6 +236,17 @@
 #define HOST_DEBUGGER()     raise (SIGTRAP);
 #endif
 
+#ifndef NO_DEBUGGER
+#define PUSH_HIGHLIGHTED(x) \
+    highlighted = x; \
+    PUSH(highlighted);
+#define POP_HIGHLIGHTED() \
+    POP(highlighted);
+#else
+#define PUSH_HIGHLIGHTED(x)
+#define POP_HIGHLIGHTED()
+#endif
+
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;
@@ -286,6 +297,7 @@ extern lispptr first_symbol;
 extern lispptr last_symbol;
 extern lispptr highlighted;
 extern bool    do_highlight;
+extern lispptr highlighted;
 extern lispptr onerror_sym;
 
 extern lispptr t;

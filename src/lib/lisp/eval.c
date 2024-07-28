@@ -99,8 +99,10 @@ eval_list (void)
     if (ATOM(x))
         return x;
     PUSH(x);
+    PUSH_HIGHLIGHTED(x);
     x = CAR(x);
     va = eval ();
+    POP_HIGHLIGHTED();
     POP(x);
     if (do_break_repl)
         return nil;
@@ -115,8 +117,10 @@ eval_list (void)
         }
         PUSH(x);
         PUSH(list_last);
+        PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         tmp = eval ();
+        POP_HIGHLIGHTED();
         POP(list_last);
         SETCDR(list_last, make_cons (tmp, nil));
         list_last = tmp;
@@ -204,10 +208,12 @@ block_statement:
         PUSH(arg1);     // Block name
         PUSH(arg2c);    // Expression list
         PUSH(x);        // Current expression
+        PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
 next_block_statement:
+        POP_HIGHLIGHTED();
         POP(x);
         POP(arg2c);
         POP(arg1);
@@ -349,7 +355,7 @@ set_arg_values:
             goto set_arg_values;
         }
 
-        // Save argument if all must be unevaluated.
+        // Save argument unevaluated.
         if (unevaluated) {
             value = CAR(args);
             goto save_arg_value;
@@ -359,11 +365,13 @@ set_arg_values:
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
         PUSH_TAG(na);
+        PUSH_HIGHLIGHTED(x);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
         // Step to next argument.
 next_builtin_arg:
+        POP_HIGHLIGHTED();
         POP_TAG(na);
         POP_TAGW(builtin_argdef);
         POP(args);
@@ -493,10 +501,12 @@ do_argument:
 #endif
 
         PUSH_TAG(TAG_NEXT_ARG);
+        PUSH_HIGHLIGHTED(x);
         x = CAR(args);
         goto do_eval;
         // Step to next argument.
 next_arg:
+        POP_HIGHLIGHTED();
         // Restore evaluator state.
 #ifndef NAIVE
         POP(original_first);
@@ -542,10 +552,12 @@ continue_body:
     if (!x || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
+    PUSH_HIGHLIGHTED(x);
     x = CAR(x);
     PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
 next_body_statement:
+    POP_HIGHLIGHTED();
     POP(x);
     goto continue_body;
 

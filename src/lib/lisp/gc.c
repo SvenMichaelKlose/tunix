@@ -270,9 +270,10 @@ relocate (void)
     onerror_sym      = relocate_ptr (onerror_sym);
     debug_step       = relocate_ptr (debug_step);
 #endif
-    args = relocate_ptr (args);
-    arg1 = relocate_ptr (arg1);
-    arg2 = relocate_ptr (arg2);
+    args        = relocate_ptr (args);
+    arg1        = relocate_ptr (arg1);
+    arg2        = relocate_ptr (arg2);
+    highlighted = relocate_ptr (highlighted);
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;

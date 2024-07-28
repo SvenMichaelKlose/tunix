@@ -2,11 +2,9 @@
   (with ((i    (car init))
          (n    (cadr init))
          (r    (cddr init))
-         (g    (symbol))
          (tag  (symbol)))
-    $(let ,g ,n
+    $(let ,i ,n
        (block nil
-         (= ,i ,g)
          ,tag
          (= ,i (-- ,i))
          (? (< ,i 0)
@@ -15,5 +13,5 @@
          (go ,tag)))))
 
 (message "Testing DOTIMES...")
-(dotimes (i 10)
+(dotimes (i 10 (terpri))
   (print i))

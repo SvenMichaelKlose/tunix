@@ -311,13 +311,13 @@ extern bool do_break_repl;
 extern bool do_continue_repl;
 extern bool do_exit_program;
 
-// For copying lists with no recursions.
-extern lispptr list_start;
-extern lispptr list_last;
-
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+
+// For processing lists with no recursions.
+extern lispptr list_start;
+extern lispptr list_last;
 
 extern lispptr tmp;
 extern lispptr tmp2;

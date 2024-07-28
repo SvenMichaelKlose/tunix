@@ -1,5 +1,4 @@
 (macro unless (cond . body)
-  $(? ,cond
-      nil
+  $(? (not ,cond)
       (progn
         ,@body)))

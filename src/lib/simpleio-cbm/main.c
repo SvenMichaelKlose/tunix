@@ -61,7 +61,7 @@ raw_err (void)
 char
 raw_in (void)
 {
-    last_in = cbm_k_basin ();
+    last_in = cbm_k_chrin ();
     if (fnin == STDIN)
         last_in = reverse_case (last_in);
     return last_in;

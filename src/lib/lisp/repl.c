@@ -64,8 +64,12 @@ lisp_repl (char mode)
 
     num_repls++;
 #ifndef NO_DEBUGGER
-    if (mode == REPL_DEBUGGER)
+    if (mode == REPL_DEBUGGER) {
         num_debugger_repls++;
+        outs ("In debugger #");
+        outn (num_debugger_repls);
+        terpri ();
+    }
 #endif
 
 #ifndef NAIVE
@@ -116,13 +120,6 @@ lisp_repl (char mode)
                 error_code = 0;
             }
 #endif
-
-#ifndef NO_DEBUGGER
-            // Print nesting count of debugger REPLs.
-            if (num_debugger_repls)
-                out ('0' + num_debugger_repls);
-#endif
-            outs ("* ");
         }
 
 #ifndef NO_DEBUGGER
@@ -131,10 +128,11 @@ lisp_repl (char mode)
 #endif
 
             x = read ();
+#ifndef TARGET_UNIX
             if (mode != REPL_LOAD) {
-                in ();
-                fresh_line ();
+                terpri ();
             }
+#endif
 
 #ifndef NO_DEBUGGER
         } else {
@@ -183,7 +181,9 @@ lisp_repl (char mode)
                     putback ();
                     if (!(x = read ()))
                         goto next;
-                    fresh_line ();
+#ifndef TARGET_UNIX
+                    terpri ();
+#endif
             }
         }
 #endif

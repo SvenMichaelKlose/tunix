@@ -125,16 +125,17 @@ APPLY copies all arguments but the last one.
 
 # User interface: The READ/EVAL/PRINT-Loop (REPL)
 
-The REPL is the user interface.  It prompts you for input
-by printing an asterisk '\*' in its regular mode.  After
-reading an expression it is evaluated and the result of that
-evaluation is printing.  Then it starts over, prompting you
-for the next expression.  It also processes input from files
-and helps debugging by providing convenient one-character
-commands.  REPLs can be nested, e.g. when an error occured,
-a new REPL is launched in debug mode, where you can provide
-a replacement for a faulty expression, execute code step by
-step and examine symbols.
+The REPL is the user interface.  It prompts you for input by
+printing an asterisk '\*' in its regular mode, except on
+Commodore 8-bit machines, to allow using the KERNAL's screen
+editor.  After reading an expression it is evaluated and the
+result of that evaluation is printing.  Then it starts over,
+prompting you for the next expression.  It also processes
+input from files and helps debugging by providing convenient
+one-character commands.  REPLs can be nested, e.g. when an
+error occured, a new REPL is launched in debug mode, where
+you can provide a replacement for a faulty expression,
+execute code step by step and examine symbols.
 
 Any REPL, no matter its mode, can be terminated using the
 built-in QUIT function, which takes a return value for the
@@ -166,6 +167,10 @@ and VAR is that VAR evaluates its initialization argument.
 ; Define permanent, named variable.
 (var x nil)
 ~~~
+
+If you are using a screen editor, the SOURCE function is
+rather useful.  It returns a defining expression for any
+symbol.
 
 # Functions
 
@@ -321,10 +326,10 @@ trying to call the undefined function CAUSE-ERROR:
 
 ~~~
 * (some-undefined-function)
+Debugger #1:
 Error #5: Not a fun.
 In :
 (>>> some-undefined-function <<<)
-1*
 ~~~
 
 The debugger takes commands like the regular REPL, e.g.
@@ -430,15 +435,20 @@ which will terminate immediately.
 | (special 'name 'args '+body) | special form |
 | (var 'name x)                | variable     |
 
+| Function   | Description                              |
+|------------|------------------------------------------|
+| (source s) | Return defining expression for a symbol. |
+
 ### (fn 'name 'args '+body): Define permanent, named function.
 
 ### (special 'name 'args '+body): Make special form.
 
-### (var 'name init): Define permanent, named
-variable.
-
 Special forms are functions that take their arguments
-unevaluated, e.g. QUASIQUOTE (see 'quasiquote.lisp').
+unevaluated, e.g. QUASIQUOTE and MACRO.
+
+### (var 'name init): Define permanent, named variable.
+
+### (source s): Return defining expression for a symbol.
 
 ## Evaluation and flow control
 

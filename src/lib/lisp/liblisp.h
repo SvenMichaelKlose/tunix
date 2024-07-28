@@ -307,6 +307,7 @@ extern lispptr unquote;
 extern lispptr unquote_spliced;
 
 extern char num_repls;
+extern char num_debugger_repls;
 extern bool do_break_repl;
 extern bool do_continue_repl;
 extern bool do_exit_program;

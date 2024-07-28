@@ -60,6 +60,8 @@
 
 (message "Testing SYMBOL?...")
 (? (symbol? 'a) nil (error))
+(? (symbol? 1) (error))
+(? (symbol? (cons t t)) (error))
 
 (message "Testing NUMBER?...")
 (? (number? 1) nil (error))

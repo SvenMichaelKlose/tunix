@@ -122,7 +122,9 @@ eval_list (void)
     DOLIST(x, CDR(x)) {
         // Evaluate CDR of dotted cons.
         if (ATOM(x)) {
-            SETCDR(list_last, x);
+            PUSH_HIGHLIGHTED(list_last);
+            SETCDR(list_last, eval ());
+            POP_HIGHLIGHTED();
             break;
         }
 

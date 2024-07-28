@@ -22,10 +22,10 @@ jobs:
       run: sudo apt-get install -y pandoc
 
     - name: Create config file
-      run: echo -e "TARGET=vic20\nNDEBUG=1" > src/config
+      run: echo -e "TARGET=unix\nGC_STRESS=1" > src/config
 
-    - name: Build Project
-      run: make allworlds
+    - name: Build Unixoid
+      run: make clean all
 
     - name: Run Tests
       run: make test

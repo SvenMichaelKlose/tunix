@@ -33,7 +33,7 @@ char * tagstack_start;
 char * tagstack_end;
 char * tagstack;
 lispptr name;
-lispptr defs;
+lispptr argdefs;
 lispptr value;
 struct builtin * bfun;
 lispptr va;
@@ -50,9 +50,9 @@ bool tag_found;
 #ifndef NAIVE
 char error_code;
 #endif
-uchar c;
+uchar typed_argdef;
 char * builtin_argdef;
-uchar na;
+uchar num_args;
 bool unevaluated;
 #ifdef __CC65__
 #pragma zpsym ("tmp")
@@ -69,7 +69,7 @@ bool unevaluated;
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("name")
-#pragma zpsym ("defs")
+#pragma zpsym ("argdefs")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
@@ -84,9 +84,9 @@ bool unevaluated;
 #ifndef NAIVE
 #pragma zpsym ("error_code")
 #endif
-#pragma zpsym ("c")
+#pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
-#pragma zpsym ("na")
+#pragma zpsym ("num_args")
 #pragma zpsym ("unevaluated")
 #pragma bss-name (pop)
 #endif
@@ -292,15 +292,15 @@ next_block_statement:
         // Call built-in with argument definition.
         // Push evaluated values on the stack and pop them
         // into arg1/arg2 before doing the call, depending
-        // on na.
-        na = 0;
+        // on num_args.
+        num_args = 0;
         PUSH_TAGW(bfun);
 
 do_builtin_arg:
-        c = *builtin_argdef;
+        typed_argdef = *builtin_argdef;
 
         // End of argument definition.
-        if (!c) {
+        if (!typed_argdef) {
 #ifndef NAIVE
             // Complain if argument left.
             if (args) {
@@ -312,10 +312,10 @@ do_builtin_arg:
 
 set_arg_values:
             // Pop argument values from object stack into
-            // arg1 and arg2, depending on na.
-            if (na == 1)
+            // arg1 and arg2, depending on num_args.
+            if (num_args == 1)
                 POP(arg1);
-            else if (na == 2) {
+            else if (num_args == 2) {
                 POP(arg2);
                 POP(arg1);
             }
@@ -326,13 +326,13 @@ set_arg_values:
             goto do_return;
         }
 
-        na++;
+        num_args++;
 
         // Optional argument.
-        if (c == '?') {
-            c = *++builtin_argdef;
+        if (typed_argdef == '?') {
+            typed_argdef = *++builtin_argdef;
 
-            // If not given, set NIL as its value.
+            // Set NIL if missing.
             if (!args) {
                 PUSH(nil);
                 goto set_arg_values;
@@ -347,11 +347,11 @@ set_arg_values:
         }
 #endif
         // Unevaluated argument.
-        if (c == '\'') {
-            c = *++builtin_argdef;
+        if (typed_argdef == '\'') {
+            typed_argdef = *++builtin_argdef;
 
             // (Rest of arguments.)
-            if (c == '+') {
+            if (typed_argdef == '+') {
                 PUSH(args);
                 goto set_arg_values;
             } else
@@ -360,20 +360,20 @@ set_arg_values:
         }
 
         // Rest of arguments.
-        if (c == '+') {
+        if (typed_argdef == '+') {
             if (unevaluated) {
                 value = args;
                 goto save_arg_value;
             }
             PUSH(args);
-            PUSH_TAG(na);
+            PUSH_TAG(num_args);
             x = args;
             value = eval_list ();
 #ifndef NAIVE
             if (error_code)
                 value = lisp_repl (REPL_DEBUGGER);
 #endif
-            POP_TAG(na);
+            POP_TAG(num_args);
             POP(args);
 
             PUSH(value);
@@ -389,7 +389,7 @@ set_arg_values:
         // Evaluate argument inline.
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
-        PUSH_TAG(na);
+        PUSH_TAG(num_args);
         PUSH_HIGHLIGHTED(args);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
@@ -397,7 +397,7 @@ set_arg_values:
         // Step to next argument.
 next_builtin_arg:
         POP_HIGHLIGHTED();
-        POP_TAG(na);
+        POP_TAG(num_args);
         POP_TAGW(builtin_argdef);
         POP(args);
 
@@ -412,9 +412,9 @@ save_arg_value:
         if (error_code) {
             PUSH(args);
             PUSH_TAGW(builtin_argdef);
-            PUSH_TAG(na);
+            PUSH_TAG(num_args);
             value = lisp_repl (REPL_DEBUGGER);
-            POP_TAG(na);
+            POP_TAG(num_args);
             POP_TAGW(builtin_argdef);
             POP(args);
         }
@@ -433,7 +433,7 @@ save_arg_value:
         goto do_builtin_arg;
 
 break_builtin_call:
-        na--;
+        num_args--;
         goto set_arg_values;
     }
 
@@ -455,39 +455,39 @@ break_builtin_call:
 #endif
 
     // Init argument list evaluation.
-    defs = FUNARGS(arg1);
-    na = 0;
+    argdefs = FUNARGS(arg1);
+    num_args = 0;
 
     // Evaluate argument.
 do_argument:
     // End of arguments.
-    if (!args && !defs)
+    if (!args && !argdefs)
         goto start_body;
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && !defs) {
+    if (args && !argdefs) {
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
-    } else if (!args && CONSP(defs)) {
+    } else if (!args && CONSP(argdefs)) {
         error (ERROR_ARG_MISSING, "Arg missing");
         goto start_body;
     }
 #endif
 
-    na++;
+    num_args++;
 
     // Rest of argument list. (consing)
-    if (ATOM(defs)) {
+    if (ATOM(argdefs)) {
         // Save old symbol value for restore_arguments.
-        PUSH(SYMBOL_VALUE(defs));
+        PUSH(SYMBOL_VALUE(argdefs));
 
         // Get argument value.
         if (unevaluated)
             value = args;
         else {
-            PUSH_TAG(na);
-            PUSH(defs);
+            PUSH_TAG(num_args);
+            PUSH(argdefs);
             PUSH(arg1); // Function
 #ifndef NAIVE
             PUSH(original_first);
@@ -498,28 +498,28 @@ do_argument:
             POP(original_first);
 #endif
             POP(arg1);  // Function
-            POP(defs);
-            POP_TAG(na);
+            POP(argdefs);
+            POP_TAG(num_args);
         }
 
         // Save argument value unless we need to fall through.
         if (!do_break_repl)
-            SET_SYMBOL_VALUE(defs, value);
+            SET_SYMBOL_VALUE(argdefs, value);
 
         goto start_body;
     }
 
     // Regular argument.  Save its value.
-    PUSH(SYMBOL_VALUE(CAR(defs)));
+    PUSH(SYMBOL_VALUE(CAR(argdefs)));
 
     // Get argument value.
     if (unevaluated)
         value = CAR(args);
     else {
         // Save evaluator state.
-        PUSH_TAG(na);
+        PUSH_TAG(num_args);
         PUSH(arg1); // Function
-        PUSH(defs);
+        PUSH(argdefs);
         PUSH(args);
 #ifndef NAIVE
         PUSH(original_first);
@@ -537,19 +537,19 @@ next_arg:
         POP(original_first);
 #endif
         POP(args);
-        POP(defs);
+        POP(argdefs);
         POP(arg1);  // Function
-        POP_TAG(na);
+        POP_TAG(num_args);
         if (do_break_repl)
             goto start_body;
     }
 
     // Replace argument symbol value with evaluated one.
-    SET_SYMBOL_VALUE(CAR(defs), value);
+    SET_SYMBOL_VALUE(CAR(argdefs), value);
 
     // Step to next argument.
-    defs = CDR(defs);
-    args = CDR(args);
+    argdefs = CDR(argdefs);
+    args    = CDR(args);
     goto do_argument;
 
     // Evaluate body.
@@ -558,8 +558,8 @@ start_body:
     unevaluated = false;
 
     // Store init info for restore_arguments.
-    PUSH_TAG(na);           // Number of arguments.
-    PUSH(FUNARGS(arg1));    // Argument definition.
+    PUSH_TAG(num_args);
+    PUSH(FUNARGS(arg1));
 
     // Get first body expression.
     x = FUNBODY(arg1);
@@ -594,19 +594,19 @@ restore_arguments:
 #endif
 
     // Get argument info.
-    POP(defs);    // Definition
-    POP_TAG(na);  // Number of arguments
-    c = na;
-    while (c--) {
-        if (ATOM(defs)) {
-            if (defs)
-                SET_SYMBOL_VALUE(defs, ((lispptr *)stack)[c]);
+    POP(argdefs);
+    POP_TAG(num_args);
+    tmpc = num_args;
+    while (tmpc--) {
+        if (ATOM(argdefs)) {
+            if (argdefs)
+                SET_SYMBOL_VALUE(argdefs, ((lispptr *)stack)[(array_index_t) tmpc]);
             break;
         }
-        SET_SYMBOL_VALUE(CAR(defs), ((lispptr *)stack)[c]);
-        defs = CDR(defs);
+        SET_SYMBOL_VALUE(CAR(argdefs), ((lispptr *)stack)[(array_index_t) tmpc]);
+        argdefs = CDR(argdefs);
     }
-    stack += sizeof (lispptr) * na;
+    stack += sizeof (lispptr) * num_args;
 
 do_return:
 #ifndef NAIVE
@@ -637,9 +637,9 @@ do_return_atom:
 
     // Continue evaluation.  Determine jump
     // destination based on tag.
-    POP_TAG(c);
-    if (c != TAG_DONE) {
-        switch (c) {
+    POP_TAG(typed_argdef);
+    if (typed_argdef != TAG_DONE) {
+        switch (typed_argdef) {
         case TAG_NEXT_ARG:
             goto next_arg;
         case TAG_NEXT_BUILTIN_ARG:

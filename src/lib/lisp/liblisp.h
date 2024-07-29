@@ -10,7 +10,7 @@
 //#define DUMP_SWEEPED
 
 // Print expressions before evaluation.
-//#define VERBOSE_EVAL
+#define VERBOSE_EVAL
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
@@ -20,7 +20,7 @@
 
 // Give inappropriately happy developers a hard time.
 // (Pre)releases require testing with this option set.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Aoid inlining of functions.
 // * Allows setting breakpoints.
@@ -250,6 +250,11 @@
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;
+#ifdef __CC65__
+typedef uchar          array_index_t;
+#else
+typedef unsigned int   array_index_t;
+#endif
 
 typedef struct _cons {
     uchar    type;

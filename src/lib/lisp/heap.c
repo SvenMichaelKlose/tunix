@@ -147,9 +147,6 @@ dump_lispptr (char * x)
         return;
     }
     switch (TYPEBITS(x)) {
-        case 0:
-            printf ("End of heap.\n");
-            break;
         case TYPE_CONS:
             printf ("cons %p, %p\n", CAR(x), CDR(x));
             break;
@@ -172,6 +169,8 @@ dump_lispptr (char * x)
             printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         default:
+            if (!x)
+                internal_error ("EOH");
             internal_error ("Illegal type");
     }
 }

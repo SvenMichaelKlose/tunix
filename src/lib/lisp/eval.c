@@ -390,7 +390,7 @@ set_arg_values:
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
         PUSH_TAG(na);
-        PUSH_HIGHLIGHTED(x);
+        PUSH_HIGHLIGHTED(args);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;

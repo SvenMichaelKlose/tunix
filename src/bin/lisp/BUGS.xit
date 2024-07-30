@@ -1,4 +1,5 @@
 [ ] LOAD: Issue error if file does not exist.
+[ ] LOAD: File error not reset.
 [ ] UNDEF: Some pointer(s) aren't relocated after GC.
 
 Debugger

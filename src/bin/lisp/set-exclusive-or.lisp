@@ -1,4 +1,9 @@
-(load "defsetfn.lisp")
+(or (cons? remove-if)
+    (load "remove-if.lisp"))
+(or (cons? intersect)
+    (load "intersect.lisp"))
+(or (macro? 'defsetfn)
+    (load "defsetfn.lisp"))
 
 (defsetfn set-exclusive-or
   ;"Elements that are not in both lists."

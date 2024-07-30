@@ -1,4 +1,5 @@
-(load "defsetfn.lisp")
+(or (macro? 'defsetfn)
+    (load "defsetfn.lisp"))
 
 (defsetfn set-difference
   ;"Elements in list b that are not in list a."

@@ -67,6 +67,9 @@
 (? (number? 1) nil (error))
 (? (number? '(1)) (error))
 
+(message "Testing BUILTIN?...")
+(or (builtin? print) (error))
+
 (message "Testing ==...")
 (or (== 1 1) (error))
 (and (== 1 0) (error))

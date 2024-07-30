@@ -315,8 +315,8 @@ New channels are created by OPEN to access files:
 
 # Debugging and advanced error handling
 
-The debugger is invoked on error unless an error handler
-has been set to the symbol value of ONERROR.
+The debugger is invoked on error unless ONERROR has been
+defined.
 
 The debugger shows a description of the error, followed by
 the current top-level expression, and the erroraneous
@@ -333,9 +333,9 @@ In :
 ~~~
 
 The debugger takes commands like the regular REPL, e.g.
-"(print x)" will print the evaluated value of X in the
-current context.  It also knows single-character commands
-to make your life easier:
+"(print x)" will print evaluated X in the current context.
+It also knows single-character commands to make your life
+easier:
 
 | Command | Description                              |
 |---------|------------------------------------------|

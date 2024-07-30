@@ -220,7 +220,7 @@ Anonymous functions as arguments need to be quoted though:
 ~~~
 
 The QUASIQUOTE (short form "$") can be used to emulate
-lexical scope:
+read-only lexical scope by unquoting outer values:
 
 ~~~lisp
 ; Make a function that adds X to its argument.
@@ -302,15 +302,15 @@ New channels are created by OPEN to access files:
 
 ~~~lisp
 (fn user-defined-load (pathname)
-  (with (old-in       fnin
-         load-in      (open pathname)
-         last-result  nil)
-    (setin load-in)
-    (while (not (eof))
-           (progn
-             (setin old-in)
-             last-result)
-      (= last-result (eval (read))))))
+  (with ((last-result  nil)
+         (old-channel  fnin)
+         (new-channel  (open pathname)))
+    (unless (err)
+      (setin new-channel)
+      (while (not (eof))
+        (= last-result (eval (read))))
+      (setin old-channel)
+      last-result)))
 ~~~
 
 # Debugging and advanced error handling
@@ -333,8 +333,9 @@ In :
 ~~~
 
 The debugger takes commands like the regular REPL, e.g.
-"(print x)" will print X in the current context, plus
-single character commands for convenience:
+"(print x)" will print the evaluated value of X in the
+current context.  It also knows single-character commands
+to make your life easier:
 
 | Command | Description                              |
 |---------|------------------------------------------|
@@ -342,6 +343,7 @@ single character commands for convenience:
 | s       | Step into user-defined procedure.        |
 | n       | Execute current expression in whole.     |
 | pX      | Evaluate and print expression X.         |
+**Debugger short commands**
 
 ## User-defined error handler ONERROR
 
@@ -349,6 +351,7 @@ single character commands for convenience:
 |-----------------|---------------------------------------|
 | (onerror n x x) | User-defined error handler.           |
 | (ignore)        | Break and continue with LOAD or REPL. |
+**Error handling related functions**
 
 If defined, user-defined function ONERROR is called on
 errors, except for internal ones which halt the interpreter
@@ -429,11 +432,11 @@ which will terminate immediately.
 
 ## Definitions
 
-| Form                         | Type         |
-|------------------------------|--------------|
-| (fn 'name 'args '+body)      | function     |
-| (special 'name 'args '+body) | special form |
-| (var 'name x)                | variable     |
+| Form                         | Type                          |
+|------------------------------|-------------------------------|
+| (var 'name x)                | Define symbol with value.     |
+| (fn 'name 'args '+body)      | Define function.              |
+| (special 'name 'args '+body) | Define special form.          |
 
 | Function   | Description                              |
 |------------|------------------------------------------|
@@ -444,7 +447,8 @@ which will terminate immediately.
 ### (special 'name 'args '+body): Make special form.
 
 Special forms are functions that take their arguments
-unevaluated, e.g. QUASIQUOTE and MACRO.
+unevaluated, e.g. QUASIQUOTE and MACRO, so you don't have to
+quote arguments of that function manually.
 
 ### (var 'name init): Define permanent, named variable.
 
@@ -502,6 +506,15 @@ happen a lot otherwise.
 Basically calls function F with the list of arguments X.
 
 ~~~lisp
+; Basically the same:
+(funcall 'print "Hello world!")
+(print "Hello world!")
+
+(funcall (?
+           (eq color 'red)    print-red
+           (eq color 'yellow) print-yellow
+           (eq color 'green)  print-green)
+         "Hello world!")
 ~~~
 
 ### (eval x): Evaluate expression.

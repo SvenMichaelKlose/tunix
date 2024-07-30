@@ -85,7 +85,8 @@ void FASTCALL
 err_type (char * type, lispptr x)
 {
     char * p;
-    p = stpcpy (buffer, typename (x));
+    p = stpcpy (buffer, "need ");
+    p = stpcpy (p, typename (x));
     p = stpcpy (p, " instead of ");
     strcpy (p, type);
     error (ERROR_TYPE, buffer);
@@ -143,6 +144,12 @@ check_stacks (char * old_stack, char * old_tagstack)
         internal_error ("tagstack");
 }
 
+void
+out_colon (void)
+{
+    outs (": ");
+}
+
 // Print error info.
 void
 print_error_info ()
@@ -150,36 +157,47 @@ print_error_info ()
     if (error_code) {
         outs ("Error #");
         outn (error_code);
-        outs (": ");
+        out_colon ();
         if (last_errstr)
             outs (last_errstr);
         terpri ();
     }
     fresh_line ();
+    outs ("Unexpanded: ");
+    print (unexpanded_toplevel);
+    terpri ();
+    outs ("Toplevel: ");
+    print (current_toplevel);
+    terpri ();
+    outs ("Expression: ");
+    print (current_expr);
+    terpri ();
     outs ("In");
     if (error_code == ERROR_USER) {
-        outs (": ");
+        out_colon ();
         print (current_expr);
+outs ("EXPR");
     } else {
         do_highlight = true;
-        if (current_function) {
+        if (!is_macroexpansion && current_function) {
             outs (" function ");
             if (SYMBOLP(current_function)) {
+/*
                 tmp2 = SYMBOL_VALUE(current_function);
                 print (current_function);
                 out (' ');
                 print (FUNARGS(tmp2));
-                outs (": ");
+                out_colon ();
                 terpri ();
                 print (FUNBODY(tmp2));
-            } else {
-                outs (": ");
-                print (current_function);
+*/
+                goto done;
             }
-        } else {
-            outs (": ");
-            print (current_toplevel);
         }
+        out_colon ();
+outs ("TOPL");
+        //print (current_toplevel);
+done:
         do_highlight = false;
     }
     terpri ();

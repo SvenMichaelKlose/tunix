@@ -20,7 +20,7 @@
 
 // Give inappropriately happy developers a hard time.
 // (Pre)releases require testing with this option set.
-//#define GC_STRESS
+#define GC_STRESS
 
 // Aoid inlining of functions.
 // * Allows setting breakpoints.
@@ -296,6 +296,7 @@ extern char    buffer[MAX_SYMBOL + 1];
 extern lispptr current_expr;
 extern lispptr current_function;
 extern lispptr current_toplevel;
+extern lispptr unexpanded_toplevel;
 extern char *  last_errstr;
 extern bool    debug_mode;
 extern lispptr first_symbol;
@@ -363,6 +364,10 @@ extern lispptr delayed_eval;
 
 extern char error_code;
 extern lispptr debug_step;
+
+#ifndef NO_MACROEXPAND
+extern bool is_macroexpansion;
+#endif
 
 #ifdef __CC65__
 #pragma zpsym ("tmp")

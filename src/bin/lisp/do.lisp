@@ -17,4 +17,7 @@
                vars)
           (go ,tag)))))
 
-(message "TODO: Test DO.")
+(message "Test DO.")
+(do ((i 0 (+ i 1)))
+    ((>= i 10))
+  (print i))

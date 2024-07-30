@@ -103,6 +103,12 @@ expand_universe (lispptr x)
 #ifndef NDEBUG
 #ifdef TARGET_UNIX
 
+void
+error_typebits (char * x)
+{
+    internal_error (x ? "type" : "EOH");
+}
+
 // Check if argument points to a valid object.
 void
 check_lispptr (char * x)
@@ -121,7 +127,6 @@ check_lispptr (char * x)
         internal_error ("Unused type bits set.");
 
     switch (TYPEBITS(x)) {
-        case 0: // End of heap.
         case TYPE_CONS:
         case TYPE_NUMBER:
         case TYPE_SYMBOL:
@@ -129,8 +134,7 @@ check_lispptr (char * x)
         case TYPE_SPECIAL:
             break;
         default:
-            printf ("Ill type: %d in %s\n", TYPEBITS(x), x);
-            internal_error ("Illegal type");
+            error_typebits (x);
     }
 }
 
@@ -169,9 +173,7 @@ dump_lispptr (char * x)
             printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         default:
-            if (!x)
-                internal_error ("EOH");
-            internal_error ("Illegal type");
+            error_typebits (x);
     }
 }
 

@@ -11,6 +11,7 @@ Built-ins
 [ ] TPS constant containing ticks per second.
 
 Debugger
+[ ] Show 'unexpanded_topelevel' if not EQUAL.
 [ ] Breakppoints.
 [ ] Conditional breakppoints.
 [ ] Watchpoints.

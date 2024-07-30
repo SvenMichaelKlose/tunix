@@ -17,14 +17,14 @@
 (fn cadr (x)
   (car (cdr x)))
 
-(fn cdar (x)
-  (cdr (car x)))
-
 (fn cddr (x)
   (cdr (cdr x)))
 
 (fn cadar (x)
   (car (cdr (car x))))
+
+(fn caddr (x)
+  (car (cdr (cdr x))))
 
 (fn append (first . rest)
   ;"Copy and concatenate."

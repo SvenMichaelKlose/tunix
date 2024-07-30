@@ -1,8 +1,8 @@
-(fn max numbers
-  ;"Return the maximum of the given numbers."
-  (? (not numbers)
+(fn max n
+  ;"Maximum of n."
+  (? (not n)
      (error "No args")
-     (let max-so-far (car numbers)
-       (dolist (n (cdr numbers) max-so-far)
-         (when (> n max-so-far)
-           (= max-so-far n))))))
+     (let result (car numbers)
+       (dolist (n (cdr n) result)
+         (? (> n result)
+            (= result n))))))

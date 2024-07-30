@@ -174,7 +174,7 @@ print0 (lispptr x)
         print_named ((symbol *) x);
 #ifndef NDEBUG
     else
-        internal_error ("Unknown object type.");
+        CHKPTR(x);
 #endif
 }
 

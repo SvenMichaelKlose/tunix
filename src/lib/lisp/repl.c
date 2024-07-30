@@ -21,6 +21,7 @@ lispptr onerror_sym;
 #endif
 #ifndef NO_MACROEXPAND
 lispptr macroexpand_sym;
+bool    is_macroexpansion;
 #endif
 
 #ifdef __CC65__
@@ -33,6 +34,7 @@ extern lispptr x;
 #endif
 
 #ifndef NAIVE
+lispptr unexpanded_toplevel;
 lispptr current_toplevel;
 #endif
 char    num_repls;          // REPL count.
@@ -190,8 +192,8 @@ lisp_repl (char mode)
 
 #ifndef NAIVE
         // Memorize new top-level expression.
-        current_toplevel = x;
-        PUSH(current_toplevel);
+        unexpanded_toplevel = x;
+        PUSH(unexpanded_toplevel);
 #endif
 
 #ifndef NO_MACROEXPAND
@@ -200,13 +202,23 @@ lisp_repl (char mode)
             x = make_cons (x, nil);
             x = make_cons (macroexpand_sym, x);
             unevaluated = true;
+            PUSH_TAG(is_macroexpansion);
+            is_macroexpansion = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
+            POP_TAG(is_macroexpansion);
         }
 #endif
 
         // Evaluate expression.
+#ifndef NAIVE
+        PUSH(current_toplevel);
+        current_toplevel = x;
+#endif
         x = eval ();
+#ifndef NAIVE
+        POP(current_toplevel);
+#endif
 
 #ifndef NAIVE
         // Call debugger on error.
@@ -216,7 +228,7 @@ lisp_repl (char mode)
         }
 
         // Forget our expression.
-        POP(current_toplevel);
+        POP(unexpanded_toplevel);
 #endif
 
         // Special treatment of results.

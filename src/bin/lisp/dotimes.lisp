@@ -1,16 +1,10 @@
 (macro dotimes (init . body)
-  (with ((i    (car init))
-         (n    (cadr init))
-         (r    (cddr init))
-         (tag  (symbol)))
-    $(let ,i ,n
-       (block nil
-         ,tag
-         (= ,i (-- ,i))
-         (? (< ,i 0)
-            (return ,(car r)))
-         ,@body
-         (go ,tag)))))
+  (with ((i (car init))
+         (n (symbol)))
+    $(let ,n (cadr init)
+       (do ((,i 0 (+ ,i 1)))
+           ((< ,i ,n) ,@(cddr init))
+         ,@body))))
 
 (message "Testing DOTIMES...")
 (dotimes (i 10 (terpri))

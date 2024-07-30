@@ -1,3 +1,4 @@
+(load "unique.lisp")
 (load "defsetfn.lisp")
 
 (defsetfn union

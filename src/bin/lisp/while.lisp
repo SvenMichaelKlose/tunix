@@ -1,9 +1,6 @@
-(macro while (cond result . body)
-  ;"Evaluate BODY while COND is true and return RESULT."
-  (let tag (string)
-    $(block nil
-       ,tag
-       (or ,cond
-           (return))
-       ,@body
-       (go ,tag))))
+(macro while (test . body)
+  $(do ()
+       ((not ,test))
+     ,@body))
+
+(message "TODO: Test WHILE.")

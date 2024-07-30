@@ -56,7 +56,7 @@ bool debug_mode;
 lispptr
 bi_eq (void)
 {
-    return BOOL(arg1 == arg2); // TOOD: Return arg1 if T.
+    return BOOL(arg1 == arg2);
 }
 
 lispptr

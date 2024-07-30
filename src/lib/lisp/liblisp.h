@@ -20,7 +20,7 @@
 
 // Give inappropriately happy developers a hard time.
 // (Pre)releases require testing with this option set.
-#define GC_STRESS
+//#define GC_STRESS
 
 // Aoid inlining of functions.
 // * Allows setting breakpoints.

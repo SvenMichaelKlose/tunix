@@ -1,12 +1,10 @@
 (var *macros* nil)
 
 (fn %requote (x)
-  ;"Put expression into an unquote."
   (cons (list (caar x) (macroexpand (cadar x)))
         (%unquote (cdr x))))
 
 (fn %unquote (x)
-  ;"Expand unquotes in quasiquoted X."
   (?
     (atom x)
       x
@@ -20,20 +18,15 @@
           (%unquote (cdr x)))))
 
 (special macro (name . lfun)
-  ;"Define macro function."
-  (? (member name *macros*)
-     (error name))
   (= *macros* (cons name *macros*))
   (eval (macroexpand $(fn ,name
                         ,@lfun))))
 
 (fn macro? (s)
-  ;"Test if symbol is a macro."
   (? (symbol? s)
      (member s *macros*)))
 
 (fn macroexpand (x)
-  ;"Expand *MACROS* in X."
   (?
     (or (atom x)
         (eq (car x) 'quote))
@@ -50,7 +43,6 @@
     (error (macroexpand '(v . body))))
 
 (message "Testing macro-expansion of unquoted list...")
-
 (message "(Part 1...)")
 (or (equal (macroexpand ',(a))
            ',(a))

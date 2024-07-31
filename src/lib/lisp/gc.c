@@ -23,6 +23,23 @@ char * xlat_end;
 extern lispptr lisp_fnin;
 extern lispptr lisp_fnout;
 
+lispptr * global_pointers[] = {
+    &universe, &delayed_eval,
+    &block_sym,
+    &quote, &quasiquote, &unquote, &unquote_spliced,
+    &return_sym, &return_name, &return_value,
+    &go_sym, &go_tag,
+    &lisp_fnin, &lisp_fnout,
+    &current_expr, &current_toplevel, &unexpanded_toplevel,
+    &onerror_sym,
+    &debug_step,
+    &args, &arg1, &arg2,
+    &highlighted,
+    NULL
+};
+
+lispptr ** gp;
+
 // Trace and mark reachable objects.
 void FASTCALL
 mark (lispptr x)
@@ -250,30 +267,9 @@ relocate_ptr (char * x)
 void
 relocate (void)
 {
-    // Relocate global variables.
-    universe         = relocate_ptr (universe);
-    delayed_eval     = relocate_ptr (delayed_eval);
-    block_sym        = relocate_ptr (block_sym);
-    quote            = relocate_ptr (quote);
-    quasiquote       = relocate_ptr (quasiquote);
-    unquote          = relocate_ptr (unquote);
-    unquote_spliced  = relocate_ptr (unquote_spliced);
-    return_name      = relocate_ptr (return_name);
-    return_value     = relocate_ptr (return_value);
-    go_sym           = relocate_ptr (go_sym);
-    go_tag           = relocate_ptr (go_tag);
-    lisp_fnin        = relocate_ptr (lisp_fnin);
-    lisp_fnout       = relocate_ptr (lisp_fnout);
-#ifndef NO_DEBUGGER
-    current_expr     = relocate_ptr (current_expr);
-    current_toplevel = relocate_ptr (current_toplevel);
-    onerror_sym      = relocate_ptr (onerror_sym);
-    debug_step       = relocate_ptr (debug_step);
-#endif
-    args        = relocate_ptr (args);
-    arg1        = relocate_ptr (arg1);
-    arg2        = relocate_ptr (arg2);
-    highlighted = relocate_ptr (highlighted);
+    // Relocate global pointers.
+    for (gp = global_pointers; *gp; gp++)
+        **gp = relocate_ptr (**gp);
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
@@ -345,18 +341,9 @@ restart:
     out ('M');
 #endif
 
-    // Mark universe.
-    mark (universe);
-    mark (return_sym);
-    mark (return_name);
-    mark (return_value);
-    mark (go_sym);
-    mark (go_tag);
-    mark (delayed_eval);
-    mark (current_expr);
-    mark (args);
-    mark (arg1);
-    mark (arg2);
+    // Mark global pointers.
+    for (gp = global_pointers; *gp; gp++)
+        mark (**gp);
 
     // Mark GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))

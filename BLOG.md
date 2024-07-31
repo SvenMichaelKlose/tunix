@@ -1,6 +1,23 @@
 TUNIX blog
 ==========
 
+# 2024-07-31
+
+Environment procedures have been split up into separate files,
+loading their prerequisites on demand.  I intended to copy over
+code from tré but the code created back then, 20 years ago in
+part, had other problems to deal with.  It never got rewritten
+to look nice because I had to achieve particular goals, like
+making money with apps.
+So it looks like there'll be code copied over from TUNIX Lisp
+to tré instead.  The DO macro for example should have been used
+more in tré.
+
+Loading prerequisites on demand gets the CPU stack to overflow
+and that is not detected yet.  There have to be checks or there
+will be time wasted with tracking down those overflows.  But for
+now there should be a round of healthy sleep first.
+
 # 2024-07-28
 
 Added the workflow, cleaned up and made the thing ready for

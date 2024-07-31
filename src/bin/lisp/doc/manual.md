@@ -256,7 +256,14 @@ They may also have prefixes:
 
 # Input/output
 
-TUNIX Lisp provides I/O by the expression or character.
+TUNIX Lisp boils I/O down to its basics: one channel for
+input and one for output, initially wired to "standard I/O",
+like your terminal with screen and keyboard.  Input and
+output can each be switched to other channels.  If you
+launch a LOAD command to execute a Lisp file, the input
+channel is connected to that file until it's been read
+entirely, but in general a channel can be directed to
+another one anytime.
 
 ## READing and PRINTing expressions
 

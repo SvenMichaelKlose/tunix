@@ -31,7 +31,9 @@ lispptr * global_pointers[] = {
     &go_sym, &go_tag,
     &lisp_fnin, &lisp_fnout,
     &current_expr, &current_toplevel, &unexpanded_toplevel,
+#ifndef NO_DEBUGGER
     &onerror_sym,
+#endif
     &debug_step,
     &args, &arg1, &arg2,
     &highlighted,

@@ -159,6 +159,10 @@ eval_list (void)
     return list_start;
 }
 
+#ifdef __CC65__
+char sp;
+#endif
+
 lispptr
 eval0 (void)
 {
@@ -168,6 +172,13 @@ eval0 (void)
 #endif
 
 do_eval:
+#ifdef __CC65__
+    asm ("tsx");
+    asm ("stx %v", sp);
+    if (sp > 0xf0)
+        internal_error ("CPU stack");
+#endif
+
 #ifdef VERBOSE_EVAL
     outs ("-> "); print (x); terpri ();
 #endif

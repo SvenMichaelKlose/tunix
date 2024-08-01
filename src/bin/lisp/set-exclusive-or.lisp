@@ -1,5 +1,3 @@
-(message "TODO: Implementation of REMOVE-IF!")
-
 (or (cons? remove-if)
     (load "remove-if.lisp"))
 (or (cons? intersect)

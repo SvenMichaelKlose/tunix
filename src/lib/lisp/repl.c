@@ -184,6 +184,9 @@ lisp_repl (char mode)
 
         // Macro expansion if MACROEXPAND is a user function.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
+#ifdef VERBOSE_MACROEXPAND
+            fresh_line (); outs ("X ");
+#endif
             // Avoid debug step into MACROEXPAND.
             PUSH(debug_step);
             debug_step = nil;

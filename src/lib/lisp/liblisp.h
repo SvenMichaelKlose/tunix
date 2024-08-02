@@ -19,6 +19,9 @@
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
+// Print message if MACROEXPAND takes action.
+//#define VERBOSE_MACROEXPAND
+
 
 /// Testing and debugging
 

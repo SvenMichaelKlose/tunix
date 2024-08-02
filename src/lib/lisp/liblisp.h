@@ -351,6 +351,7 @@ extern lispptr args;
 extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
+extern lispptr value;
 extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
 
 extern lispptr block_sym;

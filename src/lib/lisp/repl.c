@@ -24,15 +24,6 @@ lispptr macroexpand_sym;
 bool    is_macroexpansion;
 #endif
 
-#ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern lispptr x;
-#ifdef __CC65__
-#pragma zpsym ("x")
-#pragma bss-name (pop)
-#endif
-
 #ifndef NAIVE
 lispptr unexpanded_toplevel;
 lispptr current_toplevel;

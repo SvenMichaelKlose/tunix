@@ -50,7 +50,6 @@ struct heap_fragment * heap;
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern lispptr tmp;
 lispptr tmp2;
 char tmpc;
 char * heap_start;
@@ -61,7 +60,6 @@ char * ptr;
 char   type;
 symbol *  sym;
 #ifdef __CC65__
-#pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
 #pragma zpsym ("heap_start");

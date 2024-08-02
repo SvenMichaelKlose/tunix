@@ -17,14 +17,10 @@
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern lispptr x;
-extern lispptr tmp;
 int len;
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
 #ifdef __CC65__
-#pragma zpsym ("x")
-#pragma zpsym ("tmp")
 #pragma zpsym ("len")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")

@@ -10,27 +10,6 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern lispptr x;
-extern lispptr args;
-extern lispptr arg1;
-extern lispptr arg2c;
-extern lispptr arg2;
-extern lispptr value;
-extern lispptr tmp;
-#ifdef __CC65__
-#pragma zpsym ("x")
-#pragma zpsym ("args")
-#pragma zpsym ("arg1")
-#pragma zpsym ("arg2c")
-#pragma zpsym ("arg2")
-#pragma zpsym ("value")
-#pragma zpsym ("tmp")
-#pragma bss-name (pop)
-#endif
-
 // Make objects for built-in procedures.
 void FASTCALL
 add_builtins (struct builtin * b)

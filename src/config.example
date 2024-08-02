@@ -28,6 +28,9 @@ TARGET = vic20  # VIC-20 has the argest code base.
 # Build TUNIX Lisp without user-defined ONERROR handler.
 #NO_DEBUGGER = 1
 
+# Print expression to eval() and return values.
+#VERBOSE_EVAL = 1
+
 # Build TUNIX Lisp with verbose garbage collector.
 #
 # It prints character

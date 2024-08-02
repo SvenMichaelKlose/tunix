@@ -1,22 +1,87 @@
 TUNIX blog
 ==========
 
+# 2024-07-02
+
+Took care of the Lisp environment and added tests and fixes
+and tests and fixes and left in some hardcore bugs for those
+who can fix them before the crack pipe hit fades.  I'll go
+for a Cohiba cigar instead if this thing works.  Tried to
+take code from the tré compiler but back then updating the
+worst Lisp code ever written was out of question due to time
+constraints (huge app).  It goes the other way around. The
+DO macro is working magic and tré could really use an update
+to keep people from getting scared off.
+
+On CBMs it's actually not as slow as it looks.  Terminal
+output, especially the scrolling, takes off a lot of CPU.
+
+There are still GC issues.  Some pointers aren't relocated.
+I've mentioned some advanced diagnostics in commit
+f451635c2047026bc5462bcb0fae9df39104505b:
+
+"Perform GC\_STRESS in alloc() instead of eval0().
+
+To catch as many dangling pointers as possible.  It's not a
+mathematical proof if it passes.  Some can escape since
+objects in question might not be moving and check\_lispptr()
+could, for reasons yet unknown, give false positives.
+check\_lispptr() will have to go all over the heap to make
+sure that a pointer refers to the first byte of a valid
+object.  That is rather time-consuming but should be doable
+on modern targets (currently TARGET\_UNIX).  Also, all
+objects should move to ensure that pointers, which haven't
+been placed on the GC stack to get relocated, are spotted by
+check\_lispptr().  Last but not least check\_lispptr()
+should be called whenever a pointer is moved to or from
+places.
+
+These are things that are easy to implement but going down
+easy road should uncover just enough bugs to keep one busy
+for a couple of days."
+
+Such things are misplaced in (b)logs.  Will probably be done
+before noon tomorrow.
+
+## Dream Time
+
+Even if the debugger is ready for app-writing, there's still
+the issue of an editor dearly missing on small systems,
+especially on the VIC.  The VI I wrote in C has no undo.
+I'll scribble a sketch of a Lisp version.  Am not having a
+faint picture of it yet.
+
+I'd like to also serve a Z80 platform with the first release
+of the Lisp.  I only have a ZX81 with a 16K RAM expansion,
+famous for sliding out of the slot if you least expect it.
+The Z80 CPU knows 16-bit pointers.  That's a huge advantage
+to the 6502; the code size of the interpreter will be a lot
+smaller, but I cannot truly tell how much unless I get my
+butt up to include the z88dk compiler into the makefiles.
+A CP/M version is probably a good choice.  Disk I/O sucks
+right there but it's OK to make another libsimpleio version
+for it.
+
+For the TUNIX kernel to be portable the CBM device scheme
+probably should remain intact on other targets.
+
 # 2024-07-31
 
-Environment procedures have been split up into separate files,
-loading their prerequisites on demand.  I intended to copy over
-code from tré but the code created back then, 20 years ago in
-part, had other problems to deal with.  It never got rewritten
-to look nice because I had to achieve particular goals, like
-making money with apps.
-So it looks like there'll be code copied over from TUNIX Lisp
-to tré instead.  The DO macro for example should have been used
+Environment procedures have been split up into separate
+files, loading their prerequisites on demand.  I intended to
+copy over code from tré but the code created back then, 20
+years ago in part, had other problems to deal with.  It
+never got rewritten to look nice because I had to achieve
+particular goals, like making money with apps.  So it looks
+like there'll be code copied over from TUNIX Lisp to tré
+instead.  The DO macro for example should have been used
 more in tré.
 
-Loading prerequisites on demand gets the CPU stack to overflow
-and that is not detected yet.  There have to be checks or there
-will be time wasted with tracking down those overflows.  But for
-now there should be a round of healthy sleep first.
+Loading prerequisites on demand gets the CPU stack to
+overflow and that is not detected yet.  There have to be
+checks or there will be time wasted with tracking down those
+overflows.  But for now there should be a round of healthy
+sleep first.
 
 # 2024-07-28
 

@@ -85,7 +85,7 @@ void FASTCALL
 err_type (char * type, lispptr x)
 {
     char * p;
-    p = stpcpy (buffer, "need ");
+    p = stpcpy (buffer, "got ");
     p = stpcpy (p, typename (x));
     p = stpcpy (p, " instead of ");
     strcpy (p, type);

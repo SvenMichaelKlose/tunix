@@ -5,12 +5,13 @@
 (terpri)
 (message "Welcome to TUNIX Lisp!")
 (out "LOADables: (Append \".lisp\"!)")(terpri)
-(print '(adjoin alist copy do dolist dotimes ensure-list
-         equality every find-if find group intersect max
-         member-if nthcdr prog1 progn queue queue-pop
-         set-difference set-exclusive-or some source stack
-         subseq subseqp union unique unless when while
-         with-queue))
+(print '(adjoin alist copy-tree do dolist dotimes
+         ensure-list equality every find-if find group
+         intersect max member-if nthcdr prog1 progn queue
+         queue-pop set-difference set-exclusive-or some
+         source stack subseq subseqp union unique unless
+         when while with-queue))
 (terpri)
 (print (gc))(out "B free.")(terpri)
 (message "Ready.")
+(load all.lisp)

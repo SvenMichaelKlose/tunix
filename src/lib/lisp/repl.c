@@ -121,6 +121,8 @@ lisp_repl (char mode)
 #endif
 #ifndef NO_DEBUGGER
         } else {
+            debug_step = nil;
+
             // Read short debugger command, skipping whitespaces.
             do {
                 cmd = in ();
@@ -131,7 +133,6 @@ lisp_repl (char mode)
                 // Continue execution.
                 case 'c':
                     fresh_line ();
-                    debug_step = nil;
                     goto do_return;
 
                 // Break on next expression.
@@ -150,7 +151,6 @@ lisp_repl (char mode)
 
                 // Print expression.
                 case 'p':
-                    fresh_line ();
                     PUSH(x);
                     x = read ();
                     terpri ();

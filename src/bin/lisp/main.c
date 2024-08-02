@@ -344,7 +344,7 @@ bi_if (void)
 
         // Evaluate condition.
 #ifndef NO_DEBUGGER
-        PUSH_HIGHLIGHTED(arg2c);
+        PUSH_HIGHLIGHTED(x);
 #endif
         PUSH(arg2c);
         x = arg1;

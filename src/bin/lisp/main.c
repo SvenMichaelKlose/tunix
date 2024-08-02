@@ -177,13 +177,15 @@ bi_cdr (void)
 lispptr
 bi_setcar (void)
 {
-    return SETCAR(arg1, arg2);
+    SETCAR(arg1, arg2);
+    return arg1;
 }
 
 lispptr
 bi_setcdr (void)
 {
-    return SETCDR(arg1, arg2);
+    SETCDR(arg1, arg2);
+    return arg1;
 }
 
 lispptr

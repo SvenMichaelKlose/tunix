@@ -715,7 +715,12 @@ However: they are just two object pointers packed together.
 ### (car l): Return first value of cons or NIL.
 ### (cdr l): Return second value of cons or NIL.
 ### (setcar c x): Set first value of cons.
+
+Returns the cons.
+
 ### (setcdr c x): Set second value of cons.
+
+Returns the cons.
 
 ## Lists
 

@@ -1,10 +1,41 @@
+# Target machine
+#
+# Always required.
+# One of 'c128', 'c16' (32K), 'c64', 'pet', 'plus4', 'vic20'
+# or 'unix'.  Target 'pet' needs fixing.
+TARGET = vic20  # VIC-20 has the argest code base.
+
 # Build oscar64 compiler.
+# It's not used yet!
 #HAVE_OSCAR64 = 1
 
 # Do not include extra checks to spot internal errors.
 #NDEBUG = 1
 
-# One of 'c128', 'c16' (32K), 'c64', 'pet', 'plus4', 'vic20'
-# or 'unix'.  Target 'pet' needs fixing.
-# Always required.
-TARGET = vic20  # VIC-20 has the argest code base.
+# Stress out TUNIX Lisp's garbage collector by triggering
+# it before every object allocation.  Intended to be set
+# in build scripts.
+#GC_STRESS = 1
+
+# Build TUNIX Lisp with absolutely nothing related to
+# testing or handling errors, reducing code size as much as
+# possible.
+#NAIVE = 1
+
+# Build TUNIX Lisp without debugger.
+#NO_DEBUGGER = 1
+
+# Build TUNIX Lisp without user-defined ONERROR handler.
+#NO_DEBUGGER = 1
+
+# Build TUNIX Lisp with verbose garbage collector.
+#
+# It prints character
+#
+# * 'M' before the mark phase,
+# * 'S' before the sweep phase,
+# * 'R' before the relocation phase, and
+# * 'N' if the next heap is being switched to.
+#
+# The number of bytes freed after GC is also printed.
+#VERBOSE_GC = 1

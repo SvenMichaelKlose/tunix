@@ -35,7 +35,7 @@ lispptr * global_pointers[] = {
     &onerror_sym,
 #endif
     &debug_step,
-    &args, &arg1, &arg2,
+    &x, &args, &arg1, &arg2,
     &highlighted,
     NULL
 };

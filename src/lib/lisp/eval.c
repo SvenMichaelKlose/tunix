@@ -237,7 +237,7 @@ do_eval:
 #endif
 
         arg2c = CDR(x); // Expression list
-        value = nil;
+        value = nil;    // Return value of empty BLOCK.
         unevaluated = false;
 block_statement:
         x = CDR(x);
@@ -245,7 +245,7 @@ block_statement:
             goto do_return;
         PUSH(arg1);     // Block name
         PUSH(arg2c);    // Expression list
-        PUSH(x);        // Current expression
+        PUSH(x);        // Element with current expression
         PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
@@ -317,8 +317,7 @@ do_builtin_arg:
 #ifndef NAIVE
             // Complain if argument left.
             if (args) {
-                error (ERROR_TOO_MANY_ARGS,
-                       "Too many args to builtin:");
+                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin:");
                 goto do_return;
             }
 #endif
@@ -354,8 +353,7 @@ set_arg_values:
 #ifndef NAIVE
         // Missing argument error.
         else if (!args) {
-            error (ERROR_ARG_MISSING,
-                   "Missing arg to builtin.");
+            error (ERROR_ARG_MISSING, "Missing arg to builtin.");
             goto do_return;
         }
 #endif
@@ -539,7 +537,7 @@ do_argument:
 #endif
 
         PUSH_TAG(TAG_NEXT_ARG);
-        PUSH_HIGHLIGHTED(x);
+        PUSH_HIGHLIGHTED(args);
         x = CAR(args);
         goto do_eval;
         // Step to next argument.

@@ -13,7 +13,7 @@ char * stack_start;
 lispptr current_expr;
 #ifndef NAIVE
 lispptr current_function;
-lispptr original_first;
+lispptr unevaluated_arg1;
 #endif
 
 #ifdef __CC65__
@@ -172,6 +172,7 @@ eval0 (void)
 #endif
 
 do_eval:
+    // Check on CPU stack overflow.
 #ifdef __CC65__
     asm ("tsx");
     asm ("stx %v", sp);
@@ -184,9 +185,9 @@ do_eval:
 #endif
 
 #ifndef NO_DEBUGGER
-    current_expr = x;
     PUSH(current_expr);
-    if (debug_step == t || do_invoke_debugger) {
+    current_expr = x;
+    if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER);
     }
@@ -203,11 +204,12 @@ do_eval:
 
     arg1 = CAR(x);
 #ifndef NAIVE
-    original_first = arg1;
+    unevaluated_arg1 = arg1;
 #endif
 
-    // Get function from symbol.
+    // Get function expression from symbol.
     if (arg1 && SYMBOLP(arg1)) {
+        // Inhinit evaluation of special form's arguments.
         if (EXTENDEDP(arg1))
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
@@ -501,12 +503,12 @@ do_argument:
             PUSH(argdefs);
             PUSH(arg1); // Function
 #ifndef NAIVE
-            PUSH(original_first);
+            PUSH(unevaluated_arg1);
 #endif
             x = args;
             value = eval_list ();
 #ifndef NAIVE
-            POP(original_first);
+            POP(unevaluated_arg1);
 #endif
             POP(arg1);  // Function
             POP(argdefs);
@@ -533,7 +535,7 @@ do_argument:
         PUSH(argdefs);
         PUSH(args);
 #ifndef NAIVE
-        PUSH(original_first);
+        PUSH(unevaluated_arg1);
 #endif
 
         PUSH_TAG(TAG_NEXT_ARG);
@@ -545,7 +547,7 @@ next_arg:
         POP_HIGHLIGHTED();
         // Restore evaluator state.
 #ifndef NAIVE
-        POP(original_first);
+        POP(unevaluated_arg1);
 #endif
         POP(args);
         POP(argdefs);
@@ -580,7 +582,7 @@ start_body:
     // TODO: Find out why this cannot be moved before init
     //       info for restore_arguments.
     PUSH(current_function);
-    current_function = original_first;
+    current_function = unevaluated_arg1;
 #endif
 
     // Evaluate body expression.

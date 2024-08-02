@@ -232,7 +232,7 @@ sweep ()
         xlat -= sizeof (unsigned);
         *(unsigned *) xlat = -total_removed;
 #ifdef VERBOSE_GC
-        outn (total_removed); outs (" heap bytes freed."); terpri ();
+        outn (total_removed); outs ("B freed."); terpri ();
 #endif
     } while ((++heap)->start);
 #else // #ifdef FRAGMENTED_HEAP
@@ -280,6 +280,7 @@ relocate (void)
 #endif
 #ifdef VERBOSE_GC
     out ('R');
+    terpri ();
 #endif
 
         // Relocate elements on heap.

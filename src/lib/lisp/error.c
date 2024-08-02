@@ -163,43 +163,23 @@ print_error_info ()
         terpri ();
     }
     fresh_line ();
-    outs ("Unexpanded: ");
-    print (unexpanded_toplevel);
-    terpri ();
-    outs ("Toplevel: ");
-    print (current_toplevel);
-    terpri ();
-    outs ("Expression: ");
-    print (current_expr);
-    terpri ();
+
     outs ("In");
-    if (error_code == ERROR_USER) {
+    do_highlight = true;
+    if (current_function) {
+        outs (" function ");
+        tmp2 = SYMBOL_VALUE(current_function);
+        print (current_function);
+        out (' ');
+        print (FUNARGS(tmp2));
         out_colon ();
-        print (current_expr);
-outs ("EXPR");
+        terpri ();
+        print (FUNBODY(tmp2));
     } else {
-        do_highlight = true;
-        if (!is_macroexpansion && current_function) {
-            outs (" function ");
-            if (SYMBOLP(current_function)) {
-/*
-                tmp2 = SYMBOL_VALUE(current_function);
-                print (current_function);
-                out (' ');
-                print (FUNARGS(tmp2));
-                out_colon ();
-                terpri ();
-                print (FUNBODY(tmp2));
-*/
-                goto done;
-            }
-        }
         out_colon ();
-outs ("TOPL");
-        //print (current_toplevel);
-done:
-        do_highlight = false;
+        print (current_toplevel);
     }
+    do_highlight = false;
     terpri ();
 }
 

@@ -11,14 +11,12 @@ Built-ins
 [ ] TPS constant containing ticks per second.
 
 Debugger
-[ ] Show 'unexpanded_topelevel' if not EQUAL.
 [ ] Breakppoints.
 [ ] Conditional breakppoints.
 [ ] Watchpoints.
 [ ] Conditional watchpoints.
 [ ] Invoking debugger with Ctrl-C.
 [ ] Invoking debugger with RESTORE key on CBMs.
-[ ] Command to start stepping through REPL user input.
 
 Manual
 [ ] Examples where appropriate.

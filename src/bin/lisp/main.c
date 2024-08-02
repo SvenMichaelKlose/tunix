@@ -675,6 +675,8 @@ bi_remove (void)
 lispptr
 bi_filter (void)
 {
+    if (!arg2)
+        return nil;
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();

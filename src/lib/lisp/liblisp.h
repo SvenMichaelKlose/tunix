@@ -346,6 +346,7 @@ extern char * tagstack_start;
 extern char * tagstack;
 extern char * tagstack_end;
 
+extern lispptr x;
 extern lispptr args;
 extern lispptr arg1;
 extern lispptr arg2;
@@ -384,6 +385,7 @@ extern bool is_macroexpansion;
 #pragma zpsym ("tagstack")
 #pragma zpsym ("error_code")
 #pragma zpsym ("unevaluated")
+#pragma zpsym ("x")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")
 #pragma zpsym ("arg2c")

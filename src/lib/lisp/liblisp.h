@@ -1,6 +1,10 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
+//// Compile-time options
+////
+//// Inteded to be set via file 'src/config' or command-line.
+
 /// Diagnostics
 
 // Dump marked objects during sweep phase.
@@ -329,6 +333,7 @@ extern lispptr list_last;
 extern lispptr tmp;
 extern lispptr tmp2;
 extern char    tmpc;
+extern char *  tmpstr;
 
 #ifdef FRAGMENTED_HEAP
 extern struct heap_fragment * heap;

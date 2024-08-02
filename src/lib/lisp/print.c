@@ -36,12 +36,9 @@ space (void)
 #define HIGHLIGHT_AFTER     true
 
 void FASTCALL
-print_highlighting (lispptr x, bool which, bool when)
+print_highlighted (lispptr x, bool when)
 {
-    if (!do_highlight)
-        return;
-    if ((which == HIGHLIGHT_CAR && LIST_CAR(highlighted) == x)
-        || LIST_CDR(highlighted) == x)
+    if (do_highlight && highlighted == x)
         outs (when == HIGHLIGHT_BEFORE ? ">>>" : "<<<");
 }
 
@@ -54,6 +51,10 @@ print_short (char * m, cons * c)
     print0 (LIST_CAR(LIST_CDR(c)));
 }
 
+#ifdef PRINT_SHORT_QUOTES
+char * tmpstr;
+#endif
+
 void FASTCALL
 print_list (cons * c)
 {
@@ -61,21 +62,18 @@ print_list (cons * c)
 
 #ifdef PRINT_SHORT_QUOTES
     if (CDR(c)) {
+        tmpstr = NULL;
         tmp = CAR(c);
-        if (tmp == quote) {
-            print_short ("'", c);
-            return;
-        }
-        if (tmp == quasiquote) {
-            print_short ("$", c);
-            return;
-        }
-        if (tmp == unquote) {
-            print_short (",", c);
-            return;
-        }
-        if (tmp == unquote_spliced) {
-            print_short (",@", c);
+        if (tmp == quote)
+            tmpstr = "'";
+        else if (tmp == quasiquote)
+            tmpstr = "$";
+        else if (tmp == unquote)
+            tmpstr = ",";
+        else if (tmp == unquote_spliced)
+            tmpstr = ",@";
+        if (tmpstr) {
+            print_short (tmpstr, c);
             return;
         }
     }
@@ -87,14 +85,14 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-        print_highlighting (c, HIGHLIGHT_CAR, HIGHLIGHT_BEFORE);
+        print_highlighted (c, HIGHLIGHT_BEFORE);
         print0 (c->car);
-        print_highlighting (c, HIGHLIGHT_CAR, HIGHLIGHT_AFTER);
+        print_highlighted (c, HIGHLIGHT_AFTER);
         if (c->cdr && !CONSP(c->cdr)) {
             outs (" . ");
-            print_highlighting (c, HIGHLIGHT_CDR, HIGHLIGHT_BEFORE);
+            print_highlighted (c, HIGHLIGHT_BEFORE);
             print0 (c->cdr);
-            print_highlighting (c, HIGHLIGHT_CDR, HIGHLIGHT_AFTER);
+            print_highlighted (c, HIGHLIGHT_AFTER);
             break;
         }
         c = c->cdr;

@@ -1,5 +1,9 @@
 Base line: make it fun writing the compiler with it.
 
+Memory management
+[ ] Clear pointers in global variables when unused so the
+    GC can take Ks of trees of objects out.
+
 Input/Output
 [ ] File numbers returned by OPEN.
 [ ] OPEN for writes.

@@ -330,26 +330,45 @@ bi_if (void)
 {
     arg2c = CDR(x);
     while (x) {
+        // Get condition.
         arg1 = CAR(x);
+
+        // It's the consequence with nothing following.
         if (!(arg2c = CDR(x))) {
+#ifndef NO_DEBUGGER
+            highlighted = x;
+#endif
             x = arg1;
             return delayed_eval;
         }
 
-        highlighted = arg2c;
+        // Evaluate condition.
+#ifndef NO_DEBUGGER
+        PUSH_HIGHLIGHTED(arg2c);
+#endif
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
-        highlighted = arg2c;
+#ifndef NO_DEBUGGER
+        POP_HIGHLIGHTED();
+#endif
+
 #ifndef NAIVE
         if (error_code)
             break;
 #endif
+
+        // Do consequence if condition isn't NIL.
         if (tmp) {
             x = CAR(arg2c);
+#ifndef NO_DEBUGGER
+            highlighted = arg2c;
+#endif
             return delayed_eval;
         }
+
+        // Step to next condition.
         x = CDR(arg2c);
     }
     return nil;

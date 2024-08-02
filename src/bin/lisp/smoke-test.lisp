@@ -125,6 +125,15 @@
 ;(message "Testing PEEK...")
 ;(or (== 1 (print (peek (rawptr (cons nil nil)))))
 ;    (error))
+(message "Testing LENGTH...")
+(or (== 0 (length nil))
+    (error))
+(or (== 1 (length '(a)))
+    (error))
+(or (== 2 (length '(a b)))
+    (error))
+(or (== 3 (length '(a b c)))
+    (error))
 
 (message "Testing GC...")
 (print (gc))(out '"B free.")(terpri)
@@ -132,7 +141,6 @@
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
 ; fn var universe gc exit
-; length butlast last member @
 
 (fn make-count (n)
   (? (< 0 n)

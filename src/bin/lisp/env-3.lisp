@@ -12,6 +12,5 @@
          source stack subseq subseqp union unique unless
          when while with-queue))
 (terpri)
-(print (gc))(out "B free.")(terpri)
+(print (gc))(message "B free.")
 (message "Ready.")
-(load all.lisp)

@@ -3,3 +3,11 @@
       ((not i))
     (? (f (car i))
        (return i))))
+
+(message "Testing MEMBER-IF...")
+(or (member-if '((x) (eq x 'i))
+               '(l i s p))
+    (error))
+(and (member-if '((x) (eq x 'x))
+                '(l i s p))
+     (error))

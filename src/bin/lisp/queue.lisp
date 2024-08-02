@@ -6,4 +6,12 @@
   vals)
 
 (fn queue-list (x)
-  (car x))
+  (cdr x))
+
+(message "Testing ENQUEUE...")
+(or (equal (let q (make-queue)
+             (enqueue q 42)
+             (enqueue q 23)
+             (queue-list q))
+           '(42 23))
+    (error))

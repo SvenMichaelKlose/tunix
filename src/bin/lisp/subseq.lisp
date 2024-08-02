@@ -1,17 +1,17 @@
-(fn subseq (seq start . end)
-  ;"Return the subsequence of LIST from START to END."
-  ;"If END is nil, the subsequence goes to the end of the list."
-  (= end (or (car end) 999999))
-  (with ((len        (length seq))
-         (actual-end (or end len))
-         (sublen     (max 0 (- actual-end start))))
-    (? (or (< start 0)
-           (> start len)
-           (> actual-end len)
-           (< start actual-end))
-       (error "ill range")
-       (with-queue q
-         (= seq (nthcdr seq start))
-         (dotimes (i sublen (queue-list q))
-           (enqueue q (car seq))
-           (= seq (cdr seq)))))))
+(or (cons? nthcdr)
+    (load "nthcdr.lisp"))
+(or (cons? make-queue)
+    (load "queue.lisp"))
+
+(fn subseq (l start . end)
+  ;"Return the subsequence of LIST from START to END.  If END is nil, the subsequence goes to the end of the list."
+  (do ((q (make-queue))
+       (i (- (or (car end) (length l)) start) (-- i))
+       (x (nthcdr start l) (cdr x)))
+      ((<= i 0) (queue-list q))
+    (enqueue q (car x)))
+
+(message "Testing SUBSEQ...")
+(or (equal (print (subseq '(l i s p) 0 2))
+           '(l i))
+    (error))

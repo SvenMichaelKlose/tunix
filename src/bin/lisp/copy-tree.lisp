@@ -5,5 +5,7 @@
            (copy-tree (cdr x)))
      x))
 
-(message "Smoke-testing COPY-TREE...")
-(print (copy-tree '((1 2) (3 (4 5)))))
+(message "Testing COPY-TREE...")
+(or (equal (copy-tree '((1 2) (3 (4 5))))
+           '((1 2) (3 (4 5))))
+    (error))

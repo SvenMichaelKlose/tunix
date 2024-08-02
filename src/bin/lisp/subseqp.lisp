@@ -1,4 +1,4 @@
-(or (macro? 'defsetfn')
+(or (macro? 'defsetfn)
     (load "defsetfn.lisp"))
 (or (cons? every)
     (load "every.lisp"))

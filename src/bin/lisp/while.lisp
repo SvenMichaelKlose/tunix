@@ -3,4 +3,9 @@
        ((not ,test))
      ,@body))
 
-(message "TODO: Test WHILE.")
+(message "Testing WHILE...")
+(let x 10
+  (while (< 0 x)
+    (print x)
+    (= x (-- x))))
+(terpri)

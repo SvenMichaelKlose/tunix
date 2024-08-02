@@ -78,7 +78,6 @@ lisp_repl (char mode)
     // Handle error in other ways than calling the debugger.
     if (error_code) {
 #ifndef NO_ONERROR
-
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Make argument list.
@@ -107,37 +106,31 @@ lisp_repl (char mode)
         goto do_return;
 #endif
 #endif // #ifndef NO_ONERROR
-
     }
 #endif // #ifndef NAIVE
 
     // Read expresions from standard input until
     // end or until QUIT has been invoked.
     while (!eof ()) {
-        if (mode != REPL_LOAD) {
 #ifndef NO_DEBUGGER
-            debug_step = nil;
-            if (mode == REPL_DEBUGGER) {
-                print_error_info ();
-                error_code = 0;
-            }
-#endif
+        if (mode == REPL_DEBUGGER) {
+            print_error_info ();
+            error_code = 0;
         }
+#endif
 
 #ifndef NO_DEBUGGER
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
-
             x = read ();
 #ifndef TARGET_UNIX
-            if (mode != REPL_LOAD) {
+            if (mode != REPL_LOAD)
                 terpri ();
-            }
 #endif
-
 #ifndef NO_DEBUGGER
         } else {
+            // Read short debugger command, skipping whitespaces.
             do {
                 cmd = in ();
             } while (cmd > 0 && cmd < ' ');
@@ -151,14 +144,14 @@ lisp_repl (char mode)
                     goto do_return;
 
                 // Break on next expression.
-                // Steps into functions.
+                // Step into function.
                 case 's':
                     fresh_line ();
                     debug_step = t;
                     goto do_return;
 
                 // Break after current expression.
-                // Steps over function calls.
+                // Step over function call.
                 case 'n':
                     fresh_line ();
                     debug_step = current_expr;
@@ -190,46 +183,53 @@ lisp_repl (char mode)
         }
 #endif
 
+#ifndef NO_MACROEXPAND
 #ifndef NAIVE
-        // Memorize new top-level expression.
-        unexpanded_toplevel = x;
+        // Memorize unexpanded expression.
         PUSH(unexpanded_toplevel);
+        unexpanded_toplevel = x;
+        current_toplevel = x;
 #endif
 
-#ifndef NO_MACROEXPAND
-        // Call user-defined MACROEXPAND.
+        // Macro expansion if MACROEXPAND is a user function.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
+            // Avoid debug step into MACROEXPAND.
+            PUSH(debug_step);
+            debug_step = nil;
+
+            // Call MACROEXPAND.
             x = make_cons (x, nil);
             x = make_cons (macroexpand_sym, x);
             unevaluated = true;
-            PUSH_TAG(is_macroexpansion);
-            is_macroexpansion = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
-            POP_TAG(is_macroexpansion);
-        }
-#endif
 
-        // Evaluate expression.
+            POP(debug_step);
+        }
+#endif // #ifndef NO_MACROEXPAND
+
 #ifndef NAIVE
         PUSH(current_toplevel);
         current_toplevel = x;
 #endif
-        x = eval ();
-#ifndef NAIVE
-        POP(current_toplevel);
+
+#ifndef NO_DEBUGGER
+        highlighted = nil;
 #endif
+
+        // Evaluate expression.
+        x = eval ();
 
 #ifndef NAIVE
         // Call debugger on error.
-        if (error_code) {
-            current_toplevel = *(lispptr *) stack;
+        if (error_code)
             x = lisp_repl (REPL_DEBUGGER);
-        }
 
-        // Forget our expression.
+        POP(current_toplevel);
+#ifndef NO_MACROEXPAND
         POP(unexpanded_toplevel);
 #endif
+#endif // #ifndef NAIVE
 
         // Special treatment of results.
         if (do_break_repl) {
@@ -331,7 +331,6 @@ load (char * pathname)
 #ifndef NAIVE
 err_open:
 #endif
-
     // Restore former input channel.
     arg1 = make_number (oldin);
     bi_setin ();
@@ -346,7 +345,12 @@ init_repl ()
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
 #endif
+#ifndef NO_MACROEXPAND
+    unexpanded_toplevel = nil;
+#endif
+#ifndef NAIVE
     current_toplevel = nil;
+#endif
 
 #ifndef NO_MACROEXPAND
     macroexpand_sym = make_symbol ("macroexpand", 11);

@@ -3,8 +3,5 @@
 [ ] UNDEF: Some pointer(s) aren't relocated after GC.
 [ ] ('symbol): Crash!
 
-Debugger
-[ ] Fix 'n' for returning from user-defined function.
-
 Commodore PET
 [ ] Fix build.  RUN breaks with syntax error.

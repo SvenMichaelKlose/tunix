@@ -13,6 +13,20 @@
 (or t (error))
 (or nil t (error))
 
+(message "Testing if arguments are restored on function return...")
+(= x 42)
+(((x)) 23)
+(or (== x 42)
+    (error))
+
+(message "Testing if argument symbol values get set before list is done...")
+(= x 42)
+(((x y)
+   (or (== y 47)
+       (error))
+  )
+ 23 (+ x 5))
+
 (message "Smoke-testing COPY-LIST...")
 (print (copy-list nil))(terpri)
 (print (copy-list '(1)))(terpri)
@@ -172,9 +186,3 @@
 ;(gc)
 ;(undef 'block-test)
 ;(gc)
-
-(message "Testing if arguments are restored on function return...")
-(= x 42)
-(((x)) 23)
-(or (== x 42)
-    (error "Argument X not restored on return."))

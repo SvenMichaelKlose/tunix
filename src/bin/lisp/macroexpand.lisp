@@ -17,10 +17,10 @@
     (cons (%unquote (car x))
           (%unquote (cdr x)))))
 
-(special macro (name . lfun)
-  (= *macros* (cons name *macros*))
-  (eval (macroexpand $(fn ,name
-                        ,@lfun))))
+(special macro (name . x)
+  (or (member name *macros*)
+      (= *macros* (cons name *macros*)))
+  (eval (macroexpand $(fn ,name ,@x))))
 
 (fn macro? (s)
   (? (symbol? s)

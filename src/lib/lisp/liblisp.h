@@ -377,6 +377,7 @@ extern lispptr debug_step;
 
 #ifndef NO_MACROEXPAND
 extern bool is_macroexpansion;
+extern lispptr macroexpand_sym;
 #endif
 
 #ifdef __CC65__

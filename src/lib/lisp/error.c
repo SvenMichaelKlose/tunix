@@ -164,8 +164,13 @@ print_error_info ()
     }
     fresh_line ();
 
-    outs ("In");
     do_highlight = true;
+#ifdef DEBUG_INTERNAL
+    outs ("Eval'd: ");
+    print (current_expr);
+    terpri ();
+#endif
+    outs ("In");
     if (current_function) {
         outs (" function ");
         tmp2 = SYMBOL_VALUE(current_function);

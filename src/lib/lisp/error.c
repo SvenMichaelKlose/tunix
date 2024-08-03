@@ -170,6 +170,14 @@ print_error_info ()
     print (current_expr);
     terpri ();
 #endif
+
+    // Print last result unless it's the current expression.
+    if (value != current_function && value != current_toplevel) {
+        outs ("Last result: ");
+        print (value);
+        terpri ();
+    }
+
     outs ("In");
     if (current_function) {
         outs (" function ");

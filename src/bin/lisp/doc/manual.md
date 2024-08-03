@@ -1157,40 +1157,18 @@ key and the rest is the value.
 
 # Compiler
 
-Interpretation is slow because of:
-
-* Parsing and checking arguments.
-* Saving and restoring symbol values.
-
-## Compiling: Why?
-
-Advantages:
-
-* Arguments are placed on the stack where they don't need to
-  be restored up on function return like it's the case with
-  user-defined functions.
-* Arguments to known functions are expanded in advance.
-  No need to parse argument definitions any more when
-  compiled functions call other compiled or built-in
-  functions.
-* Jump destinations do not need to get looked up via
-  list searches.
-* Bytecode is about 70% smaller.
-
-Disadvantages:
-
-* No source-level debugging unless implemented.
-
-The compiler is most simple, translating expressions to
-bytecodes that describe function calls and control flow.
-
-Quoted function expressions will not be compiled.
-[^compile-anon-funs]
-
-[^compile-anon-funs]:
-  Compiling in such functions would require the LAMBDA
-  keyword (or another) to tell them apart from lists.
-  FUNCTION or FN are also good options for a keyword.
+The simplicity, flexibility and transparency of a Lisp interpreter is cutting edge in every aspect.  TUNIX Lisp is a bit
+more complicated as 16-bit indexed pointers and stacks
+larger than 256 bytes are required on 8-bit CPUs like the
+MOS 6502 and the required code space to handle the two
+bytes of a 16-bit word is eating away on precious heap size
+and performance.  The situation can be improved a little for
+error-free applications by removing all sorts of error
+checking through setting the compile-time option "NAIVE",
+but it still takes a working development to get an
+application to be almost free of errors.  Achieving that
+is next to impossible in the first place due to the
+complexity inherent to computer programs.
 
 ## The target machine: Bytecode format
 
@@ -1280,7 +1258,7 @@ Transform to metacode:
 * Compiler macro expansion
 * Quote expansion
 * Quasiquote expansion
-* Argument rename
+* Argument renaming
 * Function collection
 * Scoping
 * Lambda expansion
@@ -1418,7 +1396,7 @@ intially, are as simple as this:
 When extending the compiler, most things will revolve around
 this pittoresque, little thing as we'll see later.
 
-### Argument renaming
+### Argument renaming pass
 
 The following lambda-expansion might need to inline
 functions with argument names that are already in use.

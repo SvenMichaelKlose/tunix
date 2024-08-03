@@ -17,6 +17,7 @@
 (load "queue-pop.lisp")
 (load "with-queue.lisp")
 (load "remove-if.lisp")
+(load "reverse.lisp")
 (load "every.lisp")
 (load "nthcdr.lisp")
 (load "when.lisp")

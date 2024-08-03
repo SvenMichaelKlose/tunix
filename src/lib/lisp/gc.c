@@ -34,6 +34,7 @@ lispptr * global_pointers[] = {
 #ifndef NAIVE
     &current_toplevel,
 #endif
+    &current_function,
     &unexpanded_toplevel,
 #ifndef NO_DEBUGGER
     &onerror_sym,

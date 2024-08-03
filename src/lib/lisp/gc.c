@@ -34,6 +34,7 @@ lispptr * global_pointers[] = {
 #ifndef NAIVE
     &current_toplevel,
 #endif
+    &current_function,
     &unexpanded_toplevel,
 #ifndef NO_DEBUGGER
     &onerror_sym,
@@ -152,7 +153,6 @@ sweep ()
         // Sweep one heap.
         s = d = heap_start;
         while (*s) {
-            CHKPTR(s);
 #ifdef PARANOID
             if (s >= heap_end)
                 internal_error ("Sweep overflow");

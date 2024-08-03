@@ -1,3 +1,15 @@
+(message "Testing SETCAR...")
+(= x (cons nil nil))
+(or (equal (setcar x t)
+           (cons t nil))
+    (error))
+
+(message "Testing SETCDR...")
+(= x (cons nil nil))
+(or (equal (setcdr x t)
+           (cons nil t))
+    (error))
+
 (= x 42)
 
 (message "Testing EQUAL...")

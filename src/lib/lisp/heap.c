@@ -98,6 +98,21 @@ expand_universe (lispptr x)
     POP(x);
 }
 
+// Get size of object in bytes.
+unsigned FASTCALL
+objsize (char * x)
+{
+    uchar s;
+    s = lisp_sizes[TYPEBITS(x)];
+#ifndef NDEBUG
+    if (!s)
+        internal_error ("0 size");
+#endif
+    if (_NAMEDP(x))
+        return s + SYMBOL_LENGTH(x);
+    return s;
+}
+
 #ifndef NDEBUG
 #ifdef TARGET_UNIX
 
@@ -107,18 +122,38 @@ error_typebits (char * x)
     internal_error (x ? "type" : "EOH");
 }
 
-// Check if argument points to a valid object.
+// Print info of all objects.
+void
+check_lispptr_addr (char * x)
+{
+    char * s = heap_start;
+    while (s != heap_end) {
+        if (s == x)
+            return;
+        s += objsize (s);
+    }
+    printf ("Pointer %p is not on an object's start address.\n", x);
+    internal_error (":(");
+}
+
+bool is_checking_lispptr;
+
+// Check if object pointed to is sane.
 void
 check_lispptr (char * x)
 {
-    if (!x)
+    if (!x || is_checking_lispptr)
         return;
+
 #ifndef FRAGMENTED_HEAP
-    // Check object is if within the heap area.
+    // Check if object is within heap.
     if (x < heap_start)
         internal_error ("Pointer below heap.");
     if (x >= heap_end)
         internal_error ("Pointer above heap.");
+
+    // Check if pointer is on an object start.
+    check_lispptr_addr (x);
 #endif
 
     if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
@@ -140,13 +175,14 @@ check_lispptr (char * x)
 void
 dump_lispptr (char * x)
 {
-    printf ("%p %d: ", x, objsize (x));
+    int n = objsize (x);
+    printf ("%p - %p %d: ", x, x + n - 1, n);
+    is_checking_lispptr = true;
     if (!MARKED(x))
         printf ("(unused) ");
-    CHKPTR(x);
     if (!x) {
         printf ("nil\n");
-        return;
+        goto done;
     }
     switch (TYPEBITS(x)) {
         case TYPE_CONS:
@@ -173,6 +209,8 @@ dump_lispptr (char * x)
         default:
             error_typebits (x);
     }
+done:
+    is_checking_lispptr = false;
 }
 
 // Print info of all objects.
@@ -188,22 +226,6 @@ dump_heap ()
 
 #endif // #ifdef TARGET_UNIX
 #endif // #ifndef NDEBUG
-
-// Get size of object in bytes.
-unsigned FASTCALL
-objsize (char * x)
-{
-    uchar s;
-    CHKPTR(x);
-    s = lisp_sizes[TYPEBITS(x)];
-#ifndef NDEBUG
-    if (!s)
-        internal_error ("0 size");
-#endif
-    if (_NAMEDP(x))
-        return s + SYMBOL_LENGTH(x);
-    return s;
-}
 
 // Allocate object.
 lispptr FASTCALL

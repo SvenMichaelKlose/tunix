@@ -3,6 +3,6 @@
 (or (cons? every)
     (load "every.lisp"))
 
-(defsetfn subseq?
+(defsetfn subset?
   ;"Check if list a is a subset of list b."
   (every $((x) (member x ,a)) b))

@@ -72,6 +72,7 @@ print_list (cons * c)
             tmpstr = ",";
         else if (tmp == unquote_spliced)
             tmpstr = ",@";
+        tmp = nil;
         if (tmpstr) {
             print_short (tmpstr, c);
             return;

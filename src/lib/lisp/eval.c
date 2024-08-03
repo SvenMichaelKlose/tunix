@@ -39,7 +39,6 @@ char * tagstack_end;
 char * tagstack;
 lispptr name;
 lispptr argdefs;
-lispptr value;
 struct builtin * bfun;
 lispptr va;
 lispptr delayed_eval;
@@ -150,6 +149,7 @@ eval_list (void)
         // result list.
         SETCDR(list_last, make_cons (tmp, nil));
         list_last = tmp;
+        tmp = nil;
 
         // Remember current cons.
         POP(x);

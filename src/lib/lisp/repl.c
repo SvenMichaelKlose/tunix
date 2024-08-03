@@ -78,6 +78,7 @@ lisp_repl (char mode)
             x = make_number ((lispnum_t) error_code);
             POP(tmp);
             x = make_cons (x, tmp);
+            tmp = nil;
             x = make_cons (onerror_sym, x);
 
             // Call ONERROR.
@@ -159,6 +160,7 @@ lisp_repl (char mode)
                     POP(x);
                     outs ("Value: ");
                     print (tmp);
+                    tmp = nil;
                     terpri ();
                     goto next;
 

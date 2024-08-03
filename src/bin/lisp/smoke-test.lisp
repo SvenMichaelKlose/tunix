@@ -182,7 +182,8 @@
 (block-test 101)
 (terpri)
 
-(message "Not testing UNDEF...")
-;(gc)
-;(undef 'block-test)
-;(gc)
+(message "Testing UNDEF...")
+(gc)
+(undef 'block-test)
+(gc)
+(message "Phew! You may put away that fire extinguisher now.")

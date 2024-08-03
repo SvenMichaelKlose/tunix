@@ -126,21 +126,25 @@ error_typebits (char * x)
 void
 check_lispptr_addr (char * x)
 {
-    char *s = heap_start;
-    while (*s) {
+    char * s = heap_start;
+    while (s != heap_end) {
         if (s == x)
             return;
         s += objsize (s);
     }
-    internal_error ("Pointer is not on an object's start address.");
+    printf ("Pointer %p is not on an object's start address.\n", x);
+    internal_error (":(");
 }
+
+bool is_checking_lispptr;
 
 // Check if object pointed to is sane.
 void
 check_lispptr (char * x)
 {
-    if (!x)
+    if (!x || is_checking_lispptr)
         return;
+
 #ifndef FRAGMENTED_HEAP
     // Check if object is within heap.
     if (x < heap_start)
@@ -173,11 +177,12 @@ dump_lispptr (char * x)
 {
     int n = objsize (x);
     printf ("%p - %p %d: ", x, x + n - 1, n);
+    is_checking_lispptr = true;
     if (!MARKED(x))
         printf ("(unused) ");
     if (!x) {
         printf ("nil\n");
-        return;
+        goto done;
     }
     switch (TYPEBITS(x)) {
         case TYPE_CONS:
@@ -204,6 +209,8 @@ dump_lispptr (char * x)
         default:
             error_typebits (x);
     }
+done:
+    is_checking_lispptr = false;
 }
 
 // Print info of all objects.

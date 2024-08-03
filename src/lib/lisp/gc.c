@@ -152,7 +152,6 @@ sweep ()
         // Sweep one heap.
         s = d = heap_start;
         while (*s) {
-            CHKPTR(s);
 #ifdef PARANOID
             if (s >= heap_end)
                 internal_error ("Sweep overflow");

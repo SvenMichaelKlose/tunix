@@ -11,7 +11,7 @@
              (group (nthcdr size x) size))))
 
 (message "Testing GROUP...")
-(or (equal (print (group '(l i s p) 2))
+(or (equal (group '(l i s p) 2)
            '((l i)
              (s p)))
     (error))

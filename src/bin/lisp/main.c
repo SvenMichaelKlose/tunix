@@ -939,7 +939,10 @@ main (int argc, char * argv[])
 #endif
 #ifdef TARGET_UNIX
     load ("all.lisp");
+#ifdef GC_STRESS
+    load ("all.lisp");
 #endif
+#endif // #ifdef TARGET_UNIX
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
     lisp_repl (REPL_STD);

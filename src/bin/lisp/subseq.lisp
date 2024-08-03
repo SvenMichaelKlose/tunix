@@ -9,9 +9,8 @@
        (i (- (or (car end) (length l)) start) (-- i))
        (x (nthcdr start l) (cdr x)))
       ((<= i 0) (queue-list q))
-    (enqueue q (car x)))
+    (enqueue q (car x))))
 
-(message "Testing SUBSEQ...")
-(or (equal (print (subseq '(l i s p) 0 2))
+(or (equal (subseq '(l i s p) 0 2)
            '(l i))
     (error))

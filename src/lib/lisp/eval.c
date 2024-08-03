@@ -181,10 +181,12 @@ do_eval:
 #endif
 
 #ifdef VERBOSE_EVAL
+    // Print what's about to be evaluated.
     outs ("-> "); print (x); terpri ();
 #endif
 
 #ifndef NO_DEBUGGER
+    // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
     if (do_invoke_debugger || debug_step == t) {
@@ -202,6 +204,7 @@ do_eval:
         goto do_return_atom;
     }
 
+    // Get first element, which is the procedure to call.
     arg1 = CAR(x);
 #ifndef NAIVE
     unevaluated_arg1 = arg1;
@@ -218,6 +221,7 @@ do_eval:
     /////////////////////////
     /// BLOCK name . body ///
     /////////////////////////
+    // Evalue BLOCK inline to avoid using the CPU stack.
 
     if (arg1 == block_sym) {
 #ifndef NAIVE
@@ -226,6 +230,8 @@ do_eval:
             goto do_return;
         }
 #endif
+
+        // Step to and get BLOCK name.
         x = CDR(x);
         arg1 = CAR(x);
 
@@ -236,13 +242,22 @@ do_eval:
         }
 #endif
 
-        arg2c = CDR(x); // Expression list
-        value = nil;    // Return value of empty BLOCK.
+        // Get body.
+        arg2c = CDR(x);
+
+        // Return value of empty BLOCK.
+        value = nil;
+
         unevaluated = false;
 block_statement:
+        // Get first/next statement.
         x = CDR(x);
+
+        // Break on end of body.
         if (!x)
             goto do_return;
+
+        // Save evaluator state.
         PUSH(arg1);     // Block name
         PUSH(arg2c);    // Expression list
         PUSH(x);        // Element with current expression
@@ -251,17 +266,21 @@ block_statement:
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
 next_block_statement:
+        // Restore evaluator state.
         POP_HIGHLIGHTED();
         POP(x);
         POP(arg2c);
         POP(arg1);
+
+        // Return to break REPL if demanded.
         if (do_break_repl)
             goto do_return;
 
-        // Handle GO.
         if (value == go_sym) {
-            // Search tag in body.
+            // Handle GO.
             value = nil;
+
+            // Search tag in body.
             tag_found = false;
             DOLIST(x, arg2c)
                 if (CAR(x) == go_tag)
@@ -273,6 +292,7 @@ next_block_statement:
             }
 #endif
         } else if (value == return_sym) {
+            // Handle RETURN,
             if (arg1 == return_name) {
                 value = return_value;
                 return_value = nil;
@@ -283,19 +303,19 @@ next_block_statement:
         goto block_statement;
     }
 
+    // Get argument list following the procedure's name.
+    args = CDR(x);
+
     //////////////////////////
     /// BUILT-IN PROCEDURE ///
     //////////////////////////
 
-    args = CDR(x);
-
-    // Call built-in.
     if (BUILTINP(arg1)) {
         bfun = (struct builtin *) SYMBOL_VALUE(arg1);
         builtin_argdef = (char *) bfun->argdef;
 
-        // Built-in with no argument-definition.
-        // Call with arguments unevaluated.
+        // Built-in has no argument-definition.
+        // Call it with arguments as they are.
         if (!builtin_argdef) {
             x = args;
             value = bfun->func ();
@@ -415,10 +435,9 @@ next_builtin_arg:
         if (do_break_repl)
             goto break_builtin_call;
 
-        // Typecheck and save argument value.
 save_arg_value:
 #ifndef NAIVE
-        // Typecheck,
+        // Type-check and throw any errors.
         bi_tcheck (value, *builtin_argdef);
         if (error_code) {
             PUSH(args);
@@ -438,7 +457,7 @@ save_arg_value:
         // Save argument value.
         PUSH(value);
 
-        // Step to next argument.
+        // Step to next argument and its definition.
         builtin_argdef++;
         args = CDR(args);
         goto do_builtin_arg;
@@ -540,10 +559,9 @@ do_argument:
         PUSH_HIGHLIGHTED(args);
         x = CAR(args);
         goto do_eval;
-        // Step to next argument.
 next_arg:
-        POP_HIGHLIGHTED();
         // Restore evaluator state.
+        POP_HIGHLIGHTED();
 #ifndef NAIVE
         POP(unevaluated_arg1);
 #endif
@@ -563,7 +581,6 @@ next_arg:
     args    = CDR(args);
     goto do_argument;
 
-    // Evaluate body.
 start_body:
     // Reset inhibited evaluation of special form arguments.
     unevaluated = false;
@@ -583,8 +600,8 @@ start_body:
     current_function = unevaluated_arg1;
 #endif
 
-    // Evaluate body expression.
 continue_body:
+    // Evaluate body expression.
     if (!x || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
@@ -627,6 +644,14 @@ do_return:
 
 do_return_atom:
     unevaluated = false;
+
+#ifndef NO_DEBUGGER
+    // Invoke debugger if we stepped over this expression.
+    if (debug_step && debug_step == current_expr)
+        // Inoke debugger before next evaluation.
+        do_invoke_debugger = true;
+#endif
+
 #ifndef NO_DEBUGGER
     POP(current_expr);
 #endif
@@ -636,14 +661,8 @@ do_return_atom:
         goto do_eval;
 
 #ifdef VERBOSE_EVAL
+    // Print return value.
     outs ("<- "); print (value); terpri ();
-#endif
-
-#ifndef NO_DEBUGGER
-    // Debugger step over expression.
-    if (debug_step && debug_step == current_expr)
-        // Inoke debugger before next evaluation.
-        do_invoke_debugger = true;
 #endif
 
     // Continue evaluation.  Determine jump
@@ -666,8 +685,10 @@ do_return_atom:
     }
 
 #ifndef NDEBUG
+    // Check if stacks are in balance.
     check_stacks (old_stack, old_tagstack + 1);
 #endif
+
     return value;
 }
 

@@ -119,7 +119,6 @@ bi_symbol (void)
     char * p;
 
     // Get length.  Truncate at 255.
-    arg1 = x ? CAR(x) : nil;
     len = length (arg1);
     if (len > 255)
         len = 255;

@@ -179,7 +179,7 @@
        (go tag))))
 
 (message "Testing BLOCK...")
-(block-test 10)
+(block-test 101)
 (terpri)
 
 (message "Not testing UNDEF...")

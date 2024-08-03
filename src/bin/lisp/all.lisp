@@ -20,7 +20,7 @@
 (load "every.lisp")
 (load "nthcdr.lisp")
 (load "when.lisp")
-;(load "subseq.lisp")
+(load "subseq.lisp")
 ;(load "group.lisp")
 (load "unique.lisp")
 (load "union.lisp")

@@ -1,6 +1,26 @@
 TUNIX blog
 ==========
 
+# 2024-07-03
+
+And there it is: one of the most stupid mistakes of a complete
+neophyte: when evaluating arguments of a user-defined function,
+the symbol values are updated immediately after evaluation of
+an argument which one of the next arguments may require.
+
+What now?  Old symbol values are already being pushed to the
+stack and new values must go there, too, before assigning them
+to their argument's symbols.  The problem is that the new values
+must be popped off the stack before the old ones, so pushing
+pairs of old and new values is not sound.  Two separate lists
+are required on the stack, so the new values can be fetched
+and assigned to their sysmbols before the function body is
+evaluated and the rest is done as before.
+
+Fortunately the solution is simple: the stack pointer is
+memorized to store the old values and the new values are
+pushed as usual.
+
 # 2024-07-02
 
 Took care of the Lisp environment and added tests and fixes

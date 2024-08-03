@@ -11,6 +11,7 @@
       ((<= i 0) (queue-list q))
     (enqueue q (car x))))
 
+(message "Testing SUBSEQ...")
 (or (equal (subseq '(l i s p) 0 2)
            '(l i))
     (error))

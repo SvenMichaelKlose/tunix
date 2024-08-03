@@ -5,6 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#ifndef __CC65__
+#include <signal.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
@@ -29,6 +32,8 @@ lispptr tmp;
 lispptr value;
 char * stack;
 char * stack_end;
+char * stack_old_arg_values;
+char * stack_entered;
 char * tagstack_start;
 char * tagstack_end;
 char * tagstack;
@@ -65,6 +70,8 @@ bool unevaluated;
 #pragma zpsym ("value")
 #pragma zpsym ("stack")
 #pragma zpsym ("stack_end")
+#pragma zpsym ("stack_old_arg_values")
+#pragma zpsym ("stack_entered")
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
@@ -157,6 +164,25 @@ eval_list (void)
     // Return memorized start of result list.
     POP(list_start);
     return list_start;
+}
+
+// Pop argument values from object stack:
+// num_args: Number of arguments.
+// argdefs: Argument definition.
+void
+pop_argument_values (void)
+{
+    tmpc = num_args;
+    while (tmpc--) {
+        if (ATOM(argdefs)) {
+            if (argdefs)
+                SET_SYMBOL_VALUE(argdefs, ((lispptr *)stack)[(array_index_t) tmpc]);
+            break;
+        }
+        SET_SYMBOL_VALUE(CAR(argdefs), ((lispptr *)stack)[(array_index_t) tmpc]);
+        argdefs = CDR(argdefs);
+    }
+    stack += sizeof (lispptr) * num_args;
 }
 
 #ifdef __CC65__
@@ -484,9 +510,21 @@ break_builtin_call:
     }
 #endif
 
-    // Init argument list evaluation.
+    // Save stack pointer start.
+    stack_entered = stack;
+
+    // Save stack position of old argument symbol values.
+    stack_old_arg_values = stack;
+
+    // Get argument definition and number of arguments.
     argdefs = FUNARGS(arg1);
-    num_args = 0;
+    num_args = (argdefs && ATOM(argdefs)) ? 1 : length (argdefs);
+
+    // NIL out stack for old argument symbol values,
+    // so garbage collection won't crash.
+    tmpc = num_args;
+    while (tmpc--)
+        PUSH(nil);
 
     // Evaluate argument.
 do_argument:
@@ -505,48 +543,59 @@ do_argument:
     }
 #endif
 
-    num_args++;
-
     // Rest of argument list. (consing)
     if (ATOM(argdefs)) {
         // Save old symbol value for restore_arguments.
-        PUSH(SYMBOL_VALUE(argdefs));
+        stack_old_arg_values -= sizeof (lispptr);
+        *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
 
         // Get argument value.
         if (unevaluated)
             value = args;
         else {
+            // Save evaluator state.
+            PUSH_TAGW(stack_entered);
+            PUSH_TAGW(stack_old_arg_values);
             PUSH_TAG(num_args);
             PUSH(argdefs);
-            PUSH(arg1); // Function
+            PUSH(arg1);
 #ifndef NAIVE
             PUSH(unevaluated_arg1);
 #endif
+
+            // Evaluate rest of arguments.
             x = args;
             value = eval_list ();
+
+            // Restore evaluator state.
 #ifndef NAIVE
             POP(unevaluated_arg1);
 #endif
-            POP(arg1);  // Function
+            POP(arg1);
             POP(argdefs);
             POP_TAG(num_args);
+            POP_TAGW(stack_old_arg_values);
+            POP_TAGW(stack_entered);
         }
 
         // Save argument value unless we need to fall through.
         if (!do_break_repl)
-            SET_SYMBOL_VALUE(argdefs, value);
+            PUSH(value);
 
         goto start_body;
     }
 
     // Regular argument.  Save its value.
-    PUSH(SYMBOL_VALUE(CAR(argdefs)));
+    stack_old_arg_values -= sizeof (lispptr);
+    *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(CAR(argdefs));
 
     // Get argument value.
     if (unevaluated)
         value = CAR(args);
     else {
         // Save evaluator state.
+        PUSH_TAGW(stack_entered);
+        PUSH_TAGW(stack_old_arg_values);
         PUSH_TAG(num_args);
         PUSH(arg1); // Function
         PUSH(argdefs);
@@ -569,12 +618,14 @@ next_arg:
         POP(argdefs);
         POP(arg1);  // Function
         POP_TAG(num_args);
+        POP_TAGW(stack_old_arg_values);
+        POP_TAGW(stack_entered);
         if (do_break_repl)
             goto start_body;
     }
 
-    // Replace argument symbol value with evaluated one.
-    SET_SYMBOL_VALUE(CAR(argdefs), value);
+    // Save new argument symbol value.
+    PUSH(value);
 
     // Step to next argument.
     argdefs = CDR(argdefs);
@@ -582,6 +633,15 @@ next_arg:
     goto do_argument;
 
 start_body:
+    if (error_code || do_break_repl) {
+        stack = stack_entered;
+        goto do_return;
+    }
+
+    // Assign new values to argument symbols.
+    argdefs = FUNARGS(arg1);
+    pop_argument_values ();
+
     // Reset inhibited evaluation of special form arguments.
     unevaluated = false;
 
@@ -620,21 +680,9 @@ restore_arguments:
     // Restore name of parent function for debugger.
     POP(current_function);
 #endif
-
-    // Get argument info.
     POP(argdefs);
     POP_TAG(num_args);
-    tmpc = num_args;
-    while (tmpc--) {
-        if (ATOM(argdefs)) {
-            if (argdefs)
-                SET_SYMBOL_VALUE(argdefs, ((lispptr *)stack)[(array_index_t) tmpc]);
-            break;
-        }
-        SET_SYMBOL_VALUE(CAR(argdefs), ((lispptr *)stack)[(array_index_t) tmpc]);
-        argdefs = CDR(argdefs);
-    }
-    stack += sizeof (lispptr) * num_args;
+    pop_argument_values ();
 
 do_return:
 #ifndef NAIVE

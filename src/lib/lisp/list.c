@@ -28,12 +28,21 @@ lispptr list_last;  // Last cons of list.
 #endif
 
 // Get number of list elements.
+// CDRs of dotted pairs are also counted.
 int FASTCALL
 length (lispptr x)
 {
     len = 0;
-    DOLIST(x, x)
+    while (x) {
         len++;
+        x = CDR(x);
+
+        // Count CDR of dotted pair.
+        if (x && ATOM(x)) {
+            len++;
+            break;
+        }
+    }
     return len;
 }
 

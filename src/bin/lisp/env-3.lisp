@@ -14,3 +14,4 @@
 (terpri)
 (print (gc))(message "B free.")
 (message "Ready.")
+(load "all.lisp")

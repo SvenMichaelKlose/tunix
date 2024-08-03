@@ -938,6 +938,9 @@ main (int argc, char * argv[])
 #ifndef TARGET_C16
     load ("env-3.lisp");
 #endif
+#ifdef TARGET_UNIX
+    load ("all.lisp");
+#endif
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
     lisp_repl (REPL_STD);

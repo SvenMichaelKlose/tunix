@@ -152,9 +152,11 @@ check_lispptr (char * x)
     if (x >= heap_end)
         internal_error ("Pointer above heap.");
 
+#ifdef TARGET_UNIX
     // Check if pointer is on an object start.
     check_lispptr_addr (x);
 #endif
+#endif // #ifndef FRAGMENTED_HEAP
 
     if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
         internal_error ("Unused type bits set.");

@@ -163,7 +163,10 @@
 (message "Testing recursion with MAKE-COUNT...")
 (print (make-count 10))(terpri)
 
-; TODO: (undef 'make-count)
+(message "Testing UNDEF...")
+(undef 'make-count)
+(gc)
+
 ; Messes up the heap with the following GC although it
 ; merely assignes a new copy of the universe list, leaving
 ; the symbol alone.
@@ -181,9 +184,6 @@
 (message "Testing BLOCK...")
 (block-test 101)
 (terpri)
-
-(message "Testing UNDEF...")
-(gc)
 (undef 'block-test)
-(gc)
+
 (message "Phew! You may put away that fire extinguisher now.")

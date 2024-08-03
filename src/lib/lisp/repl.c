@@ -21,11 +21,11 @@ lispptr onerror_sym;
 #endif
 #ifndef NO_MACROEXPAND
 lispptr macroexpand_sym;
-bool    is_macroexpansion;
+bool    is_macroexpansion;  // TODO: Remove.
+lispptr unexpanded_toplevel;
 #endif
 
 #ifndef NAIVE
-lispptr unexpanded_toplevel;
 lispptr current_toplevel;
 #endif
 char    num_repls;          // REPL count.

@@ -173,7 +173,7 @@ eval0 (void)
 
 do_eval:
     // Check on CPU stack overflow.
-#ifdef __CC65__
+#if defined(__CC65__) && !defined(NAIVE)
     asm ("tsx");
     asm ("stx %v", sp);
     if (sp > 0xf0)

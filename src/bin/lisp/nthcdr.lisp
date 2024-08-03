@@ -5,6 +5,11 @@
      (nthcdr (-- n) (cdr l))))
 
 (message "Testing NTHCDR...")
+(or (equal (nthcdr 0 '(l i s p))
+           '(l i s p))
+    (error))
 (or (equal (nthcdr 2 '(l i s p))
            '(s p))
     (error))
+(and (nthcdr 4 '(l i s p))
+     (error))

@@ -514,7 +514,9 @@ bi_close (void)
 lispptr
 bi_load (void)
 {
+#ifdef VERBOSE_LOAD
     outs ("Loading "); print (arg1); terpri ();
+#endif
     name_to_buffer (arg1);
     load (buffer);
     return nil;

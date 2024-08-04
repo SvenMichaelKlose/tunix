@@ -27,8 +27,8 @@ jobs:
     - name: Make PDF manual
       run: cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 
-    - name: Install ZIP
-      run: sudo apt-get install -y zip
+    - name: Build all worlds
+      run: make allworlds VERBOSE_LOAD=1
 
     - name: Create ZIP file
       run: |

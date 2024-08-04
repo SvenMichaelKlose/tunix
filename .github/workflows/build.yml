@@ -12,20 +12,14 @@ jobs:
       with:
         submodules: true
 
-    - name: Set up C Compiler
-      run: sudo apt-get install -y gcc make
-
-    - name: Install VICE Emulator
-      run: sudo apt-get install -y vice
-
-    - name: Install Pandoc
-      run: sudo apt-get install -y pandoc
+    - name: Set up prerequisites
+      run: sudo apt-get install -y gcc make vice texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
 
     - name: Create config file
-      run: echo -e "TARGET=unix\nGC_STRESS=1" > src/config
+      run: echo -e "TARGET=unix\n" > src/config
 
     - name: Build Unixoid
-      run: make clean all
+      run: make clean all GC_STRESS=1 VERBOSE_LOAD=1
 
     - name: Run Tests
       run: make test

@@ -441,10 +441,15 @@ bi_eof (void)
 lispptr
 bi_open (void)
 {
+    char mode = SYMBOL_NAME(arg2)[0];
     simpleio_chn_t c;
 
+    if (SYMBOL_LENGTH(arg2) != 1 || (mode != 'r' && mode != 'w')) {
+        error (ERROR_FILEMODE, "Ill file mode");
+        return nil;
+    }
     name_to_buffer (arg1);
-    c = simpleio_open (buffer, 'r');
+    c = simpleio_open (buffer, mode);
     return make_number (c);
 }
 
@@ -787,7 +792,7 @@ struct builtin builtins[] = {
 
     { "read",       "",     read },
     { "print",      "x",    bi_print },
-    { "open",       "s",    bi_open },
+    { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
     { "in",         "",     bi_in },

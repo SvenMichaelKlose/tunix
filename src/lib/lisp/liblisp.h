@@ -613,12 +613,14 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #define ERROR_TOO_MANY_ARGS 4
 #define ERROR_NOT_FUNCTION  5
 #define ERROR_OUT_OF_HEAP   6
-#define ERROR_UNKNOWN_TYPE  7
-#define ERROR_NO_PAREN      8
-#define ERROR_STALE_PAREN   9
-#define ERROR_CHANNEL       10
-#define ERROR_FILE          11
+#define ERROR_NO_PAREN      7
+#define ERROR_STALE_PAREN   8
+#define ERROR_CHANNEL       9
+#define ERROR_FILE          10
+#define ERROR_FILEMODE      11
 #define ERROR_USER          12
+
+// Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      13
 
 #if !defined (NDEBUG) && defined (TARGET_UNIX)

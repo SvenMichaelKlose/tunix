@@ -398,7 +398,7 @@ evaluated, and the expression inside it is faulty.
 
 ### Error codes
 
-| ID (ERR_...)    | Code | Description                    |
+| ID (ERROR_...)  | Code | Description                    |
 |-----------------|------|--------------------------------|
 | TYPE            | 1    | Unexpected object type.        |
 | ARG\_MISSING    | 2    | One or more missing arguments. |
@@ -406,12 +406,12 @@ evaluated, and the expression inside it is faulty.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.            |
 | NOT\_FUNCTION   | 5    | Object is not a function.      |
 | OUT\_OF\_HEAP   | 6    | Out of heap.  Cannot catch.    |
-| UNKNOWN\_TYPE   | 7    | Internal error.                |
-| NO\_PAREN       | 8    | ')' missing.                   |
-| STALE\_PAREN    | 9    | Unexpected ')'.                |
-| CHANNEL         | 10   | Channel not open.              |
+| NO\_PAREN       | 7    | ')' missing.                   |
+| STALE\_PAREN    | 8    | Unexpected ')'.                |
+| FILE            | 10   | File error code in (ERR).      |
+| FILEMODE        | 11   | Illegal mode for OPEN.         |
 | USER            | 12   | ERROR function was called.     |
-| INTERNAL        | 13   | Internal interpreter error.    |
+| INTERNAL        | 14   | Returned to operating system.  |
 
 # Built-in functions
 
@@ -870,7 +870,18 @@ x           ; 23
 
 ### (read): Read expression.
 ### (print x): Print expression.
-### (open pathname): Open file and channel.
+### (open pathname mode): Open file and channel.
+
+Opens file at PATHNAME for reading or writing.  MODE must
+be a symbol.  Returns the channel number or NIL.
+
+| Mode | Description    |
+|------|----------------|
+|  r   | Read mode      |
+|  w   | Write mode     |
+
+Illegal modes cause an ERROR\_FILEMODE.
+
 ### (err): Return number of last I/O error or NIL.
 ### (eof): Tell if last read reached end of file.
 ### (setin channel): Set input channel.

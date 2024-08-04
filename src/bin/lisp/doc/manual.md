@@ -15,7 +15,7 @@ book: true
 
 TUNIX Lisp is a highly efficient Lisp interpreter, written
 in ANSI-C.  It is designed for constrained environments,
-such as embedded systems, classic home computers, and
+such as embedded systems, classic home computers, including
 6502-based systems.
 
 Features:
@@ -47,13 +47,13 @@ using the cc65 C compiler suite:
 * Commodore VIC-20 (+27K)
 
 It also compiles on regular Unixoids, using the GNU compiler
-toolchain or compatible.
+toolchain or compatibles.
 
 ## Differences to other dialects
 
 The TUNIX Lisp dialect is very much like any other.  Here
 are some things that raise an eyebrow when seeing them the
-first time, but can be cleared up quickly:
+first time:
 
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
@@ -129,13 +129,13 @@ The REPL is the user interface.  It prompts you for input by
 printing an asterisk '\*' in its regular mode, except on
 Commodore 8-bit machines, to allow using the KERNAL's screen
 editor.  After reading an expression it is evaluated and the
-result of that evaluation is printing.  Then it starts over,
-prompting you for the next expression.  It also processes
-input from files and helps debugging by providing convenient
-one-character commands.  REPLs can be nested, e.g. when an
-error occured, a new REPL is launched in debug mode, where
-you can provide a replacement for a faulty expression,
-execute code step by step and examine symbols.
+result of that evaluation is output.  Then it starts over,
+prompting you for the next expression.
+
+REPLs can be nested, e.g. when an error occured, a new REPL
+is launched in debug mode.  With that you can examine the
+environment, execute code step by step and present a
+correct alternative for a faulty expression.
 
 Any REPL, no matter its mode, can be terminated using the
 built-in QUIT function, which takes a return value for the
@@ -148,15 +148,16 @@ with reading and evaluating the next one.
 
 Built-in function EXIT stops the program and returns to the
 topmost REPL.  When passed an exit code, EXIT terminates the
-interpreter to return to the operating system TUNIX Lisp is
-running on.
+interpreter and returns to the operating system.
 
 # Definiton of permanent symbols
 
-FN and VAR assign expressions to a symbol which is then
-added to the universe (a list of symbols the garbage
-collector is starting off with).  The difference between FN
-and VAR is that VAR evaluates its initialization argument.
+FN and VAR assign expressions to symbols which are also
+added to variable \*universe\*, a list of symbols the
+garbage collector starting off with to reach all used
+objects.  The difference between FN and VAR is that VAR
+evaluates its initialization argument and FN assigns its
+argument list unevaluated.
 
 ~~~lisp
 ; Define permanent, named function.

@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     branches:
-      - prerelease
+      - test-release
     tags:
       - 'v*.*.*'
 
@@ -38,11 +38,7 @@ jobs:
 
     - name: Define zip file name
       id: define_zip_name
-      run: |
-        BRANCH_NAME=${GITHUB_REF#refs/heads/}
-        DATE=$(date +'%Y-%m-%d')
-        ZIP_NAME="tunix-lisp.cbm.d64-images.${BRANCH_NAME}-${DATE}.zip"
-        echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+      run: echo "ZIP_NAME=tunix-lisp.cbm.${{ env.VERSION }}.zip" >> $GITHUB_ENV
 
     - name: Make PDF manual
       id: make_pdf_manual

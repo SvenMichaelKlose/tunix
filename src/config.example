@@ -6,7 +6,7 @@
 TARGET = vic20  # VIC-20 has the argest code base.
 
 # Build oscar64 compiler.
-# It's not used yet!
+# It's not used!
 #HAVE_OSCAR64 = 1
 
 # Do not include extra checks to spot internal errors.
@@ -42,3 +42,6 @@ TARGET = vic20  # VIC-20 has the argest code base.
 #
 # The number of bytes freed after GC is also printed.
 #VERBOSE_GC = 1
+
+# Print pathnames of LOADed files.
+#VERBOSE_LOAD = 1

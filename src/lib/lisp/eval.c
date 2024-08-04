@@ -653,12 +653,13 @@ start_body:
     // Get first body expression.
     x = FUNBODY(arg1);
 
-#ifndef NAIVE
+#ifndef NO_DEBUGGER
     // Save function symbol for debugger.
     // TODO: Find out why this cannot be moved before init
     //       info for restore_arguments.
     PUSH(current_function);
-    current_function = unevaluated_arg1;
+    if (ATOM(unevaluated_arg1))
+        current_function = unevaluated_arg1;
 #endif
 
 continue_body:
@@ -677,7 +678,7 @@ next_body_statement:
 
     // Restore argument symbol values.
 restore_arguments:
-#ifndef NAIVE
+#ifndef NO_DEBUGGER
     // Restore name of parent function for debugger.
     POP(current_function);
 #endif

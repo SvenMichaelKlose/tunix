@@ -934,9 +934,7 @@ main (int argc, char * argv[])
     load ("test-onerror.lisp");
 #endif
 #endif
-#ifndef TARGET_C16
     load ("env-3.lisp");
-#endif
 #ifdef TARGET_UNIX
     load ("all.lisp");
 #ifdef GC_STRESS

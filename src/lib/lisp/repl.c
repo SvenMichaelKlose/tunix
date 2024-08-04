@@ -14,8 +14,6 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-char    load_fn = 12;
-
 #ifndef NO_ONERROR
 lispptr onerror_sym;
 #endif
@@ -288,12 +286,14 @@ do_return:
 void FASTCALL
 load (char * pathname)
 {
+    simpleio_chn_t load_fn;
+
     // Memorize input channel.
     int oldin = fnin;
 
     // Open file.
-    simpleio_open (load_fn, pathname, 'r');
-    if (err ()) {
+    load_fn = simpleio_open (pathname, 'r');
+    if (!load_fn) {
         outs ("File error: ");
         outs (pathname);
         terpri ();
@@ -312,14 +312,8 @@ load (char * pathname)
     }
 #endif
 
-    // Bump up file number for next LOAD.
-    load_fn++;
-
     // Read file.
     lisp_repl (REPL_LOAD);
-
-    // Back to former file number for next LOAD.
-    load_fn--;
 
     // Close file.
     simpleio_close (load_fn);

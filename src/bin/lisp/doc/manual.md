@@ -845,21 +845,21 @@ x           ; 23
 
 ## I/O
 
-| Function        | Description                         |
-|-----------------|-------------------------------------|
-| (read)          | Read expression.                    |
-| (print x)       | Print expression.                   |
-| (open pathname) | Open file and return channel.       |
-| (err)           | Return number of last error or NIL. |
-| (eof)           | Tell if read reached end of file.   |
-| (setin n)       | Set input channel.                  |
-| (setout n)      | Set output channel.                 |
-| (in)            | Read char.                          |
-| (out x)         | Print char or plain symbol name.    |
-| (terpri)        | Step to next line.                  |
-| (fresh-line)    | Open line if not on a fresh one.    |
-| (close n)       | Close a channel.                    |
-| (load pathname) | Load and evaluate file.             |
+| Function         | Description                         |
+|------------------|-------------------------------------|
+| (read)           | Read expression.                    |
+| (print x)        | Print expression.                   |
+| (load name)      | Load and evaluate file.             |
+| (open name mode) | Open file and return channel.       |
+| (err)            | Return number of last error or NIL. |
+| (eof)            | Tell if read reached end of file.   |
+| (setin n)        | Set input channel.                  |
+| (setout n)       | Set output channel.                 |
+| (in)             | Read char.                          |
+| (out x)          | Print char or plain symbol name.    |
+| (terpri)         | Step to next line.                  |
+| (fresh-line)     | Open line if not on a fresh one.    |
+| (close n)        | Close a channel.                    |
 
 | Variable | Description            |
 |----------|------------------------|

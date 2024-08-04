@@ -441,10 +441,11 @@ bi_eof (void)
 lispptr
 bi_open (void)
 {
-    uchar fn = NUMBER_VALUE(arg1);
-    name_to_buffer (arg2);
-    simpleio_open (fn, buffer, 'r');
-    return make_number (err ());
+    simpleio_chn_t c;
+
+    name_to_buffer (arg1);
+    c = simpleio_open (buffer, 'r');
+    return make_number (c);
 }
 
 lispptr
@@ -786,7 +787,7 @@ struct builtin builtins[] = {
 
     { "read",       "",     read },
     { "print",      "x",    bi_print },
-    { "open",       "ns",   bi_open },
+    { "open",       "s",    bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
     { "in",         "",     bi_in },

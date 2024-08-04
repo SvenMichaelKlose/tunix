@@ -10,7 +10,7 @@
     #define STDERR 2
 #endif
 
-typedef char simpleio_chn_t;
+typedef signed char simpleio_chn_t;
 
 // Supplied by driver libraries.
 typedef struct _simpleio {
@@ -26,10 +26,10 @@ typedef struct _simpleio {
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-extern char fnin;     // Input file number.
-extern char fnout;    // Output file number.
-extern char last_in;  // Last input char.
-extern char last_out; // Last output char.
+extern simpleio_chn_t fnin;   // Input file number.
+extern simpleio_chn_t fnout;  // Output file number.
+extern char last_in;   // Last input char.
+extern char last_out;  // Last output char.
 #ifdef __CC65__
 #pragma zpsym ("fnin")
 #pragma zpsym ("fnout")
@@ -40,23 +40,25 @@ extern char last_out; // Last output char.
 
 extern char eof (void);
 extern char err (void);
-extern void setin (simpleio_chn_t fn);
+    
+extern void setin  (simpleio_chn_t fn);
 extern void setout (simpleio_chn_t fn);
 
-extern char in (void);      // Read char.
-extern void putback (void); // Put back char for in().
+extern char in          (void);      // Read char.
+extern void putback     (void); // Put back char for in().
 extern void skip_spaces (void);
 
-extern void out (char c);
-extern void outnu (unsigned long);
-extern void outn (long);
-extern void outs (char *);
-extern void outsn (char *, char len);
-extern void terpri (void);
-extern void fresh_line (void);
+extern void out         (char c);
+extern void outnu       (unsigned long);
+extern void outn        (long);
+extern void outs        (char *);
+extern void outsn       (char *, char len);
+extern void terpri      (void);
+extern void fresh_line  (void);
 
-extern void simpleio_open (simpleio_chn_t, char * pathname, char mode);
-extern void simpleio_close (simpleio_chn_t);
+extern simpleio_chn_t simpleio_open (char * pathname, char mode);
+extern void           simpleio_close (simpleio_chn_t);
+
 extern void simpleio_init ();
 extern void simpleio_set (simpleio *);
 

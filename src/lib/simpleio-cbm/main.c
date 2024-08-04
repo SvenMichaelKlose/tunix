@@ -16,6 +16,9 @@
 
 #include <simpleio/libsimpleio.h>
 
+#define  MAX_CHANNELS   15
+#define  FIRST_CHANNEL  8
+
 #define UPCASE_A  65
 #define UPCASE_Z  90
 #define LOCASE_A  97
@@ -24,6 +27,10 @@
 #define ISLOWER(c) (c >= LOCASE_A && c <= LOCASE_Z)
 #define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
 #define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
+
+unsigned char i;
+simpleio_chn_t next_channel;
+bool channels[MAX_CHANNELS];
 
 char
 reverse_case (char c)
@@ -35,15 +42,36 @@ reverse_case (char c)
     return c;
 }
 
-void
-simpleio_open (simpleio_chn_t c, char * name, char mode)
+simpleio_chn_t
+alloc_channel (void)
 {
-    unsigned char i;
-    unsigned char len = strlen (name);
-    (void) mode; // TODO
-    for (i = 0; i < len; i++)
-        name[i] = reverse_case (name[i]);
-    cbm_open (c, 8, c, name);
+    // Set empty slot to channel.
+    for (i = FIRST_CHANNEL; i < MAX_CHANNELS; i++)
+        if (!channels[i]) {
+            channels[i] = true;
+            return i;
+        }
+    return 0;
+}
+
+simpleio_chn_t
+simpleio_open (char * name, char mode)
+{
+    simpleio_chn_t c = alloc_channel ();
+    unsigned char len;
+
+    // Catch error.
+    if (c) {
+        // Convert ASCII to whatever it is we're using for the KERNAL.
+        len = strlen (name);
+        for (i = 0; i < len; i++)
+            name[i] = reverse_case (name[i]);
+
+        (void) mode; // TODO
+        cbm_open (c, 8, c, name);
+    }
+
+    return c;
 }
 
 bool
@@ -92,6 +120,7 @@ raw_close (simpleio_chn_t c)
 {
     cbm_k_clrch ();
     cbm_k_close (c);
+    channels[c] = false;
 }
 
 simpleio vectors = {
@@ -107,9 +136,14 @@ simpleio vectors = {
 void
 simpleio_init ()
 {
+    bzero (channels, sizeof (channels));
+    channels[STDIN] = STDIN;
+    channels[STDOUT] = STDOUT;
+
+    next_channel = FIRST_CHANNEL;
     simpleio_set (&vectors);
 
     // Set up standard stream LFNs.
-    cbm_open (0, 0, 0, NULL);
-    cbm_open (3, 3, 3, NULL);
+    cbm_open (STDIN, STDIN, STDIN, NULL);
+    cbm_open (STDOUT, STDOUT, STDOUT, NULL);
 }

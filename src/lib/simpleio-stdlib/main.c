@@ -17,14 +17,16 @@
 
 #include <simpleio/libsimpleio.h>
 
-FILE * handles[256];
+#define MIN_CHANNEL     (STDERR + 1)
+#define MAX_CHANNELS    256
 
+FILE * allocated_channels[MAX_CHANNELS];
 char last_error;
 
 bool
 raw_eof (void)
 {
-    return feof (handles[(int) fnin]);
+    return feof (allocated_channels[(int) fnin]);
 }
 
 char
@@ -36,7 +38,7 @@ raw_err (void)
 char
 raw_in (void)
 {
-    int c = fgetc (handles[(int) fnin]);
+    int c = fgetc (allocated_channels[(int) fnin]);
     if (c == EOF)
         c = 0;
     last_in = c;
@@ -46,7 +48,7 @@ raw_in (void)
 void
 raw_out (char c)
 {
-    fputc (c, handles[(int) fnout]);
+    fputc (c, allocated_channels[(int) fnout]);
 }
 
 void
@@ -58,28 +60,48 @@ raw_setin (simpleio_chn_t c)
 void
 raw_setout (simpleio_chn_t c)
 {
-    fflush (handles[(int) fnout]);
+    fflush (allocated_channels[(int) fnout]);
     (void) c;
+}
+
+simpleio_chn_t
+alloc_channel (FILE * handle)
+{
+    int i;
+
+    for (i = MIN_CHANNEL; i < MAX_CHANNELS; i++)
+        if (!allocated_channels[i]) {
+            allocated_channels[i] = handle;
+            return i;
+        }
+
+    return -1;
 }
 
 void
 raw_close (simpleio_chn_t c)
 {
-    fclose (handles[(int) c]);
+    fclose (allocated_channels[(int) c]);
+    allocated_channels[(int) c] = NULL;
 }
 
-void
-simpleio_open (simpleio_chn_t c, char * name, char mode)
+simpleio_chn_t 
+simpleio_open (char * name, char mode)
 {
+    FILE * handle;
     char m[2];
+
     m[0] = mode;
     m[1] = 0;
-    handles[(int) c] = fopen (name, m);
-    if (!handles[(int) c]) {
+
+    handle = fopen (name, m);
+    if (!handle) {
         fprintf (stderr, "'%s': ", name);
         perror ("simpleio-stdlib::open()");
-        last_error = c;
+        last_error = -1;
     }
+
+    return alloc_channel (handle);
 }
 
 simpleio vectors = {
@@ -96,7 +118,7 @@ void
 simpleio_init ()
 {
     simpleio_set (&vectors);
-    handles[STDIN] = stdin;
-    handles[STDOUT] = stdout;
-    handles[STDERR] = stderr;
+    allocated_channels[STDIN] = stdin;
+    allocated_channels[STDOUT] = stdout;
+    allocated_channels[STDERR] = stderr;
 }

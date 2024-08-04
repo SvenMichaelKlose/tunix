@@ -3,6 +3,7 @@
 (load "with.lisp")
 (load "do.lisp")
 
+(fresh-line)
 (message "Welcome to TUNIX Lisp!")
 (out "LOADables: (Append \".lisp\"!)")(terpri)
 (print '(adjoin alist all copy-tree do dolist dotimes

@@ -35,9 +35,9 @@
     (terror "Too many arguments should be an error"))
 
 ; ERROR_NOT_FUNCTION  5
-(not-a-function)
+(not-fun)
 (or (== *last-err* 5)
-    (terror "(not-a-function) should be an error"))
+    (terror "(not-fun) should be an error"))
 
 ; ERROR_OUT_OF_HEAP   6 ; Good luck testing this one.
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
@@ -63,4 +63,4 @@
     (terror "SETCDR of non-NIL atom should be an error"))
 
 (= onerror nil)
-(undef 'terror)
+(= *universe* (remove 'terror *universe*))

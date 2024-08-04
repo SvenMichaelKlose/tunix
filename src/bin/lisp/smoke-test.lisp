@@ -1,7 +1,7 @@
 (var x nil)
 
 (message "Testing GC...")
-(print (gc))(message '"B free.")
+(print (gc))(message '" bytes free.")
 
 (message "Testing ATOM...")
 (atom 1)
@@ -150,7 +150,7 @@
     (error))
 
 (message "Testing GC...")
-(print (gc))(out '"B free.")(terpri)
+(print (gc))(out '" bytes free.")(terpri)
 
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
@@ -162,10 +162,6 @@
 
 (message "Testing recursion with MAKE-COUNT...")
 (print (make-count 10))(terpri)
-
-(message "Testing UNDEF...")
-(undef 'make-count)
-(gc)
 
 ; Messes up the heap with the following GC although it
 ; merely assignes a new copy of the universe list, leaving
@@ -184,6 +180,7 @@
 (message "Testing BLOCK...")
 (block-test 101)
 (terpri)
-(undef 'block-test)
 
-(message "Phew! You may put away that fire extinguisher now.")
+(message "Removing MAKE-COUNT and BLOCK-TEST...")
+(= *universe* (remove 'make-count (remove 'block-test *universe*)))
+(print (gc))(message " bytes free.")

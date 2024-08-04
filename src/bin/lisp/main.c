@@ -546,26 +546,6 @@ bi_special (void)
 }
 
 lispptr
-bi_undef (void)
-{
-#ifndef NAIVE
-    if (!arg1)
-        error (ERROR_TYPE, "non-NIL expected");
-#endif
-    outs ("Undefining "); print (arg1); terpri ();
-    PUSH(arg1);
-    universe = copy_list (universe, COPY_REMOVE, arg1);
-    POP(arg1);
-    return nil;
-}
-
-lispptr
-bi_universe (void)
-{
-    return universe;
-}
-
-lispptr
 bi_gc (void)
 {
 #ifdef FRAGMENTED_HEAP
@@ -822,8 +802,6 @@ struct builtin builtins[] = {
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
     { "special",    "'s'+", bi_special },
-    { "undef",      "s",    bi_undef },
-    { "universe",   "",     bi_universe },
     { "gc",         "",     bi_gc },
 #ifndef NAIVE
     { "error",      "?x",   bi_error },

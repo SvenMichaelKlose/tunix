@@ -36,4 +36,4 @@
 (load "unless.lisp")
 (load "while.lisp")
 (message "All loaded.")
-(print (gc))(message "B free.")
+(print (gc))(message " bytes free.")

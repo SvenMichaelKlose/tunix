@@ -419,17 +419,14 @@ evaluated, and the expression inside it is faulty.
 
 | Function   | Description                            |
 |------------|----------------------------------------|
-| (universe) | Return list of permanent symbols.      |
 | (gc)       | Free unused objects.                   |
 | (exit ?n)  | Exit program or interpreter with code. |
 
-### (universe): Return list of permanent symbols.
-
 ### (gc): Free unused objects.
 
-Triggers the garbage collector.  It marks all objects linked
-to the universe, compacts the heap and relocates all
-pointers.
+Triggers the garbage collector.  It marks all objects
+linked to variable \*UNIVERSE\*, compacts the heap and
+relocates all pointers.
 
 ### (exit ?n): Exit program or interpreter with exit code.
 
@@ -440,11 +437,11 @@ which will terminate immediately.
 
 ## Definitions
 
-| Form                         | Type                          |
-|------------------------------|-------------------------------|
-| (var 'name x)                | Define symbol with value.     |
-| (fn 'name 'args '+body)      | Define function.              |
-| (special 'name 'args '+body) | Define special form.          |
+| Form                         | Type                      |
+|------------------------------|---------------------------|
+| (var 'name x)                | Define symbol with value. |
+| (fn 'name 'args '+body)      | Define function.          |
+| (special 'name 'args '+body) | Define special form.      |
 
 | Function   | Description                              |
 |------------|------------------------------------------|
@@ -1596,22 +1593,13 @@ some point.
 | (gc x)    | GC with another root object. |
 
 GC could take an optional argument to specify another root
-than the universe to discard everything that is not part of
-an app.
+than variable \*universe\* to discard everything that is
+not part of an app.
 
 ~~~lisp
 (gc 'appstart)
 ; Put APPSTART back in the universe.
 (var appstart appstart)
-~~~
-
-Or one could save the current list of definitions and throw
-everything out that appeared later:
-
-~~~lisp
-(var *old-defs* (universe))
-(load "app.lisp")
-(gc *old-defs*)
 ~~~
 
 ## Bielefeld DB

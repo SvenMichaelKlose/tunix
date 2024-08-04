@@ -356,6 +356,8 @@ extern char * tagstack_end;
 
 extern lispptr x;
 extern lispptr args;
+extern lispptr argdefs;
+extern lispptr unevaluated_arg1;
 extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
@@ -380,6 +382,8 @@ extern bool is_macroexpansion;
 extern lispptr macroexpand_sym;
 #endif
 
+extern lispptr va; // Temporary in 'eval.c'.
+
 #ifdef __CC65__
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
@@ -396,6 +400,8 @@ extern lispptr macroexpand_sym;
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
+#pragma zpsym ("argdefs")
+#pragma zpsym ("unevaluated_arg1")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2")
 #pragma zpsym ("arg2c")
@@ -410,6 +416,7 @@ extern lispptr macroexpand_sym;
 #pragma zpsym ("debug_step")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
+#pragma zpsym ("va")
 #pragma bss-name (pop)
 #endif
 

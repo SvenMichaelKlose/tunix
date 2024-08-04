@@ -93,9 +93,7 @@ bool do_gc_stress;
 void FASTCALL
 expand_universe (lispptr x)
 {
-    PUSH(x);
-    universe = make_cons (x, universe);
-    POP(x);
+    SET_SYMBOL_VALUE(universe, make_cons (x, SYMBOL_VALUE(universe)));
 }
 
 // Get size of object in bytes.
@@ -293,7 +291,8 @@ alloc_symbol (char * str, uchar len)
 {
     tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     if (len) {
-        SYMBOL_NEXT(last_symbol) = tmp;
+        if (last_symbol)
+            SYMBOL_NEXT(last_symbol) = tmp;
         last_symbol = tmp;
     }
     SYMBOL(tmp)->next = nil;
@@ -390,11 +389,14 @@ init_heap ()
 #endif
 
     // Make universe.
-    last_symbol = heap_free;
-    t = first_symbol = last_symbol = make_symbol ("t", 1);
-    universe = make_cons (t, nil);
+    last_symbol = nil;
+    universe = make_symbol ("*universe*", 10);
+    first_symbol = universe;
+    t = make_symbol ("t", 1);
+    SET_SYMBOL_VALUE(universe, make_cons (t, nil));
 
-    // Init input. TODO: Move (pixel)
+    // Init input.
+    // TODO: Move (pixel)
     do_putback = false;
 
     // Clear error info.

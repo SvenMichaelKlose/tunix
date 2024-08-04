@@ -16,7 +16,6 @@ char * stack_start;
 lispptr current_expr;
 #ifndef NAIVE
 lispptr current_function;
-lispptr unevaluated_arg1;
 #endif
 
 #ifdef __CC65__
@@ -25,6 +24,9 @@ lispptr unevaluated_arg1;
 extern char * msg;
 lispptr x;
 lispptr args;
+#ifndef NAIVE
+lispptr unevaluated_arg1;
+#endif
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
@@ -37,7 +39,6 @@ char * stack_entered;
 char * tagstack_start;
 char * tagstack_end;
 char * tagstack;
-lispptr name;
 lispptr argdefs;
 struct builtin * bfun;
 lispptr va;
@@ -63,6 +64,7 @@ bool unevaluated;
 #pragma zpsym ("msg")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
+#pragma zpsym ("unevaluated_arg1")
 #pragma zpsym ("arg1")
 #pragma zpsym ("arg2c")
 #pragma zpsym ("arg2")
@@ -74,7 +76,6 @@ bool unevaluated;
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
-#pragma zpsym ("name")
 #pragma zpsym ("argdefs")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")

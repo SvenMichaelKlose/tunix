@@ -24,7 +24,7 @@ extern lispptr lisp_fnin;
 extern lispptr lisp_fnout;
 
 lispptr * global_pointers[] = {
-    &universe, &delayed_eval,
+    &universe, &t, &delayed_eval,
     &block_sym,
     &quote, &quasiquote, &unquote, &unquote_spliced,
     &return_sym, &return_name, &return_value,
@@ -36,15 +36,20 @@ lispptr * global_pointers[] = {
 #endif
     &current_function,
     &unexpanded_toplevel,
+    &unevaluated_arg1,
 #ifndef NO_DEBUGGER
     &onerror_sym,
+    &debug_step,
 #endif
 #ifndef NO_MACROEXPAND
     &macroexpand_sym,
 #endif
-    &debug_step,
-    &x, &args, &arg1, &arg2,
     &highlighted,
+
+    // To be safe:
+    &x, &args, &argdefs, &arg1, &arg2, &arg2c,
+    &list_start, &list_last,
+    &value, &va,
     NULL
 };
 
@@ -129,7 +134,7 @@ sweep ()
     last_sweeped = nil;
 
     // Get start of singly-linked list of named symbols.
-    last_kept_sym = first_symbol;
+    last_kept_sym = universe;
 
     // Initialize relocation table.
     xlat = xlat_end;    // Point to its start.

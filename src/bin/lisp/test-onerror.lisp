@@ -63,3 +63,4 @@
     (terror "SETCDR of non-NIL atom should be an error"))
 
 (= onerror nil)
+(undef 'terror)

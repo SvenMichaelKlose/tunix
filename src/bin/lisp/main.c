@@ -10,6 +10,10 @@
 #ifndef __CC65__
 #include <signal.h>
 #endif
+#ifdef TARGET_UNIX
+#include <stdio.h>
+#include <time.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
@@ -714,6 +718,7 @@ bi_filter (void)
 }
 
 #ifdef __CC65__
+#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
 char bekloppies[sizeof (long)];
 
 lispptr
@@ -733,7 +738,30 @@ bi_time (void)
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }
+#endif // #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
 #endif
+
+#ifdef TARGET_UNIX
+
+long bekloppies_start;
+
+long
+bekloppies (void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+        return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    perror("clock_gettime");
+    return 0;
+}
+
+lispptr
+bi_time (void)
+{
+    return make_number (bekloppies () - bekloppies_start);
+}
+
+#endif // #ifdef TARGET_UNIX
 
 #ifndef NDEBUG
 lispptr
@@ -849,9 +877,7 @@ struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
-#ifdef __CC65__
     { "time",       "",     bi_time },
-#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
@@ -913,6 +939,10 @@ main (int argc, char * argv[])
 {
     (void) argc, (void) argv;
 
+#ifdef TARGET_UNIX
+    bekloppies_start = bekloppies ();
+#endif
+
     simpleio_init ();
     if (!init_heap ()) {
         outs ("No memory.");
@@ -941,6 +971,9 @@ main (int argc, char * argv[])
     load ("env-1.lisp");
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
     load ("cbm-common.lisp");
+#endif
+#ifdef TARGET_UNIX
+    load ("unix.lisp");
 #endif
 #ifndef NDEBUG
     load ("test.lisp");

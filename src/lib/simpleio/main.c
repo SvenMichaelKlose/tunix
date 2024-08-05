@@ -122,7 +122,7 @@ outn (long n)
 {
     if (n < 0) {
         out ('-');
-        n = -n;
+        n = abs (n);
     }
     outnu (n);
 }

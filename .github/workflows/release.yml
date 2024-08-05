@@ -2,8 +2,6 @@ name: Create release
 
 on:
   push:
-    branches:
-      - test-release
     tags:
       - 'v*'
 

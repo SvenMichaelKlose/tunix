@@ -1,12 +1,8 @@
-Base line: make it fun writing the compiler with it.
-
-Memory management
-[ ] Clear pointers in global variables when unused so the
-    GC can take Ks of trees of objects out.
+Base line: make it fun writing the bytecode compiler with
+it.
 
 Input/Output
-[ ] File numbers returned by OPEN.
-[ ] OPEN for writes.
+[@] OPEN for writes.
 [ ] OPENDIR, READDIR, CLOSEDIR.
 
 Built-ins
@@ -23,5 +19,5 @@ Debugger
 [ ] Invoking debugger with RESTORE key on CBMs.
 
 Manual
-[ ] Examples where appropriate.
+[ ] Enough xamples.
 [ ] Reviewed phrasing.

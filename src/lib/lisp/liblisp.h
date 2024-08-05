@@ -235,7 +235,7 @@
 #define TAGSTACK_CHECKS
 #endif // #ifdef NAIVE
 
-#ifdef CC65
+#ifdef __CC65__
 #define FASTCALL            __fastcall__
 #define HOST_DEBUGGER()
 #else

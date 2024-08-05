@@ -1,6 +1,6 @@
+[ ] "Args missing" in rare cases for unknown reason.
 [ ] LOAD: Issue error if file does not exist.
 [ ] LOAD: File error not reset.
-[ ] UNDEF: Some pointer(s) aren't relocated after GC.
 
 Commodore PET
-[ ] Fix build.  RUN breaks with syntax error.
+[ ] Breaks program start with syntax error.

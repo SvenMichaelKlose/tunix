@@ -49,7 +49,7 @@ jobs:
       run: cp src/bin/lisp/doc/manual.md tunix-lisp.md
 
     - name: Zip files
-      run: zip -r ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
+      run: zip -o ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
 
     - name: Create Release
       id: create_release

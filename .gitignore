@@ -1,5 +1,6 @@
 src/config
 *.o
+*.o.S
 *.lbl
 *.map
 *.dbg

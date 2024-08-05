@@ -1,7 +1,15 @@
-TUNIX blog
-==========
+TUNIX development blog
+======================
 
-# 2024-07-04
+Author: Sven Michael Klose <pixel@hugbox.org>
+
+# 2024-08-05
+
+'(universe)' has been replaced with '\*universe\*', making
+it a lot easier do "overlays".  (That's keeping only parts
+of a program in memory if that's not large enough.)
+
+# 2024-08-04
 
 I've spent the night on TUNIX Lisp, which is working like a
 charm.  Includes the UNDEF function, so programs can be
@@ -10,7 +18,7 @@ to small machines.  It'll be replaced by another strategy.
 Function UNIVERSE will become variable \*UNIVERSE\* to work
 it with standard functions.
 
-# 2024-07-03
+# 2024-08-03
 
 And there it is: one of the most stupid mistakes of a
 complete neophyte: when evaluating arguments of a
@@ -31,7 +39,7 @@ Fortunately the solution is simple: the stack pointer is
 memorized to store the old values and the new values are
 pushed as usual.
 
-# 2024-07-02
+# 2024-08-02
 
 Took care of the Lisp environment and added tests and fixes
 and tests and fixes and left in some hardcore bugs for those

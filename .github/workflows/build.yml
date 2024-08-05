@@ -24,6 +24,9 @@ jobs:
     - name: Run Tests
       run: make test
 
+    - name: Run Lisp
+      run: ./run-unix-lisp.sh
+
     - name: Make PDF manual
       run: cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 

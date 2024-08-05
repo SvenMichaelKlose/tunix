@@ -34,13 +34,13 @@ char last_out;
 #pragma bss-name (pop)
 #endif
 
-void
+void FASTCALL
 simpleio_close (simpleio_chn_t c)
 {
     io->close (c);
 }
 
-void
+void FASTCALL
 setin (simpleio_chn_t c)
 {
     if (fnin != c) {
@@ -49,7 +49,7 @@ setin (simpleio_chn_t c)
     }
 }
 
-void
+void FASTCALL
 setout (simpleio_chn_t c)
 {
     if (fnout != c) {
@@ -102,7 +102,7 @@ skip_spaces ()
     }
 }
 
-void
+void FASTCALL
 out (char c)
 {
     last_out = c;
@@ -127,7 +127,7 @@ outn (long n)
     outnu (n);
 }
 
-void
+void FASTCALL
 outs (char * s)
 {
     char c;
@@ -135,7 +135,7 @@ outs (char * s)
         out (c);
 }
 
-void
+void FASTCALL
 outsn (char * s, char len)
 {
     while (len--)
@@ -163,7 +163,7 @@ fresh_line (void)
         terpri ();
 }
 
-void
+void FASTCALL
 simpleio_set (simpleio * x)
 {
     io = x;

@@ -184,3 +184,9 @@
 (message "Removing MAKE-COUNT and BLOCK-TEST...")
 (= *universe* (remove 'make-count (remove 'block-test *universe*)))
 (print (gc))(message " bytes free.")
+
+(message "Testing SETOUT...")
+(setout stdout)
+
+(message "Testing SETIN...")
+(setin stdin)

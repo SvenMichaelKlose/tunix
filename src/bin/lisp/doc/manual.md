@@ -908,10 +908,14 @@ Illegal modes cause an ERROR\_FILEMODE.
 | (time)     | Current bekloppie count.         |
 
 Constant +bps+ contains the number of bekloppies per
-second.  On CBM machines it's currently set to 50, no
+second.
+
+On CBM machines it's currently set to 50, no
 matter if it's a NTSC or PAL machine.  Please contribute
 some auto-detection to file "cbm-common.lisp".
-On Unices +BPS+ is 1000.
+
+On Unices +BPS+ is 1000 and counting starts with launching
+TUNIX Lisp.
 
 Function TIME return the current count of bekloppies.
 It depends on the actual machine TUNIX Lisp is running on

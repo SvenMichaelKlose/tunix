@@ -711,6 +711,22 @@ bi_filter (void)
     return list_start;
 }
 
+#ifdef __CC65__
+char bekloppies[sizeof (long)];
+
+lispptr
+bi_time (void)
+{
+    asm ("cli");
+    bekloppies[0] = *(char *) 0xa2;
+    bekloppies[1] = *(char *) 0xa1;
+    bekloppies[2] = *(char *) 0xa0;
+    bekloppies[0] = 0;
+    asm ("sei");
+    return make_number (*(long *) bekloppies);
+}
+#endif
+
 #ifndef NDEBUG
 lispptr
 bi_debug (void)
@@ -825,6 +841,10 @@ struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifdef __CC65__
+    { "time",       "",     bi_time },
+#endif
+
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
 #endif
@@ -911,6 +931,9 @@ main (int argc, char * argv[])
     load ("smoke-test.lisp");
 #endif
     load ("env-1.lisp");
+#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+    load ("cbm-common.lisp");
+#endif
 #ifndef NDEBUG
     load ("test.lisp");
 #endif
@@ -920,7 +943,9 @@ main (int argc, char * argv[])
     load ("test-onerror.lisp");
 #endif
 #endif
+#ifndef TARGET_C16
     load ("env-3.lisp");
+#endif
 #ifdef TARGET_UNIX
     load ("all.lisp");
 #ifdef GC_STRESS

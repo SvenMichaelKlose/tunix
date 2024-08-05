@@ -64,8 +64,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v0.0.0
-        release_name: Release v0.0.0
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
         body: |
           TUNIX Lisp D64 images for the Commodore C128, C16, C64, Plus/4, and VIC-20, and manual in Markdown and PDF format.
         draft: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}

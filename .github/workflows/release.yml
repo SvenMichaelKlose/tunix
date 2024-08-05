@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v1
       with:
         submodules: true
 
@@ -55,7 +55,7 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v2
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -68,7 +68,7 @@ jobs:
 
 
     - name: Upload release artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v1
       with:
         name: release-zip
         path: ${{ env.ZIP_NAME }}

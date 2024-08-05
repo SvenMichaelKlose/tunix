@@ -47,7 +47,7 @@ lisp_repl (char mode)
     simpleio_chn_t this_in;
     simpleio_chn_t this_out;
 
-    // Update and save I/O channels.
+    // Ensure terminal I/O in user- and debug-mode.
     if (mode != REPL_LOAD)
         set_channels (STDIN, STDOUT);
     this_in  = fnin;
@@ -292,7 +292,8 @@ load (char * pathname)
     int oldin = fnin;
 
     // Open file.
-    load_fn = simpleio_open (pathname, 'r');
+    strcpy (buffer, pathname);
+    load_fn = simpleio_open (buffer, 'r');
     if (!load_fn) {
         outs ("File error: ");
         outs (pathname);

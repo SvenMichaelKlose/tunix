@@ -28,8 +28,6 @@
 #define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
 #define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
 
-unsigned char i;
-simpleio_chn_t next_channel;
 bool channels[MAX_CHANNELS];
 
 char
@@ -41,6 +39,8 @@ reverse_case (char c)
         return TOUPPER(c);
     return c;
 }
+
+signed char i;
 
 simpleio_chn_t
 alloc_channel (void)
@@ -54,21 +54,64 @@ alloc_channel (void)
     return 0;
 }
 
+signed char ofs;
+/*
+char ctrl;
+char ctrh;
+char ctr;
+*/
+
+// DANGEROUS but we need the heap:
+// 'name' is modified and extended on writes.
 simpleio_chn_t
 simpleio_open (char * name, char mode)
 {
     simpleio_chn_t c = alloc_channel ();
     unsigned char len;
 
-    // Catch error.
     if (c) {
-        // Convert ASCII to whatever it is we're using for the KERNAL.
-        len = strlen (name);
-        for (i = 0; i < len; i++)
-            name[i] = reverse_case (name[i]);
+        ofs = 0;
+        if (mode == 'w')
+            ofs = 2;
+#ifndef NDEBUG
+        if (mode != 'r')
+            return 0;
+#endif
 
-        (void) mode; // TODO
-        cbm_open (c, 8, c, name);
+        len = strlen (name);
+
+        // Move name and reverse case.
+        for (i = len; i >= 0; i--)
+            name[i + ofs] = reverse_case (name[i]);
+
+        if (mode == 'w') {
+            name[0] = '@';
+            name[1] = ':';
+            strcpy (name + len + ofs, ",S,W");
+        }
+
+        // Open file.
+        if (cbm_open (c, 8, c, name))
+            return 0;
+
+/*
+        // Read status code from control channel.
+        cbm_open (15, 8, 15, NULL);
+        cbm_k_chkin (15);
+        ctrh = cbm_k_basin ();
+        ctrl = cbm_k_basin ();
+        if (ctrl != '0' && ctrh != '0') {
+            cbm_k_ckout (3);
+            cbm_k_bsout (ctrl);
+            cbm_k_bsout (ctrh);
+            while (ctr = cbm_k_basin () && !(cbm_k_readst () & 0x40))
+               cbm_k_bsout (ctr);
+            cbm_k_ckout (fnout);
+            return 0;
+        }
+        cbm_close (15);
+        cbm_k_chkin (fnin);
+*/
     }
 
     return c;
@@ -137,13 +180,13 @@ void
 simpleio_init ()
 {
     bzero (channels, sizeof (channels));
-    channels[STDIN] = STDIN;
-    channels[STDOUT] = STDOUT;
+    channels[STDIN]  = 0;
+    channels[STDOUT] = 3;
+    channels[STDERR] = 3;
 
-    next_channel = FIRST_CHANNEL;
     simpleio_set (&vectors);
 
     // Set up standard stream LFNs.
-    cbm_open (STDIN, STDIN, STDIN, NULL);
-    cbm_open (STDOUT, STDOUT, STDOUT, NULL);
+    cbm_open (0, 0, 0, NULL);
+    cbm_open (3, 3, 3, NULL);
 }

@@ -450,7 +450,9 @@ bi_open (void)
     }
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
-    return make_number (c);
+    if (c)
+        return make_number (c);
+    return nil;
 }
 
 lispptr

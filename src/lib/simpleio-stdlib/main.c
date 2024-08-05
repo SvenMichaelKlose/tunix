@@ -38,17 +38,24 @@ raw_err (void)
 char
 raw_in (void)
 {
-    int c = fgetc (allocated_channels[(int) fnin]);
-    if (c == EOF)
+    int c;
+
+    last_error = 0;
+    c = fgetc (allocated_channels[(int) fnin]);
+    if (c == EOF) {
         c = 0;
-    last_in = c;
-    return last_in;
+        if (errno)
+            last_error = -1;
+    }
+    return c;
 }
 
 void
 raw_out (char c)
 {
-    fputc (c, allocated_channels[(int) fnout]);
+    last_error = 0;
+    if (EOF == fputc (c, allocated_channels[(int) fnout]))
+        last_error = -1;
 }
 
 void
@@ -95,12 +102,8 @@ simpleio_open (char * name, char mode)
     m[1] = 0;
 
     handle = fopen (name, m);
-    if (!handle) {
-        fprintf (stderr, "'%s': ", name);
-        perror ("simpleio-stdlib::open()");
-        last_error = -1;
-    }
-
+    if (!handle)
+        return 0;
     return alloc_channel (handle);
 }
 

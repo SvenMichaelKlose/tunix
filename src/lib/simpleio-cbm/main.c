@@ -48,7 +48,7 @@ alloc_channel (void)
     // Set empty slot to channel.
     for (i = FIRST_CHANNEL; i < MAX_CHANNELS; i++)
         if (!channels[i]) {
-            channels[i] = true;
+            channels[i] = i;
             return i;
         }
     return 0;
@@ -146,24 +146,24 @@ raw_out (char c)
     cbm_k_bsout (c);
 }
 
-void
-raw_setin (simpleio_chn_t c)
+void FASTCALL
+raw_setin (simpleio_chn_t chn)
 {
-    cbm_k_chkin (c);
+    cbm_k_chkin (channels[chn]);
 }
 
-void
-raw_setout (simpleio_chn_t c)
+void FASTCALL
+raw_setout (simpleio_chn_t chn)
 {
-    cbm_k_ckout (c);
+    cbm_k_ckout (channels[chn]);
 }
 
-void
-raw_close (simpleio_chn_t c)
+void FASTCALL
+raw_close (simpleio_chn_t chn)
 {
     cbm_k_clrch ();
-    cbm_k_close (c);
-    channels[c] = false;
+    cbm_k_close (channels[chn]);
+    channels[chn] = false;
 }
 
 simpleio vectors = {

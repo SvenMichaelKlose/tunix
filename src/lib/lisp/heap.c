@@ -395,6 +395,31 @@ init_heap ()
     t = make_symbol ("t", 1);
     SET_SYMBOL_VALUE(universe, make_cons (t, nil));
 
+    // Make +target+.
+    tmp2 = make_symbol ("+target+", 8);
+    expand_universe (tmp2);
+#ifdef TARGET_C128
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("c128", 4));
+#endif
+#ifdef TARGET_C16
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("c16", 3));
+#endif
+#ifdef TARGET_C64
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("c64", 3));
+#endif
+#ifdef TARGET_PET
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("pet", 3));
+#endif
+#ifdef TARGET_PLUS4
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("plus4", 5));
+#endif
+#ifdef TARGET_VIC20
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("vic20", 5));
+#endif
+#ifdef TARGET_UNIX
+    SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
+#endif
+
     // Init input.
     // TODO: Move (pixel)
     do_putback = false;

@@ -1,5 +1,6 @@
 ((()))
 (out "TUNIX Lisp (nightly)")(terpri)
+(var *start-time* (time))
 (fn message (x)
   (out x)
   (terpri))

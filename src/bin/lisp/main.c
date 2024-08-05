@@ -718,10 +718,16 @@ lispptr
 bi_time (void)
 {
     asm ("cli");
+#if defined(TARGET_C16) || defined(TARGET_PLUS4)
+    bekloppies[0] = *(char *) 0xa5;
+    bekloppies[1] = *(char *) 0xa4;
+    bekloppies[2] = *(char *) 0xa3;
+#else
     bekloppies[0] = *(char *) 0xa2;
     bekloppies[1] = *(char *) 0xa1;
     bekloppies[2] = *(char *) 0xa0;
-    bekloppies[0] = 0;
+#endif
+    bekloppies[3] = 0;
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }

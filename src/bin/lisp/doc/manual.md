@@ -893,6 +893,29 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (close channel): Close a channel.
 ### (load pathname): Load and evaluate file.
 
+## Time
+
+| Constant   | Description                      |
+|------------|----------------------------------|
+| +bps+      | Number of bekloppies per second. |
+
+| Variable       | Description                      |
+|----------------|----------------------------------|
+| \*start-time\* | Number of bekloppies at start.   |
+
+| Function   | Description                      |
+|------------|----------------------------------|
+| (time)     | Current bekloppie count.         |
+
+Constant +bps+ contains the number of bekloppies per
+second.  On CBM machines it's currently set to 50, no
+matter if it's a NTSC or PAL machine.  Please contribute
+some auto-detection to file "cbm-common.lisp".
+
+Function TIME return the current count of bekloppies.
+It depends on the actual machine TUNIX Lisp is running on
+when the counting from 0 started.
+
 ## Raw machine access
 
 | Function   | Description                      |
@@ -1163,3 +1186,16 @@ key and the rest is the value.
 ### (acons alist c): Add key/value to associative list.
 
 ### (assoc x l): Return list that start with X.
+
+## Target information
+
+Constant +TARGET+ identifies the target machine, which is
+one of:
+
+* c128
+* c16
+* c64
+* pet
+* plus4
+* unix
+* vic20

@@ -1,11 +1,11 @@
-name: Create Release
+name: Create release
 
 on:
   push:
     branches:
       - test-release
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   build:
@@ -29,10 +29,10 @@ jobs:
     - name: Create config file
       run: echo -e "TARGET=vic20\nNDEBUG=1" > src/config
 
-    - name: Build Project
+    - name: Build project
       run: make allworlds
 
-    - name: Run Tests
+    - name: Run tests
       run: make test
 
     - name: Make PDF manual
@@ -53,7 +53,7 @@ jobs:
     - name: Zip files
       run: zip -o ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
 
-    - name: Create Release
+    - name: Create release
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -65,10 +65,11 @@ jobs:
           TUNIX Lisp D64 images for the Commodore C128, C16, C64, Plus/4, and VIC-20, and manual in Markdown and PDF format.
         draft: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
         prerelease: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
+        release: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/master') }}
 
-
-    - name: Upload release artifact
-      uses: actions/upload-artifact@v1
+    - name: Upload release
+      uses: softprops/action-gh-release@v1
       with:
-        name: release-zip
-        path: ${{ env.ZIP_NAME }}
+        files: ${{ env.ZIP_NAME }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

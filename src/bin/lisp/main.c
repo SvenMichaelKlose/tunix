@@ -565,7 +565,13 @@ bi_gc (void)
     size_t freed = 0;
 #endif
 
+#ifdef COMPRESSED_CONS
+    do_compress_cons = true;
+#endif
     gc ();
+#ifdef COMPRESSED_CONS
+    do_compress_cons = false;
+#endif
 #ifdef FRAGMENTED_HEAP
     for (h = heaps; h->start; h++)
         freed += h->end - h->free;
@@ -965,39 +971,43 @@ main (int argc, char * argv[])
 #endif
 
     load ("env-0.lisp");
+
 #ifdef TEST
     load ("smoke-test.lisp");
 #endif
+
     load ("env-1.lisp");
+
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
     load ("cbm-common.lisp");
 #endif
+
 #ifdef TARGET_UNIX
     load ("unix.lisp");
 #endif
+
 #ifdef TEST
     load ("test.lisp");
 #endif
+
     load ("env-2.lisp");
+
 #ifdef TARGET_C16
     load ("welcome.lisp");
 #endif
+
 #if defined (TEST) && !defined(NO_ONERROR)
     load ("test-onerror.lisp");
 #endif
+
 #ifndef TARGET_C16
     load ("env-3.lisp");
 #ifdef TEST
     load ("test-file.lisp");
 #endif
     load ("welcome.lisp");
-#endif
-#ifdef TARGET_UNIX
-    load ("all.lisp");
-#ifdef GC_STRESS
-    load ("all.lisp");
-#endif
-#endif // #ifdef TARGET_UNIX
+#endif // #ifndef TARGET_C16
+
     do_break_repl = do_continue_repl = false;
     num_repls = -1;
     lisp_repl (REPL_STD);

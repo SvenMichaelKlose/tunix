@@ -61,6 +61,12 @@ tagstack_underflow ()
     internal_error ("Tag stack underflow");
 }
 
+void
+error_set_ccons_cdr ()
+{
+    internal_error ("ccons CDR");
+}
+
 // Return type name of object.
 char * FASTCALL
 typename (lispptr * x)

@@ -7,6 +7,9 @@
 
 /// Diagnostics
 
+// Add dump_lispptr().
+//#define DUMP_LISPPTR
+
 // Dump marked objects during sweep phase.
 //#define DUMP_MARKED
 
@@ -25,8 +28,14 @@
 
 /// Testing and debugging
 
+// Sanity-check objects pointed to.
+// If TARGET_UNIX, walk over heap to check if addresses
+// are valid.
+//#define CHECK_OBJ_POINTERS
+
 // Give inappropriately happy developers a hard time.
 // (Pre)releases require testing with this option set.
+// Implies CHECK_OBJ_POINTERS
 //#define GC_STRESS
 
 // Aoid inlining of functions.
@@ -254,6 +263,14 @@
 #define POP_HIGHLIGHTED()
 #endif
 
+#if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
+#define DUMP_LISPPTR
+#endif
+
+#ifdef GC_STRESS
+#define CHECK_OBJ_POINTERS
+#endif
+
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;
@@ -268,6 +285,13 @@ typedef struct _cons {
     lispptr  car;
     lispptr  cdr;
 } cons;
+
+#ifdef COMPRESSED_CONS
+typedef struct _ccons {
+    uchar    type;
+    lispptr  car;
+} ccons;
+#endif
 
 typedef struct _number {
     uchar      type;
@@ -324,6 +348,10 @@ extern char num_debugger_repls;
 extern bool do_break_repl;
 extern bool do_continue_repl;
 extern bool do_exit_program;
+
+#ifdef COMPRESSED_CONS
+extern bool do_compress_cons;
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -533,6 +561,7 @@ extern lispptr           poptagw (void);
 #define TYPE_UNUSED2    64
 #define TYPE_MARKED     128
 #define TYPE_SPECIAL    (TYPE_SYMBOL | TYPE_EXTENDED)
+#define TYPE_CCONS      (TYPE_CONS | TYPE_EXTENDED)
 
 #define TYPE(x)     (*((char *) (x))) // TODO: Rename.
 #define TYPEBITS(x) (TYPE(x) & TYPE_MASK)
@@ -543,6 +572,12 @@ extern lispptr           poptagw (void);
 
 #define CONS(x)     ((cons *) (x))
 
+#ifdef COMPRESSED_CONS
+// CDR of a compressed cons is the address of the next
+// object (which is also a cons).
+#define CCONS_CDR(x)    (&CONS(x)->cdr)
+#endif
+
 #define _ATOM(x)        (!(x) || !(TYPE(x) & TYPE_CONS))
 #define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
 #define _SYMBOLP(x)     (!(x) || (TYPE(x) & TYPE_SYMBOL))
@@ -551,12 +586,30 @@ extern lispptr           poptagw (void);
 #define _LISTP(x)       (!(x) || (TYPE(x) & TYPE_CONS))
 #define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
 #define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
 #define EXTENDEDP(x) ((x) && (TYPE(x) & TYPE_EXTENDED))
+
+#define LIST_CAR(x)  (!(x) ? x : CAR(x))
+#define LIST_CDR(x)  (!(x) ? x : CDR(x))
+
+#define _SETCAR(x, v) (CONS(x)->car = v)
+#ifdef COMPRESSED_CONS
+    #define _SETCDR(x, v) \
+        do { \
+            if (_EXTENDEDP(x)) \
+                error_set_ccons_cdr (); \
+            CONS(x)->cdr = v; \
+        } while (0);
+#else
+    #define _SETCDR(x, v) (CONS(x)->cdr = v)
+#endif // #ifdef COMPRESSED_CONS
 
 #ifdef SLOW
 #define CAR(x)       (lisp_car (x))
 #define CDR(x)       (lisp_cdr (x))
+#define SETCAR(x, v) (lisp_setcar (x, v))
+#define SETCDR(x, v) (lisp_setcdr (x, v))
 #define ATOM(x)      (lisp_atom (x))
 #define CONSP(x)     (lisp_consp (x))
 #define LISTP(x)     (lisp_listp (x))
@@ -566,6 +619,8 @@ extern lispptr           poptagw (void);
 #define SPECIALP(x)  (lisp_specialp (x))
 extern lispptr FASTCALL lisp_car (lispptr);
 extern lispptr FASTCALL lisp_cdr (lispptr);
+extern void    FASTCALL lisp_setcar (lispptr x, lispptr v);
+extern void    FASTCALL lisp_setcdr (lispptr x, lispptr v);
 extern bool    FASTCALL lisp_atom (lispptr);
 extern bool    FASTCALL lisp_consp (lispptr);
 extern bool    FASTCALL lisp_listp (lispptr);
@@ -575,7 +630,13 @@ extern bool    FASTCALL lisp_builtinp (lispptr);
 extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
 #define CAR(x)       (CONS(x)->car)
-#define CDR(x)       (CONS(x)->cdr)
+#ifdef COMPRESSED_CONS
+    #define CDR(x)   (_EXTENDEDP(x) ? CCONS_CDR(x) : CONS(x)->cdr)
+#else
+    #define CDR(x)   (CONS(x)->cdr)
+#endif
+#define SETCAR(x, v) _SETCAR(x, v)
+#define SETCDR(x, v) _SETCDR(x, v)
 #define ATOM(x)      _ATOM(x)
 #define CONSP(x)     _CONSP(x)
 #define LISTP(x)     _LISTP(x)
@@ -584,11 +645,6 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 #define BUILTINP(x)  _BUILTINP(x)
 #define SPECIALP(x)  _SPECIALP(x)
 #endif // #ifdef SLOW
-
-#define LIST_CAR(x)  (!(x) ? x : CAR(x))
-#define LIST_CDR(x)  (!(x) ? x : CDR(x))
-#define SETCAR(x, v) (CONS(x)->car = v)
-#define SETCDR(x, v) (CONS(x)->cdr = v)
 
 #define BOOL(x)      ((x) ? t : nil)
 
@@ -623,7 +679,7 @@ extern bool    FASTCALL lisp_specialp (lispptr);
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      13
 
-#if !defined (NDEBUG) && defined (TARGET_UNIX)
+#if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
 #else
     #define CHKPTR(x)
@@ -681,14 +737,21 @@ extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);
 extern void              tagstack_overflow   (void);
 extern void              tagstack_underflow  (void);
+#ifdef COMPRESSED_CONS
+extern void              error_set_ccons_cdr (void);
+#endif
 extern char *   FASTCALL typestr             (lispptr *);
 extern void     FASTCALL bi_tcheck           (lispptr, uchar type);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
 extern void              print_error_info (void);
 
+#ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
+#endif
+#ifdef TARGET_UNIX
 extern void              dump_lispptr        (char *);
 extern void              dump_heap           (void);
+#endif
 
 extern void     FASTCALL name_to_buffer (lispptr s);
 extern void     FASTCALL make_call      (lispptr args);

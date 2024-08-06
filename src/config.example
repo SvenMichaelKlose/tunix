@@ -3,14 +3,20 @@
 # Always required.
 # One of 'c128', 'c16' (32K), 'c64', 'pet', 'plus4', 'vic20'
 # or 'unix'.  Target 'pet' needs fixing.
-TARGET = vic20  # VIC-20 has the argest code base.
+TARGET = vic20  # VIC-20 has the largest code base.
 
 # Build oscar64 compiler.
 # It's not used!
 #HAVE_OSCAR64 = 1
 
-# Do not include extra checks to spot internal errors.
-#NDEBUG = 1
+# Check if objects pointed to look sane.
+# On TARGET_UNIX the address is checked by walking over the heap. (SLOW!)
+# Keep this enabled on other targets unless you have a stable release.
+#CHECK_OBJ_POINTERS = 1
+
+# Compress conses whose CDR points to the following object.
+# (EXPERIMENTAL!)
+#COMPRESS_CONS = 1
 
 # Stress out TUNIX Lisp's garbage collector by triggering
 # it before every object allocation.  Intended to be set
@@ -21,6 +27,9 @@ TARGET = vic20  # VIC-20 has the argest code base.
 # testing or handling errors, reducing code size as much as
 # possible.
 #NAIVE = 1
+
+# Do not include extra checks to spot internal errors.
+#NDEBUG = 1
 
 # Build TUNIX Lisp without debugger.
 #NO_DEBUGGER = 1

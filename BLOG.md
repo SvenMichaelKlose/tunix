@@ -5,6 +5,22 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-05
 
+Files can be written.  That means that apps can be written.
+But there's still not enough heap, although there is enough
+if overlays are used.  But file I/O takes extra long time.
+I'm considering to pick up on that idea to have compressed
+lists where the CDR of a cons is the next cons.  It's
+unnerving to reload the environment either, so images must
+be there – and those can be optimized to scan and reuse
+duplicate object trees.
+
+With compressed cons there is the question how much extra
+code that'd make in the final binary because then there
+is of course an extended cons type requiring extra checks.
+Let's check or we'll barely know.
+
+# 2024-08-05
+
 '(universe)' has been replaced with '\*universe\*', making
 it a lot easier do "overlays".  (That's keeping only parts
 of a program in memory if that's not large enough.)

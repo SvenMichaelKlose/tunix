@@ -130,6 +130,7 @@ add_gap (unsigned char n)
     *(lispptr *) xlat = s;
     xlat -= sizeof (unsigned);
     *(unsigned *) xlat = n;
+
 #ifdef FRAGMENTED_HEAP
     total_removed += n;
 #endif
@@ -141,8 +142,8 @@ add_gap (unsigned char n)
 void
 sweep ()
 {
-    // Start with first heap.
 #ifdef FRAGMENTED_HEAP
+    // Start with first heap.
     struct heap_fragment * heap = heaps;
 #endif
 
@@ -171,6 +172,7 @@ sweep ()
         heap_end = heap->end;
 #endif
 #endif // #ifdef FRAGMENTED_HEAP
+
 #ifdef VERBOSE_GC
     out ('S');
 #endif
@@ -201,6 +203,8 @@ sweep ()
                 else if (do_compress_cons && _CONSP(s) && !_EXTENDEDP(s)) {
                     // ...if CDR is pointing to the following object.
                     if (CONS(s)->cdr == s + sizeof (cons)) {
+                        out ('C');
+
                         // Copy with mark bit cleard and type extended.
                         *d = (*s & ~TYPE_MARKED) | TYPE_EXTENDED;
 
@@ -333,7 +337,7 @@ relocate (void)
         // Relocate elements on heap.
         for (p = heap_start; *p; p += objsize (p)) {
             CHKPTR(p);
-#ifndef NDEBUG
+#ifndef PARANOID
             if (p >= heap_end)
                 internal_error ("Heap reloc overflow");
 #endif

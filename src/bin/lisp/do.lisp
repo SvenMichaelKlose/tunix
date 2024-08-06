@@ -21,3 +21,4 @@
 (do ((i 0 (+ i 1)))
     ((>= i 10))
   (print i))
+(terpri)

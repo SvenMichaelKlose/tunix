@@ -122,7 +122,6 @@ typedef struct _channel {
     char *   bufrptr;       // Read pointer
 } channel;
 
-#define TEST
 #ifdef TEST
 extern bool has_prefix;
 extern bool has_params;

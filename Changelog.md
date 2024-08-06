@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Unix: Environment file "unix.lisp".
 - Unix: Built-in function "time" and constant "+bps+".
+- Compile-time option TEST enables all tests at program initialization.

@@ -4,7 +4,6 @@ SOURCES= \
 	ipc.c \
 	kernal.c \
 	main.c \
-	test.c \
 	ultifs.c
 ASMSOURCES= \
 	reset.asm \
@@ -16,5 +15,10 @@ LIBRARIES= \
     $(TUNIX_LIB)/posix/libposix.a \
     $(TUNIX_LIB)/log/liblog.a
 LD65CFG=vic.cfg
+
+ifdef TEST
+CFLAGS += -DTEST
+SOURCES += test.c
+endif
 
 include ../../mk/Makefile.build

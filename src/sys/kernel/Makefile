@@ -9,6 +9,10 @@ LD65CFG = vic.cfg
 
 include ../../mk/Makefile.config
 
+ifdef TEST
+CFLAGS += -DEARLY_TESTS
+endif
+
 %.o: %.asm
 	$(AS) $(ASFLAGS) -I$(CA65_INCLUDE) -o $@ $<
 

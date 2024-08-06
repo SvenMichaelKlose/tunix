@@ -30,7 +30,7 @@
 
 bool channels[MAX_CHANNELS];
 
-char
+char FASTCALL
 reverse_case (char c)
 {
     if (ISUPPER(c))
@@ -40,36 +40,36 @@ reverse_case (char c)
     return c;
 }
 
-signed char i;
+simpleio_chn_t chn;
 
 simpleio_chn_t
 alloc_channel (void)
 {
     // Set empty slot to channel.
-    for (i = FIRST_CHANNEL; i < MAX_CHANNELS; i++)
-        if (!channels[i]) {
-            channels[i] = i;
-            return i;
+    for (chn = FIRST_CHANNEL; chn < MAX_CHANNELS; chn++)
+        if (!channels[chn]) {
+            channels[chn] = chn;
+            return chn;
         }
     return 0;
 }
 
 signed char ofs;
-/*
 char ctrl;
 char ctrh;
-char ctr;
-*/
+unsigned char i;
+
+// XXX: ld65 complains about this being a duplicate if named 'len',
+// but does not tell in which places it occurs.
+unsigned char silen;
 
 // DANGEROUS but we need the heap:
 // 'name' is modified and extended on writes.
-simpleio_chn_t
+simpleio_chn_t FASTCALL
 simpleio_open (char * name, char mode)
 {
-    simpleio_chn_t c = alloc_channel ();
-    unsigned char len;
-
-    if (c) {
+    chn = alloc_channel ();
+    if (chn) {
         ofs = 0;
         if (mode == 'w')
             ofs = 2;
@@ -78,43 +78,36 @@ simpleio_open (char * name, char mode)
             return 0;
 #endif
 
-        len = strlen (name);
+        silen = strlen (name);
 
         // Move name and reverse case.
-        for (i = len; i >= 0; i--)
+        for (i = silen; i != 255; i--)
             name[i + ofs] = reverse_case (name[i]);
 
         if (mode == 'w') {
             name[0] = '@';
             name[1] = ':';
-            strcpy (name + len + ofs, ",S,W");
+            strcpy (name + silen + ofs, ",S,W");
         }
 
         // Open file.
-        if (cbm_open (c, 8, c, name))
+        if (cbm_open (chn, 8, chn, name))
             return 0;
 
 /*
-        // Read status code from control channel.
+        // Read and check DOS status code.
         cbm_open (15, 8, 15, NULL);
         cbm_k_chkin (15);
         ctrh = cbm_k_basin ();
         ctrl = cbm_k_basin ();
-        if (ctrl != '0' && ctrh != '0') {
-            cbm_k_ckout (3);
-            cbm_k_bsout (ctrl);
-            cbm_k_bsout (ctrh);
-            while (ctr = cbm_k_basin () && !(cbm_k_readst () & 0x40))
-               cbm_k_bsout (ctr);
-            cbm_k_ckout (fnout);
-            return 0;
-        }
         cbm_close (15);
         cbm_k_chkin (fnin);
+        if (ctrl != '0' && ctrh != '0')
+            return 0;
 */
     }
 
-    return c;
+    return chn;
 }
 
 bool
@@ -138,7 +131,7 @@ raw_in (void)
     return last_in;
 }
 
-void
+void FASTCALL
 raw_out (char c)
 {
     if (fnout == STDOUT || fnout == STDERR)

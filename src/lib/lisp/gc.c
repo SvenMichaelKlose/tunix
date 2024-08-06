@@ -125,9 +125,6 @@ size_t total_removed;
 void FASTCALL
 add_gap (unsigned char n)
 {
-    // Memorize this latest gap.
-    last_sweeped = d;
-
     // Log gap position and size.
     xlat -= sizeof (lispptr);
     *(lispptr *) xlat = s;
@@ -203,21 +200,19 @@ sweep ()
                 // Turn regular cons into compressed cons...
                 else if (do_compress_cons && _CONSP(s) && !_EXTENDEDP(s)) {
                     // ...if CDR is pointing to the following object.
-                    if (CONS(s)->cdr == (char *) s + sizeof (cons)) {
-                        out ('C');
+                    if (CONS(s)->cdr == s + sizeof (cons)) {
                         // Copy with mark bit cleard and type extended.
-                        *d++ = (*s++ & ~TYPE_MARKED) | TYPE_EXTENDED;
+                        *d = (*s & ~TYPE_MARKED) | TYPE_EXTENDED;
 
                         // Copy CAR.
-                        n = sizeof (ccons) - 1;
-                        while (n--)
-                            *d++ = *s++;
+                        CONS(d)->car = CONS(s)->car;
+
+                        // Advance.
+                        d += sizeof (ccons);
+                        s += sizeof (cons);
 
                         // Add gap to relocation table.
                         add_gap (sizeof (cons) - sizeof (ccons));
-
-                        // Advance over CDR.
-                        s += sizeof (cons) - sizeof (ccons);
 
                         goto check_xlat;
                     }
@@ -250,8 +245,12 @@ sweep ()
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
 #endif
-                } else
+                } else {
+                    // Memorize this latest gap.
+                    last_sweeped = d;
+
                     add_gap (n);
+                }
 
                 // Step to next object.
                 s += n;

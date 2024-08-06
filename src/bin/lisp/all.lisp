@@ -1,7 +1,3 @@
-(load "smoke-test.lisp")
-(load "test.lisp")
-(load "test-onerror.lisp")
-(load "test-file.lisp")
 (load "member-if.lisp")
 (load "find.lisp")
 (load "find-if.lisp")

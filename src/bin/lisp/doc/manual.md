@@ -1204,3 +1204,16 @@ one of:
 * plus4
 * unix
 * vic20
+
+# Optional features
+
+## Compressed conses
+
+If the CDR of a cons points to the following object, TUNIX
+Lisp converts it into a compressed cons with the CDR left
+out.  SETCDR will issue an error when passed a compressed
+cons.
+
+Compression is only done if function GC has been called by
+the user to get around problems building lists, because that
+required being able to set the CDR.

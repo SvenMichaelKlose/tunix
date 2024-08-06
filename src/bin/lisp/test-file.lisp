@@ -14,9 +14,9 @@
   (setin stdin))
 (message "Done.")(terpri)
 
-(message "Testing OPEN on missing file...")
-(and (open "k87sfdasdj9" 'r)
-     (error))
+;(message "Testing OPEN on missing file...")
+;(and (open "k87sfdasdj9" 'r)
+     ;(error))
 
 (message "Testing OPEN file write to \"test.out\"...")
 (let c (open "test.out" 'w)

@@ -111,8 +111,7 @@ objsize (char * x)
     return s;
 }
 
-#ifndef NDEBUG
-#ifdef TARGET_UNIX
+#ifdef CHECK_OBJ_POINTERS
 
 void
 error_typebits (char * x)
@@ -161,6 +160,9 @@ check_lispptr (char * x)
 
     switch (TYPEBITS(x)) {
         case TYPE_CONS:
+#ifdef COMPRESSED_CONS
+        case TYPE_CONS | TYPE_EXTENDED:
+#endif
         case TYPE_NUMBER:
         case TYPE_SYMBOL:
         case TYPE_BUILTIN:
@@ -171,13 +173,19 @@ check_lispptr (char * x)
     }
 }
 
+#endif // #ifdef CHECK_OBJ_POINTERS
+
+#ifdef DUMP_LISPPTR
+
 // Print object info.
 void
 dump_lispptr (char * x)
 {
     int n = objsize (x);
     printf ("%p - %p %d: ", x, x + n - 1, n);
+#ifdef CHECK_OBJ_POINTERS
     is_checking_lispptr = true;
+#endif
     if (!MARKED(x))
         printf ("(unused) ");
     if (!x) {
@@ -186,6 +194,11 @@ dump_lispptr (char * x)
     }
     switch (TYPEBITS(x)) {
         case TYPE_CONS:
+#ifdef COMPRESSED_CONS
+            if (_EXTENDEDP(x))
+                printf ("ccons %p\n", CAR(x));
+            else
+#endif
             printf ("cons %p, %p\n", CAR(x), CDR(x));
             break;
         case TYPE_NUMBER:
@@ -210,7 +223,9 @@ dump_lispptr (char * x)
             error_typebits (x);
     }
 done:
+#ifdef CHECK_OBJ_POINTERS
     is_checking_lispptr = false;
+#endif
 }
 
 // Print info of all objects.
@@ -224,8 +239,7 @@ dump_heap ()
     }
 }
 
-#endif // #ifdef TARGET_UNIX
-#endif // #ifndef NDEBUG
+#endif // #ifdef DUMP_LISPPTR
 
 // Allocate object.
 lispptr FASTCALL
@@ -321,6 +335,9 @@ init_heap ()
     for (i = 0; i < TYPE_EXTENDED * 2; i++)
         lisp_sizes[i] = 0;
     lisp_sizes[TYPE_CONS] = sizeof (cons);
+#ifdef COMPRESSED_CONS
+    lisp_sizes[TYPE_CONS | TYPE_EXTENDED] = sizeof (ccons);
+#endif
     lisp_sizes[TYPE_NUMBER] = sizeof (number);
     lisp_sizes[TYPE_SYMBOL] = sizeof (symbol);
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
@@ -388,6 +405,10 @@ init_heap ()
     do_gc_stress = false;
 #endif
 
+#ifdef COMPRESSED_CONS
+    do_compress_cons = false;
+#endif
+
     // Make universe.
     last_symbol = nil;
     universe = make_symbol ("*universe*", 10);
@@ -432,6 +453,10 @@ init_heap ()
     error_code = false;
     last_errstr = NULL;
     current_expr  = nil;
+#endif
+
+#ifdef CHECK_OBJ_POINTERS
+    is_checking_lispptr = false;
 #endif
 
     return true;

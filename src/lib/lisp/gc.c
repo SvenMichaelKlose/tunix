@@ -23,6 +23,10 @@ char * xlat_end;
 extern lispptr lisp_fnin;
 extern lispptr lisp_fnout;
 
+#ifdef COMPRESSED_CONS
+bool do_compress_cons;
+#endif
+
 lispptr * global_pointers[] = {
     &universe, &t, &delayed_eval,
     &block_sym,
@@ -118,6 +122,22 @@ size_t gapsize;
 size_t total_removed;
 #endif
 
+void FASTCALL
+add_gap (unsigned char n)
+{
+    // Memorize this latest gap.
+    last_sweeped = d;
+
+    // Log gap position and size.
+    xlat -= sizeof (lispptr);
+    *(lispptr *) xlat = s;
+    xlat -= sizeof (unsigned);
+    *(unsigned *) xlat = n;
+#ifdef FRAGMENTED_HEAP
+    total_removed += n;
+#endif
+}
+
 // Copy marked objects over deleted ones and make a
 // relocation table containing the addresses and sizes of
 // the deleted objects.
@@ -179,6 +199,30 @@ sweep ()
                     SYMBOL_NEXT(last_kept_sym) = s;
                     last_kept_sym = d;
                 }
+#ifdef COMPRESSED_CONS
+                // Turn regular cons into compressed cons...
+                else if (do_compress_cons && _CONSP(s) && !_EXTENDEDP(s)) {
+                    // ...if CDR is pointing to the following object.
+                    if (CONS(s)->cdr == (char *) s + sizeof (cons)) {
+                        out ('C');
+                        // Copy with mark bit cleard and type extended.
+                        *d++ = (*s++ & ~TYPE_MARKED) | TYPE_EXTENDED;
+
+                        // Copy CAR.
+                        n = sizeof (ccons) - 1;
+                        while (n--)
+                            *d++ = *s++;
+
+                        // Add gap to relocation table.
+                        add_gap (sizeof (cons) - sizeof (ccons));
+
+                        // Advance over CDR.
+                        s += sizeof (cons) - sizeof (ccons);
+
+                        goto check_xlat;
+                    }
+                }
+#endif // #ifdef COMPRESSED_CONS
 
 #ifdef SKIPPING_SWEEP
                 // Clear mark bit.
@@ -206,23 +250,15 @@ sweep ()
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
 #endif
-                } else {
-                    // Memorize this latest gap.
-                    last_sweeped = d;
-
-                    // Log gap position and size.
-                    xlat -= sizeof (lispptr);
-                    *(lispptr *) xlat = s;
-                    xlat -= sizeof (unsigned);
-                    *(unsigned *) xlat = n;
-#ifdef FRAGMENTED_HEAP
-                    total_removed += n;
-#endif
-                }
+                } else
+                    add_gap (n);
 
                 // Step to next object.
                 s += n;
 
+#ifdef COMPRESSED_CONS
+check_xlat:
+#endif
                 // Flag relocation table being full and
                 // the rest of the objects won't be sweeped.
                 if (xlat == xlat_start)
@@ -304,7 +340,10 @@ relocate (void)
 #endif
             if (_CONSP(p)) {
                 SETCAR(p, relocate_ptr (CAR(p)));
-                SETCDR(p, relocate_ptr (CDR(p)));
+#ifdef COMPRESSED_CONS
+                if (!_EXTENDEDP(p))
+#endif
+                    SETCDR(p, relocate_ptr (CDR(p)));
             } else if (_SYMBOLP(p))
                 SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
             if (_NAMEDP(p) && SYMBOL_LENGTH(p))

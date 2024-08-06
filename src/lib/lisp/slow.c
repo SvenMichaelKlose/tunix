@@ -22,7 +22,25 @@ lispptr FASTCALL
 lisp_cdr (lispptr x)
 {
     CHKPTR(x);
+#ifdef COMPRESSED_CONS
+    if (_EXTENDEDP(x))
+        return CCONS_CDR(x);
+#endif
     return CONS(x)->cdr;
+}
+
+void FASTCALL
+lisp_setcar (lispptr x, lispptr v)
+{
+    CHKPTR(x);
+    _SETCAR(x, v);
+}
+
+void FASTCALL
+lisp_setcdr (lispptr x, lispptr v)
+{
+    CHKPTR(x);
+    _SETCDR(x, v);
 }
 
 bool FASTCALL

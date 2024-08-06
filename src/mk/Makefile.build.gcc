@@ -5,7 +5,7 @@ $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) $(ARFLAGS) $@ $^
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(LIBRARY)
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(LIBRARY) $(CLEANFILES)
 
 %.o: %.asm
 	$(AS) $(ASFLAGS) -o $@ $<

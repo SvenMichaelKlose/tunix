@@ -965,7 +965,7 @@ main (int argc, char * argv[])
 #endif
 
     load ("env-0.lisp");
-#ifndef NDEBUG
+#ifdef TEST
     load ("smoke-test.lisp");
 #endif
     load ("env-1.lisp");
@@ -975,17 +975,22 @@ main (int argc, char * argv[])
 #ifdef TARGET_UNIX
     load ("unix.lisp");
 #endif
-#ifndef NDEBUG
+#ifdef TEST
     load ("test.lisp");
 #endif
     load ("env-2.lisp");
-#ifndef NDEBUG
-#ifndef NO_ONERROR
-    load ("test-onerror.lisp");
+#ifdef TARGET_C16
+    load ("welcome.lisp");
 #endif
+#if defined (TEST) && !defined(NO_ONERROR)
+    load ("test-onerror.lisp");
 #endif
 #ifndef TARGET_C16
     load ("env-3.lisp");
+#ifdef TEST
+    load ("test-file.lisp");
+#endif
+    load ("welcome.lisp");
 #endif
 #ifdef TARGET_UNIX
     load ("all.lisp");

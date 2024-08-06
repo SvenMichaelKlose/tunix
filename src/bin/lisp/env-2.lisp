@@ -1,11 +1,2 @@
 (load '"quasiquote.lisp")
 (load '"macroexpand.lisp")
-(print (gc))(message " bytes free.")
-(and (builtin? 'time)
-     (number? +bps+)
-  (block t
-    (out "Time since boot: ")
-    (print (/ (- (time) *start-time*) +bps+))
-    (out 's)
-    (terpri)))
-(message "Ready.")

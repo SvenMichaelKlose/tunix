@@ -24,8 +24,8 @@ jobs:
     - name: Run Tests
       run: make test
 
-    - name: Run Lisp
-      run: ./run-unix-lisp.sh
+    - name: Test Lisp mercilessly
+      run: ./run-unix-lisp.sh VERBOSE_LOAD=1 COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 GC_STRESS=1 TEST=1
 
     - name: Make PDF manual
       run: cd src/bin/lisp/doc && ./md2pdf.sh && cd -

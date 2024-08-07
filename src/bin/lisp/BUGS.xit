@@ -1,6 +1,5 @@
 [ ] "Args missing" in rare cases for unknown reason.
 [ ] LOAD: Issue error if file does not exist.
-[ ] LOAD: File error not reset.
 
 Commodore PET
 [ ] Breaks program start with syntax error.

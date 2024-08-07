@@ -5,9 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
 
 ### TUNIX Lisp
+
+#### Fixed
+
+- Fixed GC trigger.  Did not take end-of-heap marker into account.
+- Detect if relocation table is full when switching to the next heap.
 
 #### Added
 
@@ -18,10 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (See manual for details.)
 - CHECK\_OBJ\_POINTERS at compile-time will enable quick sanity checks that
   is suitable for use on small machines.  On TARGET\_UNIX it's thorough
-  and slow, but easy to reget if not used for testing.
-- Fixed GC trigger.  Did not take end-of-heap marker into account.
-- Exit interpreter if out of heap.
-- Detect if relocation table is full when switching to the next heap.
+  and slow, but easy to regret if not enabled during tests.
 - Add PARANOID relocation table overflow check to GC sweep phase.
-- New option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
+- Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
   each compressed cons.
+
+#### Changed
+
+- Interpreter exits if out of heap instead of going vodka.  This is temporary.
+
+### libsimpleio
+
+#### Fixed
+
+- File errors are reset.

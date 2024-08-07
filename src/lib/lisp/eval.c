@@ -20,6 +20,10 @@ lispptr current_expr;
 lispptr current_function;
 #endif
 
+#ifndef NO_DEBUGGER
+lispptr breakpoints_sym;
+#endif
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -214,6 +218,10 @@ do_eval:
     // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
+#ifndef NO_DEBUGGER
+        if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
+            do_invoke_debugger = true;
+#endif
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER);
@@ -771,6 +779,9 @@ init_eval ()
     current_function = nil;
 #endif
 #ifndef NO_DEBUGGER
+    breakpoints_sym = make_symbol ("*brk*", 5);
+    expand_universe (breakpoints_sym);
+    SET_SYMBOL_VALUE(breakpoints_sym, nil);
     do_invoke_debugger = false;
     debug_step = nil;
 #endif

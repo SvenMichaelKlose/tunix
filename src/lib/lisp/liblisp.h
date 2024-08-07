@@ -340,6 +340,7 @@ extern lispptr highlighted;
 extern bool    do_highlight;
 extern lispptr highlighted;
 extern lispptr onerror_sym;
+extern lispptr breakpoints_sym;
 
 extern lispptr t;
 extern lispptr quote;

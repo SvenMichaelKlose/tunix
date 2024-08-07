@@ -1,3 +1,6 @@
+(or (macro? 'prog1)
+    (load "prog1.lisp"))
+
 (macro push (x l)
   ;"Destructively push on stack."
   $(= ,l (cons ,x ,l)))

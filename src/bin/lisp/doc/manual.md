@@ -1209,10 +1209,15 @@ one of:
 
 ## Compressed conses
 
-If the CDR of a cons points to the following object, TUNIX
-Lisp converts it into a compressed cons with the CDR left
-out.  SETCDR will issue an error when passed a compressed
-cons.  To avoid that to happen, compression is only done if
-function GC has been called by the user, or if there is
-less heap left than specified by GC\_AFTER\_LOAD\_THRESHOLD,
-which is 2048 bytes by default.
+When enabled by compile-time option COMPRESSED\CONS, storing
+the CDR of a cons can be spare if that is following
+immediately on the heap.  Since that makes compressed conses
+immutable (you cannot use SETCDR on them), compression is
+performed if the garbage collector was called by the program
+and not the allocator.  The GC is also called for
+compression if the available heap left is smaller than the
+number of bytes specified by compile-time option
+GC\_AFTER\_LOAD\_THRESHOLD, which is 2048 by default.
+
+Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
+GC will print a 'C' to the currently active output channel.

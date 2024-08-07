@@ -149,6 +149,7 @@
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 64
 #define MAX_SYMBOL          255
+#define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
 // Commodore C64
@@ -204,6 +205,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL          255
+#define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
 // Unixoids
@@ -212,7 +214,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE           (32 * 1024U)
+#define HEAP_SIZE           (64 * 1024U)
 #define STACK_SIZE          (HEAP_SIZE / 8U)
 #define TAGSTACK_SIZE       (HEAP_SIZE / 64U)
 #define RELOC_TABLE_ENTRIES (HEAP_SIZE / 128U)
@@ -686,27 +688,28 @@ extern bool do_gc_stress;
 #endif
 
 extern void     FASTCALL expand_universe (lispptr);
-extern lispptr  FASTCALL make_cons (lispptr, lispptr);
-extern lispptr  FASTCALL make_number (lispnum_t);
-extern lispptr  FASTCALL alloc_symbol (char *, uchar len);
-extern lispptr  FASTCALL make_symbol (char *, uchar len);
-extern lispptr           read (void);
-extern lispptr           read_symbol (void);
-extern lispptr           read_number (void);
-extern lispptr  FASTCALL print (lispptr);
-extern lispptr  FASTCALL dprint (lispptr);
-extern void     FASTCALL set_channels (simpleio_chn_t in, simpleio_chn_t out);
-extern lispptr           bi_setin  (void);
-extern lispptr           bi_setout (void);
+extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
+extern lispptr  FASTCALL make_number     (lispnum_t);
+extern lispptr  FASTCALL alloc_symbol    (char *, uchar len);
+extern lispptr  FASTCALL make_symbol     (char *, uchar len);
+extern lispptr           read            (void);
+extern lispptr           read_symbol     (void);
+extern lispptr           read_number     (void);
+extern lispptr  FASTCALL print           (lispptr);
+extern lispptr  FASTCALL dprint          (lispptr);
+extern void     FASTCALL set_channels    (simpleio_chn_t in, simpleio_chn_t out);
+extern lispptr           bi_setin        (void);
+extern lispptr           bi_setout       (void);
 
 // Arguments in global 'x'.
-extern lispptr  eval0     (void);
-extern lispptr  eval      (void);
-extern lispptr  eval_list (void);
-extern lispptr  funcall   (void);
+extern lispptr           eval0           (void);
+extern lispptr           eval            (void);
+extern lispptr           eval_list       (void);
+extern lispptr           funcall         (void);
 
-extern void     gc (void);
-extern unsigned FASTCALL objsize (char *);
+extern void              gc              (void);
+extern unsigned FASTCALL objsize         (char *);
+extern size_t            heap_free_size  (void);
 
 #define REPL_STD        0
 #define REPL_DEBUGGER   1

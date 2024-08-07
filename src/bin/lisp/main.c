@@ -523,6 +523,8 @@ bi_close (void)
     return nil;
 }
 
+lispptr bi_gc (void);
+
 lispptr
 bi_load (void)
 {
@@ -531,6 +533,10 @@ bi_load (void)
 #endif
     name_to_buffer (arg1);
     load (buffer);
+#ifdef GC_AFTER_LOAD_THRESHOLD
+    if (heap_free_size () < GC_AFTER_LOAD_THRESHOLD)
+        bi_gc ();
+#endif
     return nil;
 }
 
@@ -560,11 +566,6 @@ bi_special (void)
 lispptr
 bi_gc (void)
 {
-#ifdef FRAGMENTED_HEAP
-    struct heap_fragment * h;
-    size_t freed = 0;
-#endif
-
 #ifdef COMPRESSED_CONS
     do_compress_cons = true;
 #endif
@@ -572,13 +573,8 @@ bi_gc (void)
 #ifdef COMPRESSED_CONS
     do_compress_cons = false;
 #endif
-#ifdef FRAGMENTED_HEAP
-    for (h = heaps; h->start; h++)
-        freed += h->end - h->free;
-    return make_number (freed);
-#else
-    return make_number (heap_end - heap_free);
-#endif
+
+    return make_number (heap_free_size ());
 }
 
 #ifndef NAIVE

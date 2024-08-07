@@ -730,7 +730,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error ("Alien tag");
+        internal_error ("tag");
 #endif
     }
 

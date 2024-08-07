@@ -18,6 +18,11 @@ TARGET = vic20  # VIC-20 has the largest code base.
 # (EXPERIMENTAL!)
 #COMPRESS_CONS = 1
 
+# GC after load threshold in bytes.
+# If total free heap is below, GC is run compressing conses if
+# COMPRESS_CONS is enabled.
+#GC_AFTER_LOAD_THRESHOLD = 2048
+
 # Stress out TUNIX Lisp's garbage collector by triggering
 # it before every object allocation.  Intended to be set
 # in build scripts.

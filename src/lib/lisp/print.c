@@ -176,6 +176,7 @@ print0 (lispptr x)
     else if (_NAMEDP(x))
         print_named ((symbol *) x);
 #ifndef NDEBUG
+    // Error.  Have check_lispptr() issue it.
     else
         CHKPTR(x);
 #endif

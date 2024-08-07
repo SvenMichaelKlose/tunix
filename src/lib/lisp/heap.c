@@ -16,7 +16,7 @@
 
 #include "liblisp.h"
 
-#define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (unsigned)))
+#define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (size_t)))
 #ifdef GC_STRESS
     #define NEEDS_GC(size)  do_gc_stress
 #else
@@ -98,7 +98,7 @@ expand_universe (lispptr x)
 }
 
 // Get size of object in bytes.
-unsigned FASTCALL
+size_t FASTCALL
 objsize (char * x)
 {
     uchar s;
@@ -360,7 +360,7 @@ init_heap ()
     stack_start = malloc (STACK_SIZE);
     if (!stack_start)
         return false;
-    stack_end = stack_start + STACK_SIZE;
+    stack_end = stack_start + STACK_SIZE - 100;
 #else
     stack_start = (void *) STACK_START;
     stack_end = (void *) STACK_END;

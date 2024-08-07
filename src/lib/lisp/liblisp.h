@@ -215,9 +215,9 @@
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define HEAP_SIZE           (64 * 1024U)
-#define STACK_SIZE          (HEAP_SIZE / 8U)
-#define TAGSTACK_SIZE       (HEAP_SIZE / 64U)
-#define RELOC_TABLE_ENTRIES (HEAP_SIZE / 128U)
+#define STACK_SIZE          HEAP_SIZE
+#define TAGSTACK_SIZE       HEAP_SIZE
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL          255
@@ -708,7 +708,7 @@ extern lispptr           eval_list       (void);
 extern lispptr           funcall         (void);
 
 extern void              gc              (void);
-extern unsigned FASTCALL objsize         (char *);
+extern size_t FASTCALL   objsize         (char *);
 extern size_t            heap_free_size  (void);
 
 #define REPL_STD        0

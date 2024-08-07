@@ -10,7 +10,7 @@
 
 #include "liblisp.h"
 
-#ifdef DUMP_SWEEPED
+#ifdef TARGET_UNIX
 #include <stdio.h>
 #endif
 
@@ -91,7 +91,7 @@ extern struct heap_fragment   heaps[];
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-unsigned n;
+size_t n;
 
 char * s;   // Source
 char * d;   // Destination
@@ -123,13 +123,13 @@ size_t total_removed;
 #endif
 
 void FASTCALL
-add_gap (unsigned char n)
+add_gap (size_t n)
 {
     // Log gap position and size.
     xlat -= sizeof (lispptr);
     *(lispptr *) xlat = s;
-    xlat -= sizeof (unsigned);
-    *(unsigned *) xlat = n;
+    xlat -= sizeof (size_t);
+    *(size_t *) xlat = n;
 
 #ifdef FRAGMENTED_HEAP
     total_removed += n;
@@ -200,7 +200,7 @@ sweep ()
                 }
 #ifdef COMPRESSED_CONS
                 // Turn regular cons into compressed cons...
-                else if (do_compress_cons && _CONSP(s) && !_EXTENDEDP(s)) {
+                else if (do_compress_cons && !xlat_full && _CONSP(s) && !_EXTENDEDP(s)) {
                     // ...if CDR is pointing to the following object.
                     if (CONS(s)->cdr == s + sizeof (cons)) {
                         out ('C');
@@ -245,7 +245,7 @@ sweep ()
                 // Remove object.
                 if (last_sweeped == d) {
                     // Merge with previous gap.
-                    *(unsigned *) xlat += n;
+                    *(size_t *) xlat += n;
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
 #endif
@@ -262,8 +262,14 @@ sweep ()
 #ifdef COMPRESSED_CONS
 check_xlat:
 #endif
-                // Flag relocation table being full and
-                // the rest of the objects won't be sweeped.
+#ifndef PARANOID
+                if (xlat < xlat_start)
+                    // Reloc table size must be multiple of entry size!
+                    internal_error ("xlat overflow");
+#endif
+                // Flag is relocation table is full, so
+                // the rest of the objects won't be sweeped
+                // and GC is started again.
                 if (xlat == xlat_start)
                     xlat_full = true;
             }
@@ -280,8 +286,10 @@ check_xlat:
         // order to not affect the following heap's pointers.
         xlat -= sizeof (lispptr);
         *(lispptr *) xlat = s;
-        xlat -= sizeof (unsigned);
-        *(unsigned *) xlat = -total_removed;
+        xlat -= sizeof (size_t);
+        *(size_t *) xlat = -total_removed;
+        if (xlat == xlat_start)
+            xlat_full = true;
 #ifdef VERBOSE_GC
         outn (total_removed); outs ("B freed."); terpri ();
 #endif
@@ -308,8 +316,8 @@ relocate_ptr (char * x)
         r -= sizeof (lispptr);
         if (*(char **) r > x)
             break;
-        r -= sizeof (unsigned);
-        gapsize += *(unsigned *) r;
+        r -= sizeof (size_t);
+        gapsize += *(size_t *) r;
     }
 
     // Subtract it from the pointer.
@@ -339,7 +347,7 @@ relocate (void)
             CHKPTR(p);
 #ifdef PARANOID
             if (p >= heap_end)
-                internal_error ("Heap reloc overflow");
+                internal_error ("Reloc: heap overflow");
 #endif
             if (_CONSP(p)) {
                 SETCAR(p, relocate_ptr (CAR(p)));
@@ -417,16 +425,20 @@ restart:
         mark (**gp);
 
     // Mark GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+        //printf ("Mark stack %p: obj %p\n", p, *(lispptr *) p);
         mark (*(lispptr *) p);
+    }
 
     sweep ();
     relocate ();
 
     // Restart if sweep was interrupted due
     // to full relocation table.
-    if (xlat_full)
+    if (xlat_full) {
+        outs ("!GC restart!");
         goto restart;
+    }
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap to allocate from there.

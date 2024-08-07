@@ -113,6 +113,7 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
+            x = nil;
             x = read ();
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)

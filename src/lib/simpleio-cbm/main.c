@@ -28,7 +28,8 @@
 #define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
 #define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
 
-bool channels[MAX_CHANNELS];
+bool            channels[MAX_CHANNELS];
+simpleio_chn_t  chn;
 
 char FASTCALL
 reverse_case (char c)
@@ -39,8 +40,6 @@ reverse_case (char c)
         return TOUPPER(c);
     return c;
 }
-
-simpleio_chn_t chn;
 
 simpleio_chn_t
 alloc_channel (void)
@@ -68,6 +67,7 @@ unsigned char silen;
 simpleio_chn_t FASTCALL
 simpleio_open (char * name, char mode)
 {
+    last_error = 0;
     chn = alloc_channel ();
     if (chn) {
         ofs = 0;
@@ -116,7 +116,7 @@ raw_eof (void)
     return cbm_k_readst () & 0x40;
 }
 
-char
+signed char
 raw_err (void)
 {
     return cbm_k_readst ();
@@ -125,6 +125,7 @@ raw_err (void)
 char
 raw_in (void)
 {
+    last_error = 0;
     last_in = cbm_k_chrin ();
     if (fnin == STDIN)
         last_in = reverse_case (last_in);
@@ -134,6 +135,7 @@ raw_in (void)
 void FASTCALL
 raw_out (char c)
 {
+    last_error = 0;
     if (fnout == STDOUT || fnout == STDERR)
         c = reverse_case (c);
     cbm_k_bsout (c);
@@ -142,12 +144,14 @@ raw_out (char c)
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
+    last_error = 0;
     cbm_k_chkin (channels[chn]);
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
+    last_error = 0;
     cbm_k_ckout (channels[chn]);
 }
 

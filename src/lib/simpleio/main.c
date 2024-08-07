@@ -18,12 +18,14 @@
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-simpleio * io;
-simpleio_chn_t fnin;
-simpleio_chn_t fnout;
-char do_putback;
-char last_in;
-char last_out;
+
+simpleio *      io;
+simpleio_chn_t  fnin;
+simpleio_chn_t  fnout;
+char            do_putback;
+char            last_in;
+char            last_out;
+
 #ifdef __CC65__
 #pragma zpsym ("io")
 #pragma zpsym ("fnin")
@@ -59,13 +61,13 @@ setout (simpleio_chn_t c)
     }
 }
 
-char
+bool
 eof ()
 {
     return io->eof ();
 }
 
-char
+signed char
 err ()
 {
     return io->err ();
@@ -109,7 +111,7 @@ out (char c)
     io->out (c);
 }
 
-void
+void FASTCALL
 outnu (unsigned long n)
 {
     if (n > 9)
@@ -117,7 +119,7 @@ outnu (unsigned long n)
     out ('0' + n % 10);
 }
 
-void
+void FASTCALL
 outn (long n)
 {
     if (n < 0) {

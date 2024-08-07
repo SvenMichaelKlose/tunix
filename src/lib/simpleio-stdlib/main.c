@@ -20,16 +20,16 @@
 #define MIN_CHANNEL     (STDERR + 1)
 #define MAX_CHANNELS    256
 
-FILE * allocated_channels[MAX_CHANNELS];
-char last_error;
+FILE *      channels[MAX_CHANNELS];
+signed char last_error;
 
 bool
 raw_eof (void)
 {
-    return feof (allocated_channels[(int) fnin]);
+    return feof (channels[(int) fnin]);
 }
 
-char
+signed char
 raw_err (void)
 {
     return last_error;
@@ -41,11 +41,11 @@ raw_in (void)
     int c;
 
     last_error = 0;
-    c = fgetc (allocated_channels[(int) fnin]);
+    c = fgetc (channels[(int) fnin]);
     if (c == EOF) {
         c = 0;
         if (errno)
-            last_error = -1;
+            last_error = errno;
     }
     return c;
 }
@@ -54,7 +54,7 @@ void
 raw_out (char c)
 {
     last_error = 0;
-    if (EOF == fputc (c, allocated_channels[(int) fnout]))
+    if (EOF == fputc (c, channels[(int) fnout]))
         last_error = -1;
 }
 
@@ -67,7 +67,6 @@ raw_setin (simpleio_chn_t c)
 void
 raw_setout (simpleio_chn_t c)
 {
-    fflush (allocated_channels[(int) fnout]);
     (void) c;
 }
 
@@ -77,19 +76,19 @@ alloc_channel (FILE * handle)
     int i;
 
     for (i = MIN_CHANNEL; i < MAX_CHANNELS; i++)
-        if (!allocated_channels[i]) {
-            allocated_channels[i] = handle;
+        if (!channels[i]) {
+            channels[i] = handle;
             return i;
         }
 
-    return -1;
+    return 0;
 }
 
 void
 raw_close (simpleio_chn_t c)
 {
-    fclose (allocated_channels[(int) c]);
-    allocated_channels[(int) c] = NULL;
+    fclose (channels[(int) c]);
+    channels[(int) c] = NULL;
 }
 
 simpleio_chn_t 
@@ -121,7 +120,7 @@ void
 simpleio_init ()
 {
     simpleio_set (&vectors);
-    allocated_channels[STDIN] = stdin;
-    allocated_channels[STDOUT] = stdout;
-    allocated_channels[STDERR] = stderr;
+    channels[STDIN]  = stdin;
+    channels[STDOUT] = stdout;
+    channels[STDERR] = stderr;
 }

@@ -543,7 +543,7 @@ bi_load (void)
 lispptr
 bi_define (void)
 {
-    if (member (arg1, universe))
+    if (member (arg1, SYMBOL_VALUE(universe)))
         outs ("Redefining ");
     else {
         expand_universe (arg1);
@@ -936,15 +936,49 @@ init_io_symbols (void)
 
 extern void test (void);
 
+char * env_files[] = {
+    "env-0.lisp",
+#ifdef TEST
+    "smoke-test.lisp",
+#endif
+    "env-1.lisp",
+#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+    "cbm-common.lisp",
+#endif
+#ifdef TARGET_UNIX
+    "unix.lisp",
+#endif
+#ifdef TEST
+    "test.lisp",
+#endif
+    "env-2.lisp",
+#ifdef TARGET_C16
+    "welcome.lisp",
+#endif
+#if defined (TEST) && !defined(NO_ONERROR)
+    "test-onerror.lisp",
+#endif
+#ifndef TARGET_C16
+    "env-3.lisp",
+#ifdef TEST
+    "test-file.lisp",
+#endif
+    "welcome.lisp",
+#endif // #ifndef TARGET_C16
+    NULL
+};
+
 int
 main (int argc, char * argv[])
 {
+    char ** f;
     (void) argc, (void) argv;
 
 #ifdef TARGET_UNIX
     bekloppies_start = bekloppies ();
 #endif
 
+    // Init components.
     simpleio_init ();
     if (!init_heap ()) {
         outs ("No memory.");
@@ -966,43 +1000,9 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
-    load ("env-0.lisp");
-
-#ifdef TEST
-    load ("smoke-test.lisp");
-#endif
-
-    load ("env-1.lisp");
-
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
-    load ("cbm-common.lisp");
-#endif
-
-#ifdef TARGET_UNIX
-    load ("unix.lisp");
-#endif
-
-#ifdef TEST
-    load ("test.lisp");
-#endif
-
-    load ("env-2.lisp");
-
-#ifdef TARGET_C16
-    load ("welcome.lisp");
-#endif
-
-#if defined (TEST) && !defined(NO_ONERROR)
-    load ("test-onerror.lisp");
-#endif
-
-#ifndef TARGET_C16
-    load ("env-3.lisp");
-#ifdef TEST
-    load ("test-file.lisp");
-#endif
-    load ("welcome.lisp");
-#endif // #ifndef TARGET_C16
+    // Load environment files.
+    for (f = env_files; *f; f++)
+        load (*f);
 
     do_break_repl = do_continue_repl = false;
     num_repls = -1;

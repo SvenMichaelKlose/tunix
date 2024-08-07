@@ -71,5 +71,13 @@
            '(a b c))
     (error))
 
+(message "Testing FN re-definition...")
+(fn doubledef ())
+(fn doubledef ())
+(and (member 'doubledef
+             (cdr (member 'doubledef *universe*)))
+     (error "DOUBLEDEF not alone in *UNIVERSE*."))
+(= *universe* (member 'doubledef *universe*))
+
 (or (== x 42)
     (error "X was modified globally"))

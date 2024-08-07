@@ -18,9 +18,10 @@
 
 #define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (unsigned)))
 #ifdef GC_STRESS
-#define NEEDS_GC()  do_gc_stress
+    #define NEEDS_GC(size)  do_gc_stress
 #else
-#define NEEDS_GC()  (heap_free >= heap_end - size)
+    // Object size + end-of-heap marker (0).
+    #define NEEDS_GC(size)  (heap_free + size + 1 >= heap_end)
 #endif
 
 // Heap memory areas  Must be consecutive!
@@ -245,11 +246,12 @@ dump_heap ()
 lispptr FASTCALL
 alloc (uchar size, uchar type)
 {
-    if (NEEDS_GC()) {
+    if (NEEDS_GC(size)) {
         gc ();
-#if !defined(NAIVE) && !defined(GC_STRESS)
-        if (NEEDS_GC()) {
-            error (ERROR_OUT_OF_HEAP, "Out of heap.");
+#if !defined(NAIVE)
+        if (NEEDS_GC(size)) {
+            //error (ERROR_OUT_OF_HEAP, "Out of heap.");
+            internal_error ("Out of heap.");
             return nil;
         }
 #endif

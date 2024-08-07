@@ -19,3 +19,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CHECK\_OBJ\_POINTERS at compile-time will enable quick sanity checks that
   is suitable for use on small machines.  On TARGET\_UNIX it's thorough
   and slow, but easy to reget if not used for testing.
+- Fixed GC trigger.  Did not take end-of-heap marker into account.
+- Exit interpreter if out of heap.

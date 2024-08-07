@@ -37,6 +37,10 @@ TARGET = vic20  # VIC-20 has the largest code base.
 # Build TUNIX Lisp without user-defined ONERROR handler.
 #NO_DEBUGGER = 1
 
+# Include all checks, no matter if they seem to be a waste
+# of time.
+#PARANOID = 1
+
 # Print expression to eval() and return values.
 #VERBOSE_EVAL = 1
 

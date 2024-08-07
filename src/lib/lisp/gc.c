@@ -337,7 +337,7 @@ relocate (void)
         // Relocate elements on heap.
         for (p = heap_start; *p; p += objsize (p)) {
             CHKPTR(p);
-#ifndef PARANOID
+#ifdef PARANOID
             if (p >= heap_end)
                 internal_error ("Heap reloc overflow");
 #endif

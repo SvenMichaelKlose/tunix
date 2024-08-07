@@ -97,7 +97,7 @@ print_list (cons * c)
         if (tmp && !CONSP(tmp)) {
             outs (" . ");
             print_highlighted (c, HIGHLIGHT_BEFORE);
-            print0 (CDR(c));
+            print0 (tmp);
             print_highlighted (c, HIGHLIGHT_AFTER);
             break;
         }

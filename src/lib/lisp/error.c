@@ -33,8 +33,10 @@ internal_error (char * msg)
     outs (msg); terpri ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
+    exit (EXIT_FAILURE);
+#else
+    while (1);
 #endif
-    exit (ERROR_INTERNAL);
 }
 
 void

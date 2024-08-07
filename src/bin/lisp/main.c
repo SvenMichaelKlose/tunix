@@ -697,7 +697,7 @@ bi_filter (void)
         tmp = make_cons (eval0 (), nil);
         POP_HIGHLIGHTED();
         if (do_break_repl) {
-            stack += 4 * sizeof (lispptr);
+            stack += sizeof (lispptr) << 2;
             return nil;
         }
         POP(list_last);
@@ -713,7 +713,7 @@ bi_filter (void)
         tmp = eval0 ();
         POP_HIGHLIGHTED();
         if (do_break_repl) {
-            stack += 2 * sizeof (lispptr);
+            stack += sizeof (lispptr) << 1;
             return nil;
         }
         POP(list_last);

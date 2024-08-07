@@ -9,6 +9,8 @@
          subseq test test-onerror union unique unless when
          while with with-queue))
 (terpri)
+; Knock off some extra compression of conses.
+(= *universe (copy-list *universe*))
 (print (gc))(message " bytes free.")
 (and (builtin? 'time)
      (number? +bps+)

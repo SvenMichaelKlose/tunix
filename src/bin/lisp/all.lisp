@@ -33,4 +33,6 @@
 (load "unless.lisp")
 (load "while.lisp")
 (message "All loaded.")
+; Have *universe* compressed.
+(= *universe* (copy-list *universe*))
 (print (gc))(message " bytes free.")

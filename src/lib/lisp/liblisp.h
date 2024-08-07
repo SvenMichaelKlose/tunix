@@ -149,7 +149,6 @@
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 64
 #define MAX_SYMBOL          255
-#define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
 // Commodore C64
@@ -205,7 +204,6 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL          255
-#define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
 // Unixoids
@@ -271,6 +269,10 @@
 
 #if defined(GC_STRESS) && !defined(CHECK_OBJ_POINTERS)
     #define CHECK_OBJ_POINTERS
+#endif
+
+#if defined(COMPRESSED_CONS) && !defined(GC_AFTER_LOAD_THRESHOLD)
+    #define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
 typedef unsigned char  uchar;

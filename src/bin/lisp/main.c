@@ -950,7 +950,7 @@ main (int argc, char * argv[])
         outs ("No memory.");
         exit (EXIT_FAILURE);
     }
-#ifdef TARGET_UNIX
+#if defined(TEST) && defined(TARGET_UNIX)
     test ();
 #endif
     init_eval ();

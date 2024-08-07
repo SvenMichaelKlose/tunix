@@ -21,3 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and slow, but easy to reget if not used for testing.
 - Fixed GC trigger.  Did not take end-of-heap marker into account.
 - Exit interpreter if out of heap.
+- Detect if relocation table is full when switching to the next heap.
+- Add PARANOID relocation table overflow check to GC sweep phase.

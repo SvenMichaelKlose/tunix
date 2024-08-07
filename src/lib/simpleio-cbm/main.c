@@ -30,6 +30,7 @@
 
 bool            channels[MAX_CHANNELS];
 simpleio_chn_t  chn;
+signed char     last_error;
 
 char FASTCALL
 reverse_case (char c)

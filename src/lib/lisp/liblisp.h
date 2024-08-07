@@ -212,8 +212,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE           (128 * 1024U)
-#define STACK_SIZE          (HEAP_SIZE / 16U)
+#define HEAP_SIZE           (32 * 1024U)
+#define STACK_SIZE          (HEAP_SIZE / 8U)
 #define TAGSTACK_SIZE       (HEAP_SIZE / 64U)
 #define RELOC_TABLE_ENTRIES (HEAP_SIZE / 128U)
 #define SKIPPING_SWEEP
@@ -230,45 +230,45 @@
 #endif
 
 #ifdef NAIVE
-#ifndef NO_DEBUGGER
-    #define NO_DEBUGGER
-#endif
-#ifndef NO_ONERROR
-    #define NO_ONERROR
-#endif
-#ifndef NDEBUG
-    #define NDEBUG
-#endif
+    #ifndef NO_DEBUGGER
+        #define NO_DEBUGGER
+    #endif
+    #ifndef NO_ONERROR
+        #define NO_ONERROR
+    #endif
+    #ifndef NDEBUG
+        #define NDEBUG
+    #endif
 #else // #ifdef NAIVE
-#define GCSTACK_CHECKS
-#define TAGSTACK_CHECKS
+    #define GCSTACK_CHECKS
+    #define TAGSTACK_CHECKS
 #endif // #ifdef NAIVE
 
 #ifdef __CC65__
-#define FASTCALL            __fastcall__
-#define HOST_DEBUGGER()
+    #define FASTCALL        __fastcall__
+    #define HOST_DEBUGGER()
 #else
-#define FASTCALL
-#define HOST_DEBUGGER()     raise (SIGTRAP);
+    #define FASTCALL
+    #define HOST_DEBUGGER() raise (SIGTRAP);
 #endif
 
 #ifndef NO_DEBUGGER
-#define PUSH_HIGHLIGHTED(x) \
-    highlighted = x; \
-    PUSH(highlighted);
-#define POP_HIGHLIGHTED() \
-    POP(highlighted);
+    #define PUSH_HIGHLIGHTED(x) \
+        highlighted = x; \
+        PUSH(highlighted);
+    #define POP_HIGHLIGHTED() \
+        POP(highlighted);
 #else
-#define PUSH_HIGHLIGHTED(x)
-#define POP_HIGHLIGHTED()
+    #define PUSH_HIGHLIGHTED(x)
+    #define POP_HIGHLIGHTED()
 #endif
 
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
-#define DUMP_LISPPTR
+    #define DUMP_LISPPTR
 #endif
 
-#ifdef GC_STRESS
-#define CHECK_OBJ_POINTERS
+#if defined(GC_STRESS) && !defined(CHECK_OBJ_POINTERS)
+    #define CHECK_OBJ_POINTERS
 #endif
 
 typedef unsigned char  uchar;
@@ -455,87 +455,87 @@ extern bool do_gc_stress;
 #endif
 
 #ifdef GCSTACK_CHECKS
-#define STACK_CHECK_OVERFLOW() \
-        if (stack == stack_start) \
-            stack_overflow ()
-#ifndef NDEBUG
-#define STACK_CHECK_UNDERFLOW() \
-        if (stack == stack_end) \
-            stack_underflow ()
-#endif
+    #define STACK_CHECK_OVERFLOW() \
+            if (stack == stack_start) \
+                stack_overflow ()
+    #ifndef NDEBUG
+        #define STACK_CHECK_UNDERFLOW() \
+            if (stack == stack_end) \
+                stack_underflow ()
+    #endif
 #endif // #ifdef GCSTACK_CHECKS
 
 #ifndef STACK_CHECK_OVERFLOW
-#define STACK_CHECK_OVERFLOW()
+    #define STACK_CHECK_OVERFLOW()
 #endif
 #ifndef STACK_CHECK_UNDERFLOW
-#define STACK_CHECK_UNDERFLOW()
+    #define STACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef TAGSTACK_CHECKS
-#define TAGSTACK_CHECK_OVERFLOW() \
-        if (tagstack == tagstack_start) \
-            tagstack_overflow ()
-#ifndef NDEBUG
-#define TAGSTACK_CHECK_UNDERFLOW() \
-        if (tagstack == tagstack_end) \
-            tagstack_underflow ()
-#endif
+    #define TAGSTACK_CHECK_OVERFLOW() \
+            if (tagstack == tagstack_start) \
+                tagstack_overflow ()
+    #ifndef NDEBUG
+        #define TAGSTACK_CHECK_UNDERFLOW() \
+                if (tagstack == tagstack_end) \
+                    tagstack_underflow ()
+    #endif
 #endif // #ifdef TAGSTACK_CHECKS
 
 #ifndef TAGSTACK_CHECK_OVERFLOW
-#define TAGSTACK_CHECK_OVERFLOW()
+    #define TAGSTACK_CHECK_OVERFLOW()
 #endif
 #ifndef TAGSTACK_CHECK_UNDERFLOW
-#define TAGSTACK_CHECK_UNDERFLOW()
+    #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef SLOW
-#define PUSH(x)         pushgc (x)
-#define POP(x)          do { x = popgc (); } while (0)
-#define PUSH_TAG(x)     pushtag (x)
-#define POP_TAG(x)      do { x = poptag (); } while (0)
-#define PUSH_TAGW(x)    pushtagw (x)
-#define POP_TAGW(x)     do { x = poptagw (); } while (0)
-extern void     FASTCALL pushgc (lispptr);
-extern lispptr           popgc (void);
-extern void     FASTCALL pushtag (char);
-extern char              poptag (void);
-extern void     FASTCALL pushtagw (lispptr);
-extern lispptr           poptagw (void);
+    #define PUSH(x)         pushgc (x)
+    #define POP(x)          do { x = popgc (); } while (0)
+    #define PUSH_TAG(x)     pushtag (x)
+    #define POP_TAG(x)      do { x = poptag (); } while (0)
+    #define PUSH_TAGW(x)    pushtagw (x)
+    #define POP_TAGW(x)     do { x = poptagw (); } while (0)
+    extern void     FASTCALL pushgc (lispptr);
+    extern lispptr           popgc (void);
+    extern void     FASTCALL pushtag (char);
+    extern char              poptag (void);
+    extern void     FASTCALL pushtagw (lispptr);
+    extern lispptr           poptagw (void);
 #else // #ifdef SLOW
-#define PUSH(x) \
-    do { \
-        STACK_CHECK_OVERFLOW(); \
-        stack -= sizeof (lispptr); \
-        *(lispptr *) stack = x; \
-    } while (0)
-#define POP(x) \
-    do { \
-        STACK_CHECK_UNDERFLOW(); \
-        x = *(lispptr *) stack; \
-        stack += sizeof (lispptr); \
-    } while (0)
-#define PUSH_TAG(x) \
-    do { \
-        (*--tagstack = (x)); \
-    } while (0)
-#define POP_TAG(x) \
-    do { \
-        ((x) = *tagstack++); \
-    } while (0)
-#define PUSH_TAGW(x) \
-    do { \
-        TAGSTACK_CHECK_OVERFLOW(); \
-        tagstack -= sizeof (lispptr); \
-        *(lispptr *) tagstack = x; \
-    } while (0)
-#define POP_TAGW(x) \
-    do { \
-        TAGSTACK_CHECK_UNDERFLOW(); \
-        x = *(lispptr *) tagstack; \
-        tagstack += sizeof (lispptr); \
-    } while (0)
+    #define PUSH(x) \
+        do { \
+            STACK_CHECK_OVERFLOW(); \
+            stack -= sizeof (lispptr); \
+            *(lispptr *) stack = x; \
+        } while (0)
+    #define POP(x) \
+        do { \
+            STACK_CHECK_UNDERFLOW(); \
+            x = *(lispptr *) stack; \
+            stack += sizeof (lispptr); \
+        } while (0)
+    #define PUSH_TAG(x) \
+        do { \
+            (*--tagstack = (x)); \
+        } while (0)
+    #define POP_TAG(x) \
+        do { \
+            ((x) = *tagstack++); \
+        } while (0)
+    #define PUSH_TAGW(x) \
+        do { \
+            TAGSTACK_CHECK_OVERFLOW(); \
+            tagstack -= sizeof (lispptr); \
+            *(lispptr *) tagstack = x; \
+        } while (0)
+    #define POP_TAGW(x) \
+        do { \
+            TAGSTACK_CHECK_UNDERFLOW(); \
+            x = *(lispptr *) tagstack; \
+            tagstack += sizeof (lispptr); \
+        } while (0)
 #endif // #ifdef SLOW
 
 // TODO: Rename from TAG_* to EVAL0_* to make
@@ -573,9 +573,9 @@ extern lispptr           poptagw (void);
 #define CONS(x)     ((cons *) (x))
 
 #ifdef COMPRESSED_CONS
-// CDR of a compressed cons is the address of the next
-// object (which is also a cons).
-#define CCONS_CDR(x)    (&CONS(x)->cdr)
+    // CDR of a compressed cons is the address of the next
+    // object (which is also a cons).
+    #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
 #define _ATOM(x)        (!(x) || !(TYPE(x) & TYPE_CONS))
@@ -606,44 +606,44 @@ extern lispptr           poptagw (void);
 #endif // #ifdef COMPRESSED_CONS
 
 #ifdef SLOW
-#define CAR(x)       (lisp_car (x))
-#define CDR(x)       (lisp_cdr (x))
-#define SETCAR(x, v) (lisp_setcar (x, v))
-#define SETCDR(x, v) (lisp_setcdr (x, v))
-#define ATOM(x)      (lisp_atom (x))
-#define CONSP(x)     (lisp_consp (x))
-#define LISTP(x)     (lisp_listp (x))
-#define NUMBERP(x)   (lisp_numberp (x))
-#define SYMBOLP(x)   (lisp_symbolp (x))
-#define BUILTINP(x)  (lisp_builtinp (x))
-#define SPECIALP(x)  (lisp_specialp (x))
-extern lispptr FASTCALL lisp_car (lispptr);
-extern lispptr FASTCALL lisp_cdr (lispptr);
-extern void    FASTCALL lisp_setcar (lispptr x, lispptr v);
-extern void    FASTCALL lisp_setcdr (lispptr x, lispptr v);
-extern bool    FASTCALL lisp_atom (lispptr);
-extern bool    FASTCALL lisp_consp (lispptr);
-extern bool    FASTCALL lisp_listp (lispptr);
-extern bool    FASTCALL lisp_numberp (lispptr);
-extern bool    FASTCALL lisp_symbolp (lispptr);
-extern bool    FASTCALL lisp_builtinp (lispptr);
-extern bool    FASTCALL lisp_specialp (lispptr);
+    #define CAR(x)       (lisp_car (x))
+    #define CDR(x)       (lisp_cdr (x))
+    #define SETCAR(x, v) (lisp_setcar (x, v))
+    #define SETCDR(x, v) (lisp_setcdr (x, v))
+    #define ATOM(x)      (lisp_atom (x))
+    #define CONSP(x)     (lisp_consp (x))
+    #define LISTP(x)     (lisp_listp (x))
+    #define NUMBERP(x)   (lisp_numberp (x))
+    #define SYMBOLP(x)   (lisp_symbolp (x))
+    #define BUILTINP(x)  (lisp_builtinp (x))
+    #define SPECIALP(x)  (lisp_specialp (x))
+    extern lispptr FASTCALL lisp_car (lispptr);
+    extern lispptr FASTCALL lisp_cdr (lispptr);
+    extern void    FASTCALL lisp_setcar (lispptr x, lispptr v);
+    extern void    FASTCALL lisp_setcdr (lispptr x, lispptr v);
+    extern bool    FASTCALL lisp_atom (lispptr);
+    extern bool    FASTCALL lisp_consp (lispptr);
+    extern bool    FASTCALL lisp_listp (lispptr);
+    extern bool    FASTCALL lisp_numberp (lispptr);
+    extern bool    FASTCALL lisp_symbolp (lispptr);
+    extern bool    FASTCALL lisp_builtinp (lispptr);
+    extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
-#define CAR(x)       (CONS(x)->car)
-#ifdef COMPRESSED_CONS
-    #define CDR(x)   (_EXTENDEDP(x) ? CCONS_CDR(x) : CONS(x)->cdr)
-#else
-    #define CDR(x)   (CONS(x)->cdr)
-#endif
-#define SETCAR(x, v) _SETCAR(x, v)
-#define SETCDR(x, v) _SETCDR(x, v)
-#define ATOM(x)      _ATOM(x)
-#define CONSP(x)     _CONSP(x)
-#define LISTP(x)     _LISTP(x)
-#define NUMBERP(x)   _NUMBERP(x)
-#define SYMBOLP(x)   _SYMBOLP(x)
-#define BUILTINP(x)  _BUILTINP(x)
-#define SPECIALP(x)  _SPECIALP(x)
+    #define CAR(x)       (CONS(x)->car)
+        #ifdef COMPRESSED_CONS
+            #define CDR(x)   (_EXTENDEDP(x) ? CCONS_CDR(x) : CONS(x)->cdr)
+        #else
+            #define CDR(x)   (CONS(x)->cdr)
+    #endif
+    #define SETCAR(x, v) _SETCAR(x, v)
+    #define SETCDR(x, v) _SETCDR(x, v)
+    #define ATOM(x)      _ATOM(x)
+    #define CONSP(x)     _CONSP(x)
+    #define LISTP(x)     _LISTP(x)
+    #define NUMBERP(x)   _NUMBERP(x)
+    #define SYMBOLP(x)   _SYMBOLP(x)
+    #define BUILTINP(x)  _BUILTINP(x)
+    #define SPECIALP(x)  _SPECIALP(x)
 #endif // #ifdef SLOW
 
 #define BOOL(x)      ((x) ? t : nil)

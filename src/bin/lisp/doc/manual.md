@@ -1209,8 +1209,8 @@ one of:
 
 ## Compressed conses
 
-When enabled by compile-time option COMPRESSED\CONS, storing
-the CDR of a cons can be spare if that is following
+When enabled by compile-time option COMPRESSED\_CONS,
+storing the CDR of a cons can be spare if that is following
 immediately on the heap.  Since that makes compressed conses
 immutable (you cannot use SETCDR on them), compression is
 performed if the garbage collector was called by the program
@@ -1218,6 +1218,9 @@ and not the allocator.  The GC is also called for
 compression if the available heap left is smaller than the
 number of bytes specified by compile-time option
 GC\_AFTER\_LOAD\_THRESHOLD, which is 2048 by default.
+
+If you want to make sure that all conses that can be are
+compressed you have to call the garbage collector twice.
 
 Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
 GC will print a 'C' to the currently active output channel.

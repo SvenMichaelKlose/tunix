@@ -168,7 +168,7 @@ sweep ()
         total_removed = 0;
         heap_start = heap->start;
         heap_free = heap->free;
-#ifndef NDEBUG
+#ifndef PARANOID
         heap_end = heap->end;
 #endif
 #endif // #ifdef FRAGMENTED_HEAP
@@ -372,6 +372,20 @@ switch_heap ()
     heap++;
 }
 #endif
+
+size_t
+heap_free_size ()
+{
+#ifdef FRAGMENTED_HEAP
+    struct heap_fragment *h;
+    size_t freed = 0;
+    for (h = heaps; h->start; h++)
+        freed += h->end - h->free;
+    return freed;
+#else
+    return heap_end - heap_free;
+#endif
+}
 
 // Mark and sweep objects, and relocate object pointers.
 void

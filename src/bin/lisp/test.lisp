@@ -77,7 +77,7 @@
 (and (member 'doubledef
              (cdr (member 'doubledef *universe*)))
      (error "DOUBLEDEF not alone in *UNIVERSE*."))
-(= *universe* (member 'doubledef *universe*))
+(= *universe* (cdr (member 'doubledef *universe*)))
 
 (or (== x 42)
     (error "X was modified globally"))

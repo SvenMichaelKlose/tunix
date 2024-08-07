@@ -168,7 +168,7 @@ sweep ()
         total_removed = 0;
         heap_start = heap->start;
         heap_free = heap->free;
-#ifndef PARANOID
+#ifdef PARANOID
         heap_end = heap->end;
 #endif
 #endif // #ifdef FRAGMENTED_HEAP

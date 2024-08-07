@@ -304,6 +304,11 @@ typedef struct _symbol {
 #define MAX_SYMBOL  65536
 #endif
 
+typedef struct _xlat_item {
+    size_t   size;
+    lispptr  pos;
+} xlat_item;
+
 typedef lispptr (*builtin_fun) (void);
 
 struct builtin {
@@ -352,10 +357,10 @@ extern bool do_exit_program;
 extern bool do_compress_cons;
 #endif
 
-extern char * heap_start;
-extern char * stack_end;
-extern char * tagstack_end;
-extern char * xlat_end;
+extern char *      heap_start;
+extern char *      stack_end;
+extern char *      tagstack_end;
+extern xlat_item * xlat_end;
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -377,13 +382,13 @@ extern struct  heap_fragment * heap;
 extern struct  heap_fragment heaps[];
 #endif
 
-extern char *  heap_free;
-extern char *  heap_end;
-extern char *  stack;
-extern char *  stack_start;
-extern char *  tagstack_start;
-extern char *  tagstack;
-extern char *  xlat_start;
+extern char *      heap_free;
+extern char *      heap_end;
+extern char *      stack;
+extern char *      stack_start;
+extern char *      tagstack_start;
+extern char *      tagstack;
+extern xlat_item * xlat_start;
 
 extern lispptr x;
 extern lispptr args;

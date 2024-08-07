@@ -14,8 +14,6 @@
 #include <stdio.h>
 #endif
 
-char * xlat_end;
-
 extern lispptr lisp_fnin;
 extern lispptr lisp_fnout;
 
@@ -84,35 +82,36 @@ extern struct heap_fragment * heap;
 extern struct heap_fragment   heaps[];
 #endif
 
+xlat_item * xlat_end;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+
 lispobj_size_t n;
 
 char * s;   // Source
 char * d;   // Destination
 
-// Separate pointers for relocation to keep s & d intact
-// when a garbage collection has to be continued.  That
-// feature has been removed temporarily because.... forgot.
-char * p;
-char * r;
+xlat_item * xlat;
+xlat_item * xlat_start;
+bool        xlat_full;
+char *      last_sweeped; // For merging consecutive gaps.
+size_t      gapsize;
 
-char * xlat;
-char * xlat_start;
-bool   xlat_full;
-char * last_sweeped; // For merging consecutive gaps.
-size_t gapsize;
+char *      p;
+xlat_item * r;
+
 #ifdef __CC65__
+#pragma zpsym ("n")
 #pragma zpsym ("s")
 #pragma zpsym ("d")
-#pragma zpsym ("n")
-#pragma zpsym ("p")
-#pragma zpsym ("r")
 #pragma zpsym ("xlat")
 #pragma zpsym ("xlat_start")
 #pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
+#pragma zpsym ("p")
+#pragma zpsym ("r")
 #pragma bss-name (pop)
 #endif
 
@@ -124,10 +123,9 @@ void FASTCALL
 add_gap (lispobj_size_t n)
 {
     // Log gap position and size.
-    xlat -= sizeof (lispptr);
-    *(lispptr *) xlat = s;
-    xlat -= sizeof (size_t);
-    *(size_t *) xlat = n;
+    xlat--;
+    xlat->pos  = s;
+    xlat->size = n;
 
 #ifdef FRAGMENTED_HEAP
     total_removed += n;
@@ -165,9 +163,9 @@ sweep ()
     do {
         total_removed = 0;
         heap_start = heap->start;
-        heap_free = heap->free;
+        heap_free  = heap->free;
 #ifdef PARANOID
-        heap_end = heap->end;
+        heap_end   = heap->end;
 #endif
 #endif // #ifdef FRAGMENTED_HEAP
 
@@ -244,15 +242,12 @@ sweep ()
 #endif
                 // Remove object.
                 if (last_sweeped == d) {
-                    // Merge with previous gap.
-                    *(size_t *) xlat += n;
+                    xlat->size += n;
 #ifdef FRAGMENTED_HEAP
                     total_removed += n;
 #endif
                 } else {
-                    // Memorize this latest gap.
                     last_sweeped = d;
-
                     add_gap (n);
                 }
 
@@ -284,10 +279,9 @@ check_xlat:
 
         // Undo address shifting with negative gap entry in
         // order to not affect the following heap's pointers.
-        xlat -= sizeof (lispptr);
-        *(lispptr *) xlat = s;
-        xlat -= sizeof (size_t);
-        *(size_t *) xlat = -total_removed;
+        xlat--;
+        xlat->pos  = s;
+        xlat->size = -total_removed;
         if (xlat == xlat_start)
             xlat_full = true;
 #ifdef VERBOSE_GC
@@ -313,11 +307,10 @@ relocate_ptr (char * x)
     // Sum up gap sizes up to the pointer.
     gapsize = 0;
     for (r = xlat_end; r != xlat;) {
-        r -= sizeof (lispptr);
-        if (*(char **) r > x)
+        r--;
+        if (r->pos > (lispptr) x)
             break;
-        r -= sizeof (size_t);
-        gapsize += *(size_t *) r;
+        gapsize += r->size;
     }
 
     // Subtract it from the pointer.

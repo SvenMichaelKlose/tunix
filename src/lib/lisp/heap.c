@@ -16,7 +16,6 @@
 
 #include "liblisp.h"
 
-#define RELOC_TABLE_SIZE (RELOC_TABLE_ENTRIES * (sizeof (lispptr) + sizeof (size_t)))
 #ifdef GC_STRESS
     #define NEEDS_GC(size)  do_gc_stress
 #else
@@ -370,10 +369,10 @@ init_heap ()
     stack = stack_end;
 
     // Allocate relocation table.
-    xlat_start = malloc (RELOC_TABLE_SIZE);
+    xlat_start = malloc (RELOC_TABLE_ENTRIES * sizeof (xlat_item));
     if (!xlat_start)
         return false;
-    xlat_end = xlat_start + RELOC_TABLE_SIZE;
+    xlat_end = xlat_start + RELOC_TABLE_ENTRIES;
 
     // Allocate heap.
 #ifdef __CC65__

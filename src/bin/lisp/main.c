@@ -942,22 +942,30 @@ char * env_files[] = {
     "smoke-test.lisp",
 #endif
     "env-1.lisp",
+
+    // Target-specific
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
     "cbm-common.lisp",
 #endif
 #ifdef TARGET_UNIX
     "unix.lisp",
 #endif
+
 #ifdef TEST
     "test.lisp",
 #endif
     "env-2.lisp",
-#ifdef TARGET_C16
-    "welcome.lisp",
-#endif
+
 #if defined (TEST) && !defined(NO_ONERROR)
     "test-onerror.lisp",
 #endif
+
+    // Early end for small machines.
+    // TODO: More generic name than TARGET_C16.
+#ifdef TARGET_C16
+    "welcome.lisp",
+#endif
+
 #ifndef TARGET_C16
     "env-3.lisp",
 #ifdef TEST

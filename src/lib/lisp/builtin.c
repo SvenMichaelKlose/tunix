@@ -3,6 +3,7 @@
 #endif
 
 #include <ctype.h>
+#include <limits.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -27,10 +28,9 @@ add_builtins (struct builtin * b)
 void FASTCALL
 name_to_buffer (lispptr s)
 {
-    uchar len;  // TODO: tmpc
-    len = SYMBOL_LENGTH(s);
-    memcpy (buffer, SYMBOL_NAME(s), len);
-    buffer[len] = 0;
+    lisp_len = SYMBOL_LENGTH(s);
+    memcpy (buffer, SYMBOL_NAME(s), lisp_len);
+    buffer[lisp_len] = 0;
 }
 
 // Make expression calling procedure 'arg1' with 'args',

@@ -94,12 +94,6 @@
 //#define VERBOSE_LOAD
 
 
-/// Type dimensions
-
-// Maximum symbol name length.
-//#define MAX_SYMBOL  255
-
-
 /// Memory allocation
 
 // Stack and table sizes.
@@ -130,7 +124,6 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 // Commodore C16
@@ -148,7 +141,6 @@
 #define STACK_SIZE          768
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 64
-#define MAX_SYMBOL          255
 #endif
 
 // Commodore C64
@@ -161,7 +153,6 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 // Commodore PET
@@ -175,7 +166,6 @@
 #define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 // Commodore Plus/4
@@ -188,7 +178,6 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 // Commodore VIC-20/VC-20
@@ -203,7 +192,6 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 // Unixoids
@@ -218,7 +206,6 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL          255
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
@@ -280,8 +267,10 @@ typedef long           lispnum_t;
 typedef void *         lispptr;
 #ifdef __CC65__
 typedef uchar          array_index_t;
+typedef uchar          lispobj_size_t;
 #else
 typedef unsigned int   array_index_t;
+typedef size_t         lispobj_size_t;
 #endif
 
 typedef struct _cons {
@@ -303,11 +292,17 @@ typedef struct _number {
 } number;
 
 typedef struct _symbol {
-    uchar    type;
-    lispptr  value;
-    lispptr  next;
-    uchar    length;
+    uchar           type;
+    lispptr         value;
+    lispptr         next;
+    lispobj_size_t  length;
 } symbol;
+
+#ifdef __CC65__
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#else
+#define MAX_SYMBOL  65536
+#endif
 
 typedef lispptr (*builtin_fun) (void);
 
@@ -357,9 +352,16 @@ extern bool do_exit_program;
 extern bool do_compress_cons;
 #endif
 
+extern char * heap_start;
+extern char * stack_end;
+extern char * tagstack_end;
+extern char * xlat_end;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
+
+extern lispobj_size_t lisp_len;
 
 // For processing lists with no recursions.
 extern lispptr list_start;
@@ -371,20 +373,17 @@ extern char    tmpc;
 extern char *  tmpstr;
 
 #ifdef FRAGMENTED_HEAP
-extern struct heap_fragment * heap;
-extern struct heap_fragment heaps[];
+extern struct  heap_fragment * heap;
+extern struct  heap_fragment heaps[];
 #endif
 
-extern char * heap_start;
-extern char * heap_free;
-extern char * heap_end;
-
-extern char * stack;
-extern char * stack_end;
-
-extern char * tagstack_start;
-extern char * tagstack;
-extern char * tagstack_end;
+extern char *  heap_free;
+extern char *  heap_end;
+extern char *  stack;
+extern char *  stack_start;
+extern char *  tagstack_start;
+extern char *  tagstack;
+extern char *  xlat_start;
 
 extern lispptr x;
 extern lispptr args;
@@ -394,7 +393,7 @@ extern lispptr arg1;
 extern lispptr arg2;
 extern lispptr arg2c;
 extern lispptr value;
-extern bool unevaluated;    // Tell eval0() to not evaluate arguments.
+extern bool    unevaluated; // Tell eval0() to not evaluate arguments.
 
 extern lispptr block_sym;
 extern lispptr return_sym;
@@ -406,28 +405,28 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
-extern char error_code;
+extern char    error_code;
 extern lispptr debug_step;
 
 #ifndef NO_MACROEXPAND
-extern bool is_macroexpansion;
+extern bool    is_macroexpansion;
 extern lispptr macroexpand_sym;
 #endif
 
 extern lispptr va; // Temporary in 'eval.c'.
 
 #ifdef __CC65__
+#pragma zpsym ("lisp_len")
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
-#pragma zpsym ("heap_start")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
 #pragma zpsym ("stack")
-#pragma zpsym ("stack_end")
+#pragma zpsym ("stack_start")
 #pragma zpsym ("tagstack_start")
-#pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
+#pragma zpsym ("xlat_start")
 #pragma zpsym ("error_code")
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("x")
@@ -495,12 +494,12 @@ extern bool do_gc_stress;
 #endif
 
 #ifdef SLOW
-    #define PUSH(x)         pushgc (x)
-    #define POP(x)          do { x = popgc (); } while (0)
-    #define PUSH_TAG(x)     pushtag (x)
-    #define POP_TAG(x)      do { x = poptag (); } while (0)
-    #define PUSH_TAGW(x)    pushtagw (x)
-    #define POP_TAGW(x)     do { x = poptagw (); } while (0)
+    #define PUSH(x)          pushgc (x)
+    #define POP(x)           do { x = popgc (); } while (0)
+    #define PUSH_TAG(x)      pushtag (x)
+    #define POP_TAG(x)       do { x = poptag (); } while (0)
+    #define PUSH_TAGW(x)     pushtagw (x)
+    #define POP_TAGW(x)      do { x = poptagw (); } while (0)
     extern void     FASTCALL pushgc (lispptr);
     extern lispptr           popgc (void);
     extern void     FASTCALL pushtag (char);
@@ -709,9 +708,9 @@ extern lispptr           eval            (void);
 extern lispptr           eval_list       (void);
 extern lispptr           funcall         (void);
 
-extern void              gc              (void);
-extern size_t FASTCALL   objsize         (char *);
-extern size_t            heap_free_size  (void);
+extern void              gc               (void);
+extern lispobj_size_t    FASTCALL objsize (char *);
+extern size_t            heap_free_size   (void);
 
 #define REPL_STD        0
 #define REPL_DEBUGGER   1

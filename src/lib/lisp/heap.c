@@ -38,32 +38,34 @@ struct heap_fragment heaps[] = {
 };
 #endif // #ifdef FRAGMENTED_HEAP
 
-lispptr t;
-lispptr first_symbol;
-lispptr last_symbol;
-extern char * xlat_start;
-extern char * xlat_end;
+lispptr  t;
+lispptr  first_symbol;
+lispptr  last_symbol;
 
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment * heap;
 #endif
 
+char *   heap_start;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-lispptr tmp2;
-char tmpc;
-char * heap_start;
-char * heap_free;
-char * heap_end;
-char * h;
-char * ptr;
-char   type;
-symbol *  sym;
+lispobj_size_t lisp_len;
+lispptr  tmp;
+lispptr  tmp2;
+char     tmpc;
+char *   heap_free;
+char *   heap_end;
+char *   h;
+char *   ptr;
+char     type;
+symbol * sym;
 #ifdef __CC65__
+#pragma zpsym ("lisp_len")
+#pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
-#pragma zpsym ("heap_start");
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");
 #pragma zpsym ("h");
@@ -83,11 +85,11 @@ extern char do_putback;
 #endif
 
 lispptr universe;
-char buffer[MAX_SYMBOL + 1];
-uchar lisp_sizes[TYPE_EXTENDED * 2];
+char    buffer[MAX_SYMBOL + 1];
+uchar   lisp_sizes[TYPE_EXTENDED * 2];
 
 #ifdef GC_STRESS
-bool do_gc_stress;
+bool    do_gc_stress;
 #endif
 
 // Add object to root list of garbage collector.
@@ -98,7 +100,7 @@ expand_universe (lispptr x)
 }
 
 // Get size of object in bytes.
-size_t FASTCALL
+lispobj_size_t FASTCALL
 objsize (char * x)
 {
     uchar s;

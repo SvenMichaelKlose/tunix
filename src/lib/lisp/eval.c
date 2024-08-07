@@ -12,7 +12,9 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-char * stack_start;
+char *  stack_end;
+char *  tagstack_end;
+
 lispptr current_expr;
 #ifndef NAIVE
 lispptr current_function;
@@ -30,15 +32,13 @@ lispptr unevaluated_arg1;
 lispptr arg1;
 lispptr arg2c;
 lispptr arg2;
-lispptr tmp;
 lispptr value;
-char * stack;
-char * stack_end;
-char * stack_old_arg_values;
-char * stack_entered;
-char * tagstack_start;
-char * tagstack_end;
-char * tagstack;
+char *  stack;
+char *  stack_start;
+char *  stack_old_arg_values;
+char *  stack_entered;
+char *  tagstack_start;
+char *  tagstack;
 lispptr argdefs;
 struct builtin * bfun;
 lispptr va;
@@ -50,17 +50,16 @@ lispptr return_value;
 lispptr go_sym;
 lispptr go_tag;
 lispptr debug_step;
-bool do_invoke_debugger;
-bool tag_found;
+bool    do_invoke_debugger;
+bool    tag_found;
 #ifndef NAIVE
-char error_code;
+char    error_code;
 #endif
-uchar typed_argdef;
-char * builtin_argdef;
-uchar num_args;
-bool unevaluated;
+uchar   typed_argdef;
+char *  builtin_argdef;
+uchar   num_args;
+bool    unevaluated;
 #ifdef __CC65__
-#pragma zpsym ("tmp")
 #pragma zpsym ("msg")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
@@ -70,12 +69,11 @@ bool unevaluated;
 #pragma zpsym ("arg2")
 #pragma zpsym ("value")
 #pragma zpsym ("stack")
-#pragma zpsym ("stack_end")
+#pragma zpsym ("stack_start")
 #pragma zpsym ("stack_old_arg_values")
 #pragma zpsym ("stack_entered")
-#pragma zpsym ("tagstack_start")
-#pragma zpsym ("tagstack_end")
 #pragma zpsym ("tagstack")
+#pragma zpsym ("tagstack_start")
 #pragma zpsym ("argdefs")
 #pragma zpsym ("value")
 #pragma zpsym ("bfun")

@@ -14,10 +14,6 @@
 #include <stdio.h>
 #endif
 
-// Relocation table
-extern char * xlat_start;
-extern char * xlat_end;
-char * xlat_start;
 char * xlat_end;
 
 extern lispptr lisp_fnin;
@@ -91,7 +87,7 @@ extern struct heap_fragment   heaps[];
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-size_t n;
+lispobj_size_t n;
 
 char * s;   // Source
 char * d;   // Destination
@@ -103,6 +99,7 @@ char * p;
 char * r;
 
 char * xlat;
+char * xlat_start;
 bool   xlat_full;
 char * last_sweeped; // For merging consecutive gaps.
 size_t gapsize;
@@ -113,6 +110,7 @@ size_t gapsize;
 #pragma zpsym ("p")
 #pragma zpsym ("r")
 #pragma zpsym ("xlat")
+#pragma zpsym ("xlat_start")
 #pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
 #pragma bss-name (pop)
@@ -123,7 +121,7 @@ size_t total_removed;
 #endif
 
 void FASTCALL
-add_gap (size_t n)
+add_gap (lispobj_size_t n)
 {
     // Log gap position and size.
     xlat -= sizeof (lispptr);

@@ -2,6 +2,7 @@
 #include <ingle/cc65-charmap.h>
 #endif
 
+#include <limits.h>
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>

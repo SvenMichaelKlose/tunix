@@ -23,3 +23,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exit interpreter if out of heap.
 - Detect if relocation table is full when switching to the next heap.
 - Add PARANOID relocation table overflow check to GC sweep phase.
+- New option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
+  each compressed cons.

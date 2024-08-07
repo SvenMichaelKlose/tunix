@@ -203,7 +203,9 @@ sweep ()
                 else if (do_compress_cons && !xlat_full && _CONSP(s) && !_EXTENDEDP(s)) {
                     // ...if CDR is pointing to the following object.
                     if (CONS(s)->cdr == s + sizeof (cons)) {
+#ifdef VERBOSE_COMPRESSED_CONS
                         out ('C');
+#endif
 
                         // Copy with mark bit cleard and type extended.
                         *d = (*s & ~TYPE_MARKED) | TYPE_EXTENDED;
@@ -436,7 +438,9 @@ restart:
     // Restart if sweep was interrupted due
     // to full relocation table.
     if (xlat_full) {
+#ifdef VERBOSE_GC
         outs ("!GC restart!");
+#endif
         goto restart;
     }
 

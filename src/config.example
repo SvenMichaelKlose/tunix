@@ -16,7 +16,8 @@ TARGET = vic20  # VIC-20 has the largest code base.
 
 # Compress conses whose CDR points to the following object.
 # (EXPERIMENTAL!)
-#COMPRESS_CONS = 1
+#COMPRESSED_CONS = 1
+#VERBOSE_COMPRESSED_CONS = 1  # Print 'C' for each compressed cons.
 
 # GC after load threshold in bytes.
 # If total free heap is below, GC is run compressing conses if

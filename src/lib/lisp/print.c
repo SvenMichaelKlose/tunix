@@ -93,14 +93,15 @@ print_list (cons * c)
         print_highlighted (c, HIGHLIGHT_BEFORE);
         print0 (c->car);
         print_highlighted (c, HIGHLIGHT_AFTER);
-        if (c->cdr && !CONSP(c->cdr)) {
+        tmp = CDR(c);
+        if (tmp && !CONSP(tmp)) {
             outs (" . ");
             print_highlighted (c, HIGHLIGHT_BEFORE);
-            print0 (c->cdr);
+            print0 (CDR(c));
             print_highlighted (c, HIGHLIGHT_AFTER);
             break;
         }
-        c = c->cdr;
+        c = CDR(c);
     }
     out (')');
 }

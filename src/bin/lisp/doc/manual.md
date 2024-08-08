@@ -353,6 +353,24 @@ easier:
 | pX      | Evaluate and print expression X.         |
 **Debugger short commands**
 
+## Breakpoints
+
+Global variable \*b\* is a list of names of procedures
+which, if called, will invoke the debugger.
+
+Use the PUSH macro to set a breakpoint:
+
+~~~lisp
+; Invoke debugger if SUBSEQ is called.
+(push 'subseq *b*)
+
+; Delete a breakpoint.
+(= *b* (remove 'subseq *b*))
+
+; Delete all breakpoints.
+(= *b* nil)
+~~~
+
 ## User-defined error handler ONERROR
 
 | Function        | Description                           |

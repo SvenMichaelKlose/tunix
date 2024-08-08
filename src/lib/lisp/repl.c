@@ -242,9 +242,11 @@ lisp_repl (char mode)
 
         // Macro expansion if MACROEXPAND is a user function.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
+#ifndef NO_DEBUGGER
             // Avoid debug step into MACROEXPAND.
             PUSH(debug_step);
             debug_step = nil;
+#endif
 
             // Call MACROEXPAND.
             x = make_cons (x, nil);
@@ -253,7 +255,9 @@ lisp_repl (char mode)
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
 
+#ifndef NO_DEBUGGER
             POP(debug_step);
+#endif
         }
 #endif // #ifndef NO_MACROEXPAND
 

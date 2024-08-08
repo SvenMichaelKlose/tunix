@@ -1,5 +1,6 @@
-[ ] "Args missing" in rare cases for unknown reason.
-[ ] LOAD: Issue error if file does not exist.
+[@] LOAD: Issue error if file does not exist.
+[ ] "Args missing" to user procedures in rare cases for
+    unknown reasons.
 
 Commodore PET
 [ ] Breaks program start with syntax error.

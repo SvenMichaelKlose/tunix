@@ -153,58 +153,6 @@ check_stacks (char * old_stack, char * old_tagstack)
         internal_error ("tagstack");
 }
 
-void
-out_colon (void)
-{
-    outs (": ");
-}
-
-// Print error info.
-void
-print_error_info ()
-{
-    if (error_code) {
-        outs ("Error #");
-        outn (error_code);
-        out_colon ();
-        if (last_errstr)
-            outs (last_errstr);
-        terpri ();
-    }
-    fresh_line ();
-
-    do_highlight = true;
-#ifdef DEBUG_INTERNAL
-    outs ("Eval'd: ");
-    print (current_expr);
-    terpri ();
-#endif
-
-    // Print last result unless it's the current expression.
-    if (value != current_function && value != current_toplevel) {
-        outs ("Last result: ");
-        print (value);
-        terpri ();
-    }
-
-    outs ("In");
-    if (current_function) {
-        outs (" function ");
-        tmp2 = SYMBOL_VALUE(current_function);
-        print (current_function);
-        out (' ');
-        print (FUNARGS(tmp2));
-        out_colon ();
-        terpri ();
-        print (FUNBODY(tmp2));
-    } else {
-        out_colon ();
-        print (current_toplevel);
-    }
-    do_highlight = false;
-    terpri ();
-}
-
 #ifndef NO_ONERROR
 void
 init_onerror ()

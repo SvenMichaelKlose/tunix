@@ -779,7 +779,7 @@ init_eval ()
     current_function = nil;
 #endif
 #ifndef NO_DEBUGGER
-    breakpoints_sym = make_symbol ("*brk*", 5);
+    breakpoints_sym = make_symbol ("*b*", 3);
     expand_universe (breakpoints_sym);
     SET_SYMBOL_VALUE(breakpoints_sym, nil);
     do_invoke_debugger = false;

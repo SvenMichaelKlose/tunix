@@ -968,6 +968,9 @@ char * env_files[] = {
 
 #ifndef TARGET_C16
     "env-3.lisp",
+#ifndef NO_DEBUGGER
+    "stack.lisp",
+#endif
 #ifdef TEST
     "test-file.lisp",
 #endif

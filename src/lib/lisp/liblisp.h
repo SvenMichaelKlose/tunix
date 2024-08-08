@@ -22,9 +22,6 @@
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
 
-// Print message if MACROEXPAND takes action.
-//#define VERBOSE_MACROEXPAND
-
 
 /// Testing and debugging
 
@@ -411,8 +408,14 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
+#ifndef NAIVE
 extern char    error_code;
+#endif
+
+#ifndef NO_DEBUGGER
 extern lispptr debug_step;
+extern lispptr debugger_return_value_sym;
+#endif
 
 #ifndef NO_MACROEXPAND
 extern bool    is_macroexpansion;
@@ -434,6 +437,9 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tagstack")
 #pragma zpsym ("xlat_start")
 #pragma zpsym ("error_code")
+#ifndef NO_DEBUGGER
+#pragma zpsym ("debug_step")
+#endif
 #pragma zpsym ("unevaluated")
 #pragma zpsym ("x")
 #pragma zpsym ("args")
@@ -450,7 +456,6 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("delayed_eval")
-#pragma zpsym ("debug_step")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
 #pragma zpsym ("va")

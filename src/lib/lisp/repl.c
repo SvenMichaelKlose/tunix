@@ -220,9 +220,10 @@ lisp_repl (char mode)
                     x = read ();
                     terpri ();
                     eval ();
-                    if (SYMBOLP(value)) {
-                        SET_SYMBOL_VALUE(breakpoints_sym,
-                                         make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
+                    if (SYMBOLP(x)) {
+                        if (x)
+                            SET_SYMBOL_VALUE(breakpoints_sym,
+                                             make_cons (x, SYMBOL_VALUE(breakpoints_sym)));
                         goto print_breakpoints;
                     }
                     goto want_symbol;

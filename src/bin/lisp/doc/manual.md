@@ -369,15 +369,16 @@ it'll be restored.
 
 These are the available short commands:
 
-| Command | Description                              |
-|---------|------------------------------------------|
-| c       | Continue program execution.              |
-| s       | Step into user-defined procedure.        |
-| n       | Execute current expression in whole.     |
-| pX      | Evaluate and print expression X.         |
-| bS      | Set breakpoint on procedure S.           |
-| dS      | Delete breakpoint on procedure S.        |
-| d       | Delete all breakpoints.                  |
+| Command | Description                                    |
+|---------|------------------------------------------------|
+| c       | Continue program execution.                    |
+| s       | Step into user-defined procedure.              |
+| n       | Execute current expression in whole.           |
+| pX      | Evaluate and print expression X.  (No macros!) |
+| bS      | Set breakpoint on procedure S.                 |
+| b       | Print breakpoints.                             |
+| dS      | Delete breakpoint on procedure S.              |
+| d       | Delete all breakpoints.                        |
 
 Command "p" evaluates the expression immediately following
 it.  A macro expansion is *not* performed and it'll *not*
@@ -402,8 +403,8 @@ You can modify \*B\* using the regular set of procedures:
 ~~~
 
 Inside the debugger REPL that's inconvenient as every
-regular expression changes the debugger's return value.
-Use short commands 'b' and 'd' instead.
+regular expression changes the debugger's return value.  Use
+short commands 'b' and 'd' instead.
 
 ~~~lisp
 bsubseq ; Set breakpoint on SUBSEQ.
@@ -416,7 +417,6 @@ d       ; Delete all breakpoints.
 |-----------------|---------------------------------------|
 | (onerror n x x) | User-defined error handler.           |
 | (ignore)        | Break and continue with LOAD or REPL. |
-**Error handling related functions**
 
 If defined, user-defined function ONERROR is called on
 errors, except for internal ones which halt the interpreter

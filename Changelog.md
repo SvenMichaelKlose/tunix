@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
   each compressed cons.
 - Breakpoints on user-defined procedures. (Symbol list "\*b\*".)
+- Debugger keeps its current return value in symbol "\*r\*".
 
 #### Changed
 

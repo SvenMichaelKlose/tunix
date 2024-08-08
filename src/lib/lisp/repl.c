@@ -29,6 +29,7 @@ lispptr current_toplevel;
 char    num_repls;          // REPL count.
 #ifndef NO_DEBUGGER
 char    num_debugger_repls; // Debugger REPL count.
+lispptr debugger_return_value_sym; // Old (erroraneous) 'value'.
 #endif
 bool    do_break_repl;      // Tells current REPL to return.
 bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
@@ -62,14 +63,13 @@ print_debugger_info ()
 
     // Print last result unless it's the current expression.
     if (value != current_function && value != current_toplevel) {
-        outs ("Return value: ");
+        outs ("Rvalue: ");
         print (value);
         terpri ();
     }
 
     outs ("In");
     if (current_function) {
-        outs (" function ");
         tmp2 = SYMBOL_VALUE(current_function);
         print (current_function);
         out (' ');
@@ -107,6 +107,7 @@ lisp_repl (char mode)
     num_repls++;
 #ifndef NO_DEBUGGER
     if (mode == REPL_DEBUGGER) {
+        SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
         outs ("In debugger #");
         outn (num_debugger_repls);
@@ -202,6 +203,7 @@ lisp_repl (char mode)
 
                 // Print expression.
                 case 'p':
+                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
                     PUSH(x);
                     x = read ();
@@ -214,6 +216,8 @@ lisp_repl (char mode)
                     tmp = nil;
                     terpri ();
                     POP(value);
+                    POP(tmp);
+                    SET_SYMBOL_VALUE(debugger_return_value_sym, tmp);
                     goto next;
 
                 default:
@@ -238,9 +242,6 @@ lisp_repl (char mode)
 
         // Macro expansion if MACROEXPAND is a user function.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
-#ifdef VERBOSE_MACROEXPAND
-            fresh_line (); outs ("X ");
-#endif
             // Avoid debug step into MACROEXPAND.
             PUSH(debug_step);
             debug_step = nil;
@@ -389,6 +390,8 @@ init_repl ()
     num_repls          = 0;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
+    debugger_return_value_sym = make_symbol ("*r*", 3);
+    expand_universe (debugger_return_value_sym);
 #endif
 #ifndef NO_MACROEXPAND
     unexpanded_toplevel = nil;

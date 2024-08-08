@@ -408,8 +408,11 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
+#ifndef NO_DEBUGGER
 extern char    error_code;
 extern lispptr debug_step;
+extern lispptr debugger_return_value_sym;
+#endif
 
 #ifndef NO_MACROEXPAND
 extern bool    is_macroexpansion;

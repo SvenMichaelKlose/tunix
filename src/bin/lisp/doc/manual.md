@@ -324,24 +324,24 @@ New channels are created by OPEN to access files:
 # Debugging and advanced error handling
 
 The debugger is invoked on error unless ONERROR has been
-defined.
-
-The debugger shows a description of the error, followed by
-the current top-level expression, and the erroraneous
-expression emphasized within it and the prompt, indicating
-wait for input.  Here's an example, triggering an error by
-trying to call the undefined function CAUSE-ERROR:
+defined.  It prints status info before waiting for user
+input, like this:
 
 ~~~
-* (some-undefined-function)
-Debugger #1:
-Error #5: Not a fun.
+Debugger #<number of nested debuggers>:
+Issue #5: <reason for debugging>
+Rvalue: <last expression's and debugger's return value>
 In :
-(>>> some-undefined-function <<<)
+<top-level expression with current one highlighted>
 ~~~
 
 The debugger takes commands like the regular REPL, e.g.
 "(print x)" will print evaluated X in the current context.
+The return value of the debugger will change with every
+expression you enter.  Symbol \*R\* contains the return
+value when the debugger was invoked, should you want to
+see or use it again.
+
 It also knows single-character commands to make your life
 easier:
 
@@ -352,6 +352,11 @@ easier:
 | n       | Execute current expression in whole.     |
 | pX      | Evaluate and print expression X.         |
 **Debugger short commands**
+
+Command "p" evaluates the expression immediately following
+it but does *not* change the debugger's return value.
+If you want to see the values of symbol C, S, N, or P,
+just enter "pc", "ps", "pn", or "pp" respectively.
 
 ## Breakpoints
 

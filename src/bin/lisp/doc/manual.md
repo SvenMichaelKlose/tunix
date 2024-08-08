@@ -410,6 +410,7 @@ short commands 'b' and 'd' instead.
 bsubseq ; Set breakpoint on SUBSEQ.
 dsubseq ; Delete breakpoint on SUBSEQ.
 d       ; Delete all breakpoints.
+~~~
 
 ## User-defined error handler ONERROR
 

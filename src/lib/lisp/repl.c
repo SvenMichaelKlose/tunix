@@ -85,6 +85,19 @@ print_debugger_info ()
     terpri ();
 }
 
+void
+read_cmd_arg (void)
+{
+    if (in () < ' ')
+        value = nil;
+    else {
+        putback ();
+        x = read ();
+        eval ();
+    }
+    terpri ();
+}
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
@@ -206,24 +219,20 @@ lisp_repl (char mode)
                 case 'p':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
-                    x = read ();
-                    terpri ();
-                    eval ();
+                    read_cmd_arg ();
                     outs ("Value: ");
-                    print (x);
+                    print (value);
                     goto done_short_command;
 
                 // Set breakpoint.
                 case 'b':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
-                    x = read ();
-                    terpri ();
-                    eval ();
-                    if (SYMBOLP(x)) {
-                        if (x)
+                    read_cmd_arg ();
+                    if (SYMBOLP(value)) {
+                        if (value)
                             SET_SYMBOL_VALUE(breakpoints_sym,
-                                             make_cons (x, SYMBOL_VALUE(breakpoints_sym)));
+                                             make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
                         goto print_breakpoints;
                     }
                     goto want_symbol;
@@ -232,16 +241,13 @@ lisp_repl (char mode)
                 case 'd':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
-                    x = read ();
-                    terpri ();
-                    eval ();
+                    read_cmd_arg ();
                     if (SYMBOLP(value)) {
-                        SET_SYMBOL_VALUE(breakpoints_sym,
-                                         value ?
-                                             copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, x) :
-                                             nil);
-                        goto print_breakpoints;
+                        if (value)
+                            copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, value);
+                        SET_SYMBOL_VALUE(breakpoints_sym, value);
                     }
+                    goto print_breakpoints;
 want_symbol:
                     outs ("Want symbol!");
                     goto done_short_command;

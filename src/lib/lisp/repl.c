@@ -34,6 +34,57 @@ bool    do_break_repl;      // Tells current REPL to return.
 bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
 bool    do_exit_program;    // Return to top-level REPL.
 
+void
+out_colon (void)
+{
+    outs (": ");
+}
+
+void
+print_debugger_info ()
+{
+    if (error_code) {
+        outs ("Error #");
+        outn (error_code);
+        out_colon ();
+        if (last_errstr)
+            outs (last_errstr);
+        terpri ();
+    }
+    fresh_line ();
+
+    do_highlight = true;
+#ifdef DEBUG_INTERNAL
+    outs ("Eval'd: ");
+    print (current_expr);
+    terpri ();
+#endif
+
+    // Print last result unless it's the current expression.
+    if (value != current_function && value != current_toplevel) {
+        outs ("Return value: ");
+        print (value);
+        terpri ();
+    }
+
+    outs ("In");
+    if (current_function) {
+        outs (" function ");
+        tmp2 = SYMBOL_VALUE(current_function);
+        print (current_function);
+        out (' ');
+        print (FUNARGS(tmp2));
+        out_colon ();
+        terpri ();
+        print (FUNBODY(tmp2));
+    } else {
+        out_colon ();
+        print (current_toplevel);
+    }
+    do_highlight = false;
+    terpri ();
+}
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
@@ -89,7 +140,7 @@ lisp_repl (char mode)
 
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
-        print_error_info ();
+        print_debugger_info ();
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;
@@ -104,7 +155,7 @@ lisp_repl (char mode)
     while (!eof ()) {
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
-            print_error_info ();
+            print_debugger_info ();
             error_code = 0;
         }
 #endif

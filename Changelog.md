@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Changed
 
 - Interpreter exits if out of heap instead of going vodka.  This is temporary.
+- Debugger command 'p': Does not modify the return value.
 
 ### libsimpleio
 

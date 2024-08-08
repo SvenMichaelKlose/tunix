@@ -151,6 +151,7 @@ lisp_repl (char mode)
 
                 // Print expression.
                 case 'p':
+                    PUSH(value);
                     PUSH(x);
                     x = read ();
                     terpri ();
@@ -161,6 +162,7 @@ lisp_repl (char mode)
                     print (tmp);
                     tmp = nil;
                     terpri ();
+                    POP(value);
                     goto next;
 
                 default:

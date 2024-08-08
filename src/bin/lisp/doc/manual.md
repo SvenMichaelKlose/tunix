@@ -324,26 +324,33 @@ New channels are created by OPEN to access files:
 # Debugging and advanced error handling
 
 The debugger is invoked on error unless ONERROR has been
-defined.  It prints status info before waiting for user
-input, like this:
+defined.
+
+## The debugger REPL
+
+The debugger is the REPL in debug mode.  It prints a status
+info before waiting for user input.  It has this format:
 
 ~~~
 Debugger #<number of nested debuggers>:
 Issue #5: <reason for debugging>
-Rvalue: <last expression's and debugger's return value>
+Rvalue: <last expression's (and debugger's) return value>
 In :
 <top-level expression with current one highlighted>
 ~~~
 
-The debugger takes commands like the regular REPL, e.g.
-"(print x)" will print evaluated X in the current context.
-The return value of the debugger will change with every
-expression you enter.  Symbol \*R\* contains the return
-value when the debugger was invoked, should you want to
-see or use it again.
+The debugger takes expressions like the regular REPL, plus
+some commands consisting of a single character to step
+through the code conveniently.  The return value of the
+debugger will change with every expression you enter, expect
+for the aforementioned short commands.  In case of an error,
+that's the value you want to replace with a valid one before
+letting the program continue.  Symbol \*R\* contains the
+return value when the debugger was invoked, should you want
+to see or use it again although you've replaced it already –
+just enter "*r*" and it'll be restored.
 
-It also knows single-character commands to make your life
-easier:
+These are the available short commands:
 
 | Command | Description                              |
 |---------|------------------------------------------|
@@ -354,19 +361,18 @@ easier:
 **Debugger short commands**
 
 Command "p" evaluates the expression immediately following
-it but does *not* change the debugger's return value.
-If you want to see the values of symbol C, S, N, or P,
-just enter "pc", "ps", "pn", or "pp" respectively.
+it.  A macro expansion is *not* performed and it'll *not*
+change the debugger's return value.
 
 ## Breakpoints
 
-Global variable \*b\* is a list of names of procedures
-which, if called, will invoke the debugger.
+Global variable \*B\* is a list procedures' names which, if
+called, will invoke the debugger.
 
-Use the PUSH macro to set a breakpoint:
+You can modify \*B\* using the regular set of procedures:
 
 ~~~lisp
-; Invoke debugger if SUBSEQ is called.
+; Set breakpoint on procedure SUBSEQ.
 (push 'subseq *b*)
 
 ; Delete a breakpoint.
@@ -394,22 +400,21 @@ QUIT or use IGNORE.
 ### Arguments to ONERROR
 
 ONERROR is called with the error code, the current REPL
-expression or body of the user-defined function thas is
-evaluated, and the expression inside it is faulty.
+(top-level) expression, and the faulty expression within
+that:
 
 ~~~lisp
 ; SKETCH! UNTESTED!
 ; Load missing functions on demand.
-(fn onerror (n repl x)
-  ; n:    Error code
-  ; repl: Top-level expression or
-  ;       body of user-defined function.
-  ; x:    The faulty expression in 'repl'.
+(fn onerror (errcode repl faulty)
+  ; errcode: Error code.
+  ; repl:    Top-level expression or
+  ;          body of user-defined function.
+  ; faulty:  The faulty expression in 'repl'.
   (? (== n 1) ; Not a function error.
      ; Evaluate matching definition in environment file.
      (with-infile f "env.lisp"
        (while (not (eof))
-              nil
          (!= (read)
            (when (and (cons? !)
                       (or (eq (car !) 'var)

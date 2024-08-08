@@ -323,32 +323,44 @@ New channels are created by OPEN to access files:
 
 # Debugging and advanced error handling
 
-The debugger is invoked on error unless ONERROR has been
-defined.
+The debugger is invoked in case of an error unless ONERROR
+has been defined.  Beatiful things can be done by handling
+errors automatically, but let's get our hands on the
+debugger first.
 
 ## The debugger REPL
 
 The debugger is the REPL in debug mode.  It prints a status
-info before waiting for user input.  It has this format:
+info before waiting for user input, so you know where the
+program execution has been interrupted.  It has this format:
 
 ~~~
-Debugger #<number of nested debuggers>:
-Issue #5: <reason for debugging>
+Debugger <number of nested debuggers>:
+Error #5: <reason for break>
 Rvalue: <last expression's (and debugger's) return value>
-In :
+In:
 <top-level expression with current one highlighted>
 ~~~
 
 The debugger takes expressions like the regular REPL, plus
 some commands consisting of a single character to step
-through the code conveniently.  The return value of the
-debugger will change with every expression you enter, expect
-for the aforementioned short commands.  In case of an error,
-that's the value you want to replace with a valid one before
-letting the program continue.  Symbol \*R\* contains the
-return value when the debugger was invoked, should you want
-to see or use it again although you've replaced it already –
-just enter "*r*" and it'll be restored.
+through the code conveniently.  If another error occurs,
+yet another debugger REPL will be invoked and the "number of
+nested debuggers" incremented.
+
+The current expression is either the one that failed, or the
+one that will be evaluated next in cause the debugger
+stopped at a breakpoint (and no error number and description
+is shown).
+
+The return value of the debugger will change with every
+expression you enter, except when using aforementioned short
+commands.  In case of an error, that's the value you want to
+replace with a valid one before continuing program
+execution.  Symbol \*R\* contains the return value when the
+debugger was invoked, should you want to see or use it again
+although you've replaced it already – just enter "*r*" and
+it'll be restored.
 
 These are the available short commands:
 

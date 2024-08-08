@@ -109,8 +109,9 @@ lisp_repl (char mode)
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
-        outs ("In debugger #");
+        outs ("Debugger ");
         outn (num_debugger_repls);
+        out (':');
         terpri ();
     }
 #endif
@@ -205,15 +206,11 @@ lisp_repl (char mode)
                 case 'p':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
-                    PUSH(x);
                     x = read ();
                     terpri ();
-                    PUSH_TAG(TAG_DONE);
-                    tmp = eval0 ();
-                    POP(x);
+                    eval ();
                     outs ("Value: ");
-                    print (tmp);
-                    tmp = nil;
+                    print (x);
                     terpri ();
                     POP(value);
                     POP(tmp);

@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -204,7 +205,7 @@ sweep ()
                         out ('C');
 #endif
 
-                        // Copy with mark bit cleard and type extended.
+                        // Copy with mark bit cleared and type extended.
                         *d = (*s & ~TYPE_MARKED) | TYPE_EXTENDED;
 
                         // Copy CAR.
@@ -442,4 +443,166 @@ restart:
 next_heap:
     switch_heap ();
 #endif
+}
+
+// Address of moved-up heap.
+char * heap_old;
+size_t heap_used;
+size_t heap_unused;
+
+bool
+compression_needs_break (void)
+{
+    // Skip what's already been dealt with.
+    if (!s || MARKED(s))
+        return true;
+
+    // Stop if relocation table is full.
+    if (xlat == xlat_start) {
+        // Mark for post-GC.
+        mark (s);
+        return true;
+    }
+
+    return false;
+}
+
+void compress_object (void);
+
+void
+compress_list (void)
+{
+    list_start = d;
+
+next_cons:
+    if (compression_needs_break ())
+        return;
+
+    // Save relocation info.
+    xlat--;
+    xlat->pos  = s;
+    xlat->size = d - s; // TODO
+
+    // Copy regular cons if CDR is an atom that's been
+    // copied already or is NIL.
+    tmp = CDR(s);
+    if (ATOM(tmp) && (!tmp || MARKED(tmp))) {
+        n = sizeof (cons);
+        while (n--)
+            *d++ = *s++;
+        goto process_cars;
+    }
+
+    // Copy as compressed cons type and CAR.
+    *d = *s | TYPE_MARKED | TYPE_EXTENDED;
+    CONS(d)->car = CONS(s)->car;
+
+    // Handle atomic CDR.
+    if (ATOM(tmp)) {
+        s = tmp;
+        compress_object ();
+        goto process_cars;
+    }
+    goto next_cons;
+
+process_cars:
+    p = list_start;
+    while (1) {
+        // Compress CAR list.
+        tmp = CAR(p);
+        if (CONSP(tmp)) {
+            PUSH(p);
+            s = CAR(p);
+            compress_object ();
+            POP(p);
+        }
+
+        // Break on end of list.
+        if (ATOM(CDR(p)))
+            return;
+
+        p = CDR(p);
+    }
+}
+
+void
+compress_object (void)
+{
+restart:
+    if (compression_needs_break ())
+        return;
+
+    if (CONSP(s))
+        compress_list ();
+    else {
+        n = objsize (s);
+
+        // Stop if we're out of space.
+        if (d + n >= heap_old)
+            return;
+
+        // Memorize symbol value.
+        p = nil;
+        if (_NAMEDP(s))
+            p = SYMBOL_VALUE(s);
+
+        // Add relocation info.
+        xlat--;
+        xlat->pos  = s;
+        xlat->size = s - d;  // TODO
+
+        // Copy object marked.
+        *d++ = *s++ | TYPE_MARKED;
+        while (n--)
+            *d++ = *s++;
+
+        // Continue with symbol value.
+        if (p) {
+            s = p;
+            goto restart;
+        }
+    }
+}
+
+void
+move_pointers (char * start, size_t len)
+{
+    start++, len++;
+    return;
+}
+
+size_t c;
+
+void
+compress (void)
+{
+    // Call garbage collector for compacting.
+    gc ();
+
+    // Calculate areas and sizes of old and new heap.
+    heap_old    = heap_start + heap_used;
+    heap_unused = heap_end - heap_free;
+    heap_used   = heap_free - heap_start;
+
+    // Move used heap part up to the end.
+    d = heap_end;
+    s = heap_free;
+    c = heap_used;
+    while (c--)
+        *--d = *--s;
+
+    move_pointers (heap_old, heap_unused);
+
+    // Start with list *universe*.
+    s = universe;
+    d = heap_start;
+    compress_object ();
+
+    // Append old heap to copied one.
+    // TODO: Skip this step by leaving a gap of minimum size
+    // that can be filled with unused dummy objects.
+    memcpy (d, heap_old, heap_used);
+    move_pointers (heap_start, (size_t) (d - heap_start) + heap_used);
+
+    relocate ();
 }

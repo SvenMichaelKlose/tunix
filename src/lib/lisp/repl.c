@@ -179,7 +179,7 @@ lisp_repl (char mode)
             // Read short debugger command, skipping whitespaces.
             do {
                 cmd = in ();
-            } while (cmd > 0 && cmd < ' ');
+            } while (!eof () && cmd < ' ');
 
             // Process short command.
             switch (cmd) {
@@ -211,6 +211,43 @@ lisp_repl (char mode)
                     eval ();
                     outs ("Value: ");
                     print (x);
+                    goto done_short_command;
+
+                // Set breakpoint.
+                case 'b':
+                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
+                    PUSH(value);
+                    x = read ();
+                    terpri ();
+                    eval ();
+                    if (SYMBOLP(value)) {
+                        SET_SYMBOL_VALUE(breakpoints_sym,
+                                         make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
+                        goto print_breakpoints;
+                    }
+                    goto want_symbol;
+
+                // Delete breakpoint.
+                case 'd':
+                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
+                    PUSH(value);
+                    x = read ();
+                    terpri ();
+                    eval ();
+                    if (SYMBOLP(value)) {
+                        SET_SYMBOL_VALUE(breakpoints_sym,
+                                         value ?
+                                             copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, x) :
+                                             nil);
+                        goto print_breakpoints;
+                    }
+want_symbol:
+                    outs ("Want symbol!");
+                    goto done_short_command;
+print_breakpoints:
+                    outs ("Breakpoints: ");
+                    print (SYMBOL_VALUE(breakpoints_sym));
+done_short_command:
                     terpri ();
                     POP(value);
                     POP(tmp);

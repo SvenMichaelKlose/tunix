@@ -330,6 +330,11 @@ debugger first.
 
 ## The debugger REPL
 
+| Variable | Description                            |
+|----------|----------------------------------------|
+|   *b*    | List of symbols that are breakpointed. |
+|   *r*    | Initial return value of current REPL.  |
+
 The debugger is the REPL in debug mode.  It prints a status
 info before waiting for user input, so you know where the
 program execution has been interrupted.  It has this format:
@@ -370,7 +375,9 @@ These are the available short commands:
 | s       | Step into user-defined procedure.        |
 | n       | Execute current expression in whole.     |
 | pX      | Evaluate and print expression X.         |
-**Debugger short commands**
+| bS      | Set breakpoint on procedure S.           |
+| dS      | Delete breakpoint on procedure S.        |
+| d       | Delete all breakpoints.                  |
 
 Command "p" evaluates the expression immediately following
 it.  A macro expansion is *not* performed and it'll *not*
@@ -393,6 +400,15 @@ You can modify \*B\* using the regular set of procedures:
 ; Delete all breakpoints.
 (= *b* nil)
 ~~~
+
+Inside the debugger REPL that's inconvenient as every
+regular expression changes the debugger's return value.
+Use short commands 'b' and 'd' instead.
+
+~~~lisp
+bsubseq ; Set breakpoint on SUBSEQ.
+dsubseq ; Delete breakpoint on SUBSEQ.
+d       ; Delete all breakpoints.
 
 ## User-defined error handler ONERROR
 

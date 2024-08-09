@@ -12,6 +12,7 @@
 
 #ifdef TARGET_UNIX
 #include <stdio.h>
+#include <string.h>
 #endif
 
 extern lispptr lisp_fnin;
@@ -293,6 +294,10 @@ check_xlat:
 #else // #ifdef FRAGMENTED_HEAP
     // Save free pointer.
     heap_free = d;
+#endif
+
+#ifndef NDEBUG
+    bzero (d, heap_end - d);
 #endif
 
     // End symbol list.

@@ -4,3 +4,6 @@
 
 Commodore PET
 [ ] Breaks program start with syntax error.
+
+Old bugs to check
+[ ] 'echo "(exit 0" | ./lisp' causes SIGSEGV.

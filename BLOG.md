@@ -3,7 +3,39 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-08-05
+# 2024-08-08
+
+I've implemented compresses conses right away the next day.
+It's done during "manual" GC, not triggered by the
+allocator, so building lists won't crash because it makes
+CDRs immutable.  I ended up fixing a lot of bugs which was
+great.  But I didn't really check how much space it saved.
+It added to the code size and both factors kind of broke
+even.  Today I sketched an algorithm to copy the heap to
+achieve compression of all lists.  This that bring about a
+third more space. Again: we'll have to see the real thing.
+Implementing it for multiple heaps will probably become
+very interesting.
+
+The tests of the Unix version are quite intense.  The CBM
+versions tend to crash once in a while.  Seems to be a
+single bug hiding somewhere.  It won't escape a vivid eye.
+The set of tests isn't complete any way.
+
+This weekend I'll be having some kind of a vacation, so the
+debugger will get some extra love.  At the moment one can't
+continue a program after a breakpoint kicked in.  In case of
+a breakpoint the debugger REPL is called *before* an
+expression is evaluated; when an error occured it is invoked
+*after* an expression failed.  It would be helpful to be
+able to replace an expression instead of stepping over it.
+The REPL could just return a boolean to indicate that
+'value' is already there.
+
+Now to bed! Expecting chilling evenings and a cigar to
+celebrate.
+
+# 2024-08-06
 
 Files can be written.  That means that apps can be written.
 But there's still not enough heap, although there is enough
@@ -14,7 +46,7 @@ unnerving to reload the environment either, so images must
 be there – and those can be optimized to scan and reuse
 duplicate object trees.
 
-With compressed cons there is the question how much extra
+With compressed conses there is the question how much extra
 code that'd make in the final binary because then there
 is of course an extended cons type requiring extra checks.
 Let's check or we'll barely know.

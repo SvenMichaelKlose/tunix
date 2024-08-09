@@ -682,16 +682,17 @@ extern bool do_gc_stress;
 #define ERROR_TAG_MISSING   3
 #define ERROR_TOO_MANY_ARGS 4
 #define ERROR_NOT_FUNCTION  5
-#define ERROR_OUT_OF_HEAP   6
-#define ERROR_NO_PAREN      7
-#define ERROR_STALE_PAREN   8
-#define ERROR_CHANNEL       9
-#define ERROR_FILE          10
-#define ERROR_FILEMODE      11
-#define ERROR_USER          12
+#define ERROR_ARGNAME_TYPE  6
+#define ERROR_OUT_OF_HEAP   7
+#define ERROR_NO_PAREN      8
+#define ERROR_STALE_PAREN   9
+#define ERROR_CHANNEL       10
+#define ERROR_FILE          11
+#define ERROR_FILEMODE      12
+#define ERROR_USER          13
 
 // Returned to OS on exit after internal error.
-#define ERROR_INTERNAL      13
+#define ERROR_INTERNAL      14
 
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
@@ -747,7 +748,7 @@ extern lispptr  FASTCALL member    (lispptr needle, lispptr haystack);
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 // TODO: Typedef for objects' type byte.
-extern void     FASTCALL err_type            (char * type, lispptr x);
+extern void     FASTCALL err_type            (char * type, lispptr x, char code);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);
 extern void              tagstack_overflow   (void);
@@ -756,7 +757,7 @@ extern void              tagstack_underflow  (void);
 extern void              error_set_ccons_cdr (void);
 #endif
 extern char *   FASTCALL typestr             (lispptr *);
-extern void     FASTCALL bi_tcheck           (lispptr, uchar type);
+extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char code);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
 extern void              print_error_info (void);
 

@@ -85,6 +85,19 @@ print_debugger_info ()
     terpri ();
 }
 
+void
+read_cmd_arg (void)
+{
+    if (in () < ' ')
+        value = nil;
+    else {
+        putback ();
+        x = read ();
+        eval ();
+    }
+    terpri ();
+}
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
@@ -109,8 +122,9 @@ lisp_repl (char mode)
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
-        outs ("In debugger #");
+        outs ("Debugger ");
         outn (num_debugger_repls);
+        out (':');
         terpri ();
     }
 #endif
@@ -178,7 +192,12 @@ lisp_repl (char mode)
             // Read short debugger command, skipping whitespaces.
             do {
                 cmd = in ();
-            } while (cmd > 0 && cmd < ' ');
+            } while (!eof () && cmd < ' ');
+
+#ifdef TARGET_UNIX
+            if (eof ())
+                exit (EXIT_FAILURE);
+#endif
 
             // Process short command.
             switch (cmd) {
@@ -205,15 +224,42 @@ lisp_repl (char mode)
                 case 'p':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
-                    PUSH(x);
-                    x = read ();
-                    terpri ();
-                    PUSH_TAG(TAG_DONE);
-                    tmp = eval0 ();
-                    POP(x);
+                    read_cmd_arg ();
                     outs ("Value: ");
-                    print (tmp);
-                    tmp = nil;
+                    print (value);
+                    goto done_short_command;
+
+                // Set breakpoint.
+                case 'b':
+                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
+                    PUSH(value);
+                    read_cmd_arg ();
+                    if (SYMBOLP(value)) {
+                        if (value)
+                            SET_SYMBOL_VALUE(breakpoints_sym,
+                                             make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
+                        goto print_breakpoints;
+                    }
+                    goto want_symbol;
+
+                // Delete breakpoint.
+                case 'd':
+                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
+                    PUSH(value);
+                    read_cmd_arg ();
+                    if (SYMBOLP(value)) {
+                        if (value)
+                            copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, value);
+                        SET_SYMBOL_VALUE(breakpoints_sym, value);
+                    }
+                    goto print_breakpoints;
+want_symbol:
+                    outs ("Want symbol!");
+                    goto done_short_command;
+print_breakpoints:
+                    outs ("Breakpoints: ");
+                    print (SYMBOL_VALUE(breakpoints_sym));
+done_short_command:
                     terpri ();
                     POP(value);
                     POP(tmp);

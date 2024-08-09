@@ -323,42 +323,62 @@ New channels are created by OPEN to access files:
 
 # Debugging and advanced error handling
 
-The debugger is invoked on error unless ONERROR has been
-defined.
+The debugger is invoked in case of an error unless ONERROR
+has been defined.  Beatiful things can be done by handling
+errors automatically, but let's get our hands on the
+debugger first.
 
 ## The debugger REPL
 
+| Variable | Description                            |
+|----------|----------------------------------------|
+|   *b*    | List of symbols that are breakpointed. |
+|   *r*    | Initial return value of current REPL.  |
+
 The debugger is the REPL in debug mode.  It prints a status
-info before waiting for user input.  It has this format:
+info before waiting for user input, so you know where the
+program execution has been interrupted.  It has this format:
 
 ~~~
-Debugger #<number of nested debuggers>:
-Issue #5: <reason for debugging>
+Debugger <number of nested debuggers>:
+Error #5: <reason for break>
 Rvalue: <last expression's (and debugger's) return value>
-In :
+In:
 <top-level expression with current one highlighted>
 ~~~
 
 The debugger takes expressions like the regular REPL, plus
 some commands consisting of a single character to step
-through the code conveniently.  The return value of the
-debugger will change with every expression you enter, expect
-for the aforementioned short commands.  In case of an error,
-that's the value you want to replace with a valid one before
-letting the program continue.  Symbol \*R\* contains the
-return value when the debugger was invoked, should you want
-to see or use it again although you've replaced it already –
-just enter "*r*" and it'll be restored.
+through the code conveniently.  If another error occurs,
+yet another debugger REPL will be invoked and the "number of
+nested debuggers" incremented.
+
+The current expression is either the one that failed, or the
+one that will be evaluated next in cause the debugger
+stopped at a breakpoint (and no error number and description
+is shown).
+
+The return value of the debugger will change with every
+expression you enter, except when using aforementioned short
+commands.  In case of an error, that's the value you want to
+replace with a valid one before continuing program
+execution.  Symbol \*R\* contains the return value when the
+debugger was invoked, should you want to see or use it again
+although you've replaced it already – just enter "*r*" and
+it'll be restored.
 
 These are the available short commands:
 
-| Command | Description                              |
-|---------|------------------------------------------|
-| c       | Continue program execution.              |
-| s       | Step into user-defined procedure.        |
-| n       | Execute current expression in whole.     |
-| pX      | Evaluate and print expression X.         |
-**Debugger short commands**
+| Command | Description                                    |
+|---------|------------------------------------------------|
+| c       | Continue program execution.                    |
+| s       | Step into user-defined procedure.              |
+| n       | Execute current expression in whole.           |
+| pX      | Evaluate and print expression X.  (No macros!) |
+| bS      | Set breakpoint on procedure S.                 |
+| b       | Print breakpoints.                             |
+| dS      | Delete breakpoint on procedure S.              |
+| d       | Delete all breakpoints.                        |
 
 Command "p" evaluates the expression immediately following
 it.  A macro expansion is *not* performed and it'll *not*
@@ -382,13 +402,22 @@ You can modify \*B\* using the regular set of procedures:
 (= *b* nil)
 ~~~
 
+Inside the debugger REPL that's inconvenient as every
+regular expression changes the debugger's return value.  Use
+short commands 'b' and 'd' instead.
+
+~~~lisp
+bsubseq ; Set breakpoint on SUBSEQ.
+dsubseq ; Delete breakpoint on SUBSEQ.
+d       ; Delete all breakpoints.
+~~~
+
 ## User-defined error handler ONERROR
 
 | Function        | Description                           |
 |-----------------|---------------------------------------|
 | (onerror n x x) | User-defined error handler.           |
 | (ignore)        | Break and continue with LOAD or REPL. |
-**Error handling related functions**
 
 If defined, user-defined function ONERROR is called on
 errors, except for internal ones which halt the interpreter
@@ -433,9 +462,10 @@ that:
 | TAG\_MISSING    | 3    | BLOCK tag couldn't be found.   |
 | TOO\_MANY\_ARGS | 4    | Too many arguments.            |
 | NOT\_FUNCTION   | 5    | Object is not a function.      |
-| OUT\_OF\_HEAP   | 6    | Out of heap.  Cannot catch.    |
-| NO\_PAREN       | 7    | ')' missing.                   |
-| STALE\_PAREN    | 8    | Unexpected ')'.                |
+| ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
+| OUT\_OF\_HEAP   | 7    | Out of heap.  Cannot catch.    |
+| NO\_PAREN       | 8    | ')' missing.                   |
+| STALE\_PAREN    | 9    | Unexpected ')'.                |
 | FILE            | 10   | File error code in (ERR).      |
 | FILEMODE        | 11   | Illegal mode for OPEN.         |
 | USER            | 12   | ERROR function was called.     |

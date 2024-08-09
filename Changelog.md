@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed GC trigger.  Did not take end-of-heap marker into account.
 - Detect if relocation table is full when switching to the next heap.
+- Check if argument names are symbols.
 
 #### Added
 
@@ -27,8 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add PARANOID relocation table overflow check to GC sweep phase.
 - Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
   each compressed cons.
-- Breakpoints on user-defined procedures. (Symbol list "\*b\*".)
-- Debugger keeps its current return value in symbol "\*r\*".
+- Breakpoints in debugger.
+- Improved debugger REPL return value handling.
+- ERROR\_ARGNAME\_TYPE
+- Macro WITH-GLOBAL to temporarily change the value of a symbol.
 
 #### Changed
 

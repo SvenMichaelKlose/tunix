@@ -1,23 +1,26 @@
-Base line: make it fun writing the bytecode compiler with
-it.
+General
+[ ] Make it fun writing the bytecode compiler with it.
+[ ] Save and load heap images.
 
-Input/Output
-[@] OPEN for writes.
-[ ] OPENDIR, READDIR, CLOSEDIR.
-
-Built-ins
-[ ] SYSTEM (program invokation)
-[ ] TIME returning "ticks".
-[ ] TPS constant containing ticks per second.
+Interpreter
+[ ] eval0() and related don't have to return a value.
 
 Debugger
-[ ] Breakppoints.
+[ ] Replace expression while stepping.
 [ ] Conditional breakppoints.
 [ ] Watchpoints.
 [ ] Conditional watchpoints.
 [ ] Invoking debugger with Ctrl-C.
 [ ] Invoking debugger with RESTORE key on CBMs.
 
+Input/Output
+[ ] OPENDIR, READDIR, CLOSEDIR.
+
+Built-ins
+[ ] SYSTEM (program invokation)
+
 Manual
-[ ] Enough xamples.
+[ ] Add section on building, installing, and a description
+    of compile-time options.
+[ ] Complete set of examples.
 [ ] Reviewed phrasing.

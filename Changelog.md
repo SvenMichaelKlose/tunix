@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Breakpoints in debugger.
 - Improved debugger REPL return value handling.
 - ERROR\_ARGNAME\_TYPE
+- Macro WITH-GLOBAL to temporarily change the value of a symbol.
 
 #### Changed
 

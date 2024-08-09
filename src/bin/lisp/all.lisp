@@ -31,6 +31,7 @@
 (load "some.lisp")
 (load "source.lisp")
 (load "unless.lisp")
+(load "with-global.lisp")
 (load "while.lisp")
 (message "All loaded.")
 ; Have *universe* compressed.

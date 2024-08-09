@@ -12,7 +12,7 @@
 
 #ifdef TARGET_UNIX
 #include <stdio.h>
-#include <string.h>
+#include <strings.h>
 #endif
 
 extern lispptr lisp_fnin;

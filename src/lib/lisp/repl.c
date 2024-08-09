@@ -194,6 +194,11 @@ lisp_repl (char mode)
                 cmd = in ();
             } while (!eof () && cmd < ' ');
 
+#ifdef TARGET_UNIX
+            if (eof ())
+                exit (EXIT_FAILURE);
+#endif
+
             // Process short command.
             switch (cmd) {
                 // Continue execution.

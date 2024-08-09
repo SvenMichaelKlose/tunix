@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <strings.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -12,7 +13,6 @@
 
 #ifdef TARGET_UNIX
 #include <stdio.h>
-#include <strings.h>
 #endif
 
 extern lispptr lisp_fnin;

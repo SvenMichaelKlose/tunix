@@ -462,9 +462,10 @@ that:
 | TAG\_MISSING    | 3    | BLOCK tag couldn't be found.   |
 | TOO\_MANY\_ARGS | 4    | Too many arguments.            |
 | NOT\_FUNCTION   | 5    | Object is not a function.      |
-| OUT\_OF\_HEAP   | 6    | Out of heap.  Cannot catch.    |
-| NO\_PAREN       | 7    | ')' missing.                   |
-| STALE\_PAREN    | 8    | Unexpected ')'.                |
+| ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
+| OUT\_OF\_HEAP   | 7    | Out of heap.  Cannot catch.    |
+| NO\_PAREN       | 8    | ')' missing.                   |
+| STALE\_PAREN    | 9    | Unexpected ')'.                |
 | FILE            | 10   | File error code in (ERR).      |
 | FILEMODE        | 11   | Illegal mode for OPEN.         |
 | USER            | 12   | ERROR function was called.     |

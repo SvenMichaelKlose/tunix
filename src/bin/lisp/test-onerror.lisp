@@ -39,6 +39,11 @@
 (or (== *last-err* 5)
     (terror "(not-fun) should be an error"))
 
+; ERROR_ARGNAME_TYPE  6
+(((1)) nil)
+(or (== *last-err* 6)
+    (terror "Non-symbol argument name should be an error"))
+
 ; ERROR_OUT_OF_HEAP   6 ; Good luck testing this one.
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
 ; ERROR_NO_PAREN      8 ; When can read from memory.

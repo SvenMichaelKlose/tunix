@@ -91,19 +91,20 @@ typename (lispptr * x)
 
 // Issue type error.
 void FASTCALL
-err_type (char * type, lispptr x)
+err_type (char * type, lispptr x, char code)
 {
     char * p;
     p = stpcpy (buffer, "got ");
     p = stpcpy (p, typename (x));
     p = stpcpy (p, " instead of ");
     strcpy (p, type);
-    error (ERROR_TYPE, buffer);
+    error (code, buffer);
 }
 
 // Type check object and issue error if it fails.
+// TODO: Do not pass on error code via argument lists.
 void FASTCALL
-bi_tcheck (lispptr x, uchar type)
+bi_tcheck (lispptr x, uchar type, char code)
 {
     (void) x, (void) type;
 
@@ -113,27 +114,27 @@ bi_tcheck (lispptr x, uchar type)
 
     case 'n':
         if (!NUMBERP(x))
-            err_type ("number", x);
+            err_type ("number", x, code);
         break;
 
     case 's':
         if (!SYMBOLP(x))
-            err_type ("symbol", x);
+            err_type ("symbol", x, code);
         break;
 
     case 'c':
         if (!CONSP(x))
-            err_type ("cons", x);
+            err_type ("cons", x, code);
         break;
 
     case 'l':
         if (!LISTP(x))
-            err_type ("list", x);
+            err_type ("list", x, code);
         break;
 
     case 'f':
         if (!LISTP(x) && !BUILTINP(x))
-            err_type ("function", x);
+            err_type ("function", x, code);
         break;
 
 #ifndef NDEBUG

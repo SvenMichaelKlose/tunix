@@ -410,6 +410,7 @@ set_arg_values:
             goto do_return;
         }
 #endif
+
         // Unevaluated argument.
         if (typed_argdef == '\'') {
             typed_argdef = *++builtin_argdef;
@@ -471,7 +472,7 @@ next_builtin_arg:
 save_arg_value:
 #ifndef NAIVE
         // Type-check and throw any errors.
-        bi_tcheck (value, *builtin_argdef);
+        bi_tcheck (value, *builtin_argdef, ERROR_TYPE);
         if (error_code) {
             PUSH(args);
             PUSH_TAGW(builtin_argdef);
@@ -552,6 +553,12 @@ do_argument:
 
     // Rest of argument list. (consing)
     if (ATOM(argdefs)) {
+
+#ifndef NAIVE
+        // Check if argument name is a symbol.
+        bi_tcheck (argdefs, 's', ERROR_ARGNAME_TYPE);
+#endif
+
         // Save old symbol value for restore_arguments.
         stack_old_arg_values -= sizeof (lispptr);
         *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
@@ -592,7 +599,13 @@ do_argument:
         goto start_body;
     }
 
-    // Regular argument.  Save its value.
+    // Regular argument.
+#ifndef NAIVE
+    // Check if name is a symbol.
+    bi_tcheck (CAR(argdefs), 's', ERROR_ARGNAME_TYPE);
+#endif
+
+    // Save argument value to restore after function call.
     stack_old_arg_values -= sizeof (lispptr);
     *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(CAR(argdefs));
 

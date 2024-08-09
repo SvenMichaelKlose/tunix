@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed GC trigger.  Did not take end-of-heap marker into account.
 - Detect if relocation table is full when switching to the next heap.
+- Check if argument names are symbols.
 
 #### Added
 
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   each compressed cons.
 - Breakpoints in debugger.
 - Improved debugger REPL return value handling.
+- ERROR\_ARGNAME\_TYPE
 
 #### Changed
 

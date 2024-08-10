@@ -55,10 +55,6 @@ print_short (char * m, cons * c)
     print0 (LIST_CAR(LIST_CDR(c)));
 }
 
-#ifdef PRINT_SHORT_QUOTES
-char * tmpstr;
-#endif
-
 void FASTCALL
 print_list (cons * c)
 {

@@ -459,22 +459,26 @@ next_heap:
 char * heap_old;
 size_t heap_used;
 size_t heap_unused;
+bool compression_was_interrupted;
 
 bool
 compression_needs_break (void)
 {
     // Skip what's already been dealt with.
     if (!s || MARKED(s))
-        return true;
+        goto issue_break;
 
     // Stop if relocation table is full.
     if (xlat == xlat_start) {
         // Mark for post-GC.
         mark (s);
-        return true;
+        goto issue_break;
     }
 
     return false;
+
+issue_break:
+    return compression_was_interrupted = true;
 }
 
 void compress_object (void);
@@ -584,35 +588,53 @@ move_pointers (char * start, size_t len)
 size_t c;
 
 void
+relocate_by_address (void)
+{
+}
+
+void
 compress (void)
 {
     // Call garbage collector for compacting.
     gc ();
 
-    // Calculate areas and sizes of old and new heap.
-    heap_old    = heap_start + heap_used;
-    heap_unused = heap_end - heap_free;
-    heap_used   = heap_free - heap_start;
+    compression_was_interrupted = false;
+    do  {
+        // Calculate areas of old and new heap.
+        heap_old    = heap_start + heap_used;
+        heap_unused = heap_end - heap_free;
+        heap_used   = heap_free - heap_start;
 
-    // Move used heap part up to the end.
-    d = heap_end;
-    s = heap_free;
-    c = heap_used;
-    while (c--)
-        *--d = *--s;
+        // Move used heap to the end.
+        d = heap_end;
+        s = heap_free;
+        c = heap_used;
+        while (c--)
+            *--d = *--s;
 
-    move_pointers (heap_old, heap_unused);
+        // Make all pointers real again.
+        move_pointers (heap_old, heap_unused);
 
-    // Start with list *universe*.
-    s = universe;
-    d = heap_start;
-    compress_object ();
+        // Start compression with list *universe*.
+        s = universe;
+        d = heap_start;
+        compress_object ();
 
-    // Append old heap to copied one.
-    // TODO: Skip this step by leaving a gap of minimum size
-    // that can be filled with unused dummy objects.
-    memcpy (d, heap_old, heap_used);
-    move_pointers (heap_start, (size_t) (d - heap_start) + heap_used);
+        // Fill gap between new heap and the
+        // old one with dummy symbols.
+        gapsize = heap_old - d;
+        while (gapsize) {
+            n = gapsize > MAX_SYMBOL - sizeof (symbol) ? MAX_SYMBOL - sizeof (symbol) * 2 : gapsize;
+            ((symbol *)d)->type = TYPE_SYMBOL;
+            ((symbol *)d)->value = nil;
+            ((symbol *)d)->length = n;
+            d += objsize (d);
+        }
 
-    relocate ();
+        // Relocate pointer to new heap.
+        relocate_by_address ();
+
+        // Garbage collect.
+        gc ();
+    } while (compression_was_interrupted);
 }

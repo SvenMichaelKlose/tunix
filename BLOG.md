@@ -3,6 +3,19 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-10
+
+Should have known already but only realized yesterday that
+the zeropage area is not cleared by the program init code
+that comes with cc65.  Am just glad to have found it.
+Again it's a miracle that the Lisp started at all.
+
+Now I'm wondering how to let ONERROR handler pass through
+errors if they cannot be handled.  Delaying evaluations
+until procedure return (which built-in "?" does already)
+should be useful here to provide (hopefully error-free)
+alternatives and continue a program.
+
 # 2024-08-08
 
 I've implemented compresses conses right away the next day.

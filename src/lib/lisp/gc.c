@@ -28,12 +28,12 @@ bool do_compress_cons;
 #endif
 
 lispptr * global_pointers[] = {
-    &universe, &t, &delayed_eval,
+    &universe, &t,
+    &delayed_eval,
     &block_sym,
     &quote, &quasiquote, &unquote, &unquote_spliced,
     &return_sym, &return_name, &return_value,
     &go_sym, &go_tag,
-    &lisp_fnin, &lisp_fnout,
     &current_expr,
 #ifndef NAIVE
     &current_toplevel,
@@ -51,6 +51,8 @@ lispptr * global_pointers[] = {
     &macroexpand_sym,
 #endif
     &highlighted,
+
+    &lisp_fnin, &lisp_fnout,
 
     // To be safe:
     &x, &args, &argdefs, &arg1, &arg2, &arg2c,
@@ -430,10 +432,8 @@ restart:
         mark (**gp);
 
     // Mark GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
-        //printf ("Mark stack %p: obj %p\n", p, *(lispptr *) p);
+    for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
-    }
 
     sweep ();
     relocate ();

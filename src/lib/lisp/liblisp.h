@@ -429,6 +429,7 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
+#pragma zpsym ("tmpstr")
 #pragma zpsym ("heap_free")
 #pragma zpsym ("heap_end")
 #pragma zpsym ("stack")

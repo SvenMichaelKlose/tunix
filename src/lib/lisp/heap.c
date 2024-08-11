@@ -54,10 +54,10 @@ lispobj_size_t lisp_len;
 lispptr  tmp;
 lispptr  tmp2;
 char     tmpc;
+char *   tmpstr;
 char *   heap_free;
 char *   heap_end;
 char *   h;
-char *   ptr;
 char     type;
 symbol * sym;
 #ifdef __CC65__
@@ -65,10 +65,11 @@ symbol * sym;
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
+#pragma zpsym ("tmpstr")
 #pragma zpsym ("heap_free");
 #pragma zpsym ("heap_end");
 #pragma zpsym ("h");
-#pragma zpsym ("ptr");
+#pragma zpsym ("tmpstr");
 #pragma zpsym ("type");
 #pragma zpsym ("sym");
 #pragma bss-name (pop)
@@ -295,10 +296,10 @@ lookup_symbol (char * str, uchar len)
 {
     // Walk over singly-linked list of named symbols.
     // (Anonymous symbols have no name.)
-    for (ptr = first_symbol; ptr; ptr = SYMBOL_NEXT(ptr))
-        if (SYMBOL_LENGTH(ptr) == len
-            && !memcmp (ptr + sizeof (symbol), str, len))
-            return ptr;
+    for (tmpstr = first_symbol; tmpstr; tmpstr = SYMBOL_NEXT(tmpstr))
+        if (SYMBOL_LENGTH(tmpstr) == len
+            && !memcmp (tmpstr + sizeof (symbol), str, len))
+            return tmpstr;
     return NULL;
 }
 

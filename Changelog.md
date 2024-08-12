@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed OPEN's write mode without NDEBUG.
 - Debugger: Keep highlighting of current expression when evaluating
   argument of short command.
+- READ: Do not put 0 back into buffer on end of file.
 
 #### Added
 

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -119,9 +120,9 @@ lispptr
 read ()
 {
     skip_spaces ();
+    in ();
     if (eof ())
         return nil;
-    in ();
     // Skip one-line comment.
     if (last_in == ';')  {
         while (in () >= ' ')

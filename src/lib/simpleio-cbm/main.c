@@ -95,7 +95,6 @@ simpleio_open (char * name, char mode)
         if (cbm_open (chn, 8, chn, name))
             return 0;
 
-/*
         // Read and check DOS status code.
         cbm_open (15, 8, 15, NULL);
         cbm_k_chkin (15);
@@ -105,7 +104,6 @@ simpleio_open (char * name, char mode)
         cbm_k_chkin (fnin);
         if (ctrl != '0' && ctrh != '0')
             return 0;
-*/
     }
 
     return chn;

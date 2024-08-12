@@ -384,6 +384,17 @@ Command "p" evaluates the expression immediately following
 it.  A macro expansion is *not* performed and it'll *not*
 change the debugger's return value.
 
+## Stepping through the code
+
+IDEA:
+If an error occured, you cannot step through the code unless
+you corrected it or you want to step into a newly entered
+expression.
+
+* step into newly entered expression
+* step into restarted expression.  Already changed values
+  are a problem then.
+
 ## Breakpoints
 
 Global variable \*B\* is a list procedures' names which, if
@@ -426,31 +437,18 @@ ONERROR will cause it to be called again.  The handler
 must return a correct replacement value insted of calling
 QUIT or use IGNORE.
 
-### Arguments to ONERROR
-
 ONERROR is called with the error code, the current REPL
 (top-level) expression, and the faulty expression within
-that:
+it:
+
+IDEA: Calling DEBUGGER inside ONERROR if the error cannot
+be dealt with.
 
 ~~~lisp
-; SKETCH! UNTESTED!
-; Load missing functions on demand.
 (fn onerror (errcode repl faulty)
-  ; errcode: Error code.
-  ; repl:    Top-level expression or
-  ;          body of user-defined function.
-  ; faulty:  The faulty expression in 'repl'.
-  (? (== n 1) ; Not a function error.
-     ; Evaluate matching definition in environment file.
-     (with-infile f "env.lisp"
-       (while (not (eof))
-         (!= (read)
-           (when (and (cons? !)
-                      (or (eq (car !) 'var)
-                          (eq (car !) 'fn))
-                      (eq (cadr !) x))
-             (eval !)
-             (return x)))))))
+  (out "ONERROR handler called!")(terpri)
+  ; We don't handle errors so unleash the debugger on it.
+  'debugger)
 ~~~
 
 ### Error codes

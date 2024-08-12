@@ -3,6 +3,29 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-11
+
+Some mean heisenbug is hiding someplace which escapes heavy
+stress testing.  Strategies: code review, cleaning up names,
+more tests and documentation.  And also compiler-writing, to
+make sure that the debugger is fun to use.
+
+cc65 also offers some ways to reduce code size.
+Optimizations can be controlled with #pragma directives and
+intialization code does not have to stay in memory as soon
+as the interpreter has booted.  The table of built-ins is
+also a waste of space as the procedure names are copied
+into symbols and never touched again.  Also, when testing
+if a pointer is NIL, only its high byte needs to be
+checked.  All that should knock off at least 1K.
+
+What I didn't mention in here yet is a weird idea on how to
+implement bytecode.  An idea that struck me during a walk,
+being busy with other kinds of things entirely.  I like it
+very much because I'm sure that it's pretty novel and very
+effective alike.  Am just too tired to eloborate on it
+right now.
+
 # 2024-08-10
 
 Should have known already but only realized yesterday that

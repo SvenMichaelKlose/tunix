@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detect if relocation table is full when switching to the next heap.
 - Check if argument names are symbols.
 - Fixed OPEN's write mode without NDEBUG.
+- Debugger: Keep highlighting of current expression when evaluating
+  argument of short command.
 
 #### Added
 

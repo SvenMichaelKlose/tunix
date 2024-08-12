@@ -93,7 +93,9 @@ read_cmd_arg (void)
     else {
         putback ();
         x = read ();
+        PUSH(highlighted);
         eval ();
+        POP(highlighted);
     }
     terpri ();
 }

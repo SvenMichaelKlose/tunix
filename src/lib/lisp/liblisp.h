@@ -259,6 +259,10 @@
     #define GC_AFTER_LOAD_THRESHOLD 2048
 #endif
 
+#if defined(VERBOSE_COMPRESSED_CONS) && !defined(COMPRESSED_CONS)
+    #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
+#endif
+
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;

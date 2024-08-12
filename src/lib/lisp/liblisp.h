@@ -231,6 +231,9 @@
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
+    #ifndef NDEBUG
+        #pragma check-stack (on)
+    #endif
 #else
     #define FASTCALL
     #define HOST_DEBUGGER() raise (SIGTRAP);

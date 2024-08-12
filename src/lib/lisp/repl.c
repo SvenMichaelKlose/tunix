@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #ifndef __CC65__
 #include <signal.h>
 #endif
@@ -439,7 +440,7 @@ init_repl ()
 {
     do_break_repl      = false;
     do_continue_repl   = false;
-    num_repls          = 0;
+    num_repls = -1;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);

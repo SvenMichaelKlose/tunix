@@ -12,4 +12,4 @@ clean:
 
 %.o: %.c
 	rm -f $@
-	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<
+	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_INCLUDE) -I$(TUNIX_LIB) $<

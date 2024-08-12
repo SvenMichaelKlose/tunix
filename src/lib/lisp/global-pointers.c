@@ -1,6 +1,8 @@
 #include <ctype.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <setjmp.h>
+
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 

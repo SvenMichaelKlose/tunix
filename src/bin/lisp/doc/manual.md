@@ -776,6 +776,13 @@ Returns the cons.
 
 Returns the cons.
 
+## Images
+
+| Function  | Description                                |
+|-----------|--------------------------------------------|
+| (isave s) | Save heap image.                           |
+| (iload s) | Load heap image and start function ISTART. |
+
 ## Lists
 
 This functions are around because the interpreter needs them

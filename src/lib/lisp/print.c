@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 

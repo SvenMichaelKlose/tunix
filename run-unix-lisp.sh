@@ -3,4 +3,4 @@
 set -e
 
 make clean all $@
-cd src/bin/lisp && ./lisp
+cd src/bin/lisp && gdb -ex run --args ./lisp

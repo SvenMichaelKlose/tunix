@@ -18,5 +18,5 @@ c1541image:
 	$(AS) $(ASFLAGS) -o $@ $<
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(COPTFLAGS) --add-source -S -o $@.S -I$(TUNIX_LIB) $<
-	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_LIB) $<
+	$(CC) $(CFLAGS) $(COPTFLAGS) --add-source -S -o $@.S -I$(TUNIX_INCLUDE) -I$(TUNIX_LIB) $<
+	$(CC) $(CFLAGS) $(COPTFLAGS) -o $@ -I$(TUNIX_INCLUDE) -I$(TUNIX_LIB) $<

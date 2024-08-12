@@ -60,6 +60,9 @@
 
 /// Disabling features
 
+// Do not check on CPU stack overflow.
+//#define NO_CHECK_CPU_STACK
+
 // Do not expand macros in REPL.
 // Required to load all of the environment.
 //#define NO_MACROEXPAND
@@ -329,6 +332,20 @@ struct heap_fragment {
     char * end;
 };
 
+typedef struct _image_header {
+    char git_version[8];
+    size_t stack_size;
+    size_t tagstack_size;
+} image_header;
+
+extern jmp_buf restart_point;
+extern lispptr * global_pointers[];
+
+#ifdef FRAGMENTED_HEAP
+extern struct  heap_fragment * heap;
+extern struct  heap_fragment heaps[];
+#endif
+
 extern lispptr universe;
 extern char *  stack_start;
 extern char    buffer[MAX_SYMBOL + 1];
@@ -367,6 +384,9 @@ extern char *      stack_end;
 extern char *      tagstack_end;
 extern xlat_item * xlat_end;
 
+extern lispptr  lisp_fnin;
+extern lispptr  lisp_fnout;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -381,11 +401,6 @@ extern lispptr tmp;
 extern lispptr tmp2;
 extern char    tmpc;
 extern char *  tmpstr;
-
-#ifdef FRAGMENTED_HEAP
-extern struct  heap_fragment * heap;
-extern struct  heap_fragment heaps[];
-#endif
 
 extern char *      heap_free;
 extern char *      heap_end;
@@ -737,6 +752,8 @@ extern size_t            heap_free_size   (void);
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
 extern void     FASTCALL load         (char * pathname);
+extern bool     FASTCALL image_load   (char * pathname);
+extern bool     FASTCALL image_save   (char * pathname);
 extern bool              init_heap    (void);
 extern void              init_eval    (void);
 extern void              init_onerror (void);

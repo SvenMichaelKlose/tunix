@@ -1,8 +1,14 @@
 include src/mk/Makefile.build
 
-all: host world mkfs/mkfs.ultifs ultimem_image c1541_image
+all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image c1541_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
+
+src/include/git-version.h:
+	mkdir -p src/include
+	echo -n "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
+	echo -n `git rev-parse --short=8 HEAD` >>src/include/git-version.h
+	echo "\"" >>src/include/git-version.h
 
 host:
 	$(MAKE) -C src host
@@ -69,6 +75,7 @@ clean:
 	@echo "# Cleaning for target $(TARGET)."
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
+	$(RM) src/include/git-version.h
 	$(RM) -rf bin/
 ifneq (,$(TARGET), $(COMMODORE_TARGETS))
 	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED) $(D64_TUNIX)

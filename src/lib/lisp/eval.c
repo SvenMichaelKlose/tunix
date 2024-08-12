@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <setjmp.h>
 #ifndef __CC65__
 #include <signal.h>
 #endif
@@ -188,7 +189,7 @@ pop_argument_values (void)
     stack += sizeof (lispptr) * num_args;
 }
 
-#ifdef __CC65__
+#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
 char sp;
 #endif
 
@@ -201,11 +202,11 @@ eval0 (void)
 #endif
 
 do_eval:
+#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
     // Check on CPU stack overflow.
-#if defined(__CC65__) && !defined(NAIVE)
     asm ("tsx");
     asm ("stx %v", sp);
-    if (sp > 0xf0)
+    if (sp > 0xf8)
         internal_error ("CPU stack");
 #endif
 

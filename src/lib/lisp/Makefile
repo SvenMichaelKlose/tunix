@@ -4,7 +4,9 @@ SOURCES = \
 	error.c \
 	eval.c \
 	gc.c \
+	global-pointers.c \
 	heap.c \
+	image.c \
 	io.c \
 	list.c \
 	print.c \

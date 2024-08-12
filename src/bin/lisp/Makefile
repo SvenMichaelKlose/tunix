@@ -5,7 +5,7 @@ SOURCES = main.c test.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
-CLEANFILES = test.out doc/manual.pdf
+CLEANFILES = image test.out doc/manual.pdf
 
 ifeq ($(TARGET), unix)
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a

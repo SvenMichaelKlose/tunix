@@ -97,13 +97,12 @@ simpleio_open (char * name, char mode)
     FILE * handle;
     char m[2];
 
+    last_error = 0;
     m[0] = mode;
     m[1] = 0;
-
-    handle = fopen (name, m);
-    if (!handle)
-        return 0;
-    return alloc_channel (handle);
+    if ((handle = fopen (name, m)))
+        return alloc_channel (handle);
+    return 0;
 }
 
 simpleio vectors = {

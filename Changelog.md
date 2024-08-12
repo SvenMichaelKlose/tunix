@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CHECK\_OBJ\_POINTERS at compile-time will enable quick sanity checks that
   is suitable for use on small machines.  On TARGET\_UNIX it's thorough
   and slow, but easy to regret if not enabled during tests.
+- NO\_CHECK\_CPU\_STACK to not check CPU stack on overflow.
 - Add PARANOID relocation table overflow check to GC sweep phase.
 - Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C' for
   each compressed cons.
@@ -37,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ERROR\_ARGNAME\_TYPE
 - Macro WITH-GLOBAL to temporarily change the value of a symbol.
 - Compile-time error on VERBOSE\_COMPRESSED\_CONS without COMPRESSED\_CONS.
+- Built-in ISAVE and ILOAD to save and load the heap.
+  Not with FRAGMENTED\_HEAP yet!
 
 #### Changed
 

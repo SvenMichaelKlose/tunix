@@ -1,4 +1,4 @@
 LIBRARY = libsimpleio.a
-SOURCES = main.c
+SOURCES = block.c main.c
 
 include ../../mk/Makefile.build

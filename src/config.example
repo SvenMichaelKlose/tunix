@@ -39,6 +39,9 @@ TARGET = vic20  # VIC-20 has the largest code base.
 # Do not include extra checks to spot internal errors.
 #NDEBUG = 1
 
+# Do not check on CPU stack overflow.
+#NO_CHECK_CPU_STACK = 1
+
 # Build TUNIX Lisp without debugger.
 #NO_DEBUGGER = 1
 

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #ifndef __CC65__
 #include <signal.h>
 #endif
@@ -17,6 +18,8 @@
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
+
+jmp_buf restart_point;
 
 extern void test (void);
 
@@ -541,6 +544,24 @@ bi_load (void)
 }
 
 lispptr
+bi_iload (void)
+{
+    name_to_buffer (arg1);
+    if (image_load (buffer))
+        longjmp (restart_point, 1);
+    return nil;
+}
+
+lispptr
+bi_isave (void)
+{
+    name_to_buffer (arg1);
+    if (image_save (buffer))
+        return t;
+    return nil;
+}
+
+lispptr
 bi_define (void)
 {
     if (member (arg1, SYMBOL_VALUE(universe)))
@@ -859,6 +880,9 @@ struct builtin builtins[] = {
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
 
+    { "iload",      "s",    bi_iload },
+    { "isave",      "s",    bi_isave },
+
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
     { "special",    "'s'+", bi_special },
@@ -938,9 +962,7 @@ extern void test (void);
 
 char * env_files[] = {
     "env-0.lisp",
-#ifdef TEST
     "smoke-test.lisp",
-#endif
     "env-1.lisp",
 
     // Target-specific
@@ -951,12 +973,9 @@ char * env_files[] = {
     "unix.lisp",
 #endif
 
-#ifdef TEST
     "test.lisp",
-#endif
     "env-2.lisp",
-
-#if defined (TEST) && !defined(NO_ONERROR)
+#ifndef NO_ONERROR
     "test-onerror.lisp",
 #endif
 
@@ -971,9 +990,7 @@ char * env_files[] = {
 #ifndef NO_DEBUGGER
     "stack.lisp",
 #endif
-#ifdef TEST
     "test-file.lisp",
-#endif
     "welcome.lisp",
 #endif // #ifndef TARGET_C16
     NULL
@@ -982,6 +999,7 @@ char * env_files[] = {
 int
 main (int argc, char * argv[])
 {
+    lispptr istart_fun;
     char ** f;
     (void) argc, (void) argv;
 
@@ -1011,12 +1029,26 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
-    // Load environment files.
-    for (f = env_files; *f; f++)
-        load (*f);
+    if (!setjmp (restart_point)) {
+        // Try to load image.
+        strcpy (buffer, "image");
+        if (image_load (buffer))
+            longjmp (restart_point, 1);
 
-    do_break_repl = do_continue_repl = false;
-    num_repls = -1;
+        // Load environment files instead.
+        for (f = env_files; *f; f++)
+            load (*f);
+    } else {
+        // Call function ISTART in loaded image.
+        istart_fun = make_symbol ("istart", 6);
+        if (CONSP(SYMBOL_VALUE(istart_fun))) {
+           PUSH(istart_fun);
+           x = make_cons (istart_fun, nil);
+           stack += sizeof (lispptr);
+           (void) eval ();
+        }
+    }
+
     lisp_repl (REPL_STD);
 
     setout (STDOUT);

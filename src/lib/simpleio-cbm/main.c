@@ -75,7 +75,7 @@ simpleio_open (char * name, char mode)
         if (mode == 'w')
             ofs = 2;
 #ifndef NDEBUG
-        if (mode != 'r')
+        else if (mode != 'r')
             return 0;
 #endif
 

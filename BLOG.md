@@ -19,6 +19,15 @@ linking the Lisp.  Looks like someone else has to complete
 that task.  TUNIX Lisp is more of a common good if it can be
 compiled for today's micro-controllers.
 
+Hacked along more after a long break and prepared some
+segmentation for overlays and throwing away init code.
+It would be useful if images could be loaded by different
+versions of the interpreter.  Symbols of built-ins would be
+required to get looked up.  One could for example throw out
+READ for some stand-alone app.  Being able to exchange
+images across targets would be mind-boggling.  At least for
+me.
+
 # 2024-08-11
 
 Some mean heisenbug is hiding someplace which escapes heavy

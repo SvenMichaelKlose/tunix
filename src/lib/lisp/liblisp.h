@@ -220,6 +220,9 @@
 #endif
 
 #ifdef NAIVE
+    #ifndef NO_CHECK_CPU_STACK
+        #define NO_CHECK_CPU_STACK
+    #endif
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
     #endif
@@ -228,6 +231,9 @@
     #endif
     #ifndef NDEBUG
         #define NDEBUG
+    #endif
+    #ifdef PARANOID
+        #error "NAIVE and PARANOID don't get along."
     #endif
 #else // #ifdef NAIVE
     #define GCSTACK_CHECKS
@@ -462,7 +468,9 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("xlat_start")
+#ifndef NAIVE
 #pragma zpsym ("error_code")
+#endif
 #ifndef NO_DEBUGGER
 #pragma zpsym ("debug_step")
 #endif
@@ -628,15 +636,22 @@ extern bool do_gc_stress;
 #define LIST_CDR(x)     (!(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
+#ifdef NAIVE
+    #define _SETCDR_CHECK(x)
+#else
+    #define _SETCDR_CHECK(x) \
+        if (_EXTENDEDP(x)) \
+            error_set_ccons_cdr ();
+#endif
 #ifdef COMPRESSED_CONS
     #define _SETCDR(x, v) \
         do { \
-            if (_EXTENDEDP(x)) \
-                error_set_ccons_cdr (); \
+            _SETCDR_CHECK(x); \
             CONS(x)->cdr = v; \
         } while (0);
 #else
-    #define _SETCDR(x, v) (CONS(x)->cdr = v)
+    #define _SETCDR(x, v) \
+        (CONS(x)->cdr = v)
 #endif // #ifdef COMPRESSED_CONS
 
 #ifdef SLOW

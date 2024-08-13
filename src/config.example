@@ -31,6 +31,9 @@ TARGET = vic20  # VIC-20 has the largest code base.
 # in build scripts.
 #GC_STRESS = 1
 
+# Load all environment files.
+#LOAD_ALL = 1
+
 # Build TUNIX Lisp with absolutely nothing related to
 # testing or handling errors, reducing code size as much as
 # possible.

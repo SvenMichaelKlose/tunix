@@ -56,7 +56,7 @@ endif
 dist:
 	mkdir -p $(DISTDIR)
 	cp src/bin/lisp/lisp $(DISTDIR)/
-	cp src/bin/lisp/lisp.lbl $(DISTDIR)/
+	-@cp src/bin/lisp/lisp.lbl $(DISTDIR)/
 	cp src/bin/lisp/*.lisp $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/

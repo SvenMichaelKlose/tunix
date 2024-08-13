@@ -14,14 +14,16 @@ lispptr * global_pointers[] = {
     &return_sym, &return_name, &return_value,
     &go_sym, &go_tag,
     &current_expr,
+    &unexpanded_toplevel,
 #ifndef NAIVE
     &current_toplevel,
-#endif
     &current_function,
-    &unexpanded_toplevel,
     &unevaluated_arg1,
-#ifndef NO_DEBUGGER
+#endif
+#ifndef NO_ONERROR
     &onerror_sym,
+#endif
+#ifndef NO_DEBUGGER
     &debug_step,
     &breakpoints_sym,
     &debugger_return_value_sym,

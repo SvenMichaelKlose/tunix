@@ -654,10 +654,12 @@ next_arg:
     goto do_argument;
 
 start_body:
+#ifndef NAIVE
     if (error_code || do_break_repl) {
         stack = stack_entered;
         goto do_return;
     }
+#endif // #ifndef NAIVE
 
     // Assign new values to argument symbols.
     argdefs = FUNARGS(arg1);

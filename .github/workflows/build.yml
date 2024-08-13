@@ -21,11 +21,11 @@ jobs:
     - name: Build Unixoid
       run: make clean all GC_STRESS=1 VERBOSE_LOAD=1
 
-    - name: Run Tests
+    - name: Run tests
       run: make test
 
-    - name: Test Lisp mercilessly
-      run: ./run-unix-lisp.sh VERBOSE_LOAD=1 COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 GC_STRESS=1 TEST=1
+    - name: Test compile-time configurations
+      run: ./test-unix.sh
 
     - name: Make PDF manual
       run: cd src/bin/lisp/doc && ./md2pdf.sh && cd -

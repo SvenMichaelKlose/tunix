@@ -231,7 +231,7 @@ sweep ()
 #ifdef COMPRESSED_CONS
 check_xlat:
 #endif
-#ifndef PARANOID
+#ifdef PARANOID
                 if (xlat < xlat_start)
                     // Reloc table size must be multiple of entry size!
                     internal_error ("xlat overflow");

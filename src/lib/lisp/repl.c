@@ -42,6 +42,8 @@ out_colon (void)
     outs (": ");
 }
 
+#ifndef NO_DEBUGGER
+
 void
 print_debugger_info ()
 {
@@ -101,6 +103,8 @@ read_cmd_arg (void)
     terpri ();
 }
 
+#endif // #ifndef NO_DEBUGGER
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
@@ -158,7 +162,7 @@ lisp_repl (char mode)
 
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
-        print_debugger_info ();
+        // TODO?: print_debugger_info ();
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;

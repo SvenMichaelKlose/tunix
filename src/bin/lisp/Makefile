@@ -1,11 +1,15 @@
 -include ../../config
 
 PROGRAM = lisp
-SOURCES = main.c test.c
+SOURCES = main.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
 CLEANFILES = image test.out doc/manual.pdf
+
+ifndef NAIVE
+SOURCES += test.c
+endif
 
 ifeq ($(TARGET), unix)
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a

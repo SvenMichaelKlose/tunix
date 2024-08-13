@@ -451,10 +451,12 @@ bi_open (void)
     char mode = SYMBOL_NAME(arg2)[0];
     simpleio_chn_t c;
 
+#ifndef NAIVE
     if (SYMBOL_LENGTH(arg2) != 1 || (mode != 'r' && mode != 'w')) {
         error (ERROR_FILEMODE, "Ill file mode");
         return nil;
     }
+#endif // #ifndef NAIVE
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
     if (c)
@@ -997,7 +999,9 @@ char * env_files[] = {
     "stack.lisp",
 #endif
     "test-file.lisp",
+#ifdef LOAD_ALL
     "welcome.lisp",
+#endif // #ifdef LOAD_ALL
 #endif // #ifndef TARGET_C16
     NULL
 };

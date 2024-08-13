@@ -55,7 +55,7 @@ image_save (char * pathname)
 
     // Write global pointers.
     for (tmpo = global_pointers; *tmpo; tmpo++)
-        outm ((char *) *tmpo++, sizeof (lispptr));
+        outm ((char *) *tmpo, sizeof (lispptr));
 
     simpleio_close (chout);
     setout (old_chout);
@@ -106,6 +106,7 @@ image_load (char * pathname)
 
         heap_free = heap_start + len;
         *heap_free = 0; // Mark end of heap.
+
 #ifdef FRAGMENTED_HEAP
         heap->free = heap_free;
     } while (heap->start);
@@ -113,19 +114,23 @@ image_load (char * pathname)
 
     // Read global pointers.
     for (tmpo = global_pointers; *tmpo; tmpo++)
-        inm ((char *) *tmpo++, sizeof (lispptr));
+        inm ((char *) *tmpo, sizeof (lispptr));
 
     // Close file.
     simpleio_close (chin);
-
-    // Ensure standard I/O channels.
-    set_channels (STDIN, STDOUT);
 
     // Initialize stack pointers.
     stack    = stack_end;
     tagstack = tagstack_end;
 
     // GC to set up linked list of named symbols.
+#ifdef FRAGMENTED_HEAP
+    heap_free = heap_end;  // Ensure start with first heap.
+#endif
     gc ();
+
+    // Ensure standard I/O channels.
+    set_channels (STDIN, STDOUT);
+
     return true;
 }

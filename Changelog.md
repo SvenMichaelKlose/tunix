@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Macro WITH-GLOBAL to temporarily change the value of a symbol.
 - Compile-time error on VERBOSE\_COMPRESSED\_CONS without COMPRESSED\_CONS.
 - Built-in ISAVE and ILOAD to save and load the heap.
+  Disable with compile-time option NO\_IMAGES.
   Not with FRAGMENTED\_HEAP yet!
 
 #### Changed

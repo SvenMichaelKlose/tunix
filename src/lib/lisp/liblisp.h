@@ -63,6 +63,9 @@
 // Do not check on CPU stack overflow.
 //#define NO_CHECK_CPU_STACK
 
+// No support for saving and loading images.
+//#define NO_IMAGES
+
 // Do not expand macros in REPL.
 // Required to load all of the environment.
 //#define NO_MACROEXPAND

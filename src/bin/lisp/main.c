@@ -543,6 +543,8 @@ bi_load (void)
     return nil;
 }
 
+#ifndef NO_IMAGES
+
 lispptr
 bi_iload (void)
 {
@@ -560,6 +562,8 @@ bi_isave (void)
         return t;
     return nil;
 }
+
+#endif // #ifndef NO_IMAGES
 
 lispptr
 bi_define (void)
@@ -880,8 +884,10 @@ struct builtin builtins[] = {
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
 
+#ifndef NO_IMAGES
     { "iload",      "s",    bi_iload },
     { "isave",      "s",    bi_isave },
+#endif
 
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
@@ -999,7 +1005,9 @@ char * env_files[] = {
 int
 main (int argc, char * argv[])
 {
+#ifndef NO_IMAGES
     lispptr istart_fun;
+#endif
     char ** f;
     (void) argc, (void) argv;
 
@@ -1029,15 +1037,18 @@ main (int argc, char * argv[])
     do_gc_stress = true;
 #endif
 
+#ifndef NO_IMAGES
     if (!setjmp (restart_point)) {
         // Try to load image.
         strcpy (buffer, "image");
         if (image_load (buffer))
             longjmp (restart_point, 1);
+#endif // #ifndef NO_IMAGES
 
-        // Load environment files instead.
+        // Load environment files.
         for (f = env_files; *f; f++)
             load (*f);
+#ifndef NO_IMAGES
     } else {
         // Call function ISTART in loaded image.
         istart_fun = make_symbol ("istart", 6);
@@ -1048,6 +1059,7 @@ main (int argc, char * argv[])
            (void) eval ();
         }
     }
+#endif // #ifndef NO_IMAGES
 
     lisp_repl (REPL_STD);
 

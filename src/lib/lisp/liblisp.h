@@ -278,6 +278,12 @@
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
 #endif
 
+#ifdef FRAGMENTED_HEAP
+    #ifndef NO_IMAGES
+        #define NO_IMAGES
+    #endif
+#endif // #ifdef FRAGMENTED_HEAP
+
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;

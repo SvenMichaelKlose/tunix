@@ -1000,8 +1000,9 @@ char * env_files[] = {
 #endif
     "test-file.lisp",
 #ifdef LOAD_ALL
-    "welcome.lisp",
+    "all.lisp",
 #endif // #ifdef LOAD_ALL
+    "welcome.lisp",
 #endif // #ifndef TARGET_C16
     NULL
 };

@@ -1,4 +1,5 @@
 -include ../../config
+include ../../mk/Makefile.targets
 
 PROGRAM = lisp
 SOURCES = main.c
@@ -14,7 +15,7 @@ endif
 ifeq ($(TARGET), cpm)
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
 endif
-ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
+ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
 endif
 ifeq ($(TARGET), unix)

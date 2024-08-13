@@ -41,6 +41,15 @@ internal_error (char * msg)
 #endif
 }
 
+// Print internal error message and exit.
+void FASTCALL
+internal_error_ptr (void * p, char * msg)
+{
+    outhw ((size_t) p);
+    out (' ');
+    internal_error (msg);
+}
+
 void
 stack_overflow ()
 {
@@ -140,7 +149,7 @@ bi_tcheck (lispptr x, uchar type, char code)
 
 #ifndef NDEBUG
     default:
-        internal_error ("ill typedef");
+        internal_error_ptr (x, "ill typedef");
 #endif
     }
 }
@@ -150,9 +159,9 @@ void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
 {
     if (old_stack != stack)
-        internal_error ("stack");
+        internal_error_ptr (stack, "stack");
     if (old_tagstack != tagstack)
-        internal_error ("tagstack");
+        internal_error_ptr (tagstack, "tagstack");
 }
 
 #ifndef NO_ONERROR

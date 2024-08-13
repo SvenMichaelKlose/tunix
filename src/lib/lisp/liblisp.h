@@ -789,7 +789,9 @@ extern bool     FASTCALL lisp_symbolp   (lispptr);
 extern bool     FASTCALL lisp_builtinp  (lispptr);
 extern bool     FASTCALL lisp_specialp  (lispptr);
 
+#ifndef NAIVE
 extern void     FASTCALL internal_error      (char * msg);
+extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 // TODO: Typedef for objects' type byte.
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
@@ -799,20 +801,21 @@ extern void              tagstack_overflow   (void);
 extern void              tagstack_underflow  (void);
 #ifdef COMPRESSED_CONS
 extern void              error_set_ccons_cdr (void);
-#endif
+#endif // #ifdef COMPRESSED_CONS
 
 extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char errorcode);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
 extern void              print_error_info    (void);
 #ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
-#endif
+#endif // #ifdef CHECK_OBJ_POINTERS
 
 extern char *   FASTCALL typestr             (lispptr *);
 #ifdef TARGET_UNIX
 extern void              dump_lispptr        (char *);
 extern void              dump_heap           (void);
-#endif
+#endif // #ifdef TARGET_UNIX
+#endif // #ifndef NAIVE
 
 extern void     FASTCALL name_to_buffer      (lispptr s);
 extern void     FASTCALL make_call           (lispptr args);

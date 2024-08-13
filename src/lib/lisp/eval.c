@@ -207,7 +207,7 @@ do_eval:
     asm ("tsx");
     asm ("stx %v", sp);
     if (sp > 0xf8)
-        internal_error ("CPU stack");
+        internal_error_ptr ((void *) sp, "CPU stack");
 #endif
 
 #ifdef VERBOSE_EVAL
@@ -752,7 +752,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error ("tag");
+        internal_error_ptr (tagstack, "tag");
 #endif
     }
 

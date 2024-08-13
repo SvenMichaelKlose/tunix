@@ -61,6 +61,7 @@ if not enabled during tests.
   COMPRESSED\_CONS.
 - Built-in ISAVE and ILOAD to save and load the heap.  Can
   be disables by compile-time option NO\_IMAGES.
+- Internal error: Print address of faulty pointer.
 
 #### Changed
 

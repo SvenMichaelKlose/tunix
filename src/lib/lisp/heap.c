@@ -108,7 +108,7 @@ objsize (char * x)
     s = lisp_sizes[TYPEBITS(x)];
 #ifndef NDEBUG
     if (!s)
-        internal_error ("0 size");
+        internal_error_ptr (x, "0 size");
 #endif
     if (_NAMEDP(x))
         return s + SYMBOL_LENGTH(x);
@@ -120,7 +120,7 @@ objsize (char * x)
 void
 error_typebits (char * x)
 {
-    internal_error (x ? "type" : "EOH");
+    internal_error_ptr (x, x ? "type" : "EOH");
 }
 
 // Print info of all objects.
@@ -133,8 +133,7 @@ check_lispptr_addr (char * x)
             return;
         s += objsize (s);
     }
-    printf ("Pointer %p is not on an object's start address.\n", x);
-    internal_error (":(");
+    internal_error_ptr (x, "Not obj addr");
 }
 
 bool is_checking_lispptr;
@@ -149,9 +148,9 @@ check_lispptr (char * x)
 #ifndef FRAGMENTED_HEAP
     // Check if object is within heap.
     if (x < heap_start)
-        internal_error ("Pointer below heap.");
+        internal_error_ptr (x, "Pointer below heap.");
     if (x >= heap_end)
-        internal_error ("Pointer above heap.");
+        internal_error_ptr (x, "Pointer above heap.");
 
 #ifdef TARGET_UNIX
     // Check if pointer is on an object start.
@@ -160,7 +159,7 @@ check_lispptr (char * x)
 #endif // #ifndef FRAGMENTED_HEAP
 
     if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
-        internal_error ("Unused type bits set.");
+        internal_error_ptr (x, "Unused type bits set.");
 
     switch (TYPEBITS(x)) {
         case TYPE_CONS:

@@ -9,3 +9,8 @@ else
 COPTFLAGS  += -O0 -g
 LDFLAGS    += -g
 endif
+
+ifdef GC_STRESS
+COPTFLAGS += -O3 -flto
+LDFLAGS   += -flto
+endif

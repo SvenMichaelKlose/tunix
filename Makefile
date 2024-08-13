@@ -69,7 +69,8 @@ endif
 clean:
 	$(MAKE) -C src clean
 	$(RM) src/include/git-version.h
+	$(RM) -rf $(DISTDIR)
 ifeq ($(TARGET), vic20)
 	$(MAKE) -C mkfs clean
-	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED) $(DISTDIR)
+	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
 endif

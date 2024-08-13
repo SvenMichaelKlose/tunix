@@ -783,6 +783,11 @@ Returns the cons.
 | (isave s) | Save heap image.                           |
 | (iload s) | Load heap image and start function ISTART. |
 
+Compile-time option NO\_IMAGES must be undefined to use
+these.  If an image file called 'image' exists in the
+current directory, that is loaded instead of default Lisp
+files.
+
 ## Lists
 
 This functions are around because the interpreter needs them

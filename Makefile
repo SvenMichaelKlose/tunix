@@ -55,8 +55,8 @@ endif
 
 dist:
 	mkdir -p $(DISTDIR)
-	cp src/bin/lisp/README.md $(DISTDIR)/lisp.md
 	cp src/bin/lisp/lisp $(DISTDIR)/
+	cp src/bin/lisp/lisp.lbl $(DISTDIR)/
 	cp src/bin/lisp/*.lisp $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/
@@ -68,7 +68,8 @@ endif
 
 clean:
 	$(MAKE) -C src clean
-	$(MAKE) -C mkfs clean
 	$(RM) src/include/git-version.h
-	$(RM) -rf $(DISTDIR)
-	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
+ifeq ($(TARGET), vic20)
+	$(MAKE) -C mkfs clean
+	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED) $(DISTDIR)
+endif

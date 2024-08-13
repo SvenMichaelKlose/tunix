@@ -77,3 +77,5 @@ if not enabled during tests.
 #### Added
 
 - simpleio\_open(): Check DOS status code.
+- outhn(), outhb(), outhw(): Print hexadecimal nibble, byte
+  or word.

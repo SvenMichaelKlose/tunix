@@ -15,6 +15,7 @@ test_options () {
     build_and_run NO_ONERROR=1 $@
     build_and_run NO_DEBUGGER=1 $@
     build_and_run NO_IMAGES=1 $@
+    build_and_run VERBOSE_EVAL=1 $@
 }
 
 test_diagnostics () {

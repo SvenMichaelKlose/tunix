@@ -36,11 +36,22 @@ image_save (char * pathname)
     memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version));
     outm ((char *) &header, sizeof (header));
 
-    // Write heap size.
-    len = heap_free - heap_start;
-    outm ((char *) &len, sizeof (len));
-    // Write heap data.
-    outm (heap_start, heap_free - heap_start);
+#ifdef FRAGMENTED_HEAP
+    // Start with first heap.
+    heap = heaps;
+    do {
+        switch_heap ();
+#endif
+
+        // Write heap size.
+        len = heap_free - heap_start;
+        outm ((char *) &len, sizeof (len));
+
+        // Write heap data.
+        outm (heap_start, heap_free - heap_start);
+#ifdef FRAGMENTED_HEAP
+    } while (heap->start);
+#endif
 
     // Write global pointers.
     for (tmpo = global_pointers; *tmpo; tmpo++)
@@ -48,6 +59,12 @@ image_save (char * pathname)
 
     simpleio_close (chout);
     setout (old_chout);
+
+#ifdef FRAGMENTED_HEAP
+    // Switch to first heap.
+    heap = heaps;
+    switch_heap ();
+#endif
 
     return true;
 }
@@ -63,26 +80,49 @@ image_load (char * pathname)
         return false;
     setin (chin);
 
+    // Read header.
     inm ((char *) &header, sizeof (header));
+
+    // Verify that the Git version matches.
+    // NOTE: It must be exactly the same machine
+    // used to save the image anyhow.
     if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version))) {
         simpleio_close (chin);
         return false;
     }
 
-    // Read heap.
-    inm ((char *) &len, sizeof (len));
-    inm (heap_start, len);
-    heap_free = heap_start + len;
-    *heap_free = 0; // Mark end of heap.
+#ifdef FRAGMENTED_HEAP
+    // Start with first heap.
+    heap = heaps;
+    do {
+        switch_heap ();
+#endif
+
+        // Read heap size.
+        inm ((char *) &len, sizeof (len));
+
+        // Read heap data.
+        inm (heap_start, len);
+
+        heap_free = heap_start + len;
+        *heap_free = 0; // Mark end of heap.
+#ifdef FRAGMENTED_HEAP
+        heap->free = heap_free;
+    } while (heap->start);
+#endif
 
     // Read global pointers.
     for (tmpo = global_pointers; *tmpo; tmpo++)
         inm ((char *) *tmpo++, sizeof (lispptr));
 
+    // Close file.
     simpleio_close (chin);
+
+    // Ensure standard I/O channels.
     set_channels (STDIN, STDOUT);
 
-    stack = stack_end;
+    // Initialize stack pointers.
+    stack    = stack_end;
     tagstack = tagstack_end;
 
     // GC to set up linked list of named symbols.

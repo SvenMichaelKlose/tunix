@@ -51,11 +51,6 @@ mark (lispptr x)
 // End of singly-linked list of named symbols.
 lispptr last_kept_sym;
 
-#ifdef FRAGMENTED_HEAP
-extern struct heap_fragment * heap;
-extern struct heap_fragment   heaps[];
-#endif
-
 xlat_item * xlat_end;
 
 #ifdef __CC65__

@@ -278,12 +278,6 @@
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
 #endif
 
-#ifdef FRAGMENTED_HEAP
-    #ifndef NO_IMAGES
-        #define NO_IMAGES
-    #endif
-#endif // #ifdef FRAGMENTED_HEAP
-
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;
@@ -349,11 +343,11 @@ struct heap_fragment {
 
 typedef struct _image_header {
     char git_version[8];
-    size_t stack_size;
-    size_t tagstack_size;
 } image_header;
 
-extern jmp_buf restart_point;
+// ILOAD restart.
+extern jmp_buf   restart_point;
+
 extern lispptr * global_pointers[];
 
 #ifdef FRAGMENTED_HEAP

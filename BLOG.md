@@ -3,6 +3,22 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-13
+
+Added buggy support for saving and loading images.  And now
+it's time to go for overlays to make as much free heap as
+possible.
+
+I've also tried to add a CP/M build but z88dk is behaving a
+bit odd.  No matter how you name libraries, they are forced
+to end on suffix '.lib'.  That's quite an inconvenience and,
+as far as I can tell, unnecessary.  Unfortunately some
+symbols are missing when compiling 'cvs2html' and I cannot
+make heads and tails of the error messages when it comes to
+linking the Lisp.  Looks like someone else has to complete
+that task.  TUNIX Lisp is more of a common good if it can be
+compiled for today's micro-controllers.
+
 # 2024-08-11
 
 Some mean heisenbug is hiding someplace which escapes heavy

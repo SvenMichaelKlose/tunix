@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#ifndef __CC65__
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 

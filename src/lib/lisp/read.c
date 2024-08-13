@@ -63,6 +63,9 @@ read_list (void)
             start = c;
         last = c;
     }
+
+    /* NOTREACHED */
+    return nil;
 }
 
 lispptr

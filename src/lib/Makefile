@@ -2,7 +2,7 @@ include ../config
 
 SUBDIRS = bdb lisp simpleio simpleio-stdlib
 
-ifneq ($(TARGET), unix)
+ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 SUBDIRS += blit conio directory-list ingle lisp log posix simpleio-cbm tunix zp lineedit text
 endif
 

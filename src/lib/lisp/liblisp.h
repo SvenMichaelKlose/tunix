@@ -127,6 +127,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore C16
@@ -144,6 +145,7 @@
 #define STACK_SIZE          768
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 64
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore C64
@@ -156,6 +158,21 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+
+// CP/M
+#ifdef TARGET_CPM
+#define MALLOCD_HEAP
+#define HEAP_SIZE   16384
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore PET
@@ -169,6 +186,7 @@
 #define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore Plus/4
@@ -181,6 +199,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore VIC-20/VC-20
@@ -195,6 +214,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Unixoids
@@ -206,6 +226,19 @@
 #define HEAP_SIZE           (64 * 1024U)
 #define STACK_SIZE          HEAP_SIZE
 #define TAGSTACK_SIZE       HEAP_SIZE
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  65536
+#endif
+
+// Sinclair ZX Spectrum
+#ifdef TARGET_ZX
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -313,12 +346,6 @@ typedef struct _symbol {
     lispptr         next;
     lispobj_size_t  length;
 } symbol;
-
-#ifdef __CC65__
-#define MAX_SYMBOL  (255 - sizeof (symbol))
-#else
-#define MAX_SYMBOL  65536
-#endif
 
 typedef struct _xlat_item {
     size_t   size;

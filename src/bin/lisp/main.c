@@ -8,10 +8,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#ifndef __CC65__
-#include <signal.h>
-#endif
 #ifdef TARGET_UNIX
+#include <signal.h>
 #include <stdio.h>
 #include <time.h>
 #endif
@@ -268,12 +266,14 @@ bi_poke (void)
     return arg2;
 }
 
+#ifndef TARGET_CPM
 lispptr
 bi_sys (void)
 {
     ((void (*) (void)) NUMBER_VALUE(arg1)) ();
     return nil;
 }
+#endif // #ifndef TARGET_CPM
 
 lispptr
 bi_eval (void)
@@ -797,7 +797,7 @@ lispptr
 bi_debug (void)
 {
     debug_mode = true;
-#ifndef __CC65__
+#ifdef TARGET_UNIX
     raise (SIGTRAP);
 #endif
     return nil;
@@ -869,7 +869,9 @@ struct builtin builtins[] = {
     { "rawptr",     "x",    bi_rawptr },
     { "peek",       "n",    bi_peek },
     { "poke",       "nn",   bi_poke },
+#ifndef TARGET_CPM
     { "sys",        "n",    bi_sys },
+#endif // #ifndef TARGET_CPM
 
     { "read",       "",     read },
     { "print",      "x",    bi_print },
@@ -911,7 +913,9 @@ struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifndef TARGET_CPM
     { "time",       "",     bi_time },
+#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },

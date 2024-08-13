@@ -3,12 +3,11 @@
 #endif
 
 #include <limits.h>
-#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <setjmp.h>
-#ifndef __CC65__
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 

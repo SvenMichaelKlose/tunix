@@ -1,4 +1,7 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_GC")
+#endif
 #include <ingle/cc65-charmap.h>
 #endif
 

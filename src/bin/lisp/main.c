@@ -58,6 +58,12 @@ lispptr unquote_spliced;
 bool debug_mode;
 #endif
 
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_BUILTINS")
+#endif
+#endif
+
 lispptr
 bi_eq (void)
 {
@@ -813,6 +819,18 @@ bi_debugger (void)
 }
 #endif
 
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
+#endif
+
+#ifdef TARGET_VIC20
+#ifdef __CC65__
+#pragma code-name (push, "LISPSTART")
+#endif
+#endif
+
 struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
@@ -1011,15 +1029,9 @@ char * env_files[] = {
     NULL
 };
 
-int
-main (int argc, char * argv[])
+void
+lisp_init (void)
 {
-#ifndef NO_IMAGES
-    lispptr istart_fun;
-#endif
-    char ** f;
-    (void) argc, (void) argv;
-
 #ifdef TARGET_UNIX
     bekloppies_start = bekloppies ();
 #endif
@@ -1045,6 +1057,26 @@ main (int argc, char * argv[])
 #ifdef GC_STRESS
     do_gc_stress = true;
 #endif
+}
+
+#ifdef TARGET_VIC20
+#ifdef __CC65__
+#pragma code-name (pop)
+#endif
+#endif
+
+int
+main (int argc, char * argv[])
+{
+    char ** f;
+#ifndef NO_IMAGES
+    lispptr istart_fun;
+#endif
+
+    // Muffle compiler warnings.
+    (void) argc, (void) argv;
+
+    lisp_init ();
 
 #ifndef NO_IMAGES
     if (!setjmp (restart_point)) {

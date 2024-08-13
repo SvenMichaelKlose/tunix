@@ -164,12 +164,18 @@ check_stacks (char * old_stack, char * old_tagstack)
 }
 
 #ifndef NO_ONERROR
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
 void
 init_onerror ()
 {
     onerror_sym = make_symbol ("onerror", 7);
     expand_universe (onerror_sym);
 }
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
 #endif // #ifndef NO_ONERROR
 
 #endif // #ifndef NAIVE

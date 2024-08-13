@@ -1,4 +1,7 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_EVAL")
+#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
@@ -782,6 +785,10 @@ funcall ()
     return eval0 ();
 }
 
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 void
 init_eval ()
 {
@@ -804,3 +811,7 @@ init_eval ()
     debug_step = nil;
 #endif
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

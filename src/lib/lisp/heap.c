@@ -355,6 +355,10 @@ heap_free_size ()
 #endif
 }
 
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 bool
 init_heap ()
 {
@@ -491,3 +495,7 @@ init_heap ()
 
     return true;
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

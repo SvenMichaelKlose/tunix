@@ -19,6 +19,12 @@
 bool do_highlight;
 lispptr highlighted;
 
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_COMMON")
+#endif
+#endif
+
 void print0 (lispptr);
 
 void
@@ -195,4 +201,10 @@ dprint (lispptr x)
     terpri ();
     return x;
 }
+#endif
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
 #endif

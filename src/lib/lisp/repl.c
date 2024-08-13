@@ -1,4 +1,7 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_REPL")
+#endif
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
 #endif
@@ -439,6 +442,10 @@ err_open:
     bi_setin ();
 }
 
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 void
 init_repl ()
 {
@@ -462,3 +469,7 @@ init_repl ()
     expand_universe (macroexpand_sym);
 #endif
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

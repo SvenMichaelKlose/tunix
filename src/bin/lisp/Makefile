@@ -22,6 +22,10 @@ ifeq ($(TARGET), unix)
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
 endif
 
+ifdef OVERLAY
+LD65CFG = cc65-cfg/$(CC65_TARGET)-overlay.cfg
+else
 LD65CFG = cc65-cfg/$(CC65_TARGET).cfg
+endif
 
 include ../../mk/Makefile.build

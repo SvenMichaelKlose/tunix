@@ -19,6 +19,12 @@
 image_header header;
 lispptr ** tmpo;
 
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_COMMON")
+#endif
+#endif
+
 bool FASTCALL
 image_save (char * pathname)
 {
@@ -134,3 +140,9 @@ image_load (char * pathname)
 
     return true;
 }
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
+#endif

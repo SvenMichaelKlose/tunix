@@ -12,6 +12,12 @@
 
 #include "liblisp.h"
 
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_COMMON")
+#endif
+#endif
+
 bool FASTCALL
 our_isalpha (char c)
 {
@@ -159,3 +165,9 @@ read ()
         return read_number ();
     return read_symbol ();
 }
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
+#endif

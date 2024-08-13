@@ -2,8 +2,8 @@
 
 set -e
 
-cd tunix/vic20 && xvic -attach8rw -autostartprgmode 0 lisp; cd -
-cd tunix/c64 && x64 -attach8rw -autostartprgmode 0 lisp; cd -
-cd tunix/c128 && x128 -attach8rw -autostartprgmode 0 lisp; cd -
-cd tunix/c16 && xplus4 -attach8rw -autostartprgmode 0 lisp; cd -
-cd tunix/plus4 && xplus4 -attach8rw -autostartprgmode 0 lisp; cd -
+cd tunix/vic20 && xvic -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -
+cd tunix/c64 && x64 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -
+cd tunix/c128 && x128 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -
+cd tunix/c16 && xplus4 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -
+cd tunix/plus4 && xplus4 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -

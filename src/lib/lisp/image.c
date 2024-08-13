@@ -48,7 +48,7 @@ image_save (char * pathname)
         outm ((char *) &len, sizeof (len));
 
         // Write heap data.
-        outm (heap_start, heap_free - heap_start);
+        outm (heap_start, len);
 #ifdef FRAGMENTED_HEAP
     } while (heap->start);
 #endif

@@ -32,5 +32,10 @@ test_diagnostics
 build_and_run NAIVE=1 $@
 build_and_run NAIVE=1 COMPRESSED_CONS=1 $@
 
+
 # Release version
 build_and_run VERBOSE_LOAD=1 COMPRESSED_CONS=1 NDEBUG=1 $@
+
+# Test image
+cd tunix/unix/ && (echo "(isave \"image\")" | ./lisp) ; cd -
+cd tunix/unix/ && (echo | ./lisp) ; cd -

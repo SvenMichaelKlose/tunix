@@ -16,7 +16,7 @@ TARGET = vic20  # VIC-20 has the largest code base.
 
 # Compress conses whose CDR points to the following object.
 # (EXPERIMENTAL!)
-#COMPRESSED_CONS = 1
+COMPRESSED_CONS = 1
 #VERBOSE_COMPRESSED_CONS = 1  # Print 'C' for each compressed cons.
 
 # GC after load threshold in bytes.
@@ -40,7 +40,7 @@ TARGET = vic20  # VIC-20 has the largest code base.
 #NAIVE = 1
 
 # Do not include extra checks to spot internal errors.
-#NDEBUG = 1
+NDEBUG = 1
 
 # Do not check on CPU stack overflow.
 #NO_CHECK_CPU_STACK = 1
@@ -74,4 +74,4 @@ TARGET = vic20  # VIC-20 has the largest code base.
 #VERBOSE_GC = 1
 
 # Print pathnames of LOADed files.
-#VERBOSE_LOAD = 1
+VERBOSE_LOAD = 1

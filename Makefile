@@ -1,6 +1,10 @@
 include src/mk/Makefile.build
 
-all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image c1541_image
+DISTDIR = tunix/$(TARGET)/
+ULTIMEM_IMG = tunix.img
+ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
+
+all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image dist
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
@@ -41,9 +45,6 @@ ifeq ($(TARGET), vic20)
 	$(MAKE) -C mkfs all
 endif
 
-ULTIMEM_IMG = tunix.img
-ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
-
 ultimem_image:
 ifeq ($(TARGET), vic20)
 	@echo "# Making UltiMem ROM image."
@@ -52,31 +53,22 @@ ifeq ($(TARGET), vic20)
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
 
-D64_TUNIX = tunix-lisp.$(TARGET).d64
-
-c1541_image:
-	@echo "# Making c1541 disk image."
-	mkdir -p bin
-	cp src/bin/lisp/README.md bin/lisp.md
-	cp src/bin/lisp/lisp bin/
-	cp src/bin/lisp/*.lisp bin/
+dist:
+	mkdir -p $(DISTDIR)
+	cp src/bin/lisp/README.md $(DISTDIR)/lisp.md
+	cp src/bin/lisp/lisp $(DISTDIR)/
+	cp src/bin/lisp/*.lisp $(DISTDIR)/
 ifeq ($(TARGET), vic20)
-	cp src/sbin/ultiburn/ultiburn bin/
-	cp src/sbin/ultidump/ultidump bin/
-	cp src/sbin/ultitest/ultitest bin/
-	cp src/bin/vi/README.md bin/vi.md
-	cp src/bin/vi/vi bin/
-endif
-ifneq (,$(TARGET), $(COMMODORE_TARGETS))
-	c1541 -format "tunix,01" d64 $(D64_TUNIX) -write bin/lisp -write bin/lisp.md -write bin/adjoin.lisp -write bin/aif.lisp -write bin/alist.lisp -write bin/all.lisp -write bin/cbm-common.lisp -write bin/copy-tree.lisp -write bin/defsetfn.lisp -write bin/do.lisp -write bin/dolist.lisp -write bin/dotimes.lisp -write bin/ensure-list.lisp -write bin/env-0.lisp -write bin/env-1.lisp -write bin/env-2.lisp -write bin/env-3.lisp -write bin/equality.lisp -write bin/every.lisp -write bin/find-if.lisp -write bin/find.lisp -write bin/group.lisp -write bin/intersect.lisp -write bin/let.lisp -write bin/list.lisp -write bin/macroexpand.lisp -write bin/max.lisp -write bin/member-if.lisp -write bin/nth.lisp -write bin/nthcdr.lisp -write bin/prog1.lisp -write bin/progn.lisp -write bin/quasiquote.lisp -write bin/queue.lisp -write bin/queue-pop.lisp -write bin/remove-if.lisp -write bin/reverse.lisp -write bin/set-difference.lisp -write bin/set-exclusive-or.lisp -write bin/smoke-test.lisp -write bin/some.lisp -write bin/source.lisp -write bin/stack.lisp -write bin/subseq.lisp -write bin/test.lisp -write bin/test-file.lisp -write bin/test-onerror.lisp -write bin/union.lisp -write bin/unique.lisp -write bin/unless.lisp -write bin/welcome.lisp -write bin/when.lisp -write bin/while.lisp -write bin/with.lisp -write bin/with-global.lisp -write bin/with-queue.lisp
+	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/
+	cp src/sbin/ultidump/ultidump $(DISTDIR)/
+	cp src/sbin/ultitest/ultitest $(DISTDIR)/
+	cp src/bin/vi/README.md $(DISTDIR)/vi.md
+	cp src/bin/vi/vi $(DISTDIR)/
 endif
 
 clean:
-	@echo "# Cleaning for target $(TARGET)."
 	$(MAKE) -C src clean
 	$(MAKE) -C mkfs clean
 	$(RM) src/include/git-version.h
-	$(RM) -rf bin/
-ifneq (,$(TARGET), $(COMMODORE_TARGETS))
-	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED) $(D64_TUNIX)
-endif
+	$(RM) -rf $(DISTDIR)
+	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)

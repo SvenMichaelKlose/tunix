@@ -2,8 +2,8 @@
 
 set -e
 
-xvic -attach8rw tunix-lisp.vic20.d64
-x64 -attach8rw tunix-lisp.c64.d64
-x128 -attach8rw tunix-lisp.c128.d64
-xplus4 -attach8rw tunix-lisp.c16.d64
-xplus4 -attach8rw tunix-lisp.plus4.d64
+cd tunix/vic20 && xvic -attach8rw -autostartprgmode 0 lisp
+cd tunix/c64 && x64 -attach8rw -autostartprgmode 0 lisp
+cd tunix/c128 && x128 -attach8rw -autostartprgmode 0 lisp
+cd tunix/c16 && xplus4 -attach8rw -autostartprgmode 0 lisp
+cd tunix/plus4 && xplus4 -attach8rw -autostartprgmode 0 lisp

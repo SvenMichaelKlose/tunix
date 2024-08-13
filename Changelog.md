@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### General
+
+#### Removed
+
+- D64 images as the have become too small for some targets.  Let's spare the trouble.
+
+#### Added
+
+- Directories with binaries to replace D64 images.
+
 ### TUNIX Lisp
 
 #### Fixed

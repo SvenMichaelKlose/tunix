@@ -362,12 +362,8 @@ restart:
 
     // Mark global pointers.
     for (gp = global_pointers; *gp; gp++)
-        {
-        outhw ((unsigned long) **gp); out (' ');
         mark (**gp);
-        }
 
-        outs ("stack"); terpri ();
     // Mark GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);

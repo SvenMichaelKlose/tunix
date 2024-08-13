@@ -537,12 +537,6 @@ extern bool do_gc_stress;
     #define POP_TAG(x)       do { x = poptag (); } while (0)
     #define PUSH_TAGW(x)     pushtagw (x)
     #define POP_TAGW(x)      do { x = poptagw (); } while (0)
-    extern void     FASTCALL pushgc (lispptr);
-    extern lispptr           popgc (void);
-    extern void     FASTCALL pushtag (char);
-    extern char              poptag (void);
-    extern void     FASTCALL pushtagw (lispptr);
-    extern lispptr           poptagw (void);
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \
@@ -603,14 +597,14 @@ extern bool do_gc_stress;
 #define TYPE_SPECIAL    (TYPE_SYMBOL | TYPE_EXTENDED)
 #define TYPE_CCONS      (TYPE_CONS | TYPE_EXTENDED)
 
-#define TYPE(x)     (*((char *) (x))) // TODO: Rename.
-#define TYPEBITS(x) (TYPE(x) & TYPE_MASK)
+#define TYPE(x)         (*((char *) (x))) // TODO: Rename.
+#define TYPEBITS(x)     (TYPE(x) & TYPE_MASK)
 
-#define MARKED(x)   (!(x) || TYPE(x) & TYPE_MARKED)
-#define MARK(x)     (TYPE(x) |= TYPE_MARKED)
-#define UNMARK(x)   (TYPE(x) &= ~TYPE_MARKED)
+#define MARKED(x)       (!(x) || TYPE(x) & TYPE_MARKED)
+#define MARK(x)         (TYPE(x) |= TYPE_MARKED)
+#define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
 
-#define CONS(x)     ((cons *) (x))
+#define CONS(x)         ((cons *) (x))
 
 #ifdef COMPRESSED_CONS
     // CDR of a compressed cons is the address of the next
@@ -628,10 +622,10 @@ extern bool do_gc_stress;
 #define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x) ((x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
 
-#define LIST_CAR(x)  (!(x) ? x : CAR(x))
-#define LIST_CDR(x)  (!(x) ? x : CDR(x))
+#define LIST_CAR(x)     (!(x) ? x : CAR(x))
+#define LIST_CDR(x)     (!(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
 #ifdef COMPRESSED_CONS
@@ -657,17 +651,6 @@ extern bool do_gc_stress;
     #define SYMBOLP(x)   (lisp_symbolp (x))
     #define BUILTINP(x)  (lisp_builtinp (x))
     #define SPECIALP(x)  (lisp_specialp (x))
-    extern lispptr FASTCALL lisp_car (lispptr);
-    extern lispptr FASTCALL lisp_cdr (lispptr);
-    extern void    FASTCALL lisp_setcar (lispptr x, lispptr v);
-    extern void    FASTCALL lisp_setcdr (lispptr x, lispptr v);
-    extern bool    FASTCALL lisp_atom (lispptr);
-    extern bool    FASTCALL lisp_consp (lispptr);
-    extern bool    FASTCALL lisp_listp (lispptr);
-    extern bool    FASTCALL lisp_numberp (lispptr);
-    extern bool    FASTCALL lisp_symbolp (lispptr);
-    extern bool    FASTCALL lisp_builtinp (lispptr);
-    extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
     #define CAR(x)       (CONS(x)->car)
         #ifdef COMPRESSED_CONS
@@ -767,16 +750,34 @@ extern lispptr           debugger     (void);
 #define COPY_LIST       0
 #define COPY_BUTLAST    1
 #define COPY_REMOVE     2
-extern int      FASTCALL length    (lispptr);
-extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
-extern lispptr  FASTCALL butlast   (lispptr);
-extern lispptr  FASTCALL last      (lispptr);
-extern lispptr  FASTCALL member    (lispptr needle, lispptr haystack);
+extern int      FASTCALL length              (lispptr);
+extern lispptr  FASTCALL copy_list           (lispptr, char mode, lispptr excluded);
+extern lispptr  FASTCALL butlast             (lispptr);
+extern lispptr  FASTCALL last                (lispptr);
+extern lispptr  FASTCALL member              (lispptr needle, lispptr haystack);
+
+extern void     FASTCALL pushgc         (lispptr);
+extern lispptr           popgc          (void);
+extern void     FASTCALL pushtag        (char);
+extern char              poptag         (void);
+extern void     FASTCALL pushtagw       (lispptr);
+extern lispptr           poptagw        (void);
+extern lispptr  FASTCALL lisp_car       (lispptr);
+extern lispptr  FASTCALL lisp_cdr       (lispptr);
+extern void     FASTCALL lisp_setcar    (lispptr x, lispptr v);
+extern void     FASTCALL lisp_setcdr    (lispptr x, lispptr v);
+extern bool     FASTCALL lisp_atom      (lispptr);
+extern bool     FASTCALL lisp_consp     (lispptr);
+extern bool     FASTCALL lisp_listp     (lispptr);
+extern bool     FASTCALL lisp_numberp   (lispptr);
+extern bool     FASTCALL lisp_symbolp   (lispptr);
+extern bool     FASTCALL lisp_builtinp  (lispptr);
+extern bool     FASTCALL lisp_specialp  (lispptr);
 
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 // TODO: Typedef for objects' type byte.
-extern void     FASTCALL err_type            (char * type, lispptr x, char code);
+extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);
 extern void              tagstack_overflow   (void);
@@ -784,21 +785,25 @@ extern void              tagstack_underflow  (void);
 #ifdef COMPRESSED_CONS
 extern void              error_set_ccons_cdr (void);
 #endif
-extern char *   FASTCALL typestr             (lispptr *);
-extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char code);
-extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
-extern void              print_error_info (void);
 
+extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char errorcode);
+extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
+extern void              print_error_info    (void);
 #ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
 #endif
+
+extern char *   FASTCALL typestr             (lispptr *);
 #ifdef TARGET_UNIX
 extern void              dump_lispptr        (char *);
 extern void              dump_heap           (void);
 #endif
 
-extern void     FASTCALL name_to_buffer (lispptr s);
-extern void     FASTCALL make_call      (lispptr args);
-extern void     FASTCALL make_car_call  (void);
+extern void     FASTCALL name_to_buffer      (lispptr s);
+extern void     FASTCALL make_call           (lispptr args);
+extern void     FASTCALL make_car_call       (void);
 
+// Switch to 'heap'.
+extern void             switch_heap          (void);
+size_t                  heap_free_size       (void);
 #endif // #ifndef __LIBLISP_H__

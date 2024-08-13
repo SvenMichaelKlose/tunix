@@ -330,6 +330,32 @@ make_symbol (char * str, uchar len)
     return tmp;
 }
 
+#ifdef FRAGMENTED_HEAP
+// Switch to 'heap'.
+void
+switch_heap ()
+{
+    heap_start = heap->start;
+    heap_free = heap->free;
+    heap_end = heap->end;
+    heap++;
+}
+#endif
+
+size_t
+heap_free_size ()
+{
+#ifdef FRAGMENTED_HEAP
+    struct heap_fragment *h;
+    size_t freed = 0;
+    for (h = heaps; h->start; h++)
+        freed += h->end - h->free;
+    return freed;
+#else
+    return heap_end - heap_free;
+#endif
+}
+
 bool
 init_heap ()
 {

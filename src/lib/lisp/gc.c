@@ -251,7 +251,7 @@ check_xlat:
         // Save free pointer.
         heap->free = d;
 
-        // Undo address shifting with negative gap entry in
+        // Undo address shifting with negative gap size entry in
         // order to not affect the following heap's pointers.
         xlat--;
         xlat->pos  = s;
@@ -340,32 +340,6 @@ relocate (void)
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }
 
-#ifdef FRAGMENTED_HEAP
-// Switch to 'heap'.
-void
-switch_heap ()
-{
-    heap_start = heap->start;
-    heap_free = heap->free;
-    heap_end = heap->end;
-    heap++;
-}
-#endif
-
-size_t
-heap_free_size ()
-{
-#ifdef FRAGMENTED_HEAP
-    struct heap_fragment *h;
-    size_t freed = 0;
-    for (h = heaps; h->start; h++)
-        freed += h->end - h->free;
-    return freed;
-#else
-    return heap_end - heap_free;
-#endif
-}
-
 // Mark and sweep objects, and relocate object pointers.
 void
 gc (void)
@@ -399,7 +373,11 @@ restart:
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 
+    // Append used objects over unused ones, freeing space.
+    // Log to gap table.
     sweep ();
+
+    // Update pointers according to gap list.
     relocate ();
 
     // Restart if sweep was interrupted due

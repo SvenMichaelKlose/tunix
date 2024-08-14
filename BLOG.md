@@ -3,6 +3,30 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-14
+
+TUNIX Lisp became more stable again but this is not going
+fast enough which unfortunately isn't my fault entirely.
+I'd prefer to be writing Lisp apps and to hack away on the
+Lisp compiler.
+
+An app that comes to mind this time is a spreadsheet to do
+very German protocols to get rid of yet another brain-dead
+speed head who's messing up the neighbourhood.  This is a
+bloody epidemic heading for its peak.
+
+For the VIC-20 with Ultimem expansion I was thinking of
+using the RAM123 area for banking to occupy as little
+address space as possible to leave it for the heap.  But
+the fast version of the evaluator is around 5.5K in size,
+so it won't fit in there.  setjmp() and longjmp() could be
+used to jump from one function to another instead of calling
+it, but that again is too much of a mess.  A graphics mode
+should also be possible. That's 29K for heap and stack only
+if I can manage to limit everything to an 8K range.  That
+also is far too messy.  Gonna have some sleep and wait for
+englightenment to hit.
+
 # 2024-08-13
 
 Added buggy support for saving and loading images.  And now

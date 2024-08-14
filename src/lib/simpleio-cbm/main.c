@@ -102,7 +102,7 @@ simpleio_open (char * name, char mode)
         ctrl = cbm_k_basin ();
         cbm_close (15);
         cbm_k_chkin (fnin);
-        if (ctrl != '0' && ctrh != '0')
+        if (ctrl != '0' || ctrh != '0')
             return 0;
     }
 

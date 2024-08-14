@@ -28,18 +28,24 @@ lispptr ** tmpo;
 bool FASTCALL
 image_save (char * pathname)
 {
-    simpleio_chn_t old_chout = fnout;
+    simpleio_chn_t old_out = fnout;
     simpleio_chn_t chout;
     size_t len;
 
     // Open image file for writing.
     chout = simpleio_open (pathname, 'w');
+
+    // Break if file couldn't be opened.
     if (!chout)
         return false;
+
+    // Switch to image file's channel for writing.
     setout (chout);
 
-    // Make and write header.
+    // Make header.
     memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version));
+
+    // Write header.
     outm ((char *) &header, sizeof (header));
 
 #ifdef FRAGMENTED_HEAP
@@ -66,8 +72,11 @@ image_save (char * pathname)
     for (tmpo = global_pointers; *tmpo; tmpo++)
         outm ((char *) *tmpo, sizeof (lispptr));
 
+    // Close image file.
     simpleio_close (chout);
-    setout (old_chout);
+
+    // Restore old output channel.
+    setout (old_out);
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap.
@@ -75,12 +84,14 @@ image_save (char * pathname)
     switch_heap ();
 #endif
 
+    // Signal success.
     return true;
 }
 
 bool FASTCALL
 image_load (char * pathname)
 {
+    simpleio_chn_t old_in = fnin;
     simpleio_chn_t chin;
     size_t len;
     lispptr pos;
@@ -98,6 +109,7 @@ image_load (char * pathname)
     // used to save the image anyhow.
     if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version))) {
         simpleio_close (chin);
+        setin (old_in);
         return false;
     }
 
@@ -136,6 +148,9 @@ image_load (char * pathname)
     // Close file.
     simpleio_close (chin);
 
+    // Restore old input channel.
+    setin (old_in);
+
     // Initialize stack pointers.
     stack    = stack_end;
     tagstack = tagstack_end;
@@ -146,9 +161,7 @@ image_load (char * pathname)
 #endif
     gc ();
 
-    // Ensure standard I/O channels.
-    set_channels (STDIN, STDOUT);
-
+    // Signal success.
     return true;
 }
 

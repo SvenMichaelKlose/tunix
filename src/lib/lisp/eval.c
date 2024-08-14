@@ -240,7 +240,7 @@ do_eval:
     if (arg1 == block_sym) {
 #ifndef NAIVE
         if (!CONSP(CDR(x))) {
-            error (ERROR_ARG_MISSING, "No name.");
+            error (ERROR_ARG_MISSING, "No name");
             goto do_return;
         }
 #endif
@@ -252,7 +252,7 @@ do_eval:
 #ifndef NAIVE
         if (!SYMBOLP(arg1)) {
             error_info = arg1;
-            error (ERROR_TYPE, "Name not a sym.");
+            error (ERROR_TYPE, "Name not a sym");
             goto do_return;
         }
 #endif
@@ -303,7 +303,7 @@ next_block_statement:
 #ifndef NAIVE
             if (!tag_found) {
                 error_info = go_tag;
-                error (ERROR_TAG_MISSING, "Tag not found.");
+                error (ERROR_TAG_MISSING, "Tag not found");
                 goto do_return;
             }
 #endif
@@ -354,7 +354,7 @@ do_builtin_arg:
             // Complain if argument left.
             if (args) {
                 error_info = args;
-                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin:");
+                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
                 goto do_return;
             }
 #endif
@@ -390,7 +390,7 @@ set_arg_values:
 #ifndef NAIVE
         // Missing argument error.
         else if (!args) {
-            error (ERROR_ARG_MISSING, "Missing arg to builtin.");
+            error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
 #endif

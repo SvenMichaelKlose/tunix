@@ -1,6 +1,3 @@
-(fn print-channel (x)
-  (out "(Channel ")(print x)(out ")")(terpri))
-
 (message "Testing OPEN on missing file...")
 (and (open "k87sfdasdj9" 'r)
      (error))

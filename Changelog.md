@@ -80,3 +80,9 @@ if not enabled during tests.
 - simpleio\_open(): Check DOS status code.
 - outhn(), outhb(), outhw(): Print hexadecimal nibble, byte
   or word.
+
+### libsimpleio-stdlib
+
+#### Fixed
+
+- out(): Set err() if channel is invalid.

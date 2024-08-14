@@ -54,8 +54,10 @@ void
 raw_out (char c)
 {
     last_error = 0;
-    if (EOF == fputc (c, channels[(int) fnout]))
+    if (!channels[(int) fnout])
         last_error = -1;
+    else if (EOF == fputc (c, channels[(int) fnout]))
+        last_error = errno;
 }
 
 void

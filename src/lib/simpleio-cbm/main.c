@@ -170,9 +170,8 @@ raw_setout (simpleio_chn_t chn)
 void FASTCALL
 raw_close (simpleio_chn_t chn)
 {
-    cbm_k_clrch ();
     cbm_k_close (channels[chn]);
-    channels[chn] = false;
+    channels[chn] = 0;
 }
 
 simpleio vectors = {

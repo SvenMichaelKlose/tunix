@@ -1,10 +1,8 @@
-[@] LOAD: Issue error if file does not exist.
+[ ] ISAVE and ILOAD during LOAD seems to spoil I/O channels.
 [ ] ERROR: Handle argument.
-[ ] "Args missing" to user procedures in rare cases for
-    unknown reasons.
 
 Commodore PET
-[ ] Breaks program start with syntax error.
+[ ] Program start breaks with syntax error.
 
 Old bugs to check
 [ ] 'echo "(exit 0" | ./lisp' causes SIGSEGV.

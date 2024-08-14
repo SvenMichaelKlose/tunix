@@ -1,10 +1,14 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_GC")
+#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <strings.h>
 #endif
@@ -20,46 +24,9 @@
 #include <stdio.h>
 #endif
 
-extern lispptr lisp_fnin;
-extern lispptr lisp_fnout;
-
 #ifdef COMPRESSED_CONS
 bool do_compress_cons;
 #endif
-
-lispptr * global_pointers[] = {
-    &universe, &t,
-    &delayed_eval,
-    &block_sym,
-    &quote, &quasiquote, &unquote, &unquote_spliced,
-    &return_sym, &return_name, &return_value,
-    &go_sym, &go_tag,
-    &current_expr,
-#ifndef NAIVE
-    &current_toplevel,
-#endif
-    &current_function,
-    &unexpanded_toplevel,
-    &unevaluated_arg1,
-#ifndef NO_DEBUGGER
-    &onerror_sym,
-    &debug_step,
-    &breakpoints_sym,
-    &debugger_return_value_sym,
-#endif
-#ifndef NO_MACROEXPAND
-    &macroexpand_sym,
-#endif
-    &highlighted,
-
-    &lisp_fnin, &lisp_fnout,
-
-    // To be safe:
-    &x, &args, &argdefs, &arg1, &arg2, &arg2c,
-    &list_start, &list_last,
-    &value, &va,
-    NULL
-};
 
 lispptr ** gp;
 
@@ -86,11 +53,6 @@ mark (lispptr x)
 
 // End of singly-linked list of named symbols.
 lispptr last_kept_sym;
-
-#ifdef FRAGMENTED_HEAP
-extern struct heap_fragment * heap;
-extern struct heap_fragment   heaps[];
-#endif
 
 xlat_item * xlat_end;
 
@@ -267,7 +229,7 @@ sweep ()
 #ifdef COMPRESSED_CONS
 check_xlat:
 #endif
-#ifndef PARANOID
+#ifdef PARANOID
                 if (xlat < xlat_start)
                     // Reloc table size must be multiple of entry size!
                     internal_error ("xlat overflow");
@@ -287,7 +249,7 @@ check_xlat:
         // Save free pointer.
         heap->free = d;
 
-        // Undo address shifting with negative gap entry in
+        // Undo address shifting with negative gap size entry in
         // order to not affect the following heap's pointers.
         xlat--;
         xlat->pos  = s;
@@ -296,12 +258,12 @@ check_xlat:
             xlat_full = true;
 #ifdef VERBOSE_GC
         outn (total_removed); outs ("B freed."); terpri ();
-#endif
+#endif // #ifdef VERBOSE_GC
     } while ((++heap)->start);
 #else // #ifdef FRAGMENTED_HEAP
     // Save free pointer.
     heap_free = d;
-#endif
+#endif // #ifdef FRAGMENTED_HEAP
 
 #ifndef NDEBUG
     bzero (d, heap_end - d);
@@ -376,32 +338,6 @@ relocate (void)
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 }
 
-#ifdef FRAGMENTED_HEAP
-// Switch to 'heap'.
-void
-switch_heap ()
-{
-    heap_start = heap->start;
-    heap_free = heap->free;
-    heap_end = heap->end;
-    heap++;
-}
-#endif
-
-size_t
-heap_free_size ()
-{
-#ifdef FRAGMENTED_HEAP
-    struct heap_fragment *h;
-    size_t freed = 0;
-    for (h = heaps; h->start; h++)
-        freed += h->end - h->free;
-    return freed;
-#else
-    return heap_end - heap_free;
-#endif
-}
-
 // Mark and sweep objects, and relocate object pointers.
 void
 gc (void)
@@ -435,7 +371,11 @@ restart:
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         mark (*(lispptr *) p);
 
+    // Append used objects over unused ones, freeing space.
+    // Log to gap table.
     sweep ();
+
+    // Update pointers according to gap list.
     relocate ();
 
     // Restart if sweep was interrupted due

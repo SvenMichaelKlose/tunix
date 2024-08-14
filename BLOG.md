@@ -3,6 +3,54 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-13
+
+Added buggy support for saving and loading images.  And now
+it's time to go for overlays to make as much free heap as
+possible.
+
+I've also tried to add a CP/M build but z88dk is behaving a
+bit odd.  No matter how you name libraries, they are forced
+to end on suffix '.lib'.  That's quite an inconvenience and,
+as far as I can tell, unnecessary.  Unfortunately some
+symbols are missing when compiling 'cvs2html' and I cannot
+make heads and tails of the error messages when it comes to
+linking the Lisp.  Looks like someone else has to complete
+that task.  TUNIX Lisp is more of a common good if it can be
+compiled for today's micro-controllers.
+
+Hacked along more after a long break and prepared some
+segmentation for overlays and throwing away init code.
+It would be useful if images could be loaded by different
+versions of the interpreter.  Symbols of built-ins would be
+required to get looked up.  One could for example throw out
+READ for some stand-alone app.  Being able to exchange
+images across targets would be mind-boggling.  At least for
+me.
+
+# 2024-08-11
+
+Some mean heisenbug is hiding someplace which escapes heavy
+stress testing.  Strategies: code review, cleaning up names,
+more tests and documentation.  And also compiler-writing, to
+make sure that the debugger is fun to use.
+
+cc65 also offers some ways to reduce code size.
+Optimizations can be controlled with #pragma directives and
+intialization code does not have to stay in memory as soon
+as the interpreter has booted.  The table of built-ins is
+also a waste of space as the procedure names are copied
+into symbols and never touched again.  Also, when testing
+if a pointer is NIL, only its high byte needs to be
+checked.  All that should knock off at least 1K.
+
+What I didn't mention in here yet is a weird idea on how to
+implement bytecode.  An idea that struck me during a walk,
+being busy with other kinds of things entirely.  I like it
+very much because I'm sure that it's pretty novel and very
+effective alike.  Am just too tired to eloborate on it
+right now.
+
 # 2024-08-10
 
 Should have known already but only realized yesterday that

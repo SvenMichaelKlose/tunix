@@ -1,4 +1,7 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_REPL")
+#endif
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
 #endif
@@ -7,7 +10,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#ifndef __CC65__
+#include <setjmp.h>
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 
@@ -40,6 +44,8 @@ out_colon (void)
 {
     outs (": ");
 }
+
+#ifndef NO_DEBUGGER
 
 void
 print_debugger_info ()
@@ -93,10 +99,14 @@ read_cmd_arg (void)
     else {
         putback ();
         x = read ();
+        PUSH(highlighted);
         eval ();
+        POP(highlighted);
     }
     terpri ();
 }
+
+#endif // #ifndef NO_DEBUGGER
 
 lispptr FASTCALL
 lisp_repl (char mode)
@@ -155,7 +165,7 @@ lisp_repl (char mode)
 
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
-        print_debugger_info ();
+        // TODO?: print_debugger_info ();
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;
@@ -432,12 +442,16 @@ err_open:
     bi_setin ();
 }
 
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 void
 init_repl ()
 {
     do_break_repl      = false;
     do_continue_repl   = false;
-    num_repls          = 0;
+    num_repls = -1;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);
@@ -455,3 +469,7 @@ init_repl ()
     expand_universe (macroexpand_sym);
 #endif
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

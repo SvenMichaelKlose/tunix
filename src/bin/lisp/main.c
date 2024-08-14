@@ -7,16 +7,17 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#ifndef __CC65__
-#include <signal.h>
-#endif
+#include <setjmp.h>
 #ifdef TARGET_UNIX
+#include <signal.h>
 #include <stdio.h>
 #include <time.h>
 #endif
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
+
+jmp_buf restart_point;
 
 extern void test (void);
 
@@ -55,6 +56,12 @@ lispptr unquote_spliced;
 // Used as breakpoint condition for host debugger.
 #ifndef NDEBUG
 bool debug_mode;
+#endif
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_BUILTINS")
+#endif
 #endif
 
 lispptr
@@ -265,12 +272,14 @@ bi_poke (void)
     return arg2;
 }
 
+#ifndef TARGET_CPM
 lispptr
 bi_sys (void)
 {
     ((void (*) (void)) NUMBER_VALUE(arg1)) ();
     return nil;
 }
+#endif // #ifndef TARGET_CPM
 
 lispptr
 bi_eval (void)
@@ -448,10 +457,12 @@ bi_open (void)
     char mode = SYMBOL_NAME(arg2)[0];
     simpleio_chn_t c;
 
+#ifndef NAIVE
     if (SYMBOL_LENGTH(arg2) != 1 || (mode != 'r' && mode != 'w')) {
         error (ERROR_FILEMODE, "Ill file mode");
         return nil;
     }
+#endif // #ifndef NAIVE
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
     if (c)
@@ -539,6 +550,28 @@ bi_load (void)
 #endif
     return nil;
 }
+
+#ifndef NO_IMAGES
+
+lispptr
+bi_iload (void)
+{
+    name_to_buffer (arg1);
+    if (image_load (buffer))
+        longjmp (restart_point, 1);
+    return nil;
+}
+
+lispptr
+bi_isave (void)
+{
+    name_to_buffer (arg1);
+    if (image_save (buffer))
+        return t;
+    return nil;
+}
+
+#endif // #ifndef NO_IMAGES
 
 lispptr
 bi_define (void)
@@ -770,7 +803,7 @@ lispptr
 bi_debug (void)
 {
     debug_mode = true;
-#ifndef __CC65__
+#ifdef TARGET_UNIX
     raise (SIGTRAP);
 #endif
     return nil;
@@ -784,6 +817,18 @@ bi_debugger (void)
     debug_step = t;
     return nil;
 }
+#endif
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
+#endif
+
+#ifdef TARGET_VIC20
+#ifdef __CC65__
+#pragma code-name (push, "LISPSTART")
+#endif
 #endif
 
 struct builtin builtins[] = {
@@ -842,7 +887,9 @@ struct builtin builtins[] = {
     { "rawptr",     "x",    bi_rawptr },
     { "peek",       "n",    bi_peek },
     { "poke",       "nn",   bi_poke },
+#ifndef TARGET_CPM
     { "sys",        "n",    bi_sys },
+#endif // #ifndef TARGET_CPM
 
     { "read",       "",     read },
     { "print",      "x",    bi_print },
@@ -858,6 +905,11 @@ struct builtin builtins[] = {
     { "putback",    "",     bi_putback },
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
+
+#ifndef NO_IMAGES
+    { "iload",      "s",    bi_iload },
+    { "isave",      "s",    bi_isave },
+#endif
 
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
@@ -879,7 +931,9 @@ struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifndef TARGET_CPM
     { "time",       "",     bi_time },
+#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
@@ -938,9 +992,7 @@ extern void test (void);
 
 char * env_files[] = {
     "env-0.lisp",
-#ifdef TEST
     "smoke-test.lisp",
-#endif
     "env-1.lisp",
 
     // Target-specific
@@ -951,12 +1003,9 @@ char * env_files[] = {
     "unix.lisp",
 #endif
 
-#ifdef TEST
     "test.lisp",
-#endif
     "env-2.lisp",
-
-#if defined (TEST) && !defined(NO_ONERROR)
+#ifndef NO_ONERROR
     "test-onerror.lisp",
 #endif
 
@@ -971,20 +1020,18 @@ char * env_files[] = {
 #ifndef NO_DEBUGGER
     "stack.lisp",
 #endif
-#ifdef TEST
     "test-file.lisp",
-#endif
+#ifdef LOAD_ALL
+    "all.lisp",
+#endif // #ifdef LOAD_ALL
     "welcome.lisp",
 #endif // #ifndef TARGET_C16
     NULL
 };
 
-int
-main (int argc, char * argv[])
+void
+lisp_init (void)
 {
-    char ** f;
-    (void) argc, (void) argv;
-
 #ifdef TARGET_UNIX
     bekloppies_start = bekloppies ();
 #endif
@@ -1010,13 +1057,52 @@ main (int argc, char * argv[])
 #ifdef GC_STRESS
     do_gc_stress = true;
 #endif
+}
 
-    // Load environment files.
-    for (f = env_files; *f; f++)
-        load (*f);
+#ifdef TARGET_VIC20
+#ifdef __CC65__
+#pragma code-name (pop)
+#endif
+#endif
 
-    do_break_repl = do_continue_repl = false;
-    num_repls = -1;
+int
+main (int argc, char * argv[])
+{
+    char ** f;
+#ifndef NO_IMAGES
+    lispptr istart_fun;
+#endif
+
+    // Muffle compiler warnings.
+    (void) argc, (void) argv;
+
+    lisp_init ();
+
+#ifndef NO_IMAGES
+    if (!setjmp (restart_point)) {
+        // Try to load image.
+        strcpy (buffer, "image");
+        if (image_load (buffer))
+            longjmp (restart_point, 1);
+#endif // #ifndef NO_IMAGES
+
+        // Load environment files.
+        for (f = env_files; *f; f++)
+            load (*f);
+#ifndef NO_IMAGES
+    } else {
+        // Called from ILOAD: Call function
+        // ISTART in loaded image.
+        istart_fun = make_symbol ("istart", 6);
+        if (CONSP(SYMBOL_VALUE(istart_fun))) {
+           PUSH(istart_fun);
+           x = make_cons (istart_fun, nil);
+           stack += sizeof (lispptr);
+           (void) eval ();
+        }
+    }
+#endif // #ifndef NO_IMAGES
+
     lisp_repl (REPL_STD);
 
     setout (STDOUT);

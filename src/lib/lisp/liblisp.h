@@ -60,6 +60,12 @@
 
 /// Disabling features
 
+// Do not check on CPU stack overflow.
+//#define NO_CHECK_CPU_STACK
+
+// No support for saving and loading images.
+//#define NO_IMAGES
+
 // Do not expand macros in REPL.
 // Required to load all of the environment.
 //#define NO_MACROEXPAND
@@ -121,6 +127,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore C16
@@ -138,6 +145,7 @@
 #define STACK_SIZE          768
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 64
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore C64
@@ -150,6 +158,21 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+
+// CP/M
+#ifdef TARGET_CPM
+#define MALLOCD_HEAP
+#define HEAP_SIZE   16384
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore PET
@@ -163,6 +186,7 @@
 #define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore Plus/4
@@ -175,6 +199,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore VIC-20/VC-20
@@ -189,6 +214,7 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Unixoids
@@ -203,6 +229,19 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  65536
+#endif
+
+// Sinclair ZX Spectrum
+#ifdef TARGET_ZX
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
@@ -214,6 +253,9 @@
 #endif
 
 #ifdef NAIVE
+    #ifndef NO_CHECK_CPU_STACK
+        #define NO_CHECK_CPU_STACK
+    #endif
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
     #endif
@@ -223,6 +265,9 @@
     #ifndef NDEBUG
         #define NDEBUG
     #endif
+    #ifdef PARANOID
+        #error "NAIVE and PARANOID don't get along."
+    #endif
 #else // #ifdef NAIVE
     #define GCSTACK_CHECKS
     #define TAGSTACK_CHECKS
@@ -231,6 +276,9 @@
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
+    #ifndef NDEBUG
+        #pragma check-stack (on)
+    #endif
 #else
     #define FASTCALL
     #define HOST_DEBUGGER() raise (SIGTRAP);
@@ -257,6 +305,10 @@
 
 #if defined(COMPRESSED_CONS) && !defined(GC_AFTER_LOAD_THRESHOLD)
     #define GC_AFTER_LOAD_THRESHOLD 2048
+#endif
+
+#if defined(VERBOSE_COMPRESSED_CONS) && !defined(COMPRESSED_CONS)
+    #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
 #endif
 
 typedef unsigned char  uchar;
@@ -295,12 +347,6 @@ typedef struct _symbol {
     lispobj_size_t  length;
 } symbol;
 
-#ifdef __CC65__
-#define MAX_SYMBOL  (255 - sizeof (symbol))
-#else
-#define MAX_SYMBOL  65536
-#endif
-
 typedef struct _xlat_item {
     size_t   size;
     lispptr  pos;
@@ -321,6 +367,20 @@ struct heap_fragment {
     char * free;
     char * end;
 };
+
+typedef struct _image_header {
+    char git_version[8];
+} image_header;
+
+// ILOAD restart.
+extern jmp_buf   restart_point;
+
+extern lispptr * global_pointers[];
+
+#ifdef FRAGMENTED_HEAP
+extern struct  heap_fragment * heap;
+extern struct  heap_fragment heaps[];
+#endif
 
 extern lispptr universe;
 extern char *  stack_start;
@@ -360,6 +420,9 @@ extern char *      stack_end;
 extern char *      tagstack_end;
 extern xlat_item * xlat_end;
 
+extern lispptr  lisp_fnin;
+extern lispptr  lisp_fnout;
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -374,11 +437,6 @@ extern lispptr tmp;
 extern lispptr tmp2;
 extern char    tmpc;
 extern char *  tmpstr;
-
-#ifdef FRAGMENTED_HEAP
-extern struct  heap_fragment * heap;
-extern struct  heap_fragment heaps[];
-#endif
 
 extern char *      heap_free;
 extern char *      heap_end;
@@ -437,7 +495,9 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("xlat_start")
+#ifndef NAIVE
 #pragma zpsym ("error_code")
+#endif
 #ifndef NO_DEBUGGER
 #pragma zpsym ("debug_step")
 #endif
@@ -512,12 +572,6 @@ extern bool do_gc_stress;
     #define POP_TAG(x)       do { x = poptag (); } while (0)
     #define PUSH_TAGW(x)     pushtagw (x)
     #define POP_TAGW(x)      do { x = poptagw (); } while (0)
-    extern void     FASTCALL pushgc (lispptr);
-    extern lispptr           popgc (void);
-    extern void     FASTCALL pushtag (char);
-    extern char              poptag (void);
-    extern void     FASTCALL pushtagw (lispptr);
-    extern lispptr           poptagw (void);
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \
@@ -578,14 +632,14 @@ extern bool do_gc_stress;
 #define TYPE_SPECIAL    (TYPE_SYMBOL | TYPE_EXTENDED)
 #define TYPE_CCONS      (TYPE_CONS | TYPE_EXTENDED)
 
-#define TYPE(x)     (*((char *) (x))) // TODO: Rename.
-#define TYPEBITS(x) (TYPE(x) & TYPE_MASK)
+#define TYPE(x)         (*((char *) (x))) // TODO: Rename.
+#define TYPEBITS(x)     (TYPE(x) & TYPE_MASK)
 
-#define MARKED(x)   (!(x) || TYPE(x) & TYPE_MARKED)
-#define MARK(x)     (TYPE(x) |= TYPE_MARKED)
-#define UNMARK(x)   (TYPE(x) &= ~TYPE_MARKED)
+#define MARKED(x)       (!(x) || TYPE(x) & TYPE_MARKED)
+#define MARK(x)         (TYPE(x) |= TYPE_MARKED)
+#define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
 
-#define CONS(x)     ((cons *) (x))
+#define CONS(x)         ((cons *) (x))
 
 #ifdef COMPRESSED_CONS
     // CDR of a compressed cons is the address of the next
@@ -603,21 +657,28 @@ extern bool do_gc_stress;
 #define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x) ((x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
 
-#define LIST_CAR(x)  (!(x) ? x : CAR(x))
-#define LIST_CDR(x)  (!(x) ? x : CDR(x))
+#define LIST_CAR(x)     (!(x) ? x : CAR(x))
+#define LIST_CDR(x)     (!(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
+#ifdef NAIVE
+    #define _SETCDR_CHECK(x)
+#else
+    #define _SETCDR_CHECK(x) \
+        if (_EXTENDEDP(x)) \
+            error_set_ccons_cdr ();
+#endif
 #ifdef COMPRESSED_CONS
     #define _SETCDR(x, v) \
         do { \
-            if (_EXTENDEDP(x)) \
-                error_set_ccons_cdr (); \
+            _SETCDR_CHECK(x); \
             CONS(x)->cdr = v; \
         } while (0);
 #else
-    #define _SETCDR(x, v) (CONS(x)->cdr = v)
+    #define _SETCDR(x, v) \
+        (CONS(x)->cdr = v)
 #endif // #ifdef COMPRESSED_CONS
 
 #ifdef SLOW
@@ -632,17 +693,6 @@ extern bool do_gc_stress;
     #define SYMBOLP(x)   (lisp_symbolp (x))
     #define BUILTINP(x)  (lisp_builtinp (x))
     #define SPECIALP(x)  (lisp_specialp (x))
-    extern lispptr FASTCALL lisp_car (lispptr);
-    extern lispptr FASTCALL lisp_cdr (lispptr);
-    extern void    FASTCALL lisp_setcar (lispptr x, lispptr v);
-    extern void    FASTCALL lisp_setcdr (lispptr x, lispptr v);
-    extern bool    FASTCALL lisp_atom (lispptr);
-    extern bool    FASTCALL lisp_consp (lispptr);
-    extern bool    FASTCALL lisp_listp (lispptr);
-    extern bool    FASTCALL lisp_numberp (lispptr);
-    extern bool    FASTCALL lisp_symbolp (lispptr);
-    extern bool    FASTCALL lisp_builtinp (lispptr);
-    extern bool    FASTCALL lisp_specialp (lispptr);
 #else // #ifdef SLOW
     #define CAR(x)       (CONS(x)->car)
         #ifdef COMPRESSED_CONS
@@ -730,6 +780,8 @@ extern size_t            heap_free_size   (void);
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
 extern void     FASTCALL load         (char * pathname);
+extern bool     FASTCALL image_load   (char * pathname);
+extern bool     FASTCALL image_save   (char * pathname);
 extern bool              init_heap    (void);
 extern void              init_eval    (void);
 extern void              init_onerror (void);
@@ -740,38 +792,63 @@ extern lispptr           debugger     (void);
 #define COPY_LIST       0
 #define COPY_BUTLAST    1
 #define COPY_REMOVE     2
-extern int      FASTCALL length    (lispptr);
-extern lispptr  FASTCALL copy_list (lispptr, char mode, lispptr excluded);
-extern lispptr  FASTCALL butlast   (lispptr);
-extern lispptr  FASTCALL last      (lispptr);
-extern lispptr  FASTCALL member    (lispptr needle, lispptr haystack);
+extern int      FASTCALL length              (lispptr);
+extern lispptr  FASTCALL copy_list           (lispptr, char mode, lispptr excluded);
+extern lispptr  FASTCALL butlast             (lispptr);
+extern lispptr  FASTCALL last                (lispptr);
+extern lispptr  FASTCALL member              (lispptr needle, lispptr haystack);
 
+extern void     FASTCALL pushgc         (lispptr);
+extern lispptr           popgc          (void);
+extern void     FASTCALL pushtag        (char);
+extern char              poptag         (void);
+extern void     FASTCALL pushtagw       (lispptr);
+extern lispptr           poptagw        (void);
+extern lispptr  FASTCALL lisp_car       (lispptr);
+extern lispptr  FASTCALL lisp_cdr       (lispptr);
+extern void     FASTCALL lisp_setcar    (lispptr x, lispptr v);
+extern void     FASTCALL lisp_setcdr    (lispptr x, lispptr v);
+extern bool     FASTCALL lisp_atom      (lispptr);
+extern bool     FASTCALL lisp_consp     (lispptr);
+extern bool     FASTCALL lisp_listp     (lispptr);
+extern bool     FASTCALL lisp_numberp   (lispptr);
+extern bool     FASTCALL lisp_symbolp   (lispptr);
+extern bool     FASTCALL lisp_builtinp  (lispptr);
+extern bool     FASTCALL lisp_specialp  (lispptr);
+
+#ifndef NAIVE
 extern void     FASTCALL internal_error      (char * msg);
+extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 // TODO: Typedef for objects' type byte.
-extern void     FASTCALL err_type            (char * type, lispptr x, char code);
+extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);
 extern void              tagstack_overflow   (void);
 extern void              tagstack_underflow  (void);
 #ifdef COMPRESSED_CONS
 extern void              error_set_ccons_cdr (void);
-#endif
-extern char *   FASTCALL typestr             (lispptr *);
-extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char code);
-extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
-extern void              print_error_info (void);
+#endif // #ifdef COMPRESSED_CONS
 
+extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char errorcode);
+extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
+extern void              print_error_info    (void);
 #ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
-#endif
+#endif // #ifdef CHECK_OBJ_POINTERS
+
+extern char *   FASTCALL typestr             (lispptr *);
 #ifdef TARGET_UNIX
 extern void              dump_lispptr        (char *);
 extern void              dump_heap           (void);
-#endif
+#endif // #ifdef TARGET_UNIX
+#endif // #ifndef NAIVE
 
-extern void     FASTCALL name_to_buffer (lispptr s);
-extern void     FASTCALL make_call      (lispptr args);
-extern void     FASTCALL make_car_call  (void);
+extern void     FASTCALL name_to_buffer      (lispptr s);
+extern void     FASTCALL make_call           (lispptr args);
+extern void     FASTCALL make_car_call       (void);
 
+// Switch to 'heap'.
+extern void             switch_heap          (void);
+size_t                  heap_free_size       (void);
 #endif // #ifndef __LIBLISP_H__

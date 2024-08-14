@@ -1,11 +1,15 @@
 #ifdef __CC65__
+#ifdef OVERLAY
+#pragma code-name ("OVL_EVAL")
+#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#ifndef __CC65__
+#include <setjmp.h>
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 
@@ -188,7 +192,7 @@ pop_argument_values (void)
     stack += sizeof (lispptr) * num_args;
 }
 
-#ifdef __CC65__
+#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
 char sp;
 #endif
 
@@ -201,12 +205,12 @@ eval0 (void)
 #endif
 
 do_eval:
+#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
     // Check on CPU stack overflow.
-#if defined(__CC65__) && !defined(NAIVE)
     asm ("tsx");
     asm ("stx %v", sp);
-    if (sp > 0xf0)
-        internal_error ("CPU stack");
+    if (sp > 0xf8)
+        internal_error_ptr ((void *) sp, "CPU stack");
 #endif
 
 #ifdef VERBOSE_EVAL
@@ -653,10 +657,12 @@ next_arg:
     goto do_argument;
 
 start_body:
+#ifndef NAIVE
     if (error_code || do_break_repl) {
         stack = stack_entered;
         goto do_return;
     }
+#endif // #ifndef NAIVE
 
     // Assign new values to argument symbols.
     argdefs = FUNARGS(arg1);
@@ -749,7 +755,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error ("tag");
+        internal_error_ptr (tagstack, "tag");
 #endif
     }
 
@@ -779,6 +785,10 @@ funcall ()
     return eval0 ();
 }
 
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 void
 init_eval ()
 {
@@ -801,3 +811,7 @@ init_eval ()
     debug_step = nil;
 #endif
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>

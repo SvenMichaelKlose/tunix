@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -107,7 +108,7 @@ objsize (char * x)
     s = lisp_sizes[TYPEBITS(x)];
 #ifndef NDEBUG
     if (!s)
-        internal_error ("0 size");
+        internal_error_ptr (x, "0 size");
 #endif
     if (_NAMEDP(x))
         return s + SYMBOL_LENGTH(x);
@@ -119,7 +120,7 @@ objsize (char * x)
 void
 error_typebits (char * x)
 {
-    internal_error (x ? "type" : "EOH");
+    internal_error_ptr (x, x ? "type" : "EOH");
 }
 
 // Print info of all objects.
@@ -132,8 +133,7 @@ check_lispptr_addr (char * x)
             return;
         s += objsize (s);
     }
-    printf ("Pointer %p is not on an object's start address.\n", x);
-    internal_error (":(");
+    internal_error_ptr (x, "Not obj addr");
 }
 
 bool is_checking_lispptr;
@@ -148,9 +148,9 @@ check_lispptr (char * x)
 #ifndef FRAGMENTED_HEAP
     // Check if object is within heap.
     if (x < heap_start)
-        internal_error ("Pointer below heap.");
+        internal_error_ptr (x, "Pointer below heap.");
     if (x >= heap_end)
-        internal_error ("Pointer above heap.");
+        internal_error_ptr (x, "Pointer above heap.");
 
 #ifdef TARGET_UNIX
     // Check if pointer is on an object start.
@@ -159,7 +159,7 @@ check_lispptr (char * x)
 #endif // #ifndef FRAGMENTED_HEAP
 
     if (*x & (TYPE_UNUSED1 | TYPE_UNUSED2))
-        internal_error ("Unused type bits set.");
+        internal_error_ptr (x, "Unused type bits set.");
 
     switch (TYPEBITS(x)) {
         case TYPE_CONS:
@@ -329,6 +329,36 @@ make_symbol (char * str, uchar len)
     return tmp;
 }
 
+#ifdef FRAGMENTED_HEAP
+// Switch to 'heap'.
+void
+switch_heap ()
+{
+    heap_start = heap->start;
+    heap_free = heap->free;
+    heap_end = heap->end;
+    heap++;
+}
+#endif
+
+size_t
+heap_free_size ()
+{
+#ifdef FRAGMENTED_HEAP
+    struct heap_fragment *h;
+    size_t freed = 0;
+    for (h = heaps; h->start; h++)
+        freed += h->end - h->free;
+    return freed;
+#else
+    return heap_end - heap_free;
+#endif
+}
+
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
+
 bool
 init_heap ()
 {
@@ -465,3 +495,7 @@ init_heap ()
 
     return true;
 }
+
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif

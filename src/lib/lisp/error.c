@@ -3,11 +3,11 @@
 #endif
 
 #include <limits.h>
-#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#ifndef __CC65__
+#include <setjmp.h>
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 
@@ -38,6 +38,15 @@ internal_error (char * msg)
 #else
     while (1);
 #endif
+}
+
+// Print internal error message and exit.
+void FASTCALL
+internal_error_ptr (void * p, char * msg)
+{
+    outhw ((size_t) p);
+    out (' ');
+    internal_error (msg);
 }
 
 void
@@ -139,7 +148,7 @@ bi_tcheck (lispptr x, uchar type, char code)
 
 #ifndef NDEBUG
     default:
-        internal_error ("ill typedef");
+        internal_error_ptr (x, "ill typedef");
 #endif
     }
 }
@@ -149,18 +158,24 @@ void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
 {
     if (old_stack != stack)
-        internal_error ("stack");
+        internal_error_ptr (stack, "stack");
     if (old_tagstack != tagstack)
-        internal_error ("tagstack");
+        internal_error_ptr (tagstack, "tagstack");
 }
 
 #ifndef NO_ONERROR
+#ifdef TARGET_VIC20
+#pragma code-name (push, "LISPSTART")
+#endif
 void
 init_onerror ()
 {
     onerror_sym = make_symbol ("onerror", 7);
     expand_universe (onerror_sym);
 }
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
 #endif // #ifndef NO_ONERROR
 
 #endif // #ifndef NAIVE

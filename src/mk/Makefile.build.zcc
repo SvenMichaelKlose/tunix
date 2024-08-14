@@ -1,8 +1,8 @@
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBRARIES)
+	$(LD) $(LDFLAGS) -l/usr/local/share/z88dk/lib/clibs/cpm_clib.lib -o=$@ $^ $(LIBRARIES)
 
 $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(AR) $(ARFLAGS) $@ $^
+	$(AR) $(ARFLAGS) -x$@ $^
 
 clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(LIBRARY) $(CLEANFILES)

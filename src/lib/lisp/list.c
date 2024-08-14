@@ -7,7 +7,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#ifndef __CC65__
+#include <setjmp.h>
+#ifdef TARGET_UNIX
 #include <signal.h>
 #endif
 
@@ -17,11 +18,9 @@
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-int len;
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
 #ifdef __CC65__
-#pragma zpsym ("len")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
 #pragma bss-name (pop)
@@ -32,18 +31,18 @@ lispptr list_last;  // Last cons of list.
 int FASTCALL
 length (lispptr x)
 {
-    len = 0;
+    lisp_len = 0;
     while (x) {
-        len++;
+        lisp_len++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
         if (x && ATOM(x)) {
-            len++;
+            lisp_len++;
             break;
         }
     }
-    return len;
+    return lisp_len;
 }
 
 lispptr FASTCALL

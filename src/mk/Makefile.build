@@ -54,3 +54,4 @@ allclean: hostclean
 	for i in $(VALID_TARGETS); do \
 		$(MAKE) -C . clean TARGET=$$i; \
 	done
+	rm -rf tunix

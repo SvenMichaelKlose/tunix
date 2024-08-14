@@ -45,26 +45,30 @@ extern char           last_out; // Last output char.
 #pragma bss-name (pop)
 #endif
 
-extern bool             eof (void);
-extern signed char      err (void);
+extern bool             eof         (void);
+extern signed char      err         (void);
     
-extern void FASTCALL    setin  (simpleio_chn_t fn);
-extern void FASTCALL    setout (simpleio_chn_t fn);
+extern void FASTCALL    setin       (simpleio_chn_t fn);
+extern void FASTCALL    setout      (simpleio_chn_t fn);
 
-extern char in          (void);  // Read char.
-extern void putback     (void);  // Put back char for in().
-extern void skip_spaces (void);
-
+extern char             in          (void);
+extern void             putback     (void);
+extern void             skip_spaces (void);
+extern void FASTCALL    inm         (char *, size_t);
 extern void FASTCALL    out         (char c);
 extern void FASTCALL    outnu       (unsigned long);
 extern void FASTCALL    outn        (long);
+extern void FASTCALL    outhn       (unsigned char);
+extern void FASTCALL    outhb       (unsigned char);
+extern void FASTCALL    outhw       (unsigned);
 extern void FASTCALL    outs        (char *);
 extern void FASTCALL    outsn       (char *, char len);
+extern void FASTCALL    outm        (char *, size_t);
 extern void             terpri      (void);
 extern void             fresh_line  (void);
 
-extern simpleio_chn_t FASTCALL  simpleio_open  (char * pathname, char mode);
-extern void           FASTCALL  simpleio_close (simpleio_chn_t);
+extern simpleio_chn_t   FASTCALL  simpleio_open  (char * pathname, char mode);
+extern void             FASTCALL  simpleio_close (simpleio_chn_t);
 
 extern void             simpleio_init (void);
 extern void FASTCALL    simpleio_set  (simpleio *);

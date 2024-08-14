@@ -1,5 +1,4 @@
 (fresh-line)
-(message "Welcome to TUNIX Lisp!")
 (out "LOADables: (Append \".lisp\"!)")(terpri)
 (print '(adjoin alist all copy-tree do dolist dotimes
          ensure-list equality every find-if find group
@@ -9,6 +8,11 @@
          subseq test test-onerror union unique unless when
          while with with-queue))
 (terpri)
+
+; Function called automatically after image load.
+(fn istart ()
+  (message "Ready."))
+
 ; Knock off some extra compression of conses.
 (= *universe (copy-list *universe*))
 (print (gc))(message " bytes free.")
@@ -19,4 +23,7 @@
     (print (/ (- (time) *start-time*) +bps+))
     (out 's)
     (terpri)))
+
+;TODO: (message "Saving 'image'...")
+;(isave "image")
 (message "Ready.")

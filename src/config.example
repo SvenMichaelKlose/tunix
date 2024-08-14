@@ -16,7 +16,7 @@ TARGET = vic20  # VIC-20 has the largest code base.
 
 # Compress conses whose CDR points to the following object.
 # (EXPERIMENTAL!)
-#COMPRESSED_CONS = 1
+COMPRESSED_CONS = 1
 #VERBOSE_COMPRESSED_CONS = 1  # Print 'C' for each compressed cons.
 
 # GC after load threshold in bytes.
@@ -31,19 +31,28 @@ TARGET = vic20  # VIC-20 has the largest code base.
 # in build scripts.
 #GC_STRESS = 1
 
+# Load all environment files.
+#LOAD_ALL = 1
+
 # Build TUNIX Lisp with absolutely nothing related to
 # testing or handling errors, reducing code size as much as
 # possible.
 #NAIVE = 1
 
 # Do not include extra checks to spot internal errors.
-#NDEBUG = 1
+NDEBUG = 1
+
+# Do not check on CPU stack overflow.
+#NO_CHECK_CPU_STACK = 1
 
 # Build TUNIX Lisp without debugger.
 #NO_DEBUGGER = 1
 
+# Build TUNIX Lisp without saving or loading images.
+#NO_IMAGES = 1
+
 # Build TUNIX Lisp without user-defined ONERROR handler.
-#NO_DEBUGGER = 1
+#NO_ONERROR = 1
 
 # Include all checks, no matter if they seem to be a waste
 # of time.
@@ -65,4 +74,4 @@ TARGET = vic20  # VIC-20 has the largest code base.
 #VERBOSE_GC = 1
 
 # Print pathnames of LOADed files.
-#VERBOSE_LOAD = 1
+VERBOSE_LOAD = 1

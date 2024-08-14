@@ -6,10 +6,17 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (push, "OVL_COMMON")
+#endif
+#endif
 
 bool FASTCALL
 our_isalpha (char c)
@@ -62,6 +69,9 @@ read_list (void)
             start = c;
         last = c;
     }
+
+    /* NOTREACHED */
+    return nil;
 }
 
 lispptr
@@ -119,9 +129,9 @@ lispptr
 read ()
 {
     skip_spaces ();
+    in ();
     if (eof ())
         return nil;
-    in ();
     // Skip one-line comment.
     if (last_in == ';')  {
         while (in () >= ' ')
@@ -155,3 +165,9 @@ read ()
         return read_number ();
     return read_symbol ();
 }
+
+#ifdef OVERLAY
+#ifdef TARGET_VIC20
+#pragma code-name (pop)
+#endif
+#endif

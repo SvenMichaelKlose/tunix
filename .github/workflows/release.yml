@@ -22,7 +22,7 @@ jobs:
         echo "ZIP_NAME=tunix.lisp.cbm.${{ env.VERSION }}.zip" >> $GITHUB_ENV
 
     - name: Install prerequisites
-      run: sudo apt-get install -y gcc make vice texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
+      run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
 
     - name: Create config file
       run: echo -e "TARGET=vic20" > src/config
@@ -33,8 +33,8 @@ jobs:
     - name: Run tests
       run: make test
 
-    - name: Test Lisp mercilessly
-      run: ./run-unix-lisp.sh VERBOSE_LOAD=1 COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 GC_STRESS=1 TEST=1
+    - name: Test compile-time configurations
+      run: ./test-unix.sh
 
     - name: Make PDF manual
       id: make_pdf_manual

@@ -532,17 +532,17 @@ do_argument:
         goto start_body;
     } else if (!args && CONSP(argdefs)) {
         error_info = argdefs;
-        error (ERROR_ARG_MISSING, "Arg missing");
+        error (ERROR_ARG_MISSING, "Missing args");
         goto start_body;
     }
 #endif
 
     // Rest of argument list. (consing)
     if (ATOM(argdefs)) {
-
 #ifndef NAIVE
         // Check if argument name is a symbol.
-        bi_tcheck (argdefs, 's', ERROR_ARGNAME_TYPE);
+        if (!SYMBOLP(argdefs))
+            error_argname (argdefs);
 #endif
 
         // Save old symbol value for restore_arguments.
@@ -588,7 +588,8 @@ do_argument:
     // Regular argument.
 #ifndef NAIVE
     // Check if name is a symbol.
-    bi_tcheck (CAR(argdefs), 's', ERROR_ARGNAME_TYPE);
+    if (!SYMBOLP(CAR(argdefs)))
+        error_argname (CAR(argdefs));
 #endif
 
     // Save argument value to restore after function call.

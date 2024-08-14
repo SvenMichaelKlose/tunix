@@ -819,6 +819,7 @@ extern bool     FASTCALL lisp_specialp  (lispptr);
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
+extern void     FASTCALL error_argname       (lispptr);
 // TODO: Typedef for objects' type byte.
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);

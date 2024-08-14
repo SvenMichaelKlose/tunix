@@ -27,6 +27,13 @@ error (char code, char * msg)
     error_code = code;
 }
 
+void FASTCALL
+error_argname (lispptr x)
+{
+    error_info = x;
+    error (ERROR_ARGNAME_TYPE, "Arg not a symbol");
+}
+
 // Print internal error message and exit.
 void FASTCALL
 internal_error (char * msg)

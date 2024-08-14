@@ -21,8 +21,6 @@
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
 #ifdef __CC65__
-#pragma zpsym ("list_start")
-#pragma zpsym ("list_last")
 #pragma bss-name (pop)
 #endif
 

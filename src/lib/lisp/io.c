@@ -11,15 +11,6 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern lispptr arg1;
-#ifdef __CC65__
-#pragma zpsym ("arg1")
-#pragma bss-name (pop)
-#endif
-
 // Set input/output channels.
 void FASTCALL
 set_channels (simpleio_chn_t cin, simpleio_chn_t cout)

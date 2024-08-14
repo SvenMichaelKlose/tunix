@@ -74,22 +74,24 @@ size_t      gapsize;
 char *      p;
 xlat_item * r;
 
+#ifdef FRAGMENTED_HEAP
+size_t total_removed;
+#endif
+
 #ifdef __CC65__
 #pragma zpsym ("n")
 #pragma zpsym ("s")
 #pragma zpsym ("d")
 #pragma zpsym ("xlat")
-#pragma zpsym ("xlat_start")
 #pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
 #pragma zpsym ("p")
 #pragma zpsym ("r")
 #pragma bss-name (pop)
-#endif
-
 #ifdef FRAGMENTED_HEAP
-size_t total_removed;
-#endif
+#pragma zpsym ("total_removed")
+#endif // #ifdef FRAGMENTED_HEAP
+#endif // #ifdef __CC65__
 
 void FASTCALL
 add_gap (lispobj_size_t n)

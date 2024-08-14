@@ -62,26 +62,9 @@ char *   h;
 char     type;
 symbol * sym;
 #ifdef __CC65__
-#pragma zpsym ("lisp_len")
-#pragma zpsym ("tmp")
-#pragma zpsym ("tmp2")
-#pragma zpsym ("tmpc")
-#pragma zpsym ("tmpstr")
-#pragma zpsym ("heap_free");
-#pragma zpsym ("heap_end");
 #pragma zpsym ("h");
-#pragma zpsym ("tmpstr");
 #pragma zpsym ("type");
 #pragma zpsym ("sym");
-#pragma bss-name (pop)
-#endif
-
-#ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern char do_putback;
-#ifdef __CC65__
-#pragma zpsym ("do_putback")
 #pragma bss-name (pop)
 #endif
 
@@ -474,10 +457,6 @@ init_heap ()
 #ifdef TARGET_UNIX
     SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
 #endif
-
-    // Init input.
-    // TODO: Move (pixel)
-    do_putback = false;
 
     // Clear error info.
 #ifndef NAIVE

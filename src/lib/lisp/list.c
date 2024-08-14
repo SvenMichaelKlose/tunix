@@ -50,23 +50,34 @@ copy_list (lispptr x, char mode, lispptr needle)
         return x;
     if (mode == COPY_BUTLAST && !CDR(x))
         return nil;
+
+    // Remove first elements if they match 'needle'.
     if (mode == COPY_REMOVE)
         while (needle == CAR(x)) {
             x = CDR(x);
-            if (ATOM(x))
-                return x;
+            // Treat dotted pair's CDR.
+            if (x && ATOM(x))
+                return x == needle ? nil : x;
         }
+
+    // Copy first element.
     PUSH(x);
     PUSH(needle);
     list_start = list_last = make_cons (CAR(x), nil);
     POP(needle);
     POP(x);
+
+    // Append rest of elements.
     PUSH(list_start);
     DOLIST(x, CDR(x)) {
         if (mode == COPY_BUTLAST && !CDR(x))
-            break;
+            goto end_butlast;
+
+        // Skip element to remove.
         if (mode == COPY_REMOVE && needle == CAR(x))
             continue;
+
+        // Copy element.
         PUSH(list_last);
         PUSH(x);
         PUSH(needle);
@@ -74,14 +85,17 @@ copy_list (lispptr x, char mode, lispptr needle)
         POP(needle);
         POP(x);
         POP(list_last);
+
+        // Append to last.
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
 
-    if (x && ATOM(x))
-        if (mode != COPY_REMOVE || needle != x)
-            SETCDR(list_last, tmp);
+    // Append dotted pair's CDR if not to remove.
+    if (x && (mode != COPY_REMOVE || needle != x))
+        SETCDR(list_last, tmp);
 
+end_butlast:
     POP(list_start);
     return list_start;
 }

@@ -70,6 +70,9 @@ if not enabled during tests.
 - Interpreter exits if out of heap instead of going vodka.
   This is temporary.
 - Debugger command 'p': Does not modify the return value.
+- BUTLAST, COPY-LIST, REMOVE: Function to handle all three
+  has been rewritten.
+- REMOVE can handle atoms and dotted pairs.
 
 ### libsimpleio
 

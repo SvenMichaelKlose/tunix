@@ -56,6 +56,10 @@ print_debugger_info ()
         out_colon ();
         if (last_errstr)
             outs (last_errstr);
+        if (error_info) {
+            outs (": ");
+            print (error_info);
+        }
         terpri ();
     }
     fresh_line ();
@@ -157,6 +161,7 @@ lisp_repl (char mode)
 
             // Call ONERROR.
             error_code  = 0;
+            error_info  = nil;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
@@ -169,6 +174,7 @@ lisp_repl (char mode)
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;
+        error_info      = nil;
         goto do_return;
 #endif
 #endif // #ifndef NO_ONERROR
@@ -182,6 +188,7 @@ lisp_repl (char mode)
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
             error_code = 0;
+            error_info = nil;
         }
 #endif
 

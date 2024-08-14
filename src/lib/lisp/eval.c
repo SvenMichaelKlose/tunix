@@ -28,6 +28,11 @@ lispptr current_function;
 lispptr breakpoints_sym;
 #endif
 
+#ifndef NAIVE
+char    error_code;
+lispptr error_info;
+#endif
+
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -60,9 +65,6 @@ lispptr go_tag;
 lispptr debug_step;
 bool    do_invoke_debugger;
 bool    tag_found;
-#ifndef NAIVE
-char    error_code;
-#endif
 uchar   typed_argdef;
 char *  builtin_argdef;
 uchar   num_args;
@@ -94,9 +96,6 @@ bool    unevaluated;
 #pragma zpsym ("go_sym")
 #pragma zpsym ("go_tag")
 #pragma zpsym ("tag_found")
-#ifndef NAIVE
-#pragma zpsym ("error_code")
-#endif
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
@@ -274,6 +273,7 @@ do_eval:
 
 #ifndef NAIVE
         if (!SYMBOLP(arg1)) {
+            error_info = arg1;
             error (ERROR_TYPE, "Name not a sym.");
             goto do_return;
         }
@@ -324,6 +324,7 @@ next_block_statement:
                     goto block_statement;
 #ifndef NAIVE
             if (!tag_found) {
+                error_info = go_tag;
                 error (ERROR_TAG_MISSING, "Tag not found.");
                 goto do_return;
             }
@@ -374,6 +375,7 @@ do_builtin_arg:
 #ifndef NAIVE
             // Complain if argument left.
             if (args) {
+                error_info = args;
                 error (ERROR_TOO_MANY_ARGS, "Too many args to builtin:");
                 goto do_return;
             }
@@ -516,7 +518,7 @@ break_builtin_call:
 #ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        current_expr = arg1;
+        error_info = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
         goto do_return;
     }
@@ -547,9 +549,11 @@ do_argument:
 #ifndef NAIVE
     // Catch wrong number of arguments.
     if (args && !argdefs) {
+        error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
     } else if (!args && CONSP(argdefs)) {
+        error_info = argdefs;
         error (ERROR_ARG_MISSING, "Arg missing");
         goto start_body;
     }

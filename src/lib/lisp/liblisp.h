@@ -400,6 +400,11 @@ extern lispptr highlighted;
 extern lispptr onerror_sym;
 extern lispptr breakpoints_sym;
 
+#ifndef NAIVE
+extern char    error_code;
+extern lispptr error_info;
+#endif
+
 extern lispptr t;
 extern lispptr quote;
 extern lispptr quasiquote;
@@ -467,10 +472,6 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
-#ifndef NAIVE
-extern char    error_code;
-#endif
-
 #ifndef NO_DEBUGGER
 extern lispptr debug_step;
 extern lispptr debugger_return_value_sym;
@@ -496,9 +497,6 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("xlat_start")
-#ifndef NAIVE
-#pragma zpsym ("error_code")
-#endif
 #ifndef NO_DEBUGGER
 #pragma zpsym ("debug_step")
 #endif

@@ -63,23 +63,25 @@ copy_list (lispptr x, char mode, lispptr needle)
     POP(x);
     PUSH(list_start);
     DOLIST(x, CDR(x)) {
-        if (CONSP(x)) {
-            if (mode == COPY_BUTLAST && !CDR(x))
-                break;
-            if (mode != COPY_REMOVE || needle != CAR(x)) {
-                PUSH(list_last);
-                PUSH(x);
-                PUSH(needle);
-                tmp = make_cons (CAR(x), nil);
-                POP(needle);
-                POP(x);
-                POP(list_last);
-            }
-        } else
-            tmp = x;
+        if (mode == COPY_BUTLAST && !CDR(x))
+            break;
+        if (mode == COPY_REMOVE && needle == CAR(x))
+            continue;
+        PUSH(list_last);
+        PUSH(x);
+        PUSH(needle);
+        tmp = make_cons (CAR(x), nil);
+        POP(needle);
+        POP(x);
+        POP(list_last);
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
+
+    if (x && ATOM(x))
+        if (mode != COPY_REMOVE || needle != x)
+            SETCDR(list_last, tmp);
+
     POP(list_start);
     return list_start;
 }

@@ -57,7 +57,9 @@ copy_list (lispptr x, char mode, lispptr needle)
                 return x;
         }
     PUSH(x);
+    PUSH(needle);
     list_start = list_last = make_cons (CAR(x), nil);
+    POP(needle);
     POP(x);
     PUSH(list_start);
     DOLIST(x, CDR(x)) {
@@ -67,7 +69,9 @@ copy_list (lispptr x, char mode, lispptr needle)
             if (mode != COPY_REMOVE || needle != CAR(x)) {
                 PUSH(list_last);
                 PUSH(x);
+                PUSH(needle);
                 tmp = make_cons (CAR(x), nil);
+                POP(needle);
                 POP(x);
                 POP(list_last);
             }

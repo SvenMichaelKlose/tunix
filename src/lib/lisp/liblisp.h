@@ -370,6 +370,7 @@ struct heap_fragment {
 
 typedef struct _image_header {
     char git_version[8];
+    lispptr heap_start;
 } image_header;
 
 // ILOAD restart.

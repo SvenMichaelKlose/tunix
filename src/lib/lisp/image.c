@@ -49,6 +49,9 @@ image_save (char * pathname)
         switch_heap ();
 #endif
 
+        // Write heap start.
+        outm ((char *) &heap_start, sizeof (lispptr));
+
         // Write heap size.
         len = heap_free - heap_start;
         outm ((char *) &len, sizeof (len));
@@ -80,6 +83,7 @@ image_load (char * pathname)
 {
     simpleio_chn_t chin;
     size_t len;
+    lispptr pos;
 
     chin = simpleio_open (pathname, 'r');
     if (!chin)
@@ -103,6 +107,11 @@ image_load (char * pathname)
     do {
         switch_heap ();
 #endif
+
+        // Read heap address.
+        inm ((char *) &pos, sizeof (lispptr));
+        if (pos != heap_start)
+            internal_error_ptr (pos, "position. ");
 
         // Read heap size.
         inm ((char *) &len, sizeof (len));

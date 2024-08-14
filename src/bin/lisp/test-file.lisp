@@ -2,7 +2,7 @@
   (out "(Channel ")(print x)(out ")")(terpri))
 
 (message "Testing OPEN on missing file...")
-(and (print (open "k87sfdasdj9" 'r))
+(and (open "k87sfdasdj9" 'r)
      (error))
 
 (message "Testing OPEN file write to \"test.out\"...")

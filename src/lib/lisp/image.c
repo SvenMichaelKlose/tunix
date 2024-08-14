@@ -110,8 +110,10 @@ image_load (char * pathname)
 
         // Read heap address.
         inm ((char *) &pos, sizeof (lispptr));
+#ifndef NAIVE
         if (pos != heap_start)
             internal_error_ptr (pos, "position. ");
+#endif
 
         // Read heap size.
         inm ((char *) &len, sizeof (len));

@@ -293,9 +293,9 @@ bi_eval (void)
 lispptr
 bi_apply (void)
 {
-    PUSH(arg1);
+    PUSH(arg1); // Function
 
-    PUSH(arg2);
+    PUSH(arg2); // Argument list.
     args = copy_list (arg2, COPY_BUTLAST, nil);
     POP(arg2);
     tmp = LIST_CAR(last (arg2));
@@ -303,7 +303,7 @@ bi_apply (void)
     if (args) {
 #ifndef NAIVE
         if (!LISTP(tmp)) {
-            error (ERROR_TYPE, "Last arg isn't list!");
+            error (ERROR_TYPE, "Last arg isn't list");
             POP(arg1);
             return nil;
         }

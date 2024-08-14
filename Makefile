@@ -24,12 +24,12 @@ hostclean:
 	$(MAKE) -C src hostclean
 
 allworlds: host
+	$(MAKE) clean all TARGET=pet
+	$(MAKE) clean all TARGET=vic20
 	$(MAKE) clean all TARGET=c64
 	$(MAKE) clean all TARGET=c128
 	$(MAKE) clean all TARGET=c16
-	$(MAKE) clean all TARGET=pet
 	$(MAKE) clean all TARGET=plus4
-	$(MAKE) clean all TARGET=vic20
 	$(MAKE) clean all TARGET=unix
 
 world:

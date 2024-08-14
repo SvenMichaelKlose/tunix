@@ -1091,7 +1091,8 @@ main (int argc, char * argv[])
             load (*f);
 #ifndef NO_IMAGES
     } else {
-        // Call function ISTART in loaded image.
+        // Called from ILOAD: Call function
+        // ISTART in loaded image.
         istart_fun = make_symbol ("istart", 6);
         if (CONSP(SYMBOL_VALUE(istart_fun))) {
            PUSH(istart_fun);

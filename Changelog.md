@@ -81,6 +81,10 @@ if not enabled during tests.
 - outhn(), outhb(), outhw(): Print hexadecimal nibble, byte
   or word.
 
+### libsimpleio-cbm
+
+- Fixed opening control channel #15.
+
 ### libsimpleio-stdlib
 
 #### Fixed

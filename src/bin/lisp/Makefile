@@ -2,7 +2,7 @@
 include ../../mk/Makefile.targets
 
 PROGRAM = lisp
-SOURCES = main.c
+SOURCES = builtins.c main.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
@@ -29,3 +29,5 @@ LD65CFG = cc65-cfg/$(CC65_TARGET).cfg
 endif
 
 include ../../mk/Makefile.build
+
+CFLAGS += $(LISP_FLAGS)

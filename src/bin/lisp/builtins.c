@@ -143,6 +143,35 @@ bi_symbol (void)
 }
 
 lispptr
+bi_char_at ()
+{
+    lispnum_t n = NUMBER_VALUE(arg2);
+    lisp_len = SYMBOL_LENGTH(arg1);
+    if (n < 0 || n >= lisp_len)
+        return nil;
+    return make_number (SYMBOL_NAME(arg1)[n]);
+}
+
+lispptr
+bi_symbol_name ()
+{
+    lispobj_size_t i = 0;
+
+    lisp_len = SYMBOL_LENGTH(arg1);
+    list_last = nil;
+    for (i = 0; i < lisp_len; i++) {
+        tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
+        if (list_last) {
+            SETCDR(list_last, tmp);
+            list_last = tmp;
+        } else
+            list_start = list_last = tmp;
+    }
+    list_last = nil;
+    return list_start;
+}
+
+lispptr
 bi_quote (void)
 {
     return arg1;
@@ -828,9 +857,11 @@ const struct builtin builtins[] = {
     { "builtin?",   "x",    bi_builtinp },
     { "special?",   "x",    bi_specialp },
 
-    { "symbol",     "?l",    bi_symbol },
-    { "=",          "'sx",  bi_setq },
-    { "value",      "s",    bi_symbol_value },
+    { "symbol",       "?l",   bi_symbol },
+    { "=",            "'sx",  bi_setq },
+    { "symbol-value", "s",    bi_symbol_value },
+    { "symbol-name",  "s",    bi_symbol_name },
+    { "char-at",      "sn",   bi_char_at },
 
     { "cons",       "xx",   bi_cons },
     { "car",        "l",    bi_car },

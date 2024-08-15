@@ -739,18 +739,24 @@ Returns its argument if it is a special form or NIL.
 
 ## Symbols
 
-| Function   | Description                           |
-|------------|---------------------------------------|
-| (symbol l) | Make symbol with name from char list. |
-| (= 's x)   | Set symbol value.                     |
-| (value s)  | Get symbol value.                     |
+| Function         | Description                           |
+|------------------|---------------------------------------|
+| (symbol l)       | Make symbol with name from char list. |
+| (= 's x)         | Set symbol value.                     |
+| (symbol-value s) | Get symbol value.                     |
+| (symbol-name s)  | Symbol name as List of char numbers.  |
+| (char-at s n)    | Char of symbol name.                  |
 
 ### (symbol l): Make symbol with name from char list.
 ### (= 's x): Set symbol value.
 
-### (value s): Get symbol value.
+### (symbol-value s): Get symbol value.
 
 This is what evaluation is doing with symbols.
+
+### (symbol-name s): Get symbol name as List of character value numbers.
+
+### (char-at s n): Char of symbol name.
 
 ## Conses
 

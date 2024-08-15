@@ -65,6 +65,8 @@ and this project adheres to
 - Additional error info (expression) like lists of missing
   arguments.
 - Faster checks if NOT on cc65-compiled platforms.
+- SYMBOL-NAME and CHAR-AT return character value numbers of
+  a symbol's name.
 
 #### Changed
 
@@ -74,6 +76,7 @@ and this project adheres to
 - BUTLAST, COPY-LIST, REMOVE: Function to handle all three
   has been rewritten.
 - REMOVE can handle atoms and dotted pairs.
+- VALUE became SYMBOL-VALUE.
 
 ### libsimpleio
 

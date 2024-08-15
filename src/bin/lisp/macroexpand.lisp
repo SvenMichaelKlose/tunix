@@ -34,7 +34,7 @@
     (eq (car x) 'quasiquote)
       (%unquote x)
     (macro? (car x))
-      (macroexpand (apply (value (car x)) (cdr x)))
+      (macroexpand (apply (symbol-value (car x)) (cdr x)))
     (@ macroexpand x)))
 
 (message "Testing macro-expansion of dotted pair...")

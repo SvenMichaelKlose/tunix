@@ -10,6 +10,11 @@
            (cons nil t))
     (error))
 
+(message "Testing SYMBOL-NAME...")
+(or (equal (symbol-name 'abc)
+           '(97 98 99))
+    (error))
+
 (= x 42)
 
 (message "Testing EQUAL...")

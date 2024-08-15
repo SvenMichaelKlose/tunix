@@ -94,8 +94,19 @@
 (= x 23)
 (or (== x 23) (error))
 
-(message "Testing VALUE...")
-(or (== (value 'x) 23) (error))
+(message "Testing SYMBOL-VALUE...")
+(or (== (symbol-value 'x) 23)
+    (error))
+
+(message "Testing CHAR-AT...")
+(and (char-at 'abc 3)
+     (error))
+(or (== 97 (char-at 'abc 0))
+    (error))
+(or (== 98 (char-at 'abc 1))
+    (error))
+(or (== 99 (char-at 'abc 2))
+    (error))
 
 ; string cons setcar setcdr
 

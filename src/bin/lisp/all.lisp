@@ -35,6 +35,7 @@
 (load "with-global.lisp")
 (load "while.lisp")
 (message "All loaded.")
-; Have *universe* compressed.
+(message "Cleaning up. Please wait...")
+; Have the universe list compressed.
 (= *universe* (copy-list *universe*))
 (print (gc))(message " bytes free.")

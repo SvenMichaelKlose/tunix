@@ -45,8 +45,10 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-//#define GCSTACK_CHECKS
-//#define TAGSTACK_CHECKS
+//#define GCSTACK_OVERFLOWCHECKS
+//#define GCSTACK_UNDERFLOWCHECKS
+//#define TAGSTACK_OVERFLOWCHECKS
+//#define TAGSTACK_UNDERFLOWCHECKS
 
 
 /// Release
@@ -528,39 +530,33 @@ extern lispptr va; // Temporary in 'eval.c'.
 extern bool do_gc_stress;
 #endif
 
-#ifdef GCSTACK_CHECKS
+#ifdef GCSTACK_OVERFLOW_CHECKS
     #define STACK_CHECK_OVERFLOW() \
             if (stack == stack_start) \
                 stack_overflow ()
-    #ifndef NDEBUG
-        #define STACK_CHECK_UNDERFLOW() \
-            if (stack == stack_end) \
-                stack_underflow ()
-    #endif
-#endif // #ifdef GCSTACK_CHECKS
-
-#ifndef STACK_CHECK_OVERFLOW
+#else
     #define STACK_CHECK_OVERFLOW()
 #endif
-#ifndef STACK_CHECK_UNDERFLOW
+#ifdef GCSTACK_UNDERFLOW_CHECKS
+    #define STACK_CHECK_UNDERFLOW() \
+        if (stack == stack_end) \
+            stack_underflow ()
+#else
     #define STACK_CHECK_UNDERFLOW()
 #endif
 
-#ifdef TAGSTACK_CHECKS
+#ifdef TAGSTACK_OVERFLOW_CHECKS
     #define TAGSTACK_CHECK_OVERFLOW() \
             if (tagstack == tagstack_start) \
                 tagstack_overflow ()
-    #ifndef NDEBUG
-        #define TAGSTACK_CHECK_UNDERFLOW() \
-                if (tagstack == tagstack_end) \
-                    tagstack_underflow ()
-    #endif
-#endif // #ifdef TAGSTACK_CHECKS
-
-#ifndef TAGSTACK_CHECK_OVERFLOW
+#else
     #define TAGSTACK_CHECK_OVERFLOW()
 #endif
-#ifndef TAGSTACK_CHECK_UNDERFLOW
+#ifdef TAGSTACK_OVERFLOW_CHECKS
+    #define TAGSTACK_CHECK_UNDERFLOW() \
+            if (tagstack == tagstack_end) \
+                tagstack_underflow ()
+#else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
 

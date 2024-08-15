@@ -58,10 +58,47 @@ lispptr unquote_spliced;
 bool debug_mode;
 #endif
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (push, "OVL_BUILTINS")
+char * env_files[] = {
+    "env-0.lisp",
+    "smoke-test.lisp",
+    "env-1.lisp",
+
+    // Target-specific
+#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+    "cbm-common.lisp",
 #endif
+#ifdef TARGET_UNIX
+    "unix.lisp",
+#endif
+
+    "test.lisp",
+    "env-2.lisp",
+#ifndef NO_ONERROR
+    "test-onerror.lisp",
+#endif
+
+    // Early end for small machines.
+    // TODO: More generic name than TARGET_C16.
+#ifdef TARGET_C16
+    "welcome.lisp",
+#endif
+
+#ifndef TARGET_C16
+    "env-3.lisp",
+#ifndef NO_DEBUGGER
+    "stack.lisp",
+#endif
+    "test-file.lisp",
+#ifdef LOAD_ALL
+    "all.lisp",
+#endif // #ifdef LOAD_ALL
+    "welcome.lisp",
+#endif // #ifndef TARGET_C16
+    NULL
+};
+
+#ifdef __CC65__
+#pragma code-name ("CODE_BUILTINS")
 #endif
 
 lispptr
@@ -819,18 +856,6 @@ bi_debugger (void)
 }
 #endif
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
-#endif
-
-#ifdef TARGET_VIC20
-#ifdef __CC65__
-#pragma code-name (push, "LISPSTART")
-#endif
-#endif
-
 struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
@@ -945,6 +970,10 @@ struct builtin builtins[] = {
     { NULL, NULL }
 };
 
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#endif
+
 void
 init_quoting (void)
 {
@@ -990,45 +1019,6 @@ init_io_symbols (void)
 
 extern void test (void);
 
-char * env_files[] = {
-    "env-0.lisp",
-    "smoke-test.lisp",
-    "env-1.lisp",
-
-    // Target-specific
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
-    "cbm-common.lisp",
-#endif
-#ifdef TARGET_UNIX
-    "unix.lisp",
-#endif
-
-    "test.lisp",
-    "env-2.lisp",
-#ifndef NO_ONERROR
-    "test-onerror.lisp",
-#endif
-
-    // Early end for small machines.
-    // TODO: More generic name than TARGET_C16.
-#ifdef TARGET_C16
-    "welcome.lisp",
-#endif
-
-#ifndef TARGET_C16
-    "env-3.lisp",
-#ifndef NO_DEBUGGER
-    "stack.lisp",
-#endif
-    "test-file.lisp",
-#ifdef LOAD_ALL
-    "all.lisp",
-#endif // #ifdef LOAD_ALL
-    "welcome.lisp",
-#endif // #ifndef TARGET_C16
-    NULL
-};
-
 void
 lisp_init (void)
 {
@@ -1059,10 +1049,8 @@ lisp_init (void)
 #endif
 }
 
-#ifdef TARGET_VIC20
 #ifdef __CC65__
-#pragma code-name (pop)
-#endif
+#pragma code-name ("CODE")
 #endif
 
 int

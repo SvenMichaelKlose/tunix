@@ -24,6 +24,10 @@ lispptr list_last;  // Last cons of list.
 #pragma bss-name (pop)
 #endif
 
+#ifdef __CC65__
+#pragma code-name ("CODE_LIST")
+#endif
+
 // Get number of list elements.
 // CDRs of dotted pairs are also counted.
 int FASTCALL

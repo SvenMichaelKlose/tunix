@@ -1,7 +1,4 @@
 #ifdef __CC65__
-#ifdef OVERLAY
-#pragma code-name ("OVL_REPL")
-#endif
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
 #endif
@@ -38,6 +35,10 @@ lispptr debugger_return_value_sym; // Old (erroraneous) 'value'.
 bool    do_break_repl;      // Tells current REPL to return.
 bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
 bool    do_exit_program;    // Return to top-level REPL.
+
+#ifdef __CC65__
+#pragma code-name ("CODE_REPL")
+#endif
 
 void
 out_colon (void)
@@ -450,7 +451,7 @@ err_open:
 }
 
 #ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
+#pragma code-name ("CODE_INIT")
 #endif
 
 void
@@ -476,7 +477,3 @@ init_repl ()
     expand_universe (macroexpand_sym);
 #endif
 }
-
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif

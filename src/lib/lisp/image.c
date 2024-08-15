@@ -19,10 +19,8 @@
 image_header header;
 lispptr ** tmpo;
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (push, "OVL_COMMON")
-#endif
+#ifdef __CC65__
+#pragma code-name ("CODE_IMAGE")
 #endif
 
 bool FASTCALL
@@ -164,9 +162,3 @@ image_load (char * pathname)
     // Signal success.
     return true;
 }
-
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
-#endif

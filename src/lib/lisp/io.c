@@ -11,6 +11,10 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+#ifdef __CC65__
+#pragma code-name ("CODE_IO")
+#endif
+
 // Set input/output channels.
 void FASTCALL
 set_channels (simpleio_chn_t cin, simpleio_chn_t cout)

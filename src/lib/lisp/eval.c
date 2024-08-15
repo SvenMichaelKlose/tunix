@@ -1,7 +1,4 @@
 #ifdef __CC65__
-#ifdef OVERLAY
-#pragma code-name ("OVL_EVAL")
-#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
@@ -79,6 +76,10 @@ bool    unevaluated;
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
 #pragma bss-name (pop)
+#endif
+
+#ifdef __CC65__
+#pragma code-name ("CODE_EVAL")
 #endif
 
 // Evaluate list to list of return values.
@@ -768,8 +769,8 @@ funcall ()
     return eval0 ();
 }
 
-#ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
 #endif
 
 void
@@ -794,7 +795,3 @@ init_eval ()
     debug_step = nil;
 #endif
 }
-
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif

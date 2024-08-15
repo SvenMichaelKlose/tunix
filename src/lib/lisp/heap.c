@@ -76,6 +76,10 @@ uchar   lisp_sizes[TYPE_EXTENDED * 2];
 bool    do_gc_stress;
 #endif
 
+#ifdef __CC65__
+#pragma code-name ("CODE_HEAP")
+#endif
+
 // Add object to root list of garbage collector.
 void FASTCALL
 expand_universe (lispptr x)
@@ -338,8 +342,8 @@ heap_free_size ()
 #endif
 }
 
-#ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
 #endif
 
 bool
@@ -474,7 +478,3 @@ init_heap ()
 
     return true;
 }
-
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif

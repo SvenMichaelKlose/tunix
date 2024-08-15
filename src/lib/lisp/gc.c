@@ -1,7 +1,4 @@
 #ifdef __CC65__
-#ifdef OVERLAY
-#pragma code-name ("OVL_GC")
-#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
@@ -29,6 +26,10 @@ bool do_compress_cons;
 #endif
 
 lispptr ** gp;
+
+#ifdef __CC65__
+#pragma code-name ("CODE_GC")
+#endif
 
 // Trace and mark reachable objects.
 void FASTCALL

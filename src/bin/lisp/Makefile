@@ -8,7 +8,7 @@ LIBRARIES = \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
 CLEANFILES = image test.out doc/manual.pdf
 
-ifndef NAIVE
+ifdef TEST
 SOURCES += test.c
 endif
 

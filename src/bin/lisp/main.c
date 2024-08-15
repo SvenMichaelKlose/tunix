@@ -22,7 +22,11 @@ lispptr quasiquote;
 lispptr unquote;
 lispptr unquote_spliced;
 
-char * env_files[] = {
+#ifdef __CC65__
+#pragma rodata-name (push,"RODATA_INIT")
+#endif
+
+const char * env_files[] = {
     "env-0.lisp",
     "smoke-test.lisp",
     "env-1.lisp",
@@ -60,6 +64,10 @@ char * env_files[] = {
 #endif // #ifndef TARGET_C16
     NULL
 };
+
+#ifdef __CC65__
+#pragma rodata-name (pop)
+#endif
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")
@@ -147,7 +155,7 @@ lisp_init (void)
 int
 main (int argc, char * argv[])
 {
-    char ** f;
+    const char ** f;
 #ifndef NO_IMAGES
     lispptr istart_fun;
 #endif
@@ -167,7 +175,7 @@ main (int argc, char * argv[])
 
         // Load environment files.
         for (f = env_files; *f; f++)
-            load (*f);
+            load ((char *) *f);
 #ifndef NO_IMAGES
     } else {
         // Called from ILOAD: Call function

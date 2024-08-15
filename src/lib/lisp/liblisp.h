@@ -356,8 +356,6 @@ struct builtin {
     builtin_fun  func;
 };
 
-extern struct builtin builtins[];
-
 struct heap_fragment {
     char * start;
     char * free;
@@ -777,7 +775,7 @@ extern void     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
 
-extern void     FASTCALL add_builtins  (struct builtin *);
+extern void     FASTCALL add_builtins  (const struct builtin *);
 extern lispptr           debugger      (void);
 
 #define COPY_LIST       0

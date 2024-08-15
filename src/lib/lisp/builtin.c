@@ -49,13 +49,13 @@ make_car_call (void)
 
 // Make objects for built-in procedures.
 void FASTCALL
-add_builtins (struct builtin * b)
+add_builtins (const struct builtin * b)
 {
     symbol * s;
     for (; b->name; b++) {
         s = make_symbol ((char *) b->name, strlen (b->name));
         s->type = TYPE_BUILTIN;
-        s->value = b;
+        s->value = (void *) b;
         expand_universe (s);
     }
 }

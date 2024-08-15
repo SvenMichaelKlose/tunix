@@ -805,7 +805,11 @@ bi_debugger (void)
 }
 #endif
 
-struct builtin builtins[] = {
+#ifdef __CC65__
+#pragma rodata-name (push, "RODATA_INIT")
+#endif
+
+const struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
     { "apply",      "f+x",  bi_apply },
@@ -918,6 +922,10 @@ struct builtin builtins[] = {
 
     { NULL, NULL }
 };
+
+#ifdef __CC65__
+#pragma rodata-name (pop)
+#endif
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")

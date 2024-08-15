@@ -27,6 +27,7 @@
 // Heap memory areas  Must be consecutive!
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment heaps[] = {
+    // Regular heap.
     { NULL, NULL, NULL },
 
     // Commodore VIC-20, BLK5
@@ -34,7 +35,8 @@ struct heap_fragment heaps[] = {
     { (void *) 0xa000, (void *) 0xa000, (void *) 0xc000 },
 #endif
 
-    { NULL, NULL, NULL }  // End of heap list.
+    // End of heap marker.
+    { NULL, NULL, NULL }
 };
 #endif // #ifdef FRAGMENTED_HEAP
 
@@ -412,8 +414,8 @@ init_heap ()
     for (heap = heaps; heap->start; heap++)
         *(heap->free) = 0;
 
-    // Cause gc() before first allocation to switch to
-    // the first heap.
+    // Trigger gc() with first allocation start with the
+    // first heap.
     heap_free = heap_end;
     heap = heaps;
 #else

@@ -852,5 +852,6 @@ extern bool init_heap     (void);
 extern void init_eval     (void);
 extern void init_onerror  (void);
 extern void init_repl     (void);
+extern void heap_add_init_areas (void);
 
 #endif // #ifndef __LIBLISP_H__

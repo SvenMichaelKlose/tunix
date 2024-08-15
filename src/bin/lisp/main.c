@@ -164,6 +164,9 @@ main (int argc, char * argv[])
     (void) argc, (void) argv;
 
     lisp_init ();
+#ifdef WAS_TARGET_VIC20
+    heap_add_init_areas ();
+#endif
 
 #ifndef NO_IMAGES
     if (!setjmp (restart_point)) {

@@ -35,6 +35,8 @@ struct heap_fragment heaps[] = {
     { (void *) 0xa000, (void *) 0xa000, (void *) 0xc000 },
 #endif
 
+    { NULL, NULL, NULL },
+
     // End of heap marker.
     { NULL, NULL, NULL }
 };
@@ -343,6 +345,29 @@ heap_free_size ()
     return heap_end - heap_free;
 #endif
 }
+
+#ifdef WAS_TARGET_VIC20
+
+extern char * _CODE_INIT_RUN__;
+extern size_t _CODE_INIT_SIZE__;
+extern size_t _RODATA_INIT_SIZE__;
+
+#pragma code-name ("CODE")
+
+void
+heap_add_init_areas (void)
+{
+    *_CODE_INIT_RUN__ = 0; // End-of-heap marker.
+    switch_heap ();
+    memcpy (&heaps[2], &heaps[1], sizeof (struct heap_fragment));
+    memcpy (&heaps[1], &heaps[0], sizeof (struct heap_fragment));
+    heap[0].start = heap[0].free = _CODE_INIT_RUN__;
+    heap[0].end = _CODE_INIT_RUN__ + _CODE_INIT_SIZE__;
+    heap_free = heap_end;
+    heap = &heaps[3];
+}
+
+#endif // #ifdef TARGET_VIC20
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")

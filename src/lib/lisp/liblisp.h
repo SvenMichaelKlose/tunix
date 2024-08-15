@@ -62,9 +62,6 @@
 
 /// Disabling features
 
-// Do not check on CPU stack overflow.
-//#define NO_CHECK_CPU_STACK
-
 // No support for saving and loading images.
 //#define NO_IMAGES
 
@@ -179,7 +176,9 @@
 
 // Commodore PET
 #ifdef TARGET_PET
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -206,7 +205,9 @@
 
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400
@@ -221,7 +222,9 @@
 
 // Unixoids
 #ifdef TARGET_UNIX
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -255,9 +258,6 @@
 #endif
 
 #ifdef NAIVE
-    #ifndef NO_CHECK_CPU_STACK
-        #define NO_CHECK_CPU_STACK
-    #endif
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
     #endif
@@ -270,17 +270,11 @@
     #ifdef PARANOID
         #error "NAIVE and PARANOID don't get along."
     #endif
-#else // #ifdef NAIVE
-    #define GCSTACK_CHECKS
-    #define TAGSTACK_CHECKS
 #endif // #ifdef NAIVE
 
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
-    #ifndef NDEBUG
-        #pragma check-stack (on)
-    #endif
 #else
     #define FASTCALL
     #define HOST_DEBUGGER() raise (SIGTRAP);
@@ -430,6 +424,10 @@ extern xlat_item * xlat_end;
 
 extern lispptr  lisp_fnin;
 extern lispptr  lisp_fnout;
+
+#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+extern long bekloppies_start;
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -777,12 +775,9 @@ extern lispptr  FASTCALL lisp_repl    (char mode);
 extern void     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
-extern bool              init_heap    (void);
-extern void              init_eval    (void);
-extern void              init_onerror (void);
-extern void              init_repl    (void);
-extern void     FASTCALL add_builtins (struct builtin *);
-extern lispptr           debugger     (void);
+
+extern void     FASTCALL add_builtins  (struct builtin *);
+extern lispptr           debugger      (void);
 
 #define COPY_LIST       0
 #define COPY_BUTLAST    1
@@ -847,4 +842,11 @@ extern void     FASTCALL make_car_call       (void);
 // Switch to 'heap'.
 extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
+
+extern void init_builtins (void);
+extern bool init_heap     (void);
+extern void init_eval     (void);
+extern void init_onerror  (void);
+extern void init_repl     (void);
+
 #endif // #ifndef __LIBLISP_H__

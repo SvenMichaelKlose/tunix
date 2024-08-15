@@ -64,6 +64,8 @@ setout (simpleio_chn_t c)
 bool
 eof ()
 {
+    if (do_putback)
+        return false;
     return io->eof ();
 }
 

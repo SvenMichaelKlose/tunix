@@ -58,6 +58,8 @@ dist:
 	cp src/bin/lisp/lisp $(DISTDIR)/
 ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.lbl $(DISTDIR)/
+	cp src/bin/lisp/lisp.map $(DISTDIR)/
+	cp src/bin/lisp/lisp.dbg $(DISTDIR)/
 endif
 	cp src/bin/lisp/*.lisp $(DISTDIR)/
 ifeq ($(TARGET), vic20)

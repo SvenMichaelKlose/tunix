@@ -166,7 +166,7 @@ print0 (lispptr x)
 {
     uchar type;
 
-    if (!x) {
+    if (NOT(x)) {
         outs ("nil");
         return;
     }

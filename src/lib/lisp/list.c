@@ -52,7 +52,7 @@ copy_list (lispptr x, char mode, lispptr needle)
 {
     if (ATOM(x))
         return x;
-    if (mode == COPY_BUTLAST && !CDR(x))
+    if (mode == COPY_BUTLAST && NOT(CDR(x)))
         return nil;
 
     // Remove first elements if they match 'needle'.
@@ -74,7 +74,7 @@ copy_list (lispptr x, char mode, lispptr needle)
     // Append rest of elements.
     PUSH(list_start);
     DOLIST(x, CDR(x)) {
-        if (mode == COPY_BUTLAST && !CDR(x))
+        if (mode == COPY_BUTLAST && NOT(CDR(x)))
             goto end_butlast;
 
         // Skip element to remove.

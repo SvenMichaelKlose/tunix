@@ -258,7 +258,7 @@ block_statement:
         x = CDR(x);
 
         // Break on end of body.
-        if (!x)
+        if (NOT(x))
             goto do_return;
 
         // Save evaluator state.
@@ -371,14 +371,14 @@ set_arg_values:
             typed_argdef = *++builtin_argdef;
 
             // Set NIL if missing.
-            if (!args) {
+            if (NOT(args)) {
                 PUSH(nil);
                 goto set_arg_values;
             }
         }
 #ifndef NAIVE
         // Missing argument error.
-        else if (!args) {
+        else if (NOT(args)) {
             error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
@@ -510,16 +510,16 @@ break_builtin_call:
     // Evaluate argument.
 do_argument:
     // End of arguments.
-    if (!args && !argdefs)
+    if (NOT(args) && NOT(argdefs))
         goto start_body;
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && !argdefs) {
+    if (args && NOT(argdefs)) {
         error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
-    } else if (!args && CONSP(argdefs)) {
+    } else if (NOT(args) && CONSP(argdefs)) {
         error_info = argdefs;
         error (ERROR_ARG_MISSING, "Missing args");
         goto start_body;
@@ -661,7 +661,7 @@ start_body:
 
 continue_body:
     // Evaluate body expression.
-    if (!x || do_break_repl)
+    if (NOT(x) || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
     PUSH_HIGHLIGHTED(x);

@@ -61,7 +61,7 @@ bi_eq (void)
 lispptr
 bi_not (void)
 {
-    return BOOL(!arg1);
+    return BOOL(NOT(arg1));
 }
 
 lispptr
@@ -336,7 +336,8 @@ bi_if (void)
         arg1 = CAR(x);
 
         // It's the consequence with nothing following.
-        if (!(arg2c = CDR(x))) {
+        arg2c = CDR(x);
+        if (NOT(arg2c)) {
 #ifndef NO_DEBUGGER
             highlighted = x;
 #endif
@@ -391,7 +392,7 @@ bi_and (void)
         if (error_code)
             return nil;
 #endif
-        if (!value)
+        if (NOT(value))
             return nil;
     }
     return value;
@@ -490,7 +491,7 @@ bi_putback (void)
 lispptr
 bi_out (void)
 {
-    if (!arg1)
+    if (NOT(arg1))
         outs ("nil");
     else if (NUMBERP(arg1))
         out (NUMBER_VALUE(arg1));
@@ -691,7 +692,7 @@ bi_remove (void)
 lispptr
 bi_filter (void)
 {
-    if (!arg2)
+    if (NOT(arg2))
         return nil;
     PUSH(arg1);
     PUSH(arg2);

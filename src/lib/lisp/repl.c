@@ -287,7 +287,8 @@ done_short_command:
                 default:
                     // Read expression to evaluate.
                     putback ();
-                    if (!(x = read ()))
+                    x = read ();
+                    if (NOT(x))
                         goto next;
 #ifndef TARGET_UNIX
                     terpri ();

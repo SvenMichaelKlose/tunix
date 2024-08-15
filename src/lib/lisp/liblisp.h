@@ -521,7 +521,12 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma bss-name (pop)
 #endif
 
-#define nil ((lispptr) 0)
+#define nil     ((lispptr) 0)
+#ifdef __CC65__
+#define NOT(x)  !((size_t) x & 0xff00)
+#else
+#define NOT(x)  (!x)
+#endif
 
 #ifdef GC_STRESS
 extern bool do_gc_stress;
@@ -627,7 +632,7 @@ extern bool do_gc_stress;
 #define TYPE(x)         (*((char *) (x))) // TODO: Rename.
 #define TYPEBITS(x)     (TYPE(x) & TYPE_MASK)
 
-#define MARKED(x)       (!(x) || TYPE(x) & TYPE_MARKED)
+#define MARKED(x)       (NOT(x) || TYPE(x) & TYPE_MARKED)
 #define MARK(x)         (TYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
 
@@ -639,20 +644,20 @@ extern bool do_gc_stress;
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
-#define _ATOM(x)        (!(x) || !(TYPE(x) & TYPE_CONS))
+#define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
 #define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
-#define _SYMBOLP(x)     (!(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
 #define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
 #define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
-#define _LISTP(x)       (!(x) || (TYPE(x) & TYPE_CONS))
+#define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
 #define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
 #define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
 #define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
 
-#define LIST_CAR(x)     (!(x) ? x : CAR(x))
-#define LIST_CDR(x)     (!(x) ? x : CDR(x))
+#define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
+#define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
 #ifdef NAIVE

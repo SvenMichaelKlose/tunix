@@ -45,8 +45,8 @@ and this project adheres to
   collection.  (See manual for details.)
 - CHECK\_OBJ\_POINTERS at compile-time will enable quick
   sanity checks that is suitable for use on small machines.
-On TARGET\_UNIX it's thorough and slow, but easy to regret
-if not enabled during tests.
+  On TARGET\_UNIX it's thorough and slow, but easy to regret
+  if not enabled during tests.
 - NO\_CHECK\_CPU\_STACK to not check CPU stack on overflow.
 - Add PARANOID relocation table overflow check to GC sweep
   phase.
@@ -64,6 +64,7 @@ if not enabled during tests.
 - Internal error: Print address of faulty pointer.
 - Additional error info (expression) like lists of missing
   arguments.
+- Faster checks if NOT on cc65-compiled platforms.
 
 #### Changed
 

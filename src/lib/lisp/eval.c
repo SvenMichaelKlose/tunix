@@ -170,10 +170,6 @@ pop_argument_values (void)
     stack += sizeof (lispptr) * num_args;
 }
 
-#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
-char sp;
-#endif
-
 lispptr
 eval0 (void)
 {
@@ -183,14 +179,6 @@ eval0 (void)
 #endif
 
 do_eval:
-#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
-    // Check on CPU stack overflow.
-    asm ("tsx");
-    asm ("stx %v", sp);
-    if (sp > 0xf8)
-        internal_error_ptr ((void *) sp, "CPU stack");
-#endif
-
 #ifdef VERBOSE_EVAL
     // Print what's about to be evaluated.
     outs ("-> "); print (x); terpri ();

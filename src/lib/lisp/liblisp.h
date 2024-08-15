@@ -426,6 +426,9 @@ extern lispptr  lisp_fnin;
 extern lispptr  lisp_fnout;
 
 extern long bekloppies_start;
+#ifdef TARGET_UNIX
+extern long bekloppies (void);
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")

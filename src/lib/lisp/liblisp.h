@@ -425,9 +425,7 @@ extern xlat_item * xlat_end;
 extern lispptr  lisp_fnin;
 extern lispptr  lisp_fnout;
 
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
 extern long bekloppies_start;
-#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")

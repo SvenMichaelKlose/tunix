@@ -15,8 +15,8 @@ book: true
 
 TUNIX Lisp is a highly efficient Lisp interpreter, written
 in ANSI-C.  It is designed for constrained environments,
-such as embedded systems, classic home computers, including
-6502-based systems.
+such as embedded systems and classic home computers,
+including 6502-based systems.
 
 Features:
 

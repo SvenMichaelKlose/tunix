@@ -123,9 +123,7 @@ bi_symbol (void)
         len = 255;
 
     // Allocate empty symbol of wanted length.
-    PUSH(arg1);
     s = alloc_symbol (buffer, len);
-    POP(arg1);
 
     // Make symbol name from list.
     p = SYMBOL_NAME(s);

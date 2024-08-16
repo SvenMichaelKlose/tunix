@@ -152,12 +152,10 @@ lisp_repl (char mode)
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Make argument list.
             x = make_cons (current_expr, nil);
-            tmp = make_cons (current_toplevel, x);
-            PUSH(tmp);
+            tmp2 = make_cons (current_toplevel, x);
             x = make_number ((lispnum_t) error_code);
-            POP(tmp);
-            x = make_cons (x, tmp);
-            tmp = nil;
+            x = make_cons (x, tmp2);
+            tmp2 = nil;
             x = make_cons (onerror_sym, x);
 
             // Call ONERROR.

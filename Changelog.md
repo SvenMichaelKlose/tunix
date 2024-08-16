@@ -8,7 +8,8 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [current]
+
+## [v0.0.2] - 2024-08-17
 
 ### TUNIX Lisp
 
@@ -48,7 +49,8 @@ and this project adheres to
 
 - fresh\_line() only if not NUL, CR or LF before.
 
-## [v0.0.1]
+
+## [v0.0.1] - 2024-08-15
 
 Changes since this file has been created.
 

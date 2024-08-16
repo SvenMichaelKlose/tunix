@@ -84,7 +84,7 @@ endif
 
 clean:
 	$(MAKE) -C src clean
-	$(RM) src/include/git-version.h
+	$(RM) -f git-version src/include/git-version.h
 	$(RM) -rf $(DISTDIR)
 ifeq ($(TARGET), vic20)
 	$(MAKE) -C mkfs clean

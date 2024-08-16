@@ -6,7 +6,7 @@ SOURCES = builtins.c main.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
-CLEANFILES = image test.out doc/manual.pdf
+CLEANFILES = image test.out doc/manual.pdf git-version.lisp
 
 ifdef TEST
 SOURCES += test.c

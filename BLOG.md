@@ -3,6 +3,20 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-16
+
+Release v0.0.1 is out!  TUNIX Lisp is stable and fast enough
+to go for it.  There's no chance to get rid of BUGS.md
+before v1.0.0 any way.  And it's time to go public for
+feedback.
+
+The manual probably needs an introduction to Lisp as the
+majority of developers has no experience with it.  It's
+also great for beginners.  But then again the manual needs
+a proper introduction in the first place.
+
+For now the debugger needs some straightening out.
+
 # 2024-08-14
 
 TUNIX Lisp became more stable again but this is not going

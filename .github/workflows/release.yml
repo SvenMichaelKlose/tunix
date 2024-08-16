@@ -15,10 +15,13 @@ jobs:
       with:
         submodules: true
 
+    - name: Get release version
+      id: get_release_version
+        echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
     - name: Set up Github environment
       id: setup_environment
       run: |
-        echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
         SHORT_SHA=$(git rev-parse --short HEAD)
         echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.zip" >> $GITHUB_ENV
 

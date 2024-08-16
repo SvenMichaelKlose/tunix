@@ -23,44 +23,79 @@ our_isalpha (char c)
 }
 
 #ifndef NAIVE
-void
+
+lispptr
 missing_closing_paren (void)
 {
     error (ERROR_NO_PAREN, "No ')'");
+    return t;
 }
-#endif
+
+lispptr
+is_unexpected_eol (void)
+{
+    return eof () ? missing_closing_paren () : nil;
+}
+
+#endif // #ifndef NAIVE
 
 lispptr
 read_list (void)
 {
     cons * c;
-    cons * start = NULL;
-    cons * last = NULL;
+    cons * start = nil;
+    cons * last  = nil;
 
     while (1) {
         skip_spaces ();
+
 #ifndef NAIVE
-        if (eof ())
-            missing_closing_paren ();
+        if (is_unexpected_eol ())
+            return nil;
 #endif
+
+        // End of list.
         if (in () == ')')
             return start;
+
 #ifndef NAIVE
-        if (eof ())
-            missing_closing_paren ();
+        if (is_unexpected_eol ())
+            return nil;
 #endif
         putback ();
 
         PUSH(start);
         PUSH(last);
-        if (in () == '.')
+
+        // Dotted pair?
+        if (in () == '.') {
+            // Read dotted pair's CDR.
             c = read ();
-        else {
+
+#ifndef NAIVE
+            // Ensure end of list.
+            skip_spaces ();
+            if (in () != ')')
+                return missing_closing_paren ();
+
+            // Delay detecting end of list.
+            putback ();
+#endif
+        } else {
+            // Read next element.
             putback ();
             c = make_cons (read (), nil);
         }
+
         POP(last);
         POP(start);
+
+#ifndef NAIVE
+        if (error_code)
+            return nil;
+#endif
+
+        // Append element to last.
         if (last)
             last->cdr = c;
         else

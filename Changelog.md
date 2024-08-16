@@ -10,16 +10,27 @@ and this project adheres to
 
 ## [current]
 
-### TUNIX Lisp debugger REPL
+### TUNIX Lisp
 
-#### Changed
+#### Debugger
+
+##### Changed
 
 - Distinguish between error-fixing and stepping mode by
   printing context-sensitive labels.
 - Block continuing unless an alternative for an erroraneous
   expression has been provided.
 
-### TUNIX Lisp environment
+#### Interpreter
+
+##### Changed
+
+- READ breaks immediately on errors.
+- Expects end of dotted pair.
+
+#### Environment
+
+##### Added
 
 - +V+ contains tag (if available) and short SHA.  It's
   printed when loading the environment.
@@ -39,72 +50,79 @@ Changes since this file has been created.
 
 - Directories with binaries to replace D64 images.
 
-### TUNIX Lisp debugger
+### TUNIX Lisp
 
-#### Fixed
+#### Debugger
+
+##### Fixed
 
 - Keep highlighting of current expression when evaluating
   argument of short command.
+- Short ommand 'p' does not modify the return value.
 
-#### Added
+##### Added
 
 - Breakpoints (new short commands).
 - Improved REPL return value handling.
+- Additional error info (expression) like lists of missing
+  arguments.
 
-### TUNIX Lisp
+#### Interpreter
 
-#### Fixed
+##### Fixed
 
 - Fixed GC trigger.  Did not take end-of-heap marker into
   account.
 - Detect if relocation table is full when switching to the
   next heap.
-- Check if argument names are symbols.
 - Fixed OPEN's write mode without NDEBUG.
 - READ: Do not put 0 back into buffer on end of file.
 
-#### Changed
+##### Changed
 
-- Interpreter exits if out of heap instead of going vodka.
+- Exits if out of heap instead of going vodka.
   This is temporary.
-- Debugger command 'p': Does not modify the return value.
 - BUTLAST, COPY-LIST, REMOVE: Function to handle all three
   has been rewritten.
 - REMOVE can handle atoms and dotted pairs.
 - VALUE became SYMBOL-VALUE.
+- Compile-time option VERBOSE\_DEFINES not set by default.
+- Compile-time error if VERBOSE\_COMPRESSED\_CONS without
+  COMPRESSED\_CONS.
 
-#### Added
+##### Added
 
-- Unix: Environment file "unix.lisp".
-- Unix: Built-in function "time" and constant "+bps+".
+- Check if argument names are symbols as well as
+  ERROR\_ARGNAME\_TYPE.
+- Compression of conses in user-triggered garbage
+  collection.  (Please see manual for details.)
+- Add PARANOID relocation table overflow check to GC sweep
+  phase.
+- Built-in ISAVE and ILOAD to save and load the heap.  Can
+  be disables by compile-time option NO\_IMAGES.
+- Internal error: Print address of faulty pointer.
+- Faster checks of NOT on 8/16-bit platforms.
+- SYMBOL-NAME and CHAR-AT return character value numbers of
+  a symbol's name.
+- Unix also: Built-in function "time" and constant "+bps+".
+
+###### Compile-time options
+
+- NO\_CHECK\_CPU\_STACK to not check CPU stack on overflow.
+- VERBOSE\_COMPRESSED\_CONS for diagnostic printing a 'C'
+  for each compressed cons.
 - Compile-time option TEST enables all tests at program
   initialization.
-- Compression of conses in user-triggered garbage
-  collection.  (See manual for details.)
 - CHECK\_OBJ\_POINTERS at compile-time will enable quick
   sanity checks that is suitable for use on small machines.
   On TARGET\_UNIX it's thorough and slow, but easy to regret
   if not enabled during tests.
-- NO\_CHECK\_CPU\_STACK to not check CPU stack on overflow.
-- Add PARANOID relocation table overflow check to GC sweep
-  phase.
-- Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a
-  'C' for each compressed cons.
-- ERROR\_ARGNAME\_TYPE
+
+#### Environment
+
 - Macro WITH-GLOBAL to temporarily change the value of a
   symbol.
-- Compile-time error on VERBOSE\_COMPRESSED\_CONS without
-  COMPRESSED\_CONS.
-- Built-in ISAVE and ILOAD to save and load the heap.  Can
-  be disables by compile-time option NO\_IMAGES.
-- Internal error: Print address of faulty pointer.
-- Additional error info (expression) like lists of missing
-  arguments.
-- Faster checks if NOT on cc65-compiled platforms.
-- SYMBOL-NAME and CHAR-AT return character value numbers of
-  a symbol's name.
-- Compile-time option VERBOSE\_DEFINES.  Not set by
-  default.
+- Unix: Environment file "unix.lisp".
 
 ### libsimpleio
 

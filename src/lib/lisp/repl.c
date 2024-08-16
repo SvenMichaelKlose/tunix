@@ -147,10 +147,12 @@ lisp_repl (char mode)
     // Ensure terminal I/O in user- and debug-mode.
     if (mode != REPL_LOAD)
         set_channels (STDIN, STDOUT);
+
     this_in  = fnin;
     this_out = fnout;
 
     num_repls++;
+
 #ifndef NO_DEBUGGER
     // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
@@ -401,6 +403,14 @@ terpri_next:
             break;
         }
 
+#ifndef NO_DEBUGGER
+        // Continue with alternative value.
+        if (mode == REPL_DEBUGGER) {
+            debug_step = t;
+            goto do_return;
+        }
+#endif
+
         // Print result of user input.
         if (mode != REPL_LOAD) {
             setout (STDOUT);
@@ -419,13 +429,15 @@ next:
 #if !defined(NO_DEBUGGER) || !defined(NO_ONERROR)
 do_return:
 #endif
-
     // Track unnesting of this REPL.
     num_repls--;
 
 #ifndef NO_DEBUGGER
-    if (mode == REPL_DEBUGGER)
+    if (mode == REPL_DEBUGGER) {
         num_debugger_repls--;
+        outs ("Continuing...");
+        terpri ();
+    }
 #endif
 
 #ifndef NDEBUG

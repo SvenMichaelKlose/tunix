@@ -20,6 +20,9 @@ and this project adheres to
   printing context-sensitive labels.
 - Block continuing unless an alternative for an erroraneous
   expression has been provided.
+- Step to next expression if alternative value has been
+  provided.
+- Tell if program is continuing.
 
 #### Interpreter
 

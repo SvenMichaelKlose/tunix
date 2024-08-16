@@ -27,6 +27,7 @@ lispptr unquote_spliced;
 #endif
 
 const char * env_files[] = {
+    "git-version.lisp",
     "env-0.lisp",
     "smoke-test.lisp",
     "env-1.lisp",

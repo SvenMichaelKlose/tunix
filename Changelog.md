@@ -19,6 +19,11 @@ and this project adheres to
 - Block continuing unless an alternative for an erroraneous
   expression has been provided.
 
+### TUNIX Lisp environment
+
+- +V+ contains tag (if available) and short SHA.  It's
+  printed when loading the environment.
+
 ## [v0.0.1]
 
 Changes since this file has been created.
@@ -34,6 +39,18 @@ Changes since this file has been created.
 
 - Directories with binaries to replace D64 images.
 
+### TUNIX Lisp debugger
+
+#### Fixed
+
+- Keep highlighting of current expression when evaluating
+  argument of short command.
+
+#### Added
+
+- Breakpoints (new short commands).
+- Improved REPL return value handling.
+
 ### TUNIX Lisp
 
 #### Fixed
@@ -44,9 +61,17 @@ Changes since this file has been created.
   next heap.
 - Check if argument names are symbols.
 - Fixed OPEN's write mode without NDEBUG.
-- Debugger: Keep highlighting of current expression when
-  evaluating argument of short command.
 - READ: Do not put 0 back into buffer on end of file.
+
+#### Changed
+
+- Interpreter exits if out of heap instead of going vodka.
+  This is temporary.
+- Debugger command 'p': Does not modify the return value.
+- BUTLAST, COPY-LIST, REMOVE: Function to handle all three
+  has been rewritten.
+- REMOVE can handle atoms and dotted pairs.
+- VALUE became SYMBOL-VALUE.
 
 #### Added
 
@@ -65,8 +90,6 @@ Changes since this file has been created.
   phase.
 - Option VERBOSE\_COMPRESSED\_CONS for diagnostic printing a
   'C' for each compressed cons.
-- Breakpoints in debugger.
-- Improved debugger REPL return value handling.
 - ERROR\_ARGNAME\_TYPE
 - Macro WITH-GLOBAL to temporarily change the value of a
   symbol.
@@ -82,16 +105,6 @@ Changes since this file has been created.
   a symbol's name.
 - Compile-time option VERBOSE\_DEFINES.  Not set by
   default.
-
-#### Changed
-
-- Interpreter exits if out of heap instead of going vodka.
-  This is temporary.
-- Debugger command 'p': Does not modify the return value.
-- BUTLAST, COPY-LIST, REMOVE: Function to handle all three
-  has been rewritten.
-- REMOVE can handle atoms and dotted pairs.
-- VALUE became SYMBOL-VALUE.
 
 ### libsimpleio
 

@@ -1,6 +1,6 @@
 include src/mk/Makefile.build
 
-TAG := $(shell git describe --tags --exact-match 2>/dev/null)
+TAG := $(shell git describe --tags 2>/dev/null)
 DISTDIR = tunix/$(TARGET)/
 ULTIMEM_IMG = tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
@@ -14,12 +14,7 @@ src/include/git-version.h:
 	echo -n "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
 	echo -n `git rev-parse --short=8 HEAD` >>src/include/git-version.h
 	echo "\"" >>src/include/git-version.h
-	rm -f git-version
-ifeq ($(TAG),"")
-	echo -n $(TAG) >>git-version
-	echo -n + >>git-version
-endif
-	echo -n `git rev-parse --short=8 HEAD` >>git-version
+	echo -n $(TAG) >git-version
 	echo -n "(var +v+ \"" >src/bin/lisp/git-version.lisp
 	cat git-version >>src/bin/lisp/git-version.lisp
 	echo "\")" >>src/bin/lisp/git-version.lisp

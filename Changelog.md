@@ -40,8 +40,8 @@ and this project adheres to
 
 ##### Added
 
-- +V+ contains tag (if available) and short SHA.  It's
-  printed when loading the environment.
+- +V+ contains the Git tag.  It's printed when loading the
+  environment.
 
 ### libsimpleio
 

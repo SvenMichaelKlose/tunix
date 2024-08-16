@@ -28,4 +28,3 @@
 ;TODO: (message "Saving 'image'...")
 ;(isave "image")
 (message "Ready.")
-(load "bug.lisp")

@@ -6,6 +6,7 @@
 //// Inteded to be set via file 'src/config' or command-line.
 
 /// Diagnostics
+/// NOTE: Current output channel is used!
 
 // Add dump_lispptr().
 //#define DUMP_LISPPTR
@@ -16,6 +17,9 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Print 'C' for each compressed cons.
+//#define COMPRESSED_CONS
+
 // Print names to built-in special forms FN and VAR.
 //#define VERBOSE_DEFINES
 
@@ -24,6 +28,9 @@
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
+
+// Print LOADed pathnames before evaluation.
+//#define VERBOSE_LOAD
 
 
 /// Testing and debugging
@@ -81,6 +88,9 @@
 
 /// Additional features
 
+// Compressed conses.
+//#define COMPRESSED_CONS
+
 // Multiple heaps.
 //#define FRAGMENTED_HEAP
 
@@ -95,8 +105,7 @@
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
-// Print LOADed pathnames before evaluation.
-//#define VERBOSE_LOAD
+// NOTE: Prints to current output channel!
 
 
 /// Memory allocation

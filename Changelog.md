@@ -33,6 +33,7 @@ and this project adheres to
 - READ breaks immediately on errors.
 - REPL handles READ errors.
 - Expects end of dotted pair.
+- cc65: Smaller initializing parts for more heap.
 
 #### Environment
 

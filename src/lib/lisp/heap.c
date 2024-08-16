@@ -371,6 +371,8 @@ heap_add_init_areas (void)
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
 #endif
 
 bool

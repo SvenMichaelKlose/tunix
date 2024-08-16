@@ -1,6 +1,8 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
 #endif
 
 #include <ctype.h>

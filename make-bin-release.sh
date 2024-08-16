@@ -3,7 +3,7 @@
 set -e
 
 DATE=`date +%Y-%m-%d`
-make allworlds LISP_FLAGS="-DVERBOSE_LOAD -DNDEBUG" $@
+make allworlds LISP_FLAGS="-DNDEBUG" $@
 cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 cp README.md tunix/
 cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md

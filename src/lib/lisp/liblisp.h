@@ -16,6 +16,9 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Print names to built-in special forms FN and VAR.
+//#define VERBOSE_DEFINES
+
 // Print expressions before evaluation.
 //#define VERBOSE_EVAL
 

@@ -67,6 +67,8 @@ and this project adheres to
 - Faster checks if NOT on cc65-compiled platforms.
 - SYMBOL-NAME and CHAR-AT return character value numbers of
   a symbol's name.
+- Compile-time option VERBOSE\_DEFINES.  Not set by
+  default.
 
 #### Changed
 

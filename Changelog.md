@@ -8,7 +8,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.0.0]
+## [v0.0.1]
 
 Changes since this file has been created.
 

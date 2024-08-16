@@ -46,6 +46,18 @@ out_colon (void)
     outs (": ");
 }
 
+void
+read_safe (void)
+{
+    PUSH_TAG(error_code);
+    error_code = 0;
+    x = nil;
+    x = read ();
+    if (error_code)
+        x = lisp_repl (REPL_DEBUGGER);
+    POP_TAG(error_code);
+}
+
 #ifndef NO_DEBUGGER
 
 void
@@ -109,7 +121,7 @@ read_cmd_arg (void)
         value = nil;
     else {
         putback ();
-        x = read ();
+        read_safe ();
         PUSH(highlighted);
         eval ();
         POP(highlighted);
@@ -197,8 +209,7 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
-            x = nil;
-            x = read ();
+            read_safe ();
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)
                 terpri ();
@@ -298,7 +309,7 @@ terpri_next:
                     // It wasn't a debugger command.
                     // Read as expression to evaluate.
                     putback ();
-                    x = read ();
+                    read_safe ();
                     if (NOT(x))
                         goto next;
 #ifndef TARGET_UNIX

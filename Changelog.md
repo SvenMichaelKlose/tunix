@@ -26,6 +26,7 @@ and this project adheres to
 ##### Changed
 
 - READ breaks immediately on errors.
+- REPL handles READ errors.
 - Expects end of dotted pair.
 
 #### Environment

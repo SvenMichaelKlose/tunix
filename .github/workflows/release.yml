@@ -19,7 +19,8 @@ jobs:
       id: setup_environment
       run: |
         echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        echo "ZIP_NAME=tunix.lisp.cbm.${{ env.VERSION }}.zip" >> $GITHUB_ENV
+        echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "ZIP_NAME=tunix.${{ env.VERSION }}+${{ env.SHORT_SHA }}.zip" >> $GITHUB_ENV
 
     - name: Install prerequisites
       run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip

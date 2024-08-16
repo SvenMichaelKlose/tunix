@@ -113,9 +113,9 @@ bi_symbol_value (void)
 lispptr
 bi_symbol (void)
 {
-    int len;
-    lispptr s;
-    char * p;
+    int      len;
+    lispptr  s;
+    char *   p;
 
     // Get length.  Truncate at 255.
     len = length (arg1);
@@ -310,18 +310,13 @@ bi_eval (void)
 lispptr
 bi_apply (void)
 {
-    PUSH(arg1); // Function
-
-    PUSH(arg2); // Argument list.
     args = copy_list (arg2, COPY_BUTLAST, nil);
-    POP(arg2);
-    tmp = LIST_CAR(last (arg2));
+    tmp  = LIST_CAR(last (arg2));
 
     if (args) {
 #ifndef NAIVE
         if (!LISTP(tmp)) {
             error (ERROR_TYPE, "Last arg isn't list");
-            POP(arg1);
             return nil;
         }
 #endif
@@ -329,7 +324,6 @@ bi_apply (void)
     } else
         args = tmp;
 
-    POP(arg1);
     make_call (args);
     return eval0 ();
 }
@@ -345,7 +339,7 @@ lispptr
 bi_return (void)
 {
     return_value = arg1;
-    return_name = arg2;
+    return_name  = arg2;
     return return_sym;
 }
 
@@ -594,6 +588,7 @@ bi_isave (void)
 lispptr
 bi_define (void)
 {
+#ifdef VERBOSE_DEFINES
     if (member (arg1, SYMBOL_VALUE(universe)))
         outs ("Redefining ");
     else {
@@ -602,6 +597,10 @@ bi_define (void)
     }
     print (arg1);
     terpri ();
+#else
+    if (!member (arg1, SYMBOL_VALUE(universe)))
+        expand_universe (arg1);
+#endif
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }

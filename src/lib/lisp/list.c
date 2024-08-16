@@ -72,7 +72,6 @@ copy_list (lispptr x, char mode, lispptr needle)
     POP(x);
 
     // Append rest of elements.
-    PUSH(list_start);
     DOLIST(x, CDR(x)) {
         if (mode == COPY_BUTLAST && NOT(CDR(x)))
             goto end_butlast;
@@ -82,13 +81,9 @@ copy_list (lispptr x, char mode, lispptr needle)
             continue;
 
         // Copy element.
-        PUSH(list_last);
-        PUSH(x);
         PUSH(needle);
         tmp = make_cons (CAR(x), nil);
         POP(needle);
-        POP(x);
-        POP(list_last);
 
         // Append to last.
         SETCDR(list_last, tmp);
@@ -100,7 +95,6 @@ copy_list (lispptr x, char mode, lispptr needle)
         SETCDR(list_last, tmp);
 
 end_butlast:
-    POP(list_start);
     return list_start;
 }
 

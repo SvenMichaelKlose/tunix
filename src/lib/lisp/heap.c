@@ -457,16 +457,17 @@ init_heap ()
     do_compress_cons = false;
 #endif
 
-    // Make universe.
+    // Make *UNIVERSE*.
     last_symbol = nil;
     universe = make_symbol ("*universe*", 10);
     first_symbol = universe;
-    t = make_symbol ("t", 1);
-    SET_SYMBOL_VALUE(universe, make_cons (t, nil));
 
-    // Make +target+.
+    // Be true.
+    t = make_symbol ("t", 1);
+
+    // Make +TARGET+.
     tmp2 = make_symbol ("+target+", 8);
-    expand_universe (tmp2);
+    SET_SYMBOL_VALUE(universe, make_cons (tmp2, nil));
 #ifdef TARGET_C128
     SET_SYMBOL_VALUE(tmp2, make_symbol ("c128", 4));
 #endif

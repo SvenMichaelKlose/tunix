@@ -136,6 +136,8 @@ lisp_repl (char mode)
 {
 #ifndef NO_DEBUGGER
     char cmd;
+    simpleio_chn_t app_in = fnin;
+    simpleio_chn_t app_out = fnout;
 #endif
 #ifndef NDEBUG
     char * old_stack    = stack;
@@ -147,7 +149,6 @@ lisp_repl (char mode)
     // Ensure terminal I/O in user- and debug-mode.
     if (mode != REPL_LOAD)
         set_channels (STDIN, STDOUT);
-
     this_in  = fnin;
     this_out = fnout;
 
@@ -158,7 +159,7 @@ lisp_repl (char mode)
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
-        outs ("Debugger ");
+        outs ("DEBUGGER ");
         outn (num_debugger_repls);
         out (':');
         terpri ();
@@ -363,10 +364,25 @@ terpri_next:
 
 #ifndef NO_DEBUGGER
         highlighted = nil;
+        // Restore program channels for evaluation.
+        if (mode == REPL_DEBUGGER)
+            set_channels (app_in, app_out);
 #endif
 
         // Evaluate expression.
         x = eval ();
+
+#ifndef NO_DEBUGGER
+        if (mode == REPL_DEBUGGER) {
+            // Save program channels, should they have
+            // changed during evaluation.
+            app_in  = fnin;
+            app_out = fnout;
+
+            // Return to debugger channels.
+            set_channels (this_in, this_out);
+        }
+#endif
 
 #ifndef NAIVE
         // Call debugger on error.
@@ -437,6 +453,9 @@ do_return:
         num_debugger_repls--;
         outs ("Continuing...");
         terpri ();
+
+        // Restore program channels.
+        set_channels (app_in, app_out);
     }
 #endif
 

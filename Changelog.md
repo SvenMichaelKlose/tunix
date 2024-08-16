@@ -23,6 +23,8 @@ and this project adheres to
 - Step to next expression if alternative value has been
   provided.
 - Tell if program is continuing.
+- Evaluate alternative expression with program's I/O
+  channels.
 
 #### Interpreter
 

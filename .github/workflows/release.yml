@@ -18,7 +18,7 @@ jobs:
     - name: Set up Github environment
       id: setup_environment
       run: |
-        echo "VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        echo "VERSION=${{ github.ref }}" >> $GITHUB_ENV
         SHORT_SHA=$(git rev-parse --short HEAD)
         echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.zip" >> $GITHUB_ENV
 

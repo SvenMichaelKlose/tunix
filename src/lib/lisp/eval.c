@@ -783,5 +783,6 @@ init_eval ()
     SET_SYMBOL_VALUE(breakpoints_sym, nil);
     do_invoke_debugger = false;
     debug_step = nil;
+    error_info = nil;
 #endif
 }

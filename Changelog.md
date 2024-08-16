@@ -8,6 +8,17 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [current]
+
+### TUNIX Lisp debugger REPL
+
+#### Changed
+
+- Distinguish between error-fixing and stepping mode by
+  printing context-sensitive labels.
+- Block continuing unless an alternative for an erroraneous
+  expression has been provided.
+
 ## [v0.0.1]
 
 Changes since this file has been created.

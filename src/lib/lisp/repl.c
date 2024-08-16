@@ -51,40 +51,46 @@ out_colon (void)
 void
 print_debugger_info ()
 {
+    // Head with errror info.
     if (error_code) {
+        // Error code.
         outs ("Error #");
         outn (error_code);
         out_colon ();
+
+        // Human-readable description.
         if (last_errstr)
             outs (last_errstr);
+
+        // Informative expression, describing the error
+        // further.
         if (error_info) {
             outs (": ");
             print (error_info);
         }
-        terpri ();
+    } else {
+        outs ("Rvalue: ");
+        print (value);
     }
     fresh_line ();
 
+    // Print current return value.
+    //if (value != current_function && value != current_toplevel) {
+    //}
+
+    // Print is either about to be evaluated or caused
+    // an error.
+    outs (error_code ? "In" : "Next:");
     do_highlight = true;
-#ifdef DEBUG_INTERNAL
-    outs ("Eval'd: ");
-    print (current_expr);
-    terpri ();
-#endif
-
-    // Print last result unless it's the current expression.
-    if (value != current_function && value != current_toplevel) {
-        outs ("Rvalue: ");
-        print (value);
-        terpri ();
-    }
-
-    outs ("In");
     if (current_function) {
         tmp2 = SYMBOL_VALUE(current_function);
-        print (current_function);
+        print (current_function); // (Name)
         out (' ');
-        print (FUNARGS(tmp2));
+        tmp = FUNARGS(tmp2);
+        if (tmp)
+            print (FUNARGS(tmp2));
+        else
+            outs ("()");
         out_colon ();
         terpri ();
         print (FUNBODY(tmp2));
@@ -134,6 +140,7 @@ lisp_repl (char mode)
 
     num_repls++;
 #ifndef NO_DEBUGGER
+    // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
@@ -145,7 +152,6 @@ lisp_repl (char mode)
 #endif
 
 #ifndef NAIVE
-    // Handle error in other ways than calling the debugger.
     if (error_code) {
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
@@ -180,15 +186,11 @@ lisp_repl (char mode)
     }
 #endif // #ifndef NAIVE
 
-    // Read expresions from standard input until
-    // end or until QUIT has been invoked.
+    // READ/EVAL/PRINT-Loop.
     while (!eof ()) {
 #ifndef NO_DEBUGGER
-        if (mode == REPL_DEBUGGER) {
+        if (mode == REPL_DEBUGGER)
             print_debugger_info ();
-            error_code = 0;
-            error_info = nil;
-        }
 #endif
 
 #ifndef NO_DEBUGGER
@@ -203,8 +205,6 @@ lisp_repl (char mode)
 #endif
 #ifndef NO_DEBUGGER
         } else {
-            debug_step = nil;
-
             // Read short debugger command, skipping whitespaces.
             do {
                 cmd = in ();
@@ -216,27 +216,35 @@ lisp_repl (char mode)
 #endif
 
             // Process short command.
+            fresh_line ();
+            debug_step = nil;
             switch (cmd) {
                 // Continue execution.
                 case 'c':
-                    fresh_line ();
+                    if (error_code)
+                        goto cannot_continue;
                     goto do_return;
 
-                // Break on next expression.
                 // Step into function.
                 case 's':
-                    fresh_line ();
+                    if (error_code)
+                        goto cannot_continue;
+
+                    // Break on next expression.
                     debug_step = t;
                     goto do_return;
 
-                // Break after current expression.
                 // Step over function call.
                 case 'n':
-                    fresh_line ();
+                    if (error_code)
+                        goto cannot_continue;
+
+                    // Break *after* current expression.
                     debug_step = current_expr;
                     goto do_return;
 
-                // Print expression.
+                // Print expression without affecting the
+                // return value.
                 case 'p':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
@@ -245,7 +253,7 @@ lisp_repl (char mode)
                     print (value);
                     goto done_short_command;
 
-                // Set breakpoint.
+                // Set breakpoint or print all of them.
                 case 'b':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
@@ -258,7 +266,7 @@ lisp_repl (char mode)
                     }
                     goto want_symbol;
 
-                // Delete breakpoint.
+                // Delete specific or all breakpoints.
                 case 'd':
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
@@ -269,21 +277,26 @@ lisp_repl (char mode)
                         SET_SYMBOL_VALUE(breakpoints_sym, value);
                     }
                     goto print_breakpoints;
+cannot_continue:
+                    outs ("Need alternative first!");
+                    goto terpri_next;
 want_symbol:
-                    outs ("Want symbol!");
+                    outs ("Symbol!");
                     goto done_short_command;
 print_breakpoints:
                     outs ("Breakpoints: ");
                     print (SYMBOL_VALUE(breakpoints_sym));
 done_short_command:
-                    terpri ();
                     POP(value);
                     POP(tmp);
                     SET_SYMBOL_VALUE(debugger_return_value_sym, tmp);
+terpri_next:
+                    terpri ();
                     goto next;
 
                 default:
-                    // Read expression to evaluate.
+                    // It wasn't a debugger command.
+                    // Read as expression to evaluate.
                     putback ();
                     x = read ();
                     if (NOT(x))
@@ -301,6 +314,12 @@ done_short_command:
         PUSH(unexpanded_toplevel);
         unexpanded_toplevel = x;
         current_toplevel = x;
+#endif
+
+#ifndef NO_DEBUGGER
+        // Reset error status for next evaluation.
+        error_code = 0;
+        error_info = nil;
 #endif
 
         // Macro expansion if MACROEXPAND is a user function.
@@ -371,7 +390,7 @@ done_short_command:
             break;
         }
 
-        // Print result.
+        // Print result of user input.
         if (mode != REPL_LOAD) {
             setout (STDOUT);
             print (x);

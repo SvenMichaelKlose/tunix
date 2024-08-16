@@ -67,9 +67,7 @@ copy_list (lispptr x, char mode, lispptr needle)
         }
 
     // Copy first element.
-    PUSH(x);
     list_start = list_last = make_cons (CAR(x), nil);
-    POP(x);
 
     // Append rest of elements.
     DOLIST(x, CDR(x)) {

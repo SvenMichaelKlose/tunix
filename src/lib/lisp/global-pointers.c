@@ -6,6 +6,8 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+extern lispptr needle;
+
 lispptr * global_pointers[] = {
     &universe, &t,
     &delayed_eval,
@@ -36,9 +38,9 @@ lispptr * global_pointers[] = {
 
     &lisp_fnin, &lisp_fnout,
 
-    // To be safe:
     &x, &args, &argdefs, &arg1, &arg2, &arg2c,
     &list_start, &list_last,
     &value, &va,
+    &needle,
     NULL
 };

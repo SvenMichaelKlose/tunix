@@ -47,6 +47,8 @@ length (lispptr x)
     return lisp_len;
 }
 
+lispptr needle;
+
 lispptr FASTCALL
 copy_list (lispptr x, char mode, lispptr needle)
 {
@@ -66,9 +68,7 @@ copy_list (lispptr x, char mode, lispptr needle)
 
     // Copy first element.
     PUSH(x);
-    PUSH(needle);
     list_start = list_last = make_cons (CAR(x), nil);
-    POP(needle);
     POP(x);
 
     // Append rest of elements.
@@ -81,9 +81,7 @@ copy_list (lispptr x, char mode, lispptr needle)
             continue;
 
         // Copy element.
-        PUSH(needle);
         tmp = make_cons (CAR(x), nil);
-        POP(needle);
 
         // Append to last.
         SETCDR(list_last, tmp);

@@ -761,12 +761,14 @@ funcall ()
 #pragma code-name ("CODE_INIT")
 #endif
 
+extern lispptr needle;
+
 void
 init_eval ()
 {
-    // TODO: Clear zeropage instantly in a loop instead.
     go_tag = return_name = return_value = nil;
     args = argdefs = arg1 = arg2 = arg2c = x = value = va = nil;
+    needle = nil;
     return_sym   = make_symbol (NULL, 0);
     go_sym       = make_symbol (NULL, 0);
     delayed_eval = make_symbol (NULL, 0);

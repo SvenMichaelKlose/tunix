@@ -56,7 +56,7 @@ setout (simpleio_chn_t c)
 {
     if (fnout != c) {
         fnout = c;
-        last_out = 0;
+        last_out = 0; // (Virtually fresh line.)
         io->setout (c);
     }
 }
@@ -163,7 +163,7 @@ terpri (void)
 void
 fresh_line (void)
 {
-    if (last_out >= ' ')
+    if (last_out && last_out != '\n' && last_out != '\r')
         terpri ();
 }
 

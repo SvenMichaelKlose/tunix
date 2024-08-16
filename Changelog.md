@@ -35,6 +35,12 @@ and this project adheres to
 - +V+ contains tag (if available) and short SHA.  It's
   printed when loading the environment.
 
+### libsimpleio
+
+#### Fixed
+
+- fresh\_line() only if not NUL, CR or LF before.
+
 ## [v0.0.1]
 
 Changes since this file has been created.

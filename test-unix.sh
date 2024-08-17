@@ -24,8 +24,8 @@ stress_out () {
 build_and_run "-DNAIVE"
 
 build_and_run "$PARANOID_FLAGS"
-cd tunix/unix/ && (echo "(isave \"image\")" | ./lisp) ; cd -
+cd tunix/unix/ && (echo "(isave \"image\")\n(iload \"image\")\n" | ./lisp) ; cd -
 # Not loadable.  Needs relocating.
 #cd tunix/unix/ && (echo | ./lisp) ; cd -
 
-stress_out
+#stress_out

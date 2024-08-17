@@ -4,41 +4,37 @@ set -e
 
 build_and_run () {
     echo "#### Testing $@"
-#    make clean allworlds $@
-    make clean all TARGET=unix LOAD_ALL=1 $@
+    make clean all TARGET=unix LISP_FLAGS="-DGC_STRESS -DCHECK_OBJ_POINTERS -DTEST -DPARANOID$@"
     cd tunix/unix/ && (echo | ./lisp) ; cd -
 }
 
 test_options () {
-    build_and_run $@
-    build_and_run COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 $@
-    build_and_run NO_ONERROR=1 $@
-    build_and_run NO_DEBUGGER=1 $@
-    build_and_run NO_IMAGES=1 $@
-    build_and_run VERBOSE_EVAL=1 $@
+    build_and_run "$@"
+    build_and_run "-DCOMPRESSED_CONS $@"
+    build_and_run "-DCOMPRESSED_CONS -DVERBOSE_COMPRESSED_CONS $@"
+    build_and_run "-DNO_ONERROR $@"
+    build_and_run "-DNO_DEBUGGER $@"
+    build_and_run "-DNO_IMAGES $@"
+    build_and_run "-DVERBOSE_EVAL $@"
 }
 
 test_diagnostics () {
-    test_options NDEBUG=1 $@
-    test_options $@
-    test_options TEST=1 $@
-    test_options PARANOID=1 $@
-    test_options CHECK_OBJ_POINTERS=1 $@
+    test_options "$@"
 }
 
 test_diagnostics
 
 # Stealth version.
-build_and_run NAIVE=1 $@
-build_and_run NAIVE=1 COMPRESSED_CONS=1 $@
+build_and_run "-DNAIVE $@"
+build_and_run "-DNAIVE -DCOMPRESSED_CONS $@"
 
 # Test image and be paranoid about it.
-#build_and_run VERBOSE_LOAD=1 COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 $@
+#build_and_run "-DVERBOSE_LOAD -DCOMPRESSED_CONS -DVERBOSE_COMPRESSED_CONS -DPARANOID -DCHECK_OBJ_POINTERS $@"
 #cd tunix/unix/ && (echo "(isave \"image\")" | ./lisp) ; cd -
 #cd tunix/unix/ && (echo | ./lisp) ; cd -
 
 # Stress out.
-build_and_run VERBOSE_LOAD=1 COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 GC_STRESS=1 $@
+build_and_run "-DVERBOSE_LOAD -DCOMPRESSED_CONS -DVERBOSE_COMPRESSED_CONS -DPARANOID -DCHECK_OBJ_POINTERS -DGC_STRESS $@"
 
 # Release version.
-build_and_run VERBOSE_LOAD=1 NDEBUG=1 $@
+build_and_run "-DVERBOSE_LOAD -DNDEBUG $@"

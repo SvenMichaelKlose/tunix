@@ -10,16 +10,16 @@ all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image dist
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
 src/include/git-version.h:
-	mkdir -p src/include
-	echo -n "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
-	echo -n `git rev-parse --short=8 HEAD` >>src/include/git-version.h
-	echo "\"" >>src/include/git-version.h
 	echo -n $(TAG) >git-version
 	echo -n "(var +v+ \"" >src/bin/lisp/git-version.lisp
 	cat git-version >>src/bin/lisp/git-version.lisp
 	echo "\")" >>src/bin/lisp/git-version.lisp
 	echo -n "(out \"TUNIX Lisp (\")(out +v+)(out \"" >>src/bin/lisp/git-version.lisp
 	echo -n ")\")(terpri)" >>src/bin/lisp/git-version.lisp
+	mkdir -p src/include
+	echo -n "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
+	cat git-version >>src/include/git-version.h
+	echo "\"" >>src/include/git-version.h
 
 host:
 	$(MAKE) -C src host

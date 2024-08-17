@@ -13,9 +13,13 @@ and this project adheres to
 
 ### TUNIX Lisp
 
-#### General
+#### Build system
 
-- Revived full stress tests.
+##### Changed
+
+- Revived full stress test.
+- src/config is not required any more.
+- Added TARGET=sim6502 (cc65's simulator).
 
 #### Debugger
 

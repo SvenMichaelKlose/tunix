@@ -811,6 +811,16 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
+#ifdef TARGET_SIM6502
+
+lispptr
+bi_time (void)
+{
+    return make_number (0);
+}
+
+#endif // #ifdef TARGET_SIM6502
+
 #ifndef NDEBUG
 lispptr
 bi_debug (void)
@@ -894,7 +904,7 @@ const struct builtin builtins[] = {
     { "sys",        "n",    bi_sys },
 #endif // #ifndef TARGET_CPM
 
-    { "read",       "",     read },
+    { "read",       "",     read_expr },
     { "print",      "x",    bi_print },
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
@@ -934,9 +944,7 @@ const struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
-#ifndef TARGET_CPM
     { "time",       "",     bi_time },
-#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },

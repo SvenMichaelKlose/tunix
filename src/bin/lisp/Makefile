@@ -14,7 +14,7 @@ endif
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
 endif
-ifeq ($(TARGET), unix)
+ifneq (,$(filter $(TARGET), sim6502 unix))
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
 endif
 

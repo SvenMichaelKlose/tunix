@@ -56,7 +56,7 @@ read_safe (void)
     error_code = 0;
 #endif
     x = nil;
-    x = read ();
+    x = read_expr ();
 #ifndef NAIVE
     if (error_code)
         x = lisp_repl (REPL_DEBUGGER);

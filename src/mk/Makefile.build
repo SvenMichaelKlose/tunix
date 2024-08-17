@@ -3,7 +3,7 @@ include $(THIS_DIR)/Makefile.config
 
 all: $(LIBRARY) $(PROGRAM)
 ifeq ($(filter $(TARGET),$(VALID_TARGETS)),)
-    $(error No TARGET specified. Preferably specify one of $(VALID_TARGETS) in file 'src/config')
+	TARGET=unix
 endif
 
 ifeq ($(TARGET), apple2)
@@ -30,6 +30,9 @@ EXOMIZER_TARGET = 4032
 endif
 ifeq ($(TARGET), plus4)
 EXOMIZER_TARGET = 4
+endif
+ifeq ($(TARGET), sim6502)
+NO_EXOMIZER = 1
 endif
 ifeq ($(TARGET), telestrat)
 EXOMIZER_TARGET = 1

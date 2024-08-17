@@ -101,7 +101,7 @@ void FASTCALL
 pushgc (lispptr x)
 {
     CHKPTR(x);
-    STACK_CHECK_OVERFLOW();
+    GCSTACK_CHECK_OVERFLOW();
     stack -= sizeof (lispptr);
     *(lispptr *) stack = x;
 }
@@ -109,7 +109,7 @@ pushgc (lispptr x)
 lispptr
 popgc ()
 {
-    STACK_CHECK_UNDERFLOW();
+    GCSTACK_CHECK_UNDERFLOW();
     tmp2 = *(lispptr *) stack;
     CHKPTR(tmp2);
     stack += sizeof (lispptr);

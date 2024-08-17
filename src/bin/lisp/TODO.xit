@@ -1,12 +1,16 @@
 General
-[ ] Make it fun writing the bytecode compiler with it.
+[@] Make it fun writing the bytecode compiler with it.
 
 Interpreter
 [ ] eval0() and related don't have to return a value.
     Save code size by removing it.
+[ ] Stack overflow checks once in a while.  They are around
+    for every push and pop, but that is far too much for
+    small machines.  There should be a bit of head space for
+    each check, and done perhaps once per eval - beware of
+    long argument lists though.
 
 Debugger
-[ ] Replace expression while stepping.
 [ ] Conditional breakppoints.
 [ ] Watchpoints.
 [ ] Conditional watchpoints.
@@ -14,6 +18,8 @@ Debugger
 [ ] Invoking debugger with RESTORE key on CBMs.
 
 Input/Output
+[ ] Char-oriented console I/O to, for example, implement a
+    simple text editor.
 [ ] OPENDIR, READDIR, CLOSEDIR.
 
 Built-ins

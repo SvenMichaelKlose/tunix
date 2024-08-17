@@ -3,6 +3,27 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-17b
+
+Am getting sleep lately.  I spare you the boring details
+about neighbours on too much of about everything.
+
+v0.0.2 was a hit on the nose.  Had to re-publish because the
+tests didn't test.  Guess I'll never really read a Unix
+shell manual.  Earliest if my place got renovated.  There's
+reason to do that now as it looks like one can finally live
+here.
+
+Releasing quite stable stuff on Github is making me feel a
+lot better too;  feeling good enough about figuring out
+where to ge a new job that's as much fun.
+
+However: I'll waste the Sunday tomorrow on writing that
+simple text editor as the first "app".  (Oh dude, do I
+**hate** marketing slang.)  That'll get me to improve the
+REPL with reason, triggered by utter frustration, because
+life is short.
+
 # 2024-08-17
 
 Took it to release v0.0.2 with the debugger being much more

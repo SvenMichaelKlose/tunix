@@ -133,10 +133,11 @@ result of that evaluation is output.  Then it starts over,
 prompting you for the next expression.
 
 REPLs can be nested, e.g. when an error occured, a new REPL
-is launched in debug mode.  With that you can examine the
-environment, execute code step by step and present a
-correct alternative for a faulty expression.
+is launched in debug mode, or "debugger" for short.  With that you can examine the
+environment, execute code step by step to observe changes,
+and temporarily replace faulty expressions.
 
+**TODO: Rewrite this**
 Any REPL, no matter its mode, can be terminated using the
 built-in QUIT function, which takes a return value for the
 REPL as its argument.  It may become the return value of

@@ -574,12 +574,12 @@ extern bool do_gc_stress;
 #ifdef GCSTACK_OVERFLOW_CHECKS
     #define GCSTACK_CHECK_OVERFLOW() _GCSTACK_CHECK_OVERFLOW()
 #else
-    #define STACK_CHECK_OVERFLOW()
+    #define GCSTACK_CHECK_OVERFLOW()
 #endif
 #ifdef GCSTACK_UNDERFLOW_CHECKS
     #define GCSTACK_CHECK_UNDERFLOW() _GCSTACK_CHECK_UNDERFLOW()
 #else
-    #define STACK_CHECK_UNDERFLOW()
+    #define GCSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef TAGSTACK_OVERFLOW_CHECKS
@@ -603,13 +603,13 @@ extern bool do_gc_stress;
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \
-            STACK_CHECK_OVERFLOW(); \
+            GCSTACK_CHECK_OVERFLOW(); \
             stack -= sizeof (lispptr); \
             *(lispptr *) stack = x; \
         } while (0)
     #define POP(x) \
         do { \
-            STACK_CHECK_UNDERFLOW(); \
+            GCSTACK_CHECK_UNDERFLOW(); \
             x = *(lispptr *) stack; \
             stack += sizeof (lispptr); \
         } while (0)

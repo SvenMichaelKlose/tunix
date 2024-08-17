@@ -13,6 +13,15 @@
 #include <lisp/liblisp.h>
 
 #ifdef __CC65__
+#pragma bss-name (push, "ZEROPAGE")
+#endif
+lispptr tmp_pop;
+#ifdef __CC65__
+#pragma zpsym ("tmp_pop")
+#pragma bss-name (pop)
+#endif
+
+#ifdef __CC65__
 #pragma code-name ("CODE_SLOW")
 #endif
 
@@ -110,10 +119,10 @@ lispptr
 popgc ()
 {
     GCSTACK_CHECK_UNDERFLOW();
-    tmp2 = *(lispptr *) stack;
-    CHKPTR(tmp2);
+    tmp_pop = *(lispptr *) stack;
+    CHKPTR(tmp_pop);
     stack += sizeof (lispptr);
-    return tmp2;
+    return tmp_pop;
 }
 
 void FASTCALL
@@ -142,7 +151,7 @@ lispptr
 poptagw ()
 {
     TAGSTACK_CHECK_UNDERFLOW();
-    tmp2 = *(lispptr *) tagstack;
+    tmp_pop = *(lispptr *) tagstack;
     tagstack += sizeof (lispptr);
-    return tmp2;
+    return tmp_pop;
 }

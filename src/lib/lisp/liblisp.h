@@ -394,6 +394,7 @@ typedef struct _image_header {
 
 // ILOAD restart.
 extern jmp_buf   restart_point;
+extern jmp_buf * hard_repl_break;
 
 extern lispptr * global_pointers[];
 
@@ -759,13 +760,11 @@ extern bool do_gc_stress;
 #define ERROR_OUT_OF_HEAP   7
 #define ERROR_NO_PAREN      8
 #define ERROR_STALE_PAREN   9
-#define ERROR_CHANNEL       10
-#define ERROR_FILE          11
-#define ERROR_FILEMODE      12
-#define ERROR_USER          13
+#define ERROR_FILEMODE      10
+#define ERROR_USER          11
 
 // Returned to OS on exit after internal error.
-#define ERROR_INTERNAL      14
+#define ERROR_INTERNAL      12
 
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)

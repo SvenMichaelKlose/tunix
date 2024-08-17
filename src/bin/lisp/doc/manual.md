@@ -461,13 +461,12 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.            |
 | NOT\_FUNCTION   | 5    | Object is not a function.      |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
-| OUT\_OF\_HEAP   | 7    | Out of heap.  Cannot catch.    |
+| OUT\_OF\_HEAP   | 7    | Out of heap.                   |
 | NO\_PAREN       | 8    | ')' missing.                   |
 | STALE\_PAREN    | 9    | Unexpected ')'.                |
-| FILE            | 10   | File error code in (ERR).      |
-| FILEMODE        | 11   | Illegal mode for OPEN.         |
-| USER            | 12   | ERROR function was called.     |
-| INTERNAL        | 14   | Returned to operating system.  |
+| FILEMODE        | 10   | Illegal mode for OPEN.         |
+| USER            | 11   | ERROR function was called.     |
+| INTERNAL        | 12   | Returned to operating system.  |
 
 # Built-in functions
 

@@ -20,6 +20,9 @@
 #ifndef NO_ONERROR
 lispptr onerror_sym;
 #endif
+#ifndef NAIVE
+jmp_buf * hard_repl_break;
+#endif
 #ifndef NO_MACROEXPAND
 lispptr macroexpand_sym;
 bool    is_macroexpansion;  // TODO: Remove.
@@ -151,6 +154,15 @@ lisp_repl (char mode)
 #endif
     simpleio_chn_t this_in;
     simpleio_chn_t this_out;
+#ifndef NAIVE
+    // Save parent REPLs return point for hard errors.
+    jmp_buf * old_break = hard_repl_break;
+
+    // Our return point and stack pointers for hard errors.
+    jmp_buf   this_break;
+    char *    saved_stack;
+    char *    saved_tagstack;
+#endif
 
     // Ensure terminal I/O in user- and debug-mode.
     if (mode != REPL_LOAD)
@@ -376,8 +388,34 @@ terpri_next:
             set_channels (app_in, app_out);
 #endif
 
-        // Evaluate expression.
-        x = eval ();
+#ifndef NAIVE
+        if (!setjmp (this_break)) {
+            // Save return point for hard errors, like out
+            // of heap or internal errors.
+            hard_repl_break = &this_break;
+
+            // Save GC and tag stack pointers.
+            saved_stack     = stack;
+            saved_tagstack  = tagstack;
+#endif
+            // Evaluate expression.
+            x = eval ();
+#ifndef NAIVE
+            hard_repl_break = old_break;
+        } else {
+            // Return from hard errror.
+            outs ("!debug me!");
+
+            // Restore GC and tag stack pointers.
+            stack           = saved_stack;
+            tagstack        = saved_tagstack;
+
+            // Restore parent REPLs return point.
+            hard_repl_break = old_break;
+            x = nil;
+            gc ();
+        }
+#endif
 
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {

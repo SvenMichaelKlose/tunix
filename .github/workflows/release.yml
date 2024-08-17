@@ -32,8 +32,8 @@ jobs:
     - name: Create config file
       run: echo -e "TARGET=vic20" > src/config
 
-    - name: Build project
-      run: make allworlds NDEBUG=1 VERBOSE_LOAD=1 TEST=1
+    - name: Build host tools
+      run: make host
 
     - name: Run tests
       run: make test

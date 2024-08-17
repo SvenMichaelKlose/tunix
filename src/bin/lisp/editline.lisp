@@ -2,12 +2,16 @@
 (or (cons? subseq)
     (load "subseq.lisp"))
 
-(fn clrscr ()
-  (out 1))
-(fn con-col0 ()
-  (out 1))
+(var *con-width* 22)
+
+(fn con-cr ()
+  (out 13)   ; CR+LF
+  (out 145)) ; UP
+
 (fn con-clr2eol ()
-  (out 1))
+  (dotimes ((- *con-width* cx))
+    (out ' ')))
+
 (fn con-xy (x y)
   (out 1)
   (out 1))
@@ -15,8 +19,9 @@
 (var cx 0)
 
 (fn display-line (line)
-  (con-col0)
-  (@ 'out (subseq line 0 *con-width*))
+  (con-cr)
+  (@ out (subseq line 0 *con-width*))
+  (= cx (length line))
   (con-clr2eol))
 
 (fn editline (x)
@@ -26,21 +31,22 @@
       (with ((len (length line))
              (c   (conin)))
         (case c
-          +con-left+
-            (? (< 0 x)
-               (= x (-- x)))
-          +con-right+
-            (? (< x len)
-               (= x (++ x)))
-          +con-del+
-            (? (< 0 x)
-              (= line (append (subseq line 0 (-- x))
-                              (subseq line x))))
-          +con-enter+
-            (list nil (return (symbol line)))
-          (con-ctrl? c)
-            (list c (return (symbol line)))
+          +arr-left+
+            (? (< 0 cx)
+               (= cx (-- cx)))
+          +arr-right+
+            (? (< cx len)
+               (= cx (++ cx)))
+          +del+
+            (? (< 0 cx)
+              (= line (append (subseq line 0 (-- cx))
+                              (subseq line cx))))
+          (< c \ )
+            (progn
+              (or (== c +enter+)
+                  (conputback))
+              (return (symbol line)))
           t
-            (= line (append (subseq line 0 x)
+            (= line (append (subseq line 0 cx)
                             (list c)
-                            (subseq line (++ x)))))))))
+                            (subseq line (++ cx)))))))))

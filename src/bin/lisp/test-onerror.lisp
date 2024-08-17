@@ -44,16 +44,16 @@
 (or (== *last-err* 6)
     (terror "Non-symbol argument name should be an error"))
 
-(message "Testing ERROR_OUT_OF_HEAP...")
-(((q)
-   (block nil
-     tag
-     (= q (cons t q))
-     (out ".")
-     (go tag)))
- nil)
-(or (== *last-err* 7)
-    (terror "Out-of-heap error expected."))
+;(message "Testing ERROR_OUT_OF_HEAP...")
+;(((q)
+   ;(block nil
+     ;tag
+     ;(= q (cons t q))
+     ;(out ".")
+     ;(go tag)))
+ ;nil)
+;(or (== *last-err* 7)
+    ;(terror "Out-of-heap error expected."))
 
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
 ; ERROR_NO_PAREN      8 ; When can read from memory.

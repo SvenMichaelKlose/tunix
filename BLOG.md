@@ -3,6 +3,19 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-17
+
+Took it to release v0.0.2 with the debugger being much more
+intuitive to use.
+
+Tomorrow I'll be turning that sketch of a line editor I just
+flushed out of my mind into reality for the Commodore home
+computer consoles.  It won't take too long to add multiple
+lines.  Et voilá: there'll be an editor.
+
+And here comes the next idea to make space: movable and
+resizeable stacks.
+
 # 2024-08-16
 
 Release v0.0.1 is out!  TUNIX Lisp is stable and fast enough

@@ -39,6 +39,8 @@ and this project adheres to
 - REPL handles READ errors.
 - Expects end of dotted pair.
 - cc65: Smaller initializing parts for more heap.
+- COPY-LIST, REMOVE, and BUTLAST do not support dotted
+  pairs any more.
 
 #### Environment
 

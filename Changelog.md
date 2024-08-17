@@ -48,6 +48,7 @@ and this project adheres to
 
 - +V+ contains the Git tag.  It's printed when loading the
   environment.
+- AWHEN assigns result of condition to local !.
 
 ### libsimpleio
 

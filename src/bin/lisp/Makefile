@@ -2,15 +2,11 @@
 include ../../mk/Makefile.targets
 
 PROGRAM = lisp
-SOURCES = builtins.c main.c
+SOURCES = builtins.c main.c test.c
 LIBRARIES = \
     $(TUNIX_LIB)/lisp/liblisp.a \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
 CLEANFILES = image test.out doc/manual.pdf git-version.lisp
-
-ifdef TEST
-SOURCES += test.c
-endif
 
 ifeq ($(TARGET), cpm)
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a

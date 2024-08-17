@@ -9,7 +9,14 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+<<<<<<< HEAD
 ## [current]
+
+### libsimpleio
+
+### Fixed
+
+- Building with clang.  Courtesy of pulluks.  Thanks!
 
 ### TUNIX Lisp
 

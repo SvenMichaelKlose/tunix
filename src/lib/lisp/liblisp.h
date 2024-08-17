@@ -388,7 +388,7 @@ struct heap_fragment {
 };
 
 typedef struct _image_header {
-    char git_version[8];
+    char git_version[16];
     lispptr heap_start;
 } image_header;
 
@@ -594,12 +594,12 @@ extern bool do_gc_stress;
 #endif
 
 #ifdef SLOW
-    #define PUSH(x)          pushgc (x)
-    #define POP(x)           do { x = popgc (); } while (0)
-    #define PUSH_TAG(x)      pushtag (x)
-    #define POP_TAG(x)       do { x = poptag (); } while (0)
-    #define PUSH_TAGW(x)     pushtagw (x)
-    #define POP_TAGW(x)      do { x = poptagw (); } while (0)
+    #define PUSH(x)      pushgc (x)
+    #define POP(x)       do { x = popgc (); } while (0)
+    #define PUSH_TAG(x)  pushtag (x)
+    #define POP_TAG(x)   do { x = poptag (); } while (0)
+    #define PUSH_TAGW(x) pushtagw (x)
+    #define POP_TAGW(x)  do { x = poptagw (); } while (0)
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \

@@ -140,6 +140,8 @@ check_lispptr (char * x)
     // Check if object is within heap.
     if (x < heap_start)
         internal_error_ptr (x, "Pointer below heap.");
+    if (x >= heap_free)
+        internal_error_ptr (x, "Pointer to free heap.");
     if (x >= heap_end)
         internal_error_ptr (x, "Pointer above heap.");
 

@@ -1,4 +1,5 @@
 (load "aif.lisp")
+(load "awhen.lisp")
 (load "member-if.lisp")
 (load "find.lisp")
 (load "find-if.lisp")

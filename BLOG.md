@@ -14,7 +14,9 @@ computer consoles.  It won't take too long to add multiple
 lines.  Et voilá: there'll be an editor.
 
 And here comes the next idea to make space: movable and
-resizeable stacks.
+resizeable stacks to adjust for more heap.  But speed is
+also an issue - probably a pain up main street for line
+editing even.
 
 # 2024-08-16
 

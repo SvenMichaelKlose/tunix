@@ -5,7 +5,7 @@ DISTDIR = tunix/$(TARGET)/
 ULTIMEM_IMG = tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all: src/include/git-version.h src mkfs/mkfs.ultifs ultimem_image
+all: src/include/git-version.h host src mkfs/mkfs.ultifs ultimem_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
@@ -59,10 +59,11 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/vi $(DISTDIR)/
 endif
 
-allworlds: host
-	$(MAKE) clean world TARGET=c64
+allworlds:
+	$(MAKE) host
 	$(MAKE) clean world TARGET=c128
 	$(MAKE) clean world TARGET=c16
+	$(MAKE) clean world TARGET=c64
 	$(MAKE) clean world TARGET=pet
 	$(MAKE) clean world TARGET=plus4
 	$(MAKE) clean world TARGET=sim6502

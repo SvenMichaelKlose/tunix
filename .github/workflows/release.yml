@@ -15,11 +15,17 @@ jobs:
       with:
         submodules: true
 
+    - name: Get release version
+      id: get_release_version
+      run: |
+        echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
     - name: Set up Github environment
       id: setup_environment
       run: |
-        echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        echo "ZIP_NAME=tunix.lisp.cbm.${{ env.VERSION }}.zip" >> $GITHUB_ENV
+        SHORT_SHA=$(git rev-parse --short HEAD)
+        DATE=`date +"%Y-%m-%d"`
+        echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.$DATE.zip" >> $GITHUB_ENV
 
     - name: Install prerequisites
       run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
@@ -27,8 +33,8 @@ jobs:
     - name: Create config file
       run: echo -e "TARGET=vic20" > src/config
 
-    - name: Build project
-      run: make allworlds NDEBUG=1 VERBOSE_LOAD=1 TEST=1
+    - name: Build host tools
+      run: make host
 
     - name: Run tests
       run: make test
@@ -36,23 +42,8 @@ jobs:
     - name: Test compile-time configurations
       run: ./test-unix.sh
 
-    - name: Make PDF manual
-      id: make_pdf_manual
-      run: cd src/bin/lisp/doc && ./md2pdf.sh
-
-    - name: Copy PDF manual to root directory
-      id: copy_pdf_manual
-      run: cp src/bin/lisp/doc/manual.pdf tunix-lisp.pdf
-
-    - name: Copy Markdown manual to root directory
-      id: copy_markdown_manual
-      run: cp src/bin/lisp/doc/manual.md tunix-lisp.md
-
-    - name: Ensure output directory exists
-      run: mkdir -p $(dirname ${{ env.ZIP_NAME }})
-
     - name: Zip files
-      run: zip -o ${{ env.ZIP_NAME }} tunix-lisp.c128.d64 tunix-lisp.c16.d64 tunix-lisp.c64.d64 tunix-lisp.plus4.d64 tunix-lisp.vic20.d64 tunix-lisp.md tunix-lisp.pdf
+      run: ./make-bin-release.sh ${{ env.ZIP_NAME }}
 
     - name: Create release
       id: create_release
@@ -63,7 +54,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: TUNIX Lisp ${{ github.ref }}
         body: |
-          TUNIX Lisp D64 images for the Commodore C128, C16, C64, Plus/4, and VIC-20, and manual in Markdown and PDF format.
+          TUNIX Lisp for the Commodore C128, C16, C64, Plus/4, and VIC-20, Linux, and manual in Markdown and PDF format.
         draft: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
         prerelease: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
         release: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/master') }}

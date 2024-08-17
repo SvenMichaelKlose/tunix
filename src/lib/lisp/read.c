@@ -12,10 +12,8 @@
 
 #include "liblisp.h"
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (push, "OVL_COMMON")
-#endif
+#ifdef __CC65__
+#pragma code-name (push, "CODE_READ")
 #endif
 
 bool FASTCALL
@@ -25,44 +23,79 @@ our_isalpha (char c)
 }
 
 #ifndef NAIVE
-void
+
+lispptr
 missing_closing_paren (void)
 {
     error (ERROR_NO_PAREN, "No ')'");
+    return t;
 }
-#endif
+
+lispptr
+is_unexpected_eol (void)
+{
+    return eof () ? missing_closing_paren () : nil;
+}
+
+#endif // #ifndef NAIVE
 
 lispptr
 read_list (void)
 {
     cons * c;
-    cons * start = NULL;
-    cons * last = NULL;
+    cons * start = nil;
+    cons * last  = nil;
 
     while (1) {
         skip_spaces ();
+
 #ifndef NAIVE
-        if (eof ())
-            missing_closing_paren ();
+        if (is_unexpected_eol ())
+            return nil;
 #endif
+
+        // End of list.
         if (in () == ')')
             return start;
+
 #ifndef NAIVE
-        if (eof ())
-            missing_closing_paren ();
+        if (is_unexpected_eol ())
+            return nil;
 #endif
         putback ();
 
         PUSH(start);
         PUSH(last);
-        if (in () == '.')
-            c = read ();
-        else {
+
+        // Dotted pair?
+        if (in () == '.') {
+            // Read dotted pair's CDR.
+            c = read_expr ();
+
+#ifndef NAIVE
+            // Ensure end of list.
+            skip_spaces ();
+            if (in () != ')')
+                return missing_closing_paren ();
+
+            // Delay detecting end of list.
             putback ();
-            c = make_cons (read (), nil);
+#endif
+        } else {
+            // Read next element.
+            putback ();
+            c = make_cons (read_expr (), nil);
         }
+
         POP(last);
         POP(start);
+
+#ifndef NAIVE
+        if (error_code)
+            return nil;
+#endif
+
+        // Append element to last.
         if (last)
             last->cdr = c;
         else
@@ -113,7 +146,7 @@ read_string (void)
 lispptr FASTCALL
 read_quoted (lispptr which)
 {
-    return make_cons (which, make_cons (read (), nil));
+    return make_cons (which, make_cons (read_expr (), nil));
 }
 
 lispptr
@@ -126,7 +159,7 @@ read_unquoted (void)
 }
 
 lispptr
-read ()
+read_expr ()
 {
     skip_spaces ();
     in ();
@@ -165,9 +198,3 @@ read ()
         return read_number ();
     return read_symbol ();
 }
-
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
-#endif

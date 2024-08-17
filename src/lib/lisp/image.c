@@ -19,27 +19,31 @@
 image_header header;
 lispptr ** tmpo;
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (push, "OVL_COMMON")
-#endif
+#ifdef __CC65__
+#pragma code-name ("CODE_IMAGE")
 #endif
 
 bool FASTCALL
 image_save (char * pathname)
 {
-    simpleio_chn_t old_chout = fnout;
+    simpleio_chn_t old_out = fnout;
     simpleio_chn_t chout;
     size_t len;
 
     // Open image file for writing.
     chout = simpleio_open (pathname, 'w');
+
+    // Break if file couldn't be opened.
     if (!chout)
         return false;
+
+    // Switch to image file's channel for writing.
     setout (chout);
 
-    // Make and write header.
+    // Make header.
     memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version));
+
+    // Write header.
     outm ((char *) &header, sizeof (header));
 
 #ifdef FRAGMENTED_HEAP
@@ -48,6 +52,9 @@ image_save (char * pathname)
     do {
         switch_heap ();
 #endif
+
+        // Write heap start.
+        outm ((char *) &heap_start, sizeof (lispptr));
 
         // Write heap size.
         len = heap_free - heap_start;
@@ -63,8 +70,11 @@ image_save (char * pathname)
     for (tmpo = global_pointers; *tmpo; tmpo++)
         outm ((char *) *tmpo, sizeof (lispptr));
 
+    // Close image file.
     simpleio_close (chout);
-    setout (old_chout);
+
+    // Restore old output channel.
+    setout (old_out);
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap.
@@ -72,14 +82,17 @@ image_save (char * pathname)
     switch_heap ();
 #endif
 
+    // Signal success.
     return true;
 }
 
 bool FASTCALL
 image_load (char * pathname)
 {
+    simpleio_chn_t old_in = fnin;
     simpleio_chn_t chin;
     size_t len;
+    lispptr pos;
 
     chin = simpleio_open (pathname, 'r');
     if (!chin)
@@ -94,6 +107,7 @@ image_load (char * pathname)
     // used to save the image anyhow.
     if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version))) {
         simpleio_close (chin);
+        setin (old_in);
         return false;
     }
 
@@ -102,6 +116,13 @@ image_load (char * pathname)
     heap = heaps;
     do {
         switch_heap ();
+#endif
+
+        // Read heap address.
+        inm ((char *) &pos, sizeof (lispptr));
+#ifndef NAIVE
+        if (pos != heap_start)
+            internal_error_ptr (pos, "position. ");
 #endif
 
         // Read heap size.
@@ -125,6 +146,9 @@ image_load (char * pathname)
     // Close file.
     simpleio_close (chin);
 
+    // Restore old input channel.
+    setin (old_in);
+
     // Initialize stack pointers.
     stack    = stack_end;
     tagstack = tagstack_end;
@@ -135,14 +159,6 @@ image_load (char * pathname)
 #endif
     gc ();
 
-    // Ensure standard I/O channels.
-    set_channels (STDIN, STDOUT);
-
+    // Signal success.
     return true;
 }
-
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
-#endif

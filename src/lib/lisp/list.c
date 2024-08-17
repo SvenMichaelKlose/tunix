@@ -21,9 +21,11 @@
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
 #ifdef __CC65__
-#pragma zpsym ("list_start")
-#pragma zpsym ("list_last")
 #pragma bss-name (pop)
+#endif
+
+#ifdef __CC65__
+#pragma code-name ("CODE_LIST")
 #endif
 
 // Get number of list elements.
@@ -45,40 +47,65 @@ length (lispptr x)
     return lisp_len;
 }
 
+lispptr needle;
+
 lispptr FASTCALL
 copy_list (lispptr x, char mode, lispptr needle)
 {
     if (ATOM(x))
         return x;
-    if (mode == COPY_BUTLAST && !CDR(x))
+
+    tmp = CDR(x);
+#ifndef NAIVE
+    if (tmp && ATOM(tmp)) {
+        error_info = tmp;
+        goto cons_expected;
+    }
+#endif
+
+    if (mode == COPY_BUTLAST && NOT(tmp))
         return nil;
-    if (mode == COPY_REMOVE)
-        while (needle == CAR(x)) {
+
+    // Remove first elements if they match 'needle'.
+    if (mode == COPY_REMOVE) {
+        while (CONSP(x) && needle == CAR(x))
             x = CDR(x);
-            if (ATOM(x))
-                return x;
-        }
-    PUSH(x);
+    }
+
+    // Copy first element.
+    PUSH(x); // TODO: Explain why this is required. (smk)
     list_start = list_last = make_cons (CAR(x), nil);
     POP(x);
-    PUSH(list_start);
+
+    // Append rest of elements.
     DOLIST(x, CDR(x)) {
-        if (CONSP(x)) {
-            if (mode == COPY_BUTLAST && !CDR(x))
-                break;
-            if (mode != COPY_REMOVE || needle != CAR(x)) {
-                PUSH(list_last);
-                PUSH(x);
-                tmp = make_cons (CAR(x), nil);
-                POP(x);
-                POP(list_last);
-            }
-        } else
-            tmp = x;
+        if (mode == COPY_BUTLAST && NOT(CDR(x)))
+            goto end_butlast;
+
+        // Skip element to remove.
+        if (mode == COPY_REMOVE && needle == CAR(x))
+            continue;
+
+        // Copy element.
+        PUSH(x); // TODO: Explain why this is required. (smk)
+        tmp = make_cons (CAR(x), nil);
+        POP(x);
+
+        // Append to last.
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
-    POP(list_start);
+
+#ifndef NAIVE
+    if (x) {
+        error_info = x;
+cons_expected:
+        error (ERROR_TYPE, "not a cons");
+        return nil;
+    }
+#endif
+
+end_butlast:
     return list_start;
 }
 

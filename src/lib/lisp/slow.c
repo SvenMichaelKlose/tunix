@@ -12,6 +12,10 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+#ifdef __CC65__
+#pragma code-name ("CODE_SLOW")
+#endif
+
 lispptr FASTCALL
 lisp_car (lispptr x)
 {

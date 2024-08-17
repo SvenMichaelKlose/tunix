@@ -1,5 +1,4 @@
-// TODO: Tests compiled separately to run each one in
-// a defined state.
+#ifdef TEST
 
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
@@ -101,3 +100,5 @@ test ()
     o3 = make_symbol ("3", 1);
     test_triplet ("symbols", o1, sizeof (symbol) + 1, o2, sizeof (symbol) + 1, o3, sizeof (symbol) + 1);
 }
+
+#endif // #ifdef TEST

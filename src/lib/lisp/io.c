@@ -12,12 +12,7 @@
 #include <lisp/liblisp.h>
 
 #ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern lispptr arg1;
-#ifdef __CC65__
-#pragma zpsym ("arg1")
-#pragma bss-name (pop)
+#pragma code-name ("CODE_IO")
 #endif
 
 // Set input/output channels.

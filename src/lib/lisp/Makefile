@@ -15,3 +15,5 @@ SOURCES = \
 	read.c
 
 include ../../mk/Makefile.build
+
+CFLAGS += $(LISP_FLAGS)

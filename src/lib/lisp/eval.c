@@ -1,7 +1,4 @@
 #ifdef __CC65__
-#ifdef OVERLAY
-#pragma code-name ("OVL_EVAL")
-#endif
 #include <ingle/cc65-charmap.h>
 #endif
 
@@ -26,6 +23,11 @@ lispptr current_function;
 
 #ifndef NO_DEBUGGER
 lispptr breakpoints_sym;
+#endif
+
+#ifndef NAIVE
+char    error_code;
+lispptr error_info;
 #endif
 
 #ifdef __CC65__
@@ -60,48 +62,24 @@ lispptr go_tag;
 lispptr debug_step;
 bool    do_invoke_debugger;
 bool    tag_found;
-#ifndef NAIVE
-char    error_code;
-#endif
 uchar   typed_argdef;
 char *  builtin_argdef;
 uchar   num_args;
 bool    unevaluated;
 #ifdef __CC65__
 #pragma zpsym ("msg")
-#pragma zpsym ("x")
-#pragma zpsym ("args")
-#pragma zpsym ("unevaluated_arg1")
-#pragma zpsym ("arg1")
-#pragma zpsym ("arg2c")
-#pragma zpsym ("arg2")
-#pragma zpsym ("value")
-#pragma zpsym ("stack")
-#pragma zpsym ("stack_start")
-#pragma zpsym ("stack_old_arg_values")
 #pragma zpsym ("stack_entered")
-#pragma zpsym ("tagstack")
-#pragma zpsym ("tagstack_start")
-#pragma zpsym ("argdefs")
-#pragma zpsym ("value")
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
-#pragma zpsym ("delayed_eval")
-#pragma zpsym ("block_sym")
-#pragma zpsym ("return_sym")
-#pragma zpsym ("return_name")
-#pragma zpsym ("return_value")
-#pragma zpsym ("go_sym")
-#pragma zpsym ("go_tag")
 #pragma zpsym ("tag_found")
-#ifndef NAIVE
-#pragma zpsym ("error_code")
-#endif
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
-#pragma zpsym ("unevaluated")
 #pragma bss-name (pop)
+#endif
+
+#ifdef __CC65__
+#pragma code-name ("CODE_EVAL")
 #endif
 
 // Evaluate list to list of return values.
@@ -192,10 +170,6 @@ pop_argument_values (void)
     stack += sizeof (lispptr) * num_args;
 }
 
-#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
-char sp;
-#endif
-
 lispptr
 eval0 (void)
 {
@@ -205,14 +179,6 @@ eval0 (void)
 #endif
 
 do_eval:
-#if defined(__CC65__) && !defined(NO_CHECK_CPU_STACK)
-    // Check on CPU stack overflow.
-    asm ("tsx");
-    asm ("stx %v", sp);
-    if (sp > 0xf8)
-        internal_error_ptr ((void *) sp, "CPU stack");
-#endif
-
 #ifdef VERBOSE_EVAL
     // Print what's about to be evaluated.
     outs ("-> "); print (x); terpri ();
@@ -263,7 +229,7 @@ do_eval:
     if (arg1 == block_sym) {
 #ifndef NAIVE
         if (!CONSP(CDR(x))) {
-            error (ERROR_ARG_MISSING, "No name.");
+            error (ERROR_ARG_MISSING, "No name");
             goto do_return;
         }
 #endif
@@ -274,7 +240,8 @@ do_eval:
 
 #ifndef NAIVE
         if (!SYMBOLP(arg1)) {
-            error (ERROR_TYPE, "Name not a sym.");
+            error_info = arg1;
+            error (ERROR_TYPE, "Name not a sym");
             goto do_return;
         }
 #endif
@@ -291,7 +258,7 @@ block_statement:
         x = CDR(x);
 
         // Break on end of body.
-        if (!x)
+        if (NOT(x))
             goto do_return;
 
         // Save evaluator state.
@@ -324,7 +291,8 @@ next_block_statement:
                     goto block_statement;
 #ifndef NAIVE
             if (!tag_found) {
-                error (ERROR_TAG_MISSING, "Tag not found.");
+                error_info = go_tag;
+                error (ERROR_TAG_MISSING, "Tag not found");
                 goto do_return;
             }
 #endif
@@ -374,7 +342,8 @@ do_builtin_arg:
 #ifndef NAIVE
             // Complain if argument left.
             if (args) {
-                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin:");
+                error_info = args;
+                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
                 goto do_return;
             }
 #endif
@@ -402,15 +371,15 @@ set_arg_values:
             typed_argdef = *++builtin_argdef;
 
             // Set NIL if missing.
-            if (!args) {
+            if (NOT(args)) {
                 PUSH(nil);
                 goto set_arg_values;
             }
         }
 #ifndef NAIVE
         // Missing argument error.
-        else if (!args) {
-            error (ERROR_ARG_MISSING, "Missing arg to builtin.");
+        else if (NOT(args)) {
+            error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
 #endif
@@ -516,7 +485,7 @@ break_builtin_call:
 #ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        current_expr = arg1;
+        error_info = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
         goto do_return;
     }
@@ -541,26 +510,28 @@ break_builtin_call:
     // Evaluate argument.
 do_argument:
     // End of arguments.
-    if (!args && !argdefs)
+    if (NOT(args) && NOT(argdefs))
         goto start_body;
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && !argdefs) {
+    if (args && NOT(argdefs)) {
+        error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
-    } else if (!args && CONSP(argdefs)) {
-        error (ERROR_ARG_MISSING, "Arg missing");
+    } else if (NOT(args) && CONSP(argdefs)) {
+        error_info = argdefs;
+        error (ERROR_ARG_MISSING, "Missing args");
         goto start_body;
     }
 #endif
 
     // Rest of argument list. (consing)
     if (ATOM(argdefs)) {
-
 #ifndef NAIVE
         // Check if argument name is a symbol.
-        bi_tcheck (argdefs, 's', ERROR_ARGNAME_TYPE);
+        if (!SYMBOLP(argdefs))
+            error_argname (argdefs);
 #endif
 
         // Save old symbol value for restore_arguments.
@@ -606,7 +577,8 @@ do_argument:
     // Regular argument.
 #ifndef NAIVE
     // Check if name is a symbol.
-    bi_tcheck (CAR(argdefs), 's', ERROR_ARGNAME_TYPE);
+    if (!SYMBOLP(CAR(argdefs)))
+        error_argname (CAR(argdefs));
 #endif
 
     // Save argument value to restore after function call.
@@ -689,7 +661,7 @@ start_body:
 
 continue_body:
     // Evaluate body expression.
-    if (!x || do_break_repl)
+    if (NOT(x) || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
     PUSH_HIGHLIGHTED(x);
@@ -785,16 +757,20 @@ funcall ()
     return eval0 ();
 }
 
-#ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
 #endif
+
+extern lispptr needle;
 
 void
 init_eval ()
 {
-    // TODO: Clear zeropage instantly in a loop instead.
     go_tag = return_name = return_value = nil;
     args = argdefs = arg1 = arg2 = arg2c = x = value = va = nil;
+    needle = nil;
     return_sym   = make_symbol (NULL, 0);
     go_sym       = make_symbol (NULL, 0);
     delayed_eval = make_symbol (NULL, 0);
@@ -809,9 +785,6 @@ init_eval ()
     SET_SYMBOL_VALUE(breakpoints_sym, nil);
     do_invoke_debugger = false;
     debug_step = nil;
+    error_info = nil;
 #endif
 }
-
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif

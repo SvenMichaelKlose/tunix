@@ -1,5 +1,10 @@
-[ ] ISAVE and ILOAD during LOAD seems to spoil I/O channels.
+[ ] ISAVE spoils I/O channels in LOAD.
 [ ] ERROR: Handle argument.
+
+Debugger
+[ ] Stepping over NIL returns from function?
+[ ] IGNORE entered by user does not leave the debugger.
+[ ] Steps must be blocked until error is resolved.
 
 Commodore PET
 [ ] Program start breaks with syntax error.

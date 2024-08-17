@@ -12,18 +12,9 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-// Make objects for built-in procedures.
-void FASTCALL
-add_builtins (struct builtin * b)
-{
-    symbol * s;
-    for (; b->name; b++) {
-        s = make_symbol ((char *) b->name, strlen (b->name));
-        s->type = TYPE_BUILTIN;
-        s->value = b;
-        expand_universe (s);
-    }
-}
+#ifdef __CC65__
+#pragma code-name ("CODE_BUILTIN")
+#endif
 
 // Copy object name to 'buffer' and zero-terminate it.
 void FASTCALL
@@ -50,4 +41,23 @@ void FASTCALL
 make_car_call (void)
 {
     make_call (make_cons (CAR(arg2), nil));
+}
+
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
+#endif
+
+// Make objects for built-in procedures.
+void FASTCALL
+add_builtins (const struct builtin * b)
+{
+    symbol * s;
+    for (; b->name; b++) {
+        s = make_symbol ((char *) b->name, strlen (b->name));
+        s->type = TYPE_BUILTIN;
+        s->value = (void *) b;
+        expand_universe (s);
+    }
 }

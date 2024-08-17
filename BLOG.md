@@ -3,6 +3,59 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-17
+
+Took it to release v0.0.2 with the debugger being much more
+intuitive to use.
+
+Tomorrow I'll be turning that sketch of a line editor I just
+flushed out of my mind into reality for the Commodore home
+computer consoles.  It won't take too long to add multiple
+lines.  Et voilá: there'll be an editor.
+
+And here comes the next idea to make space: movable and
+resizeable stacks to adjust for more heap.  But speed is
+also an issue - probably a pain up main street for line
+editing even.
+
+# 2024-08-16
+
+Release v0.0.1 is out!  TUNIX Lisp is stable and fast enough
+to go for it.  There's no chance to get rid of BUGS.md
+before v1.0.0 any way.  And it's time to go public for
+feedback.
+
+The manual probably needs an introduction to Lisp as the
+majority of developers has no experience with it.  It's
+also great for beginners.  But then again the manual needs
+a proper introduction in the first place.
+
+For now the debugger needs some straightening out.
+
+# 2024-08-14
+
+TUNIX Lisp became more stable again but this is not going
+fast enough which unfortunately isn't my fault entirely.
+I'd prefer to be writing Lisp apps and to hack away on the
+Lisp compiler.
+
+An app that comes to mind this time is a spreadsheet to do
+very German protocols to get rid of yet another brain-dead
+speed head who's messing up the neighbourhood.  This is a
+bloody epidemic heading for its peak.
+
+For the VIC-20 with Ultimem expansion I was thinking of
+using the RAM123 area for banking to occupy as little
+address space as possible to leave it for the heap.  But
+the fast version of the evaluator is around 5.5K in size,
+so it won't fit in there.  setjmp() and longjmp() could be
+used to jump from one function to another instead of calling
+it, but that again is too much of a mess.  A graphics mode
+should also be possible. That's 29K for heap and stack only
+if I can manage to limit everything to an 8K range.  That
+also is far too messy.  Gonna have some sleep and wait for
+englightenment to hit.
+
 # 2024-08-13
 
 Added buggy support for saving and loading images.  And now

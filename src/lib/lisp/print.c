@@ -19,10 +19,8 @@
 bool do_highlight;
 lispptr highlighted;
 
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (push, "OVL_COMMON")
-#endif
+#ifdef __CC65__
+#pragma code-name (push, "CODE_PRINT")
 #endif
 
 void print0 (lispptr);
@@ -168,7 +166,7 @@ print0 (lispptr x)
 {
     uchar type;
 
-    if (!x) {
+    if (NOT(x)) {
         outs ("nil");
         return;
     }
@@ -201,10 +199,4 @@ dprint (lispptr x)
     terpri ();
     return x;
 }
-#endif
-
-#ifdef OVERLAY
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
 #endif

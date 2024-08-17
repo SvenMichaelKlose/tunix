@@ -70,43 +70,56 @@ simpleio_open (char * name, char mode)
 {
     last_error = 0;
     chn = alloc_channel ();
-    if (chn) {
-        ofs = 0;
-        if (mode == 'w')
-            ofs = 2;
+    if (!chn)
+        goto error;
+
+    ofs = 2;
+    if (mode == 'w')
+        ofs = 3;
 #ifndef NDEBUG
-        else if (mode != 'r')
-            return 0;
+    // Must be checked by caller already.
+    else if (mode != 'r')
+        goto error;
 #endif
 
-        silen = strlen (name);
+    silen = strlen (name);
 
-        // Move name and reverse case.
-        for (i = silen; i != 255; i--)
-            name[i + ofs] = reverse_case (name[i]);
+    // Move name and reverse case.
+    for (i = silen; i != 255; i--)
+        name[i + ofs] = reverse_case (name[i]);
 
-        if (mode == 'w') {
-            name[0] = '@';
-            name[1] = ':';
-            strcpy (name + silen + ofs, ",S,W");
-        }
+    if (mode == 'w') {
+        name[0] = '@';
+        name[1] = '0';
+        name[2] = ':';
+        strcpy (name + silen + ofs, ",S,W");
+    } else {
+        name[0] = '0';
+        name[1] = ':';
+        strcpy (name + silen + ofs, ",S,R");
+    }
 
-        // Open file.
-        if (cbm_open (chn, 8, chn, name))
-            return 0;
+    // Open file.
+    if (cbm_open (chn, 8, chn, name))
+        goto error;
 
-        // Read and check DOS status code.
-        cbm_open (15, 8, 15, NULL);
-        cbm_k_chkin (15);
-        ctrh = cbm_k_basin ();
-        ctrl = cbm_k_basin ();
-        cbm_close (15);
-        cbm_k_chkin (fnin);
-        if (ctrl != '0' && ctrh != '0')
-            return 0;
+    // Read and check DOS status code.
+    cbm_open (15, 8, 15, "");
+    cbm_k_chkin (15);
+    ctrh = cbm_k_basin ();
+    ctrl = cbm_k_basin ();
+    cbm_close (15);
+    cbm_k_chkin (fnin);
+    if (ctrl != '0' || ctrh != '0') {
+        last_error = ((ctrh - '0') << 4) + (ctrl - '0');
+        return 0;
     }
 
     return chn;
+
+error:
+    last_error = -1;
+    return 0;
 }
 
 bool
@@ -157,9 +170,8 @@ raw_setout (simpleio_chn_t chn)
 void FASTCALL
 raw_close (simpleio_chn_t chn)
 {
-    cbm_k_clrch ();
     cbm_k_close (channels[chn]);
-    channels[chn] = false;
+    channels[chn] = 0;
 }
 
 simpleio vectors = {

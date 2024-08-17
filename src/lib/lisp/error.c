@@ -1,5 +1,7 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
 #endif
 
 #include <limits.h>
@@ -18,6 +20,10 @@
 
 char * last_errstr;
 
+#ifdef __CC65__
+#pragma code-name ("CODE_ERROR")
+#endif
+
 // Issue error, with code and message.
 // Causes call of ONERROR handler or debugger.
 void FASTCALL
@@ -25,6 +31,13 @@ error (char code, char * msg)
 {
     last_errstr = msg;
     error_code = code;
+}
+
+void FASTCALL
+error_argname (lispptr x)
+{
+    error_info = x;
+    error (ERROR_ARGNAME_TYPE, "Arg not a symbol");
 }
 
 // Print internal error message and exit.
@@ -105,7 +118,7 @@ err_type (char * type, lispptr x, char code)
     char * p;
     p = stpcpy (buffer, "got ");
     p = stpcpy (p, typename (x));
-    p = stpcpy (p, " instead of ");
+    p = stpcpy (p, ", not ");
     strcpy (p, type);
     error (code, buffer);
 }
@@ -164,18 +177,14 @@ check_stacks (char * old_stack, char * old_tagstack)
 }
 
 #ifndef NO_ONERROR
-#ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
-#endif
+
 void
 init_onerror ()
 {
     onerror_sym = make_symbol ("onerror", 7);
     expand_universe (onerror_sym);
 }
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif
+
 #endif // #ifndef NO_ONERROR
 
 #endif // #ifndef NAIVE

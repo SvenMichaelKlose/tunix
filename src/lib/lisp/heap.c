@@ -27,6 +27,7 @@
 // Heap memory areas  Must be consecutive!
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment heaps[] = {
+    // Regular heap.
     { NULL, NULL, NULL },
 
     // Commodore VIC-20, BLK5
@@ -34,7 +35,10 @@ struct heap_fragment heaps[] = {
     { (void *) 0xa000, (void *) 0xa000, (void *) 0xc000 },
 #endif
 
-    { NULL, NULL, NULL }  // End of heap list.
+    { NULL, NULL, NULL },
+
+    // End of heap marker.
+    { NULL, NULL, NULL }
 };
 #endif // #ifdef FRAGMENTED_HEAP
 
@@ -62,26 +66,9 @@ char *   h;
 char     type;
 symbol * sym;
 #ifdef __CC65__
-#pragma zpsym ("lisp_len")
-#pragma zpsym ("tmp")
-#pragma zpsym ("tmp2")
-#pragma zpsym ("tmpc")
-#pragma zpsym ("tmpstr")
-#pragma zpsym ("heap_free");
-#pragma zpsym ("heap_end");
 #pragma zpsym ("h");
-#pragma zpsym ("tmpstr");
 #pragma zpsym ("type");
 #pragma zpsym ("sym");
-#pragma bss-name (pop)
-#endif
-
-#ifdef __CC65__
-#pragma bss-name (push, "ZEROPAGE")
-#endif
-extern char do_putback;
-#ifdef __CC65__
-#pragma zpsym ("do_putback")
 #pragma bss-name (pop)
 #endif
 
@@ -91,6 +78,10 @@ uchar   lisp_sizes[TYPE_EXTENDED * 2];
 
 #ifdef GC_STRESS
 bool    do_gc_stress;
+#endif
+
+#ifdef __CC65__
+#pragma code-name ("CODE_HEAP")
 #endif
 
 // Add object to root list of garbage collector.
@@ -149,6 +140,8 @@ check_lispptr (char * x)
     // Check if object is within heap.
     if (x < heap_start)
         internal_error_ptr (x, "Pointer below heap.");
+    if (x >= heap_free)
+        internal_error_ptr (x, "Pointer to free heap.");
     if (x >= heap_end)
         internal_error_ptr (x, "Pointer above heap.");
 
@@ -355,8 +348,33 @@ heap_free_size ()
 #endif
 }
 
-#ifdef TARGET_VIC20
-#pragma code-name (push, "LISPSTART")
+#ifdef WAS_TARGET_VIC20
+
+extern char * _CODE_INIT_RUN__;
+extern size_t _CODE_INIT_SIZE__;
+extern size_t _RODATA_INIT_SIZE__;
+
+#pragma code-name ("CODE")
+
+void
+heap_add_init_areas (void)
+{
+    *_CODE_INIT_RUN__ = 0; // End-of-heap marker.
+    switch_heap ();
+    memcpy (&heaps[2], &heaps[1], sizeof (struct heap_fragment));
+    memcpy (&heaps[1], &heaps[0], sizeof (struct heap_fragment));
+    heap[0].start = heap[0].free = _CODE_INIT_RUN__;
+    heap[0].end = _CODE_INIT_RUN__ + _CODE_INIT_SIZE__;
+    heap_free = heap_end;
+    heap = &heaps[3];
+}
+
+#endif // #ifdef TARGET_VIC20
+
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
 #endif
 
 bool
@@ -425,8 +443,8 @@ init_heap ()
     for (heap = heaps; heap->start; heap++)
         *(heap->free) = 0;
 
-    // Cause gc() before first allocation to switch to
-    // the first heap.
+    // Trigger gc() with first allocation start with the
+    // first heap.
     heap_free = heap_end;
     heap = heaps;
 #else
@@ -443,16 +461,17 @@ init_heap ()
     do_compress_cons = false;
 #endif
 
-    // Make universe.
+    // Make *UNIVERSE*.
     last_symbol = nil;
     universe = make_symbol ("*universe*", 10);
     first_symbol = universe;
-    t = make_symbol ("t", 1);
-    SET_SYMBOL_VALUE(universe, make_cons (t, nil));
 
-    // Make +target+.
+    // Be true.
+    t = make_symbol ("t", 1);
+
+    // Make +TARGET+.
     tmp2 = make_symbol ("+target+", 8);
-    expand_universe (tmp2);
+    SET_SYMBOL_VALUE(universe, make_cons (tmp2, nil));
 #ifdef TARGET_C128
     SET_SYMBOL_VALUE(tmp2, make_symbol ("c128", 4));
 #endif
@@ -475,10 +494,6 @@ init_heap ()
     SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
 #endif
 
-    // Init input.
-    // TODO: Move (pixel)
-    do_putback = false;
-
     // Clear error info.
 #ifndef NAIVE
 #ifndef NDEBUG
@@ -495,7 +510,3 @@ init_heap ()
 
     return true;
 }
-
-#ifdef TARGET_VIC20
-#pragma code-name (pop)
-#endif

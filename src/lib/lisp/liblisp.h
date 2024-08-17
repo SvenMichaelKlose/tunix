@@ -6,6 +6,7 @@
 //// Inteded to be set via file 'src/config' or command-line.
 
 /// Diagnostics
+/// NOTE: Current output channel is used!
 
 // Add dump_lispptr().
 //#define DUMP_LISPPTR
@@ -16,11 +17,20 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Print 'C' for each compressed cons.
+//#define COMPRESSED_CONS
+
+// Print names to built-in special forms FN and VAR.
+//#define VERBOSE_DEFINES
+
 // Print expressions before evaluation.
 //#define VERBOSE_EVAL
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
+
+// Print LOADed pathnames before evaluation.
+//#define VERBOSE_LOAD
 
 
 /// Testing and debugging
@@ -45,8 +55,10 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-//#define GCSTACK_CHECKS
-//#define TAGSTACK_CHECKS
+//#define GCSTACK_OVERFLOWCHECKS
+//#define GCSTACK_UNDERFLOWCHECKS
+//#define TAGSTACK_OVERFLOWCHECKS
+//#define TAGSTACK_UNDERFLOWCHECKS
 
 
 /// Release
@@ -59,9 +71,6 @@
 
 
 /// Disabling features
-
-// Do not check on CPU stack overflow.
-//#define NO_CHECK_CPU_STACK
 
 // No support for saving and loading images.
 //#define NO_IMAGES
@@ -79,6 +88,9 @@
 
 /// Additional features
 
+// Compressed conses.
+//#define COMPRESSED_CONS
+
 // Multiple heaps.
 //#define FRAGMENTED_HEAP
 
@@ -93,8 +105,7 @@
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
-// Print LOADed pathnames before evaluation.
-//#define VERBOSE_LOAD
+// NOTE: Prints to current output channel!
 
 
 /// Memory allocation
@@ -177,7 +188,9 @@
 
 // Commodore PET
 #ifdef TARGET_PET
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -202,9 +215,24 @@
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
+// cc65's sim6502
+#ifdef TARGET_SIM6502
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400
@@ -219,7 +247,9 @@
 
 // Unixoids
 #ifdef TARGET_UNIX
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -253,9 +283,6 @@
 #endif
 
 #ifdef NAIVE
-    #ifndef NO_CHECK_CPU_STACK
-        #define NO_CHECK_CPU_STACK
-    #endif
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
     #endif
@@ -268,17 +295,11 @@
     #ifdef PARANOID
         #error "NAIVE and PARANOID don't get along."
     #endif
-#else // #ifdef NAIVE
-    #define GCSTACK_CHECKS
-    #define TAGSTACK_CHECKS
 #endif // #ifdef NAIVE
 
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
-    #ifndef NDEBUG
-        #pragma check-stack (on)
-    #endif
 #else
     #define FASTCALL
     #define HOST_DEBUGGER() raise (SIGTRAP);
@@ -360,8 +381,6 @@ struct builtin {
     builtin_fun  func;
 };
 
-extern struct builtin builtins[];
-
 struct heap_fragment {
     char * start;
     char * free;
@@ -370,6 +389,7 @@ struct heap_fragment {
 
 typedef struct _image_header {
     char git_version[8];
+    lispptr heap_start;
 } image_header;
 
 // ILOAD restart.
@@ -399,6 +419,11 @@ extern lispptr highlighted;
 extern lispptr onerror_sym;
 extern lispptr breakpoints_sym;
 
+#ifndef NAIVE
+extern char    error_code;
+extern lispptr error_info;
+#endif
+
 extern lispptr t;
 extern lispptr quote;
 extern lispptr quasiquote;
@@ -422,6 +447,11 @@ extern xlat_item * xlat_end;
 
 extern lispptr  lisp_fnin;
 extern lispptr  lisp_fnout;
+
+extern long bekloppies_start;
+#ifdef TARGET_UNIX
+extern long bekloppies (void);
+#endif
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
@@ -466,10 +496,6 @@ extern lispptr go_tag;
 
 extern lispptr delayed_eval;
 
-#ifndef NAIVE
-extern char    error_code;
-#endif
-
 #ifndef NO_DEBUGGER
 extern lispptr debug_step;
 extern lispptr debugger_return_value_sym;
@@ -495,9 +521,6 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("tagstack_start")
 #pragma zpsym ("tagstack")
 #pragma zpsym ("xlat_start")
-#ifndef NAIVE
-#pragma zpsym ("error_code")
-#endif
 #ifndef NO_DEBUGGER
 #pragma zpsym ("debug_step")
 #endif
@@ -523,45 +546,44 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma bss-name (pop)
 #endif
 
-#define nil ((lispptr) 0)
+#define nil     ((lispptr) 0)
+#ifdef __CC65__
+#define NOT(x)  !((size_t) x & 0xff00)
+#else
+#define NOT(x)  (!x)
+#endif
 
 #ifdef GC_STRESS
 extern bool do_gc_stress;
 #endif
 
-#ifdef GCSTACK_CHECKS
+#ifdef GCSTACK_OVERFLOW_CHECKS
     #define STACK_CHECK_OVERFLOW() \
             if (stack == stack_start) \
                 stack_overflow ()
-    #ifndef NDEBUG
-        #define STACK_CHECK_UNDERFLOW() \
-            if (stack == stack_end) \
-                stack_underflow ()
-    #endif
-#endif // #ifdef GCSTACK_CHECKS
-
-#ifndef STACK_CHECK_OVERFLOW
+#else
     #define STACK_CHECK_OVERFLOW()
 #endif
-#ifndef STACK_CHECK_UNDERFLOW
+#ifdef GCSTACK_UNDERFLOW_CHECKS
+    #define STACK_CHECK_UNDERFLOW() \
+        if (stack == stack_end) \
+            stack_underflow ()
+#else
     #define STACK_CHECK_UNDERFLOW()
 #endif
 
-#ifdef TAGSTACK_CHECKS
+#ifdef TAGSTACK_OVERFLOW_CHECKS
     #define TAGSTACK_CHECK_OVERFLOW() \
             if (tagstack == tagstack_start) \
                 tagstack_overflow ()
-    #ifndef NDEBUG
-        #define TAGSTACK_CHECK_UNDERFLOW() \
-                if (tagstack == tagstack_end) \
-                    tagstack_underflow ()
-    #endif
-#endif // #ifdef TAGSTACK_CHECKS
-
-#ifndef TAGSTACK_CHECK_OVERFLOW
+#else
     #define TAGSTACK_CHECK_OVERFLOW()
 #endif
-#ifndef TAGSTACK_CHECK_UNDERFLOW
+#ifdef TAGSTACK_OVERFLOW_CHECKS
+    #define TAGSTACK_CHECK_UNDERFLOW() \
+            if (tagstack == tagstack_end) \
+                tagstack_underflow ()
+#else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
 
@@ -635,7 +657,7 @@ extern bool do_gc_stress;
 #define TYPE(x)         (*((char *) (x))) // TODO: Rename.
 #define TYPEBITS(x)     (TYPE(x) & TYPE_MASK)
 
-#define MARKED(x)       (!(x) || TYPE(x) & TYPE_MARKED)
+#define MARKED(x)       (NOT(x) || TYPE(x) & TYPE_MARKED)
 #define MARK(x)         (TYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
 
@@ -647,20 +669,20 @@ extern bool do_gc_stress;
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
-#define _ATOM(x)        (!(x) || !(TYPE(x) & TYPE_CONS))
+#define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
 #define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
-#define _SYMBOLP(x)     (!(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
 #define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
 #define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
-#define _LISTP(x)       (!(x) || (TYPE(x) & TYPE_CONS))
+#define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
 #define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
 #define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
 #define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
 
-#define LIST_CAR(x)     (!(x) ? x : CAR(x))
-#define LIST_CDR(x)     (!(x) ? x : CDR(x))
+#define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
+#define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
 #ifdef NAIVE
@@ -756,7 +778,7 @@ extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
 extern lispptr  FASTCALL make_number     (lispnum_t);
 extern lispptr  FASTCALL alloc_symbol    (char *, uchar len);
 extern lispptr  FASTCALL make_symbol     (char *, uchar len);
-extern lispptr           read            (void);
+extern lispptr           read_expr       (void);
 extern lispptr           read_symbol     (void);
 extern lispptr           read_number     (void);
 extern lispptr  FASTCALL print           (lispptr);
@@ -782,12 +804,9 @@ extern lispptr  FASTCALL lisp_repl    (char mode);
 extern void     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
-extern bool              init_heap    (void);
-extern void              init_eval    (void);
-extern void              init_onerror (void);
-extern void              init_repl    (void);
-extern void     FASTCALL add_builtins (struct builtin *);
-extern lispptr           debugger     (void);
+
+extern void     FASTCALL add_builtins  (const struct builtin *);
+extern lispptr           debugger      (void);
 
 #define COPY_LIST       0
 #define COPY_BUTLAST    1
@@ -820,6 +839,7 @@ extern bool     FASTCALL lisp_specialp  (lispptr);
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
+extern void     FASTCALL error_argname       (lispptr);
 // TODO: Typedef for objects' type byte.
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);
@@ -851,4 +871,12 @@ extern void     FASTCALL make_car_call       (void);
 // Switch to 'heap'.
 extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
+
+extern void init_builtins (void);
+extern bool init_heap     (void);
+extern void init_eval     (void);
+extern void init_onerror  (void);
+extern void init_repl     (void);
+extern void heap_add_init_areas (void);
+
 #endif // #ifndef __LIBLISP_H__

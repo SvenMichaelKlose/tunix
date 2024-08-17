@@ -1,9 +1,9 @@
 General
 [ ] Make it fun writing the bytecode compiler with it.
-[ ] Save and load heap images.
 
 Interpreter
 [ ] eval0() and related don't have to return a value.
+    Save code size by removing it.
 
 Debugger
 [ ] Replace expression while stepping.
@@ -17,7 +17,10 @@ Input/Output
 [ ] OPENDIR, READDIR, CLOSEDIR.
 
 Built-ins
-[ ] SYSTEM (program invokation)
+[ ] SYSTEM (program invokation).
+
+Tests
+[ ] READ on syntax errors.
 
 Manual
 [ ] Add section on building, installing, and a description

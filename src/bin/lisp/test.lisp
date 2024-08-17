@@ -10,6 +10,11 @@
            (cons nil t))
     (error))
 
+(message "Testing SYMBOL-NAME...")
+(or (equal (symbol-name 'abc)
+           '(97 98 99))
+    (error))
+
 (= x 42)
 
 (message "Testing EQUAL...")
@@ -38,12 +43,38 @@
            (cons 1 2))
     (error "Dotted pair not read OK"))
 
+(message "Testing COPY-LIST...")
+(and (copy-list nil)
+     (error))
+(or (equal (copy-list '(a))
+           '(a))
+    (error))
+(or (equal (copy-list '(a b))
+           '(a b))
+    (error))
+(or (equal (copy-list '(a b c))
+           '(a b c))
+    (error))
+
 (message "Testing BUTLAST...")
 (and (butlast nil)
      (error))
 (and (butlast '(a))
      (error))
 (or (equal (butlast '(a b c))
+           '(a b))
+    (error))
+
+(message "Testing REMOVE...")
+(and (remove 'b nil)
+     (error))
+(or (equal (remove 'a '(a b c))
+           '(b c))
+    (error))
+(or (equal (remove 'b '(a b c))
+           '(a c))
+    (error))
+(or (equal (remove 'c '(a b c))
            '(a b))
     (error))
 
@@ -71,7 +102,7 @@
            '(a b c))
     (error))
 
-(message "Testing FN re-definition...")
+(message "Testing FN redefinition...")
 (fn doubledef ())
 (fn doubledef ())
 (and (member 'doubledef

@@ -13,12 +13,16 @@ and this project adheres to
 
 ### TUNIX Lisp
 
+#### General
+
+- Revived full stress tests.
+
 #### Debugger
 
 ##### Changed
 
-- Distinguish between error-fixing and stepping mode by
-  printing context-sensitive labels.
+- Make it more to the user if an error has to be fixed of if
+  one is stepping through.
 - Block continuing unless an alternative for an erroraneous
   expression has been provided.
 - Step to next expression if alternative value has been

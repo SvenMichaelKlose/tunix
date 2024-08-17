@@ -51,13 +51,17 @@ out_colon (void)
 void
 read_safe (void)
 {
+#ifndef NAIVE
     PUSH_TAG(error_code);
     error_code = 0;
+#endif
     x = nil;
     x = read ();
+#ifndef NAIVE
     if (error_code)
         x = lisp_repl (REPL_DEBUGGER);
     POP_TAG(error_code);
+#endif
 }
 
 #ifndef NO_DEBUGGER

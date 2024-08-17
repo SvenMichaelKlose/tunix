@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Changed
+
+- LOAD returns NIL on error, T otherwise.
+
+
 ## [v0.0.2] - 2024-08-17
 
 ### TUNIX Lisp

@@ -801,7 +801,7 @@ extern size_t            heap_free_size   (void);
 #define REPL_DEBUGGER   1
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
-extern void     FASTCALL load         (char * pathname);
+extern bool     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
 

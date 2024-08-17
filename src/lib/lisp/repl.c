@@ -473,9 +473,10 @@ do_return:
     return x;
 }
 
-void FASTCALL
+bool FASTCALL
 load (char * pathname)
 {
+    char status = false;
     simpleio_chn_t load_fn;
 
     // Memorize input channel.
@@ -484,12 +485,8 @@ load (char * pathname)
     // Open file.
     strcpy (buffer, pathname);
     load_fn = simpleio_open (buffer, 'r');
-    if (!load_fn) {
-        outs ("File error: ");
-        outs (pathname);
-        terpri ();
-        return;
-    }
+    if (!load_fn)
+        return false;
 
     // Switch input channel to file.
     arg1 = make_number (load_fn);
@@ -497,10 +494,8 @@ load (char * pathname)
 
 #ifndef NAIVE
     // Handle file error.
-    if (err ()) {
-        error (ERROR_FILE, pathname);
+    if (err ())
         goto err_open;
-    }
 #endif
 
     // Read file.
@@ -508,6 +503,7 @@ load (char * pathname)
 
     // Close file.
     simpleio_close (load_fn);
+    status = true;
 
 #ifndef NAIVE
 err_open:
@@ -515,6 +511,8 @@ err_open:
     // Restore former input channel.
     arg1 = make_number (oldin);
     bi_setin ();
+
+    return status;
 }
 
 #ifdef TARGET_VIC20

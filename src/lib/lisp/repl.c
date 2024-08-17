@@ -51,13 +51,17 @@ out_colon (void)
 void
 read_safe (void)
 {
+#ifndef NAIVE
     PUSH_TAG(error_code);
     error_code = 0;
+#endif
     x = nil;
-    x = read ();
+    x = read_expr ();
+#ifndef NAIVE
     if (error_code)
         x = lisp_repl (REPL_DEBUGGER);
     POP_TAG(error_code);
+#endif
 }
 
 #ifndef NO_DEBUGGER
@@ -176,9 +180,10 @@ lisp_repl (char mode)
             // Make argument list.
             x = make_cons (current_expr, nil);
             tmp2 = make_cons (current_toplevel, x);
+            PUSH(tmp2);
             x = make_number ((lispnum_t) error_code);
+            POP(tmp2);
             x = make_cons (x, tmp2);
-            tmp2 = nil;
             x = make_cons (onerror_sym, x);
 
             // Call ONERROR.

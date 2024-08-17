@@ -1,4 +1,7 @@
-include ../config
+-include ../config
+ifndef TARGET
+TARGET=unix
+endif
 include ../mk/Makefile.targets
 
 SUBDIRS = bdb simpleio simpleio-stdlib

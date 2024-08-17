@@ -3,14 +3,17 @@ CFLAGS      = -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
 LD		    = gcc
 NO_EXOMIZER = 1
 
-ifdef NDEBUG
-COPTFLAGS  += -Os
-else
-COPTFLAGS  += -O0 -g
-LDFLAGS    += -g
-endif
-
-ifdef GC_STRESS
-COPTFLAGS += -O3 -flto
-LDFLAGS   += -flto
+ifndef COPTFLAGS
+    ifdef GC_STRESS
+        COPTFLAGS += -O3 -flto
+        LDFLAGS   += -flto
+    else
+        ifdef NDEBUG
+            COPTFLAGS  += -Os -flto
+            LDFLAGS   += -flto
+        else
+            COPTFLAGS  += -O0 -g
+            LDFLAGS    += -g
+        endif
+    endif
 endif

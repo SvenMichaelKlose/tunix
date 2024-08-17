@@ -24,7 +24,8 @@ jobs:
       id: setup_environment
       run: |
         SHORT_SHA=$(git rev-parse --short HEAD)
-        echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.zip" >> $GITHUB_ENV
+        DATE=`date +"%Y-%m-%d"`
+        echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.$DATE.zip" >> $GITHUB_ENV
 
     - name: Install prerequisites
       run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
@@ -32,8 +33,8 @@ jobs:
     - name: Create config file
       run: echo -e "TARGET=vic20" > src/config
 
-    - name: Build project
-      run: make allworlds NDEBUG=1 VERBOSE_LOAD=1 TEST=1
+    - name: Build host tools
+      run: make host
 
     - name: Run tests
       run: make test

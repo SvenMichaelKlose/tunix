@@ -2,7 +2,7 @@
 
 set -e
 
-make allworlds LISP_FLAGS="-DNDEBUG"
+make allworlds NDEBUG=1
 cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 cp README.md tunix/
 cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf

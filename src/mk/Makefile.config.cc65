@@ -30,6 +30,9 @@ endif
 ifeq ($(TARGET), plus4)
 COPTFLAGS += -Os -Oi
 endif
+ifeq ($(TARGET), sim6502)
+COPTFLAGS += -Os -Oi
+endif
 ifeq ($(TARGET), vic20)
 COPTFLAGS += -Os -Oi
 endif

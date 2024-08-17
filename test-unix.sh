@@ -2,43 +2,32 @@
 
 set -e
 
-build_and_run () {
-    echo "#### Testing $@"
-#    make clean allworlds $@
-    make clean all TARGET=unix LOAD_ALL=1 $@
-    cd tunix/unix/ && (echo | ./lisp) ; cd -
+PARANOID="-DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOWCHECKS -DGCSTACK_UNDERFLOWCHECKS -DTAGSTACK_OVERFLOWCHECKS -DTAGSTACK_UNDERFLOWCHECKS"
+SIM65=`pwd`/src/contrib/cc65/bin/sim65
+
+test_sim6502 () {
+    make clean world TARGET=sim6502 LISP_FLAGS="$1" $2
+    cd tunix/sim6502/ && (echo "(isave \"image\")" | $SIM65 lisp) ; cd -
+    cd tunix/sim6502/ && (echo | $SIM65 lisp) ; cd -
 }
 
-test_options () {
-    build_and_run $@
-    build_and_run COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 $@
-    build_and_run NO_ONERROR=1 $@
-    build_and_run NO_DEBUGGER=1 $@
-    build_and_run NO_IMAGES=1 $@
-    build_and_run VERBOSE_EVAL=1 $@
+test_unix () {
+    make clean world TARGET=unix LISP_FLAGS="$1" $2
+    cd tunix/unix/ && (echo -n "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
 }
 
-test_diagnostics () {
-    test_options NDEBUG=1 $@
-    test_options $@
-    test_options TEST=1 $@
-    test_options PARANOID=1 $@
-    test_options CHECK_OBJ_POINTERS=1 $@
-}
+# TODO: -DCHECK_OBJ_POINTERS on sim65.
+test_sim6502
+test_sim6502 "-DNDEBUG"
+test_sim6502 "-DCOMPRESSED_CONS"
+test_sim6502 "-DNO_ONERROR"
+test_sim6502 "-DNO_DEBUGGER"
+test_sim6502 "-DNAIVE"
 
-test_diagnostics
-
-# Stealth version.
-build_and_run NAIVE=1 $@
-build_and_run NAIVE=1 COMPRESSED_CONS=1 $@
-
-# Test image and be paranoid about it.
-#build_and_run VERBOSE_LOAD=1 COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 $@
-#cd tunix/unix/ && (echo "(isave \"image\")" | ./lisp) ; cd -
-#cd tunix/unix/ && (echo | ./lisp) ; cd -
-
-# Stress out.
-build_and_run VERBOSE_LOAD=1 COMPRESSED_CONS=1 VERBOSE_COMPRESSED_CONS=1 PARANOID=1 CHECK_OBJ_POINTERS=1 GC_STRESS=1 $@
-
-# Release version.
-build_and_run VERBOSE_LOAD=1 NDEBUG=1 $@
+test_unix
+test_unix "$PARANOID"
+test_unix "-DGC_STRESS $PARANOID_"
+test_unix "-DCOMPRESSED_CONS $PARANOID"
+test_unix "-DNO_ONERROR $PARANOID"
+test_unix "-DNO_DEBUGGER $PARANOID"
+test_unix "-DNAIVE"

@@ -70,7 +70,7 @@ read_list (void)
         // Dotted pair?
         if (in () == '.') {
             // Read dotted pair's CDR.
-            c = read ();
+            c = read_expr ();
 
 #ifndef NAIVE
             // Ensure end of list.
@@ -84,7 +84,7 @@ read_list (void)
         } else {
             // Read next element.
             putback ();
-            c = make_cons (read (), nil);
+            c = make_cons (read_expr (), nil);
         }
 
         POP(last);
@@ -146,7 +146,7 @@ read_string (void)
 lispptr FASTCALL
 read_quoted (lispptr which)
 {
-    return make_cons (which, make_cons (read (), nil));
+    return make_cons (which, make_cons (read_expr (), nil));
 }
 
 lispptr
@@ -159,7 +159,7 @@ read_unquoted (void)
 }
 
 lispptr
-read ()
+read_expr ()
 {
     skip_spaces ();
     in ();

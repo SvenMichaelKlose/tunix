@@ -54,20 +54,28 @@ copy_list (lispptr x, char mode, lispptr needle)
 {
     if (ATOM(x))
         return x;
-    if (mode == COPY_BUTLAST && NOT(CDR(x)))
+
+    tmp = CDR(x);
+#ifndef NAIVE
+    if (tmp && ATOM(tmp)) {
+        error_info = tmp;
+        goto cons_expected;
+    }
+#endif
+
+    if (mode == COPY_BUTLAST && NOT(tmp))
         return nil;
 
     // Remove first elements if they match 'needle'.
-    if (mode == COPY_REMOVE)
-        while (needle == CAR(x)) {
+    if (mode == COPY_REMOVE) {
+        while (CONSP(x) && needle == CAR(x))
             x = CDR(x);
-            // Treat dotted pair's CDR.
-            if (x && ATOM(x))
-                return x == needle ? nil : x;
-        }
+    }
 
     // Copy first element.
+    PUSH(x); // TODO: Explain why this is required. (smk)
     list_start = list_last = make_cons (CAR(x), nil);
+    POP(x);
 
     // Append rest of elements.
     DOLIST(x, CDR(x)) {
@@ -79,16 +87,23 @@ copy_list (lispptr x, char mode, lispptr needle)
             continue;
 
         // Copy element.
+        PUSH(x); // TODO: Explain why this is required. (smk)
         tmp = make_cons (CAR(x), nil);
+        POP(x);
 
         // Append to last.
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
 
-    // Append dotted pair's CDR if not to remove.
-    if (x && (mode != COPY_REMOVE || needle != x))
-        SETCDR(list_last, tmp);
+#ifndef NAIVE
+    if (x) {
+        error_info = x;
+cons_expected:
+        error (ERROR_TYPE, "not a cons");
+        return nil;
+    }
+#endif
 
 end_butlast:
     return list_start;

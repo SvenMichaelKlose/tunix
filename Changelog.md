@@ -13,12 +13,20 @@ and this project adheres to
 
 ### TUNIX Lisp
 
+#### Build system
+
+##### Changed
+
+- Revived full stress test.
+- src/config is not required any more.
+- Added TARGET=sim6502 (cc65's simulator).
+
 #### Debugger
 
 ##### Changed
 
-- Distinguish between error-fixing and stepping mode by
-  printing context-sensitive labels.
+- Make it more to the user if an error has to be fixed of if
+  one is stepping through.
 - Block continuing unless an alternative for an erroraneous
   expression has been provided.
 - Step to next expression if alternative value has been
@@ -35,6 +43,8 @@ and this project adheres to
 - REPL handles READ errors.
 - Expects end of dotted pair.
 - cc65: Smaller initializing parts for more heap.
+- COPY-LIST, REMOVE, and BUTLAST do not support dotted
+  pairs any more.
 
 #### Environment
 
@@ -42,6 +52,7 @@ and this project adheres to
 
 - +V+ contains the Git tag.  It's printed when loading the
   environment.
+- AWHEN assigns result of condition to local !.
 
 ### libsimpleio
 

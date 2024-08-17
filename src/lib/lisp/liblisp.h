@@ -215,6 +215,19 @@
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
+// cc65's sim6502
+#ifdef TARGET_SIM6502
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
 #ifndef SLOW
@@ -765,7 +778,7 @@ extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
 extern lispptr  FASTCALL make_number     (lispnum_t);
 extern lispptr  FASTCALL alloc_symbol    (char *, uchar len);
 extern lispptr  FASTCALL make_symbol     (char *, uchar len);
-extern lispptr           read            (void);
+extern lispptr           read_expr       (void);
 extern lispptr           read_symbol     (void);
 extern lispptr           read_number     (void);
 extern lispptr  FASTCALL print           (lispptr);

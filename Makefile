@@ -5,7 +5,7 @@ DISTDIR = tunix/$(TARGET)/
 ULTIMEM_IMG = tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image dist
+all: src/include/git-version.h host world mkfs/mkfs.ultifs ultimem_image
 	@echo "# Making all."
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
@@ -31,6 +31,7 @@ hostclean:
 	$(MAKE) -C src hostclean
 
 allworlds: host
+	$(MAKE) clean all TARGET=sim6502
 	$(MAKE) clean all TARGET=pet
 	$(MAKE) clean all TARGET=vic20
 	$(MAKE) clean all TARGET=c64

@@ -15,6 +15,12 @@
 #include <stdio.h>
 #include <errno.h>
 
+#ifdef TARGET_UNIX
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+#endif
+
 #include <simpleio/libsimpleio.h>
 
 #define MIN_CHANNEL     (STDERR + 1)
@@ -22,6 +28,50 @@
 
 FILE *      channels[MAX_CHANNELS];
 signed char last_error;
+
+#ifdef TARGET_UNIX
+
+void
+set_nonblocking_mode ()
+{
+    struct termios term;
+
+    // Get current terminal attributes.
+    tcgetattr (STDIN_FILENO, &term);
+
+    // Set terminal to non-canonical mode and disable echo.
+    term.c_lflag &= ~(ICANON | ECHO);
+
+    // Set minimum number of characters for non-canonical read to return.
+    term.c_cc[VMIN] = 1;
+    term.c_cc[VTIME] = 0;
+
+    // Apply the new settings.
+    tcsetattr (STDIN_FILENO, TCSANOW, &term);
+
+    // Set stdin to non-blocking.
+    fcntl (STDIN_FILENO, F_SETFL, O_NONBLOCK);
+}
+
+void
+reset_terminal_mode ()
+{
+    struct termios term;
+
+    // Get current terminal attributes.
+    tcgetattr (STDIN_FILENO, &term);
+
+    // Reset terminal to canonical mode and enable echo.
+    term.c_lflag |= (ICANON | ECHO);
+
+    // Apply the reset settings.
+    tcsetattr (STDIN_FILENO, TCSANOW, &term);
+
+    // Reset stdin to blocking mode.
+    fcntl (STDIN_FILENO, F_SETFL, 0);
+}
+
+#endif // #ifdef TARGET_UNIX
 
 bool
 raw_eof (void)
@@ -49,6 +99,22 @@ raw_in (void)
     }
     return c;
 }
+
+#ifdef TARGET_UNIX
+
+char
+raw_conin (void)
+{
+    int c;
+
+    set_nonblocking_mode ();
+    c = raw_in ();
+    reset_terminal_mode ();
+
+    return c;
+}
+
+#endif
 
 void
 raw_out (char c)
@@ -110,6 +176,11 @@ simpleio_open (char * name, char mode)
 simpleio vectors = {
     raw_eof,
     raw_err,
+#ifdef TARGET_UNIX
+    raw_conin,
+#else
+    raw_in,
+#endif // #ifdef TARGET_UNIX
     raw_in,
     raw_out,
     raw_setin,

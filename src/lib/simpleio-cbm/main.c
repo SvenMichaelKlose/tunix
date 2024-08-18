@@ -135,13 +135,27 @@ raw_err (void)
 }
 
 char
+convert_in (void)
+{
+    if (fnin == STDIN)
+        last_in = reverse_case (last_in);
+    return last_in;
+}
+
+char
+raw_conin (void)
+{
+    last_error = 0;
+    last_in = cbm_k_getin ();
+    return convert_in ();
+}
+
+char
 raw_in (void)
 {
     last_error = 0;
     last_in = cbm_k_chrin ();
-    if (fnin == STDIN)
-        last_in = reverse_case (last_in);
-    return last_in;
+    return convert_in ();
 }
 
 void FASTCALL
@@ -177,6 +191,7 @@ raw_close (simpleio_chn_t chn)
 simpleio vectors = {
     raw_eof,
     raw_err,
+    raw_conin,
     raw_in,
     raw_out,
     raw_setin,

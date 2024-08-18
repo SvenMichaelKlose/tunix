@@ -76,6 +76,16 @@ err ()
 }
 
 char
+conin ()
+{
+    if (do_putback)
+        do_putback = false;
+    else
+        last_in = io->conin ();
+    return last_in;
+}
+
+char
 in ()
 {
     if (do_putback)

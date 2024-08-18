@@ -1,5 +1,10 @@
 [ ] ISAVE spoils I/O channels in LOAD.
 [ ] ERROR: Handle argument.
+[ ] Endless, printing 13s if not in function:
+    (while t
+      (let c (conin)
+        (or (== 0 c)
+            (print c))))
 
 Debugger
 [ ] Stepping over NIL returns from function?

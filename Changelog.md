@@ -57,6 +57,10 @@ and this project adheres to
 - src/config is not required any more.
 - Added TARGET=sim6502 (cc65's simulator).
 
+##### Removed
+
+- oscar64 submodule.  It's never been used.
+
 #### Debugger
 
 ##### Changed

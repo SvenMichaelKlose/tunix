@@ -41,9 +41,9 @@ and this project adheres to
 
 ##### Added
 
-- Issue regular error when out of heap, but return to the
-  current REPL and do a garbage collection before calling an
-  ONERROR handler or the debugger.
+- EXPERIMENTAL: Issue regular error when out of heap, but
+  return to the current REPL and do a garbage collection
+  before calling an ONERROR handler or the debugger.
 
 ## [v0.0.2] - 2024-08-17
 

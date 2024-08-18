@@ -12,7 +12,6 @@ all: src/include/git-version.h host src mkfs/mkfs.ultifs ultimem_image
 clean:
 	$(MAKE) -C src clean
 	$(RM) -f git-version src/include/git-version.h
-	$(RM) -rf $(DISTDIR)
 ifeq ($(TARGET), vic20)
 	$(MAKE) -C mkfs clean
 	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
@@ -58,6 +57,9 @@ ifeq ($(TARGET), vic20)
 	cp src/bin/vi/README.md $(DISTDIR)/vi.md
 	cp src/bin/vi/vi $(DISTDIR)/
 endif
+
+worldclean:
+	$(RM) -rf $(DISTDIR)
 
 allworlds:
 	$(MAKE) host

@@ -18,6 +18,10 @@ and this project adheres to
 
 - Building with clang.  Courtesy of pulluks.  Thanks!
 
+### libsimpleio-cbm
+
+- Print ASCII underscore '\_' as PETSCII graphics.
+
 ### TUNIX Lisp
 
 #### Interpreter

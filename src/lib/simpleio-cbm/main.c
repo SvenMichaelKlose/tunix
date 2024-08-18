@@ -149,7 +149,7 @@ raw_out (char c)
 {
     last_error = 0;
     if (fnout == STDOUT || fnout == STDERR)
-        c = reverse_case (c);
+        c = (c == '_') ? 164 : reverse_case (c);
     cbm_k_bsout (c);
 }
 

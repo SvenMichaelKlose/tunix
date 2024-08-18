@@ -96,6 +96,8 @@ Symbols may also be anonymous, with no name at all.
 (symbol) ; Anonymous symbol that won't get re-used.
 ~~~
 
+SYMBOL will issue an error if it is passed a dotted pair.
+
 ## Memory consumption
 
 ### Heap
@@ -614,6 +616,8 @@ NIL.  The value of the last evaluation is returned.
 (and 1 2)     -> 2
 ~~~
 
+AND will issue an error if it is passed a dotted pair.
+
 ### (or +x)
 
 Evaluates all arguments unless one evaluates to non-NIL.
@@ -623,6 +627,8 @@ The value of the last evaluation is returned.
 (or 1 nil) -> 1
 (or nil 2) -> 2
 ~~~
+
+OR will issue an error if it is passed a dotted pair.
 
 ### (block name . body), (return x block-name), (go tag)
 
@@ -747,6 +753,7 @@ Returns its argument if it is a special form or NIL.
 | (char-at s n)    | Char of symbol name.                  |
 
 ### (symbol l): Make symbol with name from char list.
+
 ### (= 's x): Set symbol value.
 
 ### (symbol-value s): Get symbol value.
@@ -769,17 +776,55 @@ This is what evaluation is doing with symbols.
 A 'cons' points to two other objects, called 'car' and 'cdr'
 for historical reasons.  They could also be called 'first'
 and 'second', 'first' and 'rest' or 'head' and 'tail'.
-However: they are just two object pointers packed together.
+However: they are just two object pointers packed together
+to form a pair.  A single cons is written with a dot in the
+middle which separates the two objects it contains.  It's
+called a "dotted pair":
 
-### (car l): Return first value of cons or NIL.
-### (cdr l): Return second value of cons or NIL.
-### (setcar c x): Set first value of cons.
+~~~lisp
+(obj-a . obj-b)
+~~~
 
-Returns the cons.
+### (car l)/(cdr l): Return first or second value of cons.
 
-### (setcdr c x): Set second value of cons.
+CAR and CDR expect a list (cons or NIL) and return the 
+first or second object a cons contains.  If the argument
+is NIL, CAR and CDR return NIL.
 
-Returns the cons.
+~~~lisp
+(car nil)   ; -> nil
+(cdr nil)   ; -> nil
+
+(var our-cons '(a . b))
+(car our-cons) ; -> a
+(cdr our-cons) ; -> b
+~~~~
+
+Because lists a conses chained up via their CDRs, this
+happens with conses of lists:
+
+~~~lisp
+(var our-list '(a b))
+(car our-list) ; -> a
+(cdr our-list) ; -> (b)
+~~~
+
+### (setcar c x)/(setcdr c x): Set first/second value of cons.
+
+Sets the first or second value of a cons.  Passing anything
+else but a cons, e.g. NIL, is an error.
+The modified cons is returned otherwise.
+
+~~~lisp
+(var our-cons '(a . b))
+(setcar our-cons 'new)     ; -> (new . b)
+(setcdr our-cons 'values)  ; -> (new . value)
+(setcdr our-cons nil)      ; -> (new)
+~~~
+
+Setting the CDR of a *compressed cons* is also an error.
+See section [compressed conses](#compressed-conses) for
+details.
 
 ## Images
 
@@ -810,38 +855,47 @@ internally.
 ### (butlast l): Copy list but not its last element.
 
 ~~~lisp
-(butlast '(1 2 3)) ; (1 2)
+(butlast '(1 2 3)) ; -> (1 2)
 ~~~
+
+BUT LAST will issue an error if it is passed a dotted pair.
 
 ### (last l): Return last cons of list.
 
 Return the last cons of a list, not the object it contains.
 
 ~~~lisp
-(last '(1 2 3)) ; (3)
+(last '(1 2 3)) ; -> (3)
 ~~~
+
+LAST will issue an error if it is passed a dotted pair.
 
 ### (length l): Return length of list.
 
 ~~~lisp
-(length nil)        ; 0
-(length '(1 2 3)))  ; 3
+(length nil)        ; -> 0
+(length '(a b)))    ; -> 2
+(length '(a b c)))  ; -> 3
+~~~
+
+LENTGH also counts CDRs of dotted pairs:
+
+~~~lisp
+(length '(a b . c)))  ; -> 3
 ~~~
 
 ### (member x l): Return cons containing X.
 
 ~~~lisp
-(member 'b '(a b c)) ; '(b c)
+(member 'b '(a b c)) ; -> '(b c)
 ~~~
 
-Uses EQ as the predicate, so numbers will most probably not
-be found..
+MEMBER uses EQL as the predicate, so numbers will also
+match.
 
 ~~~lisp
-(member 2 '(1 2 3)) ; NIL
+(member 2 '(1 2 3)) ; -> '(2 3)
 ~~~
-
-Use MEMBER-IF to use EQL with numbers.
 
 ### (remove x l): Copy list except element X.
 

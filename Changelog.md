@@ -9,8 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-<<<<<<< HEAD
-## [current]
+## [v0.0.3] - 2024-08-18
 
 ### libsimpleio
 
@@ -28,8 +27,8 @@ and this project adheres to
 
 ##### Fixed
 
-- Topmost REPL is not exited when a child REPL, like one in
-  debug mode, issues a break.
+- Topmost REPL is not exited when a child debugger REPL
+  issues a break.
 
 ##### Changed
 
@@ -44,6 +43,7 @@ and this project adheres to
 - EXPERIMENTAL: Issue regular error when out of heap, but
   return to the current REPL and do a garbage collection
   before calling an ONERROR handler or the debugger.
+
 
 ## [v0.0.2] - 2024-08-17
 
@@ -83,8 +83,8 @@ and this project adheres to
 - REPL handles READ errors.
 - Expects end of dotted pair.
 - cc65: Smaller initializing parts for more heap.
-- COPY-LIST, REMOVE, and BUTLAST do not support dotted
-  pairs any more.
+- COPY-LIST, REMOVE, and BUTLAST do not support dotted pairs
+  any more.
 
 #### Environment
 

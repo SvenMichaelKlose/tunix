@@ -2,6 +2,10 @@
 
 set -e
 
+# For whatever reason without this cc65 won't have its
+# libraries built.
+make host
+
 PARANOID="-DLOAD_ALL -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOWCHECKS -DGCSTACK_UNDERFLOWCHECKS -DTAGSTACK_OVERFLOWCHECKS -DTAGSTACK_UNDERFLOWCHECKS"
 SIM65=`pwd`/src/contrib/cc65/bin/sim65
 

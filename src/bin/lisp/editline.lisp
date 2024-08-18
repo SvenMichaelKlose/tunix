@@ -59,14 +59,13 @@
                               (subseq line cx))))
           (< c \ )
             (progn
-              (conputback)
+              (putback)
               (return (symbol line)))
-          t
-            (progn
-              (= saved? nil)
-              (= line (append (subseq line 0 cx)
-                              (list c)
-                              (subseq line (++ cx))))))))))
+          (progn
+            (= saved? nil)
+            (= line (append (subseq line 0 cx)
+                            (list c)
+                            (subseq line (++ cx))))))))))
 
 (var lines nil)
 
@@ -120,10 +119,8 @@
         (case (conin)
           \s (save-file)
           \q (and (quit-editor)
-                  (return))
-
-      t
-        (conputback))))
+                  (return)))
+      (conputback))))
 
 (fn edit (file)
   (= lines (read-lines file))

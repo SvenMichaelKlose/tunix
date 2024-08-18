@@ -126,7 +126,7 @@ outn (long n)
 {
     if (n < 0) {
         out ('-');
-        n = abs (n);
+        n = labs (n);
     }
     outnu (n);
 }

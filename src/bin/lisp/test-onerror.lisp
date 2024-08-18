@@ -14,45 +14,52 @@
   (= onerror nil)
   (error (or x "error expected")))
 
-; ERROR_TYPE          1
+(message "Testing ERROR_TYPE...")
 (+ 's 1)
 (or (== *last-err* 1)
     (terror "Adding 1 to symbol should be an error"))
 
-; ERROR_ARG_MISSING   2
+(message "Testing ERROR_ARG_MISSING...")
 (((a b) a) 1)
 (or (== *last-err* 2)
     (terror "Argument missing should be an error"))
 
-; ERROR_TAG_MISSING   3
+(message "Testing ERROR_TAG_MISSING...")
 (block t fnord (go foo))
 (or (== *last-err* 3)
     (terror "Missing block tag should be an error"))
 
-; ERROR_TOO_MANY_ARGS 4
+(message "Testing ERROR_TOO_MANY_ARGS...")
 (((a b) a) 1 2 3)
 (or (== *last-err* 4)
     (terror "Too many arguments should be an error"))
 
-; ERROR_NOT_FUNCTION  5
+(message "Testing ERROR_NOT_FUNCTION...")
 (not-fun)
 (or (== *last-err* 5)
     (terror "(not-fun) should be an error"))
 
-; ERROR_ARGNAME_TYPE  6
+(message "Testing ERROR_ARGNAME_TYPE...")
 (((1)) nil)
 (or (== *last-err* 6)
     (terror "Non-symbol argument name should be an error"))
 
-; ERROR_OUT_OF_HEAP   6 ; Good luck testing this one.
+;(message "Testing ERROR_OUT_OF_HEAP...")
+;(((q)
+   ;(block nil
+     ;tag
+     ;(= q (cons t q))
+     ;(out ".")
+     ;(go tag)))
+ ;nil)
+;(or (== *last-err* 7)
+    ;(terror "Out-of-heap error expected."))
+
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
 ; ERROR_NO_PAREN      8 ; When can read from memory.
 ; ERROR_STALE_PAREN   9 ; When can read from memory.
-
-; ERROR_CHANNEL       10
-
-; ERROR_FILE          11
-; ERROR_USER          12
+; ERROR_FILE_MODE     10
+; ERROR_USER          11
 
 (car 's)
 (or (== *last-err* 1)

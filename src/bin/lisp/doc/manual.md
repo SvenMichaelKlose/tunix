@@ -461,13 +461,12 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.            |
 | NOT\_FUNCTION   | 5    | Object is not a function.      |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
-| OUT\_OF\_HEAP   | 7    | Out of heap.  Cannot catch.    |
+| OUT\_OF\_HEAP   | 7    | Out of heap.                   |
 | NO\_PAREN       | 8    | ')' missing.                   |
 | STALE\_PAREN    | 9    | Unexpected ')'.                |
-| FILE            | 10   | File error code in (ERR).      |
-| FILEMODE        | 11   | Illegal mode for OPEN.         |
-| USER            | 12   | ERROR function was called.     |
-| INTERNAL        | 14   | Returned to operating system.  |
+| FILEMODE        | 10   | Illegal mode for OPEN.         |
+| USER            | 11   | ERROR function was called.     |
+| INTERNAL        | 12   | Returned to operating system.  |
 
 # Built-in functions
 
@@ -944,6 +943,31 @@ x           ; 23
 
 ### (read): Read expression.
 ### (print x): Print expression.
+
+### (load pathname): Load and evaluate file.
+
+Loads a file expression by expression, evaluating each
+right away.
+
+Returns NIL if the file could not be loaded, or T if all
+of the file has been processed successfully.
+
+This expample loads file "subseq.lisp" and returns T when
+finished:
+
+~~~lisp
+(load "subseq.lisp")
+~~~
+
+If compile-time option VERBOSE\_LOAD was defined when
+TUNIX Lisp was built, a message of the form
+
+~~~lisp
+(load <pathname>)
+~~~
+
+is printed before a load is attempted.
+
 ### (open pathname mode): Open file and channel.
 
 Opens file at PATHNAME for reading or writing.  MODE must

@@ -55,10 +55,10 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-//#define GCSTACK_OVERFLOWCHECKS
-//#define GCSTACK_UNDERFLOWCHECKS
-//#define TAGSTACK_OVERFLOWCHECKS
-//#define TAGSTACK_UNDERFLOWCHECKS
+//#define GCSTACK_OVERFLOW_CHECKS
+//#define GCSTACK_UNDERFLOW_CHECKS
+//#define TAGSTACK_OVERFLOW_CHECKS
+//#define TAGSTACK_UNDERFLOW_CHECKS
 
 
 /// Release
@@ -388,12 +388,13 @@ struct heap_fragment {
 };
 
 typedef struct _image_header {
-    char git_version[8];
+    char git_version[16];
     lispptr heap_start;
 } image_header;
 
 // ILOAD restart.
 extern jmp_buf   restart_point;
+extern jmp_buf * hard_repl_break;
 
 extern lispptr * global_pointers[];
 
@@ -557,53 +558,58 @@ extern lispptr va; // Temporary in 'eval.c'.
 extern bool do_gc_stress;
 #endif
 
+#define _GCSTACK_CHECK_OVERFLOW() \
+    if (stack == stack_start) \
+        stack_overflow ()
+#define _GCSTACK_CHECK_UNDERFLOW() \
+    if (stack == stack_end) \
+        stack_underflow ()
+#define _TAGSTACK_CHECK_OVERFLOW() \
+    if (tagstack == tagstack_start) \
+        tagstack_overflow ()
+#define _TAGSTACK_CHECK_UNDERFLOW() \
+    if (tagstack == tagstack_end) \
+        tagstack_underflow ()
+
 #ifdef GCSTACK_OVERFLOW_CHECKS
-    #define STACK_CHECK_OVERFLOW() \
-            if (stack == stack_start) \
-                stack_overflow ()
+    #define GCSTACK_CHECK_OVERFLOW() _GCSTACK_CHECK_OVERFLOW()
 #else
-    #define STACK_CHECK_OVERFLOW()
+    #define GCSTACK_CHECK_OVERFLOW()
 #endif
 #ifdef GCSTACK_UNDERFLOW_CHECKS
-    #define STACK_CHECK_UNDERFLOW() \
-        if (stack == stack_end) \
-            stack_underflow ()
+    #define GCSTACK_CHECK_UNDERFLOW() _GCSTACK_CHECK_UNDERFLOW()
 #else
-    #define STACK_CHECK_UNDERFLOW()
+    #define GCSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef TAGSTACK_OVERFLOW_CHECKS
-    #define TAGSTACK_CHECK_OVERFLOW() \
-            if (tagstack == tagstack_start) \
-                tagstack_overflow ()
+    #define TAGSTACK_CHECK_OVERFLOW() _TAGSTACK_CHECK_OVERFLOW()
 #else
     #define TAGSTACK_CHECK_OVERFLOW()
 #endif
 #ifdef TAGSTACK_OVERFLOW_CHECKS
-    #define TAGSTACK_CHECK_UNDERFLOW() \
-            if (tagstack == tagstack_end) \
-                tagstack_underflow ()
+    #define TAGSTACK_CHECK_UNDERFLOW() _TAGSTACK_CHECK_UNDERFLOW()
 #else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef SLOW
-    #define PUSH(x)          pushgc (x)
-    #define POP(x)           do { x = popgc (); } while (0)
-    #define PUSH_TAG(x)      pushtag (x)
-    #define POP_TAG(x)       do { x = poptag (); } while (0)
-    #define PUSH_TAGW(x)     pushtagw (x)
-    #define POP_TAGW(x)      do { x = poptagw (); } while (0)
+    #define PUSH(x)      pushgc (x)
+    #define POP(x)       do { x = popgc (); } while (0)
+    #define PUSH_TAG(x)  pushtag (x)
+    #define POP_TAG(x)   do { x = poptag (); } while (0)
+    #define PUSH_TAGW(x) pushtagw (x)
+    #define POP_TAGW(x)  do { x = poptagw (); } while (0)
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \
-            STACK_CHECK_OVERFLOW(); \
+            GCSTACK_CHECK_OVERFLOW(); \
             stack -= sizeof (lispptr); \
             *(lispptr *) stack = x; \
         } while (0)
     #define POP(x) \
         do { \
-            STACK_CHECK_UNDERFLOW(); \
+            GCSTACK_CHECK_UNDERFLOW(); \
             x = *(lispptr *) stack; \
             stack += sizeof (lispptr); \
         } while (0)
@@ -759,13 +765,11 @@ extern bool do_gc_stress;
 #define ERROR_OUT_OF_HEAP   7
 #define ERROR_NO_PAREN      8
 #define ERROR_STALE_PAREN   9
-#define ERROR_CHANNEL       10
-#define ERROR_FILE          11
-#define ERROR_FILEMODE      12
-#define ERROR_USER          13
+#define ERROR_FILEMODE      10
+#define ERROR_USER          11
 
 // Returned to OS on exit after internal error.
-#define ERROR_INTERNAL      14
+#define ERROR_INTERNAL      12
 
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
@@ -801,7 +805,7 @@ extern size_t            heap_free_size   (void);
 #define REPL_DEBUGGER   1
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
-extern void     FASTCALL load         (char * pathname);
+extern bool     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
 

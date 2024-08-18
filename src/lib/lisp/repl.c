@@ -416,6 +416,8 @@ terpri_next:
             hard_repl_break = old_break;
             x = nil;
 #ifdef FRAGMENTED_HEAP
+            // Ensure that the GC is not just switching to
+            // the next heap.
             while (heap->start)
                 switch_heap ();
 #endif

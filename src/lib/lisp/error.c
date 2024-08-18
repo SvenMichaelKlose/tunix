@@ -58,6 +58,8 @@ internal_error (char * msg)
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
     exit (EXIT_FAILURE);
+#elif TARGET_SIM6502
+    exit (EXIT_FAILURE);
 #else
     while (1);
 #endif

@@ -710,7 +710,18 @@ bi_last (void)
 lispptr
 bi_member (void)
 {
-    return member (arg1, arg2);
+    DOLIST(tmp, arg2) {
+        tmp2 = CAR(tmp);
+        if (tmp2 == arg1 ||
+            (NUMBERP(tmp2) && NUMBERP(arg1) &&
+             NUMBER_VALUE(tmp2) == NUMBER_VALUE(arg1)))
+            return tmp;
+    }
+#ifndef NAIVE
+    if (tmp)
+        error_cons_expected (tmp);
+#endif
+    return nil;
 }
 
 lispptr

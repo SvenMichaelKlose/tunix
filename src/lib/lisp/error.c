@@ -40,6 +40,14 @@ error_argname (lispptr x)
     error (ERROR_ARGNAME_TYPE, "Arg not a symbol");
 }
 
+lispptr FASTCALL
+error_cons_expected (lispptr x)
+{
+    error_info = x;
+    error (ERROR_TYPE, "not a cons");
+    return nil;
+}
+
 // Print internal error message and exit.
 void FASTCALL
 internal_error (char * msg)

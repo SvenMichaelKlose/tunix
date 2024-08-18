@@ -34,6 +34,9 @@ and this project adheres to
 ##### Changed
 
 - LOAD returns NIL on error, T otherwise.
+- MEMBER uses EQL as the predicate to match number values.
+  Otherwise working with character value lists would become
+  a rather hairy issue.
 
 
 ## [v0.0.2] - 2024-08-17

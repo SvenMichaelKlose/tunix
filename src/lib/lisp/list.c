@@ -57,10 +57,8 @@ copy_list (lispptr x, char mode, lispptr needle)
 
     tmp = CDR(x);
 #ifndef NAIVE
-    if (tmp && ATOM(tmp)) {
-        error_info = tmp;
-        goto cons_expected;
-    }
+    if (tmp && ATOM(tmp))
+        return error_cons_expected (tmp);
 #endif
 
     if (mode == COPY_BUTLAST && NOT(tmp))
@@ -97,12 +95,8 @@ copy_list (lispptr x, char mode, lispptr needle)
     }
 
 #ifndef NAIVE
-    if (x) {
-        error_info = x;
-cons_expected:
-        error (ERROR_TYPE, "not a cons");
-        return nil;
-    }
+    if (x)
+        return error_cons_expected (x);
 #endif
 
 end_butlast:

@@ -26,6 +26,11 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
+- Topmost REPL is not exited when a child REPL, like one in
+  debug mode, issues a break.
+
 ##### Changed
 
 - LOAD returns NIL on error, T otherwise.

@@ -403,9 +403,6 @@ terpri_next:
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
-            // Return from hard errror.
-            outs ("!debug me!");
-
             // Restore GC and tag stack pointers.
             stack           = saved_stack;
             tagstack        = saved_tagstack;
@@ -459,9 +456,10 @@ terpri_next:
                 goto next;
             }
 
-            // Break this REPL.
+            // Break this REPL if it's not the topmost.
             do_break_repl = false;
-            break;
+            if (num_repls)
+                break;
         }
 
 #ifndef NO_DEBUGGER

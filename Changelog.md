@@ -8,6 +8,22 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [current]
+
+### libsimpleio
+
+#### Added
+
+- conio(): Returns waiting char or 0.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Added
+
+- CONIO: Wraps libsimpleio/conio().
+
 
 ## [v0.0.3] - 2024-08-18
 

@@ -21,6 +21,7 @@ typedef signed char simpleio_chn_t;
 typedef struct _simpleio {
     bool          (*eof)    (void);
     signed char   (*err)    (void);
+    char          (*conin)  (void);
     char          (*in)     (void);
     void FASTCALL (*out)    (char c);
     void FASTCALL (*setin)  (simpleio_chn_t);
@@ -51,6 +52,7 @@ extern signed char      err         (void);
 extern void FASTCALL    setin       (simpleio_chn_t fn);
 extern void FASTCALL    setout      (simpleio_chn_t fn);
 
+extern char             conin       (void);
 extern char             in          (void);
 extern void             putback     (void);
 extern void             skip_spaces (void);

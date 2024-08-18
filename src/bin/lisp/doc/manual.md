@@ -997,6 +997,7 @@ x           ; 23
 | (setin n)        | Set input channel.                  |
 | (setout n)       | Set output channel.                 |
 | (in)             | Read char.                          |
+| (conin)          | Read char from console.             |
 | (out x)          | Print char or plain symbol name.    |
 | (terpri)         | Step to next line.                  |
 | (fresh-line)     | Open line if not on a fresh one.    |
@@ -1053,6 +1054,7 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.
 ### (in): Read char.
+### (conin): Read console char (non-blocking).
 ### (out x): Print char or plain symbol name.
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.

@@ -509,6 +509,12 @@ bi_setout (void)
 }
 
 lispptr
+bi_conin (void)
+{
+    return make_number (conin ());
+}
+
+lispptr
 bi_in (void)
 {
     return make_number (in ());
@@ -936,6 +942,7 @@ const struct builtin builtins[] = {
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
+    { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
     { "out",        "x",    bi_out },
     { "terpri",     "",     bi_terpri },

@@ -1,1 +1,0 @@
-[@] Soft segmentation fault detection.

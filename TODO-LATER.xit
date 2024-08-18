@@ -1,10 +1,8 @@
-[ ] Loading/saving/calling snapshots.
-[ ] Bielefeld DB API.
+TUNIX Lisp
 [ ] On-demand function/macro loading.
+[ ] Bielefeld DB API.
 [ ] Recursion to loop conversion.
 [ ] Tail call optimization.
-[ ] Snapshot optimization.
 
 Reducing Memory Usage
-[?] Compressed conses.
 [?] GC stack compression, utilizing tag stack.

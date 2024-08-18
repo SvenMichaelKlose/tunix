@@ -1,8 +1,11 @@
 (macro with (inits . body)
   ;"Local symbol values."
-  $((,(carlist inits)
-     ,@body)
-    ,@(carlist (cdrlist inits))))
+  (? inits
+     $((,(carlist inits)
+        ,@body)
+       ,@(carlist (cdrlist inits)))
+     $(block t
+        ,@body)))
 
 (message "Testing WITH...")
 (or (equal (macroexpand '(with ((a 1)

@@ -23,6 +23,7 @@
 (load "when.lisp")
 (load "subseq.lisp")
 (load "group.lisp")
+(load "case.lisp")
 (load "unique.lisp")
 (load "union.lisp")
 (load "intersect.lisp")

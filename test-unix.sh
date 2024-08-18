@@ -20,14 +20,6 @@ test_unix () {
     cd tunix/unix/ && (printf "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
 }
 
-# TODO: -DCHECK_OBJ_POINTERS on sim65.
-test_sim6502 "-DLOAD_ALL"
-test_sim6502 "-DLOAD_ALL -DNDEBUG"
-test_sim6502 "-DLOAD_ALL -DCOMPRESSED_CONS"
-test_sim6502 "-DLOAD_ALL -DNO_ONERROR"
-test_sim6502 "-DLOAD_ALL -DNO_DEBUGGER"
-test_sim6502 "-DLOAD_ALL -DNAIVE"
-
 test_unix
 test_unix "$PARANOID"
 test_unix "-DGC_STRESS $PARANOID_"
@@ -35,5 +27,13 @@ test_unix "-DCOMPRESSED_CONS $PARANOID"
 test_unix "-DNO_ONERROR $PARANOID"
 test_unix "-DNO_DEBUGGER $PARANOID"
 test_unix "-DNAIVE"
+
+# TODO: -DCHECK_OBJ_POINTERS on sim65.
+test_sim6502 "-DLOAD_ALL"
+test_sim6502 "-DLOAD_ALL -DNDEBUG"
+test_sim6502 "-DLOAD_ALL -DCOMPRESSED_CONS"
+test_sim6502 "-DLOAD_ALL -DNO_ONERROR"
+test_sim6502 "-DLOAD_ALL -DNO_DEBUGGER"
+test_sim6502 "-DLOAD_ALL -DNAIVE"
 
 ./make-development-versions.sh

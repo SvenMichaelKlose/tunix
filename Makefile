@@ -30,6 +30,7 @@ src/include/git-version.h:
 	printf "\"\n" >>src/include/git-version.h
 
 host:
+	cp kgetin.s src/contrib/cc65/libsrc/plus4/
 	$(MAKE) -C src host
 
 hosttest:

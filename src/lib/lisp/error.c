@@ -52,7 +52,9 @@ error_cons_expected (lispptr x)
 void FASTCALL
 internal_error (char * msg)
 {
-    outs (msg); terpri ();
+    outs ("INTERNAL: ");
+    outs (msg);
+    terpri ();
 #ifdef TARGET_UNIX
     raise (SIGTRAP);
     exit (EXIT_FAILURE);

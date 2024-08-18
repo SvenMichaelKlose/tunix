@@ -5,10 +5,6 @@
 # or 'unix'.  Target 'pet' needs fixing.
 TARGET = vic20  # VIC-20 has the largest code base.
 
-# Build oscar64 compiler.
-# It's not used!
-#HAVE_OSCAR64 = 1
-
 # TUNIX Lisp options
 # See 'src/lib/lisp/liblisp.h'.
 LISP_FLAGS = -DVERBOSE_LOAD=1 -DCOMPRESSED_CONS=1 -DNDEBUG=1

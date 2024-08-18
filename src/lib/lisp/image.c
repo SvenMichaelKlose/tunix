@@ -122,7 +122,7 @@ image_load (char * pathname)
         inm ((char *) &pos, sizeof (lispptr));
 #ifndef NAIVE
         if (pos != heap_start)
-            internal_error_ptr (pos, "position. ");
+            internal_error_ptr (pos, "image position");
 #endif
 
         // Read heap size.

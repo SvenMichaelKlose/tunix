@@ -136,6 +136,10 @@ bi_symbol (void)
 #endif
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
+#ifndef NAIVE
+    if (arg1)
+        error_cons_expected (arg1);
+#endif
 
     return s;
 }
@@ -416,6 +420,10 @@ bi_and (void)
         if (NOT(value))
             return nil;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return value;
 }
 
@@ -436,6 +444,10 @@ bi_or (void)
         if (value)
             return value;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return nil;
 }
 
@@ -710,7 +722,18 @@ bi_last (void)
 lispptr
 bi_member (void)
 {
-    return member (arg1, arg2);
+    DOLIST(tmp, arg2) {
+        tmp2 = CAR(tmp);
+        if (tmp2 == arg1 ||
+            (NUMBERP(tmp2) && NUMBERP(arg1) &&
+             NUMBER_VALUE(tmp2) == NUMBER_VALUE(arg1)))
+            return tmp;
+    }
+#ifndef NAIVE
+    if (tmp)
+        error_cons_expected (tmp);
+#endif
+    return nil;
 }
 
 lispptr

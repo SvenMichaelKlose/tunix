@@ -46,14 +46,14 @@
 
 ;(message "Testing ERROR_OUT_OF_HEAP...")
 ;(((q)
-   ;(block nil
-     ;tag
-     ;(= q (cons t q))
-     ;(out ".")
-     ;(go tag)))
- ;nil)
+;   (block nil
+;     tag
+;     (= q (cons t q))
+;     (out ".")
+;     (go tag)))
+; nil)
 ;(or (== *last-err* 7)
-    ;(terror "Out-of-heap error expected."))
+;    (terror "Out-of-heap error expected."))
 
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
 ; ERROR_NO_PAREN      8 ; When can read from memory.

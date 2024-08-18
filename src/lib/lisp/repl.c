@@ -223,8 +223,13 @@ lisp_repl (char mode)
     // READ/EVAL/PRINT-Loop.
     while (!eof ()) {
 #ifndef NO_DEBUGGER
-        if (mode == REPL_DEBUGGER)
+        if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
+
+            // Out of heap errors cannot be corrected.
+            if (error_code == ERROR_OUT_OF_HEAP)
+                error_code = 0;
+        }
 #endif
 
 #ifndef NO_DEBUGGER
@@ -403,16 +408,19 @@ terpri_next:
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
-            // Return from hard errror.
-            outs ("!debug me!");
-
             // Restore GC and tag stack pointers.
-            stack           = saved_stack;
-            tagstack        = saved_tagstack;
+            stack    = saved_stack;
+            tagstack = saved_tagstack;
 
             // Restore parent REPLs return point.
             hard_repl_break = old_break;
             x = nil;
+#ifdef FRAGMENTED_HEAP
+            // Ensure that the GC is not just switching to
+            // the next heap.
+            while (heap->start)
+                switch_heap ();
+#endif
             gc ();
         }
 #endif
@@ -459,9 +467,10 @@ terpri_next:
                 goto next;
             }
 
-            // Break this REPL.
+            // Break this REPL if it's not the topmost.
             do_break_repl = false;
-            break;
+            if (num_repls)
+                break;
         }
 
 #ifndef NO_DEBUGGER
@@ -496,6 +505,8 @@ do_return:
 #ifndef NO_DEBUGGER
     if (mode == REPL_DEBUGGER) {
         num_debugger_repls--;
+        onetime_heap_margin = ONETIME_HEAP_MARGIN;
+
         outs ("Continuing...");
         terpri ();
 

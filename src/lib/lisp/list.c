@@ -57,10 +57,8 @@ copy_list (lispptr x, char mode, lispptr needle)
 
     tmp = CDR(x);
 #ifndef NAIVE
-    if (tmp && ATOM(tmp)) {
-        error_info = tmp;
-        goto cons_expected;
-    }
+    if (tmp && ATOM(tmp))
+        return error_cons_expected (tmp);
 #endif
 
     if (mode == COPY_BUTLAST && NOT(tmp))
@@ -97,12 +95,8 @@ copy_list (lispptr x, char mode, lispptr needle)
     }
 
 #ifndef NAIVE
-    if (x) {
-        error_info = x;
-cons_expected:
-        error (ERROR_TYPE, "not a cons");
-        return nil;
-    }
+    if (x)
+        return error_cons_expected (x);
 #endif
 
 end_butlast:
@@ -116,10 +110,15 @@ last (lispptr x)
     DOLIST(tmp2, x)
         if (ATOM(CDR(tmp2)))
             return tmp2;
+#ifndef NAIVE
+    if (tmp2)
+        return error_cons_expected (tmp2);
+#endif
     return nil;
 }
 
 // Get cons of list containing 'needle'.
+// For internal use only as it ignores CDRs of dotted pairs.
 lispptr FASTCALL
 member (lispptr needle, lispptr x)
 {

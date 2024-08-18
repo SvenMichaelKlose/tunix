@@ -125,6 +125,9 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
+// Out-of-heap margin for calling ONERROR handlers.
+#define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
+
 
 /// Target configurations
 
@@ -343,6 +346,8 @@ typedef unsigned int   array_index_t;
 typedef size_t         lispobj_size_t;
 #endif
 
+// TODO: Typedef for objects' type byte.
+
 typedef struct _cons {
     uchar    type;
     lispptr  car;
@@ -402,6 +407,8 @@ extern lispptr * global_pointers[];
 extern struct  heap_fragment * heap;
 extern struct  heap_fragment heaps[];
 #endif
+
+extern size_t  onetime_heap_margin;
 
 extern lispptr universe;
 extern char *  stack_start;
@@ -844,7 +851,7 @@ extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 extern void     FASTCALL error_argname       (lispptr);
-// TODO: Typedef for objects' type byte.
+extern lispptr  FASTCALL error_cons_expected (lispptr);
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);

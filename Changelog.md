@@ -9,8 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-<<<<<<< HEAD
-## [current]
+## [v0.0.3] - 2024-08-18
 
 ### libsimpleio
 
@@ -18,13 +17,32 @@ and this project adheres to
 
 - Building with clang.  Courtesy of pulluks.  Thanks!
 
+### libsimpleio-cbm
+
+- Print ASCII underscore '\_' as PETSCII graphics.
+
 ### TUNIX Lisp
 
 #### Interpreter
 
+##### Fixed
+
+- Topmost REPL is not exited when a child debugger REPL
+  issues a break.
+
 ##### Changed
 
 - LOAD returns NIL on error, T otherwise.
+- MEMBER uses EQL as the predicate to match number values.
+  Otherwise working with character value lists would become
+  a rather hairy issue.
+- AND, LAST, OR, and SYMBOL issue an error for dotted pairs.
+
+##### Added
+
+- EXPERIMENTAL: Issue regular error when out of heap, but
+  return to the current REPL and do a garbage collection
+  before calling an ONERROR handler or the debugger.
 
 
 ## [v0.0.2] - 2024-08-17
@@ -38,6 +56,10 @@ and this project adheres to
 - Revived full stress test.
 - src/config is not required any more.
 - Added TARGET=sim6502 (cc65's simulator).
+
+##### Removed
+
+- oscar64 submodule.  It's never been used.
 
 #### Debugger
 
@@ -61,8 +83,8 @@ and this project adheres to
 - REPL handles READ errors.
 - Expects end of dotted pair.
 - cc65: Smaller initializing parts for more heap.
-- COPY-LIST, REMOVE, and BUTLAST do not support dotted
-  pairs any more.
+- COPY-LIST, REMOVE, and BUTLAST do not support dotted pairs
+  any more.
 
 #### Environment
 

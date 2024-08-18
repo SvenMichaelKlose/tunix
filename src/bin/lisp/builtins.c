@@ -136,6 +136,10 @@ bi_symbol (void)
 #endif
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
+#ifndef NAIVE
+    if (arg1)
+        error_cons_expected (arg1);
+#endif
 
     return s;
 }
@@ -416,6 +420,10 @@ bi_and (void)
         if (NOT(value))
             return nil;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return value;
 }
 
@@ -436,6 +444,10 @@ bi_or (void)
         if (value)
             return value;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return nil;
 }
 

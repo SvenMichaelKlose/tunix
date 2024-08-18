@@ -110,10 +110,15 @@ last (lispptr x)
     DOLIST(tmp2, x)
         if (ATOM(CDR(tmp2)))
             return tmp2;
+#ifndef NAIVE
+    if (tmp2)
+        return error_cons_expected (tmp2);
+#endif
     return nil;
 }
 
 // Get cons of list containing 'needle'.
+// For internal use only as it ignores CDRs of dotted pairs.
 lispptr FASTCALL
 member (lispptr needle, lispptr x)
 {

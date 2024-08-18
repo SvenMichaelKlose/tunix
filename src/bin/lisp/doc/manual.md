@@ -854,14 +854,19 @@ with EQL to match numbers.
 
 ### (@ f l): Filter list by function
 
+Call function F for each element in l and returns a new
+list containing the return values of F.
+
 ~~~lisp
-(@ ++ '(1 2 3)) ; (2 3 4)
+(@ ++ '(1 2 3)) ; -> (2 3 4)
 ~~~
 
-Also handles dotted pairs, filtering the last atom if it is not NIL.
+Also handles dotted pairs, filtering the last atom if it is
+not NIL.  This is supported because of rest argument
+definitions (which are dotted pairs).
 
 ~~~lisp
-(@ ++ '(1 2 . 3)) ; (2 3 . 4)
+(@ ++ '(1 2 . 3)) ; -> (2 3 . 4)
 ~~~
 
 ## Numbers

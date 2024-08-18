@@ -125,6 +125,9 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
+// Out-of-heap margin for calling ONERROR handlers.
+#define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
+
 
 /// Target configurations
 
@@ -404,6 +407,8 @@ extern lispptr * global_pointers[];
 extern struct  heap_fragment * heap;
 extern struct  heap_fragment heaps[];
 #endif
+
+extern size_t  onetime_heap_margin;
 
 extern lispptr universe;
 extern char *  stack_start;

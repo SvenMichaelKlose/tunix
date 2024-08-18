@@ -39,6 +39,11 @@ and this project adheres to
   a rather hairy issue.
 - AND, LAST, OR, and SYMBOL issue an error for dotted pairs.
 
+##### Added
+
+- Issue regular error when out of heap, but return to the
+  current REPL and do a garbage collection before calling an
+  ONERROR handler or the debugger.
 
 ## [v0.0.2] - 2024-08-17
 

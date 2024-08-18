@@ -470,6 +470,15 @@ be dealt with.
 | USER            | 11   | ERROR function was called.     |
 | INTERNAL        | 12   | Returned to operating system.  |
 
+#### ERROR\_OUT\_OF\_HEAP
+
+Returns to the current REPL and does a garbage collection
+before calling an ONERROR handler or debugger.
+
+Compile-time option ONETIME\_HEAP\_MARGIN specified the
+number of heap bytes that are kept for calling an ONERROR
+handler.
+
 # Built-in functions
 
 ## General

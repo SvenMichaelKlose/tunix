@@ -18,7 +18,7 @@ ifeq ($(TARGET), vic20)
 endif
 
 src/include/git-version.h:
-	printf $(TAG) >git-version
+	printf "$(TAG)" >git-version
 	printf "(var +v+ \"" >src/bin/lisp/git-version.lisp
 	cat git-version >>src/bin/lisp/git-version.lisp
 	printf "\")\n" >>src/bin/lisp/git-version.lisp

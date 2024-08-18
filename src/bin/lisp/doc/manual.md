@@ -1211,9 +1211,9 @@ programming languages.
 ## Local variables
 
 | Macro           | Desscription                        |
-|-----------------|-------------------------------------|
-| (let n init +b) | Block with one local variable.
-| (with inits +b) | Block with many local variables.
+|--------------------|-------------------------------------|
+| (let n init +b)    | Block with one local variable.
+| (with inits +b)    | Block with many local variables.
 
 ### (let n init +b): Block with one local variable.
 
@@ -1223,9 +1223,12 @@ programming languages.
 
 | Macro                | Description                      |
 |----------------------|----------------------------------|
+| (!? cond conseq...)  | ?, assigning cond to !.          |
 | (prog1 +b)           | Return result of first.          |
 | (progn +b)           | Return result of last.           |
 | (when cond +b)       | Evaluate if condition is true.   |
+| (awhen cond +b)      | WHEN, assigning cond to !.       |
+| (case x v conseq...) | ?, using values insted of cond.  |
 | (unless cond +b)     | Evaluate if condition is false.  |
 | (while (cond x) +b)  | Loop while condiiton is true.    |
 | (dolist (i init) +b) | Loop over elements of a list.    |
@@ -1244,16 +1247,27 @@ programming languages.
 
 ## Lists
 
-| Function      | Description                         |
-|---------------|-------------------------------------|
-| (list +x)     | Return list evaluated.              |
-| (list? x)     | Test if argument is NIL or a cons.  |
-| (cadr l)...   | Nested CAR/CDR combinations.        |
-| (carlist l)   | Get first elements of lists.        |
-| (cdrlist l)   | Get rest elements of lists.         |
-| (copy-list x) | Copy list.                          |
-| (copy x)      | Copy recursively.                   |
-| (find x l)    | Find element X in list.             |
+| Function        | Description                         |
+|-----------------|-------------------------------------|
+| (list +x)       | Return list evaluated.              |
+| (list? x)       | Test if argument is NIL or a cons.  |
+| (cadr l)...     | Nested CAR/CDR combinations.        |
+| (carlist l)     | Get first elements of lists.        |
+| (cdrlist l)     | Get rest elements of lists.         |
+| (copy-list x)   | Copy list.                          |
+| (copy-tree x)   | Copy recursively.                   |
+| (ensure-list x) | Turn atom into list.                |
+| (every f x)     | Test if F is T for all X.           |
+| (some f x)      | Test if F is T for some X.          |
+| (find x l)      | Find element X in list.             |
+| (find-if f l)   | Find element X in list.             |
+| (group l n)     | Split L in lists of length N.       |
+| (nth n l)       | Get Nth cons in L.                  |
+| (nthcdr n l)    | Get Nth CDR of cons in L.           |
+| (member-if f l) | Find cons with element in list.     |
+| (remove-if f l) | Removed elemnts from L.             |
+| (reverse l)     | Reverse list.                       |
+| (subseq l n n)  | Return sublist.                     |
 
 ### (list +x): Return list evaluated.
 
@@ -1273,10 +1287,11 @@ programming languages.
 
 ## Loops
 
-| Macro                       | Description              |
-|-----------------------------|--------------------------|
-| (dolist (iter init) . body) | Loop over list elements. |
-| (dotimes (iter n) . body)   | Loop N times.            |
+| Macro                         | Description              |
+|-------------------------------|--------------------------|
+| (do ((iters) (cond res)) . b) | Generic loop.            |
+| (dolist (iter init) . body)   | Loop over list elements. |
+| (dotimes (iter n) . body)     | Loop N times.            |
 
 ### (dolist (iter init) . body): Loop over list elements.
 
@@ -1311,10 +1326,13 @@ x ; '(2)
 
 ## Queues
 
-| Function      | Description                  |
-|---------------|------------------------------|
-| (make-queue)  | Make queue.                  |
-| (enqueue c x) | Add object X to queue C.     |
+| Function           | Description                   |
+|--------------------|-------------------------------|
+| (make-queue)       | Make queue.                   |
+| (enqueue c x)      | Add object X to queue C.      |
+| (queue-list c)     | Return list of queue.         |
+| (queue-pop c)      | Pop element from queue front. |
+| (with-queue s . b) | Make local queue.             |
 
 ### (make-queue): Make queue.
 
@@ -1359,6 +1377,12 @@ key and the rest is the value.
 ### (acons alist c): Add key/value to associative list.
 
 ### (assoc x l): Return list that start with X.
+
+## Other
+
+| Function   | Description               |
+|------------|---------------------------|
+| (source s) | Get definition of symbol. |
 
 ## Target information
 

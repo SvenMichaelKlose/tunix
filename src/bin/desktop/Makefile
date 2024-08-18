@@ -27,4 +27,4 @@ clean:
 	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM) $(PROGRAM).lbl $(PROGRAM).map desktop.bin charset-4x8.o charset-4x8.bin desktop-file-window.bin
 
 test:
-	@echo "No test to be done."
+	@printf "No test to be done.\n"

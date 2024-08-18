@@ -7,13 +7,13 @@ SIM65=`pwd`/src/contrib/cc65/bin/sim65
 
 test_sim6502 () {
     make clean world TARGET=sim6502 LISP_FLAGS="$1" $2
-    cd tunix/sim6502/ && (echo "(isave \"image\")" | $SIM65 lisp) ; cd -
-    cd tunix/sim6502/ && (echo | $SIM65 lisp) ; cd -
+    cd tunix/sim6502/ && (printf "(isave \"image\")" | $SIM65 lisp) ; cd -
+    cd tunix/sim6502/ && (printf | $SIM65 lisp) ; cd -
 }
 
 test_unix () {
     make clean world TARGET=unix LISP_FLAGS="$1" $2
-    cd tunix/unix/ && (echo -n "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
+    cd tunix/unix/ && (printf "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
 }
 
 # TODO: -DCHECK_OBJ_POINTERS on sim65.

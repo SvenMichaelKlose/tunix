@@ -19,7 +19,7 @@
 
 (fn con-clr2eol ()
   (dotimes ((- *con-width* cx))
-    (out ' ')))
+    (out \ )))
 
 (fn con-xy (x y)
   (out 1)
@@ -39,7 +39,7 @@
 
 ;;; Editing
 
-(fn editline (x)
+(fn edit-line (x)
   (with ((line (symbol-name x)))
     (while t
       (display-line line)
@@ -68,6 +68,25 @@
                             (subseq line (++ cx))))))))))
 
 (var lines nil)
+
+(fn skipctrls ()
+  (while (not (eof))
+    (= (conin))
+    (? (< c \ )
+       (return nil))))
+
+(fn read-line ()
+  (symbol
+    (with-queue q
+      (let c nil
+        (skipctrls)
+        (? (eof)
+           (return nil))
+        (while (not (eof))
+          (= c (conin))
+          (? (< c \ )
+             (return nil))
+          (enqueue q))))))
 
 (fn read-lines (x)
   (with-input (open x 'r)

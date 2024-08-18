@@ -43,6 +43,7 @@ src: host
 
 world: all
 	mkdir -p $(DISTDIR)
+	rm -f $(DISTDIR)/image
 	cp src/bin/lisp/lisp $(DISTDIR)/
 ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.lbl $(DISTDIR)/

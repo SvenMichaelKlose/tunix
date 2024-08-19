@@ -221,7 +221,9 @@ lisp_repl (char mode)
 #endif // #ifndef NAIVE
 
     // READ/EVAL/PRINT-Loop.
-    while (!eof ()) {
+    while (in (), !eof ()) {
+        putback ();
+
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
@@ -530,6 +532,10 @@ load (char * pathname)
 
     // Memorize input channel.
     int oldin = fnin;
+
+#ifdef VERBOSE_LOAD
+    outs ("Loading "); outs (pathname); terpri ();
+#endif
 
     // Open file.
     strcpy (buffer, pathname);

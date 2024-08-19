@@ -455,20 +455,22 @@ be dealt with.
 
 ### Error codes
 
-| ID (ERROR_...)  | Code | Description                    |
-|-----------------|------|--------------------------------|
-| TYPE            | 1    | Unexpected object type.        |
-| ARG\_MISSING    | 2    | One or more missing arguments. |
-| TAG\_MISSING    | 3    | BLOCK tag couldn't be found.   |
-| TOO\_MANY\_ARGS | 4    | Too many arguments.            |
-| NOT\_FUNCTION   | 5    | Object is not a function.      |
-| ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
-| OUT\_OF\_HEAP   | 7    | Out of heap.                   |
-| NO\_PAREN       | 8    | ')' missing.                   |
-| STALE\_PAREN    | 9    | Unexpected ')'.                |
-| FILEMODE        | 10   | Illegal mode for OPEN.         |
-| USER            | 11   | ERROR function was called.     |
-| INTERNAL        | 12   | Returned to operating system.  |
+| ID (ERROR_...)  | Code | Description                     |
+|-----------------|------|---------------------------------|
+| TYPE            | 1    | Unexpected object type.         |
+| ARG\_MISSING    | 2    | One or more missing arguments.  |
+| TAG\_MISSING    | 3    | BLOCK tag couldn't be found.    |
+| TOO\_MANY\_ARGS | 4    | Too many arguments.             |
+| NOT\_FUNCTION   | 5    | Object is not a function.       |
+| ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
+| OUT\_OF\_HEAP   | 7    | Out of heap.                    |
+| NO\_PAREN       | 8    | ')' missing.                    |
+| STALE\_PAREN    | 9    | Unexpected ')'.                 |
+| SYM\_TOO\_LONG  | 10   | Symbol longer than MAX\_SYMBOL. |
+| QUOTE\_MISSING  | 11   | '"' missing.                    |
+| FILEMODE        | 12   | Illegal mode for OPEN.          |
+| USER            | 13   | ERROR function was called.      |
+| INTERNAL        | 14   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 

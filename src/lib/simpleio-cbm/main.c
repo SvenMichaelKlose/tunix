@@ -54,9 +54,9 @@ alloc_channel (void)
     return 0;
 }
 
-signed char ofs;
-char ctrl;
-char ctrh;
+signed char   ofs;
+char          ctrl;
+char          ctrh;
 unsigned char i;
 
 // XXX: ld65 complains about this being a duplicate if named 'len',
@@ -145,40 +145,40 @@ convert_in (void)
 char
 raw_conin (void)
 {
-    last_error = 0;
     last_in = cbm_k_getin ();
+    last_error = cbm_k_readst ();
     return convert_in ();
 }
 
 char
 raw_in (void)
 {
-    last_error = 0;
     last_in = cbm_k_chrin ();
+    last_error = cbm_k_readst ();
     return convert_in ();
 }
 
 void FASTCALL
 raw_out (char c)
 {
-    last_error = 0;
     if (fnout == STDOUT || fnout == STDERR)
         c = (c == '_') ? 164 : reverse_case (c);
     cbm_k_bsout (c);
+    last_error = cbm_k_readst ();
 }
 
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
-    last_error = 0;
     cbm_k_chkin (channels[chn]);
+    last_error = cbm_k_readst ();
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
-    last_error = 0;
     cbm_k_ckout (channels[chn]);
+    last_error = cbm_k_readst ();
 }
 
 void FASTCALL

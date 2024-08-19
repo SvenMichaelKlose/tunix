@@ -19,7 +19,8 @@
 bool FASTCALL
 our_isalpha (char c)
 {
-    return !isspace (c) && c != '(' && c != ')' && c != ';';
+    return !isspace (c) && !isdigit (c) &&
+           c != '(' && c != ')' && c != ';';
 }
 
 #ifndef NAIVE
@@ -39,6 +40,26 @@ is_unexpected_eol (void)
 
 #endif // #ifndef NAIVE
 
+void
+skip_comments_and_spaces ()
+{
+    if (skip_spaces ())
+        return;
+
+    // Skip comment.
+    if (in () == ';')  {
+        // Skip until control chars.
+        while (in () >= ' ')
+            if (eof ())
+                return;
+        // Skip control chars.
+        while (in () < ' ')
+            if (eof ())
+                return;
+    }
+    putback ();
+}
+
 lispptr
 read_list (void)
 {
@@ -47,7 +68,7 @@ read_list (void)
     cons * last  = nil;
 
     while (1) {
-        skip_spaces ();
+        skip_comments_and_spaces ();
 
 #ifndef NAIVE
         if (is_unexpected_eol ())
@@ -57,7 +78,6 @@ read_list (void)
         // End of list.
         if (in () == ')')
             return start;
-
 #ifndef NAIVE
         if (is_unexpected_eol ())
             return nil;
@@ -74,12 +94,10 @@ read_list (void)
 
 #ifndef NAIVE
             // Ensure end of list.
-            skip_spaces ();
+            skip_comments_and_spaces ();
             if (in () != ')')
                 return missing_closing_paren ();
-
-            // Delay detecting end of list.
-            putback ();
+            putback (); // Keep for regular end-of-list detection.
 #endif
         } else {
             // Read next element.
@@ -108,38 +126,18 @@ read_list (void)
 }
 
 lispptr
-read_number (void)
-{
-    char * p = buffer;
-    for (p = buffer; !eof () && isdigit (in ()); p++)
-        *p = last_in;
-    *p = 0;
-    putback ();
-    return make_number (atoi (buffer));
-}
-
-lispptr
-read_symbol (void)
-{
-    char * p;
-    unsigned char len;
-    for (p = buffer; !eof () && our_isalpha (in ()); p++)
-        *p = last_in;
-    putback ();
-    len = p - buffer;
-    if (len == 3 && !memcmp (buffer, "nil", 3))
-        return nil;
-    return make_symbol (buffer, p - buffer);
-}
-
-lispptr
 read_string (void)
 {
     char * p;
-    for (p = buffer;
-         p != &buffer[MAX_SYMBOL] && !eof () && in () != '"';
-         p++)
+    for (p = buffer; p != &buffer[MAX_SYMBOL] && in () != '"'; p++) {
+#ifndef NAIVE
+        if (eof ()) {
+            error (ERROR_QUOTE_MISSING, "No '\"'");
+            return nil;
+        }
+#endif
         *p = (last_in == '\\') ? in () : last_in;
+    }
     return make_symbol (buffer, p - buffer);
 }
 
@@ -159,23 +157,68 @@ read_unquoted (void)
 }
 
 lispptr
+read_symbol_or_number (void)
+{
+    bool is_number = false;
+    char * p;
+    lispobj_size_t len = 0;
+
+    // Read char by char...
+    for (p = buffer; in (), !eof (); p++) {
+#ifndef NAIVE
+        // Check if buffer is full.
+        if (len == MAX_SYMBOL) {
+            error (ERROR_SYM_TOO_LONG, "Sym len");
+            return nil;
+        }
+#endif
+
+        // Determine type or end.
+        if (our_isalpha (last_in)) {
+            // Valid symbol char but not a digit.
+            // Break if we determined that it's a number.
+            if (is_number)
+                break;
+        } else if (isdigit (last_in)) {
+            // Got a digit.  Make it a number if it's the
+            // first char.  Also if it's preceded by a minus
+            // as the first char.
+            if (!is_number)
+                if (!len || (len == 1 && *buffer == '-'))
+                    is_number = true;
+        } else
+            // Break on anything else.
+            break;
+
+        // Add char to buffer.
+        *p = last_in;
+        len++;
+
+    }
+    putback ();
+
+    // Make number.
+    if (is_number) {
+        *p = 0; // Zero-terminate for atoi().
+        if (buffer[0] == '-')
+            return make_number (-atoi (&buffer[1]));
+        return make_number (atoi (buffer));
+    }
+
+    // Make symbol.
+    if (len == 3 && !memcmp (buffer, "nil", 3))
+        return nil;
+    return make_symbol (buffer, len);
+}
+
+lispptr
 read_expr ()
 {
-    skip_spaces ();
-    in ();
+    skip_comments_and_spaces ();
     if (eof ())
         return nil;
-    // Skip one-line comment.
-    if (last_in == ';')  {
-        while (in () >= ' ')
-            if (eof ())
-                return nil; // TODO: EOF object to set with eof(s).
-        while (in () < ' ')
-            if (eof ())
-                return nil;
-        putback ();
-    }
-    switch (last_in) {
+
+    switch (in ()) {
     case '(':
         return read_list ();
     case '"':
@@ -193,8 +236,5 @@ read_expr ()
 #endif
     }
     putback ();
-    // TODO: Negative numbers.
-    if (isdigit (last_in))
-        return read_number ();
-    return read_symbol ();
+    return read_symbol_or_number ();
 }

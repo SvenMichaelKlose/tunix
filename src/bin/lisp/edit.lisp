@@ -1,5 +1,9 @@
+(or (cons? while)
+    (load "while.lisp"))
 (or (cons? subseq)
     (load "subseq.lisp"))
+(or (cons? case)
+    (load "case.lisp"))
 
 (var *con-width* 22)
 (var *con-height* 23)

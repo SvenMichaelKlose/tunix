@@ -1,10 +1,12 @@
 (fn nth (n l)
   (? (or (not l)
-         (== 0 n))
+         (<= 0 n))
      (car l)
      (nth (-- n) (cdr l))))
 
 (message "Testing NTH...")
+(and (nth -1 '(l i s p))
+     (error))
 (or (equal (nth 0 '(l i s p))
            'l)
     (error))

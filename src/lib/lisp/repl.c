@@ -207,6 +207,10 @@ lisp_repl (char mode)
             goto do_return;
         }
 
+#ifdef EXIT_FAILURE_ON_ERROR
+        exit (EXIT_FAILURE);
+#endif
+
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
         // TODO?: print_debugger_info ();

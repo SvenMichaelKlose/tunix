@@ -1418,3 +1418,7 @@ compressed you have to call the garbage collector twice.
 
 Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
 GC will print a 'C' to the currently active output channel.
+
+# XXX
+
+EXIT\_FAILURE\_ON\_ERROR

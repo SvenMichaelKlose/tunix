@@ -3,6 +3,20 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-19
+
+Did v0.0.3 yesterday, mainly because there was help to
+get compiled with clang.
+
+READ has been reworked and can also read negative numbers,
+but I've messed up EOF.  On all platforms.  Will continue
+work tomorrow evening perhaps.  Could use a paid job.
+
+The sketched text editor occupies 3.5K heap so far which
+leaves me a bit baffled.  Could be running on the VIC-20
+with no "tricks" like overlays.  Now for a night worth a
+pause.
+
 # 2024-08-17
 
 Took it to release v0.0.2 with the debugger being much more

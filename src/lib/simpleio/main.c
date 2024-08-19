@@ -101,19 +101,17 @@ putback ()
     do_putback = true;
 }
 
-void
+bool
 skip_spaces ()
 {
-    while (!eof ()) {
-        // Skip comment until end of line.
-        if (in () == ';') {
-            while (!eof () && in () >= ' ');
-            putback ();
-        } else if (!isspace (last_in)) {
-            putback ();
-            return;
-        }
+    while (in ()) {
+        if (eof ())
+            return true;
+        if (!isspace (last_in))
+            break;
     }
+    putback ();
+    return false;
 }
 
 void FASTCALL

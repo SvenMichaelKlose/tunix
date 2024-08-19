@@ -55,7 +55,7 @@ extern void FASTCALL    setout      (simpleio_chn_t fn);
 extern char             conin       (void);
 extern char             in          (void);
 extern void             putback     (void);
-extern void             skip_spaces (void);
+extern bool             skip_spaces (void);
 extern void FASTCALL    inm         (char *, size_t);
 extern void FASTCALL    out         (char c);
 extern void FASTCALL    outnu       (unsigned long);

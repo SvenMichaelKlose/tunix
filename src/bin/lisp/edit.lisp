@@ -3,10 +3,17 @@
 
 (var *con-width* 22)
 (var *con-height* 23)
+(var +array-up+ 23)
+(var +array-down+ 23)
+(var +array-left+ 23)
+(var +array-right+ 23)
+(var +bs+ 23)
+(var +hotkey+ 23)   ; Ctrl-K?
 
 ;;; State
 
-(var saved? nil)
+(var *lines* nil)
+(var *saved?* nil)
 (var lx 0)      ; Line X position.
 (var ln 0)
 (var conln 0)   ; First ln on console.
@@ -39,6 +46,8 @@
 
 ;;; Editing
 
+; Edit line.
+; Return new line if an unrelated char has been input.
 (fn edit-line (x)
   (with ((line (symbol-name x)))
     (while t
@@ -52,9 +61,9 @@
           +arr-right+
             (? (< cx len)
                (= cx (++ cx)))
-          +del+
+          +bs+
             (when (< 0 cx)
-              (= saved? nil)
+              (= *saved?* nil)
               (= line (append (subseq line 0 (-- cx))
                               (subseq line cx))))
           (< c \ )
@@ -62,7 +71,7 @@
               (putback)
               (return (symbol line)))
           (progn
-            (= saved? nil)
+            (= *saved?* nil)
             (= line (append (subseq line 0 cx)
                             (list c)
                             (subseq line (++ cx))))))))))
@@ -95,13 +104,14 @@
         (enqueue q (read-line))))))
 
 (fn save-file ()
-  (put-file x lines)
+  (with-output (open pathname 'w)
+    (@ out *lines*))
   (? (err)
      (status "Cannot save.")
-     (= saved? t)))
+     (= *saved?* t)))
 
 (fn del-line (ln)
-  (= file (append (subseq lines 0 (-- ln))
+  (= *lines* (append (subseq lines 0 (-- ln))
                   (subseq lines (++ ln)))))
 
 (fn choose x
@@ -119,30 +129,40 @@
          (save-file))
     (not (== ! \c))))
 
+; Navigate up and down lines, catch commands.
 (fn edit-lines ()
+  (status *filename*)
   (while t
-    (status fname)
+    ; Update screen.
     (display)
-    (let lcons (nth file ln)
+
+    ; Edit current line.
+    (let lcons (nth *lines* ln)
       (!? (edit-line (car lcons))
-          (setcar lcons newl)
+          ; Replace line in list.
+          (setcar lcons !)
+          ; Remove line.
           (del-line ln)))
+
+    (status *filename*)
+
+    ; Handle line motion and commands.
     (case (conin)
       +arr-up+
         (? (< 0 ln)
            (= ln (-- ln)))
       +arr-down+
-        (? (< ln (length file))
+        (? (< ln (length *lines*))
            (= ln (++ ln)))
       +hotkey+
         (case (conin)
           \s (save-file)
           \q (and (quit-editor)
                   (return)))
-      (conputback))))
+      (putback))))
 
 (fn edit (file)
-  (= lines (read-lines file))
+  (= *lines* (read-lines file))
   (= saved? t)
   (edit-lines)
   (out "Bye!")(terpri))

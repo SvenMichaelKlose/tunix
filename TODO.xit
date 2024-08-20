@@ -38,6 +38,8 @@ Input/Output
 [ ] OPENDIR, READDIR, CLOSEDIR.
 
 Built-ins
+[ ] SYMBOL with look-up by default, boolean second argument
+    to tell not to.
 [ ] SYSTEM (program invokation).
 
 Tests

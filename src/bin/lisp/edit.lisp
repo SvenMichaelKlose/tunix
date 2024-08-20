@@ -46,7 +46,7 @@
   (out (subseq l 0 *con-w*))
   (con-clr2eol))
 
-(fn display ()
+(fn update-screen ()
   (con-home)
   (let y *win-y*
     (dolist (l (subseq *lines* con-ofs *win-h*))
@@ -67,8 +67,8 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (x)
-  (with ((line (symbol-name x)))
-    (while t
+  (let line (symbol-name x)
+    (while (not (eof))
       (display-line line)
       (con-xy cx (- cy cyofs))
       (con-crson)
@@ -102,31 +102,31 @@
 
 (fn skipctrls ()
   (while (not (eof))
-    (= c (conin))
-    (? (< c \ )
-       (return))))
+    (when (<= \  (conin))
+      (putback)
+      (return))
+    t))
 
 (fn read-line ()
   (symbol
     (with-queue q
       (let c nil
-        (skipctrls)
-        (? (eof)
+        (? (skipctrls)
            (return))
         (while (not (eof))
           (= c (conin))
           (? (< c \ )
              (return))
-          (enqueue q))))))
+          (enqueue q c))))))
 
 (fn read-lines (x)
-  (with-input (open x 'r)
+  (with-input i (open x 'r)
     (with-queue q
       (while (not (eof))
         (enqueue q (read-line))))))
 
 (fn save-file ()
-  (with-output (open pathname 'w)
+  (with-output o (open pathname 'w)
     (@ out *lines*))
   (? (err)
      (and (status "Cannot save.") nil)
@@ -137,7 +137,7 @@
                      (subseq lines (++ ln)))))
 
 (fn choose x
-  (while t
+  (while (not (eof))
     (!= (conin)
       (and (member ! x)
            (return !)))))
@@ -154,9 +154,8 @@
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
   (status *filename* (? (not *lines*) " (new)"))
-  (while t
-    ; Update screen.
-    (display)
+  (while (not (eof))
+    (update-screen)
 
     ; Edit current line.
     (let lcons (nth *lines* ln)

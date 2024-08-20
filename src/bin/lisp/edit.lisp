@@ -5,13 +5,16 @@
 (or (cons? case)
     (load "case.lisp"))
 
-(var *con-width* 22)
-(var *con-height* 23)
-(var +array-up+ 23)
-(var +array-down+ 23)
-(var +array-left+ 23)
-(var +array-right+ 23)
+(var *con-w* 22)
+(var *con-h* 23)
+(var *win-h* 23)
+(var *win-y* 23)
+(var +arr-up+ 23)
+(var +arr-down+ 23)
+(var +arr-left+ 23)
+(var +arr-right+ 23)
 (var +bs+ 23)
+(var +del+ 23)
 (var +hotkey+ 23)   ; Ctrl-K?
 
 ;;; State
@@ -29,26 +32,37 @@
   (out 145)) ; UP
 
 (fn con-clr2eol ()
-  (dotimes ((- *con-width* cx))
+  (dotimes ((- *con-w* cx))
     (out \ )))
 
 (fn con-xy (x y)
   (out 1)
   (out 1))
 
-(fn update-line (line)
-  (con-cr)
-  (@ out (subseq line 0 *con-width*))
-  (= cx (length line))
+;;; Rendering
+
+(fn update-line (l y)
+  (con-xy 0 y)
+  (out (subseq l 0 *con-w*))
   (con-clr2eol))
 
-; Update screen from ln line on.
-; Scroll if necessary.
-(fn display ())
+(fn display ()
+  (con-home)
+  (let y *win-y*
+    (dolist (l (subseq *lines* con-ofs *win-h*))
+      (update-line l y)
+      (!++ y))
 
-(fn status (msg))
+(fn status msg
+  (con-xy 0 *win-h*)
+  (@ out msg))
 
 ;;; Editing
+
+(fn del-char (x)
+  (= *saved?* nil)
+  (= line (append (subseq line 0 (-- x))
+                  (subseq line x))))
 
 ; Edit line.
 ; Return new line if an unrelated char has been input.
@@ -56,20 +70,23 @@
   (with ((line (symbol-name x)))
     (while t
       (display-line line)
+      (con-xy cx (- cy cyofs))
+      (con-crson)
       (with ((len (length line))
              (c   (conin)))
         (case c
           +arr-left+
             (? (< 0 cx)
-               (= cx (-- cx)))
+               (!-- cx))
           +arr-right+
             (? (< cx len)
-               (= cx (++ cx)))
+               (!++ cx))
+          +del+
+            (? (< 0 cx)
+              (del-char cx))
           +bs+
-            (when (< 0 cx)
-              (= *saved?* nil)
-              (= line (append (subseq line 0 (-- cx))
-                              (subseq line cx))))
+            (? (< 0 cx)
+              (del-char (!-- cx)))
           (< c \ )
             (progn
               (putback)
@@ -78,15 +95,16 @@
             (= *saved?* nil)
             (= line (append (subseq line 0 cx)
                             (list c)
-                            (subseq line (++ cx))))))))))
+                            (subseq line (++ cx))))))))
+    (con-crsoff)))
 
 (var lines nil)
 
 (fn skipctrls ()
   (while (not (eof))
-    (= (conin))
+    (= c (conin))
     (? (< c \ )
-       (return nil))))
+       (return))))
 
 (fn read-line ()
   (symbol
@@ -94,11 +112,11 @@
       (let c nil
         (skipctrls)
         (? (eof)
-           (return nil))
+           (return))
         (while (not (eof))
           (= c (conin))
           (? (< c \ )
-             (return nil))
+             (return))
           (enqueue q))))))
 
 (fn read-lines (x)
@@ -111,12 +129,12 @@
   (with-output (open pathname 'w)
     (@ out *lines*))
   (? (err)
-     (status "Cannot save.")
+     (and (status "Cannot save.") nil)
      (= *saved?* t)))
 
 (fn del-line (ln)
   (= *lines* (append (subseq lines 0 (-- ln))
-                  (subseq lines (++ ln)))))
+                     (subseq lines (++ ln)))))
 
 (fn choose x
   (while t
@@ -125,7 +143,7 @@
            (return !)))))
 
 (fn quit-editor ()
-  (or modified?
+  (or *saved?*
       (return t))
   (status "Save first (y/n/c)?")
   (!= (choose \y \n \c)
@@ -143,10 +161,8 @@
     ; Edit current line.
     (let lcons (nth *lines* ln)
       (!? (edit-line (car lcons))
-          ; Replace line in list.
-          (setcar lcons !)
-          ; Remove line.
-          (del-line ln)))
+          (setcar lcons !) ; Replace line in list.
+          (del-line ln))) ; Remove line.
 
     (status *filename*)
 
@@ -154,10 +170,10 @@
     (case (conin)
       +arr-up+
         (? (< 0 ln)
-           (= ln (-- ln)))
+           (!-- ln))
       +arr-down+
         (? (< ln (length *lines*))
-           (= ln (++ ln)))
+           (!++ ln))
       +hotkey+
         (case (conin)
           \s (save-file)
@@ -169,4 +185,4 @@
   (= *lines* (read-lines file))
   (= saved? t)
   (edit-lines)
-  (out "Bye!")(terpri))
+  (status "Bye!")(con-crson)(terpri))

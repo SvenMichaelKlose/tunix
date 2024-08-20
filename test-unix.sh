@@ -20,12 +20,12 @@ test_unix () {
     cd tunix/unix/ && (printf "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
 }
 
-test_unix
+test_unix "-DEXIT_FAILURE_ON_ERROR"
 test_unix "$PARANOID"
-test_unix "-DGC_STRESS $PARANOID_"
-test_unix "-DCOMPRESSED_CONS $PARANOID"
-test_unix "-DNO_ONERROR $PARANOID"
-test_unix "-DNO_DEBUGGER $PARANOID"
+test_unix "$PARANOID -DGC_STRESS"
+test_unix "$PARANOID -DCOMPRESSED_CONS"
+test_unix "$PARANOID -DNO_ONERROR"
+test_unix "$PARANOID -DNO_DEBUGGER"
 test_unix "-DNAIVE"
 
 # TODO: -DCHECK_OBJ_POINTERS on sim65.

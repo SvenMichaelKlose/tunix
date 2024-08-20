@@ -51,7 +51,7 @@
   (let y *win-y*
     (dolist (l (subseq *lines* con-ofs *win-h*))
       (update-line l y)
-      (!++ y))
+      (!++ y))))
 
 (fn status msg
   (con-xy 0 *win-h*)

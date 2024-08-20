@@ -98,14 +98,15 @@ in ()
 void
 putback ()
 {
-    do_putback = true;
+    if (!eof ())
+        do_putback = true;
 }
 
 bool
 skip_spaces ()
 {
     while (!eof ()) {
-        if (!isspace (last_in)) {
+        if (!isspace (in ())) {
             putback ();
             return false;
         }

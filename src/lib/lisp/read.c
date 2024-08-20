@@ -7,6 +7,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#ifdef TARGET_UNIX
+#include <signal.h> // For HOST_DEBUGGER().
+#endif
 
 #include <simpleio/libsimpleio.h>
 

@@ -61,6 +61,12 @@
 (? (cdr nil)
    (error))
 
+(message "Testing READing dotted pair...")
+(or (eq 'a (car '(a . 49)))
+    (error))
+(or (eq 'b (cdr '(10 . b)))
+    (error))
+
 (message "Testing NOT...")
 (or (not nil) (error))
 

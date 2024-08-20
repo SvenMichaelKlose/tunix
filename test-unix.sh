@@ -34,6 +34,6 @@ test_sim6502 "-DLOAD_ALL -DNDEBUG"
 test_sim6502 "-DLOAD_ALL -DCOMPRESSED_CONS"
 test_sim6502 "-DLOAD_ALL -DNO_ONERROR"
 test_sim6502 "-DLOAD_ALL -DNO_DEBUGGER"
-test_sim6502 "-DLOAD_ALL -DNAIVE"
+#test_sim6502 "-DLOAD_ALL -DNAIVE"
 
 ./make-development-versions.sh

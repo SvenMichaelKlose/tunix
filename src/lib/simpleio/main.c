@@ -104,14 +104,13 @@ putback ()
 bool
 skip_spaces ()
 {
-    while (in ()) {
-        if (eof ())
-            return true;
-        if (!isspace (last_in))
-            break;
+    while (!eof ()) {
+        if (!isspace (last_in)) {
+            putback ();
+            return false;
+        }
     }
-    putback ();
-    return false;
+    return true;
 }
 
 void FASTCALL

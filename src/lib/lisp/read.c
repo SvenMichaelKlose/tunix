@@ -95,7 +95,7 @@ read_list (void)
 #ifndef NAIVE
             // Ensure end of list.
             skip_comments_and_spaces ();
-            if (in () != ')')
+            if (eof () || in () != ')')
                 return missing_closing_paren ();
             putback (); // Keep for regular end-of-list detection.
 #endif
@@ -164,7 +164,7 @@ read_symbol_or_number (void)
     lispobj_size_t len = 0;
 
     // Read char by char...
-    for (p = buffer; in (), !eof (); p++) {
+    for (p = buffer; !eof (); p++) {
 #ifndef NAIVE
         // Check if buffer is full.
         if (len == MAX_SYMBOL) {
@@ -174,7 +174,7 @@ read_symbol_or_number (void)
 #endif
 
         // Determine type or end.
-        if (our_isalpha (last_in)) {
+        if (our_isalpha (in ())) {
             // Valid symbol char but not a digit.
             // Break if we determined that it's a number.
             if (is_number)

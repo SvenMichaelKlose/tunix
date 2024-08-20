@@ -225,9 +225,7 @@ lisp_repl (char mode)
 #endif // #ifndef NAIVE
 
     // READ/EVAL/PRINT-Loop.
-    while (in (), !eof ()) {
-        putback ();
-
+    while (!eof ()) {
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();

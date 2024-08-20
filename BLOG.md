@@ -3,6 +3,15 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-20
+
+I can't stop thinking about giving the editor cut and
+past and undo - of course without letting it grow much
+larger.  That's probably because I got woken up in the
+middle of the night.  The I/O needs separate status info
+for each channel, of course.  It wasn't fun to debug.
+Back to bed.
+
 # 2024-08-19
 
 Did v0.0.3 yesterday, mainly because there was help to

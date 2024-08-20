@@ -135,7 +135,7 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (status *filename*)
+  (status *filename* (? (not *lines*) " (new)"))
   (while t
     ; Update screen.
     (display)

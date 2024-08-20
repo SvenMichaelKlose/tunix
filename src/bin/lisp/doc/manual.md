@@ -1262,16 +1262,18 @@ programming languages.
 | (every f x)     | Test if F is T for all X.           |
 | (some f x)      | Test if F is T for some X.          |
 | (find x l)      | Find element X in list.             |
-| (find-if f l)   | Find element X in list.             |
+| (find-if f l)   | Find element X in list by F.        |
 | (group l n)     | Split L in lists of length N.       |
 | (nth n l)       | Get Nth cons in L.                  |
 | (nthcdr n l)    | Get Nth CDR of cons in L.           |
+| (mapcar f +l)   | Map CARs of lists.                  |
+| (mapcan f +l)   | Concatenating MAPCAR.               |
 | (member-if f l) | Find cons with element in list.     |
 | (remove-if f l) | Removed elemnts from L.             |
 | (reverse l)     | Reverse list.                       |
 | (subseq l n n)  | Return sublist.                     |
 
-### (list +x): Return list evaluated.
+### (list +x): Make list of arguments.
 
 ### (list? x): Test if argument is NIL or a cons.
 

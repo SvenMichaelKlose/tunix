@@ -20,10 +20,16 @@ and this project adheres to
 
 #### Interpreter
 
+##### Changed
+
+- READ accepts negative numbers.  End-of-file checks have
+  been completed.
+
 ##### Added
 
 - Macro CASE to test for values.
 - CONIO: Wraps libsimpleio/conio().
+- MAPCAR and MAPCAN.
 
 
 ## [v0.0.3] - 2024-08-18

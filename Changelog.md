@@ -23,6 +23,7 @@ and this project adheres to
 ##### Added
 
 - Macro CASE to test for values.
+- Macros !++ and !--.
 - CONIO: Wraps libsimpleio/conio().
 
 

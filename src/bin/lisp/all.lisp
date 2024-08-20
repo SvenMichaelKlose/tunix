@@ -36,6 +36,7 @@
 (load "unless.lisp")
 (load "with-global.lisp")
 (load "while.lisp")
+(load "incdec.lisp")
 (message "All loaded.")
 (message "Cleaning up. Please wait...")
 ; Have the universe list compressed.

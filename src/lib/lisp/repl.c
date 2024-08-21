@@ -137,17 +137,17 @@ read_cmd_arg (void)
 
 #endif // #ifndef NO_DEBUGGER
 
+simpleio_chn_t app_in;
+simpleio_chn_t app_out;
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
-    simpleio_chn_t app_in = fnin;
-    simpleio_chn_t app_out = fnout;
+    simpleio_chn_t read_chn = (mode == REPL_LOAD) ? fnin : STDIN;
 #ifndef NDEBUG
     char * old_stack    = stack;
     char * old_tagstack = tagstack;
 #endif
-    simpleio_chn_t this_in;
-    simpleio_chn_t this_out;
 #ifndef NAIVE
     // Save parent REPLs return point for hard errors.
     jmp_buf * old_break = hard_repl_break;
@@ -160,11 +160,8 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
     char cmd;
 #endif
-    // Ensure terminal I/O in user- and debug-mode.
-    if (mode != REPL_LOAD)
-        set_channels (STDIN, STDOUT);
-    this_in  = fnin;
-    this_out = fnout;
+
+    set_channels (STDIN, STDOUT);
 
     num_repls++;
 #ifndef NO_DEBUGGER
@@ -219,6 +216,11 @@ lisp_repl (char mode)
 
     // READ/EVAL/PRINT-Loop.
     while (!eof ()) {
+        setin (read_chn);
+        if (eof ())
+            break;
+        setin (STDIN);
+
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
@@ -232,7 +234,9 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
+            setin (read_chn);
             read_safe ();
+            setin (STDIN);
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)
                 terpri ();
@@ -395,9 +399,8 @@ terpri_next:
             // Update saved program channels.
             app_in  = fnin;
             app_out = fnout;
+            set_channels (STDIN, STDOUT);
 
-            // Set channels of this REPL.
-            set_channels (this_in, this_out);
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
@@ -481,14 +484,15 @@ do_return:
 
         outs ("Continuing...");
         terpri ();
-
-        // Restore program channels.
-        set_channels (app_in, app_out);
     }
 #endif
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
 #endif
+
+    // Restore program channels.
+    set_channels (app_in, app_out);
+
     return x;
 }
 
@@ -548,6 +552,8 @@ init_repl ()
     do_break_repl      = false;
     do_continue_repl   = false;
     num_repls = -1;
+    app_in = STDIN;
+    app_out = STDOUT;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);
@@ -559,7 +565,6 @@ init_repl ()
 #ifndef NAIVE
     current_toplevel = nil;
 #endif
-
 #ifndef NO_MACROEXPAND
     macroexpand_sym = make_symbol ("macroexpand", 11);
     expand_universe (macroexpand_sym);

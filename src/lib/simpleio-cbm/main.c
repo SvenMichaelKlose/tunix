@@ -22,6 +22,7 @@
 #define DEV_KEYBOARD    0
 #define DEV_SCREEN      3
 
+// cc65 charmap-independent values
 #define UPCASE_A  65
 #define UPCASE_Z  90
 #define LOCASE_A  97

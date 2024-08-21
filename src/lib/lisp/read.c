@@ -96,7 +96,7 @@ read_list (void)
 #ifndef NAIVE
             // Ensure end of list.
             skip_comments_and_spaces ();
-            if (eof () || in () != ')')
+            if (in () != ')' || eof ())
                 return missing_closing_paren ();
             putback (); // Keep for regular end-of-list detection.
 #endif
@@ -131,13 +131,13 @@ read_string (void)
 {
     char * p;
     for (p = buffer; p != &buffer[MAX_SYMBOL] && in () != '"'; p++) {
+        *p = (lastin () == '\\') ? in () : lastin ();
 #ifndef NAIVE
         if (eof ()) {
             error (ERROR_QUOTE_MISSING, "No '\"'");
             return nil;
         }
 #endif
-        *p = (lastin () == '\\') ? in () : lastin ();
     }
     return make_symbol (buffer, p - buffer);
 }
@@ -165,7 +165,10 @@ read_symbol_or_number (void)
     lispobj_size_t len = 0;
 
     // Read char by char...
-    for (p = buffer; !eof (); p++) {
+    for (p = buffer; in (); p++) {
+        if (eof ())
+            break;
+
 #ifndef NAIVE
         // Check if buffer is full.
         if (len == MAX_SYMBOL) {
@@ -175,7 +178,7 @@ read_symbol_or_number (void)
 #endif
 
         // Determine type or end.
-        if (our_isalpha (in ())) {
+        if (our_isalpha (lastin ())) {
             // Valid symbol char but not a digit.
             // Break if we determined that it's a number.
             if (is_number)

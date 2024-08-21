@@ -112,8 +112,12 @@ lastin ()
 bool
 skip_spaces ()
 {
-    while (!eof ()) {
-        if (!isspace (in ())) {
+    char c;
+    while (1) {
+        c = in ();
+        if (eof ())
+            break;
+        if (!isspace (c)) {
             putback ();
             return false;
         }

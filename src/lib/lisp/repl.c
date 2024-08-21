@@ -101,7 +101,7 @@ print_debugger_info ()
 
     // Print is either about to be evaluated or caused
     // an error.
-    outs (error_code ? "In" : "Next:");
+    outs (error_code ? "In" : "Next");
     do_highlight = true;
     if (current_function) {
         tmp2 = SYMBOL_VALUE(current_function);

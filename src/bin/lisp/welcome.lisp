@@ -5,7 +5,7 @@
 ; Have the universe list compressed.
 (= *universe (copy-list *universe*))
 (message "Cleaning up. Please wait...")
-(print (gc))(message " bytes free.")
+(print (gc))(out " bytes free.")
 (and (builtin? 'time)
      (number? +bps+)
   (block t

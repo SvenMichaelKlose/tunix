@@ -3,6 +3,17 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-21
+
+Unix input channel works, CBM doesn't.  It's been a long
+day and, as usual, utterly frustrating to have to give it
+a break.  Found a Rasperry Pi Pico + magazine in the
+mailbox (dead tree version) but when it comes to install
+the command-line development tools on Linux, I'm as smart
+as last night.  It mentioned that there is some "ulisp"
+right in the front of the magaizine but no more info on
+that either.  Not very motivating either.
+
 # 2024-08-20
 
 Thinking about the editor, alongside just messing up

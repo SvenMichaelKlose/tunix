@@ -1,8 +1,9 @@
 (fn nthcdr (n l)
-  (? (or (not l)
-         (<= 0 n))
-     l
-     (nthcdr (-- n) (cdr l))))
+  (and (<= 0 n)
+    (? (or (not l)
+           (== n 0))
+       l
+       (nthcdr (-- n) (cdr l)))))
 
 (message "Testing NTHCDR...")
 (and (nthcdr -1 '(l i s p))

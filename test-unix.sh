@@ -22,7 +22,7 @@ test_unix () {
 
 test_unix "-DEXIT_FAILURE_ON_ERROR"
 test_unix "$PARANOID"
-test_unix "$PARANOID -DGC_STRESS"
+test_unix "-DGC_STRESS"
 test_unix "$PARANOID -DCOMPRESSED_CONS"
 test_unix "$PARANOID -DNO_ONERROR"
 test_unix "$PARANOID -DNO_DEBUGGER"

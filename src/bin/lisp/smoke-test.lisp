@@ -1,7 +1,7 @@
 (var x nil)
 
 (message "Testing GC...")
-(print (gc))(message '" bytes free.")
+(print (gc))(out '" bytes free.")
 
 (message "Testing ATOM...")
 (atom 1)

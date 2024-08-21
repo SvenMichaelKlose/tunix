@@ -1,8 +1,9 @@
 (fn nth (n l)
-  (? (or (not l)
-         (<= 0 n))
-     (car l)
-     (nth (-- n) (cdr l))))
+  (and (<= 0 n)
+    (? (or (not l)
+           (== n 0))
+       (car l)
+       (nth (-- n) (cdr l)))))
 
 (message "Testing NTH...")
 (and (nth -1 '(l i s p))

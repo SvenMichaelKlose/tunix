@@ -7,7 +7,7 @@
        (?
          ,@(mapcan $((p)
                       (? (cdr p)
-                         $((eql ,g ,,(car p)) ,,(cadr p))
+                         $((eql ,g ,',(car p)) ,',(cadr p))
                          (list (car p))))
                    (group (cdr x) 2))))))
 

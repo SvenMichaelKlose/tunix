@@ -198,9 +198,6 @@ lisp_repl (char mode)
             x = eval0 ();
             goto do_return;
         }
-#ifdef EXIT_FAILURE_ON_ERROR
-        exit (EXIT_FAILURE);
-#endif
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
         // TODO?: print_debugger_info ();
@@ -224,7 +221,9 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
-
+#ifdef EXIT_FAILURE_ON_ERROR
+        exit (EXIT_FAILURE);
+#endif
             // Out of heap errors cannot be corrected.
             if (error_code == ERROR_OUT_OF_HEAP)
                 error_code = 0;

@@ -200,7 +200,7 @@
 
 (message "Removing MAKE-COUNT and BLOCK-TEST...")
 (= *universe* (remove 'make-count (remove 'block-test *universe*)))
-(print (gc))(message " bytes free.")
+(print (gc))(out " bytes free.")
 
 (message "Testing SETOUT...")
 (setout stdout)

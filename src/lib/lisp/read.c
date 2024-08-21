@@ -139,7 +139,7 @@ read_string (void)
             return nil;
         }
 #endif
-        *p = (last_in == '\\') ? in () : last_in;
+        *p = (lastin () == '\\') ? in () : lastin ();
     }
     return make_symbol (buffer, p - buffer);
 }
@@ -182,7 +182,7 @@ read_symbol_or_number (void)
             // Break if we determined that it's a number.
             if (is_number)
                 break;
-        } else if (isdigit (last_in)) {
+        } else if (isdigit (lastin ())) {
             // Got a digit.  Make it a number if it's the
             // first char.  Also if it's preceded by a minus
             // as the first char.
@@ -194,7 +194,7 @@ read_symbol_or_number (void)
             break;
 
         // Add char to buffer.
-        *p = last_in;
+        *p = lastin ();
         len++;
 
     }

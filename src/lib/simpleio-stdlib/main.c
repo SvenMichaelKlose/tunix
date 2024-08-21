@@ -163,12 +163,16 @@ simpleio_open (char * name, char mode)
 {
     FILE * handle;
     char m[2];
+    simpleio_chn_t chn;
 
     last_error = 0;
     m[0] = mode;
     m[1] = 0;
-    if ((handle = fopen (name, m)))
-        return alloc_channel (handle);
+    if ((handle = fopen (name, m))) {
+        chn = alloc_channel (handle);
+        simpleio_init_channel (chn);
+        return chn;
+    }
     return 0;
 }
 

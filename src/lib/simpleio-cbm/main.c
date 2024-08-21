@@ -77,6 +77,7 @@ simpleio_open (char * name, char mode)
     chn = alloc_channel ();
     if (!chn)
         goto error;
+    simpleio_init_channel (chn);
 
     ofs = 2;
     if (mode == 'w')
@@ -139,28 +140,26 @@ raw_err (void)
     return cbm_k_readst ();
 }
 
-char
-convert_in (void)
+char FASTCALL
+convert_in (char c)
 {
-    if (fnin == STDIN)
-        last_in = reverse_case (last_in);
-    return last_in;
+    return (fnin == STDIN) ? reverse_case (c) : c;
 }
 
-char
+char FASTCALL
 raw_conin (void)
 {
-    last_in = cbm_k_getin ();
+    char c = cbm_k_getin ();
     last_error = cbm_k_readst ();
-    return convert_in ();
+    return convert_in (c);
 }
 
 char
 raw_in (void)
 {
-    last_in = cbm_k_chrin ();
+    char c = cbm_k_chrin ();
     last_error = cbm_k_readst ();
-    return convert_in ();
+    return convert_in (c);
 }
 
 void FASTCALL

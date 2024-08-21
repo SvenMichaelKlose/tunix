@@ -46,12 +46,6 @@ bool    do_exit_program;    // Return to top-level REPL.
 #endif
 
 void
-out_colon (void)
-{
-    outs (": ");
-}
-
-void
 read_safe (void)
 {
 #ifndef NAIVE
@@ -70,9 +64,16 @@ read_safe (void)
 #ifndef NO_DEBUGGER
 
 void
+out_colon (void)
+{
+    outs (": ");
+}
+
+void
 print_debugger_info ()
 {
     // Head with errror info.
+    fresh_line ();
     if (error_code) {
         // Error code.
         outs ("Error #");
@@ -93,14 +94,10 @@ print_debugger_info ()
         outs ("Rvalue: ");
         print (value);
     }
-    fresh_line ();
-
-    // Print current return value.
-    //if (value != current_function && value != current_toplevel) {
-    //}
 
     // Print is either about to be evaluated or caused
     // an error.
+    fresh_line ();
     outs (error_code ? "In" : "Next");
     do_highlight = true;
     if (current_function) {
@@ -177,6 +174,7 @@ lisp_repl (char mode)
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
+        fresh_line ();
         outs ("DEBUGGER ");
         outn (num_debugger_repls);
         out (':');

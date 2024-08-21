@@ -12,6 +12,11 @@ and this project adheres to
 
 ### libsimpleio
 
+#### Changed
+
+- Last input/output and put back chars are stored for each
+  channel separately.
+
 #### Added
 
 - conio(): Returns waiting char or 0.

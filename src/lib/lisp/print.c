@@ -28,10 +28,8 @@ void print0 (lispptr);
 void
 space (void)
 {
-    if (last_out != '('
-        && last_out != ')'
-        && last_out != '\''
-        && last_out > ' ')
+    char c = lastout ();
+    if (c != '(' && c != ')' && c != '\'' && c > ' ')
         out (' ');
 }
 
@@ -56,7 +54,6 @@ void FASTCALL
 print_short (char * m, cons * c)
 {
     outs (m);
-    last_out = ' '; // Avoid output padding.
     print0 (LIST_CAR(LIST_CDR(c)));
 }
 

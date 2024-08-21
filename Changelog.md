@@ -29,6 +29,7 @@ and this project adheres to
 
 - READ accepts negative numbers.  End-of-file checks have
   been completed.
+- REPL has its own set of channels apart from the program.
 
 ##### Added
 

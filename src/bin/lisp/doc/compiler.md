@@ -13,13 +13,9 @@ book: true
 
 # Overview
 
-TUNIX Lisp is a highly efficient Lisp interpreter, written
-in ANSI-C.  It is designed for constrained environments,
-such as embedded systems, classic home computers.
-
-This is the plan on implementing a bytecode compiler to gain
-improved performance and smaller code size.  The compiler
-is written in TUNIX Lisp itself.
+This is the plan of implementing a bytecode compiler for
+TUNIX Lisp, written in itself, to gain improved performance
+and smaller code size.
 
 ## The target machine: Bytecode format
 
@@ -116,25 +112,24 @@ Transform to metacode:
 * Block folding
 * Expression expansion
 
-After that transformation the resulting code has to be
-cleaned from macro artifacts.
-
-Cleaning up at least:
-
 * Optimization
 
-Finally the desired code can be generated, e.g. byte code or
-assembly language.
+After the transformation to metacode the latter has to be
+at least cleaned from artifacts.
 
 Code generation:
+
+Finally the desired code can be generated, e.g. bytecode or
+assembly language.
 
 * Place expansion
 * Code macro expansion
 
 ### Compiler macro expansion
 
+The first compiler pass.
 Expands control flow special forms (BLOCK, GO, RETURN, ?,
-AND, OR) to these assembly-level jump and tag expressions:
+AND, OR) to simpler jump and tag expressions:
 
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
@@ -153,12 +148,12 @@ Jump tags must be EQ.
    (b)
    (c)
 
-(%= %0 a)
+(%= %0 (a))
 (%jmp-nil 1)
-(%= %0 b)
+(%= %0 (b))
 (%jmp 2)
 (%tag 1)
-(%= %0 c)
+(%= %0 (c))
 (%tag 2)
 ~~~
 
@@ -255,11 +250,12 @@ This pass solves that issue by renaming all arguments.
 [^bcdbgarg]
 
 [^bcdbgarg]: A map of the original names must be created if
-  debugging is in order.
+  debugging must be supported.
 
 ~~~lisp
 ; TODO example of shadowed arguments that would clash on
-; a common list.
+; a single list for all arguments of all functions in
+; an expression.
 ~~~
 
 ### Lambda expansion
@@ -321,71 +317,3 @@ These are actually two passes:
 
 * Collecting objects.
 * Calculating jump destinations.
-
-# Internals
-
-## Heap object layouts
-
-You can get the memory address of any object with RAWPTR.
-You can then use it to PEEK and POKE memory directly.
-
-On 32-bit and 64-bit architecture pointers and numbers are
-four or eight bytes in size.  The following tables show the
-layouts for 16-bit systems.
-
-All objects start with a type byte:
-
-| Bit | Description                        |
-|-----|------------------------------------|
-|  0  | Type bit for conses                |
-|  1  | Type bit for numbers               |
-|  2  | Type bit for symbols               |
-|  3  | Type bit for built-in functions    |
-|  4  | Extended type (for symbols)        |
-|  5  | Unused                             |
-|  6  | Unused                             |
-|  7  | Mark bit for garbage collection    |
-
-### Cones
-
-| Offset | Description         |
-|--------|---------------------|
-|   0    | Type info (value 1) |
-|   1-2  | CAR value           |
-|   3-4  | CDR value           |
-
-### Numbers
-
-| Offset | Description         |
-|--------|---------------------|
-|   0    | Type info (value 2) |
-|   1-4  | Long integer[^long] |
-
-[^long]: Will occupy eight bytes on 64-bit systems.
-
-### Symbols
-
-| Offset | Description                         |
-|--------|-------------------------------------|
-|   0    | Type info (value 4 or 20)           |
-|   1    | Name length (0-255)                 |
-|   2-3  | Pointer to next symbol for look-ups |
-|   4-x  | Name (optional)                     |
-
-Adding the extended type bit turn a symbol to a special
-form.  Arguments its function won't be evaluated then.
-
-### Built-in functions
-
-Built-ins are symbols with a pointer to a descriptor of the
-built-in.  It contains an ASCIIZ pointer to the name,
-another to the character-based argument definition and the
-address of its implementation.
-
-| Offset | Description                         |
-|--------|-------------------------------------|
-|  0     | Type info (value 8)                 |
-|  1-2   | Symbol value                        |
-|  3-4   | Pointer to next symbol for look-ups |
-|  5     | Name length (0-255)                 |
-| (6-x)  | Name (optional)                     |

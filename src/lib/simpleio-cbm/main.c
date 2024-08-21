@@ -19,6 +19,9 @@
 #define  MAX_CHANNELS   15
 #define  FIRST_CHANNEL  8
 
+#define DEV_KEYBOARD    0
+#define DEV_SCREEN      3
+
 #define UPCASE_A  65
 #define UPCASE_Z  90
 #define LOCASE_A  97
@@ -28,7 +31,9 @@
 #define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
 #define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
 
-bool            channels[MAX_CHANNELS];
+#define CHN_USED    1
+
+char            logical_fns[MAX_CHANNELS];
 simpleio_chn_t  chn;
 signed char     last_error;
 
@@ -47,8 +52,8 @@ alloc_channel (void)
 {
     // Set empty slot to channel.
     for (chn = FIRST_CHANNEL; chn < MAX_CHANNELS; chn++)
-        if (!channels[chn]) {
-            channels[chn] = chn;
+        if (!logical_fns[chn]) {
+            logical_fns[chn] = chn;
             return chn;
         }
     return 0;
@@ -170,22 +175,22 @@ raw_out (char c)
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
-    cbm_k_chkin (channels[chn]);
+    cbm_k_chkin (logical_fns[chn]);
     last_error = cbm_k_readst ();
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
-    cbm_k_ckout (channels[chn]);
+    cbm_k_ckout (logical_fns[chn]);
     last_error = cbm_k_readst ();
 }
 
 void FASTCALL
 raw_close (simpleio_chn_t chn)
 {
-    cbm_k_close (channels[chn]);
-    channels[chn] = 0;
+    cbm_k_close (logical_fns[chn]);
+    logical_fns[chn] = 0;
 }
 
 simpleio vectors = {
@@ -202,14 +207,11 @@ simpleio vectors = {
 void
 simpleio_init ()
 {
-    bzero (channels, sizeof (channels));
-    channels[STDIN]  = 0;
-    channels[STDOUT] = 3;
-    channels[STDERR] = 3;
-
+    cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
+    cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
+    bzero (logical_fns, sizeof (logical_fns));
+    logical_fns[STDIN]  = STDIN;
+    logical_fns[STDOUT] = STDOUT;
+    logical_fns[STDERR] = STDOUT;
     simpleio_set (&vectors);
-
-    // Set up standard stream LFNs.
-    cbm_open (0, 0, 0, NULL);
-    cbm_open (3, 3, 3, NULL);
 }

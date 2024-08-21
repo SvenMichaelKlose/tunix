@@ -232,6 +232,8 @@ read_expr ()
         return read_quoted (quasiquote);
     case ',':
         return read_unquoted ();
+    case '\\':
+        return make_number (in ());
 #ifndef NAIVE
     case ')':
         error (ERROR_STALE_PAREN, "Stale ')'");

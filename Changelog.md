@@ -35,6 +35,8 @@ and this project adheres to
 - Macro CASE to test for values.
 - CONIO: Wraps libsimpleio/conio().
 - MAPCAR and MAPCAN.
+- READ accepts char notation '\<char>' as promised in the
+  manual.
 
 
 ## [v0.0.3] - 2024-08-18

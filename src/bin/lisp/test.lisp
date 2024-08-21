@@ -10,6 +10,7 @@
      (error "Unexpected EOF after 'a'"))
 (or (== \b (in))
     (error "Should read 'b'"))
+(in)
 (or (eof)
     (error "EOF expected"))
 (setin stdin)

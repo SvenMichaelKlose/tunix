@@ -179,7 +179,12 @@ check_lispptr (char * x)
 void
 dump_lispptr (char * x)
 {
-    int n = objsize (x);
+    int n;
+    if (!x) {
+        printf ("0 - 0 0: nil\n");
+        return;
+    }
+    n = objsize (x);
     printf ("%p - %p %d: ", x, x + n - 1, n);
 #ifdef CHECK_OBJ_POINTERS
     is_checking_lispptr = true;

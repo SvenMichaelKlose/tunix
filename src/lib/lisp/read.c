@@ -55,10 +55,8 @@ skip_comments_and_spaces ()
         while (in () >= ' ')
             if (eof ())
                 return;
-        // Skip control chars.
-        while (in () < ' ')
-            if (eof ())
-                return;
+        if (skip_spaces ())
+            return;
     }
     putback ();
 }

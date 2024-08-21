@@ -1,5 +1,6 @@
-(message "Testing EOF...")
+(message "Testing top-level file read...")
 (var ch (open "test-read.bin" 'r))
+(or ch (error "Cannot open \"test-read.bin\"."))
 (setin ch)
 (and (eof)
      (error "Unexpected EOF at file start"))

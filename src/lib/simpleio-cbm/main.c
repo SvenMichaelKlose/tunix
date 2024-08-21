@@ -131,13 +131,13 @@ error:
 bool
 raw_eof (void)
 {
-    return cbm_k_readst () & 0x40;
+    return last_error;
 }
 
 signed char
 raw_err (void)
 {
-    return cbm_k_readst ();
+    return last_error;
 }
 
 char FASTCALL
@@ -151,6 +151,8 @@ raw_conin (void)
 {
     char c = cbm_k_getin ();
     last_error = cbm_k_readst ();
+    if (last_error)
+        return 0;
     return convert_in (c);
 }
 
@@ -159,6 +161,8 @@ raw_in (void)
 {
     char c = cbm_k_chrin ();
     last_error = cbm_k_readst ();
+    if (last_error)
+        return 0;
     return convert_in (c);
 }
 

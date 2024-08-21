@@ -400,7 +400,6 @@ terpri_next:
             app_in  = fnin;
             app_out = fnout;
             set_channels (STDIN, STDOUT);
-
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {

@@ -8,7 +8,7 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [current]
+## [v0.0.4]
 
 ### libsimpleio
 
@@ -27,15 +27,13 @@ and this project adheres to
 
 ##### Changed
 
-- READ accepts negative numbers.  End-of-file checks have
-  been completed.
+- READ accepts negative numbers.
+- READ with end of file checks on the spot.
 - REPL has its own set of channels apart from the program.
 
 ##### Added
 
-- Macro CASE to test for values.
-- CONIO: Wraps libsimpleio/conio().
-- MAPCAR and MAPCAN.
+- CONIO: Unbuffered input.
 - READ accepts char notation '\<char>' as promised in the
   manual.
 

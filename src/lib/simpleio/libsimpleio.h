@@ -15,6 +15,8 @@
 #define STDOUT 1
 #define STDERR 2
 
+#define MAX_CHANNELS    32
+
 typedef signed char simpleio_chn_t;
 
 // Supplied by driver libraries.

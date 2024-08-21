@@ -16,7 +16,6 @@
 
 #include <simpleio/libsimpleio.h>
 
-#define  MAX_CHANNELS   15
 #define  FIRST_CHANNEL  8
 
 #define DEV_KEYBOARD    0

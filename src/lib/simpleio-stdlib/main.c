@@ -24,7 +24,6 @@
 #include <simpleio/libsimpleio.h>
 
 #define MIN_CHANNEL     (STDERR + 1)
-#define MAX_CHANNELS    256
 
 FILE *      channels[MAX_CHANNELS];
 signed char last_error;

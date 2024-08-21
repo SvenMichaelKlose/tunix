@@ -5,12 +5,35 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-20
 
-I can't stop thinking about giving the editor cut and
-past and undo - of course without letting it grow much
-larger.  That's probably because I got woken up in the
-middle of the night.  The I/O needs separate status info
-for each channel, of course.  It wasn't fun to debug.
-Back to bed.
+Thinking about the editor, alongside just messing up
+the Lisp's intestines and forgetting that it has its own
+debugger so gdb can be put aside once in a while, the idea
+of compressing lines returned.  With TUNIX Lisp, the symbol
+look-up can help with that by splitting up lines into chunks
+of spaces, punctuation, control sequences and the rest of
+characters.  Calls for a new function called
+GROUP-BY-PREDICATES:
+
+~~~lisp
+(group-by-predicates x whitespace? punctuation? ctrl?)
+~~~
+
+Also mathing the case when no predicate on the list rings.
+That one either has to be built-in, compiled, somehow be
+running in the background when waiting for keypresses, or
+in an extra pass.
+
+Another idea that is coming closer to free heap is to
+replace named symbols by unnamed ones.  Optionally,
+procedure names and arguments may remain untouched.
+
+# 2024-08-20
+
+I can't stop thinking about giving the editor cut and past
+and undo - of course without letting it grow much larger.
+That's probably because I got woken up in the middle of the
+night.  The I/O needs separate status info for each channel,
+of course.  It wasn't fun to debug.  Back to bed.
 
 # 2024-08-19
 

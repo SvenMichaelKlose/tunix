@@ -181,7 +181,10 @@ eval0 (void)
 do_eval:
 #ifdef VERBOSE_EVAL
     // Print what's about to be evaluated.
+    PUSH_TAG(fnout);
+    setout (STDOUT);
     outs ("-> "); print (x); terpri ();
+    POP_TAG(fnout);
 #endif
 
 #ifndef NO_DEBUGGER
@@ -709,7 +712,10 @@ do_return_atom:
 
 #ifdef VERBOSE_EVAL
     // Print return value.
+    PUSH_TAG(fnout);
+    setout (STDOUT);
     outs ("<- "); print (value); terpri ();
+    POP_TAG(fnout);
 #endif
 
     // Continue evaluation.  Determine jump

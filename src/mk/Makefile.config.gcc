@@ -1,6 +1,6 @@
 CC			= gcc
 CFLAGS      = -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
-LD		    = gcc
+LD		    = gcc -Werror
 NO_EXOMIZER = 1
 
 ifndef COPTFLAGS

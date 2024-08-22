@@ -134,6 +134,9 @@
 
 // Commodore C128
 #ifdef TARGET_C128
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -153,7 +156,9 @@
 #ifndef NO_ONERROR
     #define NO_ONERROR
 #endif
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK

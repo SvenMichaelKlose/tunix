@@ -137,7 +137,7 @@ raw_eof (void)
 signed char
 raw_err (void)
 {
-    return last_error;
+    return last_error & ~0x40;
 }
 
 char FASTCALL
@@ -151,8 +151,6 @@ raw_conin (void)
 {
     char c = cbm_k_getin ();
     last_error = cbm_k_readst ();
-    if (last_error)
-        return 0;
     return convert_in (c);
 }
 

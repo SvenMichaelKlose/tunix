@@ -235,6 +235,8 @@ lisp_repl (char mode)
 #endif
             setin (read_chn);
             read_safe ();
+            if (eof ())
+                goto do_return;
             setin (STDIN);
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)
@@ -470,9 +472,7 @@ next:
         do_break_repl    = false;
         do_continue_repl = false;
     }
-#if !defined(NO_DEBUGGER) || !defined(NO_ONERROR)
 do_return:
-#endif
     // Track unnesting of this REPL.
     num_repls--;
 #ifndef NO_DEBUGGER

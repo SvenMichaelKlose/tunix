@@ -12,7 +12,7 @@
     (error "Should read 'b'"))
 (and (eof)
      (error "Unexpected EOF before file end"))
-(print (in))
+(in)
 ; TODO: CBMs won't give us an EOF here.
 ; Maybe a REPL thing.
 (and (eq +t+ 'unix)

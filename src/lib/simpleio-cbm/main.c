@@ -196,6 +196,7 @@ raw_close (simpleio_chn_t chn)
 {
     cbm_k_close (logical_fns[chn]);
     logical_fns[chn] = 0;
+    last_status[chn] = 0;
 }
 
 simpleio vectors = {

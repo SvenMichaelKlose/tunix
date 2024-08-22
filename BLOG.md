@@ -3,6 +3,13 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-22
+
+Phew!  Release v0.0.4 fixes a lot of things.  Especially
+I/O.  Enjoy!
+
+Guess I deserve a round of ice cream right away. :p
+
 # 2024-08-21
 
 Unix input channel works, CBM doesn't.  It's been a long

@@ -297,8 +297,8 @@ reading from the keyboard, which does not happen when
 reading from other devices.
 
 On error this routine returns with the carry flag set and
-additional flags in the STATUS zeropage locate (also see the
-READST system call).
+additional flags in STATUS byte on the zeropage
+(also see the READST system call).
 
 ## GETIN - Input character from channel
 

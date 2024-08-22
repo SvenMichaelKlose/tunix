@@ -46,12 +46,6 @@ bool    do_exit_program;    // Return to top-level REPL.
 #endif
 
 void
-out_colon (void)
-{
-    outs (": ");
-}
-
-void
 read_safe (void)
 {
 #ifndef NAIVE
@@ -70,9 +64,16 @@ read_safe (void)
 #ifndef NO_DEBUGGER
 
 void
+out_colon (void)
+{
+    outs (": ");
+}
+
+void
 print_debugger_info ()
 {
     // Head with errror info.
+    fresh_line ();
     if (error_code) {
         // Error code.
         outs ("Error #");
@@ -93,15 +94,11 @@ print_debugger_info ()
         outs ("Rvalue: ");
         print (value);
     }
-    fresh_line ();
-
-    // Print current return value.
-    //if (value != current_function && value != current_toplevel) {
-    //}
 
     // Print is either about to be evaluated or caused
     // an error.
-    outs (error_code ? "In" : "Next:");
+    fresh_line ();
+    outs (error_code ? "In" : "Next");
     do_highlight = true;
     if (current_function) {
         tmp2 = SYMBOL_VALUE(current_function);
@@ -140,20 +137,17 @@ read_cmd_arg (void)
 
 #endif // #ifndef NO_DEBUGGER
 
+simpleio_chn_t app_in;
+simpleio_chn_t app_out;
+
 lispptr FASTCALL
 lisp_repl (char mode)
 {
-#ifndef NO_DEBUGGER
-    char cmd;
-    simpleio_chn_t app_in = fnin;
-    simpleio_chn_t app_out = fnout;
-#endif
+    simpleio_chn_t read_chn = (mode == REPL_LOAD) ? fnin : STDIN;
 #ifndef NDEBUG
     char * old_stack    = stack;
     char * old_tagstack = tagstack;
 #endif
-    simpleio_chn_t this_in;
-    simpleio_chn_t this_out;
 #ifndef NAIVE
     // Save parent REPLs return point for hard errors.
     jmp_buf * old_break = hard_repl_break;
@@ -163,27 +157,25 @@ lisp_repl (char mode)
     char *    saved_stack;
     char *    saved_tagstack;
 #endif
+#ifndef NO_DEBUGGER
+    char cmd;
+#endif
 
-    // Ensure terminal I/O in user- and debug-mode.
-    if (mode != REPL_LOAD)
-        set_channels (STDIN, STDOUT);
-    this_in  = fnin;
-    this_out = fnout;
+    set_channels (STDIN, STDOUT);
 
     num_repls++;
-
 #ifndef NO_DEBUGGER
     // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
+        fresh_line ();
         outs ("DEBUGGER ");
         outn (num_debugger_repls);
         out (':');
         terpri ();
     }
 #endif
-
 #ifndef NAIVE
     if (error_code) {
 #ifndef NO_ONERROR
@@ -206,7 +198,6 @@ lisp_repl (char mode)
             x = eval0 ();
             goto do_return;
         }
-
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
         // TODO?: print_debugger_info ();
@@ -222,21 +213,38 @@ lisp_repl (char mode)
 
     // READ/EVAL/PRINT-Loop.
     while (!eof ()) {
+        setin (read_chn);
+        if (eof ())
+            break;
+        setin (STDIN);
+
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
-
+#ifdef EXIT_FAILURE_ON_ERROR
+        exit (EXIT_FAILURE);
+#endif
             // Out of heap errors cannot be corrected.
             if (error_code == ERROR_OUT_OF_HEAP)
                 error_code = 0;
         }
 #endif
-
 #ifndef NO_DEBUGGER
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
+            setin (read_chn);
             read_safe ();
+            if (eof ())
+                goto do_return;
+#ifdef VERBOSE_READ
+            PUSH_TAG(fnout);
+            setout (STDOUT);
+            print (x);
+            setout (fnout);
+            POP_TAG(fnout);
+#endif
+            setin (STDIN);
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)
                 terpri ();
@@ -247,12 +255,10 @@ lisp_repl (char mode)
             do {
                 cmd = in ();
             } while (!eof () && cmd < ' ');
-
 #ifdef TARGET_UNIX
             if (eof ())
                 exit (EXIT_FAILURE);
 #endif
-
             // Process short command.
             fresh_line ();
             debug_step = nil;
@@ -345,7 +351,6 @@ terpri_next:
             }
         }
 #endif
-
 #ifndef NO_MACROEXPAND
 #ifndef NAIVE
         // Memorize unexpanded expression.
@@ -353,13 +358,11 @@ terpri_next:
         unexpanded_toplevel = x;
         current_toplevel = x;
 #endif
-
 #ifndef NO_DEBUGGER
         // Reset error status for next evaluation.
         error_code = 0;
         error_info = nil;
 #endif
-
         // Macro expansion if MACROEXPAND is a user function.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
 #ifndef NO_DEBUGGER
@@ -367,32 +370,24 @@ terpri_next:
             PUSH(debug_step);
             debug_step = nil;
 #endif
-
             // Call MACROEXPAND.
             x = make_cons (x, nil);
             x = make_cons (macroexpand_sym, x);
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
             x = eval0 ();
-
 #ifndef NO_DEBUGGER
             POP(debug_step);
 #endif
         }
 #endif // #ifndef NO_MACROEXPAND
-
 #ifndef NAIVE
         PUSH(current_toplevel);
         current_toplevel = x;
 #endif
-
 #ifndef NO_DEBUGGER
-        highlighted = nil;
-        // Restore program channels for evaluation.
-        if (mode == REPL_DEBUGGER)
-            set_channels (app_in, app_out);
+        highlighted = nil; // TODO: Explain.
 #endif
-
 #ifndef NAIVE
         if (!setjmp (this_break)) {
             // Save return point for hard errors, like out
@@ -403,8 +398,16 @@ terpri_next:
             saved_stack     = stack;
             saved_tagstack  = tagstack;
 #endif
+            // Set program channels.
+            set_channels (app_in, app_out);
+
             // Evaluate expression.
             x = eval ();
+
+            // Update saved program channels.
+            app_in  = fnin;
+            app_out = fnout;
+            set_channels (STDIN, STDOUT);
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
@@ -414,29 +417,17 @@ terpri_next:
 
             // Restore parent REPLs return point.
             hard_repl_break = old_break;
-            x = nil;
 #ifdef FRAGMENTED_HEAP
             // Ensure that the GC is not just switching to
             // the next heap.
             while (heap->start)
                 switch_heap ();
 #endif
+            // Free what is now unused.
+            x = nil;
             gc ();
         }
 #endif
-
-#ifndef NO_DEBUGGER
-        if (mode == REPL_DEBUGGER) {
-            // Save program channels, should they have
-            // changed during evaluation.
-            app_in  = fnin;
-            app_out = fnout;
-
-            // Return to debugger channels.
-            set_channels (this_in, this_out);
-        }
-#endif
-
 #ifndef NAIVE
         // Call debugger on error.
         if (error_code)
@@ -446,8 +437,7 @@ terpri_next:
 #ifndef NO_MACROEXPAND
         POP(unexpanded_toplevel);
 #endif
-#endif // #ifndef NAIVE
-
+#endif
         // Special treatment of results.
         if (do_break_repl) {
             // Ignore result and continue with next expression.
@@ -472,7 +462,6 @@ terpri_next:
             if (num_repls)
                 break;
         }
-
 #ifndef NO_DEBUGGER
         // Continue with alternative value.
         if (mode == REPL_DEBUGGER) {
@@ -480,28 +469,19 @@ terpri_next:
             goto do_return;
         }
 #endif
-
         // Print result of user input.
         if (mode != REPL_LOAD) {
             setout (STDOUT);
             print (x);
             fresh_line ();
         }
-
 next:
         do_break_repl    = false;
         do_continue_repl = false;
-
-        // Restore I/O channels of this REPL.
-        set_channels (this_in, this_out);
     }
-
-#if !defined(NO_DEBUGGER) || !defined(NO_ONERROR)
 do_return:
-#endif
     // Track unnesting of this REPL.
     num_repls--;
-
 #ifndef NO_DEBUGGER
     if (mode == REPL_DEBUGGER) {
         num_debugger_repls--;
@@ -509,15 +489,14 @@ do_return:
 
         outs ("Continuing...");
         terpri ();
-
-        // Restore program channels.
-        set_channels (app_in, app_out);
     }
 #endif
-
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
 #endif
+
+    // Restore program channels.
+    set_channels (app_in, app_out);
 
     return x;
 }
@@ -530,6 +509,10 @@ load (char * pathname)
 
     // Memorize input channel.
     int oldin = fnin;
+
+#ifdef VERBOSE_LOAD
+    outs ("Loading "); outs (pathname); terpri ();
+#endif
 
     // Open file.
     strcpy (buffer, pathname);
@@ -574,6 +557,8 @@ init_repl ()
     do_break_repl      = false;
     do_continue_repl   = false;
     num_repls = -1;
+    app_in = STDIN;
+    app_out = STDOUT;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);
@@ -585,7 +570,6 @@ init_repl ()
 #ifndef NAIVE
     current_toplevel = nil;
 #endif
-
 #ifndef NO_MACROEXPAND
     macroexpand_sym = make_symbol ("macroexpand", 11);
     expand_universe (macroexpand_sym);

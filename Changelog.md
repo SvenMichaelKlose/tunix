@@ -10,7 +10,25 @@ and this project adheres to
 
 ## [current]
 
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Added
+
+- Macros !++ and !--.
+
+## [v0.0.4] - 2024-08-22
+
+Heavy I/O reworks make this release worth a new checkout.
+
 ### libsimpleio
+
+#### Changed
+
+- Last input/output and put back chars are stored for each
+  channel separately.
+- eof() and err() are tied to their channels.
 
 #### Added
 
@@ -20,12 +38,28 @@ and this project adheres to
 
 #### Interpreter
 
+##### Changed
+
+- READ accepts negative numbers.
+- READ with end of file checks on the spot.
+- REPL has its own set of channels apart from the program.
+- Default image is saved after environment has loaded.
+
 ##### Added
 
-- Macro CASE to test for values.
-- Macros !++ and !--.
-- CONIO: Wraps libsimpleio/conio().
+- CONIO: Unbuffered input.
+- READ accepts char notation '\<char>' as promised in the
+  manual.
+- Compile-time option VERBOSE\_READ to have expression read
+  by the REPL printed.
 
+#### Debugger
+
+##### Added
+
+- TARGET\_UNIX: Highlighting with terminal reverse mode instead
+  of triple chevrons, '<<<' and '>>>'.  There are kept for new
+  targets.
 
 ## [v0.0.3] - 2024-08-18
 

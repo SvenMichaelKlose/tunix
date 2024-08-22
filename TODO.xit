@@ -45,6 +45,10 @@ Built-ins
 Tests
 [ ] READ on syntax errors.
 
+Text editor
+[ ] Required procedures, user-defined and built-in.
+[ ] Portable termina I/O.
+
 Manual
 [ ] Add section on building, installing.
 [ ] Compile-time options.

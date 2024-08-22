@@ -16,9 +16,12 @@
 
 #include <simpleio/libsimpleio.h>
 
-#define  MAX_CHANNELS   15
-#define  FIRST_CHANNEL  8
+#define FIRST_CHANNEL  8
 
+#define DEV_KEYBOARD    0
+#define DEV_SCREEN      3
+
+// cc65 charmap-independent values
 #define UPCASE_A  65
 #define UPCASE_Z  90
 #define LOCASE_A  97
@@ -28,9 +31,11 @@
 #define TOUPPER(c) (c - LOCASE_A + UPCASE_A)
 #define TOLOWER(c) (c - UPCASE_A + LOCASE_A)
 
-bool            channels[MAX_CHANNELS];
+#define CHN_USED    1
+
+char            logical_fns[MAX_CHANNELS];
 simpleio_chn_t  chn;
-signed char     last_error;
+signed char     last_status[MAX_CHANNELS];
 
 char FASTCALL
 reverse_case (char c)
@@ -47,16 +52,16 @@ alloc_channel (void)
 {
     // Set empty slot to channel.
     for (chn = FIRST_CHANNEL; chn < MAX_CHANNELS; chn++)
-        if (!channels[chn]) {
-            channels[chn] = chn;
+        if (!logical_fns[chn]) {
+            logical_fns[chn] = chn;
             return chn;
         }
     return 0;
 }
 
-signed char ofs;
-char ctrl;
-char ctrh;
+signed char   ofs;
+char          ctrl;
+char          ctrh;
 unsigned char i;
 
 // XXX: ld65 complains about this being a duplicate if named 'len',
@@ -68,10 +73,11 @@ unsigned char silen;
 simpleio_chn_t FASTCALL
 simpleio_open (char * name, char mode)
 {
-    last_error = 0;
     chn = alloc_channel ();
+    last_status[chn] = 0;
     if (!chn)
         goto error;
+    simpleio_init_channel (chn);
 
     ofs = 2;
     if (mode == 'w')
@@ -111,81 +117,86 @@ simpleio_open (char * name, char mode)
     cbm_close (15);
     cbm_k_chkin (fnin);
     if (ctrl != '0' || ctrh != '0') {
-        last_error = ((ctrh - '0') << 4) + (ctrl - '0');
+        last_status[chn] = ((ctrh - '0') << 4) + (ctrl - '0');
         return 0;
     }
 
     return chn;
 
 error:
-    last_error = -1;
+    last_status[chn] = -1;
     return 0;
 }
 
 bool
 raw_eof (void)
 {
-    return cbm_k_readst () & 0x40;
+    return last_status[chn];
 }
 
 signed char
 raw_err (void)
 {
-    return cbm_k_readst ();
+    return last_status[chn] & ~0x40;
 }
 
-char
-convert_in (void)
+char FASTCALL
+convert_in (char c)
 {
-    if (fnin == STDIN)
-        last_in = reverse_case (last_in);
-    return last_in;
+    return (fnin == STDIN) ? reverse_case (c) : c;
 }
 
-char
+void
+set_status (void)
+{
+    last_status[chn] = cbm_k_readst ();
+}
+
+char FASTCALL
 raw_conin (void)
 {
-    last_error = 0;
-    last_in = cbm_k_getin ();
-    return convert_in ();
+    char c = cbm_k_getin ();
+    set_status ();
+    return convert_in (c);
 }
 
 char
 raw_in (void)
 {
-    last_error = 0;
-    last_in = cbm_k_chrin ();
-    return convert_in ();
+    char c = cbm_k_chrin ();
+    set_status ();
+    return convert_in (c);
 }
 
 void FASTCALL
 raw_out (char c)
 {
-    last_error = 0;
     if (fnout == STDOUT || fnout == STDERR)
         c = (c == '_') ? 164 : reverse_case (c);
     cbm_k_bsout (c);
+    set_status ();
 }
 
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
-    last_error = 0;
-    cbm_k_chkin (channels[chn]);
+    cbm_k_chkin (logical_fns[chn]);
+    set_status ();
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
-    last_error = 0;
-    cbm_k_ckout (channels[chn]);
+    cbm_k_ckout (logical_fns[chn]);
+    set_status ();
 }
 
 void FASTCALL
 raw_close (simpleio_chn_t chn)
 {
-    cbm_k_close (channels[chn]);
-    channels[chn] = 0;
+    cbm_k_close (logical_fns[chn]);
+    logical_fns[chn] = 0;
+    last_status[chn] = 0;
 }
 
 simpleio vectors = {
@@ -202,14 +213,11 @@ simpleio vectors = {
 void
 simpleio_init ()
 {
-    bzero (channels, sizeof (channels));
-    channels[STDIN]  = 0;
-    channels[STDOUT] = 3;
-    channels[STDERR] = 3;
-
+    cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
+    cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
+    bzero (logical_fns, sizeof (logical_fns));
+    logical_fns[STDIN]  = STDIN;
+    logical_fns[STDOUT] = STDOUT;
+    logical_fns[STDERR] = STDOUT;
     simpleio_set (&vectors);
-
-    // Set up standard stream LFNs.
-    cbm_open (0, 0, 0, NULL);
-    cbm_open (3, 3, 3, NULL);
 }

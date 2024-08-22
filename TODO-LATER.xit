@@ -3,6 +3,8 @@ TUNIX Lisp
 [ ] Bielefeld DB API.
 [ ] Recursion to loop conversion.
 [ ] Tail call optimization.
+[ ] Relocateable images.
+[ ] Portable images.
 
 Reducing Memory Usage
 [?] GC stack compression, utilizing tag stack.

@@ -146,8 +146,8 @@ image_load (char * pathname)
     // Close file.
     simpleio_close (chin);
 
-    // Restore old input channel.
-    setin (old_in);
+    // Standard output to be safe.
+    setin (STDIN);
 
     // Initialize stack pointers.
     stack    = stack_end;

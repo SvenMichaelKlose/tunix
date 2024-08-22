@@ -32,6 +32,9 @@
 // Print LOADed pathnames before evaluation.
 //#define VERBOSE_LOAD
 
+// Print READ expressions in REPL.
+//#define VERBOSE_READ
+
 
 /// Testing and debugging
 
@@ -763,17 +766,19 @@ extern bool do_gc_stress;
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
 
-#define ERROR_TYPE          1
-#define ERROR_ARG_MISSING   2
-#define ERROR_TAG_MISSING   3
-#define ERROR_TOO_MANY_ARGS 4
-#define ERROR_NOT_FUNCTION  5
-#define ERROR_ARGNAME_TYPE  6
-#define ERROR_OUT_OF_HEAP   7
-#define ERROR_NO_PAREN      8
-#define ERROR_STALE_PAREN   9
-#define ERROR_FILEMODE      10
-#define ERROR_USER          11
+#define ERROR_TYPE              1
+#define ERROR_ARG_MISSING       2
+#define ERROR_TAG_MISSING       3
+#define ERROR_TOO_MANY_ARGS     4
+#define ERROR_NOT_FUNCTION      5
+#define ERROR_ARGNAME_TYPE      6
+#define ERROR_OUT_OF_HEAP       7
+#define ERROR_NO_PAREN          8
+#define ERROR_STALE_PAREN       9
+#define ERROR_SYM_TOO_LONG      10
+#define ERROR_QUOTE_MISSING     11
+#define ERROR_FILEMODE          12
+#define ERROR_USER              13
 
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12

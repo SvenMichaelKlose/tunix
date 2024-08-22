@@ -3,6 +3,70 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-22
+
+Phew!  Release v0.0.4 fixes a lot of things.  Especially
+I/O.  Enjoy!
+
+Guess I deserve a round of ice cream right away. :p
+
+# 2024-08-21
+
+Unix input channel works, CBM doesn't.  It's been a long
+day and, as usual, utterly frustrating to have to give it
+a break.  Found a Rasperry Pi Pico + magazine in the
+mailbox (dead tree version) but when it comes to install
+the command-line development tools on Linux, I'm as smart
+as last night.  It mentioned that there is some "ulisp"
+right in the front of the magaizine but no more info on
+that either.  Not very motivating either.
+
+# 2024-08-20
+
+Thinking about the editor, alongside just messing up
+the Lisp's intestines and forgetting that it has its own
+debugger so gdb can be put aside once in a while, the idea
+of compressing lines returned.  With TUNIX Lisp, the symbol
+look-up can help with that by splitting up lines into chunks
+of spaces, punctuation, control sequences and the rest of
+characters.  Calls for a new function called
+GROUP-BY-PREDICATES:
+
+~~~lisp
+(group-by-predicates x whitespace? punctuation? ctrl?)
+~~~
+
+Also mathing the case when no predicate on the list rings.
+That one either has to be built-in, compiled, somehow be
+running in the background when waiting for keypresses, or
+in an extra pass.
+
+Another idea that is coming closer to free heap is to
+replace named symbols by unnamed ones.  Optionally,
+procedure names and arguments may remain untouched.
+
+# 2024-08-20
+
+I can't stop thinking about giving the editor cut and past
+and undo - of course without letting it grow much larger.
+That's probably because I got woken up in the middle of the
+night.  The I/O needs separate status info for each channel,
+of course.  It wasn't fun to debug.  Back to bed.
+
+# 2024-08-19
+
+Did v0.0.3 yesterday, mainly because there was help to
+get compiled with clang.
+
+READ has been reworked and can also read negative numbers,
+but I've messed up EOF.  On all platforms.  Will continue
+work tomorrow evening perhaps.  Could use a paid job.
+
+The sketched text editor occupies 3.5K heap so far which
+leaves me a bit baffled.  Could be running on the VIC-20
+with no "tricks" like overlays.  Now for a night worth a
+pause.
+
 # 2024-08-17
 
 Took it to release v0.0.2 with the debugger being much more

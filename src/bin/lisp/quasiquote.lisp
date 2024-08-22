@@ -3,6 +3,9 @@
 (special quasiquote (qqx)
   (%qq qqx))
 
+(fn %qeval (qqx)
+  (eval qqx))
+
 (fn %qq (qqx)
   (?
     ; End of list.
@@ -15,26 +18,30 @@
 
     ; Replace UNQUOTE expression by its evaluated argument.
     (eq (caar qqx) 'unquote)
-      (cons (eval (cadar qqx)) (%qq (cdr qqx)))
+      (cons (%qeval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Insert evaluated argument of UNQUOTE-SPLICE into
     ; the list.
     (eq (caar qqx) 'unquote-spliced)
-      (append (eval (cadar qqx)) (%qq (cdr qqx)))
+      (append (%qeval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))
 
 (message "Testing QUASIQUOTE...")
+(message "(Part 1)")
 (or (equal $(1 2 ,3 ,4)
            '(1 2 3 4))
     (error $(1 2 ,3 ,4)))
+(message "(Part 2)")
 (or (equal $(1 2 ,@'(3 4))
            '(1 2 3 4))
     (error $(1 2 ,@'(3 4))))
+(message "(Part 3)")
 (or (equal $(((,1) ,@'(2)) ,3)
            '(((1) 2) 3))
     (error $(((,1) ,@'(2)) ,3)))
+(message "(Part 4)")
 (= x '(n v . body))
 (or (equal $(fn ,x bla)
            '(fn (n v . body) bla))

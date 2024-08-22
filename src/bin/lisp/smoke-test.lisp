@@ -1,7 +1,7 @@
 (var x nil)
 
 (message "Testing GC...")
-(print (gc))(message '" bytes free.")
+(print (gc))(out '" bytes free.")(terpri)
 
 (message "Testing ATOM...")
 (atom 1)
@@ -60,6 +60,12 @@
 (message "Testing CDR...")
 (? (cdr nil)
    (error))
+
+(message "Testing READing dotted pair...")
+(or (eq 'a (car '(a . 49)))
+    (error))
+(or (eq 'b (cdr '(10 . b)))
+    (error))
 
 (message "Testing NOT...")
 (or (not nil) (error))
@@ -194,7 +200,7 @@
 
 (message "Removing MAKE-COUNT and BLOCK-TEST...")
 (= *universe* (remove 'make-count (remove 'block-test *universe*)))
-(print (gc))(message " bytes free.")
+(print (gc))(out " bytes free.")(terpri)
 
 (message "Testing SETOUT...")
 (setout stdout)

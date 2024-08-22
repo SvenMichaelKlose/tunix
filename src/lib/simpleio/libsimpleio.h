@@ -15,6 +15,8 @@
 #define STDOUT 1
 #define STDERR 2
 
+#define MAX_CHANNELS    32
+
 typedef signed char simpleio_chn_t;
 
 // Supplied by driver libraries.
@@ -35,14 +37,10 @@ typedef struct _simpleio {
 
 extern simpleio_chn_t fnin;     // Input file number.
 extern simpleio_chn_t fnout;    // Output file number.
-extern char           last_in;  // Last input char.
-extern char           last_out; // Last output char.
 
 #ifdef __CC65__
 #pragma zpsym ("fnin")
 #pragma zpsym ("fnout")
-#pragma zpsym ("last_in")
-#pragma zpsym ("last_out")
 #pragma bss-name (pop)
 #endif
 
@@ -54,10 +52,12 @@ extern void FASTCALL    setout      (simpleio_chn_t fn);
 
 extern char             conin       (void);
 extern char             in          (void);
+extern char             lastin      (void);
 extern void             putback     (void);
-extern void             skip_spaces (void);
+extern bool             skip_spaces (void);
 extern void FASTCALL    inm         (char *, size_t);
 extern void FASTCALL    out         (char c);
+extern char             lastout     (void);
 extern void FASTCALL    outnu       (unsigned long);
 extern void FASTCALL    outn        (long);
 extern void FASTCALL    outhn       (unsigned char);
@@ -72,6 +72,7 @@ extern void             fresh_line  (void);
 extern simpleio_chn_t   FASTCALL  simpleio_open  (char * pathname, char mode);
 extern void             FASTCALL  simpleio_close (simpleio_chn_t);
 
+extern void FASTCALL    simpleio_init_channel (simpleio_chn_t c);
 extern void             simpleio_init (void);
 extern void FASTCALL    simpleio_set  (simpleio *);
 

@@ -136,6 +136,10 @@ bi_symbol (void)
 #endif
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
+#ifndef NAIVE
+    if (arg1)
+        error_cons_expected (arg1);
+#endif
 
     return s;
 }
@@ -416,6 +420,10 @@ bi_and (void)
         if (NOT(value))
             return nil;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return value;
 }
 
@@ -436,6 +444,10 @@ bi_or (void)
         if (value)
             return value;
     }
+#ifndef NAIVE
+    if (x)
+        error_cons_expected (x);
+#endif
     return nil;
 }
 
@@ -497,6 +509,12 @@ bi_setout (void)
 }
 
 lispptr
+bi_conin (void)
+{
+    return make_number (conin ());
+}
+
+lispptr
 bi_in (void)
 {
     return make_number (in ());
@@ -549,16 +567,16 @@ lispptr bi_gc (void);
 lispptr
 bi_load (void)
 {
-#ifdef VERBOSE_LOAD
-    outs ("Loading "); print (arg1); terpri ();
-#endif
     name_to_buffer (arg1);
-    load (buffer);
+    if (!load (buffer))
+        return nil;
+
 #ifdef GC_AFTER_LOAD_THRESHOLD
     if (heap_free_size () < GC_AFTER_LOAD_THRESHOLD)
         bi_gc ();
 #endif
-    return nil;
+
+    return t;
 }
 
 #ifndef NO_IMAGES
@@ -706,7 +724,18 @@ bi_last (void)
 lispptr
 bi_member (void)
 {
-    return member (arg1, arg2);
+    DOLIST(tmp, arg2) {
+        tmp2 = CAR(tmp);
+        if (tmp2 == arg1 ||
+            (NUMBERP(tmp2) && NUMBERP(arg1) &&
+             NUMBER_VALUE(tmp2) == NUMBER_VALUE(arg1)))
+            return tmp;
+    }
+#ifndef NAIVE
+    if (tmp)
+        error_cons_expected (tmp);
+#endif
+    return nil;
 }
 
 lispptr
@@ -909,6 +938,7 @@ const struct builtin builtins[] = {
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
+    { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
     { "out",        "x",    bi_out },
     { "terpri",     "",     bi_terpri },

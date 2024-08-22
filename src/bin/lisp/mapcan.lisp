@@ -1,0 +1,13 @@
+(fn mapcan (f . l)
+  (apply append (apply mapcar f l)))
+
+(message "Testing MAPCAN...")
+(and (mapcan '((x)))
+     (error))
+(and (mapcan '((x) x) '(nil))
+     (error))
+(and (mapcan '((x) x) '(nil nil))
+     (error))
+(or (equal (mapcan list '(l i s p))
+           '(l i s p))
+     (error))

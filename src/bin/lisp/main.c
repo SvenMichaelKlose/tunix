@@ -29,6 +29,7 @@ lispptr unquote_spliced;
 #endif
 
 const char * env_files[] = {
+    "smoke-test-read.lisp",
     "git-version.lisp",
     "env-0.lisp",
     "smoke-test.lisp",
@@ -184,8 +185,10 @@ main (int argc, char * argv[])
             load ((char *) *f);
 #ifndef NO_IMAGES
     } else {
-        // Called from ILOAD: Call function
-        // ISTART in loaded image.
+        // Called from ILOAD.  Reset I/O.
+        simpleio_init ();
+
+        // Call function ISTART.
         istart_fun = make_symbol ("istart", 6);
         if (CONSP(SYMBOL_VALUE(istart_fun))) {
            PUSH(istart_fun);

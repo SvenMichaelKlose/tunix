@@ -23,6 +23,9 @@
 (load "when.lisp")
 (load "subseq.lisp")
 (load "group.lisp")
+(load "mapcar.lisp")
+(load "mapcan.lisp")
+;(load "case.lisp")
 (load "unique.lisp")
 (load "union.lisp")
 (load "intersect.lisp")
@@ -39,4 +42,4 @@
 (message "Cleaning up. Please wait...")
 ; Have the universe list compressed.
 (= *universe* (copy-list *universe*))
-(print (gc))(message " bytes free.")
+(print (gc))(out " bytes free.")(terpri)

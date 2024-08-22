@@ -21,7 +21,7 @@
     #define NEEDS_GC(size)  do_gc_stress
 #else
     // Object size + end-of-heap marker (0).
-    #define NEEDS_GC(size)  (heap_free + size + 1 >= heap_end)
+    #define NEEDS_GC(size)  (heap_free + size + onetime_heap_margin + 1 >= heap_end)
 #endif
 
 // Heap memory areas  Must be consecutive!
@@ -45,6 +45,8 @@ struct heap_fragment heaps[] = {
 lispptr  t;
 lispptr  first_symbol;
 lispptr  last_symbol;
+
+size_t  onetime_heap_margin;
 
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment * heap;
@@ -177,7 +179,12 @@ check_lispptr (char * x)
 void
 dump_lispptr (char * x)
 {
-    int n = objsize (x);
+    int n;
+    if (!x) {
+        printf ("0 - 0 0: nil\n");
+        return;
+    }
+    n = objsize (x);
     printf ("%p - %p %d: ", x, x + n - 1, n);
 #ifdef CHECK_OBJ_POINTERS
     is_checking_lispptr = true;
@@ -245,8 +252,9 @@ alloc (uchar size, uchar type)
         gc ();
 #if !defined(NAIVE) && !defined(GC_STRESS)
         if (NEEDS_GC(size)) {
-            //error (ERROR_OUT_OF_HEAP, "Out of heap.");
-            internal_error ("Out of heap.");
+            onetime_heap_margin = 0;
+            error (ERROR_OUT_OF_HEAP, "Out of heap.");
+            longjmp (*hard_repl_break, 1);
             return nil;
         }
 #endif
@@ -451,6 +459,8 @@ init_heap ()
     // Mark end of heap.
     *heap_free = 0;
 #endif
+
+    onetime_heap_margin = ONETIME_HEAP_MARGIN;
 
 #ifdef GC_STRESS
     // We need to wait until inits are done.

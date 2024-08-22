@@ -32,6 +32,9 @@
 // Print LOADed pathnames before evaluation.
 //#define VERBOSE_LOAD
 
+// Print READ expressions in REPL.
+//#define VERBOSE_READ
+
 
 /// Testing and debugging
 
@@ -55,10 +58,10 @@
 
 // Do boundary checks of tag and GC stack pointers before
 // moving them.
-//#define GCSTACK_OVERFLOWCHECKS
-//#define GCSTACK_UNDERFLOWCHECKS
-//#define TAGSTACK_OVERFLOWCHECKS
-//#define TAGSTACK_UNDERFLOWCHECKS
+//#define GCSTACK_OVERFLOW_CHECKS
+//#define GCSTACK_UNDERFLOW_CHECKS
+//#define TAGSTACK_OVERFLOW_CHECKS
+//#define TAGSTACK_UNDERFLOW_CHECKS
 
 
 /// Release
@@ -105,8 +108,6 @@
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
-// NOTE: Prints to current output channel!
-
 
 /// Memory allocation
 
@@ -125,11 +126,17 @@
 // Use malloc() to allocate the object stack.
 //#define MALLOCD_STACK
 
+// Out-of-heap margin for calling ONERROR handlers.
+#define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
+
 
 /// Target configurations
 
 // Commodore C128
 #ifdef TARGET_C128
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -149,7 +156,9 @@
 #ifndef NO_ONERROR
     #define NO_ONERROR
 #endif
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -343,6 +352,8 @@ typedef unsigned int   array_index_t;
 typedef size_t         lispobj_size_t;
 #endif
 
+// TODO: Typedef for objects' type byte.
+
 typedef struct _cons {
     uchar    type;
     lispptr  car;
@@ -388,12 +399,13 @@ struct heap_fragment {
 };
 
 typedef struct _image_header {
-    char git_version[8];
+    char git_version[16];
     lispptr heap_start;
 } image_header;
 
 // ILOAD restart.
 extern jmp_buf   restart_point;
+extern jmp_buf * hard_repl_break;
 
 extern lispptr * global_pointers[];
 
@@ -401,6 +413,8 @@ extern lispptr * global_pointers[];
 extern struct  heap_fragment * heap;
 extern struct  heap_fragment heaps[];
 #endif
+
+extern size_t  onetime_heap_margin;
 
 extern lispptr universe;
 extern char *  stack_start;
@@ -546,64 +560,73 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma bss-name (pop)
 #endif
 
+// NOT_NIL() doesn't work.  Either the onset of dementia
+// or terrible bugs hiding.
 #define nil     ((lispptr) 0)
 #ifdef __CC65__
-#define NOT(x)  !((size_t) x & 0xff00)
+    #define NOT(x)      !((size_t) x & 0xff00)
+    #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
-#define NOT(x)  (!x)
+    #define NOT(x)      (!x)
+    #define NOT_NIL(x)  (x)
 #endif
 
 #ifdef GC_STRESS
 extern bool do_gc_stress;
 #endif
 
+#define _GCSTACK_CHECK_OVERFLOW() \
+    if (stack == stack_start) \
+        stack_overflow ()
+#define _GCSTACK_CHECK_UNDERFLOW() \
+    if (stack == stack_end) \
+        stack_underflow ()
+#define _TAGSTACK_CHECK_OVERFLOW() \
+    if (tagstack == tagstack_start) \
+        tagstack_overflow ()
+#define _TAGSTACK_CHECK_UNDERFLOW() \
+    if (tagstack == tagstack_end) \
+        tagstack_underflow ()
+
 #ifdef GCSTACK_OVERFLOW_CHECKS
-    #define STACK_CHECK_OVERFLOW() \
-            if (stack == stack_start) \
-                stack_overflow ()
+    #define GCSTACK_CHECK_OVERFLOW() _GCSTACK_CHECK_OVERFLOW()
 #else
-    #define STACK_CHECK_OVERFLOW()
+    #define GCSTACK_CHECK_OVERFLOW()
 #endif
 #ifdef GCSTACK_UNDERFLOW_CHECKS
-    #define STACK_CHECK_UNDERFLOW() \
-        if (stack == stack_end) \
-            stack_underflow ()
+    #define GCSTACK_CHECK_UNDERFLOW() _GCSTACK_CHECK_UNDERFLOW()
 #else
-    #define STACK_CHECK_UNDERFLOW()
+    #define GCSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef TAGSTACK_OVERFLOW_CHECKS
-    #define TAGSTACK_CHECK_OVERFLOW() \
-            if (tagstack == tagstack_start) \
-                tagstack_overflow ()
+    #define TAGSTACK_CHECK_OVERFLOW() _TAGSTACK_CHECK_OVERFLOW()
 #else
     #define TAGSTACK_CHECK_OVERFLOW()
 #endif
 #ifdef TAGSTACK_OVERFLOW_CHECKS
-    #define TAGSTACK_CHECK_UNDERFLOW() \
-            if (tagstack == tagstack_end) \
-                tagstack_underflow ()
+    #define TAGSTACK_CHECK_UNDERFLOW() _TAGSTACK_CHECK_UNDERFLOW()
 #else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
 
 #ifdef SLOW
-    #define PUSH(x)          pushgc (x)
-    #define POP(x)           do { x = popgc (); } while (0)
-    #define PUSH_TAG(x)      pushtag (x)
-    #define POP_TAG(x)       do { x = poptag (); } while (0)
-    #define PUSH_TAGW(x)     pushtagw (x)
-    #define POP_TAGW(x)      do { x = poptagw (); } while (0)
+    #define PUSH(x)      pushgc (x)
+    #define POP(x)       do { x = popgc (); } while (0)
+    #define PUSH_TAG(x)  pushtag (x)
+    #define POP_TAG(x)   do { x = poptag (); } while (0)
+    #define PUSH_TAGW(x) pushtagw (x)
+    #define POP_TAGW(x)  do { x = poptagw (); } while (0)
 #else // #ifdef SLOW
     #define PUSH(x) \
         do { \
-            STACK_CHECK_OVERFLOW(); \
+            GCSTACK_CHECK_OVERFLOW(); \
             stack -= sizeof (lispptr); \
             *(lispptr *) stack = x; \
         } while (0)
     #define POP(x) \
         do { \
-            STACK_CHECK_UNDERFLOW(); \
+            GCSTACK_CHECK_UNDERFLOW(); \
             x = *(lispptr *) stack; \
             stack += sizeof (lispptr); \
         } while (0)
@@ -750,22 +773,22 @@ extern bool do_gc_stress;
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
 
-#define ERROR_TYPE          1
-#define ERROR_ARG_MISSING   2
-#define ERROR_TAG_MISSING   3
-#define ERROR_TOO_MANY_ARGS 4
-#define ERROR_NOT_FUNCTION  5
-#define ERROR_ARGNAME_TYPE  6
-#define ERROR_OUT_OF_HEAP   7
-#define ERROR_NO_PAREN      8
-#define ERROR_STALE_PAREN   9
-#define ERROR_CHANNEL       10
-#define ERROR_FILE          11
-#define ERROR_FILEMODE      12
-#define ERROR_USER          13
+#define ERROR_TYPE              1
+#define ERROR_ARG_MISSING       2
+#define ERROR_TAG_MISSING       3
+#define ERROR_TOO_MANY_ARGS     4
+#define ERROR_NOT_FUNCTION      5
+#define ERROR_ARGNAME_TYPE      6
+#define ERROR_OUT_OF_HEAP       7
+#define ERROR_NO_PAREN          8
+#define ERROR_STALE_PAREN       9
+#define ERROR_SYM_TOO_LONG      10
+#define ERROR_QUOTE_MISSING     11
+#define ERROR_FILEMODE          12
+#define ERROR_USER              13
 
 // Returned to OS on exit after internal error.
-#define ERROR_INTERNAL      14
+#define ERROR_INTERNAL      12
 
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
@@ -801,7 +824,7 @@ extern size_t            heap_free_size   (void);
 #define REPL_DEBUGGER   1
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode);
-extern void     FASTCALL load         (char * pathname);
+extern bool     FASTCALL load         (char * pathname);
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
 
@@ -840,7 +863,7 @@ extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
 extern void     FASTCALL error               (char code, char * msg);
 extern void     FASTCALL error_argname       (lispptr);
-// TODO: Typedef for objects' type byte.
+extern lispptr  FASTCALL error_cons_expected (lispptr);
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
 extern void              stack_overflow      (void);
 extern void              stack_underflow     (void);

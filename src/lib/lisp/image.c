@@ -41,7 +41,7 @@ image_save (char * pathname)
     setout (chout);
 
     // Make header.
-    memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version));
+    memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (TUNIX_GIT_VERSION));
 
     // Write header.
     outm ((char *) &header, sizeof (header));
@@ -105,7 +105,7 @@ image_load (char * pathname)
     // Verify that the Git version matches.
     // NOTE: It must be exactly the same machine
     // used to save the image anyhow.
-    if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version))) {
+    if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (TUNIX_GIT_VERSION))) {
         simpleio_close (chin);
         setin (old_in);
         return false;
@@ -122,7 +122,7 @@ image_load (char * pathname)
         inm ((char *) &pos, sizeof (lispptr));
 #ifndef NAIVE
         if (pos != heap_start)
-            internal_error_ptr (pos, "position. ");
+            internal_error_ptr (pos, "image position");
 #endif
 
         // Read heap size.
@@ -146,8 +146,8 @@ image_load (char * pathname)
     // Close file.
     simpleio_close (chin);
 
-    // Restore old input channel.
-    setin (old_in);
+    // Standard output to be safe.
+    setin (STDIN);
 
     // Initialize stack pointers.
     stack    = stack_end;

@@ -51,7 +51,7 @@ endif
 include $(THIS_DIR)/Makefile.build.$(TARGETCC)
 
 test:
-	@echo "No test to be done."
+	@printf "No test to be done.\n"
 
 allclean: hostclean
 	for i in $(VALID_TARGETS); do \

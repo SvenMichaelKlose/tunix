@@ -12,27 +12,29 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#ifdef __CC65__
+#include <string.h>
+#else
+#include <strings.h>
+#endif
 
 #include "libsimpleio.h"
+
+char    last_in[MAX_CHANNELS];
+char    last_out[MAX_CHANNELS];
+char    do_putback[MAX_CHANNELS];
+char    putback_chars[MAX_CHANNELS];
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-
 simpleio *      io;
 simpleio_chn_t  fnin;
 simpleio_chn_t  fnout;
-char            do_putback;
-char            last_in;
-char            last_out;
-
 #ifdef __CC65__
 #pragma zpsym ("io")
 #pragma zpsym ("fnin")
 #pragma zpsym ("fnout")
-#pragma zpsym ("do_putback")
-#pragma zpsym ("last_in")
-#pragma zpsym ("last_out")
 #pragma bss-name (pop)
 #endif
 
@@ -56,7 +58,6 @@ setout (simpleio_chn_t c)
 {
     if (fnout != c) {
         fnout = c;
-        last_out = 0; // (Virtually fresh line.)
         io->setout (c);
     }
 }
@@ -64,8 +65,6 @@ setout (simpleio_chn_t c)
 bool
 eof ()
 {
-    if (do_putback)
-        return false;
     return io->eof ();
 }
 
@@ -76,41 +75,65 @@ err ()
 }
 
 char
+conin ()
+{
+    if (!do_putback[fnin])
+        return last_in[fnin] = io->conin ();
+    do_putback[fnin] = false;
+    return last_in[fnin] = putback_chars[fnin];
+}
+
+char
 in ()
 {
-    if (do_putback)
-        do_putback = false;
-    else
-        last_in = io->in ();
-    return last_in;
+    if (!do_putback[fnin])
+        return last_in[fnin] = io->in ();
+    do_putback[fnin] = false;
+    return last_in[fnin] = putback_chars[fnin];
 }
 
 void
 putback ()
 {
-    do_putback = true;
+    if (!eof ()) {
+        do_putback[fnin] = true;
+        putback_chars[fnin] = last_in[fnin];
+    }
 }
 
-void
+char
+lastin ()
+{
+    return last_in[fnin];
+}
+
+bool
 skip_spaces ()
 {
-    while (!eof ()) {
-        // Skip comment until end of line.
-        if (in () == ';') {
-            while (!eof () && in () >= ' ');
+    char c;
+    while (1) {
+        c = in ();
+        if (eof ())
+            break;
+        if (!isspace (c)) {
             putback ();
-        } else if (!isspace (last_in)) {
-            putback ();
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 void FASTCALL
 out (char c)
 {
-    last_out = c;
+    last_out[fnout] = c;
     io->out (c);
+}
+
+char
+lastout ()
+{
+    return last_out[fnout];
 }
 
 void FASTCALL
@@ -126,7 +149,7 @@ outn (long n)
 {
     if (n < 0) {
         out ('-');
-        n = abs (n);
+        n = labs (n);
     }
     outnu (n);
 }
@@ -152,24 +175,38 @@ terpri (void)
 #ifdef TARGET_C128
     outs ("\r");
 #else
-#ifdef __CC65__
-    outs ("\n\r");
-#else
-    outs ("\n");
-#endif
+    #ifdef __CC65__
+        outs ("\n\r");
+    #else
+        outs ("\n");
+    #endif
 #endif
 }
+
+char c;
 
 void
 fresh_line (void)
 {
-    if (last_out && last_out != '\n' && last_out != '\r')
+    c = last_out[fnout];
+    if (c && c != '\n' && c != '\r')
         terpri ();
+}
+
+void FASTCALL
+simpleio_init_channel (simpleio_chn_t chn)
+{
+    do_putback[chn] = false;
+    putback_chars[chn] = 0;
+    last_in[chn] = 0;
+    last_out[chn] = 0;
 }
 
 void FASTCALL
 simpleio_set (simpleio * x)
 {
     io = x;
-    do_putback = false;
+    bzero (do_putback, sizeof (do_putback));
+    bzero (last_in, sizeof (last_in));
+    bzero (last_out, sizeof (last_out));
 }

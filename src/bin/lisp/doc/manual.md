@@ -13,16 +13,29 @@ book: true
 
 # Overview
 
-TUNIX Lisp is a highly efficient Lisp interpreter, written
-in ANSI-C.  It is designed for constrained environments,
-such as embedded systems and classic home computers,
-including 6502-based systems.
+TUNIX Lisp is a highly efficient and scalable Lisp
+interpreter, written in ANSI-C.  It is designed for
+constrained environments, such as classic home computers
+(including 6502-based systems), microcontrollers and
+embedded systems, but also has its place on modern
+machines.
 
 Features:
 
-* Compacting mark-and-sweep garbage collector.[^gc]
+* Interactive REPL.
+* Debugger with stepping and breakpoints.
+* User-defined error handlers.
 * Lean I/O interface.[^io]
+* Compacting mark-and-sweep garbage collector.[^gc]
 * Supplementary compressed stack.[^stack]
+* List compression.
+* Saving and loading system images.
+* Unified symbol and string handling with data compression
+  features.
+* UNDER CONSTRUCTION: Integrated text editor.
+
+Most features can be left out during compilation to make
+TUNIX Lisp fit even the most contrained environments.
 
 [^gc]: Planned to be made interruptible to some degree,
   optionally truly interruptible providing a copying garbage
@@ -95,6 +108,8 @@ Symbols may also be anonymous, with no name at all.
 ~~~lisp
 (symbol) ; Anonymous symbol that won't get re-used.
 ~~~
+
+SYMBOL will issue an error if it is passed a dotted pair.
 
 ## Memory consumption
 
@@ -453,21 +468,31 @@ be dealt with.
 
 ### Error codes
 
-| ID (ERROR_...)  | Code | Description                    |
-|-----------------|------|--------------------------------|
-| TYPE            | 1    | Unexpected object type.        |
-| ARG\_MISSING    | 2    | One or more missing arguments. |
-| TAG\_MISSING    | 3    | BLOCK tag couldn't be found.   |
-| TOO\_MANY\_ARGS | 4    | Too many arguments.            |
-| NOT\_FUNCTION   | 5    | Object is not a function.      |
-| ARGNAME\_TYPE   | 6    | Argument name is not a symbol. |
-| OUT\_OF\_HEAP   | 7    | Out of heap.  Cannot catch.    |
-| NO\_PAREN       | 8    | ')' missing.                   |
-| STALE\_PAREN    | 9    | Unexpected ')'.                |
-| FILE            | 10   | File error code in (ERR).      |
-| FILEMODE        | 11   | Illegal mode for OPEN.         |
-| USER            | 12   | ERROR function was called.     |
-| INTERNAL        | 14   | Returned to operating system.  |
+| ID (ERROR_...)  | Code | Description                     |
+|-----------------|------|---------------------------------|
+| TYPE            | 1    | Unexpected object type.         |
+| ARG\_MISSING    | 2    | One or more missing arguments.  |
+| TAG\_MISSING    | 3    | BLOCK tag couldn't be found.    |
+| TOO\_MANY\_ARGS | 4    | Too many arguments.             |
+| NOT\_FUNCTION   | 5    | Object is not a function.       |
+| ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
+| OUT\_OF\_HEAP   | 7    | Out of heap.                    |
+| NO\_PAREN       | 8    | ')' missing.                    |
+| STALE\_PAREN    | 9    | Unexpected ')'.                 |
+| SYM\_TOO\_LONG  | 10   | Symbol longer than MAX\_SYMBOL. |
+| QUOTE\_MISSING  | 11   | '"' missing.                    |
+| FILEMODE        | 12   | Illegal mode for OPEN.          |
+| USER            | 13   | ERROR function was called.      |
+| INTERNAL        | 14   | Returned to operating system.   |
+
+#### ERROR\_OUT\_OF\_HEAP
+
+Returns to the current REPL and does a garbage collection
+before calling an ONERROR handler or debugger.
+
+Compile-time option ONETIME\_HEAP\_MARGIN specified the
+number of heap bytes that are kept for calling an ONERROR
+handler.
 
 # Built-in functions
 
@@ -615,6 +640,8 @@ NIL.  The value of the last evaluation is returned.
 (and 1 2)     -> 2
 ~~~
 
+AND will issue an error if it is passed a dotted pair.
+
 ### (or +x)
 
 Evaluates all arguments unless one evaluates to non-NIL.
@@ -624,6 +651,8 @@ The value of the last evaluation is returned.
 (or 1 nil) -> 1
 (or nil 2) -> 2
 ~~~
+
+OR will issue an error if it is passed a dotted pair.
 
 ### (block name . body), (return x block-name), (go tag)
 
@@ -748,6 +777,7 @@ Returns its argument if it is a special form or NIL.
 | (char-at s n)    | Char of symbol name.                  |
 
 ### (symbol l): Make symbol with name from char list.
+
 ### (= 's x): Set symbol value.
 
 ### (symbol-value s): Get symbol value.
@@ -770,17 +800,55 @@ This is what evaluation is doing with symbols.
 A 'cons' points to two other objects, called 'car' and 'cdr'
 for historical reasons.  They could also be called 'first'
 and 'second', 'first' and 'rest' or 'head' and 'tail'.
-However: they are just two object pointers packed together.
+However: they are just two object pointers packed together
+to form a pair.  A single cons is written with a dot in the
+middle which separates the two objects it contains.  It's
+called a "dotted pair":
 
-### (car l): Return first value of cons or NIL.
-### (cdr l): Return second value of cons or NIL.
-### (setcar c x): Set first value of cons.
+~~~lisp
+(obj-a . obj-b)
+~~~
 
-Returns the cons.
+### (car l)/(cdr l): Return first or second value of cons.
 
-### (setcdr c x): Set second value of cons.
+CAR and CDR expect a list (cons or NIL) and return the 
+first or second object a cons contains.  If the argument
+is NIL, CAR and CDR return NIL.
 
-Returns the cons.
+~~~lisp
+(car nil)   ; -> nil
+(cdr nil)   ; -> nil
+
+(var our-cons '(a . b))
+(car our-cons) ; -> a
+(cdr our-cons) ; -> b
+~~~~
+
+Because lists a conses chained up via their CDRs, this
+happens with conses of lists:
+
+~~~lisp
+(var our-list '(a b))
+(car our-list) ; -> a
+(cdr our-list) ; -> (b)
+~~~
+
+### (setcar c x)/(setcdr c x): Set first/second value of cons.
+
+Sets the first or second value of a cons.  Passing anything
+else but a cons, e.g. NIL, is an error.
+The modified cons is returned otherwise.
+
+~~~lisp
+(var our-cons '(a . b))
+(setcar our-cons 'new)     ; -> (new . b)
+(setcdr our-cons 'values)  ; -> (new . value)
+(setcdr our-cons nil)      ; -> (new)
+~~~
+
+Setting the CDR of a *compressed cons* is also an error.
+See section [compressed conses](#compressed-conses) for
+details.
 
 ## Images
 
@@ -811,38 +879,47 @@ internally.
 ### (butlast l): Copy list but not its last element.
 
 ~~~lisp
-(butlast '(1 2 3)) ; (1 2)
+(butlast '(1 2 3)) ; -> (1 2)
 ~~~
+
+BUT LAST will issue an error if it is passed a dotted pair.
 
 ### (last l): Return last cons of list.
 
 Return the last cons of a list, not the object it contains.
 
 ~~~lisp
-(last '(1 2 3)) ; (3)
+(last '(1 2 3)) ; -> (3)
 ~~~
+
+LAST will issue an error if it is passed a dotted pair.
 
 ### (length l): Return length of list.
 
 ~~~lisp
-(length nil)        ; 0
-(length '(1 2 3)))  ; 3
+(length nil)        ; -> 0
+(length '(a b)))    ; -> 2
+(length '(a b c)))  ; -> 3
+~~~
+
+LENTGH also counts CDRs of dotted pairs:
+
+~~~lisp
+(length '(a b . c)))  ; -> 3
 ~~~
 
 ### (member x l): Return cons containing X.
 
 ~~~lisp
-(member 'b '(a b c)) ; '(b c)
+(member 'b '(a b c)) ; -> '(b c)
 ~~~
 
-Uses EQ as the predicate, so numbers will most probably not
-be found..
+MEMBER uses EQL as the predicate, so numbers will also
+match.
 
 ~~~lisp
-(member 2 '(1 2 3)) ; NIL
+(member 2 '(1 2 3)) ; -> '(2 3)
 ~~~
-
-Use MEMBER-IF to use EQL with numbers.
 
 ### (remove x l): Copy list except element X.
 
@@ -855,14 +932,19 @@ with EQL to match numbers.
 
 ### (@ f l): Filter list by function
 
+Call function F for each element in l and returns a new
+list containing the return values of F.
+
 ~~~lisp
-(@ ++ '(1 2 3)) ; (2 3 4)
+(@ ++ '(1 2 3)) ; -> (2 3 4)
 ~~~
 
-Also handles dotted pairs, filtering the last atom if it is not NIL.
+Also handles dotted pairs, filtering the last atom if it is
+not NIL.  This is supported because of rest argument
+definitions (which are dotted pairs).
 
 ~~~lisp
-(@ ++ '(1 2 . 3)) ; (2 3 . 4)
+(@ ++ '(1 2 . 3)) ; -> (2 3 . 4)
 ~~~
 
 ## Numbers
@@ -930,6 +1012,7 @@ x           ; 23
 | (setin n)        | Set input channel.                  |
 | (setout n)       | Set output channel.                 |
 | (in)             | Read char.                          |
+| (conin)          | Read char from console.             |
 | (out x)          | Print char or plain symbol name.    |
 | (terpri)         | Step to next line.                  |
 | (fresh-line)     | Open line if not on a fresh one.    |
@@ -944,6 +1027,31 @@ x           ; 23
 
 ### (read): Read expression.
 ### (print x): Print expression.
+
+### (load pathname): Load and evaluate file.
+
+Loads a file expression by expression, evaluating each
+right away.
+
+Returns NIL if the file could not be loaded, or T if all
+of the file has been processed successfully.
+
+This expample loads file "subseq.lisp" and returns T when
+finished:
+
+~~~lisp
+(load "subseq.lisp")
+~~~
+
+If compile-time option VERBOSE\_LOAD was defined when
+TUNIX Lisp was built, a message of the form
+
+~~~lisp
+(load <pathname>)
+~~~
+
+is printed before a load is attempted.
+
 ### (open pathname mode): Open file and channel.
 
 Opens file at PATHNAME for reading or writing.  MODE must
@@ -961,6 +1069,7 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.
 ### (in): Read char.
+### (conin): Read console char (non-blocking).
 ### (out x): Print char or plain symbol name.
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
@@ -1117,9 +1226,9 @@ programming languages.
 ## Local variables
 
 | Macro           | Desscription                        |
-|-----------------|-------------------------------------|
-| (let n init +b) | Block with one local variable.
-| (with inits +b) | Block with many local variables.
+|--------------------|-------------------------------------|
+| (let n init +b)    | Block with one local variable.
+| (with inits +b)    | Block with many local variables.
 
 ### (let n init +b): Block with one local variable.
 
@@ -1129,9 +1238,12 @@ programming languages.
 
 | Macro                | Description                      |
 |----------------------|----------------------------------|
+| (!? cond conseq...)  | ?, assigning cond to !.          |
 | (prog1 +b)           | Return result of first.          |
 | (progn +b)           | Return result of last.           |
 | (when cond +b)       | Evaluate if condition is true.   |
+| (awhen cond +b)      | WHEN, assigning cond to !.       |
+| (case x v conseq...) | ?, using values insted of cond.  |
 | (unless cond +b)     | Evaluate if condition is false.  |
 | (while (cond x) +b)  | Loop while condiiton is true.    |
 | (dolist (i init) +b) | Loop over elements of a list.    |
@@ -1150,18 +1262,31 @@ programming languages.
 
 ## Lists
 
-| Function      | Description                         |
-|---------------|-------------------------------------|
-| (list +x)     | Return list evaluated.              |
-| (list? x)     | Test if argument is NIL or a cons.  |
-| (cadr l)...   | Nested CAR/CDR combinations.        |
-| (carlist l)   | Get first elements of lists.        |
-| (cdrlist l)   | Get rest elements of lists.         |
-| (copy-list x) | Copy list.                          |
-| (copy x)      | Copy recursively.                   |
-| (find x l)    | Find element X in list.             |
+| Function        | Description                         |
+|-----------------|-------------------------------------|
+| (list +x)       | Return list evaluated.              |
+| (list? x)       | Test if argument is NIL or a cons.  |
+| (cadr l)...     | Nested CAR/CDR combinations.        |
+| (carlist l)     | Get first elements of lists.        |
+| (cdrlist l)     | Get rest elements of lists.         |
+| (copy-list x)   | Copy list.                          |
+| (copy-tree x)   | Copy recursively.                   |
+| (ensure-list x) | Turn atom into list.                |
+| (every f x)     | Test if F is T for all X.           |
+| (some f x)      | Test if F is T for some X.          |
+| (find x l)      | Find element X in list.             |
+| (find-if f l)   | Find element X in list by F.        |
+| (group l n)     | Split L in lists of length N.       |
+| (nth n l)       | Get Nth cons in L.                  |
+| (nthcdr n l)    | Get Nth CDR of cons in L.           |
+| (mapcar f +l)   | Map CARs of lists.                  |
+| (mapcan f +l)   | Concatenating MAPCAR.               |
+| (member-if f l) | Find cons with element in list.     |
+| (remove-if f l) | Removed elemnts from L.             |
+| (reverse l)     | Reverse list.                       |
+| (subseq l n n)  | Return sublist.                     |
 
-### (list +x): Return list evaluated.
+### (list +x): Make list of arguments.
 
 ### (list? x): Test if argument is NIL or a cons.
 
@@ -1179,10 +1304,11 @@ programming languages.
 
 ## Loops
 
-| Macro                       | Description              |
-|-----------------------------|--------------------------|
-| (dolist (iter init) . body) | Loop over list elements. |
-| (dotimes (iter n) . body)   | Loop N times.            |
+| Macro                         | Description              |
+|-------------------------------|--------------------------|
+| (do ((iters) (cond res)) . b) | Generic loop.            |
+| (dolist (iter init) . body)   | Loop over list elements. |
+| (dotimes (iter n) . body)     | Loop N times.            |
 
 ### (dolist (iter init) . body): Loop over list elements.
 
@@ -1217,10 +1343,13 @@ x ; '(2)
 
 ## Queues
 
-| Function      | Description                  |
-|---------------|------------------------------|
-| (make-queue)  | Make queue.                  |
-| (enqueue c x) | Add object X to queue C.     |
+| Function           | Description                   |
+|--------------------|-------------------------------|
+| (make-queue)       | Make queue.                   |
+| (enqueue c x)      | Add object X to queue C.      |
+| (queue-list c)     | Return list of queue.         |
+| (queue-pop c)      | Pop element from queue front. |
+| (with-queue s . b) | Make local queue.             |
 
 ### (make-queue): Make queue.
 
@@ -1266,6 +1395,12 @@ key and the rest is the value.
 
 ### (assoc x l): Return list that start with X.
 
+## Other
+
+| Function   | Description               |
+|------------|---------------------------|
+| (source s) | Get definition of symbol. |
+
 ## Target information
 
 Constant +TARGET+ identifies the target machine, which is
@@ -1298,3 +1433,75 @@ compressed you have to call the garbage collector twice.
 
 Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
 GC will print a 'C' to the currently active output channel.
+
+# XXX
+
+EXIT\_FAILURE\_ON\_ERROR
+
+# Internals
+
+## Heap object layouts
+
+You can get the memory address of any object with RAWPTR.
+You can then use it to PEEK and POKE memory directly.
+
+On 32-bit and 64-bit architecture pointers and numbers are
+four or eight bytes in size.  The following tables show the
+layouts for 16-bit systems.
+
+All objects start with a type byte:
+
+| Bit | Description                                   |
+|-----|-----------------------------------------------|
+|  0  | Type bit for conses                           |
+|  1  | Type bit for numbers                          |
+|  2  | Type bit for symbols                          |
+|  3  | Type bit for built-in functions               |
+|  4  | Extended type (special form, compressed cons) |
+|  5  | Unused                                        |
+|  6  | Unused                                        |
+|  7  | Mark bit for garbage collection               |
+
+### Cones
+
+| Offset | Description         |
+|--------|---------------------|
+|   0    | Type info (value 1) |
+|   1-2  | CAR value           |
+|   3-4  | CDR value           |
+
+### Numbers
+
+| Offset | Description         |
+|--------|---------------------|
+|   0    | Type info (value 2) |
+|   1-4  | Long integer[^long] |
+
+[^long]: Will occupy eight bytes on 64-bit systems.
+
+### Symbols
+
+| Offset | Description                         |
+|--------|-------------------------------------|
+|   0    | Type info (value 4 or 20)           |
+|   1    | Name length (0-255)                 |
+|   2-3  | Pointer to next symbol for look-ups |
+|   4-x  | Name (optional)                     |
+
+Adding the extended type bit turn a symbol to a special
+form.  Arguments its function won't be evaluated then.
+
+### Built-in functions
+
+Built-ins are symbols with a pointer to a descriptor of the
+built-in.  It contains an ASCIIZ pointer to the name,
+another to the character-based argument definition and the
+address of its implementation.
+
+| Offset | Description                         |
+|--------|-------------------------------------|
+|  0     | Type info (value 8)                 |
+|  1-2   | Symbol value                        |
+|  3-4   | Pointer to next symbol for look-ups |
+|  5     | Name length (0-255)                 |
+| (6-x)  | Name (optional)                     |

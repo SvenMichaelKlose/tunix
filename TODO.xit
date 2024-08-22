@@ -1,0 +1,54 @@
+# Commodore VIC-20
+
+Ultimem boot (src/sys/boot/)
+[ ] Can run as PRG with any configuration of the UltiMem.
+[ ] Can make and burn images.
+[ ] Can install itself as one of the boot ROMs.
+[ ] Fast memory config selection.
+[ ] Alternative boot ROMs.
+[ ] Launch from disk or Ultifs.
+[ ] Autostart.
+[ ] Autostart device preference.
+[ ] Memorize launch for next reset or hotkey.
+
+Kernel (src/sys/kernel/)
+[ ] Find memory bank allocation bug.
+[@] Soft segmentation fault detection.
+
+# TUNIX Lisp
+
+General
+[@] Make it fun writing the bytecode compiler with it.
+
+Interpreter
+[@] Full heap compression (conses).
+[ ] eval0() and related don't have to return a value.
+    Save code size by removing it.
+
+Debugger
+[ ] Error messages without debugger.
+[ ] Replace expression while stepping.
+[ ] Conditional breakppoints.
+[ ] Watchpoints.
+[ ] Conditional watchpoints.
+[ ] Invoking debugger with Ctrl-C.
+[ ] Invoking debugger with RESTORE key on CBMs.
+
+Input/Output
+[ ] OPENDIR, READDIR, CLOSEDIR.
+
+Built-ins
+[ ] SYSTEM (program invokation).
+
+Tests
+[ ] READ on syntax errors.
+
+Text editor
+[ ] Required procedures, user-defined and built-in.
+[ ] Portable termina I/O.
+
+Manual
+[ ] Add section on building, installing.
+[ ] Compile-time options.
+[ ] Complete set of examples.
+[ ] Reviewed phrasing.

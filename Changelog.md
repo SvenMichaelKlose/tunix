@@ -9,6 +9,107 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.5] - 2024-08-23
+
+Most essential fixes.
+
+### TUNIX Lisp
+
+#### General
+
+- Configure Comodore C128 to be able to load "all.lisp".
+  (SLOW, COMPRESSED\_CONS).
+
+#### Environment
+
+##### Fixed
+
+- APPEND with no arguments.
+
+##### Added
+
+- CDAR, MAPCAR, MAPAN
+
+
+## [v0.0.4] - 2024-08-22
+
+Heavy I/O reworks make this release worth a new checkout.
+
+### libsimpleio
+
+#### Changed
+
+- Last input/output and put back chars are stored for each
+  channel separately.
+- eof() and err() are tied to their channels.
+
+#### Added
+
+- conio(): Returns waiting char or 0.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Changed
+
+- READ accepts negative numbers.
+- READ with end of file checks on the spot.
+- REPL has its own set of channels apart from the program.
+- Default image is saved after environment has loaded.
+
+##### Added
+
+- CONIO: Unbuffered input.
+- READ accepts char notation '\<char>' as promised in the
+  manual.
+- Compile-time option VERBOSE\_READ to have expression read
+  by the REPL printed.
+
+#### Debugger
+
+##### Added
+
+- TARGET\_UNIX: Highlighting with terminal reverse mode instead
+  of triple chevrons, '<<<' and '>>>'.  There are kept for new
+  targets.
+
+## [v0.0.3] - 2024-08-18
+
+### libsimpleio
+
+### Fixed
+
+- Building with clang.  Courtesy of pulluks.  Thanks!
+
+### libsimpleio-cbm
+
+- Print ASCII underscore '\_' as PETSCII graphics.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- Topmost REPL is not exited when a child debugger REPL
+  issues a break.
+
+##### Changed
+
+- LOAD returns NIL on error, T otherwise.
+- MEMBER uses EQL as the predicate to match number values.
+  Otherwise working with character value lists would become
+  a rather hairy issue.
+- AND, LAST, OR, and SYMBOL issue an error for dotted pairs.
+
+##### Added
+
+- EXPERIMENTAL: Issue regular error when out of heap, but
+  return to the current REPL and do a garbage collection
+  before calling an ONERROR handler or the debugger.
+
+
 ## [v0.0.2] - 2024-08-17
 
 ### TUNIX Lisp
@@ -20,6 +121,10 @@ and this project adheres to
 - Revived full stress test.
 - src/config is not required any more.
 - Added TARGET=sim6502 (cc65's simulator).
+
+##### Removed
+
+- oscar64 submodule.  It's never been used.
 
 #### Debugger
 
@@ -43,8 +148,8 @@ and this project adheres to
 - REPL handles READ errors.
 - Expects end of dotted pair.
 - cc65: Smaller initializing parts for more heap.
-- COPY-LIST, REMOVE, and BUTLAST do not support dotted
-  pairs any more.
+- COPY-LIST, REMOVE, and BUTLAST do not support dotted pairs
+  any more.
 
 #### Environment
 

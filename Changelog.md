@@ -8,13 +8,27 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [current]
+
+## [v0.0.5] - 2024-08-23
+
+Most essential fixes.
 
 ### TUNIX Lisp
 
 #### General
 
-- Loading images works on Linux.
+- Configure Comodore C128 to be able to load "all.lisp".
+  (SLOW, COMPRESSED\_CONS).
+
+#### Environment
+
+##### Fixed
+
+- APPEND with no arguments.
+
+##### Added
+
+- CDAR, MAPCAR, MAPAN
 
 
 ## [v0.0.4] - 2024-08-22

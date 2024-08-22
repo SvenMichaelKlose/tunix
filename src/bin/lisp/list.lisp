@@ -24,6 +24,9 @@
 (fn cadr (x)
   (car (cdr x)))
 
+(fn cdar (x)
+  (cdr (car x)))
+
 (fn cddr (x)
   (cdr (cdr x)))
 
@@ -33,16 +36,20 @@
 (fn caddr (x)
   (car (cdr (cdr x))))
 
-(fn append (first . rest)
+(fn append x
   ;"Copy and concatenate."
   (?
-    first
-      (cons (car first)
-            (apply append (cdr first) rest))
-    rest
-      (apply append rest)))
+    (car x)
+      (cons (caar x)
+            (apply append (cdar x) (cdr x)))
+    (cdr x)
+      (apply append (cdr x))))
 
 (out "Testing APPEND...")(terpri)
+(and (append)
+     (error))
+(and (append nil)
+     (error))
 (and (append nil nil)
      (error))
 (or (equal (append nil '(3 4))

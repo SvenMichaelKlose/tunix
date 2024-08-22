@@ -13,13 +13,13 @@
 (or t (error))
 (or nil t (error))
 
-(message "Testing if arguments are restored on function return...")
+(message "Testing if argument symbol values are restored on return...")
 (= x 42)
 (((x)) 23)
 (or (== x 42)
     (error))
 
-(message "Testing if argument symbol values get set before list is done...")
+(message "Testing if argument values get set after evaluation has completed...")
 (= x 42)
 (((x y)
    (or (== y 47)
@@ -34,15 +34,15 @@
 (((first . rest)) t)
 
 (message "Smoke-testing COPY-LIST...")
-(print (copy-list nil))(terpri)
-(print (copy-list '(1)))(terpri)
-(print (copy-list '(1 2 3)))(terpri)
+(copy-list nil)
+(copy-list '(1))
+(copy-list '(1 2 3))
 
 (message "Smoke-testing APPLY...")
-(print (apply '(x x) nil))(terpri)
-(print (apply '(x x) '(1)))(terpri)
-(print (apply '(x x) '(1 2)))(terpri)
-(print (apply '(x x) 1 2 '(3 4)))(terpri)
+(apply '(x x) nil)
+(apply '(x x) '(1))
+(apply '(x x) '(1 2))
+(apply '(x x) 1 2 '(3 4))
 
 (message "Smoke-testing EVAL...")
 (eval ''(error))
@@ -67,7 +67,7 @@
 (? (cdr nil)
    (error))
 
-(message "Testing READing dotted pair...")
+(message "Testing to READ dotted pair...")
 (or (eq 'a (car '(a . 49)))
     (error))
 (or (eq 'b (cdr '(10 . b)))
@@ -183,8 +183,8 @@
   (? (< 0 n)
      (cons n (make-count (-- n)))))
 
-(message "Testing recursion with MAKE-COUNT...")
-(print (make-count 10))(terpri)
+(message "Smoke-testing recursion...")
+(make-count 10)
 
 ; Messes up the heap with the following GC although it
 ; merely assignes a new copy of the universe list, leaving
@@ -200,16 +200,15 @@
     (? (not (== c 0))
        (go tag))))
 
-(message "Testing BLOCK...")
+(message "Smoke-testing BLOCK...")
 (block-test 101)
-(terpri)
 
-(message "Removing MAKE-COUNT and BLOCK-TEST...")
+(message "Removing test functions...")
 (= *universe* (remove 'make-count (remove 'block-test *universe*)))
 (print (gc))(out " bytes free.")(terpri)
 
-(message "Testing SETOUT...")
-(setout stdout)
-
 (message "Testing SETIN...")
 (setin stdin)
+
+(message "Testing SETOUT...")
+(setout stdout)

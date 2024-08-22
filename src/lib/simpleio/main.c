@@ -65,8 +65,6 @@ setout (simpleio_chn_t c)
 bool
 eof ()
 {
-    if (do_putback[fnin])
-        return false;
     return io->eof ();
 }
 

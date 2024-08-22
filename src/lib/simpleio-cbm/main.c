@@ -16,7 +16,7 @@
 
 #include <simpleio/libsimpleio.h>
 
-#define  FIRST_CHANNEL  8
+#define FIRST_CHANNEL  8
 
 #define DEV_KEYBOARD    0
 #define DEV_SCREEN      3
@@ -35,7 +35,7 @@
 
 char            logical_fns[MAX_CHANNELS];
 simpleio_chn_t  chn;
-signed char     last_error;
+signed char     last_status[MAX_CHANNELS];
 
 char FASTCALL
 reverse_case (char c)
@@ -73,8 +73,8 @@ unsigned char silen;
 simpleio_chn_t FASTCALL
 simpleio_open (char * name, char mode)
 {
-    last_error = 0;
     chn = alloc_channel ();
+    last_status[chn] = 0;
     if (!chn)
         goto error;
     simpleio_init_channel (chn);
@@ -117,27 +117,27 @@ simpleio_open (char * name, char mode)
     cbm_close (15);
     cbm_k_chkin (fnin);
     if (ctrl != '0' || ctrh != '0') {
-        last_error = ((ctrh - '0') << 4) + (ctrl - '0');
+        last_status[chn] = ((ctrh - '0') << 4) + (ctrl - '0');
         return 0;
     }
 
     return chn;
 
 error:
-    last_error = -1;
+    last_status[chn] = -1;
     return 0;
 }
 
 bool
 raw_eof (void)
 {
-    return last_error;
+    return last_status[chn];
 }
 
 signed char
 raw_err (void)
 {
-    return last_error & ~0x40;
+    return last_status[chn] & ~0x40;
 }
 
 char FASTCALL
@@ -146,11 +146,17 @@ convert_in (char c)
     return (fnin == STDIN) ? reverse_case (c) : c;
 }
 
+void
+set_status (void)
+{
+    last_status[chn] = cbm_k_readst ();
+}
+
 char FASTCALL
 raw_conin (void)
 {
     char c = cbm_k_getin ();
-    last_error = cbm_k_readst ();
+    set_status ();
     return convert_in (c);
 }
 
@@ -158,9 +164,7 @@ char
 raw_in (void)
 {
     char c = cbm_k_chrin ();
-    last_error = cbm_k_readst ();
-    if (last_error)
-        return 0;
+    set_status ();
     return convert_in (c);
 }
 
@@ -170,21 +174,21 @@ raw_out (char c)
     if (fnout == STDOUT || fnout == STDERR)
         c = (c == '_') ? 164 : reverse_case (c);
     cbm_k_bsout (c);
-    last_error = cbm_k_readst ();
+    set_status ();
 }
 
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
     cbm_k_chkin (logical_fns[chn]);
-    last_error = cbm_k_readst ();
+    set_status ();
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
     cbm_k_ckout (logical_fns[chn]);
-    last_error = cbm_k_readst ();
+    set_status ();
 }
 
 void FASTCALL
@@ -211,6 +215,7 @@ simpleio_init ()
     cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
     cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
     bzero (logical_fns, sizeof (logical_fns));
+    bzero (eof_countdowns, sizeof (eof_countdowns));
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;

@@ -16,6 +16,7 @@ and this project adheres to
 
 - Last input/output and put back chars are stored for each
   channel separately.
+- eof() and err() are tied to their channels.
 
 #### Added
 

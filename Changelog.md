@@ -40,6 +40,13 @@ and this project adheres to
 - Compile-time option VERBOSE\_READ to have expression read
   by the REPL printed.
 
+#### Debugger
+
+##### Added
+
+- TARGET\_UNIX: Highlighting with terminal reverse mode instead
+  of triple chevrons, '<<<' and '>>>'.  There are kept for new
+  targets.
 
 ## [v0.0.3] - 2024-08-18
 

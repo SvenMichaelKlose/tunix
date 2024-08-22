@@ -44,6 +44,8 @@ print_highlighted (lispptr x, bool when)
     if (do_highlight && highlighted == x)
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
         out (when == HIGHLIGHT_BEFORE ? 18 : 146);
+#elif TARGET_UNIX
+        outs (when == HIGHLIGHT_BEFORE ? "\033[7m\000" : "\033[27m\000");
 #else
         outs (when == HIGHLIGHT_BEFORE ? ">>>" : "<<<");
 #endif

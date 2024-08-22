@@ -32,6 +32,9 @@
 // Print LOADed pathnames before evaluation.
 //#define VERBOSE_LOAD
 
+// Print READ expressions in REPL.
+//#define VERBOSE_READ
+
 
 /// Testing and debugging
 

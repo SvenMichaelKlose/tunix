@@ -237,6 +237,13 @@ lisp_repl (char mode)
             read_safe ();
             if (eof ())
                 goto do_return;
+#ifdef VERBOSE_READ
+            PUSH_TAG(fnout);
+            setout (STDOUT);
+            print (x);
+            setout (fnout);
+            POP_TAG(fnout);
+#endif
             setin (STDIN);
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)

@@ -36,6 +36,8 @@ and this project adheres to
 - CONIO: Unbuffered input.
 - READ accepts char notation '\<char>' as promised in the
   manual.
+- Compile-time option VERBOSE\_READ to have expression read
+  by the REPL printed.
 
 
 ## [v0.0.3] - 2024-08-18

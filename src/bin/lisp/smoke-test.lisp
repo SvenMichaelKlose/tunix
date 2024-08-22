@@ -1,7 +1,7 @@
 (var x nil)
 
 (message "Testing GC...")
-(print (gc))(out '" bytes free.")
+(print (gc))(out '" bytes free.")(terpri)
 
 (message "Testing ATOM...")
 (atom 1)
@@ -200,7 +200,7 @@
 
 (message "Removing MAKE-COUNT and BLOCK-TEST...")
 (= *universe* (remove 'make-count (remove 'block-test *universe*)))
-(print (gc))(out " bytes free.")
+(print (gc))(out " bytes free.")(terpri)
 
 (message "Testing SETOUT...")
 (setout stdout)

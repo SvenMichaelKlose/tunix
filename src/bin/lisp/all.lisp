@@ -42,4 +42,4 @@
 (message "Cleaning up. Please wait...")
 ; Have the universe list compressed.
 (= *universe* (copy-list *universe*))
-(print (gc))(out " bytes free.")
+(print (gc))(out " bytes free.")(terpri)

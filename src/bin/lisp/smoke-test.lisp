@@ -27,6 +27,12 @@
   )
  23 (+ x 5))
 
+(message "Missing rest arguments...")
+((rest))
+
+(message "Following, missing rest arguments...")
+(((first . rest)) t)
+
 (message "Smoke-testing COPY-LIST...")
 (print (copy-list nil))(terpri)
 (print (copy-list '(1)))(terpri)

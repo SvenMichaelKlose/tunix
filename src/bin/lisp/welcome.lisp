@@ -14,6 +14,6 @@
     (out 's)
     (terpri)))
 
-;TODO: (message "Saving 'image'...")
-;(isave "image")
+(message "Saving 'image'...")
+(isave "image")
 (message "Ready.")

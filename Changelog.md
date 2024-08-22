@@ -8,7 +8,9 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [current]
+## [v0.0.4] - 2024-08-22
+
+Heavy I/O reworks make this release worth a new checkout.
 
 ### libsimpleio
 
@@ -31,6 +33,7 @@ and this project adheres to
 - READ accepts negative numbers.
 - READ with end of file checks on the spot.
 - REPL has its own set of channels apart from the program.
+- Default image is saved after environment has loaded.
 
 ##### Added
 

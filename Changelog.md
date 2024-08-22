@@ -8,6 +8,15 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [current]
+
+### TUNIX Lisp
+
+#### General
+
+- Loading images works on Linux.
+
+
 ## [v0.0.4] - 2024-08-22
 
 Heavy I/O reworks make this release worth a new checkout.

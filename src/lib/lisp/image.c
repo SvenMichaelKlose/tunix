@@ -41,7 +41,7 @@ image_save (char * pathname)
     setout (chout);
 
     // Make header.
-    memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version));
+    memcpy (&header.git_version, TUNIX_GIT_VERSION, sizeof (TUNIX_GIT_VERSION));
 
     // Write header.
     outm ((char *) &header, sizeof (header));
@@ -105,7 +105,7 @@ image_load (char * pathname)
     // Verify that the Git version matches.
     // NOTE: It must be exactly the same machine
     // used to save the image anyhow.
-    if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (header.git_version))) {
+    if (strncmp ((char *) &header.git_version, TUNIX_GIT_VERSION, sizeof (TUNIX_GIT_VERSION))) {
         simpleio_close (chin);
         setin (old_in);
         return false;

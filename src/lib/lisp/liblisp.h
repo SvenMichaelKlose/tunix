@@ -108,8 +108,6 @@
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
-// NOTE: Prints to current output channel!
-
 
 /// Memory allocation
 
@@ -136,6 +134,9 @@
 
 // Commodore C128
 #ifdef TARGET_C128
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -155,7 +156,9 @@
 #ifndef NO_ONERROR
     #define NO_ONERROR
 #endif
-#define SLOW
+#ifndef SLOW
+    #define SLOW
+#endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -557,11 +560,15 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma bss-name (pop)
 #endif
 
+// NOT_NIL() doesn't work.  Either the onset of dementia
+// or terrible bugs hiding.
 #define nil     ((lispptr) 0)
 #ifdef __CC65__
-#define NOT(x)  !((size_t) x & 0xff00)
+    #define NOT(x)      !((size_t) x & 0xff00)
+    #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
-#define NOT(x)  (!x)
+    #define NOT(x)      (!x)
+    #define NOT_NIL(x)  (x)
 #endif
 
 #ifdef GC_STRESS

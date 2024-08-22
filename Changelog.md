@@ -18,6 +18,30 @@ and this project adheres to
 
 - Macros !++ and !--.
 
+
+## [v0.0.5] - 2024-08-23
+
+Most essential fixes.
+
+### TUNIX Lisp
+
+#### General
+
+- Configure Comodore C128 to be able to load "all.lisp".
+  (SLOW, COMPRESSED\_CONS).
+
+#### Environment
+
+##### Fixed
+
+- APPEND with no arguments.
+
+##### Added
+
+- CDAR, MAPCAR, MAPAN
+
+>>>>>>> development
+
 ## [v0.0.4] - 2024-08-22
 
 Heavy I/O reworks make this release worth a new checkout.

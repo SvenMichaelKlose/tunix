@@ -8,7 +8,59 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 Phew!  Release v0.0.4 fixes a lot of things.  Especially
 I/O.  Enjoy!
 
-Guess I deserve a round of ice cream right away. :p
+Guess I deserve a round of ice cream right away! :p
+
+---8<------8<------8<------8<------8<------8<---
+
+I shared with a wasp which seemed to have had several
+orgasms eating it.  It, too, must have been older.
+
+Now for the hard part.  The debugger is off-putting,
+especially if the sugar flash fades.  What's this?
+(Calling MAPCAN with a function only.)
+
+~~~lisp
+DEBUGGER 1:
+Error #2: Missing args: (first . rest)
+In mapcan (f . l):
+((apply append >>>(apply mapcar f l)<<<))
+~~~
+
+It is APPEND with argument defintion (first . rest), which
+is wrong in my mind.  Let's see what SBCL says:
+
+~~~lisp
+(append)
+nil
+~~~
+
+Cool.  There's the relief of having guessed right.  But,
+since the call has been made inside APPLYm and it's last
+argument is still marked as bein g highlighted, the info is
+confusing.  Before APPEND can be fixed, I'll have to make
+sure that the debugger won't steal time acting like this.
+Essentially we want something like:
+
+~~~lisp
+DEBUGGER 1:
+Error #2: APPEND: Missing args: (first . rest), got: nil
+In mapcan (f . l):
+((apply append (apply mapcar f l)))
+~~~
+
+Accordingly I'll make sure that the highlighting is cleared
+after the last argument to a function has been evaluated.
+One moment... and there is the blues: EVAL pushes and pops
+the highlighting marker onto the GC stack.  That should be
+OK.  I'm tired already.  It's late and the classical music
+by Schubert („Der Tod und das Mädchen“, Das Busch-Quartett),
+I left on, because I didn't care really, is getting on my
+nerves, racing towards its finishing peak.  NnnnnnnnngAh!
+Thanks, Schubert.  That's better!  I'll go explore the
+virtues of horizontal mind mapping, leaving a throw-away
+note: "Show name of called function by APPLY and discard
+highlighting."
+But I'll APPEND a quick fix.
 
 # 2024-08-21
 

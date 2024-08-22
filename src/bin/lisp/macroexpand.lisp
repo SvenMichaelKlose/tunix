@@ -43,27 +43,18 @@
     (error (macroexpand '(v . body))))
 
 (message "Testing macro-expansion of unquoted list...")
-(message "(Part 1...)")
 (or (equal (macroexpand ',(a))
            ',(a))
     (error (macroexpand ',(a))))
-
-(message "(Part 2...)")
 (or (equal (macroexpand '(,(a)))
            '(,(a)))
     (error (macroexpand '(,(a)))))
-
-(message "(Part 3...)")
 (or (equal (macroexpand '((,(a))))
            '((,(a))))
     (error (macroexpand '((,(a))))))
-
-(message "(Part 4...)")
 (or (equal (list (macroexpand '((,(a)))))
            '(((,(a)))))
     (error (list (macroexpand '((,(a)))))))
-
-(message "(Part 5...)")
 (or (equal (list 2 (macroexpand '((,(a)))))
            '(2 ((,(a)))))
     (error (list 2 (macroexpand '((,(a)))))))

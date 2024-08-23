@@ -565,7 +565,9 @@ extern lispptr va; // Temporary in 'eval.c'.
 #define nil     ((lispptr) 0)
 #ifdef __CC65__
     #define NOT(x)      !((size_t) x & 0xff00)
-    #define NOT_NIL(x)  ((size_t) x & 0xff00)
+    // TOOD: Fix https://github.com/cc65/cc65/issues/2487
+    //#define NOT_NIL(x)  ((size_t) x & 0xff00)
+    #define NOT_NIL(x)  (x)
 #else
     #define NOT(x)      (!x)
     #define NOT_NIL(x)  (x)
@@ -693,16 +695,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       (NOT_NIL(x) && (TYPE(x) & TYPE_CONS))
 #define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
+#define _BUILTINP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     (NOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
 #define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _SPECIALP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      (NOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))

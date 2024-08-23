@@ -34,12 +34,12 @@ int FASTCALL
 length (lispptr x)
 {
     lisp_len = 0;
-    while (x) {
+    while (NOT_NIL(x)) {
         lisp_len++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
-        if (x && ATOM(x)) {
+        if (NOT_NIL(x) && ATOM(x)) {
             lisp_len++;
             break;
         }
@@ -57,7 +57,7 @@ copy_list (lispptr x, char mode, lispptr needle)
 
     tmp = CDR(x);
 #ifndef NAIVE
-    if (tmp && ATOM(tmp))
+    if (NOT_NIL(tmp) && ATOM(tmp))
         return error_cons_expected (tmp);
 #endif
 
@@ -95,7 +95,7 @@ copy_list (lispptr x, char mode, lispptr needle)
     }
 
 #ifndef NAIVE
-    if (x)
+    if (NOT_NIL(x))
         return error_cons_expected (x);
 #endif
 
@@ -111,7 +111,7 @@ last (lispptr x)
         if (ATOM(CDR(tmp2)))
             return tmp2;
 #ifndef NAIVE
-    if (tmp2)
+    if (NOT_NIL(tmp2))
         return error_cons_expected (tmp2);
 #endif
     return nil;

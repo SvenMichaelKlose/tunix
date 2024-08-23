@@ -163,7 +163,7 @@ bi_symbol_name ()
     list_last = nil;
     for (i = 0; i < lisp_len; i++) {
         tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
-        if (list_last) {
+        if (NOT_NIL(list_last)) {
             SETCDR(list_last, tmp);
             list_last = tmp;
         } else
@@ -315,7 +315,7 @@ bi_apply (void)
     args = copy_list (arg2, COPY_BUTLAST, nil);
     tmp  = LIST_CAR(last (arg2));
 
-    if (args) {
+    if (NOT_NIL(args)) {
 #ifndef NAIVE
         if (!LISTP(tmp)) {
             error (ERROR_TYPE, "Last arg isn't list");
@@ -356,7 +356,7 @@ lispptr
 bi_if (void)
 {
     arg2c = CDR(x);
-    while (x) {
+    while (NOT_NIL(x)) {
         // Get condition.
         arg1 = CAR(x);
 
@@ -388,7 +388,7 @@ bi_if (void)
 #endif
 
         // Do consequence if condition isn't NIL.
-        if (tmp) {
+        if (NOT_NIL(tmp)) {
             x = CAR(arg2c);
 #ifndef NO_DEBUGGER
             highlighted = arg2c;
@@ -421,7 +421,7 @@ bi_and (void)
             return nil;
     }
 #ifndef NAIVE
-    if (x)
+    if (NOT_NIL(x))
         error_cons_expected (x);
 #endif
     return value;
@@ -441,11 +441,11 @@ bi_or (void)
         if (error_code)
             break;
 #endif
-        if (value)
+        if (NOT_NIL(value))
             return value;
     }
 #ifndef NAIVE
-    if (x)
+    if (NOT_NIL(x))
         error_cons_expected (x);
 #endif
     return nil;
@@ -649,7 +649,7 @@ lispptr
 bi_error (void)
 {
     last_errstr = "User error";
-    if (arg1)
+    if (NOT_NIL(arg1))
         current_expr = arg1;
     error_code = ERROR_USER;
     return nil;
@@ -690,7 +690,7 @@ bi_quit (void)
 lispptr
 bi_exit (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         exit (NUMBER_VALUE(arg1));
     else
         do_exit_program = do_break_repl = true;
@@ -732,7 +732,7 @@ bi_member (void)
             return tmp;
     }
 #ifndef NAIVE
-    if (tmp)
+    if (NOT_NIL(tmp))
         error_cons_expected (tmp);
 #endif
     return nil;
@@ -826,7 +826,7 @@ long
 bekloppies (void)
 {
     struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+    if (clock_gettime (CLOCK_REALTIME, &ts) == 0)
         return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
     perror("clock_gettime");
     return 0;

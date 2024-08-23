@@ -94,7 +94,7 @@ print_list (cons * c)
         print0 (c->car);
         print_highlighted (c, HIGHLIGHT_AFTER);
         tmp = CDR(c);
-        if (tmp && !CONSP(tmp)) {
+        if (NOT_NIL(tmp) && !CONSP(tmp)) {
             outs (" . ");
             print_highlighted (c, HIGHLIGHT_BEFORE);
             print0 (tmp);

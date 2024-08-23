@@ -1617,29 +1617,31 @@ anonymous symbol):
 
 ## Lists
 
-| Function        | Description                         |
-|-----------------|-------------------------------------|
-| (list +x)       | Return list evaluated.              |
-| (list? x)       | Test if argument is NIL or a cons.  |
-| (cadr l)...     | Nested CAR/CDR combinations.        |
-| (carlist l)     | Get first elements of lists.        |
-| (cdrlist l)     | Get rest elements of lists.         |
-| (copy-list x)   | Copy list.                          |
-| (copy-tree x)   | Copy recursively.                   |
-| (ensure-list x) | Turn atom into list.                |
-| (every f x)     | Test if F is T for all X.           |
-| (some f x)      | Test if F is T for some X.          |
-| (find x l)      | Find element X in list.             |
-| (find-if f l)   | Find element X in list by F.        |
-| (group l n)     | Split L in lists of length N.       |
-| (nth n l)       | Get Nth cons in L.                  |
-| (nthcdr n l)    | Get Nth CDR of cons in L.           |
-| (mapcar f +l)   | Map CARs of lists.                  |
-| (mapcan f +l)   | Concatenating MAPCAR.               |
-| (member-if f l) | Find cons with element in list.     |
-| (remove-if f l) | Removed elemnts from L.             |
-| (reverse l)     | Reverse list.                       |
-| (subseq l n n)  | Return sublist.                     |
+| Function          | Description                         |
+|-------------------|-------------------------------------|
+| (list +x)         | Return list evaluated.              |
+| (list? x)         | Test if argument is NIL or a cons.  |
+| (cadr l)...       | Nested CAR/CDR combinations.        |
+| (carlist l)       | Get first elements of lists.        |
+| (cdrlist l)       | Get rest elements of lists.         |
+| (copy-list x)     | Copy list.                          |
+| (copy-tree x)     | Copy recursively.                   |
+| (ensure-list x)   | Turn atom into list.                |
+| (every f x)       | Test if F is T for all X.           |
+| (some f x)        | Test if F is T for some X.          |
+| (find x l)        | Find element X in list.             |
+| (find-if f l)     | Find element X in list by F.        |
+| (group l n)       | Split L in lists of length N.       |
+| (nth n l)         | Get Nth cons in list.               |
+| (nthcdr n l)      | Get Nth CDR of cons in list.        |
+| (mapcar f +l)     | Map CARs of lists.                  |
+| (mapcan f +l)     | Concatenating MAPCAR.               |
+| (member-if f l)   | Find cons with element in list.     |
+| (remove-if f l)   | Removed elemnts from list.          |
+| (reverse l)       | Reverse list.                       |
+| (position x l ?f) | Find position of object in list.    |
+| (split x l ?f)    | Split list where object occurs.     |
+| (subseq l n n)    | Return sublist.                     |
 
 ### (list +x): Make list of arguments.
 
@@ -1656,6 +1658,29 @@ anonymous symbol):
 ### (copy x): Copy recursively.
 
 ### (find x l): Find element X in list.
+
+### (position x l ?f) | Find position of X in L.
+
+Returns the position of X in list L, starting with 0 for
+the first position, or NIL if X has not been found.
+Predicate F is EQL by default.
+
+~~~lisp
+(position 'foreign '(mom dad)) ; -> nil
+(position 'mom '(mom dad))     ; -> 0
+(position 'dad '(mom dad))     ; -> 1
+~~~
+
+### (split x l ?f) | Split list at object.
+
+Splits list L where object X occurs, tested by predicate F,
+which is EQL by default.  The object is removed from the
+list.
+
+~~~lisp
+(split 'b '(a a b c c c)) ; -> ((a a) (c c c))
+(split 'b '(a a b b c c)) ; -> ((a a) nil (c c))
+~~~
 
 ## Loops
 

@@ -26,6 +26,8 @@
 (load "mapcar.lisp")
 (load "mapcan.lisp")
 (load "case.lisp")
+(load "position.lisp")
+(load "split.lisp")
 (load "unique.lisp")
 (load "union.lisp")
 (load "intersect.lisp")

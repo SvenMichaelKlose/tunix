@@ -1562,12 +1562,35 @@ programming languages.
 
 ### (progn +b): Return result of last.
 
-### (when cond +b): Evaluate if condition is true.
+### (when cond +b): Evaluate body if condition is true.
+
+~~~lisp
+(when (hungry? coder)
+  (feed coder)
+  (tell coder "That's 5.99!"))
+~~~
+
+replaces
+
+~~~lisp
+(? (hungry? coder)
+   (block t
+     (feed coder)
+     (tell coder "That's 5.99!")))
+~~~
 
 ### (case x +l): Evaluate conditionally by matching value.
 
-Evaluates conditionally by matching values in pairs, with
-an optional default.  EQL is used as the matching predicate.
+Evaluates conditionally by matching values in pairs.
+EQL is used as the matching predicate.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5."))
+~~~
+
+It can have an optional default.
 
 ~~~lisp
 (case x
@@ -1576,7 +1599,8 @@ an optional default.  EQL is used as the matching predicate.
   (out "X is neither A or 5."))
 ~~~
 
-This is equivalent without the CASE macro:
+This is the macro-expanded version (TMP would be an
+anonymous symbol):
 
 ~~~lisp
 (let tmp x

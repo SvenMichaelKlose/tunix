@@ -2,7 +2,7 @@
     (load "stack.lisp"))
 
 (fn reverse (x)
-  (do ((l nil)
+  (do ((l)
        (i x (cdr i)))
       ((not i) l)
     (push (car i) l)))

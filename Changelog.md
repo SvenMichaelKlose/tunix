@@ -15,6 +15,10 @@ and this project adheres to
 
 #### Environment
 
+##### Fixed
+
+- Macro !? reimplemented and tests added.
+
 ##### Added
 
 - Macro CASE: Evaluate conditionally by matching value.

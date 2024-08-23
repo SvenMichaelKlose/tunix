@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current] - 2024-08-23
+## [v0.0.6] - 2024-08-24
 
 ### TUNIX Lisp
 
@@ -48,6 +48,7 @@ and this project adheres to
 
 - Compile-time option GC\_DIAGNOSTICS to detect zeropage
   issues (undefined globals).
+
 
 ## [v0.0.5] - 2024-08-23
 

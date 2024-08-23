@@ -138,6 +138,316 @@ definitions.
 
 APPLY copies all arguments but the last one.
 
+# Installing binaries
+
+"Installing" a binary release is the easiest way to go
+exploring.  I'd rather recommend compiling it yourself.
+
+## Getting a release
+
+Download the latest binary from
+[https://github.com/SvenMichaelKlose/tunix/releases](https://github.com/SvenMichaelKlose/tunix/releases).
+
+The name of the ZIP file contains the project's name
+"tunix", followed by its release version, ID in the
+public Git repository (short SHA hash), and finally the
+release data, followed by the opligatory ZIP suffix.
+It should look like this:
+
+~~~
+tunix.v0.0.5+bca5411.2024-08-22.zip
+       ^^^^^ ^^^^^^^ ^^^^^^^^^^
+         |      |        |
+         |      |   release date
+         |   Git SHA
+      version
+~~~
+
+The version, "0.0.5" in this case, contains a major, minor
+and patch version according to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+TUNIX Lisp is a bit different as it has a major version
+number of "0", indicating that it's not meant for production
+where you expect things to not change from one day to the
+other.  To make it even worse, the minor version also being
+"0" means that absolutely everything could change, no matter
+if there'll be hell or high water.  It's about making TUNIX
+grown up enough to be able to follow the Semantic Versioning
+rules in the first place.  But we're trying to keep the pain
+away.  The patch level increases with every release - that
+happens if a bunch of changes happened that makes everyones
+life easier.  You must download the latest.  The others are
+kept for the protocol only.
+
+Things you must expect to change sooner than later:
+
+- Required special keyword (like the notoriuos LAMBDA) to
+  tell function expressiod from regular expressions.  It'll
+  be required to make the language more comfortable when it
+  comes to lexical scope, and to have a compiler produce
+  effective code.
+
+## Unpacking
+
+Download the latest release and unpack it.  On a unixoid
+command-line (Linux/Mac) this should do:
+
+~~~sh
+unzip tunix.v
+~~~
+
+It contains directory "tunix" and subdirectories for
+all supported platforms, e.g. "tunix/c64".  You can step
+into one of those and run TUNIX Lisp in your favourite
+emulator, or you can also transfer the files to your
+platform, depending on what it supports.  For Commdore
+8-bit machines there are SD card readers, also known as
+SD2IEC drives, available.
+
+### Running on Linux/Mac/BSD, etc.
+
+If you're running a something Unixoid, step into directory
+"tunix/unix" and shoot it up by typing "./lisp":
+
+~~~sh
+cd tunix/unix
+./lisp
+~~~
+
+You have to step into "tunix/unix" or TUNIX Lisp won't find
+the other files it needs to get going.
+
+### Installing VICE and YAPE mmulators
+
+The "VersatIle Commodore Emulator" is the most popular one
+for Commodore 8-bit machines.  Commodore C16 and Plus/4
+fanatics will insist on using YAPE as it's more compatible
+to the original.
+
+#### The VersatIle Commdore Emulator (VICE)
+
+##### **Linux**
+
+For most Linux distributions, VICE can be installed directly from the package manager.
+
+- **Debian/Ubuntu-based distributions**:
+  ```sh
+  sudo apt-get update
+  sudo apt-get install vice
+  ```
+
+- **Fedora**:
+  ```sh
+  sudo dnf install vice
+  ```
+
+- **Arch Linux**:
+  ```sh
+  sudo pacman -S vice
+  ```
+
+If VICE is not available in your distribution's repositories, you may need to compile it from source. Visit the [VICE website](https://vice-emu.sourceforge.io/) for more information.
+
+##### **macOS**
+
+VICE can be installed via Homebrew on macOS:
+
+- **Using Homebrew**:
+  ```sh
+  brew install vice
+  ```
+
+Alternatively, you can download the latest macOS binary from
+the [VICE website](https://vice-emu.sourceforge.io/)
+and follow the instructions provided there.
+
+##### **Windows**
+
+For Windows, you can download the latest VICE binary from
+the [VICE website](https://vice-emu.sourceforge.io/).
+After downloading, extract the archive to a directory of
+your choice and run the appropriate executable (e.g.,
+`x64.exe` for C64 emulation).
+
+#### Yet Another Plus/4 Emulator (YAPE)
+
+##### **Windows**
+
+YAPE is primarily a Windows-based emulator.  You can
+download it from the
+[YAPE website](http://yape.homeserver.hu/).
+After downloading, extract the archive and run `yape.exe`.
+
+##### **Linux and macOS**
+
+YAPE is not natively available for Linux or macOS, but you
+can run it using Wine, a compatibility layer for running
+Windows applications on Unix-like operating systems.
+
+- **Install Wine**:
+  - **Debian/Ubuntu**:
+    ```bash
+    sudo apt-get install wine
+    ```
+  - **Fedora**:
+    ```bash
+    sudo dnf install wine
+    ```
+  - **macOS** (using Homebrew):
+    ```bash
+    brew install --cask wine-stable
+    ```
+
+- **Run YAPE with Wine**:
+  After installing Wine, download YAPE from the
+  [YAPE website](http://yape.homeserver.hu/) and run it
+  with:
+  ```bash
+  wine yape.exe
+  ```
+
+#### Additional Resources
+
+For more detailed installation instructions or
+troubleshooting, please refer to the respective emulator's
+website:
+
+- [VICE Emulator](https://vice-emu.sourceforge.io/)
+- [YAPE Emulator](http://yape.homeserver.hu/)
+
+## Building TUNIX from source
+
+Building TUNIX from source code is highly recommended if you
+want to stay up to date, especially for getting patches that
+remove bugs - naturally these occur often in early software.
+
+### General instructions for all platforms
+
+#### Cloning the Repository
+
+To begin, clone the TUNIX repository:
+
+```bash
+git clone https://github.com/svenklose/tunix.git
+cd tunix
+```
+
+#### Fetching third-party code
+
+After cloning the repository, you must fetch all the
+required third-party code and build that first:
+
+```bash
+git submodule update --init --recursive
+make host
+```
+
+#### Building all targets
+
+To build binaries for all supported targets, run:
+
+```bash
+make allworlds
+```
+
+#### Building for a specific target
+
+If you want to build TUNIX for a specific platform, use the following command:
+
+```bash
+make world TARGET=<target>
+```
+
+Replace `<target>` with one of the supported targets listed below.
+
+#### Supported targets:
+
+| Target   | Description                   |
+|----------|-------------------------------|
+| `c128`   | Commodore C128                |
+| `c16`    | Commodore C16                 |
+| `c64`    | Commodore C64                 |
+| `pet`    | Commodore PET (doesn't start) |
+| `plus4`  | Commodore Plus/4              |
+| `sim6502`| cc65's sim65                  |
+| `unix`   | GCC-compatible toolchain      |
+| `vic20`  | Commodore VIC-20              |
+
+### Linux
+
+#### Prerequisites
+
+Ensure you have the necessary tools installed:
+
+```bash
+sudo apt-get update
+sudo apt-get install git build-essential
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### macOS
+
+#### Prerequisites
+
+Install the necessary tools using Homebrew:
+
+```bash
+brew install git
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### Windows
+
+#### Prerequisites
+
+Set up a Unix-like environment using MSYS2 or MinGW:
+
+1. **Install MSYS2** from [msys2.org](https://www.msys2.org/).
+
+2. **Update the Package Database**:
+   ```bash
+   pacman -Syu
+   ```
+
+3. **Install the Development Tools**:
+   ```bash
+   pacman -S base-devel git mingw-w64-x86_64-gcc
+   ```
+
+#### Building
+
+1. **Clone the Repository and Fetch Third-Party Code**:
+   ```bash
+   git clone https://github.com/svenklose/tunix.git
+   cd tunix
+   git submodule update --init --recursive
+   make host
+   ```
+
+2. **Build TUNIX**:
+   ```bash
+   make allworlds
+   ```
+
+   Or for a specific target like Unix:
+   ```bash
+   make world TARGET=unix
+   ```
+
 # User interface: The READ/EVAL/PRINT-Loop (REPL)
 
 The REPL is the user interface.  It prompts you for input by

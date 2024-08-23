@@ -382,6 +382,7 @@ set_arg_values:
 #ifndef NAIVE
         // Missing argument error.
         else if (NOT(args)) {
+            error_info = unevaluated_arg1;
             error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
@@ -733,7 +734,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error_ptr (tagstack, "tag");
+        internal_error_ptr (tagstack, "alien tag");
 #endif
     }
 

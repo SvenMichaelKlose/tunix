@@ -25,6 +25,12 @@ and this project adheres to
 - POSITION: Find position of object in list.
 - SPLIT: Split list where object occurs, removing that object.
 
+#### Debugger
+
+##### Fixed
+
+- Show faulty value on type error.
+
 
 ## [v0.0.5] - 2024-08-23
 

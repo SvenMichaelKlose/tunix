@@ -132,6 +132,7 @@ err_type (char * type, lispptr x, char code)
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
+    error_info = x;
     error (code, buffer);
 }
 

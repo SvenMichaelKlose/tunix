@@ -38,6 +38,10 @@ and this project adheres to
 - Global list start/last pointers weren't cleared on program
   start, which is bad with zeropage locations (6502-CPU).
 
+##### Added
+
+- Compile-time option GC\_DIAGNOSTICS to detect zeropage
+  issues (undefined globals).
 
 ## [v0.0.5] - 2024-08-23
 

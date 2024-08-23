@@ -17,8 +17,12 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Dump global and GC stack pointers during mark phase.
+// Especially useful if 'global_pointers' is incomplete.
+//#define GC_DIAGNOSTICS
+
 // Print 'C' for each compressed cons.
-//#define COMPRESSED_CONS
+//#define VERBOSE_COMPRESSED_CONS
 
 // Print names to built-in special forms FN and VAR.
 //#define VERBOSE_DEFINES
@@ -898,8 +902,9 @@ extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
 
 extern void init_builtins (void);
-extern bool init_heap     (void);
 extern void init_eval     (void);
+extern bool init_heap     (void);
+extern void init_list     (void);
 extern void init_onerror  (void);
 extern void init_repl     (void);
 extern void heap_add_init_areas (void);

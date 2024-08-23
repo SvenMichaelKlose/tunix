@@ -362,12 +362,29 @@ restart:
 #endif
 
     // Mark global pointers.
-    for (gp = global_pointers; *gp; gp++)
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark globals: ");
+#endif
+    for (gp = global_pointers; *gp; gp++) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *gp); out (' ');
+#endif
         mark (**gp);
+    }
 
     // Mark GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark stack: ");
+#endif
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *p); out (' ');
+#endif
         mark (*(lispptr *) p);
+    }
+#ifdef GC_DIAGNOSTICS
+    outs ("Sweep: ");
+#endif
 
     // Append used objects over unused ones, freeing space.
     // Log to gap table.

@@ -30,6 +30,7 @@ and this project adheres to
 ##### Fixed
 
 - Show faulty value on type error.
+- Tell to which built-in arguments are missing.
 
 #### Interpreter
 

@@ -33,6 +33,10 @@ and this project adheres to
 - Show faulty value on type error.
 - Tell to which built-in arguments are missing.
 
+##### Added
+
+- New error code ERROR\_NO\_BLOCK\_NAME.
+
 #### Interpreter
 
 ##### Fixed

@@ -786,14 +786,15 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.             |
 | NOT\_FUNCTION   | 5    | Object is not a function.       |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
-| OUT\_OF\_HEAP   | 7    | Out of heap.                    |
-| NO\_PAREN       | 8    | ')' missing.                    |
-| STALE\_PAREN    | 9    | Unexpected ')'.                 |
-| SYM\_TOO\_LONG  | 10   | Symbol longer than MAX\_SYMBOL. |
-| QUOTE\_MISSING  | 11   | '"' missing.                    |
-| FILEMODE        | 12   | Illegal mode for OPEN.          |
-| USER            | 13   | ERROR function was called.      |
-| INTERNAL        | 14   | Returned to operating system.   |
+| NO\_BLOCK\_NAME | 7    | BLOCK name is missing.          |
+| OUT\_OF\_HEAP   | 8    | Out of heap.                    |
+| NO\_PAREN       | 9    | ')' missing.                    |
+| STALE\_PAREN    | 10   | Unexpected ')'.                 |
+| SYM\_TOO\_LONG  | 11   | Symbol longer than MAX\_SYMBOL. |
+| QUOTE\_MISSING  | 12   | '"' missing.                    |
+| FILEMODE        | 13   | Illegal mode for OPEN.          |
+| USER            | 14   | ERROR function was called.      |
+| INTERNAL        | 15   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 

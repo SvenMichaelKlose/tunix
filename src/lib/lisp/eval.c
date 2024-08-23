@@ -232,7 +232,7 @@ do_eval:
     if (arg1 == block_sym) {
 #ifndef NAIVE
         if (!CONSP(CDR(x))) {
-            error (ERROR_ARG_MISSING, "No name");
+            error (ERROR_NO_BLOCK_NAME, "No name");
             goto do_return;
         }
 #endif

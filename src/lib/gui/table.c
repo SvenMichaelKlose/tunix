@@ -115,7 +115,7 @@ void __fastcall__
 layout_table (struct obj * t)
 {
     uchar * column_sizes = malloc (MAX_TABLE_COLUMNS);
-    bzero (column_sizes, MAX_TABLE_COLUMNS);
+    memset (column_sizes, 0, MAX_TABLE_COLUMNS);
 
     get_common_column_sizes_for_all_rows (column_sizes, t);
     layout_rows (column_sizes, t);

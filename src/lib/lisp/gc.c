@@ -6,12 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#ifdef TARGET_UNIX
-#include <strings.h>
-#endif
-#ifdef __CC65__
 #include <string.h>
-#endif
 
 #include <simpleio/libsimpleio.h>
 
@@ -269,7 +264,7 @@ check_xlat:
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifndef NDEBUG
-    bzero (d, heap_end - d);
+    memset (d, 0, heap_end - d);
 #endif
 
     // End symbol list.

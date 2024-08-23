@@ -54,7 +54,7 @@ void
 storage_write_virgin_snode (bdb *db, dbid_t id)
 {
     snode sn;
-    bzero (&sn, snode_size (0));
+    memset (&sn, 0, snode_size (0));
     storage_write_snode (db, id, &sn);
 }
 

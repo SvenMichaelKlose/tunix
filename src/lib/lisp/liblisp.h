@@ -582,16 +582,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _GCSTACK_CHECK_OVERFLOW() \
-    if (stack == stack_start) \
+    if (stack <= stack_start) \
         stack_overflow ()
 #define _GCSTACK_CHECK_UNDERFLOW() \
-    if (stack == stack_end) \
+    if (stack >= stack_end) \
         stack_underflow ()
 #define _TAGSTACK_CHECK_OVERFLOW() \
-    if (tagstack == tagstack_start) \
+    if (tagstack <= tagstack_start) \
         tagstack_overflow ()
 #define _TAGSTACK_CHECK_UNDERFLOW() \
-    if (tagstack == tagstack_end) \
+    if (tagstack >= tagstack_end) \
         tagstack_underflow ()
 
 #ifdef GCSTACK_OVERFLOW_CHECKS

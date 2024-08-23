@@ -29,6 +29,7 @@ and this project adheres to
 
 ##### Fixed
 
+- GC/tag stack over-/underflow checks.
 - Show faulty value on type error.
 - Tell to which built-in arguments are missing.
 

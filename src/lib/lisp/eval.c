@@ -203,7 +203,7 @@ do_eval:
 
     // Evaluate atom.
     if (ATOM(x)) {
-        if (x)
+        if (NOT_NIL(x))  // TODO: NOT_NIL(x) - terrible bug hiding here.
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
@@ -217,7 +217,7 @@ do_eval:
 #endif
 
     // Get function expression from symbol.
-    if (arg1 && SYMBOLP(arg1)) {
+    if (NOT_NIL(arg1) && SYMBOLP(arg1)) {
         // Inhinit evaluation of special form's arguments.
         if (EXTENDEDP(arg1))
             unevaluated = true;
@@ -518,7 +518,7 @@ do_argument:
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && NOT(argdefs)) {
+    if (NOT_NIL(args) && NOT(argdefs)) {
         error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;

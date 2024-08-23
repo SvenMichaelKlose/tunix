@@ -127,3 +127,15 @@ member (lispptr needle, lispptr x)
             return tmp;
     return nil;
 }
+
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
+#endif
+
+void
+init_list (void)
+{
+    list_start = list_last = nil;
+}

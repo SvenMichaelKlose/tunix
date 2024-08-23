@@ -31,6 +31,13 @@ and this project adheres to
 
 - Show faulty value on type error.
 
+#### Interpreter
+
+##### Fixed
+
+- Global list start/last pointers weren't cleared on program
+  start, which is bad with zeropage locations (6502-CPU).
+
 
 ## [v0.0.5] - 2024-08-23
 

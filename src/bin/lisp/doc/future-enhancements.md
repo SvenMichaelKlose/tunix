@@ -55,27 +55,15 @@ avoid performance issues.
 
 # Exceptions
 
-Catch stack.
+setjmp() buffers on tag stack.
 
 # Real-time applications
 
+Copying GC is the only way to go in my mind.  Goes well
+with banked memory.
 Interruptible GC with lower threshold to keep space for
 critical operations is a bad idea as a GC has to complete at
 some point.
-
-| Function  | Description                  |
-|-----------|------------------------------|
-| (gc x)    | GC with another root object. |
-
-GC could take an optional argument to specify another root
-than variable \*universe\* to discard everything that is
-not part of an app.
-
-~~~lisp
-(gc 'appstart)
-; Put APPSTART back in the universe.
-(var appstart appstart)
-~~~
 
 # Bielefeld DB
 
@@ -102,15 +90,6 @@ Embedded database to the rescue the day for large data sets.
 | (mkbuiltin s a) | Add built-in function. |
 
 Submit to your fantasy.
-
-# Compressed lists
-
-Conses which only store the CAR if the CDR is the next
-object on the heap.  This can be done at allocation time but
-would make the list's CDRs immutable.
-
-The disadvantage is that extra checks are required to access
-a CDR.
 
 # Processes
 

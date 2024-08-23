@@ -8,6 +8,7 @@
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <strings.h>
+#include <string.h>
 #endif
 #ifdef __CC65__
 #include <string.h>
@@ -528,8 +529,6 @@ move_pointers (char * start, size_t len)
     return;
 }
 
-size_t c;
-
 void
 relocate_by_address (void)
 {
@@ -549,11 +548,7 @@ compress (void)
         heap_used   = heap_free - heap_start;
 
         // Move used heap to the end.
-        d = heap_end;
-        s = heap_free;
-        c = heap_used;
-        while (c--)
-            *--d = *--s;
+        memcpy (heap_free, heap_end, heap_used);
 
         // Make all pointers real again.
         move_pointers (heap_old, heap_unused);

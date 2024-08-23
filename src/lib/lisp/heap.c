@@ -297,7 +297,7 @@ lookup_symbol (char * str, uchar len)
 {
     // Walk over singly-linked list of named symbols.
     // (Anonymous symbols have no name.)
-    for (tmpstr = first_symbol; tmpstr; tmpstr = SYMBOL_NEXT(tmpstr))
+    for (tmpstr = first_symbol; NOT_NIL(tmpstr); tmpstr = SYMBOL_NEXT(tmpstr))
         if (SYMBOL_LENGTH(tmpstr) == len
             && !memcmp (tmpstr + sizeof (symbol), str, len))
             return tmpstr;
@@ -310,7 +310,7 @@ alloc_symbol (char * str, uchar len)
 {
     tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     if (len) {
-        if (last_symbol)
+        if (NOT_NIL(last_symbol))
             SYMBOL_NEXT(last_symbol) = tmp;
         last_symbol = tmp;
     }
@@ -325,7 +325,8 @@ alloc_symbol (char * str, uchar len)
 lispptr FASTCALL
 make_symbol (char * str, uchar len)
 {
-    if (!(tmp = lookup_symbol (str, len)))
+    tmp = lookup_symbol (str, len);
+    if (NOT(tmp))
         return alloc_symbol (str, len);
     return tmp;
 }

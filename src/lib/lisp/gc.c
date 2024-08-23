@@ -6,12 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#ifdef TARGET_UNIX
-#include <strings.h>
-#endif
-#ifdef __CC65__
 #include <string.h>
-#endif
 
 #include <simpleio/libsimpleio.h>
 
@@ -269,7 +264,7 @@ check_xlat:
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifndef NDEBUG
-    bzero (d, heap_end - d);
+    memset (d, 0, heap_end - d);
 #endif
 
     // End symbol list.
@@ -367,12 +362,29 @@ restart:
 #endif
 
     // Mark global pointers.
-    for (gp = global_pointers; *gp; gp++)
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark globals: ");
+#endif
+    for (gp = global_pointers; *gp; gp++) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *gp); out (' ');
+#endif
         mark (**gp);
+    }
 
     // Mark GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark stack: ");
+#endif
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *p); out (' ');
+#endif
         mark (*(lispptr *) p);
+    }
+#ifdef GC_DIAGNOSTICS
+    outs ("Sweep: ");
+#endif
 
     // Append used objects over unused ones, freeing space.
     // Log to gap table.

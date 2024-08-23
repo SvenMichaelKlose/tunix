@@ -138,6 +138,316 @@ definitions.
 
 APPLY copies all arguments but the last one.
 
+# Installing binaries
+
+"Installing" a binary release is the easiest way to go
+exploring.  I'd rather recommend compiling it yourself.
+
+## Getting a release
+
+Download the latest binary from
+[https://github.com/SvenMichaelKlose/tunix/releases](https://github.com/SvenMichaelKlose/tunix/releases).
+
+The name of the ZIP file contains the project's name
+"tunix", followed by its release version, ID in the
+public Git repository (short SHA hash), and finally the
+release data, followed by the opligatory ZIP suffix.
+It should look like this:
+
+~~~
+tunix.v0.0.5+bca5411.2024-08-22.zip
+       ^^^^^ ^^^^^^^ ^^^^^^^^^^
+         |      |        |
+         |      |   release date
+         |   Git SHA
+      version
+~~~
+
+The version, "0.0.5" in this case, contains a major, minor
+and patch version according to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+TUNIX Lisp is a bit different as it has a major version
+number of "0", indicating that it's not meant for production
+where you expect things to not change from one day to the
+other.  To make it even worse, the minor version also being
+"0" means that absolutely everything could change, no matter
+if there'll be hell or high water.  It's about making TUNIX
+grown up enough to be able to follow the Semantic Versioning
+rules in the first place.  But we're trying to keep the pain
+away.  The patch level increases with every release - that
+happens if a bunch of changes happened that makes everyones
+life easier.  You must download the latest.  The others are
+kept for the protocol only.
+
+Things you must expect to change sooner than later:
+
+- Required special keyword (like the notoriuos LAMBDA) to
+  tell function expressiod from regular expressions.  It'll
+  be required to make the language more comfortable when it
+  comes to lexical scope, and to have a compiler produce
+  effective code.
+
+## Unpacking
+
+Download the latest release and unpack it.  On a unixoid
+command-line (Linux/Mac) this should do:
+
+~~~sh
+unzip tunix.v
+~~~
+
+It contains directory "tunix" and subdirectories for
+all supported platforms, e.g. "tunix/c64".  You can step
+into one of those and run TUNIX Lisp in your favourite
+emulator, or you can also transfer the files to your
+platform, depending on what it supports.  For Commdore
+8-bit machines there are SD card readers, also known as
+SD2IEC drives, available.
+
+### Running on Linux/Mac/BSD, etc.
+
+If you're running a something Unixoid, step into directory
+"tunix/unix" and shoot it up by typing "./lisp":
+
+~~~sh
+cd tunix/unix
+./lisp
+~~~
+
+You have to step into "tunix/unix" or TUNIX Lisp won't find
+the other files it needs to get going.
+
+### Installing VICE and YAPE mmulators
+
+The "VersatIle Commodore Emulator" is the most popular one
+for Commodore 8-bit machines.  Commodore C16 and Plus/4
+fanatics will insist on using YAPE as it's more compatible
+to the original.
+
+#### The VersatIle Commdore Emulator (VICE)
+
+##### **Linux**
+
+For most Linux distributions, VICE can be installed directly from the package manager.
+
+- **Debian/Ubuntu-based distributions**:
+  ```sh
+  sudo apt-get update
+  sudo apt-get install vice
+  ```
+
+- **Fedora**:
+  ```sh
+  sudo dnf install vice
+  ```
+
+- **Arch Linux**:
+  ```sh
+  sudo pacman -S vice
+  ```
+
+If VICE is not available in your distribution's repositories, you may need to compile it from source. Visit the [VICE website](https://vice-emu.sourceforge.io/) for more information.
+
+##### **macOS**
+
+VICE can be installed via Homebrew on macOS:
+
+- **Using Homebrew**:
+  ```sh
+  brew install vice
+  ```
+
+Alternatively, you can download the latest macOS binary from
+the [VICE website](https://vice-emu.sourceforge.io/)
+and follow the instructions provided there.
+
+##### **Windows**
+
+For Windows, you can download the latest VICE binary from
+the [VICE website](https://vice-emu.sourceforge.io/).
+After downloading, extract the archive to a directory of
+your choice and run the appropriate executable (e.g.,
+`x64.exe` for C64 emulation).
+
+#### Yet Another Plus/4 Emulator (YAPE)
+
+##### **Windows**
+
+YAPE is primarily a Windows-based emulator.  You can
+download it from the
+[YAPE website](http://yape.homeserver.hu/).
+After downloading, extract the archive and run `yape.exe`.
+
+##### **Linux and macOS**
+
+YAPE is not natively available for Linux or macOS, but you
+can run it using Wine, a compatibility layer for running
+Windows applications on Unix-like operating systems.
+
+- **Install Wine**:
+  - **Debian/Ubuntu**:
+    ```bash
+    sudo apt-get install wine
+    ```
+  - **Fedora**:
+    ```bash
+    sudo dnf install wine
+    ```
+  - **macOS** (using Homebrew):
+    ```bash
+    brew install --cask wine-stable
+    ```
+
+- **Run YAPE with Wine**:
+  After installing Wine, download YAPE from the
+  [YAPE website](http://yape.homeserver.hu/) and run it
+  with:
+  ```bash
+  wine yape.exe
+  ```
+
+#### Additional Resources
+
+For more detailed installation instructions or
+troubleshooting, please refer to the respective emulator's
+website:
+
+- [VICE Emulator](https://vice-emu.sourceforge.io/)
+- [YAPE Emulator](http://yape.homeserver.hu/)
+
+## Building TUNIX from source
+
+Building TUNIX from source code is highly recommended if you
+want to stay up to date, especially for getting patches that
+remove bugs - naturally these occur often in early software.
+
+### General instructions for all platforms
+
+#### Cloning the Repository
+
+To begin, clone the TUNIX repository:
+
+```bash
+git clone https://github.com/svenklose/tunix.git
+cd tunix
+```
+
+#### Fetching third-party code
+
+After cloning the repository, you must fetch all the
+required third-party code and build that first:
+
+```bash
+git submodule update --init --recursive
+make host
+```
+
+#### Building all targets
+
+To build binaries for all supported targets, run:
+
+```bash
+make allworlds
+```
+
+#### Building for a specific target
+
+If you want to build TUNIX for a specific platform, use the following command:
+
+```bash
+make world TARGET=<target>
+```
+
+Replace `<target>` with one of the supported targets listed below.
+
+#### Supported targets:
+
+| Target   | Description                   |
+|----------|-------------------------------|
+| `c128`   | Commodore C128                |
+| `c16`    | Commodore C16                 |
+| `c64`    | Commodore C64                 |
+| `pet`    | Commodore PET (doesn't start) |
+| `plus4`  | Commodore Plus/4              |
+| `sim6502`| cc65's sim65                  |
+| `unix`   | GCC-compatible toolchain      |
+| `vic20`  | Commodore VIC-20              |
+
+### Linux
+
+#### Prerequisites
+
+Ensure you have the necessary tools installed:
+
+```bash
+sudo apt-get update
+sudo apt-get install git build-essential
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### macOS
+
+#### Prerequisites
+
+Install the necessary tools using Homebrew:
+
+```bash
+brew install git
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### Windows
+
+#### Prerequisites
+
+Set up a Unix-like environment using MSYS2 or MinGW:
+
+1. **Install MSYS2** from [msys2.org](https://www.msys2.org/).
+
+2. **Update the Package Database**:
+   ```bash
+   pacman -Syu
+   ```
+
+3. **Install the Development Tools**:
+   ```bash
+   pacman -S base-devel git mingw-w64-x86_64-gcc
+   ```
+
+#### Building
+
+1. **Clone the Repository and Fetch Third-Party Code**:
+   ```bash
+   git clone https://github.com/svenklose/tunix.git
+   cd tunix
+   git submodule update --init --recursive
+   make host
+   ```
+
+2. **Build TUNIX**:
+   ```bash
+   make allworlds
+   ```
+
+   Or for a specific target like Unix:
+   ```bash
+   make world TARGET=unix
+   ```
+
 # User interface: The READ/EVAL/PRINT-Loop (REPL)
 
 The REPL is the user interface.  It prompts you for input by
@@ -476,14 +786,15 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.             |
 | NOT\_FUNCTION   | 5    | Object is not a function.       |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
-| OUT\_OF\_HEAP   | 7    | Out of heap.                    |
-| NO\_PAREN       | 8    | ')' missing.                    |
-| STALE\_PAREN    | 9    | Unexpected ')'.                 |
-| SYM\_TOO\_LONG  | 10   | Symbol longer than MAX\_SYMBOL. |
-| QUOTE\_MISSING  | 11   | '"' missing.                    |
-| FILEMODE        | 12   | Illegal mode for OPEN.          |
-| USER            | 13   | ERROR function was called.      |
-| INTERNAL        | 14   | Returned to operating system.   |
+| NO\_BLOCK\_NAME | 7    | BLOCK name is missing.          |
+| OUT\_OF\_HEAP   | 8    | Out of heap.                    |
+| NO\_PAREN       | 9    | ')' missing.                    |
+| STALE\_PAREN    | 10   | Unexpected ')'.                 |
+| SYM\_TOO\_LONG  | 11   | Symbol longer than MAX\_SYMBOL. |
+| QUOTE\_MISSING  | 12   | '"' missing.                    |
+| FILEMODE        | 13   | Illegal mode for OPEN.          |
+| USER            | 14   | ERROR function was called.      |
+| INTERNAL        | 15   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 
@@ -1252,7 +1563,52 @@ programming languages.
 
 ### (progn +b): Return result of last.
 
-### (when cond +b): Evaluate if condition is true.
+### (when cond +b): Evaluate body if condition is true.
+
+~~~lisp
+(when (hungry? coder)
+  (feed coder)
+  (tell coder "That's 5.99!"))
+~~~
+
+replaces
+
+~~~lisp
+(? (hungry? coder)
+   (block t
+     (feed coder)
+     (tell coder "That's 5.99!")))
+~~~
+
+### (case x +l): Evaluate conditionally by matching value.
+
+Evaluates conditionally by matching values in pairs.
+EQL is used as the matching predicate.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5."))
+~~~
+
+It can have an optional default.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
+
+This is the macro-expanded version (TMP would be an
+anonymous symbol):
+
+~~~lisp
+(let tmp x
+  (eql tmp 'a) (out "X is A.")
+  (eql tmp 5)  (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
 
 ### (unless cond +b): Evaluate if condition is false.
 
@@ -1262,29 +1618,31 @@ programming languages.
 
 ## Lists
 
-| Function        | Description                         |
-|-----------------|-------------------------------------|
-| (list +x)       | Return list evaluated.              |
-| (list? x)       | Test if argument is NIL or a cons.  |
-| (cadr l)...     | Nested CAR/CDR combinations.        |
-| (carlist l)     | Get first elements of lists.        |
-| (cdrlist l)     | Get rest elements of lists.         |
-| (copy-list x)   | Copy list.                          |
-| (copy-tree x)   | Copy recursively.                   |
-| (ensure-list x) | Turn atom into list.                |
-| (every f x)     | Test if F is T for all X.           |
-| (some f x)      | Test if F is T for some X.          |
-| (find x l)      | Find element X in list.             |
-| (find-if f l)   | Find element X in list by F.        |
-| (group l n)     | Split L in lists of length N.       |
-| (nth n l)       | Get Nth cons in L.                  |
-| (nthcdr n l)    | Get Nth CDR of cons in L.           |
-| (mapcar f +l)   | Map CARs of lists.                  |
-| (mapcan f +l)   | Concatenating MAPCAR.               |
-| (member-if f l) | Find cons with element in list.     |
-| (remove-if f l) | Removed elemnts from L.             |
-| (reverse l)     | Reverse list.                       |
-| (subseq l n n)  | Return sublist.                     |
+| Function          | Description                         |
+|-------------------|-------------------------------------|
+| (list +x)         | Return list evaluated.              |
+| (list? x)         | Test if argument is NIL or a cons.  |
+| (cadr l)...       | Nested CAR/CDR combinations.        |
+| (carlist l)       | Get first elements of lists.        |
+| (cdrlist l)       | Get rest elements of lists.         |
+| (copy-list x)     | Copy list.                          |
+| (copy-tree x)     | Copy recursively.                   |
+| (ensure-list x)   | Turn atom into list.                |
+| (every f x)       | Test if F is T for all X.           |
+| (some f x)        | Test if F is T for some X.          |
+| (find x l)        | Find element X in list.             |
+| (find-if f l)     | Find element X in list by F.        |
+| (group l n)       | Split L in lists of length N.       |
+| (nth n l)         | Get Nth cons in list.               |
+| (nthcdr n l)      | Get Nth CDR of cons in list.        |
+| (mapcar f +l)     | Map CARs of lists.                  |
+| (mapcan f +l)     | Concatenating MAPCAR.               |
+| (member-if f l)   | Find cons with element in list.     |
+| (remove-if f l)   | Removed elemnts from list.          |
+| (reverse l)       | Reverse list.                       |
+| (position x l ?f) | Find position of object in list.    |
+| (split x l ?f)    | Split list where object occurs.     |
+| (subseq l n n)    | Return sublist.                     |
 
 ### (list +x): Make list of arguments.
 
@@ -1301,6 +1659,29 @@ programming languages.
 ### (copy x): Copy recursively.
 
 ### (find x l): Find element X in list.
+
+### (position x l ?f) | Find position of X in L.
+
+Returns the position of X in list L, starting with 0 for
+the first position, or NIL if X has not been found.
+Predicate F is EQL by default.
+
+~~~lisp
+(position 'foreign '(mom dad)) ; -> nil
+(position 'mom '(mom dad))     ; -> 0
+(position 'dad '(mom dad))     ; -> 1
+~~~
+
+### (split x l ?f) | Split list at object.
+
+Splits list L where object X occurs, tested by predicate F,
+which is EQL by default.  The object is removed from the
+list.
+
+~~~lisp
+(split 'b '(a a b c c c)) ; -> ((a a) (c c c))
+(split 'b '(a a b b c c)) ; -> ((a a) nil (c c))
+~~~
 
 ## Loops
 

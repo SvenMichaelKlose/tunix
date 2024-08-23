@@ -203,7 +203,7 @@ do_eval:
 
     // Evaluate atom.
     if (ATOM(x)) {
-        if (x)
+        if (x) // (NOT_NIL(x)) surfaces https://github.com/cc65/cc65/issues/2487
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
@@ -217,7 +217,7 @@ do_eval:
 #endif
 
     // Get function expression from symbol.
-    if (arg1 && SYMBOLP(arg1)) {
+    if (NOT_NIL(arg1) && SYMBOLP(arg1)) {
         // Inhinit evaluation of special form's arguments.
         if (EXTENDEDP(arg1))
             unevaluated = true;
@@ -232,7 +232,7 @@ do_eval:
     if (arg1 == block_sym) {
 #ifndef NAIVE
         if (!CONSP(CDR(x))) {
-            error (ERROR_ARG_MISSING, "No name");
+            error (ERROR_NO_BLOCK_NAME, "No name");
             goto do_return;
         }
 #endif
@@ -344,7 +344,7 @@ do_builtin_arg:
         if (!typed_argdef) {
 #ifndef NAIVE
             // Complain if argument left.
-            if (args) {
+            if (NOT_NIL(args)) {
                 error_info = args;
                 error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
                 goto do_return;
@@ -382,6 +382,7 @@ set_arg_values:
 #ifndef NAIVE
         // Missing argument error.
         else if (NOT(args)) {
+            error_info = unevaluated_arg1;
             error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
@@ -518,7 +519,7 @@ do_argument:
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && NOT(argdefs)) {
+    if (NOT_NIL(args) && NOT(argdefs)) {
         error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
@@ -733,7 +734,7 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error_ptr (tagstack, "tag");
+        internal_error_ptr (tagstack, "alien tag");
 #endif
     }
 

@@ -126,7 +126,7 @@ menu (void)
 void
 main (void)
 {
-    bzero (names, sizeof (names));
+    memset (names, 0, sizeof (names));
     clrscr ();
     *ULTIMEM_CONTROL = ULTIMEM_CTRL_LED;
     menu ();

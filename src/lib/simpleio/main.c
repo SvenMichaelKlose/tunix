@@ -12,11 +12,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#ifdef __CC65__
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #include "libsimpleio.h"
 
@@ -206,7 +202,7 @@ void FASTCALL
 simpleio_set (simpleio * x)
 {
     io = x;
-    bzero (do_putback, sizeof (do_putback));
-    bzero (last_in, sizeof (last_in));
-    bzero (last_out, sizeof (last_out));
+    memset (do_putback, 0, sizeof (do_putback));
+    memset (last_in, 0, sizeof (last_in));
+    memset (last_out, 0, sizeof (last_out));
 }

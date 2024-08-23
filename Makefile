@@ -25,7 +25,10 @@ src/include/git-version.h:
 	printf "(out \"TUNIX Lisp (\")(out +v+)(out \"" >>src/bin/lisp/git-version.lisp
 	printf ")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
 	mkdir -p src/include
-	printf "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
+	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
+	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h
+	printf "\"\n" >>src/include/git-version.h
+	printf "#define TUNIX_GIT_VERSION \"" >>src/include/git-version.h
 	cat git-version >>src/include/git-version.h
 	printf "\"\n" >>src/include/git-version.h
 

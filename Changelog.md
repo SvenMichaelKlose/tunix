@@ -19,6 +19,47 @@ and this project adheres to
 - Macros !++ and !--.
 
 
+## [v0.0.6] - 2024-08-24
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Fixed
+
+- Macro !? reimplemented and tests added.
+
+##### Added
+
+- Macro CASE: Evaluate conditionally by matching value.
+- POSITION: Find position of object in list.
+- SPLIT: Split list where object occurs, removing that object.
+
+#### Debugger
+
+##### Fixed
+
+- GC/tag stack over-/underflow checks.
+- Show faulty value on type error.
+- Tell to which built-in arguments are missing.
+
+##### Added
+
+- New error code ERROR\_NO\_BLOCK\_NAME.
+
+#### Interpreter
+
+##### Fixed
+
+- Global list start/last pointers weren't cleared on program
+  start, which is bad with zeropage locations (6502-CPU).
+
+##### Added
+
+- Compile-time option GC\_DIAGNOSTICS to detect zeropage
+  issues (undefined globals).
+
+
 ## [v0.0.5] - 2024-08-23
 
 Most essential fixes.

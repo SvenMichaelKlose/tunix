@@ -138,6 +138,7 @@ lisp_init (void)
 #if defined(TEST) && defined(TARGET_UNIX)
     test ();
 #endif
+    init_list ();
     init_eval ();
     init_builtins ();
     init_quoting ();

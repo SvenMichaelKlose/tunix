@@ -58,7 +58,7 @@ split_pathname (char * pathname)
     char ** arr = malloc (sizeof (char *) * 8);
     uchar n = 0;
 
-    bzero (arr, sizeof (char *) * 8);
+    memset (arr, 0, sizeof (char *) * 8);
     while ((arr[n++] = strdup (strsep (&pn, ","))));
 
     free (pn);

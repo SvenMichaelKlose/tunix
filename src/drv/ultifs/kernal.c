@@ -50,7 +50,7 @@ init_kernal_emulation ()
         exit (0);
     }
 
-    bzero (channels, sizeof (channels));
+    memset (channels, 0, sizeof (channels));
     response = NULL;
 
     ultifs_mount ();

@@ -3,13 +3,12 @@
 
 (macro case x
   (let g (symbol)
-    $(let ,g ,(car x)
-       (?
-         ,@(mapcan $((p)
-                      (? (cdr p)
-                         $((eql ,g ,',(car p)) ,',(cadr p))
-                         (list (car p))))
-                   (group (cdr x) 2))))))
+    (let f $((p)
+              (? (cdr p)
+                 $((eql ,g ,',(car p)) ,',(cadr p))
+                 (list (car p))))
+      $(let ,g ,(car x)
+         (? ,@(mapcan f (group (cdr x) 2)))))))
 
 (message "Testing CASE...")
 (case 23

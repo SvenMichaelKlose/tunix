@@ -77,25 +77,25 @@ internal_error_ptr (void * p, char * msg)
 void
 stack_overflow ()
 {
-    internal_error ("Stack overflow");
+    internal_error ("GC overflow");
 }
 
 void
 stack_underflow ()
 {
-    internal_error ("Stack underflow");
+    internal_error ("GC underflow");
 }
 
 void
 tagstack_overflow ()
 {
-    internal_error ("Tag stack overflow");
+    internal_error ("Tag overflow");
 }
 
 void
 tagstack_underflow ()
 {
-    internal_error ("Tag stack underflow");
+    internal_error ("Tag underflow");
 }
 
 void

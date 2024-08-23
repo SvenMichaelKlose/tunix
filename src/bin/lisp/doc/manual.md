@@ -1564,6 +1564,27 @@ programming languages.
 
 ### (when cond +b): Evaluate if condition is true.
 
+### (case x +l): Evaluate conditionally by matching value.
+
+Evaluates conditionally by matching values in pairs, with
+an optional default.  EQL is used as the matching predicate.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
+
+This is equivalent without the CASE macro:
+
+~~~lisp
+(let tmp x
+  (eql tmp 'a) (out "X is A.")
+  (eql tmp 5)  (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
+
 ### (unless cond +b): Evaluate if condition is false.
 
 ### (while (cond x) +b): Loop while condiiton is true.

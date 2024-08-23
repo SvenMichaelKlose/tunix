@@ -25,7 +25,7 @@
 (load "group.lisp")
 (load "mapcar.lisp")
 (load "mapcan.lisp")
-;(load "case.lisp")
+(load "case.lisp")
 (load "unique.lisp")
 (load "union.lisp")
 (load "intersect.lisp")

@@ -12,8 +12,11 @@
                    (group (cdr x) 2))))))
 
 (message "Testing CASE...")
-(or (eq b (case 23
-            42 (error)
-            23 'b
-            (error)))
-    (error))
+(case 23
+  42 (error)
+  23 'b
+  (error))
+(case t
+  42 (error)
+  65 (error)
+  'ok)

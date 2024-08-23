@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current] - 2024-08-23
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Added
+
+- Macro CASE: Evaluate conditionally by matching value.
+
+
 ## [v0.0.5] - 2024-08-23
 
 Most essential fixes.

@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [v0.0.7]
+## [v0.0.7] - 2024-08-24
 
 Mostly for fixing missing file accident and cleaned up
 build scripts.
@@ -30,7 +30,6 @@ build scripts.
 
 - Increased object stack size to 1K for Comodore C128, C64
   and Plus/4.
-
 
 #### Environment
 

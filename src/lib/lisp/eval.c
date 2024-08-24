@@ -186,7 +186,6 @@ do_eval:
     outs ("-> "); print (x); terpri ();
     POP_TAG(fnout);
 #endif
-
 #ifndef NO_DEBUGGER
     // Inovke debugger.
     PUSH(current_expr);
@@ -200,7 +199,6 @@ do_eval:
         lisp_repl (REPL_DEBUGGER);
     }
 #endif
-
     // Evaluate atom.
     if (ATOM(x)) {
         if (x) // (NOT_NIL(x)) surfaces https://github.com/cc65/cc65/issues/2487
@@ -215,7 +213,6 @@ do_eval:
 #ifndef NAIVE
     unevaluated_arg1 = arg1;
 #endif
-
     // Get function expression from symbol.
     if (NOT_NIL(arg1) && SYMBOLP(arg1)) {
         // Inhinit evaluation of special form's arguments.
@@ -236,11 +233,9 @@ do_eval:
             goto do_return;
         }
 #endif
-
         // Step to and get BLOCK name.
         x = CDR(x);
         arg1 = CAR(x);
-
 #ifndef NAIVE
         if (!SYMBOLP(arg1)) {
             error_info = arg1;
@@ -248,7 +243,6 @@ do_eval:
             goto do_return;
         }
 #endif
-
         // Get body.
         arg2c = CDR(x);
 
@@ -350,7 +344,6 @@ do_builtin_arg:
                 goto do_return;
             }
 #endif
-
 set_arg_values:
             // Pop argument values from object stack into
             // arg1 and arg2, depending on num_args.
@@ -387,7 +380,6 @@ set_arg_values:
             goto do_return;
         }
 #endif
-
         // Unevaluated argument.
         if (typed_argdef == '\'') {
             typed_argdef = *++builtin_argdef;
@@ -460,7 +452,6 @@ save_arg_value:
             POP(args);
         }
 #endif
-
         // Break evaluation.
         if (do_break_repl)
             goto break_builtin_call;
@@ -494,7 +485,6 @@ break_builtin_call:
         goto do_return;
     }
 #endif
-
     // Save stack pointer start.
     stack_entered = stack;
 
@@ -529,7 +519,6 @@ do_argument:
         goto start_body;
     }
 #endif
-
     // Rest of argument list. (consing)
     if (ATOM(argdefs)) {
 #ifndef NAIVE
@@ -537,7 +526,6 @@ do_argument:
         if (!SYMBOLP(argdefs))
             error_argname (argdefs);
 #endif
-
         // Save old symbol value for restore_arguments.
         stack_old_arg_values -= sizeof (lispptr);
         *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
@@ -555,7 +543,6 @@ do_argument:
 #ifndef NAIVE
             PUSH(unevaluated_arg1);
 #endif
-
             // Evaluate rest of arguments.
             x = args;
             value = eval_list ();
@@ -584,7 +571,6 @@ do_argument:
     if (!SYMBOLP(CAR(argdefs)))
         error_argname (CAR(argdefs));
 #endif
-
     // Save argument value to restore after function call.
     stack_old_arg_values -= sizeof (lispptr);
     *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(CAR(argdefs));
@@ -603,7 +589,6 @@ do_argument:
 #ifndef NAIVE
         PUSH(unevaluated_arg1);
 #endif
-
         PUSH_TAG(TAG_NEXT_ARG);
         PUSH_HIGHLIGHTED(args);
         x = CAR(args);
@@ -638,8 +623,7 @@ start_body:
         stack = stack_entered;
         goto do_return;
     }
-#endif // #ifndef NAIVE
-
+#endif
     // Assign new values to argument symbols.
     argdefs = FUNARGS(arg1);
     pop_argument_values ();
@@ -662,7 +646,6 @@ start_body:
     if (ATOM(unevaluated_arg1))
         current_function = unevaluated_arg1;
 #endif
-
 continue_body:
     // Evaluate body expression.
     if (NOT(x) || do_break_repl)
@@ -692,7 +675,6 @@ do_return:
     if (error_code)
         value = lisp_repl (REPL_DEBUGGER);
 #endif
-
 do_return_atom:
     unevaluated = false;
 
@@ -706,11 +688,9 @@ do_return_atom:
 #ifndef NO_DEBUGGER
     POP(current_expr);
 #endif
-
     // Evaluate consequence of conditional.
     if (value == delayed_eval)
         goto do_eval;
-
 #ifdef VERBOSE_EVAL
     // Print return value.
     PUSH_TAG(fnout);
@@ -718,7 +698,6 @@ do_return_atom:
     outs ("<- "); print (value); terpri ();
     POP_TAG(fnout);
 #endif
-
     // Continue evaluation.  Determine jump
     // destination based on tag.
     POP_TAG(typed_argdef);
@@ -737,12 +716,10 @@ do_return_atom:
         internal_error_ptr (tagstack, "alien tag");
 #endif
     }
-
 #ifndef NDEBUG
     // Check if stacks are in balance.
     check_stacks (old_stack, old_tagstack + 1);
 #endif
-
     return value;
 }
 

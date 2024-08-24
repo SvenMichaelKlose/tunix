@@ -73,14 +73,14 @@ endif
 
 allworlds:
 	$(MAKE) host
-	$(MAKE) clean world TARGET=c128
-	$(MAKE) clean world TARGET=c16
-	$(MAKE) clean world TARGET=c64
-	$(MAKE) clean world TARGET=pet
-	$(MAKE) clean world TARGET=plus4
-	$(MAKE) clean world TARGET=sim6502
-	$(MAKE) clean world TARGET=unix
-	$(MAKE) clean world TARGET=vic20
+	$(MAKE) worldclean world TARGET=c128
+	$(MAKE) worldclean world TARGET=c16
+	$(MAKE) worldclean world TARGET=c64
+	$(MAKE) worldclean world TARGET=pet
+	$(MAKE) worldclean world TARGET=plus4
+	$(MAKE) worldclean world TARGET=sim6502
+	$(MAKE) worldclean world TARGET=unix
+	$(MAKE) worldclean world TARGET=vic20
 
 test: all
 	$(MAKE) -C src test
@@ -127,12 +127,7 @@ release:
 	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
 	$(MAKE) host
 	$(MAKE) test TARGET=unix
-	for target in c128 c16 pet vic20; do \
-   		$(MAKE) world TARGET=$$target NDEBUG=1 LISP_FLAGS="$(RELEASE_LISP_FLAGS) -DCOMPRESSED_CONS"; \
-	done
-	for target in c64 plus4 unix; do \
-   		$(MAKE) world TARGET=$$target NDEBUG=1 LISP_FLAGS="$(RELEASE_LISP_FLAGS)"; \
-	done
+	$(MAKE) allworlds NDEBUG=1 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
 	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
 	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md

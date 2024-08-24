@@ -1,1 +1,4 @@
-make clean world TARGET=plus4 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DPARANOID -DCHECK_OBJ_POINTERS -DGCSTACK_OVERFLOW_CECKS -DTAGSTACK_OVERFLOW_CHECKS $@" && cd tunix/plus4 && xplus4 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -
+make clean world TARGET=plus4
+pushd tunix/plus4
+xplus4 -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp
+popd

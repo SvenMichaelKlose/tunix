@@ -1,1 +1,4 @@
-make clean world TARGET=unix LISP_FLAGS="-DLOAD_ALL -DVERBOSE_LOAD -DVERBOSE_DEFINES -DCHECK_OBJ_POINTERS -DPARANOID $@"
+make clean world TARGET=unix "$@"
+pushd tunix/unix
+gdb --ex run --args lisp
+popd

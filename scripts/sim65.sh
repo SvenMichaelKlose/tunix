@@ -1,1 +1,4 @@
-make clean world TARGET=sim6502 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DPARANOID -DCHECK_OBJ_POINTERS -DGCSTACK_OVERFLOW_CECKS -DTAGSTACK_OVERFLOW_CHECKS $1" $2 && cd tunix/sim6502 && sim65 lisp; cd -
+make worldclean world TARGET=sim6502 "$@"
+pushd tunix/sim6502
+sim65 lisp
+popd

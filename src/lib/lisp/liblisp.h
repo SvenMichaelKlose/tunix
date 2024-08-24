@@ -569,9 +569,7 @@ extern lispptr va; // Temporary in 'eval.c'.
 #define nil     ((lispptr) 0)
 #ifdef __CC65__
     #define NOT(x)      !((size_t) x & 0xff00)
-    // TOOD: Fix https://github.com/cc65/cc65/issues/2487
-    //#define NOT_NIL(x)  ((size_t) x & 0xff00)
-    #define NOT_NIL(x)  (x)
+    #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
     #define NOT(x)      (!x)
     #define NOT_NIL(x)  (x)

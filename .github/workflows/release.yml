@@ -51,7 +51,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: TUNIX Lisp ${{ github.ref }}
         body: |
-          TUNIX Lisp for the Commodore C128, C16, C64, Plus/4, and VIC-20, Linux, and manual in Markdown and PDF format.
+          TUNIX for the Commodore C128, C16, C64, Plus/4, VIC-20 and Linux (x86_64).
         draft: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
         prerelease: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/test-release') }}
         release: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/master') }}

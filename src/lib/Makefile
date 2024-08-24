@@ -1,6 +1,6 @@
 -include ../config
 ifndef TARGET
-TARGET=unix
+TARGET=unix	# TODO: Remove dupe.
 endif
 include ../mk/Makefile.targets
 

@@ -1328,6 +1328,9 @@ x           ; 23
 | (terpri)         | Step to next line.                  |
 | (fresh-line)     | Open line if not on a fresh one.    |
 | (close n)        | Close a channel.                    |
+| (opendir)        | Open directory and return channel.  |
+| (readdir n)      | Read directory.                     |
+| (closedir n)     | Close directory.                    |
 
 | Variable | Description            |
 |----------|------------------------|
@@ -1385,7 +1388,36 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
 ### (close channel): Close a channel.
-### (load pathname): Load and evaluate file.
+
+### (opendir): Open directory and return channel.
+
+Commodore 8-bit platforms only.
+
+Opens the current directory and returns the channel number,
+or NIL if no more channels can be allocated or an error
+occured.
+
+Then behaviour when reading from a directory channel is
+undefined.
+
+See: ERR, READDIR, CLOSEDIR
+
+### (readdir n): Read first/next directory from channel.
+
+Commodore 8-bit platforms only.
+
+Returns a list of the format (name size type) or NIL if an
+error occured.
+
+See: ERR, OPENDIR, CLOSEDIR
+
+### (closedir n): Close a directory channel.
+
+Commodore 8-bit platforms only.  Always returns NIL and
+never issues an error.  If a regular channel is applied, the
+behaviour is undefined.
+
+See: OPENDIR, READDIR, CLOSEDIR
 
 ## Time
 

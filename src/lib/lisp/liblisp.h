@@ -79,6 +79,9 @@
 
 /// Disabling features
 
+// No directory support.
+//#define NO_DIRECTORY
+
 // No support for saving and loading images.
 //#define NO_IMAGES
 

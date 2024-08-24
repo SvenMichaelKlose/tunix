@@ -34,6 +34,12 @@
 
 (message "TODO: Testing AWHEN...")
 
+(message "Testing AWHILE...")
+(awhile (< 0 x)
+  (print !)
+  (= x (-- x)))
+(terpri)
+
 (message "Testing CASE...")
 (case 23
   42 (error)

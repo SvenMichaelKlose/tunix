@@ -1,0 +1,1 @@
+make clean world TARGET=vic20 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DPARANOID -DCHECK_OBJ_POINTERS -DGCSTACK_OVERFLOW_CECKS -DTAGSTACK_OVERFLOW_CHECKS -DNO_DEBUGGER$@" && cd tunix/vic20 && xvic -attach8rw -autostartprgmode 0 -moncommands lisp.lbl lisp; cd -

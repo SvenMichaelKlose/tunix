@@ -3,6 +3,17 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-24
+
+We're now at release v0.0.6.  Unfortunately a bug in
+cc65's peephole optimizations prohibits to give the
+Lisp a little boost.  Today wasn't the day to spend
+a couple of hours on that.  The Lisp environment grew
+to over 1,300 lines.  Was a little suprised how much
+code accumulated already – and the manual could use
+some gaps filled.  I don't like it's style.  Actually
+it should be great to teach kids programming.
+
 # 2024-08-22
 
 Phew!  Release v0.0.4 fixes a lot of things.  Especially

@@ -17,8 +17,12 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Dump global and GC stack pointers during mark phase.
+// Especially useful if 'global_pointers' is incomplete.
+//#define GC_DIAGNOSTICS
+
 // Print 'C' for each compressed cons.
-//#define COMPRESSED_CONS
+//#define VERBOSE_COMPRESSED_CONS
 
 // Print names to built-in special forms FN and VAR.
 //#define VERBOSE_DEFINES
@@ -140,7 +144,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -173,7 +177,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -216,7 +220,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -229,7 +233,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -276,7 +280,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -399,7 +403,7 @@ struct heap_fragment {
 };
 
 typedef struct _image_header {
-    char git_version[16];
+    char git_version[8];
     lispptr heap_start;
 } image_header;
 
@@ -565,7 +569,9 @@ extern lispptr va; // Temporary in 'eval.c'.
 #define nil     ((lispptr) 0)
 #ifdef __CC65__
     #define NOT(x)      !((size_t) x & 0xff00)
-    #define NOT_NIL(x)  ((size_t) x & 0xff00)
+    // TOOD: Fix https://github.com/cc65/cc65/issues/2487
+    //#define NOT_NIL(x)  ((size_t) x & 0xff00)
+    #define NOT_NIL(x)  (x)
 #else
     #define NOT(x)      (!x)
     #define NOT_NIL(x)  (x)
@@ -576,16 +582,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _GCSTACK_CHECK_OVERFLOW() \
-    if (stack == stack_start) \
+    if (stack <= stack_start) \
         stack_overflow ()
 #define _GCSTACK_CHECK_UNDERFLOW() \
-    if (stack == stack_end) \
+    if (stack >= stack_end) \
         stack_underflow ()
 #define _TAGSTACK_CHECK_OVERFLOW() \
-    if (tagstack == tagstack_start) \
+    if (tagstack <= tagstack_start) \
         tagstack_overflow ()
 #define _TAGSTACK_CHECK_UNDERFLOW() \
-    if (tagstack == tagstack_end) \
+    if (tagstack >= tagstack_end) \
         tagstack_underflow ()
 
 #ifdef GCSTACK_OVERFLOW_CHECKS
@@ -693,16 +699,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       (NOT_NIL(x) && (TYPE(x) & TYPE_CONS))
 #define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
+#define _BUILTINP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     (NOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
 #define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _SPECIALP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      (NOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
@@ -779,13 +785,14 @@ extern bool do_gc_stress;
 #define ERROR_TOO_MANY_ARGS     4
 #define ERROR_NOT_FUNCTION      5
 #define ERROR_ARGNAME_TYPE      6
-#define ERROR_OUT_OF_HEAP       7
-#define ERROR_NO_PAREN          8
-#define ERROR_STALE_PAREN       9
-#define ERROR_SYM_TOO_LONG      10
-#define ERROR_QUOTE_MISSING     11
-#define ERROR_FILEMODE          12
-#define ERROR_USER              13
+#define ERROR_NO_BLOCK_NAME     7
+#define ERROR_OUT_OF_HEAP       8
+#define ERROR_NO_PAREN          9
+#define ERROR_STALE_PAREN       10
+#define ERROR_SYM_TOO_LONG      11
+#define ERROR_QUOTE_MISSING     12
+#define ERROR_FILEMODE          13
+#define ERROR_USER              14
 
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12
@@ -896,8 +903,9 @@ extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
 
 extern void init_builtins (void);
-extern bool init_heap     (void);
 extern void init_eval     (void);
+extern bool init_heap     (void);
+extern void init_list     (void);
 extern void init_onerror  (void);
 extern void init_repl     (void);
 extern void heap_add_init_areas (void);

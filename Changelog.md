@@ -9,6 +9,76 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.7] - 2024-08-24
+
+Mostly for fixing missing file accident and cleaned up
+build scripts.
+
+### Build
+
+- Thorough clean-up of Makefiles.
+- Complain if there are foureign files before doing a
+  release.
+
+### libsimpleio-cbm
+
+- Print '\' instead of British Pound sign.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Increased object stack size to 1K for Comodore C128, C64
+  and Plus/4.
+
+#### Environment
+
+##### Fixed
+
+- Lisp environment files for POSITION and SPLIT were missing.
+
+
+## [v0.0.6] - 2024-08-24
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Fixed
+
+- Macro !? reimplemented and tests added.
+
+##### Added
+
+- Macro CASE: Evaluate conditionally by matching value.
+- POSITION: Find position of object in list.
+- SPLIT: Split list where object occurs, removing that object.
+
+#### Debugger
+
+##### Fixed
+
+- GC/tag stack over-/underflow checks.
+- Show faulty value on type error.
+- Tell to which built-in arguments are missing.
+
+##### Added
+
+- New error code ERROR\_NO\_BLOCK\_NAME.
+
+#### Interpreter
+
+##### Fixed
+
+- Global list start/last pointers weren't cleared on program
+  start, which is bad with zeropage locations (6502-CPU).
+
+##### Added
+
+- Compile-time option GC\_DIAGNOSTICS to detect zeropage
+  issues (undefined globals).
+
+
 ## [v0.0.5] - 2024-08-23
 
 Most essential fixes.

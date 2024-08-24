@@ -172,7 +172,12 @@ void FASTCALL
 raw_out (char c)
 {
     if (fnout == STDOUT || fnout == STDERR)
-        c = (c == '_') ? 164 : reverse_case (c);
+        if (c == '_')
+            c = 164;
+        else if (c == '\\')
+            c = 205;
+        else
+            c = reverse_case (c);
     cbm_k_bsout (c);
     set_status ();
 }

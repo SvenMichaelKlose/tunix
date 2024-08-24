@@ -12,7 +12,7 @@ test: $(addprefix test-,$(SUBDIRS))
 $(SUBDIRS):
 	$(MAKE) -C $@
 
-test-%:
+test-%: all
 	$(MAKE) -C $* test
 
 .PHONY: clean

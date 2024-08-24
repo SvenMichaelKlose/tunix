@@ -86,7 +86,7 @@ print_debugger_info ()
 
         // Informative expression, describing the error
         // further.
-        if (error_info) {
+        if (NOT_NIL(error_info)) {
             outs (": ");
             print (error_info);
         }
@@ -100,7 +100,7 @@ print_debugger_info ()
     fresh_line ();
     outs (error_code ? "In" : "Next");
     do_highlight = true;
-    if (current_function) {
+    if (NOT_NIL(current_function)) {
         tmp2 = SYMBOL_VALUE(current_function);
         print (current_function); // (Name)
         out (' ');
@@ -303,7 +303,7 @@ lisp_repl (char mode)
                     PUSH(value);
                     read_cmd_arg ();
                     if (SYMBOLP(value)) {
-                        if (value)
+                        if (NOT_NIL(value))
                             SET_SYMBOL_VALUE(breakpoints_sym,
                                              make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
                         goto print_breakpoints;
@@ -316,7 +316,7 @@ lisp_repl (char mode)
                     PUSH(value);
                     read_cmd_arg ();
                     if (SYMBOLP(value)) {
-                        if (value)
+                        if (NOT_NIL(value))
                             copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, value);
                         SET_SYMBOL_VALUE(breakpoints_sym, value);
                     }

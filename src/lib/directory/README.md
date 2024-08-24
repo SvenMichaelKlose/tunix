@@ -1,6 +1,5 @@
-Directory list
-==============
+libdirectory
+============
 
-Library to fetch singly-linked lists of malloc()'ed
-directory entries from CBM DOS-compatible drives to further
-act upon, e.g. in a file selector box.
+Library to open, read, and close directories, or fetch
+singly-linked lists of malloc()'ed directory entries.

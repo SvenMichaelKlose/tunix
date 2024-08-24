@@ -9,6 +9,20 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### libdirectory
+
+#### Changed
+
+- Was 'libdirectory-list'.
+
+#### Added
+
+- Basic I/O functions to open, read and close the current
+  directory.
+
+
 ## [v0.0.8] - 2024-08-24
 
 User experience has been improved so dramatically that

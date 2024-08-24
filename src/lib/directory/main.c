@@ -7,24 +7,6 @@
 
 struct cbm_dirent dirent;
 
-char
-gcbm_opendir ()
-{
-    return cbm_opendir (2, 8, "$");
-}
-
-char __fastcall__
-gcbm_readdir (struct cbm_dirent * dirent)
-{
-    return cbm_readdir (2, dirent);
-}
-
-void
-gcbm_closedir ()
-{
-    cbm_closedir (2);
-}
-
 // Free directory list.
 void __fastcall__
 free_directory_list (struct dirent * d)
@@ -48,9 +30,11 @@ make_directory_list (unsigned *num_items)
     struct dirent * d;
 
     *num_items = 0;
-    gcbm_opendir ();
+    if (directory_open ())
+        return NULL;
+
     while (1) {
-        if (gcbm_readdir (&dirent))
+        if (directory_read (&dirent))
             break;
 
         // Self or parent directory.
@@ -75,7 +59,7 @@ make_directory_list (unsigned *num_items)
         d->type = dirent.type;
         memcpy (&d->name, &dirent.name, 17);
     }
-    gcbm_closedir ();
+    directory_close ();
 
     return first_dirent;
 }

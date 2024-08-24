@@ -1,5 +1,5 @@
-#ifndef __DIRECTORY_LIST_H__
-#define __DIRECTORY_LIST_H__
+#ifndef __LIBDIRECTORY_H__
+#define __LIBDIRECTORY_H__
 
 struct dirent {
     char            name[17];
@@ -8,7 +8,10 @@ struct dirent {
     struct dirent * next;
 };
 
+extern char            __fastcall__ directory_open ();
+extern char            __fastcall__ directory_read (struct cbm_dirent * dirent);
+extern void            __fastcall__ directory_close ();
 extern struct dirent * __fastcall__ make_directory_list (unsigned *);
 extern void            __fastcall__ free_directory_list (struct dirent *);
 
-#endif // #define __DIRECTORY_LIST_H__
+#endif // #define __LIBDIRECTORY_H__

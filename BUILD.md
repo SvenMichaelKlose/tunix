@@ -81,7 +81,7 @@ you picked, e.g.:
 
 ~~~sh
 cd tunix/vic20
-xvic -autostartprgmode 0 lisp
+xvic -attach8rw -autostartprgmode 0 lisp
 ~~~
 
 You can also run all CBM machines, one by one, using shell

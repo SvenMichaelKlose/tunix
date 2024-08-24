@@ -1,6 +1,10 @@
 Building TUNIX
 ==============
 
+First off: you can also
+[grab a binary release online](https://github.com/SvenMichaelKlose/tunix/releases)
+for the sniff test.
+
 Before doing anything else after cloning this repository,
 please do this first to fetch all third-party code:
 
@@ -61,3 +65,25 @@ There are also incomplete targets that need some love:
 |----------|-------------------------------|
 | cpm      | Generic CP/M (Z80-CPU)        |
 | zx       | Sinclair ZX Spectrum          |
+
+# Running the Lisp
+
+~~~sh
+cd tunix/unix
+./lisp
+~~~
+
+## Running in VICE (VersatIle Commodore Emulator)
+
+Step into one of the subdirectories in directory 'tunix'
+and launch the version of VICE, depending on the platform
+you picked, e.g.:
+
+~~~sh
+cd tunix/vic20
+xvic -autostartprgmode 0 lisp
+~~~
+
+You can also run all CBM machines, one by one, using shell
+script
+[scripts/run-cbms-in-vice.sh](scripts/run-cbms-in-vice.sh).

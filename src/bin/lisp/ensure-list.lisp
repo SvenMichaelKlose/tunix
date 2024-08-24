@@ -2,9 +2,3 @@
   (? (atom x)
      (list x)
      x))
-
-(message "Testing ENSURE-LIST...")
-(or (equal '(tunix) (ensure-list 'tunix))
-    (error))
-(or (equal '(tunix) (ensure-list '(tunix)))
-    (error))

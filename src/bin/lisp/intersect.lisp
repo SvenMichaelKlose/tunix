@@ -1,6 +1,3 @@
-(or (macro? 'defsetfn)
-    (load "defsetfn.lisp"))
-
 (defsetfn intersect
   ;"Elements that are in both lists."
   (and a b

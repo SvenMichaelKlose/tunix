@@ -5,6 +5,22 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-24
 
+cc65 didn't have no bug as far as I can see and that's a
+relief.
+
+Now it's time to get serious and make use of the true powers
+of Lisp.  So all tests moved into an own file and manual
+loading of dependencies isn't done any more.  Am thinking
+code-walking and automatic loading.
+
+The user experience is much more favourable.  The loading
+time to make the initial environment image has been reduced
+to less than a sixth.  Thus: release of v0.0.8.
+
+And off we shoot...
+
+# 2024-08-24
+
 We're now at release v0.0.6.  Unfortunately a bug in
 cc65's peephole optimizations prohibits to give the
 Lisp a little boost.  Today wasn't the day to spend

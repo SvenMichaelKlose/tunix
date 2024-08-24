@@ -27,21 +27,3 @@
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))
-
-(message "Testing QUASIQUOTE...")
-(or (equal $(1 2 ,3 ,4)
-           '(1 2 3 4))
-    (error $(1 2 ,3 ,4)))
-(or (equal $(,@'(3 4))
-           '(3 4))
-    (error $(,@'(3 4))))
-(or (equal $(1 2 ,@'(3 4))
-           '(1 2 3 4))
-    (error $(1 2 ,@'(3 4))))
-(or (equal $(((,1) ,@'(2)) ,3)
-           '(((1) 2) 3))
-    (error $(((,1) ,@'(2)) ,3)))
-(= x '(n v . body))
-(or (equal $(fn ,x bla)
-           '(fn (n v . body) bla))
-    (error "Error unquoting dotted pair"))

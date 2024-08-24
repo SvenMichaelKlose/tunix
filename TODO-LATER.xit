@@ -1,3 +1,5 @@
+See also src/bin/lisp/doc/future-enhancements.md
+
 TUNIX Lisp
 [ ] On-demand function/macro loading.
 [ ] Bielefeld DB API.

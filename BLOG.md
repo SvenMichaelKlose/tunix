@@ -5,6 +5,21 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-24
 
+Release v0.0.8.  For Sunday entertainment I'll try to solder
+one of those SD2IEC drives laying around.  Since the VIC has
+an Ultimem expansion that's just the right time to get
+'src/sys/boot' to do more than just print a menu and tell
+which of the eight boot banks contain any data.  As it's
+written in C.  Now I'm asking myself why not use Lisp for
+that.  Stripping down most features probably isn't enough.
+But then again exomizer to the rescue...
+
+Isn't it amazing how I manage to stretch doing things that
+could be done since yesterday by being a bit lazier?
+OK, so let's be serious.
+
+# 2024-08-24
+
 cc65 didn't have no bug as far as I can see and that's a
 relief.
 

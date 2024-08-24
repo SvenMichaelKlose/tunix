@@ -9,7 +9,7 @@ $(info COMMODORE_TARGET = $(COMMODORE_TARGETS))
 $(info TARGET = $(TARGET))
 
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
-SUBDIRS += blit conio directory-list ingle log posix simpleio-cbm tunix zp lineedit text
+SUBDIRS += blit conio directory ingle log posix simpleio-cbm tunix zp lineedit text
 $(info SUBDIRS = $(SUBDIRS))
 endif
 

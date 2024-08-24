@@ -3,7 +3,7 @@
 
 #include <cbm.h>
 
-#include "directory-list.h"
+#include "libdirectory.h"
 
 struct cbm_dirent dirent;
 

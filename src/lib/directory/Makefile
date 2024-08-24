@@ -1,4 +1,4 @@
-LIBRARY = libdirectory-list.a
+LIBRARY = libdirectory.a
 SOURCES = main.c
 
 include ../../mk/Makefile.build

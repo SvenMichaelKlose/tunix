@@ -4,7 +4,6 @@ src/config
 *.lbl
 *.map
 *.dbg
-*.zip
 *.prg
 *.a
 src/contrib/exomizer-3.0.2/src/deps
@@ -40,5 +39,3 @@ src/sys/kernel/tunix
 tunix.img
 tunix.trimmed.img
 tunix/
-unix.sh
-vic.sh

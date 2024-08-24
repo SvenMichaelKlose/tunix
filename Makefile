@@ -1,21 +1,20 @@
 include src/mk/Makefile.build
 
-TAG := $(shell git describe --tags 2>/dev/null)
-DISTDIR = tunix/$(TARGET)/
-ULTIMEM_IMG = tunix.img
+TAG 			 := $(shell git describe --tags 2>/dev/null)
+DISTDIR_BASE 	   ?= tunix
+DISTDIR 	 	    = $(DISTDIR_BASE)/$(TARGET)/
+RELEASE_LISP_FLAGS ?= -DVERBOSE_LOAD=1 -DVERBOSE_DEFINES=1
+RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
+
+ULTIMEM_IMG 		= tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all: src/include/git-version.h host src mkfs/mkfs.ultifs ultimem_image
-	@printf "# Making all.\n"
+all: src/include/git-version.h #host src mkfs/mkfs.ultifs ultimem_image
+	$(MAKE) host
+	$(MAKE) src
+	$(MAKE) mkfs/mkfs.ultifs
+	$(MAKE) ultimem_image
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
-
-clean:
-	$(MAKE) -C src clean
-	$(RM) -f git-version src/include/git-version.h
-ifeq ($(TARGET), vic20)
-	$(MAKE) -C mkfs clean
-	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
-endif
 
 src/include/git-version.h:
 	printf "$(TAG)" >git-version
@@ -65,7 +64,12 @@ ifeq ($(TARGET), vic20)
 endif
 
 worldclean:
-	$(RM) -rf $(DISTDIR)
+	$(MAKE) -C src clean
+ifeq ($(TARGET), vic20)
+	$(MAKE) -C mkfs clean
+	rm -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
+endif
+	rm -rf $(DISTDIR)
 
 allworlds:
 	$(MAKE) host
@@ -78,8 +82,9 @@ allworlds:
 	$(MAKE) clean world TARGET=unix
 	$(MAKE) clean world TARGET=vic20
 
-test:
+test: all
 	$(MAKE) -C src test
+	./scripts/test-unix.sh
 
 mkfs/mkfs.ultifs:
 ifeq ($(TARGET), vic20)
@@ -94,3 +99,42 @@ ifeq ($(TARGET), vic20)
 	@printf "# Making trimmed UltiMem ROM image.\n"
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
+
+clean:
+	for i in $(VALID_TARGETS); do \
+    	$(MAKE) -C src clean TARGET=$$i; \
+    done
+	$(MAKE) -C mkfs clean
+	rm -rf $(DISTDIR_BASE)
+	rm -f git-version src/include/git-version.h
+	@if [ -d src/include ]; then rmdir src/include; fi
+
+.NOTPARALLEL: release
+release:
+	$(MAKE) clean hostclean
+	git submodule update --init --recursive
+	@git status --porcelain | grep "^??" > /dev/null && { \
+		printf "There are untracked files in the repository which are also not ignored:\n"; \
+		git status --porcelain | grep "^??"; \
+		read -p "Do you want to continue anyway? [y/N] " answer; \
+		if [ "$$answer" != "y" ]; then \
+			printf "User aborted.\n"; \
+			exit 1; \
+		fi \
+	} || { \
+		printf "No untracked files, proceeding with release.\n"; \
+	}
+	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
+	$(MAKE) host
+	$(MAKE) test TARGET=unix
+	for target in c128 c16 pet vic20; do \
+   		$(MAKE) world TARGET=$$target NDEBUG=1 LISP_FLAGS="$(RELEASE_LISP_FLAGS) -DCOMPRESSED_CONS"; \
+	done
+	for target in c64 plus4 unix; do \
+   		$(MAKE) world TARGET=$$target NDEBUG=1 LISP_FLAGS="$(RELEASE_LISP_FLAGS)"; \
+	done
+	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
+	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
+	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md
+	rm -f $(RELEASE_ZIP_NAME)
+	zip -r -o $(RELEASE_ZIP_NAME) tunix

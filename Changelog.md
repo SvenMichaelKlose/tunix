@@ -9,6 +9,36 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.7]
+
+Mostly for fixing missing file accident and cleaned up
+build scripts.
+
+### Build
+
+- Thorough clean-up of Makefiles.
+- Complain if there are foureign files before doing a
+  release.
+
+### libsimpleio-cbm
+
+- Print '\' instead of British Pound sign.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Increased object stack size to 1K for Comodore C128, C64
+  and Plus/4.
+
+
+#### Environment
+
+##### Fixed
+
+- Lisp environment files for POSITION and SPLIT were missing.
+
+
 ## [v0.0.6] - 2024-08-24
 
 ### TUNIX Lisp

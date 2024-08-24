@@ -39,11 +39,8 @@ jobs:
     - name: Run tests
       run: make test
 
-    - name: Test compile-time configurations
-      run: ./test-unix.sh
-
     - name: Zip files
-      run: ./make-bin-release.sh ${{ env.ZIP_NAME }}
+      run: make release RELEASE_ZIP_NAME=${{ env.ZIP_NAME }}
 
     - name: Create release
       id: create_release

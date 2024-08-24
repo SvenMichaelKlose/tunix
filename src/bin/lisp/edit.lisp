@@ -2,6 +2,8 @@
     (load "while.lisp"))
 (or (cons? subseq)
     (load "subseq.lisp"))
+(or (cons? mapcan)
+    (load "mapcan.lisp"))
 (or (cons? case)
     (load "case.lisp"))
 

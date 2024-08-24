@@ -306,7 +306,6 @@ relocate (void)
 #endif
 #ifdef VERBOSE_GC
     out ('R');
-    terpri ();
 #endif
 
         // Relocate elements on heap.
@@ -334,6 +333,10 @@ relocate (void)
     // Relocate GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+
+#ifdef VERBOSE_GC
+    terpri ();
+#endif
 }
 
 // Mark and sweep objects, and relocate object pointers.

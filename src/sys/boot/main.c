@@ -9,13 +9,16 @@ typedef unsigned char uchar;
 #define BLK3_START  ((void *) 0x6000)
 #define BLK4_START  ((void *) 0x8000)
 
-#define NUM_BOOT_BANKS  6
+#define NUM_BOOT_BANKS      6
+#define REAL_NUM_BOOT_BANKS 8
+#define MAX_BANK_NAME       16
 
 #define SWITCH1_PRESSED() \
   (*ULTIMEM_CONTROL & ULTIMEM_CTRL_SWITCH1)
 
 char detected[NUM_BOOT_BANKS];
-char names[8 * 16];
+
+char boot_bank_names[REAL_NUM_BOOT_BANKS][MAX_BANK_NAME];
 
 #pragma code-name (push, "TRAMPOLINE")
 void __fastcall__
@@ -26,6 +29,7 @@ boot (char bank)
 }
 #pragma code-name (pop)
 
+// Draw a rectangle using PETSCII graphics.
 void
 draw_panel (uchar x, uchar y,
             uchar w, uchar h,
@@ -42,8 +46,9 @@ draw_panel (uchar x, uchar y,
     cputsxy (x + 1, y, title);
 }
 
+// Check if all bytes of a bank have value 0xff.
 bool
-bank_is_empty (uchar bank)
+is_bank_empty (uchar bank)
 {
     char * p = BLK3_START;
     *ULTIMEM_CONFIG2 = 0xdf; // BLK3 ROM
@@ -55,27 +60,14 @@ bank_is_empty (uchar bank)
     return true;
 }
 
-bool
-detect_bank (uchar bank)
-{
-    (void) bank;
-    return true;
-}
-
-void
-detect_banks (void)
-{
-    char i;
-    for (i = 0; i < NUM_BOOT_BANKS; i++)
-        detect_bank (i);
-}
-
+// Erase bank using Flash ROM commands.
 void
 erase_bank (uchar bank)
 {
     (void) bank;
 }
 
+// Read bank to memory.
 void
 read_bank (char * to, uchar bank)
 {
@@ -83,6 +75,7 @@ read_bank (char * to, uchar bank)
     (void) bank;
 }
 
+// Burn loaded image onto bank.
 void
 burn_bank (uchar bank, char * data)
 {
@@ -102,23 +95,30 @@ menu (void)
 {
     char c, i, j, y;
 
+    // Draw panel for bank selection.
     y = 4;
     draw_panel (0, y, 21, NUM_BOOT_BANKS + 4, "Boot ROM editor");
+
+    // Print option to boot BASIC.
     y += 2;
     cputsxy (2, y++, "0:BASIC");
+
+    // Detect and print bank names.
     for (i = 0; i < NUM_BOOT_BANKS; i++) {
         cputcxy (2, y++, '0' + 1 + i);
         cputs (":");
-        if (bank_is_empty (i))
+        if (is_bank_empty (i))
             cputs ("(empty)");
-        else if (!names[i * 16])
+        else if (!boot_bank_names[i])
             cputs ("unnamed");
         else
             for (j = 0; j < 16; j++) {
-                c = names[i * 16 + j];
+                c = boot_bank_names[i][j];
                 cputc (c ? c : ' ');
             }
     }
+
+    // Print command selection.
     y += 3;
     cputsxy (1, y++, "[Boot] [Kill] [Burn]  [Name] [View] [Quit]");
 }
@@ -126,7 +126,7 @@ menu (void)
 void
 main (void)
 {
-    memset (names, 0, sizeof (names));
+    memset (boot_bank_names, 0, sizeof (boot_bank_names));
     clrscr ();
     *ULTIMEM_CONTROL = ULTIMEM_CTRL_LED;
     menu ();

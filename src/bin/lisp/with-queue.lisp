@@ -1,8 +1,3 @@
-(or (cons? ensure-list)
-    (load "ensure-list.lisp"))
-(or (cons? make-queue)
-    (load "queue.lisp"))
-
 (macro with-queue (q . body)
   $(with ,(@ '((x)
                 $(,x (make-queue)))

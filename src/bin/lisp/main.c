@@ -29,10 +29,14 @@ lispptr unquote_spliced;
 #endif
 
 const char * env_files[] = {
+#ifdef TEST
     "smoke-test-read.lisp",
+#endif
     "git-version.lisp",
     "env-0.lisp",
+#ifdef TEST
     "smoke-test.lisp",
+#endif
     "env-1.lisp",
 
     // Target-specific
@@ -43,10 +47,14 @@ const char * env_files[] = {
     "unix.lisp",
 #endif
 
+#ifdef TEST
     "test.lisp",
+#endif
     "env-2.lisp",
 #ifndef NO_ONERROR
+#ifdef TEST
     "test-onerror.lisp",
+#endif
 #endif
 
     // Early end for small machines.
@@ -60,7 +68,9 @@ const char * env_files[] = {
 #ifndef NO_DEBUGGER
     "stack.lisp",
 #endif
+#ifdef TEST
     "test-file.lisp",
+#endif
 #ifdef LOAD_ALL
     "all.lisp",
 #endif // #ifdef LOAD_ALL

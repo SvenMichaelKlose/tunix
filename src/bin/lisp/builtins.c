@@ -562,6 +562,57 @@ bi_close (void)
     return nil;
 }
 
+#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+
+#include <cbm.h>
+
+lispptr
+bi_opendir (void)
+{
+    simpleio_chn_t chn = directory_open ();
+    if (!chn)
+        return nil;
+    return make_number (chn);
+}
+
+struct cbm_dirent dirent;
+
+lispptr
+bi_readdir (void)
+{
+    char err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
+    char i;
+    if (err) {
+        // cc65's stdlib does a CLRCH if there's no more
+        // to read.  Not sure what purpose that serves.
+        // TODO: Ask.
+        set_channels (NUMBER_VALUE(arg1), fnout);
+        return nil;
+    }
+    memcpy (buffer, dirent.name, sizeof (dirent.name));
+    buffer[sizeof (dirent.name)] = 0;
+    lisp_len = strlen (buffer);
+    for (i = 0; i < lisp_len; i++)
+        buffer[i] = reverse_case (buffer[i]);
+    list_start = make_cons (make_symbol (buffer, lisp_len), nil);
+    tmp = make_cons (make_number (dirent.size), nil);
+    SETCDR(list_start, tmp);
+    PUSH(tmp);
+    tmp2 = make_cons (make_number (dirent.type), nil);
+    POP(tmp);
+    SETCDR(tmp, tmp2);
+    return list_start;
+}
+
+lispptr
+bi_closedir (void)
+{
+    directory_close ((simpleio_chn_t) NUMBER_VALUE(arg1));
+    return nil;
+}
+
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+
 lispptr bi_gc (void);
 
 lispptr
@@ -948,6 +999,12 @@ const struct builtin builtins[] = {
     { "putback",    "",     bi_putback },
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
+
+#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+    { "opendir",    "",     bi_opendir },
+    { "readdir",    "n",    bi_readdir },
+    { "closedir",   "n",    bi_closedir },
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
 
 #ifndef NO_IMAGES
     { "iload",      "s",    bi_iload },

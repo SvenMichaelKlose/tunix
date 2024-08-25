@@ -128,6 +128,36 @@ error:
     return 0;
 }
 
+simpleio_chn_t
+directory_open ()
+{
+    chn = alloc_channel ();
+    last_status[chn] = 0;
+    if (!chn)
+        goto error;
+    simpleio_init_channel (chn);
+    if (cbm_opendir (chn, 8, "$"))
+        goto error;
+    return chn;
+error:
+    last_status[chn] = -1;
+    return 0;
+}
+
+char FASTCALL
+directory_read (simpleio_chn_t chn, struct cbm_dirent * dirent)
+{
+    return last_status[chn] = cbm_readdir (logical_fns[chn], dirent);
+}
+
+void FASTCALL
+directory_close (simpleio_chn_t chn)
+{
+    cbm_closedir (logical_fns[chn]);
+    logical_fns[chn] = 0;
+    last_status[chn] = 0;
+}
+
 bool
 raw_eof (void)
 {
@@ -172,7 +202,12 @@ void FASTCALL
 raw_out (char c)
 {
     if (fnout == STDOUT || fnout == STDERR)
-        c = (c == '_') ? 164 : reverse_case (c);
+        if (c == '_')
+            c = 164;
+        else if (c == '\\')
+            c = 205;
+        else
+            c = reverse_case (c);
     cbm_k_bsout (c);
     set_status ();
 }

@@ -19,6 +19,115 @@ and this project adheres to
 - Macros !++ and !--.
 
 
+## [v0.0.9]
+
+Lost pointer fix makes it worth this release.
+
+### libdirectory
+
+#### Changed
+
+- Was 'libdirectory-list'.
+
+#### Added
+
+- Basic I/O functions to open, read and close the current
+  directory.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- Lost pointer is evaluation of rest arguments.  Happened
+  during GC stress test.
+
+##### Added
+
+- EXPERIMENTAL!: CBMs only: OPENDIR, READDIR and CLOSEDIR.
+
+#### Debugger
+
+##### Added
+
+- Short command 'q' to exit the running program and return
+  to the top-level REPL.
+
+#### Environment
+
+##### Changed
+
+- PROGN does not use BLOCK.  That caught RETURNs
+  unintentionally.
+
+##### Added
+
+- Macro AWHILE: Anaphoric equivalent to WHILE.
+- CBMs only: LS to list the current directory.
+- Macro WITH-PROF to time stop (aka "to profile")
+  expressions.
+
+
+## [v0.0.8] - 2024-08-24
+
+User experience has been improved so dramatically that
+delaying a release wouldn't be acceptable really.
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Changed
+
+- Moved tests into own files.  No test is loaded in
+  releases any more.  If compile-time option TEST was
+  set, all tests are run as usual (plus a few internal
+  interpreter tests at program start.
+  Global variable +T?+ tells if TEST was set.
+- Initial load time for saving the first image is down
+  to less than a sixth of what it was before.
+- Prerequisites aren't loaded on demand.  That can be
+  made automatic.
+
+#### Interpreter
+
+- On 6502-CPU platforms, only high bytes of pointers are
+  checked to tell if they are NIL or not.  Except for NIL
+  there are never any objects on the zeropage.  NIL isn't
+  either but it could be done to reduce code size a bit or
+  two.
+
+
+## [v0.0.7] - 2024-08-24
+
+Mostly for fixing missing file accident and cleaned up
+build scripts.
+
+### Build
+
+- Thorough clean-up of Makefiles.
+- Complain if there are foureign files before doing a
+  release.
+
+### libsimpleio-cbm
+
+- Print '\' instead of British Pound sign.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Increased object stack size to 1K for Comodore C128, C64
+  and Plus/4.
+
+#### Environment
+
+##### Fixed
+
+- Lisp environment files for POSITION and SPLIT were missing.
+
+
 ## [v0.0.6] - 2024-08-24
 
 ### TUNIX Lisp

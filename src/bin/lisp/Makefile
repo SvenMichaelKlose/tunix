@@ -1,6 +1,10 @@
 -include ../../config
 include ../../mk/Makefile.targets
 
+ifndef TARGET
+TARGET = unix	# TODO: Remove doublettes like this.
+endif
+
 PROGRAM = lisp
 SOURCES = builtins.c main.c test.c
 LIBRARIES = \

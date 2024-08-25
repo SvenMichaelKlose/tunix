@@ -5,7 +5,3 @@
        (do ((,i 0 (+ ,i 1)))
            ((>= ,i ,n) ,@(cddr init))
          ,@body))))
-
-(message "Testing DOTIMES...")
-(dotimes (i 10 (terpri))
-  (print i))

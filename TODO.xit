@@ -27,6 +27,9 @@ Interpreter
 [ ] Revive GG/tag stack checks as default but don't
     check every operation to rescue performance.
 [ ] Make stack overflows regular errors.
+[ ] Reduce per function call stack usage.  It was OK to get
+    on, but 15B stack per call on 8-bitters is like asking
+    for trouble and Lisp is about recursion too.
 
 Debugger
 [ ] Error messages without debugger.

@@ -134,9 +134,6 @@ sweep ()
         total_removed = 0;
         heap_start = heap->start;
         heap_free  = heap->free;
-#ifdef PARANOID
-        heap_end   = heap->end;
-#endif
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifdef VERBOSE_GC
@@ -146,11 +143,6 @@ sweep ()
         // Sweep one heap.
         s = d = heap_start;
         while (*s) {
-#ifdef PARANOID
-            if (s >= heap_end)
-                internal_error ("Sweep overflow");
-#endif
-
             // Get size of object.
             n = objsize (s);
 
@@ -229,7 +221,7 @@ check_xlat:
 #endif
 #ifdef PARANOID
                 if (xlat < xlat_start)
-                    // Reloc table size must be multiple of entry size!
+                    // Reloc table size must be a multiple of an entry's size!
                     internal_error ("xlat overflow");
 #endif
                 // Flag is relocation table is full, so
@@ -262,10 +254,6 @@ check_xlat:
     // Save free pointer.
     heap_free = d;
 #endif // #ifdef FRAGMENTED_HEAP
-
-#ifndef NDEBUG
-    memset (d, 0, heap_end - d);
-#endif
 
     // End symbol list.
     SYMBOL_NEXT(last_kept_sym) = nil;
@@ -306,7 +294,6 @@ relocate (void)
 #endif
 #ifdef VERBOSE_GC
     out ('R');
-    terpri ();
 #endif
 
         // Relocate elements on heap.
@@ -334,6 +321,10 @@ relocate (void)
     // Relocate GC'ed stack.
     for (p = stack; p != stack_end; p += sizeof (lispptr))
         *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+
+#ifdef VERBOSE_GC
+    terpri ();
+#endif
 }
 
 // Mark and sweep objects, and relocate object pointers.

@@ -505,6 +505,15 @@ init_heap ()
     SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
 #endif
 
+    // Set test flag *T?*.
+    tmp2 = make_symbol ("+t?+", 4);
+#ifdef TEST
+    SET_SYMBOL_VALUE(tmp2, t);
+#else
+    SET_SYMBOL_VALUE(tmp2, nil);
+#endif
+    expand_universe (tmp2);
+
     // Clear error info.
 #ifndef NAIVE
 #ifndef NDEBUG

@@ -697,6 +697,7 @@ These are the available short commands:
 | Command | Description                                    |
 |---------|------------------------------------------------|
 | c       | Continue program execution.                    |
+| q       | Stop execution, returning to top level REPL.   |
 | s       | Step into user-defined procedure.              |
 | n       | Execute current expression in whole.           |
 | pX      | Evaluate and print expression X.  (No macros!) |
@@ -711,11 +712,15 @@ change the debugger's return value.
 
 ## Stepping through the code
 
-IDEA:
-If an error occured, you cannot step through the code unless
-you corrected it or you want to step into a newly entered
-expression.
+Short command 's' will step to the next argument of the
+current expression, evaluation what's on the way or enter
+the currently highlighted function if all arguments have
+been dealt with.  With 'n' the function and all its
+arguments are evaluated, taking you to the next expression
+in the list.  If you had it the program, you can exit it
+with short command 'q' and take a break yourself.
 
+IDEA:
 * step into newly entered expression
 * step into restarted expression.  Already changed values
   are a problem then.
@@ -927,18 +932,18 @@ which is then the default.
 
 ~~~lisp
 (? nil
-   1)   -> nil
+   1)  ; -> nil
 (? nil
    1
-   2)   -> 2
+   2)  ; -> 2
 (? nil
    1
    2
-   3)   -> 3
+   3)  ; -> 3
 (? t
    1
-   2)   -> 1
-(? t)   -> nil
+   2)  ; -> 1
+(? t)  ; -> nil
 ~~~
 
 ### (and +x)
@@ -947,8 +952,8 @@ Evaluates all arguments in order unless one evaluates to
 NIL.  The value of the last evaluation is returned.
 
 ~~~lisp
-(and 1 2 nil) -> nil
-(and 1 2)     -> 2
+(and 1 2 nil) ; -> nil
+(and 1 2)     ; -> 2
 ~~~
 
 AND will issue an error if it is passed a dotted pair.
@@ -959,8 +964,8 @@ Evaluates all arguments unless one evaluates to non-NIL.
 The value of the last evaluation is returned.
 
 ~~~lisp
-(or 1 nil) -> 1
-(or nil 2) -> 2
+(or 1 nil) ; -> 1
+(or nil 2) ; -> 2
 ~~~
 
 OR will issue an error if it is passed a dotted pair.
@@ -976,7 +981,7 @@ match.  It is NIL, if not specified.
 (block foo
   'a
   (return 'b foo)
-  'c) -> b
+  'c)   ; -> b
 ~~~
 
 Blocks of name NIL are used for loops.  For the purpose of
@@ -996,13 +1001,20 @@ of the parent blocks in the current function.  If no
 expression follows the tag, NIL is returned.
 
 ~~~lisp
+; Print "1".
+(block nil
+  (print 1)
+  (go jump-destination)
+  (print 2)
+  jump-destination) ; -> nil
+
 ; Print "1" and "3".
 (block nil
   (print 1)
   (go jump-destination)
   (print 2)
   jump-destination
-  (print 3))
+  (print 3))        ; -> 3
 ~~~
 
 ## Equality
@@ -1328,6 +1340,9 @@ x           ; 23
 | (terpri)         | Step to next line.                  |
 | (fresh-line)     | Open line if not on a fresh one.    |
 | (close n)        | Close a channel.                    |
+| (opendir)        | Open directory and return channel.  |
+| (readdir n)      | Read directory.                     |
+| (closedir n)     | Close directory.                    |
 
 | Variable | Description            |
 |----------|------------------------|
@@ -1385,7 +1400,36 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
 ### (close channel): Close a channel.
-### (load pathname): Load and evaluate file.
+
+### (opendir): Open directory and return channel.
+
+Commodore 8-bit platforms only.
+
+Opens the current directory and returns the channel number,
+or NIL if no more channels can be allocated or an error
+occured.
+
+Then behaviour when reading from a directory channel is
+undefined.
+
+See: ERR, READDIR, CLOSEDIR
+
+### (readdir n): Read first/next directory from channel.
+
+Commodore 8-bit platforms only.
+
+Returns a list of the format (name size type) or NIL if an
+error occured.
+
+See: ERR, OPENDIR, CLOSEDIR
+
+### (closedir n): Close a directory channel.
+
+Commodore 8-bit platforms only.  Always returns NIL and
+never issues an error.  If a regular channel is applied, the
+behaviour is undefined.
+
+See: OPENDIR, READDIR, CLOSEDIR
 
 ## Time
 

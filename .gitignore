@@ -36,6 +36,7 @@ src/sbin/ultitest/ultitest
 src/sys/boot/flashboot.bin
 src/sys/kernel/init
 src/sys/kernel/tunix
+empty-ultimem.img
 tunix.img
 tunix.trimmed.img
 tunix/

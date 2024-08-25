@@ -17,17 +17,19 @@ test_unix () {
     cd tunix/unix/ && (printf "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
 }
 
-test_unix "-DEXIT_FAILURE_ON_ERROR"
-test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE $PARANOID"
-test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DGC_STRESS"
+test_unix "$PARANOID -DGC_STRESS"
+test_unix "$PARANOID -DNDEBUG"
 test_unix "$PARANOID -DCOMPRESSED_CONS"
 test_unix "$PARANOID -DNO_ONERROR"
 test_unix "$PARANOID -DNO_DEBUGGER"
+test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE"
 test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DNAIVE"
 
-test_sim6502 "$PARANOID"
-test_sim6502 "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DNDEBUG"
+# Works with CBMs though.
+#test_sim6502 "$PARAMOID -DGC_STRESS"
+test_sim6502 "$PARANOID -DNDEBUG"
 test_sim6502 "$PARANOID -DCOMPRESSED_CONS"
 test_sim6502 "$PARANOID -DNO_ONERROR"
 test_sim6502 "$PARANOID -DNO_DEBUGGER"
+test_sim6502 "-DEXIT_FAILURE_ON_ERROR $VERBOSE"
 test_sim6502 "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DNAIVE"

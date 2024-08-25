@@ -697,6 +697,7 @@ These are the available short commands:
 | Command | Description                                    |
 |---------|------------------------------------------------|
 | c       | Continue program execution.                    |
+| q       | Stop execution, returning to top level REPL.   |
 | s       | Step into user-defined procedure.              |
 | n       | Execute current expression in whole.           |
 | pX      | Evaluate and print expression X.  (No macros!) |
@@ -711,11 +712,15 @@ change the debugger's return value.
 
 ## Stepping through the code
 
-IDEA:
-If an error occured, you cannot step through the code unless
-you corrected it or you want to step into a newly entered
-expression.
+Short command 's' will step to the next argument of the
+current expression, evaluation what's on the way or enter
+the currently highlighted function if all arguments have
+been dealt with.  With 'n' the function and all its
+arguments are evaluated, taking you to the next expression
+in the list.  If you had it the program, you can exit it
+with short command 'q' and take a break yourself.
 
+IDEA:
 * step into newly entered expression
 * step into restarted expression.  Already changed values
   are a problem then.

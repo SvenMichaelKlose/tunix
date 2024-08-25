@@ -321,6 +321,14 @@ lisp_repl (char mode)
                         SET_SYMBOL_VALUE(breakpoints_sym, value);
                     }
                     goto print_breakpoints;
+
+                // Exit program
+                case 'q':
+                    arg1 = nil;
+                    do_break_repl   = true;
+                    do_exit_program = true;
+                    error_code = 0;
+                    goto do_return;
 cannot_continue:
                     outs ("Need alternative first!");
                     goto terpri_next;

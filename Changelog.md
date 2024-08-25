@@ -30,6 +30,13 @@ and this project adheres to
 
 - CBMs only: OPENDIR, READDIR and CLOSEDIR.
 
+#### Debugger
+
+##### Added
+
+- Short command 'q' to exit the running program and return
+  to the top-level REPL.
+
 #### Environment
 
 ##### Added

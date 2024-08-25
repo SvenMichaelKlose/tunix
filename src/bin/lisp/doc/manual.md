@@ -78,6 +78,7 @@ first time:
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
+| (cond +l)              | (? +l)          |
 
 Because the backquote (`) is not part of the charsets of old
 machines TUNIX Lisp intends to support, the dollar sign ($)

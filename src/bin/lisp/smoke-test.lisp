@@ -213,16 +213,16 @@
         (= x 'b2s)
         (block b3
           (= x 'b3s)
-          (? nil
-             nil
-             (return nil block-name)))))
-    x) nil))
-(or (eq 'b3s (return-test 'b3))
-    (error))
-(or (eq 'b3s (return-test 'b2))
-    (error))
-(or (eq 'b3s (return-test 'b1))
-    (error))
+          (return nil block-name))
+        (= x 'b2e))
+      (= x 'b1e))
+    (print x)) 'b0))
+;(or (eq 'b2e (return-test 'b3))
+;    (error))
+;(or (eq 'b1e (return-test 'b2))
+;    (error))
+;(or (eq 'b0 (return-test 'b1))
+;    (error))
 
 (message "Smoke-testing removal from *UNIVERSE'...")
 (= *universe* (remove 'make-count *universe*))

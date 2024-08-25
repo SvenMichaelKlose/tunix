@@ -932,18 +932,18 @@ which is then the default.
 
 ~~~lisp
 (? nil
-   1)   -> nil
+   1)  ; -> nil
 (? nil
    1
-   2)   -> 2
+   2)  ; -> 2
 (? nil
    1
    2
-   3)   -> 3
+   3)  ; -> 3
 (? t
    1
-   2)   -> 1
-(? t)   -> nil
+   2)  ; -> 1
+(? t)  ; -> nil
 ~~~
 
 ### (and +x)
@@ -952,8 +952,8 @@ Evaluates all arguments in order unless one evaluates to
 NIL.  The value of the last evaluation is returned.
 
 ~~~lisp
-(and 1 2 nil) -> nil
-(and 1 2)     -> 2
+(and 1 2 nil) ; -> nil
+(and 1 2)     ; -> 2
 ~~~
 
 AND will issue an error if it is passed a dotted pair.
@@ -964,8 +964,8 @@ Evaluates all arguments unless one evaluates to non-NIL.
 The value of the last evaluation is returned.
 
 ~~~lisp
-(or 1 nil) -> 1
-(or nil 2) -> 2
+(or 1 nil) ; -> 1
+(or nil 2) ; -> 2
 ~~~
 
 OR will issue an error if it is passed a dotted pair.
@@ -981,7 +981,7 @@ match.  It is NIL, if not specified.
 (block foo
   'a
   (return 'b foo)
-  'c) -> b
+  'c)   ; -> b
 ~~~
 
 Blocks of name NIL are used for loops.  For the purpose of
@@ -1001,13 +1001,20 @@ of the parent blocks in the current function.  If no
 expression follows the tag, NIL is returned.
 
 ~~~lisp
+; Print "1".
+(block nil
+  (print 1)
+  (go jump-destination)
+  (print 2)
+  jump-destination) ; -> nil
+
 ; Print "1" and "3".
 (block nil
   (print 1)
   (go jump-destination)
   (print 2)
   jump-destination
-  (print 3))
+  (print 3))        ; -> 3
 ~~~
 
 ## Equality

@@ -200,11 +200,34 @@
     (? (not (== c 0))
        (go tag))))
 
-(message "Smoke-testing BLOCK...")
-(block-test 101)
+(message "Testing BLOCK...")
+(and (block-test 101)
+     (error))
 
-(message "Removing test functions...")
-(= *universe* (remove 'make-count (remove 'block-test *universe*)))
+(message "Testing RETURN...")
+(fn return-test (block-name)
+  (((x)
+    (block b1
+      (= x 'b1s)
+      (block b2
+        (= x 'b2s)
+        (block b3
+          (= x 'b3s)
+          (? nil
+             nil
+             (return nil block-name)))))
+    x) nil))
+(or (eq 'b3s (return-test 'b3))
+    (error))
+(or (eq 'b3s (return-test 'b2))
+    (error))
+(or (eq 'b3s (return-test 'b1))
+    (error))
+
+(message "Smoke-testing removal from *UNIVERSE'...")
+(= *universe* (remove 'make-count *universe*))
+(= *universe* (remove 'block-test *universe*))
+(= *universe* (remove 'return-test *universe*))
 (print (gc))(out " bytes free.")(terpri)
 
 (message "Testing SETIN...")

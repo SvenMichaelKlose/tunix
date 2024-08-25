@@ -103,11 +103,18 @@ guaranteed to be found in the head of file
 
 # Building for (interpeter) development
 
-If you want to play around with the interpreter code, better
-fly with seat belt and parachute:
+If you want to play around with the interpreter code on
+platforms that don't have a decent debugger, better
+fly with seat belt and parachute[^nodebugger]:
+
+[^nodebugger]
+  There is an IDE with a plug-in for VICE but that requires
+  registering on a world-dominating, damaging company's web
+  site.  Just for debugging.  Personally, I'd prefer to die
+  like a dog instead.
 
 ~~~sh
-make world TARGET=vic20 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DVERBOSE_GC -DTEST -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"
+make worldclean world TARGET=vic20 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DVERBOSE_GC -DTEST -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"
 ~~~
 
 On Unix you can also add '-DGC\_STRESS' to trap lost
@@ -115,6 +122,17 @@ pointers, but that's very time-consuming.
 If push comes to shove VERBOSE\_READ and VERBOSE\_EVAL
 may be of help and there are even more diagnostics worth
 a look.
+
+## Debugging on Unices
+
+For debugging on Unices (with 'gdb' for example), don't miss
+out on disabling the C compiler's optimization flags, or the
+debugger won't work properly with the code having been
+optimized to something else:
+
+~~~sh
+make worldclean world TARGET=unix COPTFLAGS="-O0 -g" LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DVERBOSE_GC -DTEST -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"
+~~~
 
 You're more than welcome to ask for help and discuss things
 on

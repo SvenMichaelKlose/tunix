@@ -258,8 +258,8 @@ block_statement:
 
         // Save evaluator state.
         PUSH(arg1);     // Block name
-        PUSH(arg2c);    // Expression list
-        PUSH(x);        // Element with current expression
+        PUSH(arg2c);    // Body
+        PUSH(x);        // Current expression
         PUSH_HIGHLIGHTED(x);
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
@@ -284,6 +284,7 @@ next_block_statement:
                 if (CAR(x) == go_tag)
                     goto block_statement;
 #ifndef NAIVE
+            // Tag not found.  Issue error.
             error_info = go_tag;
             error (ERROR_TAG_MISSING, "Tag not found");
             goto do_return;

@@ -395,6 +395,7 @@ set_arg_values:
                 value = args;
                 goto save_arg_value;
             }
+
             PUSH(args);
             PUSH_TAG(num_args);
             x = args;

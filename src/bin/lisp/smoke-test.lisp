@@ -204,7 +204,7 @@
 (and (block-test 101)
      (error))
 
-(message "Testing RETURN...")
+(message "Testing RETURN... (disabled!)")
 (fn return-test (block-name)
   (((x)
     (block b1
@@ -224,7 +224,7 @@
 ;(or (eq 'b0 (return-test 'b1))
 ;    (error))
 
-(message "Smoke-testing removal from *UNIVERSE'...")
+(message "Smoke-testing removal from *UNIVERSE*...")
 (= *universe* (remove 'make-count *universe*))
 (= *universe* (remove 'block-test *universe*))
 (= *universe* (remove 'return-test *universe*))

@@ -186,25 +186,7 @@
 (message "Smoke-testing recursion...")
 (make-count 10)
 
-; Messes up the heap with the following GC although it
-; merely assignes a new copy of the universe list, leaving
-; the symbol alone.
-
-; 2024-06-09: 3:40min (10,000), VIC-20/cc65
-(fn block-test (c)
-  (block nil
-    tag
-    (= c (-- c))
-    (? (== 0 (% c 100))
-       (print c))
-    (? (not (== c 0))
-       (go tag))))
-
-(message "Testing BLOCK...")
-(and (block-test 101)
-     (error))
-
-(message "Testing RETURN... (disabled!)")
+(message "Testing RETURN...")
 (fn return-test (block-name)
   (((x)
     (block b1
@@ -214,15 +196,32 @@
         (block b3
           (= x 'b3s)
           (return nil block-name))
-        (= x 'b2e))
-      (= x 'b1e))
+        (= x 'b2e)
+        (return nil nil))
+      (= x 'b1e)
+      (return nil nil))
     (print x)) 'b0))
-;(or (eq 'b2e (return-test 'b3))
-;    (error))
-;(or (eq 'b1e (return-test 'b2))
-;    (error))
-;(or (eq 'b0 (return-test 'b1))
-;    (error))
+
+(or (eq 'b2e (return-test 'b3))
+    (error))
+(or (eq 'b1e (return-test 'b2))
+    (error))
+(or (eq 'b3s (return-test 'b1))
+    (error))
+
+; 2024-06-09: 3:40min (10,000), VIC-20/cc65
+(message "Testing BLOCK...")
+(fn block-test (c)
+  (block nil
+    tag
+    (= c (-- c))
+    (? (== 0 (% c 100))
+       (print c))
+    (? (not (== c 0))
+       (go tag))))
+
+(and (block-test 101)
+     (error))
 
 (message "Smoke-testing removal from *UNIVERSE*...")
 (= *universe* (remove 'make-count *universe*))

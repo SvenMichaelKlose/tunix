@@ -263,7 +263,7 @@
 
 // Unixoids
 #ifdef TARGET_UNIX
-#ifndef SLOW
+#if !defined(SLOW) && defined(NDEBUG)
     #define SLOW
 #endif
 #define MALLOCD_HEAP

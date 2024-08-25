@@ -130,7 +130,8 @@ eval_list (void)
 
         // Make new cons and append it to the end of the
         // result list.
-        SETCDR(list_last, make_cons (tmp, nil));
+        tmp = make_cons (tmp, nil);
+        SETCDR(list_last, tmp);
         list_last = tmp;
         tmp = nil;
 

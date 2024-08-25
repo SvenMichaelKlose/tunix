@@ -46,6 +46,11 @@ Lost pointer fix makes it worth this release.
 
 #### Environment
 
+##### Changed
+
+- PROGN does not use BLOCK.  That caught RETURNs
+  unintentionally.
+
 ##### Added
 
 - Macro AWHILE: Anaphoric equivalent to WHILE.

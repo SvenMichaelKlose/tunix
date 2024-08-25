@@ -1,6 +1,15 @@
 The TUNIX Project
 =================
 
+⚠️ **This project is currently under heavy development and
+has not been officially released yet.**
+
+# Alerting issues
+
+* TUNIX Lisp's built-in RETURN does not work as expected.
+
+# Overview
+
 This project attempts to create an operating system for
 minimalistic computers that is portable, self-hosting, and
 multi-tasking, complete with a comprehensive set of

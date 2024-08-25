@@ -61,7 +61,6 @@ lispptr go_sym;
 lispptr go_tag;
 lispptr debug_step;
 bool    do_invoke_debugger;
-bool    tag_found;
 uchar   typed_argdef;
 char *  builtin_argdef;
 uchar   num_args;
@@ -71,7 +70,6 @@ bool    unevaluated;
 #pragma zpsym ("stack_entered")
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
-#pragma zpsym ("tag_found")
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
@@ -282,16 +280,13 @@ next_block_statement:
             value = nil;
 
             // Search tag in body.
-            tag_found = false;
             DOLIST(x, arg2c)
                 if (CAR(x) == go_tag)
                     goto block_statement;
 #ifndef NAIVE
-            if (!tag_found) {
-                error_info = go_tag;
-                error (ERROR_TAG_MISSING, "Tag not found");
-                goto do_return;
-            }
+            error_info = go_tag;
+            error (ERROR_TAG_MISSING, "Tag not found");
+            goto do_return;
 #endif
         } else if (value == return_sym) {
             // Handle RETURN,

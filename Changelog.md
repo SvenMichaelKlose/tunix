@@ -9,7 +9,9 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.9]
+
+Lost pointer fix makes it worth this release.
 
 ### libdirectory
 
@@ -26,9 +28,14 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
+- Lost pointer is evaluation of rest arguments.  Happened
+  during GC stress test.
+
 ##### Added
 
-- CBMs only: OPENDIR, READDIR and CLOSEDIR.
+- EXPERIMENTAL!: CBMs only: OPENDIR, READDIR and CLOSEDIR.
 
 #### Debugger
 

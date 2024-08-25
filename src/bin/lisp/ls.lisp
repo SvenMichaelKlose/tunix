@@ -1,8 +1,8 @@
 (load when.lisp)
+(load awhen.lisp)
 (load awhile.lisp)
 (fn ls ()
-  (let chn (opendir)
-    (when chn
-      (awhile (readdir chn)
+  (awhen (opendir)
+    (awhile (readdir !)
       (print !)(terpri))
-    (closedir chn))))
+    (closedir !)))

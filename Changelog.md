@@ -22,6 +22,21 @@ and this project adheres to
 - Basic I/O functions to open, read and close the current
   directory.
 
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Added
+
+- CBMs only: OPENDIR, READDIR and CLOSEDIR.
+
+#### Environment
+
+##### Added
+
+- Macro AWHILE: Anaphoric equivalent to WHILE.
+- CBMs only: LS to list the current directory.
+
 
 ## [v0.0.8] - 2024-08-24
 

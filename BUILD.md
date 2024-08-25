@@ -108,10 +108,10 @@ platforms that don't have a decent debugger, better
 fly with seat belt and parachute[^nodebugger]:
 
 [^nodebugger]
-  There is an IDE with a plug-in for VICE but that requires
-  registering on a world-dominating, damaging company's web
-  site.  Just for debugging.  Personally, I'd prefer to die
-  like a dog instead.
+  There is some toy IDE with a plug-in for VICE but that
+  requires registering on a world-dominating, damaging
+  company's web site.  Personally, I'd prefer to die like a
+  dog instead.
 
 ~~~sh
 make worldclean world TARGET=vic20 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DVERBOSE_GC -DTEST -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"

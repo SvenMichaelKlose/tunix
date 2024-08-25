@@ -43,6 +43,8 @@ and this project adheres to
 
 - Macro AWHILE: Anaphoric equivalent to WHILE.
 - CBMs only: LS to list the current directory.
+- Macro WITH-PROF to time stop (aka "to profile")
+  expressions.
 
 
 ## [v0.0.8] - 2024-08-24

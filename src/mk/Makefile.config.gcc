@@ -4,6 +4,6 @@ LD		    = gcc -Werror
 NO_EXOMIZER = 1
 
 ifndef COPTFLAGS
-	COPTFLAGS ?= -O3 -flto
-	LDFLAGS   ?= -flto
+	COPTFLAGS ?= -Ofast -flto -march=native
+	LDFLAGS   ?= -Ofast -flto -march=native
 endif

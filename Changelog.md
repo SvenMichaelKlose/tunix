@@ -25,6 +25,7 @@ and this project adheres to
 ##### Changed
 
 - SUBSEQ can take negative positions.
+- WITH-QUEUE handles only one queue and returns its list.
 
 
 ## [v0.0.10] - 2024-08-26

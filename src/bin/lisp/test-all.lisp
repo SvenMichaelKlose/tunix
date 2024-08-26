@@ -35,9 +35,10 @@
 (message "TODO: Testing AWHEN...")
 
 (message "Testing AWHILE...")
-(awhile (< 0 x)
-  (print !)
-  (= x (-- x)))
+(let x 19
+  (awhile (< 0 x)
+    (print x)
+    (= x (-- x))))
 (terpri)
 
 (message "Testing CASE...")
@@ -106,13 +107,22 @@
 (or (cons? nthcdr)
     (load "nthcdr.lisp"))
 
+(message "Testing SUBSEQ...")
+(or (equal (subseq '(l i s p) 0 2)
+           '(l i))
+    (error))
+
 (message "Testing GROUP...")
 (or (equal (group '(l i s p) 2)
            '((l i)
              (s p)))
     (error))
 
-(message "TODO: Testing GROUP...")
+(message "TODO: Testing !--...")
+
+(message "TODO: Testing !++...")
+
+(message "TODO: Testing INTERSECT...")
 
 (message "Testing MACRO? on LET...")
 (or (macro? 'let)
@@ -249,11 +259,6 @@
 (or (cons? make-queue)
     (load "queue.lisp"))
 
-(message "Testing SUBSEQ...")
-(or (equal (subseq '(l i s p) 0 2)
-           '(l i))
-    (error))
-
 (message "Testing UNION...")
 (or (equal (union '(l l i i) '(s s p p))
            '(l i s p))
@@ -294,4 +299,8 @@
              1 2))
     (error))
 
-(message "TODO: Testing WITH-QUEUE...")
+(message "Testing WITH-QUEUE...")
+(or (equal (with-queue q
+             (enqueue q 5))
+           '(5))
+    (error))

@@ -185,8 +185,10 @@ do_eval:
     outs ("-> "); print (x); terpri ();
     POP_TAG(fnout);
 #endif
+#ifndef NAIVE
     _GCSTACK_CHECK_OVERFLOW();
     _TAGSTACK_CHECK_OVERFLOW();
+#endif
 #ifndef NO_DEBUGGER
     // Inovke debugger.
     PUSH(current_expr);

@@ -73,6 +73,9 @@ const char * env_files[] = {
 #endif
 #ifdef LOAD_ALL
     "all.lisp",
+#ifdef TEST
+    "test-all.lisp",
+#endif
 #endif // #ifdef LOAD_ALL
     "welcome.lisp",
 #endif // #ifndef TARGET_C16

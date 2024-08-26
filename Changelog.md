@@ -13,6 +13,10 @@ and this project adheres to
 
 ### TUNIX Lisp
 
+#### Interpreter
+
+- Compile-time option TEST makes all environment tests load.
+
 #### Environment
 
 ##### Added

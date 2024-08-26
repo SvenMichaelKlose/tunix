@@ -21,7 +21,7 @@ General
 [@] Make it fun writing the bytecode compiler with it.
 
 Interpreter
-[@] Full heap compression (conses).
+[@] Full heap compression (compressed conses with CAR only).
 [ ] eval0() and related don't have to return a value.
     Save code size by removing it.
 [ ] Revive GG/tag stack checks as default but don't

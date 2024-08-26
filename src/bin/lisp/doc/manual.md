@@ -78,6 +78,7 @@ first time:
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
+| (cond +l)              | (? +l)          |
 
 Because the backquote (`) is not part of the charsets of old
 machines TUNIX Lisp intends to support, the dollar sign ($)
@@ -1820,11 +1821,62 @@ key and the rest is the value.
 
 ### (assoc x l): Return list that start with X.
 
-## Other
+## Maintainance
 
-| Function   | Description               |
-|------------|---------------------------|
-| (source s) | Get definition of symbol. |
+| Function          | Description                       |
+|-------------------|-----------------------------------|
+| (source s)        | Get definition of symbol.         |
+| (compress-tree x) | Find and replace double subtrees. |
+
+### (source s): Print definition of a symbol.
+
+Prints a definition that can be used to re-define the
+symbol later, e.g. by writing it to a file for LOAD.
+
+### (compress-tree x): Find and replace double subtrees.
+
+***COMPRESS-TREE Cannot be used with compressed conses.***
+
+This is about finding duplicate subtrees in the heap and
+replacing them by referencing the "original".  This might
+pay out very well, although it is computationally
+demanding and is best performed in the background if the
+machine is otherwise idle.
+
+This function should only be used on modern machines or in
+acclerating emulators (e.g. "warp mode" in VICE).
+
+Here is how to compress all of the heap:
+
+~~~lisp
+(compress-tree *universe*)
+~~~
+
+#### The algorithm
+
+This algorithm assumes, that no-one else will modify the
+trees in the heap.  If lists are created, the algorithm
+cannot work alongside.
+
+Two iterators are being used.  The first starts at the root
+of the tree and traverses in CAR direction.  With each cons
+a second iterator goes through the rest of the tree, starting
+with the CDR of the cons and comparing each cons with the one
+where the first iterator resides.  It is also traversing back to the
+top of the tree to do the same with the CDRs of the conses
+which have already been visited.  Then the first iterator
+steps on and the process repeats until both iterator came
+back to the root of the tree.
+
+The movement of the first iterator could be implemented using
+recursion.  The application of the second iterator travelling
+up the same path prohibits that.  Instead, a path list has to
+be created by the first iterator which the second one can use
+to travel back down to the root.  From each cons on it can
+use regular recursion to travel through the rest of the tree.
+
+Essentially the first iterator is implemented as function
+COMPRESS-TREE and the second iterator as REPLACE-DUPLICATES.
 
 ## Target information
 

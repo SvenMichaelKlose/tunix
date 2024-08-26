@@ -19,7 +19,31 @@ and this project adheres to
 - Macros !++ and !--.
 
 
-## [v0.0.9]
+## [v0.0.10] - 2024-08-26
+
+You'll want the stack checks, young Jedi!
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Do object and stack overflow checks at least once per
+  expression evaluation.  Did that with every PUSH/POP in
+  development versions.
+- Reduced object stack consumption per evaluation
+  (1 object).
+- Compile-time option NO\_DEBUGGER also excludes code for
+  highlighting.
+
+#### Environment
+
+##### Added
+
+- COMPRESS-TREE finds and replaces duplicates subtrees
+  across \*UNIVERSE\* symbol definitions.  (See manual.)
+
+
+## [v0.0.9] - 2024-08-25
 
 Lost pointer fix makes it worth this release.
 

@@ -90,10 +90,9 @@ eval_list (void)
 
     // Evaluate first element.
     PUSH(x);
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     x = CAR(x);
     va = eval ();
-    POP_HIGHLIGHTED();
     POP(x);
 
     if (do_break_repl)
@@ -111,9 +110,8 @@ eval_list (void)
     DOLIST(x, CDR(x)) {
         // Evaluate CDR of dotted cons.
         if (ATOM(x)) {
-            PUSH_HIGHLIGHTED(list_last);
+            HIGHLIGHT(list_last);
             SETCDR(list_last, eval ());
-            POP_HIGHLIGHTED();
             break;
         }
 
@@ -122,10 +120,9 @@ eval_list (void)
 
         // Evaluate CAR of cons.
         PUSH(list_last);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         tmp = eval ();
-        POP_HIGHLIGHTED();
         POP(list_last);
 
         // Make new cons and append it to the end of the
@@ -184,6 +181,10 @@ do_eval:
     setout (STDOUT);
     outs ("-> "); print (x); terpri ();
     POP_TAG(fnout);
+#endif
+#ifndef NAIVE
+    _GCSTACK_CHECK_OVERFLOW();
+    _TAGSTACK_CHECK_OVERFLOW();
 #endif
 #ifndef NO_DEBUGGER
     // Inovke debugger.
@@ -261,13 +262,12 @@ block_statement:
         PUSH(arg1);     // Block name
         PUSH(arg2c);    // Body
         PUSH(x);        // Current expression
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
 next_block_statement:
         // Restore evaluator state.
-        POP_HIGHLIGHTED();
         POP(x);
         POP(arg2c);
         POP(arg1);
@@ -422,13 +422,12 @@ set_arg_values:
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
         PUSH_TAG(num_args);
-        PUSH_HIGHLIGHTED(args);
+        HIGHLIGHT(args);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
         // Step to next argument.
 next_builtin_arg:
-        POP_HIGHLIGHTED();
         POP_TAG(num_args);
         POP_TAGW(builtin_argdef);
         POP(args);
@@ -587,13 +586,12 @@ do_argument:
 #ifndef NAIVE
         PUSH(unevaluated_arg1);
 #endif
-        PUSH_TAG(TAG_NEXT_ARG);
-        PUSH_HIGHLIGHTED(args);
+        HIGHLIGHT(args);
         x = CAR(args);
+        PUSH_TAG(TAG_NEXT_ARG);
         goto do_eval;
 next_arg:
         // Restore evaluator state.
-        POP_HIGHLIGHTED();
 #ifndef NAIVE
         POP(unevaluated_arg1);
 #endif
@@ -649,12 +647,11 @@ continue_body:
     if (NOT(x) || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     x = CAR(x);
     PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
 next_body_statement:
-    POP_HIGHLIGHTED();
     POP(x);
     goto continue_body;
 

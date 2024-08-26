@@ -363,24 +363,17 @@ bi_if (void)
         // It's the consequence with nothing following.
         arg2c = CDR(x);
         if (NOT(arg2c)) {
-#ifndef NO_DEBUGGER
-            highlighted = x;
-#endif
+            HIGHLIGHT(x);
             x = arg1;
             return delayed_eval;
         }
 
         // Evaluate condition.
-#ifndef NO_DEBUGGER
-        PUSH_HIGHLIGHTED(x);
-#endif
+        HIGHLIGHT(x);
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
-#ifndef NO_DEBUGGER
-        POP_HIGHLIGHTED();
-#endif
 
 #ifndef NAIVE
         if (error_code)
@@ -390,9 +383,7 @@ bi_if (void)
         // Do consequence if condition isn't NIL.
         if (NOT_NIL(tmp)) {
             x = CAR(arg2c);
-#ifndef NO_DEBUGGER
-            highlighted = arg2c;
-#endif
+            HIGHLIGHT(arg2c);
             return delayed_eval;
         }
 
@@ -408,10 +399,9 @@ bi_and (void)
     value = nil;
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -432,10 +422,9 @@ bi_or (void)
 {
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -803,9 +792,8 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     list_start = list_last = make_cons (eval0 (), nil);
-    POP_HIGHLIGHTED();
     POP(arg2);
     POP(arg1);
     if (do_break_repl)
@@ -817,9 +805,8 @@ bi_filter (void)
         PUSH(arg2);
         PUSH(list_last);
         make_car_call ();
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = make_cons (eval0 (), nil);
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 2;
             return nil;
@@ -833,9 +820,8 @@ bi_filter (void)
     if (arg2) {
         PUSH(list_last);
         make_call (make_cons (arg2, nil));
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = eval0 ();
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 1;
             return nil;

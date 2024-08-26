@@ -12,12 +12,12 @@ cd tunix/unix/ && (printf "\n" | ./lisp) ; cd -
 
 test_unix () {
     make worldclean world TARGET=unix LISP_FLAGS="$1" $2
-    cd tunix/unix/ && (printf "(load \"all.lisp\")(load \"test-all.lisp\")" | ./lisp) ; cd -
+    cd tunix/unix/ && (printf "" | ./lisp) ; cd -
 }
 
 test_sim6502 () {
     make worldclean world TARGET=sim6502 LISP_FLAGS="$1" $2
-    cd tunix/sim6502/ && (printf "(load \"all.lisp\")(load \"test-all.lisp\")" | $SIM65 lisp) ; cd -
+    cd tunix/sim6502/ && (printf "" | $SIM65 lisp) ; cd -
 }
 
 #test_unix "$PARANOID -DGC_STRESS"
@@ -25,7 +25,7 @@ test_unix "$PARANOID -DNDEBUG"
 test_unix "$PARANOID -DCOMPRESSED_CONS"
 test_unix "$PARANOID -DNO_ONERROR"
 test_unix "$PARANOID -DNO_DEBUGGER"
-test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE"
+test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DTEST $VERBOSE"
 test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE -DNAIVE"
 
 # Works with CBMs though.
@@ -34,5 +34,5 @@ test_sim6502 "$PARANOID -DNDEBUG"
 test_sim6502 "$PARANOID -DCOMPRESSED_CONS"
 test_sim6502 "$PARANOID -DNO_ONERROR"
 test_sim6502 "$PARANOID -DNO_DEBUGGER"
-test_sim6502 "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE"
+test_sim6502 "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DTEST $VERBOSE"
 test_sim6502 "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE -DNAIVE"

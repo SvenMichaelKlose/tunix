@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.11] - 2024-08-27
 
 ### TUNIX Lisp
 
@@ -21,11 +21,11 @@ and this project adheres to
 
 ##### Added
 
-- File 'user-pre-image.lisp' and 'user-post-image.lisp'
-  are loaded before and after saving the default image.
+- File 'user-pre-image.lisp' and 'user-post-image.lisp' are
+  loaded before and after saving the default image.
   'user-post-image.lisp' is also loaded at image start.
 - Macro != (file "alet.lisp").
-- Macros !++ and !-- for destructive ++ and --.
+- Macros !++ and !--: destructive versions of ++ and --.
 
 ##### Changed
 
@@ -46,11 +46,11 @@ You'll want the stack checks, young Jedi!
 
 - Do object and stack overflow checks at least once per
   expression evaluation.  Did that with every PUSH/POP in
-  development versions.
+development versions.
 
 ##### Changed
-- Reduced object stack consumption per evaluation
-  (1 object).
+- Reduced object stack consumption per evaluation (1
+  object).
 
 ##### Fixed
 
@@ -236,6 +236,7 @@ Most essential fixes.
 
 - CDAR, MAPCAR, MAPAN
 
+>>>>>>> development
 
 ## [v0.0.4] - 2024-08-22
 

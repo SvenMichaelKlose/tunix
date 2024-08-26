@@ -516,17 +516,35 @@ bi_putback (void)
     return nil;
 }
 
+void FASTCALL bi_out_list (lispptr);
+
+void FASTCALL
+bi_out_atom (lispptr x)
+{
+    if (NUMBERP(x))
+        out (NUMBER_VALUE(x));
+    else if (_NAMEDP(x))
+        outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+    else if (CONSP(x))
+        bi_out_list (x);
+    else
+        print (x);
+}
+
+void FASTCALL
+bi_out_list (lispptr x)
+{
+    DOLIST(tmp, x) {
+        PUSH(tmp);
+        bi_out_atom (CAR(tmp));
+        POP(tmp);
+    }
+}
+
 lispptr
 bi_out (void)
 {
-    if (NOT(arg1))
-        outs ("nil");
-    else if (NUMBERP(arg1))
-        out (NUMBER_VALUE(arg1));
-    else if (SYMBOLP(arg1))
-        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
-    else
-        print (arg1);
+    bi_out_list (arg1);
     return arg1;
 }
 
@@ -977,7 +995,7 @@ const struct builtin builtins[] = {
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
-    { "out",        "x",    bi_out },
+    { "out",        "+x",   bi_out },
     { "terpri",     "",     bi_terpri },
     { "fresh-line", "",     bi_fresh_line },
     { "setin",      "n",    bi_setin },

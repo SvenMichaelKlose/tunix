@@ -21,6 +21,7 @@
 (load "nth.lisp")
 (load "nthcdr.lisp")
 (load "when.lisp")
+(load "incdec.lisp")
 (load "subseq.lisp")
 (load "group.lisp")
 (load "mapcar.lisp")
@@ -40,7 +41,7 @@
 (load "unless.lisp")
 (load "with-global.lisp")
 (load "while.lisp")
-(load "incdec.lisp")
+(load "awhile.lisp")
 (message "All loaded.")
 (message "Cleaning up. Please wait...")
 ; Have the universe list compressed.

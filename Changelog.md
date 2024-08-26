@@ -23,6 +23,10 @@ and this project adheres to
 
 ### TUNIX Lisp
 
+#### Interpreter
+
+- Compile-time option TEST makes all environment tests load.
+
 #### Environment
 
 ##### Added
@@ -31,6 +35,13 @@ and this project adheres to
   are loaded before and after saving the default image.
   'user-post-image.lisp' is also loaded at image start.
 - Macro != (file "alet.lisp").
+- Macros !++ and !-- for destructive ++ and --.
+
+##### Changed
+
+- OUT: Take any number of arguments and traverse lists.
+- SUBSEQ can take negative positions.
+- WITH-QUEUE handles only one queue and returns its list.
 
 
 ## [v0.0.10] - 2024-08-26

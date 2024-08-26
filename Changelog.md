@@ -25,9 +25,12 @@ and this project adheres to
 
 #### Environment
 
+##### Added
+
 - File 'user-pre-image.lisp' and 'user-post-image.lisp'
   are loaded before and after saving the default image.
   'user-post-image.lisp' is also loaded at image start.
+- Macro != (file "alet.lisp").
 
 
 ## [v0.0.10] - 2024-08-26

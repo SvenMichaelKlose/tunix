@@ -19,6 +19,17 @@ and this project adheres to
 - Macros !++ and !--.
 
 
+## [current]
+
+### TUNIX Lisp
+
+#### Environment
+
+- File 'user-pre-image.lisp' and 'user-post-image.lisp'
+  are loaded before and after saving the default image.
+  'user-post-image.lisp' is also loaded at image start.
+
+
 ## [v0.0.10] - 2024-08-26
 
 You'll want the stack checks, young Jedi!
@@ -27,11 +38,18 @@ You'll want the stack checks, young Jedi!
 
 #### Interpreter
 
+##### Added
+
 - Do object and stack overflow checks at least once per
   expression evaluation.  Did that with every PUSH/POP in
   development versions.
+
+##### Changed
 - Reduced object stack consumption per evaluation
   (1 object).
+
+##### Fixed
+
 - Compile-time option NO\_DEBUGGER also excludes code for
   highlighting.
 

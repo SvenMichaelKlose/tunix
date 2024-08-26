@@ -21,6 +21,7 @@ and this project adheres to
   are loaded before and after saving the default image.
   'user-post-image.lisp' is also loaded at image start.
 - Macro != (file "alet.lisp").
+- Macros !++ and !-- for destructive ++ and --.
 
 ##### Changed
 

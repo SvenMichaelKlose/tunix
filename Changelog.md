@@ -9,7 +9,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [v0.0.9]
+## [current]
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Do object and stack overflow checks at least once per
+  expression evaluation.  Did that with every PUSH/POP in
+  development versions.
+
+
+## [v0.0.9] - 2024-08-25
 
 Lost pointer fix makes it worth this release.
 

@@ -147,7 +147,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -180,7 +180,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -194,7 +194,7 @@
 #define HEAP_SIZE   16384
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -283,7 +283,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP

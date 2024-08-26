@@ -449,6 +449,42 @@ Set up a Unix-like environment using MSYS2 or MinGW:
    make world TARGET=unix
    ```
 
+# Booting TUNIX Lisp
+
+When starting the program the first time, only built-in
+functions and symbols exist.  The most basic function
+required are loaded from Lisp code files to form the basic
+_environment_.  It is saves and an _image file_ which is
+loaded instead of the Lisp code as that is much faster.
+You an have your own code run before that image is created
+by saving it to file "user-pre-image.lisp".  Code that
+should be executed after the image has been loaded can be
+saved to file "user-post-image.lisp".  By setting these
+files up you can set up an environment that fits your
+desires best.
+
+~~~lisp
+; Example "user-pre-image.lisp"
+; Loads a set of regularly used functions.
+(@ '((x)
+      (load (symbol (append (symbol-name x)
+                            (symbol-name ".lisp")))))
+   '("when" "unless" "dolist" "alet" "while" "awhile"
+     "awhen"))
+~~~
+
+File "user-post-image.lisp" could be used for develeopment
+when part of the application code changes constantly.
+
+~~~lisp
+(load "mycrashycode.lisp")
+~~~
+
+Of course TUNIX Lisp shouldn't crash!  Pleas don't hestitate
+to file a
+[bug report](https://github.com/SvenMichaelKlose/tunix/issues)
+regardless of how it affected your temper.
+
 # User interface: The READ/EVAL/PRINT-Loop (REPL)
 
 The REPL is the user interface.  It prompts you for input by

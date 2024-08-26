@@ -9,7 +9,9 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.10] - 2024-08-26
+
+You'll want the stack checks, young Jedi!
 
 ### TUNIX Lisp
 

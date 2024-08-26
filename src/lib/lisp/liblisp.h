@@ -321,17 +321,6 @@
     #define HOST_DEBUGGER() raise (SIGTRAP);
 #endif
 
-#ifndef NO_DEBUGGER
-    #define PUSH_HIGHLIGHTED(x) \
-        highlighted = x; \
-        PUSH(highlighted);
-    #define POP_HIGHLIGHTED() \
-        POP(highlighted);
-#else
-    #define PUSH_HIGHLIGHTED(x)
-    #define POP_HIGHLIGHTED()
-#endif
-
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
     #define DUMP_LISPPTR
 #endif
@@ -346,6 +335,12 @@
 
 #if defined(VERBOSE_COMPRESSED_CONS) && !defined(COMPRESSED_CONS)
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
+#endif
+
+#ifndef NO_DEBUGGER
+    #define HIGHLIGHT(x)  highlighted = x
+#else
+    #define HIGHLIGHT(x)
 #endif
 
 typedef unsigned char  uchar;
@@ -434,11 +429,12 @@ extern char *  last_errstr;
 extern bool    debug_mode;
 extern lispptr first_symbol;
 extern lispptr last_symbol;
+#ifndef NO_DEBUGGER
 extern lispptr highlighted;
 extern bool    do_highlight;
-extern lispptr highlighted;
-extern lispptr onerror_sym;
 extern lispptr breakpoints_sym;
+#endif
+extern lispptr onerror_sym;
 
 #ifndef NAIVE
 extern char    error_code;

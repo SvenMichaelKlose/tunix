@@ -30,11 +30,11 @@ lispptr * global_pointers[] = {
     &debug_step,
     &breakpoints_sym,
     &debugger_return_value_sym,
+    &highlighted,
 #endif
 #ifndef NO_MACROEXPAND
     &macroexpand_sym,
 #endif
-    &highlighted,
 
     &lisp_fnin, &lisp_fnout,
 

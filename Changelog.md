@@ -20,6 +20,10 @@ You'll want the stack checks, young Jedi!
 - Do object and stack overflow checks at least once per
   expression evaluation.  Did that with every PUSH/POP in
   development versions.
+- Reduced object stack consumption per evaluation
+  (1 object).
+- Compile-time option NO\_DEBUGGER also excludes code for
+  highlighting.
 
 #### Environment
 

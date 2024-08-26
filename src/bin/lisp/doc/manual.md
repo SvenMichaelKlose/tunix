@@ -1842,6 +1842,9 @@ pay out very well, although it is computationally
 demanding and is best performed in the background if the
 machine is otherwise idle.
 
+This function should only be used on modern machines or in
+acclerating emulators (e.g. "warp mode" in VICE).
+
 Here is how to compress all of the heap:
 
 ~~~lisp

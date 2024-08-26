@@ -24,6 +24,7 @@ and this project adheres to
 
 ##### Changed
 
+- OUT: Take any number of arguments and traverse lists.
 - SUBSEQ can take negative positions.
 - WITH-QUEUE handles only one queue and returns its list.
 

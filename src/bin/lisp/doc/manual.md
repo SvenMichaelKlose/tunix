@@ -592,7 +592,39 @@ read-only lexical scope by unquoting outer values:
      (+ a ,x)))
 ~~~
 
-## Argument type descriptions (and definitions)
+## Rest arguments
+
+If an argument definition ends with a dotted pair, the last
+argument will contain the rest of the arguments passed to
+the function as a list or NIL.
+
+(fn cool-exmaple-missing (first . rest))
+(fn cool-exmaple-missing (first second . rest))
+
+## Optional arguments
+
+Rest arguments can be used to implement one or more optional
+arguments with defaults.
+
+~~~lisp
+(fn subeq (first . optional)
+  (= optional (or (car optional) 0)))
+~~~
+
+~~~lisp
+(fn subeq (first . optionals)
+  (with ((optional1 (or (car optionals) 0))
+         (optional2 (or (cadr optionals) 0)))
+    (print optional1)
+    (print optional2)
+    (terpri)))
+~~~
+
+In this example, if optional is NIL, CAR will also return
+NIL, making the OR-expression return number 0.
+This scheme can also be applied to multiple arguments:
+
+## Argument type descriptions in this manual
 
 Built-in functions have character-based and typed argument
 definitions.  They are also used, padded with spaces, to
@@ -1361,25 +1393,25 @@ x           ; 23
 
 ## I/O
 
-| Function         | Description                         |
-|------------------|-------------------------------------|
-| (read)           | Read expression.                    |
-| (print x)        | Print expression.                   |
-| (load name)      | Load and evaluate file.             |
-| (open name mode) | Open file and return channel.       |
-| (err)            | Return number of last error or NIL. |
-| (eof)            | Tell if read reached end of file.   |
-| (setin n)        | Set input channel.                  |
-| (setout n)       | Set output channel.                 |
-| (in)             | Read char.                          |
-| (conin)          | Read char from console.             |
-| (out x)          | Print char or plain symbol name.    |
-| (terpri)         | Step to next line.                  |
-| (fresh-line)     | Open line if not on a fresh one.    |
-| (close n)        | Close a channel.                    |
-| (opendir)        | Open directory and return channel.  |
-| (readdir n)      | Read directory.                     |
-| (closedir n)     | Close directory.                    |
+| Function         | Description                          |
+|------------------|--------------------------------------|
+| (read)           | Read expression.                     |
+| (print x)        | Print expression.                    |
+| (load name)      | Load and evaluate file.              |
+| (open name mode) | Open file and return channel.        |
+| (err)            | Return number of last error or NIL.  |
+| (eof)            | Tell if read reached end of file.    |
+| (setin n)        | Set input channel.                   |
+| (setout n)       | Set output channel.                  |
+| (in)             | Read char.                           |
+| (conin)          | Read char from console.              |
+| (out x)          | Print char or string, lists of them. |
+| (terpri)         | Step to next line.                   |
+| (fresh-line)     | Open line if not on a fresh one.     |
+| (close n)        | Close a channel.                     |
+| (opendir)        | Open directory and return channel.   |
+| (readdir n)      | Read directory.                      |
+| (closedir n)     | Close directory.                     |
 
 | Variable | Description            |
 |----------|------------------------|
@@ -1433,7 +1465,38 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setout channel): Set output channel.
 ### (in): Read char.
 ### (conin): Read console char (non-blocking).
-### (out x): Print char or plain symbol name.
+
+### (out x): Print char, string or list of both.
+
+Prints numbers as characters, plain symbol names,
+also names of other objects with a name, e.g. built-in
+functions, and lists of both of them.  Lists may also
+be nested (contain other lists).
+
+~~~lisp
+; Print nothing.
+(out)
+
+; Print 'A'.
+(out 65)
+
+; Also print 'A'.  (READ converts '\A' to number 65.)
+(out \A)
+
+; Print 'Hello world' without double qoutes.
+; Finish with a newline instead of using TERPRI.
+; But not using TERPRI might not work with your terminal
+; (TODO LF/CR explanation for terminals, files and
+; operating systems).
+(out "Hello world!" 10)
+
+; Print 'TUNIX!'.
+(out \T \U "NIX" 33)
+
+; Also print 'TUNIX!'.
+(out '(\T \U "NIX" 33))
+~~~
+
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
 ### (close channel): Close a channel.
@@ -1623,6 +1686,16 @@ programming languages.
 | (with inits +b)    | Block with many local variables.
 
 ### (let n init +b): Block with one local variable.
+
+LET is like WITH but creating only one local variable for
+its body.
+
+~~~lisp
+(var x 'a)
+(let x 'b
+  (print x))    ; Prints 'b'.
+(print x)       ; Prints 'a'.
+~~~
 
 ### (with inits +b): Block with many local variables.
 

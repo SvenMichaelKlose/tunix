@@ -19,6 +19,13 @@ and this project adheres to
   expression evaluation.  Did that with every PUSH/POP in
   development versions.
 
+#### Environment
+
+##### Added
+
+- COMPRESS-TREE finds and replaces duplicates subtrees
+  across \*UNIVERSE\* symbol definitions.  (See manual.)
+
 
 ## [v0.0.9] - 2024-08-25
 

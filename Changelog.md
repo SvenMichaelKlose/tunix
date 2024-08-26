@@ -22,6 +22,10 @@ and this project adheres to
   'user-post-image.lisp' is also loaded at image start.
 - Macro != (file "alet.lisp").
 
+##### Changed
+
+- SUBSEQ can take negative positions.
+
 
 ## [v0.0.10] - 2024-08-26
 

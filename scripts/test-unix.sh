@@ -6,24 +6,27 @@ VERBOSE="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
 PARANOID="$VERBOSE -DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"
 SIM65=`pwd`/src/contrib/cc65/bin/sim65
 
-test_sim6502 () {
-    make worldclean world TARGET=sim6502 LISP_FLAGS="$1" $2
-    cd tunix/sim6502/ && (printf "(isave \"image\")" | $SIM65 lisp) ; cd -
-    cd tunix/sim6502/ && (printf "\n" | $SIM65 lisp) ; cd -
-}
+# Stress test with base environment only.
+make worldclean world TARGET=unix LISP_FLAGS="$VERBOSE -DEXIT_FAILURE_ON_ERROR -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS -DGC_STRESS"
+cd tunix/unix/ && (printf "\n" | ./lisp) ; cd -
 
 test_unix () {
     make worldclean world TARGET=unix LISP_FLAGS="$1" $2
-    cd tunix/unix/ && (printf "(isave \"image\")(iload \"image\")" | ./lisp) ; cd -
+    cd tunix/unix/ && (printf "(load \"all.lisp\")(load \"test-all.lisp\")" | ./lisp) ; cd -
 }
 
-test_unix "$PARANOID -DGC_STRESS"
+test_sim6502 () {
+    make worldclean world TARGET=sim6502 LISP_FLAGS="$1" $2
+    cd tunix/sim6502/ && (printf "(load \"all.lisp\")(load \"test-all.lisp\")" | $SIM65 lisp) ; cd -
+}
+
+#test_unix "$PARANOID -DGC_STRESS"
 test_unix "$PARANOID -DNDEBUG"
 test_unix "$PARANOID -DCOMPRESSED_CONS"
 test_unix "$PARANOID -DNO_ONERROR"
 test_unix "$PARANOID -DNO_DEBUGGER"
-test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE"
-test_unix "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DNAIVE"
+test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE"
+test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE -DNAIVE"
 
 # Works with CBMs though.
 #test_sim6502 "$PARAMOID -DGC_STRESS"
@@ -31,5 +34,5 @@ test_sim6502 "$PARANOID -DNDEBUG"
 test_sim6502 "$PARANOID -DCOMPRESSED_CONS"
 test_sim6502 "$PARANOID -DNO_ONERROR"
 test_sim6502 "$PARANOID -DNO_DEBUGGER"
-test_sim6502 "-DEXIT_FAILURE_ON_ERROR $VERBOSE"
-test_sim6502 "-DEXIT_FAILURE_ON_ERROR $VERBOSE -DNAIVE"
+test_sim6502 "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE"
+test_sim6502 "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE -DNAIVE"

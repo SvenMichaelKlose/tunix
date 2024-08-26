@@ -1,23 +1,4 @@
-(or (cons? while)
-    (load "while.lisp"))
-(or (cons? subseq)
-    (load "subseq.lisp"))
-(or (cons? mapcan)
-    (load "mapcan.lisp"))
-(or (cons? case)
-    (load "case.lisp"))
-
-(var *con-w* 22)
-(var *con-h* 23)
-(var *win-h* 23)
-(var *win-y* 23)
-(var +arr-up+ 23)
-(var +arr-down+ 23)
-(var +arr-left+ 23)
-(var +arr-right+ 23)
-(var +bs+ 23)
-(var +del+ 23)
-(var +hotkey+ 23)   ; Ctrl-K?
+(var +hotkey+ 11)   ; CBM Ctrl-K
 
 ;;; State
 
@@ -25,7 +6,7 @@
 (var *saved?* nil)
 (var lx 0)      ; Line X position.
 (var ln 0)
-(var conln 0)   ; First ln on console.
+(var conln 0)   ; # of first displayed line.
 
 ;;; Console basics
 
@@ -34,7 +15,7 @@
   (out 145)) ; UP
 
 (fn con-clr2eol ()
-  (dotimes ((- *con-w* cx))
+  (dotimes (i (- *con-w* lx))
     (out \ )))
 
 (fn con-xy (x y)
@@ -48,15 +29,18 @@
   (out (subseq l 0 *con-w*))
   (con-clr2eol))
 
+(update-line '(\T \U \N \I \X) 0)
+(exit)
+
 (fn update-screen ()
   (con-home)
-  (let y *win-y*
-    (dolist (l (subseq *lines* con-ofs *win-h*))
+  (let y 0
+    (dolist (l (subseq *lines* con-ofs (-- *con-h*)))
       (update-line l y)
       (!++ y))))
 
 (fn status msg
-  (con-xy 0 *win-h*)
+  (con-xy 0 *con-h*)
   (@ out msg))
 
 ;;; Editing
@@ -69,36 +53,41 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (x)
-  (let line (symbol-name x)
+  (let line (? x (symbol-name x) nil)
     (while (not (eof))
-      (display-line line)
-      (con-xy cx (- cy cyofs))
-      (con-crson)
+      (update-line line 0)
+      ;(con-xy lx (- cy cyofs))
+      ;(con-crson)
       (with ((len (length line))
              (c   (conin)))
         (case c
+          0 nil
           +arr-left+
-            (? (< 0 cx)
-               (!-- cx))
+            (? (< 0 lx)
+               (!-- lx))
           +arr-right+
-            (? (< cx len)
-               (!++ cx))
+            (? (< lx len)
+               (!++ lx))
           +del+
-            (? (< 0 cx)
-              (del-char cx))
+            (? (< 0 lx)
+              (del-char lx))
           +bs+
-            (? (< 0 cx)
-              (del-char (!-- cx)))
+            (? (< 0 lx)
+              (del-char (!-- lx)))
           (< c \ )
             (progn
               (putback)
               (return (symbol line)))
           (progn
             (= *saved?* nil)
-            (= line (append (subseq line 0 cx)
+            (= line (append (subseq line 0 lx)
                             (list c)
-                            (subseq line (++ cx))))))))
-    (con-crsoff)))
+                            (subseq line (++ lx))))))))
+    ))
+    ;(con-crsoff)))
+
+(message "Editing line...")
+(edit-line nil)
 
 (var lines nil)
 
@@ -182,8 +171,8 @@
                   (return)))
       (putback))))
 
-(fn edit (file)
-  (= *lines* (read-lines file))
+(fn edit file
+  ;(= *lines* (read-lines file))
   (= saved? t)
   (edit-lines)
   (status "Bye!")(con-crson)(terpri))

@@ -75,6 +75,7 @@ endif
 
 allworlds:
 	$(MAKE) host
+	$(MAKE) worldclean world TARGET=apple2
 	$(MAKE) worldclean world TARGET=c128
 	$(MAKE) worldclean world TARGET=c16
 	$(MAKE) worldclean world TARGET=c64

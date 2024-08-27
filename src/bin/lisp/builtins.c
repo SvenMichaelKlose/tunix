@@ -569,7 +569,7 @@ bi_close (void)
     return nil;
 }
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
 
 #include <cbm.h>
 
@@ -618,7 +618,7 @@ bi_closedir (void)
     return nil;
 }
 
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
 
 lispptr bi_gc (void);
 
@@ -896,7 +896,7 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
-#ifdef TARGET_SIM6502
+#if defined(TARGET_SIM6502) || defined(TARGET_APPLE2)
 
 lispptr
 bi_time (void)
@@ -904,7 +904,7 @@ bi_time (void)
     return make_number (0);
 }
 
-#endif // #ifdef TARGET_SIM6502
+#endif // #ifdef defined(TARGET_SIM6502) || defined(TARGET_APPLE2)
 
 #ifndef NDEBUG
 lispptr
@@ -1005,11 +1005,11 @@ const struct builtin builtins[] = {
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
     { "opendir",    "",     bi_opendir },
     { "readdir",    "n",    bi_readdir },
     { "closedir",   "n",    bi_closedir },
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502)
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
 
 #ifndef NO_IMAGES
     { "iload",      "s",    bi_iload },
@@ -1036,7 +1036,9 @@ const struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifndef TARGET_APPLE2
     { "time",       "",     bi_time },
+#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },

@@ -139,6 +139,19 @@
 
 /// Target configurations
 
+// Apple II
+#ifdef TARGET_APPLE2
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          2048
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+
 // Commodore C128
 #ifdef TARGET_C128
 #ifndef SLOW

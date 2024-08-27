@@ -196,7 +196,7 @@ Download the latest release and unpack it.  On a unixoid
 command-line (Linux/Mac) this should do:
 
 ~~~sh
-unzip tunix.v
+unzip tunix.<LatestVersion>.zip
 ~~~
 
 It contains directory "tunix" and subdirectories for
@@ -317,6 +317,8 @@ website:
 
 - [VICE Emulator](https://vice-emu.sourceforge.io/)
 - [YAPE Emulator](http://yape.homeserver.hu/)
+
+*** TODO: Apple IIe emulator installation ***
 
 ## Building TUNIX from source
 
@@ -2124,3 +2126,91 @@ address of its implementation.
 |  3-4   | Pointer to next symbol for look-ups |
 |  5     | Name length (0-255)                 |
 | (6-x)  | Name (optional)                     |
+
+# Adding a new target
+
+## 1. Add a supplementary compiler configuration (cc65)
+
+Copy the configuration file of the desired platform from
+'src/contrib/cc65/cfg' to 'cfg/ld65/', and to
+'src/bin/lisp/cc65-cfg/'.  You'll have to tweak the latter to provide
+enough zeropage locations, and add these segments:
+
+~~~
+CODE_BUILTIN:  load = MAIN, type = ro;
+CODE_BUILTINS: load = MAIN, type = ro;
+CODE_ERROR:    load = MAIN, type = ro;
+CODE_EVAL:     load = MAIN, type = ro;
+CODE_GC:       load = MAIN, type = ro;
+CODE_HEAP:     load = MAIN, type = ro;
+CODE_IO:       load = MAIN, type = ro;
+CODE_IMAGE:    load = MAIN, type = ro;
+CODE_LIST:     load = MAIN, type = ro;
+CODE_PRINT:    load = MAIN, type = ro;
+CODE_READ:     load = MAIN, type = ro;
+CODE_REPL:     load = MAIN, type = ro;
+CODE_SLOW:     load = MAIN, type = ro;
+CODE_INIT:     load = MAIN, type = ro;
+~~~
+
+## 2. Add target to build system (GNU make)
+
+If it's a new compiler, add a new variable with the new target's name to
+'src/mk/Makefile.targets'.  For example, if that compiler is called
+"MagiC", and the new target is a "SlideRule", add
+
+~~~
+MAGIC_TARGETS = sliderule
+~~~
+
+## 3. Create build files for the compiler compiler.
+
+Copy one of files 'src/mk/Makefile.config.\*' to 'src/mk/Makefile.config.magic'
+and adapt it to that brand new, incredible MagiC compiler.  It should contain
+alls flags wants to play around with.  These are used by the new file
+'src/mk/Makefile.build.magic', which you can create the same way.
+
+## 4. Add C preprocessor definition for the target
+
+Add the preprocessor definition of TARGET\_SLIDERULE to the end of 'src/mk/Makefile.config'.
+You will need it to make changes in the C code of TUNIX Lisp.
+
+## 5. Add default compile-time configuration.
+
+These are in the head of 'src/lib/lisp/liblisp.h'.  Again, copy one that suits you
+best.  For our SlideRule it might look like this:
+
+~~~C
+// Calculation Circus Co. "SlideRule 2000"
+#ifdef TARGET_SLIDERULE
+
+// Save as much memory as can be.
+#define SLOW
+#define NO_DEBUGGER
+
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       256
+#define RELOC_TABLE_ENTRIES 128
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+~~~
+
+## 6. Add libsimple I/O.
+
+Add 'libsimpleio-stdlib' for your target to
+'src/bin/lisp/Makefile'.  You may come up with your own, platform-specific libsimpleio add-on
+for the SlideRule.
+
+## 7. Build, fix, build, fix...
+
+Try to build for your target...
+
+~~~sh
+make worldclean world TARGET=sliderule
+~~~
+
+...and share your thoughts with us!

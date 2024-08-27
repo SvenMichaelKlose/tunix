@@ -11,6 +11,13 @@ and this project adheres to
 
 ## [current]
 
+### General
+
+#### Added
+
+- Manual section on how to add new targets.
+- Build for Apple IIe (TARGET\_APPLE2) **untested**
+
 ### TUNIX Lisp
 
 #### Interpreter

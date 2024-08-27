@@ -21,6 +21,7 @@ src/bin/desktop/desktop-lib.bin
 src/bin/desktop/desktop.bin
 src/bin/lisp/autoload.lisp
 src/bin/lisp/doc/manual.pdf
+src/bin/lisp/doc/compiler.pdf
 src/bin/lisp/git-version.lisp
 src/bin/lisp/lisp
 src/bin/lisp/vi

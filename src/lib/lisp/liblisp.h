@@ -182,7 +182,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -196,7 +196,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -225,7 +225,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -238,7 +238,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -272,7 +272,7 @@
 #define HEAP_SIZE           (128 * 1024U)
 #define STACK_SIZE          (HEAP_SIZE / 8)
 #define TAGSTACK_SIZE       (HEAP_SIZE / 8)
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
@@ -285,7 +285,7 @@
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #endif

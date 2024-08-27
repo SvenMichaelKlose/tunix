@@ -13,12 +13,14 @@ and this project adheres to
 
 ### TUNIX Lisp
 
-#### Environment
+#### Interpreter
 
 ##### Changed
 
 - CONIN returns NIL instead of 0 if there's no input,
   so the heap won't get filled with 0's.
+- ERROR prints its arguments like OUT, prefixed by
+  "ERROR: ".
 
 
 ## [v0.0.11] - 2024-08-27
@@ -27,9 +29,10 @@ and this project adheres to
 
 #### Interpreter
 
-##### Added
+##### Changed
 
 - Compile-time option TEST makes all environment tests load.
+- OUT: Take any number of arguments and traverse lists.
 
 #### Environment
 
@@ -43,7 +46,6 @@ and this project adheres to
 
 ##### Changed
 
-- OUT: Take any number of arguments and traverse lists.
 - SUBSEQ can take negative positions.
 - WITH-QUEUE handles only one queue and returns its list.
 
@@ -60,7 +62,7 @@ You'll want the stack checks, young Jedi!
 
 - Do object and stack overflow checks at least once per
   expression evaluation.  Did that with every PUSH/POP in
-development versions.
+  development versions.
 
 ##### Changed
 - Reduced object stack consumption per evaluation (1

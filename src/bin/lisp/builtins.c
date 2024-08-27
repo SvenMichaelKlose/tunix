@@ -52,6 +52,8 @@ bool debug_mode;
 #pragma code-name ("CODE_BUILTINS")
 #endif
 
+void FASTCALL bi_out_list (lispptr);
+
 lispptr
 bi_eq (void)
 {
@@ -519,8 +521,6 @@ bi_putback (void)
     return nil;
 }
 
-void FASTCALL bi_out_list (lispptr);
-
 void FASTCALL
 bi_out_atom (lispptr x)
 {
@@ -713,6 +713,7 @@ bi_error (void)
     if (NOT_NIL(arg1))
         current_expr = arg1;
     error_code = ERROR_USER;
+    bi_out_list (make_cons (make_symbol ("ERROR: ", 7), arg1));
     return nil;
 }
 
@@ -1023,7 +1024,7 @@ const struct builtin builtins[] = {
     { "special",    "'s'+", bi_special },
     { "gc",         "",     bi_gc },
 #ifndef NAIVE
-    { "error",      "?x",   bi_error },
+    { "error",      "+x",   bi_error },
     { "ignore",    "",      bi_ignore },
     { "stack",      "",     bi_stack },
 #endif

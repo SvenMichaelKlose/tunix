@@ -1,6 +1,5 @@
-(while t
-  (!= (conin)
-    (unless (== 0 !)
-      (print !)
-      (and (< ! \ )
-           (return nil)))))
+(while (not (eof))
+  (awhen (conin)
+    (print !)
+    (and (< ! \ )
+           (return nil))))

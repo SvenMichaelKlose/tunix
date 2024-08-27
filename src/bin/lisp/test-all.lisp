@@ -118,9 +118,17 @@
              (s p)))
     (error))
 
-(message "TODO: Testing !--...")
+(message "Testing !++...")
+(let x 1
+  (!++ x)
+  (or (== x 2)
+      (error "X didn't increment to 2.")))
 
-(message "TODO: Testing !++...")
+(message "Testing !--...")
+(let x 1
+  (!-- x)
+  (or (== x 0)
+      (error "X didn't decrement to 0.")))
 
 (message "TODO: Testing INTERSECT...")
 

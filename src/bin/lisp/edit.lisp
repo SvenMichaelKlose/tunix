@@ -10,13 +10,10 @@
 
 ;;; Console basics
 
-(fn con-cr ()
-  (out 13)   ; CR+LF
-  (out 145)) ; UP
-
-(fn con-xy (x y)
-  (out 1)
-  (out 1))
+(fn clrscr (x y))
+(fn con-xy (x y))
+(fn con-crs (onoff))
+(fn con-rvs (onoff))
 
 ;;; Rendering
 
@@ -24,9 +21,6 @@
   (out (subseq l 0 *con-w*))
   (dotimes (i (- *con-w* (length l)))
     (out \ )))
-
-(update-line '(\T \U \N \I \X) 0)
-(exit)
 
 (fn update-screen ()
   (con-home)
@@ -52,12 +46,13 @@
   (let line (? x (symbol-name x) nil)
     (while (not (eof))
       (update-line line 0)
-      ;(con-xy lx (- cy cyofs))
-      ;(con-crson)
+      (con-xy lx (- ln conln))
+      (con-crs t)
       (with ((len (length line))
-             (c   (conin)))
+             (c   (while (not (eof))
+                    (awhen (conin)
+                      (return !)))))
         (case c
-          0 nil
           +arr-left+
             (? (< 0 lx)
                (!-- lx))
@@ -78,12 +73,10 @@
             (= *saved?* nil)
             (= line (append (subseq line 0 lx)
                             (list c)
-                            (subseq line (++ lx))))))))
-    ))
-    ;(con-crsoff)))
-
-(message "Editing line...")
-(edit-line nil)
+                            (subseq line lx)))
+            ))))
+            ;(!++ lx)))))
+    (con-crs nil)))
 
 (var lines nil)
 
@@ -168,7 +161,14 @@
       (putback))))
 
 (fn edit file
+  (messages "Cleaning up, please wait...")
+  (gc)
   ;(= *lines* (read-lines file))
   (= saved? t)
   (edit-lines)
   (status "Bye!")(con-crson)(terpri))
+
+(gc)
+
+(message "Editing line...")
+(edit-line "TUNIX")

@@ -74,8 +74,7 @@
             (= line (append (subseq line 0 lx)
                             (list c)
                             (subseq line lx)))
-            ))))
-            ;(!++ lx)))))
+            (!++ lx)))))
     (con-crs nil)))
 
 (var lines nil)

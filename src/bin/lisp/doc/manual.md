@@ -1592,17 +1592,40 @@ when the counting from 0 started.
 |-----------------|----------------------------------------|
 | (quit ?x)       | Return from debugger REPL              |
 | (exit)          | Stop program and go to top-level REPL. |
-| (error x)       | Issue a user error.                    |
+| (error +x)      | Issue a user error like OUT.           |
 | (onerror n x x) | User-defined error handler.            |
-| (ignore)        | Break and continue with LOAD or REPL.  |
+| (ignore)        | Continue with next REPL expresssion.   |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
 | (debugger)      | Invoke debugger with next instruction. |
 
 ### (quit ?x): Return from debugger REPL.
 ### (exit): Stop program and go to top-level REPL.
+
 ### (error x): Issue a user error.
+
+Prints its arguments to standard output, like OUT, prefixed
+with string "ERROR: ", and invokes a debugger REPL with
+code ERROR\_USER.
+
+~~~lisp
+(with ((haystack nil)
+       (needle   t))
+  (or (assoc needle *haystack*)
+      (error "Cannot find " needle " in haystack.")))
+; -> ERROR: Cannot find t in haystack.
+;    DEBUGGER #1:
+;    Error #14: User error
+;    ...and so on...
+~~~
+
 ### (onerror n x x): User-defined error handler.
-### (ignore): Break and continue with LOAD or REPL.
+
+(See "Advanced error handling".)
+
+### (ignore): Continue with next REPL expression.
+
+*** TODO: Might not be working any more! ***
+
 ### (debug): Raises a SIGTRAP signal for debugging.
 ### (debugger): Invoke debugger with next instruction.
 

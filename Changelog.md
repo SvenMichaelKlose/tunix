@@ -9,13 +9,26 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- ERROR prints its arguments like OUT, prefixed by
+  "ERROR: ".
+
+
 ## [v0.0.11] - 2024-08-27
 
 ### TUNIX Lisp
 
 #### Interpreter
 
+##### Changed
+
 - Compile-time option TEST makes all environment tests load.
+- OUT: Take any number of arguments and traverse lists.
 
 #### Environment
 
@@ -29,7 +42,6 @@ and this project adheres to
 
 ##### Changed
 
-- OUT: Take any number of arguments and traverse lists.
 - SUBSEQ can take negative positions.
 - WITH-QUEUE handles only one queue and returns its list.
 
@@ -46,7 +58,7 @@ You'll want the stack checks, young Jedi!
 
 - Do object and stack overflow checks at least once per
   expression evaluation.  Did that with every PUSH/POP in
-development versions.
+  development versions.
 
 ##### Changed
 - Reduced object stack consumption per evaluation (1

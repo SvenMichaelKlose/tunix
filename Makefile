@@ -10,16 +10,14 @@ RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
 ULTIMEM_IMG 		= tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all:
-	rm src/include/git-version.h
-	$(MAKE) src/include/git-version.h
+all: src/include/git-version.h
 	$(MAKE) host
 	$(MAKE) src
 	$(MAKE) mkfs/mkfs.ultifs
 	$(MAKE) ultimem_image
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
-src/include/git-version.h:
+src/include/git-version.h: FORCE
 	printf "$(TAG)" >git-version
 	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
 	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
@@ -32,6 +30,8 @@ src/include/git-version.h:
 	printf "#define TUNIX_GIT_VERSION \"" >>src/include/git-version.h
 	cat git-version >>src/include/git-version.h
 	printf "\"\n" >>src/include/git-version.h
+
+FORCE:
 
 host:
 	cp kgetin.s src/contrib/cc65/libsrc/plus4/

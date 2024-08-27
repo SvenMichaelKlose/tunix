@@ -18,6 +18,17 @@ and this project adheres to
 - ERROR prints its arguments like OUT, prefixed by
   "ERROR: ".
 
+#### Environment
+
+##### Fixed
+
+- Revived +V+.
+
+##### Added
+
+- +VB+ contains the Git branch name for use with conditional
+  code in "user-*-image.lisp".
+
 
 ## [v0.0.11] - 2024-08-27
 

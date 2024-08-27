@@ -164,6 +164,8 @@ tunix.v0.0.5+bca5411.2024-08-22.zip
       version
 ~~~
 
+*** TODO: See also "Version information". ***
+
 The version, "0.0.5" in this case, contains a major, minor
 and patch version according to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -1952,6 +1954,14 @@ key and the rest is the value.
 ### (acons alist c): Add key/value to associative list.
 
 ### (assoc x l): Return list that start with X.
+
+## Version information
+
+| Variable | Description                             |
+|----------|-----------------------------------------|
+| +target+ | Target machine the interpreter runs on. |
+|   +v+    | Git tag and short SHA.                  |
+|   +vb+   | Git branch.                             |
 
 ## Maintainance
 

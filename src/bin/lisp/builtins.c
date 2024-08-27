@@ -502,7 +502,7 @@ bi_conin (void)
 {
     char c = conin ();
     if (c)
-        return make_number (conin ());
+        return make_number (c);
     return nil;
 }
 

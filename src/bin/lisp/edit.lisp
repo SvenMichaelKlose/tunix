@@ -14,10 +14,6 @@
   (out 13)   ; CR+LF
   (out 145)) ; UP
 
-(fn con-clr2eol ()
-  (dotimes (i (- *con-w* lx))
-    (out \ )))
-
 (fn con-xy (x y)
   (out 1)
   (out 1))
@@ -25,9 +21,9 @@
 ;;; Rendering
 
 (fn update-line (l y)
-  (con-xy 0 y)
   (out (subseq l 0 *con-w*))
-  (con-clr2eol))
+  (dotimes (i (- *con-w* (length l)))
+    (out \ )))
 
 (update-line '(\T \U \N \I \X) 0)
 (exit)

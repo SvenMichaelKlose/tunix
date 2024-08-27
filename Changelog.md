@@ -9,11 +9,25 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Changed
+
+- CONIN returns NIL instead of 0 if there's no input,
+  so the heap won't get filled with 0's.
+
+
 ## [v0.0.11] - 2024-08-27
 
 ### TUNIX Lisp
 
 #### Interpreter
+
+##### Added
 
 - Compile-time option TEST makes all environment tests load.
 

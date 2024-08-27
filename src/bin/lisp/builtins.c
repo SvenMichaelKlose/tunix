@@ -500,7 +500,10 @@ bi_setout (void)
 lispptr
 bi_conin (void)
 {
-    return make_number (conin ());
+    char c = conin ();
+    if (c)
+        return make_number (conin ());
+    return nil;
 }
 
 lispptr

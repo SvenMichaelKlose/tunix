@@ -1464,7 +1464,22 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.
 ### (in): Read char.
+
+Read character from channel.  It is returned as the
+character number (e.g. ASCII).
+
 ### (conin): Read console char (non-blocking).
+
+Unlinke IN, CONIN does not wait for input but returns NIL
+instead when used with standard input (console, terminal,
+hoewever you name it).
+
+~~~lisp
+; Wait for single character input.
+(while t
+  (!? (conin)
+      (return !)))
+~~~
 
 ### (out x): Print char, string or list of both.
 
@@ -1835,6 +1850,20 @@ list.
 ~~~lisp
 (split 'b '(a a b c c c)) ; -> ((a a) (c c c))
 (split 'b '(a a b b c c)) ; -> ((a a) nil (c c))
+~~~
+
+### (subseq l start ?end): Get sublist.
+
+Copies part of a list into a new one from 'start' to 'end'.
+If 'end' is not given, everything to the end of the list is
+taken.  'start' and 'end' begin with number 0 for the first
+position in the list.  'end' is exclusive, telling with
+which position copying finishes.
+
+~~~lisp
+(subseq '(t u n i x) 2)   ; -> (n i x)
+(subseq '(t u n i x) 0 2) ; -> (t u)
+;         0 1 2 3 4
 ~~~
 
 ## Loops

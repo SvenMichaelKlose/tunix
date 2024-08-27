@@ -1476,7 +1476,7 @@ hoewever you name it).
 
 ~~~lisp
 ; Wait for single character input.
-(while t
+(while (not (eof))
   (!? (conin)
       (return !)))
 ~~~

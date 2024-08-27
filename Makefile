@@ -1,6 +1,7 @@
 include src/mk/Makefile.build
 
 TAG 			 := $(shell git describe --tags 2>/dev/null)
+BRANCH 			 := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
 DISTDIR_BASE 	   ?= tunix
 DISTDIR 	 	    = $(DISTDIR_BASE)/$(TARGET)/
 RELEASE_LISP_FLAGS ?= -DVERBOSE_LOAD=1 -DVERBOSE_DEFINES=1
@@ -9,7 +10,9 @@ RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
 ULTIMEM_IMG 		= tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all: src/include/git-version.h #host src mkfs/mkfs.ultifs ultimem_image
+all:
+	rm src/include/git-version.h
+	$(MAKE) src/include/git-version.h
 	$(MAKE) host
 	$(MAKE) src
 	$(MAKE) mkfs/mkfs.ultifs
@@ -18,9 +21,8 @@ all: src/include/git-version.h #host src mkfs/mkfs.ultifs ultimem_image
 
 src/include/git-version.h:
 	printf "$(TAG)" >git-version
-	printf "(var +v+ \"" >src/bin/lisp/git-version.lisp
-	cat git-version >>src/bin/lisp/git-version.lisp
-	printf "\")\n" >>src/bin/lisp/git-version.lisp
+	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
+	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
 	printf "(out \"TUNIX Lisp (\")(out +v+)(out \"" >>src/bin/lisp/git-version.lisp
 	printf ")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
 	mkdir -p src/include

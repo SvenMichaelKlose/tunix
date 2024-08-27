@@ -25,7 +25,7 @@ TUNIX Lisp is under heavy construction at the moment.
 | Commodore C128    |                                 |
 | Commodore C16     | No debugger.                    |
 | Commodore C64     |                                 |
-| Commodore PET     |                                 |
+| Commodore PET     | SYNTAX ERROR on program start.  |
 | Commodore Plus/4  |                                 |
 | Commodore VIC-20  | + some native toy apps.         |
 | Apple IIe         | Untested & no disk images!      |

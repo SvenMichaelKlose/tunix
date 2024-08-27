@@ -6,4 +6,4 @@
         '("when" "unless" "dolist" "alet" "aif" "while" "awhile"
           "queue" "with-queue" "dotimes" "incdec"
           "awhen" "nthcdr" "subseq" "mapcar" "mapcan" "case"
-          "group" "cbm-keycode" "cbm-con")))
+          "group" "cbm-keycode" "cbm-con" "ls")))

@@ -17,7 +17,7 @@ number of bytes left which is updated sporadically.
 Entered characters are inserted immediately at the current
 cursor position.  Cursor keys move the cursor, backspace
 and delete keys remove chars and enter opens a new line.
-Removing all character from a line will delete it as well.
+Removing all characters from a line will delete it as well.
 
 # Commands
 
@@ -34,8 +34,8 @@ of these characters:
 
 When pressing Ctrl-K e, the editor will save the test as
 file "etmp.img", remove most of its code from the heap and
-LOAD the saved file.  By call EDIT again, the editor will be
-restarted where you left off.
+LOAD the saved file.  By calling EDIT again, the editor will
+be restarted where you left off.
 
 ## Saving the file
 
@@ -48,6 +48,6 @@ return to the editor afterwards.
 ## Exiting the editor
 
 Ctrl-K x will exit the editor immediately if the text has
-not been modified without saving.  Otherwise you'll be asked
-to save it.  You may choose to do or not to do so, or to
-continue editing, by pressing either 'y', 'n', or 'c'.
+not been modified.  Otherwise you'll be asked to save it.
+You may choose to do or not to do so, or to continue editing,
+by pressing either 'y', 'n', or 'c'.

@@ -1,2 +1,2 @@
-(var *con-w* 22)
-(var *con-h* 23)
+(var *con-w* 40)
+(var *con-h* 25)

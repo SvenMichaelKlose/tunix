@@ -1,8 +1,11 @@
 name: Build and test on Ubuntu
 
-on: [pull_request]
+on:
   push:
     branches:
+      - main
+      - development
+  pull_request:
       - main
       - development
 

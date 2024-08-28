@@ -4,12 +4,11 @@ on:
   push:
     tags:
       - 'v*'
-    branches:
-      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "github.head_ref == 'main'"
 
     steps:
     - name: Checkout code

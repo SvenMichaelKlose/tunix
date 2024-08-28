@@ -653,7 +653,8 @@ continue_body:
     goto do_eval;
 next_body_statement:
     POP(x);
-    goto continue_body;
+    if (value != return_sym && value != go_sym)
+        goto continue_body;
 
     // Restore argument symbol values.
 restore_arguments:

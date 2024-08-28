@@ -1,9 +1,9 @@
 (macro with-global (n v .body)
   ;"Temporarily assign global with new value."
   (let g (symbol)
-    $(block t
+    $(progn
        (= ,g ,n)
        (= ,n ,v)
-       (block nil
+       (progn
          ,@body)
        (= ,n ,g))))

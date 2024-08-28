@@ -4,5 +4,5 @@
      $((,(carlist inits)
         ,@body)
        ,@(carlist (cdrlist inits)))
-     $(block t
+     $(progn
         ,@body)))

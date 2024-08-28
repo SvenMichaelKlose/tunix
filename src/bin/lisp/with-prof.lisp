@@ -4,7 +4,7 @@
     (with ((stime    (symbol))
            (duration (symbol)))
       $(let ,stime (time)
-         (block nil
+         (progn
            ,@body)
          (let ,duration (- (time) ,stime)
            (out "Time spent: ")

@@ -1,5 +1,7 @@
 name: Build and test on Ubuntu
 
+on: [push, pull_request]
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest

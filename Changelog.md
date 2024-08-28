@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.13] - 2024-08-29
 
 ### Interpeter
 
@@ -17,6 +17,11 @@ and this project adheres to
 
 - Error on lost RETURN or GO.
 - Function bodies treat RETURNs by passing them on instantly.
+
+### Environment
+
+- WITH-* macros do not use BLOCK any more.
+
 
 ## [v0.0.12] - 2024-08-28
 

@@ -16,7 +16,11 @@ and this project adheres to
 #### Added
 
 - Manual section on how to add new targets.
-- Build for Apple IIe (TARGET\_APPLE2) **untested**
+- New targets (**untested**):
+ - Apple II (TARGET\_APPLE2)
+ - Apple II enhanced (TARGET\_APPLE2ENH)
+- New targets (**not working**):
+ - Atari XL (TARGET\_ATARIXL) - Need adjusted ld65 config.
 
 ### TUNIX Lisp
 

@@ -572,7 +572,7 @@ bi_close (void)
     return nil;
 }
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
+#if !defined(NO_DIRECTORY) && defined(__CC65__)
 
 #include <cbm.h>
 
@@ -621,7 +621,7 @@ bi_closedir (void)
     return nil;
 }
 
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
 
 lispptr bi_gc (void);
 
@@ -855,7 +855,7 @@ bi_filter (void)
     return list_start;
 }
 
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#if !defined(NO_TIME) && defined(__CC65__)
 char bekloppies[sizeof (long)];
 
 lispptr
@@ -875,7 +875,7 @@ bi_time (void)
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }
-#endif // #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#endif // #if !defined(NO_TIME) && defined(__CC65__)
 
 #ifdef TARGET_UNIX
 
@@ -899,7 +899,7 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
-#if defined(TARGET_SIM6502) || defined(TARGET_APPLE2)
+#ifdef NO_TIME
 
 lispptr
 bi_time (void)
@@ -907,7 +907,7 @@ bi_time (void)
     return make_number (0);
 }
 
-#endif // #ifdef defined(TARGET_SIM6502) || defined(TARGET_APPLE2)
+#endif // #ifdef NO_TIME
 
 #ifndef NDEBUG
 lispptr
@@ -1008,11 +1008,11 @@ const struct builtin builtins[] = {
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
+#if !defined(NO_DIRECTORY) && defined(__CC65__)
     { "opendir",    "",     bi_opendir },
     { "readdir",    "n",    bi_readdir },
     { "closedir",   "n",    bi_closedir },
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__) && !defined(TARGET_SIM6502) && !defined(TARGET_APPLE2)
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
 
 #ifndef NO_IMAGES
     { "iload",      "s",    bi_iload },
@@ -1039,7 +1039,7 @@ const struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
-#ifndef TARGET_APPLE2
+#ifndef TARGET_TIME
     { "time",       "",     bi_time },
 #endif
 

@@ -435,6 +435,13 @@ terpri_next:
             x = nil;
             gc ();
         }
+#endif // #ifndef NAIVE
+#ifndef NO_DEBUGGER
+        // Catch lost RETURN and GO.
+        if (value == return_sym)
+            error_code = ERROR_LOST_RETURN;
+        else if (value == go_sym)
+            error_code = ERROR_LOST_GO;
 #endif
 #ifndef NAIVE
         // Call debugger on error.
@@ -445,7 +452,7 @@ terpri_next:
 #ifndef NO_MACROEXPAND
         POP(unexpanded_toplevel);
 #endif
-#endif
+#endif // #ifndef NAIVE
         // Special treatment of results.
         if (do_break_repl) {
             // Ignore result and continue with next expression.

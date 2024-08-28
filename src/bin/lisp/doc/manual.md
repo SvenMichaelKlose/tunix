@@ -870,9 +870,11 @@ be dealt with.
 | STALE\_PAREN    | 10   | Unexpected ')'.                 |
 | SYM\_TOO\_LONG  | 11   | Symbol longer than MAX\_SYMBOL. |
 | QUOTE\_MISSING  | 12   | '"' missing.                    |
-| FILEMODE        | 13   | Illegal mode for OPEN.          |
-| USER            | 14   | ERROR function was called.      |
-| INTERNAL        | 15   | Returned to operating system.   |
+| LOST\_RETURN    | 13   | RETURN name didn't match BLOCK. |
+| LOST\_GO        | 14   | GO outside BLOCK.               |
+| FILEMODE        | 15   | Illegal mode for OPEN.          |
+| USER            | 15   | ERROR function was called.      |
+| INTERNAL        | 16   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 

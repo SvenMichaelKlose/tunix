@@ -195,19 +195,30 @@
         (= x 'b2s)
         (block b3
           (= x 'b3s)
+          (print 'before-return)
+          (print block-name)
+          (terpri)
           (return nil block-name))
         (= x 'b2e)
         (return nil nil))
       (= x 'b1e)
-      (return nil nil))
-    (print x)) 'b0))
+      (return nil nil))) 'b0))
 
+(= *b* (cons 'return *b*))
 (or (eq 'b2e (return-test 'b3))
     (error))
 (or (eq 'b1e (return-test 'b2))
     (error))
 (or (eq 'b3s (return-test 'b1))
     (error))
+
+((()
+  (block nil
+    ((()
+      ((()
+        (return nil)))
+      (error "RETURN should have been returned from parent function body.")))
+    (error "Should have returned past BLOCK."))))
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (message "Testing BLOCK...")

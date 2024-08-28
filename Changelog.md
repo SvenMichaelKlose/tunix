@@ -9,6 +9,15 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Interpeter
+
+#### Added
+
+- Error on lost RETURN or GO.
+- Function bodies treat RETURNs by passing them on instantly.
+
 ## [v0.0.12] - 2024-08-28
 
 ### General

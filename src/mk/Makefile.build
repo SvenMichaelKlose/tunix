@@ -9,6 +9,11 @@ endif
 ifeq ($(TARGET), apple2)
 EXOMIZER_TARGET = 0xa2
 endif
+# TODO: Needs testing.
+ifeq ($(TARGET), apple2enh)
+#EXOMIZER_TARGET = 0xa2
+NO_EXOMIZER = 1
+endif
 ifeq ($(TARGET), atarixl)
 EXOMIZER_TARGET = 0xa8
 endif

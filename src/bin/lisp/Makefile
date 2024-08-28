@@ -12,16 +12,10 @@ LIBRARIES = \
     $(TUNIX_LIB)/simpleio/libsimpleio.a
 CLEANFILES = image test.out doc/manual.pdf git-version.lisp
 
-ifeq ($(TARGET), apple2)
-LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
-endif
-ifeq ($(TARGET), cpm)
-LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
-endif
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
 endif
-ifneq (,$(filter $(TARGET), sim6502 unix))
+ifneq (,$(filter $(TARGET), cpm sim6502 unix $(APPLE_TARGETS)))
 LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
 endif
 

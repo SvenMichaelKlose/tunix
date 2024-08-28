@@ -16,7 +16,9 @@ and this project adheres to
 #### Added
 
 - Manual section on how to add new targets.
-- Build for Apple IIe (TARGET\_APPLE2) **untested**
+- New targets (**untested**):
+ - Apple II (TARGET\_APPLE2)
+ - Apple II enhanced (TARGET\_APPLE2ENH)
 
 ### TUNIX Lisp
 

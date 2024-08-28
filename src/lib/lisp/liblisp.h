@@ -150,6 +150,23 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
+#endif
+
+// Apple II enhanced
+#ifdef TARGET_APPLE2ENH
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          2048
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 // Commodore C128
@@ -166,6 +183,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
 #endif
 
 // Commodore C16
@@ -213,6 +231,8 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 // Commodore PET
@@ -255,6 +275,8 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 // Commodore VIC-20/VC-20
@@ -289,6 +311,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
+#define NO_DIRECTORY
 #endif
 
 // Sinclair ZX Spectrum
@@ -301,6 +324,8 @@
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)

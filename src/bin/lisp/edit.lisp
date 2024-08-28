@@ -59,17 +59,17 @@
           +arr-right+
             (? (< lx len)
                (!++ lx))
-          +del+
-            (? (< 0 lx)
-              (del-char lx))
           +bs+
             (? (< 0 lx)
               (del-char (!-- lx)))
-          (< c \ )
-            (progn
+          +del+
+            (? (< 0 lx)
+              (del-char lx))
+          (progn
+            (print c)
+            (when (< c \ )
               (putback)
               (return (symbol line)))
-          (progn
             (= *saved?* nil)
             (= line (append (subseq line 0 lx)
                             (list c)

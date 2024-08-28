@@ -18,6 +18,19 @@ TUNIX Lisp is under heavy construction at the moment.
 * [Discuss](https://github.com/SvenMichaelKlose/tunix/discussions)
   (Be the first!)
 
+# Platforms
+
+| Target            | Limitations                     |
+|-------------------|---------------------------------|
+| Commodore C128    |                                 |
+| Commodore C16     | No debugger.                    |
+| Commodore C64     |                                 |
+| Commodore PET     | SYNTAX ERROR on program start.  |
+| Commodore Plus/4  |                                 |
+| Commodore VIC-20  | + some native toy apps.         |
+| Apple IIe         | Untested & no disk images!      |
+| Generic Z80 CP/M  | Need help with z88dk compiler!  |
+
 # Manuals
 
 Only what's most affecting.

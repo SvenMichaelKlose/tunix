@@ -168,6 +168,3 @@
   (status "Bye!")(con-crson)(terpri))
 
 (gc)
-
-(message "Editing line...")
-(edit-line "TUNIX")

@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#if defined(TARGET_UNIX) && !defined(NDEBUG)
+#include <stdio.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 
@@ -202,6 +205,9 @@ lispptr FASTCALL
 print (lispptr x)
 {
     print0 (x);
+#if defined(TARGET_UNIX) && !defined(NDEBUG)
+    fflush (stdout);
+#endif
     return x;
 }
 

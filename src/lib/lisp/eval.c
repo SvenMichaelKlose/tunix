@@ -748,11 +748,24 @@ void
 init_eval ()
 {
     go_tag = return_name = return_value = nil;
-    args = argdefs = arg1 = arg2 = arg2c = x = value = va = nil;
-    needle = nil;
+    args = argdefs = arg1 = arg2 = arg2c = nil;
+    x = value = va = needle = nil;
+
+#ifdef NDEBUG
     return_sym   = make_symbol (NULL, 0);
+#else
+    return_sym   = make_symbol ("~RETURN", 7);
+#endif
+#ifdef NDEBUG
     go_sym       = make_symbol (NULL, 0);
+#else
+    go_sym       = make_symbol ("~GO", 3);
+#endif
+#ifdef NDEBUG
     delayed_eval = make_symbol (NULL, 0);
+#else
+    delayed_eval = make_symbol ("~EVAL", 5);
+#endif
     block_sym    = make_symbol ("block", 5);
     expand_universe (block_sym);
 #ifndef NAIVE

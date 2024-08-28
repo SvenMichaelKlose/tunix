@@ -2,11 +2,12 @@ name: Create release
 
 on:
   push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/v') && github.head_ref == 'main'"
 
     steps:
     - name: Checkout code

@@ -295,7 +295,6 @@ next_block_statement:
             if (arg1 == return_name) {
                 value = return_value;
                 return_value = nil;
-                goto do_return;
             }
             goto do_return;
         }
@@ -653,8 +652,22 @@ continue_body:
     goto do_eval;
 next_body_statement:
     POP(x);
+#ifndef NAIVE
     if (value != return_sym && value != go_sym)
+#endif
         goto continue_body;
+#ifndef NO_DEBUGGER
+    else if (SYMBOLP(unevaluated_arg1)) {
+        // Catch lost RETURN and GO.
+        if (value == return_sym) {
+            error_info = return_name;
+            error (ERROR_LOST_RETURN, "RETURN without BLOCK");
+        } else if (value == go_sym) {
+            error_info = go_tag;
+            error (ERROR_LOST_GO, "GO without BLOCK");
+        }
+    }
+#endif
 
     // Restore argument symbol values.
 restore_arguments:

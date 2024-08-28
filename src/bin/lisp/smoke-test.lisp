@@ -187,38 +187,31 @@
 (make-count 10)
 
 (message "Testing RETURN...")
-(fn return-test (block-name)
-  (((x)
-    (block b1
-      (= x 'b1s)
-      (block b2
-        (= x 'b2s)
-        (block b3
-          (= x 'b3s)
-          (print 'before-return)
-          (print block-name)
-          (terpri)
-          (return nil block-name))
-        (= x 'b2e)
-        (return nil nil))
-      (= x 'b1e)
-      (return nil nil))) 'b0))
-
-(= *b* (cons 'return *b*))
-(or (eq 'b2e (return-test 'b3))
-    (error))
-(or (eq 'b1e (return-test 'b2))
-    (error))
-(or (eq 'b3s (return-test 'b1))
-    (error))
-
 ((()
   (block nil
     ((()
       ((()
-        (return nil)))
+        (and (or (return nil)))))
       (error "RETURN should have been returned from parent function body.")))
     (error "Should have returned past BLOCK."))))
+
+(fn return-test (block-name)
+  (((x)
+    (block b1
+      (block b2
+        (block b3
+          (return nil block-name))
+        (= x 'b2e))
+      (= x 'b1e))
+    x) 'b0))
+
+(= *b* (cons 'return *b*))
+(or (eq 'b1e (return-test 'b3))
+    (error))
+(or (eq 'b1e (return-test 'b2))
+    (error))
+(or (eq 'b0 (return-test 'b1))
+    (error))
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
 (message "Testing BLOCK...")

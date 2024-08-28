@@ -398,8 +398,8 @@ terpri_next:
 #endif
 #ifndef NAIVE
         if (!setjmp (this_break)) {
-            // Save return point for hard errors, like out
-            // of heap or internal errors.
+            // Save return point for hard errors, like
+            // out-of-heap or internal errors.
             hard_repl_break = &this_break;
 
             // Save GC and tag stack pointers.
@@ -438,10 +438,12 @@ terpri_next:
 #endif // #ifndef NAIVE
 #ifndef NO_DEBUGGER
         // Catch lost RETURN and GO.
-        if (value == return_sym)
-            error_code = ERROR_LOST_RETURN;
-        else if (value == go_sym)
-            error_code = ERROR_LOST_GO;
+        if (!error_code) {
+            if (x == return_sym)
+                error (ERROR_LOST_RETURN, "RETURN without BLOCK");
+            else if (x == go_sym)
+                error (ERROR_LOST_GO, "GO without BLOCK");
+        }
 #endif
 #ifndef NAIVE
         // Call debugger on error.

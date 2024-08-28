@@ -144,7 +144,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
@@ -159,7 +159,22 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
+#define STACK_SIZE          1024
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
+#endif
+
+// Atari XL
+#ifdef TARGET_ATARIXL
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          1024
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP

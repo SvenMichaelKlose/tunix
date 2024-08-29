@@ -222,13 +222,57 @@ bi_setcdr (void)
 lispptr
 bi_nthcdr (void)
 {
-    size_t n = NUMBER_VALUE(arg1);
+    lispnum_t n = NUMBER_VALUE(arg1);
+    if (n < 0) {
+        error_info = arg1;
+        error (ERROR_NEGATIVE, "< 0");
+        return nil;
+    }
     while (n-- && CONSP(arg2))
         arg2 = CDR(arg2);
     if (ATOM(arg2) && NOT_NIL(arg2))
         return error_cons_expected (arg2);
     return arg2;
 }
+
+/*
+size_t n;
+size_t nstart;
+size_t nend;
+bool has_end;
+
+lispptr
+bi_subseq (void)
+{
+    list_start = bi_nthcdr ();
+    if (end < 0) {
+        error_info = end;
+        error (ERROR_NEGATIVE, "< 0");
+        return nil;
+    }
+
+    // Get start of list.
+    n = start;
+    bi_nthcdr ();
+
+    has_end = NOT_NIL(end);
+    if (has_end)
+        nend = NUMBER_VALUE(end);
+
+    // Copy until end.
+    n = nend - nstart;
+    list_start = list_last = make_cons (CAR(p), nil);
+    while ((no_end || n-- > 0) && CONSP(arg2)) {
+        tmp = make_cons (CAR(p), nil);
+        SETCDR(list_last, tmp);
+        list_last = tmp;
+        arg2 = CDR(arg2);
+    }
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+    return arg2;
+}
+*/
 
 lispptr
 bi_numberp (void)
@@ -532,11 +576,26 @@ bi_putback (void)
     return nil;
 }
 
+size_t countdown;
+
+void
+cout (char c)
+{
+    if (countdown == -1) {
+        out (c);
+        return;
+    }
+    if (countdown) {
+        out (c);
+        countdown--;
+    }
+}
+
 void FASTCALL
 bi_out_atom (lispptr x)
 {
     if (NUMBERP(x))
-        out (NUMBER_VALUE(x));
+        cout (NUMBER_VALUE(x));
     else if (_NAMEDP(x))
         outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
     else if (CONSP(x))
@@ -559,6 +618,14 @@ lispptr
 bi_out (void)
 {
     bi_out_list (arg1);
+    countdown = -1;
+    return arg1;
+}
+
+lispptr
+bi_outlim (void)
+{
+    countdown = NUMBER_VALUE(arg1);
     return arg1;
 }
 
@@ -1012,6 +1079,7 @@ const struct builtin builtins[] = {
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
     { "out",        "+x",   bi_out },
+    { "outlim",     "n",    bi_outlim },
     { "terpri",     "",     bi_terpri },
     { "fresh-line", "",     bi_fresh_line },
     { "setin",      "n",    bi_setin },
@@ -1073,4 +1141,5 @@ void
 init_builtins (void)
 {
     add_builtins (builtins);
+    countdown = -1;
 }

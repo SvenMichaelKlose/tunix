@@ -843,8 +843,9 @@ extern bool do_gc_stress;
 #define ERROR_QUOTE_MISSING     12
 #define ERROR_LOST_RETURN       13
 #define ERROR_LOST_GO           14
-#define ERROR_FILEMODE          15
-#define ERROR_USER              16
+#define ERROR_NEGATIVE          15
+#define ERROR_FILEMODE          16
+#define ERROR_USER              17
 
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12

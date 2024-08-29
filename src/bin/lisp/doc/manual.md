@@ -891,9 +891,10 @@ be dealt with.
 | QUOTE\_MISSING  | 12   | '"' missing.                    |
 | LOST\_RETURN    | 13   | RETURN name didn't match BLOCK. |
 | LOST\_GO        | 14   | GO outside BLOCK.               |
-| FILEMODE        | 15   | Illegal mode for OPEN.          |
-| USER            | 15   | ERROR function was called.      |
-| INTERNAL        | 16   | Returned to operating system.   |
+| NEGATIVE        | 15   | Positive number expected.       |
+| FILEMODE        | 16   | Illegal mode for OPEN.          |
+| USER            | 17   | ERROR function was called.      |
+| INTERNAL        | 18   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 
@@ -1431,6 +1432,7 @@ x           ; 23
 | (in)             | Read char.                           |
 | (conin)          | Read char from console.              |
 | (out x)          | Print char or string, lists of them. |
+| (outlim n)       | Limit number of char values printed. |
 | (terpri)         | Step to next line.                   |
 | (fresh-line)     | Open line if not on a fresh one.     |
 | (close n)        | Close a channel.                     |
@@ -1536,6 +1538,8 @@ be nested (contain other lists).
 ; Also print 'TUNIX!'.
 (out '(\T \U "NIX" 33))
 ~~~
+
+### (outlim n): Limit number of chars printed.
 
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.

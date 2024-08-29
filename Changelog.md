@@ -20,6 +20,17 @@ and this project adheres to
  - position cursor
  - clear/set flags (cursor visibility, reverse mode)
 
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Changed
+
+- NTHCDR is built-in.
+
+##### Added
+
+- OUTLIM limits number of printed character values.
 
 ## [v0.0.13] - 2024-08-29
 

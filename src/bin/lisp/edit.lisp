@@ -34,7 +34,8 @@
 ; Update line up to a particular number of chars.
 (fn update-line (l y)
   (con-xy 0 y)
-  (out (or (subseq l 0 *con-w*) ""))
+  (outlim *con-w*)
+  (out (or l ""))
   (dotimes (i (- *con-w* (length l)))
     (out \ )))
 
@@ -54,8 +55,8 @@
 
 (fn del-char (x)
   (= *saved?* nil)
-  (= line (append (subseq line 0 (-- x))
-                  (subseq line x))))
+  (= line (append (subseq line 0 x)
+                  (subseq line (++ x)))))
 
 ; Edit line.
 ; Return new line if an unrelated char has been input.

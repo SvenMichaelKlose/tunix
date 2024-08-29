@@ -4,6 +4,6 @@
                                      (symbol-name ".lisp"))))
                (error "Can't load " x ".lisp")))
         '("when" "unless" "dolist" "alet" "aif" "while" "awhile"
-          "queue" "with-queue" "dotimes" "incdec"
+          "queue" "with-queue" "dotimes" "incdec" "nth"
           "awhen" "nthcdr" "subseq" "mapcar" "mapcan" "case"
           "group" "cbm-keycode" "cbm-con" "ls")))

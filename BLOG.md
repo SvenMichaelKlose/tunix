@@ -3,6 +3,25 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-29
+
+Release v0.0.12.  Starting the first app, the integrated
+text editor in this case, always comes with early
+disappointments and writing more tests instead.  But it's
+taking shape.  I don't care that it is slow.  The reason for
+that is that the current line is a list of characters and
+functions like NTHCDR and SUBSEQ are implemented in Lisp
+which can run around 300 expressions per second.
+Implementing those, and perhaps a couple more,  in C could
+take the edge off well enough to make the editor usable.
+Actually everything that has to walk a line should be done
+in C before a bytecode compiler is around to help out.
+
+I dearly missed to ability to walk up and down the stack,
+or to just list the call stack.  The tag stack might be
+helping out implementing such thing rapidly.  No stress.
+I planned to grow old in peace.
+
 # 2024-08-24
 
 Release v0.0.8.  For Sunday entertainment I'll try to solder

@@ -5,6 +5,27 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-29
 
+Oh dude, is the editor slow, or what?  The need for more
+built-in functions is pressing big time.  Instead of SUBSEQ,
+a C version of NTHCDR and an OUT with a length limit should
+work the miracle.  SUBSEQ makes copies and we don't want the
+GC to kick in regularly, especially not for displaying text
+alone.
+
+~~~lisp
+(outlim line-width)
+(out (nthcdr xstart line))
+~~~
+
+OUTLIM just has to set a countdown for OUT (which defaults
+to -1 if there's no limit).  Implementing NTHCDR as a built-
+in is definitely a no-brainer as well.
+Tomorrow.  It's been an action-loaded day and I'm deperate
+for a complete chunk of healthy sleep, including sweet
+dreams.
+
+# 2024-08-29
+
 Release v0.0.12.  Starting the first app, the integrated
 text editor in this case, always comes with early
 disappointments and writing more tests instead.  But it's

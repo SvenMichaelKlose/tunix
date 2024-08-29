@@ -1831,8 +1831,8 @@ anonymous symbol):
 | (find x l)        | Find element X in list.             |
 | (find-if f l)     | Find element X in list by F.        |
 | (group l n)       | Split L in lists of length N.       |
-| (nth n l)         | Get Nth cons in list.               |
-| (nthcdr n l)      | Get Nth CDR of cons in list.        |
+| (nth n l)         | Get Nth element of list.            |
+| (nthcdr n l)      | Get Nth cons of list.               |
 | (mapcar f +l)     | Map CARs of lists.                  |
 | (mapcan f +l)     | Concatenating MAPCAR.               |
 | (member-if f l)   | Find cons with element in list.     |
@@ -1857,6 +1857,25 @@ anonymous symbol):
 ### (copy x): Copy recursively.
 
 ### (find x l): Find element X in list.
+
+### (nth n l): Get Nth element of list.
+
+~~~lisp
+(nth 0 '(l i s p)) ; -> l
+(nth 2 '(l i s p)) ; -> s
+~~~
+
+### (nthcdr n l): Get Nth cons of list.
+
+The name of NTHCDR is misleading, should you think of NTH
+being NTHCAR compared to NTHCDR.  NTHCDR actually returns
+the cons instead of the element that is in it.  And that
+is, of course, much more practical:
+
+~~~lisp
+(nth 0 '(l i s p)) ; -> (l i s p)
+(nth 2 '(l i s p)) ; -> (s p)
+~~~
 
 ### (position x l ?f) | Find position of X in L.
 

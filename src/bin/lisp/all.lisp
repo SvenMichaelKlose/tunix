@@ -19,7 +19,6 @@
 (load "reverse.lisp")
 (load "every.lisp")
 (load "nth.lisp")
-(load "nthcdr.lisp")
 (load "when.lisp")
 (load "incdec.lisp")
 (load "subseq.lisp")

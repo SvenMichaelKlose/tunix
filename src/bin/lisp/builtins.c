@@ -220,6 +220,17 @@ bi_setcdr (void)
 }
 
 lispptr
+bi_nthcdr (void)
+{
+    size_t n = NUMBER_VALUE(arg1);
+    while (n-- && CONSP(arg2))
+        arg2 = CDR(arg2);
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+    return arg2;
+}
+
+lispptr
 bi_numberp (void)
 {
     return NUMBERP(arg1) ? arg1 : nil;
@@ -963,6 +974,7 @@ const struct builtin builtins[] = {
     { "cdr",        "l",    bi_cdr },
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
+    { "nthcdr",     "nx",   bi_nthcdr },
 
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },

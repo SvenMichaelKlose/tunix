@@ -104,8 +104,6 @@
     (load "when.lisp"))
 (or (cons? subseq)
     (load "subseq.lisp"))
-(or (cons? nthcdr)
-    (load "nthcdr.lisp"))
 
 (message "Testing SUBSEQ...")
 (and (subseq '(l i s p) 0 0)
@@ -264,8 +262,6 @@
            (eq 'l (pop x))
            (equal x '(i s p))))
     (error))
-(or (cons? nthcdr)
-    (load "nthcdr.lisp"))
 (or (cons? make-queue)
     (load "queue.lisp"))
 

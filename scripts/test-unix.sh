@@ -3,24 +3,24 @@
 set -e
 
 VERBOSE="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
-PARANOID="$VERBOSE -DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS"
+PARANOID="$VERBOSE -DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DCHECK_OBJ_POINTERS -DTEST -DPARANOID"
 SIM65=`pwd`/src/contrib/cc65/bin/sim65
-
-# Stress test with base environment only.
-make worldclean world TARGET=unix LISP_FLAGS="$VERBOSE -DEXIT_FAILURE_ON_ERROR -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGCSTACK_OVERFLOW_CHECKS -DGCSTACK_UNDERFLOW_CHECKS -DTAGSTACK_OVERFLOW_CHECKS -DTAGSTACK_UNDERFLOW_CHECKS -DGC_STRESS"
-cd tunix/unix/ && (printf "\n" | ./lisp) ; cd -
 
 test_unix () {
     make worldclean world TARGET=unix LISP_FLAGS="$1" $2
-    cd tunix/unix/ && (printf "" | ./lisp) ; cd -
+    pushd tunix/unix/
+    (printf "" | ./lisp)
+    popd
 }
 
 test_sim6502 () {
     make worldclean world TARGET=sim6502 LISP_FLAGS="$1" $2
-    cd tunix/sim6502/ && (printf "" | $SIM65 lisp) ; cd -
+    pushd tunix/sim6502/
+    (printf "" | $SIM65 lisp)
+    popd
 }
 
-#test_unix "$PARANOID -DGC_STRESS"
+test_unix "$VERBOSE -DEXIT_FAILURE_ON_ERROR -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGC_STRESS"
 test_unix "$PARANOID -DNDEBUG"
 test_unix "$PARANOID -DCOMPRESSED_CONS"
 test_unix "$PARANOID -DNO_ONERROR"
@@ -29,7 +29,7 @@ test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL -DTEST $VERBOSE"
 test_unix "-DEXIT_FAILURE_ON_ERROR -DLOAD_ALL $VERBOSE -DNAIVE"
 
 # Works with CBMs though.
-#test_sim6502 "$PARAMOID -DGC_STRESS"
+#test_sim6502 "$VERBOSE -DEXIT_FAILURE_ON_ERROR -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGC_STRESS"
 test_sim6502 "$PARANOID -DNDEBUG"
 test_sim6502 "$PARANOID -DCOMPRESSED_CONS"
 test_sim6502 "$PARANOID -DNO_ONERROR"

@@ -10,30 +10,45 @@
 (var conln 0)   ; # of first displayed line.
 
 ;;; Console basics
+;;; Super-minimalistic terminal support with only
+;;; CLRSCR, HOME, CR and LF.
 
 (fn clrscr ()
-  (out 147))
-(fn con-xy (x y))
-(fn con-crs (onoff))
+  (out 12))
+
+(fn con-xy (x y)
+  (out 1)
+  (out x)
+  (out y))
+
+(fn con-crs (x)
+  (out (? x 3 2))   ; CLR/SET
+  (out 1))          ; cursor
+
 (fn con-rvs (onoff))
 
 ;;; Rendering
 
+; Update line up to a particular number of chars.
 (fn update-line (l y)
-  (out (subseq l 0 *con-w*))
+  (con-xy 0 y)
+  (out (or (subseq l 0 *con-w*) ""))
   (dotimes (i (- *con-w* (length l)))
-    (out \ )))
+    (out \ ))
+  (con-xy cx y))
 
 (fn update-screen ()
   (con-xy 0 0)
   (let y 0
-    (dolist (l (subseq *lines* conln (-- *con-h*)))
+    (dolist (l (subseq *lines* conln *con-h*))
       (update-line (symbol-name l) y)
       (!++ y))))
 
 (fn status msg
-  (con-xy 0 *con-h*)
-  (apply out msg))
+  (con-xy 0 (-- *con-h*))
+  (con-rvs t)
+  (apply out msg)
+  (con-rvs nil))
 
 ;;; Editing
 
@@ -62,11 +77,11 @@
             (? (< lx len)
                (!++ lx))
           +bs+
-            (? (< 0 lx)
-              (del-char (!-- lx)))
+            (? (<= 0 lx)
+               (del-char (!-- lx)))
           +del+
-            (? (< 0 lx)
-              (del-char lx))
+            (? (<= 0 lx)
+               (del-char lx))
           (progn
             (when (< c \ )
               (putback)

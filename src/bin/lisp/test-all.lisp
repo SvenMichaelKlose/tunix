@@ -108,6 +108,8 @@
     (load "nthcdr.lisp"))
 
 (message "Testing SUBSEQ...")
+(and (subseq '(l i s p) 0 0)
+     (error))
 (or (equal (subseq '(l i s p) 0 2)
            '(l i))
     (error))

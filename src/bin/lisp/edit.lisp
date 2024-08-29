@@ -2,6 +2,7 @@
 
 ;;; State
 
+(var *filename* "code.lisp")
 (var *lines* nil)
 (var *saved?* nil)
 (var lx 0)      ; Line X position.
@@ -10,7 +11,8 @@
 
 ;;; Console basics
 
-(fn clrscr (x y))
+(fn clrscr ()
+  (out 147))
 (fn con-xy (x y))
 (fn con-crs (onoff))
 (fn con-rvs (onoff))
@@ -23,15 +25,15 @@
     (out \ )))
 
 (fn update-screen ()
-  (con-home)
+  (con-xy 0 0)
   (let y 0
-    (dolist (l (subseq *lines* con-ofs (-- *con-h*)))
-      (update-line l y)
+    (dolist (l (subseq *lines* conln (-- *con-h*)))
+      (update-line (symbol-name l) y)
       (!++ y))))
 
 (fn status msg
   (con-xy 0 *con-h*)
-  (@ out msg))
+  (apply out msg))
 
 ;;; Editing
 
@@ -66,7 +68,6 @@
             (? (< 0 lx)
               (del-char lx))
           (progn
-            (print c)
             (when (< c \ )
               (putback)
               (return (symbol line)))
@@ -137,7 +138,7 @@
     (update-screen)
 
     ; Edit current line.
-    (let lcons (nth *lines* ln)
+    (let lcons (nthcdr ln *lines*)
       (!? (edit-line (car lcons))
           (setcar lcons !) ; Replace line in list.
           (del-line ln))) ; Remove line.
@@ -160,10 +161,10 @@
       (putback))))
 
 (fn edit file
-  (messages "Cleaning up, please wait...")
-  (gc)
   ;(= *lines* (read-lines file))
+  (= *lines* (list "TUNIX Lisp IDE"))
   (= saved? t)
+  (clrscr)
   (edit-lines)
   (status "Bye!")(con-crson)(terpri))
 

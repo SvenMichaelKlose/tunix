@@ -9,9 +9,7 @@
 (var ln 0)
 (var conln 0)   ; # of first displayed line.
 
-;;; Console basics
-;;; Super-minimalistic terminal support with only
-;;; CLRSCR, HOME, CR and LF.
+;;; Terminal control
 
 (fn clrscr ()
   (out 12))
@@ -21,24 +19,26 @@
   (out x)
   (out y))
 
+(fn con-clrset (x f)
+  (out (? x 3 2))
+  (out f))
+
 (fn con-crs (x)
-  (out (? x 3 2))   ; CLR/SET
-  (out 1))          ; cursor
+  (con-clrset x 1))
 
-(fn con-rvs (onoff))
+(fn con-rvs (x)
+  (con-clrset x 2))
 
-;;; Rendering
+;;; Display
 
 ; Update line up to a particular number of chars.
 (fn update-line (l y)
   (con-xy 0 y)
   (out (or (subseq l 0 *con-w*) ""))
   (dotimes (i (- *con-w* (length l)))
-    (out \ ))
-  (con-xy cx y))
+    (out \ )))
 
 (fn update-screen ()
-  (con-xy 0 0)
   (let y 0
     (dolist (l (subseq *lines* conln *con-h*))
       (update-line (symbol-name l) y)
@@ -148,7 +148,7 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (status *filename* (? (not *lines*) " (new)"))
+  (status *filename* (? (not *lines*) " (new)" ""))
   (while (not (eof))
     (update-screen)
 
@@ -158,7 +158,7 @@
           (setcar lcons !) ; Replace line in list.
           (del-line ln))) ; Remove line.
 
-    (status *filename*)
+    (status (list *filename*)) ; TODO: Shouldn't require LIST.
 
     ; Handle line motion and commands.
     (case (conin)
@@ -181,6 +181,8 @@
   (= saved? t)
   (clrscr)
   (edit-lines)
-  (status "Bye!")(con-crson)(terpri))
+  (status "Bye!")
+  (terpri)
+  (con-crs t))
 
 (gc)

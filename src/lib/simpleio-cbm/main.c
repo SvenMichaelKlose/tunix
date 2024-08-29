@@ -68,8 +68,8 @@ char cmd_params[2];
 con_cmd con_commands[] = {
     { 0, cmd_null },    // 0
     { 2, cmd_goto },    // 1
-    { 0, cmd_clr },     // 2
-    { 0, cmd_set },     // 3
+    { 1, cmd_clr },     // 2
+    { 1, cmd_set },     // 3
     { 0, cmd_null },    // 4
     { 0, cmd_null },    // 5
     { 0, cmd_null },    // 6
@@ -230,7 +230,7 @@ set_status (void)
 char FASTCALL
 raw_conin (void)
 {
-    char c = cbm_k_getin ();
+    char c = cgetc ();
     set_status ();
     return convert_in (c);
 }

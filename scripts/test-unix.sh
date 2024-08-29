@@ -8,16 +8,12 @@ SIM65=`pwd`/src/contrib/cc65/bin/sim65
 
 test_unix () {
     make worldclean world TARGET=unix LISP_FLAGS="$1" $2
-    pushd tunix/unix/
-    (printf "" | ./lisp)
-    popd
+    cd tunix/unix/ ; (printf "" | ./lisp) ; cd -
 }
 
 test_sim6502 () {
     make worldclean world TARGET=sim6502 LISP_FLAGS="$1" $2
-    pushd tunix/sim6502/
-    (printf "" | $SIM65 lisp)
-    popd
+    cd tunix/sim6502/ ; (printf "" | $SIM65 lisp) ; cd -
 }
 
 test_unix "$VERBOSE -DEXIT_FAILURE_ON_ERROR -DCHECK_OBJ_POINTERS -DTEST -DPARANOID -DGC_STRESS"

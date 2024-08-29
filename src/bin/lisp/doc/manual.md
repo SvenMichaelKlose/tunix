@@ -719,6 +719,25 @@ New channels are created by OPEN to access files:
       last-result)))
 ~~~
 
+## Terminal control codes
+
+| Code     | Function           |
+|----------|--------------------|
+|   0      | Do nothing.        |
+|   1 x y  | Position cursor.   |
+|   2 f    | Clear flags.       |
+|   3 f    | Set flags.         |
+|  10      | Line feed.         |
+|  12      | Clear screen.      |
+|  13      | Carriage return.   |
+
+| Flag | Function             |
+|------|----------------------|
+|   1  | Cursor visibility    |
+|   2  | Reverse mode         |
+
+Flags may be combined.
+
 # Debugging and advanced error handling
 
 The debugger is invoked in case of an error unless ONERROR

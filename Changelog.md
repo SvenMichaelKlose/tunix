@@ -9,6 +9,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### libsimpleio-cbm
+
+#### Added
+
+- Terminal control codes (see manual section)
+ - clear screen
+ - position cursor
+ - clear/set flags (cursor visibility, reverse mode)
+
+
 ## [v0.0.13] - 2024-08-29
 
 ### Interpeter

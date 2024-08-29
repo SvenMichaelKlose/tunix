@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <conio.h>
 
 #include <simpleio/libsimpleio.h>
 
@@ -36,6 +37,50 @@
 char            logical_fns[MAX_CHANNELS];
 simpleio_chn_t  chn;
 signed char     last_status[MAX_CHANNELS];
+
+//#define CMD_CLRSCR  12
+//#define CMD_GOTO    1
+//#define CMD_CLR     2
+//#define CMD_SET     3
+
+#define TERM_FLAG_CURSOR   1
+#define TERM_FLAG_REVERSE  2
+
+void cmd_null (void);
+void cmd_goto (void);
+void cmd_clr (void);
+void cmd_set (void);
+void cmd_lf (void);
+void cmd_cr (void);
+void cmd_clrscr (void);
+
+typedef void (*cmd_handler) (void);
+
+typedef struct _con_cmd {
+    char        num_params;
+    cmd_handler handler;
+} con_cmd;
+
+cmd_handler cmd_current;
+char cmd_params_needed;
+char cmd_params[2];
+
+con_cmd con_commands[] = {
+    { 0, cmd_null },    // 0
+    { 2, cmd_goto },    // 1
+    { 0, cmd_clr },     // 2
+    { 0, cmd_set },     // 3
+    { 0, cmd_null },    // 4
+    { 0, cmd_null },    // 5
+    { 0, cmd_null },    // 6
+    { 0, cmd_null },    // 7
+    { 0, cmd_null },    // 8
+    { 0, cmd_null },    // 9
+    { 0, cmd_lf },      // 10
+    { 0, cmd_null },    // 11
+    { 0, cmd_clrscr },  // 12
+    { 0, cmd_cr },      // 13
+};
 
 char FASTCALL
 reverse_case (char c)
@@ -198,16 +243,81 @@ raw_in (void)
     return convert_in (c);
 }
 
+void
+cmd_null (void)
+{
+}
+
+void
+cmd_goto (void)
+{
+    gotoxy (cmd_params[1], cmd_params[0]);
+}
+
+void
+cmd_clr (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        cursor (0);
+    if (c & TERM_FLAG_REVERSE)
+        revers (0);
+}
+
+void
+cmd_set (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        cursor (1);
+    if (c & TERM_FLAG_REVERSE)
+        revers (1);
+}
+
+void
+cmd_clrscr (void)
+{
+    cbm_k_bsout (147);
+}
+
+void
+cmd_lf (void)
+{
+    cbm_k_bsout (10);
+}
+
+void
+cmd_cr (void)
+{
+    cbm_k_bsout (13);
+}
+
 void FASTCALL
 raw_out (char c)
 {
-    if (fnout == STDOUT || fnout == STDERR)
-        if (c == '_')
+    // Get control code argument, call handler.
+    if (cmd_params_needed) {
+        cmd_params[--cmd_params_needed] = c;
+        if (!cmd_params_needed) {
+            cmd_current ();
+            cmd_current = NULL;
+        }
+        return;
+    }
+    if (fnout == STDOUT || fnout == STDERR) {
+        if (c <= 13) {
+            if ((cmd_params_needed = con_commands[c].num_params))
+                cmd_current = con_commands[c].handler;
+            else
+                con_commands[c].handler ();
+            return;
+        } if (c == '_')
             c = 164;
         else if (c == '\\')
             c = 205;
         else
             c = reverse_case (c);
+    }
     cbm_k_bsout (c);
     set_status ();
 }

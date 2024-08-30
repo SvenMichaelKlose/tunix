@@ -22,6 +22,7 @@
 #endif
 
 #include <simpleio/libsimpleio.h>
+#include <simpleio/control.h>
 
 #define MIN_CHANNEL     (STDERR + 1)
 
@@ -71,6 +72,59 @@ reset_terminal_mode ()
 }
 
 #endif // #ifdef TARGET_UNIX
+
+void
+cmd_null (void)
+{
+}
+
+void
+cmd_goto (void)
+{
+    fputs ("\033[", stdout);
+    outn (cmd_params[0]);
+    fputc (';', stdout);
+    outn (cmd_params[1]);
+    fputc ('H', stdout);
+}
+
+void
+cmd_clr (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        fputs ("\033[?25l", stdout);
+    if (c & TERM_FLAG_REVERSE)
+        fputs ("\033[7m", stdout);
+}
+
+void
+cmd_set (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        fputs ("\033[?25h", stdout);
+    if (c & TERM_FLAG_REVERSE)
+        fputs ("\033[27m", stdout);
+}
+
+void
+cmd_clrscr (void)
+{
+    fputs ("\033[2J", stdout);
+}
+
+void
+cmd_lf (void)
+{
+    fputc (10, stdout);
+}
+
+void
+cmd_cr (void)
+{
+    fputc (13, stdout);
+}
 
 bool
 raw_eof (void)

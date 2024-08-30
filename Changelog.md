@@ -11,7 +11,12 @@ and this project adheres to
 
 ## [current]
 
-### libsimpleio-cbm
+Some functions needed to become built-in to in order to make
+the editor usable.  Also, a simple terminal emulation has
+been added, which should to for Unices and CBMs. The latter
+via cc65's conio functions.
+
+### libsimpleio
 
 #### Added
 

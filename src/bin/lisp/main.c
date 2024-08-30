@@ -12,6 +12,7 @@
 #include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
+#include <simpleio/control.h>
 #include <lisp/liblisp.h>
 
 jmp_buf restart_point;

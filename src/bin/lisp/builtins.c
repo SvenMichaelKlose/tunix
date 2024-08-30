@@ -222,7 +222,7 @@ bi_setcdr (void)
 lispptr
 bi_nthcdr (void)
 {
-    lispnum_t n = NUMBER_VALUE(arg1);
+    int n = NUMBER_VALUE(arg1);
 #ifndef NAIVE
     if (n < 0) {
         error_info = arg1;
@@ -276,44 +276,72 @@ bi_nconc (void)
     return list_start;
 }
 
-/*
-size_t n;
-size_t nstart;
-size_t nend;
-bool has_end;
-
 lispptr
 bi_subseq (void)
 {
-    list_start = bi_nthcdr ();
-    if (end < 0) {
-        error_info = end;
+    int n;
+    int nstart;
+    int nend;
+    lispptr start;
+    lispptr end;
+    bool has_end = false;
+
+    // Evaluate arguments and dings them.
+    args = eval_list ();
+    // TODO: type-check list
+    list_start = LIST_CAR(args);
+    arg2c = LIST_CDR(args);
+    start = LIST_CAR(arg2c);
+    end = LIST_CAR(LIST_CDR(arg2c));
+
+    // TODO: type-check start
+    nstart = NUMBER_VALUE(start);
+#ifndef NAIVE
+    if (nstart < 0) {
+        error_info = start;
         error (ERROR_NEGATIVE, "< 0");
         return nil;
     }
+#endif
 
     // Get start of list.
-    n = start;
-    bi_nthcdr ();
+    arg1 = start;
+    arg2 = list_start;
+    arg2 = bi_nthcdr ();
 
-    has_end = NOT_NIL(end);
-    if (has_end)
+    // TODO: type-check end
+    if (NOT_NIL(end)) {
         nend = NUMBER_VALUE(end);
+#ifndef NAIVE
+        if (nend < 0) {
+            error_info = end;
+            error (ERROR_NEGATIVE, "< 0");
+            return nil;
+        }
+#endif
+        n = nend - nstart;
+        has_end = true;
+    }
 
     // Copy until end.
-    n = nend - nstart;
-    list_start = list_last = make_cons (CAR(p), nil);
-    while ((no_end || n-- > 0) && CONSP(arg2)) {
-        tmp = make_cons (CAR(p), nil);
-        SETCDR(list_last, tmp);
+    list_start = list_last = nil;
+    while ((!has_end || n-- > 0) && CONSP(arg2)) {
+        tmp = make_cons (CAR(arg2), nil);
+        if (NOT(list_start))
+            list_start = tmp;
+        else
+            SETCDR(list_last, tmp);
         list_last = tmp;
         arg2 = CDR(arg2);
     }
+
+#ifndef NAIVE
     if (ATOM(arg2) && NOT_NIL(arg2))
         return error_cons_expected (arg2);
-    return arg2;
+#endif
+
+    return list_start;
 }
-*/
 
 lispptr
 bi_numberp (void)
@@ -1084,6 +1112,7 @@ const struct builtin builtins[] = {
     { "setcdr",     "cx",   bi_setcdr },
     { "nthcdr",     "nx",   bi_nthcdr },
     { "nconc",      NULL,   bi_nconc },
+    { "subseq",     NULL,   bi_subseq },
 
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },

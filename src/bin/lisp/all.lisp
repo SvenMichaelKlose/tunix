@@ -21,7 +21,7 @@
 (load "nth.lisp")
 (load "when.lisp")
 (load "incdec.lisp")
-(load "subseq.lisp")
+;(load "subseq.lisp")
 (load "group.lisp")
 (load "mapcar.lisp")
 (load "mapcan.lisp")

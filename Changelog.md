@@ -26,7 +26,9 @@ and this project adheres to
 
 ##### Changed
 
-- NTHCDR is built-in.
+- Now built in (for endurable performance):
+ - NTHCDR
+ - SUBSEQ
 
 ##### Added
 

@@ -15,10 +15,6 @@
                (error)
                5))
     (error))
-(or (cons? find-if)
-    (load "find-if.lisp"))
-(or (macro? 'push)
-    (load "stack.lisp"))
 
 (message "Testing ASSOC...")
 (or (assoc 'vic '((c64 t)(vic t)))
@@ -84,8 +80,6 @@
     (error))
 (and (every '((x) (== x 1)) '(1 1 2 1))
     (error))
-(or (cons? member-if)
-    (load "member-if.lisp"))
 
 (message "Testing FIND-IF...")
 (or (find-if '((x) (eq x 'i))
@@ -100,15 +94,11 @@
     (error))
 (and (find 'x '(l i s p))
      (error))
-(or (macro? 'when)
-    (load "when.lisp"))
-(or (cons? subseq)
-    (load "subseq.lisp"))
 
 (message "Testing SUBSEQ...")
-(and (subseq '(l i s p) 0 0)
+(and (print (subseq '(l i s p) 0 0))
      (error))
-(or (equal (subseq '(l i s p) 0 2)
+(or (equal (print (subseq '(l i s p) 0 2))
            '(l i))
     (error))
 
@@ -194,8 +184,6 @@
     (error))
 (and (nth 4 '(l i s p))
      (error))
-(or (macro? '!?)
-    (load "aif.lisp"))
 
 (message "Testing POSITION...")
 (and (position 'a '(l i s p))
@@ -234,8 +222,6 @@
 (or (equal (reverse '(p s i l))
            '(l i s p))
     (error))
-(or (macro? 'defsetfn)
-    (load "defsetfn.lisp"))
 
 (message "TODO: Testing SET-DIFFERENCE...")
 
@@ -250,8 +236,6 @@
      (error))
 (or (equal (split 'b '(a a a b a a b b a a a a))
            '((a a a) (a a) nil (a a a a))))
-(or (macro? 'prog1)
-    (load "prog1.lisp"))
 
 (message "Testing PUSH and POP...")
 (or (let x nil
@@ -263,8 +247,6 @@
            (eq 'l (pop x))
            (equal x '(i s p))))
     (error))
-(or (cons? make-queue)
-    (load "queue.lisp"))
 
 (message "Testing UNION...")
 (or (equal (union '(l l i i) '(s s p p))

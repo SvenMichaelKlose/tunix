@@ -37,22 +37,26 @@ char cmd_params[2];
 bool FASTCALL
 simpleio_control (char c)
 {
-    // Get control code argument, call handler.
-    if (cmd_params_needed) {
-        cmd_params[(int) --cmd_params_needed] = c;
-        if (!cmd_params_needed) {
-            cmd_current ();
-            cmd_current = NULL;
+    if (fnout == STDOUT || fnout == STDERR) {
+        // Get control code argument, call handler.
+        if (cmd_params_needed) {
+            cmd_params[(int) --cmd_params_needed] = c;
+            if (!cmd_params_needed) {
+                cmd_current ();
+                cmd_current = NULL;
+            }
+            return true;
         }
-        return true;
+
+        // Init control sequence, or call handler.
+        if (c <= 13) {
+            if ((cmd_params_needed = con_commands[(int) c].num_params))
+                cmd_current = con_commands[(int) c].handler;
+            else
+                con_commands[(int) c].handler ();
+            return true;
+        }
     }
 
-    if ((c <= 13) && (fnout == STDOUT || fnout == STDERR)) {
-        if ((cmd_params_needed = con_commands[(int) c].num_params))
-            cmd_current = con_commands[(int) c].handler;
-        else
-            con_commands[(int) c].handler ();
-        return true;
-    }
     return false;
 }

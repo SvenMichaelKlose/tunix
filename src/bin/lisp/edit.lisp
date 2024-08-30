@@ -31,13 +31,17 @@
 
 ;;; Display
 
+(var *spaces* nil)
+(dotimes (i *con-w*)
+  (push \  *spaces*))
+
 ; Update line up to a particular number of chars.
 (fn update-line (l y)
   (con-xy 0 y)
   (outlim *con-w*)
   (out (or l ""))
-  (dotimes (i (- *con-w* (length l)))
-    (out \ )))
+  (outlim (- *con-w* (length l)))
+  (out *spaces*))
 
 (fn update-screen ()
   (let y 0

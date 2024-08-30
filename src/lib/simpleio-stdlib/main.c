@@ -86,6 +86,7 @@ cmd_goto (void)
     fputc (';', stdout);
     outn (cmd_params[1]);
     fputc ('H', stdout);
+    fflush (stdout);
 }
 
 void
@@ -95,7 +96,8 @@ cmd_clr (void)
     if (c & TERM_FLAG_CURSOR)
         fputs ("\033[?25l", stdout);
     if (c & TERM_FLAG_REVERSE)
-        fputs ("\033[7m", stdout);
+        fputs ("\033[27m", stdout);
+    fflush (stdout);
 }
 
 void
@@ -105,13 +107,15 @@ cmd_set (void)
     if (c & TERM_FLAG_CURSOR)
         fputs ("\033[?25h", stdout);
     if (c & TERM_FLAG_REVERSE)
-        fputs ("\033[27m", stdout);
+        fputs ("\033[7m", stdout);
+    fflush (stdout);
 }
 
 void
 cmd_clrscr (void)
 {
-    fputs ("\033[2J", stdout);
+    fputs ("\033[2J\033[H", stdout);
+    fflush (stdout);
 }
 
 void
@@ -173,6 +177,8 @@ void
 raw_out (char c)
 {
     last_error = 0;
+    if (simpleio_control (c))
+        return;
     if (!channels[(int) fnout])
         last_error = -1;
     else if (EOF == fputc (c, channels[(int) fnout]))

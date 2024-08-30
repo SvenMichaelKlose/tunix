@@ -261,10 +261,7 @@ raw_out (char c)
         c = 205;
     else
         c = reverse_case (c);
-    if (fnout == STDOUT)
-        cputc (c);
-    else
-        cbm_k_bsout (c);
+    cbm_k_bsout (c);
     set_status ();
 }
 

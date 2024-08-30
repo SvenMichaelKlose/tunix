@@ -11,10 +11,9 @@ and this project adheres to
 
 ## [current]
 
-Some functions needed to become built-in to in order to make
-the editor usable.  Also, a simple terminal emulation has
-been added, which should to for Unices and CBMs. The latter
-via cc65's conio functions.
+Optimizations to make the upcoming editor usable.  Also, a
+simple terminal emulation has been added, which should to
+for Unices and CBMs. The latter via cc65's conio functions.
 
 ### libsimpleio
 
@@ -25,24 +24,30 @@ via cc65's conio functions.
  - position cursor
  - clear/set flags (cursor visibility, reverse mode)
 
+### libsimpleio-cbm
+
+#### Changed
+
+- cc65's conio library for faster standard output.
+
 ### TUNIX Lisp
 
 #### Interpreter
 
-##### Changed
+##### Fixed
 
-- Now built in (for endurable performance):
- - NTHCDR
- - SUBSEQ
+- Revived lost tests of APPEND.
 
 ##### Added
 
 - NCONC: Destructively concatenates lists.
 - OUTLIM limits number of printed character values.
 
-##### Fixed
+##### Changed
 
-- Revived lost tests of APPEND.
+- Now built in (for endurable performance):
+ - NTHCDR
+ - SUBSEQ
 
 
 ## [v0.0.13] - 2024-08-29

@@ -51,6 +51,9 @@
   (apply out msg)
   (con-rvs nil))
 
+(fn dflt-status ()
+  (status *filename* (? (not *lines*) " (new)" "")))
+
 ;;; Editing
 
 (fn del-char (x)
@@ -91,8 +94,7 @@
             (= line (nconc (subseq line 0 lx)
                            (list c)
                            (subseq line lx)))
-            (!++ lx)))))
-    (con-crs nil)))
+            (!++ lx)))))))
 
 (var lines nil)
 
@@ -149,7 +151,7 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (status *filename* (? (not *lines*) " (new)" ""))
+  (dflt-status)
   (while (not (eof))
     (update-screen)
 
@@ -159,7 +161,8 @@
           (setcar lcons !) ; Replace line in list.
           (del-line ln))) ; Remove line.
 
-    (status (list *filename*)) ; TODO: Shouldn't require LIST.
+    ; Make any error message go away.
+    (dflt-status)
 
     ; Handle line motion and commands.
     (case (conin)

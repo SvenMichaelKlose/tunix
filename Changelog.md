@@ -30,7 +30,13 @@ and this project adheres to
 
 ##### Added
 
+- NCONC: Destructively concatenates lists.
 - OUTLIM limits number of printed character values.
+
+##### Fixed
+
+- Revived lost tests of APPEND.
+
 
 ## [v0.0.13] - 2024-08-29
 

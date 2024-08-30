@@ -55,8 +55,8 @@
 
 (fn del-char (x)
   (= *saved?* nil)
-  (= line (append (subseq line 0 x)
-                  (subseq line (++ x)))))
+  (= line (nconc (subseq line 0 x)
+                 (subseq line (++ x)))))
 
 ; Edit line.
 ; Return new line if an unrelated char has been input.
@@ -88,9 +88,9 @@
               (putback)
               (return (symbol line)))
             (= *saved?* nil)
-            (= line (append (subseq line 0 lx)
-                            (list c)
-                            (subseq line lx)))
+            (= line (nconc (subseq line 0 lx)
+                           (list c)
+                           (subseq line lx)))
             (!++ lx)))))
     (con-crs nil)))
 
@@ -129,8 +129,8 @@
      (= *saved?* t)))
 
 (fn del-line (ln)
-  (= *lines* (append (subseq lines 0 (-- ln))
-                     (subseq lines (++ ln)))))
+  (= *lines* (nconc (subseq lines 0 (-- ln))
+                    (subseq lines (++ ln)))))
 
 (fn choose x
   (while (not (eof))

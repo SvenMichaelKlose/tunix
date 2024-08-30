@@ -1,3 +1,5 @@
+// TODO: Crashes on Plus/4 GC in "test.lisp".
+
 #ifdef TEST
 
 #ifdef __CC65__

@@ -223,16 +223,57 @@ lispptr
 bi_nthcdr (void)
 {
     lispnum_t n = NUMBER_VALUE(arg1);
+#ifndef NAIVE
     if (n < 0) {
         error_info = arg1;
         error (ERROR_NEGATIVE, "< 0");
         return nil;
     }
+#endif
     while (n-- && CONSP(arg2))
         arg2 = CDR(arg2);
+#ifndef NAIVE
     if (ATOM(arg2) && NOT_NIL(arg2))
         return error_cons_expected (arg2);
+#endif
     return arg2;
+}
+
+lispptr
+bi_nconc (void)
+{
+    // Taking any arguments, we need to eval manually.
+    args = eval_list ();
+
+    // Get first list and its tail.
+    list_start = nil;
+    while (NOT_NIL(args) && NOT(list_start)) {
+        list_start = CAR(args);
+        args = CDR(args);
+    }
+    if (NOT(list_start))
+        return nil;
+#ifndef NAIVE
+    if (ATOM(list_start))
+        return error_cons_expected (list_start);
+#endif
+    list_last = last (list_start);
+
+    // Connect tails.
+    while (NOT_NIL(args)) {
+        tmp = CAR(args);
+        if (NOT_NIL(tmp)) {
+#ifndef NAIVE
+            if (ATOM(tmp))
+                return error_cons_expected (list_start);
+#endif
+            SETCDR(list_last, tmp);
+            list_last = last (tmp);
+        }
+        args = CDR(args);
+    }
+
+    return list_start;
 }
 
 /*
@@ -1042,6 +1083,7 @@ const struct builtin builtins[] = {
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
     { "nthcdr",     "nx",   bi_nthcdr },
+    { "nconc",      NULL,   bi_nconc },
 
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },

@@ -1282,7 +1282,7 @@ files.
 
 ## Lists
 
-This functions are around because the interpreter needs them
+These functions are around because the interpreter needs them
 internally.
 
 | Function          | Description                         |
@@ -1293,6 +1293,12 @@ internally.
 | (last l)          | Return last cons of list.           |
 | (member x l)      | Return list starting with X.        |
 | (remove x l)      | Copy list except element X.         |
+
+These are built-in or performance issues surface quickly:
+
+| Function          | Description                         |
+|-------------------|-------------------------------------|
+| (nconc +l)        | Destructively concatenae lists.     |
 
 ### (butlast l): Copy list but not its last element.
 
@@ -1846,6 +1852,7 @@ anonymous symbol):
 | (cadr l)...       | Nested CAR/CDR combinations.        |
 | (carlist l)       | Get first elements of lists.        |
 | (cdrlist l)       | Get rest elements of lists.         |
+| (append +l)       | Copy and append lists.              |
 | (copy-list x)     | Copy list.                          |
 | (copy-tree x)     | Copy recursively.                   |
 | (ensure-list x)   | Turn atom into list.                |
@@ -1874,6 +1881,8 @@ anonymous symbol):
 ### (carlist l): Get first elements of lists.
 
 ### (cdrlist l): Get rest elements of lists.
+
+### (append +l): Copy and append lists.
 
 ### (copy-list x): Copy list.
 

@@ -53,10 +53,12 @@ Tests
 
 Text editor
 [ ] Required procedures, user-defined and built-in.
-[ ] Portable termina I/O.
+[ ] Portable terminal I/O for libsimpleio-stdlib.
 
 Manual
-[ ] Add section on building, installing.
 [ ] Compile-time options.
 [ ] Complete set of examples.
-[ ] Reviewed phrasing.
+[ ] Release rework.
+
+Documentation
+[ ] Introduction to (TUNIX) Lisp programming

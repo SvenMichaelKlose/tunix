@@ -255,12 +255,14 @@ raw_out (char c)
 {
     if (simpleio_control (c))
         return;
-    if (c == '_')
-        c = 164;
-    else if (c == '\\')
-        c = 205;
-    else
-        c = reverse_case (c);
+    if (fnout == STDOUT || fnout == STDERR) {
+        if (c == '_')
+            c = 164;
+        else if (c == '\\')
+            c = 205;
+        else
+            c = reverse_case (c);
+    }
     cbm_k_bsout (c);
     set_status ();
 }

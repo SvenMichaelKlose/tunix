@@ -1287,7 +1287,7 @@ internally.
 
 | Function          | Description                         |
 |-------------------|-------------------------------------|
-| (length l)        | Return length of list.              |
+| (length l)        | Return length of list or name.      |
 | (@ f l)           | Run elements through function.      |
 | (butlast l)       | Copy list but not its last element. |
 | (last l)          | Return last cons of list.           |
@@ -1318,7 +1318,7 @@ Return the last cons of a list, not the object it contains.
 
 LAST will issue an error if it is passed a dotted pair.
 
-### (length l): Return length of list.
+### (length l): Return length of list or name.
 
 ~~~lisp
 (length nil)        ; -> 0
@@ -1330,6 +1330,14 @@ LENTGH also counts CDRs of dotted pairs:
 
 ~~~lisp
 (length '(a b . c)))  ; -> 3
+~~~
+
+Also, the length of symbol names or names of built-ins is
+returned:
+
+~~~lisp
+(length "TUNIX")    ; -> 5
+(length car)        ; -> 3
 ~~~
 
 ### (member x l): Return cons containing X.

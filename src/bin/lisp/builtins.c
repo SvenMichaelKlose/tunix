@@ -909,7 +909,13 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    return make_number (length (arg1));
+    if (_NAMEDP(arg1))
+        return make_number (SYMBOL_LENGTH(arg1));
+    if (LISTP(arg1))
+        return make_number (length (arg1));
+    error_info = arg1;
+    error (ERROR_TYPE, "Not named or list");
+    return nil;
 }
 
 lispptr
@@ -1185,7 +1191,7 @@ const struct builtin builtins[] = {
     { "butlast",    "l",    bi_butlast },
     { "copy-list",  "l",    bi_copy_list },
     { "last",       "l",    bi_last },
-    { "length",     "l",    bi_length },
+    { "length",     "x",    bi_length },
     { "member",     "xl",   bi_member },
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },

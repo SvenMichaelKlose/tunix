@@ -24,12 +24,6 @@ for Unices and CBMs. The latter via cc65's conio functions.
  - position cursor
  - clear/set flags (cursor visibility, reverse mode)
 
-### libsimpleio-cbm
-
-#### Changed
-
-- cc65's conio library for faster standard output.
-
 ### TUNIX Lisp
 
 #### Interpreter
@@ -48,6 +42,8 @@ for Unices and CBMs. The latter via cc65's conio functions.
 - Now built in (for endurable performance):
  - NTHCDR
  - SUBSEQ
+- LENGTH also returns the length of symbol names or names
+  of built-ins.
 
 
 ## [v0.0.13] - 2024-08-29

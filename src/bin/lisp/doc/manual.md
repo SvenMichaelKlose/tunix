@@ -1863,6 +1863,7 @@ anonymous symbol):
 | (append +l)       | Copy and append lists.              |
 | (copy-list x)     | Copy list.                          |
 | (copy-tree x)     | Copy recursively.                   |
+| (cut-at n l)      | Destructively split list.           |
 | (ensure-list x)   | Turn atom into list.                |
 | (every f x)       | Test if F is T for all X.           |
 | (some f x)        | Test if F is T for some X.          |
@@ -1894,7 +1895,16 @@ anonymous symbol):
 
 ### (copy-list x): Copy list.
 
-### (copy x): Copy recursively.
+### (copy-tree x): Copy recursively.
+
+### (cut-at n l): Destructively split list at position.
+
+~~~lisp
+(let l '(l i s p)
+  l             ; -> (l i s p)
+  (cut-at 2 l)  ; -> (s p)
+  l)            ; -> (l i)
+~~~
 
 ### (find x l): Find element X in list.
 

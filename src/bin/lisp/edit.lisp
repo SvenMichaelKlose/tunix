@@ -5,9 +5,9 @@
 (var *filename* "code.lisp")
 (var *lines* nil)
 (var *saved?* nil)
-(var lx 0)      ; Line X position.
-(var ln 0)
-(var conln 0)   ; # of first displayed line.
+(var *lx* 0)      ; Line X position.
+(var *ln* 0)
+(var *conln* 0)   ; # of first displayed line.
 
 ;;; Terminal control
 
@@ -35,30 +35,27 @@
 (dotimes (i *con-w*)
   (push \  *spaces*))
 
-; Update line up to a particular number of chars.
 (fn update-line (l y)
   (con-xy 0 y)
-  (outlim *con-w*)
-  (out (or l ""))
-  (outlim (- *con-w* (length l)))
-  (out *spaces*))
+  (when l
+    (outlim *con-w*)
+    (out l))
+  (out (nthcdr (length l) *spaces*)))
 
 (fn update-screen ()
   (let y 0
-    (dolist (l (subseq *lines* conln *con-h*))
+    (dolist (l (subseq *lines* *conln* (+ *conln* (- *con-h* 2))))
       (update-line (symbol-name l) y)
       (!++ y))))
 
-(fn status msg
+(fn status ()
   (con-xy 0 (-- *con-h*))
   (con-rvs t)
-  (apply out msg)
+  (apply out *filename* (list (? (not *lines*) " (new)" "")))
+  (out " ")(print (++ *lx*))(out ",")(print (++ *ln*))
   (con-rvs nil))
 
-(fn dflt-status ()
-  (status *filename* (? (not *lines*) " (new)" "")))
-
-;;; Editing
+;;; Line editing
 
 (fn del-char (x)
   (= *saved?* nil)
@@ -68,39 +65,46 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (x)
+  (con-crs t)
   (let line (? x (symbol-name x) nil)
+    ; Don't have cursor past line end.
+    (let n (length line)
+      (and (> *lx* n)
+           (= *lx* (? (> n 0) (-- n) 0))))
     (while (not (eof))
-      (update-line line 0)
-      (con-xy lx (- ln conln))
-      (con-crs t)
+      (update-line line (- *ln* *conln*))
+      (con-xy *lx* (- *ln* *conln*))
       (with ((len (length line))
              (c   (while (not (eof))
                     (awhen (conin)
                       (return !)))))
         (case c
           +arr-left+
-            (? (< 0 lx)
-               (!-- lx))
+            (? (< 0 *lx*)
+               (!-- *lx*))
           +arr-right+
-            (? (< lx len)
-               (!++ lx))
+            (? (< *lx* len)
+               (!++ *lx*))
           +bs+
-            (? (<= 0 lx)
-               (del-char (!-- lx)))
-          +del+
-            (? (<= 0 lx)
-               (del-char lx))
+            (progn
+              (when (== 0 *lx*)
+                (putback)
+                (return (symbol line)))
+              (? (<= 0 *lx*)
+                 (del-char (!-- *lx*))))
           (progn
+            ; Put back unknown key and return line.
             (when (< c \ )
               (putback)
               (return (symbol line)))
+            ; Insert char and step right.
             (= *saved?* nil)
-            (= line (nconc (subseq line 0 lx)
+            (= line (nconc (subseq line 0 *lx*)
                            (list c)
-                           (subseq line lx)))
-            (!++ lx)))))))
+                           (subseq line *lx*)))
+            (!++ *lx*)))))))
 
-(var lines nil)
+;;; File I/O
 
 (fn skipctrls ()
   (while (not (eof))
@@ -129,14 +133,13 @@
 
 (fn save-file ()
   (with-output o (open pathname 'w)
-    (@ out *lines*))
+    (@ '((x)
+          (out x)
+          (terpri))
+       *lines*))
   (? (err)
      (and (status "Cannot save.") nil)
      (= *saved?* t)))
-
-(fn del-line (ln)
-  (= *lines* (nconc (subseq lines 0 (-- ln))
-                    (subseq lines (++ ln)))))
 
 (fn choose x
   (while (not (eof))
@@ -153,44 +156,82 @@
          (save-file))
     (not (== ! \c))))
 
+;;; Text editing
+
+(fn del-line (ln)
+  (= *lines* (nconc (subseq *lines* 0 ln)
+                    (subseq *lines* (++ ln)))))
+
+(fn ins-line (l)
+  (= *lines* (nconc (subseq *lines* 0 *ln*)
+                    (let lc (symbol-name l)
+                      (list (symbol (subseq lc 0 *lx*))
+                            (symbol (subseq lc *lx*))))
+                    (subseq *lines* (++ *ln*))))
+  (!++ *ln*)
+  (= *lx* 0))
+
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (dflt-status)
   (while (not (eof))
     (update-screen)
+    (status)
 
     ; Edit current line.
-    (let lcons (nthcdr ln *lines*)
-      (!? (edit-line (car lcons))
-          (setcar lcons !) ; Replace line in list.
-          (del-line ln))) ; Remove line.
-
-    ; Make any error message go away.
-    (dflt-status)
+    (let lcons (nthcdr *ln* *lines*)
+      (!= (edit-line (car lcons))
+        (case (conin)
+          +enter+
+            (ins-line !)
+          ;+del+
+          ; Replace line.
+          (progn
+            (putback)
+            (setcar lcons !)))))
 
     ; Handle line motion and commands.
     (case (conin)
       +arr-up+
-        (? (< 0 ln)
-           (!-- ln))
+        (? (< 0 *ln*)
+           (!-- *ln*))
       +arr-down+
-        (? (< ln (length *lines*))
-           (!++ ln))
+        (? (< *ln* (-- (length *lines*)))
+           (!++ *ln*))
       +hotkey+
-        (case (conin)
-          \s (save-file)
-          \q (and (quit-editor)
-                  (return)))
-      (putback))))
+        (progn
+          (status "Command: " "")
+          (case (conin)
+            \s  (save-file)
+            \q  (and (quit-editor)
+                     (return nil)))))))
 
 (fn edit file
-  ;(= *lines* (read-lines file))
-  (= *lines* (list "TUNIX Lisp IDE"))
+  (= *lx* 0)
+  (= *ln* 0)
+  (= *conln* 0)
   (= saved? t)
+  ;(= *lines* (read-lines file))
+  (= *lines*
+     (list
+       "
+This is a text editor written in TUNIX
+Lisp, required to write the bytecode
+compiler with no supplementary software,
+like emulators in warp mode.  Only Lisps
+are powerful enough to bring on seamless
+integration with little effort.  But the
+debugger has to be picture-book to get
+there.
+
+This editor is slower than an East-
+Westfalian on a Sunday morning.
+Destructive built-ins are the cups of
+coffee.  'Destructive' to get around
+memory allocation and 'built-in' to make
+it fast.  Still, it's pure cc65-compiled
+ANSI-C.
+"
+))
   (clrscr)
   (edit-lines)
-  (status "Bye!")
-  (terpri)
-  (con-crs t))
-
-(gc)
+  (clrscr))

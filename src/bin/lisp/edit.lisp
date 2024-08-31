@@ -213,25 +213,22 @@
   ;(= *lines* (read-lines file))
   (= *lines*
      (list
-       "
-This is a text editor written in TUNIX
-Lisp, required to write the bytecode
-compiler with no supplementary software,
-like emulators in warp mode.  Only Lisps
-are powerful enough to bring on seamless
-integration with little effort.  But the
-debugger has to be picture-book to get
-there.
-
-This editor is slower than an East-
-Westfalian on a Sunday morning.
-Destructive built-ins are the cups of
-coffee.  'Destructive' to get around
-memory allocation and 'built-in' to make
-it fast.  Still, it's pure cc65-compiled
-ANSI-C.
-"
-))
+       "This is a text editor written in TUNIX"
+       "Lisp, required to write the bytecode"
+       "compiler with no supplementary software,"
+       "like emulators in warp mode.  Only Lisps"
+       "are powerful enough to bring on seamless"
+       "integration with little effort.  But the"
+       "debugger has to be picture-book to get"
+       "there."
+       ""
+       "This editor is slower than an East-"
+       "Westfalian on a Sunday morning."
+       "Destructive built-ins are the cups of"
+       "coffee.  'Destructive' to get around"
+       "memory allocation and 'built-in' to make"
+       "it fast.  Still, it's pure cc65-compiled"
+       "ANSI-C."))
   (clrscr)
   (edit-lines)
   (clrscr))

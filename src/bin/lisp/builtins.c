@@ -913,8 +913,10 @@ bi_length (void)
         return make_number (SYMBOL_LENGTH(arg1));
     if (LISTP(arg1))
         return make_number (length (arg1));
+#ifndef NAIVE
     error_info = arg1;
     error (ERROR_TYPE, "Not named or list");
+#endif
     return nil;
 }
 

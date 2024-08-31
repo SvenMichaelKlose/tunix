@@ -9,11 +9,14 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.14] - 2024-08-31
 
 Optimizations to make the upcoming editor usable.  Also, a
 simple terminal emulation has been added, which should to
 for Unices and CBMs. The latter via cc65's conio functions.
+
+The C128 and Plus/4 are the only CBMs that work at the
+moment.
 
 ### libsimpleio
 

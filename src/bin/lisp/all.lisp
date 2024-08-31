@@ -8,6 +8,7 @@
 (load "stack.lisp")
 (load "alist.lisp")
 (load "copy-tree.lisp")
+(load "cut-at.lisp")
 (load "defsetfn.lisp")
 (load "dolist.lisp")
 (load "dotimes.lisp")

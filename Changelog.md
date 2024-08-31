@@ -45,6 +45,12 @@ for Unices and CBMs. The latter via cc65's conio functions.
 - LENGTH also returns the length of symbol names or names
   of built-ins.
 
+#### Environment
+
+##### Added
+
+- CUT-AT: Destructively splits a list at position.
+
 
 ## [v0.0.13] - 2024-08-29
 

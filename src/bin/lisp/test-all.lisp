@@ -51,9 +51,13 @@
 (or (equal (copy-tree '((1 2) (3 (4 5))))
            '((1 2) (3 (4 5))))
     (error))
-(macro defsetfn (name . body)
-  $(fn ,name (a b)
-     ,@body ))
+
+(message "Testing CUT-AT...")
+(let head '(l i s p)
+  (or (equal (cut-at 2 head) '(s p))
+      (error))
+  (or (equal head '(l i))
+      (error)))
 
 (message "Testing DO...")
 (do ((i 0 (+ i 1)))
@@ -223,6 +227,17 @@
            '(l i s p))
     (error))
 
+(message "Testing PUSH and POP...")
+(or (let x nil
+      (push p x)
+      (push s x)
+      (push i x)
+      (push l x)
+      (and (equal x '(l i s p))
+           (eq 'l (pop x))
+           (equal x '(i s p))))
+    (error))
+
 (message "TODO: Testing SET-DIFFERENCE...")
 
 (message "TODO: Testing SET-EXCLUSIVE-OR...")
@@ -236,17 +251,6 @@
      (error))
 (or (equal (split 'b '(a a a b a a b b a a a a))
            '((a a a) (a a) nil (a a a a))))
-
-(message "Testing PUSH and POP...")
-(or (let x nil
-      (push p x)
-      (push s x)
-      (push i x)
-      (push l x)
-      (and (equal x '(l i s p))
-           (eq 'l (pop x))
-           (equal x '(i s p))))
-    (error))
 
 (message "Testing UNION...")
 (or (equal (union '(l l i i) '(s s p p))

@@ -45,10 +45,16 @@
 (fn update-screen ()
   (with ((y 0)
          (l (nthcdr *conln* *lines*)))
-    (dotimes (i (+ *conln* (- *con-h* 2)))
+    (dotimes (i (+ *conln* (-- *con-h*)))
       (update-line (and l (symbol-name (car l))) y)
       (!++ y)
       (= l (cdr l)))))
+
+(fn prompt (msg)
+  (con-xy 0 (-- *con-h*))
+  (out *spaces*)
+  (con-xy 0 (-- *con-h*))
+  (out msg))
 
 (fn status ()
   (con-xy 0 (-- *con-h*))
@@ -200,11 +206,19 @@
                    (!++ *ln*))
               +hotkey+
                 (progn
-                  (status "Command: " "")
+                  (prompt "Ctrl+K+")
                   (case (conin)
                     \s  (save-file)
                     \q  (and (quit-editor)
-                             (return nil)))))))))))
+                             (return nil))
+                    \e  (progn
+                          (prompt ": ")
+                          (con-clrset nil 4)
+                          (!= (eval (read))
+                            (terpri)
+                            (print !))
+                          (conin)
+                          (con-clrset t 4)))))))))))
 
 (fn edit file
   (= *lx* 0)
@@ -215,23 +229,20 @@
   (= *lines*
      (list
        "This is a text editor written in TUNIX"
-       "Lisp, required to write the bytecode"
-       "compiler with no supplementary software,"
-       "like emulators in warp mode.  Only Lisps"
-       "are powerful enough to bring on seamless"
-       "integration with little effort.  But the"
-       "debugger has to be picture-book to get"
-       "there."
-       ""
-       "This editor is slower than an East-"
-       "Westfalian on a Sunday morning."
+       "Lisp, slower than an East-Westfalian on "
+       "a Sunday morning and buggy as eff."
        "Destructive built-ins are the cups of"
        "coffee.  'Destructive' to get around"
        "memory allocation and 'built-in' to make"
        "it fast.  Still, it's pure cc65-compiled"
-       "ANSI-C."))
+       "ANSI-C, no assembly."
+       ""
+       "It's not another VI clone..."
+       "Ctrl+K-e(gc) says there're about 10000"
+       "bytes left..."
+       ))
   (clrscr)
-  (con-clrset 4 t)   ; Direct mode
+  (con-clrset t 4)   ; Direct mode
   (edit-lines)
-  (con-clrset 4 nil) ; Normal mode
+  (con-clrset nil 4) ; Normal mode
   (clrscr))

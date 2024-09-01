@@ -24,11 +24,12 @@ Removing all characters from a line will delete it as well.
 Commands are started by pressing Ctrl-K, followed by one
 of these characters:
 
-| Command | Description         |
-|---------|---------------------|
-|    e    | Evaluate the file.  |
-|    s    | Save the file.      |
-|    x    | Exit the editor.    |
+| Command | Description                       |
+|---------|-----------------------------------|
+|    e    | Input and evaluate an expression. |
+|    r    | Run the file.                     |
+|    s    | Save the file.                    |
+|    q    | Exit the editor.                  |
 
 ## Evaluating the file
 

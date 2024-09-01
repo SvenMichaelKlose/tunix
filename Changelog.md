@@ -19,6 +19,10 @@ and this project adheres to
 - putbackc() to put back another char than the last one.
 - Direct mode with no scrolling and separate CR/LF.
 
+### Interpreter
+
+- TIME supports TARGET\_PET.
+
 
 ## [v0.0.14] - 2024-08-31
 

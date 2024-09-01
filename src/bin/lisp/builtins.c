@@ -1021,10 +1021,10 @@ bi_time (void)
     bekloppies[0] = *(char *) 0xa5;
     bekloppies[1] = *(char *) 0xa4;
     bekloppies[2] = *(char *) 0xa3;
-#else
-    bekloppies[0] = *(char *) 0xa2;
-    bekloppies[1] = *(char *) 0xa1;
-    bekloppies[2] = *(char *) 0xa0;
+#elif defined (TARGET_PET)
+    bekloppies[0] = *(char *) 0x8f;
+    bekloppies[1] = *(char *) 0x8e;
+    bekloppies[2] = *(char *) 0x8d;
 #endif
     bekloppies[3] = 0;
     asm ("sei");

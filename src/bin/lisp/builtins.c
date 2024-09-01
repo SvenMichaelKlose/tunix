@@ -52,6 +52,8 @@ bool debug_mode;
 #pragma code-name ("CODE_BUILTINS")
 #endif
 
+void FASTCALL bi_out_list (lispptr);
+
 lispptr
 bi_eq (void)
 {
@@ -163,7 +165,7 @@ bi_symbol_name ()
     list_last = nil;
     for (i = 0; i < lisp_len; i++) {
         tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
-        if (list_last) {
+        if (NOT_NIL(list_last)) {
             SETCDR(list_last, tmp);
             list_last = tmp;
         } else
@@ -216,6 +218,192 @@ bi_setcdr (void)
     SETCDR(arg1, arg2);
     return arg1;
 }
+
+lispptr
+bi_nthcdr (void)
+{
+    int n = NUMBER_VALUE(arg1);
+#ifndef NAIVE
+    if (n < 0) {
+        error_info = arg1;
+        error (ERROR_NEGATIVE, "< 0");
+        return nil;
+    }
+#endif
+    while (n-- && CONSP(arg2))
+        arg2 = CDR(arg2);
+#ifndef NAIVE
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+#endif
+    return arg2;
+}
+
+#ifndef NO_APPEND
+
+lispptr
+bi_append ()
+{
+    x = eval_list ();
+    list_start = list_last = nil;
+    while (CONSP(x)) {
+        // Skip NILs in arguments.
+        while (CONSP(x) && !CONSP(CAR(x))) {
+#ifndef NAIVE
+            if (NOT_NIL(CAR(x)))
+                return error_cons_expected (tmp);
+#endif
+            x = CDR(x);
+        }
+
+        // Break on end of argument list.
+        if (NOT(x))
+            goto done;
+
+        // Copy first element.
+        arg1 = CAR(x);
+        tmp = make_cons (CAR(arg1), nil);
+        if (NOT_NIL(list_last))
+            SETCDR(list_last, tmp);
+        list_last = tmp;
+
+        if (NOT(list_start))
+            list_start = list_last;
+
+        // Append rest of elements.
+        DOLIST(arg1, CDR(arg1)) {
+            // Copy element.
+            tmp = make_cons (CAR(arg1), nil);
+
+            // Append to last.
+            SETCDR(list_last, tmp);
+            list_last = tmp;
+        }
+
+#ifndef NAIVE
+        if (NOT_NIL(arg1))
+            return error_cons_expected (x);
+#endif
+        x = CDR(x);
+    }
+
+done:
+    return list_start;
+}
+
+#endif // #ifndef NO_APPEND
+
+#ifndef NO_NCONC
+
+lispptr
+bi_nconc (void)
+{
+    // Taking any arguments, we need to eval manually.
+    args = eval_list ();
+
+    // Get first list and its tail.
+    list_start = nil;
+    while (NOT_NIL(args) && NOT(list_start)) {
+        list_start = CAR(args);
+        args = CDR(args);
+    }
+    if (NOT(list_start))
+        return nil;
+#ifndef NAIVE
+    if (ATOM(list_start))
+        return error_cons_expected (list_start);
+#endif
+    list_last = last (list_start);
+
+    // Connect tails.
+    while (NOT_NIL(args)) {
+        tmp = CAR(args);
+        if (NOT_NIL(tmp)) {
+#ifndef NAIVE
+            if (ATOM(tmp))
+                return error_cons_expected (list_start);
+#endif
+            SETCDR(list_last, tmp);
+            list_last = last (tmp);
+        }
+        args = CDR(args);
+    }
+
+    return list_start;
+}
+
+#endif // #ifndef NO_NCONC
+
+#ifndef NO_SUBSEQ
+
+lispptr
+bi_subseq (void)
+{
+    int n;
+    int nstart;
+    int nend;
+    lispptr start;
+    lispptr end;
+    bool has_end = false;
+
+    // Evaluate arguments and dings them.
+    args = eval_list ();
+    // TODO: type-check list
+    list_start = LIST_CAR(args);
+    arg2c = LIST_CDR(args);
+    start = LIST_CAR(arg2c);
+    end = LIST_CAR(LIST_CDR(arg2c));
+
+    // TODO: type-check start
+    nstart = NUMBER_VALUE(start);
+#ifndef NAIVE
+    if (nstart < 0) {
+        error_info = start;
+        error (ERROR_NEGATIVE, "< 0");
+        return nil;
+    }
+#endif
+
+    // Get start of list.
+    arg1 = start;
+    arg2 = list_start;
+    arg2 = bi_nthcdr ();
+
+    // TODO: type-check end
+    if (NOT_NIL(end)) {
+        nend = NUMBER_VALUE(end);
+#ifndef NAIVE
+        if (nend < 0) {
+            error_info = end;
+            error (ERROR_NEGATIVE, "< 0");
+            return nil;
+        }
+#endif
+        n = nend - nstart;
+        has_end = true;
+    }
+
+    // Copy until end.
+    list_start = list_last = nil;
+    while ((!has_end || n-- > 0) && CONSP(arg2)) {
+        tmp = make_cons (CAR(arg2), nil);
+        if (NOT(list_start))
+            list_start = tmp;
+        else
+            SETCDR(list_last, tmp);
+        list_last = tmp;
+        arg2 = CDR(arg2);
+    }
+
+#ifndef NAIVE
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+#endif
+
+    return list_start;
+}
+
+#endif // #ifndef NO_SUBSEQ
 
 lispptr
 bi_numberp (void)
@@ -315,7 +503,7 @@ bi_apply (void)
     args = copy_list (arg2, COPY_BUTLAST, nil);
     tmp  = LIST_CAR(last (arg2));
 
-    if (args) {
+    if (NOT_NIL(args)) {
 #ifndef NAIVE
         if (!LISTP(tmp)) {
             error (ERROR_TYPE, "Last arg isn't list");
@@ -356,31 +544,24 @@ lispptr
 bi_if (void)
 {
     arg2c = CDR(x);
-    while (x) {
+    while (NOT_NIL(x)) {
         // Get condition.
         arg1 = CAR(x);
 
         // It's the consequence with nothing following.
         arg2c = CDR(x);
         if (NOT(arg2c)) {
-#ifndef NO_DEBUGGER
-            highlighted = x;
-#endif
+            HIGHLIGHT(x);
             x = arg1;
             return delayed_eval;
         }
 
         // Evaluate condition.
-#ifndef NO_DEBUGGER
-        PUSH_HIGHLIGHTED(x);
-#endif
+        HIGHLIGHT(x);
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
-#ifndef NO_DEBUGGER
-        POP_HIGHLIGHTED();
-#endif
 
 #ifndef NAIVE
         if (error_code)
@@ -388,11 +569,9 @@ bi_if (void)
 #endif
 
         // Do consequence if condition isn't NIL.
-        if (tmp) {
+        if (NOT_NIL(tmp)) {
             x = CAR(arg2c);
-#ifndef NO_DEBUGGER
-            highlighted = arg2c;
-#endif
+            HIGHLIGHT(arg2c);
             return delayed_eval;
         }
 
@@ -408,10 +587,9 @@ bi_and (void)
     value = nil;
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -421,7 +599,7 @@ bi_and (void)
             return nil;
     }
 #ifndef NAIVE
-    if (x)
+    if (NOT_NIL(x))
         error_cons_expected (x);
 #endif
     return value;
@@ -432,20 +610,19 @@ bi_or (void)
 {
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
             break;
 #endif
-        if (value)
+        if (NOT_NIL(value))
             return value;
     }
 #ifndef NAIVE
-    if (x)
+    if (NOT_NIL(x))
         error_cons_expected (x);
 #endif
     return nil;
@@ -511,7 +688,10 @@ bi_setout (void)
 lispptr
 bi_conin (void)
 {
-    return make_number (conin ());
+    char c = conin ();
+    if (c)
+        return make_number (c);
+    return nil;
 }
 
 lispptr
@@ -527,17 +707,56 @@ bi_putback (void)
     return nil;
 }
 
+size_t countdown;
+
+void
+cout (char c)
+{
+    if (countdown == -1) {
+        out (c);
+        return;
+    }
+    if (countdown) {
+        out (c);
+        countdown--;
+    }
+}
+
+void FASTCALL
+bi_out_atom (lispptr x)
+{
+    if (NUMBERP(x))
+        cout (NUMBER_VALUE(x));
+    else if (_NAMEDP(x))
+        outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+    else if (CONSP(x))
+        bi_out_list (x);
+    else
+        print (x);
+}
+
+void FASTCALL
+bi_out_list (lispptr x)
+{
+    DOLIST(tmp, x) {
+        PUSH(tmp);
+        bi_out_atom (CAR(tmp));
+        POP(tmp);
+    }
+}
+
 lispptr
 bi_out (void)
 {
-    if (NOT(arg1))
-        outs ("nil");
-    else if (NUMBERP(arg1))
-        out (NUMBER_VALUE(arg1));
-    else if (SYMBOLP(arg1))
-        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
-    else
-        print (arg1);
+    bi_out_list (arg1);
+    countdown = -1;
+    return arg1;
+}
+
+lispptr
+bi_outlim (void)
+{
+    countdown = NUMBER_VALUE(arg1);
     return arg1;
 }
 
@@ -561,6 +780,57 @@ bi_close (void)
     simpleio_close (NUMBER_VALUE(arg1));
     return nil;
 }
+
+#if !defined(NO_DIRECTORY) && defined(__CC65__)
+
+#include <cbm.h>
+
+lispptr
+bi_opendir (void)
+{
+    simpleio_chn_t chn = directory_open ();
+    if (!chn)
+        return nil;
+    return make_number (chn);
+}
+
+struct cbm_dirent dirent;
+
+lispptr
+bi_readdir (void)
+{
+    char err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
+    char i;
+    if (err) {
+        // cc65's stdlib does a CLRCH if there's no more
+        // to read.  Not sure what purpose that serves.
+        // TODO: Ask.
+        set_channels (NUMBER_VALUE(arg1), fnout);
+        return nil;
+    }
+    memcpy (buffer, dirent.name, sizeof (dirent.name));
+    buffer[sizeof (dirent.name)] = 0;
+    lisp_len = strlen (buffer);
+    for (i = 0; i < lisp_len; i++)
+        buffer[i] = reverse_case (buffer[i]);
+    list_start = make_cons (make_symbol (buffer, lisp_len), nil);
+    tmp = make_cons (make_number (dirent.size), nil);
+    SETCDR(list_start, tmp);
+    PUSH(tmp);
+    tmp2 = make_cons (make_number (dirent.type), nil);
+    POP(tmp);
+    SETCDR(tmp, tmp2);
+    return list_start;
+}
+
+lispptr
+bi_closedir (void)
+{
+    directory_close ((simpleio_chn_t) NUMBER_VALUE(arg1));
+    return nil;
+}
+
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
 
 lispptr bi_gc (void);
 
@@ -649,9 +919,10 @@ lispptr
 bi_error (void)
 {
     last_errstr = "User error";
-    if (arg1)
+    if (NOT_NIL(arg1))
         current_expr = arg1;
     error_code = ERROR_USER;
+    bi_out_list (make_cons (make_symbol ("ERROR: ", 7), arg1));
     return nil;
 }
 
@@ -690,7 +961,7 @@ bi_quit (void)
 lispptr
 bi_exit (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         exit (NUMBER_VALUE(arg1));
     else
         do_exit_program = do_break_repl = true;
@@ -700,7 +971,15 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    return make_number (length (arg1));
+    if (_NAMEDP(arg1))
+        return make_number (SYMBOL_LENGTH(arg1));
+    if (LISTP(arg1))
+        return make_number (length (arg1));
+#ifndef NAIVE
+    error_info = arg1;
+    error (ERROR_TYPE, "Not named or list");
+#endif
+    return nil;
 }
 
 lispptr
@@ -732,7 +1011,7 @@ bi_member (void)
             return tmp;
     }
 #ifndef NAIVE
-    if (tmp)
+    if (NOT_NIL(tmp))
         error_cons_expected (tmp);
 #endif
     return nil;
@@ -752,9 +1031,8 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     list_start = list_last = make_cons (eval0 (), nil);
-    POP_HIGHLIGHTED();
     POP(arg2);
     POP(arg1);
     if (do_break_repl)
@@ -766,9 +1044,8 @@ bi_filter (void)
         PUSH(arg2);
         PUSH(list_last);
         make_car_call ();
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = make_cons (eval0 (), nil);
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 2;
             return nil;
@@ -782,9 +1059,8 @@ bi_filter (void)
     if (arg2) {
         PUSH(list_last);
         make_call (make_cons (arg2, nil));
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = eval0 ();
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 1;
             return nil;
@@ -796,7 +1072,7 @@ bi_filter (void)
     return list_start;
 }
 
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#if !defined(NO_TIME) && defined(__CC65__)
 char bekloppies[sizeof (long)];
 
 lispptr
@@ -807,16 +1083,16 @@ bi_time (void)
     bekloppies[0] = *(char *) 0xa5;
     bekloppies[1] = *(char *) 0xa4;
     bekloppies[2] = *(char *) 0xa3;
-#else
-    bekloppies[0] = *(char *) 0xa2;
-    bekloppies[1] = *(char *) 0xa1;
-    bekloppies[2] = *(char *) 0xa0;
+#elif defined (TARGET_PET)
+    bekloppies[0] = *(char *) 0x8f;
+    bekloppies[1] = *(char *) 0x8e;
+    bekloppies[2] = *(char *) 0x8d;
 #endif
     bekloppies[3] = 0;
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }
-#endif // #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#endif // #if !defined(NO_TIME) && defined(__CC65__)
 
 #ifdef TARGET_UNIX
 
@@ -826,7 +1102,7 @@ long
 bekloppies (void)
 {
     struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
+    if (clock_gettime (CLOCK_REALTIME, &ts) == 0)
         return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
     perror("clock_gettime");
     return 0;
@@ -840,7 +1116,7 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
-#ifdef TARGET_SIM6502
+#ifdef NO_TIME
 
 lispptr
 bi_time (void)
@@ -848,7 +1124,7 @@ bi_time (void)
     return make_number (0);
 }
 
-#endif // #ifdef TARGET_SIM6502
+#endif // #ifdef NO_TIME
 
 #ifndef NDEBUG
 lispptr
@@ -904,6 +1180,16 @@ const struct builtin builtins[] = {
     { "cdr",        "l",    bi_cdr },
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
+    { "nthcdr",     "nx",   bi_nthcdr },
+#ifndef NO_APPEND
+    { "append",     NULL,   bi_append },
+#endif
+#ifndef NO_NCONC
+    { "nconc",      NULL,   bi_nconc },
+#endif
+#ifndef NO_SUBSEQ
+    { "subseq",     NULL,   bi_subseq },
+#endif
 
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },
@@ -940,7 +1226,8 @@ const struct builtin builtins[] = {
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
-    { "out",        "x",    bi_out },
+    { "out",        "+x",   bi_out },
+    { "outlim",     "n",    bi_outlim },
     { "terpri",     "",     bi_terpri },
     { "fresh-line", "",     bi_fresh_line },
     { "setin",      "n",    bi_setin },
@@ -948,6 +1235,12 @@ const struct builtin builtins[] = {
     { "putback",    "",     bi_putback },
     { "close",      "n",    bi_close },
     { "load",       "s",    bi_load },
+
+#if !defined(NO_DIRECTORY) && defined(__CC65__)
+    { "opendir",    "",     bi_opendir },
+    { "readdir",    "n",    bi_readdir },
+    { "closedir",   "n",    bi_closedir },
+#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
 
 #ifndef NO_IMAGES
     { "iload",      "s",    bi_iload },
@@ -959,7 +1252,7 @@ const struct builtin builtins[] = {
     { "special",    "'s'+", bi_special },
     { "gc",         "",     bi_gc },
 #ifndef NAIVE
-    { "error",      "?x",   bi_error },
+    { "error",      "+x",   bi_error },
     { "ignore",    "",      bi_ignore },
     { "stack",      "",     bi_stack },
 #endif
@@ -969,12 +1262,14 @@ const struct builtin builtins[] = {
     { "butlast",    "l",    bi_butlast },
     { "copy-list",  "l",    bi_copy_list },
     { "last",       "l",    bi_last },
-    { "length",     "l",    bi_length },
+    { "length",     "x",    bi_length },
     { "member",     "xl",   bi_member },
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifndef TARGET_TIME
     { "time",       "",     bi_time },
+#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
@@ -994,4 +1289,5 @@ void
 init_builtins (void)
 {
     add_builtins (builtins);
+    countdown = -1;
 }

@@ -268,18 +268,20 @@ alloc (uchar size, uchar type)
     return h;
 }
 
+lispptr make_cons_tmp;
+lispptr make_cons_car;
+lispptr make_cons_cdr;
+
 // Make list cell.
 lispptr FASTCALL
 make_cons (lispptr car, lispptr cdr)
 {
-    PUSH(car);
-    PUSH(cdr);
-    tmp = alloc (sizeof (cons), TYPE_CONS);
-    POP(cdr);
-    POP(car);
-    CONS(tmp)->car = car;
-    CONS(tmp)->cdr = cdr;
-    return tmp;
+    make_cons_car = car;
+    make_cons_cdr = cdr;
+    make_cons_tmp = alloc (sizeof (cons), TYPE_CONS);
+    CONS(make_cons_tmp)->car = make_cons_car;
+    CONS(make_cons_tmp)->cdr = make_cons_cdr;
+    return make_cons_tmp;
 }
 
 // Make number object.
@@ -297,7 +299,7 @@ lookup_symbol (char * str, uchar len)
 {
     // Walk over singly-linked list of named symbols.
     // (Anonymous symbols have no name.)
-    for (tmpstr = first_symbol; tmpstr; tmpstr = SYMBOL_NEXT(tmpstr))
+    for (tmpstr = first_symbol; NOT_NIL(tmpstr); tmpstr = SYMBOL_NEXT(tmpstr))
         if (SYMBOL_LENGTH(tmpstr) == len
             && !memcmp (tmpstr + sizeof (symbol), str, len))
             return tmpstr;
@@ -310,7 +312,7 @@ alloc_symbol (char * str, uchar len)
 {
     tmp = alloc (sizeof (symbol) + len, TYPE_SYMBOL);
     if (len) {
-        if (last_symbol)
+        if (NOT_NIL(last_symbol))
             SYMBOL_NEXT(last_symbol) = tmp;
         last_symbol = tmp;
     }
@@ -325,7 +327,8 @@ alloc_symbol (char * str, uchar len)
 lispptr FASTCALL
 make_symbol (char * str, uchar len)
 {
-    if (!(tmp = lookup_symbol (str, len)))
+    tmp = lookup_symbol (str, len);
+    if (NOT(tmp))
         return alloc_symbol (str, len);
     return tmp;
 }
@@ -503,6 +506,15 @@ init_heap ()
 #ifdef TARGET_UNIX
     SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
 #endif
+
+    // Set test flag *T?*.
+    tmp2 = make_symbol ("+t?+", 4);
+#ifdef TEST
+    SET_SYMBOL_VALUE(tmp2, t);
+#else
+    SET_SYMBOL_VALUE(tmp2, nil);
+#endif
+    expand_universe (tmp2);
 
     // Clear error info.
 #ifndef NAIVE

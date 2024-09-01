@@ -9,8 +9,15 @@ endif
 ifeq ($(TARGET), apple2)
 EXOMIZER_TARGET = 0xa2
 endif
+# TODO: Needs testing.
+ifeq ($(TARGET), apple2enh)
+#EXOMIZER_TARGET = 0xa2
+NO_EXOMIZER = 1
+endif
+# TODO: No BASIC support?
 ifeq ($(TARGET), atarixl)
-EXOMIZER_TARGET = 0xa8
+#EXOMIZER_TARGET = 0xa8
+NO_EXOMIZER = 1
 endif
 ifeq ($(TARGET), bbc)
 EXOMIZER_TARGET = 64
@@ -52,9 +59,3 @@ include $(THIS_DIR)/Makefile.build.$(TARGETCC)
 
 test:
 	@printf "No test to be done.\n"
-
-allclean: hostclean
-	for i in $(VALID_TARGETS); do \
-		$(MAKE) -C . clean TARGET=$$i; \
-	done
-	rm -rf tunix

@@ -1,22 +1,21 @@
 -include ../../config
 include ../../mk/Makefile.targets
 
-PROGRAM = lisp
-SOURCES = builtins.c main.c test.c
-LIBRARIES = \
-    $(TUNIX_LIB)/lisp/liblisp.a \
-    $(TUNIX_LIB)/simpleio/libsimpleio.a
-CLEANFILES = image test.out doc/manual.pdf git-version.lisp
+ifndef TARGET
+TARGET = unix	# TODO: Remove doublettes like this.
+endif
 
-ifeq ($(TARGET), cpm)
-LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
-endif
+PROGRAM 	= lisp
+SOURCES 	= builtins.c main.c test.c
+CLEANFILES 	= image test.out doc/manual.pdf git-version.lisp
+LIBRARIES 	= $(TUNIX_LIB)/lisp/liblisp.a
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
-LIBRARIES += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
+LIBRARIES  += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a
 endif
-ifneq (,$(filter $(TARGET), sim6502 unix))
-LIBRARIES += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
+ifneq (,$(filter $(TARGET), cpm sim6502 unix $(APPLE_TARGETS) $(ATARI_TARGETS)))
+LIBRARIES  += $(TUNIX_LIB)/simpleio-stdlib/libsimpleio-stdlib.a
 endif
+LIBRARIES  += $(TUNIX_LIB)/simpleio/libsimpleio.a
 
 ifdef OVERLAY
 LD65CFG = cc65-cfg/$(CC65_TARGET)-overlay.cfg

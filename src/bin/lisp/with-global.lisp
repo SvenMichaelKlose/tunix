@@ -1,17 +1,9 @@
 (macro with-global (n v .body)
   ;"Temporarily assign global with new value."
   (let g (symbol)
-    $(block t
+    $(progn
        (= ,g ,n)
        (= ,n ,v)
-       (block nil
+       (progn
          ,@body)
        (= ,n ,g))))
-
-(message "Testing WITH-GLOBAL...")
-(let old-macros *macros*
-  (with-global *macros* nil
-    (and *macros*
-         (error "*MACROS* not NIL.")))
-    (or *macros*
-        (error "*MACROS* is NIL.")))

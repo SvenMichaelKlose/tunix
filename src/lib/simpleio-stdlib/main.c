@@ -22,6 +22,7 @@
 #endif
 
 #include <simpleio/libsimpleio.h>
+#include <simpleio/control.h>
 
 #define MIN_CHANNEL     (STDERR + 1)
 
@@ -72,6 +73,146 @@ reset_terminal_mode ()
 
 #endif // #ifdef TARGET_UNIX
 
+void
+cmd_null (void)
+{
+}
+
+void
+cmd_goto (void)
+{
+    fputs ("\033[", stdout);
+    outn (cmd_params[0]);
+    fputc (';', stdout);
+    outn (cmd_params[1]);
+    fputc ('H', stdout);
+    fflush (stdout);
+}
+
+void
+cmd_clr (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        fputs ("\033[?25l", stdout);
+    if (c & TERM_FLAG_REVERSE)
+        fputs ("\033[27m", stdout);
+#ifdef TARGET_UNIX
+    if (c & TERM_FLAG_DIRECT)
+        reset_terminal_mode ();
+#endif
+    fflush (stdout);
+}
+
+void
+cmd_set (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        fputs ("\033[?25h", stdout);
+    if (c & TERM_FLAG_REVERSE)
+        fputs ("\033[7m", stdout);
+#ifdef TARGET_UNIX
+    if (c & TERM_FLAG_DIRECT)
+        set_nonblocking_mode ();
+#endif
+    fflush (stdout);
+}
+
+void
+cmd_clrscr (void)
+{
+    fputs ("\033[2J\033[H", stdout);
+    fflush (stdout);
+}
+
+void
+cmd_lf (void)
+{
+    fputc (10, stdout);
+}
+
+void
+cmd_cr (void)
+{
+    fputc (13, stdout);
+}
+
+#ifndef __CC65__
+
+// Get terminal cursor position.
+// Returns 'false' on error.
+bool
+getxy (int * col, int * row)
+{
+#ifdef TARGET_UNIX
+    int old_c_lflag;
+    struct termios term;
+
+    // Disable terminal's canonical mode and echo
+    if (tcgetattr (STDIN_FILENO, &term))
+        return false;
+    old_c_lflag = term.c_lflag;
+    term.c_lflag &= ~(ICANON | ECHO);
+    if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
+        return false;
+    term.c_lflag = old_c_lflag;
+#endif
+
+    // Request cursor position
+    if (0 > write (STDOUT_FILENO, "\033[6n", 4))
+        goto error_with_term_restored;
+
+    // Read the response.
+    char buf[16] = {0};
+    if (0 > read (STDIN_FILENO, buf, sizeof(buf) - 1))
+        goto error_with_term_restored;
+
+    // Scan the response.
+    if (2 != sscanf (buf, "\033[%d;%dR", row, col))
+        goto error_with_term_restored;
+
+#ifdef TARGET_UNIX
+    // Restore former terminal status.
+    if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
+        return false;
+#endif
+
+    return true;
+
+error_with_term_restored:
+#ifdef TARGET_UNIX
+    tcsetattr (STDIN_FILENO, TCSANOW, &term);
+#endif
+    return false;
+}
+
+#endif // #ifndef __CC65__
+
+void
+cmd_getx (void)
+{
+#ifndef __CC65__
+    int row, col;
+    getxy (&row, &col);
+    putbackc (row);
+#else
+    putbackc (0);
+#endif // #ifndef __CC65__
+}
+
+void
+cmd_gety (void)
+{
+#ifndef __CC65__
+    int row, col;
+    getxy (&row, &col);
+    putbackc (col);
+#else
+    putbackc (0);
+#endif // #ifndef TARGET_SIM6502
+}
+
 bool
 raw_eof (void)
 {
@@ -119,6 +260,8 @@ void
 raw_out (char c)
 {
     last_error = 0;
+    if (simpleio_control (c))
+        return;
     if (!channels[(int) fnout])
         last_error = -1;
     else if (EOF == fputc (c, channels[(int) fnout]))

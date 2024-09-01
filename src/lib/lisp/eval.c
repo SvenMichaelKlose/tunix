@@ -61,7 +61,6 @@ lispptr go_sym;
 lispptr go_tag;
 lispptr debug_step;
 bool    do_invoke_debugger;
-bool    tag_found;
 uchar   typed_argdef;
 char *  builtin_argdef;
 uchar   num_args;
@@ -71,7 +70,6 @@ bool    unevaluated;
 #pragma zpsym ("stack_entered")
 #pragma zpsym ("bfun")
 #pragma zpsym ("va")
-#pragma zpsym ("tag_found")
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
@@ -92,10 +90,9 @@ eval_list (void)
 
     // Evaluate first element.
     PUSH(x);
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     x = CAR(x);
     va = eval ();
-    POP_HIGHLIGHTED();
     POP(x);
 
     if (do_break_repl)
@@ -104,18 +101,15 @@ eval_list (void)
     // Make first element of result list and put it on
     // the object stack, so we don't have to worry about
     // garbage collection for the rest of elements.
-    PUSH(x);
     list_start = list_last = make_cons (va, nil);
-    POP(x);
     PUSH(list_start);
 
     // Evaluate rest of list.
     DOLIST(x, CDR(x)) {
         // Evaluate CDR of dotted cons.
         if (ATOM(x)) {
-            PUSH_HIGHLIGHTED(list_last);
+            HIGHLIGHT(list_last);
             SETCDR(list_last, eval ());
-            POP_HIGHLIGHTED();
             break;
         }
 
@@ -124,15 +118,15 @@ eval_list (void)
 
         // Evaluate CAR of cons.
         PUSH(list_last);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         tmp = eval ();
-        POP_HIGHLIGHTED();
         POP(list_last);
 
         // Make new cons and append it to the end of the
         // result list.
-        SETCDR(list_last, make_cons (tmp, nil));
+        tmp = make_cons (tmp, nil);
+        SETCDR(list_last, tmp);
         list_last = tmp;
         tmp = nil;
 
@@ -187,13 +181,18 @@ do_eval:
     POP_TAG(fnout);
 #endif
 
+#ifndef NAIVE
+    _GCSTACK_CHECK_OVERFLOW();
+    _TAGSTACK_CHECK_OVERFLOW();
+#endif
+
 #ifndef NO_DEBUGGER
     // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
 #ifndef NO_DEBUGGER
-        if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
-            do_invoke_debugger = true;
+    if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
+        do_invoke_debugger = true;
 #endif
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
@@ -203,7 +202,7 @@ do_eval:
 
     // Evaluate atom.
     if (ATOM(x)) {
-        if (x)
+        if (x) // (NOT_NIL(x)) surfaces https://github.com/cc65/cc65/issues/2487
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
@@ -215,14 +214,19 @@ do_eval:
 #ifndef NAIVE
     unevaluated_arg1 = arg1;
 #endif
-
     // Get function expression from symbol.
-    if (arg1 && SYMBOLP(arg1)) {
+    if (NOT_NIL(arg1) && SYMBOLP(arg1)) {
         // Inhinit evaluation of special form's arguments.
         if (EXTENDEDP(arg1))
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
     }
+
+    // Now we have:
+    //
+    // current_expr, x:  Current expression
+    // unevaluated_arg1: CAR(x)
+    // arg1:             CAR(x) evaluated
 
     /////////////////////////
     /// BLOCK name . body ///
@@ -232,15 +236,13 @@ do_eval:
     if (arg1 == block_sym) {
 #ifndef NAIVE
         if (!CONSP(CDR(x))) {
-            error (ERROR_ARG_MISSING, "No name");
+            error (ERROR_NO_BLOCK_NAME, "No name");
             goto do_return;
         }
 #endif
-
         // Step to and get BLOCK name.
         x = CDR(x);
         arg1 = CAR(x);
-
 #ifndef NAIVE
         if (!SYMBOLP(arg1)) {
             error_info = arg1;
@@ -248,7 +250,6 @@ do_eval:
             goto do_return;
         }
 #endif
-
         // Get body.
         arg2c = CDR(x);
 
@@ -266,15 +267,14 @@ block_statement:
 
         // Save evaluator state.
         PUSH(arg1);     // Block name
-        PUSH(arg2c);    // Expression list
-        PUSH(x);        // Element with current expression
-        PUSH_HIGHLIGHTED(x);
+        PUSH(arg2c);    // Body
+        PUSH(x);        // Current expression
+        HIGHLIGHT(x);
         x = CAR(x);
         PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
         goto do_eval;
 next_block_statement:
         // Restore evaluator state.
-        POP_HIGHLIGHTED();
         POP(x);
         POP(arg2c);
         POP(arg1);
@@ -288,29 +288,27 @@ next_block_statement:
             value = nil;
 
             // Search tag in body.
-            tag_found = false;
             DOLIST(x, arg2c)
                 if (CAR(x) == go_tag)
                     goto block_statement;
 #ifndef NAIVE
-            if (!tag_found) {
-                error_info = go_tag;
-                error (ERROR_TAG_MISSING, "Tag not found");
-                goto do_return;
-            }
+            // Tag not found.  Issue error.
+            error_info = go_tag;
+            error (ERROR_TAG_MISSING, "Tag not found");
+            goto do_return;
 #endif
         } else if (value == return_sym) {
             // Handle RETURN,
             if (arg1 == return_name) {
                 value = return_value;
                 return_value = nil;
-                goto do_return;
             }
             goto do_return;
         }
         goto block_statement;
     }
 
+    // It wasn't a BLOCK.
     // Get argument list following the procedure's name.
     args = CDR(x);
 
@@ -344,13 +342,12 @@ do_builtin_arg:
         if (!typed_argdef) {
 #ifndef NAIVE
             // Complain if argument left.
-            if (args) {
+            if (NOT_NIL(args)) {
                 error_info = args;
                 error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
                 goto do_return;
             }
 #endif
-
 set_arg_values:
             // Pop argument values from object stack into
             // arg1 and arg2, depending on num_args.
@@ -382,11 +379,11 @@ set_arg_values:
 #ifndef NAIVE
         // Missing argument error.
         else if (NOT(args)) {
+            error_info = unevaluated_arg1;
             error (ERROR_ARG_MISSING, "Missing arg to builtin");
             goto do_return;
         }
 #endif
-
         // Unevaluated argument.
         if (typed_argdef == '\'') {
             typed_argdef = *++builtin_argdef;
@@ -406,6 +403,7 @@ set_arg_values:
                 value = args;
                 goto save_arg_value;
             }
+
             PUSH(args);
             PUSH_TAG(num_args);
             x = args;
@@ -431,13 +429,12 @@ set_arg_values:
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
         PUSH_TAG(num_args);
-        PUSH_HIGHLIGHTED(args);
+        HIGHLIGHT(args);
         x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
         // Step to next argument.
 next_builtin_arg:
-        POP_HIGHLIGHTED();
         POP_TAG(num_args);
         POP_TAGW(builtin_argdef);
         POP(args);
@@ -459,7 +456,6 @@ save_arg_value:
             POP(args);
         }
 #endif
-
         // Break evaluation.
         if (do_break_repl)
             goto break_builtin_call;
@@ -477,13 +473,11 @@ break_builtin_call:
         goto set_arg_values;
     }
 
+    // It was neither a BLOCK or built-in procedure.
+
     //////////////////////////////
     /// USER-DEFINED PROCEDURE ///
     //////////////////////////////
-
-    // Save argument names and their old values on the
-    // stack and overwrite the names' symbol values
-    // with evaluated ones.  Restore them on return.
 
 #ifndef NAIVE
     // Ensure user-defined function.
@@ -493,12 +487,8 @@ break_builtin_call:
         goto do_return;
     }
 #endif
-
-    // Save stack pointer start.
-    stack_entered = stack;
-
-    // Save stack position of old argument symbol values.
-    stack_old_arg_values = stack;
+    // Save stack pointer for return.
+    stack_entered = stack_old_arg_values = stack;
 
     // Get argument definition and number of arguments.
     argdefs = FUNARGS(arg1);
@@ -510,15 +500,14 @@ break_builtin_call:
     while (tmpc--)
         PUSH(nil);
 
-    // Evaluate argument.
 do_argument:
-    // End of arguments.
+    // Start evaluating body when done with arguments.
     if (NOT(args) && NOT(argdefs))
         goto start_body;
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (args && NOT(argdefs)) {
+    if (NOT_NIL(args) && NOT(argdefs)) {
         error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
@@ -529,14 +518,13 @@ do_argument:
     }
 #endif
 
-    // Rest of argument list. (consing)
+    // Rest argument.
     if (ATOM(argdefs)) {
 #ifndef NAIVE
-        // Check if argument name is a symbol.
+        // Ensure argument name is a symbol.
         if (!SYMBOLP(argdefs))
             error_argname (argdefs);
 #endif
-
         // Save old symbol value for restore_arguments.
         stack_old_arg_values -= sizeof (lispptr);
         *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
@@ -554,7 +542,6 @@ do_argument:
 #ifndef NAIVE
             PUSH(unevaluated_arg1);
 #endif
-
             // Evaluate rest of arguments.
             x = args;
             value = eval_list ();
@@ -583,7 +570,6 @@ do_argument:
     if (!SYMBOLP(CAR(argdefs)))
         error_argname (CAR(argdefs));
 #endif
-
     // Save argument value to restore after function call.
     stack_old_arg_values -= sizeof (lispptr);
     *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(CAR(argdefs));
@@ -602,14 +588,12 @@ do_argument:
 #ifndef NAIVE
         PUSH(unevaluated_arg1);
 #endif
-
-        PUSH_TAG(TAG_NEXT_ARG);
-        PUSH_HIGHLIGHTED(args);
+        HIGHLIGHT(args);
         x = CAR(args);
+        PUSH_TAG(TAG_NEXT_ARG);
         goto do_eval;
 next_arg:
         // Restore evaluator state.
-        POP_HIGHLIGHTED();
 #ifndef NAIVE
         POP(unevaluated_arg1);
 #endif
@@ -637,8 +621,7 @@ start_body:
         stack = stack_entered;
         goto do_return;
     }
-#endif // #ifndef NAIVE
-
+#endif
     // Assign new values to argument symbols.
     argdefs = FUNARGS(arg1);
     pop_argument_values ();
@@ -661,20 +644,33 @@ start_body:
     if (ATOM(unevaluated_arg1))
         current_function = unevaluated_arg1;
 #endif
-
 continue_body:
     // Evaluate body expression.
     if (NOT(x) || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     x = CAR(x);
     PUSH_TAG(TAG_NEXT_BODY_STATEMENT);
     goto do_eval;
 next_body_statement:
-    POP_HIGHLIGHTED();
     POP(x);
-    goto continue_body;
+#ifndef NAIVE
+    if (value != return_sym && value != go_sym)
+#endif
+        goto continue_body;
+#ifndef NO_DEBUGGER
+    else if (SYMBOLP(unevaluated_arg1)) {
+        // Catch lost RETURN and GO.
+        if (value == return_sym) {
+            error_info = return_name;
+            error (ERROR_LOST_RETURN, "RETURN without BLOCK");
+        } else if (value == go_sym) {
+            error_info = go_tag;
+            error (ERROR_LOST_GO, "GO without BLOCK");
+        }
+    }
+#endif
 
     // Restore argument symbol values.
 restore_arguments:
@@ -691,7 +687,6 @@ do_return:
     if (error_code)
         value = lisp_repl (REPL_DEBUGGER);
 #endif
-
 do_return_atom:
     unevaluated = false;
 
@@ -705,11 +700,9 @@ do_return_atom:
 #ifndef NO_DEBUGGER
     POP(current_expr);
 #endif
-
     // Evaluate consequence of conditional.
     if (value == delayed_eval)
         goto do_eval;
-
 #ifdef VERBOSE_EVAL
     // Print return value.
     PUSH_TAG(fnout);
@@ -717,7 +710,6 @@ do_return_atom:
     outs ("<- "); print (value); terpri ();
     POP_TAG(fnout);
 #endif
-
     // Continue evaluation.  Determine jump
     // destination based on tag.
     POP_TAG(typed_argdef);
@@ -733,15 +725,13 @@ do_return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error_ptr (tagstack, "tag");
+        internal_error_ptr (tagstack, "alien tag");
 #endif
     }
-
 #ifndef NDEBUG
     // Check if stacks are in balance.
     check_stacks (old_stack, old_tagstack + 1);
 #endif
-
     return value;
 }
 
@@ -775,11 +765,24 @@ void
 init_eval ()
 {
     go_tag = return_name = return_value = nil;
-    args = argdefs = arg1 = arg2 = arg2c = x = value = va = nil;
-    needle = nil;
+    args = argdefs = arg1 = arg2 = arg2c = nil;
+    x = value = va = needle = nil;
+
+#ifdef NDEBUG
     return_sym   = make_symbol (NULL, 0);
+#else
+    return_sym   = make_symbol ("~RETURN", 7);
+#endif
+#ifdef NDEBUG
     go_sym       = make_symbol (NULL, 0);
+#else
+    go_sym       = make_symbol ("~GO", 3);
+#endif
+#ifdef NDEBUG
     delayed_eval = make_symbol (NULL, 0);
+#else
+    delayed_eval = make_symbol ("~EVAL", 5);
+#endif
     block_sym    = make_symbol ("block", 5);
     expand_universe (block_sym);
 #ifndef NAIVE

@@ -30,11 +30,11 @@ lispptr * global_pointers[] = {
     &debug_step,
     &breakpoints_sym,
     &debugger_return_value_sym,
+    &highlighted,
 #endif
 #ifndef NO_MACROEXPAND
     &macroexpand_sym,
 #endif
-    &highlighted,
 
     &lisp_fnin, &lisp_fnout,
 
@@ -42,5 +42,10 @@ lispptr * global_pointers[] = {
     &list_start, &list_last,
     &value, &va,
     &needle,
+
+    &tmp, &tmp2,
+    &make_cons_tmp,
+    &make_cons_car,
+    &make_cons_cdr,
     NULL
 };

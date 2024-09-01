@@ -3,6 +3,141 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-02
+
+I gave the terminal code a little rework.  The Unix part is
+more or less untested.  The editor also has to run on Unix
+terminals, so it can run on microcontrollers.  I also
+implented APPEND as an optional built-in funciton, expecting
+it to give MACROEXPAND a little boost.  And happy me, I also
+removed some unnecessary use of the object stack.  Every
+piece of code is dragging 8-bit targets down noticably.  I
+ended up breaking the test runs and that is frustrating at
+the end of the day.
+
+I think my mind got numbed by some plant-based gnat
+repellant, because since I'm not using it any more I'm not
+waking up, feeling like I've been on a drinking binge, and I
+can think clearer now.  Just for the record: I only do
+coffee and tobacco and sugary things tend to rot away in
+reach.  I'm an athletic disappointment to the doctors when
+it comes to earning money, doing 50 miles on a bike without
+getting exhausted.  That's what programming is for.
+
+Now I'll go dream about a fantastic Lisp IDE for our beloved
+machines.
+
+# 2024-09-01
+
+Two days passed and yesterday I woke up brain-dead.  One
+more minute of programming and I would have qualified for
+and official care level and free drool bib.  Great
+opportunity to head out and inspect other things entirely
+and to visit friends - mine aren't into the details of
+computing and that's perfect for me.  I barely talk about
+what I'm doing with them and if I'm away from the machine,
+that's usually because I'm fed up.
+
+Implementing NTHCDR and SUBSEQ as C functions built into the
+interpreter, as well as adding OUTLIM, improved performance
+as expected.  Similarly expected, SUBSEQ allocates too much,
+so garbage collection is triggered too often.  Unfortunately
+native CBM console output isn't known for its snappiness
+either.  When outputting a list of chars, they'll have to be
+written to The Buffer first or the overhead of calling out()
+is weighing in too heavily.  But whole lines shouldn't be
+updated for each keypress in the first place, nor should the
+whole screen be for up and down movements, unless it needs
+to be scrolled.  cc65's conio library doesn't support
+scrolling any way.
+
+Another thing on the list is replacing SUBSEQ by the new
+function CUT-AT which splits a list at a position and
+returns the cut-off tail.  That actually removes two SUBSEQs
+for inserting chars or lines.
+
+# 2024-08-29
+
+Oh dude, is the editor slow, or what?  The need for more
+built-in functions is pressing big time.  Instead of SUBSEQ,
+a C version of NTHCDR and an OUT with a length limit should
+work the miracle.  SUBSEQ makes copies and we don't want the
+GC to kick in regularly, especially not for displaying text
+alone.
+
+~~~lisp
+(outlim line-width)
+(out (nthcdr xstart line))
+~~~
+
+OUTLIM just has to set a countdown for OUT (which defaults
+to -1 if there's no limit).  Implementing NTHCDR as a built-
+in is definitely a no-brainer as well.
+Tomorrow.  It's been an action-loaded day and I'm desperate
+for a complete chunk of healthy sleep, including sweet
+dreams.
+
+# 2024-08-29
+
+Release v0.0.12.  Starting the first app, the integrated
+text editor in this case, always comes with early
+disappointments and writing more tests instead.  But it's
+taking shape.  I don't care that it is slow.  The reason for
+that is that the current line is a list of characters and
+functions like NTHCDR and SUBSEQ are implemented in Lisp
+which can run around 300 expressions per second.
+Implementing those, and perhaps a couple more,  in C could
+take the edge off well enough to make the editor usable.
+Actually everything that has to walk a line should be done
+in C before a bytecode compiler is around to help out.
+
+I dearly missed to ability to walk up and down the stack,
+or to just list the call stack.  The tag stack might be
+helping out implementing such thing rapidly.  No stress.
+I planned to grow old in peace.
+
+# 2024-08-24
+
+Release v0.0.8.  For Sunday entertainment I'll try to solder
+one of those SD2IEC drives laying around.  Since the VIC has
+an Ultimem expansion that's just the right time to get
+'src/sys/boot' to do more than just print a menu and tell
+which of the eight boot banks contain any data.  As it's
+written in C.  Now I'm asking myself why not use Lisp for
+that.  Stripping down most features probably isn't enough.
+But then again exomizer to the rescue...
+
+Isn't it amazing how I manage to stretch doing things that
+could be done since yesterday by being a bit lazier?
+OK, so let's be serious.
+
+# 2024-08-24
+
+cc65 didn't have no bug as far as I can see and that's a
+relief.
+
+Now it's time to get serious and make use of the true powers
+of Lisp.  So all tests moved into an own file and manual
+loading of dependencies isn't done any more.  Am thinking
+code-walking and automatic loading.
+
+The user experience is much more favourable.  The loading
+time to make the initial environment image has been reduced
+to less than a sixth.  Thus: release of v0.0.8.
+
+And off we shoot...
+
+# 2024-08-24
+
+We're now at release v0.0.6.  Unfortunately a bug in
+cc65's peephole optimizations prohibits to give the
+Lisp a little boost.  Today wasn't the day to spend
+a couple of hours on that.  The Lisp environment grew
+to over 1,300 lines.  Was a little suprised how much
+code accumulated already – and the manual could use
+some gaps filled.  I don't like it's style.  Actually
+it should be great to teach kids programming.
+
 # 2024-08-22
 
 Phew!  Release v0.0.4 fixes a lot of things.  Especially

@@ -86,7 +86,7 @@ print_debugger_info ()
 
         // Informative expression, describing the error
         // further.
-        if (error_info) {
+        if (NOT_NIL(error_info)) {
             outs (": ");
             print (error_info);
         }
@@ -100,7 +100,7 @@ print_debugger_info ()
     fresh_line ();
     outs (error_code ? "In" : "Next");
     do_highlight = true;
-    if (current_function) {
+    if (NOT_NIL(current_function)) {
         tmp2 = SYMBOL_VALUE(current_function);
         print (current_function); // (Name)
         out (' ');
@@ -167,6 +167,7 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
     // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
+        outs ("\002\004"); // Normal terminal.
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
         fresh_line ();
@@ -303,7 +304,7 @@ lisp_repl (char mode)
                     PUSH(value);
                     read_cmd_arg ();
                     if (SYMBOLP(value)) {
-                        if (value)
+                        if (NOT_NIL(value))
                             SET_SYMBOL_VALUE(breakpoints_sym,
                                              make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
                         goto print_breakpoints;
@@ -316,11 +317,19 @@ lisp_repl (char mode)
                     PUSH(value);
                     read_cmd_arg ();
                     if (SYMBOLP(value)) {
-                        if (value)
+                        if (NOT_NIL(value))
                             copy_list (SYMBOL_VALUE(breakpoints_sym), COPY_REMOVE, value);
                         SET_SYMBOL_VALUE(breakpoints_sym, value);
                     }
                     goto print_breakpoints;
+
+                // Exit program
+                case 'q':
+                    arg1 = nil;
+                    do_break_repl   = true;
+                    do_exit_program = true;
+                    error_code = 0;
+                    goto do_return;
 cannot_continue:
                     outs ("Need alternative first!");
                     goto terpri_next;
@@ -390,8 +399,8 @@ terpri_next:
 #endif
 #ifndef NAIVE
         if (!setjmp (this_break)) {
-            // Save return point for hard errors, like out
-            // of heap or internal errors.
+            // Save return point for hard errors, like
+            // out-of-heap or internal errors.
             hard_repl_break = &this_break;
 
             // Save GC and tag stack pointers.
@@ -427,6 +436,15 @@ terpri_next:
             x = nil;
             gc ();
         }
+#endif // #ifndef NAIVE
+#ifndef NO_DEBUGGER
+        // Catch lost RETURN and GO.
+        if (!error_code) {
+            if (x == return_sym)
+                error (ERROR_LOST_RETURN, "RETURN without BLOCK");
+            else if (x == go_sym)
+                error (ERROR_LOST_GO, "GO without BLOCK");
+        }
 #endif
 #ifndef NAIVE
         // Call debugger on error.
@@ -437,7 +455,7 @@ terpri_next:
 #ifndef NO_MACROEXPAND
         POP(unexpanded_toplevel);
 #endif
-#endif
+#endif // #ifndef NAIVE
         // Special treatment of results.
         if (do_break_repl) {
             // Ignore result and continue with next expression.

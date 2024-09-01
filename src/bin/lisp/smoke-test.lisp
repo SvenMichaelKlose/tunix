@@ -186,11 +186,35 @@
 (message "Smoke-testing recursion...")
 (make-count 10)
 
-; Messes up the heap with the following GC although it
-; merely assignes a new copy of the universe list, leaving
-; the symbol alone.
+(message "Testing RETURN...")
+((()
+  (block nil
+    ((()
+      ((()
+        (and (or (return nil)))))
+      (error "RETURN should have been returned from parent function body.")))
+    (error "Should have returned past BLOCK."))))
+
+(fn return-test (block-name)
+  (((x)
+    (block b1
+      (block b2
+        (block b3
+          (return nil block-name))
+        (= x 'b2e))
+      (= x 'b1e))
+    x) 'b0))
+
+(= *b* (cons 'return *b*))
+(or (eq 'b1e (return-test 'b3))
+    (error))
+(or (eq 'b1e (return-test 'b2))
+    (error))
+(or (eq 'b0 (return-test 'b1))
+    (error))
 
 ; 2024-06-09: 3:40min (10,000), VIC-20/cc65
+(message "Testing BLOCK...")
 (fn block-test (c)
   (block nil
     tag
@@ -200,11 +224,13 @@
     (? (not (== c 0))
        (go tag))))
 
-(message "Smoke-testing BLOCK...")
-(block-test 101)
+(and (block-test 101)
+     (error))
 
-(message "Removing test functions...")
-(= *universe* (remove 'make-count (remove 'block-test *universe*)))
+(message "Smoke-testing removal from *UNIVERSE*...")
+(= *universe* (remove 'make-count *universe*))
+(= *universe* (remove 'block-test *universe*))
+(= *universe* (remove 'return-test *universe*))
 (print (gc))(out " bytes free.")(terpri)
 
 (message "Testing SETIN...")

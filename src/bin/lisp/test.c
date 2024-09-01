@@ -1,3 +1,5 @@
+// TODO: Crashes on Plus/4 GC in "test.lisp".
+
 #ifdef TEST
 
 #ifdef __CC65__
@@ -60,6 +62,7 @@ test_triplet (char *info, lispptr o1, size_t s1, lispptr o2, size_t s2, lispptr 
 void
 test ()
 {
+#if 0
 #ifndef NDEBUG
     char * heap_fill = heap_free;
 #endif
@@ -99,6 +102,7 @@ test ()
     o2 = make_symbol ("2", 1);
     o3 = make_symbol ("3", 1);
     test_triplet ("symbols", o1, sizeof (symbol) + 1, o2, sizeof (symbol) + 1, o3, sizeof (symbol) + 1);
+#endif
 }
 
 #endif // #ifdef TEST

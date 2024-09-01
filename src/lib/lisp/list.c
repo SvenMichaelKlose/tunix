@@ -34,12 +34,12 @@ int FASTCALL
 length (lispptr x)
 {
     lisp_len = 0;
-    while (x) {
+    while (NOT_NIL(x)) {
         lisp_len++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
-        if (x && ATOM(x)) {
+        if (NOT_NIL(x) && ATOM(x)) {
             lisp_len++;
             break;
         }
@@ -52,12 +52,14 @@ lispptr needle;
 lispptr FASTCALL
 copy_list (lispptr x, char mode, lispptr needle)
 {
-    if (ATOM(x))
-        return x;
+    tmp2 = x;
 
-    tmp = CDR(x);
+    if (ATOM(tmp2))
+        return tmp2;
+
+    tmp = CDR(tmp2);
 #ifndef NAIVE
-    if (tmp && ATOM(tmp))
+    if (NOT_NIL(tmp) && ATOM(tmp))
         return error_cons_expected (tmp);
 #endif
 
@@ -65,41 +67,35 @@ copy_list (lispptr x, char mode, lispptr needle)
         return nil;
 
     // Remove first elements if they match 'needle'.
-    if (mode == COPY_REMOVE) {
-        while (CONSP(x) && needle == CAR(x))
-            x = CDR(x);
-    }
+    if (mode == COPY_REMOVE)
+        while (CONSP(tmp2) && needle == CAR(tmp2))
+            tmp2 = CDR(tmp2);
 
     // Copy first element.
-    PUSH(x); // TODO: Explain why this is required. (smk)
-    list_start = list_last = make_cons (CAR(x), nil);
-    POP(x);
+    list_start = list_last = make_cons (CAR(tmp2), nil);
 
     // Append rest of elements.
-    DOLIST(x, CDR(x)) {
-        if (mode == COPY_BUTLAST && NOT(CDR(x)))
+    DOLIST(tmp2, CDR(tmp2)) {
+        if (mode == COPY_BUTLAST && NOT(CDR(tmp2)))
             goto end_butlast;
 
         // Skip element to remove.
-        if (mode == COPY_REMOVE && needle == CAR(x))
+        if (mode == COPY_REMOVE && needle == CAR(tmp2))
             continue;
 
-        // Copy element.
-        PUSH(x); // TODO: Explain why this is required. (smk)
-        tmp = make_cons (CAR(x), nil);
-        POP(x);
-
-        // Append to last.
+        // Copy and append cons.
+        tmp = make_cons (CAR(tmp2), nil);
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
 
 #ifndef NAIVE
-    if (x)
-        return error_cons_expected (x);
+    if (NOT_NIL(tmp2))
+        return error_cons_expected (tmp2);
 #endif
 
 end_butlast:
+    tmp2 = nil;
     return list_start;
 }
 
@@ -111,7 +107,7 @@ last (lispptr x)
         if (ATOM(CDR(tmp2)))
             return tmp2;
 #ifndef NAIVE
-    if (tmp2)
+    if (NOT_NIL(tmp2))
         return error_cons_expected (tmp2);
 #endif
     return nil;
@@ -126,4 +122,16 @@ member (lispptr needle, lispptr x)
         if (CAR(tmp) == needle)
             return tmp;
     return nil;
+}
+
+#ifdef __CC65__
+#pragma code-name ("CODE_INIT")
+#pragma inline-stdfuncs (off)
+#pragma allow-eager-inline (off)
+#endif
+
+void
+init_list (void)
+{
+    list_start = list_last = nil;
 }

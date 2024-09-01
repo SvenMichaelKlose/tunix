@@ -4,16 +4,5 @@
      $((,(carlist inits)
         ,@body)
        ,@(carlist (cdrlist inits)))
-     $(block t
+     $(progn
         ,@body)))
-
-(message "Testing WITH...")
-(or (equal (macroexpand '(with ((a 1)
-                                (b 2))
-                           (print a)
-                           (print b)))
-           '(((a b)
-               (print a)
-               (print b))
-             1 2))
-    (error))

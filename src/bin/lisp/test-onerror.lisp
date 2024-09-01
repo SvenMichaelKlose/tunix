@@ -20,7 +20,8 @@
     (terror "Adding 1 to symbol should be an error"))
 
 (message "Testing ERROR_ARG_MISSING...")
-(((a b) a) 1)
+(((a b)
+  a) 1)
 (or (== *last-err* 2)
     (terror "Argument missing should be an error"))
 
@@ -30,7 +31,8 @@
     (terror "Missing block tag should be an error"))
 
 (message "Testing ERROR_TOO_MANY_ARGS...")
-(((a b) a) 1 2 3)
+(((a b)
+  a) 1 2 3)
 (or (== *last-err* 4)
     (terror "Too many arguments should be an error"))
 
@@ -43,6 +45,18 @@
 (((1)) nil)
 (or (== *last-err* 6)
     (terror "Non-symbol argument name should be an error"))
+
+(message "Testing ERROR_LOST_RETURN...")
+((()
+  (return nil)))
+(or (== *last-err* 13)
+    (terror "Lost RETURN should be an error"))
+
+(message "Testing ERROR_LOST_RETURN...")
+((()
+  (go tag)))
+(or (== *last-err* 14)
+    (terror "Lost GO should be an error"))
 
 ;(message "Testing ERROR_OUT_OF_HEAP...")
 ;(((q)

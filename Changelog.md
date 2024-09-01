@@ -9,6 +9,333 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### libsimpleio
+
+#### Added
+
+- Terminal control codes to get the cursor position.
+- putbackc() to put back another char than the last one.
+- Direct mode with no scrolling and separate CR/LF.
+
+### Interpreter
+
+#### Changed
+
+- TIME supports TARGET\_PET.
+- SUBSEQ: Optional to be built-in.
+
+#### Added
+
+- APPEND may be built-in.
+- Compile-time options NO\_APPEND, NO\_NCONC, NO\_SUBSEQ.
+
+
+## [v0.0.14] - 2024-08-31
+
+Optimizations to make the upcoming editor usable.  Also, a
+simple terminal emulation has been added, which should to
+for Unices and CBMs. The latter via cc65's conio functions.
+
+The C128 and Plus/4 are the only CBMs that work at the
+moment.
+
+### libsimpleio
+
+#### Added
+
+- Terminal control codes (see manual section)
+ - clear screen
+ - position cursor
+ - clear/set flags (cursor visibility, reverse mode)
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- Revived lost tests of APPEND.
+
+##### Added
+
+- NCONC: Destructively concatenates lists.
+- OUTLIM limits number of printed character values.
+
+##### Changed
+
+- Now built in (for endurable performance):
+ - NTHCDR
+ - SUBSEQ
+- LENGTH also returns the length of symbol names or names
+  of built-ins.
+
+#### Environment
+
+##### Added
+
+- CUT-AT: Destructively splits a list at position.
+
+
+## [v0.0.13] - 2024-08-29
+
+### Interpeter
+
+#### Added
+
+- Error on lost RETURN or GO.
+- Function bodies treat RETURNs by passing them on instantly.
+
+### Environment
+
+- WITH-* macros do not use BLOCK any more.
+
+
+## [v0.0.12] - 2024-08-28
+
+### General
+
+#### Added
+
+- Manual section on how to add new targets.
+- New targets (**untested**):
+ - Apple II (TARGET\_APPLE2)
+ - Apple II enhanced (TARGET\_APPLE2ENH)
+- New targets (**not working**):
+ - Atari XL (TARGET\_ATARIXL) - Need adjusted ld65 config.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Changed
+
+- CONIN returns NIL instead of 0 if there's no input,
+  so the heap won't get filled with 0's.
+- ERROR prints its arguments like OUT, prefixed by
+  "ERROR: ".
+
+#### Environment
+
+##### Fixed
+
+- Revived +V+.
+
+##### Added
+
+- +VB+ contains the Git branch name for use with conditional
+  code in "user-*-image.lisp".
+
+
+## [v0.0.11] - 2024-08-27
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Changed
+
+- Compile-time option TEST makes all environment tests load.
+- OUT: Take any number of arguments and traverse lists.
+
+#### Environment
+
+##### Added
+
+- File 'user-pre-image.lisp' and 'user-post-image.lisp' are
+  loaded before and after saving the default image.
+  'user-post-image.lisp' is also loaded at image start.
+- Macro != (file "alet.lisp").
+- Macros !++ and !--: destructive versions of ++ and --.
+
+##### Changed
+
+- SUBSEQ can take negative positions.
+- WITH-QUEUE handles only one queue and returns its list.
+
+
+## [v0.0.10] - 2024-08-26
+
+You'll want the stack checks, young Jedi!
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Added
+
+- Do object and stack overflow checks at least once per
+  expression evaluation.  Did that with every PUSH/POP in
+  development versions.
+
+##### Changed
+- Reduced object stack consumption per evaluation (1
+  object).
+
+##### Fixed
+
+- Compile-time option NO\_DEBUGGER also excludes code for
+  highlighting.
+
+#### Environment
+
+##### Added
+
+- COMPRESS-TREE finds and replaces duplicates subtrees
+  across \*UNIVERSE\* symbol definitions.  (See manual.)
+
+
+## [v0.0.9] - 2024-08-25
+
+Lost pointer fix makes it worth this release.
+
+### libdirectory
+
+#### Changed
+
+- Was 'libdirectory-list'.
+
+#### Added
+
+- Basic I/O functions to open, read and close the current
+  directory.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- Lost pointer is evaluation of rest arguments.  Happened
+  during GC stress test.
+
+##### Added
+
+- EXPERIMENTAL!: CBMs only: OPENDIR, READDIR and CLOSEDIR.
+
+#### Debugger
+
+##### Added
+
+- Short command 'q' to exit the running program and return
+  to the top-level REPL.
+
+#### Environment
+
+##### Changed
+
+- PROGN does not use BLOCK.  That caught RETURNs
+  unintentionally.
+
+##### Added
+
+- Macro AWHILE: Anaphoric equivalent to WHILE.
+- CBMs only: LS to list the current directory.
+- Macro WITH-PROF to time stop (aka "to profile")
+  expressions.
+
+
+## [v0.0.8] - 2024-08-24
+
+User experience has been improved so dramatically that
+delaying a release wouldn't be acceptable really.
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Changed
+
+- Moved tests into own files.  No test is loaded in
+  releases any more.  If compile-time option TEST was
+  set, all tests are run as usual (plus a few internal
+  interpreter tests at program start.
+  Global variable +T?+ tells if TEST was set.
+- Initial load time for saving the first image is down
+  to less than a sixth of what it was before.
+- Prerequisites aren't loaded on demand.  That can be
+  made automatic.
+
+#### Interpreter
+
+- On 6502-CPU platforms, only high bytes of pointers are
+  checked to tell if they are NIL or not.  Except for NIL
+  there are never any objects on the zeropage.  NIL isn't
+  either but it could be done to reduce code size a bit or
+  two.
+
+
+## [v0.0.7] - 2024-08-24
+
+Mostly for fixing missing file accident and cleaned up
+build scripts.
+
+### Build
+
+- Thorough clean-up of Makefiles.
+- Complain if there are foureign files before doing a
+  release.
+
+### libsimpleio-cbm
+
+- Print '\' instead of British Pound sign.
+
+### TUNIX Lisp
+
+#### Interpreter
+
+- Increased object stack size to 1K for Comodore C128, C64
+  and Plus/4.
+
+#### Environment
+
+##### Fixed
+
+- Lisp environment files for POSITION and SPLIT were missing.
+
+
+## [v0.0.6] - 2024-08-24
+
+### TUNIX Lisp
+
+#### Environment
+
+##### Fixed
+
+- Macro !? reimplemented and tests added.
+
+##### Added
+
+- Macro CASE: Evaluate conditionally by matching value.
+- POSITION: Find position of object in list.
+- SPLIT: Split list where object occurs, removing that object.
+
+#### Debugger
+
+##### Fixed
+
+- GC/tag stack over-/underflow checks.
+- Show faulty value on type error.
+- Tell to which built-in arguments are missing.
+
+##### Added
+
+- New error code ERROR\_NO\_BLOCK\_NAME.
+
+#### Interpreter
+
+##### Fixed
+
+- Global list start/last pointers weren't cleared on program
+  start, which is bad with zeropage locations (6502-CPU).
+
+##### Added
+
+- Compile-time option GC\_DIAGNOSTICS to detect zeropage
+  issues (undefined globals).
+
+
 ## [v0.0.5] - 2024-08-23
 
 Most essential fixes.
@@ -30,6 +357,7 @@ Most essential fixes.
 
 - CDAR, MAPCAR, MAPAN
 
+>>>>>>> development
 
 ## [v0.0.4] - 2024-08-22
 

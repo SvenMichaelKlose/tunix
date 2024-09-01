@@ -11,13 +11,19 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
+#if defined(TARGET_UNIX) && !defined(NDEBUG)
+#include <stdio.h>
+#endif
 
 #include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
 
+#ifndef NO_DEBUGGER
 bool do_highlight;
 lispptr highlighted;
+#endif
+lispptr print_tmp;
 
 #ifdef __CC65__
 #pragma code-name (push, "CODE_PRINT")
@@ -38,6 +44,8 @@ space (void)
 #define HIGHLIGHT_BEFORE    false
 #define HIGHLIGHT_AFTER     true
 
+#ifndef NO_DEBUGGER
+
 void FASTCALL
 print_highlighted (lispptr x, bool when)
 {
@@ -50,6 +58,8 @@ print_highlighted (lispptr x, bool when)
         outs (when == HIGHLIGHT_BEFORE ? ">>>" : "<<<");
 #endif
 }
+
+#endif // #ifndef NO_DEBUGGER
 
 // Print abbreviation.
 void FASTCALL
@@ -67,16 +77,16 @@ print_list (cons * c)
 #ifdef PRINT_SHORT_QUOTES
     if (CDR(c)) {
         tmpstr = NULL;
-        tmp = CAR(c);
-        if (tmp == quote)
+        print_tmp = CAR(c);
+        if (print_tmp == quote)
             tmpstr = "'";
-        else if (tmp == quasiquote)
+        else if (print_tmp == quasiquote)
             tmpstr = "$";
-        else if (tmp == unquote)
+        else if (print_tmp == unquote)
             tmpstr = ",";
-        else if (tmp == unquote_spliced)
+        else if (print_tmp == unquote_spliced)
             tmpstr = ",@";
-        tmp = nil;
+        print_tmp = nil;
         if (tmpstr) {
             print_short (tmpstr, c);
             return;
@@ -90,15 +100,23 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
+#ifndef NO_DEBUGGER
         print_highlighted (c, HIGHLIGHT_BEFORE);
+#endif
         print0 (c->car);
+#ifndef NO_DEBUGGER
         print_highlighted (c, HIGHLIGHT_AFTER);
-        tmp = CDR(c);
-        if (tmp && !CONSP(tmp)) {
+#endif
+        print_tmp = CDR(c);
+        if (NOT_NIL(print_tmp) && !CONSP(print_tmp)) {
             outs (" . ");
+#ifndef NO_DEBUGGER
             print_highlighted (c, HIGHLIGHT_BEFORE);
-            print0 (tmp);
+#endif
+            print0 (print_tmp);
+#ifndef NO_DEBUGGER
             print_highlighted (c, HIGHLIGHT_AFTER);
+#endif
             break;
         }
         c = CDR(c);
@@ -187,6 +205,9 @@ lispptr FASTCALL
 print (lispptr x)
 {
     print0 (x);
+#if defined(TARGET_UNIX) && !defined(NDEBUG)
+    fflush (stdout);
+#endif
     return x;
 }
 

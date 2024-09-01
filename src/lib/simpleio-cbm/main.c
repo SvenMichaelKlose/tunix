@@ -13,8 +13,10 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <conio.h>
 
 #include <simpleio/libsimpleio.h>
+#include <simpleio/control.h>
 
 #define FIRST_CHANNEL  8
 
@@ -36,6 +38,78 @@
 char            logical_fns[MAX_CHANNELS];
 simpleio_chn_t  chn;
 signed char     last_status[MAX_CHANNELS];
+
+void
+cmd_null (void)
+{
+}
+
+void
+cmd_goto (void)
+{
+    gotoxy (cmd_params[1], cmd_params[0]);
+}
+
+void
+cmd_clr (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        cursor (0);
+    if (c & TERM_FLAG_REVERSE)
+        revers (0);
+    if (c & TERM_FLAG_DIRECT)
+        term_direct_mode = false;
+}
+
+void
+cmd_set (void)
+{
+    char c = cmd_params[0];
+    if (c & TERM_FLAG_CURSOR)
+        cursor (1);
+    if (c & TERM_FLAG_REVERSE)
+        revers (1);
+    if (c & TERM_FLAG_DIRECT)
+        term_direct_mode = true;
+}
+
+void
+cmd_getx (void)
+{
+    putbackc (wherex () + 1);
+}
+
+void
+cmd_gety (void)
+{
+    putbackc (wherey () + 1);
+}
+
+void
+cmd_clrscr (void)
+{
+    cbm_k_bsout (147);
+}
+
+void
+cmd_lf (void)
+{
+    if (term_direct_mode)
+        cputc (10);
+    else
+        cbm_k_bsout (10);
+}
+
+void
+cmd_cr (void)
+{
+    if (term_direct_mode)
+        cputc (13);
+    else
+        cbm_k_bsout (13);
+}
+
 
 char FASTCALL
 reverse_case (char c)
@@ -128,6 +202,36 @@ error:
     return 0;
 }
 
+simpleio_chn_t
+directory_open ()
+{
+    chn = alloc_channel ();
+    last_status[chn] = 0;
+    if (!chn)
+        goto error;
+    simpleio_init_channel (chn);
+    if (cbm_opendir (chn, 8, "$"))
+        goto error;
+    return chn;
+error:
+    last_status[chn] = -1;
+    return 0;
+}
+
+char FASTCALL
+directory_read (simpleio_chn_t chn, struct cbm_dirent * dirent)
+{
+    return last_status[chn] = cbm_readdir (logical_fns[chn], dirent);
+}
+
+void FASTCALL
+directory_close (simpleio_chn_t chn)
+{
+    cbm_closedir (logical_fns[chn]);
+    logical_fns[chn] = 0;
+    last_status[chn] = 0;
+}
+
 bool
 raw_eof (void)
 {
@@ -155,7 +259,7 @@ set_status (void)
 char FASTCALL
 raw_conin (void)
 {
-    char c = cbm_k_getin ();
+    char c = cgetc ();
     set_status ();
     return convert_in (c);
 }
@@ -171,9 +275,20 @@ raw_in (void)
 void FASTCALL
 raw_out (char c)
 {
-    if (fnout == STDOUT || fnout == STDERR)
-        c = (c == '_') ? 164 : reverse_case (c);
-    cbm_k_bsout (c);
+    if (simpleio_control (c))
+        return;
+    if (fnout == STDOUT || fnout == STDERR) {
+        if (c == '_')
+            c = 164;
+        else if (c == '\\')
+            c = 205;
+        else
+            c = reverse_case (c);
+    }
+    if (term_direct_mode)
+        cputc (c);
+    else
+        cbm_k_bsout (c);
     set_status ();
 }
 
@@ -215,7 +330,7 @@ simpleio_init ()
 {
     cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
     cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
-    bzero (logical_fns, sizeof (logical_fns));
+    memset (logical_fns, 0, sizeof (logical_fns));
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;

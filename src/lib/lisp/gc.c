@@ -9,18 +9,12 @@
 #ifdef TARGET_UNIX
 #include <strings.h>
 #include <string.h>
-#endif
-#ifdef __CC65__
-#include <string.h>
+#include <stdio.h>
 #endif
 
 #include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
-
-#ifdef TARGET_UNIX
-#include <stdio.h>
-#endif
 
 #ifdef COMPRESSED_CONS
 bool do_compress_cons;
@@ -140,9 +134,6 @@ sweep ()
         total_removed = 0;
         heap_start = heap->start;
         heap_free  = heap->free;
-#ifdef PARANOID
-        heap_end   = heap->end;
-#endif
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifdef VERBOSE_GC
@@ -152,11 +143,6 @@ sweep ()
         // Sweep one heap.
         s = d = heap_start;
         while (*s) {
-#ifdef PARANOID
-            if (s >= heap_end)
-                internal_error ("Sweep overflow");
-#endif
-
             // Get size of object.
             n = objsize (s);
 
@@ -235,7 +221,7 @@ check_xlat:
 #endif
 #ifdef PARANOID
                 if (xlat < xlat_start)
-                    // Reloc table size must be multiple of entry size!
+                    // Reloc table size must be a multiple of an entry's size!
                     internal_error ("xlat overflow");
 #endif
                 // Flag is relocation table is full, so
@@ -269,10 +255,6 @@ check_xlat:
     heap_free = d;
 #endif // #ifdef FRAGMENTED_HEAP
 
-#ifndef NDEBUG
-    bzero (d, heap_end - d);
-#endif
-
     // End symbol list.
     SYMBOL_NEXT(last_kept_sym) = nil;
 
@@ -305,6 +287,10 @@ relocate (void)
     for (gp = global_pointers; *gp; gp++)
         **gp = relocate_ptr (**gp);
 
+    // Relocate GC'ed stack.
+    for (p = stack; p != stack_end; p += sizeof (lispptr))
+        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
     do {
@@ -312,7 +298,6 @@ relocate (void)
 #endif
 #ifdef VERBOSE_GC
     out ('R');
-    terpri ();
 #endif
 
         // Relocate elements on heap.
@@ -337,9 +322,9 @@ relocate (void)
     } while ((++heap)->start);
 #endif
 
-    // Relocate GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
-        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+#ifdef VERBOSE_GC
+    terpri ();
+#endif
 }
 
 // Mark and sweep objects, and relocate object pointers.
@@ -368,12 +353,29 @@ restart:
 #endif
 
     // Mark global pointers.
-    for (gp = global_pointers; *gp; gp++)
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark globals: ");
+#endif
+    for (gp = global_pointers; *gp; gp++) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *gp); out (' ');
+#endif
         mark (**gp);
+    }
 
     // Mark GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
+#ifdef GC_DIAGNOSTICS
+    outs ("Mark stack: ");
+#endif
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+#ifdef GC_DIAGNOSTICS
+        outhw ((int) *p); out (' ');
+#endif
         mark (*(lispptr *) p);
+    }
+#ifdef GC_DIAGNOSTICS
+    outs ("Sweep: ");
+#endif
 
     // Append used objects over unused ones, freeing space.
     // Log to gap table.

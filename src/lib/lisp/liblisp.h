@@ -17,8 +17,12 @@
 // Dump sweeped objects during sweep phase.
 //#define DUMP_SWEEPED
 
+// Dump global and GC stack pointers during mark phase.
+// Especially useful if 'global_pointers' is incomplete.
+//#define GC_DIAGNOSTICS
+
 // Print 'C' for each compressed cons.
-//#define COMPRESSED_CONS
+//#define VERBOSE_COMPRESSED_CONS
 
 // Print names to built-in special forms FN and VAR.
 //#define VERBOSE_DEFINES
@@ -75,6 +79,9 @@
 
 /// Disabling features
 
+// No directory support.
+//#define NO_DIRECTORY
+
 // No support for saving and loading images.
 //#define NO_IMAGES
 
@@ -88,6 +95,10 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
+// Disable built-ins
+//#define NO_APPEND
+//#define NO_NCONC
+//#define NO_SUBSEQ
 
 /// Additional features
 
@@ -132,6 +143,51 @@
 
 /// Target configurations
 
+// Apple II
+#ifdef TARGET_APPLE2
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          1024
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
+#endif
+
+// Apple II enhanced
+#ifdef TARGET_APPLE2ENH
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          1024
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
+#endif
+
+// Atari XL
+#ifdef TARGET_ATARIXL
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          1024
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
+#endif
+
 // Commodore C128
 #ifdef TARGET_C128
 #ifndef SLOW
@@ -140,12 +196,13 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
 #endif
 
 // Commodore C16
@@ -173,9 +230,9 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -187,12 +244,14 @@
 #define HEAP_SIZE   16384
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 // Commodore PET
@@ -216,9 +275,9 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -229,12 +288,14 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          3072
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 // Commodore VIC-20/VC-20
@@ -256,19 +317,20 @@
 
 // Unixoids
 #ifdef TARGET_UNIX
-#ifndef SLOW
+#if !defined(SLOW) && defined(NDEBUG)
     #define SLOW
 #endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE           (64 * 1024U)
-#define STACK_SIZE          HEAP_SIZE
-#define TAGSTACK_SIZE       HEAP_SIZE
-#define RELOC_TABLE_ENTRIES 256
+#define HEAP_SIZE           (128 * 1024U)
+#define STACK_SIZE          (HEAP_SIZE / 8)
+#define TAGSTACK_SIZE       (HEAP_SIZE / 8)
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
+#define NO_DIRECTORY
 #endif
 
 // Sinclair ZX Spectrum
@@ -276,11 +338,13 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
+#define NO_TIME
+#define NO_DIRECTORY
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
@@ -314,17 +378,6 @@
     #define HOST_DEBUGGER() raise (SIGTRAP);
 #endif
 
-#ifndef NO_DEBUGGER
-    #define PUSH_HIGHLIGHTED(x) \
-        highlighted = x; \
-        PUSH(highlighted);
-    #define POP_HIGHLIGHTED() \
-        POP(highlighted);
-#else
-    #define PUSH_HIGHLIGHTED(x)
-    #define POP_HIGHLIGHTED()
-#endif
-
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
     #define DUMP_LISPPTR
 #endif
@@ -339,6 +392,12 @@
 
 #if defined(VERBOSE_COMPRESSED_CONS) && !defined(COMPRESSED_CONS)
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
+#endif
+
+#ifndef NO_DEBUGGER
+    #define HIGHLIGHT(x)  highlighted = x
+#else
+    #define HIGHLIGHT(x)
 #endif
 
 typedef unsigned char  uchar;
@@ -399,7 +458,7 @@ struct heap_fragment {
 };
 
 typedef struct _image_header {
-    char git_version[16];
+    char git_version[8];
     lispptr heap_start;
 } image_header;
 
@@ -424,14 +483,17 @@ extern lispptr current_function;
 extern lispptr current_toplevel;
 extern lispptr unexpanded_toplevel;
 extern char *  last_errstr;
+#ifndef NDEBUG
 extern bool    debug_mode;
+#endif
 extern lispptr first_symbol;
 extern lispptr last_symbol;
+#ifndef NO_DEBUGGER
 extern lispptr highlighted;
 extern bool    do_highlight;
-extern lispptr highlighted;
-extern lispptr onerror_sym;
 extern lispptr breakpoints_sym;
+#endif
+extern lispptr onerror_sym;
 
 #ifndef NAIVE
 extern char    error_code;
@@ -522,6 +584,10 @@ extern lispptr macroexpand_sym;
 
 extern lispptr va; // Temporary in 'eval.c'.
 
+extern lispptr make_cons_tmp;
+extern lispptr make_cons_car;
+extern lispptr make_cons_cdr;
+
 #ifdef __CC65__
 #pragma zpsym ("lisp_len")
 #pragma zpsym ("tmp")
@@ -576,16 +642,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _GCSTACK_CHECK_OVERFLOW() \
-    if (stack == stack_start) \
+    if (stack <= stack_start) \
         stack_overflow ()
 #define _GCSTACK_CHECK_UNDERFLOW() \
-    if (stack == stack_end) \
+    if (stack >= stack_end) \
         stack_underflow ()
 #define _TAGSTACK_CHECK_OVERFLOW() \
-    if (tagstack == tagstack_start) \
+    if (tagstack <= tagstack_start) \
         tagstack_overflow ()
 #define _TAGSTACK_CHECK_UNDERFLOW() \
-    if (tagstack == tagstack_end) \
+    if (tagstack >= tagstack_end) \
         tagstack_underflow ()
 
 #ifdef GCSTACK_OVERFLOW_CHECKS
@@ -693,16 +759,16 @@ extern bool do_gc_stress;
 #endif
 
 #define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)       ((x) && (TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       (NOT_NIL(x) && (TYPE(x) & TYPE_CONS))
 #define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x)    ((x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)     ((x) && (TYPE(x) & TYPE_NUMBER))
+#define _BUILTINP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     (NOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
 #define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x)    ((x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)      ((x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _SPECIALP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      (NOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x)    ((x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
@@ -779,13 +845,17 @@ extern bool do_gc_stress;
 #define ERROR_TOO_MANY_ARGS     4
 #define ERROR_NOT_FUNCTION      5
 #define ERROR_ARGNAME_TYPE      6
-#define ERROR_OUT_OF_HEAP       7
-#define ERROR_NO_PAREN          8
-#define ERROR_STALE_PAREN       9
-#define ERROR_SYM_TOO_LONG      10
-#define ERROR_QUOTE_MISSING     11
-#define ERROR_FILEMODE          12
-#define ERROR_USER              13
+#define ERROR_NO_BLOCK_NAME     7
+#define ERROR_OUT_OF_HEAP       8
+#define ERROR_NO_PAREN          9
+#define ERROR_STALE_PAREN       10
+#define ERROR_SYM_TOO_LONG      11
+#define ERROR_QUOTE_MISSING     12
+#define ERROR_LOST_RETURN       13
+#define ERROR_LOST_GO           14
+#define ERROR_NEGATIVE          15
+#define ERROR_FILEMODE          16
+#define ERROR_USER              17
 
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12
@@ -896,8 +966,9 @@ extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
 
 extern void init_builtins (void);
-extern bool init_heap     (void);
 extern void init_eval     (void);
+extern bool init_heap     (void);
+extern void init_list     (void);
 extern void init_onerror  (void);
 extern void init_repl     (void);
 extern void heap_add_init_areas (void);

@@ -78,6 +78,7 @@ first time:
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
+| (cond +l)              | (? +l)          |
 
 Because the backquote (`) is not part of the charsets of old
 machines TUNIX Lisp intends to support, the dollar sign ($)
@@ -137,6 +138,356 @@ definitions.
 ### Inevitable creation of list elements
 
 APPLY copies all arguments but the last one.
+
+# Installing binaries
+
+"Installing" a binary release is the easiest way to go
+exploring.  I'd rather recommend compiling it yourself.
+
+## Getting a release
+
+Download the latest binary from
+[https://github.com/SvenMichaelKlose/tunix/releases](https://github.com/SvenMichaelKlose/tunix/releases).
+
+The name of the ZIP file contains the project's name
+"tunix", followed by its release version, ID in the
+public Git repository (short SHA hash), and finally the
+release data, followed by the opligatory ZIP suffix.
+It should look like this:
+
+~~~
+tunix.v0.0.5+bca5411.2024-08-22.zip
+       ^^^^^ ^^^^^^^ ^^^^^^^^^^
+         |      |        |
+         |      |   release date
+         |   Git SHA
+      version
+~~~
+
+*** TODO: See also "Version information". ***
+
+The version, "0.0.5" in this case, contains a major, minor
+and patch version according to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+TUNIX Lisp is a bit different as it has a major version
+number of "0", indicating that it's not meant for production
+where you expect things to not change from one day to the
+other.  To make it even worse, the minor version also being
+"0" means that absolutely everything could change, no matter
+if there'll be hell or high water.  It's about making TUNIX
+grown up enough to be able to follow the Semantic Versioning
+rules in the first place.  But we're trying to keep the pain
+away.  The patch level increases with every release - that
+happens if a bunch of changes happened that makes everyones
+life easier.  You must download the latest.  The others are
+kept for the protocol only.
+
+Things you must expect to change sooner than later:
+
+- Required special keyword (like the notoriuos LAMBDA) to
+  tell function expressiod from regular expressions.  It'll
+  be required to make the language more comfortable when it
+  comes to lexical scope, and to have a compiler produce
+  effective code.
+
+## Unpacking
+
+Download the latest release and unpack it.  On a unixoid
+command-line (Linux/Mac) this should do:
+
+~~~sh
+unzip tunix.<LatestVersion>.zip
+~~~
+
+It contains directory "tunix" and subdirectories for
+all supported platforms, e.g. "tunix/c64".  You can step
+into one of those and run TUNIX Lisp in your favourite
+emulator, or you can also transfer the files to your
+platform, depending on what it supports.  For Commdore
+8-bit machines there are SD card readers, also known as
+SD2IEC drives, available.
+
+### Running on Linux/Mac/BSD, etc.
+
+If you're running a something Unixoid, step into directory
+"tunix/unix" and shoot it up by typing "./lisp":
+
+~~~sh
+cd tunix/unix
+./lisp
+~~~
+
+You have to step into "tunix/unix" or TUNIX Lisp won't find
+the other files it needs to get going.
+
+### Installing VICE and YAPE mmulators
+
+The "VersatIle Commodore Emulator" is the most popular one
+for Commodore 8-bit machines.  Commodore C16 and Plus/4
+fanatics will insist on using YAPE as it's more compatible
+to the original.
+
+#### The VersatIle Commdore Emulator (VICE)
+
+##### **Linux**
+
+For most Linux distributions, VICE can be installed directly from the package manager.
+
+- **Debian/Ubuntu-based distributions**:
+  ```sh
+  sudo apt-get update
+  sudo apt-get install vice
+  ```
+
+- **Fedora**:
+  ```sh
+  sudo dnf install vice
+  ```
+
+- **Arch Linux**:
+  ```sh
+  sudo pacman -S vice
+  ```
+
+If VICE is not available in your distribution's repositories, you may need to compile it from source. Visit the [VICE website](https://vice-emu.sourceforge.io/) for more information.
+
+##### **macOS**
+
+VICE can be installed via Homebrew on macOS:
+
+- **Using Homebrew**:
+  ```sh
+  brew install vice
+  ```
+
+Alternatively, you can download the latest macOS binary from
+the [VICE website](https://vice-emu.sourceforge.io/)
+and follow the instructions provided there.
+
+##### **Windows**
+
+For Windows, you can download the latest VICE binary from
+the [VICE website](https://vice-emu.sourceforge.io/).
+After downloading, extract the archive to a directory of
+your choice and run the appropriate executable (e.g.,
+`x64.exe` for C64 emulation).
+
+#### Yet Another Plus/4 Emulator (YAPE)
+
+##### **Windows**
+
+YAPE is primarily a Windows-based emulator.  You can
+download it from the
+[YAPE website](http://yape.homeserver.hu/).
+After downloading, extract the archive and run `yape.exe`.
+
+##### **Linux and macOS**
+
+YAPE is not natively available for Linux or macOS, but you
+can run it using Wine, a compatibility layer for running
+Windows applications on Unix-like operating systems.
+
+- **Install Wine**:
+  - **Debian/Ubuntu**:
+    ```bash
+    sudo apt-get install wine
+    ```
+  - **Fedora**:
+    ```bash
+    sudo dnf install wine
+    ```
+  - **macOS** (using Homebrew):
+    ```bash
+    brew install --cask wine-stable
+    ```
+
+- **Run YAPE with Wine**:
+  After installing Wine, download YAPE from the
+  [YAPE website](http://yape.homeserver.hu/) and run it
+  with:
+  ```bash
+  wine yape.exe
+  ```
+
+#### Additional Resources
+
+For more detailed installation instructions or
+troubleshooting, please refer to the respective emulator's
+website:
+
+- [VICE Emulator](https://vice-emu.sourceforge.io/)
+- [YAPE Emulator](http://yape.homeserver.hu/)
+
+*** TODO: Apple IIe emulator installation ***
+
+## Building TUNIX from source
+
+Building TUNIX from source code is highly recommended if you
+want to stay up to date, especially for getting patches that
+remove bugs - naturally these occur often in early software.
+
+### General instructions for all platforms
+
+#### Cloning the Repository
+
+To begin, clone the TUNIX repository:
+
+```bash
+git clone https://github.com/svenklose/tunix.git
+cd tunix
+```
+
+#### Fetching third-party code
+
+After cloning the repository, you must fetch all the
+required third-party code and build that first:
+
+```bash
+git submodule update --init --recursive
+make host
+```
+
+#### Building all targets
+
+To build binaries for all supported targets, run:
+
+```bash
+make allworlds
+```
+
+#### Building for a specific target
+
+If you want to build TUNIX for a specific platform, use the following command:
+
+```bash
+make world TARGET=<target>
+```
+
+Replace `<target>` with one of the supported targets listed below.
+
+#### Supported targets:
+
+| Target   | Description                   |
+|----------|-------------------------------|
+| `c128`   | Commodore C128                |
+| `c16`    | Commodore C16                 |
+| `c64`    | Commodore C64                 |
+| `pet`    | Commodore PET (doesn't start) |
+| `plus4`  | Commodore Plus/4              |
+| `sim6502`| cc65's sim65                  |
+| `unix`   | GCC-compatible toolchain      |
+| `vic20`  | Commodore VIC-20              |
+
+### Linux
+
+#### Prerequisites
+
+Ensure you have the necessary tools installed:
+
+```bash
+sudo apt-get update
+sudo apt-get install git build-essential
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### macOS
+
+#### Prerequisites
+
+Install the necessary tools using Homebrew:
+
+```bash
+brew install git
+```
+
+#### Building
+
+```bash
+git submodule update --init --recursive
+make host
+make allworlds
+```
+
+### Windows
+
+#### Prerequisites
+
+Set up a Unix-like environment using MSYS2 or MinGW:
+
+1. **Install MSYS2** from [msys2.org](https://www.msys2.org/).
+
+2. **Update the Package Database**:
+   ```bash
+   pacman -Syu
+   ```
+
+3. **Install the Development Tools**:
+   ```bash
+   pacman -S base-devel git mingw-w64-x86_64-gcc
+   ```
+
+#### Building
+
+1. **Clone the Repository and Fetch Third-Party Code**:
+   ```bash
+   git clone https://github.com/svenklose/tunix.git
+   cd tunix
+   git submodule update --init --recursive
+   make host
+   ```
+
+2. **Build TUNIX**:
+   ```bash
+   make allworlds
+   ```
+
+   Or for a specific target like Unix:
+   ```bash
+   make world TARGET=unix
+   ```
+
+# Booting TUNIX Lisp
+
+When starting the program the first time, only built-in
+functions and symbols exist.  The most basic function
+required are loaded from Lisp code files to form the basic
+_environment_.  It is saves and an _image file_ which is
+loaded instead of the Lisp code as that is much faster.
+You an have your own code run before that image is created
+by saving it to file "user-pre-image.lisp".  Code that
+should be executed after the image has been loaded can be
+saved to file "user-post-image.lisp".  By setting these
+files up you can set up an environment that fits your
+desires best.
+
+~~~lisp
+; Example "user-pre-image.lisp"
+; Loads a set of regularly used functions.
+(@ '((x)
+      (load (symbol (append (symbol-name x)
+                            (symbol-name ".lisp")))))
+   '("when" "unless" "dolist" "alet" "while" "awhile"
+     "awhen"))
+~~~
+
+File "user-post-image.lisp" could be used for develeopment
+when part of the application code changes constantly.
+
+~~~lisp
+(load "mycrashycode.lisp")
+~~~
+
+Of course TUNIX Lisp shouldn't crash!  Pleas don't hestitate
+to file a
+[bug report](https://github.com/SvenMichaelKlose/tunix/issues)
+regardless of how it affected your temper.
 
 # User interface: The READ/EVAL/PRINT-Loop (REPL)
 
@@ -245,7 +596,39 @@ read-only lexical scope by unquoting outer values:
      (+ a ,x)))
 ~~~
 
-## Argument type descriptions (and definitions)
+## Rest arguments
+
+If an argument definition ends with a dotted pair, the last
+argument will contain the rest of the arguments passed to
+the function as a list or NIL.
+
+(fn cool-exmaple-missing (first . rest))
+(fn cool-exmaple-missing (first second . rest))
+
+## Optional arguments
+
+Rest arguments can be used to implement one or more optional
+arguments with defaults.
+
+~~~lisp
+(fn subeq (first . optional)
+  (= optional (or (car optional) 0)))
+~~~
+
+~~~lisp
+(fn subeq (first . optionals)
+  (with ((optional1 (or (car optionals) 0))
+         (optional2 (or (cadr optionals) 0)))
+    (print optional1)
+    (print optional2)
+    (terpri)))
+~~~
+
+In this example, if optional is NIL, CAR will also return
+NIL, making the OR-expression return number 0.
+This scheme can also be applied to multiple arguments:
+
+## Argument type descriptions in this manual
 
 Built-in functions have character-based and typed argument
 definitions.  They are also used, padded with spaces, to
@@ -336,6 +719,28 @@ New channels are created by OPEN to access files:
       last-result)))
 ~~~
 
+## Terminal control codes
+
+| Code     | Function           |
+|----------|--------------------|
+|   0      | Do nothing.        |
+|   1 x y  | Position cursor.   |
+|   2 f    | Clear flags.       |
+|   3 f    | Set flags.         |
+|   4      | Get X position.    |
+|   5      | Get Y position.    |
+|  10      | Line feed.         |
+|  12      | Clear screen.      |
+|  13      | Carriage return.   |
+
+| Flag | Function             |
+|------|----------------------|
+|   1  | Cursor visibility    |
+|   2  | Reverse mode         |
+|   4  | Direct mode          |
+
+Flags may be combined.
+
 # Debugging and advanced error handling
 
 The debugger is invoked in case of an error unless ONERROR
@@ -387,6 +792,7 @@ These are the available short commands:
 | Command | Description                                    |
 |---------|------------------------------------------------|
 | c       | Continue program execution.                    |
+| q       | Stop execution, returning to top level REPL.   |
 | s       | Step into user-defined procedure.              |
 | n       | Execute current expression in whole.           |
 | pX      | Evaluate and print expression X.  (No macros!) |
@@ -401,11 +807,15 @@ change the debugger's return value.
 
 ## Stepping through the code
 
-IDEA:
-If an error occured, you cannot step through the code unless
-you corrected it or you want to step into a newly entered
-expression.
+Short command 's' will step to the next argument of the
+current expression, evaluation what's on the way or enter
+the currently highlighted function if all arguments have
+been dealt with.  With 'n' the function and all its
+arguments are evaluated, taking you to the next expression
+in the list.  If you had it the program, you can exit it
+with short command 'q' and take a break yourself.
 
+IDEA:
 * step into newly entered expression
 * step into restarted expression.  Already changed values
   are a problem then.
@@ -476,14 +886,18 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.             |
 | NOT\_FUNCTION   | 5    | Object is not a function.       |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
-| OUT\_OF\_HEAP   | 7    | Out of heap.                    |
-| NO\_PAREN       | 8    | ')' missing.                    |
-| STALE\_PAREN    | 9    | Unexpected ')'.                 |
-| SYM\_TOO\_LONG  | 10   | Symbol longer than MAX\_SYMBOL. |
-| QUOTE\_MISSING  | 11   | '"' missing.                    |
-| FILEMODE        | 12   | Illegal mode for OPEN.          |
-| USER            | 13   | ERROR function was called.      |
-| INTERNAL        | 14   | Returned to operating system.   |
+| NO\_BLOCK\_NAME | 7    | BLOCK name is missing.          |
+| OUT\_OF\_HEAP   | 8    | Out of heap.                    |
+| NO\_PAREN       | 9    | ')' missing.                    |
+| STALE\_PAREN    | 10   | Unexpected ')'.                 |
+| SYM\_TOO\_LONG  | 11   | Symbol longer than MAX\_SYMBOL. |
+| QUOTE\_MISSING  | 12   | '"' missing.                    |
+| LOST\_RETURN    | 13   | RETURN name didn't match BLOCK. |
+| LOST\_GO        | 14   | GO outside BLOCK.               |
+| NEGATIVE        | 15   | Positive number expected.       |
+| FILEMODE        | 16   | Illegal mode for OPEN.          |
+| USER            | 17   | ERROR function was called.      |
+| INTERNAL        | 18   | Returned to operating system.   |
 
 #### ERROR\_OUT\_OF\_HEAP
 
@@ -616,18 +1030,18 @@ which is then the default.
 
 ~~~lisp
 (? nil
-   1)   -> nil
+   1)  ; -> nil
 (? nil
    1
-   2)   -> 2
+   2)  ; -> 2
 (? nil
    1
    2
-   3)   -> 3
+   3)  ; -> 3
 (? t
    1
-   2)   -> 1
-(? t)   -> nil
+   2)  ; -> 1
+(? t)  ; -> nil
 ~~~
 
 ### (and +x)
@@ -636,8 +1050,8 @@ Evaluates all arguments in order unless one evaluates to
 NIL.  The value of the last evaluation is returned.
 
 ~~~lisp
-(and 1 2 nil) -> nil
-(and 1 2)     -> 2
+(and 1 2 nil) ; -> nil
+(and 1 2)     ; -> 2
 ~~~
 
 AND will issue an error if it is passed a dotted pair.
@@ -648,8 +1062,8 @@ Evaluates all arguments unless one evaluates to non-NIL.
 The value of the last evaluation is returned.
 
 ~~~lisp
-(or 1 nil) -> 1
-(or nil 2) -> 2
+(or 1 nil) ; -> 1
+(or nil 2) ; -> 2
 ~~~
 
 OR will issue an error if it is passed a dotted pair.
@@ -665,7 +1079,7 @@ match.  It is NIL, if not specified.
 (block foo
   'a
   (return 'b foo)
-  'c) -> b
+  'c)   ; -> b
 ~~~
 
 Blocks of name NIL are used for loops.  For the purpose of
@@ -685,13 +1099,20 @@ of the parent blocks in the current function.  If no
 expression follows the tag, NIL is returned.
 
 ~~~lisp
+; Print "1".
+(block nil
+  (print 1)
+  (go jump-destination)
+  (print 2)
+  jump-destination) ; -> nil
+
 ; Print "1" and "3".
 (block nil
   (print 1)
   (go jump-destination)
   (print 2)
   jump-destination
-  (print 3))
+  (print 3))        ; -> 3
 ~~~
 
 ## Equality
@@ -864,17 +1285,23 @@ files.
 
 ## Lists
 
-This functions are around because the interpreter needs them
+These functions are around because the interpreter needs them
 internally.
 
 | Function          | Description                         |
 |-------------------|-------------------------------------|
-| (length l)        | Return length of list.              |
+| (length l)        | Return length of list or name.      |
 | (@ f l)           | Run elements through function.      |
 | (butlast l)       | Copy list but not its last element. |
 | (last l)          | Return last cons of list.           |
 | (member x l)      | Return list starting with X.        |
 | (remove x l)      | Copy list except element X.         |
+
+These are built-in or performance issues surface quickly:
+
+| Function          | Description                         |
+|-------------------|-------------------------------------|
+| (nconc +l)        | Destructively concatenae lists.     |
 
 ### (butlast l): Copy list but not its last element.
 
@@ -894,7 +1321,7 @@ Return the last cons of a list, not the object it contains.
 
 LAST will issue an error if it is passed a dotted pair.
 
-### (length l): Return length of list.
+### (length l): Return length of list or name.
 
 ~~~lisp
 (length nil)        ; -> 0
@@ -906,6 +1333,14 @@ LENTGH also counts CDRs of dotted pairs:
 
 ~~~lisp
 (length '(a b . c)))  ; -> 3
+~~~
+
+Also, the length of symbol names or names of built-ins is
+returned:
+
+~~~lisp
+(length "TUNIX")    ; -> 5
+(length car)        ; -> 3
 ~~~
 
 ### (member x l): Return cons containing X.
@@ -1001,22 +1436,27 @@ x           ; 23
 
 ## I/O
 
-| Function         | Description                         |
-|------------------|-------------------------------------|
-| (read)           | Read expression.                    |
-| (print x)        | Print expression.                   |
-| (load name)      | Load and evaluate file.             |
-| (open name mode) | Open file and return channel.       |
-| (err)            | Return number of last error or NIL. |
-| (eof)            | Tell if read reached end of file.   |
-| (setin n)        | Set input channel.                  |
-| (setout n)       | Set output channel.                 |
-| (in)             | Read char.                          |
-| (conin)          | Read char from console.             |
-| (out x)          | Print char or plain symbol name.    |
-| (terpri)         | Step to next line.                  |
-| (fresh-line)     | Open line if not on a fresh one.    |
-| (close n)        | Close a channel.                    |
+| Function         | Description                          |
+|------------------|--------------------------------------|
+| (read)           | Read expression.                     |
+| (print x)        | Print expression.                    |
+| (load name)      | Load and evaluate file.              |
+| (open name mode) | Open file and return channel.        |
+| (err)            | Return number of last error or NIL.  |
+| (eof)            | Tell if read reached end of file.    |
+| (setin n)        | Set input channel.                   |
+| (setout n)       | Set output channel.                  |
+| (in)             | Read char.                           |
+| (putback +n)     | Put last char back to input.         |
+| (conin)          | Read char from console.              |
+| (out x)          | Print char or string, lists of them. |
+| (outlim n)       | Limit number of char values printed. |
+| (terpri)         | Step to next line.                   |
+| (fresh-line)     | Open line if not on a fresh one.     |
+| (close n)        | Close a channel.                     |
+| (opendir)        | Open directory and return channel.   |
+| (readdir n)      | Read directory.                      |
+| (closedir n)     | Close directory.                     |
 
 | Variable | Description            |
 |----------|------------------------|
@@ -1069,12 +1509,96 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.
 ### (in): Read char.
+
+Read character from channel.  It is returned as the
+character number (e.g. ASCII).
+
 ### (conin): Read console char (non-blocking).
-### (out x): Print char or plain symbol name.
+
+Unlinke IN, CONIN does not wait for input but returns NIL
+instead when used with standard input (console, terminal,
+hoewever you name it).
+
+~~~lisp
+; Wait for single character input.
+(while (not (eof))
+  (!? (conin)
+      (return !)))
+~~~
+
+### (putback): Put last read char back to input.
+
+This is the equivalent of C's ungetc(), putting the
+last character back to input.  Only one character can
+be put back.  If one has already been put back and not
+read by IN or CONIN, it is overwritten.
+
+### (out x): Print char, string or list of both.
+
+Prints numbers as characters, plain symbol names,
+also names of other objects with a name, e.g. built-in
+functions, and lists of both of them.  Lists may also
+be nested (contain other lists).
+
+~~~lisp
+; Print nothing.
+(out)
+
+; Print 'A'.
+(out 65)
+
+; Also print 'A'.  (READ converts '\A' to number 65.)
+(out \A)
+
+; Print 'Hello world' without double qoutes.
+; Finish with a newline instead of using TERPRI.
+; But not using TERPRI might not work with your terminal
+; (TODO LF/CR explanation for terminals, files and
+; operating systems).
+(out "Hello world!" 10)
+
+; Print 'TUNIX!'.
+(out \T \U "NIX" 33)
+
+; Also print 'TUNIX!'.
+(out '(\T \U "NIX" 33))
+~~~
+
+### (outlim n): Limit number of chars printed.
+
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
 ### (close channel): Close a channel.
-### (load pathname): Load and evaluate file.
+
+### (opendir): Open directory and return channel.
+
+Commodore 8-bit platforms only.
+
+Opens the current directory and returns the channel number,
+or NIL if no more channels can be allocated or an error
+occured.
+
+Then behaviour when reading from a directory channel is
+undefined.
+
+See: ERR, READDIR, CLOSEDIR
+
+### (readdir n): Read first/next directory from channel.
+
+Commodore 8-bit platforms only.
+
+Returns a list of the format (name size type) or NIL if an
+error occured.
+
+See: ERR, OPENDIR, CLOSEDIR
+
+### (closedir n): Close a directory channel.
+
+Commodore 8-bit platforms only.  Always returns NIL and
+never issues an error.  If a regular channel is applied, the
+behaviour is undefined.
+
+See: OPENDIR, READDIR, CLOSEDIR
 
 ## Time
 
@@ -1137,17 +1661,40 @@ when the counting from 0 started.
 |-----------------|----------------------------------------|
 | (quit ?x)       | Return from debugger REPL              |
 | (exit)          | Stop program and go to top-level REPL. |
-| (error x)       | Issue a user error.                    |
+| (error +x)      | Issue a user error like OUT.           |
 | (onerror n x x) | User-defined error handler.            |
-| (ignore)        | Break and continue with LOAD or REPL.  |
+| (ignore)        | Continue with next REPL expresssion.   |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
 | (debugger)      | Invoke debugger with next instruction. |
 
 ### (quit ?x): Return from debugger REPL.
 ### (exit): Stop program and go to top-level REPL.
+
 ### (error x): Issue a user error.
+
+Prints its arguments to standard output, like OUT, prefixed
+with string "ERROR: ", and invokes a debugger REPL with
+code ERROR\_USER.
+
+~~~lisp
+(with ((haystack nil)
+       (needle   t))
+  (or (assoc needle *haystack*)
+      (error "Cannot find " needle " in haystack.")))
+; -> ERROR: Cannot find t in haystack.
+;    DEBUGGER #1:
+;    Error #14: User error
+;    ...and so on...
+~~~
+
 ### (onerror n x x): User-defined error handler.
-### (ignore): Break and continue with LOAD or REPL.
+
+(See "Advanced error handling".)
+
+### (ignore): Continue with next REPL expression.
+
+*** TODO: Might not be working any more! ***
+
 ### (debug): Raises a SIGTRAP signal for debugging.
 ### (debugger): Invoke debugger with next instruction.
 
@@ -1232,6 +1779,16 @@ programming languages.
 
 ### (let n init +b): Block with one local variable.
 
+LET is like WITH but creating only one local variable for
+its body.
+
+~~~lisp
+(var x 'a)
+(let x 'b
+  (print x))    ; Prints 'b'.
+(print x)       ; Prints 'a'.
+~~~
+
 ### (with inits +b): Block with many local variables.
 
 ## Control flow macros
@@ -1252,7 +1809,52 @@ programming languages.
 
 ### (progn +b): Return result of last.
 
-### (when cond +b): Evaluate if condition is true.
+### (when cond +b): Evaluate body if condition is true.
+
+~~~lisp
+(when (hungry? coder)
+  (feed coder)
+  (tell coder "That's 5.99!"))
+~~~
+
+replaces
+
+~~~lisp
+(? (hungry? coder)
+   (block t
+     (feed coder)
+     (tell coder "That's 5.99!")))
+~~~
+
+### (case x +l): Evaluate conditionally by matching value.
+
+Evaluates conditionally by matching values in pairs.
+EQL is used as the matching predicate.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5."))
+~~~
+
+It can have an optional default.
+
+~~~lisp
+(case x
+  'a  (out "X is A.")
+  5   (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
+
+This is the macro-expanded version (TMP would be an
+anonymous symbol):
+
+~~~lisp
+(let tmp x
+  (eql tmp 'a) (out "X is A.")
+  (eql tmp 5)  (out "X is 5.")
+  (out "X is neither A or 5."))
+~~~
 
 ### (unless cond +b): Evaluate if condition is false.
 
@@ -1262,29 +1864,33 @@ programming languages.
 
 ## Lists
 
-| Function        | Description                         |
-|-----------------|-------------------------------------|
-| (list +x)       | Return list evaluated.              |
-| (list? x)       | Test if argument is NIL or a cons.  |
-| (cadr l)...     | Nested CAR/CDR combinations.        |
-| (carlist l)     | Get first elements of lists.        |
-| (cdrlist l)     | Get rest elements of lists.         |
-| (copy-list x)   | Copy list.                          |
-| (copy-tree x)   | Copy recursively.                   |
-| (ensure-list x) | Turn atom into list.                |
-| (every f x)     | Test if F is T for all X.           |
-| (some f x)      | Test if F is T for some X.          |
-| (find x l)      | Find element X in list.             |
-| (find-if f l)   | Find element X in list by F.        |
-| (group l n)     | Split L in lists of length N.       |
-| (nth n l)       | Get Nth cons in L.                  |
-| (nthcdr n l)    | Get Nth CDR of cons in L.           |
-| (mapcar f +l)   | Map CARs of lists.                  |
-| (mapcan f +l)   | Concatenating MAPCAR.               |
-| (member-if f l) | Find cons with element in list.     |
-| (remove-if f l) | Removed elemnts from L.             |
-| (reverse l)     | Reverse list.                       |
-| (subseq l n n)  | Return sublist.                     |
+| Function          | Description                         |
+|-------------------|-------------------------------------|
+| (list +x)         | Return list evaluated.              |
+| (list? x)         | Test if argument is NIL or a cons.  |
+| (cadr l)...       | Nested CAR/CDR combinations.        |
+| (carlist l)       | Get first elements of lists.        |
+| (cdrlist l)       | Get rest elements of lists.         |
+| (append +l)       | Copy and append lists.              |
+| (copy-list x)     | Copy list.                          |
+| (copy-tree x)     | Copy recursively.                   |
+| (cut-at n l)      | Destructively split list.           |
+| (ensure-list x)   | Turn atom into list.                |
+| (every f x)       | Test if F is T for all X.           |
+| (some f x)        | Test if F is T for some X.          |
+| (find x l)        | Find element X in list.             |
+| (find-if f l)     | Find element X in list by F.        |
+| (group l n)       | Split L in lists of length N.       |
+| (nth n l)         | Get Nth element of list.            |
+| (nthcdr n l)      | Get Nth cons of list.               |
+| (mapcar f +l)     | Map CARs of lists.                  |
+| (mapcan f +l)     | Concatenating MAPCAR.               |
+| (member-if f l)   | Find cons with element in list.     |
+| (remove-if f l)   | Removed elemnts from list.          |
+| (reverse l)       | Reverse list.                       |
+| (position x l ?f) | Find position of object in list.    |
+| (split x l ?f)    | Split list where object occurs.     |
+| (subseq l n n)    | Return sublist.                     |
 
 ### (list +x): Make list of arguments.
 
@@ -1296,11 +1902,78 @@ programming languages.
 
 ### (cdrlist l): Get rest elements of lists.
 
+### (append +l): Copy and append lists.
+
 ### (copy-list x): Copy list.
 
-### (copy x): Copy recursively.
+### (copy-tree x): Copy recursively.
+
+### (cut-at n l): Destructively split list at position.
+
+~~~lisp
+(let l '(l i s p)
+  l             ; -> (l i s p)
+  (cut-at 2 l)  ; -> (s p)
+  l)            ; -> (l i)
+~~~
 
 ### (find x l): Find element X in list.
+
+### (nth n l): Get Nth element of list.
+
+~~~lisp
+(nth 0 '(l i s p)) ; -> l
+(nth 2 '(l i s p)) ; -> s
+~~~
+
+### (nthcdr n l): Get Nth cons of list.
+
+The name of NTHCDR is misleading, should you think of NTH
+being NTHCAR compared to NTHCDR.  NTHCDR actually returns
+the cons instead of the element that is in it.  And that
+is, of course, much more practical:
+
+~~~lisp
+(nth 0 '(l i s p)) ; -> (l i s p)
+(nth 2 '(l i s p)) ; -> (s p)
+~~~
+
+### (position x l ?f) | Find position of X in L.
+
+Returns the position of X in list L, starting with 0 for
+the first position, or NIL if X has not been found.
+Predicate F is EQL by default.
+
+~~~lisp
+(position 'foreign '(mom dad)) ; -> nil
+(position 'mom '(mom dad))     ; -> 0
+(position 'dad '(mom dad))     ; -> 1
+~~~
+
+### (split x l ?f) | Split list at object.
+
+Splits list L where object X occurs, tested by predicate F,
+which is EQL by default.  The object is removed from the
+list.
+
+~~~lisp
+(split 'b '(a a b c c c)) ; -> ((a a) (c c c))
+(split 'b '(a a b b c c)) ; -> ((a a) nil (c c))
+~~~
+
+### (subseq l start ?end): Get sublist.
+
+Copies part of a list into a new one from 'start' to 'end'.
+If 'end' is not given, everything to the end of the list is
+taken.  'start' and 'end' begin with number 0 for the first
+position in the list.  'end' is exclusive, telling with
+which position copying finishes.
+
+~~~lisp
+(subseq '(t u n i x) 2)   ; -> (n i x)
+(subseq '(t u n i x) 0 2) ; -> (t u)
+;         0 1 2 3 4
+~~~
 
 ## Loops
 
@@ -1395,11 +2068,70 @@ key and the rest is the value.
 
 ### (assoc x l): Return list that start with X.
 
-## Other
+## Version information
 
-| Function   | Description               |
-|------------|---------------------------|
-| (source s) | Get definition of symbol. |
+| Variable | Description                             |
+|----------|-----------------------------------------|
+| +target+ | Target machine the interpreter runs on. |
+|   +v+    | Git tag and short SHA.                  |
+|   +vb+   | Git branch.                             |
+
+## Maintainance
+
+| Function          | Description                       |
+|-------------------|-----------------------------------|
+| (source s)        | Get definition of symbol.         |
+| (compress-tree x) | Find and replace double subtrees. |
+
+### (source s): Print definition of a symbol.
+
+Prints a definition that can be used to re-define the
+symbol later, e.g. by writing it to a file for LOAD.
+
+### (compress-tree x): Find and replace double subtrees.
+
+***COMPRESS-TREE Cannot be used with compressed conses.***
+
+This is about finding duplicate subtrees in the heap and
+replacing them by referencing the "original".  This might
+pay out very well, although it is computationally
+demanding and is best performed in the background if the
+machine is otherwise idle.
+
+This function should only be used on modern machines or in
+acclerating emulators (e.g. "warp mode" in VICE).
+
+Here is how to compress all of the heap:
+
+~~~lisp
+(compress-tree *universe*)
+~~~
+
+#### The algorithm
+
+This algorithm assumes, that no-one else will modify the
+trees in the heap.  If lists are created, the algorithm
+cannot work alongside.
+
+Two iterators are being used.  The first starts at the root
+of the tree and traverses in CAR direction.  With each cons
+a second iterator goes through the rest of the tree, starting
+with the CDR of the cons and comparing each cons with the one
+where the first iterator resides.  It is also traversing back to the
+top of the tree to do the same with the CDRs of the conses
+which have already been visited.  Then the first iterator
+steps on and the process repeats until both iterator came
+back to the root of the tree.
+
+The movement of the first iterator could be implemented using
+recursion.  The application of the second iterator travelling
+up the same path prohibits that.  Instead, a path list has to
+be created by the first iterator which the second one can use
+to travel back down to the root.  From each cons on it can
+use regular recursion to travel through the rest of the tree.
+
+Essentially the first iterator is implemented as function
+COMPRESS-TREE and the second iterator as REPLACE-DUPLICATES.
 
 ## Target information
 
@@ -1505,3 +2237,91 @@ address of its implementation.
 |  3-4   | Pointer to next symbol for look-ups |
 |  5     | Name length (0-255)                 |
 | (6-x)  | Name (optional)                     |
+
+# Adding a new target
+
+## 1. Add a supplementary compiler configuration (cc65)
+
+Copy the configuration file of the desired platform from
+'src/contrib/cc65/cfg' to 'cfg/ld65/', and to
+'src/bin/lisp/cc65-cfg/'.  You'll have to tweak the latter to provide
+enough zeropage locations, and add these segments:
+
+~~~
+CODE_BUILTIN:  load = MAIN, type = ro;
+CODE_BUILTINS: load = MAIN, type = ro;
+CODE_ERROR:    load = MAIN, type = ro;
+CODE_EVAL:     load = MAIN, type = ro;
+CODE_GC:       load = MAIN, type = ro;
+CODE_HEAP:     load = MAIN, type = ro;
+CODE_IO:       load = MAIN, type = ro;
+CODE_IMAGE:    load = MAIN, type = ro;
+CODE_LIST:     load = MAIN, type = ro;
+CODE_PRINT:    load = MAIN, type = ro;
+CODE_READ:     load = MAIN, type = ro;
+CODE_REPL:     load = MAIN, type = ro;
+CODE_SLOW:     load = MAIN, type = ro;
+CODE_INIT:     load = MAIN, type = ro;
+~~~
+
+## 2. Add target to build system (GNU make)
+
+If it's a new compiler, add a new variable with the new target's name to
+'src/mk/Makefile.targets'.  For example, if that compiler is called
+"MagiC", and the new target is a "SlideRule", add
+
+~~~
+MAGIC_TARGETS = sliderule
+~~~
+
+## 3. Create build files for the compiler compiler.
+
+Copy one of files 'src/mk/Makefile.config.\*' to 'src/mk/Makefile.config.magic'
+and adapt it to that brand new, incredible MagiC compiler.  It should contain
+alls flags wants to play around with.  These are used by the new file
+'src/mk/Makefile.build.magic', which you can create the same way.
+
+## 4. Add C preprocessor definition for the target
+
+Add the preprocessor definition of TARGET\_SLIDERULE to the end of 'src/mk/Makefile.config'.
+You will need it to make changes in the C code of TUNIX Lisp.
+
+## 5. Add default compile-time configuration.
+
+These are in the head of 'src/lib/lisp/liblisp.h'.  Again, copy one that suits you
+best.  For our SlideRule it might look like this:
+
+~~~C
+// Calculation Circus Co. "SlideRule 2000"
+#ifdef TARGET_SLIDERULE
+
+// Save as much memory as can be.
+#define SLOW
+#define NO_DEBUGGER
+
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define STACK_SIZE          768
+#define TAGSTACK_SIZE       256
+#define RELOC_TABLE_ENTRIES 128
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#endif
+~~~
+
+## 6. Add libsimple I/O.
+
+Add 'libsimpleio-stdlib' for your target to
+'src/bin/lisp/Makefile'.  You may come up with your own, platform-specific libsimpleio add-on
+for the SlideRule.
+
+## 7. Build, fix, build, fix...
+
+Try to build for your target...
+
+~~~sh
+make worldclean world TARGET=sliderule
+~~~
+
+...and share your thoughts with us!

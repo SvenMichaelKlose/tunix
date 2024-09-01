@@ -144,7 +144,7 @@ main (int argc, char * argv[])
     }
     dev = atoi (argv[1]);
 
-    bzero (fifos, sizeof (fifos));
+    memset (fifos, 0, sizeof (fifos));
     id = drv_register (dev, vectors);
     if (id)
         printf (SUCCESS, id, dev);

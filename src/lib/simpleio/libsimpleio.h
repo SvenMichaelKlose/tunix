@@ -35,6 +35,14 @@ typedef struct _simpleio {
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 
+#ifdef __CC65__
+#include <cbm.h>
+extern char FASTCALL  reverse_case (char c); // TODO: CBM only. Doesn't belong here.
+extern simpleio_chn_t          directory_open  (void);
+extern char           FASTCALL directory_read  (simpleio_chn_t , struct cbm_dirent *);
+extern void           FASTCALL directory_close (simpleio_chn_t);
+#endif
+
 extern simpleio_chn_t fnin;     // Input file number.
 extern simpleio_chn_t fnout;    // Output file number.
 
@@ -54,6 +62,7 @@ extern char             conin       (void);
 extern char             in          (void);
 extern char             lastin      (void);
 extern void             putback     (void);
+extern void FASTCALL    putbackc    (char);
 extern bool             skip_spaces (void);
 extern void FASTCALL    inm         (char *, size_t);
 extern void FASTCALL    out         (char c);

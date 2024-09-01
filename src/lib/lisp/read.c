@@ -31,7 +31,7 @@ our_isalpha (char c)
 lispptr
 missing_closing_paren (void)
 {
-    error (ERROR_NO_PAREN, "No ')'");
+    error (ERROR_NO_PAREN, "Missing ')'");
     return t;
 }
 

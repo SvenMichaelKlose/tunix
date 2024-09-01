@@ -1,6 +1,11 @@
 The TUNIX Project
 =================
 
+⚠️ **This project is currently under heavy development and
+has not been officially released yet.**
+
+# Overview
+
 This project attempts to create an operating system for
 minimalistic computers that is portable, self-hosting, and
 multi-tasking, complete with a comprehensive set of
@@ -13,9 +18,34 @@ TUNIX Lisp is under heavy construction at the moment.
 * [Discuss](https://github.com/SvenMichaelKlose/tunix/discussions)
   (Be the first!)
 
-# Manuals
+## Targets
 
-Only what's most affecting.
+All targets require a disk drive of some sort, until images
+can be created by the host or other targets and then saved
+to other media, like tape or ROM, or within the Lisp program
+itself.
+
+| Target            | Requirements | Limits           |
+|-------------------|--------------|------------------|
+| Commodore C128    |              |                  |
+| Commodore C16     |              | No debugger.     |
+| Commodore C64     |              |                  |
+| Commodore Plus/4  |              |                  |
+| Commodore VIC-20  | +37K RAM.    |                  |
+
+## Untested targets
+
+| Target            |                                     |
+|-------------------|-------------------------------------|
+| Apple II          | Full memory expansion required.     |
+| Apple II enhanced |                                     |
+
+## Broken targets
+
+| Commodore PET     | SYNTAX ERROR on program start.      |
+| Generic Z80 CP/M  | Need help with z88dk compiler!      |
+
+# Manuals
 
 ## TUNIX Lisp (glowing hot!)
 
@@ -39,3 +69,4 @@ portale and embedded database will make a difference:
 * [VI editor](src/bin/vi/README.md)
 * [Console](src/bin/cbm-console/README.md)
 * [UltiFS filesystem](src/drv/ultifs/README.md)
+

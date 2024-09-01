@@ -12,6 +12,7 @@
 #include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
+#include <simpleio/control.h>
 #include <lisp/liblisp.h>
 
 jmp_buf restart_point;
@@ -29,11 +30,18 @@ lispptr unquote_spliced;
 #endif
 
 const char * env_files[] = {
+#ifdef TEST
     "smoke-test-read.lisp",
+#endif
     "git-version.lisp",
     "env-0.lisp",
+#ifdef TEST
     "smoke-test.lisp",
+#endif
     "env-1.lisp",
+#ifdef NO_APPEND
+    "append.lisp",
+#endif
 
     // Target-specific
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
@@ -43,10 +51,14 @@ const char * env_files[] = {
     "unix.lisp",
 #endif
 
+#ifdef TEST
     "test.lisp",
+#endif
     "env-2.lisp",
 #ifndef NO_ONERROR
+#ifdef TEST
     "test-onerror.lisp",
+#endif
 #endif
 
     // Early end for small machines.
@@ -60,9 +72,14 @@ const char * env_files[] = {
 #ifndef NO_DEBUGGER
     "stack.lisp",
 #endif
+#ifdef TEST
     "test-file.lisp",
+#endif
 #ifdef LOAD_ALL
     "all.lisp",
+#ifdef TEST
+    "test-all.lisp",
+#endif
 #endif // #ifdef LOAD_ALL
     "welcome.lisp",
 #endif // #ifndef TARGET_C16
@@ -138,6 +155,7 @@ lisp_init (void)
 #if defined(TEST) && defined(TARGET_UNIX)
     test ();
 #endif
+    init_list ();
     init_eval ();
     init_builtins ();
     init_quoting ();

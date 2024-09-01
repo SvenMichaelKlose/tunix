@@ -1,33 +1,37 @@
 include src/mk/Makefile.build
 
-TAG := $(shell git describe --tags 2>/dev/null)
-DISTDIR = tunix/$(TARGET)/
-ULTIMEM_IMG = tunix.img
+TAG 			 := $(shell git describe --tags 2>/dev/null)
+BRANCH 			 := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
+DISTDIR_BASE 	   ?= tunix
+DISTDIR 	 	    = $(DISTDIR_BASE)/$(TARGET)/
+RELEASE_LISP_FLAGS ?= -DVERBOSE_LOAD=1 -DVERBOSE_DEFINES=1
+RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
+
+ULTIMEM_IMG 		= tunix.img
 ULTIMEM_IMG_TRIMMED = tunix.trimmed.img
 
-all: src/include/git-version.h host src mkfs/mkfs.ultifs ultimem_image
-	@printf "# Making all.\n"
+all: src/include/git-version.h
+	$(MAKE) host
+	$(MAKE) src
+	$(MAKE) mkfs/mkfs.ultifs
+	$(MAKE) ultimem_image
 #	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
 
-clean:
-	$(MAKE) -C src clean
-	$(RM) -f git-version src/include/git-version.h
-ifeq ($(TARGET), vic20)
-	$(MAKE) -C mkfs clean
-	$(RM) -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
-endif
-
-src/include/git-version.h:
+src/include/git-version.h: FORCE
 	printf "$(TAG)" >git-version
-	printf "(var +v+ \"" >src/bin/lisp/git-version.lisp
-	cat git-version >>src/bin/lisp/git-version.lisp
-	printf "\")\n" >>src/bin/lisp/git-version.lisp
-	printf "(out \"TUNIX Lisp (\")(out +v+)(out \"" >>src/bin/lisp/git-version.lisp
+	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
+	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
+	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lisp
 	printf ")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
 	mkdir -p src/include
-	printf "#define TUNIX_GIT_VERSION \"" >src/include/git-version.h
+	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
+	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h
+	printf "\"\n" >>src/include/git-version.h
+	printf "#define TUNIX_GIT_VERSION \"" >>src/include/git-version.h
 	cat git-version >>src/include/git-version.h
 	printf "\"\n" >>src/include/git-version.h
+
+FORCE:
 
 host:
 	cp kgetin.s src/contrib/cc65/libsrc/plus4/
@@ -62,21 +66,30 @@ ifeq ($(TARGET), vic20)
 endif
 
 worldclean:
-	$(RM) -rf $(DISTDIR)
+	$(MAKE) -C src clean
+ifeq ($(TARGET), vic20)
+	$(MAKE) -C mkfs clean
+	rm -rf $(ULTIMEM_IMG) $(ULTIMEM_IMG_TRIMMED)
+endif
+	rm -rf $(DISTDIR)
 
 allworlds:
 	$(MAKE) host
-	$(MAKE) clean world TARGET=c128
-	$(MAKE) clean world TARGET=c16
-	$(MAKE) clean world TARGET=c64
-	$(MAKE) clean world TARGET=pet
-	$(MAKE) clean world TARGET=plus4
-	$(MAKE) clean world TARGET=sim6502
-	$(MAKE) clean world TARGET=unix
-	$(MAKE) clean world TARGET=vic20
+	$(MAKE) worldclean world TARGET=apple2
+	$(MAKE) worldclean world TARGET=apple2enh
+	#$(MAKE) worldclean world TARGET=atarixl
+	$(MAKE) worldclean world TARGET=c128
+	$(MAKE) worldclean world TARGET=c16
+	$(MAKE) worldclean world TARGET=c64
+	$(MAKE) worldclean world TARGET=pet
+	$(MAKE) worldclean world TARGET=plus4
+	$(MAKE) worldclean world TARGET=sim6502
+	$(MAKE) worldclean world TARGET=unix
+	$(MAKE) worldclean world TARGET=vic20
 
-test:
+test: all
 	$(MAKE) -C src test
+	./scripts/test-unix.sh
 
 mkfs/mkfs.ultifs:
 ifeq ($(TARGET), vic20)
@@ -91,3 +104,37 @@ ifeq ($(TARGET), vic20)
 	@printf "# Making trimmed UltiMem ROM image.\n"
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
+
+clean:
+	for i in $(VALID_TARGETS); do \
+    	$(MAKE) -C src clean TARGET=$$i; \
+    done
+	$(MAKE) -C mkfs clean
+	rm -rf $(DISTDIR_BASE)
+	rm -f git-version src/include/git-version.h
+	@if [ -d src/include ]; then rmdir src/include; fi
+
+.NOTPARALLEL: release
+release:
+	$(MAKE) clean hostclean
+	git submodule update --init --recursive
+	@git status --porcelain | grep "^??" > /dev/null && { \
+		printf "There are untracked files in the repository which are also not ignored:\n"; \
+		git status --porcelain | grep "^??"; \
+		read -p "Do you want to continue anyway? [y/N] " answer; \
+		if [ "$$answer" != "y" ]; then \
+			printf "User aborted.\n"; \
+			exit 1; \
+		fi \
+	} || { \
+		printf "No untracked files, proceeding with release.\n"; \
+	}
+	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
+	$(MAKE) host COPTFLAGS="-Ofast -flto -march=native" LDFLAGS="-Ofast -flto -march=native"
+	$(MAKE) test TARGET=unix
+	$(MAKE) allworlds NDEBUG=1 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
+	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
+	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
+	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md
+	rm -f $(RELEASE_ZIP_NAME)
+	zip -r -o $(RELEASE_ZIP_NAME) tunix

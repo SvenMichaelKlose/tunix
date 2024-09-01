@@ -12,11 +12,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#ifdef __CC65__
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #include "libsimpleio.h"
 
@@ -75,12 +71,18 @@ err ()
 }
 
 char
+_getold (void)
+{
+    do_putback[fnin] = false;
+    return last_in[fnin] = putback_chars[fnin];
+}
+
+char
 conin ()
 {
     if (!do_putback[fnin])
         return last_in[fnin] = io->conin ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+    return _getold ();
 }
 
 char
@@ -88,17 +90,22 @@ in ()
 {
     if (!do_putback[fnin])
         return last_in[fnin] = io->in ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+    return _getold ();
+}
+
+void FASTCALL
+putbackc (char c)
+{
+    if (!eof ()) {
+        do_putback[fnin] = true;
+        putback_chars[fnin] = c;
+    }
 }
 
 void
 putback ()
 {
-    if (!eof ()) {
-        do_putback[fnin] = true;
-        putback_chars[fnin] = last_in[fnin];
-    }
+    putbackc (last_in[fnin]);
 }
 
 char
@@ -206,7 +213,7 @@ void FASTCALL
 simpleio_set (simpleio * x)
 {
     io = x;
-    bzero (do_putback, sizeof (do_putback));
-    bzero (last_in, sizeof (last_in));
-    bzero (last_out, sizeof (last_out));
+    memset (do_putback, 0, sizeof (do_putback));
+    memset (last_in, 0, sizeof (last_in));
+    memset (last_out, 0, sizeof (last_out));
 }

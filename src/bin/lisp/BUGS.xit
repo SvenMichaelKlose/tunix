@@ -1,16 +1,7 @@
-[ ] Compile-time option NAIVE breaks sim65 test.
-[ ] ISAVE spoils I/O channels in LOAD.
-[ ] ERROR: Handle argument.
-[ ] Endless, printing 13s if not in function:
-    (while t
-      (let c (conin)
-        (or (== 0 c)
-            (print c))))
-
 Debugger
+[ ] Built-in name not shown but parent function on argument typ error.
 [ ] Stepping over NIL returns from function?
-[ ] IGNORE entered by user does not leave the debugger.
-[ ] Steps must be blocked until error is resolved.
+[ ] IGNORE entered by user does not leave the debugger?
 
 Commodore PET
 [ ] Program start breaks with syntax error.

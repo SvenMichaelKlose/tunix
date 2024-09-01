@@ -1,9 +1,11 @@
-(macro !? (c . x)
-  ;"Like '?' but assigning result of condition to '!'.
-  (? x
-     $(let ! ,c
-        (? !
-           ,(car x)
-           ,@(? (cdr x)
-                $((%!? ,@(cdr x))))))
-     c))
+(macro !? x
+  ;"Like '?' but assigning results of conditions to '!'.
+  (let rec '((x)
+              (and x
+                   (? (cdr x)
+                      $((= ! ,(car x))
+                        ,(cadr x)
+                        ,@(rec (cddr x)))
+                      (list (car x)))))
+    $(let ! nil
+       (? ,@(rec x)))))

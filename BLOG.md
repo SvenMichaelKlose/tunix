@@ -3,9 +3,33 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-08-01
+# 2024-09-02
 
-Two days passed and yesterday I woke up brain dead.  One
+I gave the terminal code a little rework.  The Unix part is
+more or less untested.  The editor also has to run on Unix
+terminals, so it can run on microcontrollers.  I also
+implented APPEND as an optional built-in funciton, expecting
+it to give MACROEXPAND a little boost.  And happy me, I also
+removed some unnecessary use of the object stack.  Every
+piece of code is dragging 8-bit targets down noticably.  I
+ended up breaking the test runs and that is frustrating at
+the end of the day.
+
+I think my mind got numbed by some plant-based gnat
+repellant, because since I'm not using it any more I'm not
+waking up, feeling like I've been on a drinking binge, and I
+can think clearer now.  Just for the record: I only do
+coffee and tobacco and sugary things tend to rot away in
+reach.  I'm an athletic disappointment to the doctors when
+it comes to earning money, doing 50 miles on a bike without
+getting exhausted.  That's what programming is for.
+
+Now I'll go dream about a fantastic Lisp IDE for our beloved
+machines.
+
+# 2024-09-01
+
+Two days passed and yesterday I woke up brain-dead.  One
 more minute of programming and I would have qualified for
 and official care level and free drool bib.  Great
 opportunity to head out and inspect other things entirely

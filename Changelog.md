@@ -17,12 +17,7 @@ and this project adheres to
 
 - Terminal control codes to get the cursor position.
 - putbackc() to put back another char than the last one.
-
-### libsimpleio-cbm
-
-#### Added
-
-- Direct mode with no scrolling an separate CR/LF.
+- Direct mode with no scrolling and separate CR/LF.
 
 
 ## [v0.0.14] - 2024-08-31

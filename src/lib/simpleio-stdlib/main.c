@@ -97,6 +97,8 @@ cmd_clr (void)
         fputs ("\033[?25l", stdout);
     if (c & TERM_FLAG_REVERSE)
         fputs ("\033[27m", stdout);
+    if (c & TERM_FLAG_DIRECT)
+        reset_terminal_mode ();
     fflush (stdout);
 }
 
@@ -108,6 +110,8 @@ cmd_set (void)
         fputs ("\033[?25h", stdout);
     if (c & TERM_FLAG_REVERSE)
         fputs ("\033[7m", stdout);
+    if (c & TERM_FLAG_DIRECT)
+        set_nonblocking_mode ();
     fflush (stdout);
 }
 

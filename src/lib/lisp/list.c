@@ -65,15 +65,12 @@ copy_list (lispptr x, char mode, lispptr needle)
         return nil;
 
     // Remove first elements if they match 'needle'.
-    if (mode == COPY_REMOVE) {
+    if (mode == COPY_REMOVE)
         while (CONSP(x) && needle == CAR(x))
             x = CDR(x);
-    }
 
     // Copy first element.
-    PUSH(x); // TODO: Explain why this is required. (smk)
     list_start = list_last = make_cons (CAR(x), nil);
-    POP(x);
 
     // Append rest of elements.
     DOLIST(x, CDR(x)) {
@@ -85,9 +82,7 @@ copy_list (lispptr x, char mode, lispptr needle)
             continue;
 
         // Copy element.
-        PUSH(x); // TODO: Explain why this is required. (smk)
         tmp = make_cons (CAR(x), nil);
-        POP(x);
 
         // Append to last.
         SETCDR(list_last, tmp);

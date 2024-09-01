@@ -75,6 +75,18 @@ cmd_set (void)
 }
 
 void
+cmd_getx (void)
+{
+    putbackc (wherex ());
+}
+
+void
+cmd_gety (void)
+{
+    putbackc (wherey ());
+}
+
+void
 cmd_clrscr (void)
 {
     cbm_k_bsout (147);

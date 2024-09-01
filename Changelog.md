@@ -11,6 +11,13 @@ and this project adheres to
 
 ## [current]
 
+### libsimpleio
+
+#### Added
+
+- Terminal control codes to get the cursor position.
+- putbackc() to put back another char than the last one.
+
 ### libsimpleio-cbm
 
 #### Added

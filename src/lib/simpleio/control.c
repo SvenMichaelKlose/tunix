@@ -18,8 +18,8 @@ con_cmd con_commands[] = {
     { 2, cmd_goto },    // 1
     { 1, cmd_clr },     // 2
     { 1, cmd_set },     // 3
-    { 0, cmd_null },    // 4
-    { 0, cmd_null },    // 5
+    { 0, cmd_getx },    // 4
+    { 0, cmd_gety },    // 5
     { 0, cmd_null },    // 6
     { 0, cmd_null },    // 7
     { 0, cmd_null },    // 8

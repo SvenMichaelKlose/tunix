@@ -62,6 +62,7 @@ extern char             conin       (void);
 extern char             in          (void);
 extern char             lastin      (void);
 extern void             putback     (void);
+extern void FASTCALL    putbackc    (char);
 extern bool             skip_spaces (void);
 extern void FASTCALL    inm         (char *, size_t);
 extern void FASTCALL    out         (char c);

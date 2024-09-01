@@ -93,13 +93,19 @@ in ()
     return _getold ();
 }
 
-void
-putback ()
+void FASTCALL
+putbackc (char c)
 {
     if (!eof ()) {
         do_putback[fnin] = true;
-        putback_chars[fnin] = last_in[fnin];
+        putback_chars[fnin] = c;
     }
+}
+
+void
+putback ()
+{
+    putbackc (last_in[fnin]);
 }
 
 char

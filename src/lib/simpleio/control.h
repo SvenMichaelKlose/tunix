@@ -5,6 +5,8 @@
 #define TERM_CMD_GOTO    1  // Position cursor.
 #define TERM_CMD_CLR     2  // Clear flags.
 #define TERM_CMD_SET     3  // Set flags.
+#define TERM_CMD_GETX    4  // Get X position.
+#define TERM_CMD_GETY    5  // Get Y position.
 
 #define TERM_FLAG_CURSOR   1    // Cursor visibility.
 #define TERM_FLAG_REVERSE  2    // Reverse mode.
@@ -15,6 +17,8 @@ extern void cmd_null (void);
 extern void cmd_goto (void);
 extern void cmd_clr (void);
 extern void cmd_set (void);
+extern void cmd_getx (void);
+extern void cmd_gety (void);
 extern void cmd_lf (void);
 extern void cmd_cr (void);
 extern void cmd_clrscr (void);

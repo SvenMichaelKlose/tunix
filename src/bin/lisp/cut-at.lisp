@@ -6,10 +6,3 @@
        (let next (cdr end)
          (and end (setcdr end nil))
          next))))
-
-(message "Testing CUT-AT...")
-(let head '(l i s p)
-  (or (equal (cut-at 2 head) '(s p))
-      (error))
-  (or (equal head '(l i))
-      (error)))

@@ -138,7 +138,7 @@ cmd_cr (void)
     fputc (13, stdout);
 }
 
-#ifndef TARGET_SIM6502
+#ifndef __CC65__
 
 // Get terminal cursor position.
 // Returns 'false' on error.
@@ -187,24 +187,24 @@ error_with_term_restored:
     return false;
 }
 
-#endif // #ifndef TARGET_SIM6502
+#endif // #ifndef __CC65__
 
 void
 cmd_getx (void)
 {
-#ifndef TARGET_SIM6502
+#ifndef __CC65__
     int row, col;
     getxy (&row, &col);
     putbackc (row);
 #else
     putbackc (0);
-#endif // #ifndef TARGET_SIM6502
+#endif // #ifndef __CC65__
 }
 
 void
 cmd_gety (void)
 {
-#ifndef TARGET_SIM6502
+#ifndef __CC65__
     int row, col;
     getxy (&row, &col);
     putbackc (col);

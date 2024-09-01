@@ -167,7 +167,7 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
     // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
-        out ("\002\004"); // Normal terminal.
+        outs ("\002\004"); // Normal terminal.
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
         fresh_line ();

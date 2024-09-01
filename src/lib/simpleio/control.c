@@ -33,6 +33,7 @@ con_cmd con_commands[] = {
 cmd_handler cmd_current;
 char cmd_params_needed;
 char cmd_params[2];
+bool term_direct_mode;
 
 bool FASTCALL
 simpleio_control (char c)

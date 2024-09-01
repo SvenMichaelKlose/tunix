@@ -8,6 +8,7 @@
 
 #define TERM_FLAG_CURSOR   1    // Cursor visibility.
 #define TERM_FLAG_REVERSE  2    // Reverse mode.
+#define TERM_FLAG_DIRECT   4    // Raw terminal.
 
 // Platform-specific handlers.
 extern void cmd_null (void);
@@ -30,6 +31,7 @@ extern con_cmd con_commands[];
 extern cmd_handler cmd_current;
 extern char cmd_params_needed;
 extern char cmd_params[2];
+extern bool term_direct_mode;
 
 extern bool FASTCALL simpleio_control (char c);
 

@@ -735,6 +735,7 @@ New channels are created by OPEN to access files:
 |------|----------------------|
 |   1  | Cursor visibility    |
 |   2  | Reverse mode         |
+|   4  | Direct mode          |
 
 Flags may be combined.
 

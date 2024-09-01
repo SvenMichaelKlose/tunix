@@ -71,12 +71,18 @@ err ()
 }
 
 char
+_getold (void)
+{
+    do_putback[fnin] = false;
+    return last_in[fnin] = putback_chars[fnin];
+}
+
+char
 conin ()
 {
     if (!do_putback[fnin])
         return last_in[fnin] = io->conin ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+    return _getold ();
 }
 
 char
@@ -84,8 +90,7 @@ in ()
 {
     if (!do_putback[fnin])
         return last_in[fnin] = io->in ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+    return _getold ();
 }
 
 void

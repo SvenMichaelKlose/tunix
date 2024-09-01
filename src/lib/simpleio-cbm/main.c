@@ -58,6 +58,8 @@ cmd_clr (void)
         cursor (0);
     if (c & TERM_FLAG_REVERSE)
         revers (0);
+    if (c & TERM_FLAG_DIRECT)
+        term_direct_mode = false;
 }
 
 void
@@ -68,6 +70,8 @@ cmd_set (void)
         cursor (1);
     if (c & TERM_FLAG_REVERSE)
         revers (1);
+    if (c & TERM_FLAG_DIRECT)
+        term_direct_mode = true;
 }
 
 void
@@ -79,13 +83,19 @@ cmd_clrscr (void)
 void
 cmd_lf (void)
 {
-    cbm_k_bsout (10);
+    if (term_direct_mode)
+        cputc (10);
+    else
+        cbm_k_bsout (10);
 }
 
 void
 cmd_cr (void)
 {
-    cbm_k_bsout (13);
+    if (term_direct_mode)
+        cputc (13);
+    else
+        cbm_k_bsout (13);
 }
 
 
@@ -263,7 +273,10 @@ raw_out (char c)
         else
             c = reverse_case (c);
     }
-    cbm_k_bsout (c);
+    if (term_direct_mode)
+        cputc (c);
+    else
+        cbm_k_bsout (c);
     set_status ();
 }
 

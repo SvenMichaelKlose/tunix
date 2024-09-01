@@ -9,6 +9,15 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### libsimpleio-cbm
+
+#### Added
+
+- Direct mode with no scrolling an separate CR/LF.
+
+
 ## [v0.0.14] - 2024-08-31
 
 Optimizations to make the upcoming editor usable.  Also, a

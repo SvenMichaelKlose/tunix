@@ -40,13 +40,15 @@
   (when l
     (outlim *con-w*)
     (out l))
-  (out (nthcdr (length l) *spaces*)))
+  (out (or (nthcdr (length l) *spaces*) "")))
 
 (fn update-screen ()
-  (let y 0
-    (dolist (l (subseq *lines* *conln* (+ *conln* (- *con-h* 2))))
-      (update-line (symbol-name l) y)
-      (!++ y))))
+  (with ((y 0)
+         (l (nthcdr *conln* *lines*)))
+    (dotimes (i (+ *conln* (- *con-h* 2)))
+      (update-line (and l (symbol-name (car l))) y)
+      (!++ y)
+      (= l (cdr l)))))
 
 (fn status ()
   (con-xy 0 (-- *con-h*))
@@ -187,23 +189,22 @@
           ; Replace line.
           (progn
             (putback)
-            (setcar lcons !)))))
-
-    ; Handle line motion and commands.
-    (case (conin)
-      +arr-up+
-        (? (< 0 *ln*)
-           (!-- *ln*))
-      +arr-down+
-        (? (< *ln* (-- (length *lines*)))
-           (!++ *ln*))
-      +hotkey+
-        (progn
-          (status "Command: " "")
-          (case (conin)
-            \s  (save-file)
-            \q  (and (quit-editor)
-                     (return nil)))))))
+            (setcar lcons !)
+            ; Handle line motion and commands.
+            (case (conin)
+              +arr-up+
+                (? (< 0 *ln*)
+                   (!-- *ln*))
+              +arr-down+
+                (? (< *ln* (-- (length *lines*)))
+                   (!++ *ln*))
+              +hotkey+
+                (progn
+                  (status "Command: " "")
+                  (case (conin)
+                    \s  (save-file)
+                    \q  (and (quit-editor)
+                             (return nil)))))))))))
 
 (fn edit file
   (= *lx* 0)
@@ -230,5 +231,7 @@
        "it fast.  Still, it's pure cc65-compiled"
        "ANSI-C."))
   (clrscr)
+  (con-clrset 4 t)   ; Direct mode
   (edit-lines)
+  (con-clrset 4 nil) ; Normal mode
   (clrscr))

@@ -1,4 +1,5 @@
 Debugger
+[ ] Built-in name not shown but parent function on argument typ error.
 [ ] Stepping over NIL returns from function?
 [ ] IGNORE entered by user does not leave the debugger?
 

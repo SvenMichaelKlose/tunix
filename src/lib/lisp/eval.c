@@ -180,23 +180,26 @@ do_eval:
     outs ("-> "); print (x); terpri ();
     POP_TAG(fnout);
 #endif
+
 #ifndef NAIVE
     _GCSTACK_CHECK_OVERFLOW();
     _TAGSTACK_CHECK_OVERFLOW();
 #endif
+
 #ifndef NO_DEBUGGER
     // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
 #ifndef NO_DEBUGGER
-        if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
-            do_invoke_debugger = true;
+    if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
+        do_invoke_debugger = true;
 #endif
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER);
     }
 #endif
+
     // Evaluate atom.
     if (ATOM(x)) {
         if (x) // (NOT_NIL(x)) surfaces https://github.com/cc65/cc65/issues/2487
@@ -218,6 +221,12 @@ do_eval:
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
     }
+
+    // Now we have:
+    //
+    // current_expr, x:  Current expression
+    // unevaluated_arg1: CAR(x)
+    // arg1:             CAR(x) evaluated
 
     /////////////////////////
     /// BLOCK name . body ///
@@ -299,6 +308,7 @@ next_block_statement:
         goto block_statement;
     }
 
+    // It wasn't a BLOCK.
     // Get argument list following the procedure's name.
     args = CDR(x);
 
@@ -463,13 +473,11 @@ break_builtin_call:
         goto set_arg_values;
     }
 
+    // It was neither a BLOCK or built-in procedure.
+
     //////////////////////////////
     /// USER-DEFINED PROCEDURE ///
     //////////////////////////////
-
-    // Save argument names and their old values on the
-    // stack and overwrite the names' symbol values
-    // with evaluated ones.  Restore them on return.
 
 #ifndef NAIVE
     // Ensure user-defined function.
@@ -479,11 +487,8 @@ break_builtin_call:
         goto do_return;
     }
 #endif
-    // Save stack pointer start.
-    stack_entered = stack;
-
-    // Save stack position of old argument symbol values.
-    stack_old_arg_values = stack;
+    // Save stack pointer for return.
+    stack_entered = stack_old_arg_values = stack;
 
     // Get argument definition and number of arguments.
     argdefs = FUNARGS(arg1);
@@ -495,9 +500,8 @@ break_builtin_call:
     while (tmpc--)
         PUSH(nil);
 
-    // Evaluate argument.
 do_argument:
-    // End of arguments.
+    // Start evaluating body when done with arguments.
     if (NOT(args) && NOT(argdefs))
         goto start_body;
 
@@ -513,10 +517,11 @@ do_argument:
         goto start_body;
     }
 #endif
-    // Rest of argument list. (consing)
+
+    // Rest argument.
     if (ATOM(argdefs)) {
 #ifndef NAIVE
-        // Check if argument name is a symbol.
+        // Ensure argument name is a symbol.
         if (!SYMBOLP(argdefs))
             error_argname (argdefs);
 #endif

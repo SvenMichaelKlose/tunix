@@ -97,8 +97,10 @@ cmd_clr (void)
         fputs ("\033[?25l", stdout);
     if (c & TERM_FLAG_REVERSE)
         fputs ("\033[27m", stdout);
+#ifdef TARGET_UNIX
     if (c & TERM_FLAG_DIRECT)
         reset_terminal_mode ();
+#endif
     fflush (stdout);
 }
 
@@ -110,8 +112,10 @@ cmd_set (void)
         fputs ("\033[?25h", stdout);
     if (c & TERM_FLAG_REVERSE)
         fputs ("\033[7m", stdout);
+#ifdef TARGET_UNIX
     if (c & TERM_FLAG_DIRECT)
         set_nonblocking_mode ();
+#endif
     fflush (stdout);
 }
 
@@ -134,11 +138,14 @@ cmd_cr (void)
     fputc (13, stdout);
 }
 
+#ifndef TARGET_SIM6502
+
 // Get terminal cursor position.
 // Returns 'false' on error.
 bool
 getxy (int * col, int * row)
 {
+#ifdef TARGET_UNIX
     int old_c_lflag;
     struct termios term;
 
@@ -150,6 +157,7 @@ getxy (int * col, int * row)
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
     term.c_lflag = old_c_lflag;
+#endif
 
     // Request cursor position
     if (0 > write (STDOUT_FILENO, "\033[6n", 4))
@@ -164,31 +172,45 @@ getxy (int * col, int * row)
     if (2 != sscanf (buf, "\033[%d;%dR", row, col))
         goto error_with_term_restored;
 
+#ifdef TARGET_UNIX
     // Restore former terminal status.
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
+#endif
 
     return true;
 
 error_with_term_restored:
+#ifdef TARGET_UNIX
     tcsetattr (STDIN_FILENO, TCSANOW, &term);
+#endif
     return false;
 }
+
+#endif // #ifndef TARGET_SIM6502
 
 void
 cmd_getx (void)
 {
+#ifndef TARGET_SIM6502
     int row, col;
     getxy (&row, &col);
     putbackc (row);
+#else
+    putbackc (0);
+#endif // #ifndef TARGET_SIM6502
 }
 
 void
 cmd_gety (void)
 {
+#ifndef TARGET_SIM6502
     int row, col;
     getxy (&row, &col);
     putbackc (col);
+#else
+    putbackc (0);
+#endif // #ifndef TARGET_SIM6502
 }
 
 bool

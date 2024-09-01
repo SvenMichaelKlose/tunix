@@ -121,7 +121,7 @@
                  (del-char (!-- *lx*))))
           (progn
             ; Put back unknown key and return line.
-            (when (< c \ )
+            (when (or (< c \ ) (> c 126))
               (putback)
               (return (symbol line)))
             ; Insert char and step right.

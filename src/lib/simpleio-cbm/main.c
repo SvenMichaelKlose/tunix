@@ -77,13 +77,13 @@ cmd_set (void)
 void
 cmd_getx (void)
 {
-    putbackc (wherex ());
+    putbackc (wherex () + 1);
 }
 
 void
 cmd_gety (void)
 {
-    putbackc (wherey ());
+    putbackc (wherey () + 1);
 }
 
 void

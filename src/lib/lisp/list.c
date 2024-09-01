@@ -52,10 +52,12 @@ lispptr needle;
 lispptr FASTCALL
 copy_list (lispptr x, char mode, lispptr needle)
 {
-    if (ATOM(x))
-        return x;
+    tmp2 = x;
 
-    tmp = CDR(x);
+    if (ATOM(tmp2))
+        return tmp2;
+
+    tmp = CDR(tmp2);
 #ifndef NAIVE
     if (NOT_NIL(tmp) && ATOM(tmp))
         return error_cons_expected (tmp);
@@ -66,35 +68,34 @@ copy_list (lispptr x, char mode, lispptr needle)
 
     // Remove first elements if they match 'needle'.
     if (mode == COPY_REMOVE)
-        while (CONSP(x) && needle == CAR(x))
-            x = CDR(x);
+        while (CONSP(tmp2) && needle == CAR(tmp2))
+            tmp2 = CDR(tmp2);
 
     // Copy first element.
-    list_start = list_last = make_cons (CAR(x), nil);
+    list_start = list_last = make_cons (CAR(tmp2), nil);
 
     // Append rest of elements.
-    DOLIST(x, CDR(x)) {
-        if (mode == COPY_BUTLAST && NOT(CDR(x)))
+    DOLIST(tmp2, CDR(tmp2)) {
+        if (mode == COPY_BUTLAST && NOT(CDR(tmp2)))
             goto end_butlast;
 
         // Skip element to remove.
-        if (mode == COPY_REMOVE && needle == CAR(x))
+        if (mode == COPY_REMOVE && needle == CAR(tmp2))
             continue;
 
-        // Copy element.
-        tmp = make_cons (CAR(x), nil);
-
-        // Append to last.
+        // Copy and append cons.
+        tmp = make_cons (CAR(tmp2), nil);
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
 
 #ifndef NAIVE
-    if (NOT_NIL(x))
-        return error_cons_expected (x);
+    if (NOT_NIL(tmp2))
+        return error_cons_expected (tmp2);
 #endif
 
 end_butlast:
+    tmp2 = nil;
     return list_start;
 }
 

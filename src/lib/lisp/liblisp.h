@@ -95,6 +95,10 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
+// Disable built-ins
+//#define NO_APPEND
+//#define NO_NCONC
+//#define NO_SUBSEQ
 
 /// Additional features
 

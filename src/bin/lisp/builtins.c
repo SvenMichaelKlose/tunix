@@ -239,6 +239,62 @@ bi_nthcdr (void)
     return arg2;
 }
 
+#ifndef NO_APPEND
+
+lispptr
+bi_append ()
+{
+    x = eval_list ();
+    list_start = list_last = nil;
+    while (CONSP(x)) {
+        // Skip NILs in arguments.
+        while (CONSP(x) && !CONSP(CAR(x))) {
+#ifndef NAIVE
+            if (NOT_NIL(CAR(x)))
+                return error_cons_expected (tmp);
+#endif
+            x = CDR(x);
+        }
+
+        // Break on end of argument list.
+        if (NOT(x))
+            goto done;
+
+        // Copy first element.
+        arg1 = CAR(x);
+        tmp = make_cons (CAR(arg1), nil);
+        if (NOT_NIL(list_last))
+            SETCDR(list_last, tmp);
+        list_last = tmp;
+
+        if (NOT(list_start))
+            list_start = list_last;
+
+        // Append rest of elements.
+        DOLIST(arg1, CDR(arg1)) {
+            // Copy element.
+            tmp = make_cons (CAR(arg1), nil);
+
+            // Append to last.
+            SETCDR(list_last, tmp);
+            list_last = tmp;
+        }
+
+#ifndef NAIVE
+        if (NOT_NIL(arg1))
+            return error_cons_expected (x);
+#endif
+        x = CDR(x);
+    }
+
+done:
+    return list_start;
+}
+
+#endif // #ifndef NO_APPEND
+
+#ifndef NO_NCONC
+
 lispptr
 bi_nconc (void)
 {
@@ -275,6 +331,10 @@ bi_nconc (void)
 
     return list_start;
 }
+
+#endif // #ifndef NO_NCONC
+
+#ifndef NO_SUBSEQ
 
 lispptr
 bi_subseq (void)
@@ -342,6 +402,8 @@ bi_subseq (void)
 
     return list_start;
 }
+
+#endif // #ifndef NO_SUBSEQ
 
 lispptr
 bi_numberp (void)
@@ -1119,8 +1181,15 @@ const struct builtin builtins[] = {
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
     { "nthcdr",     "nx",   bi_nthcdr },
+#ifndef NO_APPEND
+    { "append",     NULL,   bi_append },
+#endif
+#ifndef NO_NCONC
     { "nconc",      NULL,   bi_nconc },
+#endif
+#ifndef NO_SUBSEQ
     { "subseq",     NULL,   bi_subseq },
+#endif
 
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },

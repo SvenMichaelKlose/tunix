@@ -21,7 +21,15 @@ and this project adheres to
 
 ### Interpreter
 
+#### Changed
+
 - TIME supports TARGET\_PET.
+- SUBSEQ: Optional to be built-in.
+
+#### Added
+
+- APPEND may be built-in.
+- Compile-time options NO\_APPEND, NO\_NCONC, NO\_SUBSEQ.
 
 
 ## [v0.0.14] - 2024-08-31

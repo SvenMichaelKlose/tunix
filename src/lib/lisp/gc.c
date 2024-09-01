@@ -287,6 +287,10 @@ relocate (void)
     for (gp = global_pointers; *gp; gp++)
         **gp = relocate_ptr (**gp);
 
+    // Relocate GC'ed stack.
+    for (p = stack; p != stack_end; p += sizeof (lispptr))
+        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
     do {
@@ -317,10 +321,6 @@ relocate (void)
 #ifdef FRAGMENTED_HEAP
     } while ((++heap)->start);
 #endif
-
-    // Relocate GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
-        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
 
 #ifdef VERBOSE_GC
     terpri ();

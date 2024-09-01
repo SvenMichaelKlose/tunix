@@ -5,11 +5,32 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-08-01
 
+Two days passed and yesterday I woke up brain dead.  One
+more minute of programming and I would have qualified for
+and official care level and free drool bib.  Great
+opportunity to head out and inspect other things entirely
+and to visit friends - mine aren't into the details of
+computing and that's perfect for me.  I barely talk about
+what I'm doing with them and if I'm away from the machine,
+that's usually because I'm fed up.
+
 Implementing NTHCDR and SUBSEQ as C functions built into the
 interpreter, as well as adding OUTLIM, improved performance
-as expected.  And SUBSEQ allocates too much, so garbage
-collection is triggered too often.  Unfortunately native
-CBM console output isn't known for its snappiness either.
+as expected.  Similarly expected, SUBSEQ allocates too much,
+so garbage collection is triggered too often.  Unfortunately
+native CBM console output isn't known for its snappiness
+either.  When outputting a list of chars, they'll have to be
+written to The Buffer first or the overhead of calling out()
+is weighing in too heavily.  But whole lines shouldn't be
+updated for each keypress in the first place, nor should the
+whole screen be for up and down movements, unless it needs
+to be scrolled.  cc65's conio library doesn't support
+scrolling any way.
+
+Another thing on the list is replacing SUBSEQ by the new
+function CUT-AT which splits a list at a position and
+returns the cut-off tail.  That actually removes two SUBSEQs
+for inserting chars or lines.
 
 # 2024-08-29
 

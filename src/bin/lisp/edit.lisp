@@ -126,9 +126,8 @@
               (return (symbol line)))
             ; Insert char and step right.
             (= *saved?* nil)
-            (= line (nconc (subseq line 0 *lx*)
-                           (list c)
-                           (subseq line *lx*)))
+            (= line (!= (cut-at line *lx*)
+                      (nconc line (list c) !)))
             (!++ *lx*)))))))
 
 ;;; File I/O
@@ -186,15 +185,17 @@
 ;;; Text editing
 
 (fn del-line (ln)
-  (= *lines* (nconc (subseq *lines* 0 ln)
-                    (subseq *lines* (++ ln)))))
+  (= *lines* (!= (cut-at *lines* ln)
+               (nconc *lines* (cdr !)))))
 
 (fn ins-line (l)
-  (= *lines* (nconc (subseq *lines* 0 *ln*)
-                    (let lc (symbol-name l)
-                      (list (symbol (subseq lc 0 *lx*))
-                            (symbol (subseq lc *lx*))))
-                    (subseq *lines* (++ *ln*))))
+  (= *lines* (!= (cut-at *lines* *ln*)
+               (nconc *lines*
+                      (let lc (symbol-name l)
+                        (!= (cut-at lc *lx*)
+                            (list (symbol lc)
+                                  (symbol !))))
+                      !)))
   (!++ *ln*)
   (= *lx* 0))
 

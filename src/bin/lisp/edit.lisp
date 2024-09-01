@@ -29,6 +29,19 @@
 (fn con-rvs (x)
   (con-clrset x 2))
 
+(fn con-direct (x)
+  (con-clrset x 4))
+
+(fn con-get (x)
+  (out x)
+  (or (conin) 0))
+
+(fn con-x ()
+  (con-get 4))
+
+(fn con-y ()
+  (con-get 5))
+
 ;;; Display
 
 (var *spaces* nil)
@@ -56,12 +69,18 @@
   (con-xy 0 (-- *con-h*))
   (out msg))
 
+(fn status-pos ()
+  (con-rvs t)
+  (con-xy (- *con-w* 8) (-- *con-h*))
+  (print (++ *lx*))(out ",")(print (++ *ln*))
+  (con-rvs nil)
+  (out "    "))
+
 (fn status ()
   (con-xy 0 (-- *con-h*))
   (con-rvs t)
   (apply out *filename* (list (? (not *lines*) " (new)" "")))
-  (out " ")(print (++ *lx*))(out ",")(print (++ *ln*))
-  (con-rvs nil))
+  (status-pos))
 
 ;;; Line editing
 
@@ -179,46 +198,59 @@
   (!++ *ln*)
   (= *lx* 0))
 
+(fn editor-cmds ()
+  (prompt "Ctrl+K+")
+  (case (conin)
+    \s  (save-file)
+    \q  (and (quit-editor)
+             (return t))
+    \e  (progn
+          (prompt ": ")
+          (con-direct nil)
+          (!= (eval (read))
+            (terpri)
+            (print !))
+          (conin)
+          (con-direct t))))
+
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
+  (clrscr)
   (while (not (eof))
+    (con-direct t)
     (update-screen)
     (status)
 
-    ; Edit current line.
-    (let lcons (nthcdr *ln* *lines*)
-      (!= (edit-line (car lcons))
-        (case (conin)
-          +enter+
-            (ins-line !)
-          ;+del+
-          ; Replace line.
-          (progn
-            (putback)
-            (setcar lcons !)
-            ; Handle line motion and commands.
-            (case (conin)
-              +arr-up+
-                (? (< 0 *ln*)
-                   (!-- *ln*))
-              +arr-down+
-                (? (< *ln* (-- (length *lines*)))
-                   (!++ *ln*))
-              +hotkey+
-                (progn
-                  (prompt "Ctrl+K+")
-                  (case (conin)
-                    \s  (save-file)
-                    \q  (and (quit-editor)
-                             (return nil))
-                    \e  (progn
-                          (prompt ": ")
-                          (con-clrset nil 4)
-                          (!= (eval (read))
-                            (terpri)
-                            (print !))
-                          (conin)
-                          (con-clrset t 4)))))))))))
+    (block t
+      no-screen-update
+      (status-pos)
+      ; Edit current line.
+      (let lcons (nthcdr *ln* *lines*)
+        (!= (edit-line (car lcons))
+          (case (conin)
+            +enter+
+              (ins-line !)
+            ;+del+
+            ; Replace line.
+            (progn
+              (putback)
+              (setcar lcons !)
+              ; Handle line motion and commands.
+              (case (conin)
+                +arr-up+
+                  (progn
+                    (when (< 0 *ln*)
+                      (!-- *ln*))
+                    (go no-screen-update))
+                +arr-down+
+                  (progn
+                    (when (< *ln* (-- (length *lines*)))
+                      (!++ *ln*))
+                    (go no-screen-update))
+                +hotkey+
+                  (? (editor-cmds)
+                     (return nil)))))))))
+  (con-direct nil))
 
 (fn edit file
   (= *lx* 0)
@@ -241,8 +273,5 @@
        "Ctrl+K-e(gc) says there're about 10000"
        "bytes left..."
        ))
-  (clrscr)
-  (con-clrset t 4)   ; Direct mode
   (edit-lines)
-  (con-clrset nil 4) ; Normal mode
   (clrscr))

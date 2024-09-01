@@ -268,18 +268,20 @@ alloc (uchar size, uchar type)
     return h;
 }
 
+lispptr make_cons_tmp;
+lispptr make_cons_car;
+lispptr make_cons_cdr;
+
 // Make list cell.
 lispptr FASTCALL
 make_cons (lispptr car, lispptr cdr)
 {
-    PUSH(car);
-    PUSH(cdr);
-    tmp = alloc (sizeof (cons), TYPE_CONS);
-    POP(cdr);
-    POP(car);
-    CONS(tmp)->car = car;
-    CONS(tmp)->cdr = cdr;
-    return tmp;
+    make_cons_car = car;
+    make_cons_cdr = cdr;
+    make_cons_tmp = alloc (sizeof (cons), TYPE_CONS);
+    CONS(make_cons_tmp)->car = make_cons_car;
+    CONS(make_cons_tmp)->cdr = make_cons_cdr;
+    return make_cons_tmp;
 }
 
 // Make number object.

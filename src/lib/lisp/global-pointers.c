@@ -42,5 +42,10 @@ lispptr * global_pointers[] = {
     &list_start, &list_last,
     &value, &va,
     &needle,
+
+    &tmp, &tmp2,
+    &make_cons_tmp,
+    &make_cons_car,
+    &make_cons_cdr,
     NULL
 };

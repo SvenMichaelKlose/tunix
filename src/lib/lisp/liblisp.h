@@ -582,6 +582,10 @@ extern lispptr macroexpand_sym;
 
 extern lispptr va; // Temporary in 'eval.c'.
 
+extern lispptr make_cons_tmp;
+extern lispptr make_cons_car;
+extern lispptr make_cons_cdr;
+
 #ifdef __CC65__
 #pragma zpsym ("lisp_len")
 #pragma zpsym ("tmp")

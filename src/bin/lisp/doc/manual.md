@@ -1445,6 +1445,7 @@ x           ; 23
 | (setin n)        | Set input channel.                   |
 | (setout n)       | Set output channel.                  |
 | (in)             | Read char.                           |
+| (putback +n)     | Put last char back to input.         |
 | (conin)          | Read char from console.              |
 | (out x)          | Print char or string, lists of them. |
 | (outlim n)       | Limit number of char values printed. |
@@ -1522,6 +1523,13 @@ hoewever you name it).
   (!? (conin)
       (return !)))
 ~~~
+
+### (putback): Put last read char back to input.
+
+This is the equivalent of C's ungetc(), putting the
+last character back to input.  Only one character can
+be put back.  If one has already been put back and not
+read by IN or CONIN, it is overwritten.
 
 ### (out x): Print char, string or list of both.
 

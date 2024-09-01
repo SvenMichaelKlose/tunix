@@ -483,7 +483,9 @@ extern lispptr current_function;
 extern lispptr current_toplevel;
 extern lispptr unexpanded_toplevel;
 extern char *  last_errstr;
+#ifndef NDEBUG
 extern bool    debug_mode;
+#endif
 extern lispptr first_symbol;
 extern lispptr last_symbol;
 #ifndef NO_DEBUGGER

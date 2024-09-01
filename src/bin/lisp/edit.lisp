@@ -34,7 +34,7 @@
 
 (fn con-get (x)
   (out x)
-  (or (conin) 0))
+  (-- (conin)))
 
 (fn con-x ()
   (con-get 4))

@@ -7,7 +7,7 @@
          (and end (setcdr end nil))
          next))))
 
-(message "Testing cut-AT...")
+(message "Testing CUT-AT...")
 (let head '(l i s p)
   (or (equal (cut-at 2 head) '(s p))
       (error))

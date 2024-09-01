@@ -101,9 +101,7 @@ eval_list (void)
     // Make first element of result list and put it on
     // the object stack, so we don't have to worry about
     // garbage collection for the rest of elements.
-    PUSH(x);
     list_start = list_last = make_cons (va, nil);
-    POP(x);
     PUSH(list_start);
 
     // Evaluate rest of list.

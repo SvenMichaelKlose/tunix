@@ -3,6 +3,14 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-08-01
+
+Implementing NTHCDR and SUBSEQ as C functions built into the
+interpreter, as well as adding OUTLIM, improved performance
+as expected.  And SUBSEQ allocates too much, so garbage
+collection is triggered too often.  Unfortunately native
+CBM console output isn't known for its snappiness either.
+
 # 2024-08-29
 
 Oh dude, is the editor slow, or what?  The need for more
@@ -20,7 +28,7 @@ alone.
 OUTLIM just has to set a countdown for OUT (which defaults
 to -1 if there's no limit).  Implementing NTHCDR as a built-
 in is definitely a no-brainer as well.
-Tomorrow.  It's been an action-loaded day and I'm deperate
+Tomorrow.  It's been an action-loaded day and I'm desperate
 for a complete chunk of healthy sleep, including sweet
 dreams.
 

@@ -105,9 +105,9 @@
      (error))
 
 (message "Testing SUBSEQ...")
-(and (print (subseq '(l i s p) 0 0))
+(and (subseq '(l i s p) 0 0)
      (error))
-(or (equal (print (subseq '(l i s p) 0 2))
+(or (equal (subseq '(l i s p) 0 2)
            '(l i))
     (error))
 

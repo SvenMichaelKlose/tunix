@@ -1910,11 +1910,26 @@ anonymous symbol):
 
 ### (cut-at n l): Destructively split list at position.
 
+Sets the CDR of the cons before that position of the
+list passed to it to NIL.
+
 ~~~lisp
 (let l '(l i s p)
-  l             ; -> (l i s p)
-  (cut-at 2 l)  ; -> (s p)
-  l)            ; -> (l i)
+  l              ; -> (l i s p)
+  (cut-at 2 l)   ; -> (s p)
+  l)             ; -> (l i)
+~~~
+
+It's vital to note that a position of 0 will cause the list
+to be returned as is, and that original list will be still
+intact and not NIL.  That makes CUT-AT less of a lispy
+function.
+
+~~~lisp
+(let l '(l i s p)
+  l              ; -> (l i s p)
+  (cut-at 0 l)   ; -> (l i s p)
+  l)             ; -> (l i s p)
 ~~~
 
 ### (find x l): Find element X in list.

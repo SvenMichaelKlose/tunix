@@ -53,7 +53,8 @@
   (when l
     (outlim *con-w*)
     (out l))
-  (out (or (nthcdr (length l) *spaces*) "")))
+  (out (or (nthcdr (or (length l) 0) *spaces*)
+           "")))
 
 (fn update-screen ()
   (with ((y 0)
@@ -126,8 +127,10 @@
               (return (symbol line)))
             ; Insert char and step right.
             (= *saved?* nil)
-            (= line (!= (cut-at line *lx*)
-                      (nconc line (list c) !)))
+            (= line (? (== 0 *lx*)
+                       (nconc (list c) line)
+                       (!= (cut-at *lx* line)
+                         (nconc line (list c) !))))
             (!++ *lx*)))))))
 
 ;;; File I/O
@@ -185,17 +188,26 @@
 ;;; Text editing
 
 (fn del-line (ln)
-  (= *lines* (!= (cut-at *lines* ln)
-               (nconc *lines* (cdr !)))))
+  (= *lines* (? (== 0 ln)
+                (cdr *lines*)
+                (!= (cut-at ln *lines*)
+                  (nconc *lines* (cdr !))))))
+
+(fn split-line (l x)
+  (? (== 0 x)
+     (list ""
+           l)
+     (let lc (symbol-name l)
+       (!= (cut-at x lc)
+         (list (symbol lc)
+               (symbol !))))))
 
 (fn ins-line (l)
-  (= *lines* (!= (cut-at *lines* *ln*)
-               (nconc *lines*
-                      (let lc (symbol-name l)
-                        (!= (cut-at lc *lx*)
-                            (list (symbol lc)
-                                  (symbol !))))
-                      !)))
+  (= l (split-line l *lx*))
+  (= *lines* (? (== 0 *ln*)
+                (nconc l (cdr *lines*))
+                (!= (cut-at *ln* *lines*)
+                  (nconc *lines* l (cdr !)))))
   (!++ *ln*)
   (= *lx* 0))
 
@@ -221,36 +233,35 @@
     (con-direct t)
     (update-screen)
     (status)
-
     (block t
       no-screen-update
       (status-pos)
       ; Edit current line.
       (let lcons (nthcdr *ln* *lines*)
         (!= (edit-line (car lcons))
-          (case (conin)
-            +enter+
-              (ins-line !)
-            ;+del+
-            ; Replace line.
-            (progn
-              (putback)
-              (setcar lcons !)
-              ; Handle line motion and commands.
-              (case (conin)
-                +arr-up+
-                  (progn
-                    (when (< 0 *ln*)
-                      (!-- *ln*))
-                    (go no-screen-update))
-                +arr-down+
-                  (progn
-                    (when (< *ln* (-- (length *lines*)))
-                      (!++ *ln*))
-                    (go no-screen-update))
-                +hotkey+
-                  (? (editor-cmds)
-                     (return nil)))))))))
+          (let c (conin)
+            (case c
+              +enter+
+                (ins-line !)
+              ;+del+
+              ; Replace line.
+              (progn
+                (setcar lcons !)
+                ; Handle line motion and commands.
+                (case c
+                  +arr-up+
+                    (progn
+                      (when (< 0 *ln*)
+                        (!-- *ln*))
+                      (go no-screen-update))
+                  +arr-down+
+                    (progn
+                      (when (< *ln* (-- (length *lines*)))
+                        (!++ *ln*))
+                      (go no-screen-update))
+                  +hotkey+
+                    (? (editor-cmds)
+                       (return nil))))))))))
   (con-direct nil))
 
 (fn edit file

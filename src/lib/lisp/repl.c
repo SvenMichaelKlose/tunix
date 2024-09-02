@@ -303,13 +303,13 @@ lisp_repl (char mode)
                     PUSH(SYMBOL_VALUE(debugger_return_value_sym));
                     PUSH(value);
                     read_cmd_arg ();
-                    if (SYMBOLP(value)) {
+                    if (_NAMEDP(value)) {
                         if (NOT_NIL(value))
                             SET_SYMBOL_VALUE(breakpoints_sym,
                                              make_cons (value, SYMBOL_VALUE(breakpoints_sym)));
                         goto print_breakpoints;
                     }
-                    goto want_symbol;
+                    goto want_name;
 
                 // Delete specific or all breakpoints.
                 case 'd':
@@ -333,8 +333,8 @@ lisp_repl (char mode)
 cannot_continue:
                     outs ("Need alternative first!");
                     goto terpri_next;
-want_symbol:
-                    outs ("Symbol!");
+want_name:
+                    outs ("Name!");
                     goto done_short_command;
 print_breakpoints:
                     outs ("Breakpoints: ");

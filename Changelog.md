@@ -9,6 +9,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Debugger
+
+##### Changed
+
+- Set breakpoints on any kind of object with a name, not
+  only user-defined functions.
+
+
 ## [v0.0.15] - 2024-09-02
 
 ### libsimpleio

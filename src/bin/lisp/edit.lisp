@@ -49,9 +49,9 @@
   (push \  *spaces*))
 
 (fn line-len (x)
-  (? (list x)
+  (? (list? x)
      (length x)
-     (nlength x)))
+     (slength x)))
 
 (fn update-line (l y)
   (con-xy 0 y)
@@ -123,7 +123,7 @@
               (when (== 0 *lx*)
                 (putback)
                 (return (symbol line)))
-              (? (<= 0 *lx*)
+              (? (< 0 *lx*)
                  (del-char (!-- *lx*))))
           (progn
             ; Put back unknown key and return line.
@@ -199,13 +199,16 @@
                   (nconc *lines* (cdr !))))))
 
 (fn join-line ()
-  (= *lines* (with ((prev (nth (-- *ln*) *lines*))
-                    (this (nth *ln* *lines*)))
-               (!= (cut-at (++ *ln*) *lines*)
-                 (nconc *lines*
-                        (list (nconc (and prev (symbol-name prev))
-                                     (symbol-name this)))
-                        !)))))
+  (let prev (nth (-- *ln*) *lines*)
+    (with ((prev-len (slength prev))
+           (joined   (list (symbol (nconc (symbol-name prev)
+                                          (symbol-name (nth *ln* *lines*)))))))
+      (= *lines* (? (== 1 *ln*)
+                    (nconc joined (cddr *lines*))
+                    (!= (cut-at (-- *ln*) *lines*)
+                      (nconc *lines* joined (cddr !)))))
+      (!-- *ln*)
+      (= *lx* prev-len))))
 
 (fn split-line (l x)
   (? (== 0 x)
@@ -243,36 +246,34 @@
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
   (clrscr)
+  (con-direct t)
   (while (not (eof))
-    (con-direct t)
     (update-screen)
     (status)
-    (block t
-      no-screen-update
-      (status-pos)
-      ; Edit current line.
-      (let lcons (nthcdr *ln* *lines*)
-        (!= (edit-line (car lcons))
-          (setcar lcons !)
-          (case (conin)
-            +enter+
-              (ins-line)
-            +bs+
-              (? (> *ln* 0)
-                 (join-line))
-            +arr-up+
-              (progn
-                (when (< 0 *ln*)
-                  (!-- *ln*))
-                (go no-screen-update))
-            +arr-down+
-              (progn
-                (when (< *ln* (-- (length *lines*)))
-                  (!++ *ln*))
-                (go no-screen-update))
-            +hotkey+
-              (? (editor-cmds)
-                 (return nil)))))))
+    no-screen-update
+    (status-pos)
+    (let line (nthcdr *ln* *lines*)
+      (!= (edit-line (car line))
+        (setcar line !)))
+    (case (conin)
+      +enter+
+        (ins-line)
+      +bs+
+        (? (< 0 *ln*)
+           (join-line))
+      +arr-up+
+        (progn
+          (when (< 0 *ln*)
+            (!-- *ln*))
+          (go no-screen-update))
+      +arr-down+
+        (progn
+          (when (< *ln* (-- (length *lines*)))
+            (!++ *ln*))
+          (go no-screen-update))
+      +hotkey+
+        (? (editor-cmds)
+           (return nil))))
   (con-direct nil))
 
 (fn edit file

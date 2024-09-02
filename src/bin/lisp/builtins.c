@@ -176,6 +176,12 @@ bi_symbol_name ()
 }
 
 lispptr
+bi_slength (void)
+{
+    return make_number (SYMBOL_LENGTH(arg1));
+}
+
+lispptr
 bi_quote (void)
 {
     return arg1;
@@ -651,6 +657,12 @@ bi_eof (void)
     return BOOL(eof ());
 }
 
+lispptr FASTCALL
+nil4zero (char c)
+{
+    return c ? make_number (c) : nil;
+}
+
 lispptr
 bi_open (void)
 {
@@ -665,9 +677,7 @@ bi_open (void)
 #endif // #ifndef NAIVE
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
-    if (c)
-        return make_number (c);
-    return nil;
+    return nil4zero (c);
 }
 
 lispptr
@@ -689,10 +699,7 @@ bi_setout (void)
 lispptr
 bi_conin (void)
 {
-    char c = conin ();
-    if (c)
-        return make_number (c);
-    return nil;
+    return nil4zero (conin ());
 }
 
 lispptr
@@ -790,9 +797,7 @@ lispptr
 bi_opendir (void)
 {
     simpleio_chn_t chn = directory_open ();
-    if (!chn)
-        return nil;
-    return make_number (chn);
+    return nil4zero (chn);
 }
 
 struct cbm_dirent dirent;
@@ -865,9 +870,7 @@ lispptr
 bi_isave (void)
 {
     name_to_buffer (arg1);
-    if (image_save (buffer))
-        return t;
-    return nil;
+    return BOOL(image_save (buffer));
 }
 
 #endif // #ifndef NO_IMAGES
@@ -972,13 +975,7 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    if (LISTP(arg1))
-        return make_number (length (arg1));
-#ifndef NAIVE
-    error_info = arg1;
-    error (ERROR_TYPE, "Not named or list");
-#endif
-    return nil;
+    return make_number (length (arg1));
 }
 
 lispptr
@@ -1172,6 +1169,7 @@ const struct builtin builtins[] = {
     { "=",            "'sx",  bi_setq },
     { "symbol-value", "s",    bi_symbol_value },
     { "symbol-name",  "s",    bi_symbol_name },
+    { "slength",      "s",    bi_slength },
     { "char-at",      "sn",   bi_char_at },
 
     { "cons",       "xx",   bi_cons },

@@ -29,7 +29,9 @@ and this project adheres to
 
 #### Added
 
-- APPEND may be built-in.
+- Optionally built-in APPEND.
+- SLENGTH returns the name length of a named object.
+  (symbol, special form, built-in)
 - Compile-time options NO\_APPEND, NO\_NCONC, NO\_SUBSEQ.
 
 

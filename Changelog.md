@@ -25,6 +25,7 @@ and this project adheres to
 
 - TIME supports TARGET\_PET.
 - SUBSEQ: Optional to be built-in.
+- LENGTH: No not work on (symbol) names any more.
 
 #### Added
 

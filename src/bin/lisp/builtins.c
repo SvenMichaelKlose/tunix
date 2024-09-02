@@ -972,8 +972,6 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    if (_NAMEDP(arg1))
-        return make_number (SYMBOL_LENGTH(arg1));
     if (LISTP(arg1))
         return make_number (length (arg1));
 #ifndef NAIVE

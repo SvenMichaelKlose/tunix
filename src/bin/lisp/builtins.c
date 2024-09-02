@@ -244,7 +244,8 @@ bi_nthcdr (void)
 lispptr
 bi_append ()
 {
-    x = eval_list ();
+    if (!unevaluated)
+        x = eval_list ();
     list_start = list_last = nil;
     while (CONSP(x)) {
         // Skip NILs in arguments.
@@ -299,7 +300,7 @@ lispptr
 bi_nconc (void)
 {
     // Taking any arguments, we need to eval manually.
-    args = eval_list ();
+    args = unevaluated ? x : eval_list ();
 
     // Get first list and its tail.
     list_start = nil;

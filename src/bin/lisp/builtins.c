@@ -715,7 +715,7 @@ bi_putback (void)
     return nil;
 }
 
-size_t countdown;
+int countdown;
 
 void
 cout (char c)

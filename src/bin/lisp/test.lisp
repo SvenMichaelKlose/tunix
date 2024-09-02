@@ -128,6 +128,9 @@
 (or (equal (append '(l i) nil '(s p))
            '(l i s p))
      (error))
+(or (equal (append '(l i) nil '(s p) nil)
+           '(l i s p))
+     (error))
 
 (message "Testing NCONC...")
 (and (nconc)

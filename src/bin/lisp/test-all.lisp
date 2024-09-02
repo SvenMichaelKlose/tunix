@@ -52,6 +52,10 @@
            '((1 2) (3 (4 5))))
     (error))
 
+(message "Testing COUNT-IF...")
+(or (== 3 (count-if number? '(1 a 2 b 3)))
+    (error))
+
 (message "Testing CUT-AT...")
 (let head '(l i s p)
   (or (equal (cut-at 0 head)

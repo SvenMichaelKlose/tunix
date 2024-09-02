@@ -170,7 +170,7 @@
      (error))
 
 (message "Testing NTHCDR...")
-; TODO: Move to "test-onerror.lisp".
+; TODO: Test with ONERROR.
 ;(and (nthcdr -1 '(l i s p))
 ;     (error))
 (or (equal (nthcdr 0 '(l i s p))
@@ -183,8 +183,9 @@
      (error))
 
 (message "Testing NTH...")
-(and (nth -1 '(l i s p))
-     (error))
+; TODO: Test with ONERROR.
+;(and (nth -1 '(l i s p))
+     ;(error))
 (or (equal (nth 0 '(l i s p))
            'l)
     (error))

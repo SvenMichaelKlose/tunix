@@ -48,19 +48,24 @@
 (dotimes (i *con-w*)
   (push \  *spaces*))
 
+(fn line-len (x)
+  (? (list x)
+     (length x)
+     (nlength x)))
+
 (fn update-line (l y)
   (con-xy 0 y)
   (when l
     (outlim *con-w*)
     (out l))
-  (out (or (nthcdr (or (length l) 0) *spaces*)
+  (out (or (nthcdr (line-len l) *spaces*)
            "")))
 
 (fn update-screen ()
   (with ((y 0)
          (l (nthcdr *conln* *lines*)))
     (dotimes (i (+ *conln* (-- *con-h*)))
-      (update-line (and l (symbol-name (car l))) y)
+      (update-line (and l (car l)) y)
       (!++ y)
       (= l (cdr l)))))
 

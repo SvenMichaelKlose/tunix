@@ -720,7 +720,7 @@ int countdown;
 void
 counted_out (char c)
 {
-    if (countdown == -1) {
+    if (countdown < 0) {
         out (c);
     } else if (countdown) {
         out (c);
@@ -736,7 +736,7 @@ bi_out_atom (lispptr x)
     else if (_NAMEDP(x)) {
         lisp_len = SYMBOL_LENGTH(x);
         tmpstr = SYMBOL_NAME(x);
-        if (countdown > -1 && countdown < lisp_len)
+        if (countdown >= 0 && countdown < lisp_len)
             lisp_len = countdown;
         outsn (tmpstr, lisp_len);
         if (countdown >= 0) {

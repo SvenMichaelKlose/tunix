@@ -27,8 +27,8 @@ and this project adheres to
 - TIME supports TARGET\_PET.
 - SUBSEQ: Optional to be built-in.
 - LENGTH: No not work on (symbol) names any more.
-- OUT: Applies limit set with OUTLIM to symbol names as
-  well.
+- OUT: Applies limit, set with OUTLIM, to printing object
+  names as well.
 
 #### Added
 

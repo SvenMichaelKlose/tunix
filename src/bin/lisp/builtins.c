@@ -718,13 +718,11 @@ bi_putback (void)
 int countdown;
 
 void
-cout (char c)
+counted_out (char c)
 {
     if (countdown == -1) {
         out (c);
-        return;
-    }
-    if (countdown) {
+    } else if (countdown) {
         out (c);
         countdown--;
     }
@@ -734,16 +732,17 @@ void FASTCALL
 bi_out_atom (lispptr x)
 {
     if (NUMBERP(x))
-        cout (NUMBER_VALUE(x));
+        counted_out (NUMBER_VALUE(x));
     else if (_NAMEDP(x)) {
-        if (countdown > SYMBOL_LENGTH(x)) {
-            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-            countdown -= SYMBOL_LENGTH(x);
+        lisp_len = SYMBOL_LENGTH(x);
+        tmpstr = SYMBOL_NAME(x);
+        if (countdown > -1 && countdown < lisp_len)
+            lisp_len = countdown;
+        outsn (tmpstr, lisp_len);
+        if (countdown >= 0) {
+            countdown -= lisp_len;
             if (countdown < 0)
                 countdown = 0;
-        } else {
-            outsn (SYMBOL_NAME(x), countdown);
-            countdown = 0;
         }
     } else if (CONSP(x))
         bi_out_list (x);

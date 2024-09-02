@@ -20,6 +20,12 @@ and this project adheres to
 - Set breakpoints on any kind of object with a name, not
   only user-defined functions.
 
+#### Environment
+
+##### Added
+
+- COUNT-IF to count by predicate.
+
 
 ## [v0.0.15] - 2024-09-02
 

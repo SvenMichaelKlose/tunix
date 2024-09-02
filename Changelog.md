@@ -17,6 +17,7 @@ and this project adheres to
 
 - Terminal control codes to get the cursor position.
 - putbackc() to put back another char than the last one.
+  Used internally to return cursor positions so far.
 - Direct mode with no scrolling and separate CR/LF.
 
 ### Interpreter
@@ -26,6 +27,8 @@ and this project adheres to
 - TIME supports TARGET\_PET.
 - SUBSEQ: Optional to be built-in.
 - LENGTH: No not work on (symbol) names any more.
+- OUT: Applies limit set with OUTLIM to symbol names as
+  well.
 
 #### Added
 
@@ -38,8 +41,8 @@ and this project adheres to
 ## [v0.0.14] - 2024-08-31
 
 Optimizations to make the upcoming editor usable.  Also, a
-simple terminal emulation has been added, which should to
-for Unices and CBMs. The latter via cc65's conio functions.
+simple terminal emulation has been added, which should do
+for Unices and CBMs.  The latter via cc65's conio functions.
 
 The C128 and Plus/4 are the only CBMs that work at the
 moment.

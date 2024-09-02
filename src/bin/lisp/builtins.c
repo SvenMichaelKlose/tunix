@@ -735,9 +735,17 @@ bi_out_atom (lispptr x)
 {
     if (NUMBERP(x))
         cout (NUMBER_VALUE(x));
-    else if (_NAMEDP(x))
-        outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-    else if (CONSP(x))
+    else if (_NAMEDP(x)) {
+        if (countdown > SYMBOL_LENGTH(x)) {
+            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            countdown -= SYMBOL_LENGTH(x);
+            if (countdown < 0)
+                countdown = 0;
+        } else {
+            outsn (SYMBOL_NAME(x), countdown);
+            countdown = 0;
+        }
+    } else if (CONSP(x))
         bi_out_list (x);
     else
         print (x);

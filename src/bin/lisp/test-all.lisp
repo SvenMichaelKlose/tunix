@@ -53,6 +53,8 @@
     (error))
 
 (message "Testing CUT-AT...")
+(and (cut-at 0 (copy-list '(l i s p)))
+     (error))
 (let head '(l i s p)
   (or (equal (cut-at 2 head) '(s p))
       (error))

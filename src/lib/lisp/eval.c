@@ -202,7 +202,7 @@ do_eval:
 
     // Evaluate atom.
     if (ATOM(x)) {
-        if (NOT_NIL(x))
+        if (x) // NOT_NIL(x))
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;

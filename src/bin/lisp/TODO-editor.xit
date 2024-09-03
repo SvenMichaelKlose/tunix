@@ -1,9 +1,0 @@
-[ ] con-xy: Position cursor. (built-in)
-[ ] con-crs: Set cursor visibility.
-[ ] con-rvs: Reverse mode on/off.
-[ ] clreol: Clear till end of line.
-[ ] clrscr: Clear screen.
-[ ] GROUP-BY-PREDICATES to convert a line back to symbols,
-    taking advantage of symbol reuse to compress texts in
-    memory.
-[ ] Multiple symbol lists to reduce look-up times.

@@ -146,6 +146,8 @@ bi_symbol (void)
     return s;
 }
 
+#ifndef NO_BUILTIN_CHAR_AT
+
 lispptr
 bi_char_at ()
 {
@@ -155,6 +157,10 @@ bi_char_at ()
         return nil;
     return make_number (SYMBOL_NAME(arg1)[n]);
 }
+
+#endif // #ifndef NO_BUILTIN_CHAR_AT
+
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
 
 lispptr
 bi_symbol_name ()
@@ -174,6 +180,14 @@ bi_symbol_name ()
     list_last = nil;
     return list_start;
 }
+
+lispptr
+bi_slength (void)
+{
+    return make_number (SYMBOL_LENGTH(arg1));
+}
+
+#endif // #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
 
 lispptr
 bi_quote (void)
@@ -219,6 +233,8 @@ bi_setcdr (void)
     return arg1;
 }
 
+#ifndef NO_BUILTIN_NTHCDR
+
 lispptr
 bi_nthcdr (void)
 {
@@ -239,12 +255,15 @@ bi_nthcdr (void)
     return arg2;
 }
 
-#ifndef NO_APPEND
+#endif // #ifndef NO_BUILTIN_NTHCDR
+
+#ifndef NO_BUILTIN_APPEND
 
 lispptr
 bi_append ()
 {
-    x = eval_list ();
+    if (!unevaluated)
+        x = eval_list ();
     list_start = list_last = nil;
     while (CONSP(x)) {
         // Skip NILs in arguments.
@@ -291,15 +310,15 @@ done:
     return list_start;
 }
 
-#endif // #ifndef NO_APPEND
+#endif // #ifndef NO_BUILTIN_APPEND
 
-#ifndef NO_NCONC
+#ifndef NO_BUILTIN_NCONC
 
 lispptr
 bi_nconc (void)
 {
     // Taking any arguments, we need to eval manually.
-    args = eval_list ();
+    args = unevaluated ? x : eval_list ();
 
     // Get first list and its tail.
     list_start = nil;
@@ -332,9 +351,9 @@ bi_nconc (void)
     return list_start;
 }
 
-#endif // #ifndef NO_NCONC
+#endif // #ifndef NO_BUILTIN_NCONC
 
-#ifndef NO_SUBSEQ
+#ifndef NO_BUILTIN_SUBSEQ
 
 lispptr
 bi_subseq (void)
@@ -403,7 +422,7 @@ bi_subseq (void)
     return list_start;
 }
 
-#endif // #ifndef NO_SUBSEQ
+#endif // #ifndef NO_BUILTIN_SUBSEQ
 
 lispptr
 bi_numberp (void)
@@ -436,11 +455,14 @@ DEFOP(bi_sub, -);
 DEFOP(bi_mul, *);
 DEFOP(bi_div, /);
 DEFOP(bi_mod, %);
-DEFOP(bi_bit_and, &);
-DEFOP(bi_bit_or, |);
-DEFOP(bi_bit_xor, ^);
-DEFOP(bi_shift_left, <<);
-DEFOP(bi_shift_right, >>);
+
+#ifndef NO_BUILTIN_BITOPS
+    DEFOP(bi_bit_and, &);
+    DEFOP(bi_bit_or, |);
+    DEFOP(bi_bit_xor, ^);
+    DEFOP(bi_shift_left, <<);
+    DEFOP(bi_shift_right, >>);
+#endif // #ifndef NO_BUILTIN_BITOPS
 
 lispptr
 bi_inc (void)
@@ -628,11 +650,17 @@ bi_or (void)
     return nil;
 }
 
+#ifndef NO_BUILTIN_PRINT
+
 lispptr
 bi_print (void)
 {
     return print (arg1);
 }
+
+#endif // #ifndef NO_BUILTIN_PRINT
+
+#ifndef NO_BUILTIN_GROUP_FILE
 
 // Get last I/O error.
 // TODO: Rename to IOERR?
@@ -650,6 +678,12 @@ bi_eof (void)
     return BOOL(eof ());
 }
 
+lispptr FASTCALL
+nil4zero (char c)
+{
+    return c ? make_number (c) : nil;
+}
+
 lispptr
 bi_open (void)
 {
@@ -664,9 +698,7 @@ bi_open (void)
 #endif // #ifndef NAIVE
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
-    if (c)
-        return make_number (c);
-    return nil;
+    return nil4zero (c);
 }
 
 lispptr
@@ -688,10 +720,7 @@ bi_setout (void)
 lispptr
 bi_conin (void)
 {
-    char c = conin ();
-    if (c)
-        return make_number (c);
-    return nil;
+    return nil4zero (conin ());
 }
 
 lispptr
@@ -707,16 +736,14 @@ bi_putback (void)
     return nil;
 }
 
-size_t countdown;
+int countdown;
 
 void
-cout (char c)
+counted_out (char c)
 {
-    if (countdown == -1) {
+    if (countdown < 0) {
         out (c);
-        return;
-    }
-    if (countdown) {
+    } else if (countdown) {
         out (c);
         countdown--;
     }
@@ -726,10 +753,19 @@ void FASTCALL
 bi_out_atom (lispptr x)
 {
     if (NUMBERP(x))
-        cout (NUMBER_VALUE(x));
-    else if (_NAMEDP(x))
-        outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
-    else if (CONSP(x))
+        counted_out (NUMBER_VALUE(x));
+    else if (_NAMEDP(x)) {
+        lisp_len = SYMBOL_LENGTH(x);
+        tmpstr = SYMBOL_NAME(x);
+        if (countdown >= 0 && countdown < lisp_len)
+            lisp_len = countdown;
+        outsn (tmpstr, lisp_len);
+        if (countdown >= 0) {
+            countdown -= lisp_len;
+            if (countdown < 0)
+                countdown = 0;
+        }
+    } else if (CONSP(x))
         bi_out_list (x);
     else
         print (x);
@@ -781,7 +817,36 @@ bi_close (void)
     return nil;
 }
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__)
+#ifndef NO_BUILTIN_READLINE
+
+lispptr
+bi_read_line (void)
+{
+    tmpstr = buffer;
+    if (fnin != STDIN) {
+        while (!eof ()) {
+            tmpc = in ();
+            if (tmpc != 13)
+                break;
+        }
+    }
+    putback ();
+    for (lisp_len = 0; lisp_len < MAX_SYMBOL - 1; lisp_len++) {
+        if (eof ())
+            break;
+        tmpc = in ();
+        if ((fnin == STDIN && tmpc == 13) || tmpc == 10)
+            break;
+        *tmpstr++ = tmpc;
+    }
+    return make_symbol (buffer, tmpstr - buffer);
+}
+
+#endif // #ifndef NO_BUILTIN_READLINE
+
+#endif // #ifndef NO_BUILTIN_GROUP_FILE
+
+#if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
 
 #include <cbm.h>
 
@@ -789,9 +854,7 @@ lispptr
 bi_opendir (void)
 {
     simpleio_chn_t chn = directory_open ();
-    if (!chn)
-        return nil;
-    return make_number (chn);
+    return nil4zero (chn);
 }
 
 struct cbm_dirent dirent;
@@ -830,9 +893,7 @@ bi_closedir (void)
     return nil;
 }
 
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
-
-lispptr bi_gc (void);
+#endif // #if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
 
 lispptr
 bi_load (void)
@@ -843,13 +904,13 @@ bi_load (void)
 
 #ifdef GC_AFTER_LOAD_THRESHOLD
     if (heap_free_size () < GC_AFTER_LOAD_THRESHOLD)
-        bi_gc ();
+        gc ();
 #endif
 
     return t;
 }
 
-#ifndef NO_IMAGES
+#ifndef NO_BUILTIN_GROUP_IMAGES
 
 lispptr
 bi_iload (void)
@@ -864,12 +925,12 @@ lispptr
 bi_isave (void)
 {
     name_to_buffer (arg1);
-    if (image_save (buffer))
-        return t;
-    return nil;
+    return BOOL(image_save (buffer));
 }
 
-#endif // #ifndef NO_IMAGES
+#endif // #ifndef NO_BUILTIN_GROUP_IMAGES
+
+#ifndef NO_BUILTIN_GROUP_DEFINITIONS
 
 lispptr
 bi_define (void)
@@ -899,6 +960,10 @@ bi_special (void)
     return tmp;
 }
 
+#endif // #ifndef NO_BUILTIN_GROUP_DEFINITIONS
+
+#ifndef NO_BUILTIN_GC
+
 lispptr
 bi_gc (void)
 {
@@ -912,6 +977,8 @@ bi_gc (void)
 
     return make_number (heap_free_size ());
 }
+
+#endif // #ifndef NO_BUILTIN_GC
 
 #ifndef NAIVE
 
@@ -971,15 +1038,7 @@ bi_exit (void)
 lispptr
 bi_length (void)
 {
-    if (_NAMEDP(arg1))
-        return make_number (SYMBOL_LENGTH(arg1));
-    if (LISTP(arg1))
-        return make_number (length (arg1));
-#ifndef NAIVE
-    error_info = arg1;
-    error (ERROR_TYPE, "Not named or list");
-#endif
-    return nil;
+    return make_number (length (arg1));
 }
 
 lispptr
@@ -1072,7 +1131,7 @@ bi_filter (void)
     return list_start;
 }
 
-#if !defined(NO_TIME) && defined(__CC65__)
+#if !defined(NO_BUILTIN_TIME) && defined(__CC65__)
 char bekloppies[sizeof (long)];
 
 lispptr
@@ -1092,7 +1151,7 @@ bi_time (void)
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }
-#endif // #if !defined(NO_TIME) && defined(__CC65__)
+#endif // #if !defined(NO_BUILTIN_TIME) && defined(__CC65__)
 
 #ifdef TARGET_UNIX
 
@@ -1116,7 +1175,7 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
-#ifdef NO_TIME
+#ifdef NO_BUILTIN_TIME
 
 lispptr
 bi_time (void)
@@ -1124,7 +1183,7 @@ bi_time (void)
     return make_number (0);
 }
 
-#endif // #ifdef NO_TIME
+#endif // #ifdef NO_BUILTIN_TIME
 
 #ifndef NDEBUG
 lispptr
@@ -1157,12 +1216,15 @@ const struct builtin builtins[] = {
     { "?",          NULL,   bi_if },
     { "and",        NULL,   bi_and },
     { "or",         NULL,   bi_or },
+
+    // BLOCK is hard-wired into "eval.c".
     { "return",     "x?s",  bi_return },
     { "go",         "'x",   bi_go },
 
     { "not",        "x",    bi_not },
     { "eq",         "xx",   bi_eq },
     { "atom",       "x",    bi_atom },
+
     { "cons?",      "x",    bi_consp },
     { "number?",    "x",    bi_numberp },
     { "symbol?",    "x",    bi_symbolp },
@@ -1172,25 +1234,35 @@ const struct builtin builtins[] = {
     { "symbol",       "?l",   bi_symbol },
     { "=",            "'sx",  bi_setq },
     { "symbol-value", "s",    bi_symbol_value },
+
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
     { "symbol-name",  "s",    bi_symbol_name },
+    { "slength",      "s",    bi_slength },
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
     { "char-at",      "sn",   bi_char_at },
+#endif
 
     { "cons",       "xx",   bi_cons },
     { "car",        "l",    bi_car },
     { "cdr",        "l",    bi_cdr },
     { "setcar",     "cx",   bi_setcar },
     { "setcdr",     "cx",   bi_setcdr },
+
+#ifndef NO_BUILTIN_NTHCDR
     { "nthcdr",     "nx",   bi_nthcdr },
-#ifndef NO_APPEND
+#endif
+#ifndef NO_BUILTIN_APPEND
     { "append",     NULL,   bi_append },
 #endif
-#ifndef NO_NCONC
+#ifndef NO_BUILTIN_NCONC
     { "nconc",      NULL,   bi_nconc },
 #endif
-#ifndef NO_SUBSEQ
+#ifndef NO_BUILTIN_SUBSEQ
     { "subseq",     NULL,   bi_subseq },
 #endif
 
+#ifndef NO_BUILTIN_GROUP_ARITH
     { "==",         "nn",   bi_number_equal },
     { ">",          "nn",   bi_gt },
     { "<",          "nn",   bi_lt },
@@ -1204,28 +1276,45 @@ const struct builtin builtins[] = {
     { "%",          "nn",   bi_mod },
     { "++",         "n",    bi_inc },
     { "--",         "n",    bi_dec },
+#endif
 
+#ifndef NO_BUILTIN_GROUP_BITOPS
     { "bit-and",    "nn",   bi_bit_and },
     { "bit-or",     "nn",   bi_bit_or },
     { "bit-xor",    "nn",   bi_bit_xor },
     { "bit-neg",    "n",    bi_bit_neg },
     { "<<",         "nn",   bi_shift_left },
     { ">>",         "nn",   bi_shift_right },
+#endif
 
+#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
     { "rawptr",     "x",    bi_rawptr },
     { "peek",       "n",    bi_peek },
     { "poke",       "nn",   bi_poke },
 #ifndef TARGET_CPM
     { "sys",        "n",    bi_sys },
-#endif // #ifndef TARGET_CPM
+#endif
+#endif // #ifndef NO_BUILTIN_GROUP_RAW_ACCESS
 
+#ifndef NO_BUILTIN_READ
     { "read",       "",     read_expr },
+#endif
+#ifndef NO_BUILTIN_PRINT
     { "print",      "x",    bi_print },
+#endif
+#ifndef NO_BUILTIN_LOAD
+    { "load",       "s",    bi_load },
+#endif
+
+#ifndef NO_BUILTIN_GROUP_FILE
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
+#ifndef NO_BUILTIN_READ_LINE
+    { "read-line",  "",     bi_read_line },
+#endif
     { "out",        "+x",   bi_out },
     { "outlim",     "n",    bi_outlim },
     { "terpri",     "",     bi_terpri },
@@ -1234,28 +1323,35 @@ const struct builtin builtins[] = {
     { "setout",     "n",    bi_setout },
     { "putback",    "",     bi_putback },
     { "close",      "n",    bi_close },
-    { "load",       "s",    bi_load },
+#endif
 
-#if !defined(NO_DIRECTORY) && defined(__CC65__)
+#if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
     { "opendir",    "",     bi_opendir },
     { "readdir",    "n",    bi_readdir },
     { "closedir",   "n",    bi_closedir },
-#endif // #if !defined(NO_DIRECTORY) && defined(__CC65__)
+#endif
 
-#ifndef NO_IMAGES
+#ifndef NO_BUILTIN_GROUP_IMAGES
     { "iload",      "s",    bi_iload },
     { "isave",      "s",    bi_isave },
 #endif
 
+#ifndef NO_BUILTIN_GROUP_DEFINITIONS
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
     { "special",    "'s'+", bi_special },
+#endif
+
+#ifndef NO_BUILTIN_GC
     { "gc",         "",     bi_gc },
+#endif
+
 #ifndef NAIVE
     { "error",      "+x",   bi_error },
     { "ignore",    "",      bi_ignore },
     { "stack",      "",     bi_stack },
 #endif
+
     { "quit",       "x",    bi_quit },
     { "exit",       "?n",   bi_exit },
 
@@ -1267,7 +1363,7 @@ const struct builtin builtins[] = {
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
-#ifndef TARGET_TIME
+#ifndef TARGET_BUILTIN_TIME
     { "time",       "",     bi_time },
 #endif
 

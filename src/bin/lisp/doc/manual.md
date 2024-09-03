@@ -71,6 +71,7 @@ first time:
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
 | backquote sign '`'     | dollar sign '$' |
+| (SETQ c v)             | (= c v)         |
 | (RPLACA c v)           | (SETCAR c v)    |
 | (RPLACD c v)           | (SETCDR c v)    |
 | (MAKE-SYMBOL x)        | (SYMBOL l)      |
@@ -139,12 +140,12 @@ definitions.
 
 APPLY copies all arguments but the last one.
 
-# Installing binaries
+# Installation
 
 "Installing" a binary release is the easiest way to go
 exploring.  I'd rather recommend compiling it yourself.
 
-## Getting a release
+## Getting a binary release
 
 Download the latest binary from
 [https://github.com/SvenMichaelKlose/tunix/releases](https://github.com/SvenMichaelKlose/tunix/releases).
@@ -152,7 +153,8 @@ Download the latest binary from
 The name of the ZIP file contains the project's name
 "tunix", followed by its release version, ID in the
 public Git repository (short SHA hash), and finally the
-release data, followed by the opligatory ZIP suffix.
+release date, followed by the opligatory ZIP suffix.
+
 It should look like this:
 
 ~~~
@@ -207,7 +209,7 @@ platform, depending on what it supports.  For Commdore
 8-bit machines there are SD card readers, also known as
 SD2IEC drives, available.
 
-### Running on Linux/Mac/BSD, etc.
+## Running on Linux/Mac/BSD, etc.
 
 If you're running a something Unixoid, step into directory
 "tunix/unix" and shoot it up by typing "./lisp":
@@ -220,16 +222,16 @@ cd tunix/unix
 You have to step into "tunix/unix" or TUNIX Lisp won't find
 the other files it needs to get going.
 
-### Installing VICE and YAPE mmulators
+## Installing VICE and YAPE mmulators
 
 The "VersatIle Commodore Emulator" is the most popular one
 for Commodore 8-bit machines.  Commodore C16 and Plus/4
 fanatics will insist on using YAPE as it's more compatible
 to the original.
 
-#### The VersatIle Commdore Emulator (VICE)
+### The VersatIle Commdore Emulator (VICE)
 
-##### **Linux**
+#### **Linux**
 
 For most Linux distributions, VICE can be installed directly from the package manager.
 
@@ -251,7 +253,7 @@ For most Linux distributions, VICE can be installed directly from the package ma
 
 If VICE is not available in your distribution's repositories, you may need to compile it from source. Visit the [VICE website](https://vice-emu.sourceforge.io/) for more information.
 
-##### **macOS**
+#### **macOS**
 
 VICE can be installed via Homebrew on macOS:
 
@@ -264,7 +266,7 @@ Alternatively, you can download the latest macOS binary from
 the [VICE website](https://vice-emu.sourceforge.io/)
 and follow the instructions provided there.
 
-##### **Windows**
+#### **Windows**
 
 For Windows, you can download the latest VICE binary from
 the [VICE website](https://vice-emu.sourceforge.io/).
@@ -272,16 +274,16 @@ After downloading, extract the archive to a directory of
 your choice and run the appropriate executable (e.g.,
 `x64.exe` for C64 emulation).
 
-#### Yet Another Plus/4 Emulator (YAPE)
+### Yet Another Plus/4 Emulator (YAPE)
 
-##### **Windows**
+#### **Windows**
 
 YAPE is primarily a Windows-based emulator.  You can
 download it from the
 [YAPE website](http://yape.homeserver.hu/).
 After downloading, extract the archive and run `yape.exe`.
 
-##### **Linux and macOS**
+#### **Linux and macOS**
 
 YAPE is not natively available for Linux or macOS, but you
 can run it using Wine, a compatibility layer for running
@@ -309,7 +311,7 @@ Windows applications on Unix-like operating systems.
   wine yape.exe
   ```
 
-#### Additional Resources
+### Additional Resources
 
 For more detailed installation instructions or
 troubleshooting, please refer to the respective emulator's
@@ -1356,6 +1358,17 @@ match.
 (member 2 '(1 2 3)) ; -> '(2 3)
 ~~~
 
+### (nconc +l): Destructively concatenate lists.
+
+NCON is a function that destructively concatenates a series
+of lists.   It is more efficient than APPEND, because it
+avoids the overhead of copying elements and directly links
+the lists together.
+
+⚠️ Lists returned by QUOTE will be modified, changing your
+code!  Use BACKQUOTE ($) instead, or use COPY-LIST before
+passing your list to NCONC.
+
 ### (remove x l): Copy list except element X.
 
 ~~~lisp
@@ -1447,10 +1460,13 @@ x           ; 23
 | (setin n)        | Set input channel.                   |
 | (setout n)       | Set output channel.                  |
 | (in)             | Read char.                           |
+| (read-line)      | Read line as a symbol.               |
 | (putback +n)     | Put last char back to input.         |
 | (conin)          | Read char from console.              |
 | (out x)          | Print char or string, lists of them. |
 | (outlim n)       | Limit number of char values printed. |
+| (with-in x +l)   | Redirect input channel for body.     |
+| (with-out x +l)  | Redirect output channel for body.    |
 | (terpri)         | Step to next line.                   |
 | (fresh-line)     | Open line if not on a fresh one.     |
 | (close n)        | Close a channel.                     |
@@ -1526,6 +1542,12 @@ hoewever you name it).
       (return !)))
 ~~~
 
+### (read-line): Read line as a symbol.
+
+Reads until CR (10) from file, until LF (13) from standard
+input, not including them.  Unless reading from standard
+input, inital LFs are ignored.
+
 ### (putback): Put last read char back to input.
 
 This is the equivalent of C's ungetc(), putting the
@@ -1565,6 +1587,9 @@ be nested (contain other lists).
 ~~~
 
 ### (outlim n): Limit number of chars printed.
+
+### (with-in x +l): Redirect input channel for body.
+### (with-out x +l): Redirect output channel for body.
 
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.
@@ -1874,6 +1899,7 @@ anonymous symbol):
 | (append +l)       | Copy and append lists.              |
 | (copy-list x)     | Copy list.                          |
 | (copy-tree x)     | Copy recursively.                   |
+| (count-if f l)    | Count by predicate.                 |
 | (cut-at n l)      | Destructively split list.           |
 | (ensure-list x)   | Turn atom into list.                |
 | (every f x)       | Test if F is T for all X.           |
@@ -1908,13 +1934,34 @@ anonymous symbol):
 
 ### (copy-tree x): Copy recursively.
 
+### (count-if f l): Count by predicate.
+
+~~~lisp
+(count-if number? '(l 1 5 p)) ; -> 2
+~~~
+
 ### (cut-at n l): Destructively split list at position.
+
+Sets the CDR of the cons before that position of the
+list passed to it to NIL.
 
 ~~~lisp
 (let l '(l i s p)
-  l             ; -> (l i s p)
-  (cut-at 2 l)  ; -> (s p)
-  l)            ; -> (l i)
+  l              ; -> (l i s p)
+  (cut-at 2 l)   ; -> (s p)
+  l)             ; -> (l i)
+~~~
+
+It's vital to note that a position of 0 will cause the list
+to be returned as is, and that original list will be still
+intact and not NIL.  That makes CUT-AT less of a lispy
+function.
+
+~~~lisp
+(let l '(l i s p)
+  l              ; -> (l i s p)
+  (cut-at 0 l)   ; -> (l i s p)
+  l)             ; -> (l i s p)
 ~~~
 
 ### (find x l): Find element X in list.

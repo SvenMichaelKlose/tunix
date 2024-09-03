@@ -11,12 +11,44 @@ and this project adheres to
 
 ## [current]
 
+### Lisp
+
+#### Debugger
+
+##### Changed
+
+- Set breakpoints on any kind of object with a name, not
+  only user-defined functions.
+
+#### Environment
+
+##### Added
+
+- COUNT-IF to count by predicate.
+
+#### Interpreter
+
+##### Changed
+
+- Most built-in functions are opt-out.
+
+##### Added
+
+- NCONC: native implementation to choose instead of the
+  built-in version.
+- READ-LINE: Reads line as a symbol.
+- WITH-IN, WITH-OUT: Redirect channel for body.
+
+
+## [v0.0.15] - 2024-09-02
+
 ### libsimpleio
 
 #### Added
 
 - Terminal control codes to get the cursor position.
 - putbackc() to put back another char than the last one.
+  Used internally to return cursor positions so far.
 - Direct mode with no scrolling and separate CR/LF.
 
 ### Interpreter
@@ -25,18 +57,23 @@ and this project adheres to
 
 - TIME supports TARGET\_PET.
 - SUBSEQ: Optional to be built-in.
+- LENGTH: No not work on (symbol) names any more.
+- OUT: Applies limit, set with OUTLIM, to printing object
+  names as well.
 
 #### Added
 
-- APPEND may be built-in.
+- Optionally built-in APPEND.
+- SLENGTH returns the name length of a named object.
+  (symbol, special form, built-in)
 - Compile-time options NO\_APPEND, NO\_NCONC, NO\_SUBSEQ.
 
 
 ## [v0.0.14] - 2024-08-31
 
 Optimizations to make the upcoming editor usable.  Also, a
-simple terminal emulation has been added, which should to
-for Unices and CBMs. The latter via cc65's conio functions.
+simple terminal emulation has been added, which should do
+for Unices and CBMs.  The latter via cc65's conio functions.
 
 The C128 and Plus/4 are the only CBMs that work at the
 moment.

@@ -52,3 +52,14 @@ Ctrl-K x will exit the editor immediately if the text has
 not been modified.  Otherwise you'll be asked to save it.
 You may choose to do or not to do so, or to continue editing,
 by pressing either 'y', 'n', or 'c'.
+
+# Wishlist
+
+## Keyword highlighting and ompression by splitting up line symbols
+
+At punctuation, spaces, and the rest.  Highlighting colours
+can be determined using predicates like BUILTIN? and MACRO?, etc.
+
+## Renaming symbols only for display
+
+To keep memory consumption low.

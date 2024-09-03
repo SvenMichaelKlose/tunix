@@ -95,10 +95,32 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
-// Disable built-ins
-//#define NO_APPEND
-//#define NO_NCONC
-//#define NO_SUBSEQ
+// Disable built-ins.
+//#define NO_BUILTIN_APPEND
+//#define NO_BUILTIN_CHAR_AT
+//#define NO_BUILTIN_GC
+//#define NO_BUILTIN_LOAD
+//#define NO_BUILTIN_NCONC
+//#define NO_BUILTIN_NTHCDR
+//#define NO_BUILTIN_PRINT
+//#define NO_BUILTIN_READ
+//#define NO_BUILTIN_READ-LINE
+//#define NO_BUILTIN_SUBSEQ
+//#define NO_BUILTIN_TIME
+
+#ifdef NO_BUILTIN_NTHCDR
+    #define NO_BUILTIN_SUBSEQ
+#endif
+
+// Disable groups of built-ins.
+//#define NO_BUILTIN_GROUP_ARITH
+//#define NO_BUILTIN_GROUP_BITOPS
+//#define NO_BUILTIN_GROUP_DEFINITIONS
+//#define NO_BUILTIN_GROUP_DIRECTORY
+//#define NO_BUILTIN_GROUP_FILE
+//#define NO_BUILTIN_GROUP_IMAGE
+//#define NO_BUILTIN_GROUP_RAW_ACCESS
+//#define NO_BUILTIN_GROUP_SYMBOL_NAME
 
 /// Additional features
 
@@ -154,8 +176,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Apple II enhanced
@@ -169,8 +195,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Atari XL
@@ -184,8 +214,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore C128
@@ -202,7 +236,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
+#define NO_BUILTIN_TIME
 #endif
 
 // Commodore C16
@@ -250,8 +284,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore PET
@@ -294,8 +332,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore VIC-20/VC-20
@@ -330,7 +372,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
-#define NO_DIRECTORY
+#define NO_BUILTIN_DIRECTORY
 #endif
 
 // Sinclair ZX Spectrum
@@ -343,8 +385,12 @@
 #define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)

@@ -52,11 +52,20 @@
            '((1 2) (3 (4 5))))
     (error))
 
+(message "Testing COUNT-IF...")
+(or (== 3 (count-if number? '(1 a 2 b 3)))
+    (error))
+
 (message "Testing CUT-AT...")
 (let head '(l i s p)
-  (or (equal (cut-at 2 head) '(s p))
+  (or (equal (cut-at 0 head)
+             '(l i s p))
       (error))
-  (or (equal head '(l i))
+  (or (equal (cut-at 2 head)
+             '(s p))
+      (error))
+  (or (equal head
+             '(l i))
       (error)))
 
 (message "Testing DO...")
@@ -100,9 +109,9 @@
      (error))
 
 (message "Testing SUBSEQ...")
-(and (print (subseq '(l i s p) 0 0))
+(and (subseq '(l i s p) 0 0)
      (error))
-(or (equal (print (subseq '(l i s p) 0 2))
+(or (equal (subseq '(l i s p) 0 2)
            '(l i))
     (error))
 
@@ -164,8 +173,25 @@
                 '(l i s p))
      (error))
 
+(message "Testing NCONC...")
+(and (nconc)
+     (error))
+(and (nconc nil)
+     (error))
+(and (nconc nil nil)
+     (error))
+(or (equal (nconc nil '(l i s p))
+           '(l i s p))
+     (error))
+(or (equal (nconc '(l i) '(s p))
+           '(l i s p))
+     (error))
+(or (equal (nconc '(l i) nil '(s p))
+           '(l i s p))
+     (error))
+
 (message "Testing NTHCDR...")
-; TODO: Move to "test-onerror.lisp".
+; TODO: Test with ONERROR.
 ;(and (nthcdr -1 '(l i s p))
 ;     (error))
 (or (equal (nthcdr 0 '(l i s p))
@@ -178,8 +204,9 @@
      (error))
 
 (message "Testing NTH...")
-(and (nth -1 '(l i s p))
-     (error))
+; TODO: Test with ONERROR.
+;(and (nth -1 '(l i s p))
+     ;(error))
 (or (equal (nth 0 '(l i s p))
            'l)
     (error))
@@ -291,6 +318,9 @@
                (print b))
              1 2))
     (error))
+
+(message "TODO: Testing WITH-IN...")
+(message "TODO: Testing WITH-OUT...")
 
 (message "Testing WITH-QUEUE...")
 (or (equal (with-queue q

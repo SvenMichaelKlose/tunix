@@ -7,11 +7,13 @@
 (or (load "user-pre-image.lisp")
     (message "INFO: You can create a file called \"user-pre-image.lisp\" to be loaded here."))
 
-(message "Cleaning up. Please wait...")
-; If compressed conses are enabled, have *UNIVERSE*
-; compressed better.
-(= *universe (copy-list *universe*))
-(print (gc))(out " bytes free.")(terpri)
+(and (builtin? gc)
+  ((()
+     (message "Cleaning up. Please wait...")
+     ; If compressed conses are enabled, have *UNIVERSE*
+     ; compressed better.
+     (= *universe (copy-list *universe*))
+     (print (gc))(out " bytes free.")(terpri))))
 
 ; Tell time it took to get here.
 (and (builtin? 'time)

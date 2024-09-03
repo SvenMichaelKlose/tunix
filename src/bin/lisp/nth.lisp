@@ -1,6 +1,2 @@
 (fn nth (n l)
-  (and (<= 0 n)
-    (? (or (not l)
-           (== n 0))
-       (car l)
-       (nth (-- n) (cdr l)))))
+  (car (nthcdr n l)))

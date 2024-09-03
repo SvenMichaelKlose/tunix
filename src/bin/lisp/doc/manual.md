@@ -1358,6 +1358,17 @@ match.
 (member 2 '(1 2 3)) ; -> '(2 3)
 ~~~
 
+### (nconc +l): Destructively concatenate lists.
+
+NCON is a function that destructively concatenates a series
+of lists.   It is more efficient than APPEND, because it
+avoids the overhead of copying elements and directly links
+the lists together.
+
+⚠️ Lists returned by QUOTE will be modified, changing your
+code!  Use BACKQUOTE ($) instead, or use COPY-LIST before
+passing your list to NCONC.
+
 ### (remove x l): Copy list except element X.
 
 ~~~lisp

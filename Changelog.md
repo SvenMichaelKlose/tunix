@@ -26,6 +26,17 @@ and this project adheres to
 
 - COUNT-IF to count by predicate.
 
+#### Interpreter
+
+##### Changed
+
+- Most built-in functions are opt-out.
+
+##### Added
+
+- NCONC: native implementation to choose instead of the
+  built-in version.
+
 
 ## [v0.0.15] - 2024-09-02
 

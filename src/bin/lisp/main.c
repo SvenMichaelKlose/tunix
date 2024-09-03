@@ -39,7 +39,7 @@ const char * env_files[] = {
     "smoke-test.lisp",
 #endif
     "env-1.lisp",
-#ifdef NO_APPEND
+#ifdef NO_BUILTIN_APPEND
     "append.lisp",
 #endif
 

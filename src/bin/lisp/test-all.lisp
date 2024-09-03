@@ -173,6 +173,23 @@
                 '(l i s p))
      (error))
 
+(message "Testing NCONC...")
+(and (nconc)
+     (error))
+(and (nconc nil)
+     (error))
+(and (nconc nil nil)
+     (error))
+(or (equal (nconc nil '(l i s p))
+           '(l i s p))
+     (error))
+(or (equal (nconc '(l i) '(s p))
+           '(l i s p))
+     (error))
+(or (equal (nconc '(l i) nil '(s p))
+           '(l i s p))
+     (error))
+
 (message "Testing NTHCDR...")
 ; TODO: Test with ONERROR.
 ;(and (nthcdr -1 '(l i s p))

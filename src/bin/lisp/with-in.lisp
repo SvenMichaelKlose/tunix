@@ -2,7 +2,9 @@
   (let g (symbol)
     $(with ((,g fnin)
             (,v ,x))
-       (setin ,v)
+       (when ,v
+         (setin ,v))
        ,@body
-       (setin ,g)
-       (close ,g))))
+       (when ,v
+         (setin ,g)
+         (close ,g)))))

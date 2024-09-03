@@ -2,7 +2,9 @@
   (let g (symbol)
     $(with ((,g fnout)
             (,v ,x))
-       (setout ,v)
+       (when ,v
+         (setout ,v))
        ,@body
-       (setout ,g)
-       (close ,g))))
+       (when ,v
+         (setout ,g)
+         (close ,g)))))

@@ -1,11 +1,23 @@
+(@ '((x)
+      (or (load (symbol (append (symbol-name x)
+                                (symbol-name ".lisp"))))
+          (error "Can't load " x ".lisp")))
+   '("prog1" "when" "unless" "dolist" "alet" "aif" "while"
+     "awhile" "queue" "with-queue" "dotimes" "incdec"
+     "nth" "awhen" "mapcar" "mapcan" "case" "group"
+     "cbm-keycode" "cbm-con" "ls" "cut-at"
+     "with-in" "with-out"))
+
 (var +hotkey+ 11)   ; CBM Ctrl-K
 
 ;;; State
 
-(var *filename* "code.lisp")
+(var *filename* "edit-help.md")
 (var *lines* nil)
 (var *saved?* nil)
-(var *lx* 0)      ; Line X position.
+(var *err* nil)
+(var *ox* 0)      ; Line X offset.
+(var *lx* 0)      ; Line X position, relative to *OX*.
 (var *ln* 0)
 (var *conln* 0)   ; # of first displayed line.
 
@@ -54,7 +66,7 @@
      (slength x)))
 
 (fn update-line (l y)
-  (con-xy 0 y)
+  (con-xy (or *ox* 0) y)
   (when l
     (outlim *con-w*)
     (out l))
@@ -64,16 +76,27 @@
 (fn update-screen ()
   (with ((y 0)
          (l (nthcdr *conln* *lines*)))
-    (dotimes (i (+ *conln* (-- *con-h*)))
+    (dotimes (i (-- *con-h*))
       (update-line (and l (car l)) y)
       (!++ y)
       (= l (cdr l)))))
 
-(fn prompt (msg)
+(fn clr-status ()
   (con-xy 0 (-- *con-h*))
-  (out *spaces*)
+  (out *spaces*))
+
+(fn prompt (msg)
+  (clr-status)
   (con-xy 0 (-- *con-h*))
   (out msg))
+
+(fn prompt-in (msg l)
+  (prompt msg)
+  (= *ox*  (con-x))
+  (prog1 (edit-line l (-- *con-h*))
+    (conin)
+    (clr-status)
+    (= *ox* nil)))
 
 (fn status-pos ()
   (con-rvs t)
@@ -85,7 +108,11 @@
 (fn status ()
   (con-xy 0 (-- *con-h*))
   (con-rvs t)
-  (apply out *filename* (list (? (not *lines*) " (new)" "")))
+;  (funcall out (or *filename* "")
+;               (? (not *lines*)
+;                  " (new)"
+;                  "")
+;               (or *err* ""))
   (status-pos))
 
 ;;; Line editing
@@ -97,16 +124,16 @@
 
 ; Edit line.
 ; Return new line if an unrelated char has been input.
-(fn edit-line (x)
+(fn edit-line (l y)
   (con-crs t)
-  (let line (? x (symbol-name x) nil)
+  (let line (? l (symbol-name l) nil)
     ; Don't have cursor past line end.
     (let n (length line)
       (and (> *lx* n)
            (= *lx* (? (> n 0) (-- n) 0))))
     (while (not (eof))
-      (update-line line (- *ln* *conln*))
-      (con-xy *lx* (- *ln* *conln*))
+      (update-line line y)
+      (con-xy (+ (or *ox* 0) *lx*) y)
       (with ((len (length line))
              (c   (while (not (eof))
                     (awhen (conin)
@@ -140,28 +167,36 @@
 
 ;;; File I/O
 
-(fn skipctrls ()
-  (while (not (eof))
-    (when (<= \  (conin))
-      (putback)
-      (return))
-    t))
-
-(fn read-lines (x)
-  (with-input i (open x 'r)
-    (with-queue q
-      (while (not (eof))
-        (enqueue q (read-line))))))
+(fn read-lines ()
+  (with-queue q
+    (while (not (eof))
+      (enqueue q (read-line)))))
 
 (fn save-file ()
-  (with-output o (open pathname 'w)
-    (@ '((x)
-          (out x)
-          (terpri))
-       *lines*))
+  (with-out o (open (prompt-in "Save: " *filename*) 'w)
+    (unless (err)
+      (prompt "...")
+      (dolist (l *lines*)
+        (out l)
+        (terpri))))
   (? (err)
      (and (status "Cannot save.") nil)
      (= *saved?* t)))
+
+(fn load-file ()
+  (with-in i (open (prompt-in "Load: " *filename*) 'r)
+    (? (or (not i) (err))
+       (progn
+         (= *err* (symbol (nconc (symbol-name "No ")
+                                 (symbol-name f))))
+         (return nil))
+       (progn
+         (prompt "...")
+         (= *lines* nil)
+         (= *lines* (read-lines)))))
+  (and (err)
+       (status "Load error.") nil))
+
 
 (fn choose x
   (while (not (eof))
@@ -219,6 +254,7 @@
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
   (case (conin)
+    \l  (load-file)
     \s  (save-file)
     \q  (and (quit-editor)
              (return t))
@@ -233,15 +269,13 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (clrscr)
-  (con-direct t)
   (while (not (eof))
     (update-screen)
     (status)
     no-screen-update
     (status-pos)
     (let line (nthcdr *ln* *lines*)
-      (!= (edit-line (car line))
+      (!= (edit-line (car line) (- *ln* *conln*))
         (setcar line !)))
     (case (conin)
       +enter+
@@ -261,29 +295,18 @@
           (go no-screen-update))
       +hotkey+
         (? (editor-cmds)
-           (return nil))))
-  (con-direct nil))
+           (return nil)))))
 
 (fn edit file
   (= *lx* 0)
   (= *ln* 0)
   (= *conln* 0)
   (= saved? t)
-  ;(= *lines* (read-lines file))
-  (= *lines*
-     (list
-       "This is a text editor written in TUNIX"
-       "Lisp, slower than an East-Westfalian on "
-       "a Sunday morning and buggy as eff."
-       "Destructive built-ins are the cups of"
-       "coffee.  'Destructive' to get around"
-       "memory allocation and 'built-in' to make"
-       "it fast.  Still, it's pure cc65-compiled"
-       "ANSI-C, no assembly."
-       ""
-       "It's not another VI clone..."
-       "Ctrl+K-e(gc) says there're about 10000"
-       "bytes left..."
-       ))
+  (clrscr)
+  (con-direct t)
+  ;(load-file)
+  (= *lines* (list ""))
   (edit-lines)
-  (clrscr))
+  (clrscr)
+  (con-direct nil)
+  *filename*)

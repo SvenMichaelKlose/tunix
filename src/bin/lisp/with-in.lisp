@@ -4,4 +4,5 @@
             (,v ,x))
        (setin ,v)
        ,@body
-       (setin ,g))))
+       (setin ,g)
+       (close ,g))))

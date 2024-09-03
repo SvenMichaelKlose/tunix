@@ -4,4 +4,5 @@
             (,v ,x))
        (setout ,v)
        ,@body
-       (setout ,g))))
+       (setout ,g)
+       (close ,g))))

@@ -3,6 +3,24 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-04
+
+The editor can load files, re-using EDIT-LINE for the
+filename prompt.  Feels like closing in on a real release
+if only the manual wouldn't be 70 pages of just notes.
+
+Since everything is rather slow, the editor will have to
+to be saved as an image for regular use.  It's also time to
+come up with an autoloader for missing procedures, and a
+sensible way to remove unused code.  Probably by resetting
+symbols in \*UNVIERSE\*, so they point to themselves.
+Also, unnaming symbols and common subtree elemination (CSE)
+will make lots of free heap.  But the latter has to be done
+with a modern machine unless... some hash stack helps out
+with finding subtrees.  There's also that list compression
+that might be effective.  Enough promising things to dream
+about.  For real.  Good night!
+
 # 2024-09-02
 
 I gave the terminal code a little rework.  The Unix part is

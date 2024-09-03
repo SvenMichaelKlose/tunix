@@ -817,6 +817,33 @@ bi_close (void)
     return nil;
 }
 
+#ifndef NO_BUILTIN_READLINE
+
+lispptr
+bi_read_line (void)
+{
+    tmpstr = buffer;
+    if (fnin != STDIN) {
+        while (!eof ()) {
+            tmpc = in ();
+            if (tmpc != 13)
+                break;
+        }
+    }
+    putback ();
+    for (lisp_len = 0; lisp_len < MAX_SYMBOL - 1; lisp_len++) {
+        if (eof ())
+            break;
+        tmpc = in ();
+        if ((fnin == STDIN && tmpc == 13) || tmpc == 10)
+            break;
+        *tmpstr++ = tmpc;
+    }
+    return make_symbol (buffer, tmpstr - buffer);
+}
+
+#endif // #ifndef NO_BUILTIN_READLINE
+
 #endif // #ifndef NO_BUILTIN_GROUP_FILE
 
 #if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
@@ -1285,6 +1312,9 @@ const struct builtin builtins[] = {
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
+#ifndef NO_BUILTIN_READ_LINE
+    { "read-line",  "",     bi_read_line },
+#endif
     { "out",        "+x",   bi_out },
     { "outlim",     "n",    bi_outlim },
     { "terpri",     "",     bi_terpri },

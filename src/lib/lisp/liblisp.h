@@ -104,6 +104,7 @@
 //#define NO_BUILTIN_NTHCDR
 //#define NO_BUILTIN_PRINT
 //#define NO_BUILTIN_READ
+//#define NO_BUILTIN_READ-LINE
 //#define NO_BUILTIN_SUBSEQ
 //#define NO_BUILTIN_TIME
 

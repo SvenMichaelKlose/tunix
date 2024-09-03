@@ -1460,6 +1460,7 @@ x           ; 23
 | (setin n)        | Set input channel.                   |
 | (setout n)       | Set output channel.                  |
 | (in)             | Read char.                           |
+| (read-line)      | Read line as a symbol.               |
 | (putback +n)     | Put last char back to input.         |
 | (conin)          | Read char from console.              |
 | (out x)          | Print char or string, lists of them. |
@@ -1538,6 +1539,12 @@ hoewever you name it).
   (!? (conin)
       (return !)))
 ~~~
+
+### (read-line): Read line as a symbol.
+
+Reads until CR (10) from file, until LF (13) from standard
+input, not including them.  Unless reading from standard
+input, inital LFs are ignored.
 
 ### (putback): Put last read char back to input.
 

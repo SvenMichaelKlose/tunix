@@ -147,18 +147,6 @@
       (return))
     t))
 
-(fn read-line ()
-  (symbol
-    (with-queue q
-      (let c nil
-        (? (skipctrls)
-           (return))
-        (while (not (eof))
-          (= c (conin))
-          (? (< c \ )
-             (return))
-          (enqueue q c))))))
-
 (fn read-lines (x)
   (with-input i (open x 'r)
     (with-queue q

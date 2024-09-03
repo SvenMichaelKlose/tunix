@@ -1465,6 +1465,8 @@ x           ; 23
 | (conin)          | Read char from console.              |
 | (out x)          | Print char or string, lists of them. |
 | (outlim n)       | Limit number of char values printed. |
+| (with-in x +l)   | Redirect input channel for body.     |
+| (with-out x +l)  | Redirect output channel for body.    |
 | (terpri)         | Step to next line.                   |
 | (fresh-line)     | Open line if not on a fresh one.     |
 | (close n)        | Close a channel.                     |
@@ -1585,6 +1587,9 @@ be nested (contain other lists).
 ~~~
 
 ### (outlim n): Limit number of chars printed.
+
+### (with-in x +l): Redirect input channel for body.
+### (with-out x +l): Redirect output channel for body.
 
 ### (terpri): Step to next line.
 ### (fresh-line): Open line if not on a fresh one.

@@ -37,6 +37,7 @@ and this project adheres to
 - NCONC: native implementation to choose instead of the
   built-in version.
 - READ-LINE: Reads line as a symbol.
+- WITH-IN, WITH-OUT: Redirect channel for body.
 
 
 ## [v0.0.15] - 2024-09-02

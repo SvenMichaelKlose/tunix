@@ -175,8 +175,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Apple II enhanced
@@ -190,8 +194,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Atari XL
@@ -205,8 +213,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore C128
@@ -223,7 +235,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
+#define NO_BUILTIN_TIME
 #endif
 
 // Commodore C16
@@ -271,8 +283,12 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore PET
@@ -355,7 +371,7 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
-#define NO_DIRECTORY
+#define NO_BUILTIN_DIRECTORY
 #endif
 
 // Sinclair ZX Spectrum
@@ -368,8 +384,12 @@
 #define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
-#define NO_TIME
-#define NO_DIRECTORY
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)

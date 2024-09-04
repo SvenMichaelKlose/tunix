@@ -26,6 +26,10 @@ and this project adheres to
 
 - COUNT-IF to count by predicate.
 
+##### Fixed
+
+- WITH-GLOBAL: Return value of body.
+
 #### Interpreter
 
 ##### Changed

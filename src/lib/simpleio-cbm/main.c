@@ -284,7 +284,7 @@ raw_out (char c)
         else if (c == '\\')
             c = 205;
         else if (c == '|')
-            c = 98;
+            c = 221;
         else
             c = reverse_case (c);
     }

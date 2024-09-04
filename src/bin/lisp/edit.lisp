@@ -79,17 +79,20 @@
       (!++ y)
       (= l (cdr l)))))
 
+(fn outrvs msg
+  (con-rvs t)
+  (out msg)
+  (con-rvs nil))
+
 (fn clr-status ()
   (con-xy 0 (-- *con-h*))
-  (con-rvs t)
-  (out *spaces*)
-  (con-rvs nil))
+  (outrvs *spaces*))
 
 (fn prompt (msg)
   (con-direct t)
   (clr-status)
   (con-xy 0 (-- *con-h*))
-  (out msg))
+  (outrvs msg))
 
 (fn prompt-in (msg l)
   (prompt msg)
@@ -107,8 +110,8 @@
   (con-rvs t)
   (con-xy (- *con-w* 8) (-- *con-h*))
   (print (++ *lx*))(out ",")(print (++ *ln*))
-  (con-rvs nil)
-  (out "    "))
+  (out " ")
+  (con-rvs nil))
 
 (fn status-msg ()
   (con-xy 0 (-- *con-h*))

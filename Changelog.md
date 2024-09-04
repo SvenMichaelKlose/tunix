@@ -24,6 +24,7 @@ and this project adheres to
 
 ##### Added
 
+- EDIT: a simple text editor.
 - COUNT-IF to count by predicate.
 
 ##### Fixed

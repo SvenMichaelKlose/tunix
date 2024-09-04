@@ -24,9 +24,10 @@
     (out 's)
     (terpri)))
 
-(unless (eq +target* 'unix)
-  (message "Saving 'image'...")
-  (isave "image"))
+(or (eq +target* 'unix)
+  (progn
+    (message "Saving 'image'...")
+    (isave "image")))
 
 ; Load user image.
 (or (load "user-post-image.lisp")

@@ -51,6 +51,7 @@ world: all
 	rm -f $(DISTDIR)/image
 	cp src/bin/lisp/lisp $(DISTDIR)/
 	cp src/bin/lisp/test-read.bin $(DISTDIR)/
+	cp src/bin/lisp/edit-help.md $(DISTDIR)/
 ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.lbl $(DISTDIR)/
 	cp src/bin/lisp/lisp.map $(DISTDIR)/

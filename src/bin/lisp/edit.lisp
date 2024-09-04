@@ -6,9 +6,7 @@
      "awhile" "queue" "with-queue" "dotimes" "incdec"
      "nth" "awhen" "mapcar" "mapcan" "case" "group"
      "cbm-keycode" "cbm-con" "cut-at"
-     "with-in" "with-out"))
-
-(var +hotkey+ 11)   ; Ctrl-K
+     "with-in" "with-out" "with-global"))
 
 ;;; State
 
@@ -66,7 +64,7 @@
      (slength x)))
 
 (fn update-line (l y)
-  (con-xy (or *ox* 0) y)
+  (con-xy *ox* y)
   (when l
     (outlim *con-w*)
     (out l))
@@ -92,11 +90,11 @@
 
 (fn prompt-in (msg l)
   (prompt msg)
-  (= *ox*  (con-x))
-  (prog1 (edit-line l (-- *con-h*))
-    (conin)
-    (clr-status)
-    (= *ox* nil)))
+  (with-global *ox* (slength msg)
+    (with-global *lx* (slength l)
+      (prog1 (edit-line l (-- *con-h*))
+        (conin)
+        (clr-status)))))
 
 (fn status-pos ()
   (con-rvs t)
@@ -124,15 +122,18 @@
   (= line (nconc (subseq line 0 x)
                  (subseq line (++ x)))))
 
+(fn go-eol (line)
+  (let n (length line)
+    (= *lx* (? (> n 0) n 0))))
+
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (l y)
   (con-crs t)
   (let line (? l (symbol-name l) nil)
     ; Don't have cursor past line end.
-    (let n (length line)
-      (and (> *lx* n)
-           (= *lx* (? (> n 0) (-- n) 0))))
+    (and (> *lx* (length line))
+         (go-eol line))
     (while (not (eof))
       (update-line line y)
       (con-xy (+ (or *ox* 0) *lx*) y)
@@ -154,6 +155,10 @@
                 (return (symbol line)))
               (? (< 0 *lx*)
                  (del-char (!-- *lx*))))
+          1 ; Ctrl-A
+            (= *lx* 0)
+          5 ; Ctrl-E
+            (go-eol line)
           (progn
             ; Put back unknown key and return line.
             (when (or (< c \ ) (> c 126))
@@ -166,47 +171,6 @@
                        (!= (cut-at *lx* line)
                          (nconc line (list c) !))))
             (!++ *lx*)))))))
-
-;;; File I/O
-
-(fn read-lines ()
-  (with-queue q
-    (while (not (eof))
-      (enqueue q (read-line)))))
-
-(fn save-file ()
-  (prompt "...")
-  (? (with-out o (open (prompt-in "Save: " *filename*) 'w)
-       (unless (err)
-         (dolist (l *lines*)
-           (out l)
-           (terpri))))
-     (and (= *err* "Cannot save.") nil)
-     (= *saved?* t)))
-
-(fn load-file ()
-  (? (with-in i (open (prompt-in "Load: " *filename*) 'r)
-       (prompt "...")
-       (= *lines* nil)
-       (= *lines* (read-lines)))
-     (= *err* "Cannot load.") nil))
-
-(fn choose x
-  (while (not (eof))
-    (!= (conin)
-      (and (member ! x)
-           (return !)))))
-
-(fn quit-editor ()
-  (or *saved?*
-      (return t))
-  (prompt "Save (y/n/c)?")
-  (!= (choose \y \n \c)
-    (and (== ! \y)
-         (save-file)
-         'quit)
-    (or (== ! \c)
-        'quit)))
 
 ;;; Text editing
 
@@ -245,6 +209,53 @@
                     (nconc *lines* l (cdr !))))))
   (!++ *ln*)
   (= *lx* 0))
+
+;;; File I/O
+
+(fn read-lines ()
+  (with-queue q
+    (while (not (eof))
+      (enqueue q (read-line)))))
+
+(fn save-file ()
+  (prompt "...")
+  (? (with-out o (open (prompt-in "Save: " *filename*) 'w)
+       (unless (err)
+         (dolist (l *lines*)
+           (out l)
+           (terpri))))
+     (and (= *err* "Cannot save.") nil)
+     (progn
+       (clr-status)
+       (= *saved?* t))))
+
+(fn load-file ()
+  (let f (open (prompt-in "Load: " *filename*) 'r)
+    (? (with-in i (open (prompt-in "Load: " *filename*) 'r)
+         (prompt "...")
+         (= *filename* f)
+         (= *lines* nil)
+         (= *lines* (read-lines))
+         (clr-status))
+       (= *err* "Cannot load.") nil)))
+
+(fn choose x
+  (while (not (eof))
+    (!= (conin)
+      (and (member ! x)
+           (return !)))))
+
+(fn quit-editor ()
+  (and *saved?*
+       (return 'quit))
+  (prompt "Save (y/n/c)?")
+  (!= (choose \y \n \c)
+    (clr-status)
+    (and (== ! \y)
+         (save-file)
+         'quit)
+    (or (== ! \c)
+        'quit)))
 
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
@@ -287,7 +298,9 @@
           (when (< *ln* (-- (length *lines*)))
             (!++ *ln*))
           (go no-screen-update))
-      +hotkey+
+      12 ; Ctrl-L
+        nil ; Redraw screen
+      11 ; Ctrl+K
         (and (eq 'quit (editor-cmds))
              (return nil)))))
 
@@ -298,8 +311,7 @@
   (= saved? t)
   (clrscr)
   (con-direct t)
-  ;(load-file)
-  (= *lines* (list "TUNIX Lisp editor"))
+  (load-file)
   (edit-lines)
   (clrscr)
   (con-direct nil)

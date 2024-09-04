@@ -5,10 +5,10 @@
    '("prog1" "when" "unless" "dolist" "alet" "aif" "while"
      "awhile" "queue" "with-queue" "dotimes" "incdec"
      "nth" "awhen" "mapcar" "mapcan" "case" "group"
-     "cbm-keycode" "cbm-con" "ls" "cut-at"
+     "cbm-keycode" "cbm-con" "cut-at"
      "with-in" "with-out"))
 
-(var +hotkey+ 11)   ; CBM Ctrl-K
+(var +hotkey+ 11)   ; Ctrl-K
 
 ;;; State
 
@@ -105,7 +105,7 @@
   (con-rvs nil)
   (out "    "))
 
-(fn status ()
+(fn status-msg ()
   (con-xy 0 (-- *con-h*))
   (con-rvs t)
 ;  (funcall out (or *filename* "")
@@ -113,7 +113,9 @@
 ;                  " (new)"
 ;                  "")
 ;               (or *err* ""))
-  (status-pos))
+  (when *err*
+    (out " " *err*))
+  (con-rvs nil))
 
 ;;; Line editing
 
@@ -134,10 +136,10 @@
     (while (not (eof))
       (update-line line y)
       (con-xy (+ (or *ox* 0) *lx*) y)
-      (with ((len (length line))
-             (c   (while (not (eof))
-                    (awhen (conin)
-                      (return !)))))
+      (with ((len  (length line))
+             (c    (while (not (eof))
+                     (awhen (conin)
+                       (return !)))))
         (case c
           +arr-left+
             (? (< 0 *lx*)
@@ -173,30 +175,21 @@
       (enqueue q (read-line)))))
 
 (fn save-file ()
-  (with-out o (open (prompt-in "Save: " *filename*) 'w)
-    (unless (err)
-      (prompt "...")
-      (dolist (l *lines*)
-        (out l)
-        (terpri))))
-  (? (err)
-     (and (status "Cannot save.") nil)
+  (prompt "...")
+  (? (with-out o (open (prompt-in "Save: " *filename*) 'w)
+       (unless (err)
+         (dolist (l *lines*)
+           (out l)
+           (terpri))))
+     (and (= *err* "Cannot save.") nil)
      (= *saved?* t)))
 
 (fn load-file ()
-  (with-in i (open (prompt-in "Load: " *filename*) 'r)
-    (? (or (not i) (err))
-       (progn
-         (= *err* (symbol (nconc (symbol-name "No ")
-                                 (symbol-name f))))
-         (return nil))
-       (progn
-         (prompt "...")
-         (= *lines* nil)
-         (= *lines* (read-lines)))))
-  (and (err)
-       (status "Load error.") nil))
-
+  (? (with-in i (open (prompt-in "Load: " *filename*) 'r)
+       (prompt "...")
+       (= *lines* nil)
+       (= *lines* (read-lines)))
+     (= *err* "Cannot load.") nil))
 
 (fn choose x
   (while (not (eof))
@@ -207,11 +200,13 @@
 (fn quit-editor ()
   (or *saved?*
       (return t))
-  (status "Save first (y/n/c)?")
+  (prompt "Save (y/n/c)?")
   (!= (choose \y \n \c)
     (and (== ! \y)
-         (save-file))
-    (not (== ! \c))))
+         (save-file)
+         'quit)
+    (or (== ! \c)
+        'quit)))
 
 ;;; Text editing
 
@@ -254,10 +249,9 @@
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
   (case (conin)
-    \l  (load-file)
-    \s  (save-file)
-    \q  (and (quit-editor)
-             (return t))
+    \l  (and (load-file) nil)
+    \s  (and (save-file) nil)
+    \q  (quit-editor)
     \e  (progn
           (prompt ": ")
           (con-direct nil)
@@ -271,7 +265,7 @@
 (fn edit-lines ()
   (while (not (eof))
     (update-screen)
-    (status)
+    (status-msg)
     no-screen-update
     (status-pos)
     (let line (nthcdr *ln* *lines*)
@@ -294,8 +288,8 @@
             (!++ *ln*))
           (go no-screen-update))
       +hotkey+
-        (? (editor-cmds)
-           (return nil)))))
+        (and (eq 'quit (editor-cmds))
+             (return nil)))))
 
 (fn edit file
   (= *lx* 0)
@@ -305,7 +299,7 @@
   (clrscr)
   (con-direct t)
   ;(load-file)
-  (= *lines* (list ""))
+  (= *lines* (list "TUNIX Lisp editor"))
   (edit-lines)
   (clrscr)
   (con-direct nil)

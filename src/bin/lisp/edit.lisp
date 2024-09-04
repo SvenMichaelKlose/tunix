@@ -84,6 +84,7 @@
   (out *spaces*))
 
 (fn prompt (msg)
+  (con-direct t)
   (clr-status)
   (con-xy 0 (-- *con-h*))
   (out msg))
@@ -92,8 +93,12 @@
   (prompt msg)
   (with-global *ox* (slength msg)
     (with-global *lx* (slength l)
-      (prog1 (edit-line l (-- *con-h*))
-        (conin)
+      (prog1
+        (while t
+          (!= (edit-line l (-- *con-h*))
+            (and (== (conin) +enter+)
+                 (return !))
+            (= l !)))
         (clr-status)))))
 
 (fn status-pos ()
@@ -230,8 +235,8 @@
        (= *saved?* t))))
 
 (fn load-file ()
-  (let f (open (prompt-in "Load: " *filename*) 'r)
-    (? (with-in i (open (prompt-in "Load: " *filename*) 'r)
+  (let f (prompt-in "Load: " *filename*)
+    (? (with-in i (open f 'r)
          (prompt "...")
          (= *filename* f)
          (= *lines* nil)
@@ -262,6 +267,12 @@
   (case (conin)
     \l  (and (load-file) nil)
     \s  (and (save-file) nil)
+    \r  (progn (save-file)
+          (clrscr)
+          (con-direct nil)
+          (load *filename*)
+          (prompt-in "Press ENTER:" "")
+          nil)
     \q  (quit-editor)
     \e  (progn
           (prompt ": ")
@@ -274,6 +285,7 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
+  (con-direct t)
   (while (not (eof))
     (update-screen)
     (status-msg)
@@ -310,8 +322,14 @@
   (= *conln* 0)
   (= saved? t)
   (clrscr)
-  (con-direct t)
-  (load-file)
+  (?
+    file
+      (progn
+        (= *filename* (car file))
+        (load-file))
+    (and (not *lines*)
+         *filename*)
+      (load-file))
   (edit-lines)
   (clrscr)
   (con-direct nil)

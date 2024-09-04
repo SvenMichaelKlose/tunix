@@ -13,13 +13,14 @@
 (var *filename* "edit-help.md")
 (var *lines* nil)
 (var *saved?* nil)  ; Modifications saved?
-(var *mod?* nil)    ; Line modified?
+(var *line* nil)
 (var *oline* nil)   ; Original line.
+(var *mod?* nil)    ; Line modified?
 (var *err* nil)
-(var *ox* 0)      ; Line X offset.
-(var *lx* 0)      ; Line X position, relative to *OX*.
 (var *ln* 0)
-(var *conln* 0)   ; # of first displayed line.
+(var *conln* 0) ; # of first displayed line.
+(var *ox* 0)    ; Line X offset.
+(var *lx* 0)    ; Line X position, relative to *OX*.
 
 ;;; Terminal control
 
@@ -127,11 +128,11 @@
 
 (fn del-char (x)
   (= *saved?* nil)
-  (= line (nconc (subseq line 0 x)
-                 (subseq line (++ x)))))
+  (= *line* (nconc (subseq *line* 0 x)
+                   (subseq *line* (++ x)))))
 
-(fn go-eol (line)
-  (let n (length line)
+(fn go-eol ()
+  (let n (length *line*)
     (= *lx* (? (> n 0) n 0))))
 
 ; Edit line.
@@ -140,14 +141,14 @@
   (con-crs t)
   (= *mod?* nil)
   (= *oline* l)
-  (let line (? l (symbol-name l) nil)
+  (let *line* (? l (symbol-name l) nil)
     ; Don't have cursor past line end.
-    (and (> *lx* (length line))
-         (go-eol line))
+    (and (> *lx* (length *line*))
+         (go-eol))
     (while (not (eof))
-      (update-line line y)
+      (update-line *line* y)
       (con-xy (+ (or *ox* 0) *lx*) y)
-      (with ((len  (length line))
+      (with ((len  (length *line*))
              (c    (while (not (eof))
                      (awhen (conin)
                        (return !)))))
@@ -162,7 +163,7 @@
             (progn
               (when (== 0 *lx*)
                 (putback)
-                (return (symbol line)))
+                (return (symbol *line*)))
               (? (< 0 *lx*)
                  (del-char (!-- *lx*))))
           1 ; Ctrl-A
@@ -170,22 +171,22 @@
           4 ; Ctrl-D
             (progn
               (= *mod?* t)
-              (= line nil)
+              (= *line* nil)
               (= *lx* 0))
           5 ; Ctrl-E
-            (go-eol line)
+            (go-eol)
           (progn
             ; Put back unknown key and return line.
             (when (or (< c \ ) (> c 126))
               (putback)
-              (return (? *mod?* (symbol line) *oline*)))
+              (return (? *mod?* (symbol *line*) *oline*)))
             ; Insert char and step right.
             (= *mod?* t)
             (= *saved?* nil)
-            (= line (? (== 0 *lx*)
-                       (nconc (list c) line)
-                       (!= (cut-at *lx* line)
-                         (nconc line (list c) !))))
+            (= *line* (? (== 0 *lx*)
+                         (nconc (list c) *line*)
+                         (!= (cut-at *lx* *line*)
+                           (nconc *line* (list c) !))))
             (!++ *lx*)))))))
 
 ;;; Text editing

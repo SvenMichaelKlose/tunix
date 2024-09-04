@@ -12,7 +12,9 @@
 
 (var *filename* "edit-help.md")
 (var *lines* nil)
-(var *saved?* nil)
+(var *saved?* nil)  ; Modifications saved?
+(var *mod?* nil)    ; Line modified?
+(var *oline* nil)   ; Original line.
 (var *err* nil)
 (var *ox* 0)      ; Line X offset.
 (var *lx* 0)      ; Line X position, relative to *OX*.
@@ -68,8 +70,8 @@
   (when l
     (outlim *con-w*)
     (out l))
-  (out (or (nthcdr (line-len l) *spaces*)
-           "")))
+  (!? (nthcdr (line-len l) *spaces*)
+      (out !)))
 
 (fn update-screen ()
   (with ((y 0)
@@ -136,6 +138,8 @@
 ; Return new line if an unrelated char has been input.
 (fn edit-line (l y)
   (con-crs t)
+  (= *mod?* nil)
+  (= *oline* l)
   (let line (? l (symbol-name l) nil)
     ; Don't have cursor past line end.
     (and (> *lx* (length line))
@@ -165,6 +169,7 @@
             (= *lx* 0)
           4 ; Ctrl-D
             (progn
+              (= *mod?* t)
               (= line nil)
               (= *lx* 0))
           5 ; Ctrl-E
@@ -173,8 +178,9 @@
             ; Put back unknown key and return line.
             (when (or (< c \ ) (> c 126))
               (putback)
-              (return (symbol line)))
+              (return (? *mod?* (symbol line) *oline*)))
             ; Insert char and step right.
+            (= *mod?* t)
             (= *saved?* nil)
             (= line (? (== 0 *lx*)
                        (nconc (list c) line)

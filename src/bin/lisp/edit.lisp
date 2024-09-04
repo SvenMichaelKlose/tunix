@@ -115,15 +115,11 @@
 
 (fn status-msg ()
   (con-xy 0 (-- *con-h*))
-  (con-rvs t)
-;  (funcall out (or *filename* "")
-;               (? (not *lines*)
-;                  " (new)"
-;                  "")
-;               (or *err* ""))
-  (when *err*
-    (out " " *err*))
-  (con-rvs nil))
+  (outrvs (or *filename* "")
+          (? (not *lines*)
+             " (new)"
+             "")
+          (or *err* "")))
 
 ;;; Line editing
 
@@ -286,7 +282,8 @@
           (con-direct nil)
           (!= (eval (read))
             (terpri)
-            (print !))
+            (print !)
+            (terpri))
           (prompt-ok))))
 
 ; Navigate up and down lines, catch commands.

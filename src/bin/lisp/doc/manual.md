@@ -106,9 +106,16 @@ character value lists:
 ~~~
 
 Symbols may also be anonymous, with no name at all.
+Calling SYMBOL with no arguments creates a unique and
+anonymous symbol that won't get reused when SYMBOL is
+called without arguments again.  As this is true for
+all symbols with no name, an empty string ("") can be
+used as well.
 
 ~~~lisp
-(symbol) ; Anonymous symbol that won't get re-used.
+(eq (symbol) (symbol))  ; -> NIL
+(eq "" (symbol))        ; -> NIL
+(eq "" "")              ; -> NIL
 ~~~
 
 SYMBOL will issue an error if it is passed a dotted pair.

@@ -259,6 +259,7 @@
          (= *lx* 0)
          (= *ln* 0)
          (= *conln* 0)
+         (= *saved?* t)
          (clr-status))
        (= *err* "Cannot load.") nil)))
 

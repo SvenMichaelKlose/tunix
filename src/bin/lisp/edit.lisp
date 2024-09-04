@@ -81,7 +81,9 @@
 
 (fn clr-status ()
   (con-xy 0 (-- *con-h*))
-  (out *spaces*))
+  (con-rvs t)
+  (out *spaces*)
+  (con-rvs nil))
 
 (fn prompt (msg)
   (con-direct t)
@@ -262,26 +264,27 @@
     (or (== ! \c)
         'quit)))
 
+(fn prompt-ok ()
+  (prompt-in "Hit ENTER:" ""))
+
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
   (case (conin)
-    \l  (and (load-file) nil)
-    \s  (and (save-file) nil)
-    \r  (progn (save-file)
+    \l  (load-file)
+    \s  (save-file)
+    \r  (when (save-file)
           (clrscr)
           (con-direct nil)
           (load *filename*)
-          (prompt-in "Press ENTER:" "")
-          nil)
+          (prompt-ok))
     \q  (quit-editor)
     \e  (progn
-          (prompt ": ")
+          (prompt "Eval: ")
           (con-direct nil)
           (!= (eval (read))
             (terpri)
             (print !))
-          (conin)
-          (con-direct t))))
+          (prompt-ok))))
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()

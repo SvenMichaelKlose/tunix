@@ -6,9 +6,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <setjmp.h>
-#ifdef TARGET_UNIX
-#include <strings.h>
 #include <string.h>
+#ifdef TARGET_UNIX
 #include <stdio.h>
 #endif
 

@@ -1,6 +1,6 @@
-(macro prog1 body
+(macro prog1 (x . body)
   ;"Return value of first expression."
   (let g (symbol)
-    $(let ,g ,(car body)
-       ,@(cdr body)
+    $(let ,g ,x
+       ,@body
        ,g)))

@@ -45,7 +45,7 @@ Built-ins
 Tests
 [ ] READ on syntax errors.
 
-Text editor
+Related to text editor
 [ ] GROUP-BY-PREDICATES to convert a line back to symbols,
     taking advantage of symbol reuse to compress texts in
     memory.

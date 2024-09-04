@@ -241,6 +241,7 @@ raw_eof (void)
 signed char
 raw_err (void)
 {
+    // (Mask out EOF.)
     return last_status[chn] & ~0x40;
 }
 

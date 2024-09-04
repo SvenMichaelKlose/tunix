@@ -34,6 +34,7 @@ CTRL key combinations allow more navigation:
 |-------------|------------------------|
 | Ctrl+A      | Move to start of line. |
 | Ctrl+E      | Move to end of line.   |
+| Ctrl+D      | Clear line.            |
 | Ctrl+L      | Redraw screen.         |
 | Ctrl+K, <?> | Start command...       |
 

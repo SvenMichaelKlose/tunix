@@ -163,6 +163,10 @@
                  (del-char (!-- *lx*))))
           1 ; Ctrl-A
             (= *lx* 0)
+          4 ; Ctrl-D
+            (progn
+              (= line nil)
+              (= *lx* 0))
           5 ; Ctrl-E
             (go-eol line)
           (progn

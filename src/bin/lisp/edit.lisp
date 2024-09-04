@@ -97,6 +97,9 @@
   (con-xy 0 (-- *con-h*))
   (outrvs msg))
 
+(fn prompt-ok ()
+  (prompt-in "Hit ENTER:" ""))
+
 (fn prompt-in (msg l)
   (prompt msg)
   (with-global *ox* (slength msg)
@@ -253,6 +256,9 @@
          (= *filename* f)
          (= *lines* nil)
          (= *lines* (read-lines))
+         (= *lx* 0)
+         (= *ln* 0)
+         (= *conln* 0)
          (clr-status))
        (= *err* "Cannot load.") nil)))
 
@@ -274,9 +280,6 @@
     (or (== ! \c)
         'quit)))
 
-(fn prompt-ok ()
-  (prompt-in "Hit ENTER:" ""))
-
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
   (case (conin)
@@ -296,6 +299,11 @@
             (print !)
             (terpri))
           (prompt-ok))))
+
+(fn adjust-conln ()
+  (= *conln* (- *ln* (- *con-h* 2)))
+  (? (< *conln* 0)
+     (= *conln* 0)))
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
@@ -326,11 +334,24 @@
           (? (>= (- *ln* *conln*) (-- *con-h*))
              (!++ *conln*)
              (go no-screen-update)))
-      12 ; Ctrl-L
-        nil ; Redraw screen
-      11 ; Ctrl+K
+      11 ; Ctrl+K: Command
         (and (eq 'quit (editor-cmds))
-             (return nil)))))
+             (return nil))
+      12 ; Ctrl-L: Redraw screen
+        (clrscr)
+      14 ; Ctrl-N: Page down
+        (progn
+          (= *ln* (+ *ln* (-- *con-h*)))
+          (!= (-- (length *lines*))
+            (? (>= *ln* !)
+               (= *ln* !))
+            (adjust-conln)))
+      15 ; Ctrl-O: Page up
+        (progn
+          (= *ln* (- *ln* (-- *con-h*)))
+          (? (< *ln* 0)
+             (= *ln* 0))
+          (adjust-conln)))))
 
 (fn edit file
   (= *lx* 0)

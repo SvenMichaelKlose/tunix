@@ -118,6 +118,14 @@
 (= x 23)
 (or (== x 23) (error))
 
+(message "Testing uniqueness of anonymous symbols...")
+(and (eq (symbol) (symbol))
+     (error))
+(and (eq "" (symbol))
+     (error))
+(and (eq "" "")
+     (error))
+
 (message "Testing SYMBOL-VALUE...")
 (or (== (symbol-value 'x) 23)
     (error))

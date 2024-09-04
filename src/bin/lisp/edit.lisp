@@ -308,15 +308,17 @@
         (? (< 0 *ln*)
            (join-line))
       +arr-up+
-        (progn
-          (when (< 0 *ln*)
-            (!-- *ln*))
-          (go no-screen-update))
+        (when (< 0 *ln*)
+          (!-- *ln*)
+          (? (< (- *ln* *conln*) 0)
+             (!-- *conln*)
+             (go no-screen-update)))
       +arr-down+
-        (progn
-          (when (< *ln* (-- (length *lines*)))
-            (!++ *ln*))
-          (go no-screen-update))
+        (when (< *ln* (-- (length *lines*)))
+          (!++ *ln*)
+          (? (>= (- *ln* *conln*) (-- *con-h*))
+             (!++ *conln*)
+             (go no-screen-update)))
       12 ; Ctrl-L
         nil ; Redraw screen
       11 ; Ctrl+K

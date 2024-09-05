@@ -121,6 +121,14 @@ reverse_case (char c)
     return c;
 }
 
+void
+cbm_reset_channels (void)
+{
+    cbm_k_clrch ();
+    cbm_k_chkin (logical_fns[fnin]);
+    cbm_k_ckout (logical_fns[fnout]);
+}
+
 simpleio_chn_t
 alloc_channel (void)
 {
@@ -230,6 +238,7 @@ directory_close (simpleio_chn_t chn)
     cbm_closedir (logical_fns[chn]);
     logical_fns[chn] = 0;
     last_status[chn] = 0;
+    cbm_reset_channels ();
 }
 
 bool
@@ -315,6 +324,7 @@ void FASTCALL
 raw_close (simpleio_chn_t chn)
 {
     cbm_k_close (logical_fns[chn]);
+    cbm_reset_channels ();
     logical_fns[chn] = 0;
     last_status[chn] = 0;
 }

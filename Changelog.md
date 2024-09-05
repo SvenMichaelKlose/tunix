@@ -36,6 +36,7 @@ and this project adheres to
 ##### Fixed
 
 - WITH-GLOBAL: Return value of body.
+- SOURCE
 
 #### Interpreter
 

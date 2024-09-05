@@ -236,17 +236,19 @@
     (while (not (eof))
       (enqueue q (read-line)))))
 
-(fn save-file ()
+(fn save-file f
   (prompt "...")
-  (? (with-out o (open (prompt-in "Save: " *filename*) 'w)
-       (unless (err)
+  (let uf (? (not f) (prompt-in "Save: " *filename*))
+    (? (with-out o (open (or (car f) uf) 'w)
+         (? uf
+            (= *filename* uf))
          (dolist (l *lines*)
            (out l)
-           (terpri))))
-     (and (= *err* "Cannot save.") nil)
-     (progn
-       (clr-status)
-       (= *saved?* t))))
+           (terpri)))
+       (and (= *err* "Cannot save.") nil)
+       (progn
+         (clr-status)
+         (= *saved?* t)))))
 
 (fn load-file ()
   (let f (prompt-in "Load: " *filename*)
@@ -283,10 +285,12 @@
   (case (conin)
     \l  (load-file)
     \s  (save-file)
-    \r  (when (save-file)
+    \r  (progn
+          (save-file "_ctrlkr.tmp")
+          (= *old-conln* -1)
           (clrscr)
           (con-direct nil)
-          (load *filename*)
+          (load "_ctrlkr.tmp")
           (prompt-ok))
     \q  (quit-editor)
     \e  (progn

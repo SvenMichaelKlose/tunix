@@ -4,7 +4,7 @@
     $(with ((,g fnout)
             (,v ,x))
        (? (not ,v)
-          (or (err) t))
+          (or (err) t)
           (progn
             (setout ,v)
             ; TODO: Replace this with an interpreter-level
@@ -14,4 +14,4 @@
               ,@body)
             (prog1 (err)
               (setout ,g)
-              (close ,g))))))
+              (close ,v)))))))

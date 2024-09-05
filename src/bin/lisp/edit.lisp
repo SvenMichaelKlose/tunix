@@ -250,7 +250,7 @@
 (fn save-file f
   (let uf (? (not f)
              (progn
-               (list-dir)
+               ;(list-dir)
                (prompt-in "Save: " *filename*)))
     (prompt "...")
     (? (with-out o (open (or (car f) uf) 'w)
@@ -265,7 +265,7 @@
          (= *saved?* t)))))
 
 (fn load-file ()
-  (list-dir)
+  ;(list-dir)
   (let f (prompt-in "Load: " *filename*)
     (? (with-in i (open f 'r)
          (prompt "...")

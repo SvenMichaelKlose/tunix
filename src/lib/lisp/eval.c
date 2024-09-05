@@ -426,11 +426,11 @@ set_arg_values:
         }
 
         // Evaluate argument inline.
+        HIGHLIGHT(args);
+        x = CAR(args);
         PUSH(args);
         PUSH_TAGW(builtin_argdef);
         PUSH_TAG(num_args);
-        HIGHLIGHT(args);
-        x = CAR(args);
         PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
         goto do_eval;
         // Step to next argument.
@@ -578,31 +578,32 @@ do_argument:
     if (unevaluated)
         value = CAR(args);
     else {
+        HIGHLIGHT(args);
+        x = CAR(args);
+
         // Save evaluator state.
-        PUSH_TAGW(stack_entered);
-        PUSH_TAGW(stack_old_arg_values);
-        PUSH_TAG(num_args);
         PUSH(arg1); // Function
         PUSH(argdefs);
         PUSH(args);
 #ifndef NAIVE
         PUSH(unevaluated_arg1);
 #endif
-        HIGHLIGHT(args);
-        x = CAR(args);
+        PUSH_TAGW(stack_entered);
+        PUSH_TAGW(stack_old_arg_values);
+        PUSH_TAG(num_args);
         PUSH_TAG(TAG_NEXT_ARG);
         goto do_eval;
 next_arg:
         // Restore evaluator state.
+        POP_TAG(num_args);
+        POP_TAGW(stack_old_arg_values);
+        POP_TAGW(stack_entered);
 #ifndef NAIVE
         POP(unevaluated_arg1);
 #endif
         POP(args);
         POP(argdefs);
         POP(arg1);  // Function
-        POP_TAG(num_args);
-        POP_TAGW(stack_old_arg_values);
-        POP_TAGW(stack_entered);
         if (do_break_repl)
             goto start_body;
     }

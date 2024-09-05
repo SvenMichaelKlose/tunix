@@ -295,6 +295,7 @@
     \q  (quit-editor)
     \e  (progn
           (prompt "Eval: ")
+          (= *old-conln* -1)
           (con-direct nil)
           (!= (eval (read))
             (terpri)

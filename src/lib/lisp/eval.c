@@ -661,16 +661,18 @@ next_body_statement:
 #endif
         goto continue_body;
 #ifndef NO_DEBUGGER
+/*
     else if (SYMBOLP(unevaluated_arg1)) {
         // Catch lost RETURN and GO.
         if (value == return_sym) {
-            error_info = return_name;
+            error_info = make_cons (unevaluated_arg1, return_name);
             error (ERROR_LOST_RETURN, "RETURN without BLOCK");
         } else if (value == go_sym) {
-            error_info = go_tag;
+            error_info = make_cons (unevaluated_arg1, go_tag);
             error (ERROR_LOST_GO, "GO without BLOCK");
         }
     }
+*/
 #endif
 
     // Restore argument symbol values.

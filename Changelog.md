@@ -26,6 +26,7 @@ and this project adheres to
 
 - EDIT: a simple text editor.
 - COUNT-IF to count by predicate.
+- TUNIX terminal control functions ("con.lisp").
 
 ##### Fixed
 

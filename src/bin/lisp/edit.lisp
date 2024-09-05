@@ -5,7 +5,7 @@
    '("prog1" "when" "unless" "dolist" "alet" "aif" "while"
      "awhile" "queue" "with-queue" "dotimes" "incdec"
      "nth" "awhen" "mapcar" "mapcan" "case" "group"
-     "cbm-keycode" "cbm-con" "cut-at"
+     "cbm-keycode" "cbm-con" "con" "cut-at"
      "with-in" "with-out" "with-global"))
 
 ;;; State
@@ -21,39 +21,16 @@
 (var *conln* 0) ; # of first displayed line.
 (var *ox* 0)    ; Line X offset.
 (var *lx* 0)    ; Line X position, relative to *OX*.
+(var *old-conln* 0)
+(var *old-ln* 0)
 
-;;; Terminal control
-
-(fn clrscr ()
-  (out 12))
-
-(fn con-xy (x y)
-  (out 1)
-  (out x)
-  (out y))
-
-(fn con-clrset (x f)
-  (out (? x 3 2))
-  (out f))
-
-(fn con-crs (x)
-  (con-clrset x 1))
-
-(fn con-rvs (x)
-  (con-clrset x 2))
-
-(fn con-direct (x)
-  (con-clrset x 4))
-
-(fn con-get (x)
-  (out x)
-  (-- (conin)))
-
-(fn con-x ()
-  (con-get 4))
-
-(fn con-y ()
-  (con-get 5))
+(fn reset-ln ()
+  (= *lx* 0)
+  (= *ln* 0)
+  (= *conln* 0)
+  (= *old-conln* -1)
+  (= *old-ln* -1)
+  (= *saved?* t))
 
 ;;; Display
 
@@ -74,13 +51,27 @@
   (!? (nthcdr (line-len l) *spaces*)
       (out !)))
 
-(fn update-screen ()
+(fn print-lines ()
   (with ((y 0)
          (l (nthcdr *conln* *lines*)))
     (dotimes (i (-- *con-h*))
       (update-line (and l (car l)) y)
       (!++ y)
       (= l (cdr l)))))
+
+(fn update-screen? ()
+  ; Adjust *conln* to keep cursor position visible.
+  (? (< (- *ln* *conln*) 0)
+     (= *conln* 0))
+  (? (>= (- *ln* *conln*) (-- *con-h*))
+     (= *conln* (- *ln* (- *con-h* 2))))
+  (not (== *old-conln* *conln*)))
+
+(fn update-screen ()
+  (? (update-screen?)
+     (print-lines))
+  (= *old-conln* *conln*)
+  (= *old-ln* *ln*))
 
 (fn outrvs msg
   (con-rvs t)
@@ -256,10 +247,7 @@
          (= *filename* f)
          (= *lines* nil)
          (= *lines* (read-lines))
-         (= *lx* 0)
-         (= *ln* 0)
-         (= *conln* 0)
-         (= *saved?* t)
+         (reset-ln)
          (clr-status))
        (= *err* "Cannot load.") nil)))
 
@@ -270,16 +258,17 @@
            (return !)))))
 
 (fn quit-editor ()
-  (and *saved?*
-       (return 'quit))
-  (prompt "Save (y/n/c)?")
-  (!= (choose \y \n \c)
-    (clr-status)
-    (and (== ! \y)
-         (save-file)
-         'quit)
-    (or (== ! \c)
-        'quit)))
+  (block nil
+    (and *saved?*
+         (return 'quit))
+    (prompt "Save (y/n/c)?")
+    (!= (choose \y \n \c)
+      (clr-status)
+      (and (== ! \y)
+           (save-file)
+           'quit)
+      (or (== ! \c)
+          'quit))))
 
 (fn editor-cmds ()
   (prompt "Ctrl+K+")
@@ -301,11 +290,6 @@
             (terpri))
           (prompt-ok))))
 
-(fn adjust-conln ()
-  (= *conln* (- *ln* (- *con-h* 2)))
-  (? (< *conln* 0)
-     (= *conln* 0)))
-
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
   (con-direct t)
@@ -324,17 +308,12 @@
         (? (< 0 *ln*)
            (join-line))
       +arr-up+
+        ; Check if for screen update range above.
         (when (< 0 *ln*)
-          (!-- *ln*)
-          (? (< (- *ln* *conln*) 0)
-             (!-- *conln*)
-             (go no-screen-update)))
+          (!-- *ln*))
       +arr-down+
         (when (< *ln* (-- (length *lines*)))
-          (!++ *ln*)
-          (? (>= (- *ln* *conln*) (-- *con-h*))
-             (!++ *conln*)
-             (go no-screen-update)))
+          (!++ *ln*))
       11 ; Ctrl+K: Command
         (and (eq 'quit (editor-cmds))
              (return nil))
@@ -345,20 +324,15 @@
           (= *ln* (+ *ln* (-- *con-h*)))
           (!= (-- (length *lines*))
             (? (>= *ln* !)
-               (= *ln* !))
-            (adjust-conln)))
+               (= *ln* !))))
       15 ; Ctrl-O: Page up
         (progn
           (= *ln* (- *ln* (-- *con-h*)))
           (? (< *ln* 0)
-             (= *ln* 0))
-          (adjust-conln)))))
+             (= *ln* 0))))))
 
 (fn edit file
-  (= *lx* 0)
-  (= *ln* 0)
-  (= *conln* 0)
-  (= saved? t)
+  (reset-ln)
   (clrscr)
   (?
     file

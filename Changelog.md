@@ -45,6 +45,10 @@ and this project adheres to
 - READ-LINE: Reads line as a symbol.
 - WITH-IN, WITH-OUT: Redirect channel for body.
 
+### libsimpleio-cbm
+
+- No "direct" mode when writing to non-standard I/O.
+
 
 ## [v0.0.15] - 2024-09-02
 

@@ -287,10 +287,11 @@ raw_out (char c)
             c = 221;
         else
             c = reverse_case (c);
-    }
-    if (term_direct_mode)
-        cputc (c);
-    else
+        if (term_direct_mode)
+            cputc (c);
+        else
+            cbm_k_bsout (c);
+    } else
         cbm_k_bsout (c);
     set_status ();
 }

@@ -236,9 +236,23 @@
     (while (not (eof))
       (enqueue q (read-line)))))
 
+(fn list-dir ()
+  (awhen (and (builtin? opendir)
+              (opendir))
+    (clrscr)
+    (con-direct nil)
+    (awhile (readdir !)
+      (print (car !)))
+    (closedir !)
+    (terpri)
+    (con-direct t)))
+
 (fn save-file f
-  (prompt "...")
-  (let uf (? (not f) (prompt-in "Save: " *filename*))
+  (let uf (? (not f)
+             (progn
+               (list-dir)
+               (prompt-in "Save: " *filename*)))
+    (prompt "...")
     (? (with-out o (open (or (car f) uf) 'w)
          (? uf
             (= *filename* uf))
@@ -251,6 +265,7 @@
          (= *saved?* t)))))
 
 (fn load-file ()
+  (list-dir)
   (let f (prompt-in "Load: " *filename*)
     (? (with-in i (open f 'r)
          (prompt "...")
@@ -281,10 +296,13 @@
           'quit))))
 
 (fn editor-cmds ()
-  (prompt "Ctrl+K+")
+  (prompt "Ctrl+K: ")
   (case (conin)
     \l  (load-file)
     \s  (save-file)
+    \d  (progn
+          (list-dir)
+          (prompt-ok))
     \r  (progn
           (save-file "_ctrlkr.tmp")
           (= *old-conln* -1)

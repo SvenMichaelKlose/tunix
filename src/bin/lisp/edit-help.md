@@ -16,6 +16,7 @@ TUNIX editor
 |------------|-------------------------|
 | Ctrl+k l   | Load file.              |
 | Ctrl+k s   | Save file.              |
+| Ctrl+k d   | List directory.         |
 | Ctrl+k r   | Save and evaluate file. |
 | Ctrl+k e   | Evaluate expression.    |
 | Ctrl+k q   | Exit editor.            |

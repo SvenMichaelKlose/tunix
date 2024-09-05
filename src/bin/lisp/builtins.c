@@ -168,6 +168,8 @@ lispptr
 bi_symbol_name ()
 {
     lispobj_size_t i = 0;
+    if (NOT(arg1))
+        return arg1;
 
     lisp_len = SYMBOL_LENGTH(arg1);
     list_start = list_last = nil;

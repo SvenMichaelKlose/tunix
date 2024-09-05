@@ -42,6 +42,7 @@ and this project adheres to
 
 ##### Fixed
 
+- SYMBOL-VALUE of NIL.
 - SYMBOL-NAME of NIL.
 
 ##### Changed

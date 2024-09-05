@@ -15,6 +15,11 @@ and this project adheres to
 
 #### Debugger
 
+##### Added
+
+- ONERROR handler can delegate errors to the debugger to
+  be handled as usual, by returning symbol %FAIL.
+
 ##### Changed
 
 - Set breakpoints on any kind of object with a name, not

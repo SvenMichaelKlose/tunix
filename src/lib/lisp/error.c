@@ -189,15 +189,4 @@ check_stacks (char * old_stack, char * old_tagstack)
         internal_error_ptr (tagstack, "tagstack");
 }
 
-#ifndef NO_ONERROR
-
-void
-init_onerror ()
-{
-    onerror_sym = make_symbol ("onerror", 7);
-    expand_universe (onerror_sym);
-}
-
-#endif // #ifndef NO_ONERROR
-
 #endif // #ifndef NAIVE

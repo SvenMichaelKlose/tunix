@@ -865,27 +865,36 @@ d       ; Delete all breakpoints.
 | (ignore)        | Break and continue with LOAD or REPL. |
 
 If defined, user-defined function ONERROR is called on
-errors, except for internal ones which halt the interpreter
-to avoid unexpected behaviour.  Errors happening inside
-ONERROR will cause it to be called again.  The handler
-must return a correct replacement value insted of calling
-QUIT or use IGNORE.
+errors, except for internal ones that need to halt the
+interpreter to avoid unexpected behaviour and thus damage.
+Errors happening inside ONERROR will cause it to be called
+again.
 
 ONERROR is called with the error code, the current REPL
 (top-level) expression, and the faulty expression within
 it:
 
-IDEA: Calling DEBUGGER inside ONERROR if the error cannot
-be dealt with.
+The handler must return an alternative value for the failed
+expression.  If that expression can be evaluated again,
+you perhaps should not forget to macro-expand it beforehand.
+
+To delegate error handling to the debugger as usual, the
+handler has to return symbol %FAIL.
 
 ~~~lisp
 (fn onerror (errcode repl faulty)
   (out "ONERROR handler called!")(terpri)
   ; We don't handle errors so unleash the debugger on it.
-  'debugger)
+  '%fail)
 ~~~
 
+The current REPL's top-level expression can be ignored by
+calling IGNORE instead.
+
 ### Error codes
+
+These are the error codes found in the CODE argument and in
+the debugger's heading printed when invoked:
 
 | ID (ERROR_...)  | Code | Description                     |
 |-----------------|------|---------------------------------|

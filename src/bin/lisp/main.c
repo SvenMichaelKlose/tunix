@@ -160,9 +160,6 @@ lisp_init (void)
     init_builtins ();
     init_quoting ();
     init_io_symbols ();
-#ifndef NO_ONERROR
-    init_onerror ();
-#endif
     init_repl ();
 
 #ifdef GC_STRESS

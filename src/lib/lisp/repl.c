@@ -19,6 +19,7 @@
 
 #ifndef NO_ONERROR
 lispptr onerror_sym;
+lispptr fail_sym;
 #endif
 #ifndef NAIVE
 jmp_buf * hard_repl_break;
@@ -164,6 +165,62 @@ lisp_repl (char mode)
     set_channels (STDIN, STDOUT);
 
     num_repls++;
+
+#ifndef NAIVE
+    if (error_code) {
+#ifndef NO_ONERROR
+        // Call user-defined ONERROR handler.
+        if (CONSP(SYMBOL_VALUE(onerror_sym))) {
+            PUSH(current_expr);
+            PUSH(current_toplevel);
+            PUSH(error_info);
+            PUSH_TAG(error_code);
+            PUSH_TAG(unevaluated);
+
+            // Make argument list.
+            x = make_cons (current_expr, nil);
+            tmp2 = make_cons (current_toplevel, x);
+            PUSH(tmp2);
+            x = make_number ((lispnum_t) error_code);
+            POP(tmp2);
+            x = make_cons (x, tmp2);
+            x = make_cons (onerror_sym, x);
+
+            // Call ONERROR.
+            error_info  = nil;
+            error_code  = 0;
+            unevaluated = true;
+            PUSH_TAG(TAG_DONE);
+            x = eval0 ();
+
+            // Handle error as usual if %FAIL was returned.
+            if (x != fail_sym) {
+                // Undo stack.
+                stack += 3 * sizeof (lispptr);
+                tagstack += 2;
+
+                // Continue with new value.
+                goto do_return;
+            }
+
+            POP_TAG(unevaluated);
+            POP_TAG(error_code);
+            POP(error_info);
+            POP(current_toplevel);
+            POP(current_expr);
+        }
+#ifdef NO_DEBUGGER
+        // Error not handled.  Exit program.
+        // TODO?: print_debugger_info ();
+        do_break_repl   = true;
+        do_exit_program = true;
+        error_code      = 0;
+        error_info      = nil;
+        goto do_return;
+#endif
+#endif // #ifndef NO_ONERROR
+    }
+
 #ifndef NO_DEBUGGER
     // Tell about debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
@@ -177,39 +234,6 @@ lisp_repl (char mode)
         terpri ();
     }
 #endif
-#ifndef NAIVE
-    if (error_code) {
-#ifndef NO_ONERROR
-        // Call user-defined ONERROR handler.
-        if (CONSP(SYMBOL_VALUE(onerror_sym))) {
-            // Make argument list.
-            x = make_cons (current_expr, nil);
-            tmp2 = make_cons (current_toplevel, x);
-            PUSH(tmp2);
-            x = make_number ((lispnum_t) error_code);
-            POP(tmp2);
-            x = make_cons (x, tmp2);
-            x = make_cons (onerror_sym, x);
-
-            // Call ONERROR.
-            error_code  = 0;
-            error_info  = nil;
-            unevaluated = true;
-            PUSH_TAG(TAG_DONE);
-            x = eval0 ();
-            goto do_return;
-        }
-#ifdef NO_DEBUGGER
-        // Error not handled.  Exit program.
-        // TODO?: print_debugger_info ();
-        do_break_repl   = true;
-        do_exit_program = true;
-        error_code      = 0;
-        error_info      = nil;
-        goto do_return;
-#endif
-#endif // #ifndef NO_ONERROR
-    }
 #endif // #ifndef NAIVE
 
     // READ/EVAL/PRINT-Loop.
@@ -504,9 +528,6 @@ do_return:
     if (mode == REPL_DEBUGGER) {
         num_debugger_repls--;
         onetime_heap_margin = ONETIME_HEAP_MARGIN;
-
-        outs ("Continuing...");
-        terpri ();
     }
 #endif
 #ifndef NDEBUG
@@ -581,6 +602,12 @@ init_repl ()
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);
     expand_universe (debugger_return_value_sym);
+#endif
+#ifndef NO_ONERROR
+    onerror_sym = make_symbol ("onerror", 7);
+    expand_universe (onerror_sym);
+    fail_sym = make_symbol ("%fail", 5);
+    expand_universe (fail_sym);
 #endif
 #ifndef NO_MACROEXPAND
     unexpanded_toplevel = nil;

@@ -539,7 +539,10 @@ extern lispptr highlighted;
 extern bool    do_highlight;
 extern lispptr breakpoints_sym;
 #endif
+#ifndef NO_ONERROR
 extern lispptr onerror_sym;
+extern lispptr fail_sym;
+#endif
 
 #ifndef NAIVE
 extern char    error_code;

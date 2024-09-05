@@ -25,6 +25,7 @@ lispptr * global_pointers[] = {
 #endif
 #ifndef NO_ONERROR
     &onerror_sym,
+    &fail_sym,
 #endif
 #ifndef NO_DEBUGGER
     &debug_step,

@@ -30,6 +30,7 @@
   (= *conln* 0)
   (= *old-conln* -1)
   (= *old-ln* -1)
+  (= *update-ln* nil)
   (= *saved?* t))
 
 ;;; Display
@@ -51,10 +52,10 @@
   (!? (nthcdr (line-len l) *spaces*)
       (out !)))
 
-(fn print-lines ()
-  (with ((y 0)
-         (l (nthcdr *conln* *lines*)))
-    (dotimes (i (-- *con-h*))
+(fn print-lines (s)
+  (with ((y s)
+         (l (nthcdr (+ *conln* s) *lines*)))
+    (dotimes (i (- (-- *con-h*) s))
       (update-line (and l (car l)) y)
       (!++ y)
       (= l (cdr l)))))
@@ -68,10 +69,14 @@
   (not (== *old-conln* *conln*)))
 
 (fn update-screen ()
-  (? (update-screen?)
-     (print-lines))
+  (?
+    *update-ln*
+      (print-lines *update-ln*)
+    (update-screen?)
+      (print-lines 0))
   (= *old-conln* *conln*)
-  (= *old-ln* *ln*))
+  (= *old-ln* *ln*)
+  (= *update-ln* nil))
 
 (fn outrvs msg
   (con-rvs t)
@@ -185,13 +190,15 @@
 
 ;;; Text editing
 
-(fn del-line ()
-  (= *lines* (? (== 0 *lx*)
-                (cdr *lines*)
-                (!= (cut-at *lx* *lines*)
-                  (nconc *lines* (cdr !))))))
+;(fn del-line ()
+;  (= *update-ln* *ln*)
+;  (= *lines* (? (== 0 *ln*)
+;                (cdr *lines*)
+;                (!= (cut-at *ln* *lines*)
+;                  (nconc *lines* (cdr !))))))
 
 (fn join-line ()
+  (= *update-ln* *ln*)
   (let prev (nth (-- *ln*) *lines*)
     (with ((prev-len (slength prev))
            (joined   (list (symbol (nconc (symbol-name prev)
@@ -213,6 +220,7 @@
                (symbol !))))))
 
 (fn ins-line ()
+  (= *update-ln* *ln*)
   (let l (split-line (nth *ln* *lines*) *lx*)
     (= *lines* (? (== 0 *ln*)
                   (nconc l (cdr *lines*))

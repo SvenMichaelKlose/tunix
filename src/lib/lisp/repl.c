@@ -171,8 +171,9 @@ lisp_repl (char mode)
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
-            PUSH(current_expr);
             PUSH(current_toplevel);
+            PUSH(current_function);
+            PUSH(current_expr);
             PUSH(error_info);
             PUSH_TAG(error_code);
             PUSH_TAG(unevaluated);
@@ -196,7 +197,7 @@ lisp_repl (char mode)
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
                 // Undo stack.
-                stack += 3 * sizeof (lispptr);
+                stack += 4 * sizeof (lispptr);
                 tagstack += 2;
 
                 // Continue with new value.
@@ -206,8 +207,9 @@ lisp_repl (char mode)
             POP_TAG(unevaluated);
             POP_TAG(error_code);
             POP(error_info);
-            POP(current_toplevel);
             POP(current_expr);
+            POP(current_function);
+            POP(current_toplevel);
         }
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.

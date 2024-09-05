@@ -29,7 +29,9 @@ and this project adheres to
 
 ##### Added
 
-- EDIT: a simple text editor.
+- AUTOLOAD: Loads missing functions and macros, but not
+  functions passed as arguments.
+- EDIT: Simple text editor.
 - COUNT-IF to count by predicate.
 - TUNIX terminal control functions ("con.lisp").
 

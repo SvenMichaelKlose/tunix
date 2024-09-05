@@ -25,7 +25,7 @@
     (terpri)))
 
 (or (eq +target* 'unix)
-  (progn
+  (block t
     (message "Saving 'image'...")
     (isave "image")))
 

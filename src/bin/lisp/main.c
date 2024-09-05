@@ -68,10 +68,7 @@ const char * env_files[] = {
 #endif
 
 #ifndef TARGET_C16
-    "env-3.lisp",
-#ifndef NO_DEBUGGER
-    "stack.lisp",
-#endif
+    "autoload.lisp",
 #ifdef TEST
     "test-file.lisp",
 #endif

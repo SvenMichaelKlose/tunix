@@ -39,7 +39,9 @@
      (message "Testing SYMBOL-NAME...")
      (or (equal (symbol-name 'abc)
                 '(97 98 99))
-         (error)))))
+         (error))
+     (and (symbol-name "")
+          (error)))))
 
 (= x 42)
 

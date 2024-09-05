@@ -108,6 +108,8 @@ bi_setq (void)
 lispptr
 bi_symbol_value (void)
 {
+    if (NOT(arg1))
+        return arg1;
     return SYMBOL_VALUE(arg1);
 }
 

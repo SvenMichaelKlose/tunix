@@ -40,6 +40,10 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
+- SYMBOL-NAME of NIL.
+
 ##### Changed
 
 - Most built-in functions are opt-out.

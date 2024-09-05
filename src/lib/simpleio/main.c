@@ -203,10 +203,10 @@ fresh_line (void)
 void FASTCALL
 simpleio_init_channel (simpleio_chn_t chn)
 {
-    do_putback[chn] = false;
+    do_putback[chn]    = false;
     putback_chars[chn] = 0;
-    last_in[chn] = 0;
-    last_out[chn] = 0;
+    last_in[chn]       = 0;
+    last_out[chn]      = 0;
 }
 
 void FASTCALL
@@ -214,6 +214,6 @@ simpleio_set (simpleio * x)
 {
     io = x;
     memset (do_putback, 0, sizeof (do_putback));
-    memset (last_in, 0, sizeof (last_in));
-    memset (last_out, 0, sizeof (last_out));
+    memset (last_in,    0, sizeof (last_in));
+    memset (last_out,   0, sizeof (last_out));
 }

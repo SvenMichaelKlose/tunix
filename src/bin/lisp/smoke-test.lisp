@@ -56,6 +56,10 @@
 (message "Smoke-testing EVAL...")
 (eval '(print 1))(terpri)
 
+(message "Smoke-testing SYMBOL-NAME...")
+(symbol-name nil)
+(symbol-name t)
+
 (message "Testing ?...")
 (? t nil (error))
 (? nil (error) nil)

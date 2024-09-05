@@ -168,7 +168,7 @@ bi_symbol_name ()
     lispobj_size_t i = 0;
 
     lisp_len = SYMBOL_LENGTH(arg1);
-    list_last = nil;
+    list_start = list_last = nil;
     for (i = 0; i < lisp_len; i++) {
         tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
         if (NOT_NIL(list_last)) {

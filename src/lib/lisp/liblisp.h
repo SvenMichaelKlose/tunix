@@ -235,7 +235,6 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_BUILTIN_TIME
 #endif
 
 // Commodore C16

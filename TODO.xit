@@ -37,6 +37,7 @@ Debugger
 
 Input/Output
 [ ] On Unix: OPENDIR, READDIR, CLOSEDIR.
+[ ] Working terminal direct mode.
 
 Built-ins
 [ ] STRING (SYMBOL with no look-up to reuse exiting ones.)

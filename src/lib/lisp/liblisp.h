@@ -96,7 +96,7 @@
 //#define NO_PRINT_ANONYMOUS
 
 // Disable built-ins.
-//#define NO_BUILTIN_APPEND
+#define NO_BUILTIN_APPEND // Native is smaller.
 //#define NO_BUILTIN_CHAR_AT
 //#define NO_BUILTIN_GC
 //#define NO_BUILTIN_LOAD

@@ -71,7 +71,7 @@ out_colon (void)
 }
 
 void
-print_debugger_info ()
+print_debug_info ()
 {
     // Head with errror info.
     fresh_line ();
@@ -162,6 +162,8 @@ lisp_repl (char mode)
     char cmd;
 #endif
 
+    // Make sure the user can communicate should anything
+    // go wrong if not actually running the program.
     set_channels (STDIN, STDOUT);
 
     num_repls++;
@@ -171,6 +173,8 @@ lisp_repl (char mode)
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
+            // Save state for debugger to restore
+            // when ONERROR handler failed.
             PUSH(current_toplevel);
             PUSH(current_function);
             PUSH(current_expr);
@@ -196,7 +200,7 @@ lisp_repl (char mode)
 
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
-                // Undo stack.
+                // Discard saved context.
                 stack += 4 * sizeof (lispptr);
                 tagstack += 2;
 
@@ -204,6 +208,7 @@ lisp_repl (char mode)
                 goto do_return;
             }
 
+            // Restore context for debugger.
             POP_TAG(unevaluated);
             POP_TAG(error_code);
             POP(error_info);
@@ -213,7 +218,7 @@ lisp_repl (char mode)
         }
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
-        // TODO?: print_debugger_info ();
+        print_debug_info ();
         do_break_repl   = true;
         do_exit_program = true;
         error_code      = 0;
@@ -226,7 +231,8 @@ lisp_repl (char mode)
 #ifndef NO_DEBUGGER
     // Tell about entering the debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
-        outs ("\002\004"); // Normal terminal.
+        // TODO: Save terminal flags.
+        outs ("\002\004"); // Normal terminal mode.
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
         num_debugger_repls++;
         fresh_line ();
@@ -243,11 +249,11 @@ lisp_repl (char mode)
         setin (read_chn);
         if (eof ())
             break;
-        setin (STDIN);
+        setin (STDIN);  // TODO: Clean up setting standard I/O.
 
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
-            print_debugger_info ();
+            print_debug_info ();
 #ifdef EXIT_FAILURE_ON_ERROR
             exit (EXIT_FAILURE);
 #endif
@@ -262,8 +268,9 @@ lisp_repl (char mode)
             if (eof ())
                 goto do_return;
 #ifdef VERBOSE_READ
+            // TODO: Set/restore terminal mode.
             PUSH_TAG(fnout);
-            setout (STDOUT);
+            setout (STDOUT);    // TODO: Clean up setting standard I/O.
             print (x);
             setout (fnout);
             POP_TAG(fnout);
@@ -275,7 +282,7 @@ lisp_repl (char mode)
 #endif
 #ifndef NO_DEBUGGER
         } else {
-            // Read short debugger command, skipping whitespaces.
+            // Read short debugger command, skipping whitespace.
             do {
                 cmd = in ();
             } while (!eof () && cmd < ' ');
@@ -348,10 +355,10 @@ lisp_repl (char mode)
 
                 // Exit program
                 case 'q':
-                    arg1 = nil;
+                    arg1            = nil;
                     do_break_repl   = true;
                     do_exit_program = true;
-                    error_code = 0;
+                    error_code      = 0;
                     goto do_return;
 cannot_continue:
                     outs ("Need alternative first!");
@@ -388,7 +395,7 @@ terpri_next:
         // Memorize unexpanded expression.
         PUSH(unexpanded_toplevel);
         unexpanded_toplevel = x;
-        current_toplevel = x;
+        current_toplevel    = x;
 #endif
 #ifndef NO_DEBUGGER
         // Reset error status for next evaluation.
@@ -492,7 +499,7 @@ terpri_next:
                     break;
 
                 // Print message.
-                setout (STDOUT);
+                setout (STDOUT);    // TODO: Clean up setting standard I/O.
                 outs ("Program exited."); terpri ();
 
                 goto next;
@@ -512,7 +519,7 @@ terpri_next:
 #endif
         // Print result of user input.
         if (mode != REPL_LOAD) {
-            setout (STDOUT);
+            setout (STDOUT);    // TODO: Clean up setting standard I/O.
             print (x);
             fresh_line ();
         }
@@ -526,14 +533,21 @@ do_return:
 #ifndef NO_DEBUGGER
     if (mode == REPL_DEBUGGER) {
         num_debugger_repls--;
+
+        // Restore earlier GC trigger threshold to
+        // be able to run ONERROR if out of heap.
         onetime_heap_margin = ONETIME_HEAP_MARGIN;
+        // TODO: Restore terminal flags.
     }
 #endif
+
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
 #endif
 
     // Restore program channels.
+    // TODO: Clean up.  Shouldn't this
+    // be required before eval() only?
     set_channels (app_in, app_out);
 
     return x;
@@ -592,11 +606,11 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl      = false;
-    do_continue_repl   = false;
-    num_repls = -1;
-    app_in = STDIN;
-    app_out = STDOUT;
+    do_break_repl    = false;
+    do_continue_repl = false;
+    num_repls        = -1;
+    app_in           = STDIN;
+    app_out          = STDOUT;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);

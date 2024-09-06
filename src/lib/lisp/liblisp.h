@@ -85,8 +85,7 @@
 // No support for saving and loading images.
 //#define NO_IMAGES
 
-// Do not expand macros in REPL.
-// Required to load all of the environment.
+// Do not call MACROEXPAND in REPL.
 //#define NO_MACROEXPAND
 
 // Disable calling user function ONERROR on errors.

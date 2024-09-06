@@ -2119,6 +2119,16 @@ key and the rest is the value.
 
 ### (assoc x l): Return list that start with X.
 
+## Console control
+
+### (clrscr): Clear screen.
+### (con-xy x y): Set cursor position.
+### (con-crs x): Set cursor visibility.
+### (con-rvs x): Set reverse mode.
+### (con-direct x): Set direct mode.
+### (con-x): Get cursor X position.
+### (con-y): Get cursor Y position.
+
 ## Version information
 
 | Variable | Description                             |

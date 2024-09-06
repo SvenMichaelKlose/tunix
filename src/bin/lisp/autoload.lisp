@@ -1,9 +1,8 @@
-; Load missing function.
+; JIT-load missing functions and macros
 ;
 ; Variable names have been prefixed with
-; a '~' to avoid ; clashes with the
-; interrupted procedure during LOAD or
-; EVAL.
+; a '~' to avoid clashes with inter-
+; rupted procedures during LOAD or EVAL.
 (fn autoload (~code ~top ~x)
   (block nil
     ; Handle only if ERROR_NOT_FUNCTION.

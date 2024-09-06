@@ -9,7 +9,9 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.16] - 2024-09-06
+
+AUTOLOAD and EDIT.
 
 ### Lisp
 

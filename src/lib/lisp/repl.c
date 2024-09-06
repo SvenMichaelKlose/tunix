@@ -138,13 +138,9 @@ read_cmd_arg (void)
 
 #endif // #ifndef NO_DEBUGGER
 
-simpleio_chn_t app_in;
-simpleio_chn_t app_out;
-
 lispptr FASTCALL
 lisp_repl (char mode)
 {
-    simpleio_chn_t read_chn = (mode == REPL_LOAD) ? fnin : STDIN;
 #ifndef NDEBUG
     char * old_stack    = stack;
     char * old_tagstack = tagstack;
@@ -164,7 +160,8 @@ lisp_repl (char mode)
 
     // Make sure the user can communicate should anything
     // go wrong if not actually running the program.
-    set_channels (STDIN, STDOUT);
+    setin (STDIN);
+    setout (STDOUT);
 
     num_repls++;
 
@@ -196,7 +193,11 @@ lisp_repl (char mode)
             error_code  = 0;
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
+            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
             x = eval0 ();
+            setin (STDIN);
+            setout (STDOUT);
 
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
@@ -246,10 +247,10 @@ lisp_repl (char mode)
 
     // READ/EVAL/PRINT-Loop.
     while (1) {
-        setin (read_chn);
+        setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
         if (eof ())
             break;
-        setin (STDIN);  // TODO: Clean up setting standard I/O.
+        setin (STDIN);
 
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
@@ -263,19 +264,15 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
-            setin (read_chn);
+            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             read_safe ();
             if (eof ())
                 goto do_return;
+            setin (STDIN);
 #ifdef VERBOSE_READ
             // TODO: Set/restore terminal mode.
-            PUSH_TAG(fnout);
-            setout (STDOUT);    // TODO: Clean up setting standard I/O.
             print (x);
-            setout (fnout);
-            POP_TAG(fnout);
 #endif
-            setin (STDIN);
 #ifndef TARGET_UNIX
             if (mode != REPL_LOAD)
                 terpri ();
@@ -438,15 +435,14 @@ terpri_next:
             saved_tagstack  = tagstack;
 #endif
             // Set program channels.
-            set_channels (app_in, app_out);
+            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
 
             // Evaluate expression.
             x = eval ();
 
-            // Update saved program channels.
-            app_in  = fnin;
-            app_out = fnout;
-            set_channels (STDIN, STDOUT);
+            setin (STDIN);
+            setin (STDOUT);
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
@@ -545,11 +541,6 @@ do_return:
     check_stacks (old_stack, old_tagstack);
 #endif
 
-    // Restore program channels.
-    // TODO: Clean up.  Shouldn't this
-    // be required before eval() only?
-    set_channels (app_in, app_out);
-
     return x;
 }
 
@@ -609,8 +600,6 @@ init_repl ()
     do_break_repl    = false;
     do_continue_repl = false;
     num_repls        = -1;
-    app_in           = STDIN;
-    app_out          = STDOUT;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     debugger_return_value_sym = make_symbol ("*r*", 3);

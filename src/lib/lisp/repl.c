@@ -224,7 +224,7 @@ lisp_repl (char mode)
     }
 
 #ifndef NO_DEBUGGER
-    // Tell about debugger and which one it is.
+    // Tell about entering the debugger and which one it is.
     if (mode == REPL_DEBUGGER) {
         outs ("\002\004"); // Normal terminal.
         SET_SYMBOL_VALUE(debugger_return_value_sym, value);
@@ -239,7 +239,7 @@ lisp_repl (char mode)
 #endif // #ifndef NAIVE
 
     // READ/EVAL/PRINT-Loop.
-    while (!eof ()) {
+    while (1) {
         setin (read_chn);
         if (eof ())
             break;
@@ -249,11 +249,8 @@ lisp_repl (char mode)
         if (mode == REPL_DEBUGGER) {
             print_debugger_info ();
 #ifdef EXIT_FAILURE_ON_ERROR
-        exit (EXIT_FAILURE);
+            exit (EXIT_FAILURE);
 #endif
-            // Out of heap errors cannot be corrected.
-            if (error_code == ERROR_OUT_OF_HEAP)
-                error_code = 0;
         }
 #endif
 #ifndef NO_DEBUGGER

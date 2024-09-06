@@ -4,6 +4,7 @@
 (load "mapcar.lisp")
 (load "incdec.lisp")
 (load "queue.lisp")
+(load "progn.lisp")
 
 (message "Testing ADJOIN...")
 (or (equal (adjoin 'l '(i s p))

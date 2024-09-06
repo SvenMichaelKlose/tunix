@@ -2,7 +2,7 @@
       (or (load (symbol (append (symbol-name x)
                                 (symbol-name ".lisp"))))
           (error "Can't load " x ".lisp")))
-   '("prog1" "when" "unless" "dolist" "alet" "aif" "while"
+   '("let" "do" "prog1" "progn" "when" "unless" "dolist" "alet" "aif" "while"
      "awhile" "queue" "with-queue" "dotimes" "incdec"
      "nth" "awhen" "mapcar" "mapcan" "case" "group"
      "cbm-keycode" "cbm-con" "con" "cut-at"

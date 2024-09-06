@@ -1,15 +1,16 @@
 ; Load missing function.
 ;
-; Variable names have been prefixed with a '~' to avoid
-; clashes ; with the interrupted procedure during LOAD
-; or EVAL.
+; Variable names have been prefixed with
+; a '~' to avoid ; clashes with the
+; interrupted procedure during LOAD or
+; EVAL.
 (fn autoload (~code ~top ~x)
   (block nil
-    ; Handle only if it's an ERROR_NOT_FUNCTION.
+    ; Handle only if ERROR_NOT_FUNCTION.
     (and (== ~code 5)
          (symbol? (car ~x))
-      ; Turn function name into a file name by appending a
-      ; ".lisp" suffix.
+      ; Turn function name into filename
+      ; by appending ".lisp" suffix.
       (((~fname)
         ; Check if file exists by opening it.
         (((~!)

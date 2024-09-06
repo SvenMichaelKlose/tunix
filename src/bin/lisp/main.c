@@ -72,12 +72,9 @@ const char * env_files[] = {
 #ifdef TEST
     "test-file.lisp",
 #endif
-#ifdef LOAD_ALL
-    "all.lisp",
 #ifdef TEST
     "test-all.lisp",
 #endif
-#endif // #ifdef LOAD_ALL
     "welcome.lisp",
 #endif // #ifndef TARGET_C16
     NULL

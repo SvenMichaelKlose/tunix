@@ -39,9 +39,6 @@ const char * env_files[] = {
     "smoke-test.lisp",
 #endif
     "env-1.lisp",
-#ifdef NO_BUILTIN_APPEND
-    "append.lisp",
-#endif
 
     // Target-specific
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)

@@ -12,7 +12,6 @@
      (message "Cleaning up. Please wait...")
      ; If compressed conses are enabled, have *UNIVERSE*
      ; compressed better.
-     (= *universe (copy-list *universe*))
      (print (gc))(out " bytes free.")(terpri))))
 
 ; Tell time it took to get here.

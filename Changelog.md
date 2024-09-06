@@ -19,6 +19,10 @@ and this project adheres to
 
 - TIME for C128, C64 and VIC-20.
 
+#### Environment
+
+- Cleaned up to boot on the VIC-20 again.
+
 
 ## [v0.0.16] - 2024-09-06
 

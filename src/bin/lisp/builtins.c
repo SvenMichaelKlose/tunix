@@ -1142,7 +1142,11 @@ lispptr
 bi_time (void)
 {
     asm ("cli");
-#if defined(TARGET_C16) || defined(TARGET_PLUS4)
+#if defined(TARGET_C128) || defined(TARGET_C64) || defined(TARGET_VIC20)
+    bekloppies[0] = *(char *) 0xa2;
+    bekloppies[1] = *(char *) 0xa1;
+    bekloppies[2] = *(char *) 0xa0;
+#elif defined(TARGET_C16) || defined(TARGET_PLUS4)
     bekloppies[0] = *(char *) 0xa5;
     bekloppies[1] = *(char *) 0xa4;
     bekloppies[2] = *(char *) 0xa3;

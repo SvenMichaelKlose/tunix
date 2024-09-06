@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- TIME for C128, C64 and VIC-20.
+
+
 ## [v0.0.16] - 2024-09-06
 
 AUTOLOAD and EDIT.

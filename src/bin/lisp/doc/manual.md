@@ -464,34 +464,22 @@ Set up a Unix-like environment using MSYS2 or MinGW:
 
 # Booting TUNIX Lisp
 
-When starting the program the first time, only built-in
-functions and symbols exist.  The most basic function
-required are loaded from Lisp code files to form the basic
-_environment_.  It is saves and an _image file_ which is
-loaded instead of the Lisp code as that is much faster.
-You an have your own code run before that image is created
-by saving it to file "user-pre-image.lisp".  Code that
-should be executed after the image has been loaded can be
-saved to file "user-post-image.lisp".  By setting these
-files up you can set up an environment that fits your
-desires best.
+The interpreter first loads essential procedures and
+saves them as an image that loads much faster.  That
+images is loaded automatically the next time and simply
+named "image".
+You an have your own code included before that image
+is created by saving it to file "user-pre-image.lisp".
+Code that should be executed after the image has been
+loaded can be provided in file "user-post-image.lisp".
+That's useful to experiment with code you want to move
+to the pre-image code later.  If you want to update the
+boot image, just delete it and start TUNIX Lisp to
+re-create it.
 
-~~~lisp
-; Example "user-pre-image.lisp"
-; Loads a set of regularly used functions.
-(@ '((x)
-      (load (symbol (append (symbol-name x)
-                            (symbol-name ".lisp")))))
-   '("when" "unless" "dolist" "alet" "while" "awhile"
-     "awhen"))
-~~~
-
-File "user-post-image.lisp" could be used for develeopment
-when part of the application code changes constantly.
-
-~~~lisp
-(load "mycrashycode.lisp")
-~~~
+To spare you figuring out dependencies, TUNIX Lisp has a
+mechanism that loads files that carry the names as missing
+procedures automatically.
 
 Of course TUNIX Lisp shouldn't crash!  Pleas don't hestitate
 to file a

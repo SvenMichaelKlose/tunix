@@ -274,7 +274,7 @@
          (= *lines* (read-lines))
          (reset-ln)
          (clr-status))
-       (= *err* "Cannot load.") nil)))
+       (= *err* "Cannot load."))))
 
 (fn choose x
   (while (not (eof))

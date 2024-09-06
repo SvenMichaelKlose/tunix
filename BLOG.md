@@ -3,6 +3,15 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-06
+
+Implemented AUTOLOAD today within a bekloppie.  Does not
+work with functions passed by arguments but goes well with
+regular function and macro calls.  Now for the other way
+around: throwing out procedure bodies when memory is low.
+
+Am very happy with this release, v0.0.16.
+
 # 2024-09-04
 
 The editor can load files, re-using EDIT-LINE for the

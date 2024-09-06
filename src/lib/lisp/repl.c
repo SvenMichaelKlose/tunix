@@ -551,7 +551,7 @@ load (char * pathname)
     simpleio_chn_t load_fn;
 
     // Memorize input channel.
-    int oldin = fnin;
+    int oldin = NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin));
 
 #ifdef VERBOSE_LOAD
     outs ("Loading "); outs (pathname); terpri ();

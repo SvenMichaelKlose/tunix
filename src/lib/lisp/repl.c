@@ -411,7 +411,11 @@ terpri_next:
             x = make_cons (macroexpand_sym, x);
             unevaluated = true;
             PUSH_TAG(TAG_DONE);
+            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
             x = eval0 ();
+            setin (STDIN);
+            setout (STDOUT);
 #ifndef NO_DEBUGGER
             POP(debug_step);
 #endif

@@ -49,6 +49,8 @@ and this project adheres to
 
 ##### Changed
 
+- No verbose LOAD, VAR and FN.  Would generate unwanted
+  output during AUTOLOAD and the like.
 - Most built-in functions are opt-out.
 
 ##### Added

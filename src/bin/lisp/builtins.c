@@ -868,13 +868,8 @@ bi_readdir (void)
 {
     char err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
     char i;
-    if (err) {
-        // cc65's stdlib does a CLRCH if there's no more
-        // to read.  Not sure what purpose that serves.
-        // TODO: Ask.
-        set_channels (NUMBER_VALUE(arg1), fnout);
+    if (err)
         return nil;
-    }
     memcpy (buffer, dirent.name, sizeof (dirent.name));
     buffer[sizeof (dirent.name)] = 0;
     lisp_len = strlen (buffer);

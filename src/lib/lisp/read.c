@@ -148,6 +148,8 @@ read_quoted (lispptr which)
     return make_cons (which, make_cons (read_expr (), nil));
 }
 
+#ifndef NO_QUASIQUOTE
+
 lispptr
 read_unquoted (void)
 {
@@ -156,6 +158,8 @@ read_unquoted (void)
     putback ();
     return read_quoted (unquote);
 }
+
+#endif // #ifndef NO_QUASIQUOTE
 
 lispptr
 read_symbol_or_number (void)
@@ -229,10 +233,12 @@ read_expr ()
         return read_string ();
     case '\'':
         return read_quoted (quote);
+#ifndef NO_QUASIQUOTE
     case '$':
         return read_quoted (quasiquote);
     case ',':
         return read_unquoted ();
+#endif
     case '\\':
         return make_number (in ());
 #ifndef NAIVE

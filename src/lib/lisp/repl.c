@@ -548,6 +548,8 @@ do_return:
     return x;
 }
 
+#ifndef NO_BUILTIN_GROUP_FILE
+
 bool FASTCALL
 load (char * pathname)
 {
@@ -593,6 +595,8 @@ err_open:
 
     return status;
 }
+
+#endif // #ifndef NO_BUILTIN_GROUP_FILE
 
 #ifdef TARGET_VIC20
 #pragma code-name ("CODE_INIT")

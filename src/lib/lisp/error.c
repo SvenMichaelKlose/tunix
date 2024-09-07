@@ -136,6 +136,8 @@ err_type (char * type, lispptr x, char code)
     error (code, buffer);
 }
 
+#ifndef NAIVE
+
 // Type check object and issue error if it fails.
 // TODO: Do not pass on error code via argument lists.
 void FASTCALL
@@ -179,6 +181,10 @@ bi_tcheck (lispptr x, uchar type, char code)
     }
 }
 
+#endif // #ifndef NAIVE
+
+#ifndef NDEBUG
+
 // Issue error if GC stack and tag stack pointers deviate from arguments.
 void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
@@ -188,5 +194,7 @@ check_stacks (char * old_stack, char * old_tagstack)
     if (old_tagstack != tagstack)
         internal_error_ptr (tagstack, "tagstack");
 }
+
+#endif // #ifndef NDEBUG
 
 #endif // #ifndef NAIVE

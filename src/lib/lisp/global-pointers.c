@@ -12,11 +12,16 @@ lispptr * global_pointers[] = {
     &universe, &t,
     &delayed_eval,
     &block_sym,
-    &quote, &quasiquote, &unquote, &unquote_spliced,
+    &quote,
+#ifndef NO_QUASIQUOTE
+    &quasiquote, &unquote, &unquote_spliced,
+#endif
     &return_sym, &return_name, &return_value,
     &go_sym, &go_tag,
     &current_expr,
+#ifndef NO_MACROEXPAND
     &unexpanded_toplevel,
+#endif
 #ifndef NAIVE
     &current_toplevel,
     &current_function,

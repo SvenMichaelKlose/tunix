@@ -80,12 +80,14 @@ print_list (cons * c)
         print_tmp = CAR(c);
         if (print_tmp == quote)
             tmpstr = "'";
+#ifndef NO_QUASIQUOTE
         else if (print_tmp == quasiquote)
             tmpstr = "$";
         else if (print_tmp == unquote)
             tmpstr = ",";
         else if (print_tmp == unquote_spliced)
             tmpstr = ",@";
+#endif
         print_tmp = nil;
         if (tmpstr) {
             print_short (tmpstr, c);

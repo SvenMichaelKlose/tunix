@@ -21,9 +21,11 @@ extern void test (void);
 
 // Symbols for quoting.
 lispptr quote;
+#ifndef NO_QUASIQUOTE
 lispptr quasiquote;
 lispptr unquote;
 lispptr unquote_spliced;
+#endif
 
 #ifdef __CC65__
 #pragma rodata-name (push,"RODATA_INIT")
@@ -54,7 +56,18 @@ const char * env_files[] = {
 #ifdef TEST
     "test.lisp",
 #endif
-    "env-2.lisp",
+#ifndef NO_QUASIQUOTE
+    "quasiquote.lisp",
+    #ifdef TEST
+        "test-quasiquote.lisp",
+    #endif
+#endif
+#ifndef NO_MACROEXPAND
+    "macroexpand.lisp",
+    #ifdef TEST
+        "test-macroexpand.lisp",
+    #endif
+#endif
 #ifndef NO_ONERROR
 #ifdef TEST
     "test-onerror.lisp",
@@ -89,17 +102,18 @@ const char * env_files[] = {
 #endif
 
 void
-init_quoting (void)
+init_quote_symbols (void)
 {
-    // Make symbols for quoting.
     quote           = make_symbol ("quote", 5);
     expand_universe (quote);
+#ifndef NO_QUASIQUOTE
     quasiquote      = make_symbol ("quasiquote", 10);
     expand_universe (quasiquote);
     unquote         = make_symbol ("unquote", 7);
     expand_universe (unquote);
     unquote_spliced = make_symbol ("unquote-spliced", 15);
     expand_universe (unquote_spliced);
+#endif
 }
 
 void
@@ -152,7 +166,7 @@ lisp_init (void)
     init_list ();
     init_eval ();
     init_builtins ();
-    init_quoting ();
+    init_quote_symbols ();
     init_io_symbols ();
     init_repl ();
 
@@ -168,7 +182,9 @@ lisp_init (void)
 int
 main (int argc, char * argv[])
 {
+#ifndef NO_BUILTIN_LOAD
     const char ** f;
+#endif
 #ifndef NO_IMAGES
     lispptr istart_fun;
 #endif
@@ -189,17 +205,21 @@ main (int argc, char * argv[])
             longjmp (restart_point, 1);
 #endif // #ifndef NO_IMAGES
 
+#ifndef NO_BUILTIN_LOAD
         // Load environment files.
         for (f = env_files; *f; f++)
             load ((char *) *f);
+#endif
 #ifndef NO_IMAGES
     } else {
         // Called by ILOAD.  Reset I/O.
         simpleio_init ();
+#ifndef NO_BUILTIN_GROUP_FILE
         arg1 = make_number (STDIN);
         bi_setin ();
         arg1 = make_number (STDOUT);
         bi_setout ();
+#endif
 
         // Call function ISTART.
         istart_fun = make_symbol ("istart", 6);

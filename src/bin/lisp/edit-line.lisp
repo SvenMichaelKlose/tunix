@@ -17,6 +17,7 @@
 (load "queue-list.lisp")
 (load "mapcar.lisp")
 (load "mapcan.lisp")
+(load "cut-at.lisp")
 (load "case.lisp")
 (load "with-global.lisp")
 (load "with-in.lisp")

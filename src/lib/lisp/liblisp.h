@@ -94,6 +94,9 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
+// Do not load QUASIQUOTE.
+//#define NO_QUASIQUOTE
+
 // Disable built-ins.
 #define NO_BUILTIN_APPEND // Native is smaller.
 //#define NO_BUILTIN_CHAR_AT
@@ -103,7 +106,7 @@
 //#define NO_BUILTIN_NTHCDR
 //#define NO_BUILTIN_PRINT
 //#define NO_BUILTIN_READ
-//#define NO_BUILTIN_READ-LINE
+//#define NO_BUILTIN_READ_LINE
 //#define NO_BUILTIN_SUBSEQ
 //#define NO_BUILTIN_TIME
 
@@ -120,6 +123,7 @@
 //#define NO_BUILTIN_GROUP_IMAGE
 //#define NO_BUILTIN_GROUP_RAW_ACCESS
 //#define NO_BUILTIN_GROUP_SYMBOL_NAME
+
 
 /// Additional features
 
@@ -160,6 +164,69 @@
 
 // Out-of-heap margin for calling ONERROR handlers.
 #define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
+
+
+/// Generic configurations
+
+#ifdef MICROSCOPIC
+#ifndef NAIVE
+    #define NAIVE
+#endif
+#ifndef SLOW
+    #define SLOW
+#endif
+#ifndef NO_ONERROR
+    #define NO_ONERROR
+#endif
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
+#endif
+#ifndef NO_IMAGE
+    #define NO_IMAGE
+#endif
+#ifndef NO_QUASIQUOTE
+    #define NO_QUASIQUOTE
+#endif
+#ifndef NO_MACROEXPAND
+    #define NO_MACROEXPAND
+#endif
+#ifndef NO_GBUILTIN_ROUP_FILE
+    #define NO_BUILTIN_GROUP_FILE
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#ifndef NO_GBUILTIN_ROUP_BITOPS
+    #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
+    #define NO_BUILTIN_CHAR_AT
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
+    #define NO_BUILTIN_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GC
+    #define NO_BUILTIN_GC
+#endif
+#ifndef NO_BUILTIN_LOAD
+    #define NO_BUILTIN_LOAD
+#endif
+#ifndef NO_BUILTIN_PRINT
+    #define NO_BUILTIN_PRINT
+#endif
+#ifndef NO_BUILTIN_READ
+    #define NO_BUILTIN_READ
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
+#endif
+#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
+    #define NO_BUILTIN_GROUP_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
+    #define NO_BUILTIN_GROUP_SYMBOL_NAME
+#endif
+#endif // #ifdef MICROSCOPIC
 
 
 /// Target configurations
@@ -247,6 +314,18 @@
 #endif
 #ifndef SLOW
     #define SLOW
+#endif
+#ifndef NO_IMAGE
+    #define NO_IMAGE
+#endif
+#ifndef NO_GROUP_DIRECTORY
+    #define NO_GROUP_DIRECTORY
+#endif
+#ifndef NO_GROUP_BITOPS
+    #define NO_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
 #endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
@@ -341,7 +420,19 @@
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
 #ifndef SLOW
-    #define SLOW
+#define SLOW
+#endif
+#ifndef NO_IMAGE
+#define NO_IMAGE
+#endif
+#ifndef NO_GROUP_DIRECTORY
+#define NO_GROUP_DIRECTORY
+#endif
+#ifndef NO_GROUP_BITOPS
+#define NO_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+#define NO_BUILTIN_READ_LINE
 #endif
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
@@ -353,6 +444,8 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#define NO_IMAGE
+#define NO_DIRECTORY
 #endif
 
 // Unixoids
@@ -549,9 +642,11 @@ extern lispptr error_info;
 
 extern lispptr t;
 extern lispptr quote;
+#ifndef NO_QUASIQUOTE
 extern lispptr quasiquote;
 extern lispptr unquote;
 extern lispptr unquote_spliced;
+#endif
 
 extern char num_repls;
 extern char num_debugger_repls;

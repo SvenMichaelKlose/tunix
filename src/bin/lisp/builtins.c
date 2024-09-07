@@ -460,13 +460,21 @@ DEFOP(bi_mul, *);
 DEFOP(bi_div, /);
 DEFOP(bi_mod, %);
 
-#ifndef NO_BUILTIN_BITOPS
-    DEFOP(bi_bit_and, &);
-    DEFOP(bi_bit_or, |);
-    DEFOP(bi_bit_xor, ^);
-    DEFOP(bi_shift_left, <<);
-    DEFOP(bi_shift_right, >>);
-#endif // #ifndef NO_BUILTIN_BITOPS
+#ifndef NO_BUILTIN_GROUP_BITOPS
+
+DEFOP(bi_bit_and, &);
+DEFOP(bi_bit_or, |);
+DEFOP(bi_bit_xor, ^);
+DEFOP(bi_shift_left, <<);
+DEFOP(bi_shift_right, >>);
+
+lispptr
+bi_bit_neg (void)
+{
+    return make_number (~NUMBER_VALUE(arg1));
+}
+
+#endif // #ifndef NO_BUILTIN_GROUP_BITOPS
 
 lispptr
 bi_inc (void)
@@ -478,12 +486,6 @@ lispptr
 bi_dec (void)
 {
     return make_number (NUMBER_VALUE(arg1) - 1);
-}
-
-lispptr
-bi_bit_neg (void)
-{
-    return make_number (~NUMBER_VALUE(arg1));
 }
 
 lispptr
@@ -894,6 +896,8 @@ bi_closedir (void)
 
 #endif // #if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
 
+#ifndef NO_BUILTIN_LOAD
+
 lispptr
 bi_load (void)
 {
@@ -908,6 +912,8 @@ bi_load (void)
 
     return t;
 }
+
+#endif // #ifndef NO_BUILTIN_LOAD
 
 #ifndef NO_BUILTIN_GROUP_IMAGES
 
@@ -988,7 +994,9 @@ bi_error (void)
     if (NOT_NIL(arg1))
         current_expr = arg1;
     error_code = ERROR_USER;
+#ifndef NO_BUILTIN_GROUP_FILE
     bi_out_list (make_cons (make_symbol ("ERROR: ", 7), arg1));
+#endif
     return nil;
 }
 
@@ -1305,11 +1313,11 @@ const struct builtin builtins[] = {
 #ifndef NO_BUILTIN_PRINT
     { "print",      "x",    bi_print },
 #endif
+
+#ifndef NO_BUILTIN_GROUP_FILE
 #ifndef NO_BUILTIN_LOAD
     { "load",       "s",    bi_load },
 #endif
-
-#ifndef NO_BUILTIN_GROUP_FILE
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
@@ -1388,5 +1396,7 @@ void
 init_builtins (void)
 {
     add_builtins (builtins);
+#ifndef NO_BUILTIN_GROUP_FILE
     countdown = -1;
+#endif
 }

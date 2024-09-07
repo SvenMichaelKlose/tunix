@@ -15,6 +15,11 @@ and this project adheres to
 
 #### Interpreter
 
+##### Added
+
+- Compile-time option MICROSCOPIC to strip off almost all
+  optional features.
+
 ##### Fixed
 
 - TIME for C128, C64 and VIC-20.

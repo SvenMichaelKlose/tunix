@@ -7,7 +7,6 @@ SOURCES = \
 	global-pointers.c \
 	heap.c \
 	image.c \
-	io.c \
 	list.c \
 	print.c \
 	repl.c \

@@ -5,11 +5,11 @@
     ; Check if file exists by opening it.
     (((~!)
        (? ~!
-          ((()
-             ; It does.  Close it.
-             (close ~!)
-             ; Load it the regular way.
-             (load ~f)))))
+          (block t
+            ; It does.  Close it.
+            (close ~!)
+            ; Load it the regular way.
+            (load ~f))))
      (open ~f 'r)))
    (symbol (nconc (symbol-name ~e)
                   (symbol-name ".lisp")))))
@@ -30,22 +30,22 @@
   (block nil
     ; Handle only if ERROR_NOT_FUNCTION.
     (? (== ~code 5)
-       ((()
-          (? (symbol? (car ~x))
-             ((()
-                (? (~alm (car ~x))
-                   ((()
-                      ; If a macro was missing, replace
-                      ; expression by an expanded one.
-                      (? (macro? (car ~x))
-                         (((~m)
-                            (setcar ~x (car ~m))
-                            (setcdr ~x (cdr ~m)))
-                          (macroexpand ~x)))
-                      (return (eval ~x)))))
-                   (? (~almr (cdr ~x))
-                      ; Evaluate the failed expression again.
-                      (return (eval ~x)))))))))
+       (block t
+         (? (symbol? (car ~x))
+            (block t
+              (? (~alm (car ~x))
+                 (block t
+                   ; If a macro was missing, replace
+                   ; expression by an expanded one.
+                   (? (macro? (car ~x))
+                      (((~m)
+                         (setcar ~x (car ~m))
+                         (setcdr ~x (cdr ~m)))
+                       (macroexpand ~x)))
+                   (return (eval ~x))))
+              (? (~almr (cdr ~x))
+                 ; Evaluate the failed expression again.
+                 (return (eval ~x)))))))
     ; Tell to fail on the error as usual.
     '%fail))
 

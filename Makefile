@@ -133,7 +133,7 @@ release:
 	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
 	$(MAKE) host COPTFLAGS="-Ofast -flto -march=native" LDFLAGS="-Ofast -flto -march=native"
 	$(MAKE) test TARGET=unix
-	$(MAKE) allworlds NDEBUG=1
+	$(MAKE) allworlds NDEBUG=1 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
 	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
 	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md

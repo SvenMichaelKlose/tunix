@@ -1,3 +1,6 @@
+(or (builtin? append)
+    (load "append.lisp"))
+
 ; Wrap expander in special form as it is recursive and needs
 ; to call itself with arguments evaluated.
 (special quasiquote (qqx)

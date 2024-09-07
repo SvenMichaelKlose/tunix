@@ -1,10 +1,6 @@
 (load "aif.lisp")
-(load "alet.lisp")
-(load "awhen.lisp")
-(load "mapcar.lisp")
-(load "incdec.lisp")
-(load "queue.lisp")
 (load "progn.lisp")
+(load "mapcar.lisp")
 
 (message "Testing ADJOIN...")
 (or (equal (adjoin 'l '(i s p))

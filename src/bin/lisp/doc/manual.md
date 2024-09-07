@@ -2137,6 +2137,43 @@ key and the rest is the value.
 |   +v+    | Git tag and short SHA.                  |
 |   +vb+   | Git branch.                             |
 
+## Automatic loading of procedures
+
+| Function   | Description             |
+|------------|-------------------------|
+| (autoload) | Load missing procedure. |
+
+Auto-loading is enabled by default.  If function AUTOLOAD
+has been assigned to ONERROR, it will try to load missing
+procedures by appending the suffix ".lisp" to it and load
+it from the current directory.  If a file of that name is
+not around, the error is passed back to the interpreter,
+which will serve it by calling a debugger REPL, so you can
+act upon it.
+
+Missing macros are also detected this way and unexpanded
+expressions will be replaced by expanded ones immediately.
+
+AUTOLOAD is rather useful on extremely constrained systems
+in conjunction with cutting off \*UNIVERSE\*, so it only
+contains AUTOLOAD and MACROEXPAND, and by clearing the
+macro definition list \*MACROS\*.
+
+~~~lisp
+(= *universe* (member 'autoload *universe*))
+(= *macros* nil)
+~~~
+
+This will discard all code that is not linked to the
+currently running program in any way during the following
+garbage collection.  It could be done if ONERROR is called
+with ERROR\_OUT\_OF\_HEAP.  Experiments will have to show
+if that is a practical scheme.
+
+**AUTOLOAD will not work with !? as the file containing it
+is "aif.lisp".***  You need to load it manually until this
+has been solved.
+
 ## Maintainance
 
 | Function          | Description                       |

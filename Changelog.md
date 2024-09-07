@@ -30,6 +30,7 @@ and this project adheres to
 
 ##### Fixed
 
+- AUTOLOAD recognizes functions passed by argument.
 - Cleaned up to boot on the VIC-20 again.
 
 ##### Changed

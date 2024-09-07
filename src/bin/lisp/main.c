@@ -194,8 +194,12 @@ main (int argc, char * argv[])
             load ((char *) *f);
 #ifndef NO_IMAGES
     } else {
-        // Called from ILOAD.  Reset I/O.
+        // Called by ILOAD.  Reset I/O.
         simpleio_init ();
+        arg1 = make_number (STDIN);
+        bi_setin ();
+        arg1 = make_number (STDOUT);
+        bi_setout ();
 
         // Call function ISTART.
         istart_fun = make_symbol ("istart", 6);

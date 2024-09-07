@@ -23,7 +23,14 @@ and this project adheres to
 
 #### Environment
 
+##### Fixed
+
 - Cleaned up to boot on the VIC-20 again.
+
+##### Changed
+
+- EDIT-LINE, split out from the edior.
+- Queue functions are in separate file for AUTOLOAD.
 
 
 ## [v0.0.16] - 2024-09-06

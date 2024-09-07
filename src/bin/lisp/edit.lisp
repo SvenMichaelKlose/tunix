@@ -1,28 +1,16 @@
-(@ '((x)
-      (or (load (symbol (append (symbol-name x)
-                                (symbol-name ".lisp"))))
-          (error "Can't load " x ".lisp")))
-   '("let" "do" "prog1" "progn" "when" "unless" "dolist" "alet" "aif" "while"
-     "awhile" "queue" "with-queue" "dotimes" "incdec"
-     "nth" "awhen" "mapcar" "mapcan" "case" "group"
-     "cbm-keycode" "cbm-con" "con" "cut-at"
-     "with-in" "with-out" "with-global"))
+(load "edit-line.lisp")
 
 ;;; State
 
 (var *filename* "edit-help.md")
 (var *lines* nil)
 (var *saved?* nil)  ; Modifications saved?
-(var *line* nil)
-(var *oline* nil)   ; Original line.
-(var *mod?* nil)    ; Line modified?
 (var *err* nil)
 (var *ln* 0)
 (var *conln* 0) ; # of first displayed line.
-(var *ox* 0)    ; Line X offset.
-(var *lx* 0)    ; Line X position, relative to *OX*.
 (var *old-conln* 0)
 (var *old-ln* 0)
+(var *update-ln* 0)
 
 (fn reset-ln ()
   (= *lx* 0)
@@ -34,23 +22,6 @@
   (= *saved?* t))
 
 ;;; Display
-
-(var *spaces* nil)
-(dotimes (i *con-w*)
-  (push \  *spaces*))
-
-(fn line-len (x)
-  (? (list? x)
-     (length x)
-     (slength x)))
-
-(fn update-line (l y)
-  (con-xy *ox* y)
-  (when l
-    (outlim *con-w*)
-    (out l))
-  (!? (nthcdr (line-len l) *spaces*)
-      (out !)))
 
 (fn print-lines (s)
   (with ((y s)
@@ -102,7 +73,8 @@
     (with-global *lx* (slength l)
       (prog1
         (while t
-          (!= (edit-line l (-- *con-h*))
+          (!= (edit-line l)
+            (con-direct t)
             (and (== (conin) +enter+)
                  (return !))
             (= l !)))
@@ -122,71 +94,6 @@
              " (new)"
              "")
           (or *err* "")))
-
-;;; Line editing
-
-(fn del-char (x)
-  (= *saved?* nil)
-  (= *line* (nconc (subseq *line* 0 x)
-                   (subseq *line* (++ x)))))
-
-(fn go-eol ()
-  (let n (length *line*)
-    (= *lx* (? (> n 0) n 0))))
-
-; Edit line.
-; Return new line if an unrelated char has been input.
-(fn edit-line (l y)
-  (con-crs t)
-  (= *mod?* nil)
-  (= *oline* l)
-  (let *line* (? l (symbol-name l) nil)
-    ; Don't have cursor past line end.
-    (and (> *lx* (length *line*))
-         (go-eol))
-    (while (not (eof))
-      (update-line *line* y)
-      (con-xy (+ (or *ox* 0) *lx*) y)
-      (with ((len  (length *line*))
-             (c    (while (not (eof))
-                     (awhen (conin)
-                       (return !)))))
-        (case c
-          +arr-left+
-            (? (< 0 *lx*)
-               (!-- *lx*))
-          +arr-right+
-            (? (< *lx* len)
-               (!++ *lx*))
-          +bs+
-            (progn
-              (when (== 0 *lx*)
-                (putback)
-                (return (symbol *line*)))
-              (? (< 0 *lx*)
-                 (del-char (!-- *lx*))))
-          1 ; Ctrl-A
-            (= *lx* 0)
-          4 ; Ctrl-D
-            (progn
-              (= *mod?* t)
-              (= *line* nil)
-              (= *lx* 0))
-          5 ; Ctrl-E
-            (go-eol)
-          (progn
-            ; Put back unknown key and return line.
-            (when (or (< c \ ) (> c 126))
-              (putback)
-              (return (? *mod?* (symbol *line*) *oline*)))
-            ; Insert char and step right.
-            (= *mod?* t)
-            (= *saved?* nil)
-            (= *line* (? (== 0 *lx*)
-                         (nconc (list c) *line*)
-                         (!= (cut-at *lx* *line*)
-                           (nconc *line* (list c) !))))
-            (!++ *lx*)))))))
 
 ;;; Text editing
 
@@ -323,14 +230,16 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
-  (con-direct t)
   (while (not (eof))
     (update-screen)
     (status-msg)
-    no-screen-update
     (status-pos)
     (let line (nthcdr *ln* *lines*)
-      (!= (edit-line (car line) (- *ln* *conln*))
+      (con-xy 0 (- *ln* *conln*))
+      (!= (edit-line (car line))
+        (con-direct t)
+        (and *mod?*
+             (= *saved?* nil))
         (setcar line !)))
     (case (conin)
       +enter+

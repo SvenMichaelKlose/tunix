@@ -1,5 +1,3 @@
-(var *con-w* 22)
-(var *con-h* 23)
 (var +enter+ 13)
 (var +arr-up+ 145)
 (var +arr-down+ 17)

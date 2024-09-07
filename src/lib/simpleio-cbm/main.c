@@ -349,5 +349,7 @@ simpleio_init ()
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;
+    fnin  = STDIN;
+    fnout = STDOUT;
     simpleio_set (&vectors);
 }

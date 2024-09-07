@@ -1,3 +1,5 @@
+#ifndef NO_IMAGE
+
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
@@ -162,3 +164,5 @@ image_load (char * pathname)
     // Signal success.
     return true;
 }
+
+#endif // #ifndef NO_IMAGE

@@ -83,7 +83,7 @@
 //#define NO_DIRECTORY
 
 // No support for saving and loading images.
-//#define NO_IMAGES
+//#define NO_IMAGE
 
 // Do not call MACROEXPAND in REPL.
 //#define NO_MACROEXPAND

@@ -26,6 +26,10 @@ and this project adheres to
 - Simplified internal I/O channel handling that separates
   program and REPL channels.
 
+##### Changed
+
+- Disabled images for the C16 and VIC-20.
+
 #### Environment
 
 ##### Fixed

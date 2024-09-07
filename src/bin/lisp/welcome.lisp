@@ -8,11 +8,11 @@
     (message "INFO: You can create a file called \"user-pre-image.lisp\" to be loaded here."))
 
 (and (builtin? gc)
-  ((()
-     (message "Cleaning up. Please wait...")
-     ; If compressed conses are enabled, have *UNIVERSE*
-     ; compressed better.
-     (print (gc))(out " bytes free.")(terpri))))
+  (block t
+    (message "Cleaning up. Please wait...")
+    ; If compressed conses are enabled, have *UNIVERSE*
+    ; compressed better.
+    (print (gc))(out " bytes free.")(terpri)))
 
 ; Tell time it took to get here.
 (and (builtin? 'time)
@@ -24,9 +24,10 @@
     (terpri)))
 
 (or (eq +target* 'unix)
-  (block t
-    (message "Saving 'image'...")
-    (isave "image")))
+    (? (builtin? isave)
+       (block t
+         (message "Saving 'image'...")
+         (isave "image"))))
 
 ; Load user image.
 (or (load "user-post-image.lisp")

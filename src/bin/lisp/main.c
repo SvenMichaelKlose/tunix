@@ -182,7 +182,7 @@ main (int argc, char * argv[])
 #ifndef NO_BUILTIN_LOAD
     const char ** f;
 #endif
-#ifndef NO_IMAGES
+#ifndef NO_IMAGE
     lispptr istart_fun;
 #endif
 
@@ -194,20 +194,20 @@ main (int argc, char * argv[])
     heap_add_init_areas ();
 #endif
 
-#ifndef NO_IMAGES
+#ifndef NO_IMAGE
     if (!setjmp (restart_point)) {
         // Try to load image.
         strcpy (buffer, "image");
         if (image_load (buffer))
             longjmp (restart_point, 1);
-#endif // #ifndef NO_IMAGES
+#endif // #ifndef NO_IMAGE
 
 #ifndef NO_BUILTIN_LOAD
         // Load environment files.
         for (f = env_files; *f; f++)
             load ((char *) *f);
 #endif
-#ifndef NO_IMAGES
+#ifndef NO_IMAGE
     } else {
         // Called by ILOAD.  Reset I/O.
         simpleio_init ();
@@ -227,7 +227,7 @@ main (int argc, char * argv[])
            (void) eval ();
         }
     }
-#endif // #ifndef NO_IMAGES
+#endif // #ifndef NO_IMAGE
 
     lisp_repl (REPL_STD);
 

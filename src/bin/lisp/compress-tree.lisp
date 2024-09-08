@@ -25,7 +25,6 @@
                  (equal original (cdr i)))
         (out "Found CDR: ")(print original)(terpri)
         (setcdr i original)))))
-        ;(return nil)))))
 
 (fn compress-tree (x . path)
   (= path (and path (car path)))

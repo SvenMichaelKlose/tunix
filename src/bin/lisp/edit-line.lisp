@@ -1,7 +1,8 @@
 (load "let.lisp")
 (load "aif.lisp")
-(load "alet.lisp")
-(load "incdec.lisp")
+(load "!=.lisp")
+(load "!++.lisp")
+(load "!--.lisp")
 (load "cbm-keycode.lisp")
 (load "con-cbm.lisp")
 (load "con.lisp")
@@ -24,8 +25,6 @@
 (load "with-out.lisp")
 (load "with-queue.lisp")
 
-;(load "with-global.lisp")
-
 ;;; State
 
 (var *line* nil)
@@ -33,7 +32,6 @@
 (var *mod?* nil)    ; Line modified?
 (var *err* nil)
 (var *ln* 0)
-(var *ox* 0)    ; Line X offset.
 (var *lx* 0)    ; Line X position, relative to *OX*.
 (var *old-conln* 0)
 (var *old-ln* 0)
@@ -49,8 +47,7 @@
      (length x)
      (slength x)))
 
-(fn update-line (l y)
-  (con-xy *ox* y)
+(fn update-line (l)
   (when l
     (outlim *con-w*)
     (out l))
@@ -75,14 +72,16 @@
   (con-direct t)
   (= *mod?* nil)
   (= *oline* l)
-  (let y (con-y)
+  (with ((x (con-x))
+         (y (con-y)))
     (= *line* (? l (symbol-name l) nil))
     ; Don't have cursor past line end.
     (and (> *lx* (length *line*))
          (go-eol))
     (while (not (eof))
-      (update-line *line* y)
-      (con-xy (+ (or *ox* 0) *lx*) y)
+      (con-xy x y)
+      (update-line *line*)
+      (con-xy (+ x *lx*) y)
       (with ((len  (length *line*))
              (c    (while (not (eof))
                      (awhen (conin)
@@ -99,7 +98,7 @@
               (when (== 0 *lx*)
                 (putback)
                 (con-direct nil)
-                (return (symbol *line*)))
+                (return (? *mod?* (symbol *line*) *oline*)))
               (? (< 0 *lx*)
                  (del-char (!-- *lx*))))
           1 ; Ctrl-A

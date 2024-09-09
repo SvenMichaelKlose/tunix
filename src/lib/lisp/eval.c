@@ -196,7 +196,7 @@ do_eval:
 #endif
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
-        lisp_repl (REPL_DEBUGGER);
+        lisp_repl (REPL_DEBUGGER, 0);
     }
 #endif
 
@@ -410,7 +410,7 @@ set_arg_values:
             value = eval_list ();
 #ifndef NAIVE
             if (error_code)
-                value = lisp_repl (REPL_DEBUGGER);
+                value = lisp_repl (REPL_DEBUGGER, 0);
 #endif
             POP_TAG(num_args);
             POP(args);
@@ -450,7 +450,7 @@ save_arg_value:
             PUSH(args);
             PUSH_TAGW(builtin_argdef);
             PUSH_TAG(num_args);
-            value = lisp_repl (REPL_DEBUGGER);
+            value = lisp_repl (REPL_DEBUGGER, 0);
             POP_TAG(num_args);
             POP_TAGW(builtin_argdef);
             POP(args);
@@ -688,7 +688,7 @@ restore_arguments:
 do_return:
 #ifndef NAIVE
     if (error_code)
-        value = lisp_repl (REPL_DEBUGGER);
+        value = lisp_repl (REPL_DEBUGGER, 0);
 #endif
 do_return_atom:
     unevaluated = false;

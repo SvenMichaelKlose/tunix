@@ -55,7 +55,7 @@ read_safe (void)
     x = read_expr ();
 #ifndef NAIVE
     if (error_code)
-        x = lisp_repl (REPL_DEBUGGER);
+        x = lisp_repl (REPL_DEBUGGER, 0);
     POP_TAG(error_code);
 #endif
 }
@@ -137,7 +137,7 @@ read_cmd_arg (void)
 #endif // #ifndef NO_DEBUGGER
 
 lispptr FASTCALL
-lisp_repl (char mode)
+lisp_repl (char mode, simpleio_chn_t load_fn)
 {
 #ifndef NDEBUG
     char * old_stack    = stack;
@@ -254,7 +254,7 @@ lisp_repl (char mode)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif
-            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            setin (load_fn ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             read_safe ();
             if (eof ())
                 break;
@@ -473,7 +473,7 @@ terpri_next:
 #ifndef NAIVE
         // Call debugger on error.
         if (error_code)
-            x = lisp_repl (REPL_DEBUGGER);
+            x = lisp_repl (REPL_DEBUGGER, 0);
 
         POP(current_toplevel);
 #ifndef NO_MACROEXPAND
@@ -540,9 +540,6 @@ load (char * pathname)
     char status = false;
     simpleio_chn_t load_fn;
 
-    // Memorize input channel.
-    int oldin = NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin));
-
 #ifdef VERBOSE_LOAD
     outs ("Loading "); outs (pathname); terpri ();
 #endif
@@ -553,10 +550,6 @@ load (char * pathname)
     if (!load_fn)
         return false;
 
-    // Switch input channel to file.
-    arg1 = make_number (load_fn);
-    bi_setin ();
-
 #ifndef NAIVE
     // Handle file error.
     if (err ())
@@ -564,7 +557,7 @@ load (char * pathname)
 #endif
 
     // Read file.
-    lisp_repl (REPL_LOAD);
+    lisp_repl (REPL_LOAD, load_fn);
 
     // Close file.
     simpleio_close (load_fn);
@@ -573,9 +566,6 @@ load (char * pathname)
 #ifndef NAIVE
 err_open:
 #endif
-    // Restore former input channel.
-    arg1 = make_number (oldin);
-    bi_setin ();
 
     return status;
 }

@@ -22,6 +22,7 @@
 ;;; Display
 
 (fn print-lines (s)
+  (con-direct t)
   (with ((y s)
          (l (nthcdr (+ *conln* s) *lines*)))
     (dotimes (i (- (-- *con-h*) s))
@@ -32,10 +33,17 @@
 
 (fn update-screen? ()
   ; Adjust *conln* to keep cursor position visible.
-  (? (< (- *ln* *conln*) 0)
-     (= *conln* 0))
-  (? (>= (- *ln* *conln*) (-- *con-h*))
-     (= *conln* (- *ln* (- *con-h* 2))))
+  (!= (-- (length *lines*))
+    (?
+      (>= *ln* !)
+        (= *ln* !)
+      (< *ln* 0)
+        (= *ln* 0)))
+  (?
+    (< *ln* *conln*)
+      (= *conln* *ln*)
+    (>= (- *ln* *conln*) (-- *con-h*))
+      (= *conln* (- *ln* (- *con-h* 2))))
   (not (== *old-conln* *conln*)))
 
 (fn update-screen ()
@@ -109,17 +117,18 @@
 ;                  (nconc *lines* (cdr !))))))
 
 (fn join-line ()
-  (= *update-ln* *ln*)
-  (let prev (nth (-- *ln*) *lines*)
-    (with ((prev-len (slength prev))
-           (joined   (list (symbol (nconc (symbol-name prev)
-                                          (symbol-name (nth *ln* *lines*)))))))
-      (= *lines* (? (== 1 *ln*)
-                    (nconc joined (cddr *lines*))
-                    (!= (cut-at (-- *ln*) *lines*)
-                      (nconc *lines* joined (cddr !)))))
-      (!-- *ln*)
-      (= *lx* prev-len))))
+  (!= (-- *ln*)
+    (= *update-ln* !)
+    (let prev (nth ! *lines*)
+      (with ((prev-len (slength prev))
+             (joined   (list (symbol (nconc (symbol-name prev)
+                                            (symbol-name (nth *ln* *lines*)))))))
+        (= *lines* (? (== 1 *ln*)
+                      (nconc joined (cddr *lines*))
+                      (!= (cut-at ! *lines*)
+                        (nconc *lines* joined (cddr !)))))
+        (!-- *ln*)
+        (= *lx* prev-len)))))
 
 (fn split-line (l x)
   (? (== 0 x)
@@ -161,7 +170,7 @@
 (fn save-file f
   (let uf (? (not f)
              (progn
-               ;(list-dir)
+               (list-dir)
                (prompt-in "Save: " *filename*)))
     (status "...")
     (? (with-out o (open (or (car f) uf) 'w)
@@ -176,7 +185,7 @@
          (= *saved?* t)))))
 
 (fn load-file ()
-  ;(list-dir)
+  (list-dir)
   (let f (prompt-in "Load: " *filename*)
     (? (with-in i (open f 'r)
          (status "...")
@@ -257,22 +266,19 @@
       +arr-down+
         (when (< *ln* (-- (length *lines*)))
           (!++ *ln*))
-      11 ; Ctrl+K: Command char following.
+      11 ; Ctrl+k: Command char following.
         (and (eq 'quit (editor-cmds))
              (return nil))
-      12 ; Ctrl-L: Redraw screen.
-        (clrscr)
-      14 ; Ctrl-N: Page down.
+      12 ; Ctrl-l: Redraw screen.
+        (progn
+          (clrscr)
+          (= *update-ln* 0))
+      24 ; Ctrl-x: Page down.
         (progn
           (= *ln* (+ *ln* (-- *con-h*)))
-          (!= (-- (length *lines*))
-            (? (>= *ln* !)
-               (= *ln* !))))
-      15 ; Ctrl-O: Page up
+      25 ; Ctrl-y: Page up
         (progn
-          (= *ln* (- *ln* (-- *con-h*)))
-          (? (< *ln* 0)
-             (= *ln* 0))))))
+          (= *ln* (- *ln* (-- *con-h*))))))))
 
 (fn edit file
   (reset-ln)

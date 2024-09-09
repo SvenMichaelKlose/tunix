@@ -18,6 +18,7 @@
 (load "queue-list.lisp")
 (load "mapcar.lisp")
 (load "mapcan.lisp")
+(load "nth.lisp")
 (load "cut-at.lisp")
 (load "case.lisp")
 (load "with-global.lisp")
@@ -42,7 +43,7 @@
 (dotimes (i *con-w*)
   (push \  *spaces*))
 
-(fn line-len (x)
+(fn llen (x)
   (? (list? x)
      (length x)
      (slength x)))
@@ -51,13 +52,19 @@
   (when l
     (outlim *con-w*)
     (out l))
-  (!? (nthcdr (line-len l) *spaces*)
+  (!? (nthcdr (llen l) *spaces*)
       (out !)))
 
 ;;; Line editing
 
+(fn mkcharline ()
+  (? (symbol? *line*)
+     (= *line* (symbol-name *line*))))
+
 (fn del-char (x)
+  (mkcharline)
   (= *saved?* nil)
+  (= *update?* t)
   (= *line* (nconc (subseq *line* 0 x)
                    (subseq *line* (++ x)))))
 
@@ -71,18 +78,20 @@
   (con-crs t)
   (con-direct t)
   (= *mod?* nil)
-  (= *oline* l)
+  (= *line* (or l ""))
+  (= *oline* *line*)
   (with ((x (con-x))
          (y (con-y)))
-    (= *line* (? l (symbol-name l) nil))
     ; Don't have cursor past line end.
-    (and (> *lx* (length *line*))
+    (and (> *lx* (llen *line*))
          (go-eol))
     (while (not (eof))
       (con-xy x y)
-      (update-line *line*)
+      (when *update?*
+        (update-line *line*)
+        (= *update?* nil))
       (con-xy (+ x *lx*) y)
-      (with ((len  (length *line*))
+      (with ((len  (llen *line*))
              (c    (while (not (eof))
                      (awhen (conin)
                        (return !)))))
@@ -106,7 +115,7 @@
           4 ; Ctrl-D
             (progn
               (= *mod?* t)
-              (= *line* nil)
+              (= *line* "")
               (= *lx* 0))
           5 ; Ctrl-E
             (go-eol)
@@ -118,6 +127,8 @@
               (return (? *mod?* (symbol *line*) *oline*)))
             ; Insert char and step right.
             (= *mod?* t)
+            (= *update?* t)
+            (mkcharline)
             (= *line* (? (== 0 *lx*)
                          (nconc (list c) *line*)
                          (!= (cut-at *lx* *line*)

@@ -1,18 +1,11 @@
-TUNIX editor
-============
+HELP
 
-| Navigation |                         |
 |------------|-------------------------|
 | Arrow keys | Move cursor.            |
-| Ctrl+a     | Move to start of line.  |
-| Ctrl+e     | Move to end of line.    |
-| Ctrl+l     | Redraw screen.          |
-|------------|-------------------------|
-| Editing    |                         |
+| Ctrl+a/e   | Move to line start/end. |
+| Ctrl+y/x   | Page up/down.           |
 |------------|-------------------------|
 | Ctrl+d     | Clear line.             |
-|------------|-------------------------|
-| Command    |                         |
 |------------|-------------------------|
 | Ctrl+k l   | Load file.              |
 | Ctrl+k s   | Save file.              |
@@ -20,4 +13,3 @@ TUNIX editor
 | Ctrl+k r   | Save and evaluate file. |
 | Ctrl+k e   | Evaluate expression.    |
 | Ctrl+k q   | Exit editor.            |
-

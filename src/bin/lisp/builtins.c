@@ -520,14 +520,18 @@ lispptr
 bi_eval (void)
 {
     x = arg1;
+#ifndef NAIVE
     PUSH(current_toplevel);
     current_toplevel = x;
     PUSH(current_function);
     current_function = nil;
+#endif
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
     x = eval0 ();
+#ifndef NAIVE
     POP(current_function);
     POP(current_toplevel);
+#endif
     return x;
 }
 
@@ -1360,8 +1364,8 @@ const struct builtin builtins[] = {
 #ifndef NAIVE
     { "error",      "+x",   bi_error },
     { "ignore",    "",      bi_ignore },
-#endif
     { "stack",      "",     bi_stack },
+#endif
     { "exit",       "?n",   bi_exit },
 
     { "butlast",    "l",    bi_butlast },

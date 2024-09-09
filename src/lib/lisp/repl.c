@@ -507,8 +507,10 @@ terpri_next:
             fresh_line ();
         }
     }
+#ifndef NAIVE
 #ifdef NO_DEBUGGER
 do_return:
+#endif
 #endif
 #ifndef NO_DEBUGGER
     // Track unnesting of this REPL.

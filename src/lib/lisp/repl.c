@@ -507,7 +507,7 @@ terpri_next:
             fresh_line ();
         }
     }
-#ifndef NAIVE
+#ifndef NO_ONERROR
 #ifdef NO_DEBUGGER
 do_return:
 #endif

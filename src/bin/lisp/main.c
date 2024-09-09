@@ -67,7 +67,7 @@ const char * env_files[] = {
 #endif
 #ifndef NO_ONERROR
 #ifdef TEST
-    "test-onerror.lisp",
+    "test-error.lisp",
 #endif
 #endif
 

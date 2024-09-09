@@ -520,8 +520,15 @@ lispptr
 bi_eval (void)
 {
     x = arg1;
+    PUSH(current_toplevel);
+    current_toplevel = x;
+    PUSH(current_function);
+    current_function = nil;
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
-    return eval0 ();
+    x = eval0 ();
+    POP(current_function);
+    POP(current_toplevel);
+    return x;
 }
 
 // Consing. Could be optimized away if moved to eval().
@@ -1003,7 +1010,7 @@ bi_error (void)
 lispptr
 bi_ignore (void)
 {
-    do_break_repl = do_continue_repl = true;
+    do_break_repl = BRK_CONTINUE;
     return nil;
 }
 
@@ -1026,19 +1033,12 @@ bi_stack (void)
 #endif // #ifndef NAIVE
 
 lispptr
-bi_quit (void)
-{
-    do_break_repl = true;
-    return arg1;
-}
-
-lispptr
 bi_exit (void)
 {
     if (NOT_NIL(arg1))
         exit (NUMBER_VALUE(arg1));
     else
-        do_exit_program = do_break_repl = true;
+        do_break_repl = BRK_EXIT;
     return nil;
 }
 
@@ -1274,19 +1274,19 @@ const struct builtin builtins[] = {
 #endif
 
 #ifndef NO_BUILTIN_GROUP_ARITH
-    { "==",         "nn",   bi_number_equal },
-    { ">",          "nn",   bi_gt },
-    { "<",          "nn",   bi_lt },
-    { ">=",         "nn",   bi_gte },
-    { "<=",         "nn",   bi_lte },
+    { "==", "nn",   bi_number_equal },
+    { ">",  "nn",   bi_gt },
+    { "<",  "nn",   bi_lt },
+    { ">=", "nn",   bi_gte },
+    { "<=", "nn",   bi_lte },
 
-    { "+",          "nn",   bi_add },
-    { "-",          "nn",   bi_sub },
-    { "*",          "nn",   bi_mul },
-    { "/",          "nn",   bi_div },
-    { "%",          "nn",   bi_mod },
-    { "++",         "n",    bi_inc },
-    { "--",         "n",    bi_dec },
+    { "+",  "nn",   bi_add },
+    { "-",  "nn",   bi_sub },
+    { "*",  "nn",   bi_mul },
+    { "/",  "nn",   bi_div },
+    { "%",  "nn",   bi_mod },
+    { "++", "n",    bi_inc },
+    { "--", "n",    bi_dec },
 #endif
 
 #ifndef NO_BUILTIN_GROUP_BITOPS
@@ -1360,10 +1360,8 @@ const struct builtin builtins[] = {
 #ifndef NAIVE
     { "error",      "+x",   bi_error },
     { "ignore",    "",      bi_ignore },
-    { "stack",      "",     bi_stack },
 #endif
-
-    { "quit",       "x",    bi_quit },
+    { "stack",      "",     bi_stack },
     { "exit",       "?n",   bi_exit },
 
     { "butlast",    "l",    bi_butlast },

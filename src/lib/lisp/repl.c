@@ -36,11 +36,9 @@ lispptr current_toplevel;
 char    num_repls;          // REPL count.
 #ifndef NO_DEBUGGER
 char    num_debugger_repls; // Debugger REPL count.
-lispptr debugger_return_value_sym; // Old (erroraneous) 'value'.
+lispptr repl_value;         // Old (erroraneous) 'value'.
 #endif
-bool    do_break_repl;      // Tells current REPL to return.
-bool    do_continue_repl;   // If do_break_repl, tell REPL to continue.
-bool    do_exit_program;    // Return to top-level REPL.
+char    do_break_repl;      // Flag to break REPL for some reason.
 
 #ifdef __CC65__
 #pragma code-name ("CODE_REPL")
@@ -96,8 +94,6 @@ print_debug_info ()
         print (value);
     }
 
-    // Print is either about to be evaluated or caused
-    // an error.
     fresh_line ();
     outs (error_code ? "In" : "Next");
     do_highlight = true;
@@ -124,6 +120,8 @@ print_debug_info ()
 void
 read_cmd_arg (void)
 {
+    PUSH(SYMBOL_VALUE(repl_value));
+    PUSH(value);
     if (in () < ' ')
         value = nil;
     else {
@@ -172,9 +170,6 @@ lisp_repl (char mode)
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Save state for debugger to restore
             // when ONERROR handler failed.
-            PUSH(current_toplevel);
-            PUSH(current_function);
-            PUSH(current_expr);
             PUSH(error_info);
             PUSH_TAG(error_code);
             PUSH_TAG(unevaluated);
@@ -202,28 +197,22 @@ lisp_repl (char mode)
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
                 // Discard saved context.
-                stack += 4 * sizeof (lispptr);
+                stack += 1 * sizeof (lispptr);
                 tagstack += 2;
 
                 // Continue with new value.
-                goto do_return;
+                goto done_onerror;
             }
 
             // Restore context for debugger.
             POP_TAG(unevaluated);
             POP_TAG(error_code);
             POP(error_info);
-            POP(current_expr);
-            POP(current_function);
-            POP(current_toplevel);
         }
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.
         print_debug_info ();
-        do_break_repl   = true;
-        do_exit_program = true;
-        error_code      = 0;
-        error_info      = nil;
+        do_break_repl = BRK_EXIT;
         goto do_return;
 #endif
 #endif // #ifndef NO_ONERROR
@@ -234,8 +223,9 @@ lisp_repl (char mode)
     if (mode == REPL_DEBUGGER) {
         // TODO: Save terminal flags.
         outs ("\002\004"); // Normal terminal mode.
-        SET_SYMBOL_VALUE(debugger_return_value_sym, value);
+        SET_SYMBOL_VALUE(repl_value, value);
         num_debugger_repls++;
+        debug_step = nil;
         fresh_line ();
         outs ("DEBUGGER ");
         outn (num_debugger_repls);
@@ -267,7 +257,7 @@ lisp_repl (char mode)
             setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             read_safe ();
             if (eof ())
-                goto do_return;
+                break;
             setin (STDIN);
 #ifdef VERBOSE_READ
             // TODO: Set/restore terminal mode.
@@ -289,13 +279,12 @@ lisp_repl (char mode)
 #endif
             // Process short command.
             fresh_line ();
-            debug_step = nil;
             switch (cmd) {
                 // Continue execution.
                 case 'c':
                     if (error_code)
                         goto cannot_continue;
-                    goto do_return;
+                    break;
 
                 // Step into function.
                 case 's':
@@ -304,7 +293,7 @@ lisp_repl (char mode)
 
                     // Break on next expression.
                     debug_step = t;
-                    goto do_return;
+                    break;
 
                 // Step over function call.
                 case 'n':
@@ -313,13 +302,11 @@ lisp_repl (char mode)
 
                     // Break *after* current expression.
                     debug_step = current_expr;
-                    goto do_return;
+                    break;
 
                 // Print expression without affecting the
                 // return value.
                 case 'p':
-                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
-                    PUSH(value);
                     read_cmd_arg ();
                     outs ("Value: ");
                     print (value);
@@ -327,8 +314,6 @@ lisp_repl (char mode)
 
                 // Set breakpoint or print all of them.
                 case 'b':
-                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
-                    PUSH(value);
                     read_cmd_arg ();
                     if (_NAMEDP(value)) {
                         if (NOT_NIL(value))
@@ -338,10 +323,8 @@ lisp_repl (char mode)
                     }
                     goto want_name;
 
-                // Delete specific or all breakpoints.
+                // Delete selected or all breakpoints.
                 case 'd':
-                    PUSH(SYMBOL_VALUE(debugger_return_value_sym));
-                    PUSH(value);
                     read_cmd_arg ();
                     if (SYMBOLP(value)) {
                         if (NOT_NIL(value))
@@ -350,13 +333,23 @@ lisp_repl (char mode)
                     }
                     goto print_breakpoints;
 
-                // Exit program
+                // Skip to next expression.
+                case 'k':
+                    do_break_repl = BRK_CONTINUE;
+                    goto break_repl;
+
+                // Return from REPL.
                 case 'q':
-                    arg1            = nil;
-                    do_break_repl   = true;
-                    do_exit_program = true;
-                    error_code      = 0;
-                    goto do_return;
+                    do_break_repl = BRK_RETURN;
+                    goto break_repl;
+
+                // Exit program.
+                case 'x':
+                    do_break_repl = BRK_EXIT;
+break_repl:
+                    error_code = 0;
+                    error_info = nil;
+                    break;
 cannot_continue:
                     outs ("Need alternative first!");
                     goto terpri_next;
@@ -369,10 +362,10 @@ print_breakpoints:
 done_short_command:
                     POP(value);
                     POP(tmp);
-                    SET_SYMBOL_VALUE(debugger_return_value_sym, tmp);
+                    SET_SYMBOL_VALUE(repl_value, tmp);
 terpri_next:
                     terpri ();
-                    goto next;
+                    break;
 
                 default:
                     // It wasn't a debugger command.
@@ -380,7 +373,7 @@ terpri_next:
                     putback ();
                     read_safe ();
                     if (NOT(x))
-                        goto next;
+                        break;
 #ifndef TARGET_UNIX
                     terpri ();
 #endif
@@ -399,7 +392,7 @@ terpri_next:
         error_code = 0;
         error_info = nil;
 #endif
-        // Macro expansion if MACROEXPAND is a user function.
+        // Macro expansion.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
 #ifndef NO_DEBUGGER
             // Avoid debug step into MACROEXPAND.
@@ -422,6 +415,7 @@ terpri_next:
         }
 #endif // #ifndef NO_MACROEXPAND
 #ifndef NAIVE
+        // Set as new top-level expression for REPL_DEBUGGER.
         PUSH(current_toplevel);
         current_toplevel = x;
 #endif
@@ -429,9 +423,9 @@ terpri_next:
         highlighted = nil; // TODO: Explain.
 #endif
 #ifndef NAIVE
+        // Init catching errors.
         if (!setjmp (this_break)) {
-            // Save return point for hard errors, like
-            // out-of-heap or internal errors.
+            // Save return point.
             hard_repl_break = &this_break;
 
             // Save GC and tag stack pointers.
@@ -486,60 +480,50 @@ terpri_next:
         POP(unexpanded_toplevel);
 #endif
 #endif // #ifndef NAIVE
-        // Special treatment of results.
-        if (do_break_repl) {
-            // Ignore result and continue with next expression.
-            if (do_continue_repl)
-                goto next;
 
-            // Exit program.
-            if (do_exit_program) {
-                // First return from all nested REPLs.
-                if (num_repls)
-                    break;
-
-                // Print message.
-                setout (STDOUT);    // TODO: Clean up setting standard I/O.
-                outs ("Program exited."); terpri ();
-
-                goto next;
-            }
-
-            // Break this REPL if it's not the topmost.
-            do_break_repl = false;
+        // Break mode.
+        if (do_break_repl == BRK_CONTINUE) {
+            do_break_repl = 0;
+            continue;
+        } else if (do_break_repl == BRK_RETURN) {
+            do_break_repl = 0;
+            break;
+        } else if (do_break_repl == BRK_EXIT) {
+            // Return from child REPLs.
             if (num_repls)
                 break;
+
+            // Clear break mode.
+            do_break_repl = 0;
+            setout (STDOUT);
+            outs ("Program exited."); terpri ();
+            continue;
         }
-#ifndef NO_DEBUGGER
-        // Continue with alternative value.
-        if (mode == REPL_DEBUGGER) {
-            debug_step = t;
-            goto do_return;
-        }
-#endif
+
         // Print result of user input.
         if (mode != REPL_LOAD) {
             setout (STDOUT);    // TODO: Clean up setting standard I/O.
             print (x);
             fresh_line ();
         }
-next:
-        do_break_repl    = false;
-        do_continue_repl = false;
     }
+#ifdef NO_DEBUGGER
 do_return:
-    // Track unnesting of this REPL.
-    num_repls--;
+#endif
 #ifndef NO_DEBUGGER
+    // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
+        outs ("<debugger"); terpri ();
         num_debugger_repls--;
 
+done_onerror:
         // Restore earlier GC trigger threshold to
         // be able to run ONERROR if out of heap.
         onetime_heap_margin = ONETIME_HEAP_MARGIN;
         // TODO: Restore terminal flags.
     }
 #endif
+    num_repls--;
 
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);
@@ -605,13 +589,12 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl    = false;
-    do_continue_repl = false;
+    do_break_repl    = 0;
     num_repls        = -1;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
-    debugger_return_value_sym = make_symbol ("*r*", 3);
-    expand_universe (debugger_return_value_sym);
+    repl_value = make_symbol ("*r*", 3);
+    expand_universe (repl_value);
 #endif
 #ifndef NO_ONERROR
     onerror_sym = make_symbol ("onerror", 7);

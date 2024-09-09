@@ -650,9 +650,11 @@ extern lispptr unquote_spliced;
 
 extern char num_repls;
 extern char num_debugger_repls;
-extern bool do_break_repl;
-extern bool do_continue_repl;
-extern bool do_exit_program;
+
+#define BRK_CONTINUE    1
+#define BRK_RETURN      2
+#define BRK_EXIT        3
+extern char do_break_repl;
 
 #ifdef COMPRESSED_CONS
 extern bool do_compress_cons;
@@ -716,7 +718,7 @@ extern lispptr delayed_eval;
 
 #ifndef NO_DEBUGGER
 extern lispptr debug_step;
-extern lispptr debugger_return_value_sym;
+extern lispptr repl_value;
 #endif
 
 #ifndef NO_MACROEXPAND

@@ -500,18 +500,13 @@ is launched in debug mode.  With that you can examine the
 environment, execute code step by step and present a
 correct alternative for a faulty expression.
 
-Any REPL, no matter its mode, can be terminated using the
-built-in QUIT function, which takes a return value for the
-REPL as its argument.  It may become the return value of
-a LOAD function when loading a file, or the alternative
-return value of a faulty expression in debug mode.
-Built-in function IGNORE interrupts evaluation of the
-current expression read by the active REPL to start over
-with reading and evaluating the next one.
-
 Built-in function EXIT stops the program and returns to the
 topmost REPL.  When passed an exit code, EXIT terminates the
 interpreter and returns to the operating system.
+
+The IGNORE function will tell the REPL to continue with the
+next expression, ignoring any errors.  It's used in ONERROR
+handlers to test if the right errors happen in "test-errors.lisp".
 
 # Definiton of permanent symbols
 
@@ -2244,9 +2239,9 @@ one of:
 * unix
 * vic20
 
-# Optional features
+# Compile-time options to add or remove features
 
-## Compressed conses
+## COMPRESSED\_CONS: Per-GC list compression.
 
 When enabled by compile-time option COMPRESSED\_CONS,
 storing the CDR of a cons can be spared if that is following
@@ -2264,11 +2259,42 @@ compressed you have to call the garbage collector twice.
 Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
 GC will print a 'C' to the currently active output channel.
 
-# XXX
-
-EXIT\_FAILURE\_ON\_ERROR
+## EXIT\_FAILURE\_ON\_ERROR
 
 # Internals
+
+## The REPL implementation
+
+The REPL comes in four flavours, being called with one of
+three modes and an optional error code in global 'error\_code'.
+EVAL calls a REPL\_DEBUGGER if an error occurred to get a
+value to continue with.  All REPLs can be instructed to
+
+- continue with the next expression, ignoring errors,
+- return from the REPL,
+- exit the program by returning from all REPLs,
+
+### REPL\_STD
+
+The classic REPL, reading and evaluating an expression, and
+printing the result.
+
+### REPL\_LOAD
+
+Reading from a channel opened by LOAD.  Does not print anything.
+
+### REPL\_DEBUGGER with error code
+
+- Calls ONERROR and returns with its value if it didn't fail.
+- Prints program info.
+- Short command prompt.
+
+### REPL\_DEBUGGER without error code
+
+- Prints program info.
+- Asks for an alternative value
+- Short command prompt.
+
 
 ## Heap object layouts
 

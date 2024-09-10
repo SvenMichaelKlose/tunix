@@ -58,7 +58,9 @@
           (? (not *lines*)
              " (new)"
              "")
-          (or *err* "")))
+          (!? *err*
+              (list " " !)
+              "")))
 
 (fn status-pos ()
   (con-rvs t)
@@ -252,10 +254,10 @@
           (= *saved?* nil)
           (setcar line !))))
     (case (conin)
-      +arr-up+
-        (!-- *ln*)
       +arr-down+
         (!++ *ln*)
+      +arr-up+
+        (!-- *ln*)
 
       ; Ctrl-x: Page down.
       24

@@ -114,6 +114,7 @@
           4 ; Ctrl-D
             (progn
               (= *mod?* t)
+              (= *update?* t)
               (= *line* "")
               (= *lx* 0))
           5 ; Ctrl-E

@@ -249,11 +249,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             exit (EXIT_FAILURE);
 #endif
         }
-#endif
-#ifndef NO_DEBUGGER
+
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
-#endif
+#endif // #ifndef NO_DEBUGGER
             setin (load_fn ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             read_safe ();
             if (eof ())
@@ -581,8 +580,8 @@ err_open:
 void
 init_repl ()
 {
-    do_break_repl    = 0;
-    num_repls        = -1;
+    do_break_repl = 0;
+    num_repls     = -1;
 #ifndef NO_DEBUGGER
     num_debugger_repls = 0;
     repl_value = make_symbol ("*r*", 3);

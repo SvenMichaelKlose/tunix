@@ -56,13 +56,13 @@ const char * env_files[] = {
 #ifndef NO_QUASIQUOTE
     "quasiquote.lisp",
     #ifdef TEST
-        "test-quasiquote.lisp",
+        "test-qq.lisp",
     #endif
 #endif
 #ifndef NO_MACROEXPAND
     "macroexpand.lisp",
     #ifdef TEST
-        "test-macroexpand.lisp",
+        "test-macros.lisp",
     #endif
 #endif
 #ifndef NO_ONERROR

@@ -21,6 +21,52 @@
 
 ;;; Display
 
+(fn outrvs msg
+  (con-rvs t)
+  (out msg)
+  (con-rvs nil))
+
+(fn clr-status ()
+  (con-direct t)
+  (con-xy 0 (-- *con-h*))
+  (out *spaces*))
+
+(fn prompt (msg)
+  (clr-status)
+  (con-xy 0 (-- *con-h*))
+  (outrvs msg))
+
+(fn prompt-in (msg l)
+  (prompt msg)
+  (out " ")
+  (with-global *lx* (slength l)
+    (prog1
+      (while t
+        (= *update?* t)
+        (!= (edit-line l)
+          (con-xy 0 0)
+          (and (== (conin) +enter+)
+               (return !))
+          (= l !))))))
+
+(fn prompt-ok ()
+  (prompt-in "Hit ENTER:" ""))
+
+(fn status-msg ()
+  (con-xy 0 (-- *con-h*))
+  (outrvs (or *filename* "")
+          (? (not *lines*)
+             " (new)"
+             "")
+          (or *err* "")))
+
+(fn status-pos ()
+  (con-rvs t)
+  (con-xy (- *con-w* 8) (-- *con-h*))
+  (print (++ *lx*))(out ",")(print (++ *ln*))
+  (out " ")
+  (con-rvs nil))
+
 (fn print-lines (s)
   (con-direct t)
   (with ((y s)
@@ -56,56 +102,11 @@
   (= *old-ln* *ln*)
   (= *update-ln* nil))
 
-(fn outrvs msg
-  (con-rvs t)
-  (out msg)
-  (con-rvs nil))
-
-(fn clr-status ()
-  (con-direct t)
-  (con-xy 0 (-- *con-h*))
-  (outrvs *spaces*))
-
-(fn prompt (msg)
-  (con-direct t)
+(fn initscr ()
+  (clrscr)
   (clr-status)
-  (con-xy 0 (-- *con-h*))
-  (outrvs msg))
-
-(fn status (msg)
-  (prompt msg)
-  (con-direct nil)
-  (con-xy 0 0))
-
-(fn prompt-ok ()
-  (prompt-in "Hit ENTER:" ""))
-
-(fn prompt-in (msg l)
-  (prompt msg)
-  (with-global *lx* (slength l)
-    (prog1
-      (while t
-        (!= (edit-line l)
-          (con-xy 0 0)
-          (and (== (conin) +enter+)
-               (return !))
-          (= l !)))
-      (clr-status))))
-
-(fn status-pos ()
-  (con-rvs t)
-  (con-xy (- *con-w* 8) (-- *con-h*))
-  (print (++ *lx*))(out ",")(print (++ *ln*))
-  (out " ")
-  (con-rvs nil))
-
-(fn status-msg ()
-  (con-xy 0 (-- *con-h*))
-  (outrvs (or *filename* "")
-          (? (not *lines*)
-             " (new)"
-             "")
-          (or *err* "")))
+  (status-msg)
+  (= *update-ln* 0))
 
 ;;; Text editing
 
@@ -168,11 +169,10 @@
     (con-direct t)))
 
 (fn save-file f
-  (let uf (? (not f)
-             (progn
-               (list-dir)
-               (prompt-in "Save: " *filename*)))
-    (status "...")
+  (let uf (unless f
+            (list-dir)
+            (prompt-in "Save:" *filename*))
+    (prompt "...")
     (? (with-out o (open (or (car f) uf) 'w)
          (? uf
             (= *filename* uf))
@@ -180,20 +180,17 @@
            (out l)
            (terpri)))
        (and (= *err* "Cannot save.") nil)
-       (progn
-         (clr-status)
-         (= *saved?* t)))))
+         (= *saved?* t))))
 
 (fn load-file ()
   (list-dir)
-  (let f (prompt-in "Load: " *filename*)
+  (let f (prompt-in "Load:" *filename*)
     (? (with-in i (open f 'r)
-         (status "...")
+         (prompt "...")
          (= *filename* f)
          (= *lines* nil)
          (= *lines* (read-lines))
-         (reset-ln)
-         (clr-status))
+         (reset-ln))
        (= *err* "Cannot load."))))
 
 (fn choose x
@@ -216,7 +213,7 @@
           'quit))))
 
 (fn editor-cmds ()
-  (prompt "Ctrl+K: ")
+  (prompt "Ctrl+K+")
   (case (conin)
     \l  (load-file)
     \s  (save-file)
@@ -232,7 +229,7 @@
           (prompt-ok))
     \q  (quit-editor)
     \e  (progn
-          (prompt "Eval: ")
+          (prompt "Eval:")
           (= *old-conln* -1)
           (con-direct nil)
           (!= (eval (read))
@@ -243,10 +240,9 @@
 
 ; Navigate up and down lines, catch commands.
 (fn edit-lines ()
+  (status-msg)
   (while (not (eof))
     (update-screen)
-    (status-msg)
-    (status-pos)
     (let line (nthcdr *ln* *lines*)
       (con-xy 0 (- *ln* *conln*))
       (!= (edit-line (car line))
@@ -260,25 +256,22 @@
         (? (< 0 *ln*)
            (join-line))
       +arr-up+
-        ; Check if for screen update range above.
-        (when (< 0 *ln*)
-          (!-- *ln*))
+        (!-- *ln*)
       +arr-down+
-        (when (< *ln* (-- (length *lines*)))
-          (!++ *ln*))
+        (!++ *ln*)
       11 ; Ctrl+k: Command char following.
-        (and (eq 'quit (editor-cmds))
-             (return nil))
+        (? (eq 'quit (editor-cmds))
+           (return nil)
+           (initscr))
       12 ; Ctrl-l: Redraw screen.
         (progn
           (clrscr)
-          (= *update-ln* 0))
+          (initscr)
+          (status-pos))
       24 ; Ctrl-x: Page down.
-        (progn
           (= *ln* (+ *ln* (-- *con-h*)))
       25 ; Ctrl-y: Page up
-        (progn
-          (= *ln* (- *ln* (-- *con-h*))))))))
+          (= *ln* (- *ln* (-- *con-h*))))))
 
 (fn edit file
   (reset-ln)

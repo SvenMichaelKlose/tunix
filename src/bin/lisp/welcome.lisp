@@ -3,9 +3,7 @@
   (load "user-post-image.lisp")
   (message "Ready."))
 
-; Load user file.
-(or (load "user-pre-image.lisp")
-    (message "INFO: You can create a file called \"user-pre-image.lisp\" to be loaded here."))
+(load "user-pre-image.lisp")
 
 (and (builtin? gc)
   (block t
@@ -21,7 +19,8 @@
     (out "Time since boot: ")
     (print (/ (- (time) *start-time*) +bps+))
     (out 's)
-    (terpri)))
+    (terpri)
+    (= *universe* (remove '*start-time* *universe*))))
 
 (or (eq +target* 'unix)
     (? (builtin? isave)
@@ -29,8 +28,6 @@
          (message "Saving 'image'...")
          (isave "image"))))
 
-; Load user image.
-(or (load "user-post-image.lisp")
-    (message "INFO: You can create a file called \"user-post-image.lisp\" to be loaded here and when the image is loaded on program start."))
+(load "user-post-image.lisp")
 
 (message "Ready.")

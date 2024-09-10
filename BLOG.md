@@ -3,6 +3,14 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-10
+
+AUTOLOAD is fairly complete, but the editor is far too
+slow, the debugger has a bug, and images aren't working
+to satisfaction either.  If only the interpreter would be
+a bit faster.  It looks like there's heavy processing when
+going up and down.  Should be easy to track down.
+
 # 2024-09-06
 
 Implemented AUTOLOAD today within a bekloppie.  Does not

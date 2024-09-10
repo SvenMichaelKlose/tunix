@@ -17,14 +17,16 @@
     (cons (%unquote (car x))
           (%unquote (cdr x)))))
 
-(special macro (name . x)
-  (or (member name *macros*)
-      (= *macros* (cons name *macros*)))
-  (eval (macroexpand $(fn ,name ,@x))))
+(special macro (n a . body)
+  (or (member n *macros*)
+      (= *macros* (cons n *macros*)))
+  (print $(macro ,n ,a))(terpri)
+  ;(eval $(= ,n '(,a ,@(@ macroexpand body)))))
+  (eval (macroexpand $(fn ,n ,a ,@body))))
 
-(fn macro? (s)
-  (? (symbol? s)
-     (member s *macros*)))
+(fn macro? (x)
+  (? (symbol? x)
+     (member x *macros*)))
 
 (fn macroexpand (x)
   (?

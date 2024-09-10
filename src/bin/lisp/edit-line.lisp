@@ -1,4 +1,5 @@
 (load "let.lisp")
+(load "with.lisp")
 (load "aif.lisp")
 (load "!=.lisp")
 (load "!++.lisp")
@@ -11,8 +12,10 @@
 (load "prog1.lisp")
 (load "progn.lisp")
 (load "while.lisp")
+(load "awhile.lisp")
 (load "when.lisp")
 (load "awhen.lisp")
+(load "unless.lisp")
 (load "make-queue.lisp")
 (load "enqueue.lisp")
 (load "queue-list.lisp")
@@ -25,17 +28,14 @@
 (load "with-in.lisp")
 (load "with-out.lisp")
 (load "with-queue.lisp")
-
+;
 ;;; State
 
 (var *line* nil)
 (var *oline* nil)   ; Original line.
 (var *mod?* nil)    ; Line modified?
-(var *err* nil)
-(var *ln* 0)
+(var *update?* nil) ; Line needs update in screen?
 (var *lx* 0)    ; Line X position, relative to *OX*.
-(var *old-conln* 0)
-(var *old-ln* 0)
 
 ;;; Display
 
@@ -58,18 +58,19 @@
 ;;; Line editing
 
 (fn mkcharline ()
-  (? (symbol? *line*)
-     (= *line* (symbol-name *line*))))
+  (= *saved?* nil)
+  (= *update?* t)
+  (= *mod?* t)
+  (when (symbol? *line*)
+    (= *line* (symbol-name *line*))))
 
 (fn del-char (x)
   (mkcharline)
-  (= *saved?* nil)
-  (= *update?* t)
   (= *line* (nconc (subseq *line* 0 x)
                    (subseq *line* (++ x)))))
 
 (fn go-eol ()
-  (let n (length *line*)
+  (let n (llen *line*)
     (= *lx* (? (> n 0) n 0))))
 
 ; Edit line.
@@ -86,8 +87,8 @@
     (and (> *lx* (llen *line*))
          (go-eol))
     (while (not (eof))
-      (con-xy x y)
       (when *update?*
+        (con-xy x y)
         (update-line *line*)
         (= *update?* nil))
       (con-xy (+ x *lx*) y)
@@ -97,11 +98,9 @@
                        (return !)))))
         (case c
           +arr-left+
-            (? (< 0 *lx*)
-               (!-- *lx*))
+            (!-- *lx*)
           +arr-right+
-            (? (< *lx* len)
-               (!++ *lx*))
+            (!++ *lx*)
           +bs+
             (progn
               (when (== 0 *lx*)
@@ -126,8 +125,6 @@
               (con-direct nil)
               (return (? *mod?* (symbol *line*) *oline*)))
             ; Insert char and step right.
-            (= *mod?* t)
-            (= *update?* t)
             (mkcharline)
             (= *line* (? (== 0 *lx*)
                          (nconc (list c) *line*)

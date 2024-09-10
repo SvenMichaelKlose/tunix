@@ -784,7 +784,9 @@ These are the available short commands:
 | Command | Description                                    |
 |---------|------------------------------------------------|
 | c       | Continue program execution.                    |
-| q       | Stop execution, returning to top level REPL.   |
+| k       | Ignore expression.                             |
+| q       | Exit REPL.                                     |
+| x       | Exit program.                                  |
 | s       | Step into user-defined procedure.              |
 | n       | Execute current expression in whole.           |
 | pX      | Evaluate and print expression X.  (No macros!) |

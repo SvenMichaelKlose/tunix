@@ -118,6 +118,7 @@
 ;                  (nconc *lines* (cdr !))))))
 
 (fn join-line ()
+  (= *saved?* nil)
   (!= (-- *ln*)
     (= *update-ln* !)
     (let prev (nth ! *lines*)
@@ -141,6 +142,7 @@
                (symbol !))))))
 
 (fn ins-line ()
+  (= *saved?* nil)
   (= *update-ln* *ln*)
   (let l (split-line (nth *ln* *lines*) *lx*)
     (= *lines* (? (== 0 *ln*)
@@ -246,32 +248,44 @@
     (let line (nthcdr *ln* *lines*)
       (con-xy 0 (- *ln* *conln*))
       (!= (edit-line (car line))
-        (and *mod?*
-             (= *saved?* nil))
-        (setcar line !)))
+        (when *mod?*
+          (= *saved?* nil)
+          (setcar line !))))
     (case (conin)
-      +enter+
-        (ins-line)
-      +bs+
-        (? (< 0 *ln*)
-           (join-line))
       +arr-up+
         (!-- *ln*)
       +arr-down+
         (!++ *ln*)
-      11 ; Ctrl+k: Command char following.
+
+      ; Ctrl-x: Page down.
+      24
+        (= *ln* (+ *ln* (-- *con-h*)))
+
+      ; Ctrl-y: Page up
+      25
+        (= *ln* (- *ln* (-- *con-h*)))
+
+      ; Make new line.
+      +enter+
+        (ins-line)
+
+      ; Join lines.
+      +bs+
+        (? (< 0 *ln*)
+           (join-line))
+
+      ; Ctrl+k: Command char following.
+      11
         (? (eq 'quit (editor-cmds))
            (return nil)
            (initscr))
-      12 ; Ctrl-l: Redraw screen.
+
+      ; Ctrl-l: Redraw screen.
+      12
         (progn
           (clrscr)
           (initscr)
-          (status-pos))
-      24 ; Ctrl-x: Page down.
-          (= *ln* (+ *ln* (-- *con-h*)))
-      25 ; Ctrl-y: Page up
-          (= *ln* (- *ln* (-- *con-h*))))))
+          (status-pos)))))
 
 (fn edit file
   (reset-ln)

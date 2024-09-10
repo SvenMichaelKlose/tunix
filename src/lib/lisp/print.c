@@ -169,7 +169,7 @@ print_named (symbol * s)
     space ();
 #ifndef NO_PRINT_ANONYMOUS
     if (!SYMBOL_LENGTH(s)) {
-        outs ("<?>");
+        outs ("\"\"");
         return;
     }
 #endif

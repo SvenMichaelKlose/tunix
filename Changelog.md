@@ -25,6 +25,7 @@ and this project adheres to
 - TIME for C128, C64 and VIC-20.
 - Simplified internal I/O channel handling that separates
   program and REPL channels.
+- PRINT prints empty strings ("") AKA anonymous symbols.
 
 ##### Changed
 

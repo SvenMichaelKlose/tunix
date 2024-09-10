@@ -28,7 +28,7 @@
 (load "with-in.lisp")
 (load "with-out.lisp")
 (load "with-queue.lisp")
-;
+
 ;;; State
 
 (var *line* nil)
@@ -115,7 +115,7 @@
             (progn
               (= *mod?* t)
               (= *update?* t)
-              (= *line* "")
+              (= *line* nil)
               (= *lx* 0))
           5 ; Ctrl-E
             (go-eol)

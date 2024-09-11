@@ -765,7 +765,10 @@ bi_out_flush (void)
     }
 }
 
-inline void FASTCALL
+#ifdef __CC65__
+inline
+#endif
+void FASTCALL
 bi_out_c (char c)
 {
     *ostr++ = c;

@@ -9,6 +9,7 @@
 (load "con.lisp")
 
 (load "do.lisp")
+(load "dolist.lisp")
 (load "prog1.lisp")
 (load "progn.lisp")
 (load "while.lisp")
@@ -121,7 +122,8 @@
             (go-eol)
           (progn
             ; Put back unknown key and return line.
-            (when (or (< c \ ) (> c 126))
+            (when (or (< c \ ) (and (> c 126)
+                                    (<= c +arr-left+)))
               (putback)
               (con-direct nil)
               (return (? *mod?* (symbol *line*) *oline*)))

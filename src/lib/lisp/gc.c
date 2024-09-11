@@ -14,6 +14,7 @@
 
 #ifdef TARGET_UNIX
 #include <stdio.h>
+#include <signal.h>
 #endif
 
 #ifdef COMPRESSED_CONS
@@ -114,6 +115,7 @@ sweep ()
     // Required to merge gaps.
     last_sweeped = nil;
 
+    first_symbol = nil;
     last_symbol = nil;
 
     // Initialize relocation table.
@@ -150,8 +152,10 @@ sweep ()
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
                     if (NOT_NIL(last_symbol))
-                        SYMBOL_NEXT(last_symbol) = d;
+                        SET_SYMBOL_NEXT(last_symbol, d);
                     last_symbol = d;
+                    if (NOT(first_symbol))
+                        first_symbol = d;
                 }
 #ifdef COMPRESSED_CONS
                 // Turn regular cons into compressed cons...
@@ -251,6 +255,9 @@ check_xlat:
     // Save free pointer.
     heap_free = d;
 #endif // #ifdef FRAGMENTED_HEAP
+
+    // End symbol list.
+    SET_SYMBOL_NEXT(last_symbol, nil);
 }
 
 // Relocate object pointer.

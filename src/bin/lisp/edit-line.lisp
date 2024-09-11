@@ -10,6 +10,7 @@
 
 (load "do.lisp")
 (load "dolist.lisp")
+(load "dotimes.lisp")
 (load "prog1.lisp")
 (load "progn.lisp")
 (load "while.lisp")
@@ -97,40 +98,42 @@
              (c    (while (not (eof))
                      (awhen (conin)
                        (return !)))))
-        (case c
-          +arr-left+
-            (!-- *lx*)
-          +arr-right+
-            (!++ *lx*)
-          +bs+
-            (progn
-              (when (== 0 *lx*)
-                (putback)
-                (con-direct nil)
-                (return (? *mod?* (symbol *line*) *oline*)))
-              (? (< 0 *lx*)
-                 (del-char (!-- *lx*))))
-          1 ; Ctrl-A
-            (= *lx* 0)
-          4 ; Ctrl-D
-            (progn
-              (= *mod?* t)
-              (= *update?* t)
-              (= *line* nil)
-              (= *lx* 0))
-          5 ; Ctrl-E
-            (go-eol)
-          (progn
-            ; Put back unknown key and return line.
-            (when (or (< c \ ) (and (> c 126)
-                                    (<= c +arr-left+)))
-              (putback)
-              (con-direct nil)
-              (return (? *mod?* (symbol *line*) *oline*)))
-            ; Insert char and step right.
-            (mkcharline)
-            (= *line* (? (== 0 *lx*)
-                         (nconc (list c) *line*)
-                         (!= (cut-at *lx* *line*)
-                           (nconc *line* (list c) !))))
-            (!++ *lx*)))))))
+        ; Insert char and step right.
+        (? (and (>= c 32)
+                (or (< c 126)
+                    (> c +arr-left+)))
+           (progn
+             (mkcharline)
+             (= *line* (? (== 0 *lx*)
+                          (nconc (list c) *line*)
+                          (!= (cut-at *lx* *line*)
+                            (nconc *line* (list c) !))))
+             (!++ *lx*))
+           (case c
+             +arr-left+
+               (!-- *lx*)
+             +arr-right+
+               (!++ *lx*)
+             +bs+
+               (progn
+                 (when (== 0 *lx*)
+                   (putback)
+                   (return (? *mod?* (symbol *line*) *oline*)))
+                 (? (< 0 *lx*)
+                    (del-char (!-- *lx*))))
+             1 ; Ctrl-A
+               (= *lx* 0)
+             4 ; Ctrl-D
+               (progn
+                 (= *mod?* t)
+                 (= *update?* t)
+                 (= *line* nil)
+                 (= *lx* 0))
+             5 ; Ctrl-E
+               (go-eol)
+             ; Put back unknown key and return line.
+             (when (or (< c \ )
+                       (and (> c 126)
+                            (<= c +arr-left+)))
+               (putback)
+               (return (? *mod?* (symbol *line*) *oline*)))))))))

@@ -17,6 +17,7 @@ and this project adheres to
 
 ##### Added
 
+- OUT: Output buffer for chars and char lists.
 - Compile-time option MICROSCOPIC to strip off almost all
   optional features.
 

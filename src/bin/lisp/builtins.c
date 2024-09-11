@@ -754,14 +754,32 @@ bi_putback (void)
 }
 
 int countdown;
+char * ostr;
+
+void
+bi_out_flush (void)
+{
+    if (ostr != buffer) {
+        outsn (buffer, ostr - buffer);
+        ostr = buffer;
+    }
+}
+
+inline void FASTCALL
+bi_out_c (char c)
+{
+    *ostr++ = c;
+    if (ostr == &buffer[MAX_SYMBOL])
+        bi_out_flush ();
+}
 
 void
 counted_out (char c)
 {
     if (countdown < 0) {
-        out (c);
+        bi_out_c (c);
     } else if (countdown) {
-        out (c);
+        bi_out_c (c);
         countdown--;
     }
 }
@@ -776,6 +794,7 @@ bi_out_atom (lispptr x)
         tmpstr = SYMBOL_NAME(x);
         if (countdown >= 0 && countdown < lisp_len)
             lisp_len = countdown;
+        bi_out_flush ();
         outsn (tmpstr, lisp_len);
         if (countdown >= 0) {
             countdown -= lisp_len;
@@ -784,8 +803,10 @@ bi_out_atom (lispptr x)
         }
     } else if (CONSP(x))
         bi_out_list (x);
-    else
+    else {
+        bi_out_flush ();
         print (x);
+    }
 }
 
 void FASTCALL
@@ -801,8 +822,10 @@ bi_out_list (lispptr x)
 lispptr
 bi_out (void)
 {
+    ostr = buffer;
     bi_out_list (arg1);
     countdown = -1;
+    bi_out_flush ();
     return arg1;
 }
 

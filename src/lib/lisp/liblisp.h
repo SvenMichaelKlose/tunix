@@ -456,7 +456,7 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define HEAP_SIZE           (128 * 1024U)
+#define HEAP_SIZE           (256 * 1024U)
 #define STACK_SIZE          (HEAP_SIZE / 8)
 #define TAGSTACK_SIZE       (HEAP_SIZE / 8)
 #define RELOC_TABLE_ENTRIES 512

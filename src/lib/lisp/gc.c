@@ -47,9 +47,6 @@ mark (lispptr x)
     }
 }
 
-// End of singly-linked list of named symbols.
-lispptr last_kept_sym;
-
 xlat_item * xlat_end;
 
 #ifdef __CC65__
@@ -117,8 +114,7 @@ sweep ()
     // Required to merge gaps.
     last_sweeped = nil;
 
-    // Get start of singly-linked list of named symbols.
-    last_kept_sym = universe;
+    last_symbol = nil;
 
     // Initialize relocation table.
     xlat = xlat_end;    // Point to its start.
@@ -153,8 +149,9 @@ sweep ()
 #endif
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
-                    SYMBOL_NEXT(last_kept_sym) = s;
-                    last_kept_sym = d;
+                    if (NOT_NIL(last_symbol))
+                        SYMBOL_NEXT(last_symbol) = d;
+                    last_symbol = d;
                 }
 #ifdef COMPRESSED_CONS
                 // Turn regular cons into compressed cons...
@@ -254,12 +251,6 @@ check_xlat:
     // Save free pointer.
     heap_free = d;
 #endif // #ifdef FRAGMENTED_HEAP
-
-    // End symbol list.
-    SYMBOL_NEXT(last_kept_sym) = nil;
-
-    // Save last symbol for lookup_symbol().
-    last_symbol = last_kept_sym;
 }
 
 // Relocate object pointer.
@@ -315,8 +306,6 @@ relocate (void)
                     SETCDR(p, relocate_ptr (CDR(p)));
             } else if (_SYMBOLP(p))
                 SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
-            if (_NAMEDP(p) && SYMBOL_LENGTH(p))
-                SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
         }
 #ifdef FRAGMENTED_HEAP
     } while ((++heap)->start);

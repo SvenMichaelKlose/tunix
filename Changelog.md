@@ -27,6 +27,7 @@ and this project adheres to
 - Simplified internal I/O channel handling that separates
   program and REPL channels.
 - PRINT prints empty strings ("") AKA anonymous symbols.
+- Garbage collector doesn't relocate symbol list links.
 
 ##### Changed
 

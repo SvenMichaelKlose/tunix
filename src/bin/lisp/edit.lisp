@@ -54,10 +54,10 @@
 
 (fn status-msg ()
   (con-xy 0 (-- *con-h*))
-  (outrvs (or *filename* "")
-          (? (not *lines*)
-             " (new)"
-             "")
+  (outrvs (or *filename* "<unnamed>")
+          (? *saved?*
+             ""
+             " (not saved)")
           (!? *err*
               (list " " !)
               "")))
@@ -232,6 +232,10 @@
           (load "_ctrlkr.tmp")
           (prompt-ok))
     \q  (quit-editor)
+    \n  (when (eq 'quit (quit-editor))
+           (= *old-conln* -1)
+           (= *filename* nil)
+           (= *lines* (list "")))
     \e  (progn
           (prompt "Eval:")
           (= *old-conln* -1)

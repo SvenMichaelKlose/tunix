@@ -99,6 +99,7 @@
 
 // Disable built-ins.
 #define NO_BUILTIN_APPEND // Native is smaller.
+//#define NO_BUILTIN_ASSOC
 //#define NO_BUILTIN_CHAR_AT
 //#define NO_BUILTIN_GC
 //#define NO_BUILTIN_LOAD
@@ -198,6 +199,9 @@
 #endif
 #ifndef NO_GBUILTIN_ROUP_BITOPS
     #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_ASSOC
+    #define NO_BUILTIN_ASSOC
 #endif
 #ifndef NO_BUILTIN_CHAR_AT
     #define NO_BUILTIN_CHAR_AT

@@ -17,15 +17,17 @@
     (cons (%unquote (car x))
           (%unquote (cdr x)))))
 
-(special macro (n a . body)
-  (or (member n *macros*)
-      (= *macros* (cons n *macros*)))
-  (print $(macro ,n ,a))(terpri)
-  (eval $(= ,n '(,a ,@(@ macroexpand body)))))
-
 (fn macro? (x)
   (? (symbol? x)
-     (member x *macros*)))
+     (assoc x *macros*)))
+
+(special macro (n a . body)
+  (? (macro? n)
+     (setcdr (macro? n) (cons a body))
+     (= *macros* (cons (cons n (cons a body))
+                       *macros*)))
+  (print $(macro ,n ,a))(terpri)
+  (eval $(= ,n '(,a ,@(@ macroexpand body)))))
 
 (fn macroexpand (x)
   (?
@@ -35,5 +37,5 @@
     (eq (car x) 'quasiquote)
       (%unquote x)
     (macro? (car x))
-      (macroexpand (apply (symbol-value (car x)) (cdr x)))
+      (macroexpand (apply (cdr (macro? (car x))) (cdr x)))
     (@ macroexpand x)))

@@ -19,6 +19,12 @@ and this project adheres to
 
 - ASSOC as built-in.
 
+#### Macros
+
+- \*MACROS\* is now an associative list, and macro functions
+  are not defined any longer, so their names may clash with
+  procedure definitions.
+
 
 ## [v0.0.17] - 2024-09-12
 

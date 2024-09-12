@@ -143,7 +143,8 @@ err_type (char * type, lispptr x, char code)
 void FASTCALL
 bi_tcheck (lispptr x, uchar type, char code)
 {
-    (void) x, (void) type;
+    (void) type;
+    error_info = x;
 
     switch (type) {
     case 'x':

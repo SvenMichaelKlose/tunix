@@ -139,7 +139,7 @@ eval_list (void)
     }
 
     // Return memorized start of result list.
-    POP(value);
+    POP(list_start);
     return list_start;
 }
 
@@ -405,7 +405,7 @@ set_arg_values:
             PUSH(args);
             PUSH_TAG(num_args);
             x = args;
-            eval_list ();
+            value = eval_list ();
 #ifndef NAIVE
             if (error_code)
                 value = lisp_repl (REPL_DEBUGGER, 0);
@@ -542,7 +542,7 @@ do_argument:
 #endif
             // Evaluate rest of arguments.
             x = args;
-            eval_list ();
+            value = eval_list ();
 
             // Restore evaluator state.
 #ifndef NAIVE

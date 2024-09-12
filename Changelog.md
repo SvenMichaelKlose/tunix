@@ -25,6 +25,12 @@ and this project adheres to
   are not defined any longer, so their names may clash with
   procedure definitions.
 
+#### Environment
+
+##### Added
+
+- IDE: Load editor, save image, and start it.
+
 
 ## [v0.0.17] - 2024-09-12
 

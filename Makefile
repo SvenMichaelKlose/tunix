@@ -22,7 +22,7 @@ src/include/git-version.h: FORCE
 	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
 	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
 	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lisp
-	printf ")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
+	printf " on \" +target+ \")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
 	mkdir -p src/include
 	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
 	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h

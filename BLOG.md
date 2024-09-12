@@ -3,6 +3,14 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-12
+
+Even a most-simple compiler will work wonders on 6502-based
+systems, where the editor is unusable and loading it is
+taking over six minutes.  It would be of help if just the control
+flow would be compiled, so all code would be in a single array
+to jump around in.
+
 # 2024-09-10
 
 AUTOLOAD is fairly complete, but the editor is far too

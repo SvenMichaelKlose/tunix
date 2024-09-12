@@ -1,4 +1,7 @@
+(load "let.lisp")
+(load "!=.lisp")
 (load "mapcar.lisp")
+(load "with-global.lisp")
 
 (var *cmacros* nil)
 
@@ -27,8 +30,6 @@
 (defcm or x
   (mklogical '%go-nnil))
 
-(= *universe* (remove 'mklogical *universe*))
-
 (fn mkif (end x)
   (? (cdr x)
      (let next ""
@@ -47,8 +48,34 @@
                  (group x 2))
        (%tag ,end))))
 
-(= *universe* (remove 'mkif *universe*))
+(var *current-return* nil)
+(var *return-tag* nil)
+
+(fn %return (v . n)
+  (? (eq *current-return* (car n))
+     $(%block
+        ,v
+        (%go ,*return-tag*))
+     $(return ,v ,@n)))
+
+(fn returnexpand (x)
+  (with-global *macros* (list (cons 'return %return))
+    (macroexpand x)))
+
+(fn %block (n . body)
+  (let end ""
+    (!= (@ macroexpand body)
+      (= *current-return* n)
+      (= *return-tag* end)
+      $(%block
+         ,@(@ returnexpand !)
+         (%tag ,end)))))
+
+(fn blockexpand (x)
+  (with-global *macros* (list (cons 'block %block))
+    (macroexpand x)))
 
 (fn cmacroexpand (x)
-  (with-global *macros* *cmacros*
-    (macroexpand x)))
+  (blockexpand
+    (with-global *macros* *cmacros*
+      (macroexpand x))))

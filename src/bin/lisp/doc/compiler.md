@@ -13,117 +13,33 @@ book: true
 
 # Overview
 
-This is the plan of implementing a bytecode compiler for
-TUNIX Lisp, written in itself, to gain improved performance
-and smaller code size.
+TUNIX Lisp is slow, especially on 6502-based systems as it
+is interpreted.  Arguments need to be expanded and all kinds
+of checks have to pass.  With compiled code that overhead
+is gone, and the resulting code should also be smaller than
+the original.
 
-## The target machine: Bytecode format
+## The simplest compiler possible
 
-| Offset | Size  | Description                         |
-|--------|-------|-------------------------------------|
-| 0      | 1     | Object TYPE\_BYTECODE                |
-| 1      | 1     | Total size - 3                      |
-| 2      | 2     | Argument definition                 |
-| 3      | 1     | Local stack size / object list size |
-| 4      | 1     | Code offset                         |
-| 5      | ?     | Data (garbage-collected objects)    |
-| <5     | ?     | Raw data                            |
-| <5     | 1-220 | Code                                |
+For the first version of the compiler we don't even care
+about argument expansion.  We want at least the control
+flow instructions to be compiled, so expressions, jumps
+and their labels, can be put into an array where jumps
+can be performed at an instant.
 
-A bytecode function has a memory layout similar to that of
-a symbol, with a type, length and value slot.  The length
-tells the number of bytes following.  The value points to a
-regular argument definition list , e.g.  '(first . rest)'.
-Addtionally the size of the local stack frame, which is
-subtracted from the stack pointer upon function entry, is
-given, followed by the length of a GCed object list and the
-size of a raw data array which contains jump destination
-offsets.  All that is followed by the actual bytecode.
+| Bytecode         | Description                      |
+|------------------|----------------------------------|
+| BC\_END          | End of bytecode function.        |
+| BC\_LIST, n, ... | List of expressions to evaluate. |
+| BC\_GO, n        | Unconditional jump.              |
+| BC\_GO\_NIL, n   | Jump if last result is NIL.      |
+| BC\_GO\_NNIL, n  | Jump if last result is not NIL.  |
 
-### Instruction format
-
-The highest bit of the first byte determines if the code is
-an assignment or a jump.  Jumps also contain an index into
-a code offset table.
-
-#### Jumps
-
-~~~
-1JJIIIII
-~~~
-
-* J: type
- * 00: unconditional
- * 01: If %0 is not NIL.
- * 10: If %0 is NIL.
- * 11: unused
-* I: Index into raw data table
-
-#### Return from function
-
-~~~
-00000000
-~~~
-
-#### Assignment:
-
-Assigments include a destination on the stack, a function
-object and the arguments which are either on the object list
-or on the stack..
-
-~~~
-0?DDDDDD FFFFFFFF
-~~~
-
-* D: Destination on stack
-* F: Function (index into object array)
-
-#### Arguments:
-
-Arguments are either indexes into the object array or into
-the stack.
-
-~~~
-EPIIIIII
-~~~
-
-* E: End of argument list flag
-* P: 0: stack place 1: object
-* I: Index into stack or object array
-
-## Passes
-
-The TUNIX compiler has a micro-pass architecture, requiring
-only workspace for the current pass.  It translates
-macro-expanded input into an assembly-style metacode made of
-assignments, jumps and jump tags.  Function information is
-also gathered for the following optimization and code
-generation passes.
-
-Transform to metacode:
-
-* Compiler macro expansion
-* Quote expansion
-* Quasiquote expansion
-* Argument renaming
-* Function collection
-* Scoping
-* Lambda expansion
-* Block folding
-* Expression expansion
-
-* Optimization
-
-After the transformation to metacode the latter has to be
-at least cleaned from artifacts.
-
-Code generation:
-
-Finally the desired code can be generated, e.g. bytecode or
-assembly language.
-
-* Place expansion
-* Code macro expansion
+- Inline direct calls of anonymous functions.
+- Expand AND, OR, ?.
+- Expand BLOCK.
+- Fold %BLOCKs.
+- Bytecode assembler.
 
 ### Compiler macro expansion
 
@@ -133,11 +49,10 @@ AND, OR) to simpler jump and tag expressions:
 
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
-| (%= d f +x)  | Call F with X and assign result to D. |
-| (%jmp s)     | Unconditional jump.                   |
-| (%jmp-nil s) | Jump if %0 is NIL.                    |
-| (%jmp-t s)   | Jump if %0 is not NIL.                |
-| (%tag s).    | Jump destination.                     |
+| (%go s)      | Unconditional jump.                   |
+| (%go-nil s)  | Jump if last result is NIL.           |
+| (%go-nnil s) | Jump if last result is not NIL.       |
+| (%tag s)     | Jump destination.                     |
 
 Jump tags must be EQ.
 
@@ -149,9 +64,9 @@ Jump tags must be EQ.
    (c)
 
 (%= %0 (a))
-(%jmp-nil 1)
+(%go-nil 1)
 (%= %0 (b))
-(%jmp 2)
+(%go 2)
 (%tag 1)
 (%= %0 (c))
 (%tag 2)
@@ -197,7 +112,7 @@ other to get a single expression list for each function.
 
 ; After COMPILER-MACROEXPAND.
 (%= %0 (do-thing? x))
-(%jmp-nil 1)
+(%go-nil 1)
 (%block
   (= %0 (do-this))
   (= %0 (do-that)))
@@ -205,7 +120,7 @@ other to get a single expression list for each function.
 
 ; After BLOCK-FOLD.
 (%= %0 (do-thing? x))
-(%jmp-nil 1)
+(%go-nil 1)
 (do-this)
 (%= %0 (do-that))
 (%tag 1)

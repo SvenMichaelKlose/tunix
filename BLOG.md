@@ -7,9 +7,28 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 Even a most-simple compiler will work wonders on 6502-based
 systems, where the editor is unusable and loading it is
-taking over six minutes.  It would be of help if just the control
-flow would be compiled, so all code would be in a single array
-to jump around in.
+taking over six minutes.  It would be of help if just the
+control flow would be compiled, so all code would be in a
+single array to jump around in.
+
+So there's a new plan:
+
+[x] Make \*MACROS\* an associative list.
+[x] Expand ?, AND, OR.
+[@] Expand BLOCK, RETURN, GO.
+[ ] Inline function expressions.
+[ ] Bytecode assembler.
+
+Changing the macro list and starting the compiler macro
+expansion was easy.  BLOCK could use a nap before.
+Inlinined expressions will call new %PUSHARGS and %POPARGS
+to save and restore argument symbol values.  The bytecode
+assembler will just have to translate labels into offsets
+and create a list containing the bytecodes.
+
+Enough trouble for the weekend.  The bytecode interpreter
+can be embedded into eval0() – but native code could also
+be generated (probably taking too much memory).
 
 # 2024-09-10
 

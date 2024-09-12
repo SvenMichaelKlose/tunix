@@ -18,7 +18,8 @@
           (%unquote (cdr x)))))
 
 (fn macro? (x)
-  (? (symbol? x)
+  (? (or (symbol? x)
+         (builtin? x))
      (assoc x *macros*)))
 
 (special macro (n a . body)
@@ -26,7 +27,7 @@
      (setcdr (macro? n) (cons a body))
      (= *macros* (cons (cons n (cons a body))
                        *macros*)))
-  (print $(macro ,n ,a))(terpri)
+  (print $(macro ,n ,a))
   (eval $(= ,n '(,a ,@(@ macroexpand body)))))
 
 (fn macroexpand (x)

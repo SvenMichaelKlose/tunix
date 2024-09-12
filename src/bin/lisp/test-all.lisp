@@ -331,3 +331,8 @@
              (enqueue q 5))
            '(5))
     (error))
+
+(load cmacros.lisp)
+(print (cmacroexpand '(and a b c)))
+(print (cmacroexpand '(or a b c)))
+(print (cmacroexpand '(? a b c)))

@@ -25,6 +25,7 @@
 (load "mapcan.lisp")
 (load "nth.lisp")
 (load "cut-at.lisp")
+(load "group.lisp")
 (load "case.lisp")
 (load "with-global.lisp")
 (load "with-in.lisp")

@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+##### Added
+
+- ASSOC as built-in.
+
+
 ## [v0.0.17] - 2024-09-12
 
 ### Lisp

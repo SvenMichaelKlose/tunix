@@ -40,7 +40,8 @@ const char * env_files[] = {
 #ifdef TEST
     "smoke-test.lisp",
 #endif
-    "env-1.lisp",
+    "equality.lisp",
+    "list.lisp",
 
     // Target-specific
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
@@ -51,6 +52,7 @@ const char * env_files[] = {
 #endif
 
 #ifdef TEST
+    "append.lisp",
     "test.lisp",
 #endif
 #ifndef NO_QUASIQUOTE

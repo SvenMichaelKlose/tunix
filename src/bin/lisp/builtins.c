@@ -261,6 +261,27 @@ bi_nthcdr (void)
 
 #endif // #ifndef NO_BUILTIN_NTHCDR
 
+#ifndef NO_BUILTIN_ASSOC
+
+lispptr
+bi_assoc ()
+{
+    DOLIST(x, arg2) {
+        tmp = CAR(x);
+        if (!CONSP(tmp))
+            break;
+        tmp = CAR(tmp);
+        if (tmp == arg1)
+            return CAR(x);
+        if (NUMBERP(tmp) && NUMBERP(arg1))
+            if (NUMBER_VALUE(tmp) == NUMBER_VALUE(arg1))
+                return CAR(x);
+    }
+    return nil;
+}
+
+#endif // #ifndef NO_BUILTIN_ASSOC
+
 #ifndef NO_BUILTIN_APPEND
 
 lispptr
@@ -1293,6 +1314,9 @@ const struct builtin builtins[] = {
 #ifndef NO_BUILTIN_NTHCDR
     { "nthcdr",     "nx",   bi_nthcdr },
 #endif
+#ifndef NO_BUILTIN_ASSOC
+    { "assoc",      "xl",   bi_assoc },
+#endif // #ifndef NO_BUILTIN_ASSOC
 #ifndef NO_BUILTIN_APPEND
     { "append",     NULL,   bi_append },
 #endif

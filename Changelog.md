@@ -42,6 +42,7 @@ and this project adheres to
 
 ##### Changed
 
+- MACRO does not define functions any more.
 - EDIT-LINE, split out from the edior.
 - Queue functions are in separate file for AUTOLOAD.
 

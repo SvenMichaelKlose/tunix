@@ -21,8 +21,7 @@
   (or (member n *macros*)
       (= *macros* (cons n *macros*)))
   (print $(macro ,n ,a))(terpri)
-  ;(eval $(= ,n '(,a ,@(@ macroexpand body)))))
-  (eval (macroexpand $(fn ,n ,a ,@body))))
+  (eval $(= ,n '(,a ,@(@ macroexpand body)))))
 
 (fn macro? (x)
   (? (symbol? x)

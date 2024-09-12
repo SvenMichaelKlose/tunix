@@ -160,12 +160,12 @@ getxy (int * col, int * row)
 #endif
 
     // Request cursor position
-    if (0 > write (STDOUT_FILENO, "\033[6n", 4))
+    if (4 != write (STDOUT_FILENO, "\033[6n", 4))
         goto error_with_term_restored;
 
     // Read the response.
     char buf[16] = {0};
-    if (0 > read (STDIN_FILENO, buf, sizeof(buf) - 1))
+    if (0 >= read (STDIN_FILENO, buf, sizeof (buf) - 1))
         goto error_with_term_restored;
 
     // Scan the response.
@@ -194,7 +194,8 @@ cmd_getx (void)
 {
 #ifndef __CC65__
     int row, col;
-    getxy (&row, &col);
+    if (!getxy (&row, &col))
+        printf ("No X!");
     putbackc (row);
 #else
     putbackc (0);
@@ -210,7 +211,7 @@ cmd_gety (void)
     putbackc (col);
 #else
     putbackc (0);
-#endif // #ifndef TARGET_SIM6502
+#endif // #ifndef __CC65__
 }
 
 bool
@@ -234,7 +235,7 @@ raw_in (void)
     c = fgetc (channels[(int) fnin]);
     if (c == EOF) {
         c = 0;
-        if (errno)
+        if (errno && errno != EAGAIN)
             last_error = errno;
     }
     return c;

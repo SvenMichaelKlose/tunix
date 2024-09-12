@@ -726,8 +726,6 @@ extern bool    is_macroexpansion;
 extern lispptr macroexpand_sym;
 #endif
 
-extern lispptr va; // Temporary in 'eval.c'.
-
 extern lispptr make_cons_tmp;
 extern lispptr make_cons_car;
 extern lispptr make_cons_cdr;
@@ -766,7 +764,6 @@ extern lispptr make_cons_cdr;
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
-#pragma zpsym ("va")
 #pragma bss-name (pop)
 #endif
 

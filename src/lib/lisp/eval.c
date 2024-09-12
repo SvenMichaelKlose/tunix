@@ -51,7 +51,6 @@ char *  tagstack_start;
 char *  tagstack;
 lispptr argdefs;
 struct builtin * bfun;
-lispptr va;
 lispptr delayed_eval;
 lispptr block_sym;
 lispptr return_sym;
@@ -69,7 +68,6 @@ bool    unevaluated;
 #pragma zpsym ("msg")
 #pragma zpsym ("stack_entered")
 #pragma zpsym ("bfun")
-#pragma zpsym ("va")
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
@@ -92,7 +90,7 @@ eval_list (void)
     PUSH(x);
     HIGHLIGHT(x);
     x = CAR(x);
-    va = eval ();
+    eval ();
     POP(x);
 
     if (do_break_repl)
@@ -101,7 +99,7 @@ eval_list (void)
     // Make first element of result list and put it on
     // the object stack, so we don't have to worry about
     // garbage collection for the rest of elements.
-    list_start = list_last = make_cons (va, nil);
+    list_start = list_last = make_cons (value, nil);
     PUSH(list_start);
 
     // Evaluate rest of list.
@@ -120,12 +118,12 @@ eval_list (void)
         PUSH(list_last);
         HIGHLIGHT(x);
         x = CAR(x);
-        tmp = eval ();
+        eval ();
         POP(list_last);
 
         // Make new cons and append it to the end of the
         // result list.
-        tmp = make_cons (tmp, nil);
+        tmp = make_cons (value, nil);
         SETCDR(list_last, tmp);
         list_last = tmp;
         tmp = nil;
@@ -141,7 +139,7 @@ eval_list (void)
     }
 
     // Return memorized start of result list.
-    POP(list_start);
+    POP(value);
     return list_start;
 }
 
@@ -407,7 +405,7 @@ set_arg_values:
             PUSH(args);
             PUSH_TAG(num_args);
             x = args;
-            value = eval_list ();
+            eval_list ();
 #ifndef NAIVE
             if (error_code)
                 value = lisp_repl (REPL_DEBUGGER, 0);
@@ -544,7 +542,7 @@ do_argument:
 #endif
             // Evaluate rest of arguments.
             x = args;
-            value = eval_list ();
+            eval_list ();
 
             // Restore evaluator state.
 #ifndef NAIVE
@@ -769,7 +767,7 @@ init_eval ()
 {
     go_tag = return_name = return_value = nil;
     args = argdefs = arg1 = arg2 = arg2c = nil;
-    x = value = va = needle = nil;
+    x = value = needle = nil;
 
 #ifdef NDEBUG
     return_sym   = make_symbol (NULL, 0);

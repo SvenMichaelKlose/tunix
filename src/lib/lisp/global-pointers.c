@@ -46,7 +46,7 @@ lispptr * global_pointers[] = {
 
     &x, &args, &argdefs, &arg1, &arg2, &arg2c,
     &list_start, &list_last,
-    &value, &va,
+    &value,
     &needle,
 
     &tmp, &tmp2,

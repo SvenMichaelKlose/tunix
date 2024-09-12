@@ -16,7 +16,7 @@ test_sim6502 () {
     cd tunix/sim6502/ ; (printf "" | $SIM65 lisp) ; cd -
 }
 
-test_unix "$PARANOID -DGC_STRESS"
+test_unix "$PARANOID -DTEST -DGC_STRESS"
 
 tests () {
     $1 "$PARANOID" NDEBUG=1

@@ -1006,7 +1006,6 @@ bi_define (void)
         outs ("Defining ");
     }
     print (arg1);
-    terpri ();
 #else
     if (!member (arg1, SYMBOL_VALUE(universe)))
         expand_universe (arg1);
@@ -1076,7 +1075,6 @@ bi_stack (void)
         outn (i++);
         outs (": ");
         print (*p);
-        terpri ();
     }
     setout (old_out);
     return nil;

@@ -207,6 +207,7 @@ lispptr FASTCALL
 print (lispptr x)
 {
     print0 (x);
+    terpri ();
 #if defined(TARGET_UNIX) && !defined(NDEBUG)
     fflush (stdout);
 #endif

@@ -1,24 +1,9 @@
-(or (cons? mapcar)
-    (or (load "mapcar.lsp")
-        (error)))
-(or (cons? mapcan)
-    (or (load "mapcan.lsp")
-        (error)))
-(or (macro? 'do)
-    (or (load "do.lsp")
-        (error)))
-(or (macro? 'dolist)
-    (or (load "dolist.lsp")
-        (error)))
-(or (macro? '!?)
-    (or (load "aif.lsp")
-        (error)))
-(dolist (i '(let with with-global prog1 progn group != when))
-  (or (macro? i)
-      (or (load (symbol
-                  (nconc (symbol-name i)
-                         (symbol-name ".lsp"))))
-          (error))))
+(dolist (i '("mapcar" "mapcan" "do" "dolist" "aif"
+             "with" "with-global" "prog1" "progn"
+             "group" "!=" "when"))
+  (or (load (symbol (nconc (symbol-name i)
+                           (symbol-name ".lsp"))))
+      (error)))
 
 (var *cmacros* nil)
 

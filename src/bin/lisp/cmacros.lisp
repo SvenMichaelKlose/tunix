@@ -1,7 +1,4 @@
-(load "let.lisp")
-(load "!=.lisp")
 (load "mapcar.lisp")
-(load "with-global.lisp")
 
 (var *cmacros* nil)
 
@@ -75,7 +72,16 @@
   (with-global *macros* (list (cons 'block %block))
     (macroexpand x)))
 
+(var *cme-macros* nil)
+(var *cme-onerror* nil)
+
+(fn cme-onerror (code top x)
+  (with-global *macros* *cme-macros*
+    (*cme-onerror* code top x)))
+
 (fn cmacroexpand (x)
-  (blockexpand
-    (with-global *macros* *cmacros*
-      (macroexpand x))))
+  (with-global *cme-macros* *macros*
+    (with-global *cme-onerror* onerror
+      (blockexpand
+        (with-global *macros* *cmacros*
+          (macroexpand x))))))

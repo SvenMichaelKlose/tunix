@@ -27,6 +27,10 @@ and this project adheres to
 
 #### Environment
 
+##### Changed
+
+- File suffix for Lisp code is not ".lsp" instead of ".lisp".
+
 ##### Added
 
 - IDE: Load editor, save image, and start it.

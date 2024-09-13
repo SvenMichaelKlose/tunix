@@ -15,14 +15,14 @@ all: src/include/git-version.h
 	$(MAKE) src
 	$(MAKE) mkfs/mkfs.ultifs
 	$(MAKE) ultimem_image
-#	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
+#	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lsp
 
 src/include/git-version.h: FORCE
 	printf "$(TAG)" >git-version
-	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
-	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
-	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lisp
-	printf " on \" +target+ \")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
+	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lsp
+	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lsp
+	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lsp
+	printf " on \" +target+ \")\")(terpri)\n" >>src/bin/lisp/git-version.lsp
 	mkdir -p src/include
 	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
 	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h
@@ -57,7 +57,7 @@ ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.map $(DISTDIR)/
 	cp src/bin/lisp/lisp.dbg $(DISTDIR)/
 endif
-	cp src/bin/lisp/*.lisp $(DISTDIR)/
+	cp src/bin/lisp/*.lsp $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/
 	cp src/sbin/ultidump/ultidump $(DISTDIR)/

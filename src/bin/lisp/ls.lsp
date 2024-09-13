@@ -1,6 +1,5 @@
-(load awhen.lisp)
 (fn ls ()
   (awhen (opendir)
     (awhile (readdir !)
-      (print !)(terpri))
+      (print !))
     (closedir !)))

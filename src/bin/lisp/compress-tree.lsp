@@ -1,8 +1,3 @@
-(load "when.lisp")
-(load "unless.lisp")
-(load "dolist.lisp")
-(load "with-prof.lisp")
-
 ; Replace duplicate subtrees by original.
 (fn replace-duplicates (original x universe-list?)
   (and (cons? original)
@@ -13,7 +8,7 @@
         (?
           (equal original (car i))
           (progn
-            (out "Found CAR: ")(print original)(terpri)
+            (out "Found CAR: ")(print original)
             (setcar i original))
           (replace-duplicates original
                               (? (and universe-list?
@@ -23,7 +18,7 @@
                               nil)))
       (when (and (not (eq original (cdr i)))
                  (equal original (cdr i)))
-        (out "Found CDR: ")(print original)(terpri)
+        (out "Found CDR: ")(print original)
         (setcdr i original)))))
 
 (fn compress-tree (x . path)

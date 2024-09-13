@@ -33,61 +33,60 @@ lispptr unquote_spliced;
 
 const char * env_files[] = {
 #ifdef TEST
-    "smoke-test-read.lisp",
+    "smoke-test-read.lsp",
 #endif
-    "git-version.lisp",
-    "env-0.lisp",
+    "git-version.lsp",
+    "env-0.lsp",
 #ifdef TEST
-    "smoke-test.lisp",
+    "smoke-test.lsp",
 #endif
-    "equality.lisp",
-    "list.lisp",
+    "equality.lsp",
+    "list.lsp",
 
     // Target-specific
 #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
-    "cbm-common.lisp",
+    "cbm-common.lsp",
 #endif
 #ifdef TARGET_UNIX
-    "unix.lisp",
+    "unix.lsp",
 #endif
 
 #ifdef TEST
-    "append.lisp",
-    "test.lisp",
+    "test.lsp",
 #endif
 #ifndef NO_QUASIQUOTE
-    "quasiquote.lisp",
+    "quasiquote.lsp",
     #ifdef TEST
-        "test-qq.lisp",
+        "test-qq.lsp",
     #endif
 #endif
 #ifndef NO_MACROEXPAND
-    "macroexpand.lisp",
+    "macroexpand.lsp",
     #ifdef TEST
-        "test-macros.lisp",
+        "test-macros.lsp",
     #endif
 #endif
 #ifndef NO_ONERROR
 #ifdef TEST
-    "test-error.lisp",
+    "test-error.lsp",
 #endif
 #endif
 
     // Early end for small machines.
     // TODO: More generic name than TARGET_C16.
 #ifdef TARGET_C16
-    "welcome.lisp",
+    "welcome.lsp",
 #endif
 
 #ifndef TARGET_C16
-    "autoload.lisp",
+    "autoload.lsp",
 #ifdef TEST
-    "test-file.lisp",
+    "test-file.lsp",
 #endif
 #ifdef TEST
-    "test-all.lisp",
+    "test-all.lsp",
 #endif
-    "welcome.lisp",
+    "welcome.lsp",
 #endif // #ifndef TARGET_C16
     NULL
 };

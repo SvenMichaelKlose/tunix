@@ -1,6 +1,6 @@
 (fn ~alm (~e)
   ; Turn function name into filename
-  ; by appending ".lisp" suffix.
+  ; by appending ".lsp" suffix.
   (((~f)
     ; Check if file exists by opening it.
     (((~!)
@@ -12,7 +12,7 @@
             (load ~f))))
      (open ~f 'r)))
    (symbol (nconc (symbol-name ~e)
-                  (symbol-name ".lisp")))))
+                  (symbol-name ".lsp")))))
 
 (fn ~almr (~x)
   (? (cons? ~x)

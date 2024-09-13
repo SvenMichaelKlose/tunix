@@ -1,6 +1,5 @@
-(load "aif.lisp")
-(load "progn.lisp")
-(load "mapcar.lisp")
+(load "aif.lsp")
+(load "mapcar.lsp")
 
 (message "Testing ADJOIN...")
 (or (equal (adjoin 'l '(i s p))
@@ -332,7 +331,7 @@
            '(5))
     (error))
 
-(load cmacros.lisp)
+(load cmacros.lsp)
 (print (cmacroexpand '(and a b c)))
 (print (cmacroexpand '(or a b c)))
 (print (cmacroexpand '(? a b c)))

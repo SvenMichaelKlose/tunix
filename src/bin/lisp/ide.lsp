@@ -1,6 +1,6 @@
 (iload "ide.img")
-(load "edit-line.lisp")
-(load "edit.lisp")
+(load "edit-line.lsp")
+(load "edit.lsp")
 (fn istart ()
   (edit))
 (message "Cleaning up, please wait...")

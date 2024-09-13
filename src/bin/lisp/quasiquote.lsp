@@ -1,5 +1,5 @@
-(or (builtin? append)
-    (load "append.lisp"))
+(or (builtin? 'append)
+    (load "append.lsp"))
 
 ; Wrap expander in special form as it is recursive and needs
 ; to call itself with arguments evaluated.

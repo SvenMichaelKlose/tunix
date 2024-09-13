@@ -1,9 +1,9 @@
 ; Function called automatically after image load.
 (fn istart ()
-  (load "user-post-image.lisp")
+  (load "post-image.lsp")
   (message "Ready."))
 
-(load "user-pre-image.lisp")
+(load "pre-image.lsp")
 
 (and (builtin? gc)
   (block t
@@ -28,6 +28,6 @@
          (message "Saving 'image'...")
          (isave "image"))))
 
-(load "user-post-image.lisp")
+(load "post-image.lsp")
 
 (message "Ready.")

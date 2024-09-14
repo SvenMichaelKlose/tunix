@@ -7,7 +7,7 @@ endif
 
 PROGRAM 	= lisp
 SOURCES 	= builtins.c main.c test.c
-CLEANFILES 	= image test.out doc/manual.pdf git-version.lisp
+CLEANFILES 	= image test.out doc/manual.pdf git-version.lsp
 LIBRARIES 	= $(TUNIX_LIB)/lisp/liblisp.a
 ifneq (,$(filter $(TARGET), $(COMMODORE_TARGETS)))
 LIBRARIES  += $(TUNIX_LIB)/simpleio-cbm/libsimpleio-cbm.a

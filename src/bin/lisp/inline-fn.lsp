@@ -8,16 +8,9 @@
              ,@(!? argsyms
                    $((%push ,@!)))
              ,@(@ '((x) $(= ,@x)) !)
-             ,@(inline-fns (cdar x))
+             ,@(@ inline-fn (cdar x))
              ,@(!? argsyms
                    $((%pop ,@!))))))
     (cons? x)
-      (inline-fns x)
+      (@ inline-fn x)
     x))
-
-(fn inline-fns (x)
-  (@ inline-fn x))
-
-(print (inline-fn '((nil (print "6502 inside")))))
-(print (inline-fn '((x (print "6502 inside")) 1 2)))
-(print (inline-fn '(((a b) (print "6502 inside")) 1 2)))

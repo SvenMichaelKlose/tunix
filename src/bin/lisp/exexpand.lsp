@@ -6,12 +6,9 @@
        (cons ! $((= ,! ,x))))
      (cons x nil)))
 
-(fn exexpand0 (x)
+(fn exexpand (x)
   (? (atom x)
      (list x)
      (!= (@ expex-moved-arg (cdr x))
        (append (mapcan cdr !)
                (list (cons (car x) (carlist !)))))))
-
-(fn exexpand (x)
-  (mapcan exexpand0 x))

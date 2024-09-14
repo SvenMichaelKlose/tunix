@@ -6,9 +6,6 @@
   (? (%block? x)
      (!= (cdr x)
        (? (cons? !)
-          (fold-blocks !)
+          (mapcan fold-block !)
           (list !)))
      (list x)))
-
-(fn fold-blocks (x)
-  (mapcan fold-block x))

@@ -1,7 +1,7 @@
-(load "aif.l")
-(load "cbm-keycode.l")
-(load "con-cbm.l")
-(load "con.l")
+(load "aif.lsp")
+(load "cbm-keycode.lsp")
+(load "con-cbm.lsp")
+(load "con.lsp")
 
 ;;; State
 

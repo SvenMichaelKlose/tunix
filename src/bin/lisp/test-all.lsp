@@ -331,7 +331,4 @@
            '(5))
     (error))
 
-(load cmacros.lsp)
-(print (cmacroexpand '(and a b c)))
-(print (cmacroexpand '(or a b c)))
-(print (cmacroexpand '(? a b c)))
+(load "test-compiler.lsp")

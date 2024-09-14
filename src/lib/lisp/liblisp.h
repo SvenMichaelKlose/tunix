@@ -98,7 +98,7 @@
 //#define NO_QUASIQUOTE
 
 // Disable built-ins.
-#define NO_BUILTIN_APPEND // Native is smaller.
+//#define NO_BUILTIN_APPEND // Native is smaller.
 //#define NO_BUILTIN_ASSOC
 //#define NO_BUILTIN_CHAR_AT
 //#define NO_BUILTIN_GC
@@ -395,7 +395,7 @@
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #define STACK_SIZE          2048
-#define TAGSTACK_SIZE       512
+#define TAGSTACK_SIZE       768
 #define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -774,7 +774,7 @@ extern lispptr make_cons_cdr;
 // NOT_NIL() doesn't work.  Either the onset of dementia
 // or terrible bugs hiding.
 #define nil     ((lispptr) 0)
-#ifdef __CC65__
+#ifdef __TODO_CC65__
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else

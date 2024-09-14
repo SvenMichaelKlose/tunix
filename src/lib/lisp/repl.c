@@ -168,13 +168,13 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #ifndef NO_ONERROR
         // Call user-defined ONERROR handler.
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
-            // Save state for debugger to restore
-            // when ONERROR handler failed.
+            // Save error state for the debugger
+            // if ONERROR handler fails.
             PUSH(error_info);
             PUSH_TAG(error_code);
             PUSH_TAG(unevaluated);
 
-            // Make argument list.
+            // Make argument list for call of ONERROR.
             x = make_cons (current_expr, nil);
             tmp2 = make_cons (current_toplevel, x);
             PUSH(tmp2);
@@ -183,14 +183,20 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             x = make_cons (x, tmp2);
             x = make_cons (onerror_sym, x);
 
-            // Call ONERROR.
+            // Clear error status.
             error_info  = nil;
             error_code  = 0;
             unevaluated = true;
-            PUSH_TAG(TAG_DONE);
+
+            // Switch to program channels.
             setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
+
+            // Call ONERROR.
+            PUSH_TAG(TAG_DONE);
             x = eval0 ();
+
+            // Back to standard I/O channels.
             setin (STDIN);
             setout (STDOUT);
 
@@ -237,7 +243,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
     // READ/EVAL/PRINT-Loop.
     while (1) {
-        setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+        setin (load_fn ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
         if (eof ())
             break;
         setin (STDIN);
@@ -398,21 +404,29 @@ terpri_next:
             PUSH(debug_step);
             debug_step = nil;
 #endif
-            // Call MACROEXPAND.
+            // Make arguments list for MACROEXPAND.
             x = make_cons (x, nil);
             x = make_cons (macroexpand_sym, x);
-            unevaluated = true;
-            PUSH_TAG(TAG_DONE);
+
+            // Switch to program's U/O c
             setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
+
+            // Call MACROEXPAND.
+            unevaluated = true;
+            PUSH_TAG(TAG_DONE);
             x = eval0 ();
+
+            // Switch back to standard I/O.
             setin (STDIN);
             setout (STDOUT);
+
 #ifndef NO_DEBUGGER
             POP(debug_step);
 #endif
         }
 #endif // #ifndef NO_MACROEXPAND
+
 #ifndef NAIVE
         // Set as new top-level expression for REPL_DEBUGGER.
         PUSH(current_toplevel);
@@ -506,10 +520,8 @@ terpri_next:
             fresh_line ();
         }
     }
-#ifndef NO_ONERROR
-#ifdef NO_DEBUGGER
+#if !defined(NO_ONERROR) && defined (NO_DEBUGGER)
 do_return:
-#endif
 #endif
 #ifndef NO_DEBUGGER
     // Track unnesting of this REPL.
@@ -567,7 +579,6 @@ load (char * pathname)
 #ifndef NAIVE
 err_open:
 #endif
-
     return status;
 }
 

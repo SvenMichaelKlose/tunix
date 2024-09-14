@@ -9,11 +9,16 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.18]
 
 ### Lisp
 
 #### Interpreter
+
+##### Fixed
+
+- End-of-file check in REPL ignored LOAD channel, leading to
+  heisenbugs.
 
 ##### Added
 

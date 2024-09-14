@@ -13,33 +13,50 @@ book: true
 
 # Overview
 
-TUNIX Lisp is slow, especially on 6502-based systems as it
-is interpreted.  Arguments need to be expanded and all kinds
-of checks have to pass.  With compiled code that overhead
-is gone, and the resulting code should also be smaller than
-the original.
+Interpreting Lisp is particularly slow on 8-bit CPUs like
+the 6502-CPU.  A 16-bit pointer manipulation takes two
+operations on these.  On CPUs that support 16-bit, at least
+internally, like the Z80, performance doubles and code size
+halves.
+
+Interpretation also comes with a lot of overhead as the
+course of a running program is not known in advance.
+Arguments have to be expanded, including saving and
+restoring symbol values, and lots of other checks that have
+to be performed for the interpreter to function and allow
+the programmer to get information about errors.
+
+Most of that overhead goes away if the code has been
+compiled.  Arguments can be expanded at compile-time and the
+object stack can be used instead of symbols.  But for our
+compiler we care about control flow only and evaluate
+expressions without jumps the regular way.
+
+Finally, we'll check how much has been achieved, to decide
+on improvements worth their effort.  For now, we expect to
+bring on enough oomfh to allow for a usable text editor.
 
 ## The simplest compiler possible
 
-For the first version of the compiler we don't even care
-about argument expansion.  We want at least the control
-flow instructions to be compiled, so expressions, jumps
-and their labels, can be put into an array where jumps
-can be performed at an instant.
+For the first version of the compiler we want at least the
+control flow instructions to be compiled, so all other
+expressions are on a list that isn't nested, so jumps can
+specify their destinations by list offset.
+Jumps and expressions are all on one level.
 
-| Bytecode         | Description                      |
-|------------------|----------------------------------|
-| BC\_END          | End of bytecode function.        |
-| BC\_LIST, n, ... | List of expressions to evaluate. |
-| BC\_GO, n        | Unconditional jump.              |
-| BC\_GO\_NIL, n   | Jump if last result is NIL.      |
-| BC\_GO\_NNIL, n  | Jump if last result is not NIL.  |
+Five byte-sized codes tell what kind of information follows
+them; Bytecode BC\_LIST for example introduces a set of expressions.
+The other codes are jumps or mark the end of a function.
 
-- Inline direct calls of anonymous functions.
-- Expand AND, OR, ?.
-- Expand BLOCK.
-- Fold %BLOCKs.
-- Bytecode assembler.
+| Bytecode         | Description                        |
+|------------------|------------------------------------|
+| BC\_END          | End of bytecode function.          |
+| BC\_LIST, n, ... | List of N expressions to evaluate. |
+| BC\_GO, n        | Unconditional jump.                |
+| BC\_GO\_NIL, n   | Jump if last result is NIL.        |
+| BC\_GO\_NNIL, n  | Jump if last result is not NIL.    |
+
+Here's what's wanted before it's assembled to bytecode:
 
 ### Compiler macro expansion
 
@@ -160,12 +177,12 @@ this pittoresque, little thing as we'll see later.
 ### Argument renaming pass
 
 The following lambda-expansion might need to inline
-functions with argument names that are already in use.
-This pass solves that issue by renaming all arguments.
+functions with argument names that are already in use.  This
+pass solves that issue by renaming all arguments.
 [^bcdbgarg]
 
 [^bcdbgarg]: A map of the original names must be created if
-  debugging must be supported.
+    debugging must be supported.
 
 ~~~lisp
 ; TODO example of shadowed arguments that would clash on

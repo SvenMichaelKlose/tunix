@@ -3,6 +3,25 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-15
+
+I wasn't in the mood to code over the weekend.  Turned to
+entertaining books instead, met complete foureigners and
+wrote some TUNIX Lisp compiler documentation to clear the
+path.  For the sake of educational purpose (including my
+own) I'm trying to boot and explain the compiler in small,
+and partially unusual, steps, like compiling the control
+flow and still interpreting function calls.  I have a
+warm fuzzy feeling about this version of the compiler,
+although I have no idea what purspose other than putting
+more contrast to separation of concerns to benefit learners
+it might serve.  A warm fuzzy feeling is just enough for
+me to get on.  It indicates spot-on intuition that might
+inspire others - big league compiler design is creeping
+in in an appetizing and digestible fasion if I'm lucky.
+For now I'll save up the energy to explain this more in
+detail in the docs.
+
 # 2024-09-12
 
 Even a most-simple compiler will work wonders on 6502-based

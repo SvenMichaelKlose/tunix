@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- APPEND: Show failing expression when skipping NILs.
+
+
 ## [v0.0.18] - 2024-09-14
 
 ### Lisp

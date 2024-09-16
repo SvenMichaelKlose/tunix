@@ -295,7 +295,7 @@ bi_append ()
         while (CONSP(x) && !CONSP(CAR(x))) {
 #ifndef NAIVE
             if (NOT_NIL(CAR(x)))
-                return error_cons_expected (tmp);
+                return error_cons_expected (x);
 #endif
             x = CDR(x);
         }

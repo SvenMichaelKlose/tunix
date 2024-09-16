@@ -41,6 +41,9 @@
 
 (message "Testing EXEXPAND...")
 (load "exexpand.lsp")
+(print (exexpand (print '(a b c d))))
+(print (exexpand (print '(a (b c d)))))
+(print (exexpand (print '(a (b (c d))))))
 
 (message "Testing COMPILE...")
 (load "dotimes.lsp")

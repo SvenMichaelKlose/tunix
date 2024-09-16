@@ -1,14 +1,31 @@
-; TODO: Having this in a QUOTE to MAPCAN is messing up the X
-; in $.
-(fn expex-moved-arg (x)
+(fn expex-move-arg (x)
   (? (cons? x)
      (!= (symbol)
-       (cons ! $((= ,! ,x))))
+       (cons ! (list (list '= ! x))))
      (cons x nil)))
 
+; Move function calls out of argument list and
+; replace them by anonymous symbols.
 (fn exexpand (x)
-  (? (atom x)
-     (list x)
-     (!= (@ expex-moved-arg (cdr x))
-       (append (mapcan cdr !)
-               (list (cons (car x) (carlist !)))))))
+  (?
+    (atom x)
+      (list x)
+    ; Handle assignments differently.
+    (eq '= (car x))
+      (? (atom (caddr x))
+         ; Ignore atomic value.
+         (list x)
+         ; Do the real work.
+         ; Split arguments into off-loaded assignments (cdrlist),
+         ; and replacement or original symbols (carlist).
+         (!= (@ expex-move-arg (cdr (caddr x)))
+           ; Concatenate moved arguments...
+           (append (mapcan exexpand (mapcan cdr !))
+                   ; ...and re-assemble orgiginal assignment with new argument list.
+                   (list (list '= (cadr x) (cons (car (caddr x)) (carlist !)))))))
+    ; Do the real work.
+    (!= (@ expex-move-arg (cdr x))
+      ; Concatenate moved arguments...
+      (append (mapcan exexpand (mapcan cdr !))
+              ; ...and re-assemble orgiginal expression with new argument list.
+              (list (cons (car x) (carlist !)))))))

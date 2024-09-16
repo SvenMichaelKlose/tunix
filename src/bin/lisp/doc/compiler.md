@@ -184,48 +184,11 @@ out the local stack frame in the process.
 ; TODO example of anonymous function first in expression.
 ~~~
 
-### Expression expansion
-
-Breaks up nested function calls into a list of single
-statement assignments.  After this the return value of
-any expression is in variable %0.
-
-This expression
-
-~~~
-(fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
-~~~
-
-becomes:
-
-~~~
-(%= %1 fun3)
-(%= %2 fun4)
-(%= %3 fun2 %1 %2)
-(%= %4 fun5)
-(%= %0 fun1 %0 %3 %4)
-~~~
-
-### Argument expansion
-
-Checks arguments and turns rest arguments into consing
-expressions.
-
 ### Optimization
 
 Basic compression of what the macro expansions messed up
 at least,  like remove assignments with no effect or chained
 jumps.
-
-### Place expansion
-
-| Expression  | Description                    |
-|-------------|--------------------------------|
-| (%S offset) | Offset into local stack frame. |
-| (%D offset) | Offset into function data.     |
-
-Here the arguments are replaced by %S or %O expressions to
-denote places on the stack or on the function's object list.
 
 ### Generating code
 
@@ -246,6 +209,43 @@ These are actually two passes:
 
 * Collecting objects.
 * Calculating jump destinations.
+
+# Compiling function calls
+
+* Passing arguments on the stack.
+* Calling unknown functions.
+
+## Expression expansion
+
+Breaks up nested function calls into a list of single
+statement assignments.  After this the return value of
+any expression is in variable %0.
+
+~~~
+(fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
+
+(= 2 (fun3))
+(= 3 (fun4))
+(= 1 (fun2 2 3)
+(= 4 (fun5))
+(fun1 arg1 1 4)
+~~~
+
+### Argument expansion
+
+Checks arguments and turns rest arguments into consing
+expressions.
+
+### Place expansion
+
+| Expression  | Description                    |
+|-------------|--------------------------------|
+| (%S offset) | Offset into local stack frame. |
+| (%D offset) | Offset into function data.     |
+
+Here the arguments are replaced by %S or %O expressions to
+denote places on the stack or on the function's object list.
+
 
 # Adding lexical scope
 

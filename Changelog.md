@@ -19,6 +19,10 @@ and this project adheres to
 
 - APPEND: Show failing expression when skipping NILs.
 
+##### Added
+
+- Compile-time option HOST\_DEBUGGER\_ON\_ERROR.
+
 
 ## [v0.0.18] - 2024-09-14
 

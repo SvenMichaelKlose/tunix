@@ -52,6 +52,9 @@
 // Implies CHECK_OBJ_POINTERS
 //#define GC_STRESS
 
+// Call HOST_DEBUGGER() in error().
+//#define HOST_DEBUGGER_ON_ERROR
+
 // Aoid inlining of functions.
 // * Allows setting breakpoints.
 // * Reduces code size for releases on small machines.

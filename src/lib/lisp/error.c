@@ -31,6 +31,9 @@ error (char code, char * msg)
 {
     last_errstr = msg;
     error_code = code;
+#ifdef HOST_DEBUGGER_ON_ERROR
+    HOST_DEBUGGER();
+#endif
 }
 
 void FASTCALL

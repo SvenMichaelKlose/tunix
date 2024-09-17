@@ -22,6 +22,8 @@ and this project adheres to
 ##### Added
 
 - Compile-time option HOST\_DEBUGGER\_ON\_ERROR.
+- SET-CHAR-AT to manipulate symbol names (to make bytecode
+  functions).
 
 
 ## [v0.0.18] - 2024-09-14

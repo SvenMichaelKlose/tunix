@@ -160,6 +160,20 @@ bi_char_at ()
     return make_number (SYMBOL_NAME(arg1)[n]);
 }
 
+lispptr
+bi_set_char_at ()
+{
+    lispptr   s = LIST_CAR(arg1);
+    lispptr   n = LIST_CAR(LIST_CDR(arg1));
+    lispptr   v = LIST_CAR(LIST_CDR(CDR(arg1)));
+    lispnum_t i = NUMBER_VALUE(n);
+    lisp_len = SYMBOL_LENGTH(s);
+    if (i < 0 || i >= lisp_len)
+        return nil;
+    SYMBOL_NAME(s)[i] = NUMBER_VALUE(v);
+    return arg1;
+}
+
 #endif // #ifndef NO_BUILTIN_CHAR_AT
 
 #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
@@ -1300,7 +1314,8 @@ const struct builtin builtins[] = {
     { "slength",      "s",    bi_slength },
 #endif
 #ifndef NO_BUILTIN_CHAR_AT
-    { "char-at",      "sn",   bi_char_at },
+    { "char-at",     "sn",  bi_char_at },
+    { "set-char-at", "+x",  bi_set_char_at },
 #endif
 
     { "cons",       "xx",   bi_cons },

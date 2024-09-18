@@ -22,14 +22,6 @@
          (builtin? x))
      (assoc x *macros*)))
 
-(special macro (n a . body)
-  (? (macro? n)
-     (setcdr (macro? n) (cons a body))
-     (= *macros* (cons (cons n (cons a body))
-                       *macros*)))
-  (print $(macro ,n ,a))
-  (eval $(= ,n '(,a ,@(@ macroexpand body)))))
-
 (fn macroexpand (x)
   (?
     (or (atom x)
@@ -40,3 +32,12 @@
     (macro? (car x))
       (macroexpand (apply (cdr (macro? (car x))) (cdr x)))
     (@ macroexpand x)))
+
+(special macro (n a . body)
+  (print $(macro ,n ,a))
+  (((!)
+     (? (macro? n)
+        (setcdr (macro? n) (cons a !))
+        (= *macros* (cons (cons n (cons a !))
+                          *macros*))))
+    (@ macroexpand body)))

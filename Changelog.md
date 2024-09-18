@@ -25,6 +25,13 @@ and this project adheres to
 - SET-CHAR-AT to manipulate symbol names (to make bytecode
   functions).
 
+#### Environment
+
+##### Fixed
+
+- MACRO: Doesn't assign the function expression to the
+  macro name any more.
+
 
 ## [v0.0.18] - 2024-09-14
 

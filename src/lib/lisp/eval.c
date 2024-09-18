@@ -198,6 +198,9 @@ do_eval:
     }
 #endif
 
+    // Detach last result.  It may be huge.
+    value = nil;
+
     // Evaluate atom.
     if (ATOM(x)) {
         if (x) // NOT_NIL(x))

@@ -328,5 +328,3 @@
              (enqueue q 5))
            '(5))
     (error))
-
-(load "test-compiler.lsp")

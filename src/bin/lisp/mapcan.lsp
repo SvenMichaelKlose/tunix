@@ -1,2 +1,2 @@
 (fn mapcan (f . l)
-  (apply append (apply mapcar f l)))
+  (apply nconc (apply mapcar f l)))

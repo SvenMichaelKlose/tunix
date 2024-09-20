@@ -12,6 +12,12 @@
     ; compressed better.
     (print (gc))(out " bytes free.")(terpri)))
 
+(or (eq +target* 'unix)
+    (? (builtin? isave)
+       (block t
+         (message "Saving 'image'...")
+         (isave "image"))))
+
 ; Tell time it took to get here.
 (and (builtin? 'time)
      (number? +bps+)
@@ -21,12 +27,6 @@
     (out 's)
     (terpri)
     (= *universe* (remove '*start-time* *universe*))))
-
-(or (eq +target* 'unix)
-    (? (builtin? isave)
-       (block t
-         (message "Saving 'image'...")
-         (isave "image"))))
 
 (load "post-image.lsp")
 

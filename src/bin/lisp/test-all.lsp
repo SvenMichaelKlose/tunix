@@ -272,8 +272,6 @@
 
 (message "TODO: Testing SET-EXCLUSIVE-OR...")
 
-(message "TODO: Testing SOME...")
-
 (message "TODO: Testing SOURCE...")
 
 (message "Testing SPLIT...")

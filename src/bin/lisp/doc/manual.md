@@ -1904,7 +1904,6 @@ anonymous symbol):
 | (cut-at n l)      | Destructively split list.           |
 | (ensure-list x)   | Turn atom into list.                |
 | (every f x)       | Test if F is T for all X.           |
-| (some f x)        | Test if F is T for some X.          |
 | (find x l)        | Find element X in list.             |
 | (find-if f l)     | Find element X in list by F.        |
 | (group l n)       | Split L in lists of length N.       |

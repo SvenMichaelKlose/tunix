@@ -1,11 +1,6 @@
 (or (builtin? 'append)
     (load "append.lsp"))
 
-; Wrap expander in special form as it is recursive and needs
-; to call itself with arguments evaluated.
-(special quasiquote (qqx)
-  (%qq qqx))
-
 (fn %qeval (qqx)
   (eval qqx))
 
@@ -30,3 +25,8 @@
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))
+
+; Wrap expander in special form as it is recursive and needs
+; to call itself with arguments evaluated.
+(special quasiquote (qqx)
+  (%qq qqx))

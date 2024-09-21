@@ -1,4 +1,10 @@
-(load "aif.lsp")
+(or (macro? '!?)
+    (load "aif.lsp"))
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+
+(app 'app-edit-line)
+
 (load "cbm-keycode.lsp")
 (load "con-cbm.lsp")
 (load "con.lsp")
@@ -109,3 +115,5 @@
                             (<= c +arr-left+)))
                (putback)
                (return (? *mod?* (symbol *line*) *oline*)))))))))
+
+(app 'app-edit-line)

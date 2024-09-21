@@ -1,5 +1,16 @@
-(load "aif.lsp")
-(load "mapcar.lsp")
+(app 'app-test-all)
+
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+
+(message "Testing LET...")
+(load "let.lsp")
+(or (equal (macroexpand '(let a 1
+                           (+ 2 a)))
+           '(((a)
+               (+ 2 a))
+             1))
+    (error))
 
 (message "Testing ADJOIN...")
 (or (equal (adjoin 'l '(i s p))
@@ -7,6 +18,7 @@
     (error))
 
 (message "Testing !?...")
+(load "aif.lsp")
 (!? 49
     (or (eql ! 49)
         (error)))
@@ -137,18 +149,6 @@
       (error "X didn't decrement to 0.")))
 
 (message "TODO: Testing INTERSECT...")
-
-(message "Testing MACRO? on LET...")
-(or (macro? 'let)
-    (error))
-
-(message "Testing LET...")
-(or (equal (macroexpand '(let a 1
-                           (+ 2 a)))
-           '(((a)
-               (+ 2 a))
-             1))
-    (error))
 
 (message "Testing MAPCAN...")
 (and (mapcan '((x)))
@@ -328,3 +328,6 @@
              (enqueue q 5))
            '(5))
     (error))
+
+(app 'app-test-all)
+(rm-app 'app-test-all)

@@ -1,3 +1,5 @@
+(app 'app-edit)
+
 ;;; State
 
 (var *filename* "edit-help.md")
@@ -308,3 +310,5 @@
   (clrscr)
   (con-direct nil)
   *filename*)
+
+(app 'app-edit)

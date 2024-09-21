@@ -1,9 +1,13 @@
-(dolist (i '("mapcar" "mapcan" "do" "dolist" "aif"
-             "with" "with-global" "prog1" "progn"
-             "group" "!=" "when"))
-  (or (load (symbol (nconc (symbol-name i)
-                           (symbol-name ".lsp"))))
-      (error)))
+(or (macro? let)
+    (load "let.lsp"))
+(or (macro? '!?)
+    (load "aif.lsp"))
+(or (macro? 'with-global)
+    (load "with-global.lsp"))
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+(or (cons? group)
+    (load "group.lsp"))
 
 (var *cmacros* nil)
 
@@ -13,15 +17,11 @@
         *cmacros*)
   nil)
 
-(fn mkgo (which end)
-  $((x)
-     (list x
-           '(,which ,end))))
-
 (fn mklogical (which)
   (let end ""
     $(%block
-       ,@(mapcan (mkgo which end)
+       ,@(mapcan $((x)
+                    (list x '(,which ,end)))
                  (butlast x))
        ,@(last x)
        (%tag ,end))))
@@ -50,43 +50,30 @@
                  (group x 2))
        (%tag ,end))))
 
-(var *current-return* nil)
-(var *return-tag* nil)
+(var *blocks* nil)
 
 (fn %return (v . n)
-  (? (eq *current-return* (car n))
-     $(%block
-        ,v
-        (%go ,*return-tag*))
-     $(return ,v ,@n)))
+  (!? (cdr (assoc n *blocks*))
+      $(%block
+         ,v
+         (%go ,!))
+      (error "Unknown BLOCK " n)))
 
-(fn returnexpand (x)
-  (with-global *macros* (list (cons 'return %return))
-    (macroexpand x)))
-
+; TODO: Collect potential tags.
 (fn %block (n . body)
   (let end ""
+    (push (cons n end) *blocks*)
     (!= (@ macroexpand body)
-      (= *current-return* n)
-      (= *return-tag* end)
+      (pop *blocks*)
       $(%block
-         ,@(@ returnexpand !)
+         ,@!
          (%tag ,end)))))
 
-(fn blockexpand (x)
-  (with-global *macros* (list (cons 'block %block))
-    (macroexpand x)))
-
-(var *cme-macros* nil)
-(var *cme-onerror* nil)
-
-(fn cme-onerror (code top x)
-  (with-global *macros* *cme-macros*
-    (*cme-onerror* code top x)))
+(defcm block (n . body)
+  (with-global *macros* (list (cons 'block %block)
+                              (cons 'return %return))
+    (apply %block n body)))
 
 (fn cmacroexpand (x)
-  (with-global *cme-macros* *macros*
-    (with-global *cme-onerror* onerror
-      (blockexpand
-        (with-global *macros* *cmacros*
-          (macroexpand x))))))
+  (with-global *macros* *cmacros*
+    (macroexpand x)))

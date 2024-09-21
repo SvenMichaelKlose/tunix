@@ -1,10 +1,11 @@
-(dolist (i '("let" "mapcar" "mapcan" "do" "dolist" "aif"
-             "with" "with-global" "prog1" "progn" "push"
-             "group" "!=" "when" "make-queue" "with-queue"
-             "queue-list" "enqueue" "app"))
-  (or (load (symbol (nconc (symbol-name i)
-                           (symbol-name ".lsp"))))
-      (error i)))
+(or (macro? '!?=)
+    (load "aif.lsp"))
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+(or (cons? app)
+    (load "app.lsp"))
+
+(app 'app-test-compiler)
 
 (message "Testing CMACROEXPAND...")
 (load "cmacros.lsp")
@@ -26,15 +27,40 @@
            '((a 1) (b 2) (c (3 4))))
     (error))
 
-(message "Testing FOLD-BLOCKS...")
+(message "Testing FOLD-BLOCK...")
 (load "fold-block.lsp")
-(@ fold-block (cmacroexpand (cdr macroexpand)))
+(or (cequal (fold-block nil)
+            '(nil))
+    (error))
+(or (cequal (fold-block '(%block a b))
+            '(a b))
+    (error))
+(or (cequal (fold-block '(%block a (%block b c)))
+            '(a b c))
+    (error))
 
-(message "Testing INLINE-FNS...")
+(message "Testing INLINE-FN...")
 (load "inline-fn.lsp")
-(print (inline-fn '((nil (print "6502 inside")))))
-(print (inline-fn '((x (print "6502 inside")) 1 2)))
-(print (inline-fn '(((a b) (print "6502 inside")) 1 2)))
+(or (cequal (inline-fn '((())))
+            '(%block))
+    (error))
+(or (cequal (inline-fn '((() a b)))
+            '(%block a b))
+    (error))
+(or (cequal (inline-fn '((()
+                           a b
+                           (((c d)
+                              e f)
+                            1 2))))
+            '(%block
+               a b
+               (%block
+                 (%push c d)
+                 (= c 1)
+                 (= d 2)
+                 e f
+                 (%pop d c))))
+    (error))
 
 ;(message "Testing EXEXPAND...")
 ;(load "exexpand.lsp")
@@ -47,18 +73,18 @@
 (message "Testing COMPILE...")
 (load "dotimes.lsp")
 (fn compile (x)
-  (print 'input)
+  (message "In:")
   (print x)
-  (print 'macroexpand)
+  (message "MACROEXPAND:")
   (= x (macroexpand x))
   (print x)
-  (print 'cmacroexpand)
+  (message "CMACROEXPAND:")
   (= x (cmacroexpand x))
   (print x)
-  (print 'inline-fn)
+  (message "INLINE-FN:")
   (= x (@ inline-fn x))
   (print x)
-  (print 'fold-block)
+  (message "FOLD-BLOCK:")
   (= x (mapcan fold-block x))
   (print x)
   )
@@ -67,3 +93,5 @@
   ;(print x))
 
 (print (length (compile (cdr fold-block))))
+
+(app 'app-test-compiler)

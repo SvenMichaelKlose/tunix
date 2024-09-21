@@ -1,83 +1,32 @@
----
-title: "((())) TUNIX Lisp"
-subtitle: "Bytecode Compiler Roadmap"
-author: "Sven Michael Klose"
-lang: "en"
-titlepage: true
-titlepage-color: "389fff"
-titlepage-text-color: "ffffff"
-toc: true
-footnodes-pretty: true
-book: true
-...
+TUNIX Lisp compiler
+===================
 
 # Overview
 
-Interpreted languages have become the most popular and come
-with several advantages compilers cannot provide, like
-changing code at run time.  They are machine-independent
-most of the time and most imporantly: they make developing
-programs easier.  This is brought to the extreme with
-Lisp.[^picolisp]  Unfortunately, interpreted Lisp is
-particularly slow on machines that don't support the pointer
-manipulations that take place most of the time, and the
-overhead of interpretation is weighing in heavily on
-machines that tick in the one-digit MHz area or less.
+The compiler translates function expressions into
+faster and smaller bytecode functions.
 
-[^picolisp]:
-  On machines that do, PicoLisp shows that an interpreter is
-  sufficient in most cases and that it comes with an overwhelming set of
-  advantages. https://picolisp.com/
+In the first version only the control flow is compiled
+and function calls are interpreted as usual.
 
-A compiler takes away the overhead required by interpreters
-to handle any kind of code that comes in as it regards the code that will
-be executed in advance.  In a completed program for example,
-arguments passed to functions usually match the argument
-definitions of those functions.  Still, an interpreter
-always checks if the arguments match their definition to
-stop the program (to avoid hazards) and issue the error.
+In the second version compiled functions call other
+functions by passing arguments via the object stack.
 
-Compile-time option NAIVE takes those checks out of TUNIX
-Lisp entirely, but that is highly impractical in a
-development environment: Although the integrated editor
-becomes appropriately responsive, not being able to detect
-mistakes on the spot is rendering the whole system useless.
-Making those checks optional at run-time would only add even
-more overhead, adding checks if checks have to be performed,
-and not all checks can be ommitted as rest arguments can
-only be handled using argument definitions when interpreted.
+## Passes
 
-A compiler checks the validiy of argument lists before the
-program is running and generates correct code to set them
-up.  When giving up on symbols and using the stack instead
-to carry arguments, simpler machine-level instructions can
-be used, leading to massive performance improvement.
+* Standard macro expansion
+* Compiler macro expansion
+  * AND, OR, ?
+  * BLOCK, RETURN, GO
+  * QUOTE, QUASIQUOTE
+* Inlining anonymous functions
+* Folding %BLOCKs
+* Expanding expressions
+* (Argument expansion)
+* Removing jumps
+* Code generation
 
-We'll use bytecode as machine-level code because it is
-portable, much more compact than native code (which is the
-alternative) and way easier to debug when writing a
-compiler.  Once the bytecode target is running, generating
-native code is less likely to cause trouble.  We'll refer
-to bytecode and machine language as "machine-level code"
-accordingly.
-
-Machine-level code is an array of bytes, containing a sequence
-of instructions that assemble function calls and jumps that
-may be conditional.  We need to convert nested Lisp code to
-a list of instructions, using jumps instead of the special
-forms AND, OR, ?, BLOCK/RETURN/GO, and inlined functions
-that introduce local variables.  Initially, function calls
-won't be compiled.  We'll have the expressions interpreted,
-so we can check how much was gained already.  It may also be
-practical in some cases.  (That's a warm fuzzy feeling about it
-only.)
-
-Instead of dealing with machine-level code as bytes, we'll use
-regular expressions that represent machine-level
-instructions, called "metacode".  They are translated to real
-code in the end.
-
-### Compiler macro expansion
+### Compiler macros
 
 Expands all special forms in functions.  Control flow
 special forms (BLOCK, GO, RETURN, ?, AND, OR) are translated

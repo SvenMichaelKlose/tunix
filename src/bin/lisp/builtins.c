@@ -99,7 +99,7 @@ bi_specialp (void)
 }
 
 lispptr
-bi_setq (void)
+bi_set (void)
 {
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg2;
@@ -1307,7 +1307,8 @@ const struct builtin builtins[] = {
     { "special?",   "x",    bi_specialp },
 
     { "symbol",       "?l",   bi_symbol },
-    { "=",            "'sx",  bi_setq },
+    { "set",          "sx",   bi_set },
+    { "=",            "'sx",  bi_set },
     { "symbol-value", "s",    bi_symbol_value },
 
 #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME

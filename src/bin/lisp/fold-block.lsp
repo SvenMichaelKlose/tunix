@@ -1,3 +1,6 @@
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+
 (fn %block? (x)
   (and (cons? x)
        (eq '%block (car x))))

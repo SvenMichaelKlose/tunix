@@ -441,6 +441,15 @@
 #ifndef NO_BUILTIN_READ_LINE
 #define NO_BUILTIN_READ_LINE
 #endif
+#ifndef NO_BUILTIN_NCONC
+#define NO_BUILTIN_NCONC
+#endif
+#ifndef NO_BUILTIN_APPEND
+#define NO_BUILTIN_APPEND
+#endif
+#ifndef NO_BUILTIN_SUBSEQ
+#define NO_BUILTIN_SUBSEQ
+#endif
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400

@@ -1,3 +1,8 @@
+(or (cons? mapcar)
+    (load "mapcar.lsp"))
+(or (macro? '!?)
+    (load "aif.lsp"))
+
 (fn inline-fn (x)
   (?
     (and (cons? x)
@@ -10,7 +15,7 @@
              ,@(@ '((x) $(= ,@x)) !)
              ,@(@ inline-fn (cdar x))
              ,@(!? argsyms
-                   $((%pop ,@!))))))
+                   $((%pop ,@(reverse !)))))))
     (cons? x)
       (@ inline-fn x)
     x))

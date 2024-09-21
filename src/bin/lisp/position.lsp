@@ -1,7 +1,7 @@
 (fn position (x l . f)
   (= f (? f (car f) eql))
-  (and l
-       (? (f x (car l))
-          0
-          (!? (position x (cdr l) f)
-              (++ !)))))
+  (do ((n 0 (++ n))
+       (i l (cdr i)))
+      ((not i))
+    (? (f x (car i))
+       (return n))))

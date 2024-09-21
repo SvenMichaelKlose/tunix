@@ -32,6 +32,10 @@ and this project adheres to
 - MACRO: Doesn't assign the function expression to the
   macro name any more.
 
+##### Changed
+
+- POSITION: Iterative version.
+
 
 ## [v0.0.18] - 2024-09-14
 

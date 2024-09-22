@@ -214,7 +214,6 @@ do_eval:
         goto do_return_atom;
     }
 
-    HIGHLIGHT(x);
     // Get first element, which is the procedure to call.
     arg1 = CAR(x);
 #ifndef NAIVE

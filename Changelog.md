@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.19] - 2024-09-22
 
 ### Lisp
 
@@ -24,6 +24,10 @@ and this project adheres to
 - Compile-time option HOST\_DEBUGGER\_ON\_ERROR.
 - SET-CHAR-AT to manipulate symbol names (to make bytecode
   functions).
+
+##### Changed
+
+- VIC-20: No debugger. (Out of heap.)
 
 #### Environment
 

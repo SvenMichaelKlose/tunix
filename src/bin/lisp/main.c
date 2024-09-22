@@ -32,12 +32,12 @@ lispptr unquote_spliced;
 #endif
 
 const char * env_files[] = {
-#ifdef TEST
+#ifdef TEST_ENVIRONMENT
     "smoke-test-read.lsp",
 #endif
     "git-version.lsp",
     "env-0.lsp",
-#ifdef TEST
+#ifdef TEST_ENVIRONMENT
     "smoke-test.lsp",
 #endif
     "equality.lsp",
@@ -51,23 +51,23 @@ const char * env_files[] = {
     "unix.lsp",
 #endif
 
-#ifdef TEST
+#ifdef TEST_ENVIRONMENT
     "test.lsp",
 #endif
 #ifndef NO_QUASIQUOTE
     "quasiquote.lsp",
-    #ifdef TEST
+    #ifdef TEST_ENVIRONMENT
         "test-qq.lsp",
     #endif
 #endif
 #ifndef NO_MACROEXPAND
     "macroexpand.lsp",
-    #ifdef TEST
+    #ifdef TEST_ENVIRONMENT
         "test-macros.lsp",
     #endif
 #endif
 #ifndef NO_ONERROR
-#ifdef TEST
+#ifdef TEST_ENVIRONMENT
     "test-error.lsp",
 #endif
 #endif
@@ -80,11 +80,8 @@ const char * env_files[] = {
 
 #ifndef TARGET_C16
     "autoload.lsp",
-#ifdef TEST
+#if defined(TEST_ENVIRONMENT) && !defined(NO_BUILTIN_GROUP_FILE)
     "test-file.lsp",
-#endif
-#ifdef TEST
-    "test-all.lsp",
 #endif
     "welcome.lsp",
 #endif // #ifndef TARGET_C16
@@ -158,7 +155,7 @@ lisp_init (void)
         outs ("No memory.");
         exit (EXIT_FAILURE);
     }
-#if defined(TEST) && defined(TARGET_UNIX)
+#if defined(TEST_INTERPRETER) && defined(TARGET_UNIX)
     test ();
 #endif
     init_list ();

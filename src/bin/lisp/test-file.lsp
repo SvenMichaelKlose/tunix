@@ -1,3 +1,8 @@
+(or (macro? 'let)
+    (load "let.lsp"))
+(or (macro? 'with)
+    (load "with.lsp"))
+
 (message "Testing OPEN on missing file...")
 (and (open "k87sfdasdj9" 'r)
      (error))

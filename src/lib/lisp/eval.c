@@ -661,8 +661,8 @@ next_body_statement:
     if (value != return_sym && value != go_sym)
 #endif
         goto continue_body;
-#ifndef NO_DEBUGGER
 /*
+#ifndef NO_DEBUGGER
     else if (SYMBOLP(unevaluated_arg1)) {
         // Catch lost RETURN and GO.
         if (value == return_sym) {
@@ -673,8 +673,8 @@ next_body_statement:
             error (ERROR_LOST_GO, "GO without BLOCK");
         }
     }
-*/
 #endif
+*/
 
     // Restore argument symbol values.
 restore_arguments:

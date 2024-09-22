@@ -987,7 +987,7 @@ bi_load (void)
 
 #endif // #ifndef NO_BUILTIN_LOAD
 
-#ifndef NO_IMAGE
+#ifndef NO_BUILTIN_GROUP_IMAGE
 
 lispptr
 bi_iload (void)
@@ -1005,7 +1005,7 @@ bi_isave (void)
     return BOOL(image_save (buffer));
 }
 
-#endif // #ifndef NO_IMAGE
+#endif // #ifndef NO_BUILTIN_GROUP_IMAGE
 
 #ifndef NO_BUILTIN_GROUP_DEFINITIONS
 
@@ -1411,7 +1411,7 @@ const struct builtin builtins[] = {
     { "closedir",   "n",    bi_closedir },
 #endif
 
-#ifndef NO_IMAGE
+#ifndef NO_BUILTIN_GROUP_IMAGE
     { "iload",      "s",    bi_iload },
     { "isave",      "s",    bi_isave },
 #endif

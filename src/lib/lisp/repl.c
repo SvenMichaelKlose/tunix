@@ -60,7 +60,7 @@ read_safe (void)
 #endif
 }
 
-#ifndef NO_DEBUGGER
+#ifndef NO_DEBUG_INFO
 
 void
 out_colon (void)
@@ -96,7 +96,9 @@ print_debug_info ()
 
     fresh_line ();
     outs (error_code ? "In" : "Next");
+#ifndef NO_DEBUGGER
     do_highlight = true;
+#endif
     if (NOT_NIL(current_function)) {
         tmp2 = SYMBOL_VALUE(current_function);
         print (current_function); // (Name)
@@ -113,9 +115,15 @@ print_debug_info ()
         out_colon ();
         print (current_toplevel);
     }
+#ifndef NO_DEBUGGER
     do_highlight = false;
+#endif
     terpri ();
 }
+
+#endif // #ifndef NO_DEBUG_INFO
+
+#ifndef NO_DEBUGGER
 
 void
 read_cmd_arg (void)
@@ -474,7 +482,7 @@ terpri_next:
             gc ();
         }
 #endif // #ifndef NAIVE
-#ifndef NO_DEBUGGER
+#if !defined(NO_DEBUGGER) && !defined(NO_ONERROR)
         // Catch lost RETURN and GO.
         if (!error_code) {
             if (x == return_sym)
@@ -482,7 +490,7 @@ terpri_next:
             else if (x == go_sym)
                 error (ERROR_LOST_GO, "GO without BLOCK");
         }
-#endif
+#endif // #if !defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #ifndef NAIVE
         // Call debugger on error.
         if (error_code)
@@ -520,14 +528,16 @@ terpri_next:
             fresh_line ();
         }
     }
-#if !defined(NO_ONERROR) && defined (NO_DEBUGGER)
+#if !defined(NO_ONERROR) && defined(NO_DEBUGGER)
 do_return:
 #endif
-#ifndef NO_DEBUGGER
+#if !defined(NO_ONERROR) || !defined(NO_DEBUGGER)
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
         outs ("<debugger"); terpri ();
+#ifndef NO_DEBUGGER
         num_debugger_repls--;
+#endif
 
 done_onerror:
         // Restore earlier GC trigger threshold to

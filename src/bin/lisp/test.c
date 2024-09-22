@@ -1,6 +1,6 @@
 // TODO: Crashes on Plus/4 GC in "test.lisp".
 
-#ifdef TEST
+#ifdef TEST_INTERPRETER
 
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
@@ -105,4 +105,4 @@ test ()
 #endif
 }
 
-#endif // #ifdef TEST
+#endif // #ifdef TEST_INTERPRETER

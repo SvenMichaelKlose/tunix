@@ -60,6 +60,12 @@
 // * Reduces code size for releases on small machines.
 //#define SLOW
 
+// Load environment tests.
+//#define TEST_ENVIRONMENT
+
+// Call test() before start-up.
+//#define TEST_INTERPRETER
+
 // Enable extra checks that'll probably not kick in.
 //#define PARANOID
 
@@ -81,9 +87,6 @@
 
 
 /// Disabling features
-
-// No directory support.
-//#define NO_DIRECTORY
 
 // No support for saving and loading images.
 //#define NO_IMAGE
@@ -170,71 +173,6 @@
 #define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
 
 
-/// Generic configurations
-
-#ifdef MICROSCOPIC
-#ifndef NAIVE
-    #define NAIVE
-#endif
-#ifndef SLOW
-    #define SLOW
-#endif
-#ifndef NO_ONERROR
-    #define NO_ONERROR
-#endif
-#ifndef NO_DEBUGGER
-    #define NO_DEBUGGER
-#endif
-#ifndef NO_IMAGE
-    #define NO_IMAGE
-#endif
-#ifndef NO_QUASIQUOTE
-    #define NO_QUASIQUOTE
-#endif
-#ifndef NO_MACROEXPAND
-    #define NO_MACROEXPAND
-#endif
-#ifndef NO_GBUILTIN_ROUP_FILE
-    #define NO_BUILTIN_GROUP_FILE
-#endif
-#ifndef NO_BUILTIN_GROUP_DIRECTORY
-    #define NO_BUILTIN_GROUP_DIRECTORY
-#endif
-#ifndef NO_GBUILTIN_ROUP_BITOPS
-    #define NO_BUILTIN_GROUP_BITOPS
-#endif
-#ifndef NO_BUILTIN_ASSOC
-    #define NO_BUILTIN_ASSOC
-#endif
-#ifndef NO_BUILTIN_CHAR_AT
-    #define NO_BUILTIN_CHAR_AT
-#endif
-#ifndef NO_BUILTIN_CHAR_AT
-    #define NO_BUILTIN_RAW_ACCESS
-#endif
-#ifndef NO_BUILTIN_GC
-    #define NO_BUILTIN_GC
-#endif
-#ifndef NO_BUILTIN_LOAD
-    #define NO_BUILTIN_LOAD
-#endif
-#ifndef NO_BUILTIN_PRINT
-    #define NO_BUILTIN_PRINT
-#endif
-#ifndef NO_BUILTIN_READ
-    #define NO_BUILTIN_READ
-#endif
-#ifndef NO_BUILTIN_READ_LINE
-    #define NO_BUILTIN_READ_LINE
-#endif
-#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
-    #define NO_BUILTIN_GROUP_RAW_ACCESS
-#endif
-#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
-    #define NO_BUILTIN_GROUP_SYMBOL_NAME
-#endif
-#endif // #ifdef MICROSCOPIC
-
 
 /// Target configurations
 
@@ -319,21 +257,7 @@
 #ifndef NO_ONERROR
     #define NO_ONERROR
 #endif
-#ifndef SLOW
-    #define SLOW
-#endif
-#ifndef NO_IMAGE
-    #define NO_IMAGE
-#endif
-#ifndef NO_GROUP_DIRECTORY
-    #define NO_GROUP_DIRECTORY
-#endif
-#ifndef NO_GROUP_BITOPS
-    #define NO_GROUP_BITOPS
-#endif
-#ifndef NO_BUILTIN_READ_LINE
-    #define NO_BUILTIN_READ_LINE
-#endif
+#define MINIMALISTIC
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -426,30 +350,8 @@
 
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
-#ifndef SLOW
-#define SLOW
-#endif
-#ifndef NO_IMAGE
-#define NO_IMAGE
-#endif
-#ifndef NO_GROUP_DIRECTORY
-#define NO_GROUP_DIRECTORY
-#endif
-#ifndef NO_GROUP_BITOPS
-#define NO_GROUP_BITOPS
-#endif
-#ifndef NO_BUILTIN_READ_LINE
-#define NO_BUILTIN_READ_LINE
-#endif
-#ifndef NO_BUILTIN_NCONC
-#define NO_BUILTIN_NCONC
-#endif
-#ifndef NO_BUILTIN_APPEND
-#define NO_BUILTIN_APPEND
-#endif
-#ifndef NO_BUILTIN_SUBSEQ
-#define NO_BUILTIN_SUBSEQ
-#endif
+#define MINIMALISTIC
+#define NO_DEBUGGER
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400
@@ -460,8 +362,6 @@
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
-#define NO_IMAGE
-#define NO_DIRECTORY
 #endif
 
 // Unixoids
@@ -499,6 +399,92 @@
     #define NO_BUILTIN_GROUP_DIRECTORY
 #endif
 #endif
+
+/// Generic configurations
+
+#ifdef MINIMALISTIC
+#ifndef SLOW
+    #define SLOW
+#endif
+#ifndef NO_IMAGE
+    #define NO_IMAGE
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#ifndef NO_BUILTIN_GROUP_BITOPS
+    #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
+#endif
+#ifndef NO_BUILTIN_SUBSEQ
+    #define NO_BUILTIN_SUBSEQ
+#endif
+#endif // #ifdef MINIMALISTIC
+
+#ifdef MICROSCOPIC
+#ifndef NO_IMAGE
+    #define NO_IMAGE
+#endif
+#ifndef NAIVE
+    #define NAIVE
+#endif
+#ifndef SLOW
+    #define SLOW
+#endif
+#ifndef NO_ONERROR
+    #define NO_ONERROR
+#endif
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
+#endif
+#ifndef NO_QUASIQUOTE
+    #define NO_QUASIQUOTE
+#endif
+#ifndef NO_MACROEXPAND
+    #define NO_MACROEXPAND
+#endif
+#ifndef NO_BUILTIN_GROUP_BITOPS
+    #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#ifndef NO_BUILTIN_GROUP_FILE
+    #define NO_BUILTIN_GROUP_FILE
+#endif
+#ifndef NO_BUILTIN_ASSOC
+    #define NO_BUILTIN_ASSOC
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
+    #define NO_BUILTIN_CHAR_AT
+#endif
+#ifndef NO_BUILTIN_RAW_ACCESS
+    #define NO_BUILTIN_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GC
+    #define NO_BUILTIN_GC
+#endif
+#ifndef NO_BUILTIN_LOAD
+    #define NO_BUILTIN_LOAD
+#endif
+#ifndef NO_BUILTIN_PRINT
+    #define NO_BUILTIN_PRINT
+#endif
+#ifndef NO_BUILTIN_READ
+    #define NO_BUILTIN_READ
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
+#endif
+#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
+    #define NO_BUILTIN_GROUP_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
+    #define NO_BUILTIN_GROUP_SYMBOL_NAME
+#endif
+#endif // #ifdef MICROSCOPIC
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
     #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."

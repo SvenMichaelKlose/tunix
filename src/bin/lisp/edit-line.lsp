@@ -6,6 +6,7 @@
 (app 'app-edit-line)
 
 (dolist (i '("do" "let" "with" "prog1" "progn" "when" "awhen" "!=" "unless"
+             "dolist" "dotimes"
              "while" "awhile" "case" "!++" "!--" "nth" "cut-at"
              "push" "pop" "make-queue" "enqueue" "with-queue"
              "queue-list"

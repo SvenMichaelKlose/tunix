@@ -462,74 +462,40 @@ Set up a Unix-like environment using MSYS2 or MinGW:
    make world TARGET=unix
    ```
 
-# Booting TUNIX Lisp
+# Using TUNIX Lisp: REPL, autoloader and debugger
 
-The interpreter first loads essential procedures and
-saves them as an image that loads much faster.  That
-images is loaded automatically the next time and simply
-named "image".
-You an have your own code included before that image
-is created by saving it to file "user-pre-image.lisp".
-Code that should be executed after the image has been
-loaded can be provided in file "user-post-image.lisp".
-That's useful to experiment with code you want to move
-to the pre-image code later.  If you want to update the
-boot image, just delete it and start TUNIX Lisp to
-re-create it.
+When firing up the interpreter the first time, it loads the
+most essential code required to load more code on demand,
+and creates a boot image which is loaded instead on next program
+start.  You then end up in the REPL (read-eval-print-loop).
+It reads an expression, evaluates it, and prints the result.
+Then it starts over if the input channel hasn't been closed.
 
-To spare you figuring out dependencies, TUNIX Lisp has a
-mechanism that loads files that carry the names as missing
-procedures automatically.
+~~~lisp
+(dotimes (i 10) (print i))
+0 1 2 3 4 5 6 7 8 9
+~~~
 
-Of course TUNIX Lisp shouldn't crash!  Pleas don't hestitate
-to file a
-[bug report](https://github.com/SvenMichaelKlose/tunix/issues)
-regardless of how it affected your temper.
-
-# User interface: The READ/EVAL/PRINT-Loop (REPL)
-
-The REPL is the user interface.  It prompts you for input by
-printing an asterisk '\*' in its regular mode, except on
-Commodore 8-bit machines, to allow using the KERNAL's screen
-editor.  After reading an expression it is evaluated and the
-result of that evaluation is output.  Then it starts over,
-prompting you for the next expression.
-
-REPLs can be nested, e.g. when an error occured, a new REPL
-is launched in debug mode.  With that you can examine the
-environment, execute code step by step and present a
-correct alternative for a faulty expression.
-
-Built-in function EXIT stops the program and returns to the
-topmost REPL.  When passed an exit code, EXIT terminates the
-interpreter and returns to the operating system.
-
-The IGNORE function will tell the REPL to continue with the
-next expression, ignoring any errors.  It's used in ONERROR
-handlers to test if the right errors happen in "test-errors.lisp".
+If function is missing, the error handler AUTOLOAD tries to
+load its source file by appending the ".lsp" suffix to its
+name.  This also works with macros.
 
 # Definiton of permanent symbols
 
-FN and VAR assign expressions to symbols which are also
-added to variable \*universe\*, a list of symbols the
-garbage collector starting off with to reach all used
-objects.  The difference between FN and VAR is that VAR
-evaluates its initialization argument and FN assigns its
-argument list unevaluated.
+Symbols that are meant to remain untouched by the garbage
+collector must be added to the global \*UNVIERSE\* list.
+Built-in pecial forms FN and VAR, which define functions and
+global variables, do that automatically.
 
 ~~~lisp
-; Define permanent, named function.
+; Define permanent function.
 (fn welcome ()
   (out '"Hello World!")
   (terpri))
 
-; Define permanent, named variable.
+; Define permanent variable.
 (var x nil)
 ~~~
-
-If you are using a screen editor, the SOURCE function is
-rather useful.  It returns a defining expression for any
-symbol.
 
 # Functions
 

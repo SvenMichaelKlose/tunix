@@ -60,7 +60,7 @@ read_safe (void)
 #endif
 }
 
-#ifndef NO_DEBUG_INFO
+#ifndef NAIVE
 
 void
 out_colon (void)
@@ -121,7 +121,7 @@ print_debug_info ()
     terpri ();
 }
 
-#endif // #ifndef NO_DEBUG_INFO
+#endif // #ifndef NAIVE
 
 #ifndef NO_DEBUGGER
 

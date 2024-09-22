@@ -171,6 +171,9 @@ eval0 (void)
 #endif
 
 do_eval:
+    // Detach last result.  It may be huge.
+    value = nil;
+
 #ifdef VERBOSE_EVAL
     // Print what's about to be evaluated.
     PUSH_TAG(fnout);
@@ -192,18 +195,16 @@ do_eval:
     // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
-#ifndef NO_DEBUGGER
+
+    // Check if breakpoint.
     if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
         do_invoke_debugger = true;
-#endif
+
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER, 0);
     }
-#endif
-
-    // Detach last result.  It may be huge.
-    value = nil;
+#endif // #ifndef NO_DEBUGGER
 
     // Evaluate atom.
     if (ATOM(x)) {
@@ -413,10 +414,6 @@ set_arg_values:
             PUSH_TAG(num_args);
             x = args;
             value = eval_list ();
-#ifndef NAIVE
-            if (error_code)
-                value = lisp_repl (REPL_DEBUGGER, 0);
-#endif
             POP_TAG(num_args);
             POP(args);
 

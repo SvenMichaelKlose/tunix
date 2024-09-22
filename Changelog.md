@@ -36,6 +36,10 @@ and this project adheres to
 
 - POSITION: Iterative version.
 
+##### Added
+
+- POSITION-IF, SPLIT-IF.
+
 
 ## [v0.0.18] - 2024-09-14
 

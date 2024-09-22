@@ -227,6 +227,8 @@
 (or (== 2 (position 's '(l i s p)))
     (error))
 
+(message "TODO: Testing POSITION-IF...")
+
 (message "Testing PROG1...")
 (or (equal (eval (macroexpand '(prog1 1 2 3)))
            1)
@@ -279,6 +281,8 @@
      (error))
 (or (equal (split 'b '(a a a b a a b b a a a a))
            '((a a a) (a a) nil (a a a a))))
+
+(message "TODO: Testing SPLIT-IF...")
 
 (message "Testing UNION...")
 (or (equal (union '(l l i i) '(s s p p))

@@ -18,6 +18,7 @@ and this project adheres to
 ##### Fixed
 
 - APPEND: Show failing expression when skipping NILs.
+- Option VERBOSE\_GC: Maintain output channel.
 
 ##### Added
 

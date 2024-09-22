@@ -106,6 +106,10 @@ add_gap (lispobj_size_t n)
 void
 sweep ()
 {
+#ifdef VERBOSE_GC
+    simpleio_chn_t oldout = fnout;
+#endif
+
 #ifdef FRAGMENTED_HEAP
     // Start with first heap.
     struct heap_fragment * heap = heaps;
@@ -135,7 +139,9 @@ sweep ()
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('S');
+    setout (oldout);
 #endif
 
         // Sweep one heap.
@@ -163,7 +169,9 @@ sweep ()
                     // ...if CDR is pointing to the following object.
                     if (CONS(s)->cdr == s + sizeof (cons)) {
 #ifdef VERBOSE_COMPRESSED_CONS
+                        setout (STDOUT);
                         out ('C');
+                        setout (oldout);
 #endif
 
                         // Copy with mark bit cleard and type extended.
@@ -327,11 +335,17 @@ relocate (void)
 void
 gc (void)
 {
+#ifdef VERBOSE_GC
+    simpleio_chn_t oldout = fnout;
+#endif
+
 #ifdef FRAGMENTED_HEAP
     // Switch to next heap if available.
     if (heap->start) {
 #ifdef VERBOSE_GC
+        setout (STDOUT);
         out ('N');
+        setout (oldout);
 #endif
         goto next_heap;
     }
@@ -345,7 +359,9 @@ restart:
 #endif
 
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('M');
+    setout (oldout);
 #endif
 
     // Mark global pointers.

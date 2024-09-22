@@ -232,21 +232,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #endif // #ifndef NO_ONERROR
     }
 
-#ifndef NO_DEBUGGER
-    // Tell about entering the debugger and which one it is.
-    if (mode == REPL_DEBUGGER) {
-        // TODO: Save terminal flags.
-        outs ("\002\004"); // Normal terminal mode.
-        SET_SYMBOL_VALUE(repl_value, value);
-        num_debugger_repls++;
-        debug_step = nil;
-        fresh_line ();
-        outs ("DEBUGGER ");
-        outn (num_debugger_repls);
-        out (':');
-        terpri ();
-    }
-#endif
 #endif // #ifndef NAIVE
 
     // READ/EVAL/PRINT-Loop.
@@ -258,6 +243,16 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
+            // TODO: Save terminal flags.
+            outs ("\002\004"); // Normal terminal mode.
+            SET_SYMBOL_VALUE(repl_value, value);
+            num_debugger_repls++;
+            debug_step = nil;
+            fresh_line ();
+            outs ("DEBUGGER ");
+            outn (num_debugger_repls);
+            out (':');
+            terpri ();
             print_debug_info ();
 #ifdef EXIT_FAILURE_ON_ERROR
             exit (EXIT_FAILURE);

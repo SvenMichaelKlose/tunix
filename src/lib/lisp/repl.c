@@ -96,7 +96,7 @@ print_debug_info ()
 
     fresh_line ();
     outs (error_code ? "In" : "Next");
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
     do_highlight = true;
 #endif
     if (NOT_NIL(current_function)) {
@@ -109,16 +109,16 @@ print_debug_info ()
         else
             outs ("()");
         out_colon ();
-        terpri ();
+        fresh_line ();
         print (FUNBODY(tmp2));
     } else {
         out_colon ();
         print (current_toplevel);
     }
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
     do_highlight = false;
 #endif
-    terpri ();
+    fresh_line ();
 }
 
 #endif // #ifndef NAIVE
@@ -440,9 +440,6 @@ terpri_next:
         PUSH(current_toplevel);
         current_toplevel = x;
 #endif
-#ifndef NO_DEBUGGER
-        highlighted = nil; // TODO: Explain.
-#endif
 #ifndef NAIVE
         // Init catching errors.
         if (!setjmp (this_break)) {
@@ -534,8 +531,8 @@ do_return:
 #if !defined(NO_ONERROR) || !defined(NO_DEBUGGER)
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
-        outs ("<debugger"); terpri ();
 #ifndef NO_DEBUGGER
+        outs ("<debugger"); terpri ();
         num_debugger_repls--;
 #endif
 

@@ -19,7 +19,7 @@
 
 #include "liblisp.h"
 
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
 bool do_highlight;
 lispptr highlighted;
 #endif
@@ -44,7 +44,7 @@ space (void)
 #define HIGHLIGHT_BEFORE    false
 #define HIGHLIGHT_AFTER     true
 
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
 
 void FASTCALL
 print_highlighted (lispptr x, bool when)
@@ -59,7 +59,7 @@ print_highlighted (lispptr x, bool when)
 #endif
 }
 
-#endif // #ifndef NO_DEBUGGER
+#endif // #ifndef NO_HIGHLIGHTING
 
 // Print abbreviation.
 void FASTCALL
@@ -102,21 +102,21 @@ print_list (cons * c)
             out (' ');
         else
             first = false;
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
         print_highlighted (c, HIGHLIGHT_BEFORE);
 #endif
         print0 (c->car);
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
         print_highlighted (c, HIGHLIGHT_AFTER);
 #endif
         print_tmp = CDR(c);
         if (NOT_NIL(print_tmp) && !CONSP(print_tmp)) {
             outs (" . ");
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
             print_highlighted (c, HIGHLIGHT_BEFORE);
 #endif
             print0 (print_tmp);
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
             print_highlighted (c, HIGHLIGHT_AFTER);
 #endif
             break;

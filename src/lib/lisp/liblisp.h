@@ -91,6 +91,9 @@
 // No support for saving and loading images.
 //#define NO_IMAGE
 
+// No highlighted expressions in debug info.
+//#define NO_HIGHLIGHTING.
+
 // Do not call MACROEXPAND in REPL.
 //#define NO_MACROEXPAND
 
@@ -498,6 +501,9 @@
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
     #endif
+    #ifndef NO_HIGHLIGHTING
+        #define NO_HIGHLIGHTING
+    #endif
     #ifndef NO_ONERROR
         #define NO_ONERROR
     #endif
@@ -533,7 +539,7 @@
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
 #endif
 
-#ifndef NO_DEBUGGER
+#ifndef NO_HIGHLIGHTING
     #define HIGHLIGHT(x)  highlighted = x
 #else
     #define HIGHLIGHT(x)
@@ -628,13 +634,16 @@ extern bool    debug_mode;
 extern lispptr first_symbol;
 extern lispptr last_symbol;
 #ifndef NO_DEBUGGER
-extern lispptr highlighted;
-extern bool    do_highlight;
 extern lispptr breakpoints_sym;
 #endif
 #ifndef NO_ONERROR
 extern lispptr onerror_sym;
 extern lispptr fail_sym;
+#endif
+
+#ifndef NO_HIGHLIGHTING
+extern lispptr highlighted;
+extern bool    do_highlight;
 #endif
 
 #ifndef NAIVE

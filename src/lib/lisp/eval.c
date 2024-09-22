@@ -184,6 +184,10 @@ do_eval:
     _TAGSTACK_CHECK_OVERFLOW();
 #endif
 
+#ifndef NO_HIGHLIGHTING
+    PUSH(highlighted);
+#endif
+
 #ifndef NO_DEBUGGER
     // Inovke debugger.
     PUSH(current_expr);
@@ -210,6 +214,7 @@ do_eval:
         goto do_return_atom;
     }
 
+    HIGHLIGHT(x);
     // Get first element, which is the procedure to call.
     arg1 = CAR(x);
 #ifndef NAIVE
@@ -703,6 +708,9 @@ do_return_atom:
 
 #ifndef NO_DEBUGGER
     POP(current_expr);
+#endif
+#ifndef NO_HIGHLIGHTING
+    POP(highlighted);
 #endif
     // Evaluate consequence of conditional.
     if (value == delayed_eval)

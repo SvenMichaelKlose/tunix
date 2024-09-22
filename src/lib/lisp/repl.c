@@ -481,13 +481,11 @@ terpri_next:
                 error (ERROR_LOST_RETURN, "RETURN without BLOCK");
             else if (x == go_sym)
                 error (ERROR_LOST_GO, "GO without BLOCK");
+            if (error_code)
+                x = lisp_repl (REPL_DEBUGGER, 0);
         }
 #endif // #if !defined(NO_DEBUGGER) && !defined(NO_ONERROR)
 #ifndef NAIVE
-        // Call debugger on error.
-        if (error_code)
-            x = lisp_repl (REPL_DEBUGGER, 0);
-
         POP(current_toplevel);
 #ifndef NO_MACROEXPAND
         POP(unexpanded_toplevel);

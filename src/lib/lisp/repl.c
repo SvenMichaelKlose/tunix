@@ -523,8 +523,8 @@ terpri_next:
             fresh_line ();
         }
     }
-done:
 #if !defined(NO_ONERROR) || !defined(NO_DEBUGGER)
+done:
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
 #ifndef NO_DEBUGGER

@@ -50,6 +50,7 @@ and this project adheres to
 ##### Added
 
 - POSITION-IF, SPLIT-IF.
+- REQUIRE to load by name.
 
 
 ## [v0.0.18] - 2024-09-14

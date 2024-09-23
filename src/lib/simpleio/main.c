@@ -179,13 +179,17 @@ outsn (char * s, char len)
 void
 terpri (void)
 {
+    if (fnout != STDOUT) {
+        out ('\n');
+        return;
+    }
 #ifdef TARGET_C128
-    outs ("\r");
+    out ('\r');
 #else
     #ifdef __CC65__
         outs ("\n\r");
     #else
-        outs ("\n");
+        out ('\n');
     #endif
 #endif
 }

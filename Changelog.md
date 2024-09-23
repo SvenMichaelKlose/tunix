@@ -13,6 +13,12 @@ and this project adheres to
 
 ### Lisp
 
+#### Debugger
+
+##### Fixed
+
+- Step and REPL break.
+
 #### Interpreter
 
 ##### Fixed

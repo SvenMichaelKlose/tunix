@@ -170,6 +170,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
     setout (STDOUT);
 
     num_repls++;
+#ifndef NO_DEBUGGER
+    if (mode == REPL_DEBUGGER)
+        num_debugger_repls++;
+#endif
 
 #ifndef NAIVE
     if (error_code) {
@@ -227,7 +231,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
         // Error not handled.  Exit program.
         print_debug_info ();
         do_break_repl = BRK_EXIT;
-        goto do_return;
+        goto done;
 #endif
 #endif // #ifndef NO_ONERROR
     }
@@ -246,7 +250,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // TODO: Save terminal flags.
             outs ("\002\004"); // Normal terminal mode.
             SET_SYMBOL_VALUE(repl_value, value);
-            num_debugger_repls++;
             debug_step = nil;
             fresh_line ();
             outs ("DEBUGGER ");
@@ -292,7 +295,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
                 case 'c':
                     if (error_code)
                         goto cannot_continue;
-                    break;
+                    goto done;
 
                 // Step into function.
                 case 's':
@@ -301,7 +304,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
                     // Break on next expression.
                     debug_step = t;
-                    break;
+                    goto done;
 
                 // Step over function call.
                 case 'n':
@@ -310,7 +313,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
                     // Break *after* current expression.
                     debug_step = current_expr;
-                    break;
+                    goto done;
 
                 // Print expression without affecting the
                 // return value.
@@ -357,7 +360,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 break_repl:
                     error_code = 0;
                     error_info = nil;
-                    break;
+                    goto done;
 cannot_continue:
                     outs ("Need alternative first!");
                     goto terpri_next;
@@ -373,7 +376,7 @@ done_short_command:
                     SET_SYMBOL_VALUE(repl_value, tmp);
 terpri_next:
                     terpri ();
-                    break;
+                    goto done;
 
                 default:
                     // It wasn't a debugger command.
@@ -381,7 +384,7 @@ terpri_next:
                     putback ();
                     read_safe ();
                     if (NOT(x))
-                        break;
+                        continue;
 #ifndef TARGET_UNIX
                     terpri ();
 #endif
@@ -474,6 +477,7 @@ terpri_next:
             gc ();
         }
 #endif // #ifndef NAIVE
+#if 0
 #if !defined(NO_DEBUGGER) && !defined(NO_ONERROR)
         // Catch lost RETURN and GO.
         if (!error_code) {
@@ -485,6 +489,7 @@ terpri_next:
                 x = lisp_repl (REPL_DEBUGGER, 0);
         }
 #endif // #if !defined(NO_DEBUGGER) && !defined(NO_ONERROR)
+#endif
 #ifndef NAIVE
         POP(current_toplevel);
 #ifndef NO_MACROEXPAND
@@ -518,9 +523,7 @@ terpri_next:
             fresh_line ();
         }
     }
-#if !defined(NO_ONERROR) && defined(NO_DEBUGGER)
-do_return:
-#endif
+done:
 #if !defined(NO_ONERROR) || !defined(NO_DEBUGGER)
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {

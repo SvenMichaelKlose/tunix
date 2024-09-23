@@ -254,13 +254,10 @@
 
 // Commodore C16
 #ifdef TARGET_C16
-#ifndef NO_DEBUGGER
-    #define NO_DEBUGGER
-#endif
+#define MINIMALISTIC
 #ifndef NO_ONERROR
     #define NO_ONERROR
 #endif
-#define MINIMALISTIC
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -354,7 +351,6 @@
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
 #define MINIMALISTIC
-#define NO_DEBUGGER
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400
@@ -408,6 +404,9 @@
 #ifdef MINIMALISTIC
 #ifndef SLOW
     #define SLOW
+#endif
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
 #endif
 #ifndef NO_IMAGE
     #define NO_IMAGE

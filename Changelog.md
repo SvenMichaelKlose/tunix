@@ -40,6 +40,7 @@ and this project adheres to
 
 ##### Fixed
 
+- WITH-IN: Close temporary channel, not the old channel.
 - MACRO: Doesn't assign the function expression to the
   macro name any more.
 

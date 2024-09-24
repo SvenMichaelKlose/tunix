@@ -3,6 +3,67 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-24
+
+Actually I (tried) to relax for a week, letting things
+dangle, and dreaming along.  That was about what the doctor
+ordered, says the body.
+
+Am hacking along with compiling sets of functions, loading
+and running only one compiler pass at a file, and using
+temporary files.  The CBM versions unnerve with unexpected
+behaviour.  Looking ahead for the progress.
+
+# 2024-09-23
+
+Using NCONC instead of APPEND in MAPCAN saved the day.
+
+# 2024-09-16
+
+The first version of the compiler is nearly complete but
+untested.  Explains why FOLD-BLOCK misses some blocks.
+Nothing exciting.  What's bothering me though is there seems
+to be more heap required already than expected.  But when I
+remember correctly I didn't expect more than one pass to fit
+in from the start with the VIC-20 in mind.  Admittedly TUNIX
+Lisp is undertested and not profiled at all.  A benchmark
+should help adjust expectations and find design flaws – or
+just things done wrong (also known as "bugs") or missing.  I
+have a strong feeling that too many unused objects remain on
+the heap.  Might be just the global pointer 'value' which
+holds the result of the last evaluated expression.  Will
+check when some benchmarking is available.
+
+Bytecode functions will be symbols that have the bytecode in
+their name plus an extra type flag.  RAWPTR has to allocate
+the returned number first and assign the pointer value
+afterwards because a GC run could make the value invalid due
+to object relocation.  A new built-in SET-CHAR-AT is also
+required.  It shouldn't trigger the GC, so that won't cause
+problems.
+
+And of course there has to be a bytecode interpreter.  Also
+not rocket science and perhaps a thing that could be done in
+assembly alongside a C version.  Take away the tests and the
+compiler is less than 200 lines of code – the program will
+have to stop on errors.  Weaving in the debugger is a bit of
+a thrill thinking about.  Postponed for the sake of inner
+peace.
+
+Speaking of: I had an AI coding session today which went
+execptionally well.  One reason for that is that GPT's can
+capture the simple structure of Python code to satisfaction;
+plugging together libraries to build AI with AI is
+next-level inspiring.  Perfect for academics who cannot
+code.  Now the use of the Lisp shell mode I've been carrying
+around since 2007 is becoming clearer.
+
+Am coming to terms with a shitload of projects that got
+stalled recently and I'm nearly where I wanted to return to:
+live and work in peace, with meaningm and to be a bit on top
+of all things life.  That cold I caught can't phase me.  I
+just know that I'm having one.
+
 # 2024-09-15
 
 I wasn't in the mood to code over the weekend.  Turned to

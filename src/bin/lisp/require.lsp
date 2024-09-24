@@ -1,3 +1,7 @@
+(or (macro? 'progn)
+    (load "progn.lsp"))
+(or (macro? 'do)
+    (load "do.lsp"))
 (or (macro? 'dolist)
     (load "dolist.lsp"))
 

@@ -699,7 +699,7 @@ New channels are created by OPEN to access files:
 
 Flags may be combined.
 
-# Debugging and advanced error handling
+# Error handling and debugging
 
 The debugger is invoked in case of an error unless ONERROR
 has been defined.  Beatiful things can be done by handling
@@ -1421,6 +1421,7 @@ x           ; 23
 | (read)           | Read expression.                     |
 | (print x)        | Print expression.                    |
 | (load name)      | Load and evaluate file.              |
+| (require +name)  | Load missing definition of NAME.     |
 | (open name mode) | Open file and return channel.        |
 | (err)            | Return number of last error or NIL.  |
 | (eof)            | Tell if read reached end of file.    |
@@ -1474,6 +1475,8 @@ TUNIX Lisp was built, a message of the form
 ~~~
 
 is printed before a load is attempted.
+
+### (require +name): Load missing definition.
 
 ### (open pathname mode): Open file and channel.
 

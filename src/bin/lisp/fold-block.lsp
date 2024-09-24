@@ -1,6 +1,8 @@
 (or (cons? mapcar)
     (load "mapcar.lsp"))
 
+(app 'app-fold-block)
+
 (fn %block? (x)
   (and (cons? x)
        (eq '%block (car x))))
@@ -12,3 +14,5 @@
           (mapcan fold-block !)
           (list !)))
      (list x)))
+
+(app 'app-fold-block)

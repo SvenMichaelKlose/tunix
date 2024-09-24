@@ -1,23 +1,13 @@
-(or (macro? let)
-    (load "let.lsp"))
-(or (macro? '!=)
-    (load "!=.lsp"))
 (or (macro? '!?)
     (load "aif.lsp"))
-(or (macro? 'with-global)
-    (load "with-global.lsp"))
-(or (macro? 'prog1)
-    (load "prog1.lsp"))
-(or (macro? 'progn)
-    (load "progn.lsp"))
-(or (macro? 'push)
-    (load "push.lsp"))
-(or (macro? 'pop)
-    (load "pop.lsp"))
 (or (cons? mapcar)
     (load "mapcar.lsp"))
-(or (cons? group)
-    (load "group.lsp"))
+(or (cons? require)
+    (load "require.lsp"))
+
+(app 'app-cmacroexpand)
+
+(require 'let '!= 'with-global 'prog1 'progn 'push 'pop 'group)
 
 (var *cmacros* nil)
 
@@ -87,3 +77,5 @@
 (fn cmacroexpand (x)
   (with-global *macros* *cmacros*
     (macroexpand x)))
+
+(app 'app-cmacroexpand)

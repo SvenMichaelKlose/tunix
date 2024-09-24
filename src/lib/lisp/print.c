@@ -186,6 +186,7 @@ print0 (lispptr x)
     uchar type;
 
     if (NOT(x)) {
+        space ();
         outs ("nil");
         return;
     }

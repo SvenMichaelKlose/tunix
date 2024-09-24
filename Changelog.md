@@ -9,6 +9,16 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- PRINT: Also pad NIL (like all other symbols).
+
 ## [v0.0.19] - 2024-09-24
 
 ### Lisp

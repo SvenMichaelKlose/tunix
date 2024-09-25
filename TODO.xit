@@ -2,11 +2,15 @@ TUNIX Lisp
 [@] Make it fun writing the bytecode compiler with it.
 
 Interpreter
+[@] Rethink channel handling.  Images won't start on C64.
+[ ] cc65 compiler bug?
+[ ] VERBOSE_GC not messing up channels.
 [ ] UNWIND-PROTECT
 [ ] Make stack overflows regular errors.
 [ ] Multiple symbol lists to reduce look-up times.
 
 Debugger
+[ ] Fix single step into function.
 [ ] Invoking debugger with Ctrl-C.
 [ ] Invoking debugger with RESTORE key on CBMs.
 
@@ -25,6 +29,7 @@ Manual
 [ ] Compile-time options.
 [ ] Complete set of examples.
 [ ] Release rework.
+[ ] Introduction to TUNIX Lisp and REPL use.
 
 Documentation
 [ ] Introduction to (TUNIX) Lisp programming

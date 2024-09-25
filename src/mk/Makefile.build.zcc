@@ -1,5 +1,5 @@
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) $(LDFLAGS) -l/usr/local/share/z88dk/lib/clibs/cpm_clib.lib $(addprefix -l,$(LIBRARIES:.a=.lib)) -o=$@ $^
+	$(LD) $(LDFLAGS) -o=$@ $(addprefix -l,$(LIBRARIES:.a=.lib)) -l/usr/local/share/z88dk/lib/clibs/cpm_clib.lib $^
 
 $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) $(ARFLAGS) -x$@ $^

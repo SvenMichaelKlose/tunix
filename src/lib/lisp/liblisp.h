@@ -698,6 +698,10 @@ extern lispptr tmp2;
 extern char    tmpc;
 extern char *  tmpstr;
 
+#ifdef TARGET_CPM
+extern long heap;  // For the 'zcc' compiler suite.
+#endif
+
 extern char *      heap_free;
 extern char *      heap_end;
 extern char *      stack;
@@ -780,7 +784,7 @@ extern lispptr make_cons_cdr;
 // NOT_NIL() doesn't work.  Either the onset of dementia
 // or terrible bugs hiding.
 #define nil     ((lispptr) 0)
-#ifdef __CC65__
+#ifdef WAS__CC65__
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else

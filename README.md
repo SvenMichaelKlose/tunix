@@ -20,18 +20,15 @@ TUNIX Lisp is under heavy construction at the moment.
 
 ## Targets
 
-All targets require a disk drive of some sort, until images
-can be created by the host or other targets and then saved
-to other media, like tape or ROM, or within the Lisp program
-itself.
+All targets require a disk drive of some sort.
 
 | Target            | Requirements | Limits           |
 |-------------------|--------------|------------------|
 | Commodore C128    |              |                  |
 | Commodore C16     |              | No debugger.     |
 | Commodore C64     |              |                  |
-| Commodore Plus/4  |              |                  |
-| Commodore VIC-20  | +37K RAM.    |                  |
+| Commodore plus/4  |              |                  |
+| Commodore VIC-20  | +37K RAM.    | No debugger.     |
 
 ## Untested targets
 
@@ -39,18 +36,24 @@ itself.
 |-------------------|-------------------------------------|
 | Apple II          | Full memory expansion required.     |
 | Apple II enhanced |                                     |
+| CP/M              |                                     |
+
+For these targets binaries are compiled but no-one went
+through the trouble making disk images and running them in
+an emulator.  Almost guaranteed to not work.
 
 ## Broken targets
 
+| Target            |                                     |
+|-------------------|-------------------------------------|
 | Commodore PET     | SYNTAX ERROR on program start.      |
-| Generic Z80 CP/M  | Need help with z88dk compiler!      |
 
 # Manuals
 
 ## TUNIX Lisp (glowing hot!)
 
 Currently for Commodore home computers (C128, C16, C64,
-Plus/4, VIC-20), and any modern Unixoid of your choice.
+plus/4, VIC-20), and any modern Unixoid of your choice.
 
 * [TUNIX Lisp](src/bin/lisp/doc/manual.md)
 * [Bytecode compiler roadmap](src/bin/lisp/doc/compiler.md)

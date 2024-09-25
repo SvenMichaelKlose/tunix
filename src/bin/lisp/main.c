@@ -15,6 +15,10 @@
 #include <simpleio/control.h>
 #include <lisp/liblisp.h>
 
+#ifdef TARGET_CPM
+long heap;
+#endif
+
 jmp_buf restart_point;
 
 extern void test (void);
@@ -85,6 +89,9 @@ const char * env_files[] = {
 #endif
     "welcome.lsp",
 #endif // #ifndef TARGET_C16
+#ifdef TEST_VICE_HEADLESS
+    "end-headless.lsp"
+#endif // #ifdef TEST_VICE_HEADLESS
     NULL
 };
 

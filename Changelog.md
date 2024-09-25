@@ -19,6 +19,11 @@ and this project adheres to
 
 - PRINT: Also pad NIL (like all other symbols).
 
+##### Added
+
+- Compiles for TARGET\_CPM.  Untested!
+
+
 ## [v0.0.19] - 2024-09-24
 
 ### Lisp

@@ -3,6 +3,15 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-09-25
+
+TUNIX Lisp compiles for CP/M but I didn't get through the
+trouble of setting up an emulator.  The generated Z80 code
+doesn't look any better than the 6502 assembly.  Unless
+TUNIX Lisp is written in itself and compiles itself that's
+as far as it gets.  Perhaps Oscar64 or llvm-mos can do
+better but I have a bad feeling about code size.
+
 # 2024-09-24
 
 Actually I (tried) to relax for a week, letting things

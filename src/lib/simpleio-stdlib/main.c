@@ -158,6 +158,7 @@ getxy (int * col, int * row)
         return false;
     term.c_lflag = old_c_lflag;
 #endif
+#ifdef TARGET_UNIX
 
     // Request cursor position
     if (4 != write (STDOUT_FILENO, "\033[6n", 4))
@@ -172,7 +173,6 @@ getxy (int * col, int * row)
     if (2 != sscanf (buf, "\033[%d;%dR", row, col))
         goto error_with_term_restored;
 
-#ifdef TARGET_UNIX
     // Restore former terminal status.
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;

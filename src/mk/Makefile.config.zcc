@@ -3,8 +3,8 @@ CFLAGS      = +$(TARGET) -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
 LD		    = zcc
 LDFLAGS     = +$(TARGET) -b
 NO_EXOMIZER = 1
-AR		    = zcc
-ARFLAGS		= +$(TARGET)
+AR		    = z88dk-z80asm
+ARFLAGS		=
 
 ifdef NDEBUG
 COPTFLAGS  += -SO3

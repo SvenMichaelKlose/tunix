@@ -1,10 +1,10 @@
 CC			= zcc
 CFLAGS      = +$(TARGET) -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
-LD		    = z88dk-z80asm
-LDFLAGS     = -b
+LD		    = zcc
+LDFLAGS     = +$(TARGET) -b
 NO_EXOMIZER = 1
-AR		    = z88dk-z80asm
-ARFLAGS		=
+AR		    = zcc
+ARFLAGS		= +$(TARGET)
 
 ifdef NDEBUG
 COPTFLAGS  += -SO3

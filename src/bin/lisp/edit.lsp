@@ -1,5 +1,7 @@
 (app 'app-edit)
 
+(require 'let 'with 'progn 'with-in 'with-out)
+
 ;;; State
 
 (var *filename* "edit-help.md")

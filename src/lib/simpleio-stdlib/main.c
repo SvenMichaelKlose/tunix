@@ -149,7 +149,7 @@ getxy (int * col, int * row)
     int old_c_lflag;
     struct termios term;
 
-    // Disable terminal's canonical mode and echo
+    // Disable terminal's canonical mode and echo.
     if (tcgetattr (STDIN_FILENO, &term))
         return false;
     old_c_lflag = term.c_lflag;
@@ -157,21 +157,28 @@ getxy (int * col, int * row)
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
     term.c_lflag = old_c_lflag;
-#endif
-#ifdef TARGET_UNIX
 
-    // Request cursor position
+    // Ensure standard input file number is in blocking mode.
+    int flags = fcntl (STDIN_FILENO, F_GETFL, 0);
+    if (flags & O_NONBLOCK)
+        fcntl (STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK); // Clear O_NONBLOCK
+
+    // Request cursor position.
     if (4 != write (STDOUT_FILENO, "\033[6n", 4))
         goto error_with_term_restored;
 
     // Read the response.
-    char buf[16] = {0};
+    char buf[32] = {0};
     if (0 >= read (STDIN_FILENO, buf, sizeof (buf) - 1))
         goto error_with_term_restored;
 
     // Scan the response.
     if (2 != sscanf (buf, "\033[%d;%dR", row, col))
         goto error_with_term_restored;
+
+    // Make position start at 1,1 as 0 is a dummy char.
+    ++*row;
+    ++*col;
 
     // Restore former terminal status.
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
@@ -182,6 +189,7 @@ getxy (int * col, int * row)
 
 error_with_term_restored:
 #ifdef TARGET_UNIX
+    fcntl (STDIN_FILENO, F_SETFL, flags);
     tcsetattr (STDIN_FILENO, TCSANOW, &term);
 #endif
     return false;

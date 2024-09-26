@@ -23,6 +23,10 @@ and this project adheres to
 
 - Compiles for TARGET\_CPM.  Untested!
 
+### libsimpleio-stdlib
+
+- Unixoids: fix fetching cursor location.
+
 
 ## [v0.0.19] - 2024-09-24
 

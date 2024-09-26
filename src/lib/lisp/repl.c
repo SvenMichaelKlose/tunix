@@ -139,7 +139,9 @@ read_cmd_arg (void)
         eval ();
         POP(highlighted);
     }
-    terpri ();
+#ifndef TARGET_UNIX
+    fresh_line ();
+#endif
 }
 
 #endif // #ifndef NO_DEBUGGER
@@ -252,10 +254,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             SET_SYMBOL_VALUE(repl_value, value);
             debug_step = nil;
             fresh_line ();
-            outs ("DEBUGGER ");
-            outn (num_debugger_repls);
-            out (':');
-            terpri ();
             print_debug_info ();
 #ifdef EXIT_FAILURE_ON_ERROR
             exit (EXIT_FAILURE);
@@ -280,6 +278,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #endif
 #ifndef NO_DEBUGGER
         } else {
+            if (error_code)
+                outs ("fix!");
+            outn (num_debugger_repls);
+            outs ("] ");
             // Read short debugger command, skipping whitespace.
             do {
                 cmd = in ();
@@ -288,8 +290,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             if (eof ())
                 exit (EXIT_FAILURE);
 #endif
+#ifndef TARGET_UNIX
             // Process short command.
             fresh_line ();
+#endif
             switch (cmd) {
                 // Continue execution.
                 case 'c':
@@ -375,7 +379,7 @@ done_short_command:
                     POP(tmp);
                     SET_SYMBOL_VALUE(repl_value, tmp);
 terpri_next:
-                    terpri ();
+                    fresh_line ();
                     goto done;
 
                 default:
@@ -512,13 +516,16 @@ terpri_next:
             // Clear break mode.
             do_break_repl = 0;
             setout (STDOUT);
-            outs ("Program exited."); terpri ();
+            outs ("Program exited.");
+            terpri ();
             continue;
         }
 
         // Print result of user input.
         if (mode != REPL_LOAD) {
             setout (STDOUT);    // TODO: Clean up setting standard I/O.
+            if (mode == REPL_DEBUGGER)
+                outs ("Result: ");
             print (x);
             fresh_line ();
         }
@@ -528,7 +535,8 @@ done:
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
 #ifndef NO_DEBUGGER
-        outs ("<debugger"); terpri ();
+        outs ("Continuing...");
+        terpri ();
         num_debugger_repls--;
 #endif
 
@@ -557,7 +565,9 @@ load (char * pathname)
     simpleio_chn_t load_fn;
 
 #ifdef VERBOSE_LOAD
-    outs ("Loading "); outs (pathname); terpri ();
+    outs ("Loading ");
+    outs (pathname);
+    terpri ();
 #endif
 
     // Open file.

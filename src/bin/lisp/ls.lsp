@@ -1,5 +1,6 @@
 (fn ls ()
   (awhen (opendir)
-    (awhile (readdir !)
-      (print !))
-    (closedir !)))
+    (with-queue q
+      (awhile (readdir !)
+        (enqueue q !))
+      (closedir !))))

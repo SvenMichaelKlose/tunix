@@ -13,6 +13,10 @@ and this project adheres to
 
 ### Lisp
 
+#### Environment
+
+- LS: Returns list instead of just printing it.
+
 #### Interpreter
 
 ##### Fixed

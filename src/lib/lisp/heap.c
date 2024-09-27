@@ -45,6 +45,7 @@ struct heap_fragment heaps[] = {
 lispptr  t;
 lispptr  first_symbol;
 lispptr  last_symbol;
+lispptr  vp_symbol;
 
 size_t  onetime_heap_margin;
 
@@ -507,14 +508,10 @@ init_heap ()
     SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
 #endif
 
-    // Set test flag *T?*.
-    tmp2 = make_symbol ("+t?+", 4);
-#ifdef TEST
-    SET_SYMBOL_VALUE(tmp2, t);
-#else
-    SET_SYMBOL_VALUE(tmp2, nil);
-#endif
-    expand_universe (tmp2);
+    // Define verbosity flag *V?*.
+    vp_symbol = make_symbol ("+v?+", 4);
+    SET_SYMBOL_VALUE(vp_symbol, t);
+    expand_universe (vp_symbol);
 
     // Clear error info.
 #ifndef NAIVE

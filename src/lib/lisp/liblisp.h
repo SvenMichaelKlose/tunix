@@ -640,6 +640,10 @@ extern lispptr onerror_sym;
 extern lispptr fail_sym;
 #endif
 
+#ifdef VERBOSE_DEFINES
+extern lispptr vp_symbol;
+#endif
+
 #ifndef NO_HIGHLIGHTING
 extern lispptr highlighted;
 extern bool    do_highlight;

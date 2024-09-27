@@ -13,6 +13,10 @@ and this project adheres to
 
 ### Lisp
 
+#### Test
+
+- Test VAR and FN.
+
 #### Environment
 
 - LS: Returns list instead of just printing it.
@@ -21,10 +25,14 @@ and this project adheres to
 
 ##### Fixed
 
+- VAR, FN: Didn't add to \*UNIVERSE\* with compile-time
+  option VERBOSE\_DEFINES.
 - PRINT: Also pad NIL (like all other symbols).
 
 ##### Added
 
+- \*V?\* tells if definitions should be printed.
+  (Requires compile-time option VERBOSE\_DEFINES.)
 - Compiles for TARGET\_CPM.  Untested!
 
 ### libsimpleio-stdlib

@@ -2101,6 +2101,7 @@ key and the rest is the value.
 | +target+ | Target machine the interpreter runs on. |
 |   +v+    | Git tag and short SHA.                  |
 |   +vb+   | Git branch.                             |
+|  \*v?\*  | Tell if definitions should be printed.  |
 
 ## Automatic loading of procedures
 

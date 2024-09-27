@@ -1013,14 +1013,16 @@ lispptr
 bi_define (void)
 {
 #ifdef VERBOSE_DEFINES
-    if (member (arg1, SYMBOL_VALUE(universe)))
-        outs ("Redefining ");
-    else {
-        expand_universe (arg1);
-        outs ("Defining ");
+    if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
+        if (member (arg1, SYMBOL_VALUE(universe)))
+            outs ("Redefining ");
+        else {
+            expand_universe (arg1);
+            outs ("Defining ");
+        }
+        print (arg1);
+        terpri ();
     }
-    print (arg1);
-    terpri ();
 #endif
     if (!member (arg1, SYMBOL_VALUE(universe)))
         expand_universe (arg1);

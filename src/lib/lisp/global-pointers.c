@@ -41,6 +41,9 @@ lispptr * global_pointers[] = {
 #ifndef NO_MACROEXPAND
     &macroexpand_sym,
 #endif
+#ifndef VERBOSE_DEFINES
+    &vp_symbol,
+#endif
 
     &lisp_fnin, &lisp_fnout,
 

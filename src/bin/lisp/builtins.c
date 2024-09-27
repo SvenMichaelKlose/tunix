@@ -1021,10 +1021,9 @@ bi_define (void)
     }
     print (arg1);
     terpri ();
-#else
+#endif
     if (!member (arg1, SYMBOL_VALUE(universe)))
         expand_universe (arg1);
-#endif
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }

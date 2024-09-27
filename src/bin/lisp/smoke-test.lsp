@@ -197,6 +197,18 @@
      (message "Testing GC...")
      (print (gc))(out '" bytes free.")(terpri))))
 
+(message "Testing VAR...")
+(var a nil)
+(or (member 'a *universe*)
+    (error "VAR didn't add to *UNIVERSE*."))
+(= *universe* (cdr (member 'a *universe*)))
+
+(message "Testing FN...")
+(fn b nil)
+(or (member 'b *universe*)
+    (error "FN didn't add to *UNIVERSE*."))
+(= *universe* (cdr (member 'b *universe*)))
+
 ; peek poke sys
 ; read print open err eof in out terpri fresh-line setin setout putback close load
 ; fn var universe gc exit
@@ -257,8 +269,8 @@
   ((()
      (print (gc))(out " bytes free.")(terpri))))
 
-(message "Testing SETIN...")
+(message "Smoke-testing SETIN...")
 (setin stdin)
 
-(message "Testing SETOUT...")
+(message "Smoke-testing SETOUT...")
 (setout stdout)

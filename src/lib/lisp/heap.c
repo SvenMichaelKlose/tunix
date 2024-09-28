@@ -45,7 +45,10 @@ struct heap_fragment heaps[] = {
 lispptr  t;
 lispptr  first_symbol;
 lispptr  last_symbol;
+
+#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
 lispptr  vp_symbol;
+#endif
 
 size_t  onetime_heap_margin;
 
@@ -509,9 +512,11 @@ init_heap ()
 #endif
 
     // Define verbosity flag *V?*.
+#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
     vp_symbol = make_symbol ("*v?*", 4);
     SET_SYMBOL_VALUE(vp_symbol, t);
     expand_universe (vp_symbol);
+#endif
 
     // Clear error info.
 #ifndef NAIVE

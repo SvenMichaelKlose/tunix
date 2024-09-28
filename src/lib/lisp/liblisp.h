@@ -640,7 +640,7 @@ extern lispptr onerror_sym;
 extern lispptr fail_sym;
 #endif
 
-#ifdef VERBOSE_DEFINES
+#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
 extern lispptr vp_symbol;
 #endif
 

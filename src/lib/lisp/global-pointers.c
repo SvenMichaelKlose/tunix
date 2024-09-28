@@ -41,7 +41,7 @@ lispptr * global_pointers[] = {
 #ifndef NO_MACROEXPAND
     &macroexpand_sym,
 #endif
-#ifndef VERBOSE_DEFINES
+#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
     &vp_symbol,
 #endif
 

@@ -564,7 +564,7 @@ load (char * pathname)
     char status = false;
     simpleio_chn_t load_fn;
 
-#ifdef VERBOSE_LOAD
+#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
         outs ("Loading ");
         outs (pathname);

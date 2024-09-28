@@ -27,26 +27,30 @@
 ; a '%' to avoid clashes with inter-
 ; rupted procedures during LOAD or EVAL.
 (fn autoload (%code %top %x)
-  (block nil
-    ; Handle only if ERROR_NOT_FUNCTION.
-    (? (== %code 5)
-       (block t
-         (? (symbol? (car %x))
-            (block t
-              (? (%alm (car %x))
-                 (block t
-                   ; If a macro was missing, replace
-                   ; expression by an expanded one.
-                   (? (macro? (car %x))
-                      (((%m)
-                         (setcar %x (car %m))
-                         (setcdr %x (cdr %m)))
-                       (macroexpand %x)))
-                   (return (eval %x))))
-              (? (%almr (cdr %x))
-                 ; Evaluate the failed expression again.
-                 (return (eval %x)))))))
-    ; Tell to fail on the error as usual.
-    '%fail))
+  (((%v?)
+     (= *v?* nil)
+     (block nil
+       ; Handle only if ERROR_NOT_FUNCTION.
+       (? (== %code 5)
+          (block t
+            (? (symbol? (car %x))
+               (block t
+                 (? (%alm (car %x))
+                    (block t
+                      ; If a macro was missing, replace
+                      ; expression by an expanded one.
+                      (? (macro? (car %x))
+                         (((%m)
+                            (setcar %x (car %m))
+                            (setcdr %x (cdr %m)))
+                          (macroexpand %x)))
+                      (return (eval %x))))
+                 (? (%almr (cdr %x))
+                    ; Evaluate the failed expression again.
+                    (return (eval %x)))))))
+       ; Tell to fail on the error as usual.
+       '%fail)
+     (= *v?* %v?))
+   *v?*))
 
 (= onerror autoload)

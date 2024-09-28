@@ -509,7 +509,7 @@ init_heap ()
 #endif
 
     // Define verbosity flag *V?*.
-    vp_symbol = make_symbol ("+v?+", 4);
+    vp_symbol = make_symbol ("*v?*", 4);
     SET_SYMBOL_VALUE(vp_symbol, t);
     expand_universe (vp_symbol);
 

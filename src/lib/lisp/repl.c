@@ -565,9 +565,11 @@ load (char * pathname)
     simpleio_chn_t load_fn;
 
 #ifdef VERBOSE_LOAD
-    outs ("Loading ");
-    outs (pathname);
-    terpri ();
+    if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
+        outs ("Loading ");
+        outs (pathname);
+        terpri ();
+    }
 #endif
 
     // Open file.

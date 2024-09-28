@@ -1,4 +1,6 @@
 (macro awhen (cond . body)
-  $(let ! ,cond
-     (when !
-       ,@body)))
+  $(((!)
+      (and !
+        ((()
+           ,@body))))
+    ,cond))

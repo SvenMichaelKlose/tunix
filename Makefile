@@ -82,7 +82,6 @@ allworlds:
 	$(MAKE) worldclean world TARGET=c128
 	$(MAKE) worldclean world TARGET=c16
 	$(MAKE) worldclean world TARGET=c64
-	$(MAKE) worldclean world TARGET=cpm
 	$(MAKE) worldclean world TARGET=pet
 	$(MAKE) worldclean world TARGET=plus4
 	$(MAKE) worldclean world TARGET=sim6502

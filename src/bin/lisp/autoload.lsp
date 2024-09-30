@@ -1,56 +1,35 @@
-(fn %alm (%e)
-  ; Turn function name into filename
-  ; by appending ".lsp" suffix.
-  (((%f)
-    ; Check if file exists by opening it.
-    (((%!)
-       (? %!
-          (block t
-            ; It does.  Close it.
-            (close %!)
-            ; Load it the regular way.
-            (load %f))))
-     (open %f 'r)))
-   (symbol (nconc (symbol-name %e)
-                  (symbol-name ".lsp")))))
+(load "let.lsp")
+(load "when.lsp")
+(load "progn.lsp")
+(load "awhen.lsp")
+(load "do.lsp")
+(load "dolist.lsp")
 
-(fn %almr (%x)
-  (? (cons? %x)
-     (or (and (symbol? (car %x))
-              (eq (symbol-value (car %x)) (car %x))
-              (%alm (car %x)))
-         (%almr (cdr %x)))))
+(fn %aload (%n)
+  (let %f (symbol (nconc (symbol-name %n)
+                        (symbol-name ".lsp")))
+    (let %! (open %f 'r)
+      (when %!
+        (close %!)
+        (load %f)))))
 
-; JIT-load missing functions and macros
-;
-; Variable names have been prefixed with
-; a '%' to avoid clashes with inter-
-; rupted procedures during LOAD or EVAL.
+(fn %al (%code %top %x)
+  (? (== %code 5) ; ERROR_NOT_CALLABLE
+     (progn
+       (%aload (car %x))
+       (when (macro? (car %x))
+         (let %m (macroexpand %x)
+           (setcar %x (car %m))
+           (setcdr %x (cdr %m))))
+       (eval %x))
+     '%fail))
+
 (fn autoload (%code %top %x)
-  (((%v?)
-     (= *v?* nil)
-     (block nil
-       ; Handle only if ERROR_NOT_FUNCTION.
-       (? (== %code 5)
-          (block t
-            (? (symbol? (car %x))
-               (block t
-                 (? (%alm (car %x))
-                    (block t
-                      ; If a macro was missing, replace
-                      ; expression by an expanded one.
-                      (? (macro? (car %x))
-                         (((%m)
-                            (setcar %x (car %m))
-                            (setcdr %x (cdr %m)))
-                          (macroexpand %x)))
-                      (return (eval %x))))
-                 (? (%almr (cdr %x))
-                    ; Evaluate the failed expression again.
-                    (return (eval %x)))))))
-       ; Tell to fail on the error as usual.
-       '%fail)
-     (= *v?* %v?))
-   *v?*))
+  (let %v? *v?*)
+    (= *v?* nil)
+    (let %! (%al %code %top %x)
+      (= *v?* %v?)
+      %!))
 
 (= onerror autoload)
+(= *macros* nil)

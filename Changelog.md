@@ -20,6 +20,7 @@ and this project adheres to
 #### Environment
 
 - AUTOLOAD is mute in order to not mess up the screen.
+  Simplified version, using macros.
 - LS: Returns list instead of just printing it.
 
 #### Interpreter

@@ -111,6 +111,7 @@
 //#define NO_BUILTIN_ASSOC
 //#define NO_BUILTIN_CHAR_AT
 //#define NO_BUILTIN_GC
+//#define NO_BUILTIN_FREE
 //#define NO_BUILTIN_LOAD
 //#define NO_BUILTIN_NCONC
 //#define NO_BUILTIN_NTHCDR

@@ -884,6 +884,7 @@ handler.
 | Function   | Description                            |
 |------------|----------------------------------------|
 | (gc)       | Free unused objects.                   |
+| (free)     | Number of free bytes on heap.          |
 | (exit ?n)  | Exit program or interpreter with code. |
 
 ### (gc): Free unused objects.
@@ -891,6 +892,8 @@ handler.
 Triggers the garbage collector.  It marks all objects
 linked to variable \*UNIVERSE\*, compacts the heap and
 relocates all pointers.
+
+### (free): Number of free bytes on heap.
 
 ### (exit ?n): Exit program or interpreter with exit code.
 
@@ -1454,14 +1457,10 @@ x           ; 23
 
 ### (load pathname): Load and evaluate file.
 
-Loads a file expression by expression, evaluating each
-right away.
-
-Returns NIL if the file could not be loaded, or T if all
-of the file has been processed successfully.
-
-This expample loads file "subseq.lisp" and returns T when
-finished:
+Reads and evaluates a file expression by expression.
+Returns NIL if the file could not be opened, T otherwise.
+LOAD opens an own input channel alongside the current
+input channel.
 
 ~~~lisp
 (load "subseq.lisp")

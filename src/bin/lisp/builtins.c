@@ -1058,6 +1058,16 @@ bi_gc (void)
 
 #endif // #ifndef NO_BUILTIN_GC
 
+#ifndef NO_BUILTIN_FREE
+
+lispptr
+bi_free (void)
+{
+    return make_number (heap_free_size ());
+}
+
+#endif // #ifndef NO_BUILTIN_FREE
+
 #ifndef NAIVE
 
 lispptr
@@ -1425,6 +1435,9 @@ const struct builtin builtins[] = {
 
 #ifndef NO_BUILTIN_GC
     { "gc",         "",     bi_gc },
+#endif
+#ifndef NO_BUILTIN_FREE
+    { "free",       "",     bi_free },
 #endif
 
 #ifndef NAIVE

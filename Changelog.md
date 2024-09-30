@@ -33,6 +33,7 @@ and this project adheres to
 
 ##### Added
 
+- FREE: Return number of free bytes on heap.
 - \*V?\* tells if definitions should be printed.
   (Requires compile-time option VERBOSE\_DEFINES.)
 - Compiles for TARGET\_CPM.  Untested!

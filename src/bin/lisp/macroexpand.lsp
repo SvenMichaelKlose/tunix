@@ -34,7 +34,8 @@
     (@ macroexpand x)))
 
 (special macro (n a . body)
-  (print $(macro ,n ,a))
+  (and *v?*
+       (print $(macro ,n ,a)))
   (((!)
      (? (macro? n)
         (setcdr (macro? n) (cons a !))

@@ -6,7 +6,10 @@
         (block nil
           ,tag
           (? ,(car brk-res)
-             (return (progn ,@(cdr brk-res))))
+             (return ,(? (cddr brk-res)
+                         $(progn
+                            ,',@(cdr brk-res))
+                         (cadr brk-res))))
           ,@body
           ,@(@ '((x)
                   (? (caddr x)

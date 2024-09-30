@@ -5,7 +5,7 @@
 
 (message "Testing OPEN on missing file...")
 (and (open "k87sfdasdj9" 'r)
-     (error))
+     (error "File \"k87sfdasdj9\" should be missing."))
 
 (message "Testing OPEN file write to \"test.out\"...")
 (let o (open "test.out" 'w)
@@ -25,7 +25,7 @@
   (setin stdin)
   (close i)
   (or (equal e message)
-      (error)))
+      (error "Expression read from \"test.out\" does not match MESSAGE")))
 
 (message "Testing READ/PRINT copy...")
 (with ((i (open "test.out" 'r))
@@ -48,4 +48,4 @@
   (setin stdin)
   (close i)
   (or (equal e message)
-      (error)))
+      (error "Unexpected expression read from \"test2.out\".")))

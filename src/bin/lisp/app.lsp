@@ -7,19 +7,16 @@
 
 (fn app (name)
   ;"Mark start or end of app."
-  (print $(app ,name))
   (= *a* name)
   (push name *universe*)
   (push (list name) *macros*))
 
 (fn reset-app ()
-  (print $(reset-app ,*a*))
   (= *universe* (member *a* *universe*))
   (= *macros* (member-if $((x)
                             (eq (car x) ',*a*))
                          *macros*)))
 (fn rm-app (name)
-  (print $(rm-app ,name))
   (= *universe* (!= (split name *universe*)
                   (or (caddr !) (error))
                   (dolist (i (cadr !))

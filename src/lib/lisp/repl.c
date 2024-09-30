@@ -325,7 +325,9 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
                     read_cmd_arg ();
                     outs ("Value: ");
                     print (value);
-                    goto done_short_command;
+                    POP(value);
+                    stack += sizeof (lispptr);
+                    continue;
 
                 // Set breakpoint or print all of them.
                 case 'b':

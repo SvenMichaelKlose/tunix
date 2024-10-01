@@ -1,7 +1,6 @@
 (load "let.lsp")
 (load "when.lsp")
 (load "progn.lsp")
-(load "awhen.lsp")
 (load "do.lsp")
 (load "dolist.lsp")
 

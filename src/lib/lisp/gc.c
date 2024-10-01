@@ -23,6 +23,10 @@ bool do_compress_cons;
 
 lispptr ** gp;
 
+#ifdef VERBOSE_GC
+simpleio_chn_t gc_oldout;
+#endif
+
 #ifdef __CC65__
 #pragma code-name ("CODE_GC")
 #endif
@@ -107,7 +111,7 @@ void
 sweep ()
 {
 #ifdef VERBOSE_GC
-    simpleio_chn_t oldout = fnout;
+    simpleio_chn_t gc_oldout = fnout;
 #endif
 
 #ifdef FRAGMENTED_HEAP
@@ -127,7 +131,10 @@ sweep ()
     xlat_full = false;  // Mark it as not full.
 
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
-    outs ("Sweep objects:"); terpri ();
+    setout (STDOUT);
+    outs ("Sweep objects:");
+    terpri ();
+    setout (gc_oldout);
 #endif
 
     // Get heap pointers.
@@ -141,7 +148,7 @@ sweep ()
 #ifdef VERBOSE_GC
     setout (STDOUT);
     out ('S');
-    setout (oldout);
+    setout (gc_oldout);
 #endif
 
         // Sweep one heap.
@@ -171,7 +178,7 @@ sweep ()
 #ifdef VERBOSE_COMPRESSED_CONS
                         setout (STDOUT);
                         out ('C');
-                        setout (oldout);
+                        setout (gc_oldout);
 #endif
 
                         // Copy with mark bit cleard and type extended.
@@ -256,7 +263,11 @@ check_xlat:
         if (xlat == xlat_start)
             xlat_full = true;
 #ifdef VERBOSE_GC
-        outn (total_removed); outs ("B freed."); terpri ();
+        setout (STDOUT);
+        outn (total_removed);
+        outs ("B freed.");
+        terpri ();
+        setout (gc_oldout);
 #endif // #ifdef VERBOSE_GC
     } while ((++heap)->start);
 #else // #ifdef FRAGMENTED_HEAP
@@ -303,7 +314,9 @@ relocate (void)
         heap_start = heap->start;
 #endif
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('R');
+    setout (gc_oldout);
 #endif
 
         // Relocate elements on heap.
@@ -327,7 +340,9 @@ relocate (void)
 #endif
 
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     terpri ();
+    setout (gc_oldout);
 #endif
 }
 
@@ -336,7 +351,7 @@ void
 gc (void)
 {
 #ifdef VERBOSE_GC
-    simpleio_chn_t oldout = fnout;
+    gc_oldout = fnout;
 #endif
 
 #ifdef FRAGMENTED_HEAP
@@ -345,7 +360,7 @@ gc (void)
 #ifdef VERBOSE_GC
         setout (STDOUT);
         out ('N');
-        setout (oldout);
+        setout (gc_oldout);
 #endif
         goto next_heap;
     }
@@ -361,32 +376,44 @@ restart:
 #ifdef VERBOSE_GC
     setout (STDOUT);
     out ('M');
-    setout (oldout);
+    setout (gc_oldout);
 #endif
 
     // Mark global pointers.
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Mark globals: ");
+    setout (gc_oldout);
 #endif
     for (gp = global_pointers; *gp; gp++) {
 #ifdef GC_DIAGNOSTICS
-        outhw ((int) *gp); out (' ');
+        setout (STDOUT);
+        outhw ((int) *gp);
+        out (' ');
+        setout (gc_oldout);
 #endif
         mark (**gp);
     }
 
     // Mark GC'ed stack.
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Mark stack: ");
+    setout (gc_oldout);
 #endif
     for (p = stack; p != stack_end; p += sizeof (lispptr)) {
 #ifdef GC_DIAGNOSTICS
-        outhw ((int) *p); out (' ');
+        setout (STDOUT);
+        outhw ((int) *p);
+        out (' ');
+        setout (gc_oldout);
 #endif
         mark (*(lispptr *) p);
     }
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Sweep: ");
+    setout (gc_oldout);
 #endif
 
     // Append used objects over unused ones, freeing space.
@@ -400,7 +427,9 @@ restart:
     // to full relocation table.
     if (xlat_full) {
 #ifdef VERBOSE_GC
+        setout (STDOUT);
         outs ("!GC restart!");
+        setout (gc_oldout);
 #endif
         goto restart;
     }

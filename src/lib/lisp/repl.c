@@ -542,7 +542,9 @@ done:
         num_debugger_repls--;
 #endif
 
+#ifndef NO_ONERROR
 done_onerror:
+#endif
         // Restore earlier GC trigger threshold to
         // be able to run ONERROR if out of heap.
         onetime_heap_margin = ONETIME_HEAP_MARGIN;

@@ -29,8 +29,7 @@
 
 (message "Testing READ/PRINT copy...")
 (with ((i (open "test.out" 'r))
-       (o (open "test2.out" 'w))
-       (e nil))
+       (o (open "test2.out" 'w)))
   (or i (message "Cannot open \"test.out\" for reading."))
   (or o (message "Cannot open \"test2.out\" for writing."))
   (setin i)

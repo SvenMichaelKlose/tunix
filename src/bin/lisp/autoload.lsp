@@ -34,4 +34,3 @@
       %!))
 
 (= onerror autoload)
-(= *macros* nil)

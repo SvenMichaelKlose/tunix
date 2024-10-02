@@ -1013,18 +1013,20 @@ lispptr
 bi_define (void)
 {
 #ifdef VERBOSE_DEFINES
+    simpleio_chn_t old_out = fnout;
+
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
-        if (member (arg1, SYMBOL_VALUE(universe)))
+        setout (STDOUT);
+        if (NOT_NIL(member (arg1, SYMBOL_VALUE(universe))))
             outs ("Redefining ");
-        else {
-            expand_universe (arg1);
+        else
             outs ("Defining ");
-        }
         print (arg1);
         terpri ();
+        setout (old_out);
     }
 #endif
-    if (!member (arg1, SYMBOL_VALUE(universe)))
+    if (NOT(member (arg1, SYMBOL_VALUE(universe))))
         expand_universe (arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;

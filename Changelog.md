@@ -39,7 +39,7 @@ and this project adheres to
 
 ##### Fixed
 
-- LOAD: Don't trash output channel when verbose.
+- LOAD, VAR, FN: Don't trash output channel when verbose.
 - VAR, FN: Didn't add to \*UNIVERSE\* with compile-time
   option VERBOSE\_DEFINES.
 - PRINT: Also pad NIL (like all other symbols).

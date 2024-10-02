@@ -32,6 +32,7 @@
       (error "Expansion of PROG1 failed.")))
 
 (do-test "Testing PROGN..."
+  (load "progn.lsp")
   (or (equal (macroexpand '(progn (error)))
              '(block t (error)))))
 
@@ -51,22 +52,16 @@
 (message "TODO: Testing WHEN...")
 (message "TODO: Testing AWHEN...")
 
-(do-test "Testing WHILE..."
-  (let x 10
-    (while (< 0 x)
-      (print x)
-      (= x (-- x))))
-  (terpri))
-
 (do-test "Testing WITH-GLOBAL..."
-  (let old-macros *macros*
-    (with-global *macros* nil
-      (and *macros*
-           (error "*MACROS* not NIL.")))
-      (or *macros*
-          (error "*MACROS* is NIL."))))
+  (let tmp 'dummy
+    (with-global tmp nil
+      (and tmp
+           (error "TMP is not NIL.")))
+    (or tmp
+        (error "TMP not restored."))))
 
 (do-test "Testing WITH..."
+  (load "with.lsp")
   (or (equal (macroexpand '(with ((a 1)
                                   (b 2))
                              (print a)
@@ -100,6 +95,11 @@
     (print i))
   (terpri))
 
+(do-test "Testing REVERSE..."
+  (or (equal (reverse '(p s i l))
+             '(l i s p))
+      (error)))
+
 (do-test "Smoke-testing DOLIST..."
   (dolist (i '(1 2 3 4 5 6 7 8 9 10))
     (fresh-line)(out '"Item ")(print i)))
@@ -109,10 +109,12 @@
     (print i))
   (terpri))
 
-(do-test "Testing REVERSE..."
-  (or (equal (reverse '(p s i l))
-             '(l i s p))
-      (error)))
+(do-test "Testing WHILE..."
+  (let x 10
+    (while (< 0 x)
+      (print x)
+      (= x (-- x))))
+  (terpri))
 
 (do-test "Smoke-testing AWHILE..."
   (let x 19

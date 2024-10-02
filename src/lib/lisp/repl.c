@@ -242,7 +242,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
     // READ/EVAL/PRINT-Loop.
     while (1) {
-        setin (load_fn ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+        if (mode == REPL_LOAD)
+            setin (load_fn);
+        else if (mode == REPL_STD)
+            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
         if (eof ())
             break;
         setin (STDIN);
@@ -263,7 +266,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif // #ifndef NO_DEBUGGER
-            setin (load_fn ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            setin (mode == REPL_LOAD ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
             read_safe ();
             if (eof ())
                 break;

@@ -156,7 +156,6 @@ lisp_init (void)
     bekloppies_start = bekloppies ();
 #endif
 
-    // Init components.
     simpleio_init ();
     if (!init_heap ()) {
         outs ("No memory.");
@@ -229,9 +228,7 @@ main (int argc, char * argv[])
         // Call function ISTART.
         istart_fun = make_symbol ("istart", 6);
         if (CONSP(SYMBOL_VALUE(istart_fun))) {
-           PUSH(istart_fun);
            x = make_cons (istart_fun, nil);
-           stack += sizeof (lispptr);
            (void) eval ();
         }
     }

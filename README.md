@@ -32,7 +32,7 @@ All targets require a disk drive of some sort.
 
 | Target            | Requirements | Limits             |
 |-------------------|--------------|--------------------|
-| Commodore C128    |              |                    |
+| Commodore C128    |              | No images/debugger |
 | Commodore C16     |              | Defunct.           |
 | Commodore C64     |              |                    |
 | Commodore plus/4  |              |                    |

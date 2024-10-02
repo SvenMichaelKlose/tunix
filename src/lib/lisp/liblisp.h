@@ -418,6 +418,9 @@
 #ifndef NO_BUILTIN_GROUP_BITOPS
     #define NO_BUILTIN_GROUP_BITOPS
 #endif
+#ifndef NO_BUILTIN_GROUP_IMAGE
+    #define NO_BUILTIN_GROUP_IMAGE
+#endif
 #ifndef NO_BUILTIN_READ_LINE
     #define NO_BUILTIN_READ_LINE
 #endif

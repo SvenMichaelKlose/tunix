@@ -346,6 +346,7 @@ simpleio_init ()
     cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
     cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
     memset (logical_fns, 0, sizeof (logical_fns));
+    memset (last_status, 0, sizeof (last_status));
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;

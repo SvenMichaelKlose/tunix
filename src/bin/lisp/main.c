@@ -194,6 +194,9 @@ main (int argc, char * argv[])
     // Muffle compiler warnings.
     (void) argc, (void) argv;
 
+#if defined(DEVELOPMENT) && defined(__CC65__)
+    memset ((char *) 0x100, 0, 0xe0);
+#endif
     lisp_init ();
 #ifdef WAS_TARGET_VIC20
     heap_add_init_areas ();

@@ -2023,38 +2023,40 @@ rest is the value.
 |   +vb+   | Git branch.                             |
 |  \*v?\*  | Tell if definitions should be printed.  |
 
-## Automatic loading of procedures
+## Autoloader
 
 | Function   | Description             |
 |------------|-------------------------|
 | (autoload) | Load missing procedure. |
 
-Auto-loading is enabled by default.  If function AUTOLOAD has been
-assigned to ONERROR, it will try to load missing procedures by appending
-the suffix ".lisp" to it and load it from the current directory.  If a
-file of that name is not around, the error is passed back to the
-interpreter, which will serve it by calling a debugger REPL, so you can
-act upon it.
+| Variable | Description                              |
+|----------|------------------------------------------|
+| \*alx\*  | Name translation map (associative list). |
+| \*alv?\* | Verbose mode during AUTOLOAD.            |
 
-Missing macros are also detected this way and unexpanded expressions will
-be replaced by expanded ones immediately.
-
-AUTOLOAD is rather useful on extremely constrained systems in conjunction
-with cutting off \*UNIVERSE\*, so it only contains AUTOLOAD and
-MACROEXPAND, and by clearing the macro definition list \*MACROS\*.
+Missing procedures are loaded on demand by AUTOLOAD (assigned to ONERROR), as long as the filename is the same
+(plus the ".lsp" suffix).
+Messages are not printed during AUTOLOAD unless \*ALV?\* is not NIL.
+The default is NIL (quiet).
 
 ~~~lisp
-(= *universe* (member 'autoload *universe*))
-(= *macros* nil)
+; Verbose autoloading of LS.
+(with-global *alv?* t
+  (ls))
+Loading ls.lsp
 ~~~
 
-This will discard all code that is not linked to the currently running
-program in any way during the following garbage collection.  It could be
-done if ONERROR is called with ERROR\_OUT\_OF\_HEAP.  Experiments will
-have to show if that is a practical scheme.
+If the missing procedure is a macro, the original code is expanded on the
+fly.
 
-**AUTOLOAD will not work with !? as the file containing it is
-"aif.lisp".***  You need to load it manually until this has been solved.
+For names with wildcards name translations can been added to \*ALX\*.
+Can be used to map many procedures to a single file.
+
+~~~lisp
+; Add translation for macro "!?" in file "aif.lsp".
+; (Already done.)
+(push (cons '!? 'aif) *alx*)
+~~~
 
 ## Maintainance
 

@@ -4,9 +4,12 @@
 (load "do.lsp")
 (load "dolist.lsp")
 
+(var *alx*
+  '((!? . aif)))
+
 (fn %aload (%n)
-  (let %f (symbol (nconc (symbol-name %n)
-                        (symbol-name ".lsp")))
+  (let %f (symbol (nconc (symbol-name (or (cdr (assoc %n *alx*)) %n))
+                         (symbol-name ".lsp")))
     (let %! (open %f 'r)
       (when %!
         (close %!)

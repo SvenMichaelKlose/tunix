@@ -19,12 +19,21 @@ and this project adheres to
 
 #### Environment
 
+##### Fixed
+
 - MACRO: Don't trash output channel when verbose.
+
+##### Changed
+
 - AUTOLOAD is mute in order to not mess up the screen.
   Simplified version, using macros.
+- LS: Returns list instead of just printing it.
+
+##### Added
+
 - \*ALX\* contains name translations for AUTOLOAD.
 - \*ALV?\* tells if AUTOLOAD should be verbose.
-- LS: Returns list instead of just printing it.
+- AREMOVE, AREMOVE-IF
 
 #### Interpreter
 

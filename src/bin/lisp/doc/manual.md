@@ -1992,17 +1992,20 @@ x ; '(2)
 
 ## Associative lists
 
-| Function        | Description                        |
-|-----------------|------------------------------------|
-| (acons alist c) | Add key/value to associative list. |
-| (assoc x l)     | Return list that start with X.     |
+| Function         | Description                        |
+|------------------|------------------------------------|
+| (acons alist c)  | Add key/value to associative list. |
+| (assoc x l)      | Return list that start with X.     |
+| (aremove x l)    | Remove X from associative L.       |
+| (aremove-if f l) | Remove by F from associative L.    |
 
-A list of lists where the first element of each list is the key and the
+A list of lists where the first element is the key and the
 rest is the value.
 
 ### (acons alist c): Add key/value to associative list.
-
 ### (assoc x l): Return list that start with X.
+### (aremove x l): Remove X from associative L.
+### (aremove-if f l): Remove by F from associative L.
 
 ## Console control
 

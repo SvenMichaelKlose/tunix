@@ -163,6 +163,17 @@
         (equal x '((vic . 20))))
       (error)))
 
+(do-test "Testing AREMOVE..."
+  (and (aremove t nil)
+       (error))
+  (or (equal (carlist (aremove 'i '((l) (i) (s) (p))))
+             '(l s p))))
+
+(do-test "Testing AREMOVE-IF..."
+  (or (equal (carlist (aremove-if '((x) (eq 'i (car x)))
+                                  '((l) (i) (s) (p))))
+             '(l s p))))
+
 (do-test "Testing COPY-TREE..."
   (or (equal (copy-tree '((1 2) (3 (4 5))))
              '((1 2) (3 (4 5))))

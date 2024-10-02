@@ -25,6 +25,7 @@ and this project adheres to
 
 ##### Changed
 
+- All things console are in file "con.lsp".
 - AUTOLOAD is mute in order to not mess up the screen.
   Simplified version, using macros.
 - LS: Returns list instead of just printing it.

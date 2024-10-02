@@ -242,6 +242,7 @@
 #ifndef SLOW
     #define SLOW
 #endif
+#define NO_IMAGE
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -418,9 +419,6 @@
 #ifndef NO_BUILTIN_GROUP_BITOPS
     #define NO_BUILTIN_GROUP_BITOPS
 #endif
-#ifndef NO_BUILTIN_GROUP_IMAGE
-    #define NO_BUILTIN_GROUP_IMAGE
-#endif
 #ifndef NO_BUILTIN_READ_LINE
     #define NO_BUILTIN_READ_LINE
 #endif
@@ -513,6 +511,10 @@
 
 #if defined (NDEBUG) && defined (DUMP_SWEEPED)
     #error "NDEBUG and DUMP_SWEEPED cannot be used together."
+#endif
+
+#if defined(NO_IMAGE) && !defined(NO_BUILTIN_GROUP_IMAGE)
+    #define NO_BUILTIN_GROUP_IMAGE
 #endif
 
 #ifdef NAIVE

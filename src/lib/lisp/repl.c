@@ -569,10 +569,13 @@ load (char * pathname)
     simpleio_chn_t load_fn;
 
 #if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
+    simpleio_chn_t old_out = fnout;
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
+        setout (STDOUT);
         outs ("Loading ");
         outs (pathname);
         terpri ();
+        setout (old_out);
     }
 #endif
 

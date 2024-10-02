@@ -22,9 +22,3 @@
 
 (fn caddr (x)
   (car (cdr (cdr x))))
-
-(fn carlist (x)
-  (@ car x))
-
-(fn cdrlist (x)
-  (@ cdr x))

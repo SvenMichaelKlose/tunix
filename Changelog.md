@@ -22,6 +22,7 @@ and this project adheres to
 - AUTOLOAD is mute in order to not mess up the screen.
   Simplified version, using macros.
 - \*ALX\* contains name translations for AUTOLOAD.
+- \*ALV?\* tells if AUTOLOAD should be verbose.
 - LS: Returns list instead of just printing it.
 
 #### Interpreter

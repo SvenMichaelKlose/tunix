@@ -1,9 +1,9 @@
 (load "let.lsp")
 (load "when.lsp")
 (load "progn.lsp")
-(load "do.lsp")
-(load "dolist.lsp")
+(load "mapcar.lsp") ; Workaround
 
+(var *alv?* nil)
 (var *alx*
   '((!? . aif)))
 
@@ -28,7 +28,7 @@
 
 (fn autoload (%code %top %x)
   (let %v? *v?*)
-    (= *v?* nil)
+    (= *v?* *alv?*)
     (let %! (%al %code %top %x)
       (= *v?* %v?)
       %!))

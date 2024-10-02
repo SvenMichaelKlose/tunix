@@ -19,6 +19,7 @@ and this project adheres to
 
 #### Environment
 
+- MACRO: Don't trash output channel when verbose.
 - AUTOLOAD is mute in order to not mess up the screen.
   Simplified version, using macros.
 - \*ALX\* contains name translations for AUTOLOAD.

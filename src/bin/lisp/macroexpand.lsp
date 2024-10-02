@@ -35,7 +35,11 @@
 
 (special macro (n a . body)
   (and *v?*
-       (print $(macro ,n ,a)))
+    (((oldout)
+       (setout stdout)
+       (print $(macro ,n ,a))
+       (setout oldout))
+     fnout))
   (((!)
      (? (macro? n)
         (setcdr (macro? n) (cons a !))

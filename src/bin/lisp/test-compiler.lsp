@@ -1,10 +1,4 @@
-(or (macro? '!?=)
-    (load "aif.lsp"))
-(or (cons? mapcar)
-    (load "mapcar.lsp"))
-(or (cons? app)
-    (load "app.lsp"))
-
+(= *alv?* t)
 (app 'app-test-compiler)
 
 (message "Testing CMACROEXPAND...")

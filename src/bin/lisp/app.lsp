@@ -1,8 +1,3 @@
-(or (cons? require)
-    (load "require.lsp"))
-
-(require '!= 'push 'do 'mapcar 'position 'position-if 'split 'split-if)
-
 (var *a* nil)
 
 (fn app (name)

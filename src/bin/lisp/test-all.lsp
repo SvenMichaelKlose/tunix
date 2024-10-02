@@ -1,8 +1,4 @@
-(or (macro? '!?)
-    (load "aif.lsp"))
-(or (cons? mapcar)
-    (load "mapcar.lsp"))
-
+(= *alv?* t) ; Verbose AUTOLOAD.
 (app 'app-test-all)
 
 (macro do-test (title . body)
@@ -15,8 +11,7 @@
          (fresh-line)
          (= *universe* (member 'app-test-all *universe*))
          (= *macros* (member-if '((x) (eq (car x) 'do-test))
-                                *macros*))
-         (print (carlist *macros*))))
+                                *macros*))))
      (fresh-line)
      ,@body))
 
@@ -344,3 +339,4 @@
 
 (app 'app-test-all)
 (rm-app 'app-test-all)
+(= *alv?* nil) ; Verbose AUTOLOAD.

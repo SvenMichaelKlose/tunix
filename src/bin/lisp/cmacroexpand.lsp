@@ -1,13 +1,4 @@
-(or (macro? '!?)
-    (load "aif.lsp"))
-(or (cons? mapcar)
-    (load "mapcar.lsp"))
-(or (cons? require)
-    (load "require.lsp"))
-
 (app 'app-cmacroexpand)
-
-(require 'let '!= 'with-global 'prog1 'progn 'push 'pop 'group)
 
 (var *cmacros* nil)
 

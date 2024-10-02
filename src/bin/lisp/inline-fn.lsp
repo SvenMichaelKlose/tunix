@@ -1,8 +1,3 @@
-(or (cons? mapcar)
-    (load "mapcar.lsp"))
-(or (macro? '!?)
-    (load "aif.lsp"))
-
 (app 'app-inline-fn)
 
 (require 'reverse)

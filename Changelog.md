@@ -18,6 +18,7 @@ and this project adheres to
 ##### Fixed
 
 - AUTOLOAD: Do not try to re-evaluate if file could not be loaded.
+- STACK: Ensure fresh line before printing an entry.
 
 ##### Added
 

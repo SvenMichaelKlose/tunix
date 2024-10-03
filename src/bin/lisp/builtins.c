@@ -1100,6 +1100,7 @@ bi_stack (void)
     lispptr * p;
     setout (STDERR);
     for (p = (void *) stack_end, p--; p != (void *) stack; p--) {
+        fresh_line ();
         outn (i++);
         outs (": ");
         print (*p);

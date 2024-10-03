@@ -19,6 +19,12 @@ and this project adheres to
 
 - AUTOLOAD: Do not try to re-evaluate if file could not be loaded.
 
+##### Added
+
+- CDDDR
+- DOLIST-INDEXED
+- LET-WHEN
+
 
 ## [v0.0.20] - 2024-10-02
 

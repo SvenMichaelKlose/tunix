@@ -16,15 +16,15 @@
         (load %f)))))
 
 (fn %al (%code %top %x)
-  (? (== %code 5) ; ERROR_NOT_CALLABLE
-     (progn
-       (%aload (car %x))
-       (when (macro? (car %x))
-         (let %m (macroexpand %x)
-           (setcar %x (car %m))
-           (setcdr %x (cdr %m))))
-       (eval %x))
-     '%fail))
+  (block nil
+    (when (and (== %code 5) ; ERROR_NOT_FUNCTION
+               (%aload (car %x)))
+      (when (macro? (car %x))
+        (let %m (macroexpand %x)
+          (setcar %x (car %m))
+          (setcdr %x (cdr %m))))
+      (return (eval %x)))
+    '%fail))
 
 (fn autoload (%code %top %x)
   (let %v? *v?*)

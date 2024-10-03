@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Fixed
+
+- AUTOLOAD: Do not try to re-evaluate if file could not be loaded.
+
+
 ## [v0.0.20] - 2024-10-02
 
 ### Lisp

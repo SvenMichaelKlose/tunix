@@ -54,28 +54,39 @@
        am)
      am))
 
+; Get operand of 1st class instruction.
 (fn mnam-opc (mn am)
+  ; Get CC by mnemonic.
   (let-when cc (mn-cc mn)
     (= am (adjust-am mn am))
-    (with ((aaa (position mn (nth cc *mn-6502*)))
-           (bbb (position am (nth cc *am-6502*))))
-      (and aaa bbb
-           (list aaa bbb cc)))))
+    ; Get AAA by mnemonic.
+    (let-when aaa (position mn (nth cc *mn-6502*))
+      ; Get BBB by addressing mode.
+      (let-when bbb (position am (nth cc *am-6502*))
+        ; Check if opcode is legal.
+        (when (!= (nth bbb (nth cc *6502*))
+                (or (eq t !)
+                    (eq t (nth aaa !))))
+          (list aaa bbb cc))))))
 
-; Search CC table for mnemonic with addressing mode "immediate".
+; Get opcode of 2nd class instruction.
 (fn mnimm-opc (mn)
   (block found
     ; Scan all CC pages.
     (dolist-indexed (c cc *6502*)
       ; Scan all its BBB addressing modes.
       (dolist-indexed (b bbb c)
-        (unless (eq t b) ; (AAA row occupied by 1st class instructions?)
-          ; Check for mnemonic in AAA row.
+        ; Check for mnemonic in AAA row.
+        (unless (eq t b) ; (all of row 1st class instructions)
           (let-when aaa (position mn b)
+            ; Mnemonic found.
             (return (list aaa bbb cc) found)))))))
 
 ; Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode.
 (fn mn-opc (mn am)
-  (? am
-     (mnam-opc mn am)
-     (mnimm-opc mn)))
+  (awhen (? am
+            (mnam-opc mn am)
+            (mnimm-opc mn))
+    (+ (+ (<< (car !) 5)
+          (<< (cadr !) 2))
+       (caddr !))))

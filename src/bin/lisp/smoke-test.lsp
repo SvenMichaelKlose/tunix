@@ -220,7 +220,7 @@
 (message "Smoke-testing recursion...")
 (make-count 10)
 
-(message "Testing RETURN...")
+(message "Testing RETURN in special form...")
 ((()
   (block nil
     ((()
@@ -228,6 +228,22 @@
         (and (or (return nil)))))
       (error "RETURN should have been returned from parent function body.")))
     (error "Should have returned past BLOCK."))))
+
+(message "Testing RETURN in argument list of built-in...")
+(or (eq 'a (block nil (print (return 'a))))
+    (error "RETURN in argument list of built-in failed."))
+
+(message "Testing RETURN in argument list of user-defined function...")
+(fn twoargs (a b))
+(or (eq 'foo (block nil (twoargs (return 'foo) nil)))
+    (error "RETURN in argument list of user-defined function failed as first argument to TWOARGS."))
+(or (eq 'foo (block nil (twoargs nil (return 'foo))))
+    (error "RETURN in argument list of user-defined function failed as second argument to TWOARGS."))
+
+(message "Testing RETURN in argument rest of user-defined function...")
+(fn list x x)
+(or (eq 'foo (block nil (list (return 'foo))))
+    (error "RETURN in argument list of user-defined function failed."))
 
 (fn return-test (block-name)
   (((x)

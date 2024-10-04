@@ -13,6 +13,10 @@ and this project adheres to
 
 ### Lisp
 
+#### Interpreter
+
+- RETURN breaks evaluation of argument lists.
+
 #### Environment
 
 ##### Fixed

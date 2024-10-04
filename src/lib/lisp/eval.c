@@ -94,7 +94,7 @@ eval_list (void)
     POP(x);
 
     if (do_break_repl || value == return_sym)
-        return nil;
+        return value;
 
     // Make first element of result list and put it on
     // the object stack, so we don't have to worry about
@@ -134,7 +134,7 @@ eval_list (void)
         // Handle break, e.g. because of an error.
         if (do_break_repl || value == return_sym) {
             stack += sizeof (lispptr);
-            return nil;
+            return value;
         }
     }
 
@@ -562,7 +562,7 @@ do_argument:
         }
 
         // Save argument value unless we need to fall through.
-        if (!do_break_repl && value != return_sym)
+        if (!do_break_repl)
             PUSH(value);
 
         goto start_body;
@@ -608,7 +608,7 @@ next_arg:
         POP(args);
         POP(argdefs);
         POP(arg1);  // Function
-        if (do_break_repl) // TOOD || value == return_sym)
+        if (do_break_repl || value == return_sym)
             goto start_body;
     }
 
@@ -622,7 +622,7 @@ next_arg:
 
 start_body:
 #ifndef NAIVE
-    if (error_code || do_break_repl) { // TODO value == return_sym
+    if (error_code || do_break_repl || value == return_sym) {
         stack = stack_entered;
         goto do_return;
     }

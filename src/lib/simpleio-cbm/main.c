@@ -244,14 +244,14 @@ directory_close (simpleio_chn_t chn)
 bool
 raw_eof (void)
 {
-    return last_status[chn];
+    return last_status[fnin];
 }
 
 signed char
 raw_err (void)
 {
     // (Mask out EOF.)
-    return last_status[chn] & ~0x40;
+    return last_status[fnin] & ~0x40;
 }
 
 char FASTCALL
@@ -261,7 +261,7 @@ convert_in (char c)
 }
 
 void
-set_status (void)
+set_status (simpleio_chn_t chn)
 {
     last_status[chn] = cbm_k_readst ();
 }
@@ -270,7 +270,7 @@ char FASTCALL
 raw_conin (void)
 {
     char c = cgetc ();
-    set_status ();
+    set_status (fnin);
     return convert_in (c);
 }
 
@@ -278,7 +278,7 @@ char
 raw_in (void)
 {
     char c = cbm_k_chrin ();
-    set_status ();
+    set_status (fnin);
     return convert_in (c);
 }
 
@@ -303,21 +303,21 @@ raw_out (char c)
         }
     }
     cbm_k_bsout (c);
-    set_status ();
+    set_status (fnout);
 }
 
 void FASTCALL
 raw_setin (simpleio_chn_t chn)
 {
     cbm_k_chkin (logical_fns[chn]);
-    set_status ();
+    set_status (chn);
 }
 
 void FASTCALL
 raw_setout (simpleio_chn_t chn)
 {
     cbm_k_ckout (logical_fns[chn]);
-    set_status ();
+    set_status (chn);
 }
 
 void FASTCALL

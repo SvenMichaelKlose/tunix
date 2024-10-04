@@ -13,6 +13,10 @@ and this project adheres to
 
 ### Lisp
 
+#### libstdio-cbm
+
+- Fix using current channel.  Used the last one for statuses.
+
 #### Interpreter
 
 - RETURN breaks evaluation of argument lists.

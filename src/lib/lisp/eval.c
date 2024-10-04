@@ -93,7 +93,7 @@ eval_list (void)
     eval ();
     POP(x);
 
-    if (do_break_repl)
+    if (do_break_repl || value == return_sym)
         return nil;
 
     // Make first element of result list and put it on
@@ -132,7 +132,7 @@ eval_list (void)
         POP(x);
 
         // Handle break, e.g. because of an error.
-        if (do_break_repl) {
+        if (do_break_repl || value == return_sym) {
             stack += sizeof (lispptr);
             return nil;
         }
@@ -366,6 +366,8 @@ set_arg_values:
 
             // Call built-in.
             POP_TAGW(bfun);
+            if (value == return_sym)
+                goto do_return;
             value = do_break_repl ? nil : bfun->func ();
             goto do_return;
         }
@@ -441,7 +443,7 @@ next_builtin_arg:
         POP_TAGW(builtin_argdef);
         POP(args);
 
-        if (do_break_repl)
+        if (do_break_repl || value == return_sym)
             goto break_builtin_call;
 
 save_arg_value:
@@ -459,7 +461,7 @@ save_arg_value:
         }
 #endif
         // Break evaluation.
-        if (do_break_repl)
+        if (do_break_repl || value == return_sym)
             goto break_builtin_call;
 
         // Save argument value.
@@ -560,7 +562,7 @@ do_argument:
         }
 
         // Save argument value unless we need to fall through.
-        if (!do_break_repl)
+        if (!do_break_repl && value != return_sym)
             PUSH(value);
 
         goto start_body;
@@ -606,7 +608,7 @@ next_arg:
         POP(args);
         POP(argdefs);
         POP(arg1);  // Function
-        if (do_break_repl)
+        if (do_break_repl) // TOOD || value == return_sym)
             goto start_body;
     }
 
@@ -620,7 +622,7 @@ next_arg:
 
 start_body:
 #ifndef NAIVE
-    if (error_code || do_break_repl) {
+    if (error_code || do_break_repl) { // TODO value == return_sym
         stack = stack_entered;
         goto do_return;
     }

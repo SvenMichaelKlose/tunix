@@ -3,6 +3,36 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-04
+
+RETURN is ignored in argument lists but I'm at it, hoping that
+this will finish AUTOLOAD which works nicely otherwise.
+Especially noteworthy is its ability to expand missing macros in
+already running code.  Anyway: The RETURN issue needs to be
+fixed to satisfaction.  With the everything loading on demand
+properly and the debugger REPL stepping properly, a v1.0.0
+release is closing in.  Without a bytecode compiler, because
+there still is a tutorial, manual and references to complete.
+
+# 2024-09-27
+
+I hate taking breaks from challenging and creative tasks that
+require grand pictures.  So let me reboot: TUNIX Lisp is
+about educational purpose in the first place.  What's there
+is not that playful toolbox it has to be, and I'm equally
+tired and motivated, which is calling for a break again.
+
+After several attempts I'm doing the new kids' intro to
+Lisp on the project's Github wiki.  Maybe it'll find its
+way into the "Garbage Collected Manual".
+Renaming classic function names to something that's
+tangible, e.g. CARLIST to FIRSTS and CDRLIST to RESTS.
+FIRST instead of CAR and REST instead of CDR is also nice
+but combinations like CAAR and CADR hit a spot either.
+Will go suspend to recharge the batteries faster.
+
+...zzZZzz...
+
 # 2024-09-25
 
 TUNIX Lisp compiles for CP/M but I didn't get through the

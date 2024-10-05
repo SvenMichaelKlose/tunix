@@ -1012,7 +1012,7 @@ bi_isave (void)
 lispptr
 bi_define (void)
 {
-#ifdef VERBOSE_DEFINES
+#ifndef NO_VERBOSE_DEFINES
     simpleio_chn_t old_out = fnout;
 
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {

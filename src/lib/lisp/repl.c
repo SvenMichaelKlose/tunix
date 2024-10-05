@@ -571,7 +571,7 @@ load (char * pathname)
     char status = false;
     simpleio_chn_t load_fn;
 
-#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
+#if !defined(NO_VERBOSE_LOAD) && !defined(NO_VERBOSE_DEFINES)
     simpleio_chn_t old_out = fnout;
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
         setout (STDOUT);

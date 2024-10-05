@@ -10,9 +10,9 @@
       x
     (atom (car x))
       (cons (car x) (%unquote (cdr x)))
-    (eq (caar x) 'unquote)
+    (eq 'unquote (caar x))
       (%requote x)
-    (eq (caar x) 'unquote-spliced)
+    (eq 'unquote-spliced (caar x))
       (%requote x)
     (cons (%unquote (car x))
           (%unquote (cdr x)))))
@@ -25,7 +25,7 @@
 (fn macroexpand (x)
   (?
     (or (atom x)
-        (eq (car x) 'quote))
+        (eq 'quote (car x)))
       x
     (eq (car x) 'quasiquote)
       (%unquote x)
@@ -34,6 +34,7 @@
     (@ macroexpand x)))
 
 (special macro (n a . body)
+  ; Print message if so desired.
   (and *v?*
     (((oldout)
        (setout stdout)
@@ -41,6 +42,7 @@
        (setout oldout))
      fnout))
   (((!)
+     ; Either add to *MACROS* or update existing entry.
      (? (macro? n)
         (setcdr (macro? n) (cons a !))
         (= *macros* (cons (cons n (cons a !))

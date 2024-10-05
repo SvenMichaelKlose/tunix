@@ -24,17 +24,11 @@
 // Print 'C' for each compressed cons.
 //#define VERBOSE_COMPRESSED_CONS
 
-// Print names to built-in special forms FN and VAR.
-//#define VERBOSE_DEFINES
-
 // Print expressions before evaluation.
 //#define VERBOSE_EVAL
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
-
-// Print LOADed pathnames before evaluation.
-//#define VERBOSE_LOAD
 
 // Print READ expressions in REPL.
 //#define VERBOSE_READ
@@ -134,6 +128,12 @@
 //#define NO_BUILTIN_GROUP_IMAGE
 //#define NO_BUILTIN_GROUP_RAW_ACCESS
 //#define NO_BUILTIN_GROUP_SYMBOL_NAME
+
+// Print names to built-in special forms FN and VAR.
+//#define NO_VERBOSE_DEFINES
+
+// Print LOADed pathnames before evaluation.
+//#define NO_VERBOSE_LOAD
 
 
 /// Additional features
@@ -661,7 +661,7 @@ extern lispptr onerror_sym;
 extern lispptr fail_sym;
 #endif
 
-#if defined(VERBOSE_LOAD) || defined(VERBOSE_DEFINES)
+#if !defined(NO_VERBOSE_LOAD) && !defined(NO_VERBOSE_DEFINES)
 extern lispptr vp_symbol;
 #endif
 

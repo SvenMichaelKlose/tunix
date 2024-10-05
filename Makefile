@@ -4,7 +4,6 @@ TAG 			 := $(shell git describe --tags 2>/dev/null)
 BRANCH 			 := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
 DISTDIR_BASE 	   ?= tunix
 DISTDIR 	 	    = $(DISTDIR_BASE)/$(TARGET)/
-RELEASE_LISP_FLAGS ?= -DVERBOSE_LOAD=1 -DVERBOSE_DEFINES=1
 RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
 
 ULTIMEM_IMG 		= tunix.img
@@ -133,7 +132,7 @@ release:
 	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
 	$(MAKE) host COPTFLAGS="-Ofast -flto -march=native" LDFLAGS="-Ofast -flto -march=native"
 	$(MAKE) test TARGET=unix
-	$(MAKE) allworlds NDEBUG=1 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES -DTEST_EVIRONMENT"
+	$(MAKE) allworlds NDEBUG=1
 	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
 	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md

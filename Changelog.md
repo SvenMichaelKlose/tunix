@@ -19,7 +19,9 @@ and this project adheres to
 
 #### Interpreter
 
-- RETURN breaks evaluation of argument lists.
+- RETURN breaks evaluation of argument lists as expected.
+- Compile-time options VERBOSE\_LOAD and VERBOSE\_DEFINES have been
+  inversed to NO\_VERBOSE\_LOAD and NO\_VERBOSE\_DEFINES.
 
 #### Environment
 

@@ -865,7 +865,7 @@ the exit code for the interpreter which will terminate immediately.
 
 ## Definitions
 
-| Form                         | Type                      |
+| Special form                  | Type                      |
 |------------------------------|---------------------------|
 | (var 'name x)                | Define symbol with value. |
 | (fn 'name 'args '+body)      | Define function.          |
@@ -875,15 +875,35 @@ the exit code for the interpreter which will terminate immediately.
 |------------|------------------------------------------|
 | (source s) | Return defining expression for a symbol. |
 
+| Variable | Description                                     |
+|----------|-------------------------------------------------|
+|  \*v?\*  | Verbosity of FN, LOAD, SPECIAL and VAR.         |
+| \*alv?\* | AUTOLOAD erbosity of FN, LOAD, SPECIAL and VAR. |
+
+### Verbosity (\*V?\*, \*ALV?\*)
+
+By default \*V\*? is set to T, causing FN, LOAD, SPECIAL and VAR
+to print messages when they are in action.  That's impractical
+when auto-loading procedures on demand as the message are likely
+to spoil the screen.  Therefore \*ALV?\* is NIL by default, so
+nothing is printed by those forms during AUTOLOAD.  As a side
+effect one may be wondering what is actually happening on slow
+machines.
+
 ### (fn 'name 'args '+body): Define permanent, named function.
+
+Adds NAME to \*UNIVERSE\* and assigns an function expression of
+the form "(args . body)".
 
 ### (special 'name 'args '+body): Make special form.
 
-Special forms are functions that take their arguments unevaluated, e.g.
-QUASIQUOTE and MACRO, so you don't have to quote arguments of that
-function manually.
+Special forms are functions that receive their arguments unevaluated,
+so the caller doesn't have to QUOTE them.  MACRO and QUASIQUOTE are
+such user-defined special forms.
 
 ### (var 'name init): Define permanent, named variable.
+
+Adds NAME to \*UNIVERSE\* and assigns it evaluated INIT.
 
 ### (source s): Return defining expression for a symbol.
 
@@ -1410,14 +1430,8 @@ alongside the current input channel.
 (load "subseq.lisp")
 ~~~
 
-If compile-time option VERBOSE\_LOAD was defined when TUNIX Lisp was
-built, a message of the form
-
-~~~lisp
-(load <pathname>)
-~~~
-
-is printed before a load is attempted.
+LOAD is printing messages.  It can be muted by making \*V?\* non-NIL, or by compiling the
+interpreter with option NO\_VERBOSE\_LOAD.
 
 ### (require +name): Load missing definition.
 

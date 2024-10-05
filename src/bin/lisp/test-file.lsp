@@ -1,8 +1,3 @@
-(or (macro? 'let)
-    (load "let.lsp"))
-(or (macro? 'with)
-    (load "with.lsp"))
-
 (message "Testing OPEN on missing file...")
 (and (open "k87sfdasdj9" 'r)
      (error "File \"k87sfdasdj9\" should be missing."))
@@ -25,7 +20,7 @@
   (setin stdin)
   (close i)
   (or (equal e message)
-      (error "Expression read from \"test.out\" does not match MESSAGE")))
+      (error "Expression read from \"test.out\" does not match MESSAGE: " e)))
 
 (message "Testing READ/PRINT copy...")
 (with ((i (open "test.out" 'r))
@@ -47,4 +42,4 @@
   (setin stdin)
   (close i)
   (or (equal e message)
-      (error "Unexpected expression read from \"test2.out\".")))
+      (error "Unexpected expression read from \"test2.out\": " e)))

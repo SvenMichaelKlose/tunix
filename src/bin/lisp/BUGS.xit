@@ -3,6 +3,7 @@ AUTOLOAD
 
 Debugger
 [ ] Complete review.
+[ ] Handle console direct mode.
 
 Commodore PET
 [ ] Program start breaks with syntax error.

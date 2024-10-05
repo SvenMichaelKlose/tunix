@@ -1,12 +1,8 @@
 AUTOLOAD
-[ ] Example "asm-6502.lsp": "(mn-opc 'brk nil)" shouldn't return NIL
-    just because functions and macros are missing.  Might be that
-    internal symbol ~RETURN is ignored in argument lists.
+[ ] Handle built-in argument type error caused by missing functions.
 
 Debugger
-[ ] Built-in name not shown but parent function on argument typ error.
-[ ] Stepping over NIL returns from function?
-[ ] IGNORE entered by user does not leave the debugger?
+[ ] Complete review.
 
 Commodore PET
 [ ] Program start breaks with syntax error.

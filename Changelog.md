@@ -17,6 +17,10 @@ and this project adheres to
 
 - REPL: Decrement debugger count correctly.
 
+#### Environment
+
+- AUTOLOAD: Be verbose by default (\*ALV?\* is T).
+
 
 ## [v0.0.21] - 2024-10-05
 

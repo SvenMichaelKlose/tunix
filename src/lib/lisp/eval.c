@@ -30,7 +30,7 @@ char    error_code;
 lispptr error_info;
 #endif
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern char * msg;
@@ -64,7 +64,7 @@ uchar   typed_argdef;
 char *  builtin_argdef;
 uchar   num_args;
 bool    unevaluated;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("msg")
 #pragma zpsym ("stack_entered")
 #pragma zpsym ("bfun")
@@ -72,7 +72,7 @@ bool    unevaluated;
 #pragma zpsym ("builtin_argdef")
 #pragma zpsym ("num_args")
 #pragma bss-name (pop)
-#endif
+#endif // #ifdef USE_ZEROPAGE
 
 #ifdef __CC65__
 #pragma code-name ("CODE_EVAL")

@@ -135,6 +135,9 @@
 // Print LOADed pathnames before evaluation.
 //#define NO_VERBOSE_LOAD
 
+// Don't use zeropage locations with cc65.
+//#define NO_ZEROPAGE
+
 
 /// Additional features
 
@@ -154,6 +157,9 @@
 // GC sweep: do not copy if object didn't move.
 // Adds extra code.
 //#define SKIPPING_SWEEP
+
+// Use zeropage locations with cc65.
+//#define USE_ZEROPAGE
 
 
 /// Memory allocation
@@ -182,6 +188,7 @@
 
 // Apple II
 #ifdef TARGET_APPLE2
+#define MALLOCD_HEAP
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -535,6 +542,11 @@
     #endif
 #endif // #ifdef NAIVE
 
+
+#if defined(__CC65__) && !defined(NO_ZEROPAGE)
+    #define USE_ZEROPAGE
+#endif
+
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
@@ -708,7 +720,7 @@ extern long bekloppies_start;
 extern long bekloppies (void);
 #endif
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 
@@ -769,7 +781,7 @@ extern lispptr make_cons_tmp;
 extern lispptr make_cons_car;
 extern lispptr make_cons_cdr;
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("lisp_len")
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
@@ -804,7 +816,7 @@ extern lispptr make_cons_cdr;
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
 #pragma bss-name (pop)
-#endif
+#endif // #ifdef USE_ZEROPAGE
 
 // NOT_NIL() doesn't work.  Either the onset of dementia
 // or terrible bugs hiding.

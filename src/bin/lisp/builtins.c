@@ -17,7 +17,7 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr x;
@@ -27,7 +27,7 @@ extern lispptr arg2c;
 extern lispptr arg2;
 extern lispptr value;
 extern lispptr tmp;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("x")
 #pragma zpsym ("args")
 #pragma zpsym ("arg1")
@@ -36,7 +36,7 @@ extern lispptr tmp;
 #pragma zpsym ("value")
 #pragma zpsym ("tmp")
 #pragma bss-name (pop)
-#endif
+#endif // #ifdef USE_ZEROPAGE
 
 // I/O channels
 lispptr lisp_fnin;

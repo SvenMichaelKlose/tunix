@@ -58,7 +58,7 @@ struct heap_fragment * heap;
 
 char *   heap_start;
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispobj_size_t lisp_len;
@@ -71,12 +71,12 @@ char *   heap_end;
 char *   h;
 char     type;
 symbol * sym;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("h");
 #pragma zpsym ("type");
 #pragma zpsym ("sym");
 #pragma bss-name (pop)
-#endif
+#endif // #ifdef USE_ZEROPAGE
 
 lispptr universe;
 char    buffer[MAX_SYMBOL + 1];

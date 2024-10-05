@@ -19,9 +19,18 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
 - RETURN breaks evaluation of argument lists as expected.
+
+##### Changed
+
 - Compile-time options VERBOSE\_LOAD and VERBOSE\_DEFINES have been
   inversed to NO\_VERBOSE\_LOAD and NO\_VERBOSE\_DEFINES.
+
+##### Added
+
+- Compile-time option NO\_ZEROPAGE for builds with cc65.
 
 #### Environment
 

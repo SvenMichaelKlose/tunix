@@ -54,7 +54,7 @@ mark (lispptr x)
 
 xlat_item * xlat_end;
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 
@@ -76,7 +76,7 @@ xlat_item * r;
 size_t total_removed;
 #endif
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("n")
 #pragma zpsym ("s")
 #pragma zpsym ("d")
@@ -89,7 +89,7 @@ size_t total_removed;
 #ifdef FRAGMENTED_HEAP
 #pragma zpsym ("total_removed")
 #endif // #ifdef FRAGMENTED_HEAP
-#endif // #ifdef __CC65__
+#endif // #ifdef USE_ZEROPAGE
 
 void FASTCALL
 add_gap (lispobj_size_t n)

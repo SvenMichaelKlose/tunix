@@ -15,12 +15,12 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (pop)
 #endif
 

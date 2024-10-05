@@ -12,11 +12,11 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr tmp_pop;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("tmp_pop")
 #pragma bss-name (pop)
 #endif

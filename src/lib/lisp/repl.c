@@ -146,9 +146,41 @@ read_cmd_arg (void)
 
 #endif // #ifndef NO_DEBUGGER
 
+void
+set_std_channels (void)
+{
+    setin (STDIN);
+    setout (STDOUT);
+}
+
+void
+repl_eval (void)
+{
+    setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+    setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
+    PUSH_TAG(TAG_DONE);
+    x = eval0 ();
+    set_std_channels ();
+}
+
+bool FASTCALL
+repl_eof (char mode, simpleio_chn_t load_fn)
+{
+    if (mode == REPL_LOAD)
+        setin (load_fn);
+    if (eof ()) {
+        setin (STDIN);
+        return true;
+    }
+    setin (STDIN);
+    return false;
+}
+
 lispptr FASTCALL
 lisp_repl (char mode, simpleio_chn_t load_fn)
 {
+    simpleio_chn_t oldin = fnin;
+    simpleio_chn_t oldout = fnout;
 #ifndef NDEBUG
     char * old_stack    = stack;
     char * old_tagstack = tagstack;
@@ -168,8 +200,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
     // Make sure the user can communicate should anything
     // go wrong if not actually running the program.
-    setin (STDIN);
-    setout (STDOUT);
+    set_std_channels ();
 
     num_repls++;
 #ifndef NO_DEBUGGER
@@ -200,19 +231,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // Clear error status.
             error_info  = nil;
             error_code  = 0;
-            unevaluated = true;
-
-            // Switch to program channels.
-            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
-            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
 
             // Call ONERROR.
-            PUSH_TAG(TAG_DONE);
-            x = eval0 ();
-
-            // Back to standard I/O channels.
-            setin (STDIN);
-            setout (STDOUT);
+            unevaluated = true;
+            repl_eval ();
 
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
@@ -242,13 +264,8 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
     // READ/EVAL/PRINT-Loop.
     while (1) {
-        if (mode == REPL_LOAD)
-            setin (load_fn);
-        else if (mode == REPL_STD)
-            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
-        if (eof ())
+        if (repl_eof (mode, load_fn))
             break;
-        setin (STDIN);
 
 #ifndef NO_DEBUGGER
         if (mode == REPL_DEBUGGER) {
@@ -266,11 +283,11 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
         // Read an expression.
         if (mode != REPL_DEBUGGER) {
 #endif // #ifndef NO_DEBUGGER
-            setin (mode == REPL_LOAD ? load_fn : NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
+            if (mode == REPL_LOAD)
+                setin (load_fn);
             read_safe ();
-            if (eof ())
+            if (repl_eof (mode, load_fn))
                 break;
-            setin (STDIN);
 #ifdef VERBOSE_READ
             // TODO: Set/restore terminal mode.
             print (x);
@@ -423,18 +440,9 @@ terpri_next:
             x = make_cons (x, nil);
             x = make_cons (macroexpand_sym, x);
 
-            // Switch to program's U/O c
-            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
-            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
-
             // Call MACROEXPAND.
             unevaluated = true;
-            PUSH_TAG(TAG_DONE);
-            x = eval0 ();
-
-            // Switch back to standard I/O.
-            setin (STDIN);
-            setout (STDOUT);
+            repl_eval ();
 
 #ifndef NO_DEBUGGER
             POP(debug_step);
@@ -457,15 +465,9 @@ terpri_next:
             saved_stack     = stack;
             saved_tagstack  = tagstack;
 #endif
-            // Set program channels.
-            setin (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnin)));
-            setout (NUMBER_VALUE(SYMBOL_VALUE(lisp_fnout)));
-
             // Evaluate expression.
-            x = eval ();
-
-            setin (STDIN);
-            setin (STDOUT);
+            unevaluated = false;
+            repl_eval ();
 #ifndef NAIVE
             hard_repl_break = old_break;
         } else {
@@ -520,7 +522,6 @@ terpri_next:
 
             // Clear break mode.
             do_break_repl = 0;
-            setout (STDOUT);
             outs ("Program exited.");
             terpri ();
             continue;
@@ -528,13 +529,13 @@ terpri_next:
 
         // Print result of user input.
         if (mode != REPL_LOAD) {
-            setout (STDOUT);    // TODO: Clean up setting standard I/O.
             if (mode == REPL_DEBUGGER)
                 outs ("Result: ");
             print (x);
             fresh_line ();
         }
     }
+
 #if !defined(NO_ONERROR) || !defined(NO_DEBUGGER)
 done:
     // Track unnesting of this REPL.
@@ -563,6 +564,8 @@ done_onerror:
     check_stacks (old_stack, old_tagstack);
 #endif
 
+    setin (oldin);
+    setin (oldout);
     return x;
 }
 

@@ -16,6 +16,7 @@ and this project adheres to
 #### Interpreter
 
 - REPL: Decrement debugger count correctly.
+- REPL: Cleaned up switching channels.
 
 #### Environment
 

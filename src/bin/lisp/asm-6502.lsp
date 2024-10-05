@@ -37,7 +37,7 @@
      t                                 ; absolute
      nil                               ; implied
      t                                 ; zero page X (Y for LDX and STX)
-     (nil nil nil nil txs txs)         ; implied
+     (nil nil nil nil txs tsx)         ; implied
      t)))                              ; absolute X (Y for LDX and STX)
 
 (fn mn-cc (mn)
@@ -54,7 +54,7 @@
        am)
      am))
 
-; Get operand of 1st class instruction.
+; Get opcode of 1st class instruction.
 (fn mnam-opc (mn am)
   ; Get CC by mnemonic.
   (let-when cc (mn-cc mn)

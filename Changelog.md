@@ -9,6 +9,15 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+- REPL: Decrement debugger count correctly.
+
+
 ## [v0.0.21] - 2024-10-05
 
 ### Lisp

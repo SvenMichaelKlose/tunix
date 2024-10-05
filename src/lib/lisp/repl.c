@@ -542,7 +542,6 @@ done:
 #ifndef NO_DEBUGGER
         outs ("Continuing...");
         terpri ();
-        num_debugger_repls--;
 #endif
 
 #ifndef NO_ONERROR
@@ -551,10 +550,14 @@ done_onerror:
         // Restore earlier GC trigger threshold to
         // be able to run ONERROR if out of heap.
         onetime_heap_margin = ONETIME_HEAP_MARGIN;
-        // TODO: Restore terminal flags.
     }
 #endif
+
     num_repls--;
+#ifndef NO_DEBUGGER
+    if (mode == REPL_DEBUGGER)
+        num_debugger_repls--;
+#endif
 
 #ifndef NDEBUG
     check_stacks (old_stack, old_tagstack);

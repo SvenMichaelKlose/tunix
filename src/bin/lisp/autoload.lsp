@@ -3,8 +3,8 @@
 (load "progn.lsp")
 (load "mapcar.lsp") ; Workaround
 
-; Be mute during AUTOLOAD.
-(var *alv?* nil)
+; Be verbose during AUTOLOAD.
+(var *alv?* t)
 
 ; Name to filename translations.
 (var *alx*

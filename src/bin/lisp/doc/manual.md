@@ -885,10 +885,8 @@ the exit code for the interpreter which will terminate immediately.
 By default \*V\*? is set to T, causing FN, LOAD, SPECIAL and VAR
 to print messages when they are in action.  That's impractical
 when auto-loading procedures on demand as the message are likely
-to spoil the screen.  Therefore \*ALV?\* is NIL by default, so
-nothing is printed by those forms during AUTOLOAD.  As a side
-effect one may be wondering what is actually happening on slow
-machines.
+to spoil the screen.  \*ALV?\* is T by default, to make it easier
+to track down errors.
 
 ### (fn 'name 'args '+body): Define permanent, named function.
 
@@ -2054,7 +2052,7 @@ rest is the value.
 Missing procedures are loaded on demand by AUTOLOAD (assigned to ONERROR), as long as the filename is the same
 (plus the ".lsp" suffix).
 Messages are not printed during AUTOLOAD unless \*ALV?\* is not NIL.
-The default is NIL (quiet).
+The default is T (verbose).
 
 ~~~lisp
 ; Verbose autoloading of LS.
@@ -2064,13 +2062,13 @@ Loading ls.lsp
 ~~~
 
 If the missing procedure is a macro, the original code is expanded on the
-fly.
+spot.
 
 For names with wildcards name translations can been added to \*ALX\*.
 Can be used to map many procedures to a single file.
 
 ~~~lisp
-; Add translation for macro "!?" in file "aif.lsp".
+; Add translation for macro "!?", which is in file "aif.lsp".
 ; (Already done.)
 (push (cons '!? 'aif) *alx*)
 ~~~

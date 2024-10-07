@@ -16,11 +16,8 @@
 (and (eof)
      (error "Unexpected EOF before file end"))
 (in)
-; TODO: CBMs won't give us an EOF here.
-; Maybe a REPL thing.
-(and (eq +t+ 'unix)
-     (or (eof)
-         (error "EOF expected")))
+(or (eof)
+    (error "EOF expected"))
 (setin stdin)
 (close ch)
 (= *universe* (remove 'ch *universe*))

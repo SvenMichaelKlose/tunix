@@ -3,8 +3,6 @@ TUNIX Lisp
 
 Interpreter
 [@] Rethink channel handling.  Images won't start on C64.
-[ ] cc65 compiler bug?
-[ ] VERBOSE_GC not messing up channels.
 [ ] UNWIND-PROTECT
 [ ] Make stack overflows regular errors.
 [ ] Multiple symbol lists to reduce look-up times.
@@ -24,6 +22,7 @@ Built-ins
 
 Tests
 [ ] READ on syntax errors.
+[ ] Fuzzers
 
 Manual
 [ ] Compile-time options.

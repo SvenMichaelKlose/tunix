@@ -126,35 +126,16 @@ typename (lispptr * x)
 #endif
 }
 
-// Return type name of object.
-char * FASTCALL
-typesymbol (lispptr * x)
-{
-    if (CONSP(x))
-        return make_symbol ("cons", 4);
-    if (SYMBOLP(x))
-        return make_symbol ("symbol", 6);
-    if (BUILTINP(x))
-        return make_symbol ("builtin", 7);
-#ifndef NDEBUG
-    if (NUMBERP(x))
-        return make_symbol ("number", 6);
-    return NULL;
-#else
-    return make_symbol ("number", 6);
-#endif
-}
-
 // Issue type error.
 void FASTCALL
 err_type (char * type, lispptr x, char code)
 {
     char * p;
-    p = stpcpy (buffer, "got ");
+    p = stpcpy (buffer, "Got ");
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
-    error_info = typesymbol (x);
+    error_info = make_symbol (type, strlen (type));
     error (code, buffer);
 }
 

@@ -451,6 +451,8 @@ save_arg_value:
         // Type-check and throw any errors.
         bi_tcheck (value, *builtin_argdef, ERROR_TYPE);
         if (error_code) {
+            PUSH(current_expr);
+            current_expr = CAR(args);
             PUSH(args);
             PUSH_TAGW(builtin_argdef);
             PUSH_TAG(num_args);
@@ -458,6 +460,7 @@ save_arg_value:
             POP_TAG(num_args);
             POP_TAGW(builtin_argdef);
             POP(args);
+            POP(current_expr);
         }
 #endif
         // Break evaluation.

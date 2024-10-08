@@ -40,6 +40,7 @@ and this project adheres to
 
 ##### Fixed
 
+- AUTOLOAD: Fix function type arguments.
 - SYMBOL-NAME and SLENGTH accept built-ins.
 
 ##### Changed

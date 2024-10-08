@@ -419,6 +419,8 @@ init_heap ()
     tagstack = (void *) TAGSTACK_END;
 #endif
     tagstack_end = tagstack;
+    // Avoid trashing rest of program on overflow.
+    tagstack_start += 8 * sizeof (lispptr);
 
     // Allocate object stack.
 #ifdef MALLOCD_STACK
@@ -431,6 +433,8 @@ init_heap ()
     stack_end = (void *) STACK_END;
 #endif
     stack = stack_end;
+    // Avoid trashing rest of program on overflow.
+    stack_start += 8 * sizeof (lispptr);
 
     // Allocate relocation table.
     xlat_start = malloc (RELOC_TABLE_ENTRIES * sizeof (xlat_item));

@@ -26,6 +26,7 @@ and this project adheres to
 
 - REPL: Decrement debugger count correctly.
 - REPL: Cleaned up switching channels.
+- Avoid trashing rest of program on stack overflows.
 
 ##### Changed
 

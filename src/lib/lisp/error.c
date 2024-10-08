@@ -126,6 +126,25 @@ typename (lispptr * x)
 #endif
 }
 
+// Return type name of object.
+char * FASTCALL
+typesymbol (lispptr * x)
+{
+    if (CONSP(x))
+        return make_symbol ("cons", 4);
+    if (SYMBOLP(x))
+        return make_symbol ("symbol", 6);
+    if (BUILTINP(x))
+        return make_symbol ("builtin", 7);
+#ifndef NDEBUG
+    if (NUMBERP(x))
+        return make_symbol ("number", 6);
+    return NULL;
+#else
+    return make_symbol ("number", 6);
+#endif
+}
+
 // Issue type error.
 void FASTCALL
 err_type (char * type, lispptr x, char code)
@@ -135,7 +154,7 @@ err_type (char * type, lispptr x, char code)
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
-    error_info = x;
+    error_info = typesymbol (x);
     error (code, buffer);
 }
 
@@ -164,7 +183,7 @@ bi_tcheck (lispptr x, uchar type, char code)
         break;
 
     case 'S':
-        if (!_NAMEDP(x))
+        if (NOT_NIL(x) && !_NAMEDP(x))
             err_type ("string", x, code);
         break;
 

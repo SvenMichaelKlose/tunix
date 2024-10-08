@@ -220,7 +220,8 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             PUSH_TAG(unevaluated);
 
             // Make argument list for call of ONERROR.
-            x = make_cons (current_expr, nil);
+            tmp2 = make_cons (error_info, nil);
+            x = make_cons (current_expr, tmp2);
             tmp2 = make_cons (current_toplevel, x);
             PUSH(tmp2);
             x = make_number ((lispnum_t) error_code);
@@ -581,6 +582,7 @@ load (char * pathname)
     simpleio_chn_t old_out = fnout;
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
         setout (STDOUT);
+        fresh_line ();
         outs ("Loading ");
         outs (pathname);
         terpri ();

@@ -1,7 +1,6 @@
 (load "let.lsp")
 (load "when.lsp")
 (load "progn.lsp")
-(load "mapcar.lsp") ; Workaround
 
 ; Be verbose during AUTOLOAD.
 (var *alv?* t)
@@ -23,7 +22,8 @@
         (close %!)
         (load %f)))))
 
-(fn %al (%code %top %x)
+(load "unless.lsp")
+(fn %al (%code %top %x %i)
   (block nil
     (when (and (== %code 5) ; ERROR_NOT_FUNCTION
                (%aload (car %x)))
@@ -47,3 +47,4 @@
       %!))
 
 (= onerror autoload)
+(= *macros* nil)

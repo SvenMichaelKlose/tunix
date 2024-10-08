@@ -30,6 +30,7 @@ and this project adheres to
 ##### Changed
 
 - ERROR: PRINTs child expressions.
+- ONERROR: Added error info argument.
 
 ##### Added
 

@@ -77,9 +77,11 @@
                              (print b)))
              '(((a b)
                  (= a 1)
-                 (= b 2))
+                 (= b 2)
+                 (print a)
+                 (print b))
                (nil nil)))
-      (error "Expansion of WITH failed")))
+      (error "Expansion of WITH* failed")))
 
 (do-test "Testing WITH-GLOBAL..."
   (let tmp 'dummy

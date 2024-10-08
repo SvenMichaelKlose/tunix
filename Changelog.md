@@ -11,6 +11,13 @@ and this project adheres to
 
 ## [current]
 
+### libsimpleio-cbm
+
+#### Fixed
+
+- End-of-file shows up when trying to read past a file's end,
+  not if the last byte has been read.
+
 ### Lisp
 
 #### Interpreter

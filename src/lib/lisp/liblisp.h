@@ -357,21 +357,6 @@
 #endif
 #endif
 
-// Commodore VIC-20/VC-20
-#ifdef TARGET_VIC20
-#define MINIMALISTIC
-#define MALLOCD_HEAP
-#define FRAGMENTED_HEAP
-#define STACK_START         0x0400
-#define STACK_END           0x0800
-#define TAGSTACK_START      0x0800
-#define TAGSTACK_END        0x1000
-#define RELOC_TABLE_ENTRIES 256
-#define SKIPPING_SWEEP
-#define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL  (255 - sizeof (symbol))
-#endif
-
 // Unixoids
 #ifdef TARGET_UNIX
 #if !defined(SLOW) && defined(NDEBUG)
@@ -388,6 +373,21 @@
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
 #define NO_BUILTIN_DIRECTORY
+#endif
+
+// Commodore VIC-20/VC-20
+#ifdef TARGET_VIC20
+#define MINIMALISTIC
+#define MALLOCD_HEAP
+#define FRAGMENTED_HEAP
+#define STACK_START         0x0400
+#define STACK_END           0x0800
+#define TAGSTACK_START      0x0800
+#define TAGSTACK_END        0x1000
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Sinclair ZX Spectrum
@@ -425,6 +425,9 @@
 #endif
 #ifndef NO_BUILTIN_GROUP_BITOPS
     #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_GROUP_IMAGE
+    #define NO_BUILTIN_GROUP_IMAGE
 #endif
 #ifndef NO_BUILTIN_READ_LINE
     #define NO_BUILTIN_READ_LINE

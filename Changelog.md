@@ -33,6 +33,10 @@ and this project adheres to
 
 #### Environment
 
+##### Fixed
+
+- SYMBOL-NAME and SLENGTH accept built-ins.
+
 ##### Changed
 
 - AUTOLOAD: Be verbose by default (\*ALV?\* is T).

@@ -1168,20 +1168,46 @@ Returns its argument if it is a special form or NIL.
 | (symbol l)       | Make symbol with name from char list. |
 | (= 's x)         | Set symbol value.                     |
 | (symbol-value s) | Get symbol value.                     |
-| (symbol-name s)  | Symbol name as List of char numbers.  |
+| (symbol-name s)  | Get name as List of char numbers.     |
+| (slength s)      | Get name length.                      |
 | (char-at s n)    | Char of symbol name.                  |
 
 ### (symbol l): Make symbol with name from char list.
 
+Already existing symbols are reused.
+
+~~~lisp
+(symbol '(110 105 108)) ; -> nil
+~~~
+
 ### (= 's x): Set symbol value.
+
+The symbol argument is not evaluated.  Returns the value.
 
 ### (symbol-value s): Get symbol value.
 
-This is what evaluation is doing with symbols.
+### (symbol-name s): Get name.
 
-### (symbol-name s): Get symbol name as List of character value numbers.
+Returns the name of a symbol or built-in as a list of numbers being the
+character values.
+
+~~~lisp
+(symbol-name nil) ; -> (110 105 108)
+~~~
+
+### (slength s): Get name length.
+
+Get length of symbol or built-in.
+
+~~~lisp
+(slength nil) ; -> 3
+~~~
 
 ### (char-at s n): Char of symbol name.
+
+~~~lisp
+(char-at nil 1) ; -> 105
+~~~
 
 ## Conses
 

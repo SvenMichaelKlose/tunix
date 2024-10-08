@@ -163,6 +163,11 @@ bi_tcheck (lispptr x, uchar type, char code)
             err_type ("symbol", x, code);
         break;
 
+    case 'S':
+        if (!_NAMEDP(x))
+            err_type ("string", x, code);
+        break;
+
     case 'c':
         if (!CONSP(x))
             err_type ("cons", x, code);

@@ -1331,8 +1331,8 @@ const struct builtin builtins[] = {
     { "symbol-value", "s",    bi_symbol_value },
 
 #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
-    { "symbol-name",  "s",    bi_symbol_name },
-    { "slength",      "s",    bi_slength },
+    { "symbol-name",  "S",    bi_symbol_name },
+    { "slength",      "S",    bi_slength },
 #endif
 #ifndef NO_BUILTIN_CHAR_AT
     { "char-at",     "sn",  bi_char_at },

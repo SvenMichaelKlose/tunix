@@ -8,7 +8,8 @@
 
 ; Name to filename translations.
 (var *alx*
-  '((!? . aif)))
+  '((!? . aif)
+    (with* . with2)))
 
 ; Try to load file for missing procedure.
 ; Returns non-NIL if file load was successful.

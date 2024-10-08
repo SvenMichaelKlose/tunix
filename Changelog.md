@@ -20,7 +20,16 @@ and this project adheres to
 
 #### Environment
 
+##### Changed
+
 - AUTOLOAD: Be verbose by default (\*ALV?\* is T).
+
+##### Added
+
+- APROG1: Anaphoric version of macro PROG1, locally assigning the
+  return value to !.
+- WITH\*: Like macro WITH, it defines local variables sequentially,
+  but allowing each variable to reference the ones defined earlier.
 
 
 ## [v0.0.21] - 2024-10-05

@@ -29,7 +29,12 @@
 (do-test "Testing PROG1..."
   (or (equal (eval (macroexpand '(prog1 1 2 3)))
              1)
-      (error "Expansion of PROG1 failed.")))
+      (error 'PROG1)))
+
+(do-test "Testing APROG1..."
+  (or (equal (eval (macroexpand '(aprog1 1 2 3)))
+             1)
+      (error 'APROG1)))
 
 (do-test "Testing PROGN..."
   (load "progn.lsp")
@@ -52,14 +57,6 @@
 (message "TODO: Testing WHEN...")
 (message "TODO: Testing AWHEN...")
 
-(do-test "Testing WITH-GLOBAL..."
-  (let tmp 'dummy
-    (with-global tmp nil
-      (and tmp
-           (error "TMP is not NIL.")))
-    (or tmp
-        (error "TMP not restored."))))
-
 (do-test "Testing WITH..."
   (load "with.lsp")
   (or (equal (macroexpand '(with ((a 1)
@@ -71,6 +68,26 @@
                  (print b))
                1 2))
       (error "Expansion of WITH failed")))
+
+(do-test "Testing WITH*..."
+  (load "with2.lsp")
+  (or (equal (macroexpand '(with* ((a 1)
+                                   (b 2))
+                             (print a)
+                             (print b)))
+             '(((a b)
+                 (= a 1)
+                 (= b 2))
+               (nil nil)))
+      (error "Expansion of WITH failed")))
+
+(do-test "Testing WITH-GLOBAL..."
+  (let tmp 'dummy
+    (with-global tmp nil
+      (and tmp
+           (error "TMP is not NIL.")))
+    (or tmp
+        (error "TMP not restored."))))
 
 (do-test "Testing WITH-QUEUE..."
   (or (equal (with-queue q

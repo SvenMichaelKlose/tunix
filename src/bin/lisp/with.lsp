@@ -1,8 +1,8 @@
 (macro with (inits . body)
   ;"Local symbol values."
   (? inits
-     $((,(carlist inits)
+     $((,(@ car inits)
         ,@body)
-       ,@(carlist (cdrlist inits)))
+       ,@(@ car (@ cdr inits)))
      $(progn
         ,@body)))

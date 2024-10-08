@@ -59,8 +59,7 @@ compatibles.
 
 ## Differences to other dialects
 
-The TUNIX Lisp dialect is very much like any other.  Here are some things
-that raise an eyebrow when seeing them the first time:
+Here is how most other Lisps translate to TUNIX Lisp:
 
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
@@ -74,6 +73,7 @@ that raise an eyebrow when seeing them the first time:
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
 | (cond +l)              | (? +l)          |
+| (= num1 num2)          | (== num1 num2)  |
 
 Because the backquote (`) is not part of the charsets of old machines
 TUNIX Lisp intends to support, the dollar sign ($) is used as the
@@ -109,6 +109,35 @@ symbols with no name, an empty string ("") can be used as well.
 ~~~
 
 SYMBOL will issue an error if it is passed a dotted pair.
+
+### Built-in = instead of SETQ
+
+### Macro ?: A more compact version of COND
+
+Macro ? is used instead of COND.  It does not require each
+condition/consequence pair to be a list.  Any remaining expression with
+no following one to make a pair is the default, so no T condition is
+required:
+
+~~~lisp
+; NOT used in TUNIX Lisp.
+(cond
+  ((hungry?) (go 'shop))
+  (t (have-fun)))
+(cond
+  ((hungry?)  (go 'shop))
+  ((thirsty?) (go 'fridge))
+  (t (have-fun)))
+
+; TUNIX Lisp version.
+(? (hungry?)
+   (go 'shop)
+   (have-fun))
+(?
+  (hungry?)  (go 'shop)
+  (thirsty?) (go 'fridge)
+  (have-fun))
+~~~
 
 ## Memory consumption
 

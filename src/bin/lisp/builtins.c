@@ -852,7 +852,11 @@ bi_out_list (lispptr x)
 {
     DOLIST(tmp, x) {
         PUSH(tmp);
-        bi_out_atom (CAR(tmp));
+        if (CONSP(CAR(tmp))) {
+            bi_out_flush ();
+            print (CAR(tmp));
+        } else
+            bi_out_atom (CAR(tmp));
         POP(tmp);
     }
 }
@@ -1080,6 +1084,7 @@ bi_error (void)
         current_expr = arg1;
     error_code = ERROR_USER;
 #ifndef NO_BUILTIN_GROUP_FILE
+    setout (STDOUT);
     bi_out_list (make_cons (make_symbol ("ERROR: ", 7), arg1));
 #endif
     return nil;

@@ -1640,15 +1640,15 @@ actual machine TUNIX Lisp is running on when the counting from 0 started.
 
 ### (error x): Issue a user error.
 
-Prints its arguments to standard output, like OUT, prefixed with string
-"ERROR: ", and invokes a debugger REPL with code ERROR\_USER.
+Prints passed names and numbers like OUT and expressions like PRINT
+with prefixed label "USER ERR".
 
 ~~~lisp
 (with ((haystack nil)
        (needle   t))
   (or (assoc needle *haystack*)
       (error "Cannot find " needle " in haystack.")))
-; -> ERROR: Cannot find t in haystack.
+; -> USER ERROR: Cannot find t in haystack.
 ;    DEBUGGER #1:
 ;    Error #14: User error
 ;    ...and so on...

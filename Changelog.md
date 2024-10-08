@@ -15,8 +15,14 @@ and this project adheres to
 
 #### Interpreter
 
+#### Fixed
+
 - REPL: Decrement debugger count correctly.
 - REPL: Cleaned up switching channels.
+
+#### Changed
+
+- ERROR: PRINTs child expressions.
 
 #### Environment
 

@@ -54,6 +54,9 @@
 // * Reduces code size for releases on small machines.
 //#define SLOW
 
+// Load "test-all.lsp" at end of boot.
+//#define TEST_ALL
+
 // Load environment tests.
 //#define TEST_ENVIRONMENT
 

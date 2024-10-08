@@ -22,14 +22,18 @@ and this project adheres to
 
 #### Interpreter
 
-#### Fixed
+##### Fixed
 
 - REPL: Decrement debugger count correctly.
 - REPL: Cleaned up switching channels.
 
-#### Changed
+##### Changed
 
 - ERROR: PRINTs child expressions.
+
+##### Added
+
+- Compile-time option TEST\_ALL: Load "test-all.lsp" at end of boot.
 
 #### Environment
 

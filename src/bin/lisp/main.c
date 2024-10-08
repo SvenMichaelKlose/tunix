@@ -89,9 +89,9 @@ const char * env_files[] = {
 #endif
     "welcome.lsp",
 #endif // #ifndef TARGET_C16
-#ifdef TEST_VICE_HEADLESS
-    "end-headless.lsp"
-#endif // #ifdef TEST_VICE_HEADLESS
+#ifdef TEST_ALL
+    "test-all.lsp",
+#endif // #ifdef TEST_ALL
     NULL
 };
 

@@ -1,15 +1,14 @@
-(load "prog1.lsp")
-(load "!=.lsp")
+(load "let.lsp")
 (load "with.lsp")
+(load "!=.lsp")
+(load "prog1.lsp")
+(load "awhen.lsp")
 (load "with-in.lsp")
 (load "with-out.lsp")
 
 (message "Testing OPEN on missing file...")
 (and (open "k87sfdasdj9" 'r)
      (error "File \"k87sfdasdj9\" should be missing."))
-
-(= *alv?* nil)
-(message "AUTOLOAD muted.")
 
 (message "Testing OPEN file write to \"test.out\"...")
 (awhen (with-out o (open "test.out" 'w)

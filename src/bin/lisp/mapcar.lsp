@@ -1,4 +1,4 @@
 (fn mapcar (f . l)
   (and (car l)
-       (cons (apply f (carlist l))
-             (apply mapcar f (cdrlist l)))))
+       (cons (apply f (@ car l))
+             (apply mapcar f (@ cdr l)))))

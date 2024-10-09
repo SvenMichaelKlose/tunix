@@ -299,7 +299,6 @@
 
 (fn edit file
   (reset-ln)
-  (clrscr)
   (?
     file
       (progn
@@ -308,6 +307,8 @@
     (and (not *lines*)
          *filename*)
       (load-file))
+  (= *alv?* nil)
+  (clrscr)
   (edit-lines)
   (clrscr)
   (con-direct nil)

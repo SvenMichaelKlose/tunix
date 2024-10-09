@@ -375,9 +375,5 @@
              '(l i s p))
       (error)))
 
-(message "TODO: Testing WITH-IN...")
-(message "TODO: Testing WITH-OUT...")
-
 (app 'app-test-all)
 (rm-app 'app-test-all)
-(= *alv?* nil) ; Verbose AUTOLOAD.

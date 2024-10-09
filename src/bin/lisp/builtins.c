@@ -579,16 +579,17 @@ bi_apply (void)
     args = copy_list (arg2, COPY_BUTLAST, nil);
     tmp  = LIST_CAR(last (arg2));
 
-    if (NOT_NIL(args)) {
-#ifndef NAIVE
-        if (!LISTP(tmp)) {
-            error (ERROR_TYPE, "Last arg isn't list");
-            return nil;
-        }
-#endif
+    if (NOT_NIL(args))
         SETCDR(last (args), tmp);
-    } else
+    else
         args = tmp;
+
+#ifndef NAIVE
+    if (!LISTP(tmp)) {
+        error (ERROR_TYPE, "Last arg isn't list");
+        return nil;
+    }
+#endif
 
     make_call (args);
     return eval0 ();

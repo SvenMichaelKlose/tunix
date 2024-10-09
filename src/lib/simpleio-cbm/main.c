@@ -39,6 +39,7 @@
 char logical_fns[MAX_CHANNELS];
 char last_errors[MAX_CHANNELS];
 char eof_status[MAX_CHANNELS];
+char con_flags;
 
 void
 cmd_null (void)
@@ -55,24 +56,40 @@ void
 cmd_clr (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags &= ~TERM_FLAG_CURSOR;
         cursor (0);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags &= ~TERM_FLAG_REVERSE;
         revers (0);
-    if (c & TERM_FLAG_DIRECT)
-        term_direct_mode = false;
+    }
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags &= ~TERM_FLAG_DIRECT;
+    }
 }
 
 void
 cmd_set (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags |= TERM_FLAG_CURSOR;
         cursor (1);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags |= TERM_FLAG_REVERSE;
         revers (1);
-    if (c & TERM_FLAG_DIRECT)
-        term_direct_mode = true;
+    }
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags |= TERM_FLAG_DIRECT;
+    }
+}
+
+void
+cmd_get (void)
+{
+    putbackc (con_flags);
 }
 
 void
@@ -96,7 +113,7 @@ cmd_clrscr (void)
 void
 cmd_lf (void)
 {
-    if (term_direct_mode)
+    if (con_flags & TERM_FLAG_DIRECT)
         cputc (10);
     else
         cbm_k_bsout (10);
@@ -105,7 +122,7 @@ cmd_lf (void)
 void
 cmd_cr (void)
 {
-    if (term_direct_mode)
+    if (con_flags & TERM_FLAG_DIRECT)
         cputc (13);
     else
         cbm_k_bsout (13);
@@ -284,7 +301,7 @@ raw_out (char c)
             c = 221;
         else
             c = reverse_case (c);
-        if (term_direct_mode) {
+        if (con_flags & TERM_FLAG_DIRECT) {
             cputc (c);
             return;
         }

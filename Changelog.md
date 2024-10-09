@@ -18,6 +18,10 @@ and this project adheres to
 - End-of-file shows up when trying to read past a file's end,
   not if the last byte has been read.
 
+#### Added
+
+- New code to get console flags.
+
 ### Lisp
 
 #### Interpreter

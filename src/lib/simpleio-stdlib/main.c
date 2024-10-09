@@ -28,6 +28,7 @@
 
 FILE *      channels[MAX_CHANNELS];
 signed char last_error;
+char        con_flags;
 
 #ifdef TARGET_UNIX
 
@@ -93,13 +94,19 @@ void
 cmd_clr (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags &= ~TERM_FLAG_CURSOR;
         fputs ("\033[?25l", stdout);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags &= ~TERM_FLAG_REVERSE;
         fputs ("\033[27m", stdout);
+    }
 #ifdef TARGET_UNIX
-    if (c & TERM_FLAG_DIRECT)
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags &= ~TERM_FLAG_DIRECT;
         reset_terminal_mode ();
+    }
 #endif
     fflush (stdout);
 }
@@ -108,15 +115,27 @@ void
 cmd_set (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags |= TERM_FLAG_CURSOR;
         fputs ("\033[?25h", stdout);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags |= TERM_FLAG_REVERSE;
         fputs ("\033[7m", stdout);
+    }
 #ifdef TARGET_UNIX
-    if (c & TERM_FLAG_DIRECT)
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags |= TERM_FLAG_DIRECT;
         set_nonblocking_mode ();
+    }
 #endif
     fflush (stdout);
+}
+
+void
+cmd_get (void)
+{
+    putbackc (con_flags);
 }
 
 void

@@ -686,8 +686,9 @@ New channels are created by OPEN to access files:
 |   1 x y  | Position cursor.   |
 |   2 f    | Clear flags.       |
 |   3 f    | Set flags.         |
-|   4      | Get X position.    |
-|   5      | Get Y position.    |
+|   4      | Get flags.         |
+|   5      | Get X position.    |
+|   6      | Get Y position.    |
 |  10      | Line feed.         |
 |  12      | Clear screen.      |
 |  13      | Carriage return.   |

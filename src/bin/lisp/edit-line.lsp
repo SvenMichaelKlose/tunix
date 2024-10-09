@@ -12,9 +12,7 @@
 
 ;;; Display
 
-(var *spaces* nil)
-(dotimes (i *con-w*)
-  (push \  *spaces*))
+(var *spaces* (dup \  *con-w*))
 
 (fn llen (x)
   (? (list? x)
@@ -49,6 +47,7 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (l)
+  (= *alv?* nil)
   (con-crs t)
   (con-direct t)
   (= *mod?* nil)

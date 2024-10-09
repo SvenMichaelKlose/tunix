@@ -1,6 +1,3 @@
-(or (builtin? 'append)
-    (load "append.lsp"))
-
 (message "Testing top-level file read...")
 (var ch (open "test-read.bin" 'r))
 (or ch (error "Cannot open \"test-read.bin\"."))

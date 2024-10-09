@@ -408,8 +408,8 @@ set_arg_values:
         // Rest of arguments.
         if (typed_argdef == '+') {
             if (unevaluated) {
-                value = args;
-                goto save_arg_value;
+                PUSH(args);
+                goto set_arg_values;
             }
 
             PUSH(args);

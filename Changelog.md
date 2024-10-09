@@ -54,6 +54,7 @@ and this project adheres to
   return value to !.
 - WITH\*: Like macro WITH, it defines local variables sequentially,
   but allowing each variable to reference the ones defined earlier.
+- DUP: Duplicates an element a number of times.
 
 
 ## [v0.0.21] - 2024-10-05

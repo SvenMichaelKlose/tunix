@@ -7,8 +7,6 @@
                   (@ car inits)
                   (@ cadr inits))
         ,@body)
-       ,(aprog1 nil
-          (dotimes (i (length inits))
-            (push nil !))))
+       ,(dup nil (length inits)))
      $(progn
         ,@body)))

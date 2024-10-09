@@ -1791,8 +1791,6 @@ LET is like WITH but creating only one local variable for its body.
 | (awhen cond +b)      | WHEN, assigning cond to !.       |
 | (case x v conseq...) | ?, using values insted of cond.  |
 | (unless cond +b)     | Evaluate if condition is false.  |
-| (while (cond x) +b)  | Loop while condiiton is true.    |
-| (dolist (i init) +b) | Loop over elements of a list.    |
 
 ### (prog1 +b): Return result of first.
 
@@ -1846,14 +1844,11 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 
 ### (unless cond +b): Evaluate if condition is false.
 
-### (while (cond x) +b): Loop while condiiton is true.
-
-### (dolist (i init) +b): Loop over elements of a list.
-
 ## Lists
 
 | Function          | Description                         |
 |-------------------|-------------------------------------|
+| (dup x n)         | Duplicate X N times.                |
 | (list +x)         | Return list evaluated.              |
 | (list? x)         | Test if argument is NIL or a cons.  |
 | (cadr l)...       | Nested CAR/CDR combinations.        |
@@ -1880,23 +1875,41 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 | (split x l ?f)    | Split list where object occurs.     |
 | (subseq l n n)    | Return sublist.                     |
 
-### (list +x): Make list of arguments.
+### (dup x n): Duplicate X N times
 
-### (list? x): Test if argument is NIL or a cons.
+#### Example
 
-### (cadr l)...: Nested CAR/CDR combinations.
+~~~lisp
+(dup 'x 3) ; -> (x x x)
+~~~
 
-### (carlist l): Get first elements of lists.
+### (list +x): Make list from arguments
 
-### (cdrlist l): Get rest elements of lists.
+### (list? x): Test if argument is NIL or a cons
 
-### (append +l): Copy and append lists.
+### (cadr l)...: Nested CAR/CDR combinations
 
-### (copy-list x): Copy list.
+As inconvenient as the names CAR and CDR are, as refreshingly practical
+combinations of them appear to be:
 
-### (copy-tree x): Copy recursively.
+~~~lisp
+(fn cadr (x)
+  (car (cdr x)))
+(fn caddr (x)
+  (car (cdr (cdr x))))
+~~~
 
-### (count-if f l): Count by predicate.
+### (carlist l): Get first elements of lists
+
+### (cdrlist l): Get rest elements of lists
+
+### (append +l): Copy and append lists
+
+### (copy-list x): Copy list
+
+### (copy-tree x): Copy recursively
+
+### (count-if f l): Count by predicate
 
 ~~~lisp
 (count-if number? '(l 1 5 p)) ; -> 2
@@ -1936,13 +1949,11 @@ makes CUT-AT less of a lispy function.
 
 ### (nthcdr n l): Get Nth cons of list.
 
-The name of NTHCDR is misleading, should you think of NTH being NTHCAR
-compared to NTHCDR.  NTHCDR actually returns the cons instead of the
-element that is in it.  And that is, of course, much more practical:
+NTHCDR returns the nth cons of a list, not the CAR of it, like NTH does.
 
 ~~~lisp
-(nth 0 '(l i s p)) ; -> (l i s p)
-(nth 2 '(l i s p)) ; -> (s p)
+(nthcdr 0 '(l i s p)) ; -> (l i s p)
+(nthcdr 2 '(l i s p)) ; -> (s p)
 ~~~
 
 ### (position x l ?f) | Find position of X in L.
@@ -1979,17 +1990,112 @@ exclusive, telling with which position copying finishes.
 ;         0 1 2 3 4
 ~~~
 
-## Loops
+## Looping
 
-| Macro                         | Description              |
-|-------------------------------|--------------------------|
-| (do ((iters) (cond res)) . b) | Generic loop.            |
-| (dolist (iter init) . body)   | Loop over list elements. |
-| (dotimes (iter n) . body)     | Loop N times.            |
+| Macro                               | Description                   |
+|-------------------------------------|-------------------------------|
+| (do (+iters (brk-cond res)) . body) | Generic loop.                 |
+| (dolist (iter init) . body)         | Loop over list elements.      |
+| (dotimes (iter n) . body)           | Loop N times.                 |
+| (while (cond x) +b)                 | Loop while condiiton is true. |
+| (awhile (cond x) +b)                | WHILE with condition in "!".  |
+
+###  DO/DO\*: Generic loop.
+
+Macro DO is used for iterative looping.  It allows for the
+execution of a block of code repeatedly, with controlled variable
+initialization, step updates, and termination conditions.
+
+DO* addtionally allows step updates to reference previously defined
+loop variables.
+
+#### Form
+
+~~~lisp
+(do ((var1 init1 step1)
+     (var2 init2 step2) ...)
+    (exit-condition result)
+  body)
+~~~
+
+- VAR, INIT, STEP: VAR is initialized to INIT, and after each iteration,
+  it is updated by STEP.
+- EXIT-CONDITION: The loop terminates when the `exit-condition`
+  evaluates to true, returning `result`.
+- BODY: The block of code that executes on each iteration until the
+  `exit-condition` is satisfied.
+
+#### Description
+
+DO is one of the most versatile constructs in Lisp, combining the
+functionality of of multiple loop constructs into a single, elegant
+tool.  Most other constructs like DOLIST, DOTIME, WHILE, and so on,
+are implemented using DO.
+
+#### Examples
+
+##### Reversed DOMTIMES
+
+~~~lisp
+(do ((i 0 (+ i 1))) 
+    ((== i 10) i)
+  (print i))
+; -> 0 1 2 3 4 5 6 7 8 9
+~~~
+
+I is initialized to 0, incremented in each iteration, and the loop
+exits when I equals 10, returning I.
+
+##### Iterating over a list's conses
+
+Iterating over conses is required if list elements ahead need to be
+token into consideration.
+
+~~~lisp
+(fn butlast (x)
+  (do ((c x (cdr c)))
+      ((not c))
+    (or (cdr c)
+        (return c))))
+~~~
+
+##### Iterating over a list's conses with indexing
+
+~~~lisp
+(do ((c x (cdr c))
+     (i 0 (++ i)))
+    ((not c))
+  (let e (car c)
+    BODY))
+~~~
 
 ### (dolist (iter init) . body): Loop over list elements.
 
 ### (dotimes (iter n) . body): Loop N times.
+
+#### Syntax
+
+~~~lisp
+(dotimes (var number ?result)
+  body)
+~~~
+
+Counts down from N to 0, evaluation BODY each time.   A non-negative N is an
+error.
+
+#### Example: Make list of duplicates
+
+~~~lisp
+(fn dup (x n)
+  (aprog1 nil
+    (dotimes (i n)
+      (push x !))))
+
+(dup 'x 3) ; -> (x x x)
+~~~
+
+### (while (cond x) +b): Loop while condiiton is true
+### (awhile (cond x) +b): WHILE with condition in "!"
 
 ## Stacks
 

@@ -69,20 +69,6 @@
                1 2))
       (error "Expansion of WITH failed")))
 
-(do-test "Testing WITH*..."
-  (load "with2.lsp")
-  (or (equal (macroexpand '(with* ((a 1)
-                                   (b 2))
-                             (print a)
-                             (print b)))
-             '(((a b)
-                 (= a 1)
-                 (= b 2)
-                 (print a)
-                 (print b))
-               (nil nil)))
-      (error "Expansion of WITH* failed")))
-
 (do-test "Testing WITH-GLOBAL..."
   (let tmp 'dummy
     (with-global tmp nil
@@ -128,7 +114,7 @@
     (print i))
   (terpri))
 
-(do-test "Testing WHILE..."
+(do-test "Smoke-testing WHILE..."
   (let x 10
     (while (< 0 x)
       (print x)
@@ -141,6 +127,27 @@
       (print x)
       (= x (-- x))))
   (terpri))
+
+(do-test "Testing DUP..."
+  (!= (dup 'x 0)
+    (and ! (error !)))
+  (!= (dup 'x 3)
+    (or (equal '(x x x) !)
+        (error !))))
+
+(do-test "Testing WITH*..."
+  (load "with2.lsp")
+  (or (equal (macroexpand '(with* ((a 1)
+                                   (b 2))
+                             (print a)
+                             (print b)))
+             '(((a b)
+                 (= a 1)
+                 (= b 2)
+                 (print a)
+                 (print b))
+               (nil nil)))
+      (error "Expansion of WITH* failed")))
 
 (do-test "Testing CASE..."
   (case 23

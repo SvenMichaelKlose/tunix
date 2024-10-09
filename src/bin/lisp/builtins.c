@@ -829,23 +829,13 @@ bi_out_atom (lispptr x)
 {
     lispobj_size_t l;
 
-    if (NUMBERP(x))
+    if (NUMBERP(x)) {
         counted_out (NUMBER_VALUE(x));
-    else if (_NAMEDP(x)) {
-        l = SYMBOL_LENGTH(x);
+    } else if (_NAMEDP(x)) {
         tmpstr = SYMBOL_NAME(x);
-        if (countdown >= 0 && countdown < l)
-            l = countdown;
-        bi_out_flush ();
-        outsn (tmpstr, l);
-        if (countdown >= 0) {
-            countdown -= l;
-            if (countdown < 0)
-                countdown = 0;
-        }
-    } else if (CONSP(x))
-        bi_out_list (x);
-    else {
+        for (l = SYMBOL_LENGTH(x); l; --l)
+            counted_out (*tmpstr++);
+    } else {
         bi_out_flush ();
         print (x);
     }

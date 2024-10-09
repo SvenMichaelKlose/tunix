@@ -46,7 +46,7 @@ image_save (char * pathname)
     memcpy (&header.git_version, TUNIX_GIT_SHA, sizeof (header.git_version));
 
     // Write header.
-    outm ((char *) &header, sizeof (header));
+    outsn ((char *) &header, sizeof (header));
 
 #ifdef FRAGMENTED_HEAP
     // Start with first heap.
@@ -56,21 +56,21 @@ image_save (char * pathname)
 #endif
 
         // Write heap start.
-        outm ((char *) &heap_start, sizeof (lispptr));
+        outsn ((char *) &heap_start, sizeof (lispptr));
 
         // Write heap size.
         len = heap_free - heap_start;
-        outm ((char *) &len, sizeof (len));
+        outsn ((char *) &len, sizeof (len));
 
         // Write heap data.
-        outm (heap_start, len);
+        outsn (heap_start, len);
 #ifdef FRAGMENTED_HEAP
     } while (heap->start);
 #endif
 
     // Write global pointers.
     for (tmpo = global_pointers; *tmpo; tmpo++)
-        outm ((char *) *tmpo, sizeof (lispptr));
+        outsn ((char *) *tmpo, sizeof (lispptr));
 
     // Close image file.
     simpleio_close (chout);

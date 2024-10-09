@@ -20,10 +20,3 @@ inm (char * p, size_t nbytes)
     for (len = nbytes; len > 0; len--)
         *p++ = in ();
 }
-
-void FASTCALL
-outm (char * p, size_t nbytes)
-{
-    for (len = nbytes; len > 0; len--)
-        out (*p++);
-}

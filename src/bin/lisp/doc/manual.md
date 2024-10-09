@@ -57,7 +57,7 @@ compiler suite:
 It also compiles on regular Unixoids, using the GNU compiler toolchain or
 compatibles.
 
-## Differences to other dialects
+## Some differences to other dialects
 
 Here is how most other Lisps translate to TUNIX Lisp:
 
@@ -875,9 +875,20 @@ bytes that are kept for calling an ONERROR handler.
 
 | Function   | Description                            |
 |------------|----------------------------------------|
+| (exit ?n)  | Exit program or interpreter with code. |
+
+### (exit ?n): Exit program or interpreter with exit code.
+
+When called without arguments the program is stopped and control is
+returned to the top-level REPL.  When called with a number that number is
+the exit code for the interpreter which will terminate immediately.
+
+## Heap
+
+| Function   | Description                            |
+|------------|----------------------------------------|
 | (gc)       | Free unused objects.                   |
 | (free)     | Number of free bytes on heap.          |
-| (exit ?n)  | Exit program or interpreter with code. |
 
 ### (gc): Free unused objects.
 
@@ -886,11 +897,9 @@ Triggers the garbage collector.  It marks all objects linked to variable
 
 ### (free): Number of free bytes on heap.
 
-### (exit ?n): Exit program or interpreter with exit code.
-
-When called without arguments the program is stopped and control is
-returned to the top-level REPL.  When called with a number that number is
-the exit code for the interpreter which will terminate immediately.
+Returns the maximum number of bytes that could be allocated.  That number
+is likely to be less but can amount to the size of a symbol with the
+biggest possible name length.
 
 ## Definitions
 
@@ -2323,38 +2332,16 @@ Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the GC will print a
 
 # Internals
 
-## The REPL implementation
+## Garbage collection
 
-The REPL comes in four flavours, being called with one of three modes and
-an optional error code in global 'error\_code'.  EVAL calls a
-REPL\_DEBUGGER if an error occurred to get a value to continue with.  All
-REPLs can be instructed to
-
-- continue with the next expression, ignoring errors,
-- return from the REPL,
-- exit the program by returning from all REPLs,
-
-### REPL\_STD
-
-The classic REPL, reading and evaluating an expression, and printing the
-result.
-
-### REPL\_LOAD
-
-Reading from a channel opened by LOAD.  Does not print anything.
-
-### REPL\_DEBUGGER with error code
-
-- Calls ONERROR and returns with its value if it didn't fail.
-- Prints program info.
-- Short command prompt.
-
-### REPL\_DEBUGGER without error code
-
-- Prints program info.
-- Asks for an alternative value
-- Short command prompt.
-
+The compacting mark-and-sweep garbage collector first traces and marks all
+objects that are in use, starting with \*UNIVERSE\*, and moves the used
+objects together in the sweep phase, overwriting the unused ones.  Finally
+it relocates all pointers to moved objects.  The more gaps have to be
+removed, the longer the relocation phase takes, because adjacent gaps are
+merged.  On small machines removing all macros and doing a manual GC is
+recommended before program start because macro-expansions create lots of
+gaps.
 
 ## Heap object layouts
 

@@ -33,18 +33,18 @@ lispptr list_last;  // Last cons of list.
 int FASTCALL
 length (lispptr x)
 {
-    lisp_len = 0;
+    int l = 0;
     while (NOT_NIL(x)) {
-        lisp_len++;
+        l++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
         if (NOT_NIL(x) && ATOM(x)) {
-            lisp_len++;
+            l++;
             break;
         }
     }
-    return lisp_len;
+    return l;
 }
 
 lispptr needle;

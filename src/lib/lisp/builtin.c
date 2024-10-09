@@ -20,9 +20,9 @@
 void FASTCALL
 name_to_buffer (lispptr s)
 {
-    lisp_len = SYMBOL_LENGTH(s);
-    memcpy (buffer, SYMBOL_NAME(s), lisp_len);
-    buffer[lisp_len] = 0;
+    lispobj_size_t l = SYMBOL_LENGTH(s);
+    memcpy (buffer, SYMBOL_NAME(s), l);
+    buffer[l] = 0;
 }
 
 // Make expression calling procedure 'arg1' with 'args',

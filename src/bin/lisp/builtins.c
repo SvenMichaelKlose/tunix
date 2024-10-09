@@ -154,8 +154,8 @@ lispptr
 bi_char_at ()
 {
     lispnum_t n = NUMBER_VALUE(arg2);
-    lisp_len = SYMBOL_LENGTH(arg1);
-    if (n < 0 || n >= lisp_len)
+    lispobj_size_t l = SYMBOL_LENGTH(arg1);
+    if (n < 0 || n >= l)
         return nil;
     return make_number (SYMBOL_NAME(arg1)[n]);
 }
@@ -163,12 +163,12 @@ bi_char_at ()
 lispptr
 bi_set_char_at ()
 {
-    lispptr   s = LIST_CAR(arg1);
-    lispptr   n = LIST_CAR(LIST_CDR(arg1));
-    lispptr   v = LIST_CAR(LIST_CDR(CDR(arg1)));
-    lispnum_t i = NUMBER_VALUE(n);
-    lisp_len = SYMBOL_LENGTH(s);
-    if (i < 0 || i >= lisp_len)
+    lispptr        s = LIST_CAR(arg1);
+    lispptr        n = LIST_CAR(LIST_CDR(arg1));
+    lispptr        v = LIST_CAR(LIST_CDR(CDR(arg1)));
+    lispnum_t      i = NUMBER_VALUE(n);
+    lispobj_size_t l = SYMBOL_LENGTH(s);
+    if (i < 0 || i >= l)
         return nil;
     SYMBOL_NAME(s)[i] = NUMBER_VALUE(v);
     return arg1;
@@ -182,12 +182,14 @@ lispptr
 bi_symbol_name ()
 {
     lispobj_size_t i = 0;
+    lispobj_size_t l;
+
     if (NOT(arg1))
         return arg1;
 
-    lisp_len = SYMBOL_LENGTH(arg1);
+    l = SYMBOL_LENGTH(arg1);
     list_start = list_last = nil;
-    for (i = 0; i < lisp_len; i++) {
+    for (i = 0; i < l; i++) {
         tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
         if (NOT_NIL(list_last)) {
             SETCDR(list_last, tmp);
@@ -825,17 +827,19 @@ counted_out (char c)
 void FASTCALL
 bi_out_atom (lispptr x)
 {
+    lispobj_size_t l;
+
     if (NUMBERP(x))
         counted_out (NUMBER_VALUE(x));
     else if (_NAMEDP(x)) {
-        lisp_len = SYMBOL_LENGTH(x);
+        l = SYMBOL_LENGTH(x);
         tmpstr = SYMBOL_NAME(x);
-        if (countdown >= 0 && countdown < lisp_len)
-            lisp_len = countdown;
+        if (countdown >= 0 && countdown < l)
+            l = countdown;
         bi_out_flush ();
-        outsn (tmpstr, lisp_len);
+        outsn (tmpstr, l);
         if (countdown >= 0) {
-            countdown -= lisp_len;
+            countdown -= l;
             if (countdown < 0)
                 countdown = 0;
         }
@@ -852,11 +856,7 @@ bi_out_list (lispptr x)
 {
     DOLIST(tmp, x) {
         PUSH(tmp);
-        if (CONSP(CAR(tmp))) {
-            bi_out_flush ();
-            print (CAR(tmp));
-        } else
-            bi_out_atom (CAR(tmp));
+        bi_out_atom (CAR(tmp));
         POP(tmp);
     }
 }
@@ -904,6 +904,8 @@ bi_close (void)
 lispptr
 bi_read_line (void)
 {
+    lispobj_size_t l;
+
     tmpstr = buffer;
     if (fnin != STDIN) {
         while (!eof ()) {
@@ -913,7 +915,7 @@ bi_read_line (void)
         }
     }
     putback ();
-    for (lisp_len = 0; lisp_len < MAX_SYMBOL - 1; lisp_len++) {
+    for (l = 0; l < MAX_SYMBOL - 1; l++) {
         if (eof ())
             break;
         tmpc = in ();
@@ -944,16 +946,19 @@ struct cbm_dirent dirent;
 lispptr
 bi_readdir (void)
 {
-    char err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
+    lispobj_size_t l;
     char i;
+    char err;
+
+    err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
     if (err)
         return nil;
     memcpy (buffer, dirent.name, sizeof (dirent.name));
     buffer[sizeof (dirent.name)] = 0;
-    lisp_len = strlen (buffer);
-    for (i = 0; i < lisp_len; i++)
+    l = strlen (buffer);
+    for (i = 0; i < l; i++)
         buffer[i] = reverse_case (buffer[i]);
-    list_start = make_cons (make_symbol (buffer, lisp_len), nil);
+    list_start = make_cons (make_symbol (buffer, l), nil);
     tmp = make_cons (make_number (dirent.size), nil);
     SETCDR(list_start, tmp);
     PUSH(tmp);

@@ -61,7 +61,6 @@ char *   heap_start;
 #ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-lispobj_size_t lisp_len;
 lispptr  tmp;
 lispptr  tmp2;
 char     tmpc;

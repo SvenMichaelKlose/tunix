@@ -730,8 +730,6 @@ extern long bekloppies (void);
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 
-extern lispobj_size_t lisp_len;
-
 // For processing lists with no recursions.
 extern lispptr list_start;
 extern lispptr list_last;
@@ -788,7 +786,6 @@ extern lispptr make_cons_car;
 extern lispptr make_cons_cdr;
 
 #ifdef USE_ZEROPAGE
-#pragma zpsym ("lisp_len")
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")

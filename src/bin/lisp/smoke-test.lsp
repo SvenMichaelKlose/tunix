@@ -46,6 +46,13 @@
 (apply '(x x) '(1 2))
 (apply '(x x) 1 2 '(3 4))
 
+(message "Smoke-testing APPLY on OUT with single number...")
+;(apply out 65) : TODO: test-error.lsp
+(apply out '(65))
+
+(message "Smoke-testing APPLY on OUT with number list...")
+(apply out '(65 66 67))
+
 (message "Smoke-testing EVAL...")
 (eval ''(error))
 

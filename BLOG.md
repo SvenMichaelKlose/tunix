@@ -3,6 +3,60 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-08
+
+I've added a buffer to the stacks so they won't trash the rest
+of the program on overflows which are only checks once per
+EVAL.  I'm bad at debugging this shit.
+
+# 2024-10-07
+
+I've been banging together an 6502-CPU opcode assembler to get
+away from homoeostasis while trying to fix I/O.  eof() has to
+be delayed with the CBM KERNAL.  The idea to was to write a
+bytecompiler for fox ache!
+
+Halfway through writing a char number tree based tokenizer I
+realized that an assembler wouldn't need a tokenizer at all.
+Let's take this real-world example, showing how READ would
+change only few lines:
+
+~~~asm
+cons?ax:
+    sta p
+    stx ,(++ p)     ; stx (unquote (++ p))
+cons?p:
+    lda ,(++ p)     ; lda (unquote (++ p))
+    beq no
+    ldy #0
+    lda (p),y       ; lda (p) (unquote y)
+    and #TYPE_CONS
+    beq no
+    lda #,(lo t)    ; lda # (unquote (lo t))
+    ldx #,(hi t)    ; ldx # (unquote (hi t))
+    rts
+no: tax
+    rts
+~~~
+
+UNQUOTES that don't denote an indexed address mode are
+evaluated while parsing the read expression.  The may span
+multiple lines.  Character '#' is cut out of the heads of symbols.
+Single quotes however need to be checked for before something is
+READ or quotes at line ends cause trouble wanting anything following
+as its argument.
+
+~~~
+    and #TYPE_CONS  ; and # TYPE_CONS
+    lda #'A'        ; lda # 65
+~~~
+
+Symbols in expressions are replaced by label values if available.
+During the first pass ONERROR helps ignoring missing forward references.
+Then it's ignoring errors again until all instruction sizes (and branch
+ranges) are known.  The last pass includes generating the opcodes and
+operand bytes.
+
 # 2024-10-04
 
 RETURN is ignored in argument lists but I'm at it, hoping that

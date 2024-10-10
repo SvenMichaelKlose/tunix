@@ -1,5 +1,3 @@
-(app 'app-edit-line)
-
 (load "con.lsp")
 
 ;;; State
@@ -107,5 +105,3 @@
                             (<= c +arr-left+)))
                (putback)
                (return (? *mod?* (symbol *line*) *oline*)))))))))
-
-(app 'app-edit-line)

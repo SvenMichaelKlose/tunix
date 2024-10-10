@@ -1,7 +1,3 @@
-(app 'app-edit)
-
-(require 'let 'progn 'with-in 'with-out)
-
 ;;; State
 
 (var *filename* "edit-help.md")
@@ -313,5 +309,3 @@
   (clrscr)
   (con-direct nil)
   *filename*)
-
-(app 'app-edit)

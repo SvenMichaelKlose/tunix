@@ -55,6 +55,7 @@ error_cons_expected (lispptr x)
 void FASTCALL
 internal_error (char * msg)
 {
+    (void) con_reset ();
     outs ("INTERNAL: ");
     outs (msg);
     terpri ();
@@ -72,6 +73,7 @@ internal_error (char * msg)
 void FASTCALL
 internal_error_ptr (void * p, char * msg)
 {
+    (void) con_reset ();
     outhw ((size_t) p);
     out (' ');
     internal_error (msg);

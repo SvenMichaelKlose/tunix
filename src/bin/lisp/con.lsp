@@ -1,5 +1,8 @@
+(var *con-w* 80)
+(var *con-h* 25)
+(var +enter+ 13)
+
 (when (member +target+ '(c128 c16 c64 pet plus4 vic20))
-  (var +enter+ 13)
   (var +arr-up+ 145)
   (var +arr-down+ 17)
   (var +arr-left+ 157)
@@ -7,8 +10,6 @@
   (var +bs+ 20)
   (var +del+ 20)
   (var +ins+ 148)
-  (var *con-w* 40)
-  (var *con-h* 25)
   (when (eq +target+ 'pet)
     (= *con-w* 80))
   (when (eq +target+ 'vic20)

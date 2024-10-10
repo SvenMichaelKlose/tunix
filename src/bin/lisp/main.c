@@ -219,10 +219,8 @@ main (int argc, char * argv[])
         // Called by ILOAD.  Reset I/O.
         simpleio_init ();
 #ifndef NO_BUILTIN_GROUP_FILE
-        arg1 = make_number (STDIN);
-        bi_setin ();
-        arg1 = make_number (STDOUT);
-        bi_setout ();
+        SET_SYMBOL_VALUE(lisp_fnin,  make_number (STDIN));
+        SET_SYMBOL_VALUE(lisp_fnout, make_number (STDOUT));
 #endif
 
         // Call function ISTART.

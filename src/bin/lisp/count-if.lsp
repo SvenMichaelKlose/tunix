@@ -1,5 +1,5 @@
 (fn count-if (f l)
-  (with (n 0)
+  (let (n 0)
     (dolist (i l n)
       (? (f i)
          (!++ n)))))

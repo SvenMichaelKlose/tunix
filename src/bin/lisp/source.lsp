@@ -1,7 +1,7 @@
 (fn source (x)
   (? (symbol? x)
-     (with (c nil
-            v (symbol-value x))
+     (let (c nil
+           v (symbol-value x))
        $(,(?
             (special? x) 'special
             (macro? x) 'macro

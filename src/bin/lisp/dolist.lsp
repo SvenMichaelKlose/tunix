@@ -1,7 +1,7 @@
 (macro dolist (iter . body)
   ;"Loop over conses of a list."
-  (with (i (symbol))
+  (let (i (symbol))
     $(do ((,i ,(cadr iter) (cdr ,i)))
          ((not ,i) ,@(cddr iter))
-       (with (,(car iter) (car ,i))
+       (let (,(car iter) (car ,i))
          ,@body))))

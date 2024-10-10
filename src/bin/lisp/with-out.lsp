@@ -1,7 +1,7 @@
 (macro with-out (v x . body)
   ;"Evaluate BODY with input channel V provided by X. Return error or NIL."
-  (with (g (symbol))
-    $(with (,g fnout
+  (let (g (symbol))
+    $(let (,g fnout
             ,v ,x)
        (unless ,v
          (return (or (err) t)))

@@ -1,7 +1,7 @@
 (defsetfn set-exclusive-or
   ;"Elements that are not in both lists."
-  (with (subset  (intersect a b)
-         pred    $((x)
-                    (member x ,subset)))
-    (append (remove-if pred a)
-            (remove-if pred b))))
+  (let (subset  (intersect a b)
+        pred    $((x)
+                   (member x ,subset)))
+    (nconc (remove-if pred a)
+           (remove-if pred b))))

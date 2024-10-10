@@ -1,7 +1,7 @@
 (macro with-global (n v . body)
   ;"Temporarily assign global with new value."
-  (with (g (symbol))
-    $(with (,g ,n)
+  (let (g (symbol))
+    $(let (,g ,n)
        (= ,n ,v)
        (prog1
          (progn

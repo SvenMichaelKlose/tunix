@@ -9,7 +9,7 @@
   nil)
 
 (fn mklogical (which)
-  (with (end "")
+  (let (end "")
     $(%block
        ,@(mapcan $((x)
                     (list x '(,which ,end)))
@@ -25,7 +25,7 @@
 
 (fn mkif (end x)
   (? (cdr x)
-     (with (next "")
+     (let (next "")
        $(,(car x)
          (%go-nil ,next)
          ,(cadr x)
@@ -34,7 +34,7 @@
      (list (car x))))
 
 (defcm ? x
-  (with (end "")
+  (let (end "")
     $(%block
        ,@(mapcan $((x)
                     (mkif ,end x))
@@ -52,7 +52,7 @@
 
 ; TODO: Collect potential tags.
 (fn %block (n . body)
-  (with (end "")
+  (let (end "")
     (push (cons n end) *blocks*)
     (!= (@ macroexpand body)
       (pop *blocks*)

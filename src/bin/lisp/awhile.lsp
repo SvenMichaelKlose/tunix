@@ -1,6 +1,6 @@
 (macro awhile (test . body)
-  (with (g (symbol))
+  (let (g (symbol))
     $(do ()
          ((not (= ,g ,test)))
-       (with (! ,g)
+       (let (! ,g)
          ,@body))))

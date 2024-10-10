@@ -1,3 +1,3 @@
 (macro != (x . body)
-  $(with (! ,x)
+  $(let (! ,x)
      ,@body))

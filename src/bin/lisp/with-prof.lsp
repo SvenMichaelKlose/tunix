@@ -1,12 +1,12 @@
 (and (builtin? 'time)
      (number? +bps+)
   (macro with-prof body
-    (with (stime    (symbol)
+    (let (stime    (symbol)
            duration (symbol))
-      $(with (,stime (time))
+      $(let (,stime (time))
          (progn
            ,@body)
-         (with (,duration (- (time) ,stime))
+         (let (,duration (- (time) ,stime))
            (out "Time spent: ")
            (print (/ ,duration +bps+))
            (out 's)

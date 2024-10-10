@@ -41,7 +41,7 @@
                    (subseq *line* (++ x)))))
 
 (fn go-eol ()
-  (with (n (llen *line*))
+  (let (n (llen *line*))
     (= *lx* (? (> n 0) n 0))))
 
 ; Edit line.
@@ -53,8 +53,8 @@
   (= *mod?* nil)
   (= *line* (or l ""))
   (= *oline* *line*)
-  (with (x (con-x)
-         y (con-y))
+  (let (x (con-x)
+        y (con-y))
     ; Don't have cursor past line end.
     (and (> *lx* (llen *line*))
          (go-eol))
@@ -64,10 +64,10 @@
         (update-line *line*)
         (= *update?* nil))
       (con-xy (+ x *lx*) y)
-      (with (len  (llen *line*)
-             c    (while (not (eof))
-                     (awhen (conin)
-                       (return !))))
+      (let (len  (llen *line*)
+            c    (while (not (eof))
+                    (awhen (conin)
+                      (return !))))
         ; Insert char and step right.
         (? (and (>= c 32)
                 (or (< c 126)

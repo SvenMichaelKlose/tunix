@@ -1,5 +1,5 @@
 (= *alv?* t) ; Verbose AUTOLOAD.
-(app 'app-test-all)
+(var app-test-all nil)
 
 (macro do-test (title . body)
   $((()
@@ -17,16 +17,6 @@
       (fresh-line)
       ,@body)))
 
-(do-test "Testing PROG1..."
-  (or (equal (eval (macroexpand '(prog1 1 2 3)))
-             1)
-      (error 'PROG1)))
-
-(do-test "Testing APROG1..."
-  (or (equal (eval (macroexpand '(aprog1 1 2 3)))
-             1)
-      (error 'APROG1)))
-
 (do-test "Testing PROGN..."
   (load "progn.lsp")
   (or (equal (macroexpand '(progn (error)))
@@ -37,9 +27,9 @@
              '((l i) (s p)))
       (error (group2 '(l i s p)))))
 
-(message "TODO: Testing UNLESS...")
-(message "TODO: Testing WHEN...")
-(message "TODO: Testing AWHEN...")
+(message "TODO: UNLESS...")
+(message "TODO: WHEN...")
+(message "TODO: AWHEN...")
 
 (do-test "Testing LET..."
   (load "let.lsp")
@@ -52,6 +42,16 @@
                  (print b))
                1 2))
       (error "Expansion of LET failed")))
+
+(do-test "Testing PROG1..."
+  (or (equal (eval (macroexpand '(prog1 1 2 3)))
+             1)
+      (error 'PROG1)))
+
+(do-test "Testing APROG1..."
+  (or (equal (eval (macroexpand '(aprog1 1 2 3)))
+             1)
+      (error 'APROG1)))
 
 (do-test "Testing WITH-GLOBAL..."
   (let (tmp 'dummy)
@@ -78,8 +78,23 @@
     (print i))
   (terpri))
 
-(message "TODO: Testing MAKE-QUEUE...")
-(message "TODO: Testing QUEUE-LIST...")
+(do-test "Testing !++..."
+  (let (x 1)
+    (!++ x)
+    (or (== x 2)
+        (error "X didn't increment to 2."))))
+
+(do-test "Testing !--..."
+  (let (x 1)
+    (!-- x)
+    (or (== x 0)
+        (error "X didn't decrement to 0."))))
+
+(do-test "Testing MAKE-QUEUE..."
+  (or (equal (make-queue)
+             '(nil))
+      (error (make-queue))))
+
 (do-test "Testing ENQUEUE..."
   (or (equal (let (q (make-queue))
                (enqueue q 42)
@@ -87,7 +102,9 @@
                (queue-list q))
              '(42 23))
       (error "Expansion of ENQUEUE failed.")))
-(message "TODO: Testing QUEUE-POP...")
+
+(message "TODO: QUEUE-LIST...")
+(message "TODO: QUEUE-POP...")
 (do-test "Testing WITH-QUEUE..."
   (or (equal (with-queue q
                (enqueue q 5))
@@ -121,6 +138,11 @@
       (print x)
       (= x (-- x))))
   (terpri))
+
+(do-test "Testing !=..."
+  (or (equal (eval (macroexpand '(!= 1 2 3)))
+             3)
+      (error '!=)))
 
 (do-test "Testing DUP..."
   (!= (dup 'x 0)
@@ -271,20 +293,8 @@
                (s p)))
       (error)))
 
-(do-test "Testing !++..."
-  (let (x 1)
-    (!++ x)
-    (or (== x 2)
-        (error "X didn't increment to 2."))))
-
-(do-test "Testing !--..."
-  (let (x 1)
-    (!-- x)
-    (or (== x 0)
-        (error "X didn't decrement to 0."))))
-
-(message "TODO: Testing INTERSECT...")
-(message "TODO: Testing MAX...")
+(message "TODO: INTERSECT...")
+(message "TODO: MAX...")
 
 (do-test "Testing MEMBER-IF..."
   (or (member-if '((x) (eq x 'i))
@@ -345,11 +355,11 @@
   (or (== 2 (position 's '(l i s p)))
       (error)))
 
-(message "TODO: Testing POSITION-IF...")
-(message "TODO: Testing REMOVE-IF...")
-(message "TODO: Testing SET-DIFFERENCE...")
-(message "TODO: Testing SET-EXCLUSIVE-OR...")
-(message "TODO: Testing SOURCE...")
+(message "TODO: POSITION-IF...")
+(message "TODO: REMOVE-IF...")
+(message "TODO: SET-DIFFERENCE...")
+(message "TODO: SET-EXCLUSIVE-OR...")
+(message "TODO: SOURCE...")
 
 (do-test "Testing SPLIT..."
   (and (split 'b nil)
@@ -357,7 +367,7 @@
   (or (equal (split 'b '(a a a b a a b b a a a a))
              '((a a a) (a a) nil (a a a a)))))
 
-(message "TODO: Testing SPLIT-IF...")
+(message "TODO: SPLIT-IF...")
 
 (do-test "Testing UNION..."
   (or (equal (union '(l l i i) '(s s p p))
@@ -369,5 +379,6 @@
              '(l i s p))
       (error)))
 
-(app 'app-test-all)
-(rm-app 'app-test-all)
+(= *universe* (cdr (member 'app-test-all *universe*)))
+(= *macros* (cdr (member-if '((x) (eq 'do-test (car x)))
+                            *macros*)))

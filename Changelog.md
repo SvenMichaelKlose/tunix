@@ -28,6 +28,7 @@ and this project adheres to
 
 ##### Fixed
 
+- Debugger resets console before prompt.
 - APPLY: Complain if the only argument is not a list.
 - REPL: Decrement debugger count correctly.
 - REPL: Cleaned up switching channels.

@@ -355,4 +355,5 @@ simpleio_init ()
     fnin  = STDIN;
     fnout = STDOUT;
     simpleio_set (&vectors);
+    con_flags = TERM_FLAG_CURSOR;
 }

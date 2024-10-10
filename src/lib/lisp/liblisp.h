@@ -1160,6 +1160,9 @@ extern void     FASTCALL make_car_call       (void);
 extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
 
+extern char con_reset (void);
+extern char con_set   (char flags);
+
 extern void init_builtins (void);
 extern void init_eval     (void);
 extern bool init_heap     (void);

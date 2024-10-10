@@ -369,4 +369,5 @@ simpleio_init ()
     channels[STDIN]  = stdin;
     channels[STDOUT] = stdout;
     channels[STDERR] = stderr;
+    con_flags = TERM_FLAG_CURSOR;
 }

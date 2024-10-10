@@ -1,8 +1,9 @@
 (macro do (vars brk-res . body)
   (let tag (symbol)
-     $(with ,(@ '((x)
-                   $(,(car x) ,(cadr x)))
-                vars)
+     $(with ,(apply append
+                    (@ '((x)
+                          $(,(car x) ,(cadr x)))
+                       vars))
         (block nil
           ,tag
           (? ,(car brk-res)

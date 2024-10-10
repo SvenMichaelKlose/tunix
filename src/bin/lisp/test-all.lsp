@@ -41,26 +41,19 @@
   (or (equal (macroexpand '(progn (error)))
              '(block t (error)))))
 
-(message "TODO: Testing MAKE-QUEUE...")
-(message "TODO: Testing QUEUE-LIST...")
+(do-test "Testing GROUP2..."
+  (or (equal (group2 '(l i s p))
+             '((l i) (s p)))
+      (error (group2 '(l i s p)))))
 
-(do-test "Testing ENQUEUE..."
-  (or (equal (let q (make-queue)
-               (enqueue q 42)
-               (enqueue q 23)
-               (queue-list q))
-             '(42 23))
-      (error "Expansion of ENQUEUE failed.")))
-
-(message "TODO: Testing QUEUE-POP...")
 (message "TODO: Testing UNLESS...")
 (message "TODO: Testing WHEN...")
 (message "TODO: Testing AWHEN...")
 
 (do-test "Testing WITH..."
   (load "with.lsp")
-  (or (equal (macroexpand '(with ((a 1)
-                                  (b 2))
+  (or (equal (macroexpand '(with (a 1
+                                  b 2)
                              (print a)
                              (print b)))
              '(((a b)
@@ -76,12 +69,6 @@
            (error "TMP is not NIL.")))
     (or tmp
         (error "TMP not restored."))))
-
-(do-test "Testing WITH-QUEUE..."
-  (or (equal (with-queue q
-               (enqueue q 5))
-             '(5))
-      (error "Expansion of WITH-QUEUE failed")))
 
 (do-test "Testing PUSH and POP..."
   (or (let x nil
@@ -99,6 +86,22 @@
       ((>= i 10))
     (print i))
   (terpri))
+
+(message "TODO: Testing MAKE-QUEUE...")
+(message "TODO: Testing QUEUE-LIST...")
+(do-test "Testing ENQUEUE..."
+  (or (equal (let q (make-queue)
+               (enqueue q 42)
+               (enqueue q 23)
+               (queue-list q))
+             '(42 23))
+      (error "Expansion of ENQUEUE failed.")))
+(message "TODO: Testing QUEUE-POP...")
+(do-test "Testing WITH-QUEUE..."
+  (or (equal (with-queue q
+               (enqueue q 5))
+             '(5))
+      (error "Expansion of WITH-QUEUE failed")))
 
 (do-test "Testing REVERSE..."
   (or (equal (reverse '(p s i l))
@@ -148,6 +151,22 @@
                  (print b))
                (nil nil)))
       (error "Expansion of WITH* failed")))
+
+(do-test "Testing MAPCAR..."
+  (or (equal (mapcar + '(1 2 3) '(4 5 6))
+             '(5 7 9))
+      (error)))
+
+(do-test "Testing MAPCAN..."
+  (and (mapcan '((x)))
+       (error))
+  (and (mapcan '((x) x) '(nil))
+       (error))
+  (and (mapcan '((x) x) '(nil nil))
+       (error))
+  (or (equal (mapcan list '(l i s p))
+             '(l i s p))
+       (error)))
 
 (do-test "Testing CASE..."
   (case 23
@@ -273,23 +292,6 @@
         (error "X didn't decrement to 0."))))
 
 (message "TODO: Testing INTERSECT...")
-
-(do-test "Testing MAPCAN..."
-  (and (mapcan '((x)))
-       (error))
-  (and (mapcan '((x) x) '(nil))
-       (error))
-  (and (mapcan '((x) x) '(nil nil))
-       (error))
-  (or (equal (mapcan list '(l i s p))
-             '(l i s p))
-       (error)))
-
-(do-test "Testing MAPCAR..."
-  (or (equal (mapcar + '(1 2 3) '(4 5 6))
-             '(5 7 9))
-      (error)))
-
 (message "TODO: Testing MAX...")
 
 (do-test "Testing MEMBER-IF..."

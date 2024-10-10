@@ -52,6 +52,8 @@ and this project adheres to
 
 ##### Changed
 
+- WITH: Variable initializers aren't in lists anymore.  Just one list
+  that will be grouped by twos automatically.
 - AUTOLOAD: Be verbose by default (\*ALV?\* is T).
 
 ##### Added

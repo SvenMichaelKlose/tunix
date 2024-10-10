@@ -1,3 +1,6 @@
+Images
+[ ] Written images are truncated.
+
 AUTOLOAD
 [ ] Handle built-in argument type error caused by missing functions.
 

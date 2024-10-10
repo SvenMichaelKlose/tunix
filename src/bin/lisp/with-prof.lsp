@@ -1,8 +1,8 @@
 (and (builtin? 'time)
      (number? +bps+)
   (macro with-prof body
-    (with ((stime    (symbol))
-           (duration (symbol)))
+    (with (stime    (symbol)
+           duration (symbol))
       $(let ,stime (time)
          (progn
            ,@body)

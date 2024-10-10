@@ -75,8 +75,8 @@
 
 (fn print-lines (s)
   (con-direct t)
-  (with ((y s)
-         (l (nthcdr (+ *conln* s) *lines*)))
+  (with (y s
+         l (nthcdr (+ *conln* s) *lines*))
     (dotimes (i (- (-- *con-h*) s))
       (con-xy 0 y)
       (update-line (and l (car l)))
@@ -128,9 +128,9 @@
   (!= (-- *ln*)
     (= *update-ln* !)
     (let prev (nth ! *lines*)
-      (with ((prev-len (slength prev))
-             (joined   (list (symbol (nconc (symbol-name prev)
-                                            (symbol-name (nth *ln* *lines*)))))))
+      (with (prev-len (slength prev)
+             joined   (list (symbol (nconc (symbol-name prev)
+                                           (symbol-name (nth *ln* *lines*))))))
         (= *lines* (? (== 1 *ln*)
                       (nconc joined (cddr *lines*))
                       (!= (cut-at ! *lines*)

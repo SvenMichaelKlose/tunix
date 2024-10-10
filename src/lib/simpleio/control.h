@@ -5,7 +5,7 @@
 #define TERM_CMD_GOTO    1  // Position cursor.
 #define TERM_CMD_CLR     2  // Clear flags.
 #define TERM_CMD_SET     3  // Set flags.
-#define TERM_CMD_GET     4  // Set flags.
+#define TERM_CMD_GET     4  // Get flags.
 #define TERM_CMD_GETX    5  // Get X position.
 #define TERM_CMD_GETY    6  // Get Y position.
 

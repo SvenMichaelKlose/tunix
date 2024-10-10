@@ -20,6 +20,22 @@ and this project adheres to
 - User-REPL resets console if in direct mode.
 - Debugger prints erroraneous value.
 
+#### Environment
+
+##### Fixed
+
+- Console functions
+
+##### Added
+
+- Simple console tests
+
+### libsimpleio
+
+#### Fixed
+
+- Control codes for TARGET\_UNIX.
+
 
 ## [v0.0.22] - 2024-10-10
 

@@ -21,8 +21,8 @@
 
 (fn con-xy (x y)
   (out 1)
-  (out x)
-  (out y))
+  (out (++ x))
+  (out (++ y)))
 
 (fn con-clrset (x f)
   (out (? x 3 2))
@@ -42,7 +42,7 @@
   (-- (conin)))
 
 (fn con-x ()
-  (con-get 4))
+  (con-get 5))
 
 (fn con-y ()
-  (con-get 5))
+  (con-get 6))

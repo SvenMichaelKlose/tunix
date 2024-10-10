@@ -49,7 +49,7 @@ cmd_null (void)
 void
 cmd_goto (void)
 {
-    gotoxy (cmd_params[1], cmd_params[0]);
+    gotoxy (cmd_params[1] - 1, cmd_params[0] - 1);
 }
 
 void

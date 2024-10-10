@@ -45,7 +45,7 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (l)
-  (= *alv?* nil)
+  ;(= *alv?* nil)
   (con-crs t)
   (con-direct t)
   (= *mod?* nil)
@@ -66,6 +66,7 @@
             c    (while (not (eof))
                     (awhen (conin)
                       (return !))))
+        (print c)
         ; Insert char and step right.
         (? (and (>= c 32)
                 (or (< c 126)

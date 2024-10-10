@@ -195,10 +195,6 @@ getxy (int * col, int * row)
     if (2 != sscanf (buf, "\033[%d;%dR", row, col))
         goto error_with_term_restored;
 
-    // Make position start at 1,1 as 0 is a dummy char.
-    ++*row;
-    ++*col;
-
     // Restore former terminal status.
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
@@ -219,25 +215,25 @@ error_with_term_restored:
 void
 cmd_getx (void)
 {
-#ifndef __CC65__
+#ifdef __CC65__
+    putbackc (0);
+#else
     int row, col;
     getxy (&row, &col);
     putbackc (row);
-#else
-    putbackc (0);
-#endif // #ifndef __CC65__
+#endif // #ifdef __CC65__
 }
 
 void
 cmd_gety (void)
 {
-#ifndef __CC65__
+#ifdef __CC65__
+    putbackc (0);
+#else
     int row, col;
     getxy (&row, &col);
     putbackc (col);
-#else
-    putbackc (0);
-#endif // #ifndef __CC65__
+#endif // #ifdef __CC65__
 }
 
 bool
@@ -261,7 +257,11 @@ raw_in (void)
     c = fgetc (channels[(int) fnin]);
     if (c == EOF) {
         c = 0;
+#ifdef __CC65__
         if (errno && errno != EAGAIN)
+#else
+        if (errno && errno != EWOULDBLOCK && errno != EAGAIN)
+#endif
             last_error = errno;
     }
     return c;
@@ -274,9 +274,11 @@ raw_conin (void)
 {
     int c;
 
-    set_nonblocking_mode ();
+    if (!(con_flags & TERM_FLAG_DIRECT))
+        set_nonblocking_mode ();
     c = raw_in ();
-    reset_terminal_mode ();
+    if (!(con_flags & TERM_FLAG_DIRECT))
+        reset_terminal_mode ();
 
     return c;
 }
@@ -293,6 +295,8 @@ raw_out (char c)
         last_error = -1;
     else if (EOF == fputc (c, channels[(int) fnout]))
         last_error = errno;
+    if (fnout == STDOUT && (con_flags & TERM_FLAG_DIRECT))
+        fflush (stdout);
 }
 
 void

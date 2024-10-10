@@ -273,7 +273,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
     // READ/EVAL/PRINT-Loop.
     while (1) {
         if (mode == REPL_STD && (con_reset () & TERM_FLAG_DIRECT)) {
-            outs ("Ready.");
+            outs ("Console reset.");
             terpri ();
         }
         if (repl_eof (mode, load_fn))
@@ -317,7 +317,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // Read short debugger command, skipping whitespace.
             do {
                 cmd = in ();
-            } while (!eof () && cmd < ' ');
+            } while (!eof () && cmd <= ' ');
 #ifdef TARGET_UNIX
             if (eof ())
                 exit (EXIT_FAILURE);

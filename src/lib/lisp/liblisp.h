@@ -333,8 +333,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
-#define TAGSTACK_SIZE       768
+#define STACK_SIZE          3072
+#define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 512
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES

@@ -64,6 +64,9 @@ and this project adheres to
   but allowing each variable to reference the ones defined earlier.
 - DUP: Duplicates an element a number of times.
 
+##### Removed
+
+- LET
 
 ## [v0.0.21] - 2024-10-05
 

@@ -17,15 +17,6 @@
       (fresh-line)
       ,@body)))
 
-(do-test "Testing LET..."
-  (load "let.lsp")
-  (or (equal (macroexpand '(let a 1
-                             (+ 2 a)))
-             '(((a)
-                 (+ 2 a))
-               1))
-      (error "Expansion of LET failed.")))
-
 (do-test "Testing PROG1..."
   (or (equal (eval (macroexpand '(prog1 1 2 3)))
              1)
@@ -63,7 +54,7 @@
       (error "Expansion of WITH failed")))
 
 (do-test "Testing WITH-GLOBAL..."
-  (let tmp 'dummy
+  (with (tmp 'dummy)
     (with-global tmp nil
       (and tmp
            (error "TMP is not NIL.")))
@@ -71,7 +62,7 @@
         (error "TMP not restored."))))
 
 (do-test "Testing PUSH and POP..."
-  (or (let x nil
+  (or (with (x nil)
         (push 'p x)
         (push 's x)
         (push 'i x)
@@ -90,7 +81,7 @@
 (message "TODO: Testing MAKE-QUEUE...")
 (message "TODO: Testing QUEUE-LIST...")
 (do-test "Testing ENQUEUE..."
-  (or (equal (let q (make-queue)
+  (or (equal (with (q (make-queue))
                (enqueue q 42)
                (enqueue q 23)
                (queue-list q))
@@ -109,8 +100,8 @@
       (error)))
 
 (do-test "Smoke-testing DOLIST..."
-  (dolist (i '(1 2 3 4 5 6 7 8 9 10))
-    (fresh-line)(out '"Item ")(print i)))
+  (dolist (i '(a b c d e f g h i j))
+    (print i)))
 
 (do-test "Smoke-testing DOTIMES..."
   (dotimes (i 10)
@@ -118,14 +109,14 @@
   (terpri))
 
 (do-test "Smoke-testing WHILE..."
-  (let x 10
+  (with (x 10)
     (while (< 0 x)
       (print x)
       (= x (-- x))))
   (terpri))
 
 (do-test "Smoke-testing AWHILE..."
-  (let x 19
+  (with (x 10)
     (awhile (< 0 x)
       (print x)
       (= x (-- x))))
@@ -137,20 +128,6 @@
   (!= (dup 'x 3)
     (or (equal '(x x x) !)
         (error !))))
-
-(do-test "Testing WITH*..."
-  (load "with2.lsp")
-  (or (equal (macroexpand '(with* ((a 1)
-                                   (b 2))
-                             (print a)
-                             (print b)))
-             '(((a b)
-                 (= a 1)
-                 (= b 2)
-                 (print a)
-                 (print b))
-               (nil nil)))
-      (error "Expansion of WITH* failed")))
 
 (do-test "Testing MAPCAR..."
   (or (equal (mapcar + '(1 2 3) '(4 5 6))
@@ -167,6 +144,21 @@
   (or (equal (mapcan list '(l i s p))
              '(l i s p))
        (error)))
+
+(do-test "Testing WITH*..."
+  (load "with2.lsp")
+  (!= (macroexpand '(with* (a 1
+                            b 2)
+                      (print a)
+                      (print b)))
+    (or (equal !
+               '(((a b)
+                   (= a 1)
+                   (= b 2)
+                   (print a)
+                   (print b))
+                 nil nil))
+        (error "Expansion of WITH* failed"))))
 
 (do-test "Testing CASE..."
   (case 23
@@ -203,7 +195,7 @@
        (error)))
 
 (do-test "Testing ACONS..."
-  (or (let x nil
+  (or (with (x nil)
         (acons 'vic 20 x)
         (equal x '((vic . 20))))
       (error)))
@@ -229,7 +221,7 @@
       (error)))
 
 (do-test "Testing CUT-AT..."
-  (let head '(l i s p)
+  (with (head '(l i s p))
     (or (equal (cut-at 0 head)
                '(l i s p))
         (error))
@@ -280,13 +272,13 @@
       (error)))
 
 (do-test "Testing !++..."
-  (let x 1
+  (with (x 1)
     (!++ x)
     (or (== x 2)
         (error "X didn't increment to 2."))))
 
 (do-test "Testing !--..."
-  (let x 1
+  (with (x 1)
     (!-- x)
     (or (== x 0)
         (error "X didn't decrement to 0."))))

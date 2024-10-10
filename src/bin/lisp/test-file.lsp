@@ -1,4 +1,3 @@
-(load "let.lsp")
 (load "with.lsp")
 (load "!=.lsp")
 (load "prog1.lsp")

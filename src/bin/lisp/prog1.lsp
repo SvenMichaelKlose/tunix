@@ -1,6 +1,6 @@
 (macro prog1 (x . body)
   ;"Return value of first expression."
-  (let g (symbol)
-    $(let ,g ,x
+  (with (g (symbol))
+    $(with (,g ,x)
        ,@body
        ,g)))

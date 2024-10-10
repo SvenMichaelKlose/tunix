@@ -1,6 +1,6 @@
 (app 'app-edit)
 
-(require 'let 'with 'progn 'with-in 'with-out)
+(require 'with 'progn 'with-in 'with-out)
 
 ;;; State
 
@@ -127,22 +127,22 @@
   (= *saved?* nil)
   (!= (-- *ln*)
     (= *update-ln* !)
-    (let prev (nth ! *lines*)
-      (with (prev-len (slength prev)
-             joined   (list (symbol (nconc (symbol-name prev)
-                                           (symbol-name (nth *ln* *lines*))))))
-        (= *lines* (? (== 1 *ln*)
-                      (nconc joined (cddr *lines*))
-                      (!= (cut-at ! *lines*)
-                        (nconc *lines* joined (cddr !)))))
-        (!-- *ln*)
-        (= *lx* prev-len)))))
+    (with* (prev     (nth ! *lines*)
+            prev-len (slength prev)
+            joined   (list (symbol (nconc (symbol-name prev)
+                                          (symbol-name (nth *ln* *lines*))))))
+      (= *lines* (? (== 1 *ln*)
+                    (nconc joined (cddr *lines*))
+                    (!= (cut-at ! *lines*)
+                      (nconc *lines* joined (cddr !)))))
+      (!-- *ln*)
+      (= *lx* prev-len))))
 
 (fn split-line (l x)
   (? (== 0 x)
      (list ""
            l)
-     (let lc (symbol-name l)
+     (with (lc (symbol-name l))
        (!= (cut-at x lc)
          (list (symbol lc)
                (symbol !))))))
@@ -150,7 +150,7 @@
 (fn ins-line ()
   (= *saved?* nil)
   (= *update-ln* *ln*)
-  (let l (split-line (nth *ln* *lines*) *lx*)
+  (with (l (split-line (nth *ln* *lines*) *lx*))
     (= *lines* (? (== 0 *ln*)
                   (nconc l (cdr *lines*))
                   (!= (cut-at *ln* *lines*)
@@ -177,9 +177,9 @@
     (con-direct t)))
 
 (fn save-file f
-  (let uf (unless f
-            ;(list-dir)
-            (prompt-in "Save:" *filename*))
+  (with (uf (unless f
+              ;(list-dir)
+              (prompt-in "Save:" *filename*)))
     (prompt "...")
     (? (with-out o (open (or (car f) uf) 'w)
          (? uf
@@ -192,7 +192,7 @@
 
 (fn load-file ()
   ;(list-dir)
-  (let f (prompt-in "Load:" *filename*)
+  (with (f (prompt-in "Load:" *filename*))
     (? (with-in i (open f 'r)
          (prompt "...")
          (= *filename* f)
@@ -255,7 +255,7 @@
   (status-msg)
   (while (not (eof))
     (update-screen)
-    (let line (nthcdr *ln* *lines*)
+    (with (line (nthcdr *ln* *lines*))
       (con-xy 0 (- *ln* *conln*))
       (!= (edit-line (car line))
         (when *mod?*

@@ -198,9 +198,8 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #ifndef NO_DEBUGGER
     char cmd;
 #endif
-#if !defined(NO_DEBUGGER) || !defined (NO_ONERROR)
     char old_con_flags;
-#endif
+    (void) old_con_flags;
 
     // Make sure the user can communicate should anything
     // go wrong if not actually running the program.

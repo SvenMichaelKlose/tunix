@@ -1,7 +1,7 @@
-(load "let.lsp")
 (load "when.lsp")
-(load "let-when.lsp")
 (load "progn.lsp")
+(load "group2.lsp")
+(load "with.lsp")
 
 ; Be verbose during AUTOLOAD.
 (var *alv?* t)
@@ -16,11 +16,12 @@
 ; Doesn't necessarily mean that the desired definition
 ; came with it.
 (fn %aload (%n)
-  (let %f (symbol (nconc (symbol-name (or (cdr (assoc %n *alx*)) %n))
-                         (symbol-name ".lsp")))
-    (let-when %! (open %f 'r)
-      (close %!)
-      (load %f))))
+  (with (%f (symbol (nconc (symbol-name (or (cdr (assoc %n *alx*)) %n))
+                           (symbol-name ".lsp"))))
+    (with (%! (open %f 'r))
+      (when %!
+        (close %!)
+        (load %f)))))
 
 (fn %al (%code %top %x %i)
   (block nil
@@ -37,7 +38,7 @@
           ; If missing function turns out to be
           ; a macro, replace it by its expansion.
           (when (macro? (car %x))
-            (let %m (macroexpand %x)
+            (with (%m (macroexpand %x))
               (setcar %x (car %m))
               (setcdr %x (cdr %m))))
           ; Try again.
@@ -47,9 +48,9 @@
     '%fail))
 
 (fn autoload (%code %top %x %i)
-  (let %v? *v?*
+  (with (%v? *v?*)
     (= *v?* *alv?*)
-    (let %! (%al %code %top %x %i)
+    (with (%! (%al %code %top %x %i))
       (= *v?* %v?)
       %!)))
 

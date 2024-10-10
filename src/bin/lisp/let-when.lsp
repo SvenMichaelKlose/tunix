@@ -1,4 +1,4 @@
 (macro let-when (v x . body)
-  $(let ,v ,x
+  $(with (,v ,x)
      (when ,v
        ,@body)))

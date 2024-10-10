@@ -4,7 +4,7 @@
          c  (cadr iter)
          l  (caddr iter)
          r  (cdddr iter))
-    $(let ,c 0
+    $(with (,c 0)
        (dolist (,i ,l ,@r)
          ,@body
          (!++ ,c)))))

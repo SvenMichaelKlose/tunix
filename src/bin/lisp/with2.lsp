@@ -1,12 +1,11 @@
 (macro with* (inits . body)
   ;"Local symbol values."
   (? inits
-     $((,(@ car inits)
-        ,@(mapcar '((a b)
-                     $(= ,a ,b))
-                  (@ car inits)
-                  (@ cadr inits))
-        ,@body)
-       ,(dup nil (length inits)))
+     (((i)
+        $((,(@ car i)
+           ,@(@ '((x) (cons '= x)) i)
+           ,@body)
+          ,@(dup nil (length i))))
+      (group2 inits))
      $(progn
         ,@body)))

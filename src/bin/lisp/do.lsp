@@ -1,5 +1,5 @@
 (macro do (vars brk-res . body)
-  (let tag (symbol)
+  (with (tag (symbol))
      $(with ,(apply append
                     (@ '((x)
                           $(,(car x) ,(cadr x)))

@@ -41,7 +41,7 @@
                    (subseq *line* (++ x)))))
 
 (fn go-eol ()
-  (let n (llen *line*)
+  (with (n (llen *line*))
     (= *lx* (? (> n 0) n 0))))
 
 ; Edit line.

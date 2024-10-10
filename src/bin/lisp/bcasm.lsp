@@ -5,10 +5,10 @@
 
 (fn bcasm (x)
   (!= (mkbcfun (bclen x))
-    (let i 0
+    (with (i 0)
       (do ((c x (cdr c)))
           ((not c))
-        (let e (car c)
+        (with (e (car c))
           (? (atom x)
              (error "Unexpected atom " x " in metacode.")
              (case (car e)
@@ -37,7 +37,7 @@
                     (= i (+ 1 i))
                     (dotimes (j (cadr e))
                       (= x (cdr x))
-                      (let p (rawptr x)
+                      (with (p (rawptr x))
                         (set-char-at ! i (bit-and p 255))
                         (set-char-at ! (++ i) (>> p 8))
                         (= i (+ 2 i))))))

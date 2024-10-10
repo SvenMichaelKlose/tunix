@@ -1,5 +1,3 @@
-(or (macro? 'let)
-    (load "let.lsp"))
 (or (macro? 'with)
     (load "with.lsp"))
 (or (macro? 'progn)

@@ -58,9 +58,9 @@
             (xlated-args q (cdr x) (cdr gsyms))))))
 
 (fn anonymize-funexpr (x syms gsyms)
-  (let q (make-queue)
+  (with (q (make-queue))
     (!= (xlated-args q (car x) gsyms)
-      (let asyms (queue-list q)
+      (with (asyms (queue-list q))
         (cons ! (anonymize-list (cdr x)
                                 (append asyms syms)
                                 (nthcdr (length syms) gsyms)))))))

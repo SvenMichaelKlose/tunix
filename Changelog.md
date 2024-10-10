@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.22] - 2024-10-10
 
 ### libsimpleio-cbm
 
@@ -55,16 +55,17 @@ and this project adheres to
 - WITH: Variable initializers aren't in lists anymore.  Just one list
   that will be grouped by twos automatically.
 - WITH is now LET.
-- WITH* is now LET*.
+- WITH* is now LET\*.
 - AUTOLOAD: Be verbose by default (\*ALV?\* is T).
 
 ##### Added
 
 - APROG1: Anaphoric version of macro PROG1, locally assigning the
-  return value to !.
+  return value to "!".
 - WITH\*: Like macro WITH, it defines local variables sequentially,
   but allowing each variable to reference the ones defined earlier.
 - DUP: Duplicates an element a number of times.
+- Test MAKE-QUEUE and "!=".
 
 ## [v0.0.21] - 2024-10-05
 

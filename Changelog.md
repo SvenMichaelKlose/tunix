@@ -20,15 +20,19 @@ and this project adheres to
 - User-REPL resets console if in direct mode.
 - Debugger prints erroraneous value.
 
+##### Added
+
+- CPU stack overflow checks.
+
 #### Environment
 
 ##### Fixed
 
-- Console functions
+- Console functions.
 
 ##### Added
 
-- Simple console tests
+- Simple console tests.
 
 ### libsimpleio
 

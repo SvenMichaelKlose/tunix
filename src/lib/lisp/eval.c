@@ -162,6 +162,10 @@ pop_argument_values (void)
     stack += sizeof (lispptr) * num_args;
 }
 
+#ifndef NAIVE
+char sp;
+#endif
+
 lispptr
 eval0 (void)
 {
@@ -185,7 +189,15 @@ do_eval:
 #ifndef NAIVE
     _GCSTACK_CHECK_OVERFLOW();
     _TAGSTACK_CHECK_OVERFLOW();
-#endif
+
+#ifdef __CC65__
+    // Get the current value of the stack pointer (SP)
+    __asm__("tsx");  // Transfer stack pointer to index register X
+    __asm__("stx %v", sp);
+    if (sp < 8)
+        internal_error ("CPU stack");
+#endif // #ifdef __CC65__
+#endif // #ifndef NAIVE
 
 #ifndef NO_HIGHLIGHTING
     PUSH(highlighted);

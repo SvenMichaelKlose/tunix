@@ -510,12 +510,6 @@
 #ifndef CHECK_OBJ_POINTERS
     #define CHECK_OBJ_POINTERS
 #endif
-#ifndef TAGSTACK_OVERFLOW_CHECKS
-    #define TAGSTACK_OVERFLOW_CHECKS
-#endif
-#ifndef GCSTACK_OVERFLOW_CHECKS
-    #define GCSTACK_OVERFLOW_CHECKS
-#endif
 #endif // #ifdef DEVELOPMENT
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)

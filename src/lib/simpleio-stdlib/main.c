@@ -221,8 +221,7 @@ cmd_getx (void)
 {
 #ifndef __CC65__
     int row, col;
-    if (!getxy (&row, &col))
-        printf ("No X!");
+    getxy (&row, &col);
     putbackc (row);
 #else
     putbackc (0);

@@ -9,6 +9,18 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+##### Fixed
+
+- User-REPL resets console if in direct mode.
+- Debugger prints erroraneous value.
+
+
 ## [v0.0.22] - 2024-10-10
 
 ### libsimpleio-cbm
@@ -66,6 +78,7 @@ and this project adheres to
   but allowing each variable to reference the ones defined earlier.
 - DUP: Duplicates an element a number of times.
 - Test MAKE-QUEUE and "!=".
+
 
 ## [v0.0.21] - 2024-10-05
 

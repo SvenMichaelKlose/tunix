@@ -90,8 +90,10 @@ print_debug_info ()
             outs (": ");
             print (error_info);
         }
-    } else {
-        outs ("Rvalue: ");
+    }
+    if (NOT_NIL(value)) {
+        fresh_line ();
+        outs ("Value: ");
         print (value);
     }
 
@@ -219,6 +221,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // Save error state for the debugger
             // if ONERROR handler fails.
             PUSH(error_info);
+            PUSH(value);
             PUSH_TAG(error_code);
             PUSH_TAG(unevaluated);
 
@@ -243,7 +246,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // Handle error as usual if %FAIL was returned.
             if (x != fail_sym) {
                 // Discard saved context.
-                stack += 1 * sizeof (lispptr);
+                stack += 2 * sizeof (lispptr);
                 tagstack += 2;
 
                 // Continue with new value.
@@ -253,6 +256,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             // Restore context for debugger.
             POP_TAG(unevaluated);
             POP_TAG(error_code);
+            POP(value);
             POP(error_info);
         }
 #ifdef NO_DEBUGGER
@@ -268,6 +272,10 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 
     // READ/EVAL/PRINT-Loop.
     while (1) {
+        if (mode == REPL_STD && (con_reset () & TERM_FLAG_DIRECT)) {
+            outs ("Ready.");
+            terpri ();
+        }
         if (repl_eof (mode, load_fn))
             break;
 

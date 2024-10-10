@@ -74,6 +74,7 @@ extern void FASTCALL    outhb       (unsigned char);
 extern void FASTCALL    outhw       (unsigned);
 extern void FASTCALL    outs        (char *);
 extern void FASTCALL    outsn       (char *, char len);
+extern void FASTCALL    outm        (char *, size_t);
 extern void             terpri      (void);
 extern void             fresh_line  (void);
 

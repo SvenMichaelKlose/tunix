@@ -285,7 +285,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             old_con_flags = con_reset ();
             SET_SYMBOL_VALUE(repl_value, value);
             debug_step = nil;
-            fresh_line ();
             print_debug_info ();
 #ifdef EXIT_FAILURE_ON_ERROR
             exit (EXIT_FAILURE);
@@ -303,10 +302,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #ifdef VERBOSE_READ
             // TODO: Set/restore terminal mode.
             print (x);
-#endif
-#ifndef TARGET_UNIX
-            if (mode != REPL_LOAD)
-                terpri ();
+            fresh_line ();
 #endif
 #ifndef NO_DEBUGGER
         } else {
@@ -321,10 +317,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
 #ifdef TARGET_UNIX
             if (eof ())
                 exit (EXIT_FAILURE);
-#endif
-#ifndef TARGET_UNIX
-            // Process short command.
-            fresh_line ();
 #endif
             switch (cmd) {
                 // Continue execution.
@@ -401,7 +393,7 @@ break_repl:
                     goto done;
 cannot_continue:
                     outs ("Need alternative first!");
-                    goto terpri_next;
+                    continue;
 want_name:
                     outs ("Name!");
                     goto done_short_command;
@@ -412,20 +404,13 @@ done_short_command:
                     POP(value);
                     POP(tmp);
                     SET_SYMBOL_VALUE(repl_value, tmp);
-terpri_next:
-                    fresh_line ();
-                    goto done;
+                    continue;
 
                 default:
                     // It wasn't a debugger command.
                     // Read as expression to evaluate.
                     putback ();
                     read_safe ();
-                    if (NOT(x))
-                        continue;
-#ifndef TARGET_UNIX
-                    terpri ();
-#endif
             }
         }
 #endif
@@ -553,8 +538,6 @@ done:
     // Track unnesting of this REPL.
     if (mode == REPL_DEBUGGER) {
 #ifndef NO_DEBUGGER
-        outs ("Continuing...");
-        terpri ();
         con_set (old_con_flags);
 #endif
 
@@ -578,7 +561,7 @@ done_onerror:
 #endif
 
     setin (oldin);
-    setin (oldout);
+    setout (oldout);
     return x;
 }
 

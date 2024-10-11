@@ -17,7 +17,7 @@ typedef struct _bdb {
     #define HAS_OPEN_STORAGE    1
 
     // Storage allocation (growing).
-    void     *storage;  // E.g. (FILE *).
+    void *   storage;  // E.g. (FILE *).
     dbid_t   next_free;
     dbid_t   storage_size;
 

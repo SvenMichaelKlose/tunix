@@ -9,6 +9,15 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Interpreter
+
+- Don't say "Bye!" on exit.
+
+
 ## [v0.0.22] - 2024-10-11
 
 ### libsimpleio-cbm

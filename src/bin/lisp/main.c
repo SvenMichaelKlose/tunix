@@ -233,8 +233,5 @@ main (int argc, char * argv[])
 #endif // #ifndef NO_IMAGE
 
     lisp_repl (REPL_STD, 0);
-
-    setout (STDOUT);
-    outs ("Bye!");
     return 0;
 }

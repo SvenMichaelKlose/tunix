@@ -8,7 +8,8 @@
 
 ; Name to filename translations.
 (var *alx*
-  '((!? . aif)
+  '((!?   . aif)
+    (do*  . do2)
     (let* . let2)))
 
 ; Try to load file for missing procedure.

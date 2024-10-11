@@ -72,7 +72,7 @@
              (equal x '(i s p))))
       (error "Test of PUSH/POP failed")))
 
-(do-test "Testing DO..."
+(do-test "Smoke-esting DO..."
   (do ((i 0 (+ i 1)))
       ((>= i 10))
     (print i))
@@ -279,6 +279,12 @@
       (error))
   (and (find 'x '(l i s p))
        (error)))
+
+(do-test "Smoke-esting DO*..."
+  (do* ((i 0 (+ i 1)))
+       ((>= i 10))
+    (print i))
+  (terpri))
 
 (do-test "Testing SUBSEQ..."
   (and (subseq '(l i s p) 0 0)

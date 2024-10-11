@@ -2002,13 +2002,14 @@ exclusive, telling with which position copying finishes.
 
 ## Looping
 
-| Macro                               | Description                   |
-|-------------------------------------|-------------------------------|
-| (do (+iters (brk-cond res)) . body) | Generic loop.                 |
-| (dolist (iter init) . body)         | Loop over list elements.      |
-| (dotimes (iter n) . body)           | Loop N times.                 |
-| (while (cond x) +b)                 | Loop while condiiton is true. |
-| (awhile (cond x) +b)                | WHILE with condition in "!".  |
+| Macro                                | Description                   |
+|--------------------------------------|-------------------------------|
+| (do (+iters (brk-cond res)) . body)  | Generic loop.                 |
+| (do* (+iters (brk-cond res)) . body) | Generic loop.                 |
+| (dolist (iter init) . body)          | Loop over list elements.      |
+| (dotimes (iter n) . body)            | Loop N times.                 |
+| (while (cond x) +b)                  | Loop while condiiton is true. |
+| (awhile (cond x) +b)                 | WHILE with condition in "!".  |
 
 ###  DO/DO\*: Generic loop.
 

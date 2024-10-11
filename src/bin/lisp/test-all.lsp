@@ -1,6 +1,15 @@
 (= *alv?* t) ; Verbose AUTOLOAD.
 (var app-test-all nil)
 
+(fn env-reset ()
+  (message "reset")
+  (= *universe* (member 'app-test-all *universe*))
+  (= *macros* (member-if '((x)
+                            (eq (car x) 'do-test))
+                         *macros*))
+  (print (gc))
+  (fresh-line))
+
 (macro do-test (title . body)
   $((()
       (message ,title)
@@ -8,12 +17,7 @@
         ((()
            (fresh-line)
            (and (< (print (gc)) 4096)
-             ((()
-                (print 'env-reset)
-                (fresh-line)
-                (= *universe* (member 'app-test-all *universe*))
-                (= *macros* (member-if '((x) (eq (car x) 'do-test))
-                                       *macros*))))))))
+                (env-reset)))))
       (fresh-line)
       ,@body)))
 
@@ -168,6 +172,7 @@
        (error)))
 
 (do-test "Testing LET*..."
+  (env-reset)
   (load "let2.lsp")
   (!= (macroexpand '(let* (a 1
                            b 2)

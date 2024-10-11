@@ -87,7 +87,7 @@ allworlds:
 	$(MAKE) worldclean world TARGET=unix
 	$(MAKE) worldclean world TARGET=vic20
 
-test: all
+test: allworlds
 	$(MAKE) -C src test
 	./scripts/test-unix.sh
 

@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.23] - 2024-10-11
 
 ### Lisp
 
@@ -17,7 +17,8 @@ and this project adheres to
 
 ##### Fixed
 
-- User-REPL resets console if in direct mode.
+- REPL: Resets output channel correctly on return.
+- REPL: Resets console before prompt.
 - Debugger prints erroraneous value.
 
 ##### Added
@@ -33,6 +34,7 @@ and this project adheres to
 ##### Added
 
 - Simple console tests.
+- Macro DO*
 
 ### libsimpleio
 

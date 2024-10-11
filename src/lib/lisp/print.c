@@ -210,9 +210,6 @@ print (lispptr x)
     print0 (x);
     if (CONSP(x))
         terpri ();
-#if defined(TARGET_UNIX) && !defined(NDEBUG)
-    fflush (stdout);
-#endif
     return x;
 }
 

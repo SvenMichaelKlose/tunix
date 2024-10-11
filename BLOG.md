@@ -3,6 +3,10 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-10
+
+The CPU stack is overflowing thanks to deep AUTOLOADs.
+
 # 2024-10-08
 
 I've added a buffer to the stacks so they won't trash the rest

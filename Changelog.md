@@ -9,44 +9,13 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
-
-### Lisp
-
-#### Interpreter
-
-##### Fixed
-
-- User-REPL resets console if in direct mode.
-- Debugger prints erroraneous value.
-
-##### Added
-
-- CPU stack overflow checks.
-
-#### Environment
-
-##### Fixed
-
-- Console functions.
-
-##### Added
-
-- Simple console tests.
-
-### libsimpleio
-
-#### Fixed
-
-- Control codes for TARGET\_UNIX.
-
-
-## [v0.0.22] - 2024-10-10
+## [v0.0.22] - 2024-10-11
 
 ### libsimpleio-cbm
 
 #### Fixed
 
+- Control codes for TARGET\_UNIX.
 - End-of-file shows up when trying to read past a file's end,
   not if the last byte has been read.
 
@@ -60,6 +29,9 @@ and this project adheres to
 
 ##### Fixed
 
+- REPL: Resets output channel correctly on return.
+- REPL: Resets console before prompt.
+- Debugger prints erroraneous value.
 - Debugger resets console before prompt.
 - APPLY: Complain if the only argument is not a list.
 - REPL: Decrement debugger count correctly.
@@ -73,12 +45,14 @@ and this project adheres to
 
 ##### Added
 
+- CPU stack overflow checks.
 - Compile-time option TEST\_ALL: Load "test-all.lsp" at end of boot.
 
 #### Environment
 
 ##### Fixed
 
+- Console functions.
 - AUTOLOAD: Fix function type arguments.
 - SYMBOL-NAME and SLENGTH accept built-ins.
 
@@ -92,9 +66,11 @@ and this project adheres to
 
 ##### Added
 
-- APROG1: Anaphoric version of macro PROG1, locally assigning the
+- Simple console tests.
+- Macro DO\*.
+- Macro APROG1: Anaphoric version of macro PROG1, locally assigning the
   return value to "!".
-- WITH\*: Like macro WITH, it defines local variables sequentially,
+- Macro WITH\*: Like macro WITH, it defines local variables sequentially,
   but allowing each variable to reference the ones defined earlier.
 - DUP: Duplicates an element a number of times.
 - Test MAKE-QUEUE and "!=".

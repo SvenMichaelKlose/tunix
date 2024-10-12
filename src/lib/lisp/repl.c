@@ -86,15 +86,13 @@ print_debug_info ()
 
         // Informative expression, describing the error
         // further.
-        if (NOT_NIL(error_info)) {
-            outs (": ");
-            print (error_info);
-        }
-    }
-    if (NOT_NIL(value)) {
-        fresh_line ();
-        outs ("Value: ");
+        outs (": ");
         print (value);
+    }
+    if (NOT_NIL(error_info)) {
+        fresh_line ();
+        outs ("Info: ");
+        print (error_info);
     }
 
     fresh_line ();

@@ -50,7 +50,7 @@ char *  stack_entered;
 char *  tagstack_start;
 char *  tagstack;
 lispptr argdefs;
-struct builtin * bfun;
+struct builtin * bifun;
 lispptr delayed_eval;
 lispptr block_sym;
 lispptr return_sym;
@@ -61,15 +61,15 @@ lispptr go_tag;
 lispptr debug_step;
 bool    do_invoke_debugger;
 uchar   typed_argdef;
-char *  builtin_argdef;
+char *  biargdef;
 uchar   num_args;
 bool    unevaluated;
 #ifdef USE_ZEROPAGE
 #pragma zpsym ("msg")
 #pragma zpsym ("stack_entered")
-#pragma zpsym ("bfun")
+#pragma zpsym ("bifun")
 #pragma zpsym ("typed_argdef")
-#pragma zpsym ("builtin_argdef")
+#pragma zpsym ("biargdef")
 #pragma zpsym ("num_args")
 #pragma bss-name (pop)
 #endif // #ifdef USE_ZEROPAGE
@@ -77,71 +77,6 @@ bool    unevaluated;
 #ifdef __CC65__
 #pragma code-name ("CODE_EVAL")
 #endif
-
-// Evaluate list to list of return values.
-// TODO: Inline into eval0.
-lispptr
-eval_list (void)
-{
-    if (ATOM(x))
-        return x;
-
-    // Evaluate first element.
-    PUSH(x);
-    HIGHLIGHT(x);
-    x = CAR(x);
-    eval ();
-    POP(x);
-
-    if (do_break_repl || value == return_sym)
-        return value;
-
-    // Make first element of result list and put it on
-    // the object stack, so we don't have to worry about
-    // garbage collection for the rest of elements.
-    list_start = list_last = make_cons (value, nil);
-    PUSH(list_start);
-
-    // Evaluate rest of list.
-    DOLIST(x, CDR(x)) {
-        // Evaluate CDR of dotted cons.
-        if (ATOM(x)) {
-            HIGHLIGHT(list_last);
-            SETCDR(list_last, eval ());
-            break;
-        }
-
-        // Save current cons to object stack.
-        PUSH(x);
-
-        // Evaluate CAR of cons.
-        PUSH(list_last);
-        HIGHLIGHT(x);
-        x = CAR(x);
-        eval ();
-        POP(list_last);
-
-        // Make new cons and append it to the end of the
-        // result list.
-        tmp = make_cons (value, nil);
-        SETCDR(list_last, tmp);
-        list_last = tmp;
-        tmp = nil;
-
-        // Remember current cons.
-        POP(x);
-
-        // Handle break, e.g. because of an error.
-        if (do_break_repl || value == return_sym) {
-            stack += sizeof (lispptr);
-            return value;
-        }
-    }
-
-    // Return memorized start of result list.
-    POP(list_start);
-    return list_start;
-}
 
 // Pop argument values from object stack:
 // num_args: Number of arguments.
@@ -165,6 +100,14 @@ pop_argument_values (void)
 #ifndef NAIVE
 char sp;
 #endif
+
+#define TOO_MANY_ARGSP() \
+    (NOT_NIL(args) && NOT(argdefs))
+#define MISSING_ARGSP() \
+    (NOT(args) && CONSP(argdefs))
+#define IS_BREAKPOINT() \
+    (CONSP(x) && SYMBOLP(CAR(x)) \
+     && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
 
 lispptr
 eval0 (void)
@@ -209,7 +152,7 @@ do_eval:
     current_expr = x;
 
     // Check if breakpoint.
-    if (CONSP(x) && SYMBOLP(CAR(x)) && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
+    if (IS_BREAKPOINT())
         do_invoke_debugger = true;
 
     if (do_invoke_debugger || debug_step == t) {
@@ -218,16 +161,23 @@ do_eval:
     }
 #endif // #ifndef NO_DEBUGGER
 
-    // Evaluate atom.
+    //////////
+    // ATOM //
+    //////////
+
     if (ATOM(x)) {
         if (NOT_NIL(x))
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
-        goto do_return_atom;
+        goto return_atom;
     }
 
-    // Get first element, which is the procedure to call.
+    ////////////////
+    // EXPRESSION //
+    ////////////////
+
+    // Evaluate expression.
     arg1 = CAR(x);
 #ifndef NAIVE
     unevaluated_arg1 = arg1;
@@ -239,271 +189,258 @@ do_eval:
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
     }
-
-    // Now we have:
-    //
-    // current_expr, x:  Current expression
-    // unevaluated_arg1: CAR(x)
-    // arg1:             CAR(x) evaluated
+    if (arg1 == block_sym)
+        goto eval_block;
+    args = CDR(x);
+    if (BUILTINP(arg1))
+        goto call_builtin;
+    goto call_user_defined;
 
     /////////////////////////
     /// BLOCK name . body ///
     /////////////////////////
     // Evalue BLOCK inline to avoid using the CPU stack.
 
-    if (arg1 == block_sym) {
+eval_block:
 #ifndef NAIVE
-        if (!CONSP(CDR(x))) {
-            error (ERROR_NO_BLOCK_NAME, "No name");
-            goto do_return;
-        }
-#endif
-        // Step to and get BLOCK name.
-        x = CDR(x);
-        arg1 = CAR(x);
-#ifndef NAIVE
-        if (!SYMBOLP(arg1)) {
-            error_info = arg1;
-            error (ERROR_TYPE, "Name not a sym");
-            goto do_return;
-        }
-#endif
-        // Get body.
-        arg2c = CDR(x);
-
-        // Return value of empty BLOCK.
-        value = nil;
-
-        unevaluated = false;
-block_statement:
-        // Get first/next statement.
-        x = CDR(x);
-
-        // Break on end of body.
-        if (NOT(x))
-            goto do_return;
-
-        // Save evaluator state.
-        PUSH(arg1);     // Block name
-        PUSH(arg2c);    // Body
-        PUSH(x);        // Current expression
-        HIGHLIGHT(x);
-        x = CAR(x);
-        PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
-        goto do_eval;
-next_block_statement:
-        // Restore evaluator state.
-        POP(x);
-        POP(arg2c);
-        POP(arg1);
-
-        // Return to break REPL if demanded.
-        if (do_break_repl)
-            goto do_return;
-
-        if (value == go_sym) {
-            // Handle GO.
-            value = nil;
-
-            // Search tag in body.
-            DOLIST(x, arg2c)
-                if (CAR(x) == go_tag)
-                    goto block_statement;
-#ifndef NAIVE
-            // Tag not found.  Issue error.
-            error_info = go_tag;
-            error (ERROR_TAG_MISSING, "Tag not found");
-            goto do_return;
-#endif
-        } else if (value == return_sym) {
-            // Handle RETURN,
-            if (arg1 == return_name) {
-                value = return_value;
-                return_value = nil;
-            }
-            goto do_return;
-        }
-        goto block_statement;
+    if (!CONSP(CDR(x))) {
+        error (ERROR_NO_BLOCK_NAME, "No name");
+        goto return_obj;
     }
+#endif
+    // Step to and get BLOCK name.
+    x = CDR(x);
+    arg1 = CAR(x);
+#ifndef NAIVE
+    if (!SYMBOLP(arg1)) {
+        error_info = arg1;
+        error (ERROR_TYPE, "Name not a sym");
+        goto return_obj;
+    }
+#endif
+    // Get body.
+    arg2c = CDR(x);
 
-    // It wasn't a BLOCK.
-    // Get argument list following the procedure's name.
-    args = CDR(x);
+    // Return value of empty BLOCK.
+    value = nil;
+
+    unevaluated = false;
+block_statement:
+    // Get first/next statement.
+    x = CDR(x);
+
+    // Break on end of body.
+    if (NOT(x))
+        goto return_obj;
+
+    // Save evaluator state.
+    PUSH(arg1);     // Block name
+    PUSH(arg2c);    // Body
+    PUSH(x);        // Current expression
+    HIGHLIGHT(x);
+    x = CAR(x);
+    PUSH_TAG(TAG_NEXT_BLOCK_STATEMENT);
+    goto do_eval;
+next_block_statement:
+    // Restore evaluator state.
+    POP(x);
+    POP(arg2c);
+    POP(arg1);
+
+    if (do_break_repl)
+        goto return_obj;
+
+    if (value == go_sym) {
+        // Search tag in body.
+        DOLIST(x, arg2c)
+            if (CAR(x) == go_tag)
+                goto block_statement;
+#ifndef NAIVE
+        // Tag not found.  Issue error.
+        error_info = go_tag;
+        error (ERROR_TAG_MISSING, "Tag not found");
+        goto return_obj;
+#endif
+    } else if (value == return_sym) {
+        // Handle RETURN,
+        if (arg1 == return_name) {
+            value = return_value;
+            return_value = nil;
+        }
+        goto return_obj;
+    }
+    goto block_statement;
 
     //////////////////////////
     /// BUILT-IN PROCEDURE ///
     //////////////////////////
 
-    if (BUILTINP(arg1)) {
-        bfun = (struct builtin *) SYMBOL_VALUE(arg1);
-        builtin_argdef = (char *) bfun->argdef;
+call_builtin:
+    bifun = (struct builtin *) SYMBOL_VALUE(arg1);
+    biargdef = (char *) bifun->argdef;
 
-        // Built-in has no argument-definition.
-        // Call it with arguments as they are.
-        if (!builtin_argdef) {
-            x = args;
-            value = bfun->func ();
-            goto do_return;
-        }
+    // Built-in has no argument-definition.
+    // Call it with arguments as they are.
+    if (!biargdef) {
+        x = args;
+        value = bifun->func ();
+        goto return_obj;
+    }
 
-        // Call built-in with argument definition.
-        // Push evaluated values on the stack and pop them
-        // into arg1/arg2 before doing the call, depending
-        // on num_args.
-        num_args = 0;
-        PUSH_TAGW(bfun);
+    // Call built-in with argument definition.
+    // Push evaluated values on the stack and pop them
+    // into arg1/arg2 before doing the call, depending
+    // on num_args.
+    num_args = 0;
+    PUSH_TAGW(bifun);
 
 do_builtin_arg:
-        typed_argdef = *builtin_argdef;
+    typed_argdef = *biargdef;
 
-        // End of argument definition.
-        if (!typed_argdef) {
+    // End of argument definition.
+    if (!typed_argdef) {
 #ifndef NAIVE
-            // Complain if argument left.
-            if (NOT_NIL(args)) {
-                error_info = args;
-                error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
-                goto do_return;
-            }
+        // Complain if argument left.
+        if (NOT_NIL(args)) {
+            error_info = args;
+            error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
+            goto return_obj;
+        }
 #endif
 set_arg_values:
-            // Pop argument values from object stack into
-            // arg1 and arg2, depending on num_args.
-            if (num_args == 1)
-                POP(arg1);
-            else if (num_args == 2) {
-                POP(arg2);
-                POP(arg1);
-            }
-
-            // Call built-in.
-            POP_TAGW(bfun);
-            if (value == return_sym)
-                goto do_return;
-            value = do_break_repl ? nil : bfun->func ();
-            goto do_return;
+        // Pop argument values from object stack into
+        // arg1 and arg2, depending on num_args.
+        if (num_args == 1)
+            POP(arg1);
+        else if (num_args == 2) {
+            POP(arg2);
+            POP(arg1);
         }
 
-        num_args++;
+        // Call built-in.
+        POP_TAGW(bifun);
+        value = bifun->func ();
+        goto return_obj;
+    }
 
-        // Optional argument.
-        if (typed_argdef == '?') {
-            typed_argdef = *++builtin_argdef;
+    num_args++;
 
-            // Set NIL if missing.
-            if (NOT(args)) {
-                PUSH(nil);
-                goto set_arg_values;
-            }
+    // Optional argument.
+    if (typed_argdef == '?') {
+        typed_argdef = *++biargdef;
+
+        // Set NIL if missing.
+        if (NOT(args)) {
+            PUSH(nil);
+            goto set_arg_values;
         }
+    }
 #ifndef NAIVE
-        // Missing argument error.
-        else if (NOT(args)) {
-            error_info = unevaluated_arg1;
-            error (ERROR_ARG_MISSING, "Missing arg to builtin");
-            goto do_return;
-        }
+    // Missing argument error.
+    else if (NOT(args)) {
+        error_info = unevaluated_arg1;
+        error (ERROR_ARG_MISSING, "Missing arg to builtin");
+        goto return_obj;
+    }
 #endif
-        // Unevaluated argument.
-        if (typed_argdef == '\'') {
-            typed_argdef = *++builtin_argdef;
+    // Unevaluated argument.
+    if (typed_argdef == '\'') {
+        typed_argdef = *++biargdef;
 
-            // (Rest of arguments.)
-            if (typed_argdef == '+') {
-                PUSH(args);
-                goto set_arg_values;
-            } else
-                value = CAR(args);
-            goto save_arg_value;
-        }
-
-        // Rest of arguments.
+        // (Rest of arguments.)
         if (typed_argdef == '+') {
-            if (unevaluated) {
-                PUSH(args);
-                goto set_arg_values;
-            }
-
             PUSH(args);
-            PUSH_TAG(num_args);
-            x = args;
-            value = eval_list ();
-            POP_TAG(num_args);
-            POP(args);
+            goto set_arg_values;
+        } else
+            value = CAR(args);
+        goto save_arg_value;
+    }
 
-            PUSH(value);
+    // Rest of arguments.
+    if (typed_argdef == '+') {
+        if (unevaluated) {
+            PUSH(args);
             goto set_arg_values;
         }
 
-        // Save argument unevaluated.
-        if (unevaluated) {
-            value = CAR(args);
-            goto save_arg_value;
-        }
-
-        // Evaluate argument inline.
-        HIGHLIGHT(args);
-        x = CAR(args);
         PUSH(args);
-        PUSH_TAGW(builtin_argdef);
         PUSH_TAG(num_args);
-        PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
-        goto do_eval;
-        // Step to next argument.
-next_builtin_arg:
+        x = args;
+        value = eval_list ();
         POP_TAG(num_args);
-        POP_TAGW(builtin_argdef);
         POP(args);
 
-        if (do_break_repl || value == return_sym)
-            goto break_builtin_call;
-
-save_arg_value:
-#ifndef NAIVE
-        // Type-check and throw any errors.
-        bi_tcheck (value, *builtin_argdef, ERROR_TYPE);
-        if (error_code) {
-            PUSH(current_expr);
-            current_expr = CAR(args);
-            PUSH(args);
-            PUSH_TAGW(builtin_argdef);
-            PUSH_TAG(num_args);
-            value = lisp_repl (REPL_DEBUGGER, 0);
-            POP_TAG(num_args);
-            POP_TAGW(builtin_argdef);
-            POP(args);
-            POP(current_expr);
-        }
-#endif
-        // Break evaluation.
-        if (do_break_repl || value == return_sym)
-            goto break_builtin_call;
-
-        // Save argument value.
         PUSH(value);
-
-        // Step to next argument and its definition.
-        builtin_argdef++;
-        args = CDR(args);
-        goto do_builtin_arg;
-
-break_builtin_call:
-        num_args--;
         goto set_arg_values;
     }
 
-    // It was neither a BLOCK or built-in procedure.
+    // Save argument unevaluated.
+    if (unevaluated) {
+        value = CAR(args);
+        goto save_arg_value;
+    }
+
+    // Evaluate argument inline.
+    HIGHLIGHT(args);
+    x = CAR(args);
+    PUSH(args);
+    PUSH_TAGW(biargdef);
+    PUSH_TAG(num_args);
+    PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
+    goto do_eval;
+    // Step to next argument.
+next_builtin_arg:
+    POP_TAG(num_args);
+    POP_TAGW(biargdef);
+    POP(args);
+
+    if (do_break_repl || value == return_sym)
+        goto break_builtin_call;
+
+save_arg_value:
+#ifndef NAIVE
+    // Type-check and throw any errors.
+    bi_tcheck (value, *biargdef, ERROR_TYPE);
+    if (error_code) {
+        PUSH(current_expr);
+        current_expr = CAR(args);
+        PUSH(args);
+        PUSH_TAGW(biargdef);
+        PUSH_TAG(num_args);
+        value = lisp_repl (REPL_DEBUGGER, 0);
+        POP_TAG(num_args);
+        POP_TAGW(biargdef);
+        POP(args);
+        POP(current_expr);
+    }
+#endif
+    // Break evaluation.
+    if (do_break_repl || value == return_sym)
+        goto break_builtin_call;
+
+    // Save argument value.
+    PUSH(value);
+
+    // Step to next argument and its definition.
+    biargdef++;
+    args = CDR(args);
+    goto do_builtin_arg;
+
+break_builtin_call:
+    num_args--;
+    goto set_arg_values;
 
     //////////////////////////////
     /// USER-DEFINED PROCEDURE ///
     //////////////////////////////
 
+call_user_defined:
 #ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         error_info = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
-        goto do_return;
+        goto return_obj;
     }
 #endif
     // Save stack pointer for return.
@@ -526,11 +463,11 @@ do_argument:
 
 #ifndef NAIVE
     // Catch wrong number of arguments.
-    if (NOT_NIL(args) && NOT(argdefs)) {
+    if (TOO_MANY_ARGSP()) {
         error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
         goto start_body;
-    } else if (NOT(args) && CONSP(argdefs)) {
+    } else if (MISSING_ARGSP()) {
         error_info = argdefs;
         error (ERROR_ARG_MISSING, "Missing args");
         goto start_body;
@@ -549,9 +486,9 @@ do_argument:
         *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
 
         // Get argument value.
-        if (unevaluated)
+        if (unevaluated) {
             value = args;
-        else {
+        } else {
             // Save evaluator state.
             PUSH_TAGW(stack_entered);
             PUSH_TAGW(stack_old_arg_values);
@@ -639,7 +576,7 @@ start_body:
 #ifndef NAIVE
     if (error_code || do_break_repl || value == return_sym) {
         stack = stack_entered;
-        goto do_return;
+        goto return_obj;
     }
 #endif
     // Assign new values to argument symbols.
@@ -679,20 +616,6 @@ next_body_statement:
     if (value != return_sym && value != go_sym)
 #endif
         goto continue_body;
-/*
-#ifndef NO_DEBUGGER
-    else if (SYMBOLP(unevaluated_arg1)) {
-        // Catch lost RETURN and GO.
-        if (value == return_sym) {
-            error_info = make_cons (unevaluated_arg1, return_name);
-            error (ERROR_LOST_RETURN, "RETURN without BLOCK");
-        } else if (value == go_sym) {
-            error_info = make_cons (unevaluated_arg1, go_tag);
-            error (ERROR_LOST_GO, "GO without BLOCK");
-        }
-    }
-#endif
-*/
 
     // Restore argument symbol values.
 restore_arguments:
@@ -704,12 +627,12 @@ restore_arguments:
     POP_TAG(num_args);
     pop_argument_values ();
 
-do_return:
+return_obj:
 #ifndef NAIVE
     if (error_code)
         value = lisp_repl (REPL_DEBUGGER, 0);
 #endif
-do_return_atom:
+return_atom:
     unevaluated = false;
 
 #ifndef NO_DEBUGGER
@@ -758,6 +681,71 @@ do_return_atom:
     check_stacks (old_stack, old_tagstack + 1);
 #endif
     return value;
+}
+
+// Evaluate list to list of return values.
+// TODO: Inline into eval0.
+lispptr
+eval_list (void)
+{
+    if (ATOM(x))
+        return x;
+
+    // Evaluate first element.
+    PUSH(x);
+    HIGHLIGHT(x);
+    x = CAR(x);
+    eval ();
+    POP(x);
+
+    if (do_break_repl || value == return_sym)
+        return value;
+
+    // Make first element of result list and put it on
+    // the object stack, so we don't have to worry about
+    // garbage collection for the rest of elements.
+    list_start = list_last = make_cons (value, nil);
+    PUSH(list_start);
+
+    // Evaluate rest of list.
+    DOLIST(x, CDR(x)) {
+        // Evaluate CDR of dotted cons.
+        if (ATOM(x)) {
+            HIGHLIGHT(list_last);
+            SETCDR(list_last, eval ());
+            break;
+        }
+
+        // Save current cons to object stack.
+        PUSH(x);
+
+        // Evaluate CAR of cons.
+        PUSH(list_last);
+        HIGHLIGHT(x);
+        x = CAR(x);
+        eval ();
+        POP(list_last);
+
+        // Make new cons and append it to the end of the
+        // result list.
+        tmp = make_cons (value, nil);
+        SETCDR(list_last, tmp);
+        list_last = tmp;
+        tmp = nil;
+
+        // Remember current cons.
+        POP(x);
+
+        // Handle break, e.g. because of an error.
+        if (do_break_repl || value == return_sym) {
+            stack += sizeof (lispptr);
+            return value;
+        }
+    }
+
+    // Return memorized start of result list.
+    POP(list_start);
+    return list_start;
 }
 
 // Call function with arguments unevaluated.

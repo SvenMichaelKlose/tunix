@@ -31,8 +31,18 @@
              '((l i) (s p)))
       (error (group2 '(l i s p)))))
 
-(message "TODO: UNLESS...")
-(message "TODO: WHEN...")
+(do-test "Testing UNLESS..."
+  (and (unless t t)
+       (error '(unless t t)))
+  (or (unless nil t)
+      (error '(unless nil t))))
+
+(do-test "Testing WHEN..."
+  (and (when nil t)
+       (error '(when nil t)))
+  (or (when t t)
+      (error '(when t t))))
+
 (message "TODO: AWHEN...")
 
 (do-test "Testing LET..."
@@ -76,7 +86,7 @@
              (equal x '(i s p))))
       (error "Test of PUSH/POP failed")))
 
-(do-test "Smoke-esting DO..."
+(do-test "Smoke-testing DO..."
   (do ((i 0 (+ i 1)))
       ((>= i 10))
     (print i))
@@ -248,6 +258,7 @@
       (error)))
 
 (do-test "Testing CUT-AT..."
+  (env-reset)
   (let (head '(l i s p))
     (or (equal (cut-at 0 head)
                '(l i s p))

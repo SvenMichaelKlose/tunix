@@ -138,6 +138,7 @@ err_type (char * type, lispptr x, char code)
     p = stpcpy (p, ", not ");
     strcpy (p, type);
     error_info = make_symbol (type, strlen (type));
+    current_expr = x;
     error (code, buffer);
 }
 

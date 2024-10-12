@@ -240,10 +240,12 @@
 (or (eq 'a (block nil (print (return 'a))))
     (error "RETURN in argument list of built-in failed."))
 
-(message "Testing RETURN in argument list of user-defined function...")
 (fn twoargs (a b))
+(message "Testing RETURN as argument 1 of user-defined function...")
 (or (eq 'foo (block nil (twoargs (return 'foo) nil)))
     (error "RETURN in argument list of user-defined function failed as first argument to TWOARGS."))
+
+(message "Testing RETURN as argument 2 user-defined function...")
 (or (eq 'foo (block nil (twoargs nil (return 'foo))))
     (error "RETURN in argument list of user-defined function failed as second argument to TWOARGS."))
 

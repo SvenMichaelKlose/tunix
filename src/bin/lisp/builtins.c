@@ -1446,7 +1446,7 @@ const struct builtin builtins[] = {
 
 #ifndef NAIVE
     { "error",      "+x",   bi_error },
-    { "ignore",    "",      bi_ignore },
+    { "ignore",     "",     bi_ignore },
     { "stack",      "",     bi_stack },
 #endif
     { "exit",       "?n",   bi_exit },

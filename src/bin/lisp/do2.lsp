@@ -6,8 +6,8 @@
           ,tag
           (? ,(car brk-res)
              (return ,(? (cddr brk-res)
-                         $(progn
-                            ,',@(cdr brk-res))
+                         $((()
+                             ,',@(cdr brk-res)))
                          (cadr brk-res))))
           ,@body
           ,@(@ '((x)

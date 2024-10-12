@@ -7,5 +7,5 @@
            ,@body)
           ,@(dup nil (length i))))
       (group2 inits))
-     $(progn
-        ,@body)))
+     $((()
+         ,@body))))

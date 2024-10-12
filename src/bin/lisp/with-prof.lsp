@@ -4,8 +4,8 @@
     (let (stime    (symbol)
            duration (symbol))
       $(let (,stime (time))
-         (progn
-           ,@body)
+         ((()
+            ,@body))
          (let (,duration (- (time) ,stime))
            (out "Time spent: ")
            (print (/ ,duration +bps+))

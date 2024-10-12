@@ -4,6 +4,6 @@
     $(let (,g ,n)
        (= ,n ,v)
        (prog1
-         (progn
-           ,@body)
+         ((()
+            ,@body))
          (= ,n ,g)))))

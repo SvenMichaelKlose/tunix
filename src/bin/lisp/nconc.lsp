@@ -6,9 +6,9 @@
         ((not x) result)
       (and (car x)
            (? result
-              (progn
-                (setcdr tail (car x))
-                (= tail (last (car x))))
-              (progn
+              ((()
+                 (setcdr tail (car x))
+                 (= tail (last (car x)))))
+              ((()
                 (= result (car x))
-                (= tail (last result))))))))
+                (= tail (last result)))))))))

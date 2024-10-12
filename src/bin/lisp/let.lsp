@@ -6,5 +6,5 @@
            ,@body)
           ,@(@ cadr i)))
       (group2 inits))
-     $(progn
-        ,@body)))
+     $((()
+         ,@body))))

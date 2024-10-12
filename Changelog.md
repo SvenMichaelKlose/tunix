@@ -15,10 +15,21 @@ and this project adheres to
 
 #### Interpreter
 
-- Don't say "Bye!" on exit.
+##### Fixed
+
 - More descriptive messages on stack overflows.
 
+##### Changed
+
+- Don't say "Bye!" on exit.
+
 #### Environment
+
+##### Fixed
+
+- AUTOLOAD: Don't load defined macros again.
+
+##### Changed
 
 - QUASIQUOTE conses less (uses NCONC instead of APPEND).
 

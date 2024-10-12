@@ -1,5 +1,4 @@
 (load "when.lsp")
-(load "progn.lsp")
 (load "group2.lsp")
 (load "let.lsp")
 
@@ -35,7 +34,8 @@
              (return (symbol-value %x)))
       ; Fix and restart function call.
       (== 5 %code) ; ERROR_NOT_FUNCTION
-        (when (%aload (car %x))
+        (when (or (macro? (car %x))
+                  (%aload (car %x)))
           ; If missing function turns out to be
           ; a macro, replace it by its expansion.
           (when (macro? (car %x))

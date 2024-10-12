@@ -45,8 +45,6 @@ lispptr arg2;
 lispptr value;
 char *  stack;
 char *  stack_start;
-char *  stack_old_arg_values;
-char *  stack_entered;
 char *  tagstack_start;
 char *  tagstack;
 lispptr argdefs;
@@ -66,7 +64,6 @@ uchar   num_args;
 bool    unevaluated;
 #ifdef USE_ZEROPAGE
 #pragma zpsym ("msg")
-#pragma zpsym ("stack_entered")
 #pragma zpsym ("bifun")
 #pragma zpsym ("typed_argdef")
 #pragma zpsym ("biargdef")
@@ -84,14 +81,16 @@ bool    unevaluated;
 void
 pop_argument_values (void)
 {
+    num_args = (argdefs && ATOM(argdefs)) ? 1 : length (argdefs);
     tmpc = num_args;
     while (tmpc--) {
-        if (ATOM(argdefs)) {
-            if (argdefs)
+        if (ATOM(argdefs)) { // Rest.
+            if (NOT_NIL(argdefs) && SYMBOLP(argdefs))
                 SET_SYMBOL_VALUE(argdefs, ((lispptr *)stack)[(array_index_t) tmpc]);
             break;
         }
-        SET_SYMBOL_VALUE(CAR(argdefs), ((lispptr *)stack)[(array_index_t) tmpc]);
+        if (SYMBOLP(CAR(argdefs)))
+            SET_SYMBOL_VALUE(CAR(argdefs), ((lispptr *)stack)[(array_index_t) tmpc]);
         argdefs = CDR(argdefs);
     }
     stack += sizeof (lispptr) * num_args;
@@ -155,6 +154,7 @@ do_eval:
     if (IS_BREAKPOINT())
         do_invoke_debugger = true;
 
+    // Call debugger if breakpoint.
     if (do_invoke_debugger || debug_step == t) {
         do_invoke_debugger = false;
         lisp_repl (REPL_DEBUGGER, 0);
@@ -166,7 +166,7 @@ do_eval:
     //////////
 
     if (ATOM(x)) {
-        if (NOT_NIL(x))
+        if (x) // NOT_NIL(x))
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
@@ -189,9 +189,9 @@ do_eval:
             unevaluated = true;
         arg1 = SYMBOL_VALUE(arg1);
     }
+    args = CDR(x);
     if (arg1 == block_sym)
         goto eval_block;
-    args = CDR(x);
     if (BUILTINP(arg1))
         goto call_builtin;
     goto call_user_defined;
@@ -203,14 +203,13 @@ do_eval:
 
 eval_block:
 #ifndef NAIVE
-    if (!CONSP(CDR(x))) {
+    if (!CONSP(args)) {
         error (ERROR_NO_BLOCK_NAME, "No name");
         goto return_obj;
     }
 #endif
     // Step to and get BLOCK name.
-    x = CDR(x);
-    arg1 = CAR(x);
+    arg1 = CAR(args);
 #ifndef NAIVE
     if (!SYMBOLP(arg1)) {
         error_info = arg1;
@@ -218,13 +217,10 @@ eval_block:
         goto return_obj;
     }
 #endif
-    // Get body.
-    arg2c = CDR(x);
-
-    // Return value of empty BLOCK.
+    arg2c = CDR(args); // Body
     value = nil;
-
     unevaluated = false;
+    x = args;
 block_statement:
     // Get first/next statement.
     x = CDR(x);
@@ -319,10 +315,11 @@ set_arg_values:
 
         // Call built-in.
         POP_TAGW(bifun);
-        value = bifun->func ();
+        value = do_break_repl ? nil : bifun->func ();
         goto return_obj;
     }
 
+    // Process an argument.
     num_args++;
 
     // Optional argument.
@@ -388,7 +385,6 @@ set_arg_values:
     PUSH_TAG(num_args);
     PUSH_TAG(TAG_NEXT_BUILTIN_ARG);
     goto do_eval;
-    // Step to next argument.
 next_builtin_arg:
     POP_TAG(num_args);
     POP_TAGW(biargdef);
@@ -402,8 +398,6 @@ save_arg_value:
     // Type-check and throw any errors.
     bi_tcheck (value, *biargdef, ERROR_TYPE);
     if (error_code) {
-        PUSH(current_expr);
-        current_expr = CAR(args);
         PUSH(args);
         PUSH_TAGW(biargdef);
         PUSH_TAG(num_args);
@@ -411,11 +405,12 @@ save_arg_value:
         POP_TAG(num_args);
         POP_TAGW(biargdef);
         POP(args);
-        POP(current_expr);
+        if (do_break_repl)
+            goto break_builtin_call;
     }
 #endif
     // Break evaluation.
-    if (do_break_repl || value == return_sym)
+    if (value == return_sym)
         goto break_builtin_call;
 
     // Save argument value.
@@ -443,21 +438,28 @@ call_user_defined:
         goto return_obj;
     }
 #endif
-    // Save stack pointer for return.
-    stack_entered = stack_old_arg_values = stack;
 
-    // Get argument definition and number of arguments.
+    // Push old symbol values on the stack,
     argdefs = FUNARGS(arg1);
-    num_args = (argdefs && ATOM(argdefs)) ? 1 : length (argdefs);
+    while (NOT_NIL(argdefs)) {
+        if (ATOM(argdefs)) { // Rest.
+            if (SYMBOLP(argdefs))
+                PUSH(SYMBOL_VALUE(argdefs));
+            else
+                PUSH(nil);
+            break;
+        }
+        if (SYMBOLP(CAR(argdefs)))
+            PUSH(SYMBOL_VALUE(CAR(argdefs)));
+        else
+            PUSH(nil);
+        argdefs = CDR(argdefs);
+    }
 
-    // NIL out stack for old argument symbol values,
-    // so garbage collection won't crash.
-    tmpc = num_args;
-    while (tmpc--)
-        PUSH(nil);
+    argdefs = FUNARGS(arg1);
 
 do_argument:
-    // Start evaluating body when done with arguments.
+    // Arguments complete?
     if (NOT(args) && NOT(argdefs))
         goto start_body;
 
@@ -470,65 +472,37 @@ do_argument:
     } else if (MISSING_ARGSP()) {
         error_info = argdefs;
         error (ERROR_ARG_MISSING, "Missing args");
-        goto start_body;
+        goto break_user_call;
     }
 #endif
 
     // Rest argument.
     if (ATOM(argdefs)) {
 #ifndef NAIVE
-        // Ensure argument name is a symbol.
         if (!SYMBOLP(argdefs))
             error_argname (argdefs);
 #endif
-        // Save old symbol value for restore_arguments.
-        stack_old_arg_values -= sizeof (lispptr);
-        *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(argdefs);
 
-        // Get argument value.
         if (unevaluated) {
             value = args;
         } else {
-            // Save evaluator state.
-            PUSH_TAGW(stack_entered);
-            PUSH_TAGW(stack_old_arg_values);
-            PUSH_TAG(num_args);
-            PUSH(argdefs);
             PUSH(arg1);
-#ifndef NAIVE
-            PUSH(unevaluated_arg1);
-#endif
-            // Evaluate rest of arguments.
             x = args;
             value = eval_list ();
-
-            // Restore evaluator state.
-#ifndef NAIVE
-            POP(unevaluated_arg1);
-#endif
             POP(arg1);
-            POP(argdefs);
-            POP_TAG(num_args);
-            POP_TAGW(stack_old_arg_values);
-            POP_TAGW(stack_entered);
         }
-
-        // Save argument value unless we need to fall through.
-        if (!do_break_repl)
-            PUSH(value);
-
+        PUSH(value);
         goto start_body;
     }
 
     // Regular argument.
 #ifndef NAIVE
     // Check if name is a symbol.
-    if (!SYMBOLP(CAR(argdefs)))
+    if (!SYMBOLP(CAR(argdefs))) {
         error_argname (CAR(argdefs));
+        goto break_user_call;
+    }
 #endif
-    // Save argument value to restore after function call.
-    stack_old_arg_values -= sizeof (lispptr);
-    *(lispptr *) stack_old_arg_values = SYMBOL_VALUE(CAR(argdefs));
 
     // Get argument value.
     if (unevaluated)
@@ -536,35 +510,18 @@ do_argument:
     else {
         HIGHLIGHT(args);
         x = CAR(args);
-
-        // Save evaluator state.
         PUSH(arg1); // Function
         PUSH(argdefs);
         PUSH(args);
-#ifndef NAIVE
-        PUSH(unevaluated_arg1);
-#endif
-        PUSH_TAGW(stack_entered);
-        PUSH_TAGW(stack_old_arg_values);
-        PUSH_TAG(num_args);
         PUSH_TAG(TAG_NEXT_ARG);
         goto do_eval;
 next_arg:
-        // Restore evaluator state.
-        POP_TAG(num_args);
-        POP_TAGW(stack_old_arg_values);
-        POP_TAGW(stack_entered);
-#ifndef NAIVE
-        POP(unevaluated_arg1);
-#endif
         POP(args);
         POP(argdefs);
         POP(arg1);  // Function
         if (do_break_repl || value == return_sym)
-            goto start_body;
+            goto break_user_call;
     }
-
-    // Save new argument symbol value.
     PUSH(value);
 
     // Step to next argument.
@@ -572,35 +529,36 @@ next_arg:
     args    = CDR(args);
     goto do_argument;
 
+break_user_call:
+    num_args = 0;
+    while (NOT_NIL(argdefs)) {
+        ++num_args;
+        if (ATOM(argdefs))
+            break;
+        argdefs = CDR(argdefs);
+    }
+    stack -= num_args * sizeof (lispptr);
+
 start_body:
+    argdefs = FUNARGS(arg1);
 #ifndef NAIVE
     if (error_code || do_break_repl || value == return_sym) {
-        stack = stack_entered;
-        goto return_obj;
+        stack += sizeof (lispptr) * ((argdefs && ATOM(argdefs)) ? 1 : length (argdefs));
+        goto restore_arguments_break;
     }
 #endif
-    // Assign new values to argument symbols.
-    argdefs = FUNARGS(arg1);
+
     pop_argument_values ();
-
-    // Reset inhibited evaluation of special form arguments.
     unevaluated = false;
-
-    // Store init info for restore_arguments.
-    PUSH_TAG(num_args);
     PUSH(FUNARGS(arg1));
-
-    // Get first body expression.
     x = FUNBODY(arg1);
 
 #ifndef NO_DEBUGGER
-    // Save function symbol for debugger.
-    // TODO: Find out why this cannot be moved before init
-    //       info for restore_arguments.
     PUSH(current_function);
     if (ATOM(unevaluated_arg1))
         current_function = unevaluated_arg1;
 #endif
+
 continue_body:
     // Evaluate body expression.
     if (NOT(x) || do_break_repl)
@@ -624,8 +582,12 @@ restore_arguments:
     POP(current_function);
 #endif
     POP(argdefs);
-    POP_TAG(num_args);
+restore_arguments_break:
     pop_argument_values ();
+
+    //////////////
+    /// RETURN ///
+    //////////////
 
 return_obj:
 #ifndef NAIVE
@@ -636,9 +598,8 @@ return_atom:
     unevaluated = false;
 
 #ifndef NO_DEBUGGER
-    // Invoke debugger if we stepped over this expression.
+    // Invoke debugger if we stepped over expression.
     if (debug_step && debug_step == current_expr)
-        // Inoke debugger before next evaluation.
         do_invoke_debugger = true;
 #endif
 
@@ -648,9 +609,11 @@ return_atom:
 #ifndef NO_HIGHLIGHTING
     POP(highlighted);
 #endif
+
     // Evaluate consequence of conditional.
     if (value == delayed_eval)
         goto do_eval;
+
 #ifdef VERBOSE_EVAL
     // Print return value.
     PUSH_TAG(fnout);
@@ -658,6 +621,7 @@ return_atom:
     outs ("<- "); print (value); terpri ();
     POP_TAG(fnout);
 #endif
+
     // Continue evaluation.  Determine jump
     // destination based on tag.
     POP_TAG(typed_argdef);
@@ -673,7 +637,7 @@ return_atom:
             goto next_block_statement;
         }
 #ifndef NDEBUG
-        internal_error_ptr (tagstack, "alien tag");
+        internal_error_ptr (tagstack, "return tag");
 #endif
     }
 #ifndef NDEBUG

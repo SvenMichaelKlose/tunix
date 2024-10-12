@@ -17,6 +17,7 @@ and this project adheres to
 
 ##### Fixed
 
+- Grand evaluator review, faster, using far less object stack.
 - More descriptive messages on stack overflows.
 
 ##### Changed

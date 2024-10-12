@@ -16,6 +16,11 @@ and this project adheres to
 #### Interpreter
 
 - Don't say "Bye!" on exit.
+- EVAL: Cleaned up, a bit faster.
+
+#### Environment
+
+- QUASIQUOTE conses less (uses NCONC instead of APPEND).
 
 
 ## [v0.0.22] - 2024-10-11

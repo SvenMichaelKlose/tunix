@@ -21,7 +21,7 @@
     ; Insert evaluated argument of UNQUOTE-SPLICE into
     ; the list.
     (eq (caar qqx) 'unquote-spliced)
-      (append (%qeval (cadar qqx)) (%qq (cdr qqx)))
+      (nconc (%qeval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))

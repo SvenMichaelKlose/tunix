@@ -201,9 +201,9 @@ void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
 {
     if (old_stack != stack)
-        internal_error_ptr (stack, "stack");
+        internal_error_ptr (stack, "stack misaligned");
     if (old_tagstack != tagstack)
-        internal_error_ptr (tagstack, "tagstack");
+        internal_error_ptr (tagstack, "tagstack misaligned");
 }
 
 #endif // #ifndef NDEBUG

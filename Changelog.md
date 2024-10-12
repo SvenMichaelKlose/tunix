@@ -16,7 +16,7 @@ and this project adheres to
 #### Interpreter
 
 - Don't say "Bye!" on exit.
-- EVAL: Cleaned up, a bit faster.
+- More descriptive messages on stack overflows.
 
 #### Environment
 

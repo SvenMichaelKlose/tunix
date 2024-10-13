@@ -298,7 +298,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             if (repl_eof (mode, load_fn))
                 break;
 #ifdef VERBOSE_READ
-            // TODO: Set/restore terminal mode.
             print (x);
             fresh_line ();
 #endif
@@ -524,6 +523,7 @@ done_short_command:
 
         // Print result of user input.
         if (mode != REPL_LOAD) {
+            fresh_line ();
             if (mode == REPL_DEBUGGER)
                 outs ("Result: ");
             print (x);

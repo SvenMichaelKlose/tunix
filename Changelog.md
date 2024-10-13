@@ -15,7 +15,15 @@ and this project adheres to
 
 #### Environment
 
+##### Changed
+
 - Discard function ISTART after saving boot image.
+
+##### Interpreter
+
+###### Fixed
+
+- REPL: Fresh line before priting result.
 
 
 ## [v0.0.23] - 2024-10-12

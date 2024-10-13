@@ -105,8 +105,7 @@ char sp;
 #define MISSING_ARGSP() \
     (NOT(args) && CONSP(argdefs))
 #define IS_BREAKPOINT() \
-    (CONSP(x) && SYMBOLP(CAR(x)) \
-     && member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
+    NOT_NIL(member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
 
 lispptr
 eval0 (void)
@@ -141,12 +140,23 @@ do_eval:
 #endif // #ifdef __CC65__
 #endif // #ifndef NAIVE
 
+    //////////
+    // ATOM //
+    //////////
+
+    if (ATOM(x)) {
+        if (x) // NOT_NIL(x))
+            value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
+        else
+            value = nil;
+        goto return_atom;
+    }
+
 #ifndef NO_HIGHLIGHTING
     PUSH(highlighted);
 #endif
 
 #ifndef NO_DEBUGGER
-    // Inovke debugger.
     PUSH(current_expr);
     current_expr = x;
 
@@ -161,17 +171,6 @@ do_eval:
     }
 #endif // #ifndef NO_DEBUGGER
 
-    //////////
-    // ATOM //
-    //////////
-
-    if (ATOM(x)) {
-        if (x) // NOT_NIL(x))
-            value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
-        else
-            value = nil;
-        goto return_atom;
-    }
 
     ////////////////
     // EXPRESSION //
@@ -580,6 +579,13 @@ return_obj:
     if (error_code)
         value = lisp_repl (REPL_DEBUGGER, 0);
 #endif
+#ifndef NO_DEBUGGER
+    POP(current_expr);
+#endif
+#ifndef NO_HIGHLIGHTING
+    POP(highlighted);
+#endif
+
 return_atom:
     unevaluated = false;
 
@@ -587,13 +593,6 @@ return_atom:
     // Invoke debugger if we stepped over expression.
     if (debug_step && debug_step == current_expr)
         do_invoke_debugger = true;
-#endif
-
-#ifndef NO_DEBUGGER
-    POP(current_expr);
-#endif
-#ifndef NO_HIGHLIGHTING
-    POP(highlighted);
 #endif
 
     // Evaluate consequence of conditional.

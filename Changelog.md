@@ -15,6 +15,10 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
+- Breakpoints revived.
+
 ##### Added
 
 - SOCKET-GETC, SOCKET-PUTC: Char-wise socket I/O.

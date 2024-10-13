@@ -9,6 +9,15 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+- Discard function ISTART after saving boot image.
+
+
 ## [v0.0.23] - 2024-10-12
 
 ### Lisp

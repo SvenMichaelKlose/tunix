@@ -13,6 +13,9 @@ has gotten to small, and the C16 version doesn't work anyway.
 Everything's fine on Unix though.  Still need to find some issue with
 libsimpleio-cbm.  It's unnerving.
 
+That brought me to the wants of a source-level debugger for VICE.  It
+provides a binary monitor via Unix networking.  Now TUNIX Lisp has
+most basic networking socket support.
 
 # 2024-10-11
 

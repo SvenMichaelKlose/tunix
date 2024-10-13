@@ -29,6 +29,14 @@ and this project adheres to
 
 - PRINT: No space after comma.
 
+###### Added
+
+- Basic UNIX sockets.  I/O is symbol-based.
+  - SOCKET-CONNECT
+  - SOCKET-SEND
+  - SOCKET-RECV (blocking)
+  - SOCKET-CLOSE
+
 
 ## [v0.0.23] - 2024-10-12
 

@@ -17,6 +17,13 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
+#ifdef HAVE_SOCKETS
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>  // For close()
+#endif
+
 #ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
@@ -1301,6 +1308,64 @@ bi_debugger (void)
 }
 #endif
 
+#ifdef HAVE_SOCKETS
+
+lispptr
+bi_socket_connect (void)
+{
+    int sockfd;
+    struct sockaddr_in server_addr;
+    int port = NUMBER_VALUE(arg2);
+
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        return nil;
+
+    memcpy (buffer, SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
+    buffer[SYMBOL_LENGTH(arg1)] = 0;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons (port);
+    inet_pton (AF_INET, buffer, &server_addr.sin_addr);
+
+    if (connect (sockfd, (struct sockaddr*) &server_addr, sizeof (server_addr)) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    return make_number (sockfd);
+}
+
+lispptr
+bi_socket_send (void)
+{
+    int    sockfd     = NUMBER_VALUE(arg1);
+    size_t bytes_sent = send (sockfd, SYMBOL_NAME(arg2), SYMBOL_LENGTH(arg2), 0);
+    if (bytes_sent < 0)
+        return nil;
+    return make_number (bytes_sent);
+}
+
+lispptr
+bi_socket_recv (void)
+{
+    int sockfd = NUMBER_VALUE(arg1);
+    ssize_t bytes_received = recv (sockfd, buffer, MAX_SYMBOL, 0);
+    if (bytes_received < 0)
+        return nil;
+    return make_symbol (buffer, bytes_received);
+}
+
+lispptr
+bi_socket_close (void)
+{
+    int sockfd = NUMBER_VALUE(arg1);
+    if (close (sockfd) < 0)
+        return nil;
+    return t;
+}
+
+#endif // #ifdef HAVE_SOCKETS
+
 const struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
@@ -1473,6 +1538,13 @@ const struct builtin builtins[] = {
 #endif
 #ifndef NO_DEBUGGER
     { "debugger",   "",     bi_debugger },
+#endif
+
+#ifdef HAVE_SOCKETS
+    { "socket-connect", "sn",   bi_socket_connect },
+    { "socket-send",    "ns",   bi_socket_send },
+    { "socket-recv",    "n",    bi_socket_recv },
+    { "socket-close",   "n",    bi_socket_close },
 #endif
 
     { NULL, NULL }

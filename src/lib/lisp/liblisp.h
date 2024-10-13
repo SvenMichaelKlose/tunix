@@ -150,6 +150,9 @@
 // Fast 8-bit NIL tests.
 //#define FAST_NIL
 
+// Unix sockets (incl. built-ins)
+//#define HAVE_SOCKETS
+
 // Real NIL in memory.
 //#define REAL_NIL
 
@@ -371,6 +374,7 @@
 #if !defined(SLOW) && defined(NDEBUG)
     #define SLOW
 #endif
+#define HAVE_SOCKETS
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK

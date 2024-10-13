@@ -2318,6 +2318,8 @@ Constant +TARGET+ identifies the target machine, which is one of:
 | (socket-connect s n)           | Open IP/port.               |
 | (socket-send n s)              | Write symbol to socket.     |
 | (socket-read n)                | Read symbol from socket.    |
+| (socket-getc n)                | Read char from socket.      |
+| (socket-putc n n)              | Write char to socket.       |
 | (socket-block n s)             | Select blocking I/O.        |
 | (socket-listen n)              | Listen on port.             |
 | (socket-accept n)              | Accept incoming connection. |
@@ -2325,6 +2327,9 @@ Constant +TARGET+ identifies the target machine, which is one of:
 
 Available on systems that support compile-time option HAVE\_SOCKETS.
 Only very basic support, no polling or listening.
+
+### (socket-getc n): Read char from socket.
+### (socket-putc n n): Put char to socket.
 
 ~~~lisp
 (!? (socket-connect "127.0.0.1" 8000)

@@ -1419,8 +1419,8 @@ bi_socket_accept (void)
 lispptr
 bi_socket_close (void)
 {
-    int sockfd = NUMBER_VALUE(arg1);
-    if (close (sockfd) < 0)
+    int fd = NUMBER_VALUE(arg1);
+    if (close (fd) < 0)
         return nil;
     return t;
 }
@@ -1602,13 +1602,13 @@ const struct builtin builtins[] = {
 #endif
 
 #ifdef HAVE_SOCKETS
-    { "socket-connect", "sn",   bi_socket_connect },
+    { "%sconnect",      "sn",   bi_socket_connect },
     { "socket-send",    "ns",   bi_socket_send },
     { "socket-recv",    "n",    bi_socket_recv },
     { "socket-block",   "ns",   bi_socket_block },
     { "socket-listen",  "n",    bi_socket_listen },
     { "socket-accept",  "n",    bi_socket_accept },
-    { "socket-close",   "n",    bi_socket_close },
+    { "%sclose",        "n",    bi_socket_close },
 #endif
 
     { NULL, NULL }

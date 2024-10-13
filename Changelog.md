@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.23] - 2024-10-12
 
 ### Lisp
 
@@ -19,6 +19,11 @@ and this project adheres to
 
 - Grand evaluator review, faster, using far less object stack.
 - More descriptive messages on stack overflows.
+
+##### Added
+
+- Compile-time option FAST\_NIL for high-byte checks only.
+- Compile-time option REAL\_NIL for more faster type checks.
 
 ##### Changed
 

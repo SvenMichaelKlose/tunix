@@ -3,27 +3,42 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-10-10
+# 2024-10-11
 
-The CPU stack is overflowing thanks to deep AUTOLOADs.
+If NOT() and NOT\_NIL() would work, NIL could be a "real" object in
+memory even on the C64, where address 0 is in use, so NIL would only
+have to be on the zeropage.  
+
+# 2024-10-11
+
+I'm in desperate need for more heap to keep things convenient on CBMs.
+Fun facts on the VIC:
+
+* The maximum code window we can sacrifice is 8K.
+* We'd like to just sacrifice 3K on Ultimems.
+* cc65 library code is 5.5K
+* simpleio is ~2.5K (should be in a kernel driver)
+* Evaluator is a bit more than 4K.
+* Built-ins are about 8K.
+* Rest of interpreter is about 8K.
+
+I wouldn't know how to split up eval0() into 4K chunks.
 
 # 2024-10-08
 
-I've added a buffer to the stacks so they won't trash the rest
-of the program on overflows which are only checks once per
-EVAL.  I'm bad at debugging this shit.
+I've added a buffer to the stacks so they won't trash the rest of the
+program on overflows which are only checks once per EVAL.  I'm bad at
+debugging this shit.
 
 # 2024-10-07
 
-I've been banging together an 6502-CPU opcode assembler to get
-away from homoeostasis while trying to fix I/O.  eof() has to
-be delayed with the CBM KERNAL.  The idea to was to write a
-bytecompiler for fox ache!
+I've been banging together an 6502-CPU opcode assembler to get away from
+homoeostasis while trying to fix I/O.  eof() has to be delayed with the
+CBM KERNAL.  The idea to was to write a bytecompiler for fox ache!
 
-Halfway through writing a char number tree based tokenizer I
-realized that an assembler wouldn't need a tokenizer at all.
-Let's take this real-world example, showing how READ would
-change only few lines:
+Halfway through writing a char number tree based tokenizer I realized
+that an assembler wouldn't need a tokenizer at all.  Let's take this
+real-world example, showing how READ would change only few lines:
 
 ~~~asm
 cons?ax:
@@ -43,12 +58,11 @@ no: tax
     rts
 ~~~
 
-UNQUOTES that don't denote an indexed address mode are
-evaluated while parsing the read expression.  The may span
-multiple lines.  Character '#' is cut out of the heads of symbols.
-Single quotes however need to be checked for before something is
-READ or quotes at line ends cause trouble wanting anything following
-as its argument.
+UNQUOTES that don't denote an indexed address mode are evaluated while
+parsing the read expression.  The may span multiple lines.  Character
+'#' is cut out of the heads of symbols.  Single quotes however need to
+be checked for before something is READ or quotes at line ends cause
+trouble wanting anything following as its argument.
 
 ~~~
     and #TYPE_CONS  ; and # TYPE_CONS
@@ -63,53 +77,49 @@ operand bytes.
 
 # 2024-10-04
 
-RETURN is ignored in argument lists but I'm at it, hoping that
-this will finish AUTOLOAD which works nicely otherwise.
-Especially noteworthy is its ability to expand missing macros in
-already running code.  Anyway: The RETURN issue needs to be
-fixed to satisfaction.  With the everything loading on demand
-properly and the debugger REPL stepping properly, a v1.0.0
-release is closing in.  Without a bytecode compiler, because
+RETURN is ignored in argument lists but I'm at it, hoping that this will
+finish AUTOLOAD which works nicely otherwise.  Especially noteworthy is
+its ability to expand missing macros in already running code.  Anyway:
+The RETURN issue needs to be fixed to satisfaction.  With the everything
+loading on demand properly and the debugger REPL stepping properly, a
+v1.0.0 release is closing in.  Without a bytecode compiler, because
 there still is a tutorial, manual and references to complete.
 
 # 2024-09-27
 
-I hate taking breaks from challenging and creative tasks that
-require grand pictures.  So let me reboot: TUNIX Lisp is
-about educational purpose in the first place.  What's there
-is not that playful toolbox it has to be, and I'm equally
-tired and motivated, which is calling for a break again.
+I hate taking breaks from challenging and creative tasks that require
+grand pictures.  So let me reboot: TUNIX Lisp is about educational
+purpose in the first place.  What's there is not that playful toolbox it
+has to be, and I'm equally tired and motivated, which is calling for a
+break again.
 
-After several attempts I'm doing the new kids' intro to
-Lisp on the project's Github wiki.  Maybe it'll find its
-way into the "Garbage Collected Manual".
-Renaming classic function names to something that's
-tangible, e.g. CARLIST to FIRSTS and CDRLIST to RESTS.
-FIRST instead of CAR and REST instead of CDR is also nice
-but combinations like CAAR and CADR hit a spot either.
-Will go suspend to recharge the batteries faster.
+After several attempts I'm doing the new kids' intro to Lisp on the
+project's Github wiki.  Maybe it'll find its way into the "Garbage
+Collected Manual".  Renaming classic function names to something that's
+tangible, e.g. CARLIST to FIRSTS and CDRLIST to RESTS.  FIRST instead of
+CAR and REST instead of CDR is also nice but combinations like CAAR and
+CADR hit a spot either.  Will go suspend to recharge the batteries
+faster.
 
 ...zzZZzz...
 
 # 2024-09-25
 
-TUNIX Lisp compiles for CP/M but I didn't get through the
-trouble of setting up an emulator.  The generated Z80 code
-doesn't look any better than the 6502 assembly.  Unless
-TUNIX Lisp is written in itself and compiles itself that's
-as far as it gets.  Perhaps Oscar64 or llvm-mos can do
-better but I have a bad feeling about code size.
+TUNIX Lisp compiles for CP/M but I didn't get through the trouble of
+setting up an emulator.  The generated Z80 code doesn't look any better
+than the 6502 assembly.  Unless TUNIX Lisp is written in itself and
+compiles itself that's as far as it gets.  Perhaps Oscar64 or llvm-mos
+can do better but I have a bad feeling about code size.
 
 # 2024-09-24
 
-Actually I (tried) to relax for a week, letting things
-dangle, and dreaming along.  That was about what the doctor
-ordered, says the body.
+Actually I (tried) to relax for a week, letting things dangle, and
+dreaming along.  That was about what the doctor ordered, says the body.
 
-Am hacking along with compiling sets of functions, loading
-and running only one compiler pass at a file, and using
-temporary files.  The CBM versions unnerve with unexpected
-behaviour.  Looking ahead for the progress.
+Am hacking along with compiling sets of functions, loading and running
+only one compiler pass at a file, and using temporary files.  The CBM
+versions unnerve with unexpected behaviour.  Looking ahead for the
+progress.
 
 # 2024-09-23
 

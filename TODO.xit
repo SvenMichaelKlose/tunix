@@ -8,7 +8,6 @@ Interpreter
 [ ] Multiple symbol lists to reduce look-up times.
 
 Debugger
-[ ] Fix single step into function.
 [ ] Invoking debugger with Ctrl-C.
 [ ] Invoking debugger with RESTORE key on CBMs.
 

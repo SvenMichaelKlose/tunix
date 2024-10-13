@@ -35,7 +35,7 @@ void
 space (void)
 {
     char c = lastout ();
-    if (c != '(' && c != ')' && c != '\'' && c > ' ')
+    if (c != '(' && c != ')' && c != '\'' && c != ',' && c > ' ')
         out (' ');
 }
 
@@ -141,7 +141,7 @@ needs_quotes (symbol * s)
     char c;
     for (; len--; p++) {
         c = *p;
-        if (c == '"' || c == ' ' || c == '(' || c == ')')
+        if (c == '"' || c == ' ' || c == '(' || c == ')' || c == ',' || c == '.')
             return true;
     }
     return false;

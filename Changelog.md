@@ -25,6 +25,10 @@ and this project adheres to
 
 - REPL: Fresh line before priting result.
 
+###### Changed
+
+- PRINT: No space after comma.
+
 
 ## [v0.0.23] - 2024-10-12
 

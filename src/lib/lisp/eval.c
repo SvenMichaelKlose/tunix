@@ -272,7 +272,7 @@ next_block_statement:
     //////////////////////////
 
 call_builtin:
-    bifun = (struct builtin *) SYMBOL_VALUE(arg1);
+    bifun    = (struct builtin *) SYMBOL_VALUE(arg1);
     biargdef = (char *) bifun->argdef;
 
     // Built-in has no argument-definition.
@@ -283,10 +283,6 @@ call_builtin:
         goto return_obj;
     }
 
-    // Call built-in with argument definition.
-    // Push evaluated values on the stack and pop them
-    // into arg1/arg2 before doing the call, depending
-    // on num_args.
     num_args = 0;
     PUSH_TAGW(bifun);
 
@@ -483,9 +479,9 @@ do_argument:
             error_argname (argdefs);
 #endif
 
-        if (unevaluated) {
+        if (unevaluated)
             value = args;
-        } else {
+        else {
             PUSH(arg1);
             x = args;
             value = eval_list ();
@@ -530,14 +526,8 @@ next_arg:
     goto do_argument;
 
 break_user_call:
-    num_args = 0;
-    while (NOT_NIL(argdefs)) {
-        ++num_args;
-        if (ATOM(argdefs))
-            break;
-        argdefs = CDR(argdefs);
-    }
-    stack -= num_args * sizeof (lispptr);
+    // Early break: Fill up argument list to expected length.
+    stack -= sizeof (lispptr) * ((argdefs && ATOM(argdefs)) ? 1 : length (argdefs));
 
 start_body:
     argdefs = FUNARGS(arg1);
@@ -547,12 +537,10 @@ start_body:
         goto restore_arguments_break;
     }
 #endif
-
     pop_argument_values ();
     unevaluated = false;
     PUSH(FUNARGS(arg1));
     x = FUNBODY(arg1);
-
 #ifndef NO_DEBUGGER
     PUSH(current_function);
     if (ATOM(unevaluated_arg1))
@@ -560,7 +548,6 @@ start_body:
 #endif
 
 continue_body:
-    // Evaluate body expression.
     if (NOT(x) || do_break_repl)
         goto restore_arguments;
     PUSH(CDR(x));   // Next expression.
@@ -578,7 +565,6 @@ next_body_statement:
     // Restore argument symbol values.
 restore_arguments:
 #ifndef NO_DEBUGGER
-    // Restore name of parent function for debugger.
     POP(current_function);
 #endif
     POP(argdefs);

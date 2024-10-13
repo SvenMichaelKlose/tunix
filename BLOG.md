@@ -3,11 +3,16 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-10-11
+# 2024-10-12
 
-If NOT() and NOT\_NIL() would work, NIL could be a "real" object in
-memory even on the C64, where address 0 is in use, so NIL would only
-have to be on the zeropage.  
+Gave the evluator a long desired clean-up.  It's a bit faster and uses
+less object stack.
+
+It's getting messed up on the Commodore plus/4 now.  The VIC-20's heap
+has gotten to small, and the C16 version doesn't work anyway.
+Everything's fine on Unix though.  Still need to find some issue with
+libsimpleio-cbm.  It's unnerving.
+
 
 # 2024-10-11
 

@@ -826,17 +826,22 @@ counted_out (char c)
 }
 
 void FASTCALL
+bi_out_named (lispptr x)
+{
+    lispobj_size_t l = SYMBOL_LENGTH(x);
+    tmpstr = SYMBOL_NAME(x);
+    while (l--)
+        counted_out (*tmpstr++);
+}
+
+void FASTCALL
 bi_out_atom (lispptr x)
 {
-    lispobj_size_t l;
-
-    if (NUMBERP(x)) {
+    if (NUMBERP(x))
         counted_out (NUMBER_VALUE(x));
-    } else if (_NAMEDP(x)) {
-        tmpstr = SYMBOL_NAME(x);
-        for (l = SYMBOL_LENGTH(x); l; --l)
-            counted_out (*tmpstr++);
-    } else {
+    else if (_NAMEDP(x))
+        bi_out_named (x);
+    else {
         bi_out_flush ();
         print (x);
     }

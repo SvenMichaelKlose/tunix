@@ -396,6 +396,9 @@ init_heap ()
 {
     size_t heap_size;
     uchar i;
+#ifdef REAL_NIL
+    symbol * s;
+#endif
 
     // Make object size table.
     for (i = 0; i < TYPE_EXTENDED * 2; i++)
@@ -408,6 +411,19 @@ init_heap ()
     lisp_sizes[TYPE_SYMBOL] = sizeof (symbol);
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
+
+    // Make real NIL.
+#ifdef REAL_NIL
+    s = NULL;
+    s->type = TYPE_SYMBOL;
+    s->length = 3;
+    s->value = nil;
+    s->next = nil;
+    tmpstr = SYMBOL_NAME((lispptr) 0);
+    tmpstr[0] = 'n';
+    tmpstr[1] = 'i';
+    tmpstr[2] = 'l';
+#endif // #ifdef REAL_NIL
 
     // Allocate tag stack.
 #ifdef MALLOCD_TAGSTACK

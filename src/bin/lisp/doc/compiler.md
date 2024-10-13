@@ -334,3 +334,39 @@ not:
     lda hl,0
     rts
 ~~~
+
+## Hardware types
+
+* Add types to argument definitions.
+* No rest arguments.
+* Good old typed argument match.
+
+~~~lisp
+(defcode + ((char * a) (char * b))
+  (asm 'lda a)
+  (asm 'clc)
+  (asm 'adc b)
+  (asm 'sta dest))
+~~~
+
+~~~lisp
+(defcode cdr ((ptr a))
+  (asm 'ldy # 3)
+  (asm 'lda $(,a),y)
+  (asm 'tax)
+  (asm 'dey)
+  (asm 'lda $(,a),y))
+~~~
+~~~lisp
+(defcode list_cdr ((ptr a))
+  (asm 'lda $(,(++ a)))
+  (asm 'bne +l)
+  (asm 'tax)
+  (asm 'beq +l2)
+  (asm 'l: ldy # 3)
+  (asm 'lda $(,a),y)
+  (asm 'tax)
+  (asm 'dey)
+  (asm 'lda $(,a),y)
+  (asm 'l2:))
+~~~

@@ -147,6 +147,12 @@
 // Compressed conses.
 //#define COMPRESSED_CONS
 
+// Fast 8-bit NIL tests.
+//#define FAST_NIL
+
+// Real NIL in memory.
+//#define REAL_NIL
+
 // Multiple heaps.
 //#define FRAGMENTED_HEAP
 
@@ -818,7 +824,7 @@ extern lispptr make_cons_cdr;
 // NOT_NIL() doesn't work.  Either the onset of dementia
 // or terrible bugs hiding.
 #define nil     ((lispptr) 0)
-#ifdef WAS__CC65__
+#ifdef FAST_NIL
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
@@ -947,17 +953,25 @@ extern bool do_gc_stress;
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
-#define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)       (NOT_NIL(x) && (TYPE(x) & TYPE_CONS))
-#define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)     (NOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
-#define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)      (NOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#if REAL_NIL
+    #define PNOT(x)     false
+    #define PNOT_NIL(x) true
+#else
+    #define PNOT(x)     NOT(x)
+    #define PNOT_NIL(x) NOT_NIL(x)
+#endif
+
+#define _ATOM(x)        (PNOT(x) || !(TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       (PNOT_NIL(x) && (TYPE(x) & TYPE_CONS))
+#define _SYMBOLP(x)     (PNOT(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _BUILTINP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     (PNOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
+#define _LISTP(x)       (PNOT(x) || (TYPE(x) & TYPE_CONS))
+#define _SPECIALP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      (PNOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
 
-#define EXTENDEDP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
+#define EXTENDEDP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))

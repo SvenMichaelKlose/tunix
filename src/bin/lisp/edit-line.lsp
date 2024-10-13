@@ -45,7 +45,7 @@
 ; Edit line.
 ; Return new line if an unrelated char has been input.
 (fn edit-line (l)
-  ;(= *alv?* nil)
+  (= *alv?* nil)
   (con-crs t)
   (con-direct t)
   (= *mod?* nil)

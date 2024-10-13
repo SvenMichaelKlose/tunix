@@ -542,7 +542,7 @@ break_user_call:
 start_body:
     argdefs = FUNARGS(arg1);
 #ifndef NAIVE
-    if (error_code || do_break_repl || value == return_sym) {
+    if (do_break_repl || value == return_sym) {
         stack += sizeof (lispptr) * ((argdefs && ATOM(argdefs)) ? 1 : length (argdefs));
         goto restore_arguments_break;
     }

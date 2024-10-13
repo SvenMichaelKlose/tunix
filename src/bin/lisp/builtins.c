@@ -22,6 +22,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>  // For close()
+#include <fcntl.h>
+#include <errno.h>
 #endif
 
 #ifdef USE_ZEROPAGE
@@ -1356,6 +1358,65 @@ bi_socket_recv (void)
 }
 
 lispptr
+bi_socket_block (void)
+{
+    int sockfd = NUMBER_VALUE(arg1);
+    int flags = fcntl (sockfd, F_GETFL, 0);
+    if (NOT_NIL(arg2))
+        flags |= SOCK_NONBLOCK;
+    else
+        flags &= ~SOCK_NONBLOCK;
+    fcntl (sockfd, F_SETFL, flags);
+    return nil;
+}
+
+lispptr
+bi_socket_listen (void)
+{
+    int sockfd;
+    struct sockaddr_in server_addr;
+    int port = NUMBER_VALUE(arg1);
+
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        return nil;
+
+    memset (&server_addr, 0, sizeof (server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons (port);
+
+    if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    if (listen (sockfd, 5) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    return make_number (sockfd);
+}
+
+lispptr
+bi_socket_accept (void)
+{
+    int listen_sockfd = NUMBER_VALUE(arg1);
+    struct sockaddr_in client_addr;
+    socklen_t client_len = sizeof (client_addr);
+
+    int client_sockfd = accept (listen_sockfd, (struct sockaddr *) &client_addr, &client_len);
+    if (client_sockfd < 0) {
+        if (errno != EAGAIN && errno != EWOULDBLOCK)
+            return nil;
+        return t;
+    }
+
+    return make_number (client_sockfd);
+}
+
+lispptr
 bi_socket_close (void)
 {
     int sockfd = NUMBER_VALUE(arg1);
@@ -1544,6 +1605,9 @@ const struct builtin builtins[] = {
     { "socket-connect", "sn",   bi_socket_connect },
     { "socket-send",    "ns",   bi_socket_send },
     { "socket-recv",    "n",    bi_socket_recv },
+    { "socket-block",   "ns",   bi_socket_block },
+    { "socket-listen",  "n",    bi_socket_listen },
+    { "socket-accept",  "n",    bi_socket_accept },
     { "socket-close",   "n",    bi_socket_close },
 #endif
 

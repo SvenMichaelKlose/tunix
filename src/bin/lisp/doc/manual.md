@@ -2313,12 +2313,15 @@ Constant +TARGET+ identifies the target machine, which is one of:
 
 ## UNIX networking sockets
 
-| Built-in                       | Description              |
-|--------------------------------|--------------------------|
-| (socket-connect ip-sym port-n) | Open a socket.           |
-| (socket-send s)                | Write symbol to socket.  |
-| (socket-read s)                | Read symbol from socket. |
-| (socket-close s)               | Close socket.            |
+| Built-in                       | Description                 |
+|--------------------------------|-----------------------------|
+| (socket-connect s n)           | Open IP/port.               |
+| (socket-send n s)              | Write symbol to socket.     |
+| (socket-read n)                | Read symbol from socket.    |
+| (socket-block n s)             | Select blocking I/O.        |
+| (socket-listen n)              | Listen on port.             |
+| (socket-accept n)              | Accept incoming connection. |
+| (socket-close s)               | Close socket.               |
 
 Available on systems that support compile-time option HAVE\_SOCKETS.
 Only very basic support, no polling or listening.
@@ -2332,6 +2335,10 @@ Only very basic support, no polling or listening.
       (socket-close !))
     (message "Cannot open 127.0.0.1:8000."))
 ~~~
+
+### (socket-accept n): Accept incoming connection.
+
+Returns T if the call was successful but no connection is waiting.
 
 # Compile-time options to add or remove features
 

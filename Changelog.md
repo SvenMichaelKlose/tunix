@@ -32,9 +32,12 @@ and this project adheres to
 ###### Added
 
 - Basic UNIX sockets.  I/O is symbol-based.
-  - SOCKET-CONNECT
-  - SOCKET-SEND
-  - SOCKET-RECV (blocking)
+  - SOCKET-CONNECT: Open an internetworking socket.
+  - SOCKET-SEND: Send symbol name.
+  - SOCKET-RECV: Read symbol up to maximum length.
+  - SOCKET-BLOCK: Turn blocking mode on/off.
+  - SOCKET-LISTEN: Start listening on port.
+  - SOCKET-ACCEPT: Accept incoming connection.
   - SOCKET-CLOSE
 
 

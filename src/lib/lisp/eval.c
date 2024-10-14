@@ -104,8 +104,6 @@ char sp;
     (NOT_NIL(args) && NOT(argdefs))
 #define MISSING_ARGSP() \
     (NOT(args) && CONSP(argdefs))
-#define IS_BREAKPOINT() \
-    NOT_NIL(member (CAR(x), SYMBOL_VALUE(breakpoints_sym)))
 
 lispptr
 eval0 (void)
@@ -145,23 +143,28 @@ do_eval:
     //////////
 
     if (ATOM(x)) {
-        if (x) // NOT_NIL(x))
+        if (NOT_NIL(x))
             value = SYMBOLP(x) ? SYMBOL_VALUE(x) : x;
         else
             value = nil;
         goto return_atom;
     }
 
-#ifndef NO_HIGHLIGHTING
-    PUSH(highlighted);
-#endif
+    ////////////////
+    // EXPRESSION //
+    ////////////////
 
 #ifndef NO_DEBUGGER
     PUSH(current_expr);
     current_expr = x;
+    arg1 = CAR(x);
+#ifndef NAIVE
+    unevaluated_arg1 = arg1;
+#endif
 
     // Check if breakpoint.
-    if (IS_BREAKPOINT())
+    tmp = SYMBOL_VALUE(breakpoints_sym);
+    if (NOT_NIL(tmp) && member (CAR(x), tmp))
         do_invoke_debugger = true;
 
     // Call debugger if breakpoint.
@@ -171,16 +174,6 @@ do_eval:
     }
 #endif // #ifndef NO_DEBUGGER
 
-
-    ////////////////
-    // EXPRESSION //
-    ////////////////
-
-    // Evaluate expression.
-    arg1 = CAR(x);
-#ifndef NAIVE
-    unevaluated_arg1 = arg1;
-#endif
     // Get function expression from symbol.
     if (NOT_NIL(arg1) && SYMBOLP(arg1)) {
         // Inhinit evaluation of special form's arguments.
@@ -581,9 +574,6 @@ return_obj:
 #endif
 #ifndef NO_DEBUGGER
     POP(current_expr);
-#endif
-#ifndef NO_HIGHLIGHTING
-    POP(highlighted);
 #endif
 
 return_atom:

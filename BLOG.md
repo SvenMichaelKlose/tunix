@@ -3,6 +3,14 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-14
+
+The CBM part of the "simple I/O" library is doing my head in.  Test
+"test-file.lsp" won't pass.  The interpreter is almost twice as fast
+than it was yesterday though.  I'll use the socket support for testing
+in headleass instances of VICE, so test can be run automatically, also
+in "Github workflows".
+
 # 2024-10-12
 
 Gave the evluator a long desired clean-up.  It's a bit faster and uses

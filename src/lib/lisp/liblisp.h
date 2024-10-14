@@ -364,7 +364,6 @@
 // cc65's sim6502
 #ifdef TARGET_SIM6502
 #define FAST_NIL
-#define REAL_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -641,6 +640,15 @@ typedef struct _symbol {
     lispobj_size_t  length;
 } symbol;
 
+#ifdef NIL_NOT_0
+
+struct real_nil {
+    symbol * s;
+    char     name[3];
+};
+
+#endif // #ifdef NIL_NOT_0
+
 typedef struct _xlat_item {
     size_t   size;
     lispptr  pos;
@@ -805,6 +813,10 @@ extern lispptr make_cons_tmp;
 extern lispptr make_cons_car;
 extern lispptr make_cons_cdr;
 
+#ifdef NIL_NOT_0
+extern struct real_nil real_nil;
+#endif
+
 #ifdef USE_ZEROPAGE
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
@@ -838,12 +850,18 @@ extern lispptr make_cons_cdr;
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
+#ifdef NIL_NOT_0
+#pragma zpsym ("real_nil")
+#endif
 #pragma bss-name (pop)
 #endif // #ifdef USE_ZEROPAGE
 
-// NOT_NIL() doesn't work.  Either the onset of dementia
-// or terrible bugs hiding.
+#ifdef NIL_NOT_0
+#define nil     ((lispptr) &real_nil)
+#else
 #define nil     ((lispptr) 0)
+#endif
+
 #ifdef FAST_NIL
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)

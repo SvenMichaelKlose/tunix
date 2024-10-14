@@ -70,6 +70,9 @@ char *   heap_end;
 char *   h;
 char     type;
 symbol * sym;
+#ifdef NIL_NOT_0
+struct real_nil real_nil;
+#endif
 #ifdef USE_ZEROPAGE
 #pragma zpsym ("h");
 #pragma zpsym ("type");
@@ -412,14 +415,14 @@ init_heap ()
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
-    // Make real NIL.
 #ifdef REAL_NIL
-    s = NULL;
+    // Make real NIL.
+    s = (symbol *) nil;
     s->type = TYPE_SYMBOL;
     s->length = 3;
     s->value = nil;
     s->next = nil;
-    tmpstr = SYMBOL_NAME((lispptr) 0);
+    tmpstr = SYMBOL_NAME((lispptr) s);
     tmpstr[0] = 'n';
     tmpstr[1] = 'i';
     tmpstr[2] = 'l';

@@ -254,6 +254,7 @@
 (or (eq 'foo (block nil (list (return 'foo))))
     (error "RETURN in argument list of user-defined function failed."))
 
+(message "Testing RETURN from nested BLOCKs...")
 (fn return-test (block-name)
   (((x)
     (block b1
@@ -263,8 +264,7 @@
         (= x 'b2e))
       (= x 'b1e))
     x) 'b0))
-
-(= *b* (cons 'return *b*))
+; TODO: (= *b* (cons 'return *b*)) ; Gives nonsensical debugger.
 (or (eq 'b1e (return-test 'b3))
     (error))
 (or (eq 'b1e (return-test 'b2))
@@ -286,7 +286,7 @@
 (and (block-test 101)
      (error))
 
-(message "Smoke-testing removal from *UNIVERSE*...")
+(message "Removing test functions from *UNIVERSE*...")
 (= *universe* (remove 'make-count *universe*))
 (= *universe* (remove 'block-test *universe*))
 (= *universe* (remove 'return-test *universe*))

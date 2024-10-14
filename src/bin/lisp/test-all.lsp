@@ -1,4 +1,5 @@
 (= *alv?* t) ; Verbose AUTOLOAD.
+(= *universe* (member 'autoload *universe*))
 (var app-test-all nil)
 
 (fn env-reset ()
@@ -153,6 +154,50 @@
       (= x (-- x))))
   (terpri))
 
+(do-test "Testing NCONC..."
+  (and (nconc)
+       (error))
+  (and (nconc nil)
+       (error))
+  (and (nconc nil nil)
+       (error))
+  (or (equal (nconc nil '(l i s p))
+             '(l i s p))
+       (error))
+  (or (equal (nconc '(l i) '(s p))
+             '(l i s p))
+       (error))
+  (or (equal (nconc '(l i) nil '(s p))
+             '(l i s p))
+       (error)))
+
+(do-test "Testing NTHCDR..."
+  ; TODO: Test with ONERROR.
+  ;(and (nthcdr -1 '(l i s p))
+  ;     (error))
+  (or (equal (nthcdr 0 '(l i s p))
+             '(l i s p))
+      (error))
+  (or (equal (nthcdr 2 '(l i s p))
+             '(s p))
+      (error))
+  (and (nthcdr 4 '(l i s p))
+       (error)))
+
+(do-test "Testing NTH..."
+  ; TODO: Test with ONERROR.
+  ;(and (nth -1 '(l i s p))
+       ;(error))
+  (or (equal (nth 0 '(l i s p))
+             'l)
+      (error))
+  (or (equal (nth 2 '(l i s p))
+             's)
+      (error))
+  (and (nth 4 '(l i s p))
+       (error)))
+
+
 (do-test "Testing !=..."
   (or (equal (eval (macroexpand '(!= 1 2 3)))
              3)
@@ -182,7 +227,6 @@
        (error)))
 
 (do-test "Testing LET*..."
-  (env-reset)
   (load "let2.lsp")
   (!= (macroexpand '(let* (a 1
                            b 2)
@@ -258,7 +302,6 @@
       (error)))
 
 (do-test "Testing CUT-AT..."
-  (env-reset)
   (let (head '(l i s p))
     (or (equal (cut-at 0 head)
                '(l i s p))
@@ -281,6 +324,14 @@
       (error))
   (and (every '((x) (== x 1)) '(1 1 2 1))
       (error)))
+
+(do-test "Testing MEMBER-IF..."
+  (or (member-if '((x) (eq x 'i))
+                   '(l i s p))
+    (error))
+  (and (member-if '((x) (eq x 'x))
+                  '(l i s p))
+       (error)))
 
 (do-test "Testing FIND-IF..."
   (or (find-if '((x) (eq x 'i))
@@ -317,57 +368,6 @@
 
 (message "TODO: INTERSECT...")
 (message "TODO: MAX...")
-
-(do-test "Testing MEMBER-IF..."
-  (or (member-if '((x) (eq x 'i))
-                   '(l i s p))
-    (error))
-  (and (member-if '((x) (eq x 'x))
-                  '(l i s p))
-       (error)))
-
-(do-test "Testing NCONC..."
-  (and (nconc)
-       (error))
-  (and (nconc nil)
-       (error))
-  (and (nconc nil nil)
-       (error))
-  (or (equal (nconc nil '(l i s p))
-             '(l i s p))
-       (error))
-  (or (equal (nconc '(l i) '(s p))
-             '(l i s p))
-       (error))
-  (or (equal (nconc '(l i) nil '(s p))
-             '(l i s p))
-       (error)))
-
-(do-test "Testing NTHCDR..."
-  ; TODO: Test with ONERROR.
-  ;(and (nthcdr -1 '(l i s p))
-  ;     (error))
-  (or (equal (nthcdr 0 '(l i s p))
-             '(l i s p))
-      (error))
-  (or (equal (nthcdr 2 '(l i s p))
-             '(s p))
-      (error))
-  (and (nthcdr 4 '(l i s p))
-       (error)))
-
-(do-test "Testing NTH..."
-  ; TODO: Test with ONERROR.
-  ;(and (nth -1 '(l i s p))
-       ;(error))
-  (or (equal (nth 0 '(l i s p))
-             'l)
-      (error))
-  (or (equal (nth 2 '(l i s p))
-             's)
-      (error))
-  (and (nth 4 '(l i s p))
-       (error)))
 
 (do-test "Testing POSITION..."
   (and (position 'a '(l i s p))

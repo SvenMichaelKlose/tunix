@@ -2,6 +2,7 @@
 #include <ingle/cc65-charmap.h>
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)
+#pragma codesize (10)
 #endif
 
 #include <limits.h>

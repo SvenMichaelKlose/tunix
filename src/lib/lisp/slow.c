@@ -1,7 +1,13 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
-#endif
+
+#ifndef DEVELOPMENT
+    #define NOT_SLOW
+    #pragma inline-stdfuncs (on)
+    #pragma codesize (300)
+#endif // #ifndef DEVELOPMENT
+#endif // #ifdef __CC65__
 
 #include <ctype.h>
 #include <string.h>
@@ -22,6 +28,7 @@ lispptr tmp_pop;
 #endif
 
 #ifdef __CC65__
+#pragma code-name ("CODE_SLOW")
 #pragma code-name ("CODE_SLOW")
 #endif
 

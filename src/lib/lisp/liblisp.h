@@ -567,6 +567,9 @@
     #endif
 #endif // #ifdef NAIVE
 
+#if defined(SLOW) && defined(NOT_SLOW) && !defined(DEVELOPMENT)
+    #undef SLOW
+#endif
 
 #if defined(__CC65__) && !defined(NO_ZEROPAGE)
     #define USE_ZEROPAGE

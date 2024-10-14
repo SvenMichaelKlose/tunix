@@ -9,6 +9,11 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+- Up to 10% better performance on SLOW configurations.
+
+
 ## [v0.0.25] - 2024-10-14
 
 ### Lisp

@@ -47,6 +47,7 @@ make_car_call (void)
 #pragma code-name ("CODE_INIT")
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)
+#pragma codesize (10)
 #endif
 
 // Make objects for built-in procedures.

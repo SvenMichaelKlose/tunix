@@ -54,7 +54,6 @@ image_save (char * pathname)
     do {
         switch_heap ();
 #endif
-
         // Write heap start.
         outm ((char *) &heap_start, sizeof (lispptr));
 
@@ -96,9 +95,12 @@ image_load (char * pathname)
     size_t len;
     lispptr pos;
 
+    // Open image file.
     chin = simpleio_open (pathname, 'r');
     if (!chin)
         return false;
+
+    // Set input channel to image.
     setin (chin);
 
     // Read header.

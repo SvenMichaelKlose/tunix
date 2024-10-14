@@ -256,12 +256,6 @@ raw_err (void)
     return last_errors[fnin] & ~CBM_EOF;
 }
 
-char FASTCALL
-convert_in (char c)
-{
-    return (fnin == STDIN) ? reverse_case (c) : c;
-}
-
 void
 set_status (simpleio_chn_t chn)
 {
@@ -276,7 +270,7 @@ raw_conin (void)
 {
     char c = cgetc ();
     last_errors[fnin] = 0;
-    return convert_in (c);
+    return reverse_case (c);
 }
 
 char
@@ -284,7 +278,7 @@ raw_in (void)
 {
     char c = cbm_k_chrin ();
     set_status (fnin);
-    return convert_in (c);
+    return (fnin == STDIN) ? reverse_case (c) : c;
 }
 
 void FASTCALL

@@ -20,6 +20,12 @@ and this project adheres to
 - Up to 10% better performance on SLOW configurations.
 - REPL: Indent printed results by a space.
 
+#### Environment
+
+##### Fixed
+
+- WITH-QUEUE: Don't return queue list on RETURN.
+
 
 ## [v0.0.25] - 2024-10-14
 

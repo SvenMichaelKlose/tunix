@@ -16,7 +16,7 @@
 
 (message "Testing OPEN file read from \"test.out\"...")
 (awhen (with-in i (open "test.out" 'r)
-         (!= (read)
+         (!= (print (read))
            (or (equal ! message)
                (error "Expression read from \"test.out\" does not match MESSAGE: " !))))
   (error !))

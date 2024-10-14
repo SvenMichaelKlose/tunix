@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.25] - 2024-10-14
 
 ### Lisp
 
@@ -17,7 +17,7 @@ and this project adheres to
 
 ##### Changed
 
-- Better performance and smaller size of 8-bit versions.
+- Up to 30% better performance and smaller size of 8-bit versions.
 - Faster breakpoint checks.
 
 ##### Fixed
@@ -28,6 +28,7 @@ and this project adheres to
 ##### Added
 
 - SOCKET-GETC, SOCKET-PUTC: Char-wise socket I/O.
+- Compile-time option: NIL\_NOT\_0 for REAL\_NIL on other address but 0.
 
 
 ## [v0.0.24] - 2024-10-13

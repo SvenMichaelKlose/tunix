@@ -22,6 +22,7 @@ and this project adheres to
 
 ##### Fixed
 
+- WITH-IN, WITH-OUT: Fix RETURN with missing BLOCK.
 - Breakpoints revived.
 
 ##### Added

@@ -327,7 +327,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
                     if (error_code)
                         goto cannot_continue;
 
-                    // Break on next expression.
+                    // Break before next expression.
                     debug_step = t;
                     goto done;
 
@@ -472,7 +472,7 @@ done_short_command:
             // Restore parent REPLs return point.
             hard_repl_break = old_break;
 #ifdef FRAGMENTED_HEAP
-            // Ensure that the GC is not just switching to
+            // Ensure that gc() is not just switching to
             // the next heap.
             while (heap->start)
                 switch_heap ();
@@ -524,8 +524,7 @@ done_short_command:
         // Print result of user input.
         if (mode != REPL_LOAD) {
             fresh_line ();
-            if (mode == REPL_DEBUGGER)
-                outs ("Result: ");
+            outs ((mode == REPL_DEBUGGER) ? "Result: " : " ");
             print (x);
             fresh_line ();
         }

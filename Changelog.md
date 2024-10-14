@@ -11,7 +11,14 @@ and this project adheres to
 
 ## [current]
 
+### Lisp
+
+#### Interpreter
+
+##### Changed
+
 - Up to 10% better performance on SLOW configurations.
+- REPL: Indent printed results by a space.
 
 
 ## [v0.0.25] - 2024-10-14

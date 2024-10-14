@@ -14,16 +14,33 @@ functions by passing arguments via the object stack.
 
 ## Passes
 
-* Standard macro expansion
-* Compiler macro expansion
+The compiler is split into three `ends`: the front-, middle and
+backend.  The goal of the frontend is to tranform all functions
+into plain lists of statements, reminiscent of machine-level
+code.  The middleend applies come machine-specific transformations
+and optimizes the code.  The backend finally generates the desired
+code.
+
+### Frontend
+
+* Standard macro-expansion
+* Compiler macro-expansion
   * AND, OR, ?
   * BLOCK, RETURN, GO
   * QUOTE, QUASIQUOTE
 * Inlining anonymous functions
-* Folding %BLOCKs
 * Expanding expressions
-* (Argument expansion)
-* Removing jumps
+* Folding %BLOCKs
+* Argument expansion
+
+### Middleend
+
+* Second argument expansion
+* (Place expansion)
+* Jump optimization
+
+### Back-end
+
 * Code generation
 
 ### Compiler macros
@@ -89,6 +106,23 @@ resolved in the correct bottom-up order.
 The last expression of a BLOCK always assigns to %O which is
 synonymous for return values from then on.
 
+### Function inlining
+
+Inlines anonymous functions and moves their arguments
+to the FUNINFO of the top-level function, which is laying
+out the local stack frame in the process.
+
+~~~lisp
+; TODO example of anonymous function first in expression.
+~~~
+
+### Expression expansion
+
+Expressions need to get moved out of argument lists, becoming
+assigned to a temporary variable or stack place, because they
+can hold jump instructions.  Later, we'll need them on the
+stack anyway.
+
 ### Block folding
 
 BLOCKs have been expanded to %BLOCKs to hold the expressions
@@ -115,22 +149,14 @@ other to get a single expression list for each function.
   (= %0 (do-that)))
 (%tag 1)
 
+; (Other passes.)
+
 ; After BLOCK-FOLD.
 (%= %0 (do-thing? x))
 (%go-nil 1)
 (do-this)
 (%= %0 (do-that))
 (%tag 1)
-~~~
-
-### Lambda expansion
-
-Inlines anonymous functions and moves their arguments
-to the FUNINFO of the top-level function, which is laying
-out the local stack frame in the process.
-
-~~~lisp
-; TODO example of anonymous function first in expression.
 ~~~
 
 ### Optimization

@@ -200,6 +200,7 @@
 
 // Apple II
 #ifdef TARGET_APPLE2
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
@@ -220,6 +221,7 @@
 
 // Apple II enhanced
 #ifdef TARGET_APPLE2ENH
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -239,6 +241,7 @@
 
 // Atari XL
 #ifdef TARGET_ATARIXL
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -258,6 +261,8 @@
 
 // Commodore C128
 #ifdef TARGET_C128
+#define FAST_NIL
+#define REAL_NIL
 #ifndef SLOW
     #define SLOW
 #endif
@@ -275,6 +280,8 @@
 
 // Commodore C16
 #ifdef TARGET_C16
+#define FAST_NIL
+#define REAL_NIL
 #define MINIMALISTIC
 #ifndef NO_ONERROR
     #define NO_ONERROR
@@ -290,6 +297,7 @@
 
 // Commodore C64
 #ifdef TARGET_C64
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -303,6 +311,7 @@
 
 // CP/M
 #ifdef TARGET_CPM
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define HEAP_SIZE   16384
 #define MALLOCD_STACK
@@ -339,6 +348,8 @@
 
 // Commodore Plus/4
 #ifdef TARGET_PLUS4
+#define FAST_NIL
+#define REAL_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -352,6 +363,8 @@
 
 // cc65's sim6502
 #ifdef TARGET_SIM6502
+#define FAST_NIL
+#define REAL_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -390,6 +403,8 @@
 
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
+#define FAST_NIL
+#define REAL_NIL
 #define MINIMALISTIC
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
@@ -405,6 +420,7 @@
 
 // Sinclair ZX Spectrum
 #ifdef TARGET_ZX
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -957,7 +973,7 @@ extern bool do_gc_stress;
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
-#if REAL_NIL
+#ifdef REAL_NIL
     #define PNOT(x)     false
     #define PNOT_NIL(x) true
 #else
@@ -970,7 +986,7 @@ extern bool do_gc_stress;
 #define _SYMBOLP(x)     (PNOT(x) || (TYPE(x) & TYPE_SYMBOL))
 #define _BUILTINP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
 #define _NUMBERP(x)     (PNOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
-#define _LISTP(x)       (PNOT(x) || (TYPE(x) & TYPE_CONS))
+#define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
 #define _SPECIALP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
 #define _NAMEDP(x)      (PNOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)

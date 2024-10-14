@@ -15,6 +15,11 @@ and this project adheres to
 
 #### Interpreter
 
+##### Changed
+
+- Better performance and smaller size of 8-bit versions.
+- Faster breakpoint checks.
+
 ##### Fixed
 
 - Breakpoints revived.

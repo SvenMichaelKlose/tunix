@@ -215,17 +215,17 @@ dump_lispptr (char * x)
             break;
         case TYPE_SYMBOL:
             printf ("symbol '");
-            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            outm (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
             printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         case TYPE_BUILTIN:
             printf ("built-in '");
-            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            outm (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
             printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         case TYPE_SPECIAL:
             printf ("special '");
-            outsn (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
+            outm (SYMBOL_NAME(x), SYMBOL_LENGTH(x));
             printf ("' %p\n", SYMBOL_VALUE(x));
             break;
         default:

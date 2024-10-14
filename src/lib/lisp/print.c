@@ -177,7 +177,7 @@ print_named (symbol * s)
         print_quoted_string (s);
         return;
     }
-    outsn (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
+    outm (SYMBOL_NAME(s), SYMBOL_LENGTH(s));
 }
 
 void FASTCALL

@@ -46,17 +46,19 @@ extern simpleio_chn_t fnout;    // Output file number.
 
 #ifdef __CC65__
 #include <cbm.h>
-extern char FASTCALL  reverse_case (char c); // TODO: CBM only. Doesn't belong here.
-extern simpleio_chn_t          directory_open  (void);
-extern char           FASTCALL directory_read  (simpleio_chn_t , struct cbm_dirent *);
-extern void           FASTCALL directory_close (simpleio_chn_t);
+// TODO: CBM only. Doesn't belong here.
+extern char FASTCALL    reverse_case    (char);
+
+extern simpleio_chn_t   directory_open  (void);
+extern char FASTCALL    directory_read  (simpleio_chn_t , struct cbm_dirent *);
+extern void FASTCALL    directory_close (simpleio_chn_t);
 #endif
 
 extern bool             eof         (void);
 extern signed char      err         (void);
     
-extern void FASTCALL    setin       (simpleio_chn_t fn);
-extern void FASTCALL    setout      (simpleio_chn_t fn);
+extern void FASTCALL    setin       (simpleio_chn_t);
+extern void FASTCALL    setout      (simpleio_chn_t);
 
 extern char             conin       (void);
 extern char             in          (void);
@@ -65,7 +67,7 @@ extern void             putback     (void);
 extern void FASTCALL    putbackc    (char);
 extern bool             skip_spaces (void);
 extern void FASTCALL    inm         (char *, size_t);
-extern void FASTCALL    out         (char c);
+extern void FASTCALL    out         (char);
 extern char             lastout     (void);
 extern void FASTCALL    outnu       (unsigned long);
 extern void FASTCALL    outn        (long);
@@ -73,7 +75,6 @@ extern void FASTCALL    outhn       (unsigned char);
 extern void FASTCALL    outhb       (unsigned char);
 extern void FASTCALL    outhw       (unsigned);
 extern void FASTCALL    outs        (char *);
-extern void FASTCALL    outsn       (char *, char len);
 extern void FASTCALL    outm        (char *, size_t);
 extern void             terpri      (void);
 extern void             fresh_line  (void);
@@ -81,8 +82,9 @@ extern void             fresh_line  (void);
 extern simpleio_chn_t   FASTCALL  simpleio_open  (char * pathname, char mode);
 extern void             FASTCALL  simpleio_close (simpleio_chn_t);
 
-extern void FASTCALL    simpleio_init_channel (simpleio_chn_t c);
-extern void             simpleio_init (void);
-extern void FASTCALL    simpleio_set  (simpleio *);
+extern void             simpleio_init           (void);
+extern void FASTCALL    simpleio_init_channel   (simpleio_chn_t, simpleio *);
+extern void             simpleio_clear_channels (void);
+extern void             simpleio_init_common    (void);
 
 #endif // #ifndef __LIBSIMPLEIO_H__

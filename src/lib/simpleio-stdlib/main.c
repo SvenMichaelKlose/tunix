@@ -332,24 +332,6 @@ raw_close (simpleio_chn_t c)
     channels[(int) c] = NULL;
 }
 
-simpleio_chn_t 
-simpleio_open (char * name, char mode)
-{
-    FILE * handle;
-    char m[2];
-    simpleio_chn_t chn;
-
-    last_error = 0;
-    m[0] = mode;
-    m[1] = 0;
-    if ((handle = fopen (name, m))) {
-        chn = alloc_channel (handle);
-        simpleio_init_channel (chn);
-        return chn;
-    }
-    return 0;
-}
-
 simpleio vectors = {
     raw_eof,
     raw_err,
@@ -365,12 +347,34 @@ simpleio vectors = {
     raw_close
 };
 
+simpleio_chn_t 
+simpleio_open (char * name, char mode)
+{
+    FILE * handle;
+    char m[2];
+    simpleio_chn_t chn;
+
+    last_error = 0;
+    m[0] = mode;
+    m[1] = 0;
+    if ((handle = fopen (name, m))) {
+        chn = alloc_channel (handle);
+        simpleio_init_channel (chn, &vectors);
+        return chn;
+    }
+    return 0;
+}
+
 void
 simpleio_init ()
 {
-    simpleio_set (&vectors);
     channels[STDIN]  = stdin;
     channels[STDOUT] = stdout;
     channels[STDERR] = stderr;
+    simpleio_clear_channels ();
+    simpleio_init_channel (STDIN,  &vectors);
+    simpleio_init_channel (STDOUT, &vectors);
+    simpleio_init_channel (STDERR, &vectors);
+    simpleio_init_common ();
     con_flags = TERM_FLAG_CURSOR;
 }

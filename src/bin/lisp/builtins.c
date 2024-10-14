@@ -807,7 +807,7 @@ void
 bi_out_flush (void)
 {
     if (ostr != buffer) {
-        outsn (buffer, ostr - buffer);
+        outm (buffer, ostr - buffer);
         ostr = buffer;
     }
 }

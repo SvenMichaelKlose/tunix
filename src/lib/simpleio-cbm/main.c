@@ -165,85 +165,6 @@ unsigned char i;
 // but does not tell in which places it occurs.
 unsigned char silen;
 
-// DANGEROUS but we need the heap:
-// 'name' is modified and extended on writes.
-simpleio_chn_t FASTCALL
-simpleio_open (char * name, char mode)
-{
-    simpleio_chn_t chn = alloc_channel ();
-    if (!chn)
-        return 0;
-    simpleio_init_channel (chn);
-
-    ofs = 2;
-    if (mode == 'w')
-        ofs = 3;
-
-    silen = strlen (name);
-
-    // Move name and reverse case.
-    for (i = silen; i != 255; i--)
-        name[i + ofs] = reverse_case (name[i]);
-
-    if (mode == 'w') {
-        name[0] = '@';
-        name[1] = '0';
-        name[2] = ':';
-        strcpy (name + silen + ofs, ",S,W");
-    } else {
-        name[0] = '0';
-        name[1] = ':';
-        strcpy (name + silen + ofs, ",S,R");
-    }
-
-    // Open file.
-    if (cbm_open (chn, 8, chn, name)) {
-        logical_fns[chn] = 0;
-        return 0;
-    }
-
-    // Read DOS status code.
-    cbm_open (15, 8, 15, "");
-    cbm_k_chkin (15);
-    ctrh = cbm_k_basin ();
-    ctrl = cbm_k_basin ();
-    cbm_close (15);
-    cbm_k_chkin (fnin);
-
-    // Check DOS status code.
-    if (ctrl != '0' || ctrh != '0') {
-        last_errors[chn] = ((ctrh - '0') << 4) + (ctrl - '0');
-        return 0;
-    }
-    return chn;
-}
-
-simpleio_chn_t
-directory_open ()
-{
-    simpleio_chn_t chn = alloc_channel ();
-    if (!chn)
-        return 0;
-    simpleio_init_channel (chn);
-    if (!cbm_opendir (chn, 8, "$"))
-        return chn;
-    logical_fns[chn] = 0;
-    return 0;
-}
-
-char FASTCALL
-directory_read (simpleio_chn_t chn, struct cbm_dirent * dirent)
-{
-    return last_errors[chn] = cbm_readdir (logical_fns[chn], dirent);
-}
-
-void FASTCALL
-directory_close (simpleio_chn_t chn)
-{
-    cbm_closedir (logical_fns[chn]);
-    logical_fns[chn] = 0;
-}
-
 bool
 raw_eof (void)
 {
@@ -334,6 +255,86 @@ simpleio vectors = {
     raw_close
 };
 
+// DANGEROUS but we need the heap:
+// 'name' is modified and extended on writes.
+simpleio_chn_t FASTCALL
+simpleio_open (char * name, char mode)
+{
+    simpleio_chn_t chn = alloc_channel ();
+    if (!chn)
+        return 0;
+    simpleio_init_channel (chn, &vectors);
+
+    ofs = 2;
+    if (mode == 'w')
+        ofs = 3;
+
+    silen = strlen (name);
+
+    // Move name and reverse case.
+    for (i = silen; i != 255; i--)
+        name[i + ofs] = reverse_case (name[i]);
+
+    if (mode == 'w') {
+        name[0] = '@';
+        name[1] = '0';
+        name[2] = ':';
+        strcpy (name + silen + ofs, ",S,W");
+    } else {
+        name[0] = '0';
+        name[1] = ':';
+        strcpy (name + silen + ofs, ",S,R");
+    }
+
+    // Open file.
+    if (cbm_open (chn, 8, chn, name)) {
+        logical_fns[chn] = 0;
+        return 0;
+    }
+
+    // Read DOS status code.
+    cbm_open (15, 8, 15, "");
+    cbm_k_chkin (15);
+    ctrh = cbm_k_basin ();
+    ctrl = cbm_k_basin ();
+    cbm_close (15);
+    cbm_k_chkin (fnin);
+
+    // Check DOS status code.
+    if (ctrl != '0' || ctrh != '0') {
+        last_errors[chn] = ((ctrh - '0') << 4) + (ctrl - '0');
+        return 0;
+    }
+    return chn;
+}
+
+simpleio_chn_t
+directory_open ()
+{
+    simpleio_chn_t chn = alloc_channel ();
+    if (!chn)
+        return 0;
+    simpleio_init_channel (chn, &vectors);
+    if (!cbm_opendir (chn, 8, "$"))
+        return chn;
+    logical_fns[chn] = 0;
+    return 0;
+}
+
+char FASTCALL
+directory_read (simpleio_chn_t chn, struct cbm_dirent * dirent)
+{
+    return last_errors[chn] = cbm_readdir (logical_fns[chn], dirent);
+}
+
+void FASTCALL
+directory_close (simpleio_chn_t chn)
+{
+    cbm_closedir (logical_fns[chn]);
+    logical_fns[chn] = 0;
+}
+
+
 void
 simpleio_init ()
 {
@@ -346,8 +347,10 @@ simpleio_init ()
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;
-    fnin  = STDIN;
-    fnout = STDOUT;
-    simpleio_set (&vectors);
+    simpleio_clear_channels ();
+    simpleio_init_channel (STDIN, &vectors);
+    simpleio_init_channel (STDOUT, &vectors);
+    simpleio_init_channel (STDERR, &vectors);
+    simpleio_init_common ();
     con_flags = TERM_FLAG_CURSOR;
 }

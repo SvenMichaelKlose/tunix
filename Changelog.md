@@ -26,6 +26,16 @@ and this project adheres to
 
 - WITH-QUEUE: Don't return queue list on RETURN.
 
+### libsimpleio
+
+#### Added
+
+- Each channel has its own vector table.
+
+#### Removed
+
+- outsn() is gone in favour of outm().
+
 
 ## [v0.0.25] - 2024-10-14
 

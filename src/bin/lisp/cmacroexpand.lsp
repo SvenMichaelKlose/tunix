@@ -1,5 +1,3 @@
-(app 'app-cmacroexpand)
-
 (var *cmacros* nil)
 
 (macro defcm (n a . body)
@@ -68,5 +66,3 @@
 (fn cmacroexpand (x)
   (with-global *macros* *cmacros*
     (macroexpand x)))
-
-(app 'app-cmacroexpand)

@@ -1,7 +1,3 @@
-(app 'app-inline-fn)
-
-(require 'reverse)
-
 (fn inline-fn (x)
   (?
     (and (cons? x)
@@ -18,5 +14,3 @@
     (cons? x)
       (@ inline-fn x)
     x))
-
-(app 'app-inline-fn)

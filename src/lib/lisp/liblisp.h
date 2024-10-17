@@ -205,8 +205,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -225,8 +225,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -245,8 +245,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -270,8 +270,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1536
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
@@ -281,7 +281,7 @@
 // Commodore C16
 #ifdef TARGET_C16
 #define FAST_NIL
-#define REAL_NIL
+//#define REAL_NIL
 #define MINIMALISTIC
 #ifndef NO_ONERROR
     #define NO_ONERROR
@@ -289,8 +289,8 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 64
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
@@ -301,9 +301,9 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
+#define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -313,12 +313,12 @@
 #ifdef TARGET_CPM
 #define FAST_NIL
 #define MALLOCD_HEAP
-#define HEAP_SIZE   16384
+#define HEAP_SIZE           8192
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          2048
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -338,9 +338,9 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 128
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -349,13 +349,13 @@
 // Commodore Plus/4
 #ifdef TARGET_PLUS4
 #define FAST_NIL
-#define REAL_NIL
+//#define REAL_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          3072
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 512
+#define STACK_SIZE          1536
+#define TAGSTACK_SIZE       384
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -367,9 +367,9 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          3072
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
+#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -410,8 +410,8 @@
 #define STACK_START         0x0400
 #define STACK_END           0x0800
 #define TAGSTACK_START      0x0800
-#define TAGSTACK_END        0x1000
-#define RELOC_TABLE_ENTRIES 256
+#define TAGSTACK_END        0x0900
+#define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))

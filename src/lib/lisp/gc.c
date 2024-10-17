@@ -1,5 +1,8 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
+#pragma codesize(1000)
+#pragma allow-eager-inline(on)
+#pragma inline-stdfuncs(on)
 #endif
 
 #include <ctype.h>
@@ -346,6 +349,12 @@ relocate (void)
 #endif
 }
 
+#ifdef __CC65__
+#pragma codesize (10)
+#pragma allow-eager-inline (off)
+#pragma inline-stdfuncs (off)
+#endif
+
 // Mark and sweep objects, and relocate object pointers.
 void
 gc (void)
@@ -366,7 +375,9 @@ gc (void)
     }
 #endif
 
+#if 0
 restart:
+#endif
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap.
     heap = heaps;
@@ -425,6 +436,7 @@ restart:
 
     // Restart if sweep was interrupted due
     // to full relocation table.
+#ifdef RESTART_GC_ON_FULL_RELOC
     if (xlat_full) {
 #ifdef VERBOSE_GC
         setout (STDOUT);
@@ -433,6 +445,12 @@ restart:
 #endif
         goto restart;
     }
+#else // #ifdef RESTART_GC_ON_FULL_RELOC
+#ifdef VERBOSE_GC
+    if (xlat_full)
+        outs ("!full reloc!");
+#endif
+#endif // #ifdef RESTART_GC_ON_FULL_RELOC
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap to allocate from there.

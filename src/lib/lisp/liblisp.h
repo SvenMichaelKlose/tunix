@@ -150,6 +150,9 @@
 // Fast 8-bit NIL tests.
 //#define FAST_NIL
 
+// Restart GC if relocation table is full
+//#define RESTART_GC_ON_FULL_RELOC
+
 // Unix sockets (incl. built-ins)
 //#define HAVE_SOCKETS
 

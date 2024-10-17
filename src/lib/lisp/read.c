@@ -115,7 +115,7 @@ read_list (void)
 #endif
 
         // Append element to last.
-        if (last)
+        if (NOT_NIL(last))
             last->cdr = c;
         else
             start = c;

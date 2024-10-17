@@ -78,7 +78,7 @@ bi_not (void)
 lispptr
 bi_atom (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return ATOM(arg1) ? arg1 : nil;
     return t;
 }
@@ -86,7 +86,7 @@ bi_atom (void)
 lispptr
 bi_symbolp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return SYMBOLP(arg1) ? arg1 : nil;
     return t;
 }
@@ -94,7 +94,7 @@ bi_symbolp (void)
 lispptr
 bi_builtinp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return BUILTINP(arg1) ? arg1 : nil;
     return nil;
 }
@@ -102,7 +102,7 @@ bi_builtinp (void)
 lispptr
 bi_specialp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return SPECIALP(arg1) ? arg1 : nil;
     return nil;
 }
@@ -150,7 +150,7 @@ bi_symbol (void)
         *p++ = NUMBER_VALUE(CAR(arg1));
     }
 #ifndef NAIVE
-    if (arg1)
+    if (NOT_NIL(arg1))
         error_cons_expected (arg1);
 #endif
 
@@ -1215,7 +1215,7 @@ bi_filter (void)
         POP(arg2);
         POP(arg1);
     }
-    if (arg2) {
+    if (NOT_NIL(arg2)) {
         PUSH(list_last);
         make_call (make_cons (arg2, nil));
         HIGHLIGHT(x);

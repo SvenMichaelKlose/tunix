@@ -27,6 +27,10 @@
 // Heap memory areas  Must be consecutive!
 #ifdef FRAGMENTED_HEAP
 struct heap_fragment heaps[] = {
+#ifdef TARGET_VIC20
+    { (void *) 0x0900, (void *) 0x0900, (void *) 0x0c00 },
+#endif
+
     // Regular heap.
     { NULL, NULL, NULL },
 
@@ -390,6 +394,7 @@ heap_add_init_areas (void)
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")
+#pragma codesize (10)
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)
 #endif
@@ -472,9 +477,12 @@ init_heap ()
     heap_end = heap_start + heap_size;
 
 #ifdef FRAGMENTED_HEAP
+#ifndef TARGET_VIC20
+#error "FRAGMENTED_HEAP requires TARGET_VIC20"
+#endif
     // Update descriptor of malloc()'ed heap.
-    heaps[0].start = heaps[0].free = heap_start;
-    heaps[0].end = heap_end;
+    heaps[1].start = heaps[1].free = heap_start;
+    heaps[1].end = heap_end;
 
     // Mark ends of heaps.
     for (heap = heaps; heap->start; heap++)

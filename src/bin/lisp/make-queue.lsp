@@ -1,2 +1,2 @@
-(fn make-queue ()
+(macro make-queue ()
   (cons nil nil))

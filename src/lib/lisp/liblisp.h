@@ -1,8 +1,9 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-//// Compile-time options
-////
+////////////////////////////
+/// Compile-time options ///
+////////////////////////////
 //// Inteded to be set via file 'src/config' or command-line.
 
 /// Diagnostics
@@ -198,8 +199,9 @@
 #define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
 
 
-
-/// Target configurations
+////////////////////////////
+/// Target configuration ///
+////////////////////////////
 
 // Apple II
 #ifdef TARGET_APPLE2
@@ -428,7 +430,9 @@
 #endif
 #endif
 
-/// Generic configurations
+/////////////////////////////
+/// Generic configuration ///
+/////////////////////////////
 
 #ifdef MINIMALISTIC
 #ifndef SLOW
@@ -529,6 +533,10 @@
 #endif
 #endif // #ifdef DEVELOPMENT
 
+//////////////////////////
+/// CONFIG ADJUSTMENTS ///
+//////////////////////////
+
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
     #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."
 #endif
@@ -597,6 +605,10 @@
     #define HIGHLIGHT(x)
 #endif
 
+//////////////
+/// TYPES  ///
+//////////////
+
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
 typedef void *         lispptr;
@@ -635,6 +647,10 @@ typedef struct _symbol {
     lispobj_size_t  length;
 } symbol;
 
+///////////////
+/// OBJECTS ///
+///////////////
+
 #ifdef NIL_NOT_0
 
 struct real_nil {
@@ -667,6 +683,10 @@ typedef struct _image_header {
     char git_version[8];
     lispptr heap_start;
 } image_header;
+
+////////////////////////
+/// GLOBAL VARIABLES ///
+////////////////////////
 
 // ILOAD restart.
 extern jmp_buf   restart_point;
@@ -851,6 +871,10 @@ extern struct real_nil real_nil;
 #pragma bss-name (pop)
 #endif // #ifdef USE_ZEROPAGE
 
+///////////
+/// NIL ///
+///////////
+
 #ifdef NIL_NOT_0
 #define nil     ((lispptr) &real_nil)
 #else
@@ -868,6 +892,10 @@ extern struct real_nil real_nil;
 #ifdef GC_STRESS
 extern bool do_gc_stress;
 #endif
+
+////////////////////////////
+/// STACK POINTER CHECKS ///
+////////////////////////////
 
 #define _GCSTACK_CHECK_OVERFLOW() \
     if (stack <= stack_start) \
@@ -903,6 +931,10 @@ extern bool do_gc_stress;
 #else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
+
+//////////////////////
+/// STACK PUSH/POP ///
+//////////////////////
 
 #ifdef SLOW
     #define PUSH(x)      pushgc (x)
@@ -946,6 +978,10 @@ extern bool do_gc_stress;
         } while (0)
 #endif // #ifdef SLOW
 
+/////////////////////////
+/// eval0 RETURN TAGS ///
+/////////////////////////
+
 // TODO: Rename from TAG_* to EVAL0_* to make
 // their function more obvious outside eval0().
 #define TAG_DONE                  0
@@ -954,10 +990,27 @@ extern bool do_gc_stress;
 #define TAG_NEXT_BODY_STATEMENT   3
 #define TAG_NEXT_BLOCK_STATEMENT  4
 
+//////////////////////
+/// LIST ITERATION ///
+//////////////////////
+
 #define DOLIST(x, init) \
     for (x = init; CONSP(x); x = CDR(x))
 #define TYPESAFE_DOLIST(x, init) \
     for (x = init; CONSP(x); x = LIST_CDR(x))
+
+/////////////
+/// CASTS ///
+/////////////
+
+#define BOOL(x)      ((x) ? t : nil)
+#define CONS(x)         ((cons *) (x))
+#define NUMBER(n)               ((number *) (n))
+#define SYMBOL(s)               ((symbol *) (s))
+
+///////////////////
+/// OBJECT TYPE ///
+///////////////////
 
 #define TYPE_CONS       1
 #define TYPE_NUMBER     2
@@ -977,8 +1030,6 @@ extern bool do_gc_stress;
 #define MARKED(x)       (NOT(x) || TYPE(x) & TYPE_MARKED)
 #define MARK(x)         (TYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
-
-#define CONS(x)         ((cons *) (x))
 
 #ifdef COMPRESSED_CONS
     // CDR of a compressed cons is the address of the next
@@ -1003,8 +1054,11 @@ extern bool do_gc_stress;
 #define _SPECIALP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
 #define _NAMEDP(x)      (PNOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
-
 #define EXTENDEDP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
+
+//////////////
+/// CONSES ///
+//////////////
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
@@ -1027,6 +1081,10 @@ extern bool do_gc_stress;
     #define _SETCDR(x, v) \
         (CONS(x)->cdr = v)
 #endif // #ifdef COMPRESSED_CONS
+
+/////////////////////////
+/// INLINING WRAPPERS ///
+/////////////////////////
 
 #ifdef SLOW
     #define CAR(x)       (lisp_car (x))
@@ -1058,13 +1116,17 @@ extern bool do_gc_stress;
     #define SPECIALP(x)  _SPECIALP(x)
 #endif // #ifdef SLOW
 
-#define BOOL(x)      ((x) ? t : nil)
+///////////////
+/// NUMBERS ///
+///////////////
 
-#define NUMBER(n)               ((number *) (n))
 #define NUMBER_VALUE(n)         (NUMBER(n)->value)
 #define SET_NUMBER_VALUE(n, x)  (NUMBER(n)->value = x)
 
-#define SYMBOL(s)               ((symbol *) (s))
+///////////////
+/// SYMBOLS ///
+///////////////
+
 #define SYMBOL_NEXT(s)          (SYMBOL(s)->next)
 #define SYMBOL_VALUE(s)         (SYMBOL(s)->value)
 #define SYMBOL_LENGTH(s)        (SYMBOL(s)->length)
@@ -1072,8 +1134,16 @@ extern bool do_gc_stress;
 #define SET_SYMBOL_NEXT(s, x)   (SYMBOL(s)->next = x)
 #define SET_SYMBOL_VALUE(s, x)  (SYMBOL(s)->value = x)
 
+////////////////////////////
+/// FUNCTION EXPRESSIONS ///
+////////////////////////////
+
 #define FUNARGS(x)      CAR(x)
 #define FUNBODY(x)      CDR(x)
+
+//////////////
+/// ERRORS ///
+//////////////
 
 #define ERROR_TYPE              1
 #define ERROR_ARG_MISSING       2
@@ -1096,11 +1166,16 @@ extern bool do_gc_stress;
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12
 
+//////////////////////
+/// POINTER CHECKS ///
+//////////////////////
+
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
 #else
     #define CHKPTR(x)
 #endif
+
 
 extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
@@ -1116,15 +1191,15 @@ extern void     FASTCALL set_channels    (simpleio_chn_t in, simpleio_chn_t out)
 extern lispptr           bi_setin        (void);
 extern lispptr           bi_setout       (void);
 
-// Arguments in global 'x'.
+// Argument in global 'x'.
 extern lispptr           eval0           (void);
 extern lispptr           eval            (void);
 extern lispptr           eval_list       (void);
 extern lispptr           funcall         (void);
 
 extern void              gc               (void);
-extern lispobj_size_t    FASTCALL objsize (char *);
 extern size_t            heap_free_size   (void);
+extern lispobj_size_t FASTCALL objsize (char *);
 
 #define REPL_STD        0
 #define REPL_DEBUGGER   1

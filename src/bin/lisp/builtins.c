@@ -272,8 +272,8 @@ bi_nthcdr (void)
     int n = NUMBER_VALUE(arg1);
 #ifndef NAIVE
     if (n < 0) {
-        error_info = arg1;
         error (ERROR_NEGATIVE, "< 0");
+        error_info = arg1;
         return nil;
     }
 #endif
@@ -429,8 +429,8 @@ bi_subseq (void)
     nstart = NUMBER_VALUE(start);
 #ifndef NAIVE
     if (nstart < 0) {
-        error_info = start;
         error (ERROR_NEGATIVE, "< 0");
+        error_info = start;
         return nil;
     }
 #endif
@@ -445,8 +445,8 @@ bi_subseq (void)
         nend = NUMBER_VALUE(end);
 #ifndef NAIVE
         if (nend < 0) {
-            error_info = end;
             error (ERROR_NEGATIVE, "< 0");
+            error_info = end;
             return nil;
         }
 #endif

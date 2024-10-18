@@ -253,6 +253,10 @@ dump_heap ()
 
 #endif // #ifdef DUMP_LISPPTR
 
+#ifdef __CC65__
+#pragma codesize (push, 500)
+#endif
+
 // Allocate object.
 lispptr FASTCALL
 alloc (uchar size, uchar type)
@@ -325,8 +329,8 @@ alloc_symbol (char * str, uchar len)
             SYMBOL_NEXT(last_symbol) = tmp;
         last_symbol = tmp;
     }
-    SYMBOL(tmp)->next   = nil;
     SYMBOL(tmp)->value  = tmp;
+    SYMBOL(tmp)->next   = nil;
     SYMBOL(tmp)->length = len;
     memcpy ((char *) tmp + sizeof (symbol), str, len);
     return tmp;
@@ -392,6 +396,7 @@ heap_add_init_areas (void)
 #endif // #ifdef WAS_TARGET_VIC20
 
 #ifdef __CC65__
+#pragma codesize (pop)
 #pragma code-name ("CODE_INIT")
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)

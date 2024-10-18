@@ -611,9 +611,6 @@ err_open:
 
 #ifdef TARGET_VIC20
 #pragma code-name ("CODE_INIT")
-#pragma codesize (10)
-#pragma allow-eager-inline (off)
-#pragma inline-stdfuncs (off)
 #endif
 
 void

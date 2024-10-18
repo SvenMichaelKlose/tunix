@@ -45,7 +45,6 @@ make_car_call (void)
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")
-#pragma codesize (10)
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)
 #endif

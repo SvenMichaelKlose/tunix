@@ -3,7 +3,6 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
-#pragma codesize (10)
 #pragma allow-eager-inline (off)
 #pragma inline-stdfuncs (off)
 #endif

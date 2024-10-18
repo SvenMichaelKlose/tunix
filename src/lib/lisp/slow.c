@@ -29,7 +29,6 @@ lispptr tmp_pop;
 
 #ifdef __CC65__
 #pragma code-name ("CODE_SLOW")
-#pragma code-name ("CODE_SLOW")
 #endif
 
 lispptr FASTCALL

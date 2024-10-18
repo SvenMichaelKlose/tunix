@@ -1,6 +1,5 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
-#pragma codesize(1000)
 #pragma allow-eager-inline(on)
 #pragma inline-stdfuncs(on)
 #endif
@@ -350,7 +349,6 @@ relocate (void)
 }
 
 #ifdef __CC65__
-#pragma codesize (10)
 #pragma allow-eager-inline (off)
 #pragma inline-stdfuncs (off)
 #endif

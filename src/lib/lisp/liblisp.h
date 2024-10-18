@@ -886,8 +886,8 @@ extern struct real_nil real_nil;
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
-    #define NOT(x)      (x != nil)
-    #define NOT_NIL(x)  (x == nil)
+    #define NOT(x)      (x == nil)
+    #define NOT_NIL(x)  (x != nil)
 #endif
 
 #ifdef REAL_NIL

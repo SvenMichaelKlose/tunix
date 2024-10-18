@@ -1,5 +1,6 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
+#pragma codesize (push, 500)
 #endif
 
 #include <string.h>
@@ -706,6 +707,7 @@ funcall ()
 }
 
 #ifdef __CC65__
+#pragma codesize (pop)
 #pragma code-name ("CODE_INIT")
 #pragma inline-stdfuncs (off)
 #pragma allow-eager-inline (off)

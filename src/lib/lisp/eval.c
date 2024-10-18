@@ -325,7 +325,7 @@ set_arg_values:
     // Missing argument error.
     else if (NOT(args)) {
         error (ERROR_ARG_MISSING, "Missing arg to builtin");
-        error_info = unevaluated_arg1;
+        value = arg1;
         goto return_obj;
     }
 #endif
@@ -536,7 +536,8 @@ start_body:
     x = FUNBODY(arg1);
 #ifndef NO_DEBUGGER
     PUSH(current_function);
-    current_function = arg1;
+    if (unevaluated_arg1)
+        current_function = unevaluated_arg1;
 #endif
 
 continue_body:

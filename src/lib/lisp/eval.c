@@ -205,8 +205,8 @@ eval_block:
     arg1 = CAR(args);
 #ifndef NAIVE
     if (!SYMBOLP(arg1)) {
-        error_info = arg1;
         error (ERROR_TYPE, "Name not a sym");
+        error_info = arg1;
         goto return_obj;
     }
 #endif
@@ -246,8 +246,8 @@ next_block_statement:
                 goto block_statement;
 #ifndef NAIVE
         // Tag not found.  Issue error.
-        error_info = go_tag;
         error (ERROR_TAG_MISSING, "Tag not found");
+        error_info = go_tag;
         goto return_obj;
 #endif
     } else if (value == return_sym) {
@@ -287,8 +287,8 @@ do_builtin_arg:
 #ifndef NAIVE
         // Complain if argument left.
         if (NOT_NIL(args)) {
-            error_info = args;
             error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
+            error_info = args;
             goto return_obj;
         }
 #endif
@@ -324,8 +324,8 @@ set_arg_values:
 #ifndef NAIVE
     // Missing argument error.
     else if (NOT(args)) {
-        error_info = unevaluated_arg1;
         error (ERROR_ARG_MISSING, "Missing arg to builtin");
+        error_info = unevaluated_arg1;
         goto return_obj;
     }
 #endif
@@ -422,8 +422,8 @@ call_user_defined:
 #ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        error_info = arg1;
         error (ERROR_NOT_FUNCTION, "Not a fun");
+        error_info = arg1;
         goto return_obj;
     }
 #endif
@@ -455,12 +455,12 @@ do_argument:
 #ifndef NAIVE
     // Catch wrong number of arguments.
     if (TOO_MANY_ARGSP()) {
-        error_info = args;
         error (ERROR_TOO_MANY_ARGS, "Too many args");
+        error_info = args;
         goto start_body;
     } else if (MISSING_ARGSP()) {
-        error_info = argdefs;
         error (ERROR_ARG_MISSING, "Missing args");
+        error_info = argdefs;
         goto break_user_call;
     }
 #endif
@@ -536,8 +536,7 @@ start_body:
     x = FUNBODY(arg1);
 #ifndef NO_DEBUGGER
     PUSH(current_function);
-    if (ATOM(unevaluated_arg1))
-        current_function = unevaluated_arg1;
+    current_function = arg1;
 #endif
 
 continue_body:

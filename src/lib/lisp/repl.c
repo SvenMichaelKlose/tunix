@@ -84,15 +84,16 @@ print_debug_info ()
         if (last_errstr)
             outs (last_errstr);
 
-        // Informative expression, describing the error
-        // further.
+        // Erroraneous object.
         outs (": ");
         print (value);
-    }
-    if (NOT_NIL(error_info)) {
-        fresh_line ();
-        outs ("Info: ");
-        print (error_info);
+
+        // Error-dependent info.
+        if (NOT_NIL(error_info)) {
+            fresh_line ();
+            outs ("Info: ");
+            print (error_info);
+        }
     }
 
     fresh_line ();
@@ -100,6 +101,8 @@ print_debug_info ()
 #ifndef NO_HIGHLIGHTING
     do_highlight = true;
 #endif
+
+    // Print current function exüression or top-level.
     if (NOT_NIL(current_function)) {
         tmp2 = SYMBOL_VALUE(current_function);
         print (current_function); // (Name)
@@ -234,7 +237,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             x = make_cons (onerror_sym, x);
 
             // Clear error status.
-            error_info  = nil;
             error_code  = 0;
 
             // Call ONERROR.
@@ -386,7 +388,6 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
                     do_break_repl = BRK_EXIT;
 break_repl:
                     error_code = 0;
-                    error_info = nil;
                     goto done;
 cannot_continue:
                     outs ("Need alternative first!");
@@ -421,7 +422,6 @@ done_short_command:
 #ifndef NO_DEBUGGER
         // Reset error status for next evaluation.
         error_code = 0;
-        error_info = nil;
 #endif
         // Macro expansion.
         if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {

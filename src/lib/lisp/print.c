@@ -75,7 +75,7 @@ print_list (cons * c)
     bool first = true;
 
 #ifdef PRINT_SHORT_QUOTES
-    if (CDR(c)) {
+    if (NOT_NIL(CDR(c))) {
         tmpstr = NULL;
         print_tmp = CAR(c);
         if (print_tmp == quote)

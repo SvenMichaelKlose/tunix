@@ -39,7 +39,7 @@ void FASTCALL
 mark (lispptr x)
 {
     CHKPTR(x);
-    if (x && !MARKED(x)) {
+    if (NOT_NIL(x) && !MARKED(x)) {
         MARK(x);
         for (; _CONSP(x); x = CDR(x)) {
             CHKPTR(x);
@@ -47,7 +47,7 @@ mark (lispptr x)
             mark (CAR(x));
         }
         CHKPTR(x);
-        if (x) {
+        if (NOT_NIL(x)) {
             MARK(x);
             if (_SYMBOLP(x))
                 mark (SYMBOL_VALUE(x));

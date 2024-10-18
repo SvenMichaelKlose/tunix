@@ -245,7 +245,7 @@ done:
 void
 dump_heap ()
 {
-    char *s = heap_start;
+    char * s = heap_start;
     while (*s) {
         dump_lispptr (s);
         s += objsize (s);

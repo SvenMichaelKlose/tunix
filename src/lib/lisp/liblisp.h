@@ -273,7 +273,7 @@
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
 #undef RELOC_TABLE_ENTRIES
-#define RELOC_TABLE_ENTRIES 256
+#define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -348,6 +348,7 @@
 #ifdef TARGET_PLUS4
 #define FAST_NIL
 //#define REAL_NIL
+//#define NIL_NOT_0
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -654,8 +655,8 @@ typedef struct _symbol {
 #ifdef NIL_NOT_0
 
 struct real_nil {
-    symbol * s;
-    char     name[3];
+    symbol  s;
+    char    name[3];
 };
 
 #endif // #ifdef NIL_NOT_0
@@ -885,8 +886,16 @@ extern struct real_nil real_nil;
     #define NOT(x)      !((size_t) x & 0xff00)
     #define NOT_NIL(x)  ((size_t) x & 0xff00)
 #else
-    #define NOT(x)      (!x)
-    #define NOT_NIL(x)  (x)
+    #define NOT(x)      (x != nil)
+    #define NOT_NIL(x)  (x == nil)
+#endif
+
+#ifdef REAL_NIL
+    #define PNOT(x)     false
+    #define PNOT_NIL(x) true
+#else
+    #define PNOT(x)     NOT(x)
+    #define PNOT_NIL(x) NOT_NIL(x)
 #endif
 
 #ifdef GC_STRESS
@@ -1003,10 +1012,10 @@ extern bool do_gc_stress;
 /// CASTS ///
 /////////////
 
-#define BOOL(x)      ((x) ? t : nil)
+#define BOOL(x)         ((x) ? t : nil)
 #define CONS(x)         ((cons *) (x))
-#define NUMBER(n)               ((number *) (n))
-#define SYMBOL(s)               ((symbol *) (s))
+#define NUMBER(n)       ((number *) (n))
+#define SYMBOL(s)       ((symbol *) (s))
 
 ///////////////////
 /// OBJECT TYPE ///
@@ -1035,14 +1044,6 @@ extern bool do_gc_stress;
     // CDR of a compressed cons is the address of the next
     // object (which is also a cons).
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
-#endif
-
-#ifdef REAL_NIL
-    #define PNOT(x)     false
-    #define PNOT_NIL(x) true
-#else
-    #define PNOT(x)     NOT(x)
-    #define PNOT_NIL(x) NOT_NIL(x)
 #endif
 
 #define _ATOM(x)        (PNOT(x) || !(TYPE(x) & TYPE_CONS))

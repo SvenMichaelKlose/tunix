@@ -1,3 +1,5 @@
+NO_EXOMIZER ?= 1
+
 CC65_ROOT    = $(THIS_DIR)/../contrib/cc65
 CC65_BIN     ?= $(CC65_ROOT)/bin
 CC65_SHARE   ?= $(CC65_ROOT)/share/cc65

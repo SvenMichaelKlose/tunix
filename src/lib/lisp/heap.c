@@ -107,8 +107,7 @@ expand_universe (lispptr x)
 lispobj_size_t FASTCALL
 objsize (char * x)
 {
-    uchar s;
-    s = lisp_sizes[TYPEBITS(x)];
+    uchar s = lisp_sizes[TYPEBITS(x)];
 #ifndef NDEBUG
     if (!s)
         internal_error_ptr (x, "0 size");
@@ -145,7 +144,7 @@ bool is_checking_lispptr;
 void
 check_lispptr (char * x)
 {
-    if (!x || is_checking_lispptr)
+    if (NOT(x) || is_checking_lispptr)
         return;
 
 #ifndef FRAGMENTED_HEAP
@@ -326,8 +325,8 @@ alloc_symbol (char * str, uchar len)
             SYMBOL_NEXT(last_symbol) = tmp;
         last_symbol = tmp;
     }
-    SYMBOL(tmp)->next = nil;
-    SYMBOL(tmp)->value = tmp;
+    SYMBOL(tmp)->next   = nil;
+    SYMBOL(tmp)->value  = tmp;
     SYMBOL(tmp)->length = len;
     memcpy ((char *) tmp + sizeof (symbol), str, len);
     return tmp;
@@ -349,8 +348,8 @@ void
 switch_heap ()
 {
     heap_start = heap->start;
-    heap_free = heap->free;
-    heap_end = heap->end;
+    heap_free  = heap->free;
+    heap_end   = heap->end;
     heap++;
 }
 #endif
@@ -385,12 +384,12 @@ heap_add_init_areas (void)
     memcpy (&heaps[2], &heaps[1], sizeof (struct heap_fragment));
     memcpy (&heaps[1], &heaps[0], sizeof (struct heap_fragment));
     heap[0].start = heap[0].free = _CODE_INIT_RUN__;
-    heap[0].end = _CODE_INIT_RUN__ + _CODE_INIT_SIZE__;
+    heap[0].end   = _CODE_INIT_RUN__ + _CODE_INIT_SIZE__;
     heap_free = heap_end;
     heap = &heaps[3];
 }
 
-#endif // #ifdef TARGET_VIC20
+#endif // #ifdef WAS_TARGET_VIC20
 
 #ifdef __CC65__
 #pragma code-name ("CODE_INIT")
@@ -415,18 +414,18 @@ init_heap ()
 #ifdef COMPRESSED_CONS
     lisp_sizes[TYPE_CONS | TYPE_EXTENDED] = sizeof (ccons);
 #endif
-    lisp_sizes[TYPE_NUMBER] = sizeof (number);
-    lisp_sizes[TYPE_SYMBOL] = sizeof (symbol);
+    lisp_sizes[TYPE_NUMBER]  = sizeof (number);
+    lisp_sizes[TYPE_SYMBOL]  = sizeof (symbol);
     lisp_sizes[TYPE_BUILTIN] = sizeof (symbol);
     lisp_sizes[TYPE_SPECIAL] = sizeof (symbol);
 
 #ifdef REAL_NIL
     // Make real NIL.
     s = (symbol *) nil;
-    s->type = TYPE_SYMBOL;
+    s->type   = TYPE_SYMBOL;
     s->length = 3;
-    s->value = nil;
-    s->next = nil;
+    s->value  = nil;
+    s->next   = nil;
     tmpstr = SYMBOL_NAME((lispptr) s);
     tmpstr[0] = 'n';
     tmpstr[1] = 'i';
@@ -436,10 +435,10 @@ init_heap ()
     // Allocate tag stack.
 #ifdef MALLOCD_TAGSTACK
     tagstack_start = malloc (TAGSTACK_SIZE);
-    tagstack = tagstack_start + TAGSTACK_SIZE;
+    tagstack       = tagstack_start + TAGSTACK_SIZE;
 #else
     tagstack_start = (void *) TAGSTACK_START;
-    tagstack = (void *) TAGSTACK_END;
+    tagstack       = (void *) TAGSTACK_END;
 #endif
     tagstack_end = tagstack;
     // Avoid trashing rest of program on overflow.
@@ -453,7 +452,7 @@ init_heap ()
     stack_end = stack_start + STACK_SIZE - 100;
 #else
     stack_start = (void *) STACK_START;
-    stack_end = (void *) STACK_END;
+    stack_end   = (void *) STACK_END;
 #endif
     stack = stack_end;
     // Avoid trashing rest of program on overflow.
@@ -474,7 +473,7 @@ init_heap ()
     if (!(heap_start = malloc (heap_size)))
         return false;
     heap_free = heap_start;
-    heap_end = heap_start + heap_size;
+    heap_end  = heap_start + heap_size;
 
 #ifdef FRAGMENTED_HEAP
 #ifndef TARGET_VIC20
@@ -482,13 +481,13 @@ init_heap ()
 #endif
     // Update descriptor of malloc()'ed heap.
     heaps[1].start = heaps[1].free = heap_start;
-    heaps[1].end = heap_end;
+    heaps[1].end   = heap_end;
 
     // Mark ends of heaps.
     for (heap = heaps; heap->start; heap++)
         *(heap->free) = 0;
 
-    // Trigger gc() with first allocation start with the
+    // Trigger gc() with first allocation to start with the
     // first heap.
     heap_free = heap_end;
     heap = heaps;
@@ -508,9 +507,9 @@ init_heap ()
     do_compress_cons = false;
 #endif
 
-    // Make *UNIVERSE*.
-    last_symbol = nil;
-    universe = make_symbol ("*universe*", 10);
+    // Make first symbol *UNIVERSE*.
+    last_symbol  = nil;
+    universe     = alloc_symbol ("*universe*", 10);
     first_symbol = universe;
 
     // Be true.
@@ -551,11 +550,11 @@ init_heap ()
     // Clear error info.
 #ifndef NAIVE
 #ifndef NDEBUG
-    debug_mode = false;
+    debug_mode   = false;
 #endif
-    error_code = false;
-    last_errstr = NULL;
-    current_expr  = nil;
+    error_code   = false;
+    last_errstr  = NULL;
+    current_expr = nil;
 #endif
 
 #ifdef CHECK_OBJ_POINTERS

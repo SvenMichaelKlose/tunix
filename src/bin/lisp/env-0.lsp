@@ -1,7 +1,7 @@
 (print (gc))(out " bytes heap.")(terpri)
 (var *start-time* (time))
 
-(fn message (x)
+(fn message x
   (fresh-line)
-  (out x)
+  (apply out x)
   (terpri))

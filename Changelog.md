@@ -15,16 +15,41 @@ and this project adheres to
 
 #### Interpreter
 
+##### Fixed
+
+- Various debugger issues introduced recently.
+- Internal handling of NIL is more consistent, avoiding
+  future bugs.
+
 ##### Changed
 
 - Up to 10% better performance on SLOW configurations.
 - REPL: Indent printed results by a space.
+- Smaller stack sizes (due to recent update of eval()).
+- TARGET\_VIC20: Use part of RAM123 as heap.
+
+##### Added
+
+- Compile-time option RESTART\_GC\_ON\_FULL\_RELOC: Makes the GC
+  restart if it had to be stopped by a full relocation table.
+  Turned off by default so save runs over already collected objects.
 
 #### Environment
 
 ##### Fixed
 
 - WITH-QUEUE: Don't return queue list on RETURN.
+- Error handling reviewed.
+
+##### Changed
+
+- MAKE-QUEUE is now a macro, so that it can be discarded.
+- MESSAGE takes variable number of arguments (like OUT).
+
+##### Added
+
+- PAD: Pad elements of a list.
+- DOTEXPAND: Expands dot-notated symbols.
 
 ### libsimpleio
 

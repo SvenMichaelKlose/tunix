@@ -1,4 +1,3 @@
-(= *alv?* t) ; Verbose AUTOLOAD.
 (= *universe* (member 'autoload *universe*))
 (var app-test-all nil)
 

@@ -3,6 +3,89 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-18
+
+Looking at the generated 6502 is giving each day a touch of unhappiness.
+Also, that pile of C code, messed up with preprocessor directives and macros,
+when we know that Lisp is "so powerful".  There are also essential optimizations
+that cannot possibly be implemented in C (unless there's a stay in the nut house
+on the todo list).  Storing a pointer index separately, for example, and word
+aligning the object stack, makes pushes and pops much faster.  Only works wit
+a word-aligned stack:
+
+~~~asm
+
+spl: .res 1
+sp:  .res 1 ; (0)
+sph: .res 1
+
+; Push AX onto object stack.
+pushxa:
+    ldy spl         ; 3
+    bne l           ; 2/3
+    dec sph         ; 5
+l:  dey             ; 2
+    sta (sp),y      ; 6
+    txa             ; 2
+    dey             ; 2
+    sta (sp),y      ; 6
+    sty spl         ; 3
+                    ; 26/32
+
+; Pop from object stack into AX.
+popxa:
+    ldy spl         ; 3
+    lda (sp),y      ; 6
+    tax             ; 2
+    iny             ; 2
+    lda (sp),y      ; 6
+    iny             ; 2
+    bne l           ; 2/3
+    inc sph         ; 5
+l:  sty spl         ; 3
+                    ; 26/32
+~~~
+
+Indirect access requires the low byte to be in place though:
+
+~~~asm
+; Load stack place `i` into AX.
+ldspi:
+    lda spl
+    sta sp
+    ldy #(++ i)
+    lda (sp),y
+    tax
+    dey
+    lda (sp),y
+    ldy #0
+    sty sp
+~~~
+
+It's still more compact than doing the addition manually and saves a word
+on the zeropage.  Furthermore automatic optimization will come into play.
+I've sketched a set of
+[code generation macros](src/bin/lisp/growroom/igen-6502.lsp).  This time
+overloaded, so optimizations and native types can be supported.
+
+That's just dreaming about.  More useful would be having an assembler that
+merges with Lisp expressions as described.  Peeking chars and READ, and a
+bit of line parsing should do the trick.  But sure as hell there won't be
+enough heap to load all labels of an application to make an executable.
+That's where the BiDB comes in.
+
+# 2024-10-17
+
+While bullshiting about the overall project to kill time it occured to
+me that perhaps the conses could be allocated from the opposite side
+of the heap to spare the type byte of each.  Lets figure out what that
+would imply.
+
+* Type checks would require an additional pointer check to determine
+  if it's a cons (with no type byte to access) or not.
+* With 16 bits address space high byte checks would do.
+* It only works with the first or last heap.
+
 # 2024-10-14
 
 The CBM part of the "simple I/O" library is doing my head in.  Test

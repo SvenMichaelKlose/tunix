@@ -56,11 +56,11 @@
 (rm-app 'app-fold-block)
 
 (message "Testing EXEXPAND...")
-(load "exexpand.lsp")
+(load '"exexpand.lsp")
 (print (exexpand (print '(a b c d))))
 (print (exexpand (print '(a (b c d)))))
 (print (exexpand (print '(a (b (c d))))))
 
-(load "bcasm.lsp")
+(load '"bcasm.lsp")
 
 (app 'app-test-compiler)

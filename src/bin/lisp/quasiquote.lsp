@@ -1,5 +1,5 @@
 (or (builtin? 'append)
-    (load "append.lsp"))
+    (load '"append.lsp"))
 
 (fn %qeval (qqx)
   (eval qqx))

@@ -225,11 +225,11 @@
           (list-dir)
           (prompt-ok))
     \r  (progn
-          (save-file "_ctrlkr.tmp")
+          (save-file '"_ctrlkr.tmp")
           (= *old-conln* -1)
           (clrscr)
           (con-direct nil)
-          (load "_ctrlkr.tmp")
+          (load '"_ctrlkr.tmp")
           (prompt-ok))
     \q  (quit-editor)
     \n  (when (eq 'quit (quit-editor))

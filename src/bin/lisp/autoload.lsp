@@ -1,6 +1,6 @@
-(load "when.lsp")
-(load "group2.lsp")
-(load "let.lsp")
+(load '"when.lsp")
+(load '"group2.lsp")
+(load '"let.lsp")
 
 ; Be verbose during AUTOLOAD.
 (var *alv?* t)
@@ -17,7 +17,7 @@
 ; came with it.
 (fn %aload (%n)
   (let (%f (symbol (nconc (symbol-name (or (cdr (assoc %n *alx*)) %n))
-                           (symbol-name ".lsp"))))
+                          (symbol-name '".lsp"))))
     (let (%! (open %f 'r))
       (when %!
         (close %!)

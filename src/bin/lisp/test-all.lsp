@@ -12,7 +12,7 @@
 
 (macro do-test (title . body)
   $((()
-      (message ,title)
+      (message "Testing " ,title '"...")
       (and (< (print (free)) 1024)
         ((()
            (fresh-line)
@@ -21,32 +21,32 @@
       (fresh-line)
       ,@body)))
 
-(do-test "Testing PROGN..."
-  (load "progn.lsp")
+(do-test 'PROGN
+  (load '"progn.lsp")
   (or (equal (macroexpand '(progn (error)))
              '(block t (error)))))
 
-(do-test "Testing GROUP2..."
+(do-test 'GROUP2
   (or (equal (group2 '(l i s p))
              '((l i) (s p)))
       (error (group2 '(l i s p)))))
 
-(do-test "Testing UNLESS..."
+(do-test 'UNLESS
   (and (unless t t)
        (error '(unless t t)))
   (or (unless nil t)
       (error '(unless nil t))))
 
-(do-test "Testing WHEN..."
+(do-test 'WHEN
   (and (when nil t)
        (error '(when nil t)))
   (or (when t t)
       (error '(when t t))))
 
-(message "TODO: AWHEN...")
+(message '"TODO: AWHEN...")
 
-(do-test "Testing LET..."
-  (load "let.lsp")
+(do-test 'LET
+  (load '"let.lsp")
   (or (equal (macroexpand '(let (a 1
                                  b 2)
                              (print a)
@@ -57,25 +57,25 @@
                1 2))
       (error "Expansion of LET failed")))
 
-(do-test "Testing PROG1..."
+(do-test 'PROG1
   (or (equal (eval (macroexpand '(prog1 1 2 3)))
              1)
       (error 'PROG1)))
 
-(do-test "Testing APROG1..."
+(do-test 'APROG1
   (or (equal (eval (macroexpand '(aprog1 1 2 3)))
              1)
       (error 'APROG1)))
 
-(do-test "Testing WITH-GLOBAL..."
+(do-test 'WITH-GLOBAL
   (let (tmp 'dummy)
     (with-global tmp nil
       (and tmp
-           (error "TMP is not NIL.")))
+           (error "TMP is not NIL")))
     (or tmp
-        (error "TMP not restored."))))
+        (error "TMP not restored"))))
 
-(do-test "Testing PUSH and POP..."
+(do-test "PUSH and POP"
   (or (let (x nil)
         (push 'p x)
         (push 's x)
@@ -86,74 +86,74 @@
              (equal x '(i s p))))
       (error "Test of PUSH/POP failed")))
 
-(do-test "Smoke-testing DO..."
+(do-test 'DO
   (do ((i 0 (+ i 1)))
       ((>= i 10))
     (print i))
   (terpri))
 
-(do-test "Testing !++..."
+(do-test '!++
   (let (x 1)
     (!++ x)
     (or (== x 2)
-        (error "X didn't increment to 2."))))
+        (error "X didn't increment to 2"))))
 
-(do-test "Testing !--..."
+(do-test '!--
   (let (x 1)
     (!-- x)
     (or (== x 0)
-        (error "X didn't decrement to 0."))))
+        (error "X didn't decrement to 0"))))
 
-(do-test "Testing MAKE-QUEUE..."
+(do-test 'MAKE-QUEUE
   (or (equal (make-queue)
              '(nil))
       (error (make-queue))))
 
-(do-test "Testing ENQUEUE..."
+(do-test 'ENQUEUE
   (or (equal (let (q (make-queue))
                (enqueue q 42)
                (enqueue q 23)
                (queue-list q))
              '(42 23))
-      (error "Expansion of ENQUEUE failed.")))
+      (error "Expansion of ENQUEUE failed")))
 
-(message "TODO: QUEUE-LIST...")
-(message "TODO: QUEUE-POP...")
-(do-test "Testing WITH-QUEUE..."
+(message '"TODO: QUEUE-LIST...")
+(message '"TODO: QUEUE-POP...")
+(do-test 'WITH-QUEUE
   (or (equal (with-queue q
                (enqueue q 5))
              '(5))
       (error "Expansion of WITH-QUEUE failed")))
 
-(do-test "Testing REVERSE..."
+(do-test 'REVERSE
   (or (equal (reverse '(p s i l))
              '(l i s p))
       (error)))
 
-(do-test "Smoke-testing DOLIST..."
+(do-test 'DOLIST
   (dolist (i '(a b c d e f g h i j))
     (print i)))
 
-(do-test "Smoke-testing DOTIMES..."
+(do-test 'DOTIMES
   (dotimes (i 10)
     (print i))
   (terpri))
 
-(do-test "Smoke-testing WHILE..."
+(do-test 'WHILE
   (let (x 10)
     (while (< 0 x)
       (print x)
       (= x (-- x))))
   (terpri))
 
-(do-test "Smoke-testing AWHILE..."
+(do-test 'AWHILE
   (let (x 10)
     (awhile (< 0 x)
       (print x)
       (= x (-- x))))
   (terpri))
 
-(do-test "Testing NCONC..."
+(do-test 'NCONC
   (and (nconc)
        (error))
   (and (nconc nil)
@@ -170,7 +170,7 @@
              '(l i s p))
        (error)))
 
-(do-test "Testing NTHCDR..."
+(do-test 'NTHCDR
   ; TODO: Test with ONERROR.
   ;(and (nthcdr -1 '(l i s p))
   ;     (error))
@@ -183,7 +183,7 @@
   (and (nthcdr 4 '(l i s p))
        (error)))
 
-(do-test "Testing NTH..."
+(do-test 'NTH
   ; TODO: Test with ONERROR.
   ;(and (nth -1 '(l i s p))
        ;(error))
@@ -197,24 +197,24 @@
        (error)))
 
 
-(do-test "Testing !=..."
+(do-test '!=
   (or (equal (eval (macroexpand '(!= 1 2 3)))
              3)
       (error '!=)))
 
-(do-test "Testing DUP..."
+(do-test 'DUP
   (!= (dup 'x 0)
     (and ! (error !)))
   (!= (dup 'x 3)
     (or (equal '(x x x) !)
         (error !))))
 
-(do-test "Testing MAPCAR..."
+(do-test 'MAPCAR
   (or (equal (mapcar + '(1 2 3) '(4 5 6))
              '(5 7 9))
       (error)))
 
-(do-test "Testing MAPCAN..."
+(do-test 'MAPCAN
   (and (mapcan '((x)))
        (error))
   (and (mapcan '((x) x) '(nil))
@@ -225,8 +225,8 @@
              '(l i s p))
        (error)))
 
-(do-test "Testing LET*..."
-  (load "let2.lsp")
+(do-test 'LET*
+  (load '"let2.lsp")
   (!= (macroexpand '(let* (a 1
                            b 2)
                       (print a)
@@ -240,7 +240,7 @@
                  nil nil))
         (error "Expansion of LET* failed"))))
 
-(do-test "Testing CASE..."
+(do-test 'CASE
   (case 23
     42 (error)
     23 'b
@@ -250,12 +250,12 @@
     65 (error)
     'ok))
 
-(do-test "Testing ADJOIN..."
+(do-test 'ADJOIN
   (or (equal (adjoin 'l '(i s p))
              '(l i s p))
       (error)))
 
-(do-test "Testing !?..."
+(do-test '!?
   (!? 49
       (or (eql ! 49)
           (error)))
@@ -268,39 +268,39 @@
                  5))
       (error)))
 
-(do-test "Testing ASSOC..."
+(do-test 'ASSOC
   (or (assoc 'vic '((c64 t)(vic t)))
       (error))
   (and (assoc 'vic '((c64 t)(amiga t)))
        (error)))
 
-(do-test "Testing ACONS..."
+(do-test 'ACONS
   (or (let (x nil)
         (acons 'vic 20 x)
         (equal x '((vic . 20))))
       (error)))
 
-(do-test "Testing AREMOVE..."
+(do-test 'AREMOVE
   (and (aremove t nil)
        (error))
   (or (equal (carlist (aremove 'i '((l) (i) (s) (p))))
              '(l s p))))
 
-(do-test "Testing AREMOVE-IF..."
+(do-test 'AREMOVE-IF
   (or (equal (carlist (aremove-if '((x) (eq 'i (car x)))
                                   '((l) (i) (s) (p))))
              '(l s p))))
 
-(do-test "Testing COPY-TREE..."
+(do-test 'COPY-TREE
   (or (equal (copy-tree '((1 2) (3 (4 5))))
              '((1 2) (3 (4 5))))
       (error)))
 
-(do-test "Testing COUNT-IF..."
+(do-test 'COUNT-IF
   (or (== 3 (count-if number? '(1 a 2 b 3)))
       (error)))
 
-(do-test "Testing CUT-AT..."
+(do-test 'CUT-AT
   (let (head '(l i s p))
     (or (equal (cut-at 0 head)
                '(l i s p))
@@ -312,19 +312,19 @@
                '(l i))
         (error))))
 
-(do-test "Testing ENSURE-LIST..."
+(do-test 'ENSURE-LIST
   (or (equal '(tunix) (ensure-list 'tunix))
       (error))
   (or (equal '(tunix) (ensure-list '(tunix)))
       (error)))
 
-(do-test "Testing EVERY..."
+(do-test 'EVERY
   (or (every '((x) (== x 1)) '(1 1 1 1))
       (error))
   (and (every '((x) (== x 1)) '(1 1 2 1))
       (error)))
 
-(do-test "Testing MEMBER-IF..."
+(do-test 'MEMBER-IF
   (or (member-if '((x) (eq x 'i))
                    '(l i s p))
     (error))
@@ -332,7 +332,7 @@
                   '(l i s p))
        (error)))
 
-(do-test "Testing FIND-IF..."
+(do-test 'FIND-IF
   (or (find-if '((x) (eq x 'i))
                '(l i s p))
       (error))
@@ -340,35 +340,35 @@
                 '(l i s p))
        (error)))
 
-(do-test "Testing FIND..."
+(do-test 'FIND
   (or (find 'i '(l i s p))
       (error))
   (and (find 'x '(l i s p))
        (error)))
 
-(do-test "Smoke-esting DO*..."
+(do-test 'DO*
   (do* ((i 0 (+ i 1)))
        ((>= i 10))
     (print i))
   (terpri))
 
-(do-test "Testing SUBSEQ..."
+(do-test 'SUBSEQ
   (and (subseq '(l i s p) 0 0)
        (error))
   (or (equal (subseq '(l i s p) 0 2)
              '(l i))
       (error)))
 
-(do-test "Testing GROUP..."
+(do-test 'GROUP
   (or (equal (group '(l i s p) 2)
              '((l i)
                (s p)))
       (error)))
 
-(message "TODO: INTERSECT...")
-(message "TODO: MAX...")
+(message '"TODO: INTERSECT...")
+(message '"TODO: MAX...")
 
-(do-test "Testing POSITION..."
+(do-test 'POSITION
   (and (position 'a '(l i s p))
        (error))
   (or (== 0 (position 'l '(l i s p)))
@@ -376,30 +376,31 @@
   (or (== 2 (position 's '(l i s p)))
       (error)))
 
-(message "TODO: POSITION-IF...")
-(message "TODO: REMOVE-IF...")
-(message "TODO: SET-DIFFERENCE...")
-(message "TODO: SET-EXCLUSIVE-OR...")
-(message "TODO: SOURCE...")
+(message '"TODO: POSITION-IF...")
+(message '"TODO: REMOVE-IF...")
+(message '"TODO: SET-DIFFERENCE...")
+(message '"TODO: SET-EXCLUSIVE-OR...")
+(message '"TODO: SOURCE...")
 
-(do-test "Testing SPLIT..."
+(do-test 'SPLIT
   (and (split 'b nil)
        (error))
   (or (equal (split 'b '(a a a b a a b b a a a a))
              '((a a a) (a a) nil (a a a a)))))
 
-(message "TODO: SPLIT-IF...")
+(message '"TODO: SPLIT-IF...")
 
-(do-test "Testing UNION..."
+(do-test 'UNION
   (or (equal (union '(l l i i) '(s s p p))
              '(l i s p))
       (error)))
 
-(do-test "Testing UNIQUE..."
+(do-test 'UNIQUE
   (or (equal (unique '(l l i i s s p p))
              '(l i s p))
       (error)))
 
 (= *universe* (cdr (member 'app-test-all *universe*)))
-(= *macros* (cdr (member-if '((x) (eq 'do-test (car x)))
+(= *macros* (cdr (member-if '((x)
+                               (eq 'do-test (car x)))
                             *macros*)))

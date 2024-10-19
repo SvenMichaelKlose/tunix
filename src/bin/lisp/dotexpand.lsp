@@ -42,5 +42,3 @@
 (print (dotexpand '.x.))
 (print (dotexpand 'x.y))
 (print (dotexpand 'x.y.z))
-
-;(= *ex* '((x) (macroexpand (dotexpand x))))

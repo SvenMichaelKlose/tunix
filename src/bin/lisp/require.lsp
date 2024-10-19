@@ -1,11 +1,11 @@
 (or (macro? 'with)
-    (load "with.lsp"))
+    (load '"with.lsp"))
 (or (macro? 'progn)
-    (load "progn.lsp"))
+    (load '"progn.lsp"))
 (or (macro? 'do)
-    (load "do.lsp"))
+    (load '"do.lsp"))
 (or (macro? 'dolist)
-    (load "dolist.lsp"))
+    (load '"dolist.lsp"))
 
 (fn require x
   (dolist (i x)
@@ -13,5 +13,5 @@
         (builtin? i)
         (cons? (symbol-value i))
         (or (load (symbol (nconc (symbol-name i)
-                                 (symbol-name ".lsp"))))
+                                 (symbol-name '".lsp"))))
             (error i)))))

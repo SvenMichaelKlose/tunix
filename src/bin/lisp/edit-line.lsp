@@ -1,4 +1,4 @@
-(load "con.lsp")
+(load '"con.lsp")
 
 ;;; State
 

@@ -50,6 +50,7 @@ and this project adheres to
 
 - PAD: Pad elements of a list.
 - DOTEXPAND: Expands dot-notated symbols.
+- SOCKET-GET-DWORD, SOCKET-GET-WORD, SOCKET-GETN.
 
 ### libsimpleio
 

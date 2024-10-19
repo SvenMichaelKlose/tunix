@@ -2,7 +2,6 @@ TUNIX Lisp
 [@] Make it fun writing the bytecode compiler with it.
 
 Interpreter
-[@] Rethink channel handling.  Images won't start on C64.
 [ ] UNWIND-PROTECT
 [ ] Make stack overflows regular errors.
 [ ] Multiple symbol lists to reduce look-up times.
@@ -13,7 +12,7 @@ Debugger
 
 Input/Output
 [ ] On Unix: OPENDIR, READDIR, CLOSEDIR.
-[ ] Working terminal direct mode.
+[@] Working terminal direct mode.
 
 Built-ins
 [ ] STRING (SYMBOL with no look-up to reuse exiting ones.)

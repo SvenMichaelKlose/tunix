@@ -1,4 +1,4 @@
-(message "Testing an ONERROR handler...")
+(message '"Testing an ONERROR handler...")
 
 (var *last-err* nil)
 
@@ -22,60 +22,60 @@
   (= onerror nil)
   (error (or x "error expected")))
 
-(message "Testing ERROR_TYPE...")
+(message '"Testing ERROR_TYPE...")
 (+ 's 1)
 (or (== *last-err* 1)
     (terror "Adding 1 to symbol should be an error"))
 
-(message "Testing ERROR_ARG_MISSING...")
+(message '"Testing ERROR_ARG_MISSING...")
 (((a b)
   a) 1)
 (or (== *last-err* 2)
     (terror "Argument missing should be an error"))
 
-(message "Testing ERROR_TAG_MISSING...")
+(message '"Testing ERROR_TAG_MISSING...")
 (block t fnord (go foo))
 (or (== *last-err* 3)
     (terror "Missing block tag should be an error"))
 
-(message "Testing ERROR_TOO_MANY_ARGS...")
+(message '"Testing ERROR_TOO_MANY_ARGS...")
 (((a b)
   a) 1 2 3)
 (or (== *last-err* 4)
     (terror "Too many arguments should be an error"))
 
-(message "Testing ERROR_NOT_FUNCTION...")
+(message '"Testing ERROR_NOT_FUNCTION...")
 (not-fun)
 (or (== *last-err* 5)
     (terror "(not-fun) should be an error"))
 
-(message "Testing ERROR_ARGNAME_TYPE...")
+(message '"Testing ERROR_ARGNAME_TYPE...")
 (((1)) nil)
 (or (== *last-err* 6)
     (terror "Non-symbol argument name should be an error"))
 
-;(message "Testing ERROR_LOST_RETURN...")
+;(message '"Testing ERROR_LOST_RETURN...")
 ;((()
 ;  (return nil)))
 ;(or (== *last-err* 13)
 ;    (terror "Lost RETURN should be an error"))
 
-;(message "Testing ERROR_LOST_GO...")
+;(message '"Testing ERROR_LOST_GO...")
 ;((()
 ;  (go tag)))
 ;(or (== *last-err* 14)
 ;    (terror "Lost GO should be an error"))
 
-;(message "Testing ERROR_OUT_OF_HEAP...")
+;(message '"Testing ERROR_OUT_OF_HEAP...")
 ;(((q)
 ;   (block nil
 ;     tag
 ;     (= q (cons t q))
-;     (out ".")
+;     (out \.)
 ;     (go tag)))
 ; nil)
 ;(or (== *last-err* 7)
-;    (terror "Out-of-heap error expected."))
+;    (terror "Out-of-heap error expected"))
 
 ; ERROR_UNKNOWN_TYPE  7 ; Internal error.
 ; ERROR_NO_PAREN      8 ; When can read from memory.

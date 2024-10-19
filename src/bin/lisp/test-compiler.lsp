@@ -1,13 +1,13 @@
 (= *alv?* t)
 (app 'app-test-compiler)
 
-(message "Testing CMACROEXPAND...")
+(message '"Testing CMACROEXPAND...")
 (print (cmacroexpand '(and a b c)))
 (print (cmacroexpand '(or a b c)))
 (print (cmacroexpand '(? a b c)))
 (rm-app 'app-cmacroexpand)
 
-(message "Testing ARGEXPAND...")
+(message '"Testing ARGEXPAND...")
 (and (argexpand nil nil)
      (error))
 (or (equal (argexpand '(a b c) '(1 2 3))
@@ -20,7 +20,7 @@
            '((a 1) (b 2) (c (3 4))))
     (error))
 
-(message "Testing INLINE-FN...")
+(message '"Testing INLINE-FN...")
 (or (cequal (inline-fn '((())))
             '(%block))
     (error))
@@ -43,7 +43,7 @@
     (error))
 (rm-app 'app-inline-fn)
 
-(message "Testing FOLD-BLOCK...")
+(message '"Testing FOLD-BLOCK...")
 (or (cequal (fold-block nil)
             '(nil))
     (error))
@@ -55,7 +55,7 @@
     (error))
 (rm-app 'app-fold-block)
 
-(message "Testing EXEXPAND...")
+(message '"Testing EXEXPAND...")
 (load '"exexpand.lsp")
 (print (exexpand (print '(a b c d))))
 (print (exexpand (print '(a (b c d)))))

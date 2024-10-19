@@ -1,9 +1,9 @@
-(message "Testing macro-expansion of dotted pair...")
+(message '"Testing macro-expansion of dotted pair...")
 (or (equal (macroexpand '(v . body))
            '(v . body))
     (error (macroexpand '(v . body))))
 
-(message "Testing macro-expansion of unquoted list...")
+(message '"Testing macro-expansion of unquoted list...")
 (or (equal (macroexpand ',(a))
            ',(a))
     (error (macroexpand ',(a))))
@@ -20,7 +20,7 @@
            '(2 ((,(a)))))
     (error (list 2 (macroexpand '((,(a)))))))
 
-(message "Testing %REQUOTE...")
+(message '"Testing %REQUOTE...")
 (or (equal (%requote '(,a))
            '(,a))
     (error (%requote '(,a))))
@@ -28,7 +28,7 @@
            '(,(a)))
     (error (%requote '(,(a)))))
 
-(message "Testing MACROEXPAND...")
+(message '"Testing MACROEXPAND...")
 (or (equal (macroexpand '$(a ,(b) ,@(c)))
            '$(a ,(b) ,@(c)))
-    (error "%requote went wrong"))
+    (error '"%requote went wrong"))

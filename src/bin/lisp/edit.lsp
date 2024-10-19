@@ -1,6 +1,6 @@
 ;;; State
 
-(var *filename* "edit-help.md")
+(var *filename* '"edit-help.md")
 (var *lines* nil)
 (var *saved?* nil)  ; Modifications saved?
 (var *err* nil)
@@ -65,7 +65,7 @@
 (fn status-pos ()
   (con-rvs t)
   (con-xy (- *con-w* 8) (-- *con-h*))
-  (print (++ *lx*))(out ",")(print (++ *ln*))
+  (print (++ *lx*))(out \,)(print (++ *ln*))
   (out " ")
   (con-rvs nil))
 

@@ -1,6 +1,6 @@
-(message "Testing top-level file read...")
-(var ch (open "test-read.bin" 'r))
-(or ch (error "Cannot open \"test-read.bin\"."))
+(message '"Testing top-level file read...")
+(var ch (open '"test-read.bin" 'r))
+(or ch (error '"Cannot open \"test-read.bin\""))
 (setin ch)
 (and (eof)
      (error "Unexpected EOF at file start"))
@@ -19,13 +19,13 @@
 (close ch)
 (= *universe* (remove 'ch *universe*))
 
-(message "Testing SETCAR...")
+(message '"Testing SETCAR...")
 (= x (cons nil nil))
 (or (equal (setcar x t)
            (cons t nil))
     (error))
 
-(message "Testing SETCDR...")
+(message '"Testing SETCDR...")
 (= x (cons nil nil))
 (or (equal (setcdr x t)
            (cons nil t))
@@ -33,7 +33,7 @@
 
 (and (builtin? symbol-name)
   ((()
-     (message "Testing SYMBOL-NAME...")
+     (message '"Testing SYMBOL-NAME...")
      (or (equal (symbol-name 'abc)
                 '(97 98 99))
          (error))
@@ -42,11 +42,11 @@
 
 (= x 42)
 
-(message "Testing EQUAL...")
+(message '"Testing EQUAL...")
 (or (equal '(1 2) '(1 2))
     (error))
 
-(message "Testing APPLY...")
+(message '"Testing APPLY...")
 (or (equal (apply '(x x) '(1))
            '(1))
     (error))
@@ -57,7 +57,7 @@
            '(1 2 3 4))
     (error))
 
-(message "Testing EVAL...")
+(message '"Testing EVAL...")
 (or (equal (eval '(list 1 2 3))
            '(1 2 3))
     (error (eval '(list 1 2 3))))
@@ -68,7 +68,7 @@
            (cons 1 2))
     (error "Dotted pair not read OK"))
 
-(message "Testing COPY-LIST...")
+(message '"Testing COPY-LIST...")
 (and (copy-list nil)
      (error))
 (or (equal (copy-list '(a))
@@ -81,7 +81,7 @@
            '(a b c))
     (error))
 
-(message "Testing BUTLAST...")
+(message '"Testing BUTLAST...")
 (and (butlast nil)
      (error))
 (and (butlast '(a))
@@ -90,7 +90,7 @@
            '(a b))
     (error))
 
-(message "Testing REMOVE...")
+(message '"Testing REMOVE...")
 (and (remove 'b nil)
      (error))
 (or (equal (remove 'a '(a b c))
@@ -103,7 +103,7 @@
            '(a b))
     (error))
 
-(message "Testing LAST...")
+(message '"Testing LAST...")
 (and (last nil)
      (error))
 (or (equal (last '(a))
@@ -113,7 +113,7 @@
            '(b))
     (error))
 
-(message "Testing APPEND...")
+(message '"Testing APPEND...")
 (and (append)
      (error))
 (and (append nil)
@@ -133,26 +133,26 @@
            '(l i s p))
      (error))
 
-(message "Testing MEMBER...")
+(message '"Testing MEMBER...")
 (and (member 'b nil)
      (error))
 (or (equal (member 'b '(a b c))
            '(b c))
     (error))
 
-(message "Testing @...")
+(message '"Testing @...")
 (and (@ '((x)) nil)
      (error))
 (or (equal (@ '((x)) '(a b c))
            '(a b c))
     (error))
 
-(message "Testing FN redefinition...")
+(message '"Testing FN redefinition...")
 (fn doubledef ())
 (fn doubledef ())
 (and (member 'doubledef
              (cdr (member 'doubledef *universe*)))
-     (error "DOUBLEDEF not alone in *UNIVERSE*."))
+     (error "DOUBLEDEF not alone in *UNIVERSE*"))
 (= *universe* (cdr (member 'doubledef *universe*)))
 
 (or (== x 42)

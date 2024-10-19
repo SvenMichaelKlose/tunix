@@ -423,7 +423,7 @@ call_user_defined:
     // Ensure user-defined function.
     if (ATOM(arg1)) {
         error (ERROR_NOT_FUNCTION, "Not a fun");
-        error_info = arg1;
+        error_info = unevaluated_arg1;
         goto return_obj;
     }
 #endif
@@ -536,7 +536,7 @@ start_body:
     x = FUNBODY(arg1);
 #ifndef NO_DEBUGGER
     PUSH(current_function);
-    if (unevaluated_arg1)
+    if (NOT_NIL(unevaluated_arg1) && SYMBOLP(unevaluated_arg1))
         current_function = unevaluated_arg1;
 #endif
 

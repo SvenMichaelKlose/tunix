@@ -18,8 +18,7 @@
 (and (builtin? isave)
   ((()
      (message "Saving 'image'...")
-     (isave "image")
-     (= *universe* (cdr (member 'istart *universe*))))))
+     (isave "image"))))
 
 (load "post-image.lsp")
 

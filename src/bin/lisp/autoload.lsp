@@ -37,7 +37,7 @@
         (when (or (macro? (car %x))
                   (%aload (car %x)))
           ; If missing function turns out to be
-          ; a macro, replace it by its expansion.
+          ; a macro, replace expression by its expansion.
           (when (macro? (car %x))
             (let (%m (macroexpand %x))
               (setcar %x (car %m))
@@ -49,9 +49,13 @@
     '%fail))
 
 (fn autoload (%code %top %x %i)
+  ; Save verbosity level.
   (let (%v? *v?*)
+    ; Set desired one during AUTOLOAD.
     (= *v?* *alv?*)
+    ; And action!
     (let (%! (%al %code %top %x %i))
+      ; Restore verbosity.
       (= *v?* %v?)
       %!)))
 

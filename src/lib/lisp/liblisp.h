@@ -264,7 +264,6 @@
 // Commodore C128
 #ifdef TARGET_C128
 #define FAST_NIL
-#define REAL_NIL
 #ifndef SLOW
     #define SLOW
 #endif
@@ -398,6 +397,7 @@
 #endif
 #if defined(REAL_NIL) && !defined(NIL_NOT_0)
     #define NIL_NOT_0
+#endif
 #endif
 
 // Commodore VIC-20/VC-20
@@ -1071,13 +1071,15 @@ extern bool do_gc_stress;
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
+
 #ifdef NAIVE
     #define _SETCDR_CHECK(x)
 #else
     #define _SETCDR_CHECK(x) \
         if (_EXTENDEDP(x)) \
             error_set_ccons_cdr ();
-#endif
+#endif // #ifdef NAIVE
+
 #ifdef COMPRESSED_CONS
     #define _SETCDR(x, v) \
         do { \
@@ -1145,8 +1147,8 @@ extern bool do_gc_stress;
 /// FUNCTION EXPRESSIONS ///
 ////////////////////////////
 
-#define FUNARGS(x)      CAR(x)
-#define FUNBODY(x)      CDR(x)
+#define FUNARGS(x)  CAR(x)
+#define FUNBODY(x)  CDR(x)
 
 //////////////
 /// ERRORS ///
@@ -1189,11 +1191,13 @@ extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
 extern lispptr  FASTCALL make_number     (lispnum_t);
 extern lispptr  FASTCALL alloc_symbol    (char *, uchar len);
 extern lispptr  FASTCALL make_symbol     (char *, uchar len);
+
 extern lispptr           read_expr       (void);
 extern lispptr           read_symbol     (void);
 extern lispptr           read_number     (void);
 extern lispptr  FASTCALL print           (lispptr);
 extern lispptr  FASTCALL dprint          (lispptr);
+
 extern void     FASTCALL set_channels    (simpleio_chn_t in, simpleio_chn_t out);
 extern lispptr           bi_setin        (void);
 extern lispptr           bi_setout       (void);
@@ -1213,8 +1217,11 @@ extern lispobj_size_t FASTCALL objsize (char *);
 #define REPL_LOAD       2
 extern lispptr  FASTCALL lisp_repl    (char mode, simpleio_chn_t);
 extern bool     FASTCALL load         (char * pathname);
+
+#ifndef NO_IMAGE
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
+#endif
 
 extern void     FASTCALL add_builtins  (const struct builtin *);
 extern lispptr           debugger      (void);
@@ -1234,6 +1241,7 @@ extern void     FASTCALL pushtag        (char);
 extern char              poptag         (void);
 extern void     FASTCALL pushtagw       (lispptr);
 extern lispptr           poptagw        (void);
+
 extern lispptr  FASTCALL lisp_car       (lispptr);
 extern lispptr  FASTCALL lisp_cdr       (lispptr);
 extern void     FASTCALL lisp_setcar    (lispptr x, lispptr v);
@@ -1263,7 +1271,6 @@ extern void              error_set_ccons_cdr (void);
 
 extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char errorcode);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
-extern void              print_error_info    (void);
 #ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
 #endif // #ifdef CHECK_OBJ_POINTERS

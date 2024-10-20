@@ -48,3 +48,5 @@
         (= *macros* (cons (cons n (cons a !))
                           *macros*))))
     (@ macroexpand body)))
+
+(= *ex* macroexpand)

@@ -1659,17 +1659,26 @@ actual machine TUNIX Lisp is running on when the counting from 0 started.
     (terpri)))
 ~~~
 
-## Error handling
+## REPL
 
 | Function        | Description                            |
 |-----------------|----------------------------------------|
 | (quit ?x)       | Return from debugger REPL              |
+| (ignore)        | Continue with next REPL expresssion.   |
 | (exit)          | Stop program and go to top-level REPL. |
+| (debugger)      | Invoke debugger with next instruction. |
+
+| Variable | Description                                    |
+|----------|------------------------------------------------|
+| *ex*     | REPL expander (e.g. MACROEXPAND and DOTEXPAND) |
+
+## Error handling
+
+| Function        | Description                            |
+|-----------------|----------------------------------------|
 | (error +x)      | Issue a user error like OUT.           |
 | (onerror n x x) | User-defined error handler.            |
-| (ignore)        | Continue with next REPL expresssion.   |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
-| (debugger)      | Invoke debugger with next instruction. |
 
 ### (quit ?x): Return from debugger REPL.
 ### (exit): Stop program and go to top-level REPL.
@@ -1728,8 +1737,8 @@ with prefixed label "USER ERR".
 | (macroexpand x)  | Expand expression.              |
 
 A macro is a special form which is replaced by the expression it returns
-during 'macro expansion'.  Macros are expanded in the REPL between READ
-and EVAL, if the value of MACROEXPAND is a user-defined function.
+during 'macro expansion'.  Macros are expanded in the REPL as soon as
+MACROEXPAND is available.
 
 Defined macros are kept in associative list \*MACROS\*.  Predicate MACRO?
 checks if a symbol is a defined macro in that list.

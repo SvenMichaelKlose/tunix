@@ -26,7 +26,7 @@ lispptr fail_sym;
 jmp_buf * hard_repl_break;
 #endif
 #ifndef NO_MACROEXPAND
-lispptr macroexpand_sym;
+lispptr expand_sym;
 bool    is_macroexpansion;  // TODO: Remove.
 lispptr unexpanded_toplevel;
 #endif
@@ -424,7 +424,7 @@ done_short_command:
         error_code = 0;
 #endif
         // Macro expansion.
-        if (CONSP(SYMBOL_VALUE(macroexpand_sym))) {
+        if (CONSP(SYMBOL_VALUE(expand_sym))) {
 #ifndef NO_DEBUGGER
             // Avoid debug step into MACROEXPAND.
             PUSH(debug_step);
@@ -432,7 +432,7 @@ done_short_command:
 #endif
             // Make arguments list for MACROEXPAND.
             x = make_cons (x, nil);
-            x = make_cons (macroexpand_sym, x);
+            x = make_cons (expand_sym, x);
 
             // Call MACROEXPAND.
             unevaluated = true;
@@ -636,7 +636,7 @@ init_repl ()
     current_toplevel = nil;
 #endif
 #ifndef NO_MACROEXPAND
-    macroexpand_sym = make_symbol ("macroexpand", 11);
-    expand_universe (macroexpand_sym);
+    expand_sym = make_symbol ("*ex*", 4);
+    expand_universe (expand_sym);
 #endif
 }

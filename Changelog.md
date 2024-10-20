@@ -27,6 +27,8 @@ and this project adheres to
 - REPL: Indent printed results by a space.
 - Smaller stack sizes (due to recent update of eval()).
 - TARGET\_VIC20: Use part of RAM123 as heap.
+- \*EX\* now holds the expander, not MACROEXPAND to whose value
+  \*EX\* is set now.
 
 ##### Added
 

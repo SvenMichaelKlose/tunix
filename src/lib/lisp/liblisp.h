@@ -822,7 +822,7 @@ extern lispptr repl_value;
 
 #ifndef NO_MACROEXPAND
 extern bool    is_macroexpansion;
-extern lispptr macroexpand_sym;
+extern lispptr expand_sym;
 #endif
 
 extern lispptr make_cons_tmp;

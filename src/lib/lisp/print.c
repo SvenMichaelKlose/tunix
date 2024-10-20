@@ -8,8 +8,9 @@
 #endif
 
 #include <ctype.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #if defined(TARGET_UNIX) && !defined(NDEBUG)
 #include <stdio.h>

@@ -7,8 +7,9 @@
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h>

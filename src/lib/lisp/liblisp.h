@@ -282,7 +282,6 @@
 // Commodore C16
 #ifdef TARGET_C16
 #define FAST_NIL
-//#define REAL_NIL
 #define MINIMALISTIC
 #ifndef NO_ONERROR
     #define NO_ONERROR
@@ -347,8 +346,6 @@
 // Commodore Plus/4
 #ifdef TARGET_PLUS4
 #define FAST_NIL
-//#define REAL_NIL
-//#define NIL_NOT_0
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
@@ -395,12 +392,17 @@
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  65536
 #define NO_BUILTIN_DIRECTORY
+
+#if defined(REAL_NIL) && defined(FAST_NIL)
+    #error "REAL_NIL and FAST_NIL cannot be used together with TARGET_UNIX"
+#endif
+#if defined(REAL_NIL) && !defined(NIL_NOT_0)
+    #define NIL_NOT_0
 #endif
 
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
 #define FAST_NIL
-#define REAL_NIL
 #define MINIMALISTIC
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
@@ -544,6 +546,10 @@
 
 #if defined (NDEBUG) && defined (DUMP_SWEEPED)
     #error "NDEBUG and DUMP_SWEEPED cannot be used together."
+#endif
+
+#if defined(NIL_NOT_0) && !defined(REAL_NIL)
+    #error "NIL_NOT_0 requires REAL_NIL"
 #endif
 
 #if defined(NO_IMAGE) && !defined(NO_BUILTIN_GROUP_IMAGE)
@@ -883,8 +889,8 @@ extern struct real_nil real_nil;
 #endif
 
 #ifdef FAST_NIL
-    #define NOT(x)      !((size_t) x & 0xff00)
-    #define NOT_NIL(x)  ((size_t) x & 0xff00)
+    #define NOT(x)      !((uintptr_t) x & (-1 & ~0xff))
+    #define NOT_NIL(x)  ((uintptr_t) x & (-1 & ~0xff))
 #else
     #define NOT(x)      (x == nil)
     #define NOT_NIL(x)  (x != nil)

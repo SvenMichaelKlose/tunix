@@ -361,38 +361,82 @@ not:
     rts
 ~~~
 
-## Hardware types
+## Compiling an interpreter
 
-* Add types to argument definitions.
-* No rest arguments.
-* Good old typed argument match.
+The C version of the interpreter is a huge mess with lots of manual overhead
+implemented to handle object pointers and the stacks.  Most getters and setters
+hide behind nested macros.  It's a pain to maintain.
+Generating the interpreter from Lisp code by introducing hardware types is the
+remedy, hiding all that from the stressed developer.  It also makes new optimizations
+possible.
 
 ~~~lisp
-(defcode + ((char * a) (char * b))
-  (asm 'lda a)
-  (asm 'clc)
-  (asm 'adc b)
-  (asm 'sta dest))
+(defcode + a ((char * a) (char * b))
+  lda a
+  clc
+  adc b
 ~~~
 
 ~~~lisp
-(defcode cdr ((ptr a))
-  (asm 'ldy # 3)
-  (asm 'lda $(,a),y)
-  (asm 'tax)
-  (asm 'dey)
-  (asm 'lda $(,a),y))
+(defcode cdr ax ((ptr a))
+  ldy #3
+  lda (a),y
+  tax
+  dey
+  lda (a),y)
 ~~~
+
 ~~~lisp
-(defcode list_cdr ((ptr a))
-  (asm 'lda $(,(++ a)))
-  (asm 'bne +l)
-  (asm 'tax)
-  (asm 'beq +l2)
-  (asm 'l: ldy # 3)
-  (asm 'lda $(,a),y)
-  (asm 'tax)
-  (asm 'dey)
-  (asm 'lda $(,a),y)
-  (asm 'l2:))
+(defcode list_cdr ax ((ptr a))
+  lda (++ a)
+  bne +l
+  tax
+  beq +l2
+l:(cdr ax a)
+l2:)
+~~~
+
+~~~asm
+member:
+    ldy #0
+    lda (arg2),y
+    lsr
+    bcs done    ; Atom...
+    ldy #cons_car+1
+    lda (arg2),y
+    cmp arg1+1
+    bne next
+    tax
+    dey
+    lda (arg2),y
+    cmp arg1
+    bne next
+    lda arg2
+    ldx arg2+1
+    rts
+next:
+    ldy #cons_cdr+1
+    lda (arg2),y
+    tax
+    dey
+    lda (arg2),y
+    sta arg2
+    stx arg2+1
+    jmp member
+done:
+    lda #<nil
+    ldx #>nil
+    rts
+~~~
+
+~~~asm
+    lda v
+    ldx v+1
+    jsr pushax
+    jsr make_cons
+    lda #4
+    jsr addsp
+    jsr pushax
+    jsr print
+    jsr incsp
 ~~~

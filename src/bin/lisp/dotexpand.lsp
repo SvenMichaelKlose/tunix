@@ -1,7 +1,8 @@
 ; Expand dot-notation
 
 (fn %des (x)
-  (? (member \. x)
+  (? (and (member \. x)
+          (not (member \  x)))
      (?
        (eql \. (car (last x)))
          $(car ,(%des (butlast x)))

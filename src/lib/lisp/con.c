@@ -9,7 +9,7 @@ void
 con_set (char f)
 {   
     out (TERM_CMD_CLR);
-    out (255);
+    out ((char) 255);
     out (TERM_CMD_SET);
     out (f);
 }

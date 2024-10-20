@@ -8,8 +8,9 @@
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <setjmp.h>
 
@@ -512,41 +513,41 @@ init_heap ()
 #endif
 
     // Make first symbol *UNIVERSE*.
-    last_symbol  = nil;
+    first_symbol = last_symbol = nil;
     universe     = alloc_symbol ("*universe*", 10);
     first_symbol = universe;
 
     // Be true.
-    t = make_symbol ("t", 1);
+    t = alloc_symbol ("t", 1);
 
     // Make +TARGET+.
-    tmp2 = make_symbol ("+target+", 8);
+    tmp2 = alloc_symbol ("+target+", 8);
     SET_SYMBOL_VALUE(universe, make_cons (tmp2, nil));
 #ifdef TARGET_C128
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("c128", 4));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("c128", 4));
 #endif
 #ifdef TARGET_C16
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("c16", 3));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("c16", 3));
 #endif
 #ifdef TARGET_C64
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("c64", 3));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("c64", 3));
 #endif
 #ifdef TARGET_PET
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("pet", 3));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("pet", 3));
 #endif
 #ifdef TARGET_PLUS4
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("plus4", 5));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("plus4", 5));
 #endif
 #ifdef TARGET_VIC20
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("vic20", 5));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("vic20", 5));
 #endif
 #ifdef TARGET_UNIX
-    SET_SYMBOL_VALUE(tmp2, make_symbol ("unix", 4));
+    SET_SYMBOL_VALUE(tmp2, alloc_symbol ("unix", 4));
 #endif
 
     // Define verbosity flag *V?*.
 #if !defined(NO_VERBOSE_LOAD) && !defined(NO_VERBOSE_DEFINES)
-    vp_symbol = make_symbol ("*v?*", 4);
+    vp_symbol = alloc_symbol ("*v?*", 4);
     SET_SYMBOL_VALUE(vp_symbol, t);
     expand_universe (vp_symbol);
 #endif

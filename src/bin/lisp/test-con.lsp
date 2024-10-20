@@ -1,5 +1,5 @@
 (message "Console tests")
-(load '"con.lsp")
+(load 'con.lsp)
 
 (= *alv?* nil)
 (fn test-clrscr ()

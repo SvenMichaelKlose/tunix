@@ -1,9 +1,9 @@
-(load '"pre-image.lsp")
+(load 'pre-image.lsp)
 
 (and (builtin? 'time)
      (number? +bps+)
   ((()
-     (out '"Time since program start: ")
+     (out "Time since program start: ")
      (print (/ (- (time) *start-time*) +bps+))
      (out 's)
      (terpri)
@@ -11,15 +11,15 @@
 
 (and (builtin? gc)
   ((()
-     (message '"Cleaning up. Please wait...")
+     (message "Cleaning up. Please wait...")
      (= *macros* nil)
-     (print (gc))(out '" bytes free.")(terpri))))
+     (print (gc))(out " bytes free.")(terpri))))
 
 (and (builtin? isave)
   ((()
-     (message '"Saving 'image'...")
-     (isave '"image"))))
+     (message "Saving 'image'...")
+     (isave 'image))))
 
-(load '"post-image.lsp")
+(load 'post-image.lsp)
 
 (message '"Ready.")

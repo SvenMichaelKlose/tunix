@@ -22,7 +22,7 @@
       ,@body)))
 
 (do-test 'PROGN
-  (load '"progn.lsp")
+  (load 'progn.lsp)
   (or (equal (macroexpand '(progn (error)))
              '(block t (error)))))
 
@@ -46,7 +46,7 @@
 (message '"TODO: AWHEN...")
 
 (do-test 'LET
-  (load '"let.lsp")
+  (load 'let.lsp)
   (or (equal (macroexpand '(let (a 1
                                  b 2)
                              (print a)
@@ -117,8 +117,8 @@
              '(42 23))
       (error "Expansion of ENQUEUE failed")))
 
-(message '"TODO: QUEUE-LIST...")
-(message '"TODO: QUEUE-POP...")
+(message "TODO: QUEUE-LIST...")
+(message "TODO: QUEUE-POP...")
 (do-test 'WITH-QUEUE
   (or (equal (with-queue q
                (enqueue q 5))
@@ -226,7 +226,7 @@
        (error)))
 
 (do-test 'LET*
-  (load '"let2.lsp")
+  (load 'let2.lsp)
   (!= (macroexpand '(let* (a 1
                            b 2)
                       (print a)
@@ -365,8 +365,8 @@
                (s p)))
       (error)))
 
-(message '"TODO: INTERSECT...")
-(message '"TODO: MAX...")
+(message "TODO: INTERSECT...")
+(message "TODO: MAX...")
 
 (do-test 'POSITION
   (and (position 'a '(l i s p))
@@ -376,11 +376,11 @@
   (or (== 2 (position 's '(l i s p)))
       (error)))
 
-(message '"TODO: POSITION-IF...")
-(message '"TODO: REMOVE-IF...")
-(message '"TODO: SET-DIFFERENCE...")
-(message '"TODO: SET-EXCLUSIVE-OR...")
-(message '"TODO: SOURCE...")
+(message "TODO: POSITION-IF...")
+(message "TODO: REMOVE-IF...")
+(message "TODO: SET-DIFFERENCE...")
+(message "TODO: SET-EXCLUSIVE-OR...")
+(message "TODO: SOURCE...")
 
 (do-test 'SPLIT
   (and (split 'b nil)
@@ -388,7 +388,7 @@
   (or (equal (split 'b '(a a a b a a b b a a a a))
              '((a a a) (a a) nil (a a a a)))))
 
-(message '"TODO: SPLIT-IF...")
+(message "TODO: SPLIT-IF...")
 
 (do-test 'UNION
   (or (equal (union '(l l i i) '(s s p p))

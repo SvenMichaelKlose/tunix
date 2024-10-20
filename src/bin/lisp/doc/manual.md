@@ -165,6 +165,15 @@ argument definitions.
 
 APPLY copies all arguments but the last one.
 
+# About this document
+
+## Short code examples
+
+~~~lisp
+; Comment on example code
+(some-example-fun)  ; -> <result of evaluation>
+~~~
+
 # Installation
 
 "Installing" a binary release is the easiest way to go exploring.  I'd
@@ -489,21 +498,47 @@ If function is missing, the error handler AUTOLOAD tries to load its
 source file by appending the ".lsp" suffix to its name.  This also works
 with macros.
 
-# Definiton of permanent symbols
+# Symbols
 
-Symbols that are meant to remain untouched by the garbage collector must
-be added to the global \*UNVIERSE\* list.  Built-in pecial forms FN and
-VAR, which define functions and global variables, do that automatically.
+Symbols have a name and a value.  Their names are also used as strings,
+converted to and from lists of character values.
+A symbol is created as soon as it is READ or by calling SYMBOL with a
+character value list.
 
 ~~~lisp
-; Define permanent function.
+(symbol '(65 66 67 68))  ; -> ABC
+(symbol '(\A \B \C \D))  ; -> ABC
+~~~
+
+Double quotes must be used to include all kinds of characters, like spaces.
+Such symbol names are also printed with double quotes.
+
+~~~lisp
+"Hello world!" ; -> "Hello world!"
+~~~
+
+Calling SYMBOL with no arguments always creates a new, unique symbol with
+no name.
+
+~~~lisp
+(symbol)                ; -> ""
+(eq (symbol) (symbol))  ; -> NIL
+~~~
+
+VAR and FN add a symbol to list \*UNIVERSE\*.  It is the starting point
+of the garbage collector.  Everything not connected to that list in one
+way or another will sooner or later be discarded.
+
+~~~lisp
+; Define function WELCOME.
 (fn welcome ()
   (out '"Hello World!")
   (terpri))
 
-; Define permanent variable.
+; Define variable X.
 (var x nil)
 ~~~
+
 
 # Functions
 
@@ -1558,6 +1593,9 @@ Lists may also be nested (contain other lists).
 
 ; Also print 'A'.  (READ converts '\A' to number 65.)
 (out \A)
+
+; Print CR/LF (aka "\r\n").
+(out 13 10)
 
 ; Print 'Hello world' without double qoutes.
 ; Finish with a newline instead of using TERPRI.

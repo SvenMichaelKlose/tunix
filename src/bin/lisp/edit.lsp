@@ -1,6 +1,6 @@
 ;;; State
 
-(var *filename* '"edit-help.md")
+(var *filename* 'edit-help.md)
 (var *lines* nil)
 (var *saved?* nil)  ; Modifications saved?
 (var *err* nil)
@@ -176,26 +176,26 @@
   (let (uf (unless f
              ;(list-dir)
              (prompt-in "Save:" *filename*)))
-    (prompt "...")
+    (prompt '"...")
     (? (with-out o (open (or (car f) uf) 'w)
          (? uf
             (= *filename* uf))
          (dolist (l *lines*)
            (out l)
            (terpri)))
-       (and (= *err* "Cannot save.") nil)
+       (and (= *err* '"Cannot save.") nil)
          (= *saved?* t))))
 
 (fn load-file ()
   ;(list-dir)
   (let (f (prompt-in "Load:" *filename*))
     (? (with-in i (open f 'r)
-         (prompt "...")
+         (prompt '"...")
          (= *filename* f)
          (= *lines* nil)
          (= *lines* (read-lines))
          (reset-ln))
-       (= *err* "Cannot load."))))
+       (= *err* '"Cannot load."))))
 
 (fn choose x
   (while (not (eof))
@@ -225,11 +225,11 @@
           (list-dir)
           (prompt-ok))
     \r  (progn
-          (save-file '"_ctrlkr.tmp")
+          (save-file '_ctrlkr.tmp)
           (= *old-conln* -1)
           (clrscr)
           (con-direct nil)
-          (load '"_ctrlkr.tmp")
+          (load '_ctrlkr.tmp)
           (prompt-ok))
     \q  (quit-editor)
     \n  (when (eq 'quit (quit-editor))

@@ -1,6 +1,6 @@
-(load '"when.lsp")
-(load '"group2.lsp")
-(load '"let.lsp")
+(load 'when.lsp)
+(load 'group2.lsp)
+(load 'let.lsp)
 
 ; Be verbose during AUTOLOAD.
 (var *alv?* t)

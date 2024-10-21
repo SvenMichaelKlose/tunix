@@ -1,4 +1,7 @@
-; Expand dot-notation
+(or (macro? do)
+    (load 'do.lsp))
+(or (cons? every)
+    (load 'every.lsp))
 
 (fn %des (x)
   (? (and (not (every '((x) (== \. x)) x))
@@ -37,9 +40,4 @@
     (cons (dotexpand (car x))
           (dotexpand (cdr x)))))
 
-(message '"Testing dotexpand...")
-(print (dotexpand '.x))
-(print (dotexpand 'x.))
-(print (dotexpand '.x.))
-(print (dotexpand 'x.y))
-(print (dotexpand 'x.y.z))
+(= *ex* '((x) (macroexpand (dotexpand x))))

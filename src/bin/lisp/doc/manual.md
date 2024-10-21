@@ -744,58 +744,53 @@ but let's get our hands on the debugger first.
 
 ## The debugger REPL
 
+The debugger is the REPL in one of two debug modes.  It prints a status info
+before waiting for user input, so you know where and why the program has been
+interrupted.
+
+The debugger has two modes: *fix mode*, if an error occured, and *inspect mode*
+for user breaks.  The fix mode expects an alternative value to be supplied for a
+failed expression.  You'll probably see this mode before the inspect mode:
+
+~~~
+Error #1: Arg missing: foo
+Info: bar
+In baz ():
+((bar))
+fix!1]
+~~~
+**Fix mode prompt**
+
+The return value of the debugger will change with every expression you
+enter into the prompt, except when using a short command, like 'p', which
+evaluates an expression alongside for inspection.
+
+## Debugger short commands
+
+| Command | Description                                       |
+|---------|---------------------------------------------------|
+|   c     | Continue program execution (fixed only).          |
+|   s     | Step into user-defined procedure (fixed only).    |
+|   n     | Execute current expression in whole (fixed only). |
+|   k     | Ignore expression.                                |
+|   q     | Exit REPL.                                        |
+|   x     | Exit program.                                     |
+|   pX    | Evaluate and print expression X.  (No macros!)    |
+|   bS    | Set breakpoint on procedure S.                    |
+|   b     | Print breakpoints.                                |
+|   dS    | Delete breakpoint on procedure S.                 |
+|   d     | Delete all breakpoints.                           |
+**Debugger short commands**
+
+## Debugger variables
+
 | Variable | Description                            |
 |----------|----------------------------------------|
 |   *b*    | List of symbols that are breakpointed. |
 |   *r*    | Initial return value of current REPL.  |
 
-The debugger is the REPL in debug mode.  It prints a status info before
-waiting for user input, so you know where the program execution has been
-interrupted.  It has this format:
-
-~~~
-Debugger <number of nested debuggers>:
-Error #5: <reason for break>
-Rvalue: <last expression's (and debugger's) return value>
-In:
-<top-level expression with current one highlighted>
-~~~
-
-The debugger takes expressions like the regular REPL, plus some commands
-consisting of a single character to step through the code conveniently.
-If another error occurs, yet another debugger REPL will be invoked and the
-"number of nested debuggers" incremented.
-
-The current expression is either the one that failed, or the one that will
-be evaluated next in cause the debugger stopped at a breakpoint (and no
-error number and description is shown).
-
-The return value of the debugger will change with every expression you
-enter, except when using aforementioned short commands.  In case of an
-error, that's the value you want to replace with a valid one before
-continuing program execution.  Symbol \*R\* contains the return value when
-the debugger was invoked, should you want to see or use it again although
-you've replaced it already – just enter "*r*" and it'll be restored.
-
-These are the available short commands:
-
-| Command | Description                                    |
-|---------|------------------------------------------------|
-| c       | Continue program execution.                    |
-| k       | Ignore expression.                             |
-| q       | Exit REPL.                                     |
-| x       | Exit program.                                  |
-| s       | Step into user-defined procedure.              |
-| n       | Execute current expression in whole.           |
-| pX      | Evaluate and print expression X.  (No macros!) |
-| bS      | Set breakpoint on procedure S.                 |
-| b       | Print breakpoints.                             |
-| dS      | Delete breakpoint on procedure S.              |
-| d       | Delete all breakpoints.                        |
-
-Command "p" evaluates the expression immediately following it.  A macro
-expansion is *not* performed and it'll *not* change the debugger's return
-value.
+Symbol \*R\* contains the most recent return value, should you want to
+use it the following expression.
 
 ## Stepping through the code
 
@@ -805,11 +800,6 @@ highlighted function if all arguments have been dealt with.  With 'n' the
 function and all its arguments are evaluated, taking you to the next
 expression in the list.  If you had it the program, you can exit it with
 short command 'q' and take a break yourself.
-
-IDEA:
-* step into newly entered expression
-* step into restarted expression.  Already changed values are a problem
-  then.
 
 ## Breakpoints
 

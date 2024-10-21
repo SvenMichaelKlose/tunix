@@ -3,45 +3,55 @@ TUNIX Lisp compiler
 
 # Overview
 
-The compiler translates function expressions into
-faster and smaller bytecode functions.
-
-In the first version only the control flow is compiled
-and function calls are interpreted as usual.
-
-In the second version compiled functions call other
-functions by passing arguments via the object stack.
+TUNIX Lisp is too slow to do anything useful with on small machines, starting with
+the text editor, which is essential for developing on the system.  To take away the
+overhead of interpretation the compiler translates function expressions into bytecodes
+for a virtual CPU, which is an interpreter for machine-level instructions.  Compiled
+functions are also smaller as every Lisp cell occupies five bytes on 8-bit machines
+whereas a bytecode function call is a byte for each item of the original expression
+(which is an index into the function's object list), leading to a dramatic performance
+boost of all of the system.  Lots of other reasons why that is not yet mentioned.
 
 ## Passes
 
-The compiler is split into three `ends`: the front-, middle and
-backend.  The goal of the frontend is to tranform all functions
-into plain lists of statements, reminiscent of machine-level
-code.  The middleend applies come machine-specific transformations
-and optimizes the code.  The backend finally generates the desired
-code.
+The compiler is translating the input to the desired output in small steps, called
+"passes".  We don't care how many passes we need, as long as they are as simple and
+independent from each other as possible.  That's called a "micropass architecture".
+Of course we'll pass on data from one pass to the other in the form of Lisp expressions.
+Some passes translate the input, some gather information or perform assertions, and some
+clean up after the other passes.
+
+Instead of directly mapping the input to code the compiler first translates the input
+to a simpler, machine-level (but machine-independent) "intermediate representation (IR)",
+not intended for human use, which is easier to handle with algorithms.  Imagine you want to
+check if a variable is used under certain conditions somewhere in nested BLOCKs: that's
+not gonna happen with the IR as every function is just a flat list of instructions and
+jumps.  Bringing the code into that state is the task of the "front end".
 
 ### Frontend
 
-* Standard macro-expansion
-* Compiler macro-expansion
-  * AND, OR, ?
-  * BLOCK, RETURN, GO
-  * QUOTE, QUASIQUOTE
+* Macro expansion
+* Compiler macro expansion (AND, OR, ?, BLOCK, RETURN, GO, QUOTE, QUASIQUOTE)
 * Inlining anonymous functions
-* Expanding expressions
-* Folding %BLOCKs
 * Argument expansion
+* Expression expansion
+* Block folding
 
 ### Middleend
 
-* Second argument expansion
-* (Place expansion)
+* Call expansion
+* Place expansion
+
+#### Optimization
+
 * Jump optimization
+* Constant elimination
+* Common code elimination
 
 ### Back-end
 
 * Code generation
+* Code optimization
 
 ### Compiler macros
 
@@ -116,12 +126,25 @@ out the local stack frame in the process.
 ; TODO example of anonymous function first in expression.
 ~~~
 
+### Argument expansion
+
+Checks arguments and turns rest arguments into consing
+expressions.
+
 ### Expression expansion
 
-Expressions need to get moved out of argument lists, becoming
-assigned to a temporary variable or stack place, because they
-can hold jump instructions.  Later, we'll need them on the
-stack anyway.
+Breaks up nested function calls into a list of single
+statement assignments to new temporary variables.
+
+~~~
+(fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
+
+(= 2 (fun3))
+(= 3 (fun4))
+(= 1 (fun2 2 3)
+(= 4 (fun5))
+(fun1 arg1 1 4)
+~~~
 
 ### Block folding
 
@@ -165,6 +188,20 @@ Basic compression of what the macro expansions messed up
 at least,  like remove assignments with no effect or chained
 jumps.
 
+### Call stack expansion
+
+This pass inserts stack place assignments of arguments before function calls.
+
+### Place expansion
+
+| Expression  | Description                    |
+|-------------|--------------------------------|
+| (%S offset) | Offset into local stack frame. |
+| (%D offset) | Offset into function data.     |
+
+Here the arguments are replaced by %S or %O expressions to
+denote places on the stack or on the function's object list.
+
 ### Generating code
 
 Five byte-sized codes tell what kind of information follows
@@ -179,48 +216,10 @@ The other codes are jumps or mark the end of a function.
 | BC\_GO\_NIL, n   | Jump if last result is NIL.        |
 | BC\_GO\_NNIL, n  | Jump if last result is not NIL.    |
 
-
 These are actually two passes:
 
 * Collecting objects.
 * Calculating jump destinations.
-
-# Compiling function calls
-
-* Passing arguments on the stack.
-* Calling unknown functions.
-
-## Expression expansion
-
-Breaks up nested function calls into a list of single
-statement assignments.  After this the return value of
-any expression is in variable %0.
-
-~~~
-(fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
-
-(= 2 (fun3))
-(= 3 (fun4))
-(= 1 (fun2 2 3)
-(= 4 (fun5))
-(fun1 arg1 1 4)
-~~~
-
-### Argument expansion
-
-Checks arguments and turns rest arguments into consing
-expressions.
-
-### Place expansion
-
-| Expression  | Description                    |
-|-------------|--------------------------------|
-| (%S offset) | Offset into local stack frame. |
-| (%D offset) | Offset into function data.     |
-
-Here the arguments are replaced by %S or %O expressions to
-denote places on the stack or on the function's object list.
-
 
 # Adding lexical scope
 
@@ -243,10 +242,6 @@ this pittoresque, little thing as we'll see later.
 The following lambda-expansion might need to inline
 functions with argument names that are already in use.  This
 pass solves that issue by renaming all arguments.
-[^bcdbgarg]
-
-[^bcdbgarg]: A map of the original names must be created if
-    debugging must be supported.
 
 ~~~lisp
 ; TODO example of shadowed arguments that would clash on

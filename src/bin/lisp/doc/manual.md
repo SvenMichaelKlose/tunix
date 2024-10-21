@@ -1219,7 +1219,7 @@ Returns its argument if it is a special form or NIL.
 
 ### (symbol l): Make symbol with name from char list.
 
-Already existing symbols are reused.
+Already existing symbols are reused unless the name is empty.
 
 ~~~lisp
 (symbol '(110 105 108)) ; -> nil

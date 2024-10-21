@@ -322,7 +322,7 @@
   (or (every '((x) (== x 1)) '(1 1 1 1))
       (error))
   (and (every '((x) (== x 1)) '(1 1 2 1))
-      (error)))
+       (error)))
 
 (do-test 'MEMBER-IF
   (or (member-if '((x) (eq x 'i))

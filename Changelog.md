@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.26] - 2024-10-22
 
 ### Lisp
 
@@ -17,9 +17,10 @@ and this project adheres to
 
 ##### Fixed
 
-- Various debugger issues introduced recently.
+- Various debugger issues introduced recently.  (More do to.)
 - Internal handling of NIL is more consistent, avoiding
   future bugs.
+- GC: Faster relocation phase on 6502 targets.
 
 ##### Changed
 
@@ -29,6 +30,7 @@ and this project adheres to
 - TARGET\_VIC20: Use part of RAM123 as heap.
 - \*EX\* now holds the expander, not MACROEXPAND to whose value
   \*EX\* is set now.
+- SYMBOL: Re-use existing symbols unless the symbol is unnamed.
 
 ##### Added
 
@@ -51,7 +53,7 @@ and this project adheres to
 ##### Added
 
 - PAD: Pad elements of a list.
-- DOTEXPAND: Expands dot-notated symbols.
+- DOTEXPAND: Expands dot-notated symbols.  See manual for details.
 - SOCKET-GET-DWORD, SOCKET-GET-WORD, SOCKET-GETN.
 
 ### libsimpleio

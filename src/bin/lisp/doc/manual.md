@@ -895,6 +895,82 @@ an ONERROR handler or debugger.
 Compile-time option ONETIME\_HEAP\_MARGIN specified the number of heap
 bytes that are kept for calling an ONERROR handler.
 
+# Dot notation
+
+The dot notation is a set of abbreviations for CAR, CDR, combinations of
+both, and CDR/ASSOC.  The conversion to regular expressions is performed
+by function DOTEXPAND.  It can be called automatically by the REPL
+(which it isn't by default due to resource constraints on small
+machines):
+
+~~~lisp
+(= *ex* '((x) (macroexpand (dotexpand x))))
+~~~
+
+With dot notation enabled , a symbol starting with a dot is transformed
+into a CDR expression for each dot at the start.
+
+~~~lisp
+.x  ; -> (cdr x)
+..x ; -> (cdr (cdr x))
+~~~
+
+After that a CAR expression is created for each ending dot.
+
+~~~lisp
+x.  ; -> (car x)
+x.. ; -> (car (car x))
+~~~
+
+Both can be combined.  The CDR expressions are made first though.
+
+~~~lisp
+x.    ; -> (car x) ; first
+.x.   ; -> (car (cdr x)) ; second
+..x.  ; -> (car (cdr (cdr x))) ; third
+..x.. ; -> (car (car (cdr (cdr x)))) ; first of third
+~~~
+
+If a dot occurs in the middle of a symbol, that is transformed to a
+CDR/ASSOC expression to access the CDR of elements of associative lists.
+
+~~~lisp
+obj.slot        ; -> (cdr (assoc 'slot obj))
+obj.slot.deeper ; -> (cdr (assoc 'deeper (cdr (assoc 'slot obj))))
+~~~
+
+Finally, all abbreviations can be combined:
+
+~~~lisp
+obj.slot.         ; -> (car (cdr (assoc 'slot obj)))
+.obj.slot.deeper. ; -> (car (cdr (cdr (assoc 'deeper (cdr (assoc 'slot obj))))))
+~~~
+
+## Real life example
+
+Let's compare the mere MACROEXPAND function with a dot-notated version:
+
+~~~lisp
+(fn macroexpand (x)
+  (?
+    (or (atom x)
+        (eq 'quote (car x)))  x
+    (eq (car x) 'quasiquote)  (%unquote x)
+    (macro? (car x))          (macroexpand (apply (cdr (macro? (car x))) (cdr x)))
+    (@ macroexpand x)))
+~~~
+
+~~~lisp
+(fn macroexpand (x)
+  (?
+    (or (atom x)
+        (eq 'quote x.))  x
+    (eq x. 'quasiquote)  (%unquote x)
+    (macro? x.)          (macroexpand (apply (cdr (macro? x.)) .x))
+    (@ macroexpand x)))
+~~~
+
+
 # Built-in functions
 
 ## General

@@ -3,6 +3,86 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-21
+
+I have created a rather tight bytecode interpreter in 6502 assembly.
+Each function has a stack frame and on each call it is decided if the
+return value is pushed onto the stack.  Other than calls of built-in
+(fastest) or a bytecode function again, super-fast internal codes get
+and set stack places, jump within the function or return from it.
+Objects and address pointers of built-ins are stored in a table at the
+start of the function.  The GC can tell between them easily.  It is told
+by the bytecode if a called function is a built-in and if it wants to
+push the value in AX on the stack.  Everything else is done by built-in
+functions.  If an unknown function needs to be called, an expression has
+to be constructed for built-in EVAL to do the job.  All in all the
+interpreter should be able to handle around 15k codes per second on a
+VIC-20/C64/C128, the called functions not included.
+
+Unfortunately that all doesn't help with the time spent by the garbage
+collector.  It'll be interesting to watch in action.
+Debugging will require type checks to built-ins wedged in.
+
+# 2024-10-20
+
+Should take a little break to get back on track.  I'm low on caffeine.
+
+As the goal is to have something nice to code I want dot-notation in to
+reduce some noise from the code picture.  Let's take a look at an
+expression expander for the compiler with no dot-notation:
+
+~~~lisp
+(fn exex-move-arg (x)
+  (? (cons? x)
+     (!= (symbol)
+       (cons ! (list (list '= ! x))))
+     (cons x nil)))
+
+(fn exexpand (x)
+  (?
+    (atom x)
+      (list x)
+
+    (eq '= (car x))
+      (? (atom (caddr x))
+         (list x)
+         (!= (@ exex-move-arg (cdr (caddr x)))
+           (append (mapcan exexpand (mapcan cdr !))
+                   (list (list '= (cadr x) (cons (car (caddr x)) (@ car !)))))))
+
+    (!= (@ exex-move-arg (cdr x))
+      (append (mapcan exexpand (mapcan cdr !))
+              (list (cons (car x) (@ car !)))))))
+~~~
+
+And now with dot-notation:
+
+~~~lisp
+(fn expex-move-arg (x)
+  (? (cons? x)
+     (!= (symbol)
+       (. ! (list (list '= ! x))))
+     (. x nil)))
+
+(fn exexpand (x)
+  (?
+    (atom x)
+      (list x)
+
+    (eq '= x.)
+      (? (atom ..x.)
+         (list x)
+         (!= (@ exex-move-arg (cdr ..x.))
+           (append (mapcan exexpand (mapcan cdr !))
+                   (list (list '= .x. (. (car ..x.) (@ car !)))))))
+
+    (!= (@ exex-move-arg .x)
+      (append (mapcan exexpand (mapcan cdr !)
+              (list (. x. (@ car !)))))))
+~~~
+
+That's right.  COBOL-style indexing.
+
 # 2024-10-18
 
 Looking at the generated 6502 is giving each day a touch of unhappiness.

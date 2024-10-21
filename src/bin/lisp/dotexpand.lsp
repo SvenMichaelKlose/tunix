@@ -1,7 +1,8 @@
 ; Expand dot-notation
 
 (fn %des (x)
-  (? (and (member \. x)
+  (? (and (not (every '((x) (== \. x)) x))
+          (member \.  x)
           (not (member \  x)))
      (?
        (eql \. (car (last x)))
@@ -10,8 +11,7 @@
          $(cdr ,(%des (cdr x)))
        (!= (split \. x)
          $(cdr (assoc ',(symbol (car (last !)))
-                      ,(%des (apply nconc (pad (list \.)
-                                               (butlast !))))))))
+                      ,(%des (apply append (pad (list \.) (butlast !))))))))
      (symbol x)))
 
 (fn %debq (x)

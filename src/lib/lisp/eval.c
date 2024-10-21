@@ -537,7 +537,7 @@ start_body:
     x = FUNBODY(arg1);
 #ifndef NO_DEBUGGER
     PUSH(current_function);
-    if (NOT_NIL(unevaluated_arg1) && SYMBOLP(unevaluated_arg1))
+    if (NOT_NIL(unevaluated_arg1) && _SYMBOLP(unevaluated_arg1))
         current_function = unevaluated_arg1;
 #endif
 

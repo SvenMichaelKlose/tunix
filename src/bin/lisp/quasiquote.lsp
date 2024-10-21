@@ -1,8 +1,5 @@
-(or (builtin? 'append)
-    (load 'append.lsp))
-
-(fn %qeval (qqx)
-  (eval qqx))
+(or (builtin? 'nconc)
+    (nconc 'append.lsp))
 
 (fn %qq (qqx)
   (?
@@ -16,13 +13,13 @@
 
     ; Replace UNQUOTE expression by its evaluated argument.
     (eq (caar qqx) 'unquote)
-      (cons (%qeval (cadar qqx)) (%qq (cdr qqx)))
+      (cons (eval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Insert evaluated argument of UNQUOTE-SPLICE into
     ; the list.
     (eq (caar qqx) 'unquote-spliced)
       ; TOOD: Test this with NCONC.
-      (append (%qeval (cadar qqx)) (%qq (cdr qqx)))
+      (nconc (eval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))

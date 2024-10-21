@@ -970,6 +970,12 @@ Let's compare the mere MACROEXPAND function with a dot-notated version:
     (@ macroexpand x)))
 ~~~
 
+If DOTEXPAND is too resource intensive, you can disable it again.
+Don't forget to keep the macro expansion active:
+
+~~~lisp
+(= *ex* macroexpand)
+~~~
 
 # Built-in functions
 

@@ -56,6 +56,7 @@ mark (lispptr x)
 }
 
 xlat_item * xlat_end;
+bool        xlat_full;
 
 #ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
@@ -68,7 +69,6 @@ char * d;   // Destination
 
 xlat_item * xlat;
 xlat_item * xlat_start;
-bool        xlat_full;
 char *      last_sweeped; // For merging consecutive gaps.
 size_t      gapsize;
 
@@ -84,7 +84,6 @@ size_t total_removed;
 #pragma zpsym ("s")
 #pragma zpsym ("d")
 #pragma zpsym ("xlat")
-#pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
 #pragma zpsym ("p")
 #pragma zpsym ("r")
@@ -243,7 +242,7 @@ check_xlat:
                     // Reloc table size must be a multiple of an entry's size!
                     internal_error ("xlat overflow");
 #endif
-                // Flag is relocation table is full, so
+                // Flag if relocation table is full, so
                 // the rest of the objects won't be sweeped
                 // and GC is started again.
                 if (xlat == xlat_start)
@@ -282,21 +281,21 @@ check_xlat:
     SET_SYMBOL_NEXT(last_symbol, nil);
 }
 
-// Relocate object pointer.
-lispptr FASTCALL
-relocate_ptr (char * x)
+// Relocate object pointer in "tmpstr".
+lispptr
+relocate_ptr (void)
 {
     // Sum up gap sizes up to the pointer.
     gapsize = 0;
     for (r = xlat_end; r != xlat;) {
         r--;
-        if (r->pos > (lispptr) x)
+        if (r->pos > (lispptr) tmpstr)
             break;
         gapsize += r->size;
     }
 
     // Subtract it from the pointer.
-    return x - gapsize;
+    return tmpstr - gapsize;
 }
 
 // Relocate object pointers on heap, stack, and in global vars.
@@ -304,12 +303,16 @@ void
 relocate (void)
 {
     // Relocate global pointers.
-    for (gp = global_pointers; *gp; gp++)
-        **gp = relocate_ptr (**gp);
+    for (gp = global_pointers; *gp; gp++) {
+        tmpstr = **gp;
+        **gp = relocate_ptr ();
+    }
 
     // Relocate GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
-        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+        tmpstr = *(lispptr *) p;
+        *(lispptr *)p = relocate_ptr ();
+    }
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
@@ -330,13 +333,20 @@ relocate (void)
                 internal_error ("Reloc: heap overflow");
 #endif
             if (_CONSP(p)) {
-                SETCAR(p, relocate_ptr (CAR(p)));
+                tmpstr = CAR(p);
+                SETCAR(p, relocate_ptr ());
 #ifdef COMPRESSED_CONS
-                if (!_EXTENDEDP(p))
+                if (!_EXTENDEDP(p)) {
 #endif
-                    SETCDR(p, relocate_ptr (CDR(p)));
-            } else if (_SYMBOLP(p))
-                SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
+                    tmpstr = CDR(p);
+                    SETCDR(p, relocate_ptr ());
+#ifdef COMPRESSED_CONS
+                }
+#endif
+            } else if (_SYMBOLP(p)) {
+                tmpstr = SYMBOL_VALUE(p);
+                SET_SYMBOL_VALUE(p, relocate_ptr ());
+            }
         }
 #ifdef FRAGMENTED_HEAP
     } while ((++heap)->start);

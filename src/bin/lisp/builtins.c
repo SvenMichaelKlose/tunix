@@ -129,20 +129,15 @@ bi_symbol_value (void)
 lispptr
 bi_symbol (void)
 {
-    int      len;
-    lispptr  s;
-    char *   p;
-
     // Get length.  Truncate at 255.
-    len = length (arg1);
+    int len = length (arg1);
+    if (!len)
+        return alloc_symbol (NULL, 0);
     if (len > 255)
         len = 255;
 
-    // Allocate empty symbol of wanted length.
-    s = alloc_symbol (buffer, len);
-
     // Make symbol name from list.
-    p = SYMBOL_NAME(s);
+    tmpstr = buffer;
     DOLIST(arg1, arg1) {
 #ifndef NAIVE
         if (!NUMBERP(CAR(arg1))) {
@@ -150,14 +145,14 @@ bi_symbol (void)
             break;
         }
 #endif
-        *p++ = NUMBER_VALUE(CAR(arg1));
+        *tmpstr++ = NUMBER_VALUE(CAR(arg1));
     }
 #ifndef NAIVE
     if (NOT_NIL(arg1))
         error_cons_expected (arg1);
 #endif
 
-    return s;
+    return make_symbol (buffer, len);
 }
 
 #ifndef NO_BUILTIN_CHAR_AT

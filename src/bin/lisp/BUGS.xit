@@ -5,6 +5,7 @@ AUTOLOAD
 [ ] Handle built-in argument type error caused by missing functions.
 
 Debugger
+[ ] Current function not displayed (when autoloaded?).
 [ ] Complete review.
 [ ] Handle console direct mode.
 

@@ -115,6 +115,7 @@ print_debug_info ()
             outs ("()");
         out_colon ();
         fresh_line ();
+        HIGHLIGHT(current_expr);
         print (FUNBODY(tmp2));
     } else {
         out_colon ();
@@ -144,9 +145,6 @@ read_cmd_arg (void)
         eval ();
         POP(highlighted);
     }
-#ifndef TARGET_UNIX
-    fresh_line ();
-#endif
 }
 
 #endif // #ifndef NO_DEBUGGER
@@ -427,15 +425,15 @@ done_short_command:
         // Macro expansion.
         if (CONSP(SYMBOL_VALUE(expand_sym))) {
 #ifndef NO_DEBUGGER
-            // Avoid debug step into MACROEXPAND.
+            // Avoid debug stepping into *EX*.
             PUSH(debug_step);
             debug_step = nil;
 #endif
-            // Make arguments list for MACROEXPAND.
+            // Make arguments list for *EX*.
             x = make_cons (x, nil);
             x = make_cons (expand_sym, x);
 
-            // Call MACROEXPAND.
+            // Call *EX*.
             unevaluated = true;
             repl_eval ();
 

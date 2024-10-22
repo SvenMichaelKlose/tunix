@@ -12,4 +12,5 @@
            (out "s (")
            (print ,duration)
            (out " bekloppies)")
-           (terpri))))))
+           (terpri)
+           ,duration)))))

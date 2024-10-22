@@ -15,6 +15,10 @@ and this project adheres to
 
 #### Environment
 
+##### Changed
+
+- WITH-PROF returns number of bekloppies measured.
+
 ##### Added
 
 - App "benchmark.lsp" gets basic GC time and calls per second.

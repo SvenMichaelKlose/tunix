@@ -31,28 +31,6 @@ A couple of ideas to enhance TUNIX Lisp significantly.
 (+ a b)
 ~~~
 
-# Objects
-
-Using SLOT-VALUE and abbreviating dot notation on
-associative lists.  ASSOC should be a built-in function to
-avoid performance issues.
-
-?: How about immutables?
-
-# Directory access
-
-| Function      | Description                   |
-|---------------|-------------------------------|
-| (mkdir s)     | Create directory.             |
-| (opendir n s) | Open directory on channel.    |
-| (readdir n)   | Read directory info.          |
-| (writedir n)  | Write partial directory info. |
-
-## (mkdir s): Create directory.
-## (opendir n s): Open directory on channel.
-## (readdir n): READ directory info.
-## (writedir n): Write partial directory info.
-
 # Exceptions
 
 setjmp() buffers on tag stack.

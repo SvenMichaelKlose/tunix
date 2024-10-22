@@ -2291,7 +2291,7 @@ x ; '(2)
 
 ### (set-exclusive-or a b): Elements that are not in both.
 
-### (subseq? a b): Test if A is subset of B,
+### (subseq? a b): Test if A is subset of B.
 
 ## Associative lists
 
@@ -2301,6 +2301,7 @@ x ; '(2)
 | (assoc x l)      | Return list that start with X.     |
 | (aremove x l)    | Remove X from associative L.       |
 | (aremove-if f l) | Remove by F from associative L.    |
+| (pairlist l l)   | Combine lists to associative list. |
 
 A list of lists where the first element is the key and the
 rest is the value.
@@ -2309,6 +2310,12 @@ rest is the value.
 ### (assoc x l): Return list that start with X.
 ### (aremove x l): Remove X from associative L.
 ### (aremove-if f l): Remove by F from associative L.
+
+### (pairlist l l): Combine lists to associative list.
+
+~~~lisp
+(pairlist '(1 2) '(3 4)) ; -> '((1 3) (2 4))
+~~~
 
 ## Console control
 

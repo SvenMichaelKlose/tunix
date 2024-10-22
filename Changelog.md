@@ -22,6 +22,7 @@ and this project adheres to
 ##### Added
 
 - App "benchmark.lsp" gets basic GC time and calls per second.
+- PAIRLIST to combine two lists to an associative one.
 
 
 ## [v0.0.26] - 2024-10-22

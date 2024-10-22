@@ -202,6 +202,11 @@
              3)
       (error '!=)))
 
+(do-test 'PAIRLIST
+  (or (equal (pairlist '(1 2) '(3 4))
+             '((1 3) (2 4)))
+      (error 'PAIRLIST)))
+
 (do-test 'DUP
   (!= (dup 'x 0)
     (and ! (error !)))

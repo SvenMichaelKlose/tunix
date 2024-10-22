@@ -562,7 +562,9 @@ restore_arguments:
     POP(current_function);
 #endif
     POP(argdefs);
+#ifndef NAIVE
 restore_arguments_break:
+#endif
     pop_argument_values ();
 
     //////////////

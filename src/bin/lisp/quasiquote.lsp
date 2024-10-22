@@ -1,6 +1,3 @@
-(or (builtin? 'nconc)
-    (nconc 'append.lsp))
-
 (fn %qq (qqx)
   (?
     ; End of list.

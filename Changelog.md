@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Added
+
+- App "benchmark.lsp" gets basic GC time and calls per second.
+
+
 ## [v0.0.26] - 2024-10-22
 
 ### Lisp

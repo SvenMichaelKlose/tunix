@@ -86,10 +86,10 @@ allworlds:
 	$(MAKE) worldclean world TARGET=sim6502
 	$(MAKE) worldclean world TARGET=unix
 	$(MAKE) worldclean world TARGET=vic20
-	printf "# allwords `date +%F`: $(CFLAGS)\n" >> sizes
-	printf "~~~ls -l tunix/*/lisp\n" >> sizes
-	ls -l tunix/*/lisp >> sizes
-	printf "~~~\n\n" >> sizes
+	#printf "# allwords `date +%F`: $(CFLAGS)\n" >> sizes
+	#printf "~~~ls -l tunix/*/lisp\n" >> sizes
+	#ls -l tunix/*/lisp >> sizes
+	#printf "~~~\n\n" >> sizes
 
 test: allworlds
 	$(MAKE) -C src test

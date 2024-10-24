@@ -21,9 +21,11 @@ and this project adheres to
 
 ##### Added
 
+- Single inheritance, duck-typed object system based on associative
+  lists.
 - App "benchmark.lsp" gets basic GC time and calls per second.
 - PAIRLIST to combine two lists to an associative one.
-
+- COPY-ALIST to copy associative lists.
 
 ## [v0.0.26] - 2024-10-22
 

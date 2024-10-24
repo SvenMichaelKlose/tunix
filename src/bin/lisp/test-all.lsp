@@ -1,4 +1,5 @@
 (= *universe* (member 'autoload *universe*))
+(var stime (time))
 (var app-test-all nil)
 
 (fn env-reset ()
@@ -424,7 +425,16 @@
              '(l i s p))
       (error)))
 
-(= *universe* (cdr (member 'app-test-all *universe*)))
-(= *macros* (cdr (member-if '((x)
-                               (eq 'do-test (car x)))
-                            *macros*)))
+(test-dotexpand)
+
+(fn test-all ()
+  (!= stime
+    (= *ex* macroexpand)
+    (= *universe* (cddr (member 'app-test-all *universe*)))
+    (= *macros* (cdr (member-if '((x)
+                                   (eq 'do-test (car x)))
+                                *macros*)))
+    (out "Tests passed. ")
+    (print (/ (- (time) !) +bps+))
+    (out '"s.")
+    (terpri)))

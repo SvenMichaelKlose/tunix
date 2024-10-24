@@ -16,7 +16,7 @@
     ; the list.
     (eq (caar qqx) 'unquote-spliced)
       ; TOOD: Test this with NCONC.
-      (nconc (eval (cadar qqx)) (%qq (cdr qqx)))
+      (append (eval (cadar qqx)) (%qq (cdr qqx)))
 
     ; Just copy then...
     (cons (%qq (car qqx)) (%qq (cdr qqx)))))

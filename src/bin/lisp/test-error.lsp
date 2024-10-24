@@ -20,7 +20,7 @@
 
 (fn terror (x)
   (= onerror nil)
-  (error (or x "error expected")))
+  (apply error (or x "error expected")))
 
 (message '"Testing ERROR_TYPE...")
 (+ 's 1)

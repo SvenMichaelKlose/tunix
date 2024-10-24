@@ -7,13 +7,12 @@
   (= *macros* (member-if '((x)
                             (eq (car x) 'do-test))
                          *macros*))
-  (print (gc))
   (fresh-line))
 
 (macro do-test (title . body)
   $((()
       (message "Testing " ,title '"...")
-      (and (< (print (free)) 1024)
+      (and (< (free) 1024)
         ((()
            (fresh-line)
            (and (< (print (gc)) 4096)
@@ -288,17 +287,24 @@
 (do-test 'AREMOVE
   (and (aremove t nil)
        (error))
-  (or (equal (carlist (aremove 'i '((l) (i) (s) (p))))
+  (or (equal (@ car (aremove 'i '((l) (i) (s) (p))))
              '(l s p))))
 
 (do-test 'AREMOVE-IF
-  (or (equal (carlist (aremove-if '((x) (eq 'i (car x)))
-                                  '((l) (i) (s) (p))))
+  (or (equal (@ cdr (aremove-if '((x) (eq 'i (car x)))
+                                '((l) (i) (s) (p))))
              '(l s p))))
+
+(message "TODO: COPY-LIST")
 
 (do-test 'COPY-TREE
   (or (equal (copy-tree '((1 2) (3 (4 5))))
              '((1 2) (3 (4 5))))
+      (error)))
+
+(do-test 'COPY-ALIST
+  (or (equal (copy-alist '((1 . 2) (3 . (4 5))))
+             '((1 . 2) (3 . (4 5))))
       (error)))
 
 (do-test 'COUNT-IF

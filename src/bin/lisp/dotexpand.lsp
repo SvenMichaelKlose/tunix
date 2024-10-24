@@ -25,8 +25,8 @@
       x
     (eq 'unquote (car x))
       (list 'unquote (dotexpand (cadr x)))
-    (cons (%debq (car x))
-          (%debq (cdr x)))))
+    (. (%debq (car x))
+       (%debq (cdr x)))))
 
 (fn dotexpand (x)
   (?
@@ -37,7 +37,7 @@
       x
     (eq 'backquote (car x))
       (list 'backquote (%debq (cadr x)))
-    (cons (dotexpand (car x))
-          (dotexpand (cdr x)))))
+    (. (dotexpand (car x))
+       (dotexpand (cdr x)))))
 
 (= *ex* '((x) (macroexpand (dotexpand x))))

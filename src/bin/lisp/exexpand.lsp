@@ -1,8 +1,8 @@
 (fn expex-move-arg (x)
   (? (cons? x)
      (!= (symbol)
-       (cons ! (list (list '= ! x))))
-     (cons x nil)))
+       (. ! (list (list '= ! x))))
+     (. x nil)))
 
 ; Move function calls out of argument list and
 ; replace them by anonymous symbols.
@@ -22,10 +22,10 @@
            ; Concatenate moved arguments...
            (append (mapcan exexpand (mapcan cdr !))
                    ; ...and re-assemble orgiginal assignment with new argument list.
-                   (list (list '= (cadr x) (cons (car (caddr x)) (carlist !)))))))
+                   (list (list '= (cadr x) (. (car (caddr x)) (carlist !)))))))
     ; Do the real work.
     (!= (@ expex-move-arg (cdr x))
       ; Concatenate moved arguments...
       (append (mapcan exexpand (mapcan cdr !))
               ; ...and re-assemble orgiginal expression with new argument list.
-              (list (cons (car x) (carlist !)))))))
+              (list (. (car x) (carlist !)))))))

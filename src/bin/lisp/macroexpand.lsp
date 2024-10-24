@@ -1,21 +1,21 @@
 (var *macros* nil)
 
 (fn %requote (x)
-  (cons (list (caar x) (macroexpand (cadar x)))
-        (%unquote (cdr x))))
+  (. (list (caar x) (macroexpand (cadar x)))
+     (%unquote (cdr x))))
 
 (fn %unquote (x)
   (?
     (atom x)
       x
     (atom (car x))
-      (cons (car x) (%unquote (cdr x)))
+      (. (car x) (%unquote (cdr x)))
     (eq 'unquote (caar x))
       (%requote x)
     (eq 'unquote-spliced (caar x))
       (%requote x)
-    (cons (%unquote (car x))
-          (%unquote (cdr x)))))
+    (. (%unquote (car x))
+       (%unquote (cdr x)))))
 
 (fn macro? (x)
   (? (or (symbol? x)
@@ -44,9 +44,9 @@
   (((!)
      ; Either add to *MACROS* or update existing entry.
      (? (macro? n)
-        (setcdr (macro? n) (cons a !))
-        (= *macros* (cons (cons n (cons a !))
-                          *macros*))))
+        (setcdr (macro? n) (. a !))
+        (= *macros* (. (. n (. a !))
+                    *macros*))))
     (@ macroexpand body)))
 
 (= *ex* macroexpand)

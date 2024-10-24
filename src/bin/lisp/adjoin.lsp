@@ -2,4 +2,4 @@
   ;"Add an element to a set."
   (? (apply member x l args)
      l
-     (cons x l)))
+     (. x l)))

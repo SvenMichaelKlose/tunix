@@ -100,7 +100,7 @@
 (message '"Testing SYMBOL?...")
 (? (symbol? 'a) nil (error))
 (? (symbol? 1) (error))
-(? (symbol? (cons t t)) (error))
+(? (symbol? (. t t)) (error))
 
 (message '"Testing NUMBER?...")
 (? (number? 1) nil (error))
@@ -196,7 +196,7 @@
      (message '"Testing >>...")
      (or (== (>> 23 1) 11) (error)))))
 ;(message '"Testing PEEK...")
-;(or (== 1 (print (peek (rawptr (cons nil nil)))))
+;(or (== 1 (print (peek (rawptr (. nil nil)))))
 ;    (error))
 
 (and (builtin? gc)
@@ -222,7 +222,7 @@
 
 (fn make-count (n)
   (? (< 0 n)
-     (cons n (make-count (-- n)))))
+     (. n (make-count (-- n)))))
 
 (message '"Smoke-testing recursion...")
 (make-count 10)
@@ -264,7 +264,7 @@
         (= x 'b2e))
       (= x 'b1e))
     x) 'b0))
-; TODO: (= *b* (cons 'return *b*)) ; Gives nonsensical debugger.
+; TODO: (= *b* (. 'return *b*)) ; Gives nonsensical debugger.
 (or (eq 'b1e (return-test 'b3))
     (error))
 (or (eq 'b1e (return-test 'b2))

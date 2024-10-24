@@ -39,9 +39,9 @@
       ; Step into subtree.
       (?
         (cons? (car i))
-          (compress-tree (car i) (cons i path))
+          (compress-tree (car i) (. i path))
         (and (not path)
              (symbol? (car i)))
           (progn
             (print (car i))(terpri)
-            (compress-tree (symbol-value (car i)) (cons i path)))))))
+            (compress-tree (symbol-value (car i)) (. i path)))))))

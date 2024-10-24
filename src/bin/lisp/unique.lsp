@@ -3,4 +3,4 @@
   (and x
        (? (member (car x) (cdr x))
           (unique (cdr x))
-          (cons (car x) (unique (cdr x))))))
+          (. (car x) (unique (cdr x))))))

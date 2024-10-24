@@ -4,7 +4,7 @@
 (fn istart ()
   (edit))
 (message "Cleaning up, please wait...")
-(= *universe* (cons 'edit (member 'autoload *universe*)))
+(= *universe* (. 'edit (member 'autoload *universe*)))
 (= *macros* nil)
 (print (gc))(out " bytes free.")(terpri)
 (message "Making image \"ide.img\"...")

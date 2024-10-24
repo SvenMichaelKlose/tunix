@@ -2,7 +2,7 @@
 
 (macro defcm (n a . body)
   (print $(defcm ,n ,a))
-  (push (cons n (cons a (@ macroexpand body)))
+  (push (. n (. a (@ macroexpand body)))
         *cmacros*)
   nil)
 
@@ -44,7 +44,7 @@
 ; TODO: Collect potential tags.
 (fn %block (n . body)
   (let (end "")
-    (push (cons n end) *blocks*)
+    (push (. n end) *blocks*)
     (!= (@ macroexpand body)
       (pop *blocks*)
       $(%block
@@ -59,8 +59,8 @@
       (error "Unknown BLOCK " n)))
 
 (defcm block (n . body)
-  (with-global *macros* (list (cons 'block %block)
-                              (cons 'return %return))
+  (with-global *macros* (list (. 'block %block)
+                              (. 'return %return))
     (apply %block n body)))
 
 (fn cmacroexpand (x)

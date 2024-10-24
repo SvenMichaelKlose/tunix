@@ -1464,7 +1464,7 @@ const struct builtin builtins[] = {
     { "set-char-at", "+x",  bi_set_char_at },
 #endif
 
-    { "cons",       "xx",   bi_cons },
+    { ".",          "xx",   bi_cons },
     { "car",        "l",    bi_car },
     { "cdr",        "l",    bi_cdr },
     { "setcar",     "cx",   bi_setcar },

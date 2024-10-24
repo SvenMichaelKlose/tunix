@@ -64,6 +64,7 @@ Here is how most other Lisps translate to TUNIX Lisp:
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
 | backquote sign '`'     | dollar sign '$' |
+| (CONS car cdr)         | (. car cdr)     |
 | (SETQ c v)             | (= c v)         |
 | (RPLACA c v)           | (SETCAR c v)    |
 | (RPLACD c v)           | (SETCDR c v)    |
@@ -566,7 +567,7 @@ the compiler work.
 (x
   x)
 ((first . rest)
-  (cons first rest))
+  (. first rest))
 ~~~
 
 Anonymous functions can be used as the first element of an expression
@@ -1330,6 +1331,7 @@ Get length of symbol or built-in.
 
 | Function     | Description                         |
 |--------------|-------------------------------------|
+| (. x x)      | Create cons object pair.            |
 | (car l)      | Return first value of cons or NIL.  |
 | (cdr l)      | Return second value of cons or NIL. |
 | (setcar c x) | Set first value of cons.            |

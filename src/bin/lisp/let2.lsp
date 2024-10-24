@@ -3,7 +3,7 @@
   (? inits
      (((i)
         $((,(@ car i)
-           ,@(@ '((x) (cons '= x)) i)
+           ,@(@ '((x) (. '= x)) i)
            ,@body)
           ,@(dup nil (length i))))
       (group2 inits))

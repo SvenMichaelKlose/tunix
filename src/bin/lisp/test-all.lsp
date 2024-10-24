@@ -295,7 +295,15 @@
                                 '((l) (i) (s) (p))))
              '(l s p))))
 
-(message "TODO: COPY-LIST")
+(do-test 'COPY-LIST
+  (let* (original '((1 . 2) (3 . (4 5)))
+         newlist  (copy-list original))
+    (or (equal newlist original)
+        (error "Lists are EQUAL"))
+    (and (eq newlist original)
+         (error "Lists are EQ"))
+    (or (eq (car newlist) (car original))
+        (error "List CARs aren't EQ"))))
 
 (do-test 'COPY-TREE
   (or (equal (copy-tree '((1 2) (3 (4 5))))
@@ -303,9 +311,14 @@
       (error)))
 
 (do-test 'COPY-ALIST
-  (or (equal (copy-alist '((1 . 2) (3 . (4 5))))
-             '((1 . 2) (3 . (4 5))))
-      (error)))
+  (let* (original '((1 . 2) (3 . (4 5)))
+         newlist  (copy-alist original))
+    (or (equal newlist original)
+        (error "Lists not EQUAL"))
+    (and (eq newlist original)
+         (error "Lists are EQ"))
+    (and (eq (car newlist) (car original))
+         (error "List CARs are EQ"))))
 
 (do-test 'COUNT-IF
   (or (== 3 (count-if number? '(1 a 2 b 3)))

@@ -20,15 +20,15 @@
 (= *universe* (remove 'ch *universe*))
 
 (message '"Testing SETCAR...")
-(= x (cons nil nil))
+(= x (. nil nil))
 (or (equal (setcar x t)
-           (cons t nil))
+           (. t nil))
     (error))
 
 (message '"Testing SETCDR...")
-(= x (cons nil nil))
+(= x (. nil nil))
 (or (equal (setcdr x t)
-           (cons nil t))
+           (. nil t))
     (error))
 
 (and (builtin? symbol-name)
@@ -65,7 +65,7 @@
            '(1 2 3))
     (error (eval '(list 1 2 ((nil 3))))))
 (or (equal '(1 . 2)
-           (cons 1 2))
+           (. 1 2))
     (error "Dotted pair not read OK"))
 
 (message '"Testing COPY-LIST...")

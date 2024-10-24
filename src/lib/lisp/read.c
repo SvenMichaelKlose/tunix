@@ -90,7 +90,7 @@ read_list (void)
         PUSH(last);
 
         // Dotted pair?
-        if (in () == '.') {
+        if (in () == '.' && NOT_NIL(start)) {
             // Read dotted pair's CDR.
             c = read_expr ();
 

@@ -3,4 +3,4 @@
   (and b
        (? (member (car b) a)
           (set-difference a (cdr b))
-          (cons (car b) (set-difference a (cdr b))))))
+          (. (car b) (set-difference a (cdr b))))))

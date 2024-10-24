@@ -13,6 +13,10 @@ and this project adheres to
 
 ### Lisp
 
+#### Interpreter
+
+- "cons" is now ".".
+
 #### Environment
 
 ##### Changed
@@ -25,6 +29,7 @@ and this project adheres to
   lists.
 - App "benchmark.lsp" gets basic GC time and calls per second.
 - PAIRLIST to combine two lists to an associative one.
+- COPY-LIST to copy associative lists.
 - COPY-ALIST to copy associative lists.
 
 ## [v0.0.26] - 2024-10-22

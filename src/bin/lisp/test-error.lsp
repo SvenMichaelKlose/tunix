@@ -70,7 +70,7 @@
 ;(((q)
 ;   (block nil
 ;     tag
-;     (= q (cons t q))
+;     (= q (. t q))
 ;     (out \.)
 ;     (go tag)))
 ; nil)

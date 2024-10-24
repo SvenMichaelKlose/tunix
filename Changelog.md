@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.27] - 2024-10-24
 
 ### Lisp
 
@@ -31,6 +31,7 @@ and this project adheres to
 - PAIRLIST to combine two lists to an associative one.
 - COPY-LIST to copy associative lists.
 - COPY-ALIST to copy associative lists.
+
 
 ## [v0.0.26] - 2024-10-22
 

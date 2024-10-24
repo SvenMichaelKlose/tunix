@@ -1834,7 +1834,7 @@ with prefixed label "USER ERR".
 ## (unquote x) | ,x: Insert into QUASIQUOTE.
 ## (unquote-splice x) | ,@x: Splice into QUASIQUOTE.
 
-# Macro system
+# Macros
 
 | Variable        | Description                 |
 |-----------------|-----------------------------|
@@ -1883,6 +1883,137 @@ Special form, adding macro S with arguments A and body B to \*MACROS\*.
 Predicate to test if a symbol denotes a macro in \*MACROS\*.
 
 ## (macroexpand x): Expand expression.
+
+# Objects
+
+A duck-typed object system with single inheritance based on alists
+supports object-oriented programming with TUNIX Lisp.  It's
+reminiscent of the one provided by JavaScript.
+
+The implementation of the objects is based on associative lists and
+amounts to a whopping 19 lines of code.  \*PROPS\* holds the default
+values for each class that has beend defined with macro CLASS.
+
+~~~lisp
+; (class classname . name-default-pairs)
+; (No class defined before.)
+(class node
+  (parent    nil)
+  (children  nil))
+
+; *PROPS* now contains:
+((node . ((parent   . nil)
+          (children . nil))))
+~~~
+
+Methods are defined using METHOD.  It pushes argument THIS to the
+front of the argument list before defining the function, and adds
+it to the properties of the class it belongs to.
+
+~~~lisp
+; (member classnane methodname arguments . body)
+(member node call-children (f)
+  (dolist (i this.children)
+    ((slot-value i f))))
+
+; *PROPS* now has:
+((node . ((call-children . ((this f)
+                             (dolist (i this.children)
+                               ((slot-value i f)))))
+          (parent        . nil)
+          (children      . nil))))
+~~~
+
+SLOT-VALUE as the function element in a call will make sure that
+the evaluator adds the object to the front of the argument list
+before doing the call.
+
+~~~lisp
+; (slot-value object slot-name)
+((slot-value i f))
+
+becomes
+
+((slot-value i f) i) ; <- Object added as argument "this".
+~~~
+
+An object is created with NEW.  It copies the properties of the
+wanted class and overwrites them with new values specified as pairs
+in the rest of its arguments.  If a slot was not defined with CLASS,
+it is added quietly.
+
+~~~lisp
+(new node)
+
+; Returned object:
+((extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+
+; Call "obj"'s method to call each children's method RENDER.
+(obj.call-children 'render)
+~~~
+
+Objects can be used as prototypes to create new classes.
+
+~~~lisp
+; (make-class classnane object)
+(make-class lm-max-w (new lm w 'max))
+~~~
+
+The need for calling a method of the same name as the currently evaluated
+method will be inevitable for object-oriented programming.  One solution
+would be to prefix methods with their classname to be able to tell them
+apart.  Given the memory constraints of small machines that's a no-go.
+But since all properties including those of the parent are in the object
+in the order of inheritance, it would suffice to start looking for a method
+in inherited properties of the wanted class.  That's where the %TYPE slot
+comes into play.  It's at the front of each inherited class' set of properties.
+Now looking up a method by type would only require the use of MEMBER-IF to
+find the right set of properties.
+
+~~~lisp
+; Example representation of a RECT object derived from NODE.
+; The %TYPE slot allows to find the CALLBACK method of the
+; NODE.
+((x        . 0)
+ (y        . 0)
+ (w        . 0)
+ (h        . 0)
+ (callback . nil)
+ (%type         . node)
+ (callback      . nil)
+ (extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+~~~
+
+That's all of it so far – the implementation amounts to a whopping
+19 lines of code.
+
+So what are we gonna do with these new powers?  How about defining
+user interfaces as LML documents and having a React-like core hold
+and render them to text or graphics, while maintaining state and
+managing layout?
+
+# Components
+
+Under construction.  React-like rendering and user interfacing with
+LML.
+
+~~~lisp
+(html
+  (head
+    (title "TUNIX Lisp"))
+  (body
+    "Hello world!"))
+~~~
 
 # Environment
 
@@ -1985,6 +2116,7 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 | (cdrlist l)       | Get rest elements of lists.         |
 | (append +l)       | Copy and append lists.              |
 | (copy-list x)     | Copy list.                          |
+| (copy-alist x)    | Copy associative list.              |
 | (copy-tree x)     | Copy recursively.                   |
 | (count-if f l)    | Count by predicate.                 |
 | (cut-at n l)      | Destructively split list.           |
@@ -2035,6 +2167,11 @@ combinations of them appear to be:
 ### (append +l): Copy and append lists
 
 ### (copy-list x): Copy list
+
+### (copy-slist x): Copy associative list
+
+Copies the associative list and the conses it contains, so you can set
+the CARs and CDRs of its elements without affecting the original.
 
 ### (copy-tree x): Copy recursively
 

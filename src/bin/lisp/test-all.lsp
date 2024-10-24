@@ -405,7 +405,6 @@
 (message "TODO: REMOVE-IF...")
 (message "TODO: SET-DIFFERENCE...")
 (message "TODO: SET-EXCLUSIVE-OR...")
-(message "TODO: SOURCE...")
 
 (do-test 'SPLIT
   (and (split 'b nil)

@@ -2514,13 +2514,7 @@ Can be used to map many procedures to a single file.
 
 | Function          | Description                       |
 |-------------------|-----------------------------------|
-| (source s)        | Get definition of symbol.         |
 | (compress-tree x) | Find and replace double subtrees. |
-
-### (source s): Print definition of a symbol.
-
-Prints a definition that can be used to re-define the symbol later, e.g.
-by writing it to a file for LOAD.
 
 ### (compress-tree x): Find and replace double subtrees.
 

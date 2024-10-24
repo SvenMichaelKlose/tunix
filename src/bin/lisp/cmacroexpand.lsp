@@ -41,13 +41,6 @@
 
 (var *blocks* nil)
 
-(fn %return (v . n)
-  (!? (cdr (assoc n *blocks*))
-      $(%block
-         ,v
-         (%go ,!))
-      (error "Unknown BLOCK " n)))
-
 ; TODO: Collect potential tags.
 (fn %block (n . body)
   (let (end "")
@@ -57,6 +50,13 @@
       $(%block
          ,@!
          (%tag ,end)))))
+
+(fn %return (v . n)
+  (!? (cdr (assoc n *blocks*))
+      $(%block
+         ,v
+         (%go ,!))
+      (error "Unknown BLOCK " n)))
 
 (defcm block (n . body)
   (with-global *macros* (list (cons 'block %block)

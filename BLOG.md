@@ -3,6 +3,238 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-10-24 - Fencing?
+
+An object- and a filesystem.  So what?  At least I was barely coding.
+
+# 2024-10-23 - Thoughts on a BielefeldDB-based filesystem: BiFS
+
+The BielefeldDB (BiBD? BDB? Let's stick with BiDB) is great for
+temporary databases that are discarded on program exit.  That's all due
+to the memory contraints of small machines.  BiDB was supposed to fuel a
+natively running version of `Small-C`, which was discared as my fingers
+refused to make anything else but Lisp out of its C source.  It's worth
+being carried further.
+
+TUNIX is lacking its own filesystem for use with classic disks and
+extended memory, be it RAM or Flash ROM.  It has to be robust and should
+not drag down the performance of mechanical devices with increasing
+fragmentation.  It must also survive system crashes, leaving the contens
+of a filesystem in a valid state.
+
+## Required BiDB features
+
+With the idea that the BiFS nodes contain a file's name as the key,
+metadata, and the payload, the lower BiDB layer must support:
+
+* Multiple indexes in the same database to allow a database of free
+  storage areas alongside, so nodes can be freed.  On overdue feature to
+  add.  It'll probably take a bunch of C macros to keep the simpler
+  version optional.
+* Subtrees with their own indexes to implement directories.  A flag
+  tells bdb\_lookup() to not traverse the children (unless being invited
+  to).
+* Truncation of node data.
+
+## Required BiFS features
+
+The filesystem has to bring on the ability to chain up blocks to a
+single file and operantions for enlarging or truncating files.
+
+The filesystem itself caches node metadata in directory files, and free
+block in a free block file.  After a crash heir contents are re-built by
+traversing the file tree.  To get around longer waits induced by the
+intial free block scan after a crash, a small fallback area is reserved
+to keep things going until the scan has completed.  Directory files can
+be re-created on demand, or in the background if multi-tasking is
+supported.  They just contain lists of records and are modified like any
+other file.
+
+## Disk allocation strategy
+
+It also needs an allocation strategy, so that if two files are written
+at the same time, their contents don't end up interleaved along with
+considerable amounts of metadata (and time lost for extra header
+updates) to chain up the fragments.  The plan: file blocks of median
+size are pre-allocated to keep writes to other files out of the way and
+keep the file contiguous.  They are truncated on file close.  On the
+other hand it would be nice if large files wouldn't occupy a set of
+neighboured tracks as that's head movements guaranteed to be added to
+the overall performance.  So if a file has filled the pre-allocated
+space, the next pre-allocation taking place is not following the filled
+block, but at least two tracks away.  When there are no free blocks of
+pre-allocation size, the largest free block is used, no matter where.
+
+## Copy-on-update (COD) and why it's needed anyhow
+
+Another thing that might make you wondering is copy-on-update, the idea
+to never modify existing data but writing new data to a fresh location
+to avoid corruption during a crash.  Including node headers this
+included updating all node up to the root node for changes to become
+part of the filesystem.  This assures that the current state of the
+filesystem is always valid after a crash.  Some may admire this feature
+being available very.  There is a good reason to implement COD: it's
+required to serve Flash ROMs.  Luckily these don't require directory
+files to cache node traversals, nor would a list of free block make much
+sense.  The latest root node is looked up at mount time.  When a Flash
+ROM is full, the filesystem needs to be defragmented with only a single
+write per bank, supporting the longevity of the ROM.  Consequently
+there's also a history of file versions available.  COD should allow new
+nodes to share file data of an old node, which adds a bit of complexity.
+COD could also be explicitly enabled or disable per branch or file, e.g.
+for faster temporary files.  I seriously have no idea why everyone is
+typing it COD instead of COU.
+
+## Ultimate robustness
+
+Finally, by tagging node headers, files can still be recovered if parent
+nodes have been destroyed.
+
+## Conclusion
+
+The current version of the BiDB with no record deletion has around 490
+lines of code (LOC).  It'll probably double up to be the filesystem as
+proposed here.  But a filesystem cannot be part of TUNIX Lisp on small
+machines unless the TUNIX kernel is running it as a driver in its own
+address space to also hold the caches.  The BiFS could offer an
+unprecedented robustness and performance advantage dearly missed and
+never seen on small machines before – and do we hate those crashes, or
+what?
+
+# 2024-10-22
+
+I've laid out a duck-typed object system with single inheritance,
+based on alists.  \*PROPS\* holds the default values for each
+class defined with CLASS.
+
+~~~lisp
+; (class classname . name-default-pairs)
+; (No class defined before.)
+(class node
+  (parent    nil)
+  (children  nil))
+
+; *PROPS* now contains:
+((node . ((parent   . nil)
+          (children . nil))))
+~~~
+
+Methods are defined using METHOD.  It pushes argument THIS to the
+front of the argument list before defining the function, and adds
+it to the properties of the class it belongs to.
+
+~~~lisp
+; (member classnane methodname arguments . body)
+(member node call-children (f)
+  (dolist (i this.children)
+    ((slot-value i f))))
+
+; *PROPS* now has:
+((node . ((call-children . ((this f)
+                             (dolist (i this.children)
+                               ((slot-value i f)))))
+          (parent        . nil)
+          (children      . nil))))
+~~~
+
+SLOT-VALUE as the function element in a call will make sure that
+the evaluator adds the object to the front of the argument list
+before doing the call.
+
+~~~lisp
+; (slot-value object slot-name)
+((slot-value i f))
+
+becomes
+
+((slot-value i f) i) ; <- Object added as argument "this".
+~~~
+
+An object is created with NEW.  It copies the properties of the
+wanted class and overwrites them with new values specified as pairs
+in the rest of its arguments.  If a slot was not defined with CLASS,
+it is added quietly.
+
+~~~lisp
+(new node extra-info "Debug here!")
+
+; Returned object:
+((extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+
+; Call "obj"'s method to call each children's method RENDER.
+(obj.call-children 'render)
+~~~
+
+Objects can be used as prototypes to create new classes.
+
+~~~lisp
+; (make-class classnane object)
+(make-class lm-max-w (new lm w 'max))
+~~~
+
+The need for calling a method of the same name as the currently evaluated
+method will be inevitable for object-oriented programming.  One solution
+would be to prefix methods with their classname to be able to tell them
+apart.  Given the memory constraints of small machines that's a no-go.
+But since all properties including those of the parent are in the object
+in the order of inheritance, it would suffice to start looking for a method
+in inherited properties of the wanted class.  That's where the %TYPE slot
+comes into play.  It's at the front of each inherited class' set of properties.
+Now looking up a method by type would only require the use of MEMBER-IF to
+find the right set of properties.
+
+~~~lisp
+; Example representation of a RECT object derived from NODE.
+; The %TYPE slot allows to find the CALLBACK method of the
+; NODE.
+((x        . 0)
+ (y        . 0)
+ (w        . 0)
+ (h        . 0)
+ (callback . nil)
+ (%type         . node)
+ (callback      . nil)
+ (extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+~~~
+
+Constructors can be defined as slot CONSTRUCTOR.  When calling
+NEW, CONSTRUCTOR contains the arguments to the constructor that is
+called by NEW.
+
+That's all of it so far – the implementation amounts to a whopping
+19 lines of code.
+
+So what are we gonna do with these new powers?  How about defining
+user interfaces as LML documents and having a React-like core hold
+and render them to text or graphics, while maintaining state and
+managing layout?  Most of the code is already in src/bin/desktop,
+written in C, as an example.
+
+# 2024-10-22
+
+DOTEXPAND works after fixing SYMBOL, which was supposed to re-use
+existing symbols but didn't.  It hasn't been enabled by default as
+things are slow enough already without compiler magic.  At the moment
+TUNIX Lisp can do a bit more than 330 calls to built-ins per second on
+a C64.
+
+DOTEXPAND brings an abbreviation for SLOT-VALUE to access object slots.
+I'll be using associative lists to implement single inheritance and
+tweak eval0() to add a hidden object argument to method calls via
+SLOT-VALUE, so "(obj.fun)" becomes "(obj.fun obj)".  The question is
+now how to get the most power out of a most simple object system.
+Taking a look at overloading functions might spark some ideas.
+
 # 2024-10-21
 
 I have created a rather tight bytecode interpreter in 6502 assembly.

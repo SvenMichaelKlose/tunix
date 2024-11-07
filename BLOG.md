@@ -3,6 +3,33 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-11-06
+
+Was hacking something else for a change.  Am building a READ-based 6502
+assembly language parser, so assembly can be integrated better.
+
+~~~lisp
+(as65 *asm-buffer*
+  $((    ldx #>screen)
+    (    lda #0)
+    (    tay)
+    (    sta p)
+    (l2: stx (++ p))
+    (l:  sta (p),y)
+    (    iny)
+    (    bne l)
+    (    inx)
+    (    cmp #(high (+ w screen)))
+    (    bne l2)
+    (    rts)))
+
+(fn clear-screen ()
+  (sys *asm-buffer*))
+~~~
+
+A built-in MALLOC and FREE it is, giving MKBUILTIN purpose. :)
+Let's also see if the BiDB can be used for labels.
+
 # 2024-10-24 - Fencing?
 
 An object- and a filesystem.  So what?  At least I was barely coding.

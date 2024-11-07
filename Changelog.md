@@ -31,6 +31,7 @@ and this project adheres to
 - PAIRLIST to combine two lists to an associative one.
 - COPY-LIST to copy associative lists.
 - COPY-ALIST to copy associative lists.
+- AS65-PARSE: READ-based 6502 assembly parser.
 
 
 ## [v0.0.26] - 2024-10-22

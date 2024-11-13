@@ -65,12 +65,6 @@ read_safe (void)
 #ifndef NAIVE
 
 void
-out_colon (void)
-{
-    outs (": ");
-}
-
-void
 print_debug_info ()
 {
     // Head with errror info.
@@ -79,7 +73,7 @@ print_debug_info ()
         // Error code.
         outs ("Error #");
         outn (error_code);
-        out_colon ();
+        outs (": ");
 
         // Human-readable description.
         if (last_errstr)
@@ -103,22 +97,21 @@ print_debug_info ()
     do_highlight = true;
 #endif
 
-    // Print current function exüression or top-level.
+    // Print current function or top-level expression.
     if (NOT_NIL(current_function)) {
         tmp2 = SYMBOL_VALUE(current_function);
-        print (current_function); // (Name)
+        print (current_function); // (function name)
         out (' ');
         tmp = FUNARGS(tmp2);
         if (tmp)
             print (FUNARGS(tmp2));
         else
             outs ("()");
-        out_colon ();
+        outs (": ");
         fresh_line ();
-        HIGHLIGHT(current_expr);
         print (FUNBODY(tmp2));
     } else {
-        out_colon ();
+        outs (": ");
         print (current_toplevel);
     }
 #ifndef NO_HIGHLIGHTING

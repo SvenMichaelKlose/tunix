@@ -1,11 +1,4 @@
-General
-[ ] -DNAIVE crashes right away.
-
-Images
-[ ] Written images are truncated.
-
-AUTOLOAD
-[ ] Handle built-in argument type error caused by missing functions.
+[ ] LOAD hanging with empty file?
 
 Debugger
 [ ] Current function not displayed (when autoloaded?).

@@ -337,7 +337,6 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
@@ -412,7 +411,6 @@
 #define TAGSTACK_END        0x0900
 #undef RELOC_TABLE_ENTRIES
 #define RELOC_TABLE_ENTRIES 128
-#define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
@@ -461,6 +459,9 @@
 #endif
 #ifndef NO_BUILTIN_SUBSEQ
     #define NO_BUILTIN_SUBSEQ
+#endif
+#ifdef SKIPPING_SWEEP
+    #undef SKIPPING_SWEEP
 #endif
 #endif // #ifdef MINIMALISTIC
 

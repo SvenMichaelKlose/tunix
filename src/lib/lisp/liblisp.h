@@ -1161,9 +1161,9 @@ extern bool do_gc_stress;
 #define ERROR_TOO_MANY_ARGS     4
 #define ERROR_NOT_FUNCTION      5
 #define ERROR_ARGNAME_TYPE      6
-#define ERROR_NO_BLOCK_NAME     7
+#define ERROR_NO_BLOCKNAME      7
 #define ERROR_OUT_OF_HEAP       8
-#define ERROR_NO_PAREN          9
+#define ERROR_PAREN_MISSING     9
 #define ERROR_STALE_PAREN       10
 #define ERROR_SYM_TOO_LONG      11
 #define ERROR_QUOTE_MISSING     12

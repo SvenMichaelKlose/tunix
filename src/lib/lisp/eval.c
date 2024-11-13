@@ -200,7 +200,7 @@ do_eval:
 eval_block:
 #ifndef NAIVE
     if (!CONSP(args)) {
-        error (ERROR_NO_BLOCK_NAME, "No name");
+        error (ERROR_NO_BLOCKNAME, "No name");
         goto return_obj;
     }
 #endif

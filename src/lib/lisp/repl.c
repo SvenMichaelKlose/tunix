@@ -79,15 +79,13 @@ print_debug_info ()
         if (last_errstr)
             outs (last_errstr);
 
-        // Erroraneous object.
         outs (": ");
-        print (value);
+        print (error_info);
 
-        // Error-dependent info.
-        if (NOT_NIL(error_info)) {
+        if (NOT_NIL(value)) {
             fresh_line ();
-            outs ("Info: ");
-            print (error_info);
+            outs ("Value: ");
+            print (value);
         }
     }
 

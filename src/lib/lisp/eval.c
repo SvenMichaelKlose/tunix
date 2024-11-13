@@ -140,6 +140,8 @@ do_eval:
 #endif // #ifdef __CC65__
 #endif // #ifndef NAIVE
 
+    PUSH(highlighted);
+
     //////////
     // ATOM //
     //////////
@@ -367,7 +369,7 @@ set_arg_values:
         goto save_arg_value;
     }
 
-    // Evaluate argument inline.
+    // Evaluate argument.
     HIGHLIGHT(args);
     x = CAR(args);
     PUSH(args);
@@ -581,6 +583,7 @@ return_obj:
 #endif
 
 return_atom:
+    POP(highlighted);
     unevaluated = false;
 
 #ifndef NO_DEBUGGER

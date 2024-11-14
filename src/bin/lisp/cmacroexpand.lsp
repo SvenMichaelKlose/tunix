@@ -2,8 +2,8 @@
 
 (macro defcm (n a . body)
   (print $(defcm ,n ,a))
-  (push (. n (. a (@ macroexpand body)))
-        *cmacros*)
+  (acons! n (. a (@ macroexpand body))
+          *cmacros*)
   nil)
 
 (fn mklogical (which)

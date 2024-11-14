@@ -17,11 +17,6 @@ and this project adheres to
 
 - Fixed highlighting and type error messages.
 
-
-## [v0.0.27] - 2024-10-24
-
-### Lisp
-
 #### Interpreter
 
 - "cons" is now ".".
@@ -34,6 +29,7 @@ and this project adheres to
 
 ##### Added
 
+- ACONS!
 - Single inheritance, duck-typed object system based on associative
   lists.
 - App "benchmark.lsp" gets basic GC time and calls per second.

@@ -2,7 +2,7 @@
 
 (var *last-err* nil)
 
-(fn onerror (code toplevel-expr faulty-expr info)
+(fn onerror (code toplevel-expr faulty-expr faulty-value info)
   (fresh-line)
   (out "ONERROR code: ")
   (print code)
@@ -10,11 +10,16 @@
   (out "REPL: ")
   (print toplevel-expr)
   (fresh-line)
-  (out "Faulty: ")
+  (out "Faulty expr: ")
   (print faulty-expr)
   (fresh-line)
-  (out "Info: ")
-  (print info)
+  (out "Faulty value: ")
+  (print faulty-value)
+  (fresh-line)
+  (and info
+       (block nil
+         (out "Info: ")
+         (print info)))
   (= *last-err* code)
   (ignore))
 

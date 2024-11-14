@@ -23,22 +23,22 @@
         (close %!)
         (load %f)))))
 
-(fn %al (%code %top %x %i)
+(fn %al (%code %top %x %f %i)
   (block nil
     (?
       ; Fix and return missing function type argument.
       (== 1 %code) ; ERROR_TYPE
         (and (eq %i 'function)
-             (symbol? %x)
-             (%aload %x)
-             (return (symbol-value %x)))
+             (symbol? %f)
+             (%aload %f)
+             (return (symbol-value %f)))
       ; Fix and restart function call.
       (== 5 %code) ; ERROR_NOT_FUNCTION
-        (when (or (macro? (car %x))
-                  (%aload (car %x)))
+        (when (or (macro? %f)
+                  (%aload %f))
           ; If missing function turns out to be
           ; a macro, replace expression by its expansion.
-          (when (macro? (car %x))
+          (when (macro? %f)
             (let (%m (macroexpand %x))
               (setcar %x (car %m))
               (setcdr %x (cdr %m))))
@@ -48,13 +48,13 @@
     ; Pass it on to the debugger.
     '%fail))
 
-(fn autoload (%code %top %x %i)
+(fn autoload (%code %top %x %f %i)
   ; Save verbosity level.
   (let (%v? *v?*)
     ; Set desired one during AUTOLOAD.
     (= *v?* *alv?*)
     ; And action!
-    (let (%! (%al %code %top %x %i))
+    (let (%! (%al %code %top %x %f %i))
       ; Restore verbosity.
       (= *v?* %v?)
       %!)))

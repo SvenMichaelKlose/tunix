@@ -217,7 +217,8 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             PUSH_TAG(unevaluated);
 
             // Make argument list for call of ONERROR.
-            tmp2 = make_cons (failed_obj, nil);
+            x = make_cons (error_info, nil);
+            tmp2 = make_cons (failed_obj, x);
             x = make_cons (current_expr, tmp2);
             tmp2 = make_cons (current_toplevel, x);
             PUSH(tmp2);

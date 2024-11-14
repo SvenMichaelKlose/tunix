@@ -9,13 +9,13 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current] - 2024-11-13
+## [current]
 
 ### Lisp
 
 #### Debugger
 
-- Fix highlighting of arguments with type error.
+- Fixed highlighting and type error messages.
 
 
 ## [v0.0.27] - 2024-10-24

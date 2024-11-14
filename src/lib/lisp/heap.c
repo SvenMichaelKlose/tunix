@@ -307,15 +307,17 @@ make_number (lispnum_t x)
     return tmp;
 }
 
+#define IS_MATCHING_SYMNAME(sym, name, len) \
+    (SYMBOL_LENGTH(sym) == len && !memcmp (SYMBOL_NAME(sym), name, len))
+
 // Look up symbol by name.
 void * FASTCALL
-lookup_symbol (char * str, uchar len)
+lookup_symbol (char * name, uchar len)
 {
     // Walk over singly-linked list of named symbols.
     // (Anonymous symbols have no name.)
     for (tmpstr = first_symbol; NOT_NIL(tmpstr); tmpstr = SYMBOL_NEXT(tmpstr))
-        if (SYMBOL_LENGTH(tmpstr) == len
-            && !memcmp (tmpstr + sizeof (symbol), str, len))
+        if (IS_MATCHING_SYMNAME(tmpstr, name, len))
             return tmpstr;
     return NULL;
 }

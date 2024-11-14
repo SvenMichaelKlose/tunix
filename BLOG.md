@@ -3,6 +3,12 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-11-14
+
+Et voilà: the first passes of the compiler are up.  On unixoids.
+Time to un-hang the CBM I/O.  Also fixed the debugger.  Let's rock on
+after that extensive break.
+
 # 2024-11-06
 
 Was hacking something else for a change.  Am building a READ-based 6502

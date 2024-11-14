@@ -9,39 +9,13 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.26] - 2024-11-14
 
 ### Lisp
 
 #### Debugger
 
 - Fixed highlighting and type error messages.
-
-#### Interpreter
-
-- "cons" is now ".".
-
-#### Environment
-
-##### Changed
-
-- WITH-PROF returns number of bekloppies measured.
-
-##### Added
-
-- ACONS!
-- Single inheritance, duck-typed object system based on associative
-  lists.
-- App "benchmark.lsp" gets basic GC time and calls per second.
-- PAIRLIST to combine two lists to an associative one.
-- COPY-LIST to copy associative lists.
-- COPY-ALIST to copy associative lists.
-- AS65-PARSE: READ-based 6502 assembly parser.
-
-
-## [v0.0.26] - 2024-10-22
-
-### Lisp
 
 #### Interpreter
 
@@ -54,6 +28,7 @@ and this project adheres to
 
 ##### Changed
 
+- "cons" is now ".".
 - Up to 10% better performance on SLOW configurations.
 - REPL: Indent printed results by a space.
 - Smaller stack sizes (due to recent update of eval()).
@@ -77,11 +52,20 @@ and this project adheres to
 
 ##### Changed
 
+- WITH-PROF returns number of bekloppies measured.
 - MAKE-QUEUE is now a macro, so that it can be discarded.
 - MESSAGE takes variable number of arguments (like OUT).
 
 ##### Added
 
+- ACONS!
+- Single inheritance, duck-typed object system based on associative
+  lists.
+- App "benchmark.lsp" gets basic GC time and calls per second.
+- PAIRLIST to combine two lists to an associative one.
+- COPY-LIST to copy associative lists.
+- COPY-ALIST to copy associative lists.
+- AS65-PARSE: READ-based 6502 assembly parser.
 - PAD: Pad elements of a list.
 - DOTEXPAND: Expands dot-notated symbols.  See manual for details.
 - SOCKET-GET-DWORD, SOCKET-GET-WORD, SOCKET-GETN.

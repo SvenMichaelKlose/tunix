@@ -1,5 +1,5 @@
-(or (macro? 'with)
-    (load 'with.lsp))
+(or (macro? 'let)
+    (load 'let.lsp))
 (or (macro? 'progn)
     (load 'progn.lsp))
 (or (macro? 'do)

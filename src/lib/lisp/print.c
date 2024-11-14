@@ -220,6 +220,9 @@ dprint (lispptr x)
 {
     print0 (x);
     terpri ();
+#ifdef TARGET_UNIX
+    fflush (stdout);
+#endif
     return x;
 }
 #endif

@@ -1,4 +1,4 @@
-(defsetfn set-difference
+(fn set-difference (a b)
   ;"Elements in list b that are not in list a."
   (and b
        (? (member (car b) a)

@@ -1,4 +1,4 @@
-(defsetfn intersect
+(fn intersect (a b)
   ;"Elements that are in both lists."
   (and a b
        (? (member (car a) b)

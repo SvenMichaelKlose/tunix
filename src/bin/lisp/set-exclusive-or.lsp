@@ -1,4 +1,4 @@
-(defsetfn set-exclusive-or
+(fn set-exclusive-or (a b)
   ;"Elements that are not in both lists."
   (let (subset  (intersect a b)
         pred    $((x)

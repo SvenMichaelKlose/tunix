@@ -82,7 +82,7 @@ print_debug_info ()
         outs (": ");
         print (failed_obj);
 
-        if (NOT_NIL(value)) {
+        if (NOT_NIL(value) && value != failed_obj) {
             fresh_line ();
             outs ("Value: ");
             print (value);

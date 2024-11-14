@@ -200,7 +200,7 @@ do_eval:
 eval_block:
 #ifndef NAIVE
     if (!CONSP(args)) {
-        error (ERROR_NO_BLOCKNAME, "No name");
+        error (ERROR_NO_BLOCKNAME, "No name", nil);
         goto return_obj;
     }
 #endif
@@ -208,8 +208,7 @@ eval_block:
     arg1 = CAR(args);
 #ifndef NAIVE
     if (!SYMBOLP(arg1)) {
-        error (ERROR_TYPE, "Name not a sym");
-        error_info = arg1;
+        error (ERROR_TYPE, "Name not a sym", arg1);
         goto return_obj;
     }
 #endif
@@ -249,8 +248,7 @@ next_block_statement:
                 goto block_statement;
 #ifndef NAIVE
         // Tag not found.  Issue error.
-        error (ERROR_TAG_MISSING, "Tag not found");
-        error_info = go_tag;
+        error (ERROR_TAG_MISSING, "Tag not found", go_tag);
         goto return_obj;
 #endif
     } else if (value == return_sym) {
@@ -290,8 +288,7 @@ do_builtin_arg:
 #ifndef NAIVE
         // Complain if argument left.
         if (NOT_NIL(args)) {
-            error (ERROR_TOO_MANY_ARGS, "Too many args to builtin");
-            error_info = args;
+            error (ERROR_TOO_MANY_ARGS, "Too many args to builtin", args);
             goto return_obj;
         }
 #endif
@@ -327,8 +324,7 @@ set_arg_values:
 #ifndef NAIVE
     // Missing argument error.
     else if (NOT(args)) {
-        error (ERROR_ARG_MISSING, "Missing arg to builtin");
-        value = arg1;
+        error (ERROR_ARG_MISSING, "Missing arg to builtin", arg1);
         goto return_obj;
     }
 #endif
@@ -387,7 +383,7 @@ next_builtin_arg:
 
 save_arg_value:
 #ifndef NAIVE
-    // Type-check and throw any errors.
+    // Type-check and debug.
     bi_tcheck (value, *biargdef, ERROR_TYPE);
     if (error_code) {
         PUSH(args);
@@ -425,8 +421,7 @@ call_user_defined:
 #ifndef NAIVE
     // Ensure user-defined function.
     if (ATOM(arg1)) {
-        error (ERROR_NOT_FUNCTION, "Not a fun");
-        error_info = unevaluated_arg1;
+        error (ERROR_NOT_FUNCTION, "Not a fun", unevaluated_arg1);
         goto return_obj;
     }
 #endif
@@ -458,12 +453,10 @@ do_argument:
 #ifndef NAIVE
     // Catch wrong number of arguments.
     if (TOO_MANY_ARGSP()) {
-        error (ERROR_TOO_MANY_ARGS, "Too many args");
-        error_info = args;
+        error (ERROR_TOO_MANY_ARGS, "Too many args", args);
         goto start_body;
     } else if (MISSING_ARGSP()) {
-        error (ERROR_ARG_MISSING, "Missing args");
-        error_info = argdefs;
+        error (ERROR_ARG_MISSING, "Missing args", argdefs);
         goto break_user_call;
     }
 #endif

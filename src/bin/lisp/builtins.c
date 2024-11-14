@@ -141,7 +141,7 @@ bi_symbol (void)
     DOLIST(arg1, arg1) {
 #ifndef NAIVE
         if (!NUMBERP(CAR(arg1))) {
-            error (ERROR_TYPE, "(string nlst)");
+            error (ERROR_TYPE, "(string nlst)", nil); // TODO: number?
             break;
         }
 #endif
@@ -268,8 +268,7 @@ bi_nthcdr (void)
     int n = NUMBER_VALUE(arg1);
 #ifndef NAIVE
     if (n < 0) {
-        error (ERROR_NEGATIVE, "< 0");
-        error_info = arg1;
+        error (ERROR_NEGATIVE, "<0", arg1);
         return nil;
     }
 #endif
@@ -425,8 +424,7 @@ bi_subseq (void)
     nstart = NUMBER_VALUE(start);
 #ifndef NAIVE
     if (nstart < 0) {
-        error (ERROR_NEGATIVE, "< 0");
-        error_info = start;
+        error (ERROR_NEGATIVE, "<0", start);
         return nil;
     }
 #endif
@@ -441,8 +439,7 @@ bi_subseq (void)
         nend = NUMBER_VALUE(end);
 #ifndef NAIVE
         if (nend < 0) {
-            error (ERROR_NEGATIVE, "< 0");
-            error_info = end;
+            error (ERROR_NEGATIVE, "<0", end);
             return nil;
         }
 #endif
@@ -593,7 +590,7 @@ bi_apply (void)
 
 #ifndef NAIVE
     if (!LISTP(tmp)) {
-        error (ERROR_TYPE, "Last arg isn't list");
+        error (ERROR_TYPE, "Last arg isn't list", nil); // TODO: info
         return nil;
     }
 #endif
@@ -754,7 +751,7 @@ bi_open (void)
 
 #ifndef NAIVE
     if (SYMBOL_LENGTH(arg2) != 1 || (mode != 'r' && mode != 'w')) {
-        error (ERROR_FILEMODE, "Ill file mode");
+        error (ERROR_FILEMODE, "Ill file mode", arg2);
         return nil;
     }
 #endif // #ifndef NAIVE

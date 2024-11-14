@@ -28,11 +28,11 @@ char * last_errstr;
 // Issue error, with code and message.
 // Causes call of ONERROR handler or debugger.
 void FASTCALL
-error (char code, char * msg)
+error (char code, char * msg, lispptr info)
 {
     last_errstr = msg;
     error_code = code;
-    error_info = nil;
+    error_info = info;
 #ifdef HOST_DEBUGGER_ON_ERROR
     HOST_DEBUGGER();
 #endif
@@ -41,15 +41,13 @@ error (char code, char * msg)
 void FASTCALL
 error_argname (lispptr x)
 {
-    error_info = x;
-    error (ERROR_ARGNAME_TYPE, "Arg not a symbol");
+    error (ERROR_ARGNAME_TYPE, "Arg not a symbol", x);
 }
 
 lispptr FASTCALL
 error_cons_expected (lispptr x)
 {
-    error_info = x;
-    error (ERROR_TYPE, "not a cons");
+    error (ERROR_TYPE, "not a cons", x);
     return nil;
 }
 
@@ -139,8 +137,7 @@ err_type (char * type, lispptr x, char code)
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
-    error_info = make_symbol (type, strlen (type));
-    error (code, buffer);
+    error (code, buffer, make_symbol (type, strlen (type)));
 }
 
 #ifndef NAIVE

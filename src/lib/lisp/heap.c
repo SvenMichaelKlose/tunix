@@ -267,7 +267,7 @@ alloc (uchar size, uchar type)
 #if !defined(NAIVE) && !defined(GC_STRESS)
         if (NEEDS_GC(size)) {
             onetime_heap_margin = 0;
-            error (ERROR_OUT_OF_HEAP, "Out of heap.");
+            error (ERROR_OUT_OF_HEAP, "Out of heap", nil);
             longjmp (*hard_repl_break, 1);
             return nil;
         }

@@ -1258,7 +1258,7 @@ extern bool     FASTCALL lisp_specialp  (lispptr);
 #ifndef NAIVE
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
-extern void     FASTCALL error               (char code, char * msg);
+extern void     FASTCALL error               (char code, char * msg, lispptr info);
 extern void     FASTCALL error_argname       (lispptr);
 extern lispptr  FASTCALL error_cons_expected (lispptr);
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);

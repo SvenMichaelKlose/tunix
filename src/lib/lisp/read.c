@@ -32,7 +32,7 @@ our_isalpha (char c)
 lispptr
 missing_closing_paren (void)
 {
-    error (ERROR_PAREN_MISSING, "Missing ')'");
+    error (ERROR_PAREN_MISSING, "Missing ')'", nil);
     return t;
 }
 
@@ -135,7 +135,7 @@ read_string (void)
         *p = (lastin () == '\\') ? in () : lastin ();
 #ifndef NAIVE
         if (eof ()) {
-            error (ERROR_QUOTE_MISSING, "No '\"'");
+            error (ERROR_QUOTE_MISSING, "No '\"'", nil);
             return nil;
         }
 #endif
@@ -177,7 +177,7 @@ read_symbol_or_number (void)
 #ifndef NAIVE
         // Check if buffer is full.
         if (len == MAX_SYMBOL) {
-            error (ERROR_SYM_TOO_LONG, "Sym len");
+            error (ERROR_SYM_TOO_LONG, "Sym len", nil);
             return nil;
         }
 #endif
@@ -244,7 +244,7 @@ read_expr ()
         return make_number (in ());
 #ifndef NAIVE
     case ')':
-        error (ERROR_STALE_PAREN, "Stale ')'");
+        error (ERROR_STALE_PAREN, "Stale ')'", nil);
         return nil;
 #endif
     }

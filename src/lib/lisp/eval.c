@@ -29,7 +29,7 @@ lispptr breakpoints_sym;
 
 #ifndef NAIVE
 char    error_code;
-lispptr error_info;
+lispptr failed_obj;
 #endif
 
 #ifdef USE_ZEROPAGE
@@ -747,6 +747,6 @@ init_eval ()
     SET_SYMBOL_VALUE(breakpoints_sym, nil);
     do_invoke_debugger = false;
     debug_step = nil;
-    error_info = nil;
+    failed_obj = nil;
 #endif
 }

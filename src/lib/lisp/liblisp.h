@@ -741,7 +741,7 @@ extern bool    do_highlight;
 
 #ifndef NAIVE
 extern char    error_code;
-extern lispptr error_info;
+extern lispptr failed_obj;
 #endif
 
 extern lispptr t;

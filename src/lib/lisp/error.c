@@ -32,7 +32,7 @@ error (char code, char * msg, lispptr info)
 {
     last_errstr = msg;
     error_code = code;
-    error_info = info;
+    failed_obj = info;
 #ifdef HOST_DEBUGGER_ON_ERROR
     HOST_DEBUGGER();
 #endif

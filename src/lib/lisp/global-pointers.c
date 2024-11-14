@@ -26,7 +26,7 @@ lispptr * global_pointers[] = {
     &current_toplevel,
     &current_function,
     &unevaluated_arg1,
-    &error_info,
+    &failed_obj,
 #endif
 #ifndef NO_ONERROR
     &onerror_sym,

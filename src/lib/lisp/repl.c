@@ -80,7 +80,7 @@ print_debug_info ()
             outs (last_errstr);
 
         outs (": ");
-        print (error_info);
+        print (failed_obj);
 
         if (NOT_NIL(value)) {
             fresh_line ();
@@ -211,13 +211,13 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
         if (CONSP(SYMBOL_VALUE(onerror_sym))) {
             // Save error state for the debugger
             // if ONERROR handler fails.
-            PUSH(error_info);
+            PUSH(failed_obj);
             PUSH(value);
             PUSH_TAG(error_code);
             PUSH_TAG(unevaluated);
 
             // Make argument list for call of ONERROR.
-            tmp2 = make_cons (error_info, nil);
+            tmp2 = make_cons (failed_obj, nil);
             x = make_cons (current_expr, tmp2);
             tmp2 = make_cons (current_toplevel, x);
             PUSH(tmp2);
@@ -247,7 +247,7 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
             POP_TAG(unevaluated);
             POP_TAG(error_code);
             POP(value);
-            POP(error_info);
+            POP(failed_obj);
         }
 #ifdef NO_DEBUGGER
         // Error not handled.  Exit program.

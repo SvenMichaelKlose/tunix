@@ -42,12 +42,14 @@ void FASTCALL
 error_argname (lispptr x)
 {
     error (ERROR_ARGNAME_TYPE, "Arg not a symbol", x);
+    error_info = make_symbol ("symbol", 6);
 }
 
 lispptr FASTCALL
 error_cons_expected (lispptr x)
 {
     error (ERROR_TYPE, "not a cons", x);
+    error_info = make_symbol ("cons", 4);
     return nil;
 }
 
@@ -137,7 +139,8 @@ err_type (char * type, lispptr x, char code)
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
-    error (code, buffer, make_symbol (type, strlen (type)));
+    error (code, buffer, x);
+    error_info = make_symbol (type, strlen (type));
 }
 
 #ifndef NAIVE

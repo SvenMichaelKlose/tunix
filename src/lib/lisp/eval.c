@@ -30,6 +30,7 @@ lispptr breakpoints_sym;
 #ifndef NAIVE
 char    error_code;
 lispptr failed_obj;
+lispptr error_info;
 #endif
 
 #ifdef USE_ZEROPAGE
@@ -209,6 +210,7 @@ eval_block:
 #ifndef NAIVE
     if (!SYMBOLP(arg1)) {
         error (ERROR_TYPE, "Name not a sym", arg1);
+        error_info = make_symbol ("symbol", 6);
         goto return_obj;
     }
 #endif
@@ -384,7 +386,7 @@ next_builtin_arg:
 save_arg_value:
 #ifndef NAIVE
     // Type-check and debug.
-    bi_tcheck (value, *biargdef, ERROR_TYPE);
+    bi_tcheck (value, *biargdef, ERROR_TYPE); // TODO: Remove type. (pixel)
     if (error_code) {
         PUSH(args);
         PUSH_TAGW(biargdef);

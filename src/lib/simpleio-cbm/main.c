@@ -128,7 +128,6 @@ cmd_cr (void)
         cbm_k_bsout (13);
 }
 
-
 char FASTCALL
 reverse_case (char c)
 {
@@ -144,7 +143,7 @@ alloc_channel (void)
 {
     simpleio_chn_t chn;
     for (chn = FIRST_CHANNEL; chn < MAX_CHANNELS; chn++) {
-        if (chn == 15)
+        if (chn == 15) // (For accessing control channel.)
             chn++;
         if (!logical_fns[chn]) {
             logical_fns[chn] = chn;
@@ -197,7 +196,9 @@ raw_conin (void)
 char
 raw_in (void)
 {
-    char c = cbm_k_chrin ();
+    char c;
+    cbm_k_chkin (logical_fns[fnin]);
+    c = cbm_k_chrin ();
     set_status (fnin);
     return (fnin == STDIN) ? reverse_case (c) : c;
 }
@@ -221,6 +222,7 @@ raw_out (char c)
             return;
         }
     }
+    cbm_k_ckout (logical_fns[fnout]);
     cbm_k_bsout (c);
     set_status (fnout);
 }
@@ -242,6 +244,8 @@ raw_close (simpleio_chn_t chn)
 {
     cbm_k_close (logical_fns[chn]);
     logical_fns[chn] = 0;
+    cbm_k_chkin (logical_fns[fnin]);
+    cbm_k_ckout (logical_fns[fnout]);
 }
 
 simpleio vectors = {
@@ -260,21 +264,20 @@ simpleio vectors = {
 simpleio_chn_t FASTCALL
 simpleio_open (char * name, char mode)
 {
+    // Set up channel.
     simpleio_chn_t chn = alloc_channel ();
     if (!chn)
         return 0;
     simpleio_init_channel (chn, &vectors);
 
+    // Make CBM DOS pathname.
     ofs = 2;
     if (mode == 'w')
         ofs = 3;
-
     silen = strlen (name);
-
-    // Move name and reverse case.
+    // (Move name and reverse case.)
     for (i = silen; i != 255; i--)
         name[i + ofs] = reverse_case (name[i]);
-
     if (mode == 'w') {
         name[0] = '@';
         name[1] = '0';
@@ -287,18 +290,17 @@ simpleio_open (char * name, char mode)
     }
 
     // Open file.
-    if (cbm_open (chn, 8, chn, name)) {
-        logical_fns[chn] = 0;
-        return 0;
-    }
+    if (cbm_open (chn, 8, chn, name))
+        goto break_with_error;
 
     // Read DOS status code.
-    cbm_open (15, 8, 15, "");
+    if (cbm_open (15, 8, 15, ""))
+        goto break_with_error;
     cbm_k_chkin (15);
     ctrh = cbm_k_basin ();
     ctrl = cbm_k_basin ();
     cbm_close (15);
-    cbm_k_chkin (fnin);
+    cbm_k_chkin (logical_fns[fnin]);
 
     // Check DOS status code.
     if (ctrl != '0' || ctrh != '0') {
@@ -306,6 +308,11 @@ simpleio_open (char * name, char mode)
         return 0;
     }
     return chn;
+
+break_with_error:
+    logical_fns[chn] = 0;
+    last_errors[chn] = -1;
+    return 0;
 }
 
 simpleio_chn_t
@@ -334,21 +341,20 @@ directory_close (simpleio_chn_t chn)
     logical_fns[chn] = 0;
 }
 
-
 void
 simpleio_init ()
 {
     cbm_k_clall ();
-    cbm_open (STDIN, DEV_KEYBOARD, 0, NULL);
-    cbm_open (STDOUT, DEV_SCREEN, 0, NULL);
+    cbm_open (STDIN,  DEV_KEYBOARD, 0, NULL);
+    cbm_open (STDOUT, DEV_SCREEN,   0, NULL);
     memset (logical_fns, 0, sizeof (logical_fns));
     memset (last_errors, 0, sizeof (last_errors));
-    memset (eof_status, 0, sizeof (eof_status));
+    memset (eof_status,  0, sizeof (eof_status));
     logical_fns[STDIN]  = STDIN;
     logical_fns[STDOUT] = STDOUT;
     logical_fns[STDERR] = STDOUT;
     simpleio_clear_channels ();
-    simpleio_init_channel (STDIN, &vectors);
+    simpleio_init_channel (STDIN,  &vectors);
     simpleio_init_channel (STDOUT, &vectors);
     simpleio_init_channel (STDERR, &vectors);
     simpleio_init_common ();

@@ -9,15 +9,30 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.28] - 2024-11-16
+
+### Lisp
+
+#### Debugger REPL
+
+##### Fixed
+
+- Command 'n' (step over expression).
+
+
 ## [v0.0.27] - 2024-11-16
 
 ### libsimpleio-cbm
 
-- Fix output to IEC devices.
+#### Fixed
+
+- Output to IEC devices.
 
 ### Lisp
 
 #### Environment
+
+##### Fixed
 
 - ERROR: Print all arguments like OUT.
 
@@ -26,9 +41,11 @@ and this project adheres to
 
 ### Lisp
 
-#### Debugger
+#### Debugger REPL
 
-- Fixed highlighting and type error messages.
+##### Fixed
+
+- Highlighting and type error messages.
 
 #### Interpreter
 

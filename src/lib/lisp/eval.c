@@ -141,8 +141,6 @@ do_eval:
 #endif // #ifdef __CC65__
 #endif // #ifndef NAIVE
 
-    PUSH(highlighted);
-
     //////////
     // ATOM //
     //////////
@@ -159,6 +157,7 @@ do_eval:
     // EXPRESSION //
     ////////////////
 
+    PUSH(highlighted);
 #ifndef NO_DEBUGGER
     PUSH(current_expr);
     current_expr = x;
@@ -573,19 +572,20 @@ return_obj:
     if (error_code)
         value = lisp_repl (REPL_DEBUGGER, 0);
 #endif
-#ifndef NO_DEBUGGER
-    POP(current_expr);
-#endif
-
-return_atom:
-    POP(highlighted);
-    unevaluated = false;
 
 #ifndef NO_DEBUGGER
     // Invoke debugger if we stepped over expression.
     if (debug_step && debug_step == current_expr)
         do_invoke_debugger = true;
 #endif
+
+#ifndef NO_DEBUGGER
+    POP(current_expr);
+#endif
+    POP(highlighted);
+
+return_atom:
+    unevaluated = false;
 
     // Evaluate consequence of conditional.
     if (value == delayed_eval)

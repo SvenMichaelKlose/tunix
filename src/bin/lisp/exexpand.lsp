@@ -1,8 +1,16 @@
+; See doc/compiler.md
+
 (fn expex-move-arg (x)
   (? (cons? x)
      (!= (symbol)
        (. ! (list (list '= ! x))))
      (. x nil)))
+
+; Returns:
+; carlist: New arguments.
+; cdrlist: Off-loaded expressions, assigning to temporaries.
+(fn expex-move-args (x)
+  (@ expex-move-arg x))
 
 ; Move function calls out of argument list and
 ; replace them by anonymous symbols.
@@ -10,22 +18,14 @@
   (?
     (atom x)
       (list x)
-    ; Handle assignments differently.
+    ; Expression in assigment
     (eq '= (car x))
       (? (atom (caddr x))
-         ; Ignore atomic value.
          (list x)
-         ; Do the real work.
-         ; Split arguments into off-loaded assignments (cdrlist),
-         ; and replacement or original symbols (carlist).
-         (!= (@ expex-move-arg (cdr (caddr x)))
-           ; Concatenate moved arguments...
+         (!= (expex-move-args (cdr (caddr x)))
            (append (mapcan exexpand (mapcan cdr !))
-                   ; ...and re-assemble orgiginal assignment with new argument list.
                    (list (list '= (cadr x) (. (car (caddr x)) (carlist !)))))))
-    ; Do the real work.
-    (!= (@ expex-move-arg (cdr x))
-      ; Concatenate moved arguments...
+    ; Expression
+    (!= (expex-move-args (cdr x))
       (append (mapcan exexpand (mapcan cdr !))
-              ; ...and re-assemble orgiginal expression with new argument list.
               (list (. (car x) (carlist !)))))))

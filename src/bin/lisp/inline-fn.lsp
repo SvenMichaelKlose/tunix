@@ -1,3 +1,5 @@
+; See doc/compiler.md
+
 (fn inline-fn (x)
   (?
     (and (cons? x)

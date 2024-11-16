@@ -1,3 +1,5 @@
+; See doc/compiler.md
+
 (fn %block? (x)
   (and (cons? x)
        (eq '%block (car x))))

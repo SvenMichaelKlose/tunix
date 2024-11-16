@@ -9,6 +9,19 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [v0.0.27] - 2024-11-16
+
+### libsimpleio-cbm
+
+- Fix output to IEC devices.
+
+### Lisp
+
+#### Environment
+
+- ERROR: Print all arguments like OUT.
+
+
 ## [v0.0.26] - 2024-11-14
 
 ### Lisp

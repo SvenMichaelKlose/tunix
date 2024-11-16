@@ -9,6 +9,10 @@
      (terpri)
      (= *universe* (remove '*start-time* *universe*)))))
 
+(fn reset! ()
+  (= *universe* (cdr (member 'reset! *universe*)))
+  (= *macros* nil))
+
 (and (builtin? gc)
   ((()
      (message "Cleaning up. Please wait...")

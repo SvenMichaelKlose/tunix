@@ -1,3 +1,5 @@
+; See doc/compiler.md
+
 (fn argexpand (def val)
   (with-queue q
     (do ((d def (cdr d))

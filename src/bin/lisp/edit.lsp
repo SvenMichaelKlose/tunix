@@ -294,6 +294,8 @@
           (status-pos)))))
 
 (fn edit file
+  (= *alv?* nil)
+  (clrscr)
   (reset-ln)
   (?
     file
@@ -303,7 +305,6 @@
     (and (not *lines*)
          *filename*)
       (load-file))
-  (= *alv?* nil)
   (clrscr)
   (edit-lines)
   (clrscr)

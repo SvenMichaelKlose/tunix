@@ -85,6 +85,10 @@ const char * env_files[] = {
 
 #ifndef TARGET_C16
     "autoload.lsp",
+    "reset!.lsp",
+#if defined(TEST_ENVIRONMENT)
+    "test-autoload.lsp",
+#endif
 #if defined(TEST_ENVIRONMENT) && !defined(NO_BUILTIN_GROUP_FILE)
     "test-file.lsp",
 #endif

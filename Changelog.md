@@ -19,6 +19,10 @@ and this project adheres to
 
 - WITH-QUEUE does not depend on MAKE-QUEUE and QUEUE-LIST anymore.
 
+##### Added
+
+- COMPILE-ENV: First compiler passes under construction.
+
 
 ## [v0.0.28] - 2024-11-16
 

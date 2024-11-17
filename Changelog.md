@@ -15,6 +15,10 @@ and this project adheres to
 
 #### Environment
 
+##### Fixed
+
+- RESET!: Don't have it remove itself.
+
 ##### Changed
 
 - WITH-QUEUE does not depend on MAKE-QUEUE and QUEUE-LIST anymore.

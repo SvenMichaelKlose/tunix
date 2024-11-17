@@ -24,8 +24,8 @@
          (list x)
          (!= (expex-move-args (cdr (caddr x)))
            (append (mapcan exexpand (mapcan cdr !))
-                   (list (list '= (cadr x) (. (car (caddr x)) (carlist !)))))))
+                   (list (list '= (cadr x) (. (car (caddr x)) (@ car !)))))))
     ; Expression
     (!= (expex-move-args (cdr x))
       (append (mapcan exexpand (mapcan cdr !))
-              (list (. (car x) (carlist !)))))))
+              (list (. (car x) (@ car !)))))))

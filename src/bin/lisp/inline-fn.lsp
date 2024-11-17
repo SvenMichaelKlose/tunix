@@ -5,7 +5,7 @@
     (and (cons? x)
          (cons? (car x)))
       (!= (argexpand (caar x) (cdr x))
-        (let (argsyms (carlist !))
+        (let (argsyms (@ car !))
           $(%block
              ,@(!? argsyms
                    $((%push ,@!)))

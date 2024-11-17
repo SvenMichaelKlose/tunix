@@ -66,19 +66,19 @@ n:  rts
 .endproc
 
 .proc zpd_dec_x
-    inc 0,x
+    dec 0,x
     lda 0,x
     cmp #$ff
     bne n
-    inc 1,x
+    dec 1,x
     lda 1,x
     cmp #$ff
     bne n
-    inc 2,x
+    dec 2,x
     lda 2,x
     cmp #$ff
     bne n
-    inc 3,x
+    dec 3,x
 n:  rts
 .endproc
 

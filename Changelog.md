@@ -11,6 +11,12 @@ and this project adheres to
 
 ## [current]
 
+### libzp
+
+- Faster zpw\_dec\_x (Courtesy of Michael Kircher.)
+- Fixed zpd\_dec\_x
+
+
 ### Lisp
 
 #### Environment

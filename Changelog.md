@@ -9,6 +9,17 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Changed
+
+- WITH-QUEUE does not depend on MAKE-QUEUE and QUEUE-LIST anymore.
+
+
 ## [v0.0.28] - 2024-11-16
 
 ### Lisp

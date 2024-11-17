@@ -1,6 +1,6 @@
 (macro with-queue (q . body)
   ;"Evaluate block with queue Q and return its list."
-  $(let (,q (make-queue))
+  $(let (,q (. nil nil))
      (block nil
        ,@body
-       (queue-list ,q))))
+       (cdr ,q))))

@@ -390,6 +390,16 @@
                (s p)))
       (error)))
 
+(do-test 'INSERT
+  (or (equal (insert '(1 3) 1 2)
+             '(1 2 3))
+      (error)))
+
+(do-test 'NINSERT
+  (or (equal (ninsert '(1 3) 1 2)
+             '(1 2 3))
+      (error)))
+
 (message "TODO: INTERSECT...")
 (message "TODO: MAX...")
 

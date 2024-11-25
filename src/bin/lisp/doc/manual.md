@@ -2127,6 +2127,8 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 | (find x l)        | Find element X in list.             |
 | (find-if f l)     | Find element X in list by F.        |
 | (group l n)       | Split L in lists of length N.       |
+| (insert l n x)    | Non-destructive insert of X at N.   |
+| (ninsert l n x)   | Destructive insert of X at N.       |
 | (nth n l)         | Get Nth element of list.            |
 | (nthcdr n l)      | Get Nth cons of list.               |
 | (mapcar f +l)     | Map CARs of lists.                  |

@@ -16,7 +16,6 @@ and this project adheres to
 - Faster zpw\_dec\_x (Courtesy of Michael Kircher.)
 - Fixed zpd\_dec\_x
 
-
 ### Lisp
 
 #### Environment
@@ -31,6 +30,8 @@ and this project adheres to
 
 ##### Added
 
+- REDUCE
+- INSERT, NINSERT: Non-(destructive) list inserts.
 - COMPILE-ENV: First compiler passes under construction.
 
 

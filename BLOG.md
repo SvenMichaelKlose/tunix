@@ -3,11 +3,32 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-11-14
+# 2024-12-08
 
-Et voilà: the first passes of the compiler are up.  On unixoids.
-Time to un-hang the CBM I/O.  Also fixed the debugger.  Let's rock on
-after that extensive break.
+Am continuing work on the 6502 assembler.  An evolutionary step
+compared to [Bender](https://github.com/SvenMichaelKlose/bender)
+which no-one should be using.   Its use of STRUCTs alone is a punch
+in the nuts.  That's also a mistake I've been pulling through
+with when writing the tré Lisp compiler.  TUNIX Lisp's object system
+based on associative lists has to get there too to take the noise out
+of the code.
+
+The new assembler will be a juwel added to TUNIX Lisp.  It'll
+be too slow to do anything useful with on 6502 targets (and I'd like
+to be proven wrong right there), but what I want to compile VIC-20
+projects outside TUNIX which require lots of complicated, generated
+speed code.
+
+The non-working VIC-20 version is also a pressing issue.  I cannot
+post updates on Denial with no woring VIC version.  With a running
+version there'd even be enough heap to do something useful.  Honestly,
+I've been sitting at the desk a little bit too long.
+
+# 2024-11-16
+
+The first compiler passes are running on unixoids and the C64.
+The plus/4 and VIC-20 seem to have memory layout issues, whereas
+the C128 is running out of heap.
 
 # 2024-11-06
 

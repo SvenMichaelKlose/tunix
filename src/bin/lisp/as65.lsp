@@ -1,5 +1,4 @@
-; Verbose AUTOLOAD.
-(= *alv?* t)
+(= *alv?* t) ; Verbose AUTOLOAD.
 
 (var *mn-6502*
   '((nil bit jmp jmpi sty ldy cpy cpx)
@@ -40,13 +39,13 @@
      (nil nil nil nil txs tsx)         ; implied
      t)))                              ; absolute X (Y for LDX and STX)
 
-(fn mn-cc (mn)
+(fn as65-mn-cc (mn)
   (dotimes (cc 3)
     (and (member mn (nth cc *mn-6502*))
          (return cc))))
 
 ; LDX/STX: Change addressing modes from ABSY/ZPY to ABSX/ZPX.
-(fn adjust-am (mn am)
+(fn a65-adjust-am (mn am)
   (? (member mn '(ldx stx))
      (?
        (eq am 'absy) 'absx
@@ -55,10 +54,10 @@
      am))
 
 ; Get opcode of 1st class instruction.
-(fn mnam-opc (mn am)
+(fn as65-mnam-opc (mn am)
   ; Get CC by mnemonic.
-  (let-when cc (mn-cc mn)
-    (= am (adjust-am mn am))
+  (let-when cc (as65-mn-cc mn)
+    (= am (a65-adjust-am mn am))
     ; Get AAA by mnemonic.
     (let-when aaa (position mn (nth cc *mn-6502*))
       ; Get BBB by addressing mode.
@@ -70,7 +69,7 @@
           (list aaa bbb cc))))))
 
 ; Get opcode of 2nd class instruction.
-(fn mnimm-opc (mn)
+(fn as65-mnimm-opc (mn)
   (block found
     ; Scan all CC pages.
     (dolist-indexed (c cc *6502*)
@@ -83,10 +82,16 @@
             (return (list aaa bbb cc) found)))))))
 
 ; Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode.
-(fn mn-opc (mn am)
+(fn as65-opcode (mn am)
   (awhen (? am
-            (mnam-opc mn am)
-            (mnimm-opc mn))
+            (as65-mnam-opc mn am)
+            (as65-mnimm-opc mn))
     (+ (+ (<< (car !) 5)
           (<< (cadr !) 2))
        (caddr !))))
+
+(fn as65 (addr x)
+  (!= (= *as65-pc* addr)
+    (dolist (v (as65 x))
+      (poke ! v)
+      (++! !))))

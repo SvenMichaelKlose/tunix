@@ -37,7 +37,7 @@ missing_closing_paren (void)
 }
 
 lispptr
-is_unexpected_eol (void)
+is_unexpected_eof (void)
 {
     return eof () ? missing_closing_paren () : nil;
 }
@@ -73,7 +73,7 @@ read_list (void)
         skip_comments_and_spaces ();
 
 #ifndef NAIVE
-        if (is_unexpected_eol ())
+        if (is_unexpected_eof ())
             return nil;
 #endif
 
@@ -81,7 +81,7 @@ read_list (void)
         if (in () == ')')
             return start;
 #ifndef NAIVE
-        if (is_unexpected_eol ())
+        if (is_unexpected_eof ())
             return nil;
 #endif
         putback ();
@@ -89,8 +89,9 @@ read_list (void)
         PUSH(start);
         PUSH(last);
 
+        c = read_expr ();
         // Dotted pair?
-        if (in () == '.' && NOT_NIL(start)) {
+        if (c == dot_symbol && NOT_NIL(start)) {
             // Read dotted pair's CDR.
             c = read_expr ();
 
@@ -101,11 +102,9 @@ read_list (void)
                 return missing_closing_paren ();
             putback (); // Keep for regular end-of-list detection.
 #endif
-        } else {
+        } else
             // Read next element.
-            putback ();
-            c = make_cons (read_expr (), nil);
-        }
+            c = make_cons (c, nil);
 
         POP(last);
         POP(start);

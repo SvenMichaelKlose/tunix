@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.29] - 2024-12-09
 
 ### libzp
 
@@ -33,6 +33,10 @@ and this project adheres to
 - REDUCE
 - INSERT, NINSERT: Non-(destructive) list inserts.
 - COMPILE-ENV: First compiler passes under construction.
+
+#### Interpreter
+
+- READ: Fix reading literal cons "(car . cdr)".
 
 
 ## [v0.0.28] - 2024-11-16

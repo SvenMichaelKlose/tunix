@@ -6,7 +6,7 @@
 
 (message '"# Standard macro expansion...")
 (with-out o (open '"_tmpa.lsp" 'w)
-  (dolist (i (remove 'quasiquote (member 'autoload *universe*)))
+  (dolist (i (member 'autoload *universe*))
     (or (builtin? i)
         (awhen (symbol-value i)
           (and (cons? !)
@@ -19,12 +19,11 @@
                  (setout o)
                  (print (. i (. (car !) (@ macroexpand (cdr !)))))))))))
 
+(message '"# Compiler macro expansion...")
 ; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
 (require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan)
 (var tag nil)
 (require 'cmacroexpand)
-
-(message '"# Compiler macro expansion...")
 (with-in i (open '"_tmpa.lsp" 'r)
   (with-out o (open '"_tmpb.lsp" 'w)
     (while (not (eof))
@@ -44,8 +43,8 @@
 (load 'fold-block.lsp)
 (= *macros* nil)
 
-(message '"# Collect function info...")
-(message '"# Argument expansion...")
+(message '"# TODO: Collect function info...")
+(message '"# TODO: Argument expansion...")
 
 (message '"# Inlining anonymous functions...")
 (with-in i (open '"_tmpb.lsp" 'r)
@@ -57,7 +56,7 @@
         (setout o)
         (print (. (car !) (. (cadr !) (@ inline-fn (cddr !)))))))))
 
-(message '"# Expression expansion...")
+(message '"# TODO: Expression expansion...")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; FRONT END CLEANUP ;;;
@@ -80,20 +79,21 @@
 ;;; OPTIMIZATION ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(message '"# Fold constants...")
-(message '"# Remove temporaries...")
-(message '"# Remove useless stores...")
-(message '"# Remove useless loads...")
-(message '"# Remove unused code...")
+(message '"# TODO: Fold constants...")
+(message '"# TODO: Remove temporaries...")
+(message '"# TODO: Remove useless stores...")
+(message '"# TODO: Remove useless loads...")
+(message '"# TODO: Remove unused code...")
 
 ;;;;;;;;;;;;;;;;;
 ;;; BACK END ;;;;
 ;;;;;;;;;;;;;;;;;
 
-(message '"# Code macros...")
-(message '"# Remove temporaries...")
-(message '"# Remove useless stores...")
-(message '"# Remove useless loads...")
-(message '"# Remove unused code...")
+(message '"# TODO: Code macros...")
+(message '"# TODO: Remove temporaries...")
+(message '"# TODO: Remove useless stores...")
+(message '"# TODO: Remove useless loads...")
+(message '"# TODO: Remove unused code...")
 
-(reset!)
+(fn compile-env ()
+  (reset!))

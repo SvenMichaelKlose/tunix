@@ -14,44 +14,44 @@
 
 (fn as65-parse (x)
   (block nil
-    (awhen x.
+    (awhen (car x)
       (unless (symbol? !)
         (error "Symbol expected"))
 
       (when (labeldef? !)
-        (return (. .x (. 'label !))))
+        (return (. (cdr x) (. 'label !))))
       (and (symbol? !)
-           (eq ': .x.)
-           (return (. ..x (. 'label !))))
+           (eq ': (cadr x))
+           (return (. (cddr x) (. 'label !))))
 
       (or (mnem? !)
           (error "Menomic expected"))
       (let (inst nil)
         (acons! 'mnem ! inst)
-        (= x .x)
+        (= x (cdr x))
 
-        (awhen x.
+        (awhen (car x)
           (when (cons? !)   ; (a) / (a,x) / expr
             (and (== 2 (length !)) ; Lisp expression
                  (cons? (cadr !)) ; (a,x) -> (a (quote x))
-                 (eq 'unquote (car .!.))
-                 (eq 'x (cadr .!.))
-                 (return (. .x
+                 (eq 'unquote (car (cadr !)))
+                 (eq 'x (cadr (cadr !)))
+                 (return (. (cdr x)
                             (. (. 'mode 'indx)
-                               (. (. 'op !.)
+                               (. (. 'op (car !))
                                   inst)))))
             (acons! 'mode 'ind inst)
             (acons! 'op ! inst))
           (unless (cons? !)
             (acons! 'op ! inst))
-          (= x .x)
-          (awhen x.
+          (= x (cdr x))
+          (awhen (car x)
             (or (eq 'unquote (car !))
                 (error "QUOTE or eol"))
-            (!= .!.
+            (!= (cadr !)
               (or (eq 'x !)
                   (eq 'y !)
                   (error ",x or ,x!"))
               (acons! 'absr ! inst))
-            (= x .x)))
+            (= x (cdr x))))
         (. x inst)))))

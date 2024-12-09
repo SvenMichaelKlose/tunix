@@ -44,8 +44,8 @@
     (and (member mn (nth cc *mn-6502*))
          (return cc))))
 
-; LDX/STX: Change addressing modes from ABSY/ZPY to ABSX/ZPX.
-(fn a65-adjust-am (mn am)
+(fn as65-adjust-am (mn am)
+  ; "LDX/STX: Change addressing modes from ABSY/ZPY to ABSX/ZPX."
   (? (member mn '(ldx stx))
      (?
        (eq am 'absy) 'absx
@@ -53,11 +53,11 @@
        am)
      am))
 
-; Get opcode of 1st class instruction.
 (fn as65-mnam-opc (mn am)
+  ; "Get opcode of 1st class instruction."
   ; Get CC by mnemonic.
   (let-when cc (as65-mn-cc mn)
-    (= am (a65-adjust-am mn am))
+    (= am (as65-adjust-am mn am))
     ; Get AAA by mnemonic.
     (let-when aaa (position mn (nth cc *mn-6502*))
       ; Get BBB by addressing mode.
@@ -68,8 +68,8 @@
                     (eq t (nth aaa !))))
           (list aaa bbb cc))))))
 
-; Get opcode of 2nd class instruction.
 (fn as65-mnimm-opc (mn)
+  ; "Get opcode of 2nd class instruction."
   (block found
     ; Scan all CC pages.
     (dolist-indexed (c cc *6502*)
@@ -81,8 +81,8 @@
             ; Mnemonic found.
             (return (list aaa bbb cc) found)))))))
 
-; Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode.
 (fn as65-opcode (mn am)
+  ; "Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode."
   (awhen (? am
             (as65-mnam-opc mn am)
             (as65-mnimm-opc mn))

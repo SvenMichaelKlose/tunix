@@ -13,14 +13,14 @@
   (= *previous-labels* nil))
 
 (fn update-label (x addr)
-  (!= *next-labels*.
-    (unless (eq !. x)
+  (!= (car *next-labels*)
+    (unless (eq (car !) x)
       (error "Wanted to update label ~A but found ~A.~%"
              "Please make sure that your code does not"
              " change across passes."
-             x !.))
-    (unless (== .! addr)
-      (= .! addr)
+             x (car !)))
+    (unless (== (cdr !) addr)
+      (= (cdr !) addr)
       (= *label-changed?* t)))
   (push (pop *next-labels*) *previous-labels*))
 

@@ -1,5 +1,3 @@
-(load '"as65.lsp")
-
 (var *all-mnem65* (append (apply append *mn-6502*)
                           (remove t (remove nil (apply append (remove t (remove nil (apply append *6502*))))))))
 
@@ -14,36 +12,46 @@
 (or (mnem? 'lda)
     (error "MNEM? not working"))
 
-(fn as65-parse ()
+(fn as65-parse (x)
   (block nil
-    (let (inst nil)
-      (awhen (read)
-        (or (symbol? !)
-            (error "Symbol expected"))
-        (and (labeldef? !)
-             (return (. 'label !)))
-        (or (mnem? !)
-            (error "Menomic expected"))
+    (awhen x.
+      (unless (symbol? !)
+        (error "Symbol expected"))
+
+      (when (labeldef? !)
+        (return (. .x (. 'label !))))
+      (and (symbol? !)
+           (eq ': .x.)
+           (return (. ..x (. 'label !))))
+
+      (or (mnem? !)
+          (error "Menomic expected"))
+      (let (inst nil)
         (acons! 'mnem ! inst)
-        (awhen (read)
+        (= x .x)
+
+        (awhen x.
           (when (cons? !)   ; (a) / (a,x) / expr
             (and (== 2 (length !)) ; Lisp expression
                  (cons? (cadr !)) ; (a,x) -> (a (quote x))
-                 (eq 'unquote (car (cadr !)))
-                 (eq 'x (cadr (cadr !)))
-                 (return (. (. 'mode 'indx)
-                            (. (. 'op (car !))
-                               inst))))
+                 (eq 'unquote (car .!.))
+                 (eq 'x (cadr .!.))
+                 (return (. .x
+                            (. (. 'mode 'indx)
+                               (. (. 'op !.)
+                                  inst)))))
             (acons! 'mode 'ind inst)
             (acons! 'op ! inst))
           (unless (cons? !)
             (acons! 'op ! inst))
-          (awhen (read)
+          (= x .x)
+          (awhen x.
             (or (eq 'unquote (car !))
                 (error "QUOTE or eol"))
-            (!= (cadr !)
+            (!= .!.
               (or (eq 'x !)
                   (eq 'y !)
                   (error ",x or ,x!"))
-              (acons! 'absr ! inst))))
-        inst))))
+              (acons! 'absr ! inst))
+            (= x .x)))
+        (. x inst)))))

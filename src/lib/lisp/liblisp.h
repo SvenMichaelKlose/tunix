@@ -181,7 +181,7 @@
 /// Memory allocation
 
 // Stack and table sizes.
-#define STACK_SIZE          1568
+#define STACK_SIZE          2048
 #define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 384
 
@@ -733,6 +733,8 @@ extern lispptr fail_sym;
 #if !defined(NO_VERBOSE_LOAD) && !defined(NO_VERBOSE_DEFINES)
 extern lispptr vp_symbol;
 #endif
+
+extern lispptr dot_symbol;
 
 #ifndef NO_HIGHLIGHTING
 extern lispptr highlighted;

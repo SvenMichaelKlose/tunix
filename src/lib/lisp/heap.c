@@ -55,6 +55,8 @@ lispptr  last_symbol;
 lispptr  vp_symbol;
 #endif
 
+lispptr  dot_symbol;
+
 size_t  onetime_heap_margin;
 
 #ifdef FRAGMENTED_HEAP
@@ -521,6 +523,8 @@ init_heap ()
 
     // Be true.
     t = alloc_symbol ("t", 1);
+
+    dot_symbol = alloc_symbol (".", 1);
 
     // Make +TARGET+.
     tmp2 = alloc_symbol ("+target+", 8);

@@ -45,6 +45,8 @@ lispptr * global_pointers[] = {
     &vp_symbol,
 #endif
 
+    &dot_symbol,
+
     &lisp_fnin, &lisp_fnout,
 
     &x, &args, &argdefs, &arg1, &arg2, &arg2c,

@@ -11,6 +11,7 @@
     (eq a b)))
 
 (fn cequal (a b)
+  "EQUAL, always matching anonymous symbols."
   (or (and (cons? a)
            (cons? b)
            (cequal (car a) (car b))

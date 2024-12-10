@@ -20,10 +20,9 @@
                  (print (. i (. (car !) (@ macroexpand (cdr !)))))))))))
 
 (message '"# Compiler macro expansion...")
+(reset!)
 ; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
-(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan)
-(var tag nil)
-(require 'cmacroexpand)
+(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan 'cmacroexpand)
 (with-in i (open '"_tmpa.lsp" 'r)
   (with-out o (open '"_tmpb.lsp" 'w)
     (while (not (eof))
@@ -31,22 +30,15 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (@ cmacroexpand (cddr !)))))))))
-
-(= *universe* (cdr (member 'tag *universe*)))
-(var tag nil)
-(load 'inline-fn.lsp)
-(load 'argexpand.lsp)
-(load 'with-queue.lsp)
-(load 'enqueue.lsp)
-(load 'reverse.lsp)
-(load 'fold-block.lsp)
-(= *macros* nil)
+        (print (. (car !) (. (cadr !) (@ cmacroexpand (cddr !)))))
+        (reset!)))))
 
 (message '"# TODO: Collect function info...")
 (message '"# TODO: Argument expansion...")
 
 (message '"# Inlining anonymous functions...")
+(reset!)
+(load 'inline-fn.lsp)
 (with-in i (open '"_tmpb.lsp" 'r)
   (with-out o (open '"_tmpc.lsp" 'w)
     (while (not (eof))
@@ -54,7 +46,8 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (@ inline-fn (cddr !)))))))))
+        (print (. (car !) (. (cadr !) (@ inline-fn (cddr !)))))
+        (reset!)))))
 
 (message '"# TODO: Expression expansion...")
 
@@ -63,6 +56,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (message '"# Folding blocks...")
+(reset!)
+(load 'fold-block.lsp)
 (with-in i (open '"_tmpc.lsp" 'r)
   (with-out o (open '"_tmpd.lsp" 'w)
     (while (not (eof))
@@ -70,30 +65,30 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (mapcan fold-block (cddr !)))))))))
+        (print (. (car !) (. (cadr !) (mapcan fold-block (cddr !)))))
+        (reset!)))))
 
-(message '"# Straighten jumps...")
-(message '"# Remove unused tags...")
+;(message '"# Straighten jumps...")
+;(message '"# Remove unused tags...")
 
 ;;;;;;;;;;;;;;;;;;;;
 ;;; OPTIMIZATION ;;;
 ;;;;;;;;;;;;;;;;;;;;
 
-(message '"# TODO: Fold constants...")
-(message '"# TODO: Remove temporaries...")
-(message '"# TODO: Remove useless stores...")
-(message '"# TODO: Remove useless loads...")
-(message '"# TODO: Remove unused code...")
+;(message '"# TODO: Fold constants...")
+;(message '"# TODO: Remove temporaries...")
+;(message '"# TODO: Remove useless stores...")
+;(message '"# TODO: Remove useless loads...")
+;(message '"# TODO: Remove unused code...")
 
 ;;;;;;;;;;;;;;;;;
 ;;; BACK END ;;;;
 ;;;;;;;;;;;;;;;;;
 
-(message '"# TODO: Code macros...")
-(message '"# TODO: Remove temporaries...")
-(message '"# TODO: Remove useless stores...")
-(message '"# TODO: Remove useless loads...")
-(message '"# TODO: Remove unused code...")
+;(message '"# TODO: Code macros...")
+;(message '"# TODO: Remove temporaries...")
+;(message '"# TODO: Remove useless stores...")
+;(message '"# TODO: Remove useless loads...")
+;(message '"# TODO: Remove unused code...")
 
-(fn compile-env ()
-  (reset!))
+;(fn compile-env () (reset!))

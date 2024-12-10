@@ -424,6 +424,11 @@
 
 (message "TODO: SPLIT-IF...")
 
+(do-test 'REDUCE
+  (or (equal (reduce + '(1 2 3 4 5))
+             15)
+      (error)))
+
 (do-test 'UNION
   (or (equal (union '(l l i i) '(s s p p))
              '(l i s p))

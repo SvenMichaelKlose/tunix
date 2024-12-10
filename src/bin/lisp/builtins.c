@@ -1604,7 +1604,7 @@ const struct builtin builtins[] = {
     { "%sclose",        "n",    bi_socket_close },
 #endif
 
-    { NULL, NULL }
+    { NULL }
 };
 
 #ifdef __CC65__

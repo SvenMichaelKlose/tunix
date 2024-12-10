@@ -31,15 +31,18 @@
         (= x (cdr x))
 
         (awhen (car x)
+          (when (eq ! '#)
+            (return $(,(cddr x)
+                      (mode . imm)
+                      ,(. 'op (cadr x)))))
           (when (cons? !)   ; (a) / (a,x) / expr
             (and (== 2 (length !)) ; Lisp expression
                  (cons? (cadr !)) ; (a,x) -> (a (quote x))
                  (eq 'unquote (car (cadr !)))
                  (eq 'x (cadr (cadr !)))
-                 (return (. (cdr x)
-                            (. (. 'mode 'indx)
-                               (. (. 'op (car !))
-                                  inst)))))
+                 (return $(,(cdr x)
+                           (mode . indx)
+                           ,(. 'op (car !)))))
             (acons! 'mode 'ind inst)
             (acons! 'op ! inst))
           (unless (cons? !)

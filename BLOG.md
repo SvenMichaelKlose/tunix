@@ -3,7 +3,7 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2024-12-08
+# 2024-12-09
 
 Am continuing work on the 6502 assembler.  An evolutionary step
 compared to [Bender](https://github.com/SvenMichaelKlose/bender)
@@ -15,12 +15,11 @@ of the code.
 
 The new assembler will be a juwel added to TUNIX Lisp.  It'll
 be too slow to do anything useful with on 6502 targets (and I'd like
-to be proven wrong right there), but what I want to compile VIC-20
-projects outside TUNIX which require lots of complicated, generated
-speed code.
+to be proven wrong right there), but I want to compile VIC-20 projects
+outside TUNIX which require lots of complicated, generated speed code.
 
 The non-working VIC-20 version is also a pressing issue.  I cannot
-post updates on Denial with no woring VIC version.  With a running
+post updates on Denial with no working VIC version.  With a running
 version there'd even be enough heap to do something useful.  Honestly,
 I've been sitting at the desk a little bit too long.
 

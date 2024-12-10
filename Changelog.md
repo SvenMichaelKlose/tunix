@@ -9,6 +9,21 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Fixed
+
+- REDUCE: No dot notation.
+
+##### Added
+
+- RESHAPE: Fold list to higher dimensions.
+
+
 ## [v0.0.29] - 2024-12-09
 
 ### libzp

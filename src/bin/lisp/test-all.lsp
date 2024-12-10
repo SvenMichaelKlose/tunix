@@ -429,6 +429,11 @@
              15)
       (error)))
 
+(do-test 'RESHAPE
+  (or (equal (reshape '(1 2 3 4 5 6 7 8) 2 3)
+             '(((1 2 3) (4 5 6)) ((7 8))))
+      (error)))
+
 (do-test 'UNION
   (or (equal (union '(l l i i) '(s s p p))
              '(l i s p))

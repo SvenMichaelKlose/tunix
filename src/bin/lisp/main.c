@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <setjmp.h>
+#include <signal.h>
 
 #include <simpleio/libsimpleio.h>
 #include <simpleio/control.h>
@@ -171,6 +172,7 @@ lisp_init (void)
 #endif
     init_list ();
     init_eval ();
+    init_read ();
     init_builtins ();
     init_quote_symbols ();
     init_io_symbols ();

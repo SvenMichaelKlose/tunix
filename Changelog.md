@@ -9,7 +9,7 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [current]
+## [v0.0.30]
 
 ### Lisp
 
@@ -22,6 +22,12 @@ and this project adheres to
 ##### Added
 
 - RESHAPE: Fold list to higher dimensions.
+
+#### Interpreter
+
+##### Fixed
+
+- READ for dotted conses.
 
 
 ## [v0.0.29] - 2024-12-09

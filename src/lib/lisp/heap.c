@@ -55,8 +55,6 @@ lispptr  last_symbol;
 lispptr  vp_symbol;
 #endif
 
-lispptr  dot_symbol;
-
 size_t  onetime_heap_margin;
 
 #ifdef FRAGMENTED_HEAP
@@ -465,7 +463,7 @@ init_heap ()
 #endif
     stack = stack_end;
     // Avoid trashing rest of program on overflow.
-    stack_start += 8 * sizeof (lispptr);
+    stack_start += 16 * sizeof (lispptr);
 
     // Allocate relocation table.
     xlat_start = malloc (RELOC_TABLE_ENTRIES * sizeof (xlat_item));
@@ -523,8 +521,6 @@ init_heap ()
 
     // Be true.
     t = alloc_symbol ("t", 1);
-
-    dot_symbol = alloc_symbol (".", 1);
 
     // Make +TARGET+.
     tmp2 = alloc_symbol ("+target+", 8);

@@ -16,6 +16,8 @@
 
 #include "liblisp.h"
 
+lispptr dot_symbol;
+
 #ifdef __CC65__
 #pragma code-name (push, "CODE_READ")
 #endif
@@ -103,7 +105,6 @@ read_list (void)
             putback (); // Keep for regular end-of-list detection.
 #endif
         } else
-            // Read next element.
             c = make_cons (c, nil);
 
         POP(last);
@@ -249,4 +250,10 @@ read_expr ()
     }
     putback ();
     return read_symbol_or_number ();
+}
+
+void
+init_read ()
+{
+    dot_symbol = alloc_symbol (".", 1);
 }

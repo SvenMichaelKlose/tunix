@@ -1302,6 +1302,7 @@ extern void init_eval     (void);
 extern bool init_heap     (void);
 extern void init_list     (void);
 extern void init_onerror  (void);
+extern void init_read     (void);
 extern void init_repl     (void);
 extern void heap_add_init_areas (void);
 

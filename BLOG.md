@@ -3,6 +3,82 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-12-11
+
+The autoloader is perhaps one of the most desireable features of
+TUNIX Lisp.  Being able to throw out currently unused functions and
+macros is priceless in constrained environments.  Following that
+strategy comes at the price of having to split up the code into
+smaller fragments as usual, to make wanted functions accessible via
+filenames.  The default environment already comes with +140 files.
+We need something to resolve this issue without adding anything to the
+interpreter.  Here's what comes to mind: use directories.
+Genius, aye? m)  AUTOLOAD will have to adapt filename assembly to the
+target platform (SD2IEC, BiDB access).  Let's look at some code:
+
+~~~asm
+; Before
+(fn edit file
+  (= *alv?* nil)
+  (clrscr)
+  (reset-ln)
+  (?
+    file
+      (progn
+        (= *filename* (car file))
+        (load-file))
+    (and (not *lines*)
+         *filename*)
+      (load-file))
+  (clrscr)
+  (edit-lines)
+  (clrscr)
+  (con-direct nil)
+  *filename*)
+
+; After
+(fn editor/edit file
+  (= *alv?* nil)
+  (clrscr)
+  (reset-ln)
+  (?
+    file
+      (progn
+        (= editor/*filename* (car file))
+        (editor/load-file))
+    (and (not editor/*lines*)
+         editor/*filename*)
+      (editor/load-file))
+  (clrscr)
+  (editor/edit-lines)
+  (clrscr)
+  (con-direct nil)
+  editor/*filename*)
+~~~
+
+You're not alone.  It's messing me up already as well.  The global
+expansion function \*EX\*, which handles MACROEXPAND and DOTEXPAND,
+could also handle symbol prefixing, based on a configuration, like:
+
+~~~asm
+; Define prefix for a set of symbols.
+(in-package 'editor '(edit *lines* *filename* edit-lines))
+
+; and to reset:
+(in-package nil)
+~~~
+
+Allow IN-PACKAGE to get overriden with an empty prefix:
+
+~~~asm
+(anonymize)     ; In current IN-PACKAGE scope.
+(/anonymize)    ; Top-level, default environment.
+~~~
+
+That's just another dozen lines of Lisp code to get comfy app
+development.  Like the assembler.  I'm happy.  Supporting CBMs will
+be its very own kind of fun.
+
 # 2024-12-09
 
 Am continuing work on the 6502 assembler.  An evolutionary step

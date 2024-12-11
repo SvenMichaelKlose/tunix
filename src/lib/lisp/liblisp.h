@@ -181,8 +181,8 @@
 /// Memory allocation
 
 // Stack and table sizes.
-#define STACK_SIZE          2048
-#define TAGSTACK_SIZE       384
+#define STACK_SIZE          3072
+#define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 384
 
 // Use malloc() to allocate the heap.

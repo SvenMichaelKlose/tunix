@@ -1,12 +1,13 @@
-(= *universe* (member 'autoload *universe*))
+(message "# Testing all...")
+
+(reset!)
 (var stime (time))
 (var app-test-all nil)
-
-(fn env-reset ()
+(fn test-reset! ()
   (message "reset")
   (= *universe* (member 'app-test-all *universe*))
   (= *macros* (member-if '((x)
-                            (eq (car x) 'do-test))
+                            (eq 'do-test (car x)))
                          *macros*))
   (fresh-line))
 
@@ -17,7 +18,7 @@
         ((()
            (fresh-line)
            (and (< (print (gc)) 4096)
-                (env-reset)))))
+                (test-reset!)))))
       (fresh-line)
       ,@body)))
 
@@ -444,16 +445,16 @@
              '(l i s p))
       (error)))
 
+(test-reset!)
 (test-dotexpand)
+(= *ex* macroexpand)
+(test-reset!)
+(load 'test-as65.lsp)
 
 (fn test-all ()
   (!= stime
-    (= *ex* macroexpand)
-    (= *universe* (cddr (member 'app-test-all *universe*)))
-    (= *macros* (cdr (member-if '((x)
-                                   (eq 'do-test (car x)))
-                                *macros*)))
-    (out "Tests passed. ")
+    (reset!)
+    (out "# Tests passed. ")
     (print (/ (- (time) !) +bps+))
     (out '"s.")
     (terpri)))

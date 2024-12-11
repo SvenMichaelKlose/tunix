@@ -12,6 +12,8 @@
 (or (mnem? 'lda)
     (error "MNEM? not working"))
 
+(require 'when)
+
 (fn as65-parse (x)
   (block nil
     (awhen (car x)
@@ -19,10 +21,12 @@
         (error "Symbol expected"))
 
       (when (labeldef? !)
-        (return (. (cdr x) (. 'label !))))
+        (return (. (cdr x)
+                   (list (. 'label (symbol (butlast (symbol-name !))))))))
       (and (symbol? !)
            (eq ': (cadr x))
-           (return (. (cddr x) (. 'label !))))
+           (return (. (cddr x)
+                      (list (. 'label !)))))
 
       (or (mnem? !)
           (error "Menomic expected"))

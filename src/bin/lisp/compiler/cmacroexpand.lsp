@@ -1,3 +1,5 @@
+(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan 'cmacroexpand)
+
 (var *cmacros* nil)
 
 (macro defcm (n a . body)

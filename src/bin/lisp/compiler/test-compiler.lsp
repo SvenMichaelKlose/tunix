@@ -1,13 +1,13 @@
 (= *alv?* t)
-(app 'app-test-compiler)
 
 (message "Testing CMACROEXPAND...")
+(reset!)
 (print (cmacroexpand '(and a b c)))
 (print (cmacroexpand '(or a b c)))
 (print (cmacroexpand '(? a b c)))
-(rm-app 'app-cmacroexpand)
 
 (message "Testing ARGEXPAND...")
+(reset!)
 (and (argexpand nil nil)
      (error))
 (or (equal (argexpand '(a b c) '(1 2 3))
@@ -21,6 +21,7 @@
     (error))
 
 (message "Testing INLINE-FN...")
+(reset!)
 (or (cequal (inline-fn '((())))
             '(%block))
     (error))
@@ -41,9 +42,9 @@
                  e f
                  (%pop d c))))
     (error))
-(rm-app 'app-inline-fn)
 
 (message "Testing FOLD-BLOCK...")
+(reset!)
 (or (cequal (fold-block nil)
             '(nil))
     (error))
@@ -53,14 +54,9 @@
 (or (cequal (fold-block '(%block a (%block b c)))
             '(a b c))
     (error))
-(rm-app 'app-fold-block)
 
 (message "Testing EXEXPAND...")
-(load 'exexpand.lsp)
+(reset!)
 (print (exexpand (print '(a b c d))))
 (print (exexpand (print '(a (b c d)))))
 (print (exexpand (print '(a (b (c d))))))
-
-(load 'bcasm.lsp)
-
-(app 'app-test-compiler)

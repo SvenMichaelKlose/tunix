@@ -10,7 +10,7 @@ TUNIX Lisp.  Being able to throw out currently unused functions and
 macros is priceless in constrained environments.  Following that
 strategy comes at the price of having to split up the code into
 smaller fragments as usual, to make wanted functions accessible via
-filenames.  The default environment already comes with +140 files.
+their filenames.  The default environment already comes with +140 files.
 We need something to resolve this issue without adding anything to the
 interpreter.  Here's what comes to mind: use directories.
 Genius, aye? m)  AUTOLOAD will have to adapt filename assembly to the

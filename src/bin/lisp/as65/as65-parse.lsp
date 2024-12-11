@@ -16,6 +16,7 @@
 (require 'when)
 
 (fn as65-parse (x)
+  ; "Returns (next-x . alist-info)"
   (block nil
     (awhen (car x)
       (unless (symbol? !)
@@ -46,11 +47,12 @@
                  (eq 'unquote (car (cadr !)))
                  (eq 'x (cadr (cadr !)))
                  (return $(,(cdr x)
-                           (mode . indx)
+                           (mode . izpx)
                            ,(. 'op (car !)))))
             (acons! 'mode 'ind inst)
-            (acons! 'op ! inst))
+            (acons! 'op !. inst))
           (unless (cons? !)
+            (acons! 'mode 'abs inst)
             (acons! 'op ! inst))
           (= x (cdr x))
           (awhen (car x)
@@ -59,7 +61,7 @@
             (!= (cadr !)
               (or (eq 'x !)
                   (eq 'y !)
-                  (error ",x or ,x!"))
-              (acons! 'absr ! inst))
+                  (error ",x or ,y!"))
+              (acons! 'ireg ! inst))
             (= x (cdr x))))
         (. x inst)))))

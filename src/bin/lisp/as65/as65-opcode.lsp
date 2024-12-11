@@ -39,12 +39,12 @@
      (nil nil nil nil txs tsx)         ; implied
      t)))                              ; absolute X (Y for LDX and STX)
 
-(fn as65-mn-cc (mn)
+(fn as65/mn-cc (mn)
   (dotimes (cc 3)
     (and (member mn (nth cc *mn-6502*))
          (return cc))))
 
-(fn as65-adjust-am (mn am)
+(fn as65/adjust-am (mn am)
   ; "LDX/STX: Change addressing modes from ABSY/ZPY to ABSX/ZPX."
   (? (member mn '(ldx stx))
      (?
@@ -53,11 +53,11 @@
        am)
      am))
 
-(fn as65-mnam-opc (mn am)
+(fn as65/mnam-opc (mn am)
   ; "Get opcode of 1st class instruction."
   ; Get CC by mnemonic.
-  (let-when cc (as65-mn-cc mn)
-    (= am (as65-adjust-am mn am))
+  (let-when cc (as65/mn-cc mn)
+    (= am (as65/adjust-am mn am))
     ; Get AAA by mnemonic.
     (let-when aaa (position mn (nth cc *mn-6502*))
       ; Get BBB by addressing mode.
@@ -68,7 +68,7 @@
                     (eq t (nth aaa !))))
           (list aaa bbb cc))))))
 
-(fn as65-mnimm-opc (mn)
+(fn as65/mnimm-opc (mn)
   ; "Get opcode of 2nd class instruction."
   (block found
     ; Scan all CC pages.
@@ -81,17 +81,35 @@
             ; Mnemonic found.
             (return (list aaa bbb cc) found)))))))
 
-(fn as65-opcode (mn am)
+(fn as65/opcode (mn am)
   ; "Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode."
+  (assert (member am *am-6502*) "Unknown address mode " am)
   (awhen (? am
-            (as65-mnam-opc mn am)
-            (as65-mnimm-opc mn))
+            (as65/mnam-opc mn am)
+            (as65/mnimm-opc mn))
     (+ (+ (<< (car !) 5)
           (<< (cadr !) 2))
        (caddr !))))
 
-(fn as65 (addr x)
-  (!= (= *as65-pc* addr)
-    (dolist (v (as65 x))
-      (poke ! v)
-      (++! !))))
+(fn as65/zpconv (op am zam)
+  (? op
+     (? (< op 256) zam am)
+     am))
+
+(fn as65/inst (i)
+  (with (mode (cdr (assoc 'mode i))
+         mnem (cdr (assoc 'mnem i))
+         ireg (cdr (assoc 'ireg i))
+         op   (cdr (assoc 'op i)))
+    (as65/opcode
+        mnem
+        (case mode
+          abs (?
+                (eq 'x ireg) (as65/zpconv op 'absx 'zpx)
+                (eq 'y ireg) (as65/zpocnv op 'absy 'zpy)
+                abs)
+          ind (?
+                (eq 'x ireg) 'izpx
+                (eq 'y ireg) 'izpy
+                ind)
+          mode))))

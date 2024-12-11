@@ -445,12 +445,6 @@
              '(l i s p))
       (error)))
 
-(test-reset!)
-(test-dotexpand)
-(= *ex* macroexpand)
-(test-reset!)
-(load 'test-as65.lsp)
-
 (fn test-all ()
   (!= stime
     (reset!)
@@ -458,3 +452,11 @@
     (print (/ (- (time) !) +bps+))
     (out '"s.")
     (terpri)))
+
+(reset!)
+(test-dotexpand)
+(= *ex* macroexpand)
+(reset!)
+(load 'test-as65.lsp)
+(reset!)
+(load 'test-compiler.lsp)

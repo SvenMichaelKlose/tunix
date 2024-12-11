@@ -1,5 +1,6 @@
-(load 'as65.lsp)
+(load 'as65-opcode.lsp)
 (load 'as65-parse.lsp)
+
 (or (equal (as65-parse '(label:))
            '(nil (label . label)))
     (error))

@@ -22,7 +22,6 @@
 (message '"# Compiler macro expansion...")
 (reset!)
 ; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
-(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan 'cmacroexpand)
 (with-in i (open '"_tmpa.lsp" 'r)
   (with-out o (open '"_tmpb.lsp" 'w)
     (while (not (eof))

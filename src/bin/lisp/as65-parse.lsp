@@ -12,6 +12,7 @@
 (or (mnem? 'lda)
     (error "MNEM? not working"))
 
+; https://github.com/SvenMichaelKlose/tunix/issues/13
 (require 'when)
 
 (fn as65-parse (x)

@@ -5,4 +5,4 @@
     get-label-in get-earlier-label get-later-label has-label?
     get-label-undirected get-label get-labels
     mn-cc adjust-am mnam-opc mnimm-opc opcode zpconv inst
-    labeldef? mnem? parse))
+    labeldef? mnem? parse asm0 asm))

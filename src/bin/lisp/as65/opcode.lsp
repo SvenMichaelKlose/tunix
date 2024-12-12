@@ -93,29 +93,4 @@
           (<< (cadr !) 2))
        (caddr !))))
 
-(fn zpconv (op am zam)
-  (? op
-     (? (< op 256) zam am)
-     am))
-
-(fn inst (i)
-  (with (mode (cdr (assoc 'mode i))
-         mnem (cdr (assoc 'mnem i))
-         ireg (cdr (assoc 'ireg i))
-         op   (cdr (assoc 'op i)))
-    (opcode
-        mnem
-        (case mode
-          abs (?
-                (eq 'x ireg)
-                  (zpconv op 'absx 'zpx)
-                (eq 'y ireg)
-                  (zpocnv op 'absy 'zpy)
-                abs)
-          ind (?
-                (eq 'x ireg) 'izpx
-                (eq 'y ireg) 'izpy
-                ind)
-          mode))))
-
 (in-package nil)

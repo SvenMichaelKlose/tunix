@@ -22,4 +22,4 @@
     (. (%mkpkg (car x))
        (%mkpkg (cdr x)))))
 
-(= *ex* '((x) (macroexpand (%mkpkg x))))
+(= *ex* '((x) (macroexpand (%mkpkg (dotexpand x)))))

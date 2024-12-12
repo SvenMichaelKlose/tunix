@@ -39,7 +39,7 @@
           ; If missing function turns out to be
           ; a macro, replace expression by its expansion.
           (when (macro? %f)
-            (let (%m (macroexpand %x))
+            (let (%m (*ex* %x))
               (setcar %x (car %m))
               (setcdr %x (cdr %m))))
           ; Try again.

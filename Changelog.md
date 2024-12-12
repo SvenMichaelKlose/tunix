@@ -9,6 +9,16 @@ and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Fixed
+
+- CHAR-AT, SET-CHAR-AT: Don't crash on NULL pointer NILs.
+
 ## [v0.0.30] - 2024-12-10
 
 ### Lisp

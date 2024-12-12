@@ -161,20 +161,27 @@ lispptr
 bi_char_at ()
 {
     lispnum_t n = NUMBER_VALUE(arg2);
-    lispobj_size_t l = SYMBOL_LENGTH(arg1);
+    lispobj_size_t l = NOT(arg1) ? 3 : SYMBOL_LENGTH(arg1);
     if (n < 0 || n >= l)
         return nil;
-    return make_number (SYMBOL_NAME(arg1)[n]);
+    return make_number ((NOT(arg1) ? "nil" : SYMBOL_NAME(arg1))[n]);
 }
 
 lispptr
 bi_set_char_at ()
 {
-    lispptr        s = LIST_CAR(arg1);
-    lispptr        n = LIST_CAR(LIST_CDR(arg1));
-    lispptr        v = LIST_CAR(LIST_CDR(CDR(arg1)));
-    lispnum_t      i = NUMBER_VALUE(n);
-    lispobj_size_t l = SYMBOL_LENGTH(s);
+    lispptr        s;
+    lispptr        n;
+    lispptr        v;
+    lispnum_t      i;
+    lispobj_size_t l;
+    if (NOT(arg1))
+        error (ERROR_TYPE, "nil", nil);
+    s = LIST_CAR(arg1);
+    n = LIST_CAR(LIST_CDR(arg1));
+    v = LIST_CAR(LIST_CDR(CDR(arg1)));
+    i = NUMBER_VALUE(n);
+    l = SYMBOL_LENGTH(s);
     if (i < 0 || i >= l)
         return nil;
     SYMBOL_NAME(s)[i] = NUMBER_VALUE(v);
@@ -211,7 +218,7 @@ bi_symbol_name ()
 lispptr
 bi_slength (void)
 {
-    return make_number (SYMBOL_LENGTH(arg1));
+    return make_number (NOT(arg1) ? 3 : SYMBOL_LENGTH(arg1));
 }
 
 #endif // #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME

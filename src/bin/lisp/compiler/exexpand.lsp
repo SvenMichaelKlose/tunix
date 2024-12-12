@@ -19,15 +19,15 @@
     (atom x)
       (list x)
     ; Expression in assigment
-    (eq '= (car x))
-      (? (atom (caddr x))
+    (eq '= x.)
+      (? (atom ..x.)
          (list x)
-         (!= (expex-move-args (cdr (caddr x)))
+         (!= (expex-move-args (cdr ..x.))
            (append (mapcan exexpand (mapcan cdr !))
-                   (list (list '= (cadr x) (. (car (caddr x)) (@ car !)))))))
+                   (list (list '= .x. (. (car ..x.) (@ car !)))))))
     ; Expression
-    (!= (expex-move-args (cdr x))
+    (!= (expex-move-args .x)
       (append (mapcan exexpand (mapcan cdr !))
-              (list (. (car x) (@ car !)))))))
+              (list (. x. (@ car !)))))))
 
 (in-package nil)

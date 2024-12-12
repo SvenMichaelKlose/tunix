@@ -2,12 +2,12 @@
 
 (fn %block? (x)
   (and (cons? x)
-       (eq '%block (car x))))
+       (eq '%block x.)))
 
 (fn fold-block (x)
   ; "Splice rest of %BLOCKs."
   (? (%block? x)
-     (!= (cdr x)
+     (!= .x
        (? (cons? !)
           (mapcan fold-block !)
           (list !)))

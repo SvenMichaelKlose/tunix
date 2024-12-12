@@ -25,14 +25,14 @@
   (mklogical '%go-nnil))
 
 (fn mkif (end x)
-  (? (cdr x)
+  (? .x
      (let (next "")
-       $(,(car x)
+       $(,x.
          (%go-nil ,next)
-         ,(cadr x)
+         ,.x.
          (%go ,end)
          (%tag ,next)))
-     (list (car x))))
+     (list x.)))
 
 (defcm ? x
   (let (end "")

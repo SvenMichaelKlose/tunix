@@ -3,8 +3,8 @@
 (fn inline-fn (x)
   (?
     (and (cons? x)
-         (cons? (car x)))
-      (!= (argexpand (caar x) (cdr x))
+         (cons? x.))
+      (!= (argexpand x.. .x)
         (let (argsyms (@ car !))
           $(%block
              ,@(!? argsyms

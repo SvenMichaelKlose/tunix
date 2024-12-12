@@ -1,5 +1,4 @@
 (fn pad (i x)
-  (? (and (cons? x)
-          (cdr x))
-     (. (car x) (. i (pad i (cdr x))))
+  (? (and (cons? x) .x)
+     (. x. (. i (pad i .x)))
      x))

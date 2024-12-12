@@ -34,13 +34,14 @@
 
       (or (mnem? !)
           (error "Menomic expected"))
-      (let (inst nil)
-        (acons! 'mnem ! inst)
+      (let (desc nil)
+        (acons! 'mnem ! desc)
         (= x (cdr x))
 
         (awhen (car x)
           (when (eq ! '#)
             (return $(,(cddr x)
+                      ,@desc
                       (mode . imm)
                       ,(. 'op (cadr x)))))
           (when (cons? !)   ; (a) / (a,x) / expr
@@ -49,13 +50,14 @@
                  (eq 'unquote (car (cadr !)))
                  (eq 'x (cadr (cadr !)))
                  (return $(,(cdr x)
+                           ,@desc
                            (mode . izpx)
                            ,(. 'op (car !)))))
-            (acons! 'mode 'ind inst)
-            (acons! 'op !. inst))
+            (acons! 'mode 'ind desc)
+            (acons! 'op (car !) desc))
           (unless (cons? !)
-            (acons! 'mode 'abs inst)
-            (acons! 'op ! inst))
+            (acons! 'mode 'abs desc)
+            (acons! 'op ! desc))
           (= x (cdr x))
           (awhen (car x)
             (or (eq 'unquote (car !))
@@ -64,8 +66,8 @@
               (or (eq 'x !)
                   (eq 'y !)
                   (error ",x or ,y!"))
-              (acons! 'ireg ! inst))
+              (acons! 'ireg ! desc))
             (= x (cdr x))))
-        (. x inst)))))
+        (. x desc)))))
 
 (in-package nil)

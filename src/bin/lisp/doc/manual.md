@@ -1349,6 +1349,15 @@ a file with IN-PACKAGE translation ends:
 (in-package nil)
 ~~~
 
+To let a symbol escape from translation cause by IN-PACKAGE, prefix
+it with a "/":
+
+~~~lisp
+(load 'my-package/package.lsp)
+sym1    ; -> my-package/sym1
+/sym1   ; -> sym1
+~~~
+
 ## Conses
 
 | Function     | Description                         |

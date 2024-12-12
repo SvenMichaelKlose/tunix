@@ -22,7 +22,6 @@
 (message '"# Compiler macro expansion...")
 (reset!)
 (load 'compiler/cmacroexpand.lsp)
-(load 'compiler/package.lsp)
 ; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
 (with-in i (open '"_tmpa.lsp" 'r)
   (with-out o (open '"_tmpb.lsp" 'w)
@@ -31,7 +30,7 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (@ cmacroexpand (cddr !)))))
+        (print (. (car !) (. (cadr !) (@ compiler/cmacroexpand (cddr !)))))
         (reset!)))))
 
 (message '"# TODO: Collect function info...")
@@ -40,7 +39,6 @@
 (message '"# Inlining anonymous functions...")
 (reset!)
 (load 'compiler/inline-fn.lsp)
-(load 'compiler/package.lsp)
 (with-in i (open '"_tmpb.lsp" 'r)
   (with-out o (open '"_tmpc.lsp" 'w)
     (while (not (eof))
@@ -48,7 +46,7 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (@ inline-fn (cddr !)))))
+        (print (. (car !) (. (cadr !) (@ compiler/inline-fn (cddr !)))))
         (reset!)))))
 
 (message '"# TODO: Expression expansion...")
@@ -60,7 +58,6 @@
 (message '"# Folding blocks...")
 (reset!)
 (load 'compiler/fold-block.lsp)
-(load 'compiler/package.lsp)
 (with-in i (open '"_tmpc.lsp" 'r)
   (with-out o (open '"_tmpd.lsp" 'w)
     (while (not (eof))
@@ -68,7 +65,7 @@
         (setout stdout)
         (print (car !))
         (setout o)
-        (print (. (car !) (. (cadr !) (mapcan fold-block (cddr !)))))
+        (print (. (car !) (. (cadr !) (mapcan compiler/fold-block (cddr !)))))
         (reset!)))))
 
 ;(message '"# Straighten jumps...")

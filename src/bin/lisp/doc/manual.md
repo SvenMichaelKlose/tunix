@@ -75,6 +75,7 @@ Here is how most other Lisps translate to TUNIX Lisp:
 | #\\A                   | \\A             |
 | (cond +l)              | (? +l)          |
 | (= num1 num2)          | (== num1 num2)  |
+| package:symbol         | package/symbol  |
 
 Because the backquote (`) is not part of the charsets of old machines
 TUNIX Lisp intends to support, the dollar sign ($) is used as the

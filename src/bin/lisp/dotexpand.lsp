@@ -41,4 +41,4 @@
     (. (dotexpand (car %dex))
        (dotexpand (cdr %dex)))))
 
-(= *ex* '((%dex) (print (macroexpand (dotexpand (print %dex))))))
+(= *ex* '((%dex) (macroexpand (dotexpand %dex))))

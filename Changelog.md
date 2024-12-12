@@ -19,6 +19,10 @@ and this project adheres to
 
 - CHAR-AT, SET-CHAR-AT: Don't crash on NULL pointer NILs.
 
+##### Changed
+
+- DOTEXPAND: Expand QUOTEd conses too.
+
 ##### Added
 
 - IN-PACKAGE

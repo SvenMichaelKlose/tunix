@@ -2139,37 +2139,38 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 
 ## Lists
 
-| Function          | Description                         |
-|-------------------|-------------------------------------|
-| (dup x n)         | Duplicate X N times.                |
-| (list +x)         | Return list evaluated.              |
-| (list? x)         | Test if argument is NIL or a cons.  |
-| (cadr l)...       | Nested CAR/CDR combinations.        |
-| (carlist l)       | Get first elements of lists.        |
-| (cdrlist l)       | Get rest elements of lists.         |
-| (append +l)       | Copy and append lists.              |
-| (copy-list x)     | Copy list.                          |
-| (copy-alist x)    | Copy associative list.              |
-| (copy-tree x)     | Copy recursively.                   |
-| (count-if f l)    | Count by predicate.                 |
-| (cut-at n l)      | Destructively split list.           |
-| (ensure-list x)   | Turn atom into list.                |
-| (every f x)       | Test if F is T for all X.           |
-| (find x l)        | Find element X in list.             |
-| (find-if f l)     | Find element X in list by F.        |
-| (group l n)       | Split L in lists of length N.       |
-| (insert l n x)    | Non-destructive insert of X at N.   |
-| (ninsert l n x)   | Destructive insert of X at N.       |
-| (nth n l)         | Get Nth element of list.            |
-| (nthcdr n l)      | Get Nth cons of list.               |
-| (mapcar f +l)     | Map CARs of lists.                  |
-| (mapcan f +l)     | Concatenating MAPCAR.               |
-| (member-if f l)   | Find cons with element in list.     |
-| (remove-if f l)   | Removed elemnts from list.          |
-| (reverse l)       | Reverse list.                       |
-| (position x l ?f) | Find position of object in list.    |
-| (split x l ?f)    | Split list where object occurs.     |
-| (subseq l n n)    | Return sublist.                     |
+| Function          | Description                          |
+|-------------------|--------------------------------------|
+| (dup x n)         | Duplicate X N times.                 |
+| (list +x)         | Return list evaluated.               |
+| (list? x)         | Test if argument is NIL or a cons.   |
+| (cadr l)...       | Nested CAR/CDR combinations.         |
+| (carlist l)       | Get first elements of lists.         |
+| (cdrlist l)       | Get rest elements of lists.          |
+| (append +l)       | Copy and append lists.               |
+| (copy-list x)     | Copy list.                           |
+| (copy-alist x)    | Copy associative list.               |
+| (copy-tree x)     | Copy recursively.                    |
+| (count-if f l)    | Count by predicate.                  |
+| (cut-at n l)      | Destructively split list.            |
+| (ensure-list x)   | Turn atom into list.                 |
+| (every f x)       | Test if F is T for all X.            |
+| (find x l)        | Find element X in list.              |
+| (find-if f l)     | Find element X in list by F.         |
+| (group l n)       | Split L in lists of length N.        |
+| (insert l n x)    | Non-destructive insert of X at N.    |
+| (ninsert l n x)   | Destructive insert of X at N.        |
+| (nth n l)         | Get Nth element of list.             |
+| (nthcdr n l)      | Get Nth cons of list.                |
+| (mapcar f +l)     | Map CARs of lists.                   |
+| (mapcan f +l)     | Concatenating MAPCAR.                |
+| (member-if f l)   | Find cons with element in list.      |
+| (reshape l n+)    | Reshape list to multiple dimensions. |
+| (remove-if f l)   | Removed elemnts from list.           |
+| (reverse l)       | Reverse list.                        |
+| (position x l ?f) | Find position of object in list.     |
+| (split x l ?f)    | Split list where object occurs.      |
+| (subseq l n n)    | Return sublist.                      |
 
 ### (dup x n): Duplicate X N times
 
@@ -2266,6 +2267,16 @@ position, or NIL if X has not been found.  Predicate F is EQL by default.
 (position 'foreign '(mom dad)) ; -> nil
 (position 'mom '(mom dad))     ; -> 0
 (position 'dad '(mom dad))     ; -> 1
+~~~
+
+### (reshape l n+): Reshape list to multiple dimensions.
+
+~~~lisp
+(reshape '(1 2 3 4 5 6 7 8) 2)
+; -> ((1 2) (3 4) (5 6) (7 8))
+
+(reshape '(1 2 3 4 5 6 7 8) 2 3)
+; -> (((1 2 3) (4 5 6)) ((7 8)))
 ~~~
 
 ### (split x l ?f) | Split list at object.

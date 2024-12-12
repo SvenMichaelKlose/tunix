@@ -1,4 +1,4 @@
-; See doc/compiler.md
+(load 'compiler/package.lsp)
 
 (fn expex-move-arg (x)
   (? (cons? x)
@@ -29,3 +29,5 @@
     (!= (expex-move-args (cdr x))
       (append (mapcan exexpand (mapcan cdr !))
               (list (. (car x) (@ car !)))))))
+
+(in-package nil)

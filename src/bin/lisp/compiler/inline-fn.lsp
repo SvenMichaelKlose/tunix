@@ -1,4 +1,4 @@
-; See doc/compiler.md
+(load 'compiler/package.lsp)
 
 (fn inline-fn (x)
   (?
@@ -16,3 +16,5 @@
     (cons? x)
       (@ inline-fn x)
     x))
+
+(in-package nil)

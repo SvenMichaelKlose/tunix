@@ -1,3 +1,5 @@
+(load 'compiler/package.lsp)
+
 (fn %block? (x)
   (and (cons? x)
        (eq '%block (car x))))
@@ -10,3 +12,5 @@
           (mapcan fold-block !)
           (list !)))
      (list x)))
+
+(in-package nil)

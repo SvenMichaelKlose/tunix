@@ -21,6 +21,8 @@
 
 (message '"# Compiler macro expansion...")
 (reset!)
+(load 'compiler/cmacroexpand.lsp)
+(load 'compiler/package.lsp)
 ; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
 (with-in i (open '"_tmpa.lsp" 'r)
   (with-out o (open '"_tmpb.lsp" 'w)
@@ -37,7 +39,8 @@
 
 (message '"# Inlining anonymous functions...")
 (reset!)
-(load 'inline-fn.lsp)
+(load 'compiler/inline-fn.lsp)
+(load 'compiler/package.lsp)
 (with-in i (open '"_tmpb.lsp" 'r)
   (with-out o (open '"_tmpc.lsp" 'w)
     (while (not (eof))
@@ -56,7 +59,8 @@
 
 (message '"# Folding blocks...")
 (reset!)
-(load 'fold-block.lsp)
+(load 'compiler/fold-block.lsp)
+(load 'compiler/package.lsp)
 (with-in i (open '"_tmpc.lsp" 'r)
   (with-out o (open '"_tmpd.lsp" 'w)
     (while (not (eof))

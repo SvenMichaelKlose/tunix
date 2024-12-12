@@ -1,3 +1,5 @@
+(load 'as65/package.lsp)
+
 (var *previous-labels* nil)
 (var *next-labels*     nil)
 (var *imported-labels* nil)
@@ -14,7 +16,7 @@
 
 (fn update-label (x addr)
   (!= (car *next-labels*)
-    (unless (eq (car !) x)
+    (unless (eq x (car !))
       (error "Wanted to update label ~A but found ~A.~%"
              "Please make sure that your code does not"
              " change across passes."
@@ -50,12 +52,12 @@
   (= required? (cdr required?))
   (let (prev  (get-earlier-label x nil)
         next  (get-later-label x nil))
-    (and required? prev next
-       (error "Label " x " appears in earlier and later code.~%"
-              "Please specify a direction by prependig a `+` or `-`.~%"
-              "If you want to look up the label from inside a"
-              " Lisp expression, please see functions GET-EARLIER-LABEL"
-              " and GET-LATER-LABEL.~%"))
+    (when required? prev next
+      (error "Label " x " appears in earlier and later code.~%"
+             "Please specify a direction by prependig a `+` or `-`.~%"
+             "If you want to look up the label from inside a"
+             " Lisp expression, please see functions GET-EARLIER-LABEL"
+             " and GET-LATER-LABEL.~%"))
     (or prev next
         (cdr (assoc x *imported-labels* :test #'eq))
         (and required?
@@ -76,3 +78,5 @@
 
 (fn get-labels ()
   *next-labels*)
+
+(in-package nil)

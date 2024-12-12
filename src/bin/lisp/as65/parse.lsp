@@ -1,3 +1,5 @@
+(load 'as65/package.lsp)
+
 (var *all-mnem65* (append (apply append *mn-6502*)
                           (remove t (remove nil (apply append (remove t (remove nil (apply append *6502*))))))))
 
@@ -15,7 +17,7 @@
 ; https://github.com/SvenMichaelKlose/tunix/issues/13
 (require 'when)
 
-(fn as65-parse (x)
+(fn parse (x)
   ; "Returns (next-x . alist-info)"
   (block nil
     (awhen (car x)
@@ -65,3 +67,5 @@
               (acons! 'ireg ! inst))
             (= x (cdr x))))
         (. x inst)))))
+
+(in-package nil)

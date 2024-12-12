@@ -2,12 +2,15 @@
 
 (message "Testing CMACROEXPAND...")
 (reset!)
+(load 'compiler/cmacroexpand.lsp)
+(load 'compiler/package.lsp)
 (print (cmacroexpand '(and a b c)))
 (print (cmacroexpand '(or a b c)))
 (print (cmacroexpand '(? a b c)))
 
 (message "Testing ARGEXPAND...")
 (reset!)
+(load 'compiler/package.lsp)
 (and (argexpand nil nil)
      (error))
 (or (equal (argexpand '(a b c) '(1 2 3))
@@ -22,6 +25,7 @@
 
 (message "Testing INLINE-FN...")
 (reset!)
+(load 'compiler/package.lsp)
 (or (cequal (inline-fn '((())))
             '(%block))
     (error))
@@ -45,6 +49,7 @@
 
 (message "Testing FOLD-BLOCK...")
 (reset!)
+(load 'compiler/package.lsp)
 (or (cequal (fold-block nil)
             '(nil))
     (error))
@@ -57,6 +62,7 @@
 
 (message "Testing EXEXPAND...")
 (reset!)
+(load 'compiler/package.lsp)
 (print (exexpand (print '(a b c d))))
 (print (exexpand (print '(a (b c d)))))
 (print (exexpand (print '(a (b (c d))))))

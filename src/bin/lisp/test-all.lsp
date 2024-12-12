@@ -452,11 +452,3 @@
     (print (/ (- (time) !) +bps+))
     (out '"s.")
     (terpri)))
-
-(reset!)
-(test-dotexpand)
-(= *ex* macroexpand)
-(reset!)
-(load 'test-as65.lsp)
-(reset!)
-(load 'test-compiler.lsp)

@@ -1281,14 +1281,15 @@ Returns its argument if it is a special form or NIL.
 
 ## Symbols
 
-| Function         | Description                           |
-|------------------|---------------------------------------|
-| (symbol l)       | Make symbol with name from char list. |
-| (= 's x)         | Set symbol value.                     |
-| (symbol-value s) | Get symbol value.                     |
-| (symbol-name s)  | Get name as List of char numbers.     |
-| (slength s)      | Get name length.                      |
-| (char-at s n)    | Char of symbol name.                  |
+| Function          | Description                              |
+|-------------------|------------------------------------------|
+| (symbol l)        | Make symbol with name from char list.    |
+| (= 's x)          | Set symbol value.                        |
+| (symbol-value s)  | Get symbol value.                        |
+| (symbol-name s)   | Get name as List of char numbers.        |
+| (slength s)       | Get name length.                         |
+| (char-at s n)     | Char of symbol name.                     |
+| (in-package s l?) | Prefix set of symbols with package name. |
 
 ### (symbol l): Make symbol with name from char list.
 
@@ -1325,6 +1326,27 @@ Get length of symbol or built-in.
 
 ~~~lisp
 (char-at nil 1) ; -> 105
+~~~
+
+### (in-package s l?): Prefix set of symbols with package name.
+
+Adds symbol prefixing to \*EX\* in the REPL.  Prefixes all symbols
+in the set, read by the REPL, with the package name and a "/".
+Files can be packaged up in directories that way.
+
+~~~lisp
+; File "my-package/package.lsp" is a good place for this to share
+; across files of a package.
+(in-package my-package sym1 sym2)
+
+sym1 ; -> my-package/sym1
+~~~
+
+It's reasonable to disable the current symbol translations before
+a file with IN-PACKAGE translation ends:
+
+~~~lisp
+(in-package nil)
 ~~~
 
 ## Conses

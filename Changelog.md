@@ -19,6 +19,11 @@ and this project adheres to
 
 - CHAR-AT, SET-CHAR-AT: Don't crash on NULL pointer NILs.
 
+##### Added
+
+- IN-PACKAGE
+
+
 ## [v0.0.30] - 2024-12-10
 
 ### Lisp

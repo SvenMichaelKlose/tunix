@@ -57,6 +57,9 @@ ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.dbg $(DISTDIR)/
 endif
 	cp src/bin/lisp/*.lsp $(DISTDIR)/
+	cp -r src/bin/lisp/as65 $(DISTDIR)/
+	cp -r src/bin/lisp/compiler $(DISTDIR)/
+	cp -r src/bin/lisp/edit $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/
 	cp src/sbin/ultidump/ultidump $(DISTDIR)/

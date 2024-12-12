@@ -1,4 +1,5 @@
-(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan 'cmacroexpand)
+(load 'compiler/package.lsp)
+(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan)
 
 (var *cmacros* nil)
 
@@ -68,3 +69,5 @@
 (fn cmacroexpand (x)
   (with-global *macros* *cmacros*
     (macroexpand x)))
+
+(in-package nil)

@@ -2,17 +2,17 @@
   (let (tag (symbol))
      $((,(@ car vars)
         (block nil
-          ,@(@ '((x) $(= ,(car x) ,(cadr x))) vars)
+          ,@(@ '((x) $(= ,x. ,.x.)) vars)
           ,tag
-          (? ,(car brk-res)
-             (return ,(? (cddr brk-res)
+          (? ,brk-res.
+             (return ,(? ..brk-res
                          $((()
-                             ,',@(cdr brk-res)))
-                         (cadr brk-res))))
+                             ,',@.brk-res))
+                         .brk-res.)))
           ,@body
           ,@(@ '((x)
-                  (!? (caddr x)
-                      $(= ,(car x) ,!)))
+                  (!? ..x.
+                      $(= ,x. ,!)))
                vars)
           (go ,tag)))
        ,@(dup nil (length vars)))))

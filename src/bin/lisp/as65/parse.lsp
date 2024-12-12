@@ -20,54 +20,54 @@
 (fn parse (x)
   ; "Returns (next-x . alist-info)"
   (block nil
-    (awhen (car x)
+    (awhen x.
       (unless (symbol? !)
         (error "Symbol expected"))
 
       (when (labeldef? !)
-        (return (. (cdr x)
+        (return (. .x
                    (list (. 'label (symbol (butlast (symbol-name !))))))))
       (and (symbol? !)
-           (eq ': (cadr x))
-           (return (. (cddr x)
+           (eq ': .x.)
+           (return (. ..x
                       (list (. 'label !)))))
 
       (or (mnem? !)
           (error "Menomic expected"))
       (let (desc nil)
         (acons! 'mnem ! desc)
-        (= x (cdr x))
+        (= x .x)
 
-        (awhen (car x)
+        (awhen x.
           (when (eq ! '#)
-            (return $(,(cddr x)
+            (return $(,..x
                       ,@desc
                       (mode . imm)
-                      ,(. 'op (cadr x)))))
+                      ,(. 'op .x.))))
           (when (cons? !)   ; (a) / (a,x) / expr
             (and (== 2 (length !)) ; Lisp expression
-                 (cons? (cadr !)) ; (a,x) -> (a (quote x))
-                 (eq 'unquote (car (cadr !)))
-                 (eq 'x (cadr (cadr !)))
-                 (return $(,(cdr x)
+                 (cons? .!.) ; (a,x) -> (a (quote x))
+                 (eq 'unquote (car .!.))
+                 (eq 'x (cadr !.))
+                 (return $(,.x
                            ,@desc
                            (mode . izpx)
-                           ,(. 'op (car !)))))
+                           ,(. 'op .!))))
             (acons! 'mode 'ind desc)
-            (acons! 'op (car !) desc))
+            (acons! 'op !. desc))
           (unless (cons? !)
             (acons! 'mode 'abs desc)
             (acons! 'op ! desc))
-          (= x (cdr x))
-          (awhen (car x)
-            (or (eq 'unquote (car !))
+          (= x .x)
+          (awhen x.
+            (or (eq 'unquote !.)
                 (error "QUOTE or eol"))
-            (!= (cadr !)
+            (!= .!.
               (or (eq 'x !)
                   (eq 'y !)
                   (error ",x or ,y!"))
               (acons! 'ireg ! desc))
-            (= x (cdr x))))
+            (= x .x)))
         (. x desc)))))
 
 (in-package nil)

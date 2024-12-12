@@ -2,46 +2,46 @@
 (fn replace-duplicates (original x universe-list?)
   (and (cons? original)
        (cons? x)
-    (do ((i x (cdr i)))
+    (do ((i x .i))
         ((atom i))
-      (unless (eq original (car i))
+      (unless (eq original i.)
         (?
-          (equal original (car i))
+          (equal original i.)
           (progn
             (out "Found CAR: ")(print original)
             (setcar i original))
           (replace-duplicates original
                               (? (and universe-list?
-                                      (symbol? (car i)))
-                                 (symbol-value (car i))
-                                 (car i))
+                                      (symbol? i.))
+                                 (symbol-value i.)
+                                 i.)
                               nil)))
-      (when (and (not (eq original (cdr i)))
-                 (equal original (cdr i)))
+      (when (and (not (eq original .i))
+                 (equal original .i))
         (out "Found CDR: ")(print original)
         (setcdr i original)))))
 
 (fn compress-tree (x . path)
-  (= path (and path (car path)))
+  (= path (and path path.))
   (when (cons? x)
     (unless path
-      (? (symbol? (car x))
-         (print (symbol-value (car x)))))
+      (? (symbol? x.)
+         (print (symbol-value x.))))
     ; Walk over list
-    (do ((i x (cdr i)))
+    (do ((i x .i))
         ((atom i))
-      (replace-duplicates (car i) i (not path))
+      (replace-duplicates i. i (not path))
       ; Search in parent CDRs.
-      (do ((j path (cdr j)))
+      (do ((j path .j))
           ((atom j))
-        (replace-duplicates (car i) (car j)
-                            (not (cdr j))))
+        (replace-duplicates i. j.
+                            (not .j)))
       ; Step into subtree.
       (?
-        (cons? (car i))
-          (compress-tree (car i) (. i path))
+        (cons? i.)
+          (compress-tree i. (. i path))
         (and (not path)
-             (symbol? (car i)))
+             (symbol? i.))
           (progn
-            (print (car i))(terpri)
-            (compress-tree (symbol-value (car i)) (. i path)))))))
+            (print i.)(terpri)
+            (compress-tree (symbol-value i.) (. i path)))))))

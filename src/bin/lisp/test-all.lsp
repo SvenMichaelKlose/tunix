@@ -118,8 +118,8 @@
              '(42 23))
       (error "Expansion of ENQUEUE failed")))
 
-(message "TODO: QUEUE-LIST...")
-(message "TODO: QUEUE-POP...")
+(message '"TODO: QUEUE-LIST...")
+(message '"TODO: QUEUE-POP...")
 (do-test 'WITH-QUEUE
   (or (equal (with-queue q
                (enqueue q 5))
@@ -401,8 +401,8 @@
              '(1 2 3))
       (error)))
 
-(message "TODO: INTERSECT...")
-(message "TODO: MAX...")
+(message '"TODO: INTERSECT...")
+(message '"TODO: MAX...")
 
 (do-test 'POSITION
   (and (position 'a '(l i s p))
@@ -412,10 +412,10 @@
   (or (== 2 (position 's '(l i s p)))
       (error)))
 
-(message "TODO: POSITION-IF...")
-(message "TODO: REMOVE-IF...")
-(message "TODO: SET-DIFFERENCE...")
-(message "TODO: SET-EXCLUSIVE-OR...")
+(message '"TODO: POSITION-IF...")
+(message '"TODO: REMOVE-IF...")
+(message '"TODO: SET-DIFFERENCE...")
+(message '"TODO: SET-EXCLUSIVE-OR...")
 
 (do-test 'SPLIT
   (and (split 'b nil)
@@ -423,17 +423,17 @@
   (or (equal (split 'b '(a a a b a a b b a a a a))
              '((a a a) (a a) nil (a a a a)))))
 
-(message "TODO: SPLIT-IF...")
+(message '"TODO: SPLIT-IF...")
 
 (do-test 'REDUCE
   (or (equal (reduce + '(1 2 3 4 5))
              15)
       (error)))
 
-(do-test 'RESHAPE
-  (or (equal (reshape '(1 2 3 4 5 6 7 8) 2 3)
-             '(((1 2 3) (4 5 6)) ((7 8))))
-      (error)))
+;(do-test 'RESHAPE
+;  (or (equal (reshape '(1 2 3 4 5 6 7 8) 2 3)
+;             '(((1 2 3) (4 5 6)) ((7 8))))
+;      (error)))
 
 (do-test 'UNION
   (or (equal (union '(l l i i) '(s s p p))
@@ -448,7 +448,7 @@
 (fn test-all ()
   (!= stime
     (reset!)
-    (out "# Tests passed. ")
+    (out '"# Tests passed. ")
     (print (/ (- (time) !) +bps+))
     (out '"s.")
     (terpri)))

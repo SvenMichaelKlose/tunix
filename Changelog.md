@@ -8,8 +8,10 @@ The format is based on
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+[Lisp manual](src/bin/lisp/doc/manual.md)
 
-## [current]
+
+## [v0.0.31] - 2024-12-12
 
 ### Lisp
 

@@ -27,6 +27,13 @@ and this project adheres to
 
 - IN-PACKAGE
 
+### Interpreter
+
+#### Changed
+
+- DOTEXPAND: Load on boot unless compile-time option NO\_DOTEXPAND
+  is defined.
+
 
 ## [v0.0.30] - 2024-12-10
 

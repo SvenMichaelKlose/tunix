@@ -86,6 +86,9 @@
 
 /// Disabling features
 
+// Disable loading DOTEXPAND on boot.
+//#define NO_DOTEXPAND
+
 // No support for saving and loading images.
 //#define NO_IMAGE
 
@@ -441,6 +444,9 @@
 #endif
 #ifndef NO_DEBUGGER
     #define NO_DEBUGGER
+#endif
+#ifndef NO_DOTEXPAND
+    #define NO_DOTEXPAND
 #endif
 #ifndef NO_IMAGE
     #define NO_IMAGE

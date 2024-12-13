@@ -28,6 +28,67 @@ check if a variable is used under certain conditions somewhere in nested BLOCKs:
 not gonna happen with the IR as every function is just a flat list of instructions and
 jumps.  Bringing the code into that state is the task of the "front end".
 
+## Function tagging
+
+A keyword to type function expressions is required to have the compiler
+compile them too.  If it can't tell if an expression is a function,
+it'll have to be interpreted.  FUNCTION as that keyword is readable
+better than the traditional LAMBDA.  People already unnerved by other
+programming language will not watch the LAMBDA with a down-home feeling
+the first time.  As far as I remember, Arc lisp is using FN.  Nice.
+
+~~~lisp
+; Old:
+(@ '((x) (+ 1 x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ 1 x))
+   numbers)
+~~~
+
+What this does not solve is closures (with lexical scope) for
+both interpreter and compiler:
+
+~~~lisp
+; Old:
+(@ $((x) (+ ,n x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ n x))
+   numbers)
+~~~
+
+That new version is barely a problem to compile to but for the
+interpreter it needs to get converted to the old version.  That can
+be done with macro-expansion.  But we want to compile functions that
+are already running in the interpreter, so we need a way to tell the
+compiler, that an expression is a mix of $ and FN.  We go for $FN
+and have that un-expand in the compiler.  For the interpreter it's
+just an $.  Ooph.
+
+~~~lisp
+; Limbo lambda:
+(@ ($fn (x) (+ ,n x))
+   numbers)
+~~~
+
+To make it all even easier to remember, FN keywords for anonymous
+functions should be optional, to make sure that traces of TUNIX Lisp
+will run on an ATtiny or something alike.  One more #ifdef won't hurt.
+
+There's one edge case with FN for anonymous functions: a rest argument
+only would be a symbol, and that tells the FN for anonymous functions
+apart from global function definitions.  Deinitiely an unwanted
+limitation.  We should probably stick with LAMBDA for the front end.
+
+~~~lisp
+; New:
+(@ (lambda (x) (+ n x))
+   numbers)
+~~~
+
 ### Frontend
 
 * Macro expansion

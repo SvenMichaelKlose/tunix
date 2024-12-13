@@ -3,6 +3,123 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-12-12
+
+I __love__ what the environment is looking like at the moment.
+Dot-expansion is now booting along as well.  Should regular code be
+required, it can be expanded to a file in advance, although at the
+cost of human readability: no indentation (unless a pretty PRINT gets
+around) and no comments (unless included as Lisp expressions by READ).
+
+~~~lisp
+(fn expand-file (pin pout . f)
+  (= f (or f. identity))
+  (with-in i (open pin 'r)
+    (with-out o (open pout 'w)
+      (while (not (eof))
+        (print (f (read)))))))
+
+(expand-file "with-dots.lsp" "no-dots.lsp" dotexpand)
+~~~
+
+It's terribly late (03:20am).  What's still giving me the creeps is
+the question of how to deal with anonymous functions (aka lambdas).
+A keyword to type function expressions is required to have the compiler
+compile them too.  If it can't tell if an expression is a function,
+it'll have to be interpreted.  FUNCTION as that keyword is readable
+better than the traditional LAMBDA.  People already unnerved by other
+programming language will not watch the LAMBDA with a down-home feeling
+the first time.  As far as I remember, Arc lisp is using FN.  Nice.
+
+~~~lisp
+; Old:
+(@ '((x) (+ 1 x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ 1 x))
+   numbers)
+~~~
+
+What this does not solve is closures (with lexical scope) for
+both interpreter and compiler:
+
+~~~lisp
+; Old:
+(@ $((x) (+ ,n x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ n x))
+   numbers)
+~~~
+
+That new version is barely a problem to compile to but for the
+interpreter it needs to get converted to the old version.  That can
+be done with macro-expansion and takes away the pain of (un-)quoting
+quotes.  But we want to compile functions that are already running in
+the interpreter, so we need a way to tell the compiler, that an
+expression is a mix of $ and FN.  We go for $FN and have that un-expand
+in the compiler.  For the interpreter it's just an $.  Ooph.
+
+~~~lisp
+; Limbo lambda:
+(@ ($fn (x) (+ ,n x))
+   numbers)
+~~~
+
+To make it all even easier to remember, FN keywords for anonymous
+functions should be optional, to make sure that traces of TUNIX Lisp
+will run on an ATtiny or something alike.  One more #ifdef won't hurt.
+
+Missed that movie again.
+
+There's one edge case with FN for anonymous functions: a rest argument
+only would be a symbol, and that tells the FN for anonymous functions
+apart from global function definitions.  Deinitiely an unwanted
+limitation.  We should probably stick with LAMBDA for the front end.
+
+~~~lisp
+; Revised:
+(@ (lambda (x) (+ n x))
+   numbers)
+~~~
+
+There is something wrong with this picture.  The code is unnecessarily
+verbose with a feature that is used quite often.  The shorter FN was so
+much better.  How about stealing from Common LISP?
+
+~~~lisp
+(@ #'((x) (+ n x))
+   numbers)
+~~~
+
+How about getting rid of the "too many parens" topic entirely
+instead?  By adding brackets:
+
+~~~lisp
+(@ [x) (+ n x)]
+   numbers)
+
+; Default argument _
+(@ [+ n x]
+   numbers)
+~~~
+
+That's what was intended to surface with tré Lisp.  The unmatched
+closing paren tells if the symbols up to it are arguments.
+Otherwise what's between the brackets is an expression if it
+starts with a symbol.
+
+~~~lisp
+[) x]   ; -> (lambda () x)
+[x]     ; -> (lambda (_) (x))
+[x) x]  ; -> (lambda (x) (x))
+~~~
+
+And no-one has to see that LAMBDA first for a bit more code in READ.
+
+
 # 2024-12-11
 
 The autoloader is perhaps one of the most desireable features of
@@ -16,7 +133,7 @@ interpreter.  Here's what comes to mind: use directories.
 Genius, aye? m)  AUTOLOAD will have to adapt filename assembly to the
 target platform (SD2IEC, BiDB access).  Let's look at some code:
 
-~~~asm
+~~~lisp
 ; Before
 (fn edit file
   (= *alv?* nil)

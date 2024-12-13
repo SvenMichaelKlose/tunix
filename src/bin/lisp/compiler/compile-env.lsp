@@ -4,8 +4,11 @@
 ;;; FRONT END ;;;
 ;;;;;;;;;;;;;;;;;
 
-(message '"# Standard macro expansion...")
-(with-out o (open '"_tmpa.lsp" 'w)
+(message '"# Dot- and standard macro-expansion...")
+; To really expand all macros there has to be a list of macros
+; available in the environment.
+(require 'let 'with-out 'dolist 'prog1 awhen progn)
+(with-out o (open '_tmpa.lsp 'w)
   (dolist (i (member 'autoload *universe*))
     (or (builtin? i)
         (awhen (symbol-value i)
@@ -17,39 +20,23 @@
                  (setout stdout)
                  (print i)
                  (setout o)
-                 (print (. i (. !. (@ macroexpand .!))))))))))
+                 (print (. i (. !. (@ '((x) (macroexpand (dotexpand x))) .!))))))))))
 
 (message '"# Compiler macro expansion...")
 (reset!)
 (load 'compiler/cmacroexpand.lsp)
-; With MACROEXPAND hijacked, macros cannot be AUTOLOADed.
-(with-in i (open '"_tmpa.lsp" 'r)
-  (with-out o (open '"_tmpb.lsp" 'w)
-    (while (not (eof))
-      (awhen (read)
-        (setout stdout)
-        (print (car !))
-        (setout o)
-        (print (. ! (. .!. (@ compiler/cmacroexpand ..!))))
-        (reset!)))))
+(load 'compiler/pass.lsp)
+(compiler/pass '_tmpa.lsp '_tmpb.lsp compiler/cmacroexpand)
 
-(message '"# TODO: Collect function info...")
-(message '"# TODO: Argument expansion...")
+;(message '"# TODO: Collect function info...")
+;(message '"# TODO: Argument expansion...")
 
 (message '"# Inlining anonymous functions...")
 (reset!)
 (load 'compiler/inline-fn.lsp)
-(with-in i (open '"_tmpb.lsp" 'r)
-  (with-out o (open '"_tmpc.lsp" 'w)
-    (while (not (eof))
-      (awhen (read)
-        (setout stdout)
-        (print !.)
-        (setout o)
-        (print (. !. (. .!. (@ compiler/inline-fn ..!))))
-        (reset!)))))
+(compiler/pass '_tmpb.lsp '_tmpc.lsp compiler/inline-fn)
 
-(message '"# TODO: Expression expansion...")
+;(message '"# TODO: Expression expansion...")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; FRONT END CLEANUP ;;;
@@ -58,15 +45,7 @@
 (message '"# Folding blocks...")
 (reset!)
 (load 'compiler/fold-block.lsp)
-(with-in i (open '"_tmpc.lsp" 'r)
-  (with-out o (open '"_tmpd.lsp" 'w)
-    (while (not (eof))
-      (awhen (read)
-        (setout stdout)
-        (print !.)
-        (setout o)
-        (print (. !. (. .!. (mapcan compiler/fold-block ..!))))
-        (reset!)))))
+(compiler/pass '_tmpc.lsp '_tmpd.lsp compiler/fold-block)
 
 ;(message '"# Straighten jumps...")
 ;(message '"# Remove unused tags...")

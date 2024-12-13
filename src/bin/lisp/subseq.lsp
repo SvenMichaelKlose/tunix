@@ -3,9 +3,9 @@
     ;"Return the subsequence of LIST from START to END."
     ;"If END is nil, the subsequence goes to the end of the list."
     (with-queue q
-      (do ((e (car end))
+      (do ((e end.)
            (i start (!++ i))
-           (l (nthcdr start l) (cdr l)))
+           (l (nthcdr start l) .l))
           ((or (not l)
                (and e (>= i e))))
-        (enqueue q (car l))))))
+        (enqueue q l.)))))

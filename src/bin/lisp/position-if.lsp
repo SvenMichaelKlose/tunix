@@ -1,6 +1,6 @@
 (fn position-if (f l)
   (do ((n 0 (++ n))
-       (i l (cdr i)))
+       (i l .i))
       ((not i))
-    (? (f (car i))
+    (? (f i.)
        (return n))))

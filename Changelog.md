@@ -11,6 +11,18 @@ and this project adheres to
 [Lisp manual](src/bin/lisp/doc/manual.md)
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Added
+
+- Macro ASSERT.
+- FILTER-FILE: Copy file, filtering expressions.
+
+
 ## [v0.0.31] - 2024-12-12
 
 ### Lisp

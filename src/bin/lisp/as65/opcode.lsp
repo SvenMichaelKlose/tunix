@@ -89,8 +89,8 @@
   (awhen (? am
             (mnam-opc mn am)
             (mnimm-opc mn))
-    (+ (+ (<< (car !) 5)
-          (<< (cadr !) 2))
-       (caddr !))))
+    (+ (+ (<< !. 5)
+          (<< .!. 2))
+       ..!.)))
 
 (in-package nil)

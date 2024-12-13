@@ -2,6 +2,9 @@
 (load 'as65/opcode.lsp)
 (load 'as65/parse.lsp)
 
+(or (equal (as65/parse '((some-fun-or-macro)))
+           '(nil (expr . (some-fun-or-macro))))
+    (error))
 (or (equal (as65/parse '(label:))
            '(nil (label . label)))
     (error))

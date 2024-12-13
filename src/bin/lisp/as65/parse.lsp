@@ -21,8 +21,10 @@
   ; "Returns (next-x . alist-info)"
   (block nil
     (awhen x.
+      (when (cons? !)
+        (return (. .x (list (. 'expr !)))))
       (unless (symbol? !)
-        (error "Symbol expected"))
+        (return (. .x (list (. 'data !)))))
 
       (when (labeldef? !)
         (return (. .x

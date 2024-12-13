@@ -46,13 +46,13 @@
                       ,(. 'op .x.))))
           (when (cons? !)   ; (a) / (a,x) / expr
             (and (== 2 (length !)) ; Lisp expression
-                 (cons? .!.) ; (a,x) -> (a (quote x))
+                 (cons? .!.) ; (a,x) -> (a (unquote x))
                  (eq 'unquote (car .!.))
-                 (eq 'x (cadr !.))
+                 (eq 'x (cadr .!.))
                  (return $(,.x
                            ,@desc
                            (mode . izpx)
-                           ,(. 'op .!))))
+                           ,(. 'op !.))))
             (acons! 'mode 'ind desc)
             (acons! 'op !. desc))
           (unless (cons? !)

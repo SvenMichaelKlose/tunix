@@ -75,9 +75,9 @@
         l (nthcdr (+ *conln* s) *lines*))
     (dotimes (i (- (-- *con-h*) s))
       (con-xy 0 y)
-      (update-line (and l (car l)))
+      (update-line (and l l.))
       (!++ y)
-      (= l (cdr l)))))
+      (= l .l))))
 
 (fn update-screen? ()
   ; Adjust *conln* to keep cursor position visible.
@@ -115,9 +115,9 @@
 ;(fn del-line ()
 ;  (= *update-ln* *ln*)
 ;  (= *lines* (? (== 0 *ln*)
-;                (cdr *lines*)
+;                .*lines*
 ;                (!= (cut-at *ln* *lines*)
-;                  (nconc *lines* (cdr !))))))
+;                  (nconc *lines* .!)))))
 
 (fn join-line ()
   (= *saved?* nil)
@@ -128,9 +128,9 @@
            joined   (list (symbol (nconc (symbol-name prev)
                                          (symbol-name (nth *ln* *lines*))))))
       (= *lines* (? (== 1 *ln*)
-                    (nconc joined (cddr *lines*))
+                    (nconc joined .. *lines*)
                     (!= (cut-at ! *lines*)
-                      (nconc *lines* joined (cddr !)))))
+                      (nconc *lines* joined ..!))))
       (!-- *ln*)
       (= *lx* prev-len))))
 
@@ -148,9 +148,9 @@
   (= *update-ln* *ln*)
   (let (l (split-line (nth *ln* *lines*) *lx*))
     (= *lines* (? (== 0 *ln*)
-                  (nconc l (cdr *lines*))
+                  (nconc l .*lines*)
                   (!= (cut-at *ln* *lines*)
-                    (nconc *lines* l (cdr !))))))
+                    (nconc *lines* l .!)))))
   (!++ *ln*)
   (= *lx* 0))
 
@@ -167,7 +167,7 @@
     (clrscr)
     (con-direct nil)
     (awhile (readdir !)
-      (print (car !)))
+      (print .!))
     (closedir !)
     (terpri)
     (con-direct t)))
@@ -177,7 +177,7 @@
              ;(list-dir)
              (prompt-in "Save:" *filename*)))
     (prompt '"...")
-    (? (with-out o (open (or (car f) uf) 'w)
+    (? (with-out o (open (or f. uf) 'w)
          (? uf
             (= *filename* uf))
          (dolist (l *lines*)
@@ -200,20 +200,19 @@
 (fn choose x
   (while (not (eof))
     (!= (conin)
-      (and (member ! x)
-           (return !)))))
+      (when (member ! x)
+        (return !)))))
 
 (fn quit-editor ()
   (block nil
-    (and *saved?*
-         (return 'quit))
+    (when *saved?*
+      (return 'quit))
     (prompt "Save (y/n/c)?")
     (!= (choose \y \n \c)
       (clr-status)
-      (and (== ! \y)
-           (save-file)
-           'quit)
       (or (== ! \c)
+          (and (== ! \y)
+               (save-file))
           'quit))))
 
 (fn editor-cmds ()
@@ -253,7 +252,7 @@
     (update-screen)
     (let (line (nthcdr *ln* *lines*))
       (con-xy 0 (- *ln* *conln*))
-      (!= (edit-line (car line))
+      (!= (edit-line line.)
         (when *mod?*
           (= *saved?* nil)
           (setcar line !))))
@@ -300,7 +299,7 @@
   (?
     file
       (progn
-        (= *filename* (car file))
+        (= *filename* file.)
         (load-file))
     (and (not *lines*)
          *filename*)

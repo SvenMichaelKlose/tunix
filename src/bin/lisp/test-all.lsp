@@ -248,12 +248,12 @@
 
 (do-test 'CASE
   (case 23
-    42 (error)
+    42 (error "23 is not 42")
     23 'b
-    (error))
+    (error "23 didn't match"))
   (case t
-    42 (error)
-    65 (error)
+    42 (error "42 is not T")
+    65 (error "65 is not T")
     'ok))
 
 (do-test 'ADJOIN

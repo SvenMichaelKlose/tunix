@@ -1,5 +1,3 @@
-(load 'pre-image.lsp)
-
 (and (builtin? 'time)
      (number? +bps+)
   ((()
@@ -12,7 +10,8 @@
 (and (builtin? gc)
   ((()
      (message "Cleaning up. Please wait...")
-     (= *macros* nil)
+     (reset!)
+     (= *universe* (remove 'group2 *universe*))
      (print (gc))(out " bytes free.")(terpri))))
 
 (and (builtin? isave)
@@ -22,4 +21,4 @@
 
 (load 'post-image.lsp)
 
-(message '"Ready.")
+(message '"Environment booted.")

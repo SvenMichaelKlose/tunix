@@ -33,8 +33,7 @@
     (and %dex (symbol? %dex))
       (%des (symbol-name %dex))
     (or (atom %dex)
-        (and (eq 'quote (car %dex))
-             (atom (cadr %dex))))
+        (eq 'quote (car %dex)))
       %dex
     (eq 'backquote (car %dex))
       (list 'backquote (%debq (cadr %dex)))

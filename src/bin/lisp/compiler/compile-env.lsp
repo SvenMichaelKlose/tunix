@@ -26,7 +26,7 @@
 (reset!)
 (load 'compiler/cmacroexpand.lsp)
 (load 'compiler/pass.lsp)
-(compiler/pass '_1dotsmacros.lsp '_2cmacros.lsp compiler/cmacroexpand nil t)
+(compiler/pass '_1dotsmacros.lsp '_2cmacros.lsp compiler/cmacroexpand t)
 
 ;(message '"# TODO: Collect function info...")
 ;(message '"# TODO: Argument expansion...")
@@ -34,21 +34,17 @@
 (message '"# Inlining anonymous functions...")
 (reset!)
 (load 'compiler/inline-fn.lsp)
-(compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn t t)
-
-(message '"# Expression expansion...")
-(reset!)
-(load 'compiler/exexpand.lsp)
-(compiler/pass '_3inlined.lsp '_4expex.lsp compiler/exexpand t t)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; FRONT END CLEANUP ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;
+(compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn t)
 
 (message '"# Folding blocks...")
 (reset!)
 (load 'compiler/fold-block.lsp)
-(compiler/pass '_4expex.lsp '_5folded.lsp compiler/fold-block t t)
+(compiler/pass '_3inlined.lsp '_4folded.lsp compiler/fold-block t)
+
+(message '"# Expression expansion...")
+(reset!)
+(load 'compiler/exexpand.lsp)
+(compiler/pass '_4folded.lsp '_5expex.lsp compiler/exexpand t)
 
 ;(message '"# Straighten jumps...")
 ;(message '"# Remove unused tags...")

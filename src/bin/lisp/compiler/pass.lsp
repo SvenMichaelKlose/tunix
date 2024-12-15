@@ -9,8 +9,6 @@
           (setout stdout)
           (print !.)
           (setout o)
-          (? reset?.
-             (= *macros* nil))
           (print (. !. (. .!. (@ f ..!))))
           (? reset?.
              (reset!)))))))

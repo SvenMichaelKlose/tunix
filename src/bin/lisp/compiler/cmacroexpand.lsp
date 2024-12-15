@@ -45,7 +45,7 @@
 (var *blocks* nil)
 
 ; TODO: Collect potential tags.
-(fn %block (n . body)
+(fn cmblock (n . body)
   (let (end "")
     (push (. n end) *blocks*)
     (!= (@ macroexpand body)
@@ -54,7 +54,7 @@
          ,@!
          (%tag ,end)))))
 
-(fn %return (v . n)
+(fn cmreturn (v . n)
   (!? (cdr (assoc n *blocks*))
       $(%block
          ,v
@@ -62,9 +62,9 @@
       (error "Unknown BLOCK " n)))
 
 (defcm block (n . body)
-  (with-global *macros* (list (. 'block %block)
-                              (. 'return %return))
-    (apply %block n body)))
+  (with-global *macros* (list (. 'block cmblock)
+                              (. 'return cmreturn))
+    (apply cmblock n body)))
 
 (fn cmacroexpand (x)
   (with-global *macros* *cmacros*

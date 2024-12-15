@@ -1,5 +1,5 @@
 (load 'compiler/package.lsp)
-(require 'let 'prog1 'when 'awhen 'do 'while 'with-in 'with-out 'while)
+(require 'let 'prog1 'awhen 'do 'while 'with-in 'with-out 'while)
 
 (fn pass (pin pout f . reset?)
   (with-in i (open pin 'r)
@@ -9,12 +9,10 @@
           (setout stdout)
           (print !.)
           (setout o)
-          (when reset?.
-            (print 'reset)
-            (reset!))
+          (? reset?.
+             (= *macros* nil))
           (print (. !. (. .!. (@ f ..!))))
-          (when reset?.
-            (print 'reset)
-            (reset!)))))))
+          (? reset?.
+             (reset!)))))))
 
 (in-package nil)

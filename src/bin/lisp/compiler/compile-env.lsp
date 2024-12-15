@@ -36,7 +36,10 @@
 (load 'compiler/inline-fn.lsp)
 (compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn t t)
 
-;(message '"# TODO: Expression expansion...")
+(message '"# Expression expansion...")
+(reset!)
+(load 'compiler/exexpand.lsp)
+(compiler/pass '_3inlined.lsp '_4expex.lsp compiler/exexpand t t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; FRONT END CLEANUP ;;;
@@ -44,7 +47,8 @@
 
 (message '"# Folding blocks...")
 (reset!)
-(compiler/pass '_3inlined.lsp '_4folded.lsp compiler/fold-block t t)
+(load 'compiler/fold-block.lsp)
+(compiler/pass '_4expex.lsp '_5folded.lsp compiler/fold-block t t)
 
 ;(message '"# Straighten jumps...")
 ;(message '"# Remove unused tags...")

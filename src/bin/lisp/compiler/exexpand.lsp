@@ -1,6 +1,7 @@
 (load 'compiler/package.lsp)
+(require '!= mapcar mapcan)
 
-(fn expex-move-arg (x)
+(fn move-arg (x)
   (? (cons? x)
      (!= (symbol)
        (. ! (list (list '= ! x))))
@@ -9,8 +10,8 @@
 ; Returns:
 ; carlist: New arguments.
 ; cdrlist: Off-loaded expressions, assigning to temporaries.
-(fn expex-move-args (x)
-  (@ expex-move-arg x))
+(fn move-args (x)
+  (@ move-arg x))
 
 ; Move function calls out of argument list and
 ; replace them by anonymous symbols.
@@ -22,11 +23,11 @@
     (eq '= x.)
       (? (atom ..x.)
          (list x)
-         (!= (expex-move-args (cdr ..x.))
+         (!= (move-args (cdr ..x.))
            (append (mapcan exexpand (mapcan cdr !))
                    (list (list '= .x. (. (car ..x.) (@ car !)))))))
     ; Expression
-    (!= (expex-move-args .x)
+    (!= (move-args .x)
       (append (mapcan exexpand (mapcan cdr !))
               (list (. x. (@ car !)))))))
 

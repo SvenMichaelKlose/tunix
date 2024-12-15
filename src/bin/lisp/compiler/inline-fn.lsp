@@ -1,5 +1,5 @@
 (load 'compiler/package.lsp)
-(require 'argexpand)
+(require 'argexpand 'let 'do 'with-queue)
 
 (fn inline-fn (x)
   (?

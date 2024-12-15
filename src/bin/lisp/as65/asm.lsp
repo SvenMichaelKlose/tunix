@@ -28,7 +28,6 @@
 
 (fn asm (x first-pass?)
   (!= (parse x)
-    (print !)
     (?
       (assoc 'mnem !)
         (asm0 !)

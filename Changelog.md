@@ -11,7 +11,7 @@ and this project adheres to
 [Lisp manual](src/bin/lisp/doc/manual.md)
 
 
-## [current]
+## [v0.0.32] - 2024-12-15
 
 ### Lisp
 
@@ -19,7 +19,7 @@ and this project adheres to
 
 ##### Added
 
-- Macro ASSERT.
+- Macro ASSERT.  Just use it... ;)
 - FILTER-FILE: Copy file, filtering expressions.
 
 ##### Changed

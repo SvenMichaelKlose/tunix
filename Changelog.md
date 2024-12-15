@@ -28,6 +28,7 @@ and this project adheres to
   symbol is not in the package.  For example /PARSE will remain
   to be PARSE if it's not in the current package.
 - REQUIRE has no requirements.
+- DOTEXPAND: Ignore QUOTEd entirely.
 
 #### Interpreter
 
@@ -35,6 +36,7 @@ and this project adheres to
 
 - Compile-time option RESTART\_GC\_ON\_FULL\_RELOC
 - Load "pre-image.lsp" before RESET!.
+- ERROR: Print messages like OUT.
 
 
 ## [v0.0.31] - 2024-12-12

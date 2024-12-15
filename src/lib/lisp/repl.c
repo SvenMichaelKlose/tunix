@@ -64,6 +64,7 @@ read_safe (void)
 
 #ifndef NAIVE
 
+extern lispptr bi_out (void);
 void
 print_debug_info ()
 {
@@ -80,7 +81,12 @@ print_debug_info ()
             outs (last_errstr);
 
         outs (": ");
-        print (failed_obj);
+        if (error_code == ERROR_USER) {
+            x = failed_obj;
+            arg1 = eval_list ();
+            bi_out ();
+        } else
+            print (failed_obj);
 
         if (NOT_NIL(value) && value != failed_obj) {
             fresh_line ();

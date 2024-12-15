@@ -1,3 +1,5 @@
+(or (cons? *6502*)
+    (load 'as65/opcode.lsp))
 (load 'as65/package.lsp)
 
 (var *all-mnem65* (append (apply append *mn-6502*)

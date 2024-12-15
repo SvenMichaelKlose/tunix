@@ -5,8 +5,8 @@
   ; "Single-pass assembly to stream."
   (= *as65-pc* addr)
   (dolist (pn pathnames)
-    (when (with-in i (open pn 'r)
-            (awhile (as65-asm (read) first-pass?)
+    (when (with-in i (open (print pn) 'r)
+            (awhile (asm (read) first-pass?)
               (when o
                 (out !))))
       (error "Can't open " pn))))
@@ -15,21 +15,23 @@
   ; "Assemble a set of files in multiple passes."
 
   ; First pass, building label database.
-  (message '"First pass...")
+  (out '"First pass...")
   (= *as65-labels* nil)
   (pass nil addr pathnames t)
+  (terpri)
 
   ; Secondary passes, until code size settled.
-  (message '"Secondary pass...")
+  (out '"Secondary pass...")
   (let (old-end *as65-pc*)
     (while t
       (pass nil addr pathnames nil)
       (when (== old-end *as65-pc*)
         (return nil))
       (= old-end *as65-pc*)))
+  (terpri)
 
   ; Final pass, outputting the binary.
-  (message "Assembling to " bin-path '"...")
+  (message "Assembling to " bin-path '...)
   (with-out o (open bin-path 'w)
     (pass o addr pathnames nil)))
 

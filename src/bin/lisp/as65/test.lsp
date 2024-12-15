@@ -1,6 +1,4 @@
-(message "# Testing as65/.")
-(load 'as65/opcode.lsp)
-(load 'as65/parse.lsp)
+(message '"# Testing AS65/...")
 
 (or (equal (as65/parse '((some-fun-or-macro)))
            '(nil (expr . (some-fun-or-macro))))
@@ -23,7 +21,7 @@
 (or (equal (as65/parse '(lda (1234,x)))
            '(nil (mnem . lda) (mode . izpx) (op . 1234)))
     (error))
-(message "# as65/parse: Tests passed.")
 
-;(print (as65/asm '(lda # 1) t))
-;(message "# as65/asm: Tests passed.")
+(message '"# as65/parse: Tests passed.")
+
+(as65/files 'helloworld.prg 1000 '(as65/helloworld.asm))

@@ -3,6 +3,24 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-12-15
+
+Spent a day on [tré](https://github.com/SvenMichaelKlose/tre/) as it
+was plain broken.  Luckily, someone just sent the right ticket.
+It was bad.  No-one could boot it, because I had a "local" config.
+Surfed the wave and brought objects of both worlds, JavaScript and PHP,
+a bit closer.  The TUNIX Lisp object piece could be placed well there.
+Took about all Saturday – actually I started at around 7:00am and it's
+now 03:00am.  But I squeezed in a couple of naps.  Am very happy with
+the improvements.  tré has a half done rehaul of the JS/PHP object
+wrappers and I wanted function overloading too.  Hard to believe that
+in 2011 the compiler was able to compile itself to JS.  Apps had to
+be written.
+
+Ahyeah, right, I wanted to wrap up the assembler and plug the thing
+into VICE.
+
+
 # 2024-12-12
 
 I __love__ what the environment is looking like at the moment.

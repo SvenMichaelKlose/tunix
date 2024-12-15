@@ -28,8 +28,16 @@
 
 (fn asm (x first-pass?)
   (!= (parse x)
-    (? (assoc 'mnem !)
-       (asm0 !)
-       (error x))))
+    (print !)
+    (?
+      (assoc 'mnem !)
+        (asm0 !)
+      (assoc 'label !)
+        nil
+      (assoc 'expr !)
+        nil
+      (assoc 'data !)
+        nil
+      (error "Bad syntax: " x))))
 
 (in-package nil)

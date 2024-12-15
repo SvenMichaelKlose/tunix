@@ -3,6 +3,32 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2024-12-15 Pre-processing
+
+When making an 8-bit environment, the build system should do generic
+macro- and dot-expansion.  Auto-loading is nice to watch but the overall
+performance is a pain in the backplate.  Also, not having even finished
+about writing how well autoloading works, problems with it showed up
+which need tracking down.
+By preprocessing files we can skip MACROEXPAND, DOTEXPAND, and PKGEXPAND,
+entirely for these until they change, speeding up the system dramatically
+(although the result will not impress many on constrained systems.)
+On constrained systems smaller code files with no formatting are more than
+welcome.  While we're at it, we could also optimize expressions, have symbols
+replaced by unnamed ones, and whatever idea comes next.  Actually these
+are the first compiler passes.  The problem is that AUTOLOAD won't kick
+in for missing macros.
+
+There's already the REQUIRE function that we can overlay with a macro that
+actually evaluates the REQUIRE.  With a dedicated macro set we have some
+kind of armor for the future surprises.  Let's have UMACROs then.
+
+~~~lisp
+(umacro pre require x
+  (*> require x))
+~~~
+
+
 # 2024-12-15
 
 Spent a day on [tré](https://github.com/SvenMichaelKlose/tre/) as it

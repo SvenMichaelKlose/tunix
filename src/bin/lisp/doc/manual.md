@@ -1874,11 +1874,13 @@ with prefixed label "USER ERR".
 |-----------------|-----------------------------|
 | \*macros\*      | Simple list of macro names. |
 
-| Function         | Description                     |
-|------------------|---------------------------------|
-| (macro s a ?+x)) | Add macro function to *macros*. |
-| (macro? x)       | Test if symbol is in *macros*.  |
-| (macroexpand x)  | Expand expression.              |
+| Function            | Description                     |
+|---------------------|---------------------------------|
+| (macro s a ?+x))    | Add macro function to *macros*. |
+| (macro? x)          | Test if symbol is in *macros*.  |
+| (macroexpand x)     | Expand expression.              |
+| (umacro s s a ?+x)) | Add macro function to *macros*. |
+| (umacroexpand s x)  | Expand expression.              |
 
 A macro is a special form which is replaced by the expression it returns
 during 'macro expansion'.  Macros are expanded in the REPL as soon as
@@ -1907,6 +1909,10 @@ complexity can be made from simpler components.
       (progn
         ,@body)))
 ~~~
+
+UMACRO and UMACROEXPAND allow to define separate groups of macros that
+do not interfere with the standard macros.  MACROEXPAND will use the
+currently selected UMACRO set when such a macro is being expanded.
 
 ## (macro s a +x)): Define macro.
 

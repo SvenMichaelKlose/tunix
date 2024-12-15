@@ -1,13 +1,5 @@
 (load 'compiler/package.lsp)
-(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan)
-
-(var *cmacros* nil)
-
-(macro defcm (n a . body)
-  (print $(defcm ,n ,a))
-  (acons! n (. a (@ macroexpand body))
-          *cmacros*)
-  nil)
+(require 'let 'prog1 'push 'pop '!= 'aif 'with-global 'with-in 'with-out 'when 'awhen 'acons! 'while 'group 'mapcar 'mapcan 'umacro)
 
 (fn mklogical (which)
   (let (end "")
@@ -18,10 +10,10 @@
        ,@(last x)
        (%tag ,end))))
 
-(defcm and x
+(umacro compiler and x
   (mklogical '%go-nil))
 
-(defcm or x
+(umacro compiler or x
   (mklogical '%go-nnil))
 
 (fn mkif (end x)
@@ -34,7 +26,7 @@
          (%tag ,next)))
      (list x.)))
 
-(defcm ? x
+(umacro compiler ? x
   (let (end "")
     $(%block
        ,@(mapcan $((x)
@@ -61,13 +53,12 @@
          (%go ,!))
       (error "Unknown BLOCK " n)))
 
-(defcm block (n . body)
+(umacro compiler block (n . body)
   (with-global *macros* (list (. 'block cmblock)
                               (. 'return cmreturn))
     (apply cmblock n body)))
 
 (fn cmacroexpand (x)
-  (with-global *macros* *cmacros*
-    (macroexpand x)))
+  (umacroexpand 'compiler x))
 
 (in-package nil)

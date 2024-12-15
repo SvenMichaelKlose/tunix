@@ -21,6 +21,7 @@ and this project adheres to
 
 - Macro ASSERT.  Just use it... ;)
 - FILTER-FILE: Copy file, filtering expressions.
+- UMACRO, UMACROEXPAND: User-defined sets of macros alongside.
 
 ##### Changed
 

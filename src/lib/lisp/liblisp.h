@@ -155,7 +155,7 @@
 //#define FAST_NIL
 
 // Restart GC if relocation table is full
-//#define RESTART_GC_ON_FULL_RELOC
+#define RESTART_GC_ON_FULL_RELOC
 
 // Unix sockets (incl. built-ins)
 //#define HAVE_SOCKETS
@@ -184,8 +184,8 @@
 /// Memory allocation
 
 // Stack and table sizes.
-#define STACK_SIZE          (512 * 3)
-#define TAGSTACK_SIZE       384
+#define STACK_SIZE          2560
+#define TAGSTACK_SIZE       512
 #define RELOC_TABLE_ENTRIES 256
 
 // Use malloc() to allocate the heap.

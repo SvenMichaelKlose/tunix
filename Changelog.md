@@ -22,11 +22,12 @@ and this project adheres to
 - Macro ASSERT.
 - FILTER-FILE: Copy file, filtering expressions.
 
-##### Changelog
+##### Changed
 
 - IN-PACKAGE: Symbol prefix "/" is not removed if the stripped
   symbol is not in the package.  For example /PARSE will remain
   to be PARSE if it's not in the current package.
+- REQUIRE has no requirements.
 
 
 ## [v0.0.31] - 2024-12-12

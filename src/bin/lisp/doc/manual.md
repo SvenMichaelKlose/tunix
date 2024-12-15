@@ -1870,9 +1870,10 @@ with prefixed label "USER ERR".
 
 # Macros
 
-| Variable        | Description                 |
-|-----------------|-----------------------------|
-| \*macros\*      | Simple list of macro names. |
+| Variable        | Description                           |
+|-----------------|---------------------------------------|
+| \*macros\*      | Simple list of macro names.           |
+| \*umacros\*     | Associative list of user macro names. |
 
 | Function            | Description                     |
 |---------------------|---------------------------------|

@@ -7,7 +7,7 @@
 (message '"# Dot- and standard macro-expansion...")
 ; To really expand all macros there has to be a list of macros
 ; available in the environment.
-(require 'let 'with-out 'dolist 'prog1 awhen progn)
+(require 'let 'with-out 'prog1 'progn 'awhen 'do 'dolist)
 (with-out o (open '_1dotsmacros.lsp 'w)
   (dolist (i (member 'autoload *universe*))
     (or (builtin? i)
@@ -26,7 +26,7 @@
 (reset!)
 (load 'compiler/cmacroexpand.lsp)
 (load 'compiler/pass.lsp)
-(compiler/pass '_1dotsmacros.lsp '_2cmacros.lsp compiler/cmacroexpand)
+(compiler/pass '_1dotsmacros.lsp '_2cmacros.lsp compiler/cmacroexpand nil t)
 
 ;(message '"# TODO: Collect function info...")
 ;(message '"# TODO: Argument expansion...")
@@ -34,7 +34,7 @@
 (message '"# Inlining anonymous functions...")
 (reset!)
 (load 'compiler/inline-fn.lsp)
-(compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn)
+(compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn t t)
 
 ;(message '"# TODO: Expression expansion...")
 
@@ -44,8 +44,7 @@
 
 (message '"# Folding blocks...")
 (reset!)
-(load 'compiler/fold-block.lsp)
-(compiler/pass '_3inlined.lsp '_4folded.lsp compiler/fold-block)
+(compiler/pass '_3inlined.lsp '_4folded.lsp compiler/fold-block t t)
 
 ;(message '"# Straighten jumps...")
 ;(message '"# Remove unused tags...")

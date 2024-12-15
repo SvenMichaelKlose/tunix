@@ -1,4 +1,5 @@
 (load 'compiler/package.lsp)
+(require 'let 'do)
 
 (fn %block? (x)
   (and (cons? x)

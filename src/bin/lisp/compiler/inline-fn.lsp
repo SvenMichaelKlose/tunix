@@ -1,4 +1,5 @@
 (load 'compiler/package.lsp)
+(require 'argexpand)
 
 (fn inline-fn (x)
   (?

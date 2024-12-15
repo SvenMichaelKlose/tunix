@@ -29,6 +29,12 @@ and this project adheres to
   to be PARSE if it's not in the current package.
 - REQUIRE has no requirements.
 
+#### Interpreter
+
+##### Fixed
+
+- Compile-time option RESTART\_GC\_ON\_FULL\_RELOC
+
 
 ## [v0.0.31] - 2024-12-12
 

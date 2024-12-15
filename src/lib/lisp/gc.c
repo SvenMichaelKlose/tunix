@@ -384,7 +384,7 @@ gc (void)
     }
 #endif
 
-#if 0
+#ifdef RESTART_GC_ON_FULL_RELOC
 restart:
 #endif
 #ifdef FRAGMENTED_HEAP
@@ -443,9 +443,9 @@ restart:
     // Update pointers according to gap list.
     relocate ();
 
+#ifdef RESTART_GC_ON_FULL_RELOC
     // Restart if sweep was interrupted due
     // to full relocation table.
-#ifdef RESTART_GC_ON_FULL_RELOC
     if (xlat_full) {
 #ifdef VERBOSE_GC
         setout (STDOUT);
@@ -456,8 +456,11 @@ restart:
     }
 #else // #ifdef RESTART_GC_ON_FULL_RELOC
 #ifdef VERBOSE_GC
-    if (xlat_full)
+    if (xlat_full) {
+        setout (STDOUT);
         outs ("!full reloc!");
+        setout (gc_oldout);
+    }
 #endif
 #endif // #ifdef RESTART_GC_ON_FULL_RELOC
 

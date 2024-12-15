@@ -2,7 +2,7 @@
   ;"Evaluate BODY with input channel V provided by X. Return error or NIL."
   (let (g (symbol))
     $(let (,g fnout
-            ,v ,x)
+           ,v ,x)
        (? ,v
           ((()
              (setout ,v)

@@ -597,7 +597,7 @@ bi_apply (void)
 
 #ifndef NAIVE
     if (!LISTP(tmp)) {
-        error (ERROR_TYPE, "Last arg isn't list", nil); // TODO: info
+        error (ERROR_TYPE, "Last arg not list", arg2);
         return nil;
     }
 #endif

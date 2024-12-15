@@ -37,6 +37,7 @@ and this project adheres to
 - Compile-time option RESTART\_GC\_ON\_FULL\_RELOC
 - Load "pre-image.lsp" before RESET!.
 - ERROR: Print messages like OUT.
+- APPLY: Print all arguments if last one isn't a list.
 
 
 ## [v0.0.31] - 2024-12-12

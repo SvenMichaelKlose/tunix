@@ -1,7 +1,7 @@
 (and (builtin? 'time)
      (number? +bps+)
   ((()
-     (out "Time since program start: ")
+     (out '"Time since program start: ")
      (print (/ (- (time) *start-time*) +bps+))
      (out 's)
      (terpri)
@@ -9,14 +9,14 @@
 
 (and (builtin? gc)
   ((()
-     (message "Cleaning up. Please wait...")
+     (message '"Cleaning up. Please wait...")
      (reset!)
      (= *universe* (remove 'group2 *universe*))
-     (print (gc))(out " bytes free.")(terpri))))
+     (print (gc))(out '" bytes free.")(terpri))))
 
 (and (builtin? isave)
   ((()
-     (message "Saving 'image'...")
+     (message '"Saving 'image'...")
      (isave 'image))))
 
 (load 'post-image.lsp)

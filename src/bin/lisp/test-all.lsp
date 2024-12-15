@@ -1,4 +1,4 @@
-(message "# Testing all...")
+(message '"# Testing all...")
 
 (reset!)
 (var stime (time))

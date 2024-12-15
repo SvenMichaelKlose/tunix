@@ -1,5 +1,5 @@
 (fn test-dotexpand ()
-  (message "Testing dotexpand...")
+  (message '"Testing dotexpand...")
   (print (dotexpand '.x))
   (print (dotexpand 'x.))
   (print (dotexpand '.x.))

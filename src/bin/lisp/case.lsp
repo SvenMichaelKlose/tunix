@@ -1,8 +1,8 @@
 (macro case x
-  (let (g (symbol))
-    (let (f $((p)
+  (let* (g  (symbol)
+         f  $((p)
                (? .p
-                  $((eql ,g ,',p.) ,',.p.)
+                  $((eql ,g ,',(car p)) ,',(cadr p))
                   (list p.))))
-      $(let (,g ,x.)
-         (? ,@(mapcan f (group2 .x)))))))
+    $(let (,g ,x.)
+       (? ,@(mapcan f (group2 .x))))))

@@ -2,7 +2,7 @@
   (let (tag (symbol))
      $((,(@ car vars)
         (block nil
-          ,@(@ '((x) $(= ,x. ,.x.)) vars)
+          ,@(@ '((x) $(= ,(car x) ,(cadr x))) vars)
           ,tag
           (? ,brk-res.
              (return ,(? ..brk-res
@@ -12,7 +12,7 @@
           ,@body
           ,@(@ '((x)
                   (!? ..x.
-                      $(= ,x. ,!)))
+                      $(= ,(car x) ,!)))
                vars)
           (go ,tag)))
        ,@(dup nil (length vars)))))

@@ -6,15 +6,15 @@
 (fn %^ (a n bits)
   (? (== 1 bits)
      (? (== 0 (bit-and n 1))
-        (car a)
-        (cdr a))
+        a.
+        .a)
      (%^ (? (== 0 (bit-and n 1))
-            (car a)
-            (cdr a))
+            a.
+            .a)
          (>> n 1) (-- bits))))
 
 (fn ^ (a n)
-  (%^ (car a) n (cdr a)))
+  (%^ a. n .a))
 
 (fn %=^ (v a n bits)
   (? (== 1 bits)
@@ -22,9 +22,9 @@
         (setcar a v)
         (setcdr a v))
      (%=^ (? (== 0 (bit-and n 1))
-             (car a)
-             (cdr a))
+             a.
+             .a)
           (>> n 1) (-- bits))))
 
 (fn =^ (v x n)
-  (%=^ v (car a) n (cdr a)))
+  (%=^ v a. n .a))

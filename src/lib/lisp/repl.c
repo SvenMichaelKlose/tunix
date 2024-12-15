@@ -168,6 +168,8 @@ repl_eof (char mode, simpleio_chn_t load_fn)
 {
     if (mode == REPL_LOAD)
         setin (load_fn);
+    in ();
+    putback ();
     if (eof ()) {
         setin (STDIN);
         return true;

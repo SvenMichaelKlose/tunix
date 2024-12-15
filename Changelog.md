@@ -34,6 +34,7 @@ and this project adheres to
 ##### Fixed
 
 - Compile-time option RESTART\_GC\_ON\_FULL\_RELOC
+- Load "pre-image.lsp" before RESET!.
 
 
 ## [v0.0.31] - 2024-12-12

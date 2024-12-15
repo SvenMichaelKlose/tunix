@@ -89,6 +89,7 @@ const char * env_files[] = {
 #ifndef NO_DOTEXPAND
     "dotexpand.lsp",
 #endif
+    "pre-image.lsp",
     "reset!.lsp",
 #if defined(TEST_ENVIRONMENT)
     "test-autoload.lsp",

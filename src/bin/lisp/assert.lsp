@@ -1,3 +1,3 @@
 (macro assert (cond . msg)
-  $(unless ,cond
-     (funcall out ,@msg)))
+  $(or ,cond
+       (funcall error ,@msg)))

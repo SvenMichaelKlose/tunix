@@ -1,40 +1,43 @@
 TUNIX Lisp
 [@] Make it fun writing the bytecode compiler with it.
+    (On modern targets of course!)
+
+6502 assembler
+[ ] !!! Bang together the new basics.
+[ ] !!! Expand asm labels in Lisp expressions.
+[ ] ... Make .o65 files.
 
 Interpreter
-[ ] UNWIND-PROTECT
-[ ] Make stack overflows regular errors.
-[ ] Multiple symbol lists to reduce look-up times.
+[ ] !!. UNWIND-PROTECT
+[ ] !.. Multiple symbol lists to reduce look-up times.
 
 Debugger
-[ ] Invoking debugger with Ctrl-C.
-[ ] Invoking debugger with RESTORE key on CBMs.
+[ ] !!! Invoking debugger with Ctrl-C.
+[ ] !!! Invoking debugger with RESTORE key on CBMs.
 
 Input/Output
-[ ] On Unix: OPENDIR, READDIR, CLOSEDIR.
-[@] Working terminal direct mode.
+[ ] !!. On Unix: OPENDIR, READDIR, CLOSEDIR.
+[@] !!! Unices: Working terminal direct mode.
 
 Built-ins
-[ ] STRING (SYMBOL with no look-up to reuse exiting ones.)
-[ ] SYSTEM (program invokation).
+[ ] !.. Static memory allocation.
+[ ] !.. SYSTEM (program invokation).
+[ ] ... STRING (SYMBOL with no look-up to reuse exiting ones.)
 
-Tests
+Tests!!!
 [ ] READ on syntax errors.
 [ ] Fuzzers
 
 Manual
-[ ] Compile-time options.
 [ ] Complete set of examples.
-[ ] Release rework.
 [ ] Introduction to TUNIX Lisp and REPL use.
-
-Documentation
-[ ] Introduction to (TUNIX) Lisp programming
+[ ] !.. Compile-time options in 'liblisp.h'.
+[ ] Release rework.
 
 Ultimem boot (src/sys/boot/)
-[ ] Can run as PRG with any configuration of the UltiMem.
-[ ] Can make and burn images.
-[ ] Can install itself as one of the boot ROMs.
+[ ] Run as PRG with any configuration of the UltiMem.
+[ ] Make and burn images.
+[ ] Install itself as one of the boot ROMs.
 [ ] Fast memory config selection.
 [ ] Alternative boot ROMs.
 [ ] Launch from disk or Ultifs.
@@ -44,4 +47,3 @@ Ultimem boot (src/sys/boot/)
 
 Kernel (src/sys/kernel/)
 [ ] Find memory bank allocation bug.
-[@] Soft segmentation fault detection.

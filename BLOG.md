@@ -5,29 +5,45 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2024-12-15 Pre-processing
 
-When making an 8-bit environment, the build system should do generic
-macro- and dot-expansion.  Auto-loading is nice to watch but the overall
-performance is a pain in the backplate.  Also, not having even finished
-about writing how well autoloading works, problems with it showed up
-which need tracking down.
-By preprocessing files we can skip MACROEXPAND, DOTEXPAND, and PKGEXPAND,
-entirely for these until they change, speeding up the system dramatically
-(although the result will not impress many on constrained systems.)
-On constrained systems smaller code files with no formatting are more than
-welcome.  While we're at it, we could also optimize expressions, have symbols
-replaced by unnamed ones, and whatever idea comes next.  Actually these
-are the first compiler passes.  The problem is that AUTOLOAD won't kick
-in for missing macros.
+When building for 8-bitters, the environment files should be expanded
+in advance to get around costly auto-loading.  Each file needs a
+REQUIRE statement to tell the pre-processor which macros need expansion.
+For compiling it should also contain required functions.
+This will actually be part of the bytecode compiler.
 
-There's already the REQUIRE function that we can overlay with a macro that
-actually evaluates the REQUIRE.  With a dedicated macro set we have some
-kind of armor for the future surprises.  Let's have UMACROs then.
+I've added user-defined macros (UMACRO, UMACROEXPAND) of which multiple
+sets may exist alongside.
 
 ~~~lisp
-(umacro pre require x
-  (*> require x))
+; Execute REQUIRE statements while pre-processing.
+(umacro preproc require x
+  (apply require x))
+
+(fn preprocess (x)
+  (macroexpand (umacroexpand preproc (pkgexpand (dotexpand x)))))
+
+(fn preprocess-env (dst-dir src-dir files)
+  (= dst-dir (symbol-name dst-dir))
+  (= src-dir (symbol-name src-dir))
+  (dolist (file files)
+    (filter-file preprocess
+                 (symbol (append dst-dir '(\/) file))
+                 (symbol (append src-dir '(\/) file)))))
 ~~~
 
+The files will be much smaller as they lose lots of whitespace, so
+they'll be a lot smaller and need to be re-built if the originals
+have beed modified.  Additionally:
+
+- Replace variable names by a fixed set of anonymous symbols for
+  each top-level expression.  Comes at the cost of argument definitions
+  as documentation.  But:
+- Build documentation database of some sort, containing the argument
+  definitions and documentation strings.  Each definer could just append
+  entries to a file.
+- Simple optimizations to support the interpreter.
+
+It's also a step towards replacing GNU Make.
 
 # 2024-12-15
 

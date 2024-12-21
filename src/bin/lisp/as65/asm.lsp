@@ -1,42 +1,38 @@
 (load 'as65/package.lsp)
+(require 'let 'aprog1 'let2 'dup 'case); 'aprog1)
 
 (fn zpconv (op am zam)
   (? op
      (? (< op 256) zam am)
      am))
 
-(fn asm0 (i) 
+(fn asm-inst (i)
   ; "Asssemble parsed instruction."
-  (with (mode (cdr (assoc 'mode i))
-         mnem (cdr (assoc 'mnem i))
-         ireg (cdr (assoc 'ireg i))
-         op   (cdr (assoc 'op i))) 
+  (let (mode (cdr (assoc 'mode i))
+        mnem (cdr (assoc 'mnem i))
+        ireg (cdr (assoc 'ireg i))
+        op   (cdr (assoc 'op i)))
     (opcode
         mnem
         (case mode
-          abs (?
-                (eq 'x ireg)   
-                  (zpconv op 'absx 'zpx)
-                (eq 'y ireg)
-                  (zpocnv op 'absy 'zpy)
-                abs)
-          ind (?
-                (eq 'x ireg) 'izpx
-                (eq 'y ireg) 'izpy
-                ind)
+          'abs (case ireg
+                 'x (zpconv op 'absx 'zpx)
+                 'y (zpocnv op 'absy 'zpy)
+                 'abs)
+          'ind (case ireg
+                 'x 'izpx
+                 'y 'izpy
+                 'ind)
           mode))))
 
 (fn asm (x first-pass?)
   (!= (parse x)
-    (?
-      (assoc 'mnem !)
-        (asm0 !)
-      (assoc 'label !)
-        nil
-      (assoc 'expr !)
-        nil
-      (assoc 'data !)
-        nil
-      (error "Bad syntax: " x))))
+    (. !.
+       (case (cdr (assoc 'type .!))
+         'inst   (asm-inst .!)
+         'label  nil
+         'expr   nil
+         'data   nil
+         (error "Bad syntax: " x)))))
 
 (in-package nil)

@@ -1,3 +1,4 @@
+(require 'when 'awhen 'acons!)
 (or (cons? *6502*)
     (load 'as65/opcode.lsp))
 (load 'as65/package.lsp)
@@ -16,30 +17,32 @@
 (or (mnem? 'lda)
     (error "MNEM? not working"))
 
-; https://github.com/SvenMichaelKlose/tunix/issues/13
-(require 'when)
-
 (fn parse (x)
   ; "Returns (next-x . alist-info)"
   (block nil
     (awhen x.
       (when (cons? !)
-        (return (. .x (list (. 'expr !)))))
+        (return (. .x (list (. 'type 'expr)
+                            (. 'data !)))))
       (unless (symbol? !)
-        (return (. .x (list (. 'data !)))))
+        (return (. .x (list (. 'type 'data)
+                            (. 'data !)))))
 
       (when (labeldef? !)
         (return (. .x
-                   (list (. 'label (symbol (butlast (symbol-name !))))))))
+                   (list (. 'type 'label)
+                         (. 'data (symbol (butlast (symbol-name !))))))))
       (and (symbol? !)
            (eq ': .x.)
            (return (. ..x
-                      (list (. 'label !)))))
+                      (list (. 'type 'label)
+                            (. 'data !)))))
 
       (or (mnem? !)
-          (error "Menomic expected"))
+          (error "No mnem: " !))
       (let (desc nil)
         (acons! 'mnem ! desc)
+        (acons! 'type 'inst desc)
         (= x .x)
 
         (awhen x.

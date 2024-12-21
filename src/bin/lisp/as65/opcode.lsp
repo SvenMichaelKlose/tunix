@@ -1,4 +1,6 @@
 (load 'as65/package.lsp)
+(require 'let 'when 'unless 'let-when 'nth 'position
+         'dolist 'dotimes 'dolist-indexed)
 
 (= *alv?* t) ; Verbose AUTOLOAD.
 
@@ -85,7 +87,6 @@
 
 (fn opcode (mn am)
   ; "Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode."
-  (assert (member am *am-6502*) "Unknown address mode " am)
   (awhen (? am
             (mnam-opc mn am)
             (mnimm-opc mn))

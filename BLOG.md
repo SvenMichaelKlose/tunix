@@ -3,13 +3,30 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2025-01-17
+
+Good to have a development diary like this after such a long break.
+
+# 2024-12-21
+
+Although the packaging scheme of TUNIX Lisp is super-simple, re-writing
+tré compiler code without the manually typed function name prefixes is
+a relief.  I wouldn't mind cleaning up tré instead and translate the
+fresher versions to TUNIX.
+
+ZetaLisp seems to have used the slash "/" too to apply hierarchies to
+names.  I like the connection.  Looking at ZetaC, a C compiler written
+in ZetaLisp, I actually was surprised (and a bit disappointed) with its
+size of around 5.5k lines of code, since I expected far less for such
+thing, especially when implemented in Lisp.
+
 # 2024-12-15 Pre-processing
 
 When building for 8-bitters, the environment files should be expanded
 in advance to get around costly auto-loading.  Each file needs a
 REQUIRE statement to tell the pre-processor which macros need expansion.
 For compiling it should also contain required functions.
-This will actually be part of the bytecode compiler.
+Inevitably this has to be part of the bytecode compiler.
 
 I've added user-defined macros (UMACRO, UMACROEXPAND) of which multiple
 sets may exist alongside.
@@ -31,16 +48,15 @@ sets may exist alongside.
                  (symbol (append src-dir '(\/) file)))))
 ~~~
 
-The files will be much smaller as they lose lots of whitespace, so
-they'll be a lot smaller and need to be re-built if the originals
-have beed modified.  Additionally:
+The files lose lots of whitespace, so they'll be a lot smaller and need
+to be re-built if the originals have beed modified.  Additionally:
 
 - Replace variable names by a fixed set of anonymous symbols for
-  each top-level expression.  Comes at the cost of argument definitions
-  as documentation.  But:
+  each top-level expression.  Comes at the cost of telling argument
+  names.  But:
 - Build documentation database of some sort, containing the argument
-  definitions and documentation strings.  Each definer could just append
-  entries to a file.
+  definitions and documentation strings (currently commented out).
+  Each definer could just append entries to a file.
 - Simple optimizations to support the interpreter.
 
 It's also a step towards replacing GNU Make.
@@ -51,17 +67,17 @@ Spent a day on [tré](https://github.com/SvenMichaelKlose/tre/) as it
 was plain broken.  Luckily, someone just sent the right ticket.
 It was bad.  No-one could boot it, because I had a "local" config.
 Surfed the wave and brought objects of both worlds, JavaScript and PHP,
-a bit closer.  The TUNIX Lisp object piece could be placed well there.
+a bit closer.  The TUNIX Lisp object piece should be there for tré's
+Common Lisp target.
 Took about all Saturday – actually I started at around 7:00am and it's
 now 03:00am.  But I squeezed in a couple of naps.  Am very happy with
 the improvements.  tré has a half done rehaul of the JS/PHP object
 wrappers and I wanted function overloading too.  Hard to believe that
-in 2011 the compiler was able to compile itself to JS.  Apps had to
-be written.
+in 2011 the compiler was able to compile itself to JS.  Business apps
+had to be written, so there was no mercy.  Yes, it paid out back then.
 
 Ahyeah, right, I wanted to wrap up the assembler and plug the thing
 into VICE.
-
 
 # 2024-12-12
 
@@ -162,7 +178,7 @@ instead?  By adding brackets:
    numbers)
 
 ; Default argument _
-(@ [+ n x]
+(@ [+ n _]
    numbers)
 ~~~
 
@@ -186,7 +202,7 @@ The autoloader is perhaps one of the most desireable features of
 TUNIX Lisp.  Being able to throw out currently unused functions and
 macros is priceless in constrained environments.  Following that
 strategy comes at the price of having to split up the code into
-smaller fragments as usual, to make wanted functions accessible via
+smaller fragments as usual, to make wanted functions accessible by
 their filenames.  The default environment already comes with +140 files.
 We need something to resolve this issue without adding anything to the
 interpreter.  Here's what comes to mind: use directories.

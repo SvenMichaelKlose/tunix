@@ -1,95 +1,40 @@
-TUNIX Lisp compiler
-===================
+---
+title: "TUNIX Lisp compiler"
+subtitle: "A roadmap"
+author: "Sven Michael Klose"
+lang: "en"
+titlepage: true
+titlepage-color: "389fff"
+titlepage-text-color: "ffffff"
+toc: true
+footnodes-pretty: true
+book: true
+...
 
-# Overview
+# Why?
 
-TUNIX Lisp is too slow to do anything useful with on small machines, starting with
-the text editor, which is essential for developing on the system.  To take away the
-overhead of interpretation the compiler translates function expressions into bytecodes
-for a virtual CPU, which is an interpreter for machine-level instructions.  Compiled
-functions are also smaller as every Lisp cell occupies five bytes on 8-bit machines
-whereas a bytecode function call is a byte for each item of the original expression
-(which is an index into the function's object list), leading to a dramatic performance
-boost of all of the system.  Lots of other reasons why that is not yet mentioned.
+The TUNIX Lisp interpreter is far too slow on 6502-based systems to do anything
+useful with.  By compiling to bytecode the overhead of interpretation vanishes
+and the size of functions is much smaller.
 
-## Passes
+# Architecture
 
-The compiler is translating the input to the desired output in small steps, called
-"passes".  We don't care how many passes we need, as long as they are as simple and
-independent from each other as possible.  That's called a "micropass architecture".
-Of course we'll pass on data from one pass to the other in the form of Lisp expressions.
-Some passes translate the input, some gather information or perform assertions, and some
-clean up after the other passes.
+The compiler has a _micropass_ architecture where each pass is as small and
+independent from the others as possible, making the compiler easier to maintain.
+Its _front end_ translates the code into a simpler, machine-level (but
+still machine-independent) _intermediate representation (IR)_, where every
+function is a flat list of instructions and (conditional) jumps.
+That format is easier to handle with algorithms of the _middle end_, which
+optimizes the IR.  The _back end_ does target-specific adjustments and generates
+the desired code.
 
-Instead of directly mapping the input to code the compiler first translates the input
-to a simpler, machine-level (but machine-independent) "intermediate representation (IR)",
-not intended for human use, which is easier to handle with algorithms.  Imagine you want to
-check if a variable is used under certain conditions somewhere in nested BLOCKs: that's
-not gonna happen with the IR as every function is just a flat list of instructions and
-jumps.  Bringing the code into that state is the task of the "front end".
+The front end also builds up a database of functions, so calls to them can be
+optimized, e.g. the interpreter would have to check arguments every time a
+function call is performed – the compiler does that in advance if the called
+function is in that database.  Calling unknown or interpreted functions,
+or using EVAL, always comes with the heavy overhead of interpretation.
 
-## Function tagging
-
-A keyword to type function expressions is required to have the compiler
-compile them too.  If it can't tell if an expression is a function,
-it'll have to be interpreted.  FUNCTION as that keyword is readable
-better than the traditional LAMBDA.  People already unnerved by other
-programming language will not watch the LAMBDA with a down-home feeling
-the first time.  As far as I remember, Arc lisp is using FN.  Nice.
-
-~~~lisp
-; Old:
-(@ '((x) (+ 1 x))
-   numbers)
-
-; New:
-(@ (fn (x) (+ 1 x))
-   numbers)
-~~~
-
-What this does not solve is closures (with lexical scope) for
-both interpreter and compiler:
-
-~~~lisp
-; Old:
-(@ $((x) (+ ,n x))
-   numbers)
-
-; New:
-(@ (fn (x) (+ n x))
-   numbers)
-~~~
-
-That new version is barely a problem to compile to but for the
-interpreter it needs to get converted to the old version.  That can
-be done with macro-expansion.  But we want to compile functions that
-are already running in the interpreter, so we need a way to tell the
-compiler, that an expression is a mix of $ and FN.  We go for $FN
-and have that un-expand in the compiler.  For the interpreter it's
-just an $.  Ooph.
-
-~~~lisp
-; Limbo lambda:
-(@ ($fn (x) (+ ,n x))
-   numbers)
-~~~
-
-To make it all even easier to remember, FN keywords for anonymous
-functions should be optional, to make sure that traces of TUNIX Lisp
-will run on an ATtiny or something alike.  One more #ifdef won't hurt.
-
-There's one edge case with FN for anonymous functions: a rest argument
-only would be a symbol, and that tells the FN for anonymous functions
-apart from global function definitions.  Deinitiely an unwanted
-limitation.  We should probably stick with LAMBDA for the front end.
-
-~~~lisp
-; New:
-(@ (lambda (x) (+ n x))
-   numbers)
-~~~
-
-### Frontend
+## Frontend
 
 * Macro expansion
 * Compiler macro expansion (AND, OR, ?, BLOCK, RETURN, GO, QUOTE, QUASIQUOTE)
@@ -98,28 +43,24 @@ limitation.  We should probably stick with LAMBDA for the front end.
 * Expression expansion
 * Block folding
 
-### Middleend
+## Middleend
 
 * Call expansion
 * Place expansion
-
-#### Optimization
-
 * Jump optimization
 * Constant elimination
 * Common code elimination
 
-### Back-end
+## Back-end
 
 * Code generation
 * Code optimization
 
-### Compiler macros
+# Compiler macros
 
-Expands all special forms in functions.  Control flow
-special forms (BLOCK, GO, RETURN, ?, AND, OR) are translated
-to machine-level jump and tag expressions.  QUASIQUOTES
-are converted to regular consing expressions.
+These are the interpreter's built-in special forms as IR-generating macros.
+Four new IR expressions replace the conventional forms BLOCK, GO, RETURN, ?,
+AND, plus OR:
 
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
@@ -127,14 +68,31 @@ are converted to regular consing expressions.
 | (%go-nil s)  | Jump if last result is NIL.           |
 | (%go-nnil s) | Jump if last result is not NIL.       |
 | (%tag s)     | Jump destination.                     |
+**IR jump expressions**
 
-#### Control flow
+QUOTEs and QUASIQUOTEs are turned into regular CONSing expressions:
 
 ~~~lisp
+; Before:
+'(a b c)
+
+; After:
+(cons 'a (cons 'b (cons 'c nil)))
+~~~
+
+CONSing expressions will also be made to pass rest arguments to functions,
+as there is no interpreter to do it.
+See [argument expansion](#argument-expansion).
+
+## Control flow
+
+~~~lisp
+; Before:
 (? (a)
    (b)
    (c)
 
+; After:
 (%= %0 (a))
 (%go-nil 1)
 (%= %0 (b))
@@ -144,7 +102,7 @@ are converted to regular consing expressions.
 (%tag 2)
 ~~~
 
-#### QUASUQUOTEs
+## QUASUQUOTEs
 
 QUASIQUOTEs need to be compiled to code to apply LIST and
 APPEND instead:
@@ -157,7 +115,7 @@ $(1 2 ,@x 4 5)
 (append '(1 2) x '(4 5))
 ~~~
 
-#### BLOCK expansion
+## BLOCK expansion
 
 The BLOCK expander need to expand child blocks first so
 that deeper RETURNs with a clashing name have precedence:
@@ -177,7 +135,7 @@ resolved in the correct bottom-up order.
 The last expression of a BLOCK always assigns to %O which is
 synonymous for return values from then on.
 
-### Function inlining
+# Function inlining
 
 Inlines anonymous functions and moves their arguments
 to the FUNINFO of the top-level function, which is laying
@@ -187,15 +145,16 @@ out the local stack frame in the process.
 ; TODO example of anonymous function first in expression.
 ~~~
 
-### Argument expansion
+# Argument expansion
 
-Checks arguments and turns rest arguments into consing
-expressions.
+Checks arguments and turns rest arguments into consing expressions.  This is
+the last chance to do it before expresison expansion with turn everything into
+IR format for good.
 
-### Expression expansion
+# Expression expansion
 
-Breaks up nested function calls into a list of single
-statement assignments to new temporary variables.
+The exit point of the _front end_.  Breaks up nested function calls into a list
+of single statement assignments to new temporary variables.
 
 ~~~
 (fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
@@ -207,7 +166,7 @@ statement assignments to new temporary variables.
 (fun1 arg1 1 4)
 ~~~
 
-### Block folding
+# Block folding
 
 BLOCKs have been expanded to %BLOCKs to hold the expressions
 together for this pass.  They are now spliced into each
@@ -243,17 +202,17 @@ other to get a single expression list for each function.
 (%tag 1)
 ~~~
 
-### Optimization
+# Optimization
 
 Basic compression of what the macro expansions messed up
 at least,  like remove assignments with no effect or chained
 jumps.
 
-### Call stack expansion
+# Call stack expansion
 
 This pass inserts stack place assignments of arguments before function calls.
 
-### Place expansion
+# Place expansion
 
 | Expression  | Description                    |
 |-------------|--------------------------------|
@@ -263,7 +222,7 @@ This pass inserts stack place assignments of arguments before function calls.
 Here the arguments are replaced by %S or %O expressions to
 denote places on the stack or on the function's object list.
 
-### Generating code
+# Generating code
 
 Five byte-sized codes tell what kind of information follows
 them; Bytecode BC\_LIST for example introduces a set of expressions.

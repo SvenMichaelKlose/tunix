@@ -1,8 +1,25 @@
-(in-package compiler/lambda-expand
-  '(make-inline-body inline-loca-call
-    mk%= export passthrough expr r))
+(in-package 'compiler/lambda-expand
+  '(mk%= inline export expr r))
 
-;;;; EXPORT
+(fn inline (binding-lambda)
+  (fn make-body (stack-places values body)
+     (+ (@ #'((stack-place init-value)
+               $(%= ,stack-place
+                    ,init-value))
+           stack-places
+           values)
+        body))
+  (with-binding-lambda (args vals body
+                        binding-lambda)
+    (with (l (argument-expand
+                 'inline-binding-lambda
+                 args vals)
+           a (@ car l)
+           v (@ cdr l))
+      (*fi*.add-var a)
+      (lambda-expand
+          (make-body a v body)))))
+
 
 (def-gensym closure-name ~cl)
 
@@ -10,44 +27,27 @@
   (let (name   (closure-name)
         args   (lambda-args x)
         body   (lambda-body x)
-        new-fi (create-funinfo :name   name
-                               :args   args
-                               :parent *fi*))
+        new-fi (create-funinfo
+                   :name   name
+                   :args   args
+                   :parent *fi*))
     (new-fi.make-scope-arg)
-    (*tr*.add-closure $((fn ,name ,args ,@body)))
+    (*tr*.add-closure
+      $((fn ,name ,args ,@body)))
     $(%closure ,name)))
 
-
-;;;; PASSTHROUGH
-
-(fn passthrough (x)
-  (!? (lambda-funinfo x)
-      (with-temporary *fi* !
-        (copy-lambda x :body (r (lambda-body x))))
-      (let (name    (or (lambda-name x)
-                        (fi-sym))
-            args    (lambda-args x)
-            new-fi  (create-funinfo :name   name
-                                    :args   args
-                                    :parent *fi*))
-        (*fi*.var-add name)
-        (with-temp *fi* new-fi
-          (copy-lambda x :name  name
-                         :args  args
-                         :body  (r (lambda-body x)))))))
-
-
-;;;; TOPLEVEL
 
 (fn expr (x)
   (pcase x
     atom x
+    binding-lambda?
+      (inline x)
     unnamed-lambda?
-      (? (lambda-export?)
-         (export x)
-         (passthrough x))
+      (export x)
     named-lambda?
-      (passthrough x)
+      (with-temporary *fi* !
+        (copy-lambda x
+            :body (r (lambda-body x))))
     (r x)))
 
 (fn r (x)

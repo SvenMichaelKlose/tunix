@@ -14,52 +14,70 @@ book: true
 # Why?
 
 The TUNIX Lisp interpreter is far too slow on 6502-based systems to do anything
-useful with.  By compiling to bytecode the overhead of interpretation vanishes
-and the size of functions is much smaller.
+useful with.  Compiling to bytecode removes the overhead of interpretation
+and reduces the code size.  Essentially, the TUNIX Lisp compiler is the smaller
+sister of the [tré compiler](https://github.com/SvenMichaelKlose/tre/), minus
+the overhead for generating high-level code.
 
 # Architecture
 
-The compiler has a _micropass_ architecture where each pass is as small and
-independent from the others as possible, making the compiler easier to maintain.
-Its _front end_ translates the code into a simpler, machine-level (but
-still machine-independent) _intermediate representation (IR)_, where every
-function is a flat list of instructions and (conditional) jumps.
-That format is easier to handle with algorithms of the _middle end_, which
-optimizes the IR.  The _back end_ does target-specific adjustments and generates
-the desired code.
-
-The front end also builds up a database of functions, so calls to them can be
-optimized, e.g. the interpreter would have to check arguments every time a
-function call is performed – the compiler does that in advance if the called
-function is in that database.  Calling unknown or interpreted functions,
-or using EVAL, always comes with the heavy overhead of interpretation.
+The compiler has a _micropass_ architecture where each of the 18 passes is as
+small and independent from the others as possible, making the compiler easier
+to maintain.  Its _frontend_ translates the input into a simpler, machine-level
+(but still machine-independent) _intermediate representation (IR)_ for the
+_middleend_, where every function is a flat list of statements, assignments and
+(conditional) jumps.  That IR is then optimized by the middleend.  The
+_backend_ finally does target-specific adjustments and generates the desired
+output, which is serializable bytecode functions.
 
 ## Frontend
 
-* Macro expansion
-* Compiler macro expansion (AND, OR, ?, BLOCK, RETURN, GO, QUOTE, QUASIQUOTE)
-* Inlining anonymous functions
-* Argument expansion
-* Expression expansion
-* Block folding
+1. **Dot expansion**: Dot notation for CAR, CDR and SLOT-VALUE.
+2. **Unquote expansion**: Top-level unquotes to generate code at compile-time.
+3. **Macro expansion**: Standard macro expansion.
+4. **Compiler macro expansion**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
+   QUOTE, QUASIQUOTE, and so on, into IR.   After this pass there must be no
+   more macros.
+5. **Quasiquote expansion**: To consing expressions.
+6. **Lambda expansion**: Inlines binding lamdas and exports closures to own
+   functions while building a function info tree required to proceed.
+
+When compiling multiple files, all must have been processed up to the previous
+pass, so all calls to known functions can be compiled in the next:
+
+7. **Call expasions**: Arguments are expanded and rest arguments are turned into
+   consing expressions.
+8. **Expression expansion**: To _single statement assignments_: All arguments of
+   function calls are assigned to temporary variables.
+9. **Block folding**: Collapses nested %BLOCK expressions.
 
 ## Middleend
 
-* Call expansion
-* Place expansion
-* Jump optimization
-* Constant elimination
-* Common code elimination
+1. **Jump optimization**: Remove chained jumps, unnecessary and unused tags,
+   and unreachable code.
+2. **Constant elimination**: Do calculations at compile time.
+3. **Common code elimination**: Remove double calculations.
+4. **Unused place elimination**
+5. **Peephole optimization**: Made of child passes.
+6. **Tailcall optimization**: Make jumps to start of function instead of
+   having it call itself if possible.
 
 ## Back-end
 
-* Code generation
-* Code optimization
+Translate the IR to code.
+
+1. **Wrapping tags**: Wrap tags (numbers) in %TAG expressions for code
+   generation.
+1. **Place expansion**: Variables are mapped to the lexical scope.
+2. **Place assignment**: Stack frames and environment vectors are laid out.
+3. **Code generation**: Macros generating bytecode expressions
 
 # Compiler macros
 
 These are the interpreter's built-in special forms as IR-generating macros.
-Four new IR expressions replace the conventional forms BLOCK, GO, RETURN, ?,
+After this pass only code generating macros for the backend remain.
+
+Four new IR expressions resemble the conventional forms BLOCK, GO, RETURN, ?,
 AND, plus OR:
 
 | Metacode     | Description                           |
@@ -102,23 +120,10 @@ See [argument expansion](#argument-expansion).
 (%tag 2)
 ~~~
 
-## QUASUQUOTEs
-
-QUASIQUOTEs need to be compiled to code to apply LIST and
-APPEND instead:
-
-~~~lisp
-; From:
-$(1 2 ,@x 4 5)
-
-; To:
-(append '(1 2) x '(4 5))
-~~~
-
 ## BLOCK expansion
 
-The BLOCK expander need to expand child blocks first so
-that deeper RETURNs with a clashing name have precedence:
+Different from "block folding" later.  The BLOCK expander need to expand child
+blocks first so that deeper RETURNs with a clashing name have precedence:
 
 ~~~lisp
 (block nil
@@ -129,23 +134,37 @@ that deeper RETURNs with a clashing name have precedence:
     ...))
 ~~~
 
-By translating deeper BLOCKs' first, RETURN statements are
-resolved in the correct bottom-up order.
+By translating deeper BLOCKs' first, RETURN statements are resolved in the
+correct bottom-up order.
 
-The last expression of a BLOCK always assigns to %O which is
-synonymous for return values from then on.
+The last expression of a BLOCK always assigns to %O which is synonymous for
+return values from then on.
 
-# Function inlining
+# Quasiquote expansion
 
-Inlines anonymous functions and moves their arguments
-to the FUNINFO of the top-level function, which is laying
-out the local stack frame in the process.
+QUASIQUOTEs need to be compiled to code to apply LIST and APPEND instead:
+
+~~~lisp
+; From:
+$(1 2 ,@x 4 5)
+
+; To:
+(append '(1 2) x '(4 5))
+~~~
+
+# Lambda expansion
+
+Inlines binding lambdas and turns closures into regular functions with an
+environment argument for lexical scope while also building a tree of FUNINFO
+objects that describe each function.  FUNINFOs are looked up by function name,
+so closures are baptized with uniquely generated names.  The FUNINFOs are
+essential to process functions further.
 
 ~~~lisp
 ; TODO example of anonymous function first in expression.
 ~~~
 
-# Argument expansion
+# Function call expansion
 
 Checks arguments and turns rest arguments into consing expressions.  This is
 the last chance to do it before expresison expansion with turn everything into
@@ -153,7 +172,7 @@ IR format for good.
 
 # Expression expansion
 
-The exit point of the _front end_.  Breaks up nested function calls into a list
+**The exit point of the front end**.  Breaks up nested function calls into a list
 of single statement assignments to new temporary variables.
 
 ~~~
@@ -168,9 +187,8 @@ of single statement assignments to new temporary variables.
 
 # Block folding
 
-BLOCKs have been expanded to %BLOCKs to hold the expressions
-together for this pass.  They are now spliced into each
-other to get a single expression list for each function.
+Nested %BLOCK expressions are collapsed and the remaining %BLOCKs are dissolved
+into their function bodies – gone.
 
 ~~~lisp
 ; Input code
@@ -204,9 +222,8 @@ other to get a single expression list for each function.
 
 # Optimization
 
-Basic compression of what the macro expansions messed up
-at least,  like remove assignments with no effect or chained
-jumps.
+Basic compression of what the macro expansions messed up at least,  like
+removing assignments with no effect or chained jumps.
 
 # Call stack expansion
 
@@ -219,14 +236,14 @@ This pass inserts stack place assignments of arguments before function calls.
 | (%S offset) | Offset into local stack frame. |
 | (%D offset) | Offset into function data.     |
 
-Here the arguments are replaced by %S or %O expressions to
-denote places on the stack or on the function's object list.
+Here the arguments are replaced by %S or %O expressions to denote places on the
+stack or on the function's object list.
 
 # Generating code
 
-Five byte-sized codes tell what kind of information follows
-them; Bytecode BC\_LIST for example introduces a set of expressions.
-The other codes are jumps or mark the end of a function.
+Five byte-sized codes tell what kind of information follows them; Bytecode
+BC\_LIST for example introduces a set of expressions.  The other codes are
+jumps or mark the end of a function.
 
 | Bytecode         | Description                        |
 |------------------|------------------------------------|
@@ -245,23 +262,22 @@ These are actually two passes:
 
 ### Function info collection
 
-Creates function info objects with argument definitions.
-They are used by optimizing and code generating passes and,
-intially, are as simple as this:
+Creates function info objects with argument definitions.  They are used by
+optimizing and code generating passes and, intially, are as simple as this:
 
 ~~~lisp
 (fn funinfo ()
   (@ list '(args)))
 ~~~
 
-When extending the compiler, most things will revolve around
-this pittoresque, little thing as we'll see later.
+When extending the compiler, most things will revolve around this pittoresque,
+little thing as we'll see later.
 
 ### Argument renaming pass
 
-The following lambda-expansion might need to inline
-functions with argument names that are already in use.  This
-pass solves that issue by renaming all arguments.
+The following lambda-expansion might need to inline functions with argument
+names that are already in use.  This pass solves that issue by renaming all
+arguments.
 
 ~~~lisp
 ; TODO example of shadowed arguments that would clash on
@@ -270,19 +286,61 @@ pass solves that issue by renaming all arguments.
 ~~~
 
 
-# Generating native code
+# Code generation
 
-Native code brings maximum performance but also maximum code size, so it must be used
-if top performance is essential.  For most people it's no problem if a text editor
-takes a 10th of a second to respond.  But whenever huge amounts of data have to be
-processed, or the system has to respond instantly, native code is a natural choice
-over bytecode.
+* Bytecode requires functions to run in.
+* These bytecode functions contain a string of byteocde in their (symbol) name,
+  and bytecode only.
+* Lisp objects are referenced by index in the function's object table.
+* Jump destinations are also byte indexes into the bytecode string.
+
+Bytecode functions must be PRINT- and READ-able.
+
+~~~lisp
+#$((a b)                  ; Argument definition
+   (print "Hello world!") ; Object list
+   nil                    ; Stack frame size or NIL
+   (1 130 0))             ; Bytecodes
+~~~
+
+* Argument list elements either reference stack places or read-only object
+  indexes.  The lowest bit determines what it is.  The highest bit marks the
+  last argument.
+
+~~~
+(fn ir-funcall-to-bytecode (x.)
+  (list
+    (+ (? .x 0 128)
+       (? (%stack? x.)
+          (<< (cadr x.) 2)
+          (++ (<< (*fi*.obj-pos x.) 2)))))
+~~~
+
+* 0:       Return from function
+* 1-32:    Function call
+* 128-252: Copy to stack
+* 253:     Jump if not NIL
+* 254:     Jump if NIL
+* 255:     Jump
+
+A set of code generating macros could be used to generate strings of assembly
+language.  But all we need to do now is to comb out literal objects which must be
+referenced in the bytecode function's object table.
+
+# Futuristic ideas
+
+## Generating native code
+
+Native code brings maximum performance but also maximum code size, so it must
+be used if top performance is essential.  For most people it's no problem if a
+text editor takes a 10th of a second to respond.  But whenever huge amounts of
+data have to be processed, or the system has to respond instantly, native code
+is a natural choice over bytecode.
 
 ## Generating code for the MOS 6502
 
-The amount of code required to do pointer manipulations on a
-MOS 6502-CPU is massive as each byte of a pointer has to be
-dealt with separately.
+The amount of code required to do pointer manipulations on a MOS 6502-CPU is
+massive as each byte of a pointer has to be dealt with separately.
 
 ~~~asm
 not:ldy #0

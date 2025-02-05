@@ -1,3 +1,29 @@
+.proc get_place
+    tay
+    lsr
+    tya
+    bcs stackplace
+    lda (bcp),y
+    sta fun
+    iny
+    lda (bcp),y
+    sta (++ fun)
+    inc bcp
+    inc bcp
+    beq +
+    inc (++ bcp)
++:  rts
+stackplace:
+    tay
+    dey
+    lda (stack),y
+    sta fun
+    iny
+    lda (stack),y
+    sta (++ fun)
+    rts
+.endproc
+
 .proc run_bytecode_fun
     ; Save pointer to bytecode object.
     sta bcp
@@ -29,16 +55,10 @@ next:
     lda (bpc),y
     beq return
     inc bpc
-    bcc :+
+    beq :+
     inc bpc+1
-:
-    ; Get function object.
-    tay
-    lda (bcp),y
-    sta fun
-    iny
-    lda (bcp),y
-    sta fun+1
+
+    jsr get_place
 
     ; Get value of function.
     ldy #OFS_SYMBOL_VALUE
@@ -48,77 +68,29 @@ next:
     lda (fun),y
     sta value
 
+    cmp #TYPE_BUILTIN
+    bne no_builtin
+
     ;;;;;;;;;;;;;;;;
     ;;; Built-in ;;;
     ;;;;;;;;;;;;;;;;
 
-    cmp #TYPE_BUILTIN
-    bne no_builtin
+    ; Arguments to built-ins are copied to table 'args'.
 
     ldx #0  ; args
 l:  ldy #0
     lda (bcc),y
-    bmi bi_call
-    asl
-    bmi bi_const
-
-    ; Stack arg
-    tay
-    lda (sp),y
-    iny
-    sta args,x
-    inx
-    lda (sp),y
-    sta args,x
-    inx
-    inc bcc
-    bcc l
-    inc bcc+1
-    bne l   ; (jmp)
-
-    ; Constant list argument
-bi_const:
-    and #$7f
-    tay
-    lda (bcp),y
-    iny
-    sta args,x
-    inx
-    lda (bcp),y
-    sta args,x
-    inx
-    inc bcc
-    bcc l
-    inc bcc+1
-    bne l   ; (jmp)
+    bmi last_arg
+    jsr get_arg
+    jmp -l
+last_arg:
+    jsr get_arg
 
     ; Call built-in
 bi_call:
     jsr push_bcp
     jsr j
     jsr pop_bcp
-
-set_place:
-    sta value
-
-    ; Get stack index.
-    ldy #0
-    lda (bcc),y
-    tay
-
-    inc bcc
-    bcc :+
-    inc bcc+1
-:
-    ; Copy value to stack.
-    lda value
-    sta (sp),y
-    iny
-    txa
-    sta (sp),y
-    jmp next
-
-j:  jmp (value)
 
 no_builtin:
 
@@ -127,6 +99,7 @@ no_builtin:
     ;;;;;;;;;;;;;;;;
     ; Same as built-in but copying arguments to the GC
     ; stack instead of 'args'..
+
 no_bytecode:
 
     ;;;;;;;;;;;;
@@ -134,6 +107,8 @@ no_bytecode:
     ;;;;;;;;;;;;
     ; Get start of argument definition.
     ; Save and set symbol values.
+
+error::
 
 jumps:
     asl

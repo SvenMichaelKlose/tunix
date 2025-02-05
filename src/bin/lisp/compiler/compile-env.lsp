@@ -28,23 +28,18 @@
 (load 'compiler/pass.lsp)
 (compiler/pass '_1dotsmacros.lsp '_2cmacros.lsp compiler/cmacroexpand t)
 
-;(message '"# TODO: Collect function info...")
-;(message '"# TODO: Argument expansion...")
-
-(message '"# Inlining anonymous functions...")
-(reset!)
-(load 'compiler/inline-fn.lsp)
-(compiler/pass '_2cmacros.lsp '_3inlined.lsp compiler/inline-fn t)
-
-(message '"# Folding blocks...")
-(reset!)
-(load 'compiler/fold-block.lsp)
-(compiler/pass '_3inlined.lsp '_4folded.lsp compiler/fold-block t)
+;(message '"# TODO: Lambda expansion...")
+;(message '"# TODO: Call expansion...")
 
 (message '"# Expression expansion...")
 (reset!)
 (load 'compiler/exexpand.lsp)
-(compiler/pass '_4folded.lsp '_5expex.lsp compiler/exexpand t)
+(compiler/pass '_2cmacros.lsp '_3expex.lsp compiler/exexpand t)
+
+(message '"# Folding blocks...")
+(reset!)
+(load 'compiler/fold-block.lsp)
+(compiler/pass '_3expex.lsp '_4folded.lsp compiler/fold-block t)
 
 ;(message '"# Straighten jumps...")
 ;(message '"# Remove unused tags...")

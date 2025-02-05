@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Preview</title>
+</head>
+<body>
+    <div id="content"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script>
+        const md = window.markdownit();
+        const contentDiv = document.getElementById('content');
+
+        async function loadMarkdown() {
+            const response = await fetch('compiler.md');
+            const text = await response.text();
+            contentDiv.innerHTML = md.render(text);
+        }
+
+        loadMarkdown();
+
+        // Reload content every 2 seconds
+        setInterval(loadMarkdown, 2000);
+    </script>
+</body>
+</html>

@@ -10,7 +10,7 @@
   (? (%block? x)
      (!= .x
        (? (cons? !)
-          (mapcan fold-block !)
+          (+@ fold-block !)
           (list !)))
      (list x)))
 

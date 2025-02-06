@@ -1,5 +1,7 @@
+(in-package 'c/ce '(call))
+
 (fn call (x)
-  (fn r (d v)
+  (fn args (d v)
     (and (not d) v
       (error "Too many args: " v))
     (when d
@@ -7,14 +9,16 @@
         (error "Missing arg: " d)))
       (? (and d (atom d))
          $(.. ,@v)
-         (. v. (r .d .v))))
+         $(,v. ,@(args .d .v))))
   (!? (*fi*.argdef x.)
-      (. x. (r ! .x))
+      $(,x. ,@(args ! .x))
       $(*> ,x. (.. ,@.x))))
 
-(walker callexpand (x)
+(walker compiler/callexpand (x)
   (%=? x)
     $(%= ,.x.
          ,(? (cons? ..x.)
              (call ..x.)
              ..x.)))
+
+(in-package nil)

@@ -4,4 +4,4 @@
        (!? (position x l f)
            (. (subseq l 0 !)
               (split x (subseq l (++ !)) f))
-           (list l))))
+           (.. l))))

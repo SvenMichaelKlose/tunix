@@ -14,7 +14,7 @@
          $(cdr ,(%des (cdr %dex)))
        (let (%dex (split \. %dex))
          $(cdr (assoc ',(symbol (car (last %dex)))
-                      ,(%des (apply append (pad (list \.) (butlast %dex))))))))
+                      ,(%des (apply append (pad (.. \.) (butlast %dex))))))))
      (symbol %dex)))
 
 (fn %debq (%dex)
@@ -24,7 +24,7 @@
     (atom %dex)
       %dex
     (eq 'unquote (car %dex))
-      (list 'unquote (dotexpand (cadr %dex)))
+      (.. 'unquote (dotexpand (cadr %dex)))
     (. (%debq (car %dex))
        (%debq (cdr %dex)))))
 
@@ -36,7 +36,7 @@
         (eq 'quote (car %dex)))
       %dex
     (eq 'backquote (car %dex))
-      (list 'backquote (%debq (cadr %dex)))
+      (.. 'backquote (%debq (cadr %dex)))
     (. (dotexpand (car %dex))
        (dotexpand (cdr %dex)))))
 

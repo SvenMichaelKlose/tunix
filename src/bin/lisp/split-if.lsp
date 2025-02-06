@@ -3,4 +3,4 @@
        (!? (position-if f l)
            (. (subseq l 0 !)
               (split-if f (subseq l (++ !))))
-           (list l))))
+           (.. l))))

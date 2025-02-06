@@ -1,7 +1,7 @@
 (var *macros* nil)
 
 (fn %requote (x)
-  (. (list (caar x) (macroexpand (cadar x)))
+  (. (.. (caar x) (macroexpand (cadar x)))
      (%unquote (cdr x))))
 
 (fn %unquote (x)

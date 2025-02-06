@@ -17,7 +17,7 @@
         ; Prefix with package name if in list.
         (member x (cdr *p*))
           (symbol (append (symbol-name (car *p*))
-                          (list \/)
+                          (.. \/)
                           (symbol-name x)))
         x)
     (atom x) x

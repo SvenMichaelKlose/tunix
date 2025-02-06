@@ -250,8 +250,8 @@
     (error "RETURN in argument list of user-defined function failed as second argument to TWOARGS"))
 
 (message '"Testing RETURN in argument rest of user-defined function...")
-(fn list x x)
-(or (eq 'foo (block nil (list (return 'foo))))
+(fn .. x x)
+(or (eq 'foo (block nil (.. (return 'foo))))
     (error "RETURN in argument list of user-defined function failed"))
 
 (message '"Testing RETURN from nested BLOCKs...")

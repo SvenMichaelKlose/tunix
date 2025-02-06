@@ -2,5 +2,5 @@
   (and x
        (. (. (car x)
              (and (cdr x)
-                  (list (cadr x))))
+                  (.. (cadr x))))
           (group2 (cddr x)))))

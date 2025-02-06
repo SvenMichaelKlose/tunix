@@ -3,6 +3,6 @@
          f  $((p)
                (? .p
                   $((eql ,g ,',(car p)) ,',(cadr p))
-                  (list p.))))
+                  (.. p.))))
     $(let (,g ,x.)
        (? ,@(mapcan f (group2 .x))))))

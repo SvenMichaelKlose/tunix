@@ -1088,11 +1088,11 @@ takes its arguments as provided, APPLY expects the last element of ARGS to
 be a list, which is then appended to the previous elements:
 
 ~~~lisp
-(fn list x
+(fn .. x
   x)
 
-(apply list '(10 11))   -> (10 11)
-(apply list 1 2 '(3 4)) -> (1 2 3 4)
+(apply .. '(10 11))   -> (10 11)
+(apply .. 1 2 '(3 4)) -> (1 2 3 4)
 ~~~
 
 The reason for this is that it takes away the need to do that kind of
@@ -2150,7 +2150,7 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 | Function          | Description                          |
 |-------------------|--------------------------------------|
 | (dup x n)         | Duplicate X N times.                 |
-| (list +x)         | Return list evaluated.               |
+| (.. +x)           | Return list of arguments.            |
 | (list? x)         | Test if argument is NIL or a cons.   |
 | (cadr l)...       | Nested CAR/CDR combinations.         |
 | (carlist l)       | Get first elements of lists.         |
@@ -2188,7 +2188,7 @@ This is the macro-expanded version (TMP would be an anonymous symbol):
 (dup 'x 3) ; -> (x x x)
 ~~~
 
-### (list +x): Make list from arguments
+### (.. +x): Make list of arguments
 
 ### (list? x): Test if argument is NIL or a cons
 
@@ -2646,7 +2646,7 @@ Only very basic support, no polling or listening.
 (!? (socket-connect "127.0.0.1" 8000)
     (progn
       (socket-send ! (symbol (append (symbol-name "GET / HTTP/1.1")
-                                     (list 13 10 13 10))))
+                                     (.. 13 10 13 10))))
       (print (socket-read !))
       (socket-close !))
     (message "Cannot open 127.0.0.1:8000."))

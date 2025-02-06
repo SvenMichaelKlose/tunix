@@ -12,8 +12,8 @@
   (?
     (atom x) x
     (eq 'unquote x.)
-      (list 'unquote
-            (anonymize-expr .x. syms gsyms))
+      (.. 'unquote
+          (anonymize-expr .x. syms gsyms))
     (anonymize-list x syms gsyms)))
 
 (fn anonymize-expr (x syms gsyms)
@@ -27,7 +27,7 @@
     (eq x. 'fn)
       (. 'fn (anonymize-funexpr .x syms gsyms))
     (eq x. 'backquote)
-      (list 'backquote (anonymize-backquote .x. syms gsyms))
+      (.. 'backquote (anonymize-backquote .x. syms gsyms))
     (eq x. 'block)
       (. 'block (. .x. (anonymize-list (cddr x) syms gsyms)))
     (cons? x.)

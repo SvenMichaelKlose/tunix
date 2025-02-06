@@ -6,6 +6,6 @@
                        $((= ! ,(car x))
                          ,(cadr x)
                          ,@(rec (cddr x)))
-                       (list (car x))))))
+                       (.. (car x))))))
     $(let (! nil)
        (? ,@(rec x)))))

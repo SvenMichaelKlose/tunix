@@ -11,60 +11,46 @@
      x
      $(quote ,x)))
 
-(fn enquote-r (x)
-  (? (atom x)
-     (enquote x)
-     $(. ,(enquote-r x.)
-         ,(enquote-r .x))))
+(def-tree-filter enquote-r (x)
+  (atom x) (enquote x))
 
 (fn enqq (x)
-  (? (any-quasiquote? (cadr x.))
-     $(. ,(backq (cadr x.))
-         ,(backq .x))
-     $(. ,(cadr x.)
-         ,(backq .x))))
+  $(. ,(? (any-quasiquote? (cadr x.))
+          (backq (cadr x.))
+          (cadr x.))
+      ,(backq .x)))
 
 (fn enqqs (x)
   (? (any-quasiquote? (cadr x.))
-     (error "Illegal ~A as argument to ,@ (QUASIQUOTE-SPLICE)." (cadr x.))
-     (with-gensym g
-       ; TODO: Make TRANSPILER-MACROEXPAND work and use LET.
+     (error "Illegal argument to ,@: "
+            (cadr x.))
+     (let (g (symbol))
        (compiler-macroexpand
          $(#'((,g)
-                (append (? (json-object? ,g)
-                           (props-klist ,g)
-                           ,g)
-                        ,(backq .x)))
-                        ,(cadr x.))))))
+                (append
+                    (? (json-object? ,g)
+                       (props-klist ,g)
+                       ,g)
+                    ,(backq .x)))
+              ,(cadr x.))))))
 
-(fn backq (x)
-  (?
-    (atom x)
-      (atomic x)
-    (pcase x.
-      atom
-        $(. ,(enquote x.)
-            ,(backq .x))
-      quasiquote?
-        (qq x)
-      quasiquote-splice?
-        (qqs x)
-      $(. ,(backq x.)
-          ,(backq .x)))))
+(def-tree-filter backq (x)
+  (atom x)
+    (atomic x)
+  (pcase x.
+    atom $(. ,(enquote x.)
+             ,(backq .x))
+    quasiquote?        (qq x)
+    quasiquote-splice? (qqs x)))
 
 (fn disp (x)
   (pcase x
-    quote?
-      (enquote-r .x.)
-    backquote?
-      (backq .x.)
+    quote?     (enquote-r .x.)
+    backquote? (backq .x.)
     x))
 
-(fn r (x)
-  (? (atom x)
-     (disp x)
-     (. (r (disp x.))
-        (r .x))))
+(def-tree-filter r (x)
+  (atom x) (disp x))
 
 (fn compiler/quote-expand (x)
   (car (r (.. x))))

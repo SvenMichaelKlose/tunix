@@ -3,30 +3,30 @@
     enqq enqqs backq disp r))
 
 (fn any-quasiquote? (x)
-  (or (quasiquote? _)
-      (quasiquote-splice? _)))
+  (or (quasiquote? x)
+      (quasiquote-splice? x)))
 
 (fn enquote (x)
-  (? (constant-literal? _)
-     _
-     $(quote ,_)))
+  (? (constant-literal? x)
+     x
+     $(quote ,x)))
 
 (fn enquote-r (x)
-  (? (atom _)
-     (enquote _)
-     $(. ,(enquote-r _.)
-         ,(enquote-r ._))))
+  (? (atom x)
+     (enquote x)
+     $(. ,(enquote-r x.)
+         ,(enquote-r .x))))
 
 (fn enqq (x)
-  (? (any-quasiquote? (cadr _.))
-     $(. ,(backq (cadr _.))
-         ,(backq ._))
-     $(. ,(cadr _.)
-         ,(backq ._))))
+  (? (any-quasiquote? (cadr x.))
+     $(. ,(backq (cadr x.))
+         ,(backq .x))
+     $(. ,(cadr x.)
+         ,(backq .x))))
 
 (fn enqqs (x)
-  (? (any-quasiquote? (cadr _.))
-     (error "Illegal ~A as argument to ,@ (QUASIQUOTE-SPLICE)." (cadr _.))
+  (? (any-quasiquote? (cadr x.))
+     (error "Illegal ~A as argument to ,@ (QUASIQUOTE-SPLICE)." (cadr x.))
      (with-gensym g
        ; TODO: Make TRANSPILER-MACROEXPAND work and use LET.
        (compiler-macroexpand
@@ -34,37 +34,37 @@
                 (append (? (json-object? ,g)
                            (props-klist ,g)
                            ,g)
-                        ,(backq ._)))
-                        ,(cadr _.))))))
+                        ,(backq .x)))
+                        ,(cadr x.))))))
 
 (fn backq (x)
   (?
-    (atom _)
-      (atomic _)
-    (pcase _.
+    (atom x)
+      (atomic x)
+    (pcase x.
       atom
-        $(. ,(enquote _.)
-            ,(backq ._))
+        $(. ,(enquote x.)
+            ,(backq .x))
       quasiquote?
-        (qq _)
+        (qq x)
       quasiquote-splice?
-        (qqs _)
-      $(. ,(backq _.)
-          ,(backq ._)))))
+        (qqs x)
+      $(. ,(backq x.)
+          ,(backq .x)))))
 
 (fn disp (x)
-  (pcase _
+  (pcase x
     quote?
-      (enquote-r ._.)
+      (enquote-r .x.)
     backquote?
-      (backq ._.)
-    _))
+      (backq .x.)
+    x))
 
 (fn r (x)
-  (? (atom _)
-     (disp _)
-     (. (r (disp _.))
-        (r ._))))
+  (? (atom x)
+     (disp x)
+     (. (r (disp x.))
+        (r .x))))
 
 (fn compiler/quote-expand (x)
   (car (r (.. x))))

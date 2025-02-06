@@ -6,10 +6,10 @@
       (error "Too many args: " v))
     (when d
       (unless v
-        (error "Missing arg: " d)))
+        (error "Missing arg: " d))
       (? (and d (atom d))
          $(.. ,@v)
-         $(,v. ,@(args .d .v))))
+         $(,v. ,@(args .d .v)))))
   (!? (*fi*.argdef x.)
       $(,x. ,@(args ! .x))
       $(*> ,x. (.. ,@.x))))

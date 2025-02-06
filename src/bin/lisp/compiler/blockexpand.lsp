@@ -1,10 +1,10 @@
-(in-package 'compiler/blockexpand
-  '(cmblock cmreturn))
+(in-package 'c/be
+  '(*blocks* cblock creturn))
 
 (var *blocks* nil)
 
 ; TODO: Collect potential tags.
-(fn cmblock (n . body)
+(fn cblock (n . body)
   (let (end "")
     (push (. n end) *blocks*)
     (!= (@ macroexpand body)
@@ -13,7 +13,7 @@
          ,@!
          (%tag ,end)))))
 
-(fn cmreturn (v . n)
+(fn creturn (v . n)
   (!? (cdr (assoc n *blocks*))
       $(%block
          ,v
@@ -22,9 +22,9 @@
 
 (umacro block block (n . body)
   (with-global
-      *macros* (list (. 'block cmblock)
-                     (. 'return cmreturn))
-    (apply cmblock n body)))
+      *macros* (.. (. 'block  cblock)
+                   (. 'return creturn))
+    (apply cblock n body)))
 
 (fn blockexpand (x)
   (umacroexpand 'block x))

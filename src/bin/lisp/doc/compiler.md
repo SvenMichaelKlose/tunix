@@ -38,7 +38,7 @@ output, which is serializable bytecode functions.
 4. **Compiler macro expansion**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
    QUOTE, QUASIQUOTE, and so on, into IR.   After this pass there must be no
    more macros.
-5. **Quasiquote expansion**: To consing expressions.
+5. **Quote expansion**: Makes consing expressions out of QUOTEs and QUASIQUOTEs.
 6. **Lambda expansion**: Inlines binding lamdas and exports closures to own
    functions while building a function info tree required to proceed.
 
@@ -74,11 +74,10 @@ Translate the IR to code.
 
 # Compiler macros
 
-These are the interpreter's built-in special forms as IR-generating macros.
-After this pass only code generating macros for the backend remain.
+Expands special forms BLOCK, GO, RETURN, ?, AND, and OR, to simpler IR statements
+and turn QUASIQUOTE expressions, like "$expr", into CONSing ones.
 
-Four new IR expressions resemble the conventional forms BLOCK, GO, RETURN, ?,
-AND, plus OR:
+## Control flow
 
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
@@ -86,23 +85,7 @@ AND, plus OR:
 | (%go-nil s)  | Jump if last result is NIL.           |
 | (%go-nnil s) | Jump if last result is not NIL.       |
 | (%tag s)     | Jump destination.                     |
-**IR jump expressions**
-
-QUOTEs and QUASIQUOTEs are turned into regular CONSing expressions:
-
-~~~lisp
-; Before:
-'(a b c)
-
-; After:
-(cons 'a (cons 'b (cons 'c nil)))
-~~~
-
-CONSing expressions will also be made to pass rest arguments to functions,
-as there is no interpreter to do it.
-See [argument expansion](#argument-expansion).
-
-## Control flow
+**IR statements for flow control**
 
 ~~~lisp
 ; Before:
@@ -140,17 +123,29 @@ correct bottom-up order.
 The last expression of a BLOCK always assigns to %O which is synonymous for
 return values from then on.
 
-# Quasiquote expansion
 
-QUASIQUOTEs need to be compiled to code to apply LIST and APPEND instead:
+# Quote expansion
+
+QUOTEs are turned into regular CONSing expressions:
+
+~~~lisp
+; Before:
+'(a b c)
+
+; After:
+(. 'a (. 'b (. 'c nil)))
+~~~
+
+QUASIQUOTEs are translated to code using LIST and APPEND instead:
 
 ~~~lisp
 ; From:
-$(1 2 ,@x 4 5)
+$(1 2 ,@x ,y 4 5)
 
 ; To:
-(append '(1 2) x '(4 5))
+(append (.. 1 2) x (. y (.. 4 5)))
 ~~~
+
 
 # Lambda expansion
 
@@ -164,15 +159,15 @@ essential to process functions further.
 ; TODO example of anonymous function first in expression.
 ~~~
 
-# Function call expansion
 
-Checks arguments and turns rest arguments into consing expressions.  This is
-the last chance to do it before expresison expansion with turn everything into
-IR format for good.
+# Call expansion
+
+Checks and expands arguments and turns rest arguments into CONSing expressions.
+
 
 # Expression expansion
 
-**The exit point of the front end**.  Breaks up nested function calls into a list
+**The exit point of the front end.**  Breaks up nested function calls into a list
 of single statement assignments to new temporary variables.
 
 ~~~

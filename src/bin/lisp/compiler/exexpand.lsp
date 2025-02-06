@@ -1,3 +1,6 @@
+(in-package 'c/ee
+  '(move-arg))
+
 (load 'compiler/package.lsp)
 (require '!= 'mapcar '+@)
 
@@ -13,12 +16,14 @@
 (fn exexpand (x)
   (?
     (atom x)
-      (list x)
+      (.. x)
     ; Expression in assigment
     (eq '= x.)
       (!= (@ move-arg (cdr ..x.))
         (+ (+@ exexpand (+@ cdr !))
-           $((= ,.x. (,(car ..x.) ,@(@ car !))))))
+           $((= ,.x.
+                (,(car ..x.)
+                    ,@(@ car !))))))
     ; Expression
     (!= (@ move-arg .x)
       (+ (+@ exexpand (+@ cdr !))

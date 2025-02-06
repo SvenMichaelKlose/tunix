@@ -1,20 +1,19 @@
-(in-package 'compiler/place-assign
+(in-package 'c/pa
   '(error stackarg assign))
 
 (fn stackarg (x)
-  (let fi (get-funinfo .x.)
-    (+ (length (fi.vars))
-       (- (length (fi.args))
-          (fi.arg-pos ..x.)
+  (!= (get-funinfo .x.)
+    (+ (length (!.vars))
+       (- (length (!.args))
+          (!.arg-pos ..x.)
           1))))
 
-(define-tree-filter assign (x)
+(def-tree-filter assign (x)
   (or (quote? x)
       (%native? x))
     x
   (and (%stackarg? x) ..x)
-    $(%stack
-       ,(stackarg x))
+    $(%stack ,(stackarg x))
   (and (%stack? x) ..x)
     $(%stack
        ,(or ((get-funinfo .x.).var-pos ..x.)
@@ -29,11 +28,11 @@
        ,((get-funinfo ..x.).scoped-var-index ...x.)
        ,(assign ....x.))
   (named-lambda? x)
-    (copy-lambda x :body (assign (lambda-body x)))
+    (copy-lambda x
+        :body (assign (lambda-body x)))
   (%slot-value? x)
     $(%slot-value ,(assign .x.) ,..x.))
 
-(fn place-assign (x)
-  (assign x))
+(var compiler/place-assign assign)
 
 (in-package nil)

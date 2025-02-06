@@ -11,7 +11,7 @@
      (!= .x
        (? (cons? !)
           (+@ fold-block !)
-          (list !)))
-     (list x)))
+          (.. !)))
+     (.. x)))
 
 (in-package nil)

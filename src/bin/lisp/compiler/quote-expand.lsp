@@ -67,4 +67,4 @@
         (r ._))))
 
 (fn compiler/quote-expand (x)
-  (car (r (list x))))
+  (car (r (.. x))))

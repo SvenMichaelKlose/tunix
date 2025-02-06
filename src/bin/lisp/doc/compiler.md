@@ -13,7 +13,7 @@ architecture.
 
 # Architecture
 
-The compiler has a _micropass_ architecture where each of the 20 passes is as
+The compiler has a _micropass_ architecture where each of the 21 passes is as
 small and independent as possible, making the compiler easier to maintain.  Its
 _frontend_ translates the input into a simpler, machine-level (but still
 machine-independent) _intermediate representation (IR)_ for the _middleend_,
@@ -64,23 +64,23 @@ pass, so all calls to known functions can be compiled in the next:
 
 ## Middleend
 
-1. **Jump optimization**: Remove chained jumps, unnecessary and unused tags,
-   and unreachable code.
-2. **Constant elimination**: Do calculations at compile time.
-3. **Common code elimination**: Remove double calculations.
-4. **Unused place elimination**
-5. **Peephole optimization**: Made of child passes.
-6. **Tailcall optimization**: Make jumps to start of function instead of
-   having it call itself if possible.
+12. **Jump optimization**: Remove chained jumps, unnecessary and unused tags,
+    and unreachable code.
+13. **Constant elimination**: Do calculations at compile time.
+14. **Common code elimination**: Remove double calculations.
+15. **Unused place elimination**
+16. **Peephole optimization**: Made of child passes.
+17. **Tailcall optimization**: Make jumps to start of function instead of
+    having it call itself if possible.
 
 ## Back-end
 
 Translate the IR to code.
 
-1. **Wrapping tags**: Wrap tags (numbers) in %TAGs for code generation.
-1. **Place expansion**: Variables are mapped to the lexical scope.
-2. **Place assignment**: Stack frames and environment vectors are laid out.
-3. **Code generation**: Macros generating bytecode
+18. **Wrapping tags**: Wrap tags (numbers) in %TAGs for code generation.
+19. **Place expansion**: Variables are mapped to the lexical scope.
+20. **Place assignment**: Stack frames and environment vectors are laid out.
+21. **Code generation**: Macros generating bytecode
 
 # The frontend passes
 
@@ -340,9 +340,9 @@ Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
 (lambda countdown (n-total)
   ((%s 1) (%s 0))
   0
-  (%0     (== (%s 1) 0))
+  (%0 (== (%s 1) 0))
   (%go-nnil 1)
-  (%0     (print (%s 1)))
+  (%0 (print (%s 1)))
   ((%s 1) (- (%s 1) 1))
   (%go 0)
   1)
@@ -354,15 +354,27 @@ Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
 
 Once again: macro expansion to the rescue!  By merely expanding named LAMBDAs,
 translating tags to offsets and making references to stack places and into a
-functions list of literals, serializable bytecode is made - bytecode functions must
-be PRINT- and READ-able:
+functions list of literals, serializable bytecode is made - bytecode functions
+must be PRINT- and READ-able:
 
 ~~~lisp
-((a b)                  ; Argument definition
- (print "Hello world!") ; Object list
- nil                    ; Stack frame size or NIL
- (1 130 0))             ; Bytecodes as numbers or string
+((a b)            ; Argument definition
+ (== 0 print - 1) ; Object list
+ nil              ; Stack frame size (args & locals)
+ (2 0      ; ((%s 1) (%s 0))
+  0 3 2 1  ; (%0 (== (%s 1) 0))
+  253 17   ; (%go-nnil 1)
+  0 5 2    ; (%0 (print (%s 1)))
+  2 7 2 9  ; ((%s 1) (- (%s 1) 1))
+  254 3)   ; (%go 3)
+  255      ; end of function
 ~~~
+
+Unlike our original COUNTDOWN made of 13 conses of 5 byte each totalling to
+65 bytes, the bytecode function amounts to 18 bytecodes, plus an object table
+of 5 pointers (10B) a stack frame size of 1B, totalling to 29 bytes.
+However, when compiling calls to such function, its argument definition must
+be looked up from a database.
 
 * Argument list elements either reference stack places or read-only object
   indexes.  The lowest bit determines what it is.  The highest bit marks the

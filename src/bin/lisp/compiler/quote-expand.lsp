@@ -49,8 +49,11 @@
     backquote? (backq .x.)
     x))
 
-(def-tree-filter r (x)
-  (atom x) (disp x))
+(fn r (x)
+  (? (atom x)
+     (disp x)
+     (. (disp x.))
+        (r .x)))
 
 (fn compiler/quote-expand (x)
   (car (r (.. x))))

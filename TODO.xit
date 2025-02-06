@@ -1,10 +1,6 @@
 TUNIX Lisp
-[@] Make it fun writing the bytecode compiler with it.
-
-Interpreter
-[ ] UNWIND-PROTECT
-[ ] Make stack overflows regular errors.
-[ ] Multiple symbol lists to reduce look-up times.
+[@] Boot compiled compiler with
+    [tré](https://github.com/SvenMichaelKlose/tre/
 
 Debugger
 [ ] Invoking debugger with Ctrl-C.

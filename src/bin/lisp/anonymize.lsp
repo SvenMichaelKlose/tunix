@@ -1,19 +1,19 @@
 ; ⚠️  UNDER CONSTRUCTION ⚠️
 ;
-; Replace argument symbols by a unnamed ones
-; from a static list to make space.
+; Replace argument symbols by unnamed
+; ones from static list.
 
-(var *gsyms* (with-queue q
-               (dotimes (i 32 (queue-list q))
-                 (enqueue q (symbol)))))
+(var *gsyms*
+     (with-queue q
+       (dotimes (i 32 (queue-list q))
+         (enqueue q (symbol)))))
 
 (fn anonymize-backquote (x syms gsyms)
   (?
-    (atom x)
-      x
-    (eq 'unquote (car x))
+    (atom x) x
+    (eq 'unquote x.)
       (list 'unquote
-            (anonymize-expr (cadr x) syms gsyms))
+            (anonymize-expr .x. syms gsyms))
     (anonymize-list x syms gsyms)))
 
 (fn anonymize-expr (x syms gsyms)
@@ -22,17 +22,17 @@
       (or (cdr (assoc x syms)) x)
     (atom x)
       x
-    (eq 'quote (car x))
+    (eq x. 'quote)
       x
-    (eq 'fn (car x))
-      (. 'fn (anonymize-funexpr (cdr x) syms gsyms))
-    (eq 'backquote (car x))
-      (list 'backquote (anonymize-backquote (cadr x) syms gsyms))
-    (eq 'block (car x))
-      (. 'block (. (cadr x) (anonymize-list (cddr x) syms gsyms)))
-    (cons? (car x))
-      (. (anonymize-funexpr (car x) syms gsyms)
-         (anonymize-list (cdr x) syms gsyms))
+    (eq x. 'fn)
+      (. 'fn (anonymize-funexpr .x syms gsyms))
+    (eq x. 'backquote)
+      (list 'backquote (anonymize-backquote .x. syms gsyms))
+    (eq x. 'block)
+      (. 'block (. .x. (anonymize-list (cddr x) syms gsyms)))
+    (cons? x.)
+      (. (anonymize-funexpr x. syms gsyms)
+         (anonymize-list .x syms gsyms))
     (anonymize-list x syms gsyms)))
 
 (fn anonymize-list (x syms gsyms)
@@ -42,24 +42,24 @@
 
 (fn xlated-args (q x gsyms)
   (?
-    (not x)
-      nil
+    (not x) nil
     (atom x)
       (progn
-        (enqueue q (. x (car gsyms)))
-        (car gsyms))
+        (enqueue q (. x gsyms.))
+        gsyms.)
     (progn
-      (enqueue q (. (car x) (car gsyms)))
-      (. (car gsyms)
-         (xlated-args q (cdr x) (cdr gsyms))))))
+      (enqueue q (. x. gsyms.))
+      (. gsyms.
+         (xlated-args q .x .gsyms)))))
 
 (fn anonymize-funexpr (x syms gsyms)
   (let (q (make-queue))
-    (!= (xlated-args q (car x) gsyms)
+    (!= (xlated-args q x. gsyms)
       (let (asyms (queue-list q))
-        (. ! (anonymize-list (cdr x)
-                             (append asyms syms)
-                             (nthcdr (length syms) gsyms)))))))
+        (. !
+           (anonymize-list .x
+                           (append asyms syms)
+                           (nthcdr (length syms) gsyms)))))))
 
 (fn anonymize (x)
   (anonymize-funexpr x nil *gsyms*))
@@ -67,7 +67,7 @@
 (dolist (i *universe*)
   (when (symbol? i)
     (!= (symbol-value i)
-      (when (cons? (car !))
+      (when (cons? !.)
         (fresh-line)
         (print i)
         (fresh-line)

@@ -1,4 +1,4 @@
-(= *alv?* t)
+(= *alv?* t) ; Verbose AUTOLOAD.
 
 (message "Testing CMACROEXPAND...")
 (reset!)
@@ -13,38 +13,17 @@
 (load 'compiler/package.lsp)
 (and (argexpand nil nil)
      (error))
-(or (equal (argexpand '(a b c) '(1 2 3))
+(or (equal (argexpand '(a b c)
+                      '(1 2 3))
            '((a 1) (b 2) (c 3)))
     (error))
-(or (equal (argexpand '(a b . c) '(1 2 3))
+(or (equal (argexpand '(a b . c)
+                      '(1 2 3))
            '((a 1) (b 2) (c (3))))
     (error))
-(or (equal (argexpand '(a b . c) '(1 2 3 4))
+(or (equal (argexpand '(a b . c)
+                      '(1 2 3 4))
            '((a 1) (b 2) (c (3 4))))
-    (error))
-
-(message "Testing INLINE-FN...")
-(reset!)
-(load 'compiler/package.lsp)
-(or (cequal (inline-fn '((())))
-            '(%block))
-    (error))
-(or (cequal (inline-fn '((() a b)))
-            '(%block a b))
-    (error))
-(or (cequal (inline-fn '((()
-                           a b
-                           (((c d)
-                              e f)
-                            1 2))))
-            '(%block
-               a b
-               (%block
-                 (%push c d)
-                 (= c 1)
-                 (= d 2)
-                 e f
-                 (%pop d c))))
     (error))
 
 (message "Testing FOLD-BLOCK...")
@@ -56,7 +35,11 @@
 (or (cequal (fold-block '(%block a b))
             '(a b))
     (error))
-(or (cequal (fold-block '(%block a (%block b c)))
+(or (cequal (fold-block '(%block
+                           a
+                           (%block
+                             b
+                             c)))
             '(a b c))
     (error))
 

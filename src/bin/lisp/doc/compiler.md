@@ -1,34 +1,43 @@
----
-title: "TUNIX Lisp compiler"
-subtitle: "A roadmap"
-author: "Sven Michael Klose"
-lang: "en"
-titlepage: true
-titlepage-color: "389fff"
-titlepage-text-color: "ffffff"
-toc: true
-footnodes-pretty: true
-book: true
-...
+TUNIX Lisp compiler
+===================
 
-# Why?
+***By Sven Michael Klose <pixel@hugbox.org>.***
 
 The TUNIX Lisp interpreter is far too slow on 6502-based systems to do anything
-useful with.  Compiling to bytecode removes the overhead of interpretation
-and reduces the code size.  Essentially, the TUNIX Lisp compiler is the smaller
-sister of the [tré compiler](https://github.com/SvenMichaelKlose/tre/), minus
-the overhead for generating high-level code.
+useful with.  Compiling to stack-based bytecode functions removes the overhead
+of interpretation and reduces the code size.
+
+Essentially, this compiler is the smaller sister of the
+[tré compiler](https://github.com/SvenMichaelKlose/tre/), which has the same
+architecture.
 
 # Architecture
 
-The compiler has a _micropass_ architecture where each of the 18 passes is as
-small and independent from the others as possible, making the compiler easier
-to maintain.  Its _frontend_ translates the input into a simpler, machine-level
-(but still machine-independent) _intermediate representation (IR)_ for the
-_middleend_, where every function is a flat list of statements, assignments and
-(conditional) jumps.  That IR is then optimized by the middleend.  The
-_backend_ finally does target-specific adjustments and generates the desired
-output, which is serializable bytecode functions.
+The compiler has a _micropass_ architecture where each of the 20 passes is as
+small and independent as possible, making the compiler easier to maintain.  Its
+_frontend_ translates the input into a simpler, machine-level (but still
+machine-independent) _intermediate representation (IR)_ for the _middleend_,
+where every function is a flat list of statements, assignments and (conditional)
+jumps.  That IR is then optimized by the middleend.  The _backend_ finally does
+target-specific adjustments and generates the desired output: serializable
+bytecode functions.
+
+It illustrate the passes we have our compiler process some highly interesting
+and nerdy function, printing a countdown:
+
+~~~lisp
+(fn countdown (n-total)
+  (dotimes (n n-total)
+    (print n)))
+~~~
+
+~~~
+; Use:
+(countdown 10)
+
+; Output:
+10 9 8 7 6 5 4 3 2 1
+~~~
 
 ## Frontend
 
@@ -38,18 +47,20 @@ output, which is serializable bytecode functions.
 4. **Compiler macro expansion**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
    QUOTE, QUASIQUOTE, and so on, into IR.   After this pass there must be no
    more macros.
-5. **Quote expansion**: Makes consing expressions out of QUOTEs and QUASIQUOTEs.
+5. **Quote expansion**: Makes consing out of QUOTEs and QUASIQUOTEs.
 6. **Lambda expansion**: Inlines binding lamdas and exports closures to own
    functions while building a function info tree required to proceed.
 
 When compiling multiple files, all must have been processed up to the previous
 pass, so all calls to known functions can be compiled in the next:
 
-7. **Call expasions**: Arguments are expanded and rest arguments are turned into
-   consing expressions.
+7. **Call expasions**: Arguments are expanded and rest arguments are made
+   consing.
 8. **Expression expansion**: To _single statement assignments_: All arguments of
    function calls are assigned to temporary variables.
-9. **Block folding**: Collapses nested %BLOCK expressions.
+9. **Block folding**: Collapses nested %BLOCKs.
+10. **Assigment compaction**: Removes '%=' from expressions.
+11. **Tag compaction**: Replaces %TAGs by numbers.
 
 ## Middleend
 
@@ -66,26 +77,35 @@ pass, so all calls to known functions can be compiled in the next:
 
 Translate the IR to code.
 
-1. **Wrapping tags**: Wrap tags (numbers) in %TAG expressions for code
-   generation.
+1. **Wrapping tags**: Wrap tags (numbers) in %TAGs for code generation.
 1. **Place expansion**: Variables are mapped to the lexical scope.
 2. **Place assignment**: Stack frames and environment vectors are laid out.
-3. **Code generation**: Macros generating bytecode expressions
+3. **Code generation**: Macros generating bytecode
 
-# Compiler macros
+# The frontend passes
 
-Expands special forms BLOCK, GO, RETURN, ?, AND, and OR, to simpler IR statements
-and turn QUASIQUOTE expressions, like "$expr", into CONSing ones.
+## Making IR: Compiler macro expansion
 
-## Control flow
+Turns special forms into ensembles of simpler IR code, using a separate,
+machine-independent set of _compiler macros_.
 
+### Control flow: BLOCK, GO, RETURN, ?, AND, OR
+
+The special forms BLOCK, GO, RETURN, ?, AND, and OR are converted to simpler
+ensembles of IR statements, also introducing %0 as a placeholder for the latest
+return value.  Tags are wrapped up into %TAGs to tell them apart
+from literals.
+
+#### IR statements for flow control
 | Metacode     | Description                           |
 |--------------|---------------------------------------|
 | (%go s)      | Unconditional jump.                   |
 | (%go-nil s)  | Jump if last result is NIL.           |
 | (%go-nnil s) | Jump if last result is not NIL.       |
 | (%tag s)     | Jump destination.                     |
-**IR statements for flow control**
+
+The new IR statements have no return values, nor do they modify %0, so there is
+always a return value, even if a body ends on a %TAG.
 
 ~~~lisp
 ; Before:
@@ -103,30 +123,73 @@ and turn QUASIQUOTE expressions, like "$expr", into CONSing ones.
 (%tag 2)
 ~~~
 
-## BLOCK expansion
+### BLOCK expansion
 
-Different from "block folding" later.  The BLOCK expander need to expand child
-blocks first so that deeper RETURNs with a clashing name have precedence:
+A RETURN makes its parent BLOCK, whose name is NIL, return immediately with the
+RETURN's argument:
 
 ~~~lisp
 (block nil
-  ...
-  (block nil
-    ...
-    (return nil)  ; Must return from the closer BLOCK NIL.
-    ...))
+  (? (eql 'n (read))
+     (return))  ; Return NIL from BLOCK of name NIL.
+  (do-something))
 ~~~
 
-By translating deeper BLOCKs' first, RETURN statements are resolved in the
-correct bottom-up order.
+With RETURN-FROM the BLOCK's name to return from can be specified, so BLOCKs can
+be told apart when nested:
 
-The last expression of a BLOCK always assigns to %O which is synonymous for
-return values from then on.
+~~~lisp
+(block outer-block
+  (block nil    ; Cannot be reached.
+    (block nil
+      ...
+      (return)  ; Must return from the closer BLOCK of name NIL.
+      (return-from outer-block))))
+~~~
 
+BLOCKs are turned into anonymous IR %BLOCKs holding everything together.  They
+will be gone with the _block folding_ pass, leaving only the jump instructions.
 
-# Quote expansion
+~~~lisp
+(%block
+  (%block
+    (%block
+      (%go nil)
+      (%go outer-block)
+      (%tag nil)))
+  (%tag nil)
+  (%tag outer-block))
+~~~
 
-QUOTEs are turned into regular CONSing expressions:
+~~~lisp
+(%block
+  (%block
+    (%block
+      (%go 2)
+      (%go 0)
+      (%tag 2)))
+  (%tag 1)
+  (%tag 0))
+~~~
+
+### Countdown function after compiler macro expansion
+
+~~~lisp
+(lambda countdown (n-total)
+  (%block
+    (%= n total)
+    (%tag 0)
+    (%= %0 (== n 0)
+    (%go-nnil t)
+    (print n)
+    (%= n (- n 1))
+    (go 0)
+    (%tag 1))))
+~~~
+
+## Quote expansion
+
+QUOTEs are turned into CONSes:
 
 ~~~lisp
 ; Before:
@@ -147,7 +210,7 @@ $(1 2 ,@x ,y 4 5)
 ~~~
 
 
-# Lambda expansion
+## Lambda expansion
 
 Inlines binding lambdas and turns closures into regular functions with an
 environment argument for lexical scope while also building a tree of FUNINFO
@@ -159,157 +222,151 @@ essential to process functions further.
 ; TODO example of anonymous function first in expression.
 ~~~
 
+~~~lisp
+(lambda countdown (n-total)
+  (%block
+    (%= n total)
+    (%tag 0)
+    (%= %0 (== n 0)
+    (%go-nnil t)
+    (print n)
+    (%= n (- n 1))
+    (go 0)
+    (%tag 1))))
+~~~
 
-# Call expansion
+## Call expansion
 
-Checks and expands arguments and turns rest arguments into CONSing expressions.
+Checks and expands arguments and turns rest arguments into CONSes.
 
 
-# Expression expansion
+## Expression expansion
 
 **The exit point of the front end.**  Breaks up nested function calls into a list
 of single statement assignments to new temporary variables.
 
+It does nothing for our COUNTDOWN example, so let's take a look at this nested
+function call and what it's being transformed into:
+
 ~~~
 (fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
 
-(= 2 (fun3))
-(= 3 (fun4))
-(= 1 (fun2 2 3)
-(= 4 (fun5))
-(fun1 arg1 1 4)
+(%= %2 (fun3))
+(%= %3 (fun4))
+(%= %1 (fun2 2 3)
+(%= %4 (fun5))
+(%= %0(fun1 arg1 1 4)
 ~~~
 
-# Block folding
+## Block folding
 
-Nested %BLOCK expressions are collapsed and the remaining %BLOCKs are dissolved
-into their function bodies – gone.
+Epression expansion is the last pass generating %BLOCKs to simplify expansions.
+Now we're in need for pure lists of IR statements as bodies to work with them
+in the middleend.
+
+With _block folding_ nested %BLOCKs are collapsed and the remaining %BLOCKs are
+dissolved into their function bodies – gone.
 
 ~~~lisp
-; Input code
-(when (do-thing? x)
-  (do-this)
-  (do-that))
-
-; After MACROEXPAND.
-(? (do-thing? x)
-   (block t
-     (do-this)
-     (do-that)))
-
-; After COMPILER-MACROEXPAND.
-(%= %0 (do-thing? x))
-(%go-nil 1)
-(%block
-  (= %0 (do-this))
-  (= %0 (do-that)))
-(%tag 1)
-
-; (Other passes.)
-
-; After BLOCK-FOLD.
-(%= %0 (do-thing? x))
-(%go-nil 1)
-(do-this)
-(%= %0 (do-that))
-(%tag 1)
+(lambda countdown (n-total)
+  (%= n total)
+  (%tag 0)
+  (%= %0 (== n 0))
+  (%go-nnil 1)
+  (%= %0 (print n))
+  (%= n (- n 1))
+  (%go 0)
+  (%tag 1))
 ~~~
 
-# Optimization
+Now, if you'd want to optimize tags for example all you have to do is to scan a
+pure list of statements for tags and jumps, no extra logic for nested structure
+required.
 
-Basic compression of what the macro expansions messed up at least,  like
+## Assignment compaction
+
+Symbol %= is not needed to tell function calls apart from jumps and tags, so
+that is removed.
+
+~~~lisp
+(lambda countdown (n-total)
+  (n total)
+  (%tag 0)
+  (%0 (== n 0)
+  (%go-nnil 1)
+  (%0 (print n))
+  (n (- n 1))
+  (%go 0)
+  (%tag 1))))
+~~~
+
+Admittedly, it's easier to read with %= around.
+
+## Tag compaction
+
+%TAG statements are replaced by numbers, saving space and a bit of function
+calling overhead in the following passes (which is probably not too notable).
+
+~~~lisp
+(lambda countdown (n-total)
+  (n total)
+  0             ; No %TAG any more.
+  (%0 (== n 0))
+  (%go-nnil t)
+  (%0 (print n))
+  (n (- n 1))
+  (%go 0)
+  1)            ; Same here.
+~~~
+
+The tré compiler brings back %TAGs for _code generation macros_ in its backend.
+
+# The middleend passes
+
+## Optimization
+
+Basic compression of what the macro expansions messed up at least, like
 removing assignments with no effect or chained jumps.
 
-# Call stack expansion
+## Place assignment
 
-This pass inserts stack place assignments of arguments before function calls.
+Wraps a variable in %STACK alongside the FUNINFO containing the variable.
 
-# Place expansion
+## Place expansion
 
-| Expression  | Description                    |
-|-------------|--------------------------------|
-| (%S offset) | Offset into local stack frame. |
-| (%D offset) | Offset into function data.     |
-
-Here the arguments are replaced by %S or %O expressions to denote places on the
-stack or on the function's object list.
-
-# Generating code
-
-Five byte-sized codes tell what kind of information follows them; Bytecode
-BC\_LIST for example introduces a set of expressions.  The other codes are
-jumps or mark the end of a function.
-
-| Bytecode         | Description                        |
-|------------------|------------------------------------|
-| BC\_END          | End of bytecode function.          |
-| BC\_LIST, n, ... | List of N expressions to evaluate. |
-| BC\_GO, n        | Unconditional jump.                |
-| BC\_GO\_NIL, n   | Jump if last result is NIL.        |
-| BC\_GO\_NNIL, n  | Jump if last result is not NIL.    |
-
-These are actually two passes:
-
-* Collecting objects.
-* Calculating jump destinations.
-
-# Adding lexical scope
-
-### Function info collection
-
-Creates function info objects with argument definitions.  They are used by
-optimizing and code generating passes and, intially, are as simple as this:
+Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
 
 ~~~lisp
-(fn funinfo ()
-  (@ list '(args)))
+(lambda countdown (n-total)
+  ((%s 1) (%s 0))
+  0
+  (%0     (== (%s 1) 0))
+  (%go-nnil 1)
+  (%0     (print (%s 1)))
+  ((%s 1) (- (%s 1) 1))
+  (%go 0)
+  1)
 ~~~
 
-When extending the compiler, most things will revolve around this pittoresque,
-little thing as we'll see later.
+# The backend passes
 
-### Argument renaming pass
+## Code generation
 
-The following lambda-expansion might need to inline functions with argument
-names that are already in use.  This pass solves that issue by renaming all
-arguments.
-
-~~~lisp
-; TODO example of shadowed arguments that would clash on
-; a single list for all arguments of all functions in
-; an expression.
-~~~
-
-
-# Code generation
-
-* Bytecode requires functions to run in.
-* These bytecode functions contain a string of byteocde in their (symbol) name,
-  and bytecode only.
-* Lisp objects are referenced by index in the function's object table.
-* Jump destinations are also byte indexes into the bytecode string.
-
-Bytecode functions must be PRINT- and READ-able.
+Once again: macro expansion to the rescue!  By merely expanding named LAMBDAs,
+translating tags to offsets and making references to stack places and into a
+functions list of literals, serializable bytecode is made - bytecode functions must
+be PRINT- and READ-able:
 
 ~~~lisp
-#$((a b)                  ; Argument definition
-   (print "Hello world!") ; Object list
-   nil                    ; Stack frame size or NIL
-   (1 130 0))             ; Bytecodes
+((a b)                  ; Argument definition
+ (print "Hello world!") ; Object list
+ nil                    ; Stack frame size or NIL
+ (1 130 0))             ; Bytecodes as numbers or string
 ~~~
 
 * Argument list elements either reference stack places or read-only object
   indexes.  The lowest bit determines what it is.  The highest bit marks the
   last argument.
-
-~~~
-(fn ir-funcall-to-bytecode (x.)
-  (list
-    (+ (? .x 0 128)
-       (? (%stack? x.)
-          (<< (cadr x.) 2)
-          (++ (<< (*fi*.obj-pos x.) 2)))))
-~~~
 
 * 0:       Return from function
 * 1-32:    Function call
@@ -321,190 +378,3 @@ Bytecode functions must be PRINT- and READ-able.
 A set of code generating macros could be used to generate strings of assembly
 language.  But all we need to do now is to comb out literal objects which must be
 referenced in the bytecode function's object table.
-
-# Futuristic ideas
-
-## Generating native code
-
-Native code brings maximum performance but also maximum code size, so it must
-be used if top performance is essential.  For most people it's no problem if a
-text editor takes a 10th of a second to respond.  But whenever huge amounts of
-data have to be processed, or the system has to respond instantly, native code
-is a natural choice over bytecode.
-
-## Generating code for the MOS 6502
-
-The amount of code required to do pointer manipulations on a MOS 6502-CPU is
-massive as each byte of a pointer has to be dealt with separately.
-
-~~~asm
-not:ldy #0
-    lda (sp),y
-    beq ret_nil
-    lda #<t
-    sta (sp),y
-    lda #>t
-    iny
-    sta (sp),y
-    rts
-ret_nil:
-    lda #0
-    sta (sp),y
-    iny
-    sta (sp),y
-    rts
-~~~
-
-~~~asm
-    lda sp
-    sec
-    sbc sp
-    sta sp
-    bcs n
-    dec sp+1
-n:  ldy #ofs_symbol_value
-    lda (sym),y
-    tax
-    iny
-    lda (sym),y
-    ldy #1
-    sta (sp),y
-    dey
-    txa
-    sta (sp),y
-~~~
-
-## Generating code for the Zilog Z80
-
-The Z80 is an 8-bit CPU.  Although it provides 16-bit register pairs,
-the ALU provides 8-bit operations only, leading to the same issues the
-6502 introduces.  There are 16-bit load and store instruction to make
-use of.  These are so precious for compiled Lisp that it's worth trying
-out tags to use the regular stack for objects.
-
-With a separate object stack pointed to by the IX register:
-
-~~~asm
-    ; Push value onto the object stack IX.
-    ld hl,sym
-    inc ix
-    lda (ix+0),h
-    inc ix
-    lda (ix+0),l
-~~~
-
-Regular stack use:
-
-~~~asm
-    ; Push value onto regular stack.
-    ld hl,sym
-    push hl
-~~~
-
-There are also function calls and the GC must leave the
-return addresses untouched, assuming that there'll be
-no temporaries on the stack either.  That can be achieved
-easily if native code is limited to a particular memory area.
-
-~~~asm
-    ld iy,sym
-    ld h,(iy+ofs_symbol_value)
-    ld l,(iy+ofs_symbol_value+1)
-    inc ix
-    ld (ix+0),h
-    inc ix
-    ld (ix+0),l
-~~~
-
-
-~~~asm
-not:
-    ld ix,sp
-    ld a,(ix+1) ; Only the high byte needs to be checked.
-    cp 0
-    jr z,ret_nil
-    lda hl,t
-    rts
-    lda hl,0
-    rts
-~~~
-
-## Compiling an interpreter
-
-The C version of the interpreter is a huge mess with lots of manual overhead
-implemented to handle object pointers and the stacks.  Most getters and setters
-hide behind nested macros.  It's a pain to maintain.
-Generating the interpreter from Lisp code by introducing hardware types is the
-remedy, hiding all that from the stressed developer.  It also makes new optimizations
-possible.
-
-~~~lisp
-(defcode + a ((char * a) (char * b))
-  lda a
-  clc
-  adc b
-~~~
-
-~~~lisp
-(defcode cdr ax ((ptr a))
-  ldy #3
-  lda (a),y
-  tax
-  dey
-  lda (a),y)
-~~~
-
-~~~lisp
-(defcode list_cdr ax ((ptr a))
-  lda (++ a)
-  bne +l
-  tax
-  beq +l2
-l:(cdr ax a)
-l2:)
-~~~
-
-~~~asm
-member:
-    ldy #0
-    lda (arg2),y
-    lsr
-    bcs done    ; Atom...
-    ldy #cons_car+1
-    lda (arg2),y
-    cmp arg1+1
-    bne next
-    tax
-    dey
-    lda (arg2),y
-    cmp arg1
-    bne next
-    lda arg2
-    ldx arg2+1
-    rts
-next:
-    ldy #cons_cdr+1
-    lda (arg2),y
-    tax
-    dey
-    lda (arg2),y
-    sta arg2
-    stx arg2+1
-    jmp member
-done:
-    lda #<nil
-    ldx #>nil
-    rts
-~~~
-
-~~~asm
-    lda v
-    ldx v+1
-    jsr pushax
-    jsr make_cons
-    lda #4
-    jsr addsp
-    jsr pushax
-    jsr print
-    jsr incsp
-~~~

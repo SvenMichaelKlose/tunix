@@ -1,4 +1,4 @@
-(in-package compiler/rename-args
+(in-package c/ra
   '(argument-sym add-args r))
 
 (def-gensym argument-sym a)
@@ -16,15 +16,16 @@
   (quote? x)
     x
   (%slot-value? x)
-    `(%slot-value ,(r .x. replacements) ,..x.)
+    `(%slot-value ,(r .x. replacements)
+                  ,..x.)
   (lambda? x)
     (? (lambda-funinfo x)
        x
        (!= (add-args x replacements)
-         (copy-lambda x
-             :args (r (lambda-args x) !)
-             :body (r (lambda-body x) !)))))
+         (do-lambda x
+           :args (r (lambda-args x) !)
+           :body (r (lambda-body x) !)))))
 
-(fn rename-arguments (x)
+(fn compiler/rename-arguments (x)
   (= *argument-sym-counter* 0)
   (r x nil))

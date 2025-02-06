@@ -3,11 +3,16 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2025-02-03 Double Tap
+
+
+
 # 2025-01-21 Limbo Lambda
 
 What?  Moved here from src/bin/lisp/doc/compiler.md for the protocol.
 
 ---8<---8<---
+
 
 ## Tagging Anonymous functions
 
@@ -63,6 +68,7 @@ limitation.  We should probably stick with LAMBDA for the front end.
 ; New:
 (@ (lambda (x) (+ n x)) numbers)
 ~~~
+
 
 # 2024-12-15 Pre-processing
 

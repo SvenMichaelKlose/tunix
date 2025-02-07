@@ -1,18 +1,12 @@
-See also src/bin/lisp/doc/future-enhancements.md
-
-Lisp interpreter
-[@] Full heap compression (compressed conses with CAR only).
-
 TUNIX Lisp
-[ ] On-demand function/macro loading.
-[ ] Bielefeld DB API.
-[ ] Recursion to loop conversion.
-[ ] Tail call optimization.
 [ ] Relocateable images.
 [ ] Portable images.
 
+TUNIX Lisp extensions
+[ ] Bielefeld DB API.
+
 Debugger
-[ ] Error messages without debugger.
+[?] Error messages without debugger. (Can't do it already?)
 [ ] Conditional breakppoints.
 [ ] Watchpoints.
 [ ] Conditional watchpoints.

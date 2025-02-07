@@ -82,6 +82,66 @@ Translate the IR to code.
 20. **Place assignment**: Stack frames and environment vectors are laid out.
 21. **Code generation**: Macros generating bytecode
 
+# The bytecode
+
+Interpreting the bytecode must remove most of the overhead that is not doing the
+program's actual business.  Most of that is calling functions, jumping, moving around
+Lisp object pointers on the stack, and returning from functions.
+Bytecode only comes along as _bytecode functions_, because stack space has to be
+reserved before running any: the bytecode is _stack-based_ with no _registers_,
+except the last return value of a function call.  Aside from stack places objects
+in the function's object list can be referenced.
+
+## Codes
+
+
+* 1-251:   Reference: an offset into the object list or stack.
+* 128-251: Copy to stack
+* 252:     Jump if not NIL
+* 253:     Jump if NIL
+* 254:     Jump
+* 255:     Return from function
+
+References are used in function calls and assignments only.  Function calls are
+lists of references.  The first reference is the destination where the return
+value will go, followed by the function and its arguments.
+
+~~~
+<destination> <function> [<arg>*] ; * last one marked
+~~~
+
+The last argument is marked as such.  The destination can only reference a
+stack place though to make the function's object list _immutable_.
+Assignments are performed if the function reference is tagged as being the last
+argument.
+
+Reference offsets are even – object offset have their lowest bit set to tell them
+apart from stack offsets:
+
+* 0: (%s 0)
+* 1: Offset 0/object 0
+* 2: (%s 1)
+* 3: Offset 2/object 1
+* 4: (%s 2)
+* 5: Offset 4/object 2
+
+...and so on.  **Last arguments and assignment values have their highest bit set.**
+
+## Spoiler: COUNTDOWN compiled to bytecode
+
+~~~lisp
+((a b)            ; Argument definition
+ (== 0 print - 1) ; Object list
+ nil              ; Stack frame size (args & locals)
+ (2 128     ; ((%s 1) (%s 0))       ; Assignment
+  0 3 2 129 ; (%0 (== (%s 1) 0))    ; Function call
+  253 17    ; (%go-nnil 1)          ; Conditional jump
+  0 5 130   ; (%0 (print (%s 1)))   ; Function call
+  2 7 2 137 ; ((%s 1) (- (%s 1) 1)) ; Function call
+  254 3)    ; (%go 3)               ; Unconditional jump
+  255                               ; end of function
+~~~
+
 # The frontend passes
 
 As mentioned before, the frontend is responsible for translating its input to a
@@ -193,7 +253,7 @@ will be gone with the _block folding_ pass, leaving only the jump instructions.
   (%tag 0))
 ~~~
 
-### Countdown function after compiler macro expansion
+### COUNTDOWN after compiler macro expansion
 
 ~~~lisp
 (lambda countdown (n-total)
@@ -395,19 +455,6 @@ must be PRINT- and READ-able:
 Unlike our original COUNTDOWN made of 13 conses of 5 byte each totalling to
 65 bytes, the bytecode function amounts to 18 bytecodes, plus an object table
 of 5 pointers (10B) a stack frame size of 1B, totalling to 29 bytes.
-However, when compiling calls to such function, its argument definition must
-be looked up from a database.
-
-* Argument list elements either reference stack places or read-only object
-  indexes.  The lowest bit determines what it is.  The highest bit marks the
-  last argument.
-
-* 0:       Return from function
-* 1-32:    Function call
-* 128-252: Copy to stack
-* 253:     Jump if not NIL
-* 254:     Jump if NIL
-* 255:     Jump
 
 A set of code generating macros could be used to generate strings of assembly
 language.  But all we need to do now is to comb out literal objects which must be

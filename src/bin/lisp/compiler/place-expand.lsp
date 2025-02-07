@@ -1,6 +1,5 @@
-(in-package 'compiler/place-expand
-  '(scope-place stackplace expand-atom
-    fun expand))
+(in-package 'c/pe
+  '(scope-place expand-atom expand))
 
 (fn scope-place (fi x)
   (fn expr (fi x)
@@ -12,26 +11,24 @@
     (? ((fi.parent).arg-or-var? x)
        (expr fi x)
        (find fi.parent x)))
+  (fn place (fi x)
+    (fi.setup-scope x)
+    (!= (find fi x)
+      $(%vec ,(expand-atom fi
+              (scope-place fi .!.))
+             ,..!.
+             ,...!.)))
   (? (fi.scope-arg? x)
      x
-     (progn
-       (fi.setup-scope x)
-       (!= (find fi x)
-         $(%vec ,(expand-atom fi
-                     (scope-place fi .!.))
-                ,..!.
-                ,...!.)))))
-
-(fn stackplace (fi x)
-  `(%stack ,fi.name ,x))
+     (place fi x)))
 
 (fn expand-atom (fi x)
   (?
     (or (literal? x)
-        (not (fi.has x)))
+        (not (fi.have x)))
       x
     (fi.arg-or-var? x)
-      (stackplace fi x)
+      $(%s ,fi.name ,x)
     (fi.scoped-var? x)
       $(%vec ,(expand-atom fi fi.scope)
              ,fi.name
@@ -40,11 +37,6 @@
       $(%global ,x)
     (scope-place fi x)))
 
-(fn fun (x)
-  (copy-lambda x
-      :body (expand (lambda-body x)
-                    (lambda-funinfo x))))
-
 (def-tree-filter expand (x fi)
   (atom x)
     (expand-atom fi x)
@@ -52,7 +44,9 @@
       (%stackarg? x))
     x
   (named-lambda? x)
-    (fun x)
+    (copy-lambda x
+      :body (expand (lambda-body x)
+                    (lambda-funinfo x)))
   (or (%=? x)
       (%set-local-fun? x))
     (!= (expand .x. fi)
@@ -64,7 +58,7 @@
     $(%slot-value ,(expand .x. fi)
                   ,..x.))
 
-(fn place-expand (x)
+(fn compiler/place-expand (x)
   (expand x (global-funinfo)))
 
 (in-package nil)

@@ -7,7 +7,7 @@
 (load 'compiler/blockexpand.lsp)
 
 (umacro compiler block x
-  (c/be/cblock x))
+  (apply c/be/cblock x))
 
 (load 'compiler/controlflow.lsp)
 

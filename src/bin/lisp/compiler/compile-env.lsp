@@ -17,9 +17,9 @@
                  (print i)
                  (setout o)
                  (print (. i (. !. (@ '((x) (macroexpand (dotexpand x))) .!))))))))))
+(reset!)
 
 (message "# Compiler macro expansion...")
-(reset!)
 (load 'compiler/cmacroexpand.lsp)
 (load 'compiler/pass.lsp)
 (compiler/pass
@@ -39,3 +39,5 @@
 (compiler/pass
     '_3expex.lsp '_4folded.lsp
     compiler/fold-block t)
+
+(message "# COMPILER/COMPILE-ENV done.")

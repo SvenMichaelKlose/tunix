@@ -55,7 +55,7 @@
                           x))))))
 
 (fn gen-ref (x)
-  (? (%stack? x)
+  (? (%s? x)
      (++ .x.) ; LSB means stack.
      (*fi*.obj-idx .x.)))
 

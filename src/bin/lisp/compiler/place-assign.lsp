@@ -12,10 +12,10 @@
   (or (quote? x)
       (%native? x))
     x
-  (and (%stackarg? x) ..x)
-    $(%stack ,(stackarg x))
-  (and (%stack? x) ..x)
-    $(%stack
+  (and (%s? x) ..x)
+    $(%s ,(stackarg x))
+  (and (%s? x) ..x)
+    $(%s
        ,(or ((get-funinfo .x.).var-pos ..x.)
             (stackarg x)))
   (and (%vec? x) ...x)
@@ -27,9 +27,6 @@
        ,(assign .x.)
        ,((get-funinfo ..x.).scoped-var-index ...x.)
        ,(assign ....x.))
-  (named-lambda? x)
-    (copy-lambda x
-        :body (assign (lambda-body x)))
   (%slot-value? x)
     $(%slot-value ,(assign .x.) ,..x.))
 

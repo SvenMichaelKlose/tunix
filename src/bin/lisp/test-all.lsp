@@ -99,9 +99,9 @@
     (or (== x 2)
         (error "X didn't increment to 2"))))
 
-(do-test '!--
+(do-test '--!
   (let (x 1)
-    (!-- x)
+    (--! x)
     (or (== x 0)
         (error "X didn't decrement to 0"))))
 

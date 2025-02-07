@@ -1,11 +1,27 @@
+(in-package 'ed
+  '(*filename* *lines* *saved?* *err*
+    *ln* *conln* *old-conln* *old-ln*
+    *update-ln*
+    reset-ln outrvs clr-status prompt
+    prompt-in prompt-ok status-msg
+    status-pos print-lines
+    update-screen?  update-screen
+    initscr join-line split-line
+    ins-line read-lines list-dir
+    save-file load-file choose
+    quit-editor editor-cmds
+    edit-lines))
+
 ;;; State
 
 (var *filename* 'edit-help.md)
 (var *lines* nil)
-(var *saved?* nil)  ; Modifications saved?
+; Modifications saved?
+(var *saved?* nil)
 (var *err* nil)
 (var *ln* 0)
-(var *conln* 0) ; # of first displayed line.
+; # of first displayed line.
+(var *conln* 0)
 (var *old-conln* 0)
 (var *old-ln* 0)
 (var *update-ln* 0)
@@ -59,7 +75,7 @@
              ""
              " (not saved)")
           (!? *err*
-              (list " " !)
+              (.. " " !)
               "")))
 
 (fn status-pos ()
@@ -125,23 +141,24 @@
     (= *update-ln* !)
     (let* (prev     (nth ! *lines*)
            prev-len (slength prev)
-           joined   (list (symbol (nconc (symbol-name prev)
+           joined   (.. (symbol (nconc (symbol-name prev)
                                          (symbol-name (nth *ln* *lines*))))))
-      (= *lines* (? (== 1 *ln*)
-                    (nconc joined .. *lines*)
-                    (!= (cut-at ! *lines*)
-                      (nconc *lines* joined ..!))))
+      (= *lines*
+         (? (== 1 *ln*)
+            (nconc joined .. *lines*)
+            (!= (cut-at ! *lines*)
+              (nconc *lines* joined ..!))))
       (--! *ln*)
       (= *lx* prev-len))))
 
 (fn split-line (l x)
   (? (== 0 x)
-     (list ""
+     (.. ""
            l)
      (let (lc (symbol-name l))
        (!= (cut-at x lc)
-         (list (symbol lc)
-               (symbol !))))))
+         (.. (symbol lc)
+             (symbol !))))))
 
 (fn ins-line ()
   (= *saved?* nil)
@@ -183,12 +200,14 @@
          (dolist (l *lines*)
            (out l)
            (terpri)))
-       (and (= *err* '"Cannot save.") nil)
+       (and (= *err* '"Cannot save.")
+            nil)
          (= *saved?* t))))
 
 (fn load-file ()
   ;(list-dir)
-  (let (f (prompt-in "Load:" *filename*))
+  (let (f (prompt-in "Load:"
+                     *filename*))
     (? (with-in i (open f 'r)
          (prompt '"...")
          (= *filename* f)
@@ -234,7 +253,7 @@
     \n  (when (eq 'quit (quit-editor))
            (= *old-conln* -1)
            (= *filename* nil)
-           (= *lines* (list "")))
+           (= *lines* (.. "")))
     \e  (progn
           (prompt "Eval:")
           (= *old-conln* -1)
@@ -245,7 +264,8 @@
             (terpri))
           (prompt-ok))))
 
-; Navigate up and down lines, catch commands.
+; Navigate up and down lines, catch
+; commands.
 (fn edit-lines ()
   (status-msg)
   (while (not (eof))

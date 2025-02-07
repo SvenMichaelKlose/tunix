@@ -1,12 +1,21 @@
 (load 'con.lsp)
+(in-package 'e/l
+  '(*line* *oline* *mod?* *update?*
+    *lx* *spaces*
+    llen update-line mkcharline
+    del-char go-eol))
 
 ;;; State
 
 (var *line* nil)
-(var *oline* nil)   ; Original line.
-(var *mod?* nil)    ; Line modified?
-(var *update?* nil) ; Line needs update in screen?
-(var *lx* 0)    ; Line X position, relative to *OX*.
+; Original line.
+(var *oline* nil)
+; Line modified?
+(var *mod?* nil)
+; Line needs update in screen?
+(var *update?* nil)
+; Line X position, relative to *OX*.
+(var *lx* 0)
 
 ;;; Display
 

@@ -34,11 +34,16 @@
         (+! pos 1)
       (+! pos (length s.))
 
-(def-filter xlat-jumps (tags x)
+(fn xlat-jump (tags x)
   (some-%go? x)
     $(,(gen-bc x.)
       ,(cdr (assoc tag tags)))
   x)
+
+(fn xlat-jumps (tags x)
+  (@ $((x)
+        (xlat-jump ,tags x))
+     x))
 
 (defcode lambda (name (args . body))
   (with-global *fi* (get-funinfo name)

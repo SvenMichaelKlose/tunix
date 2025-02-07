@@ -26,7 +26,7 @@
                    (. 'return creturn))
     (apply cblock n body)))
 
-(fn blockexpand (x)
+(fn compiler/blockexpand (x)
   (umacroexpand 'block x))
 
 (in-package nil)

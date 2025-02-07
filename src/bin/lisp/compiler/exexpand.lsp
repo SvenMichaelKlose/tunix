@@ -1,5 +1,9 @@
 (require '!= 'mapcar '+@)
-(in-package 'c/ee '(expand))
+(in-package 'c/ee '(move-args expand))
+
+(def-filter move-args x
+  (!= (symbol)
+    (. ! $((%= ,! ,x)))))
 
 ; Move arguments out of function call
 ; and assign them to temporaries.
@@ -8,9 +12,6 @@
   ; carlist: New arguments.
   ; cdrlist: Off-loaded expressions,
   ;          assigning to temporaries.
-  (def-filter move-args (x)
-    (!= (symbol)
-      (. ! $((%= ,! ,x)))))
   (?
     (atom x)
       (.. x)

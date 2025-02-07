@@ -5,7 +5,11 @@ Author: Sven Michael Klose <pixel@hugbox.org>
 
 # 2025-02-03 Double Tap
 
-
+Copied over code from the
+[tré lisp compiler](https://github.com/SvenMichaelKlose/tre/)
+while cleaning that up, making TUNIX Lisp tré's little sister,
+hard-coded to compile the simpler dialect to bytecode only.
+Will be using tré to boot it.
 
 # 2025-01-21 Limbo Lambda
 

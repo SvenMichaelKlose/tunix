@@ -5,7 +5,11 @@
          'umacro)
 
 (load 'compiler/blockexpand.lsp)
+
+(umacro compiler block x
+  (c/be/cblock x))
+
 (load 'compiler/controlflow.lsp)
 
-(fn compiler/macroexpand (x)
+(fn compiler/cmacroexpand (x)
   (umacroexpand 'compiler x))

@@ -1,4 +1,4 @@
-(require '!= 'mapcar '+@)
+(require '!= 'mapcar 'mapcan '+@)
 (in-package 'c/ee '(move-args expand))
 
 (def-filter move-args x

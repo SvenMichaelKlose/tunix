@@ -45,7 +45,7 @@
         *arr-up*
           (when (< 0 selected)
             (fsb-redraw-item files ofs selected nil)
-            (!-- selected))
+            (--! selected))
         *arr-down*
           (when (< selected (-- (length files)))
             (fsb-redraw-item files ofs selected nil)

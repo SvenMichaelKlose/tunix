@@ -131,7 +131,7 @@
                     (nconc joined .. *lines*)
                     (!= (cut-at ! *lines*)
                       (nconc *lines* joined ..!))))
-      (!-- *ln*)
+      (--! *ln*)
       (= *lx* prev-len))))
 
 (fn split-line (l x)
@@ -260,7 +260,7 @@
       +arr-down+
         (++! *ln*)
       +arr-up+
-        (!-- *ln*)
+        (--! *ln*)
 
       ; Ctrl-x: Page down.
       24

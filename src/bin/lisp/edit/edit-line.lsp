@@ -80,7 +80,7 @@
              (++! *lx*))
            (case c
              +arr-left+
-               (!-- *lx*)
+               (--! *lx*)
              +arr-right+
                (++! *lx*)
              +bs+
@@ -89,7 +89,7 @@
                    (putback)
                    (return (? *mod?* (symbol *line*) *oline*)))
                  (? (< 0 *lx*)
-                    (del-char (!-- *lx*))))
+                    (del-char (--! *lx*))))
              1 ; Ctrl-A
                (= *lx* 0)
              4 ; Ctrl-D

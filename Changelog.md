@@ -20,11 +20,14 @@ and this project adheres to
 ##### Added
 
 - Macro ASSERT.  Just use it... ;)
+- Macro DEF-FILTER.
 - FILTER-FILE: Copy file, filtering expressions.
 - UMACRO, UMACROEXPAND: User-defined sets of macros alongside.
+- +@ for single-list MAPCAN.
 
 ##### Changed
 
+- LIST is now "..".
 - IN-PACKAGE: Symbol prefix "/" is not removed if the stripped
   symbol is not in the package.  For example /PARSE will remain
   to be PARSE if it's not in the current package.

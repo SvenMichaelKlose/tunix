@@ -1,17 +1,18 @@
-(load 'compiler/package.lsp)
-(require 'let 'do)
+(require '!= '+@)
+(in-package 'c/bf '(%block? fold))
 
 (fn %block? (x)
   (and (cons? x)
        (eq '%block x.)))
 
-(fn fold-block (x)
-  ; "Splice rest of %BLOCKs."
+(fn fold (x)
   (? (%block? x)
      (!= .x
        (? (cons? !)
-          (mapcan fold-block !)
-          (list !)))
-     (list x)))
+          (+@ fold !)
+          (.. !)))
+     (.. x)))
+
+(var compiler/fold-block fold)
 
 (in-package nil)

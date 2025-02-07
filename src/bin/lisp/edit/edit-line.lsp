@@ -77,12 +77,12 @@
                           (nconc (list c) *line*)
                           (!= (cut-at *lx* *line*)
                             (nconc *line* (list c) !))))
-             (!++ *lx*))
+             (++! *lx*))
            (case c
              +arr-left+
                (!-- *lx*)
              +arr-right+
-               (!++ *lx*)
+               (++! *lx*)
              +bs+
                (progn
                  (when (== 0 *lx*)

@@ -94,10 +94,10 @@
 (cdr 's)
 (or (== *last-err* 1)
     (terror "CDR of non-NIL atom should be an error"))
-(setcar 's t)
+(=-car 's t)
 (or (== *last-err* 1)
     (terror "SETCAR of non-NIL atom should be an error"))
-(setcdr 's t)
+(=-cdr 's t)
 (or (== *last-err* 1)
     (terror "SETCDR of non-NIL atom should be an error"))
 

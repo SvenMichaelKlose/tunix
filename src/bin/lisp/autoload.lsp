@@ -7,9 +7,12 @@
 
 ; Name to filename translations.
 (var *alx*
-  '((!?   . aif)
+  '((..   . list)
+    (!?   . aif)
     (do*  . do2)
-    (let* . let2)))
+    (let* . let2)
+    (++!  . incf)
+    (--!  . decf)))
 
 ; Try to load file for missing procedure.
 ; Returns non-NIL if file load was successful.
@@ -40,8 +43,8 @@
           ; a macro, replace expression by its expansion.
           (when (macro? %f)
             (let (%m (*ex* %x))
-              (setcar %x (car %m))
-              (setcdr %x (cdr %m))))
+              (=-car %x (car %m))
+              (=-cdr %x (cdr %m))))
           ; Try again.
           (return (eval %x))))
     ; Couldn't fix the problem.

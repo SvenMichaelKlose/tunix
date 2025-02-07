@@ -1,31 +1,30 @@
-(load 'compiler/package.lsp)
-(require '!= 'mapcar 'mapcan)
+(require '!= 'mapcar 'mapcan '+@)
+(in-package 'c/ee '(move-args expand))
 
-; @ move-arg returns:
-; carlist: New arguments.
-; cdrlist: Off-loaded expressions, assigning to temporaries.
-(fn move-arg (x)
-  (? (cons? x)
-     (!= (symbol)
-       (. ! $((= ,! ,x))))
-     (. x nil)))
+(def-filter move-args x
+  (!= (symbol)
+    (. ! $((%= ,! ,x)))))
 
-; Move function calls out of argument list and
-; replace them by anonymous symbols.
-(fn exexpand (x)
+; Move arguments out of function call
+; and assign them to temporaries.
+(fn expand (x)
+  ; @ move-arg returns:
+  ; carlist: New arguments.
+  ; cdrlist: Off-loaded expressions,
+  ;          assigning to temporaries.
   (?
     (atom x)
-      (list x)
-    ; Expression in assigment
-    (eq '= x.)
-      (? (atom ..x.)
-         (list x)
-         (!= (@ move-arg (cdr ..x.))
-           (append (mapcan exexpand (mapcan cdr !))
-                   $((= ,.x. (,(car ..x.) ,@(@ car !)))))))
-    ; Expression
-    (!= (@ move-arg .x)
-      (append (mapcan exexpand (mapcan cdr !))
-              $((,x. (@ car !)))))))
+      (.. x)
+    (eq '%= x.)
+      (!= (move-args (cdr ..x.))
+        (+ (+@ expand (+@ cdr !))
+           $((%= ,.x.
+                 (,(car ..x.)
+                     ,@(@ car !))))))
+    (!= (move-args .x)
+      (+ (+@ expand (+@ cdr !))
+         $((,x. (@ car !)))))))
+
+(var compiler/exexpand expand)
 
 (in-package nil)

@@ -11,13 +11,13 @@
         ; Escaped symbol, prefixed with "/".
         (and (< 1 (slength x))
              (== \/ (char-at x 0)))
-          ; (Pass through if not a package symbol.
+          ; Pass through if not a package symbol.
           (!= (symbol (cdr (symbol-name x)))
             (? (member ! (cdr *p*)) ! x))
         ; Prefix with package name if in list.
         (member x (cdr *p*))
           (symbol (append (symbol-name (car *p*))
-                          (list \/)
+                          (.. \/)
                           (symbol-name x)))
         x)
     (atom x) x

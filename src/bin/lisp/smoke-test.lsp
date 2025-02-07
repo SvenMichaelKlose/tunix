@@ -72,6 +72,8 @@
 (? nil (error) nil)
 (? nil (error) nil (error))
 
+; TODO: string cons =-car =-cdr
+
 (message '"Testing CAR...")
 (? (car nil)
    (error))
@@ -152,8 +154,6 @@
          (error))
      (or (== 99 (char-at 'abc 2))
          (error)))))
-
-; string cons setcar setcdr
 
 (message '"Testing >...")
 (or (> 42 23) (error))
@@ -250,8 +250,8 @@
     (error "RETURN in argument list of user-defined function failed as second argument to TWOARGS"))
 
 (message '"Testing RETURN in argument rest of user-defined function...")
-(fn list x x)
-(or (eq 'foo (block nil (list (return 'foo))))
+(fn .. x x)
+(or (eq 'foo (block nil (.. (return 'foo))))
     (error "RETURN in argument list of user-defined function failed"))
 
 (message '"Testing RETURN from nested BLOCKs...")

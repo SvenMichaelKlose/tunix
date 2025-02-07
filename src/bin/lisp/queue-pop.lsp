@@ -1,4 +1,4 @@
 (fn queue-pop (x)
   (prog1 (cadr x)
-    (or (setcdr x (cddr x))
-        (setcar x nil))))
+    (or (=-cdr x (cddr x))
+        (=-car x nil))))

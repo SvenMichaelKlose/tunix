@@ -1,5 +1,4 @@
-(fn list x
-  x)
+(fn .. x x)
 
 (fn list? (x)
   (or (not x)

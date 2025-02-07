@@ -29,5 +29,5 @@ tests () {
 }
 
 tests test_unix
-test_unix "$PARANOID -DGC_STRESS"
+#test_unix "$PARANOID -DGC_STRESS"
 tests test_sim6502

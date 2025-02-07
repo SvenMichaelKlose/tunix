@@ -1,3 +1,3 @@
 (fn enqueue (x . vals)
-  (setcar x (cdr (setcdr (or (car x) x) vals)))
+  (=-car x (cdr (=-cdr (or x. x) vals)))
   vals)

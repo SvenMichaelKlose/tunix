@@ -1,33 +1,31 @@
 (var *props* nil)
-
-(fn %cq (x)
-  (!= (ensure-list x))
-    $(. ',!. ,(? .! .!. !)))
-
-(macro class (base n . x)
-  $(push (. (. t ',class)
-            (nconc (list ,@(@ %cq (group2 x)))
-                   (cdr (assoc ',base *props*))))
-         *props*))
-
-(macro method (class n a . body)
-  $(push ',$(,n ,(. 'this a) ,@body)
-         (assoc class *props*)))
-
-(fn new (class . x)
-  (let (o (copy-alist (cdr (assoc class *props*))))
-    (!? (cdr (assoc 'constructor o))
-        (apply ! o x)
-        o)))
-
-(fn slot-value (x s)
-  (cdr (assoc s x)))
-
-(fn set-slot-value (x s v)
-  (setcdr (assoc s x) v))
+(var *m* nil)
 
 (fn %type? (x)
   (eq t x.))
 
-(fn super (x)
+(fn super (cls x)
   (member-if %type? .*m*))
+
+(fn %cq (x)
+  $(. ',x. ,(? .x .x. x)))
+
+(macro class (cls . members)
+  (let (name (? (atom cls) cls cls.)
+        base (? (cons? cls) .cls.))
+    $(push (. (. t ',name)
+              (nconc (.. ,@(@ %cq
+                              (group2 members)))
+                     (%slot-value *props* ,base)))
+           *props*)))
+
+(macro method (cls n a . body)
+  $(push ',$(,n ,(. 'this a)
+              ,@body)
+         (slot-value *props* cls)))
+
+(fn new (cls . x)
+  (let (o (copy-alist (slot-value *props* cls)))
+    (!? o.construct
+        (apply ! o x)
+        o)))

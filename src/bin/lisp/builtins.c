@@ -1460,14 +1460,14 @@ const struct builtin builtins[] = {
 #endif
 #ifndef NO_BUILTIN_CHAR_AT
     { "char-at",     "sn",  bi_char_at },
-    { "set-char-at", "+x",  bi_set_char_at },
+    { "=-char-at", "+x",    bi_set_char_at },
 #endif
 
     { ".",          "xx",   bi_cons },
     { "car",        "l",    bi_car },
     { "cdr",        "l",    bi_cdr },
-    { "setcar",     "cx",   bi_setcar },
-    { "setcdr",     "cx",   bi_setcdr },
+    { "=-car",      "cx",   bi_setcar },
+    { "=-cdr",      "cx",   bi_setcdr },
 
 #ifndef NO_BUILTIN_NTHCDR
     { "nthcdr",     "nx",   bi_nthcdr },

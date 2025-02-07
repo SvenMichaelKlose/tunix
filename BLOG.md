@@ -3,22 +3,82 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
-# 2025-01-17
 
-Good to have a development diary like this after such a long break.
+# 2025-02-03 Double Tap
 
-# 2024-12-21
+Copied over code from the
+[tré lisp compiler](https://github.com/SvenMichaelKlose/tre/)
+while cleaning that up, making TUNIX Lisp tré's little sister,
+hard-coded to compile the simpler dialect to bytecode only.
+Will be using tré to boot it.
+
+# 2025-01-21 Limbo Lambda
 
 Although the packaging scheme of TUNIX Lisp is super-simple, re-writing
 tré compiler code without the manually typed function name prefixes is
 a relief.  I wouldn't mind cleaning up tré instead and translate the
 fresher versions to TUNIX.
 
-ZetaLisp seems to have used the slash "/" too to apply hierarchies to
-names.  I like the connection.  Looking at ZetaC, a C compiler written
-in ZetaLisp, I actually was surprised (and a bit disappointed) with its
-size of around 5.5k lines of code, since I expected far less for such
-thing, especially when implemented in Lisp.
+What?  Moved here from src/bin/lisp/doc/compiler.md for the protocol:
+
+---8<---8<---
+
+
+## Tagging Anonymous functions
+
+A keyword to type function expressions is required to have the compiler
+compile them too.  If it can't tell if an expression is a function,
+it'll have to be interpreted.  FUNCTION as that keyword is readable
+better than the traditional LAMBDA.  People already unnerved by other
+programming languages will not watch the LAMBDA with a down-home feeling
+at first.  As far as I remember, Arc lisp is using FN.  Nice.
+
+~~~lisp
+; Old:
+(@ '((x) (+ 1 x)) numbers)
+
+; New:
+(@ (fn (x) (+ 1 x)) numbers)
+~~~
+
+What this does not solve is closures (with lexical scope) for
+both interpreter and compiler:
+
+~~~lisp
+; Old:
+(@ $((x) (+ ,n x)) numbers)
+
+; New:
+(@ (fn (x) (+ n x)) numbers)
+~~~
+
+That new version is barely a problem to compile to but for the
+interpreter it needs to get converted to the old version.  That can
+be done with macro-expansion.  But we want to compile functions that
+are already running in the interpreter, so we need a way to tell the
+compiler, that an expression is a mix of $ and FN.  We go for $FN
+and have that un-expand in the compiler.  For the interpreter it's
+just an $.  Ooph.
+
+~~~lisp
+; Limbo lambda:
+(@ ($fn (x) (+ ,n x)) numbers)
+~~~
+
+To make it all even easier to remember, FN keywords for anonymous
+functions should be optional to make sure that traces of TUNIX Lisp
+will run on an ATtiny or something alike.  One more #ifdef won't hurt.
+
+There's one edge case with FN for anonymous functions: a rest argument
+only would be a symbol, and that tells the FN for anonymous functions
+apart from global function definitions.  Deinitiely an unwanted
+limitation.  We should probably stick with LAMBDA for the front end.
+
+~~~lisp
+; New:
+(@ (lambda (x) (+ n x)) numbers)
+~~~
+
 
 # 2024-12-15 Pre-processing
 
@@ -291,6 +351,10 @@ The non-working VIC-20 version is also a pressing issue.  I cannot
 post updates on Denial with no working VIC version.  With a running
 version there'd even be enough heap to do something useful.  Honestly,
 I've been sitting at the desk a little bit too long.
+
+# 2025-01-17
+
+Good to have a development diary like this after such a long break.
 
 # 2024-11-16
 

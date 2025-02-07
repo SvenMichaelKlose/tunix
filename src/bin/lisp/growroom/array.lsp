@@ -19,8 +19,8 @@
 (fn %=^ (v a n bits)
   (? (== 1 bits)
      (? (== 0 (bit-and n 1))
-        (setcar a v)
-        (setcdr a v))
+        (=-car a v)
+        (=-cdr a v))
      (%=^ (? (== 0 (bit-and n 1))
              a.
              .a)

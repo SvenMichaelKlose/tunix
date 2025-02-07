@@ -9,7 +9,7 @@
           (equal original i.)
           (progn
             (out "Found CAR: ")(print original)
-            (setcar i original))
+            (=-car i original))
           (replace-duplicates original
                               (? (and universe-list?
                                       (symbol? i.))
@@ -19,7 +19,7 @@
       (when (and (not (eq original .i))
                  (equal original .i))
         (out "Found CDR: ")(print original)
-        (setcdr i original)))))
+        (=-cdr i original)))))
 
 (fn compress-tree (x . path)
   (= path (and path path.))

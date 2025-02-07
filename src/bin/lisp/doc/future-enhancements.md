@@ -1,16 +1,5 @@
----
-title: "TUNIX Lisp"
-subtitle: "Future Enhancements"
-author: "Sven Michael Klose"
-lang: "en"
-titlepage: true
-titlepage-color: "389fff"
-titlepage-text-color: "ffffff"
-toc: true
-footnodes-pretty: true
-...
-
-# Overview
+Future enhancements of the TUNIX Lisp dialect
+=============================================
 
 A couple of ideas to enhance TUNIX Lisp significantly.
 

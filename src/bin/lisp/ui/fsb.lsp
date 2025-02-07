@@ -49,7 +49,7 @@
         *arr-down*
           (when (< selected (-- (length files)))
             (fsb-redraw-item files ofs selected nil)
-            (!++ selected))
+            (++! selected))
         *enter*
           (return nil)))
     (con-direct nil)

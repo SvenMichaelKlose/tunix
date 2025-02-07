@@ -93,9 +93,9 @@
     (print i))
   (terpri))
 
-(do-test '!++
+(do-test '++!
   (let (x 1)
-    (!++ x)
+    (++! x)
     (or (== x 2)
         (error "X didn't increment to 2"))))
 

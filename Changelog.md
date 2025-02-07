@@ -33,6 +33,7 @@ and this project adheres to
   to be PARSE if it's not in the current package.
 - REQUIRE has no requirements.
 - DOTEXPAND: Ignore QUOTEd entirely.
+- !++/!-- renamed to ++!/--!.
 
 #### Interpreter
 

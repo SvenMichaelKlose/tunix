@@ -19,15 +19,15 @@
 (close ch)
 (= *universe* (remove 'ch *universe*))
 
-(message '"Testing SETCAR...")
+(message '"Testing =-CAR...")
 (= x (. nil nil))
-(or (equal (setcar x t)
+(or (equal (=-car x t)
            (. t nil))
     (error))
 
-(message '"Testing SETCDR...")
+(message '"Testing =-CDR...")
 (= x (. nil nil))
-(or (equal (setcdr x t)
+(or (equal (=-cdr x t)
            (. nil t))
     (error))
 

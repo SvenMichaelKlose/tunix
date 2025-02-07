@@ -66,8 +66,8 @@ Here is how most other Lisps translate to TUNIX Lisp:
 | backquote sign '`'     | dollar sign '$' |
 | (CONS car cdr)         | (. car cdr)     |
 | (SETQ c v)             | (= c v)         |
-| (RPLACA c v)           | (SETCAR c v)    |
-| (RPLACD c v)           | (SETCDR c v)    |
+| (RPLACA c v)           | (=-CAR c v)     |
+| (RPLACD c v)           | (=-CDR c v)     |
 | (MAKE-SYMBOL x)        | (SYMBOL l)      |
 | (SYMBOL-VALUE s)       | (VALUE s)       |
 | (FILTER f l)           | (@ f l)         |
@@ -1361,13 +1361,13 @@ sym1    ; -> my-package/sym1
 
 ## Conses
 
-| Function     | Description                         |
-|--------------|-------------------------------------|
-| (. x x)      | Create cons object pair.            |
-| (car l)      | Return first value of cons or NIL.  |
-| (cdr l)      | Return second value of cons or NIL. |
-| (setcar c x) | Set first value of cons.            |
-| (setcdr c x) | Set second value of cons.           |
+| Function    | Description                         |
+|-------------|-------------------------------------|
+| (. x x)     | Create cons object pair.            |
+| (car l)     | Return first value of cons or NIL.  |
+| (cdr l)     | Return second value of cons or NIL. |
+| (=-car c x) | Set first value of cons.            |
+| (=-cdr c x) | Set second value of cons.           |
 
 A 'cons' points to two other objects, called 'car' and 'cdr' for
 historical reasons.  They could also be called 'first' and 'second',
@@ -1403,16 +1403,16 @@ of lists:
 (cdr our-list) ; -> (b)
 ~~~
 
-### (setcar c x)/(setcdr c x): Set first/second value of cons.
+### (=-car c x)/(=-cdr c x): Set first/second value of cons.
 
 Sets the first or second value of a cons.  Passing anything else but a
 cons, e.g. NIL, is an error.  The modified cons is returned otherwise.
 
 ~~~lisp
 (var our-cons '(a . b))
-(setcar our-cons 'new)     ; -> (new . b)
-(setcdr our-cons 'values)  ; -> (new . value)
-(setcdr our-cons nil)      ; -> (new)
+(=-car our-cons 'new)     ; -> (new . b)
+(=-cdr our-cons 'values)  ; -> (new . value)
+(=-cdr our-cons nil)      ; -> (new)
 ~~~
 
 Setting the CDR of a *compressed cons* is also an error.  See section
@@ -2662,7 +2662,7 @@ Returns T if the call was successful but no connection is waiting.
 
 When enabled by compile-time option COMPRESSED\_CONS, storing the CDR of a
 cons can be spared if that is following immediately on the heap.  Since
-that makes compressed conses immutable (you cannot use SETCDR on them),
+that makes compressed conses immutable (you cannot use =-CDR on them),
 compression is performed if the garbage collector was called by the
 program and not the allocator.  The GC is also called to compress conses
 if the available heap left is smaller than the number of bytes specified

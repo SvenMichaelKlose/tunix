@@ -72,6 +72,8 @@
 (? nil (error) nil)
 (? nil (error) nil (error))
 
+; TODO: string cons =-car =-cdr
+
 (message '"Testing CAR...")
 (? (car nil)
    (error))
@@ -152,8 +154,6 @@
          (error))
      (or (== 99 (char-at 'abc 2))
          (error)))))
-
-; string cons setcar setcdr
 
 (message '"Testing >...")
 (or (> 42 23) (error))

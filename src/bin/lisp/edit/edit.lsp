@@ -76,7 +76,7 @@
     (dotimes (i (- (-- *con-h*) s))
       (con-xy 0 y)
       (update-line (and l l.))
-      (!++ y)
+      (++! y)
       (= l .l))))
 
 (fn update-screen? ()
@@ -151,7 +151,7 @@
                   (nconc l .*lines*)
                   (!= (cut-at *ln* *lines*)
                     (nconc *lines* l .!)))))
-  (!++ *ln*)
+  (++! *ln*)
   (= *lx* 0))
 
 ;;; File I/O
@@ -255,10 +255,10 @@
       (!= (edit-line line.)
         (when *mod?*
           (= *saved?* nil)
-          (setcar line !))))
+          (=-car line !))))
     (case (conin)
       +arr-down+
-        (!++ *ln*)
+        (++! *ln*)
       +arr-up+
         (!-- *ln*)
 

@@ -11,6 +11,17 @@ and this project adheres to
 [Lisp manual](src/bin/lisp/doc/manual.md)
 
 
+## [current]
+
+### Lisp
+
+#### Environment
+
+##### Added
+
+- Support for nested QUASIQUOTEs: Nested un-quoting quotes.
+
+
 ## [v0.0.33] - 2025-01-07
 
 ### Lisp

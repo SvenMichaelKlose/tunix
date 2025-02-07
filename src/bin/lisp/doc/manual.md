@@ -1854,7 +1854,7 @@ with prefixed label "USER ERR".
 ### (debug): Raises a SIGTRAP signal for debugging.
 ### (debugger): Invoke debugger with next instruction.
 
-# Quasiquoting
+# Quoting
 
 | Form               |     | Description                  |
 |--------------------|-----|------------------------------|
@@ -1863,10 +1863,33 @@ with prefixed label "USER ERR".
 | (unquote x)        | ,x  | Insert into QUASIQUOTE.      |
 | (unquote-splice x) | ,@x | Splice into QUASIQUOTE.      |
 
-## (quote x) | 'x: Return X unevaluated.
-## (quasiquote x) | $x: Unevaluated if not unquoted.
-## (unquote x) | ,x: Insert into QUASIQUOTE.
-## (unquote-splice x) | ,@x: Splice into QUASIQUOTE.
+QUOTEs and QUASIQUOTEs enable you to assemble lists with an abbreviated syntax.
+
+~~~lisp
+(list 1 2 3) -> (1 2 3)
+'(1 2 3)     -> (1 2 3)
+$(1 2 3)     -> (1 2 3)
+~~~
+
+QUASIQUOTEs allow dynamic construction with variables.  Just prefix a list with
+"$" (the abbreviated form of QUASIQUOTE) and insert variables with UNQUOTE (",")
+or UNQUOTE-SPLICE (",@") to splice lists in.
+
+~~~lisp
+(let (a 42)
+  '(1 2 a)  -> (1 2 a)
+  $(1 2 a)) -> (1 2 42)
+~~~
+
+If you want to pass on UNQUOTE of UNQUOTE-SPLICE to a nested QUASIQUOTE, wrap it
+in another QUOTE:
+
+~~~lisp
+$((x) $(wrap ,,x)) -> ((x) $(wrap ,x))
+
+; Essentially the same:
+$((x) $(wrap ,',x)) -> ((x) $(wrap ,x))
+~~~
 
 # Macros
 

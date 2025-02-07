@@ -1,6 +1,10 @@
+#ifndef NO_IMAGE
+
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
+#pragma allow-eager-inline (off)
+#pragma inline-stdfuncs (off)
 #endif
 
 #include <ctype.h>
@@ -52,7 +56,6 @@ image_save (char * pathname)
     do {
         switch_heap ();
 #endif
-
         // Write heap start.
         outm ((char *) &heap_start, sizeof (lispptr));
 
@@ -94,9 +97,12 @@ image_load (char * pathname)
     size_t len;
     lispptr pos;
 
+    // Open image file.
     chin = simpleio_open (pathname, 'r');
     if (!chin)
         return false;
+
+    // Set input channel to image.
     setin (chin);
 
     // Read header.
@@ -162,3 +168,5 @@ image_load (char * pathname)
     // Signal success.
     return true;
 }
+
+#endif // #ifndef NO_IMAGE

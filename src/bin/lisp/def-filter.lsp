@@ -1,0 +1,5 @@
+(macro def-filter (n a . b)
+  (let (l (symbol))
+    $(fn ,n (,l)
+       (@ $((,a) ,@b)
+          ,l))))

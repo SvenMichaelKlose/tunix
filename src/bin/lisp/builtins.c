@@ -1,12 +1,15 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
+#pragma allow-eager-inline (off)
+#pragma inline-stdfuncs (off)
 #endif
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h>
@@ -17,7 +20,16 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef HAVE_SOCKETS
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>  // For close()
+#include <fcntl.h>
+#include <errno.h>
+#endif
+
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 extern lispptr x;
@@ -27,7 +39,7 @@ extern lispptr arg2c;
 extern lispptr arg2;
 extern lispptr value;
 extern lispptr tmp;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("x")
 #pragma zpsym ("args")
 #pragma zpsym ("arg1")
@@ -36,7 +48,7 @@ extern lispptr tmp;
 #pragma zpsym ("value")
 #pragma zpsym ("tmp")
 #pragma bss-name (pop)
-#endif
+#endif // #ifdef USE_ZEROPAGE
 
 // I/O channels
 lispptr lisp_fnin;
@@ -51,6 +63,8 @@ bool debug_mode;
 #ifdef __CC65__
 #pragma code-name ("CODE_BUILTINS")
 #endif
+
+void FASTCALL bi_out_list (lispptr);
 
 lispptr
 bi_eq (void)
@@ -67,7 +81,7 @@ bi_not (void)
 lispptr
 bi_atom (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return ATOM(arg1) ? arg1 : nil;
     return t;
 }
@@ -75,7 +89,7 @@ bi_atom (void)
 lispptr
 bi_symbolp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return SYMBOLP(arg1) ? arg1 : nil;
     return t;
 }
@@ -83,7 +97,7 @@ bi_symbolp (void)
 lispptr
 bi_builtinp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return BUILTINP(arg1) ? arg1 : nil;
     return nil;
 }
@@ -91,13 +105,13 @@ bi_builtinp (void)
 lispptr
 bi_specialp (void)
 {
-    if (arg1)
+    if (NOT_NIL(arg1))
         return SPECIALP(arg1) ? arg1 : nil;
     return nil;
 }
 
 lispptr
-bi_setq (void)
+bi_set (void)
 {
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg2;
@@ -106,6 +120,8 @@ bi_setq (void)
 lispptr
 bi_symbol_value (void)
 {
+    if (NOT(arg1))
+        return arg1;
     return SYMBOL_VALUE(arg1);
 }
 
@@ -113,55 +129,81 @@ bi_symbol_value (void)
 lispptr
 bi_symbol (void)
 {
-    int      len;
-    lispptr  s;
-    char *   p;
-
     // Get length.  Truncate at 255.
-    len = length (arg1);
+    int len = length (arg1);
+    if (!len)
+        return alloc_symbol (NULL, 0);
     if (len > 255)
         len = 255;
 
-    // Allocate empty symbol of wanted length.
-    s = alloc_symbol (buffer, len);
-
     // Make symbol name from list.
-    p = SYMBOL_NAME(s);
+    tmpstr = buffer;
     DOLIST(arg1, arg1) {
 #ifndef NAIVE
         if (!NUMBERP(CAR(arg1))) {
-            error (ERROR_TYPE, "(string nlst)");
+            error (ERROR_TYPE, "(string nlst)", nil); // TODO: number?
             break;
         }
 #endif
-        *p++ = NUMBER_VALUE(CAR(arg1));
+        *tmpstr++ = NUMBER_VALUE(CAR(arg1));
     }
 #ifndef NAIVE
-    if (arg1)
+    if (NOT_NIL(arg1))
         error_cons_expected (arg1);
 #endif
 
-    return s;
+    return make_symbol (buffer, len);
 }
+
+#ifndef NO_BUILTIN_CHAR_AT
 
 lispptr
 bi_char_at ()
 {
     lispnum_t n = NUMBER_VALUE(arg2);
-    lisp_len = SYMBOL_LENGTH(arg1);
-    if (n < 0 || n >= lisp_len)
+    lispobj_size_t l = NOT(arg1) ? 3 : SYMBOL_LENGTH(arg1);
+    if (n < 0 || n >= l)
         return nil;
-    return make_number (SYMBOL_NAME(arg1)[n]);
+    return make_number ((NOT(arg1) ? "nil" : SYMBOL_NAME(arg1))[n]);
 }
+
+lispptr
+bi_set_char_at ()
+{
+    lispptr        s;
+    lispptr        n;
+    lispptr        v;
+    lispnum_t      i;
+    lispobj_size_t l;
+    if (NOT(arg1))
+        error (ERROR_TYPE, "nil", nil);
+    s = LIST_CAR(arg1);
+    n = LIST_CAR(LIST_CDR(arg1));
+    v = LIST_CAR(LIST_CDR(CDR(arg1)));
+    i = NUMBER_VALUE(n);
+    l = SYMBOL_LENGTH(s);
+    if (i < 0 || i >= l)
+        return nil;
+    SYMBOL_NAME(s)[i] = NUMBER_VALUE(v);
+    return arg1;
+}
+
+#endif // #ifndef NO_BUILTIN_CHAR_AT
+
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
 
 lispptr
 bi_symbol_name ()
 {
     lispobj_size_t i = 0;
+    lispobj_size_t l;
 
-    lisp_len = SYMBOL_LENGTH(arg1);
-    list_last = nil;
-    for (i = 0; i < lisp_len; i++) {
+    if (NOT(arg1))
+        return arg1;
+
+    l = SYMBOL_LENGTH(arg1);
+    list_start = list_last = nil;
+    for (i = 0; i < l; i++) {
         tmp = make_cons (make_number (SYMBOL_NAME(arg1)[i]), nil);
         if (NOT_NIL(list_last)) {
             SETCDR(list_last, tmp);
@@ -172,6 +214,14 @@ bi_symbol_name ()
     list_last = nil;
     return list_start;
 }
+
+lispptr
+bi_slength (void)
+{
+    return make_number (NOT(arg1) ? 3 : SYMBOL_LENGTH(arg1));
+}
+
+#endif // #ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
 
 lispptr
 bi_quote (void)
@@ -217,6 +267,215 @@ bi_setcdr (void)
     return arg1;
 }
 
+#ifndef NO_BUILTIN_NTHCDR
+
+lispptr
+bi_nthcdr (void)
+{
+    int n = NUMBER_VALUE(arg1);
+#ifndef NAIVE
+    if (n < 0) {
+        error (ERROR_NEGATIVE, "<0", arg1);
+        return nil;
+    }
+#endif
+    while (n-- && CONSP(arg2))
+        arg2 = CDR(arg2);
+#ifndef NAIVE
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+#endif
+    return arg2;
+}
+
+#endif // #ifndef NO_BUILTIN_NTHCDR
+
+#ifndef NO_BUILTIN_ASSOC
+
+lispptr
+bi_assoc ()
+{
+    DOLIST(x, arg2) {
+        tmp = CAR(x);
+        if (!CONSP(tmp))
+            break;
+        tmp = CAR(tmp);
+        if (tmp == arg1)
+            return CAR(x);
+        if (NUMBERP(tmp) && NUMBERP(arg1))
+            if (NUMBER_VALUE(tmp) == NUMBER_VALUE(arg1))
+                return CAR(x);
+    }
+    return nil;
+}
+
+#endif // #ifndef NO_BUILTIN_ASSOC
+
+#ifndef NO_BUILTIN_APPEND
+
+lispptr
+bi_append ()
+{
+    if (!unevaluated)
+        x = eval_list ();
+    list_start = list_last = nil;
+    while (CONSP(x)) {
+        // Skip NILs in arguments.
+        while (CONSP(x) && !CONSP(CAR(x))) {
+#ifndef NAIVE
+            if (NOT_NIL(CAR(x)))
+                return error_cons_expected (x);
+#endif
+            x = CDR(x);
+        }
+
+        // Break on end of argument list.
+        if (NOT(x))
+            goto done;
+
+        // Copy first element.
+        arg1 = CAR(x);
+        tmp = make_cons (CAR(arg1), nil);
+        if (NOT_NIL(list_last))
+            SETCDR(list_last, tmp);
+        list_last = tmp;
+
+        if (NOT(list_start))
+            list_start = list_last;
+
+        // Append rest of elements.
+        DOLIST(arg1, CDR(arg1)) {
+            // Copy element.
+            tmp = make_cons (CAR(arg1), nil);
+
+            // Append to last.
+            SETCDR(list_last, tmp);
+            list_last = tmp;
+        }
+
+#ifndef NAIVE
+        if (NOT_NIL(arg1))
+            return error_cons_expected (x);
+#endif
+        x = CDR(x);
+    }
+
+done:
+    return list_start;
+}
+
+#endif // #ifndef NO_BUILTIN_APPEND
+
+#ifndef NO_BUILTIN_NCONC
+
+lispptr
+bi_nconc (void)
+{
+    // Taking any arguments, we need to eval manually.
+    args = unevaluated ? x : eval_list ();
+
+    // Get first list and its tail.
+    list_start = nil;
+    while (NOT_NIL(args) && NOT(list_start)) {
+        list_start = CAR(args);
+        args = CDR(args);
+    }
+    if (NOT(list_start))
+        return nil;
+#ifndef NAIVE
+    if (ATOM(list_start))
+        return error_cons_expected (list_start);
+#endif
+    list_last = last (list_start);
+
+    // Connect tails.
+    while (NOT_NIL(args)) {
+        tmp = CAR(args);
+        if (NOT_NIL(tmp)) {
+#ifndef NAIVE
+            if (ATOM(tmp))
+                return error_cons_expected (list_start);
+#endif
+            SETCDR(list_last, tmp);
+            list_last = last (tmp);
+        }
+        args = CDR(args);
+    }
+
+    return list_start;
+}
+
+#endif // #ifndef NO_BUILTIN_NCONC
+
+#ifndef NO_BUILTIN_SUBSEQ
+
+lispptr
+bi_subseq (void)
+{
+    int n;
+    int nstart;
+    int nend;
+    lispptr start;
+    lispptr end;
+    bool has_end = false;
+
+    // Evaluate arguments and dings them.
+    args = eval_list ();
+    // TODO: type-check list
+    list_start = LIST_CAR(args);
+    arg2c = LIST_CDR(args);
+    start = LIST_CAR(arg2c);
+    end = LIST_CAR(LIST_CDR(arg2c));
+
+    // TODO: type-check start
+    nstart = NUMBER_VALUE(start);
+#ifndef NAIVE
+    if (nstart < 0) {
+        error (ERROR_NEGATIVE, "<0", start);
+        return nil;
+    }
+#endif
+
+    // Get start of list.
+    arg1 = start;
+    arg2 = list_start;
+    arg2 = bi_nthcdr ();
+
+    // TODO: type-check end
+    if (NOT_NIL(end)) {
+        nend = NUMBER_VALUE(end);
+#ifndef NAIVE
+        if (nend < 0) {
+            error (ERROR_NEGATIVE, "<0", end);
+            return nil;
+        }
+#endif
+        n = nend - nstart;
+        has_end = true;
+    }
+
+    // Copy until end.
+    list_start = list_last = nil;
+    while ((!has_end || n-- > 0) && CONSP(arg2)) {
+        tmp = make_cons (CAR(arg2), nil);
+        if (NOT(list_start))
+            list_start = tmp;
+        else
+            SETCDR(list_last, tmp);
+        list_last = tmp;
+        arg2 = CDR(arg2);
+    }
+
+#ifndef NAIVE
+    if (ATOM(arg2) && NOT_NIL(arg2))
+        return error_cons_expected (arg2);
+#endif
+
+    return list_start;
+}
+
+#endif // #ifndef NO_BUILTIN_SUBSEQ
+
 lispptr
 bi_numberp (void)
 {
@@ -248,11 +507,22 @@ DEFOP(bi_sub, -);
 DEFOP(bi_mul, *);
 DEFOP(bi_div, /);
 DEFOP(bi_mod, %);
+
+#ifndef NO_BUILTIN_GROUP_BITOPS
+
 DEFOP(bi_bit_and, &);
 DEFOP(bi_bit_or, |);
 DEFOP(bi_bit_xor, ^);
 DEFOP(bi_shift_left, <<);
 DEFOP(bi_shift_right, >>);
+
+lispptr
+bi_bit_neg (void)
+{
+    return make_number (~NUMBER_VALUE(arg1));
+}
+
+#endif // #ifndef NO_BUILTIN_GROUP_BITOPS
 
 lispptr
 bi_inc (void)
@@ -264,12 +534,6 @@ lispptr
 bi_dec (void)
 {
     return make_number (NUMBER_VALUE(arg1) - 1);
-}
-
-lispptr
-bi_bit_neg (void)
-{
-    return make_number (~NUMBER_VALUE(arg1));
 }
 
 lispptr
@@ -304,8 +568,19 @@ lispptr
 bi_eval (void)
 {
     x = arg1;
+#ifndef NAIVE
+    PUSH(current_toplevel);
+    current_toplevel = x;
+    PUSH(current_function);
+    current_function = nil;
+#endif
     PUSH_TAG(TAG_DONE); // Tell to return from eval0().
-    return eval0 ();
+    x = eval0 ();
+#ifndef NAIVE
+    POP(current_function);
+    POP(current_toplevel);
+#endif
+    return x;
 }
 
 // Consing. Could be optimized away if moved to eval().
@@ -315,16 +590,17 @@ bi_apply (void)
     args = copy_list (arg2, COPY_BUTLAST, nil);
     tmp  = LIST_CAR(last (arg2));
 
-    if (NOT_NIL(args)) {
-#ifndef NAIVE
-        if (!LISTP(tmp)) {
-            error (ERROR_TYPE, "Last arg isn't list");
-            return nil;
-        }
-#endif
+    if (NOT_NIL(args))
         SETCDR(last (args), tmp);
-    } else
+    else
         args = tmp;
+
+#ifndef NAIVE
+    if (!LISTP(tmp)) {
+        error (ERROR_TYPE, "Last arg not list", arg2);
+        return nil;
+    }
+#endif
 
     make_call (args);
     return eval0 ();
@@ -363,24 +639,17 @@ bi_if (void)
         // It's the consequence with nothing following.
         arg2c = CDR(x);
         if (NOT(arg2c)) {
-#ifndef NO_DEBUGGER
-            highlighted = x;
-#endif
+            HIGHLIGHT(x);
             x = arg1;
             return delayed_eval;
         }
 
         // Evaluate condition.
-#ifndef NO_DEBUGGER
-        PUSH_HIGHLIGHTED(x);
-#endif
+        HIGHLIGHT(x);
         PUSH(arg2c);
         x = arg1;
         tmp = eval ();
         POP(arg2c);
-#ifndef NO_DEBUGGER
-        POP_HIGHLIGHTED();
-#endif
 
 #ifndef NAIVE
         if (error_code)
@@ -390,9 +659,7 @@ bi_if (void)
         // Do consequence if condition isn't NIL.
         if (NOT_NIL(tmp)) {
             x = CAR(arg2c);
-#ifndef NO_DEBUGGER
-            highlighted = arg2c;
-#endif
+            HIGHLIGHT(arg2c);
             return delayed_eval;
         }
 
@@ -408,10 +675,9 @@ bi_and (void)
     value = nil;
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -432,10 +698,9 @@ bi_or (void)
 {
     DOLIST(x, x) {
         PUSH(x);
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         x = CAR(x);
         value = eval ();
-        POP_HIGHLIGHTED();
         POP(x);
 #ifndef NAIVE
         if (error_code)
@@ -451,11 +716,17 @@ bi_or (void)
     return nil;
 }
 
+#ifndef NO_BUILTIN_PRINT
+
 lispptr
 bi_print (void)
 {
     return print (arg1);
 }
+
+#endif // #ifndef NO_BUILTIN_PRINT
+
+#ifndef NO_BUILTIN_GROUP_FILE
 
 // Get last I/O error.
 // TODO: Rename to IOERR?
@@ -473,6 +744,12 @@ bi_eof (void)
     return BOOL(eof ());
 }
 
+lispptr FASTCALL
+nil4zero (char c)
+{
+    return c ? make_number (c) : nil;
+}
+
 lispptr
 bi_open (void)
 {
@@ -481,15 +758,13 @@ bi_open (void)
 
 #ifndef NAIVE
     if (SYMBOL_LENGTH(arg2) != 1 || (mode != 'r' && mode != 'w')) {
-        error (ERROR_FILEMODE, "Ill file mode");
+        error (ERROR_FILEMODE, "Ill file mode", arg2);
         return nil;
     }
 #endif // #ifndef NAIVE
     name_to_buffer (arg1);
     c = simpleio_open (buffer, mode);
-    if (c)
-        return make_number (c);
-    return nil;
+    return nil4zero (c);
 }
 
 lispptr
@@ -511,7 +786,7 @@ bi_setout (void)
 lispptr
 bi_conin (void)
 {
-    return make_number (conin ());
+    return nil4zero (conin ());
 }
 
 lispptr
@@ -527,17 +802,86 @@ bi_putback (void)
     return nil;
 }
 
+int countdown;
+char * ostr;
+
+void
+bi_out_flush (void)
+{
+    if (ostr != buffer) {
+        outm (buffer, ostr - buffer);
+        ostr = buffer;
+    }
+}
+
+#ifdef __CC65__
+inline
+#endif
+void FASTCALL
+bi_out_c (char c)
+{
+    *ostr++ = c;
+    if (ostr == &buffer[MAX_SYMBOL])
+        bi_out_flush ();
+}
+
+void
+counted_out (char c)
+{
+    if (countdown < 0) {
+        bi_out_c (c);
+    } else if (countdown) {
+        bi_out_c (c);
+        countdown--;
+    }
+}
+
+void FASTCALL
+bi_out_named (lispptr x)
+{
+    lispobj_size_t l = SYMBOL_LENGTH(x);
+    tmpstr = SYMBOL_NAME(x);
+    while (l--)
+        counted_out (*tmpstr++);
+}
+
+void FASTCALL
+bi_out_atom (lispptr x)
+{
+    if (NUMBERP(x))
+        counted_out (NUMBER_VALUE(x));
+    else if (_NAMEDP(x))
+        bi_out_named (x);
+    else {
+        bi_out_flush ();
+        print (x);
+    }
+}
+
+void FASTCALL
+bi_out_list (lispptr x)
+{
+    DOLIST(tmp, x) {
+        PUSH(tmp);
+        bi_out_atom (CAR(tmp));
+        POP(tmp);
+    }
+}
+
 lispptr
 bi_out (void)
 {
-    if (NOT(arg1))
-        outs ("nil");
-    else if (NUMBERP(arg1))
-        out (NUMBER_VALUE(arg1));
-    else if (SYMBOLP(arg1))
-        outsn (SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
-    else
-        print (arg1);
+    ostr = buffer;
+    bi_out_list (arg1);
+    countdown = -1;
+    bi_out_flush ();
+    return arg1;
+}
+
+lispptr
+bi_outlim (void)
+{
+    countdown = NUMBER_VALUE(arg1);
     return arg1;
 }
 
@@ -562,7 +906,85 @@ bi_close (void)
     return nil;
 }
 
-lispptr bi_gc (void);
+#ifndef NO_BUILTIN_READLINE
+
+lispptr
+bi_read_line (void)
+{
+    lispobj_size_t l;
+
+    tmpstr = buffer;
+    if (fnin != STDIN) {
+        while (!eof ()) {
+            tmpc = in ();
+            if (tmpc != 13)
+                break;
+        }
+    }
+    putback ();
+    for (l = 0; l < MAX_SYMBOL - 1; l++) {
+        if (eof ())
+            break;
+        tmpc = in ();
+        if ((fnin == STDIN && tmpc == 13) || tmpc == 10)
+            break;
+        *tmpstr++ = tmpc;
+    }
+    return make_symbol (buffer, tmpstr - buffer);
+}
+
+#endif // #ifndef NO_BUILTIN_READLINE
+
+#endif // #ifndef NO_BUILTIN_GROUP_FILE
+
+#if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
+
+#include <cbm.h>
+
+lispptr
+bi_opendir (void)
+{
+    simpleio_chn_t chn = directory_open ();
+    return nil4zero (chn);
+}
+
+struct cbm_dirent dirent;
+
+lispptr
+bi_readdir (void)
+{
+    lispobj_size_t l;
+    char i;
+    char err;
+
+    err = directory_read ((simpleio_chn_t) NUMBER_VALUE(arg1), &dirent);
+    if (err)
+        return nil;
+    memcpy (buffer, dirent.name, sizeof (dirent.name));
+    buffer[sizeof (dirent.name)] = 0;
+    l = strlen (buffer);
+    for (i = 0; i < l; i++)
+        buffer[i] = reverse_case (buffer[i]);
+    list_start = make_cons (make_symbol (buffer, l), nil);
+    tmp = make_cons (make_number (dirent.size), nil);
+    SETCDR(list_start, tmp);
+    PUSH(tmp);
+    tmp2 = make_cons (make_number (dirent.type), nil);
+    POP(tmp);
+    SETCDR(tmp, tmp2);
+    return list_start;
+}
+
+lispptr
+bi_closedir (void)
+{
+    directory_close ((simpleio_chn_t) NUMBER_VALUE(arg1));
+    return nil;
+}
+
+#endif // #if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
+
+#ifndef NO_BUILTIN_LOAD
 
 lispptr
 bi_load (void)
@@ -573,13 +995,15 @@ bi_load (void)
 
 #ifdef GC_AFTER_LOAD_THRESHOLD
     if (heap_free_size () < GC_AFTER_LOAD_THRESHOLD)
-        bi_gc ();
+        gc ();
 #endif
 
     return t;
 }
 
-#ifndef NO_IMAGES
+#endif // #ifndef NO_BUILTIN_LOAD
+
+#ifndef NO_BUILTIN_GROUP_IMAGE
 
 lispptr
 bi_iload (void)
@@ -594,29 +1018,32 @@ lispptr
 bi_isave (void)
 {
     name_to_buffer (arg1);
-    if (image_save (buffer))
-        return t;
-    return nil;
+    return BOOL(image_save (buffer));
 }
 
-#endif // #ifndef NO_IMAGES
+#endif // #ifndef NO_BUILTIN_GROUP_IMAGE
+
+#ifndef NO_BUILTIN_GROUP_DEFINITIONS
 
 lispptr
 bi_define (void)
 {
-#ifdef VERBOSE_DEFINES
-    if (member (arg1, SYMBOL_VALUE(universe)))
-        outs ("Redefining ");
-    else {
-        expand_universe (arg1);
-        outs ("Defining ");
+#ifndef NO_VERBOSE_DEFINES
+    simpleio_chn_t old_out = fnout;
+
+    if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
+        setout (STDOUT);
+        if (NOT_NIL(member (arg1, SYMBOL_VALUE(universe))))
+            outs ("Redefining ");
+        else
+            outs ("Defining ");
+        print (arg1);
+        terpri ();
+        setout (old_out);
     }
-    print (arg1);
-    terpri ();
-#else
-    if (!member (arg1, SYMBOL_VALUE(universe)))
-        expand_universe (arg1);
 #endif
+    if (NOT(member (arg1, SYMBOL_VALUE(universe))))
+        expand_universe (arg1);
     SET_SYMBOL_VALUE(arg1, arg2);
     return arg1;
 }
@@ -628,6 +1055,10 @@ bi_special (void)
     TYPE(tmp) = TYPE_SPECIAL;
     return tmp;
 }
+
+#endif // #ifndef NO_BUILTIN_GROUP_DEFINITIONS
+
+#ifndef NO_BUILTIN_GC
 
 lispptr
 bi_gc (void)
@@ -643,22 +1074,33 @@ bi_gc (void)
     return make_number (heap_free_size ());
 }
 
+#endif // #ifndef NO_BUILTIN_GC
+
+#ifndef NO_BUILTIN_FREE
+
+lispptr
+bi_free (void)
+{
+    return make_number (heap_free_size ());
+}
+
+#endif // #ifndef NO_BUILTIN_FREE
+
 #ifndef NAIVE
 
 lispptr
 bi_error (void)
 {
     last_errstr = "User error";
-    if (NOT_NIL(arg1))
-        current_expr = arg1;
     error_code = ERROR_USER;
+    failed_obj = args;
     return nil;
 }
 
 lispptr
 bi_ignore (void)
 {
-    do_break_repl = do_continue_repl = true;
+    do_break_repl = BRK_CONTINUE;
     return nil;
 }
 
@@ -670,10 +1112,10 @@ bi_stack (void)
     lispptr * p;
     setout (STDERR);
     for (p = (void *) stack_end, p--; p != (void *) stack; p--) {
+        fresh_line ();
         outn (i++);
         outs (": ");
         print (*p);
-        terpri ();
     }
     setout (old_out);
     return nil;
@@ -681,19 +1123,12 @@ bi_stack (void)
 #endif // #ifndef NAIVE
 
 lispptr
-bi_quit (void)
-{
-    do_break_repl = true;
-    return arg1;
-}
-
-lispptr
 bi_exit (void)
 {
     if (NOT_NIL(arg1))
         exit (NUMBER_VALUE(arg1));
     else
-        do_exit_program = do_break_repl = true;
+        do_break_repl = BRK_EXIT;
     return nil;
 }
 
@@ -752,9 +1187,8 @@ bi_filter (void)
     PUSH(arg1);
     PUSH(arg2);
     make_car_call ();
-    PUSH_HIGHLIGHTED(x);
+    HIGHLIGHT(x);
     list_start = list_last = make_cons (eval0 (), nil);
-    POP_HIGHLIGHTED();
     POP(arg2);
     POP(arg1);
     if (do_break_repl)
@@ -766,9 +1200,8 @@ bi_filter (void)
         PUSH(arg2);
         PUSH(list_last);
         make_car_call ();
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = make_cons (eval0 (), nil);
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 2;
             return nil;
@@ -779,12 +1212,11 @@ bi_filter (void)
         POP(arg2);
         POP(arg1);
     }
-    if (arg2) {
+    if (NOT_NIL(arg2)) {
         PUSH(list_last);
         make_call (make_cons (arg2, nil));
-        PUSH_HIGHLIGHTED(x);
+        HIGHLIGHT(x);
         tmp = eval0 ();
-        POP_HIGHLIGHTED();
         if (do_break_repl) {
             stack += sizeof (lispptr) << 1;
             return nil;
@@ -796,27 +1228,31 @@ bi_filter (void)
     return list_start;
 }
 
-#if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#if !defined(NO_BUILTIN_TIME) && defined(__CC65__)
 char bekloppies[sizeof (long)];
 
 lispptr
 bi_time (void)
 {
     asm ("cli");
-#if defined(TARGET_C16) || defined(TARGET_PLUS4)
-    bekloppies[0] = *(char *) 0xa5;
-    bekloppies[1] = *(char *) 0xa4;
-    bekloppies[2] = *(char *) 0xa3;
-#else
+#if defined(TARGET_C128) || defined(TARGET_C64) || defined(TARGET_VIC20)
     bekloppies[0] = *(char *) 0xa2;
     bekloppies[1] = *(char *) 0xa1;
     bekloppies[2] = *(char *) 0xa0;
+#elif defined(TARGET_C16) || defined(TARGET_PLUS4)
+    bekloppies[0] = *(char *) 0xa5;
+    bekloppies[1] = *(char *) 0xa4;
+    bekloppies[2] = *(char *) 0xa3;
+#elif defined (TARGET_PET)
+    bekloppies[0] = *(char *) 0x8f;
+    bekloppies[1] = *(char *) 0x8e;
+    bekloppies[2] = *(char *) 0x8d;
 #endif
     bekloppies[3] = 0;
     asm ("sei");
     return make_number (*(long *) bekloppies);
 }
-#endif // #if defined(TARGET_C128) || defined(TARGET_C16) || defined(TARGET_C64) || defined(TARGET_PET) || defined(TARGET_PLUS4) || defined(TARGET_VIC20)
+#endif // #if !defined(NO_BUILTIN_TIME) && defined(__CC65__)
 
 #ifdef TARGET_UNIX
 
@@ -840,7 +1276,7 @@ bi_time (void)
 
 #endif // #ifdef TARGET_UNIX
 
-#ifdef TARGET_SIM6502
+#ifdef NO_BUILTIN_TIME
 
 lispptr
 bi_time (void)
@@ -848,7 +1284,7 @@ bi_time (void)
     return make_number (0);
 }
 
-#endif // #ifdef TARGET_SIM6502
+#endif // #ifdef NO_BUILTIN_TIME
 
 #ifndef NDEBUG
 lispptr
@@ -871,6 +1307,123 @@ bi_debugger (void)
 }
 #endif
 
+#ifdef HAVE_SOCKETS
+
+lispptr
+bi_socket_connect (void)
+{
+    int sockfd;
+    struct sockaddr_in server_addr;
+    int port = NUMBER_VALUE(arg2);
+
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        return nil;
+
+    memcpy (buffer, SYMBOL_NAME(arg1), SYMBOL_LENGTH(arg1));
+    buffer[SYMBOL_LENGTH(arg1)] = 0;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons (port);
+    inet_pton (AF_INET, buffer, &server_addr.sin_addr);
+
+    if (connect (sockfd, (struct sockaddr*) &server_addr, sizeof (server_addr)) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    return make_number (sockfd);
+}
+
+lispptr
+bi_socket_send (void)
+{
+    int    sockfd     = NUMBER_VALUE(arg1);
+    size_t bytes_sent = send (sockfd, SYMBOL_NAME(arg2), SYMBOL_LENGTH(arg2), 0);
+    if (bytes_sent < 0)
+        return nil;
+    return make_number (bytes_sent);
+}
+
+lispptr
+bi_socket_recv (void)
+{
+    int sockfd = NUMBER_VALUE(arg1);
+    ssize_t bytes_received = recv (sockfd, buffer, MAX_SYMBOL, 0);
+    if (bytes_received < 0)
+        return nil;
+    return make_symbol (buffer, bytes_received);
+}
+
+lispptr
+bi_socket_block (void)
+{
+    int sockfd = NUMBER_VALUE(arg1);
+    int flags = fcntl (sockfd, F_GETFL, 0);
+    if (NOT_NIL(arg2))
+        flags |= SOCK_NONBLOCK;
+    else
+        flags &= ~SOCK_NONBLOCK;
+    fcntl (sockfd, F_SETFL, flags);
+    return nil;
+}
+
+lispptr
+bi_socket_listen (void)
+{
+    int sockfd;
+    struct sockaddr_in server_addr;
+    int port = NUMBER_VALUE(arg1);
+
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        return nil;
+
+    memset (&server_addr, 0, sizeof (server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons (port);
+
+    if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    if (listen (sockfd, 5) < 0) {
+        close (sockfd);
+        return nil;
+    }
+
+    return make_number (sockfd);
+}
+
+lispptr
+bi_socket_accept (void)
+{
+    int listen_sockfd = NUMBER_VALUE(arg1);
+    struct sockaddr_in client_addr;
+    socklen_t client_len = sizeof (client_addr);
+
+    int client_sockfd = accept (listen_sockfd, (struct sockaddr *) &client_addr, &client_len);
+    if (client_sockfd < 0) {
+        if (errno != EAGAIN && errno != EWOULDBLOCK)
+            return nil;
+        return t;
+    }
+
+    return make_number (client_sockfd);
+}
+
+lispptr
+bi_socket_close (void)
+{
+    int fd = NUMBER_VALUE(arg1);
+    if (close (fd) < 0)
+        return nil;
+    return t;
+}
+
+#endif // #ifdef HAVE_SOCKETS
+
 const struct builtin builtins[] = {
     { "quote",      "'x",   bi_quote },
 
@@ -881,12 +1434,15 @@ const struct builtin builtins[] = {
     { "?",          NULL,   bi_if },
     { "and",        NULL,   bi_and },
     { "or",         NULL,   bi_or },
+
+    // BLOCK is hard-wired into "eval.c".
     { "return",     "x?s",  bi_return },
     { "go",         "'x",   bi_go },
 
     { "not",        "x",    bi_not },
     { "eq",         "xx",   bi_eq },
     { "atom",       "x",    bi_atom },
+
     { "cons?",      "x",    bi_consp },
     { "number?",    "x",    bi_numberp },
     { "symbol?",    "x",    bi_symbolp },
@@ -894,87 +1450,146 @@ const struct builtin builtins[] = {
     { "special?",   "x",    bi_specialp },
 
     { "symbol",       "?l",   bi_symbol },
-    { "=",            "'sx",  bi_setq },
+    { "set",          "sx",   bi_set },
+    { "=",            "'sx",  bi_set },
     { "symbol-value", "s",    bi_symbol_value },
-    { "symbol-name",  "s",    bi_symbol_name },
-    { "char-at",      "sn",   bi_char_at },
 
-    { "cons",       "xx",   bi_cons },
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
+    { "symbol-name",  "S",    bi_symbol_name },
+    { "slength",      "S",    bi_slength },
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
+    { "char-at",     "sn",  bi_char_at },
+    { "=-char-at", "+x",    bi_set_char_at },
+#endif
+
+    { ".",          "xx",   bi_cons },
     { "car",        "l",    bi_car },
     { "cdr",        "l",    bi_cdr },
-    { "setcar",     "cx",   bi_setcar },
-    { "setcdr",     "cx",   bi_setcdr },
+    { "=-car",      "cx",   bi_setcar },
+    { "=-cdr",      "cx",   bi_setcdr },
 
-    { "==",         "nn",   bi_number_equal },
-    { ">",          "nn",   bi_gt },
-    { "<",          "nn",   bi_lt },
-    { ">=",         "nn",   bi_gte },
-    { "<=",         "nn",   bi_lte },
+#ifndef NO_BUILTIN_NTHCDR
+    { "nthcdr",     "nx",   bi_nthcdr },
+#endif
+#ifndef NO_BUILTIN_ASSOC
+    { "assoc",      "xl",   bi_assoc },
+#endif // #ifndef NO_BUILTIN_ASSOC
+#ifndef NO_BUILTIN_APPEND
+    { "append",     NULL,   bi_append },
+#endif
+#ifndef NO_BUILTIN_NCONC
+    { "nconc",      NULL,   bi_nconc },
+#endif
+#ifndef NO_BUILTIN_SUBSEQ
+    { "subseq",     NULL,   bi_subseq },
+#endif
 
-    { "+",          "nn",   bi_add },
-    { "-",          "nn",   bi_sub },
-    { "*",          "nn",   bi_mul },
-    { "/",          "nn",   bi_div },
-    { "%",          "nn",   bi_mod },
-    { "++",         "n",    bi_inc },
-    { "--",         "n",    bi_dec },
+#ifndef NO_BUILTIN_GROUP_ARITH
+    { "==", "nn",   bi_number_equal },
+    { ">",  "nn",   bi_gt },
+    { "<",  "nn",   bi_lt },
+    { ">=", "nn",   bi_gte },
+    { "<=", "nn",   bi_lte },
 
+    { "+",  "nn",   bi_add },
+    { "-",  "nn",   bi_sub },
+    { "*",  "nn",   bi_mul },
+    { "/",  "nn",   bi_div },
+    { "%",  "nn",   bi_mod },
+    { "++", "n",    bi_inc },
+    { "--", "n",    bi_dec },
+#endif
+
+#ifndef NO_BUILTIN_GROUP_BITOPS
     { "bit-and",    "nn",   bi_bit_and },
     { "bit-or",     "nn",   bi_bit_or },
     { "bit-xor",    "nn",   bi_bit_xor },
     { "bit-neg",    "n",    bi_bit_neg },
     { "<<",         "nn",   bi_shift_left },
     { ">>",         "nn",   bi_shift_right },
+#endif
 
+#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
     { "rawptr",     "x",    bi_rawptr },
     { "peek",       "n",    bi_peek },
     { "poke",       "nn",   bi_poke },
 #ifndef TARGET_CPM
     { "sys",        "n",    bi_sys },
-#endif // #ifndef TARGET_CPM
+#endif
+#endif // #ifndef NO_BUILTIN_GROUP_RAW_ACCESS
 
+#ifndef NO_BUILTIN_READ
     { "read",       "",     read_expr },
+#endif
+#ifndef NO_BUILTIN_PRINT
     { "print",      "x",    bi_print },
+#endif
+
+#ifndef NO_BUILTIN_GROUP_FILE
+#ifndef NO_BUILTIN_LOAD
+    { "load",       "s",    bi_load },
+#endif
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },
-    { "out",        "x",    bi_out },
+#ifndef NO_BUILTIN_READ_LINE
+    { "read-line",  "",     bi_read_line },
+#endif
+    { "out",        "+x",   bi_out },
+    { "outlim",     "n",    bi_outlim },
     { "terpri",     "",     bi_terpri },
     { "fresh-line", "",     bi_fresh_line },
     { "setin",      "n",    bi_setin },
     { "setout",     "n",    bi_setout },
     { "putback",    "",     bi_putback },
     { "close",      "n",    bi_close },
-    { "load",       "s",    bi_load },
+#endif
 
-#ifndef NO_IMAGES
+#if !defined(NO_BUILTIN_GROUP_DIRECTORY) && defined(__CC65__)
+    { "opendir",    "",     bi_opendir },
+    { "readdir",    "n",    bi_readdir },
+    { "closedir",   "n",    bi_closedir },
+#endif
+
+#ifndef NO_BUILTIN_GROUP_IMAGE
     { "iload",      "s",    bi_iload },
     { "isave",      "s",    bi_isave },
 #endif
 
+#ifndef NO_BUILTIN_GROUP_DEFINITIONS
     { "fn",         "'s'+", bi_define },
     { "var",        "'sx",  bi_define },
     { "special",    "'s'+", bi_special },
+#endif
+
+#ifndef NO_BUILTIN_GC
     { "gc",         "",     bi_gc },
+#endif
+#ifndef NO_BUILTIN_FREE
+    { "free",       "",     bi_free },
+#endif
+
 #ifndef NAIVE
-    { "error",      "?x",   bi_error },
-    { "ignore",    "",      bi_ignore },
+    { "error",      "+x",   bi_error },
+    { "ignore",     "",     bi_ignore },
     { "stack",      "",     bi_stack },
 #endif
-    { "quit",       "x",    bi_quit },
     { "exit",       "?n",   bi_exit },
 
     { "butlast",    "l",    bi_butlast },
     { "copy-list",  "l",    bi_copy_list },
     { "last",       "l",    bi_last },
-    { "length",     "l",    bi_length },
+    { "length",     "x",    bi_length },
     { "member",     "xl",   bi_member },
     { "remove",     "xl",   bi_remove },
     { "@",          "fl",   bi_filter },
 
+#ifndef TARGET_BUILTIN_TIME
     { "time",       "",     bi_time },
+#endif
 
 #ifndef NDEBUG
     { "debug",      "",     bi_debug },
@@ -983,7 +1598,17 @@ const struct builtin builtins[] = {
     { "debugger",   "",     bi_debugger },
 #endif
 
-    { NULL, NULL }
+#ifdef HAVE_SOCKETS
+    { "%sconnect",      "sn",   bi_socket_connect },
+    { "socket-send",    "ns",   bi_socket_send },
+    { "socket-recv",    "n",    bi_socket_recv },
+    { "socket-block",   "ns",   bi_socket_block },
+    { "socket-listen",  "n",    bi_socket_listen },
+    { "socket-accept",  "n",    bi_socket_accept },
+    { "%sclose",        "n",    bi_socket_close },
+#endif
+
+    { NULL }
 };
 
 #ifdef __CC65__
@@ -994,4 +1619,7 @@ void
 init_builtins (void)
 {
     add_builtins (builtins);
+#ifndef NO_BUILTIN_GROUP_FILE
+    countdown = -1;
+#endif
 }

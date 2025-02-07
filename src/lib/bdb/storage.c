@@ -120,16 +120,19 @@ storage_insert_key (bdb *db, void *key, dbid_t recid)
         if (db->compare (db, n->data, key) < 0) {
             if (!(id = n->left)) {
                 n->left = recid;
-                storage_write_snode (db, oid, n);
-                break;
+                goto do_insert;
             }
         } else
             if (!(id = n->right)) {
                 n->right = recid;
-                storage_write_snode (db, oid, n);
-                break;
+                goto do_insert;
             }
         free (n);
+        continue;
+
+do_insert:
+        storage_write_snode (db, oid, n);
+        break;
     }
     free (n);
 }

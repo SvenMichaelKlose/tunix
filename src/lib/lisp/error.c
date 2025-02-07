@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h>
@@ -27,24 +28,29 @@ char * last_errstr;
 // Issue error, with code and message.
 // Causes call of ONERROR handler or debugger.
 void FASTCALL
-error (char code, char * msg)
+error (char code, char * msg, lispptr info)
 {
     last_errstr = msg;
     error_code = code;
+    failed_obj = info;
+    error_info = nil;
+#ifdef HOST_DEBUGGER_ON_ERROR
+    HOST_DEBUGGER();
+#endif
 }
 
 void FASTCALL
 error_argname (lispptr x)
 {
-    error_info = x;
-    error (ERROR_ARGNAME_TYPE, "Arg not a symbol");
+    error (ERROR_ARGNAME_TYPE, "Arg not a symbol", x);
+    error_info = make_symbol ("symbol", 6);
 }
 
 lispptr FASTCALL
 error_cons_expected (lispptr x)
 {
-    error_info = x;
-    error (ERROR_TYPE, "not a cons");
+    error (ERROR_TYPE, "not a cons", x);
+    error_info = make_symbol ("cons", 4);
     return nil;
 }
 
@@ -52,6 +58,7 @@ error_cons_expected (lispptr x)
 void FASTCALL
 internal_error (char * msg)
 {
+    (void) con_reset ();
     outs ("INTERNAL: ");
     outs (msg);
     terpri ();
@@ -69,6 +76,7 @@ internal_error (char * msg)
 void FASTCALL
 internal_error_ptr (void * p, char * msg)
 {
+    (void) con_reset ();
     outhw ((size_t) p);
     out (' ');
     internal_error (msg);
@@ -128,21 +136,21 @@ void FASTCALL
 err_type (char * type, lispptr x, char code)
 {
     char * p;
-    p = stpcpy (buffer, "got ");
+    p = stpcpy (buffer, "Got ");
     p = stpcpy (p, typename (x));
     p = stpcpy (p, ", not ");
     strcpy (p, type);
-    error_info = x;
-    error (code, buffer);
+    error (code, buffer, x);
+    error_info = make_symbol (type, strlen (type));
 }
+
+#ifndef NAIVE
 
 // Type check object and issue error if it fails.
 // TODO: Do not pass on error code via argument lists.
 void FASTCALL
 bi_tcheck (lispptr x, uchar type, char code)
 {
-    (void) x, (void) type;
-
     switch (type) {
     case 'x':
         break;
@@ -155,6 +163,11 @@ bi_tcheck (lispptr x, uchar type, char code)
     case 's':
         if (!SYMBOLP(x))
             err_type ("symbol", x, code);
+        break;
+
+    case 'S':
+        if (NOT_NIL(x) && !_NAMEDP(x))
+            err_type ("string", x, code);
         break;
 
     case 'c':
@@ -179,25 +192,20 @@ bi_tcheck (lispptr x, uchar type, char code)
     }
 }
 
+#endif // #ifndef NAIVE
+
+#ifndef NDEBUG
+
 // Issue error if GC stack and tag stack pointers deviate from arguments.
 void FASTCALL
 check_stacks (char * old_stack, char * old_tagstack)
 {
     if (old_stack != stack)
-        internal_error_ptr (stack, "stack");
+        internal_error_ptr (stack, "stack misaligned");
     if (old_tagstack != tagstack)
-        internal_error_ptr (tagstack, "tagstack");
+        internal_error_ptr (tagstack, "tagstack misaligned");
 }
 
-#ifndef NO_ONERROR
-
-void
-init_onerror ()
-{
-    onerror_sym = make_symbol ("onerror", 7);
-    expand_universe (onerror_sym);
-}
-
-#endif // #ifndef NO_ONERROR
+#endif // #ifndef NDEBUG
 
 #endif // #ifndef NAIVE

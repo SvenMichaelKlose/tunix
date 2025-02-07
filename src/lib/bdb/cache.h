@@ -1,9 +1,7 @@
 #ifndef __CACHE_H__
 #define __CACHE_H__
 
-// Cached record
-//
-// Node in all of:
+// Cached record, composing:
 //
 //  * LRU list (deque)
 //  * ID index btree
@@ -12,8 +10,7 @@
 // See also: https://en.wikipedia.org/wiki/Binary_search_tree
 typedef struct _cnode cnode;
 typedef struct _cnode {
-    // Offset on secondary storage.
-    dbid_t  id;
+    dbid_t  id;     // Offset on secondary storage.
     size_t  size;
 
     char    flags;

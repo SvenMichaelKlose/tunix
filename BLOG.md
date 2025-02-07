@@ -3,6 +3,1135 @@ TUNIX development blog
 
 Author: Sven Michael Klose <pixel@hugbox.org>
 
+# 2025-02-03 Double Tap
+
+Copied over code from the
+[tré lisp compiler](https://github.com/SvenMichaelKlose/tre/)
+while cleaning that up, making TUNIX Lisp tré's little sister,
+hard-coded to compile the simpler dialect to bytecode only.
+Will be using tré to boot it.
+
+# 2025-01-21 Limbo Lambda
+
+What?  Moved here from src/bin/lisp/doc/compiler.md for the protocol.
+
+---8<---8<---
+
+
+## Tagging Anonymous functions
+
+A keyword to type function expressions is required to have the compiler
+compile them too.  If it can't tell if an expression is a function,
+it'll have to be interpreted.  FUNCTION as that keyword is readable
+better than the traditional LAMBDA.  People already unnerved by other
+programming languages will not watch the LAMBDA with a down-home feeling
+at first.  As far as I remember, Arc lisp is using FN.  Nice.
+
+~~~lisp
+; Old:
+(@ '((x) (+ 1 x)) numbers)
+
+; New:
+(@ (fn (x) (+ 1 x)) numbers)
+~~~
+
+What this does not solve is closures (with lexical scope) for
+both interpreter and compiler:
+
+~~~lisp
+; Old:
+(@ $((x) (+ ,n x)) numbers)
+
+; New:
+(@ (fn (x) (+ n x)) numbers)
+~~~
+
+That new version is barely a problem to compile to but for the
+interpreter it needs to get converted to the old version.  That can
+be done with macro-expansion.  But we want to compile functions that
+are already running in the interpreter, so we need a way to tell the
+compiler, that an expression is a mix of $ and FN.  We go for $FN
+and have that un-expand in the compiler.  For the interpreter it's
+just an $.  Ooph.
+
+~~~lisp
+; Limbo lambda:
+(@ ($fn (x) (+ ,n x)) numbers)
+~~~
+
+To make it all even easier to remember, FN keywords for anonymous
+functions should be optional to make sure that traces of TUNIX Lisp
+will run on an ATtiny or something alike.  One more #ifdef won't hurt.
+
+There's one edge case with FN for anonymous functions: a rest argument
+only would be a symbol, and that tells the FN for anonymous functions
+apart from global function definitions.  Deinitiely an unwanted
+limitation.  We should probably stick with LAMBDA for the front end.
+
+~~~lisp
+; New:
+(@ (lambda (x) (+ n x)) numbers)
+~~~
+
+
+# 2024-12-15 Pre-processing
+
+When making an 8-bit environment, the build system should do generic
+macro- and dot-expansion.  Auto-loading is nice to watch but the overall
+performance is a pain in the backplate.  Also, not having even finished
+about writing how well autoloading works, problems with it showed up
+which need tracking down.
+By preprocessing files we can skip MACROEXPAND, DOTEXPAND, and PKGEXPAND,
+entirely for these until they change, speeding up the system dramatically
+(although the result will not impress many on constrained systems.)
+On constrained systems smaller code files with no formatting are more than
+welcome.  While we're at it, we could also optimize expressions, have symbols
+replaced by unnamed ones, and whatever idea comes next.  Actually these
+are the first compiler passes.  The problem is that AUTOLOAD won't kick
+in for missing macros.
+
+There's already the REQUIRE function that we can overlay with a macro that
+actually evaluates the REQUIRE.  With a dedicated macro set we have some
+kind of armor for the future surprises.  Let's have UMACROs then.
+
+~~~lisp
+(umacro pre require x
+  (*> require x))
+~~~
+
+
+# 2024-12-15
+
+Spent a day on [tré](https://github.com/SvenMichaelKlose/tre/) as it
+was plain broken.  Luckily, someone just sent the right ticket.
+It was bad.  No-one could boot it, because I had a "local" config.
+Surfed the wave and brought objects of both worlds, JavaScript and PHP,
+a bit closer.  The TUNIX Lisp object piece could be placed well there.
+Took about all Saturday – actually I started at around 7:00am and it's
+now 03:00am.  But I squeezed in a couple of naps.  Am very happy with
+the improvements.  tré has a half done rehaul of the JS/PHP object
+wrappers and I wanted function overloading too.  Hard to believe that
+in 2011 the compiler was able to compile itself to JS.  Apps had to
+be written.
+
+Ahyeah, right, I wanted to wrap up the assembler and plug the thing
+into VICE.
+
+
+# 2024-12-12
+
+I __love__ what the environment is looking like at the moment.
+Dot-expansion is now booting along as well.  Should regular code be
+required, it can be expanded to a file in advance, although at the
+cost of human readability: no indentation (unless a pretty PRINT gets
+around) and no comments (unless included as Lisp expressions by READ).
+
+~~~lisp
+(fn expand-file (pin pout . f)
+  (= f (or f. identity))
+  (with-in i (open pin 'r)
+    (with-out o (open pout 'w)
+      (while (not (eof))
+        (print (f (read)))))))
+
+(expand-file "with-dots.lsp" "no-dots.lsp" dotexpand)
+~~~
+
+It's terribly late (03:20am).  What's still giving me the creeps is
+the question of how to deal with anonymous functions (aka lambdas).
+A keyword to type function expressions is required to have the compiler
+compile them too.  If it can't tell if an expression is a function,
+it'll have to be interpreted.  FUNCTION as that keyword is readable
+better than the traditional LAMBDA.  People already unnerved by other
+programming language will not watch the LAMBDA with a down-home feeling
+the first time.  As far as I remember, Arc lisp is using FN.  Nice.
+
+~~~lisp
+; Old:
+(@ '((x) (+ 1 x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ 1 x))
+   numbers)
+~~~
+
+What this does not solve is closures (with lexical scope) for
+both interpreter and compiler:
+
+~~~lisp
+; Old:
+(@ $((x) (+ ,n x))
+   numbers)
+
+; New:
+(@ (fn (x) (+ n x))
+   numbers)
+~~~
+
+That new version is barely a problem to compile to but for the
+interpreter it needs to get converted to the old version.  That can
+be done with macro-expansion and takes away the pain of (un-)quoting
+quotes.  But we want to compile functions that are already running in
+the interpreter, so we need a way to tell the compiler, that an
+expression is a mix of $ and FN.  We go for $FN and have that un-expand
+in the compiler.  For the interpreter it's just an $.  Ooph.
+
+~~~lisp
+; Limbo lambda:
+(@ ($fn (x) (+ ,n x))
+   numbers)
+~~~
+
+To make it all even easier to remember, FN keywords for anonymous
+functions should be optional, to make sure that traces of TUNIX Lisp
+will run on an ATtiny or something alike.  One more #ifdef won't hurt.
+
+Missed that movie again.
+
+There's one edge case with FN for anonymous functions: a rest argument
+only would be a symbol, and that tells the FN for anonymous functions
+apart from global function definitions.  Deinitiely an unwanted
+limitation.  We should probably stick with LAMBDA for the front end.
+
+~~~lisp
+; Revised:
+(@ (lambda (x) (+ n x))
+   numbers)
+~~~
+
+There is something wrong with this picture.  The code is unnecessarily
+verbose with a feature that is used quite often.  The shorter FN was so
+much better.  How about stealing from Common LISP?
+
+~~~lisp
+(@ #'((x) (+ n x))
+   numbers)
+~~~
+
+How about getting rid of the "too many parens" topic entirely
+instead?  By adding brackets:
+
+~~~lisp
+(@ [x) (+ n x)]
+   numbers)
+
+; Default argument _
+(@ [+ n x]
+   numbers)
+~~~
+
+That's what was intended to surface with tré Lisp.  The unmatched
+closing paren tells if the symbols up to it are arguments.
+Otherwise what's between the brackets is an expression if it
+starts with a symbol.
+
+~~~lisp
+[) x]   ; -> (lambda () x)
+[x]     ; -> (lambda (_) (x))
+[x) x]  ; -> (lambda (x) (x))
+~~~
+
+And no-one has to see that LAMBDA first for a bit more code in READ.
+
+
+# 2024-12-11
+
+The autoloader is perhaps one of the most desireable features of
+TUNIX Lisp.  Being able to throw out currently unused functions and
+macros is priceless in constrained environments.  Following that
+strategy comes at the price of having to split up the code into
+smaller fragments as usual, to make wanted functions accessible via
+their filenames.  The default environment already comes with +140 files.
+We need something to resolve this issue without adding anything to the
+interpreter.  Here's what comes to mind: use directories.
+Genius, aye? m)  AUTOLOAD will have to adapt filename assembly to the
+target platform (SD2IEC, BiDB access).  Let's look at some code:
+
+~~~lisp
+; Before
+(fn edit file
+  (= *alv?* nil)
+  (clrscr)
+  (reset-ln)
+  (?
+    file
+      (progn
+        (= *filename* (car file))
+        (load-file))
+    (and (not *lines*)
+         *filename*)
+      (load-file))
+  (clrscr)
+  (edit-lines)
+  (clrscr)
+  (con-direct nil)
+  *filename*)
+
+; After
+(fn editor/edit file
+  (= *alv?* nil)
+  (clrscr)
+  (reset-ln)
+  (?
+    file
+      (progn
+        (= editor/*filename* (car file))
+        (editor/load-file))
+    (and (not editor/*lines*)
+         editor/*filename*)
+      (editor/load-file))
+  (clrscr)
+  (editor/edit-lines)
+  (clrscr)
+  (con-direct nil)
+  editor/*filename*)
+~~~
+
+You're not alone.  It's messing me up already as well.  The global
+expansion function \*EX\*, which handles MACROEXPAND and DOTEXPAND,
+could also handle symbol prefixing, based on a configuration, like:
+
+~~~asm
+; Define prefix for a set of symbols.
+(in-package 'editor '(edit *lines* *filename* edit-lines))
+
+; and to reset:
+(in-package nil)
+~~~
+
+Allow IN-PACKAGE to get overriden with an empty prefix:
+
+~~~asm
+(anonymize)     ; In current IN-PACKAGE scope.
+(/anonymize)    ; Top-level, default environment.
+~~~
+
+That's just another dozen lines of Lisp code to get comfy app
+development.  Like the assembler.  I'm happy.  Supporting CBMs will
+be its very own kind of fun.
+
+# 2024-12-09
+
+Am continuing work on the 6502 assembler.  An evolutionary step
+compared to [Bender](https://github.com/SvenMichaelKlose/bender)
+which no-one should be using.   Its use of STRUCTs alone is a punch
+in the nuts.  That's also a mistake I've been pulling through
+with when writing the tré Lisp compiler.  TUNIX Lisp's object system
+based on associative lists has to get there too to take the noise out
+of the code.
+
+The new assembler will be a juwel added to TUNIX Lisp.  It'll
+be too slow to do anything useful with on 6502 targets (and I'd like
+to be proven wrong right there), but I want to compile VIC-20 projects
+outside TUNIX which require lots of complicated, generated speed code.
+
+The non-working VIC-20 version is also a pressing issue.  I cannot
+post updates on Denial with no working VIC version.  With a running
+version there'd even be enough heap to do something useful.  Honestly,
+I've been sitting at the desk a little bit too long.
+
+# 2024-11-16
+
+The first compiler passes are running on unixoids and the C64.
+The plus/4 and VIC-20 seem to have memory layout issues, whereas
+the C128 is running out of heap.
+
+# 2024-11-06
+
+Was hacking something else for a change.  Am building a READ-based 6502
+assembly language parser, so assembly can be integrated better.
+
+~~~lisp
+(as65 *asm-buffer*
+  $((    ldx #>screen)
+    (    lda #0)
+    (    tay)
+    (    sta p)
+    (l2: stx (++ p))
+    (l:  sta (p),y)
+    (    iny)
+    (    bne l)
+    (    inx)
+    (    cmp #(high (+ w screen)))
+    (    bne l2)
+    (    rts)))
+
+(fn clear-screen ()
+  (sys *asm-buffer*))
+~~~
+
+A built-in MALLOC and FREE it is, giving MKBUILTIN purpose. :)
+Let's also see if the BiDB can be used for labels.
+
+# 2024-10-24 - Fencing?
+
+An object- and a filesystem.  So what?  At least I was barely coding.
+
+# 2024-10-23 - Thoughts on a BielefeldDB-based filesystem: BiFS
+
+The BielefeldDB (BiBD? BDB? Let's stick with BiDB) is great for
+temporary databases that are discarded on program exit.  That's all due
+to the memory contraints of small machines.  BiDB was supposed to fuel a
+natively running version of `Small-C`, which was discared as my fingers
+refused to make anything else but Lisp out of its C source.  It's worth
+being carried further.
+
+TUNIX is lacking its own filesystem for use with classic disks and
+extended memory, be it RAM or Flash ROM.  It has to be robust and should
+not drag down the performance of mechanical devices with increasing
+fragmentation.  It must also survive system crashes, leaving the contens
+of a filesystem in a valid state.
+
+## Required BiDB features
+
+With the idea that the BiFS nodes contain a file's name as the key,
+metadata, and the payload, the lower BiDB layer must support:
+
+* Multiple indexes in the same database to allow a database of free
+  storage areas alongside, so nodes can be freed.  On overdue feature to
+  add.  It'll probably take a bunch of C macros to keep the simpler
+  version optional.
+* Subtrees with their own indexes to implement directories.  A flag
+  tells bdb\_lookup() to not traverse the children (unless being invited
+  to).
+* Truncation of node data.
+
+## Required BiFS features
+
+The filesystem has to bring on the ability to chain up blocks to a
+single file and operantions for enlarging or truncating files.
+
+The filesystem itself caches node metadata in directory files, and free
+block in a free block file.  After a crash heir contents are re-built by
+traversing the file tree.  To get around longer waits induced by the
+intial free block scan after a crash, a small fallback area is reserved
+to keep things going until the scan has completed.  Directory files can
+be re-created on demand, or in the background if multi-tasking is
+supported.  They just contain lists of records and are modified like any
+other file.
+
+## Disk allocation strategy
+
+It also needs an allocation strategy, so that if two files are written
+at the same time, their contents don't end up interleaved along with
+considerable amounts of metadata (and time lost for extra header
+updates) to chain up the fragments.  The plan: file blocks of median
+size are pre-allocated to keep writes to other files out of the way and
+keep the file contiguous.  They are truncated on file close.  On the
+other hand it would be nice if large files wouldn't occupy a set of
+neighboured tracks as that's head movements guaranteed to be added to
+the overall performance.  So if a file has filled the pre-allocated
+space, the next pre-allocation taking place is not following the filled
+block, but at least two tracks away.  When there are no free blocks of
+pre-allocation size, the largest free block is used, no matter where.
+
+## Copy-on-update (COD) and why it's needed anyhow
+
+Another thing that might make you wondering is copy-on-update, the idea
+to never modify existing data but writing new data to a fresh location
+to avoid corruption during a crash.  Including node headers this
+included updating all node up to the root node for changes to become
+part of the filesystem.  This assures that the current state of the
+filesystem is always valid after a crash.  Some may admire this feature
+being available very.  There is a good reason to implement COD: it's
+required to serve Flash ROMs.  Luckily these don't require directory
+files to cache node traversals, nor would a list of free block make much
+sense.  The latest root node is looked up at mount time.  When a Flash
+ROM is full, the filesystem needs to be defragmented with only a single
+write per bank, supporting the longevity of the ROM.  Consequently
+there's also a history of file versions available.  COD should allow new
+nodes to share file data of an old node, which adds a bit of complexity.
+COD could also be explicitly enabled or disable per branch or file, e.g.
+for faster temporary files.  I seriously have no idea why everyone is
+typing it COD instead of COU.
+
+## Ultimate robustness
+
+Finally, by tagging node headers, files can still be recovered if parent
+nodes have been destroyed.
+
+## Conclusion
+
+The current version of the BiDB with no record deletion has around 490
+lines of code (LOC).  It'll probably double up to be the filesystem as
+proposed here.  But a filesystem cannot be part of TUNIX Lisp on small
+machines unless the TUNIX kernel is running it as a driver in its own
+address space to also hold the caches.  The BiFS could offer an
+unprecedented robustness and performance advantage dearly missed and
+never seen on small machines before – and do we hate those crashes, or
+what?
+
+# 2024-10-22
+
+I've laid out a duck-typed object system with single inheritance,
+based on alists.  \*PROPS\* holds the default values for each
+class defined with CLASS.
+
+~~~lisp
+; (class classname . name-default-pairs)
+; (No class defined before.)
+(class node
+  (parent    nil)
+  (children  nil))
+
+; *PROPS* now contains:
+((node . ((parent   . nil)
+          (children . nil))))
+~~~
+
+Methods are defined using METHOD.  It pushes argument THIS to the
+front of the argument list before defining the function, and adds
+it to the properties of the class it belongs to.
+
+~~~lisp
+; (member classnane methodname arguments . body)
+(member node call-children (f)
+  (dolist (i this.children)
+    ((slot-value i f))))
+
+; *PROPS* now has:
+((node . ((call-children . ((this f)
+                             (dolist (i this.children)
+                               ((slot-value i f)))))
+          (parent        . nil)
+          (children      . nil))))
+~~~
+
+SLOT-VALUE as the function element in a call will make sure that
+the evaluator adds the object to the front of the argument list
+before doing the call.
+
+~~~lisp
+; (slot-value object slot-name)
+((slot-value i f))
+
+becomes
+
+((slot-value i f) i) ; <- Object added as argument "this".
+~~~
+
+An object is created with NEW.  It copies the properties of the
+wanted class and overwrites them with new values specified as pairs
+in the rest of its arguments.  If a slot was not defined with CLASS,
+it is added quietly.
+
+~~~lisp
+(new node extra-info "Debug here!")
+
+; Returned object:
+((extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+
+; Call "obj"'s method to call each children's method RENDER.
+(obj.call-children 'render)
+~~~
+
+Objects can be used as prototypes to create new classes.
+
+~~~lisp
+; (make-class classnane object)
+(make-class lm-max-w (new lm w 'max))
+~~~
+
+The need for calling a method of the same name as the currently evaluated
+method will be inevitable for object-oriented programming.  One solution
+would be to prefix methods with their classname to be able to tell them
+apart.  Given the memory constraints of small machines that's a no-go.
+But since all properties including those of the parent are in the object
+in the order of inheritance, it would suffice to start looking for a method
+in inherited properties of the wanted class.  That's where the %TYPE slot
+comes into play.  It's at the front of each inherited class' set of properties.
+Now looking up a method by type would only require the use of MEMBER-IF to
+find the right set of properties.
+
+~~~lisp
+; Example representation of a RECT object derived from NODE.
+; The %TYPE slot allows to find the CALLBACK method of the
+; NODE.
+((x        . 0)
+ (y        . 0)
+ (w        . 0)
+ (h        . 0)
+ (callback . nil)
+ (%type         . node)
+ (callback      . nil)
+ (extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+~~~
+
+Constructors can be defined as slot CONSTRUCTOR.  When calling
+NEW, CONSTRUCTOR contains the arguments to the constructor that is
+called by NEW.
+
+That's all of it so far – the implementation amounts to a whopping
+19 lines of code.
+
+So what are we gonna do with these new powers?  How about defining
+user interfaces as LML documents and having a React-like core hold
+and render them to text or graphics, while maintaining state and
+managing layout?  Most of the code is already in src/bin/desktop,
+written in C, as an example.
+
+# 2024-10-22
+
+DOTEXPAND works after fixing SYMBOL, which was supposed to re-use
+existing symbols but didn't.  It hasn't been enabled by default as
+things are slow enough already without compiler magic.  At the moment
+TUNIX Lisp can do a bit more than 330 calls to built-ins per second on
+a C64.
+
+DOTEXPAND brings an abbreviation for SLOT-VALUE to access object slots.
+I'll be using associative lists to implement single inheritance and
+tweak eval0() to add a hidden object argument to method calls via
+SLOT-VALUE, so "(obj.fun)" becomes "(obj.fun obj)".  The question is
+now how to get the most power out of a most simple object system.
+Taking a look at overloading functions might spark some ideas.
+
+# 2024-10-21
+
+I have created a rather tight bytecode interpreter in 6502 assembly.
+Each function has a stack frame and on each call it is decided if the
+return value is pushed onto the stack.  Other than calls of built-in
+(fastest) or a bytecode function again, super-fast internal codes get
+and set stack places, jump within the function or return from it.
+Objects and address pointers of built-ins are stored in a table at the
+start of the function.  The GC can tell between them easily.  It is told
+by the bytecode if a called function is a built-in and if it wants to
+push the value in AX on the stack.  Everything else is done by built-in
+functions.  If an unknown function needs to be called, an expression has
+to be constructed for built-in EVAL to do the job.  All in all the
+interpreter should be able to handle around 15k codes per second on a
+VIC-20/C64/C128, the called functions not included.
+
+Unfortunately that all doesn't help with the time spent by the garbage
+collector.  It'll be interesting to watch in action.
+Debugging will require type checks to built-ins wedged in.
+
+# 2024-10-20
+
+Should take a little break to get back on track.  I'm low on caffeine.
+
+As the goal is to have something nice to code I want dot-notation in to
+reduce some noise from the code picture.  Let's take a look at an
+expression expander for the compiler with no dot-notation:
+
+~~~lisp
+(fn exex-move-arg (x)
+  (? (cons? x)
+     (!= (symbol)
+       (cons ! (list (list '= ! x))))
+     (cons x nil)))
+
+(fn exexpand (x)
+  (?
+    (atom x)
+      (list x)
+
+    (eq '= (car x))
+      (? (atom (caddr x))
+         (list x)
+         (!= (@ exex-move-arg (cdr (caddr x)))
+           (append (mapcan exexpand (mapcan cdr !))
+                   (list (list '= (cadr x) (cons (car (caddr x)) (@ car !)))))))
+
+    (!= (@ exex-move-arg (cdr x))
+      (append (mapcan exexpand (mapcan cdr !))
+              (list (cons (car x) (@ car !)))))))
+~~~
+
+And now with dot-notation:
+
+~~~lisp
+(fn expex-move-arg (x)
+  (? (cons? x)
+     (!= (symbol)
+       (. ! (list (list '= ! x))))
+     (. x nil)))
+
+(fn exexpand (x)
+  (?
+    (atom x)
+      (list x)
+
+    (eq '= x.)
+      (? (atom ..x.)
+         (list x)
+         (!= (@ exex-move-arg (cdr ..x.))
+           (append (mapcan exexpand (mapcan cdr !))
+                   (list (list '= .x. (. (car ..x.) (@ car !)))))))
+
+    (!= (@ exex-move-arg .x)
+      (append (mapcan exexpand (mapcan cdr !)
+              (list (. x. (@ car !)))))))
+~~~
+
+That's right.  COBOL-style indexing.
+
+# 2024-10-18
+
+Looking at the generated 6502 is giving each day a touch of unhappiness.
+Also, that pile of C code, messed up with preprocessor directives and macros,
+when we know that Lisp is "so powerful".  There are also essential optimizations
+that cannot possibly be implemented in C (unless there's a stay in the nut house
+on the todo list).  Storing a pointer index separately, for example, and word
+aligning the object stack, makes pushes and pops much faster.  Only works wit
+a word-aligned stack:
+
+~~~asm
+
+spl: .res 1
+sp:  .res 1 ; (0)
+sph: .res 1
+
+; Push AX onto object stack.
+pushxa:
+    ldy spl         ; 3
+    bne l           ; 2/3
+    dec sph         ; 5
+l:  dey             ; 2
+    sta (sp),y      ; 6
+    txa             ; 2
+    dey             ; 2
+    sta (sp),y      ; 6
+    sty spl         ; 3
+                    ; 26/32
+
+; Pop from object stack into AX.
+popxa:
+    ldy spl         ; 3
+    lda (sp),y      ; 6
+    tax             ; 2
+    iny             ; 2
+    lda (sp),y      ; 6
+    iny             ; 2
+    bne l           ; 2/3
+    inc sph         ; 5
+l:  sty spl         ; 3
+                    ; 26/32
+~~~
+
+Indirect access requires the low byte to be in place though:
+
+~~~asm
+; Load stack place `i` into AX.
+ldspi:
+    lda spl
+    sta sp
+    ldy #(++ i)
+    lda (sp),y
+    tax
+    dey
+    lda (sp),y
+    ldy #0
+    sty sp
+~~~
+
+It's still more compact than doing the addition manually and saves a word
+on the zeropage.  Furthermore automatic optimization will come into play.
+I've sketched a set of
+[code generation macros](src/bin/lisp/growroom/igen-6502.lsp).  This time
+overloaded, so optimizations and native types can be supported.
+
+That's just dreaming about.  More useful would be having an assembler that
+merges with Lisp expressions as described.  Peeking chars and READ, and a
+bit of line parsing should do the trick.  But sure as hell there won't be
+enough heap to load all labels of an application to make an executable.
+That's where the BiDB comes in.
+
+# 2024-10-17
+
+While bullshiting about the overall project to kill time it occured to
+me that perhaps the conses could be allocated from the opposite side
+of the heap to spare the type byte of each.  Lets figure out what that
+would imply.
+
+* Type checks would require an additional pointer check to determine
+  if it's a cons (with no type byte to access) or not.
+* With 16 bits address space high byte checks would do.
+* It only works with the first or last heap.
+
+# 2024-10-14
+
+The CBM part of the "simple I/O" library is doing my head in.  Test
+"test-file.lsp" won't pass.  The interpreter is almost twice as fast
+than it was yesterday though.  I'll use the socket support for testing
+in headleass instances of VICE, so test can be run automatically, also
+in "Github workflows".
+
+# 2024-10-12
+
+Gave the evluator a long desired clean-up.  It's a bit faster and uses
+less object stack.
+
+It's getting messed up on the Commodore plus/4 now.  The VIC-20's heap
+has gotten to small, and the C16 version doesn't work anyway.
+Everything's fine on Unix though.  Still need to find some issue with
+libsimpleio-cbm.  It's unnerving.
+
+That brought me to the wants of a source-level debugger for VICE.  It
+provides a binary monitor via Unix networking.  Now TUNIX Lisp has
+most basic networking socket support.
+
+# 2024-10-11
+
+I'm in desperate need for more heap to keep things convenient on CBMs.
+Fun facts on the VIC:
+
+* The maximum code window we can sacrifice is 8K.
+* We'd like to just sacrifice 3K on Ultimems.
+* cc65 library code is 5.5K
+* simpleio is ~2.5K (should be in a kernel driver)
+* Evaluator is a bit more than 4K.
+* Built-ins are about 8K.
+* Rest of interpreter is about 8K.
+
+I wouldn't know how to split up eval0() into 4K chunks.
+
+# 2024-10-08
+
+I've added a buffer to the stacks so they won't trash the rest of the
+program on overflows which are only checks once per EVAL.  I'm bad at
+debugging this shit.
+
+# 2024-10-07
+
+I've been banging together an 6502-CPU opcode assembler to get away from
+homoeostasis while trying to fix I/O.  eof() has to be delayed with the
+CBM KERNAL.  The idea to was to write a bytecompiler for fox ache!
+
+Halfway through writing a char number tree based tokenizer I realized
+that an assembler wouldn't need a tokenizer at all.  Let's take this
+real-world example, showing how READ would change only few lines:
+
+~~~asm
+cons?ax:
+    sta p
+    stx ,(++ p)     ; stx (unquote (++ p))
+cons?p:
+    lda ,(++ p)     ; lda (unquote (++ p))
+    beq no
+    ldy #0
+    lda (p),y       ; lda (p) (unquote y)
+    and #TYPE_CONS
+    beq no
+    lda #,(lo t)    ; lda # (unquote (lo t))
+    ldx #,(hi t)    ; ldx # (unquote (hi t))
+    rts
+no: tax
+    rts
+~~~
+
+UNQUOTES that don't denote an indexed address mode are evaluated while
+parsing the read expression.  The may span multiple lines.  Character
+'#' is cut out of the heads of symbols.  Single quotes however need to
+be checked for before something is READ or quotes at line ends cause
+trouble wanting anything following as its argument.
+
+~~~
+    and #TYPE_CONS  ; and # TYPE_CONS
+    lda #'A'        ; lda # 65
+~~~
+
+Symbols in expressions are replaced by label values if available.
+During the first pass ONERROR helps ignoring missing forward references.
+Then it's ignoring errors again until all instruction sizes (and branch
+ranges) are known.  The last pass includes generating the opcodes and
+operand bytes.
+
+# 2024-10-04
+
+RETURN is ignored in argument lists but I'm at it, hoping that this will
+finish AUTOLOAD which works nicely otherwise.  Especially noteworthy is
+its ability to expand missing macros in already running code.  Anyway:
+The RETURN issue needs to be fixed to satisfaction.  With the everything
+loading on demand properly and the debugger REPL stepping properly, a
+v1.0.0 release is closing in.  Without a bytecode compiler, because
+there still is a tutorial, manual and references to complete.
+
+# 2024-09-27
+
+I hate taking breaks from challenging and creative tasks that require
+grand pictures.  So let me reboot: TUNIX Lisp is about educational
+purpose in the first place.  What's there is not that playful toolbox it
+has to be, and I'm equally tired and motivated, which is calling for a
+break again.
+
+After several attempts I'm doing the new kids' intro to Lisp on the
+project's Github wiki.  Maybe it'll find its way into the "Garbage
+Collected Manual".  Renaming classic function names to something that's
+tangible, e.g. CARLIST to FIRSTS and CDRLIST to RESTS.  FIRST instead of
+CAR and REST instead of CDR is also nice but combinations like CAAR and
+CADR hit a spot either.  Will go suspend to recharge the batteries
+faster.
+
+...zzZZzz...
+
+# 2024-09-25
+
+TUNIX Lisp compiles for CP/M but I didn't get through the trouble of
+setting up an emulator.  The generated Z80 code doesn't look any better
+than the 6502 assembly.  Unless TUNIX Lisp is written in itself and
+compiles itself that's as far as it gets.  Perhaps Oscar64 or llvm-mos
+can do better but I have a bad feeling about code size.
+
+# 2024-09-24
+
+Actually I (tried) to relax for a week, letting things dangle, and
+dreaming along.  That was about what the doctor ordered, says the body.
+
+Am hacking along with compiling sets of functions, loading and running
+only one compiler pass at a file, and using temporary files.  The CBM
+versions unnerve with unexpected behaviour.  Looking ahead for the
+progress.
+
+# 2024-09-23
+
+Using NCONC instead of APPEND in MAPCAN saved the day.
+
+# 2024-09-16
+
+The first version of the compiler is nearly complete but
+untested.  Explains why FOLD-BLOCK misses some blocks.
+Nothing exciting.  What's bothering me though is there seems
+to be more heap required already than expected.  But when I
+remember correctly I didn't expect more than one pass to fit
+in from the start with the VIC-20 in mind.  Admittedly TUNIX
+Lisp is undertested and not profiled at all.  A benchmark
+should help adjust expectations and find design flaws – or
+just things done wrong (also known as "bugs") or missing.  I
+have a strong feeling that too many unused objects remain on
+the heap.  Might be just the global pointer 'value' which
+holds the result of the last evaluated expression.  Will
+check when some benchmarking is available.
+
+Bytecode functions will be symbols that have the bytecode in
+their name plus an extra type flag.  RAWPTR has to allocate
+the returned number first and assign the pointer value
+afterwards because a GC run could make the value invalid due
+to object relocation.  A new built-in SET-CHAR-AT is also
+required.  It shouldn't trigger the GC, so that won't cause
+problems.
+
+And of course there has to be a bytecode interpreter.  Also
+not rocket science and perhaps a thing that could be done in
+assembly alongside a C version.  Take away the tests and the
+compiler is less than 200 lines of code – the program will
+have to stop on errors.  Weaving in the debugger is a bit of
+a thrill thinking about.  Postponed for the sake of inner
+peace.
+
+Speaking of: I had an AI coding session today which went
+execptionally well.  One reason for that is that GPT's can
+capture the simple structure of Python code to satisfaction;
+plugging together libraries to build AI with AI is
+next-level inspiring.  Perfect for academics who cannot
+code.  Now the use of the Lisp shell mode I've been carrying
+around since 2007 is becoming clearer.
+
+Am coming to terms with a shitload of projects that got
+stalled recently and I'm nearly where I wanted to return to:
+live and work in peace, with meaningm and to be a bit on top
+of all things life.  That cold I caught can't phase me.  I
+just know that I'm having one.
+
+# 2024-09-15
+
+I wasn't in the mood to code over the weekend.  Turned to
+entertaining books instead, met complete foureigners and
+wrote some TUNIX Lisp compiler documentation to clear the
+path.  For the sake of educational purpose (including my
+own) I'm trying to boot and explain the compiler in small,
+and partially unusual, steps, like compiling the control
+flow and still interpreting function calls.  I have a
+warm fuzzy feeling about this version of the compiler,
+although I have no idea what purspose other than putting
+more contrast to separation of concerns to benefit learners
+it might serve.  A warm fuzzy feeling is just enough for
+me to get on.  It indicates spot-on intuition that might
+inspire others - big league compiler design is creeping
+in in an appetizing and digestible fasion if I'm lucky.
+For now I'll save up the energy to explain this more in
+detail in the docs.
+
+# 2024-09-12
+
+Even a most-simple compiler will work wonders on 6502-based
+systems, where the editor is unusable and loading it is
+taking over six minutes.  It would be of help if just the
+control flow would be compiled, so all code would be in a
+single array to jump around in.
+
+So there's a new plan:
+
+[x] Make \*MACROS\* an associative list.
+[x] Expand ?, AND, OR.
+[@] Expand BLOCK, RETURN, GO.
+[ ] Inline function expressions.
+[ ] Bytecode assembler.
+
+Changing the macro list and starting the compiler macro
+expansion was easy.  BLOCK could use a nap before.
+Inlinined expressions will call new %PUSHARGS and %POPARGS
+to save and restore argument symbol values.  The bytecode
+assembler will just have to translate labels into offsets
+and create a list containing the bytecodes.
+
+Enough trouble for the weekend.  The bytecode interpreter
+can be embedded into eval0() – but native code could also
+be generated (probably taking too much memory).
+
+# 2024-09-10
+
+AUTOLOAD is fairly complete, but the editor is far too
+slow, the debugger has a bug, and images aren't working
+to satisfaction either.  If only the interpreter would be
+a bit faster.  It looks like there's heavy processing when
+going up and down.  Should be easy to track down.
+
+# 2024-09-06
+
+Implemented AUTOLOAD today within a bekloppie.  Does not
+work with functions passed by arguments but goes well with
+regular function and macro calls.  Now for the other way
+around: throwing out procedure bodies when memory is low.
+
+Am very happy with this release, v0.0.16.
+
+# 2024-09-04
+
+The editor can load files, re-using EDIT-LINE for the
+filename prompt.  Feels like closing in on a real release
+if only the manual wouldn't be 70 pages of just notes.
+
+Since everything is rather slow, the editor will have to
+to be saved as an image for regular use.  It's also time to
+come up with an autoloader for missing procedures, and a
+sensible way to remove unused code.  Probably by resetting
+symbols in \*UNVIERSE\*, so they point to themselves.
+Also, unnaming symbols and common subtree elemination (CSE)
+will make lots of free heap.  But the latter has to be done
+with a modern machine unless... some hash stack helps out
+with finding subtrees.  There's also that list compression
+that might be effective.  Enough promising things to dream
+about.  For real.  Good night!
+
+# 2024-09-02
+
+I gave the terminal code a little rework.  The Unix part is
+more or less untested.  The editor also has to run on Unix
+terminals, so it can run on microcontrollers.  I also
+implented APPEND as an optional built-in funciton, expecting
+it to give MACROEXPAND a little boost.  And happy me, I also
+removed some unnecessary use of the object stack.  Every
+piece of code is dragging 8-bit targets down noticably.  I
+ended up breaking the test runs and that is frustrating at
+the end of the day.
+
+I think my mind got numbed by some plant-based gnat
+repellant, because since I'm not using it any more I'm not
+waking up, feeling like I've been on a drinking binge, and I
+can think clearer now.  Just for the record: I only do
+coffee and tobacco and sugary things tend to rot away in
+reach.  I'm an athletic disappointment to the doctors when
+it comes to earning money, doing 50 miles on a bike without
+getting exhausted.  That's what programming is for.
+
+Now I'll go dream about a fantastic Lisp IDE for our beloved
+machines.
+
+# 2024-09-01
+
+Two days passed and yesterday I woke up brain-dead.  One
+more minute of programming and I would have qualified for
+and official care level and free drool bib.  Great
+opportunity to head out and inspect other things entirely
+and to visit friends - mine aren't into the details of
+computing and that's perfect for me.  I barely talk about
+what I'm doing with them and if I'm away from the machine,
+that's usually because I'm fed up.
+
+Implementing NTHCDR and SUBSEQ as C functions built into the
+interpreter, as well as adding OUTLIM, improved performance
+as expected.  Similarly expected, SUBSEQ allocates too much,
+so garbage collection is triggered too often.  Unfortunately
+native CBM console output isn't known for its snappiness
+either.  When outputting a list of chars, they'll have to be
+written to The Buffer first or the overhead of calling out()
+is weighing in too heavily.  But whole lines shouldn't be
+updated for each keypress in the first place, nor should the
+whole screen be for up and down movements, unless it needs
+to be scrolled.  cc65's conio library doesn't support
+scrolling any way.
+
+Another thing on the list is replacing SUBSEQ by the new
+function CUT-AT which splits a list at a position and
+returns the cut-off tail.  That actually removes two SUBSEQs
+for inserting chars or lines.
+
+# 2024-08-29
+
+Oh dude, is the editor slow, or what?  The need for more
+built-in functions is pressing big time.  Instead of SUBSEQ,
+a C version of NTHCDR and an OUT with a length limit should
+work the miracle.  SUBSEQ makes copies and we don't want the
+GC to kick in regularly, especially not for displaying text
+alone.
+
+~~~lisp
+(outlim line-width)
+(out (nthcdr xstart line))
+~~~
+
+OUTLIM just has to set a countdown for OUT (which defaults
+to -1 if there's no limit).  Implementing NTHCDR as a built-
+in is definitely a no-brainer as well.
+Tomorrow.  It's been an action-loaded day and I'm desperate
+for a complete chunk of healthy sleep, including sweet
+dreams.
+
+# 2024-08-29
+
+Release v0.0.12.  Starting the first app, the integrated
+text editor in this case, always comes with early
+disappointments and writing more tests instead.  But it's
+taking shape.  I don't care that it is slow.  The reason for
+that is that the current line is a list of characters and
+functions like NTHCDR and SUBSEQ are implemented in Lisp
+which can run around 300 expressions per second.
+Implementing those, and perhaps a couple more,  in C could
+take the edge off well enough to make the editor usable.
+Actually everything that has to walk a line should be done
+in C before a bytecode compiler is around to help out.
+
+I dearly missed to ability to walk up and down the stack,
+or to just list the call stack.  The tag stack might be
+helping out implementing such thing rapidly.  No stress.
+I planned to grow old in peace.
+
+# 2024-08-24
+
+Release v0.0.8.  For Sunday entertainment I'll try to solder
+one of those SD2IEC drives laying around.  Since the VIC has
+an Ultimem expansion that's just the right time to get
+'src/sys/boot' to do more than just print a menu and tell
+which of the eight boot banks contain any data.  As it's
+written in C.  Now I'm asking myself why not use Lisp for
+that.  Stripping down most features probably isn't enough.
+But then again exomizer to the rescue...
+
+Isn't it amazing how I manage to stretch doing things that
+could be done since yesterday by being a bit lazier?
+OK, so let's be serious.
+
 # 2024-08-24
 
 cc65 didn't have no bug as far as I can see and that's a

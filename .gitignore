@@ -19,8 +19,8 @@ src/bin/desktop/charset-4x8.bin
 src/bin/desktop/desktop-file-window.bin
 src/bin/desktop/desktop-lib.bin
 src/bin/desktop/desktop.bin
-src/bin/lisp/autoload.lisp
 src/bin/lisp/doc/manual.pdf
+src/bin/lisp/doc/compiler.pdf
 src/bin/lisp/git-version.lisp
 src/bin/lisp/lisp
 src/bin/lisp/vi
@@ -36,6 +36,7 @@ src/sbin/ultitest/ultitest
 src/sys/boot/flashboot.bin
 src/sys/kernel/init
 src/sys/kernel/tunix
+empty-ultimem.img
 tunix.img
 tunix.trimmed.img
 tunix/

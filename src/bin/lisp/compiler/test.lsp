@@ -1,0 +1,51 @@
+(= *alv?* t) ; Verbose AUTOLOAD.
+
+(message "Testing CMACROEXPAND...")
+(reset!)
+(load 'compiler/cmacroexpand.lsp)
+(load 'compiler/package.lsp)
+(print (cmacroexpand '(and a b c)))
+(print (cmacroexpand '(or a b c)))
+(print (cmacroexpand '(? a b c)))
+
+(message "Testing ARGEXPAND...")
+(reset!)
+(load 'compiler/package.lsp)
+(and (argexpand nil nil)
+     (error))
+(or (equal (argexpand '(a b c)
+                      '(1 2 3))
+           '((a 1) (b 2) (c 3)))
+    (error))
+(or (equal (argexpand '(a b . c)
+                      '(1 2 3))
+           '((a 1) (b 2) (c (3))))
+    (error))
+(or (equal (argexpand '(a b . c)
+                      '(1 2 3 4))
+           '((a 1) (b 2) (c (3 4))))
+    (error))
+
+(message "Testing FOLD-BLOCK...")
+(reset!)
+(load 'compiler/package.lsp)
+(or (cequal (fold-block nil)
+            '(nil))
+    (error))
+(or (cequal (fold-block '(%block a b))
+            '(a b))
+    (error))
+(or (cequal (fold-block '(%block
+                           a
+                           (%block
+                             b
+                             c)))
+            '(a b c))
+    (error))
+
+(message "Testing EXEXPAND...")
+(reset!)
+(load 'compiler/package.lsp)
+(print (exexpand (print '(a b c d))))
+(print (exexpand (print '(a (b c d)))))
+(print (exexpand (print '(a (b (c d))))))

@@ -1,9 +1,0 @@
-Debugger
-[ ] Stepping over NIL returns from function?
-[ ] IGNORE entered by user does not leave the debugger?
-
-Commodore PET
-[ ] Program start breaks with syntax error.
-
-Old bugs to check
-[ ] 'echo "(exit 0" | ./lisp' causes SIGSEGV.

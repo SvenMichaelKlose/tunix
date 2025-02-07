@@ -1,12 +1,19 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
-#endif
+
+#ifndef DEVELOPMENT
+    #define NOT_SLOW
+    #pragma inline-stdfuncs (on)
+    #pragma codesize (300)
+#endif // #ifndef DEVELOPMENT
+#endif // #ifdef __CC65__
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h>
@@ -15,12 +22,12 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (pop)
 #endif
 
@@ -33,18 +40,18 @@ lispptr list_last;  // Last cons of list.
 int FASTCALL
 length (lispptr x)
 {
-    lisp_len = 0;
+    int l = 0;
     while (NOT_NIL(x)) {
-        lisp_len++;
+        l++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
         if (NOT_NIL(x) && ATOM(x)) {
-            lisp_len++;
+            l++;
             break;
         }
     }
-    return lisp_len;
+    return l;
 }
 
 lispptr needle;
@@ -52,10 +59,12 @@ lispptr needle;
 lispptr FASTCALL
 copy_list (lispptr x, char mode, lispptr needle)
 {
-    if (ATOM(x))
-        return x;
+    tmp2 = x;
 
-    tmp = CDR(x);
+    if (ATOM(tmp2))
+        return tmp2;
+
+    tmp = CDR(tmp2);
 #ifndef NAIVE
     if (NOT_NIL(tmp) && ATOM(tmp))
         return error_cons_expected (tmp);
@@ -65,41 +74,35 @@ copy_list (lispptr x, char mode, lispptr needle)
         return nil;
 
     // Remove first elements if they match 'needle'.
-    if (mode == COPY_REMOVE) {
-        while (CONSP(x) && needle == CAR(x))
-            x = CDR(x);
-    }
+    if (mode == COPY_REMOVE)
+        while (CONSP(tmp2) && needle == CAR(tmp2))
+            tmp2 = CDR(tmp2);
 
     // Copy first element.
-    PUSH(x); // TODO: Explain why this is required. (smk)
-    list_start = list_last = make_cons (CAR(x), nil);
-    POP(x);
+    list_start = list_last = make_cons (CAR(tmp2), nil);
 
     // Append rest of elements.
-    DOLIST(x, CDR(x)) {
-        if (mode == COPY_BUTLAST && NOT(CDR(x)))
+    DOLIST(tmp2, CDR(tmp2)) {
+        if (mode == COPY_BUTLAST && NOT(CDR(tmp2)))
             goto end_butlast;
 
         // Skip element to remove.
-        if (mode == COPY_REMOVE && needle == CAR(x))
+        if (mode == COPY_REMOVE && needle == CAR(tmp2))
             continue;
 
-        // Copy element.
-        PUSH(x); // TODO: Explain why this is required. (smk)
-        tmp = make_cons (CAR(x), nil);
-        POP(x);
-
-        // Append to last.
+        // Copy and append cons.
+        tmp = make_cons (CAR(tmp2), nil);
         SETCDR(list_last, tmp);
         list_last = tmp;
     }
 
 #ifndef NAIVE
-    if (NOT_NIL(x))
-        return error_cons_expected (x);
+    if (NOT_NIL(tmp2))
+        return error_cons_expected (tmp2);
 #endif
 
 end_butlast:
+    tmp2 = nil;
     return list_start;
 }
 

@@ -1,0 +1,5 @@
+(fn assoc (k x)
+  (do ((i x (cdr i)))
+      ((not i))
+    (? (eql k (caar i))
+       (return (car i)))))

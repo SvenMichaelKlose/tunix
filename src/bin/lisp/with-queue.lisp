@@ -1,5 +1,0 @@
-(macro with-queue (q . body)
-  $(with ,(@ '((x)
-                $(,x (make-queue)))
-             (ensure-list q))
-     ,@body))

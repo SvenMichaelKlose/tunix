@@ -1,7 +1,5 @@
 Playground
 ==========
 
-Be highly creative, entertaining and visionary.
-
-Add a short description of whatever you'd like to see, no
-matter how realistic.
+Short and creative description of whatever one would like to see
+running in TUNIX as soon as it has become usable.

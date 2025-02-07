@@ -16,28 +16,31 @@
 
 #include "libsimpleio.h"
 
-char    last_in[MAX_CHANNELS];
-char    last_out[MAX_CHANNELS];
-char    do_putback[MAX_CHANNELS];
-char    putback_chars[MAX_CHANNELS];
+char       last_in[MAX_CHANNELS];
+char       last_out[MAX_CHANNELS];
+char       do_putback[MAX_CHANNELS];
+char       putback_chars[MAX_CHANNELS];
+simpleio * drivers[MAX_CHANNELS];
 
 #ifdef __CC65__
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-simpleio *      io;
 simpleio_chn_t  fnin;
 simpleio_chn_t  fnout;
+simpleio *      vin;
+simpleio *      vout;
 #ifdef __CC65__
-#pragma zpsym ("io")
 #pragma zpsym ("fnin")
 #pragma zpsym ("fnout")
+#pragma zpsym ("vin")
+#pragma zpsym ("vout")
 #pragma bss-name (pop)
 #endif
 
 void FASTCALL
 simpleio_close (simpleio_chn_t c)
 {
-    io->close (c);
+    drivers[c]->close (c);
 }
 
 void FASTCALL
@@ -45,7 +48,8 @@ setin (simpleio_chn_t c)
 {
     if (fnin != c) {
         fnin = c;
-        io->setin (c);
+        vin = drivers[fnin];
+        vin->setin (c);
     }
 }
 
@@ -54,47 +58,59 @@ setout (simpleio_chn_t c)
 {
     if (fnout != c) {
         fnout = c;
-        io->setout (c);
+        vout = drivers[fnout];
+        vout->setout (c);
     }
 }
 
 bool
 eof ()
 {
-    return io->eof ();
+    return vout->eof ();
 }
 
 signed char
 err ()
 {
-    return io->err ();
+    return vout->err ();
+}
+
+char
+_getold (void)
+{
+    do_putback[fnin] = false;
+    return last_in[fnin] = putback_chars[fnin];
 }
 
 char
 conin ()
 {
     if (!do_putback[fnin])
-        return last_in[fnin] = io->conin ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+        return last_in[fnin] = vin->conin ();
+    return _getold ();
 }
 
 char
 in ()
 {
     if (!do_putback[fnin])
-        return last_in[fnin] = io->in ();
-    do_putback[fnin] = false;
-    return last_in[fnin] = putback_chars[fnin];
+        return last_in[fnin] = vin->in ();
+    return _getold ();
+}
+
+void FASTCALL
+putbackc (char c)
+{
+    if (!eof ()) {
+        do_putback[fnin] = true;
+        putback_chars[fnin] = c;
+    }
 }
 
 void
 putback ()
 {
-    if (!eof ()) {
-        do_putback[fnin] = true;
-        putback_chars[fnin] = last_in[fnin];
-    }
+    putbackc (last_in[fnin]);
 }
 
 char
@@ -123,7 +139,7 @@ void FASTCALL
 out (char c)
 {
     last_out[fnout] = c;
-    io->out (c);
+    vout->out (c);
 }
 
 char
@@ -158,23 +174,20 @@ outs (char * s)
         out (c);
 }
 
-void FASTCALL
-outsn (char * s, char len)
-{
-    while (len--)
-        out (*s++);
-}
-
 void
 terpri (void)
 {
+    if (fnout != STDOUT) {
+        out ('\n');
+        return;
+    }
 #ifdef TARGET_C128
-    outs ("\r");
+    out ('\r');
 #else
     #ifdef __CC65__
         outs ("\n\r");
     #else
-        outs ("\n");
+        out ('\n');
     #endif
 #endif
 }
@@ -190,19 +203,28 @@ fresh_line (void)
 }
 
 void FASTCALL
-simpleio_init_channel (simpleio_chn_t chn)
+simpleio_init_channel (simpleio_chn_t chn, simpleio * s)
 {
-    do_putback[chn] = false;
+    do_putback[chn]    = false;
     putback_chars[chn] = 0;
-    last_in[chn] = 0;
-    last_out[chn] = 0;
+    last_in[chn]       = 0;
+    last_out[chn]      = 0;
+    drivers[chn]       = s;
 }
 
-void FASTCALL
-simpleio_set (simpleio * x)
+void
+simpleio_clear_channels ()
 {
-    io = x;
     memset (do_putback, 0, sizeof (do_putback));
-    memset (last_in, 0, sizeof (last_in));
-    memset (last_out, 0, sizeof (last_out));
+    memset (last_in,    0, sizeof (last_in));
+    memset (last_out,   0, sizeof (last_out));
+}
+
+void
+simpleio_init_common ()
+{
+    fnin  = STDIN;
+    fnout = STDOUT;
+    vin   = drivers[fnin];
+    vout  = drivers[fnout];
 }

@@ -1,8 +1,9 @@
 #ifndef __LIBLISP_H__
 #define __LIBLISP_H__
 
-//// Compile-time options
-////
+////////////////////////////
+/// Compile-time options ///
+////////////////////////////
 //// Inteded to be set via file 'src/config' or command-line.
 
 /// Diagnostics
@@ -24,17 +25,11 @@
 // Print 'C' for each compressed cons.
 //#define VERBOSE_COMPRESSED_CONS
 
-// Print names to built-in special forms FN and VAR.
-//#define VERBOSE_DEFINES
-
 // Print expressions before evaluation.
 //#define VERBOSE_EVAL
 
 // Print message if garbage collector takes action.
 //#define VERBOSE_GC
-
-// Print LOADed pathnames before evaluation.
-//#define VERBOSE_LOAD
 
 // Print READ expressions in REPL.
 //#define VERBOSE_READ
@@ -52,10 +47,22 @@
 // Implies CHECK_OBJ_POINTERS
 //#define GC_STRESS
 
+// Call HOST_DEBUGGER() in error().
+//#define HOST_DEBUGGER_ON_ERROR
+
 // Aoid inlining of functions.
 // * Allows setting breakpoints.
 // * Reduces code size for releases on small machines.
 //#define SLOW
+
+// Load "test-all.lsp" at end of boot.
+//#define TEST_ALL
+
+// Load environment tests.
+//#define TEST_ENVIRONMENT
+
+// Call test() before start-up.
+//#define TEST_INTERPRETER
 
 // Enable extra checks that'll probably not kick in.
 //#define PARANOID
@@ -79,11 +86,16 @@
 
 /// Disabling features
 
-// No support for saving and loading images.
-//#define NO_IMAGES
+// Disable loading DOTEXPAND on boot.
+//#define NO_DOTEXPAND
 
-// Do not expand macros in REPL.
-// Required to load all of the environment.
+// No support for saving and loading images.
+//#define NO_IMAGE
+
+// No highlighted expressions in debug info.
+//#define NO_HIGHLIGHTING.
+
+// Do not call MACROEXPAND in REPL.
 //#define NO_MACROEXPAND
 
 // Disable calling user function ONERROR on errors.
@@ -92,11 +104,64 @@
 // Do not print anonymous symbols.
 //#define NO_PRINT_ANONYMOUS
 
+// Do not load QUASIQUOTE.
+//#define NO_QUASIQUOTE
+
+// Disable built-ins.
+//#define NO_BUILTIN_APPEND // Native is smaller.
+//#define NO_BUILTIN_ASSOC
+//#define NO_BUILTIN_CHAR_AT
+//#define NO_BUILTIN_GC
+//#define NO_BUILTIN_FREE
+//#define NO_BUILTIN_LOAD
+//#define NO_BUILTIN_NCONC
+//#define NO_BUILTIN_NTHCDR
+//#define NO_BUILTIN_PRINT
+//#define NO_BUILTIN_READ
+//#define NO_BUILTIN_READ_LINE
+//#define NO_BUILTIN_SUBSEQ
+//#define NO_BUILTIN_TIME
+
+#ifdef NO_BUILTIN_NTHCDR
+    #define NO_BUILTIN_SUBSEQ
+#endif
+
+// Disable groups of built-ins.
+//#define NO_BUILTIN_GROUP_ARITH
+//#define NO_BUILTIN_GROUP_BITOPS
+//#define NO_BUILTIN_GROUP_DEFINITIONS
+//#define NO_BUILTIN_GROUP_DIRECTORY
+//#define NO_BUILTIN_GROUP_FILE
+//#define NO_BUILTIN_GROUP_IMAGE
+//#define NO_BUILTIN_GROUP_RAW_ACCESS
+//#define NO_BUILTIN_GROUP_SYMBOL_NAME
+
+// Print names to built-in special forms FN and VAR.
+//#define NO_VERBOSE_DEFINES
+
+// Print LOADed pathnames before evaluation.
+//#define NO_VERBOSE_LOAD
+
+// Don't use zeropage locations with cc65.
+//#define NO_ZEROPAGE
+
 
 /// Additional features
 
 // Compressed conses.
 //#define COMPRESSED_CONS
+
+// Fast 8-bit NIL tests.
+//#define FAST_NIL
+
+// Restart GC if relocation table is full
+#define RESTART_GC_ON_FULL_RELOC
+
+// Unix sockets (incl. built-ins)
+//#define HAVE_SOCKETS
+
+// Real NIL in memory.
+//#define REAL_NIL
 
 // Multiple heaps.
 //#define FRAGMENTED_HEAP
@@ -112,13 +177,16 @@
 // Adds extra code.
 //#define SKIPPING_SWEEP
 
+// Use zeropage locations with cc65.
+//#define USE_ZEROPAGE
+
 
 /// Memory allocation
 
 // Stack and table sizes.
-//#define STACK_SIZE          768
-//#define TAGSTACK_SIZE       512
-//#define RELOC_TABLE_ENTRIES 64
+#define STACK_SIZE          2560
+#define TAGSTACK_SIZE       512
+#define RELOC_TABLE_ENTRIES 256
 
 // Use malloc() to allocate the heap.
 //#define MALLOCD_HEAP
@@ -134,19 +202,80 @@
 #define ONETIME_HEAP_MARGIN (16 * sizeof (lispptr))
 
 
-/// Target configurations
+////////////////////////////
+/// Target configuration ///
+////////////////////////////
 
-// Commodore C128
-#ifdef TARGET_C128
-#ifndef SLOW
-    #define SLOW
-#endif
+// Apple II
+#ifdef TARGET_APPLE2
+#define FAST_NIL
+#define MALLOCD_HEAP
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
+#undef RELOC_TABLE_ENTRIES
 #define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#endif
+
+// Apple II enhanced
+#ifdef TARGET_APPLE2ENH
+#define FAST_NIL
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#undef RELOC_TABLE_ENTRIES
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#endif
+
+// Atari XL
+#ifdef TARGET_ATARIXL
+#define FAST_NIL
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#undef RELOC_TABLE_ENTRIES
+#define RELOC_TABLE_ENTRIES 256
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  (255 - sizeof (symbol))
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#endif
+
+// Commodore C128
+#ifdef TARGET_C128
+#define FAST_NIL
+#ifndef SLOW
+    #define SLOW
+#endif
+#define NO_IMAGE
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#undef RELOC_TABLE_ENTRIES
+#define RELOC_TABLE_ENTRIES 128
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -154,32 +283,29 @@
 
 // Commodore C16
 #ifdef TARGET_C16
-#ifndef NO_DEBUGGER
-    #define NO_DEBUGGER
-#endif
+#define FAST_NIL
+#define MINIMALISTIC
 #ifndef NO_ONERROR
     #define NO_ONERROR
-#endif
-#ifndef SLOW
-    #define SLOW
 #endif
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
-#define TAGSTACK_SIZE       512
+#undef STACK_SIZE
+#define STACK_SIZE          512
+#undef TAGSTACK_SIZE
+#define TAGSTACK_SIZE       256
+#undef RELOC_TABLE_ENTRIES
 #define RELOC_TABLE_ENTRIES 64
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore C64
 #ifdef TARGET_C64
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -187,16 +313,23 @@
 
 // CP/M
 #ifdef TARGET_CPM
+#define FAST_NIL
 #define MALLOCD_HEAP
-#define HEAP_SIZE   16384
+#define HEAP_SIZE           8192
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
-#define TAGSTACK_SIZE       512
+#define STACK_SIZE          1280
+#define TAGSTACK_SIZE       384
 #define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
 #endif
 
 // Commodore PET
@@ -207,22 +340,16 @@
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          768
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 128
-#define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
 // Commodore Plus/4
 #ifdef TARGET_PLUS4
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
@@ -230,62 +357,195 @@
 
 // cc65's sim6502
 #ifdef TARGET_SIM6502
+#define FAST_NIL
 #define MALLOCD_HEAP
 #define MALLOCD_STACK
 #define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
 #define SKIPPING_SWEEP
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#endif
+
+// Unixoids
+#ifdef TARGET_UNIX
+#if !defined(SLOW) && defined(NDEBUG)
+    #define SLOW
+#endif
+#define HAVE_SOCKETS
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#undef HEAP_SIZE
+#define HEAP_SIZE           (256 * 1024U)
+#undef STACK_SIZE
+#define STACK_SIZE          (HEAP_SIZE / 8)
+#undef TAGSTACK_SIZE
+#define TAGSTACK_SIZE       (HEAP_SIZE / 8)
+#undef RELOC_TABLE_ENTRIES
+#define RELOC_TABLE_ENTRIES 512
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#define MAX_SYMBOL  65536
+#define NO_BUILTIN_DIRECTORY
+
+#if defined(REAL_NIL) && defined(FAST_NIL)
+    #error "REAL_NIL and FAST_NIL cannot be used together with TARGET_UNIX"
+#endif
+#if defined(REAL_NIL) && !defined(NIL_NOT_0)
+    #define NIL_NOT_0
+#endif
 #endif
 
 // Commodore VIC-20/VC-20
 #ifdef TARGET_VIC20
-#ifndef SLOW
-    #define SLOW
-#endif
+#define FAST_NIL
+#define MINIMALISTIC
 #define MALLOCD_HEAP
 #define FRAGMENTED_HEAP
 #define STACK_START         0x0400
 #define STACK_END           0x0800
 #define TAGSTACK_START      0x0800
-#define TAGSTACK_END        0x1000
-#define RELOC_TABLE_ENTRIES 256
-#define SKIPPING_SWEEP
+#define TAGSTACK_END        0x0900
+#undef RELOC_TABLE_ENTRIES
+#define RELOC_TABLE_ENTRIES 128
 #define PRINT_SHORT_QUOTES
 #define MAX_SYMBOL  (255 - sizeof (symbol))
 #endif
 
-// Unixoids
-#ifdef TARGET_UNIX
+// Sinclair ZX Spectrum
+#ifdef TARGET_ZX
+#define FAST_NIL
+#define MALLOCD_HEAP
+#define MALLOCD_STACK
+#define MALLOCD_TAGSTACK
+#define SKIPPING_SWEEP
+#define PRINT_SHORT_QUOTES
+#ifndef NO_BUILTIN_TIME
+    #define NO_BUILTIN_TIME
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#endif
+
+/////////////////////////////
+/// Generic configuration ///
+/////////////////////////////
+
+#ifdef MINIMALISTIC
 #ifndef SLOW
     #define SLOW
 #endif
-#define MALLOCD_HEAP
-#define MALLOCD_STACK
-#define MALLOCD_TAGSTACK
-#define HEAP_SIZE           (64 * 1024U)
-#define STACK_SIZE          HEAP_SIZE
-#define TAGSTACK_SIZE       HEAP_SIZE
-#define RELOC_TABLE_ENTRIES 256
-#define SKIPPING_SWEEP
-#define PRINT_SHORT_QUOTES
-#define MAX_SYMBOL  65536
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
 #endif
+#ifndef NO_DOTEXPAND
+    #define NO_DOTEXPAND
+#endif
+#ifndef NO_IMAGE
+    #define NO_IMAGE
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#ifndef NO_BUILTIN_GROUP_BITOPS
+    #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_GROUP_IMAGE
+    #define NO_BUILTIN_GROUP_IMAGE
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
+#endif
+#ifndef NO_BUILTIN_SUBSEQ
+    #define NO_BUILTIN_SUBSEQ
+#endif
+#ifdef SKIPPING_SWEEP
+    #undef SKIPPING_SWEEP
+#endif
+#endif // #ifdef MINIMALISTIC
 
-// Sinclair ZX Spectrum
-#ifdef TARGET_ZX
-#define MALLOCD_HEAP
-#define MALLOCD_STACK
-#define MALLOCD_TAGSTACK
-#define STACK_SIZE          1024
-#define TAGSTACK_SIZE       512
-#define RELOC_TABLE_ENTRIES 256
-#define SKIPPING_SWEEP
-#define PRINT_SHORT_QUOTES
+#ifdef MICROSCOPIC
+#ifndef NO_IMAGE
+    #define NO_IMAGE
 #endif
+#ifndef NAIVE
+    #define NAIVE
+#endif
+#ifndef SLOW
+    #define SLOW
+#endif
+#ifndef NO_ONERROR
+    #define NO_ONERROR
+#endif
+#ifndef NO_DEBUGGER
+    #define NO_DEBUGGER
+#endif
+#ifndef NO_QUASIQUOTE
+    #define NO_QUASIQUOTE
+#endif
+#ifndef NO_MACROEXPAND
+    #define NO_MACROEXPAND
+#endif
+#ifndef NO_BUILTIN_GROUP_BITOPS
+    #define NO_BUILTIN_GROUP_BITOPS
+#endif
+#ifndef NO_BUILTIN_GROUP_DIRECTORY
+    #define NO_BUILTIN_GROUP_DIRECTORY
+#endif
+#ifndef NO_BUILTIN_GROUP_FILE
+    #define NO_BUILTIN_GROUP_FILE
+#endif
+#ifndef NO_BUILTIN_ASSOC
+    #define NO_BUILTIN_ASSOC
+#endif
+#ifndef NO_BUILTIN_CHAR_AT
+    #define NO_BUILTIN_CHAR_AT
+#endif
+#ifndef NO_BUILTIN_RAW_ACCESS
+    #define NO_BUILTIN_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GC
+    #define NO_BUILTIN_GC
+#endif
+#ifndef NO_BUILTIN_LOAD
+    #define NO_BUILTIN_LOAD
+#endif
+#ifndef NO_BUILTIN_PRINT
+    #define NO_BUILTIN_PRINT
+#endif
+#ifndef NO_BUILTIN_READ
+    #define NO_BUILTIN_READ
+#endif
+#ifndef NO_BUILTIN_READ_LINE
+    #define NO_BUILTIN_READ_LINE
+#endif
+#ifndef NO_BUILTIN_GROUP_RAW_ACCESS
+    #define NO_BUILTIN_GROUP_RAW_ACCESS
+#endif
+#ifndef NO_BUILTIN_GROUP_SYMBOL_NAME
+    #define NO_BUILTIN_GROUP_SYMBOL_NAME
+#endif
+#endif // #ifdef MICROSCOPIC
+
+#ifdef DEVELOPMENT
+#ifndef SLOW
+    #define SLOW
+#endif
+#ifndef CHECK_OBJ_POINTERS
+    #define CHECK_OBJ_POINTERS
+#endif
+#endif // #ifdef DEVELOPMENT
+
+//////////////////////////
+/// CONFIG ADJUSTMENTS ///
+//////////////////////////
 
 #if !defined (MALLOCD_HEAP) && !defined (HEAP_SIZE)
     #error "Either HEAP_SIZE or MALLOCD_HEAP must be defined."
@@ -295,9 +555,20 @@
     #error "NDEBUG and DUMP_SWEEPED cannot be used together."
 #endif
 
+#if defined(NIL_NOT_0) && !defined(REAL_NIL)
+    #error "NIL_NOT_0 requires REAL_NIL"
+#endif
+
+#if defined(NO_IMAGE) && !defined(NO_BUILTIN_GROUP_IMAGE)
+    #define NO_BUILTIN_GROUP_IMAGE
+#endif
+
 #ifdef NAIVE
     #ifndef NO_DEBUGGER
         #define NO_DEBUGGER
+    #endif
+    #ifndef NO_HIGHLIGHTING
+        #define NO_HIGHLIGHTING
     #endif
     #ifndef NO_ONERROR
         #define NO_ONERROR
@@ -310,23 +581,20 @@
     #endif
 #endif // #ifdef NAIVE
 
+#if defined(SLOW) && defined(NOT_SLOW) && !defined(DEVELOPMENT)
+    #undef SLOW
+#endif
+
+#if defined(__CC65__) && !defined(NO_ZEROPAGE)
+    #define USE_ZEROPAGE
+#endif
+
 #ifdef __CC65__
     #define FASTCALL        __fastcall__
     #define HOST_DEBUGGER()
 #else
     #define FASTCALL
     #define HOST_DEBUGGER() raise (SIGTRAP);
-#endif
-
-#ifndef NO_DEBUGGER
-    #define PUSH_HIGHLIGHTED(x) \
-        highlighted = x; \
-        PUSH(highlighted);
-    #define POP_HIGHLIGHTED() \
-        POP(highlighted);
-#else
-    #define PUSH_HIGHLIGHTED(x)
-    #define POP_HIGHLIGHTED()
 #endif
 
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
@@ -344,6 +612,16 @@
 #if defined(VERBOSE_COMPRESSED_CONS) && !defined(COMPRESSED_CONS)
     #error "VERBOSE_COMPRESSED_CONS has no effect without COMPRESSED_CONS."
 #endif
+
+#ifndef NO_HIGHLIGHTING
+    #define HIGHLIGHT(x)  highlighted = x
+#else
+    #define HIGHLIGHT(x)
+#endif
+
+//////////////
+/// TYPES  ///
+//////////////
 
 typedef unsigned char  uchar;
 typedef long           lispnum_t;
@@ -383,6 +661,19 @@ typedef struct _symbol {
     lispobj_size_t  length;
 } symbol;
 
+///////////////
+/// OBJECTS ///
+///////////////
+
+#ifdef NIL_NOT_0
+
+struct real_nil {
+    symbol  s;
+    char    name[3];
+};
+
+#endif // #ifdef NIL_NOT_0
+
 typedef struct _xlat_item {
     size_t   size;
     lispptr  pos;
@@ -407,6 +698,10 @@ typedef struct _image_header {
     lispptr heap_start;
 } image_header;
 
+////////////////////////
+/// GLOBAL VARIABLES ///
+////////////////////////
+
 // ILOAD restart.
 extern jmp_buf   restart_point;
 extern jmp_buf * hard_repl_break;
@@ -428,31 +723,51 @@ extern lispptr current_function;
 extern lispptr current_toplevel;
 extern lispptr unexpanded_toplevel;
 extern char *  last_errstr;
+#ifndef NDEBUG
 extern bool    debug_mode;
+#endif
 extern lispptr first_symbol;
 extern lispptr last_symbol;
+#ifndef NO_DEBUGGER
+extern lispptr breakpoints_sym;
+#endif
+#ifndef NO_ONERROR
+extern lispptr onerror_sym;
+extern lispptr fail_sym;
+#endif
+
+#if !defined(NO_VERBOSE_LOAD) && !defined(NO_VERBOSE_DEFINES)
+extern lispptr vp_symbol;
+#endif
+
+extern lispptr dot_symbol;
+
+#ifndef NO_HIGHLIGHTING
 extern lispptr highlighted;
 extern bool    do_highlight;
-extern lispptr highlighted;
-extern lispptr onerror_sym;
-extern lispptr breakpoints_sym;
+#endif
 
 #ifndef NAIVE
 extern char    error_code;
+extern lispptr failed_obj;
 extern lispptr error_info;
 #endif
 
 extern lispptr t;
 extern lispptr quote;
+#ifndef NO_QUASIQUOTE
 extern lispptr quasiquote;
 extern lispptr unquote;
 extern lispptr unquote_spliced;
+#endif
 
 extern char num_repls;
 extern char num_debugger_repls;
-extern bool do_break_repl;
-extern bool do_continue_repl;
-extern bool do_exit_program;
+
+#define BRK_CONTINUE    1
+#define BRK_RETURN      2
+#define BRK_EXIT        3
+extern char do_break_repl;
 
 #ifdef COMPRESSED_CONS
 extern bool do_compress_cons;
@@ -471,11 +786,9 @@ extern long bekloppies_start;
 extern long bekloppies (void);
 #endif
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
-
-extern lispobj_size_t lisp_len;
 
 // For processing lists with no recursions.
 extern lispptr list_start;
@@ -485,6 +798,10 @@ extern lispptr tmp;
 extern lispptr tmp2;
 extern char    tmpc;
 extern char *  tmpstr;
+
+#ifdef TARGET_CPM
+extern long heap;  // For the 'zcc' compiler suite.
+#endif
 
 extern char *      heap_free;
 extern char *      heap_end;
@@ -516,18 +833,23 @@ extern lispptr delayed_eval;
 
 #ifndef NO_DEBUGGER
 extern lispptr debug_step;
-extern lispptr debugger_return_value_sym;
+extern lispptr repl_value;
 #endif
 
 #ifndef NO_MACROEXPAND
 extern bool    is_macroexpansion;
-extern lispptr macroexpand_sym;
+extern lispptr expand_sym;
 #endif
 
-extern lispptr va; // Temporary in 'eval.c'.
+extern lispptr make_cons_tmp;
+extern lispptr make_cons_car;
+extern lispptr make_cons_cdr;
 
-#ifdef __CC65__
-#pragma zpsym ("lisp_len")
+#ifdef NIL_NOT_0
+extern struct real_nil real_nil;
+#endif
+
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("tmp")
 #pragma zpsym ("tmp2")
 #pragma zpsym ("tmpc")
@@ -560,24 +882,45 @@ extern lispptr va; // Temporary in 'eval.c'.
 #pragma zpsym ("delayed_eval")
 #pragma zpsym ("list_start")
 #pragma zpsym ("list_last")
-#pragma zpsym ("va")
+#ifdef NIL_NOT_0
+#pragma zpsym ("real_nil")
+#endif
 #pragma bss-name (pop)
+#endif // #ifdef USE_ZEROPAGE
+
+///////////
+/// NIL ///
+///////////
+
+#ifdef NIL_NOT_0
+#define nil     ((lispptr) &real_nil)
+#else
+#define nil     ((lispptr) 0)
 #endif
 
-// NOT_NIL() doesn't work.  Either the onset of dementia
-// or terrible bugs hiding.
-#define nil     ((lispptr) 0)
-#ifdef __CC65__
-    #define NOT(x)      !((size_t) x & 0xff00)
-    #define NOT_NIL(x)  ((size_t) x & 0xff00)
+#ifdef FAST_NIL
+    #define NOT(x)      !((uintptr_t) x & (-1 & ~0xff))
+    #define NOT_NIL(x)  ((uintptr_t) x & (-1 & ~0xff))
 #else
-    #define NOT(x)      (!x)
-    #define NOT_NIL(x)  (x)
+    #define NOT(x)      (x == nil)
+    #define NOT_NIL(x)  (x != nil)
+#endif
+
+#ifdef REAL_NIL
+    #define PNOT(x)     false
+    #define PNOT_NIL(x) true
+#else
+    #define PNOT(x)     NOT(x)
+    #define PNOT_NIL(x) NOT_NIL(x)
 #endif
 
 #ifdef GC_STRESS
 extern bool do_gc_stress;
 #endif
+
+////////////////////////////
+/// STACK POINTER CHECKS ///
+////////////////////////////
 
 #define _GCSTACK_CHECK_OVERFLOW() \
     if (stack <= stack_start) \
@@ -613,6 +956,10 @@ extern bool do_gc_stress;
 #else
     #define TAGSTACK_CHECK_UNDERFLOW()
 #endif
+
+//////////////////////
+/// STACK PUSH/POP ///
+//////////////////////
 
 #ifdef SLOW
     #define PUSH(x)      pushgc (x)
@@ -656,6 +1003,10 @@ extern bool do_gc_stress;
         } while (0)
 #endif // #ifdef SLOW
 
+/////////////////////////
+/// eval0 RETURN TAGS ///
+/////////////////////////
+
 // TODO: Rename from TAG_* to EVAL0_* to make
 // their function more obvious outside eval0().
 #define TAG_DONE                  0
@@ -664,10 +1015,27 @@ extern bool do_gc_stress;
 #define TAG_NEXT_BODY_STATEMENT   3
 #define TAG_NEXT_BLOCK_STATEMENT  4
 
+//////////////////////
+/// LIST ITERATION ///
+//////////////////////
+
 #define DOLIST(x, init) \
     for (x = init; CONSP(x); x = CDR(x))
 #define TYPESAFE_DOLIST(x, init) \
     for (x = init; CONSP(x); x = LIST_CDR(x))
+
+/////////////
+/// CASTS ///
+/////////////
+
+#define BOOL(x)         ((x) ? t : nil)
+#define CONS(x)         ((cons *) (x))
+#define NUMBER(n)       ((number *) (n))
+#define SYMBOL(s)       ((symbol *) (s))
+
+///////////////////
+/// OBJECT TYPE ///
+///////////////////
 
 #define TYPE_CONS       1
 #define TYPE_NUMBER     2
@@ -688,37 +1056,40 @@ extern bool do_gc_stress;
 #define MARK(x)         (TYPE(x) |= TYPE_MARKED)
 #define UNMARK(x)       (TYPE(x) &= ~TYPE_MARKED)
 
-#define CONS(x)         ((cons *) (x))
-
 #ifdef COMPRESSED_CONS
     // CDR of a compressed cons is the address of the next
     // object (which is also a cons).
     #define CCONS_CDR(x)    (&CONS(x)->cdr)
 #endif
 
-#define _ATOM(x)        (NOT(x) || !(TYPE(x) & TYPE_CONS))
-#define _CONSP(x)       (NOT_NIL(x) && (TYPE(x) & TYPE_CONS))
-#define _SYMBOLP(x)     (NOT(x) || (TYPE(x) & TYPE_SYMBOL))
-#define _BUILTINP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
-#define _NUMBERP(x)     (NOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
+#define _ATOM(x)        (PNOT(x) || !(TYPE(x) & TYPE_CONS))
+#define _CONSP(x)       (PNOT_NIL(x) && (TYPE(x) & TYPE_CONS))
+#define _SYMBOLP(x)     (PNOT(x) || (TYPE(x) & TYPE_SYMBOL))
+#define _BUILTINP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_BUILTIN))
+#define _NUMBERP(x)     (PNOT_NIL(x) && (TYPE(x) & TYPE_NUMBER))
 #define _LISTP(x)       (NOT(x) || (TYPE(x) & TYPE_CONS))
-#define _SPECIALP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
-#define _NAMEDP(x)      (NOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
+#define _SPECIALP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_SPECIAL) == TYPE_SPECIAL)
+#define _NAMEDP(x)      (PNOT_NIL(x) && TYPE(x) & (TYPE_SYMBOL | TYPE_BUILTIN))
 #define _EXTENDEDP(x)   (TYPE(x) & TYPE_EXTENDED)
+#define EXTENDEDP(x)    (PNOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
 
-#define EXTENDEDP(x)    (NOT_NIL(x) && (TYPE(x) & TYPE_EXTENDED))
+//////////////
+/// CONSES ///
+//////////////
 
 #define LIST_CAR(x)     (NOT(x) ? x : CAR(x))
 #define LIST_CDR(x)     (NOT(x) ? x : CDR(x))
 
 #define _SETCAR(x, v) (CONS(x)->car = v)
+
 #ifdef NAIVE
     #define _SETCDR_CHECK(x)
 #else
     #define _SETCDR_CHECK(x) \
         if (_EXTENDEDP(x)) \
             error_set_ccons_cdr ();
-#endif
+#endif // #ifdef NAIVE
+
 #ifdef COMPRESSED_CONS
     #define _SETCDR(x, v) \
         do { \
@@ -729,6 +1100,10 @@ extern bool do_gc_stress;
     #define _SETCDR(x, v) \
         (CONS(x)->cdr = v)
 #endif // #ifdef COMPRESSED_CONS
+
+/////////////////////////
+/// INLINING WRAPPERS ///
+/////////////////////////
 
 #ifdef SLOW
     #define CAR(x)       (lisp_car (x))
@@ -760,13 +1135,17 @@ extern bool do_gc_stress;
     #define SPECIALP(x)  _SPECIALP(x)
 #endif // #ifdef SLOW
 
-#define BOOL(x)      ((x) ? t : nil)
+///////////////
+/// NUMBERS ///
+///////////////
 
-#define NUMBER(n)               ((number *) (n))
 #define NUMBER_VALUE(n)         (NUMBER(n)->value)
 #define SET_NUMBER_VALUE(n, x)  (NUMBER(n)->value = x)
 
-#define SYMBOL(s)               ((symbol *) (s))
+///////////////
+/// SYMBOLS ///
+///////////////
+
 #define SYMBOL_NEXT(s)          (SYMBOL(s)->next)
 #define SYMBOL_VALUE(s)         (SYMBOL(s)->value)
 #define SYMBOL_LENGTH(s)        (SYMBOL(s)->length)
@@ -774,8 +1153,16 @@ extern bool do_gc_stress;
 #define SET_SYMBOL_NEXT(s, x)   (SYMBOL(s)->next = x)
 #define SET_SYMBOL_VALUE(s, x)  (SYMBOL(s)->value = x)
 
-#define FUNARGS(x)      CAR(x)
-#define FUNBODY(x)      CDR(x)
+////////////////////////////
+/// FUNCTION EXPRESSIONS ///
+////////////////////////////
+
+#define FUNARGS(x)  CAR(x)
+#define FUNBODY(x)  CDR(x)
+
+//////////////
+/// ERRORS ///
+//////////////
 
 #define ERROR_TYPE              1
 #define ERROR_ARG_MISSING       2
@@ -783,17 +1170,24 @@ extern bool do_gc_stress;
 #define ERROR_TOO_MANY_ARGS     4
 #define ERROR_NOT_FUNCTION      5
 #define ERROR_ARGNAME_TYPE      6
-#define ERROR_NO_BLOCK_NAME     7
+#define ERROR_NO_BLOCKNAME      7
 #define ERROR_OUT_OF_HEAP       8
-#define ERROR_NO_PAREN          9
+#define ERROR_PAREN_MISSING     9
 #define ERROR_STALE_PAREN       10
 #define ERROR_SYM_TOO_LONG      11
 #define ERROR_QUOTE_MISSING     12
-#define ERROR_FILEMODE          13
-#define ERROR_USER              14
+#define ERROR_LOST_RETURN       13
+#define ERROR_LOST_GO           14
+#define ERROR_NEGATIVE          15
+#define ERROR_FILEMODE          16
+#define ERROR_USER              17
 
 // Returned to OS on exit after internal error.
 #define ERROR_INTERNAL      12
+
+//////////////////////
+/// POINTER CHECKS ///
+//////////////////////
 
 #if !defined (NDEBUG) && (defined(GC_STRESS) || defined(CHECK_OBJ_POINTERS))
     #define CHKPTR(x)   check_lispptr (x)
@@ -801,37 +1195,43 @@ extern bool do_gc_stress;
     #define CHKPTR(x)
 #endif
 
+
 extern void     FASTCALL expand_universe (lispptr);
 extern lispptr  FASTCALL make_cons       (lispptr, lispptr);
 extern lispptr  FASTCALL make_number     (lispnum_t);
 extern lispptr  FASTCALL alloc_symbol    (char *, uchar len);
 extern lispptr  FASTCALL make_symbol     (char *, uchar len);
+
 extern lispptr           read_expr       (void);
 extern lispptr           read_symbol     (void);
 extern lispptr           read_number     (void);
 extern lispptr  FASTCALL print           (lispptr);
 extern lispptr  FASTCALL dprint          (lispptr);
+
 extern void     FASTCALL set_channels    (simpleio_chn_t in, simpleio_chn_t out);
 extern lispptr           bi_setin        (void);
 extern lispptr           bi_setout       (void);
 
-// Arguments in global 'x'.
+// Argument in global 'x'.
 extern lispptr           eval0           (void);
 extern lispptr           eval            (void);
 extern lispptr           eval_list       (void);
 extern lispptr           funcall         (void);
 
 extern void              gc               (void);
-extern lispobj_size_t    FASTCALL objsize (char *);
 extern size_t            heap_free_size   (void);
+extern lispobj_size_t FASTCALL objsize (char *);
 
 #define REPL_STD        0
 #define REPL_DEBUGGER   1
 #define REPL_LOAD       2
-extern lispptr  FASTCALL lisp_repl    (char mode);
+extern lispptr  FASTCALL lisp_repl    (char mode, simpleio_chn_t);
 extern bool     FASTCALL load         (char * pathname);
+
+#ifndef NO_IMAGE
 extern bool     FASTCALL image_load   (char * pathname);
 extern bool     FASTCALL image_save   (char * pathname);
+#endif
 
 extern void     FASTCALL add_builtins  (const struct builtin *);
 extern lispptr           debugger      (void);
@@ -851,6 +1251,7 @@ extern void     FASTCALL pushtag        (char);
 extern char              poptag         (void);
 extern void     FASTCALL pushtagw       (lispptr);
 extern lispptr           poptagw        (void);
+
 extern lispptr  FASTCALL lisp_car       (lispptr);
 extern lispptr  FASTCALL lisp_cdr       (lispptr);
 extern void     FASTCALL lisp_setcar    (lispptr x, lispptr v);
@@ -866,7 +1267,7 @@ extern bool     FASTCALL lisp_specialp  (lispptr);
 #ifndef NAIVE
 extern void     FASTCALL internal_error      (char * msg);
 extern void     FASTCALL internal_error_ptr  (void *, char * msg);
-extern void     FASTCALL error               (char code, char * msg);
+extern void     FASTCALL error               (char code, char * msg, lispptr info);
 extern void     FASTCALL error_argname       (lispptr);
 extern lispptr  FASTCALL error_cons_expected (lispptr);
 extern void     FASTCALL err_type            (char * type, lispptr x, char errorcode);
@@ -880,7 +1281,6 @@ extern void              error_set_ccons_cdr (void);
 
 extern void     FASTCALL bi_tcheck           (lispptr, uchar type, char errorcode);
 extern void     FASTCALL check_stacks        (char * old_stack, char * old_tagstack);
-extern void              print_error_info    (void);
 #ifdef CHECK_OBJ_POINTERS
 extern void              check_lispptr       (char *);
 #endif // #ifdef CHECK_OBJ_POINTERS
@@ -900,11 +1300,15 @@ extern void     FASTCALL make_car_call       (void);
 extern void             switch_heap          (void);
 size_t                  heap_free_size       (void);
 
+extern char con_reset (void);
+extern char con_set   (char flags);
+
 extern void init_builtins (void);
 extern void init_eval     (void);
 extern bool init_heap     (void);
 extern void init_list     (void);
 extern void init_onerror  (void);
+extern void init_read     (void);
 extern void init_repl     (void);
 extern void heap_add_init_areas (void);
 

@@ -1,11 +1,11 @@
 $(PROGRAM_PLAIN): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
-	$(LD) $(LDFLAGS) -l/usr/local/share/z88dk/lib/clibs/cpm_clib.lib -o=$@ $^ $(LIBRARIES)
+	$(LD) $(LDFLAGS) -o=$@ $(addprefix -l,$(LIBRARIES:.a=.lib)) -l/usr/local/share/z88dk/lib/clibs/cpm_clib.lib $^
 
 $(LIBRARY): $(SOURCES:.c=.o) $(ASMSOURCES:.asm=.o)
 	$(AR) $(ARFLAGS) -x$@ $^
 
 clean:
-	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(LIBRARY) $(CLEANFILES)
+	rm -f $(ASMSOURCES:.asm=.o) $(SOURCES:.c=.o) $(PROGRAM_PLAIN) $(PROGRAM) $(LIBRARY:.a=.lib) $(CLEANFILES)
 
 %.o: %.asm
 	$(AS) $(ASFLAGS) -o $@ $<

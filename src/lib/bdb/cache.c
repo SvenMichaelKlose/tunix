@@ -166,9 +166,9 @@ cache_index_remove_id (bdb *db, cnode *cn)
 void
 cache_insert_key (bdb *db, cnode *cn)
 {
-    void    *key = db->data2key (cn->data);
-    cnode   *n   = db->cache_root_keys;
-    cnode   *on  = (void *) -1;
+    void  * key = db->data2key (cn->data);
+    cnode * n   = db->cache_root_keys;
+    cnode * on  = (void *) -1;
 
     // Add first node as root.
     if (!n) {
@@ -218,8 +218,8 @@ cache_index_remove_key (bdb *db, cnode *cn)
 cnode *
 cache_find_id (bdb *db, dbid_t id)
 {
-    dbid_t  key = cache_id2key (id);
-    cnode   *n  = db->cache_root_ids;
+    dbid_t   key = cache_id2key (id);
+    cnode *  n  = db->cache_root_ids;
 
     // Empty tree, nothing to find.
     if (!n)
@@ -242,7 +242,7 @@ cache_find_id (bdb *db, dbid_t id)
 cnode *
 cache_find_key (bdb *db, void *key)
 {
-    cnode *n = db->cache_root_keys;
+    cnode * n = db->cache_root_keys;
     int c;
 
     if (!n)
@@ -274,10 +274,10 @@ cache_remove (bdb *db, cnode *cn)
 
 // Move least-recently used record to storage.
 void
-cache_swap_out_lru (bdb *db)
+cache_lru_to_storage (bdb *db)
 {
     // Get least-recently used record.
-    cnode *cn = cache_pop_lru (db);
+    cnode * cn = cache_pop_lru (db);
     assert(cn);
 
     // Update data or write new storage record.
@@ -293,13 +293,13 @@ cache_swap_out_lru (bdb *db)
 cnode *
 cache_add (bdb *db, dbid_t id, void *data, size_t size)
 {
-    cnode *cn;
+    cnode * cn;
 
     // Swap out if it's time.
-    if (db->num_cached == BDB_MAX_CACHED)
-        cache_swap_out_lru (db);
-    else
-        db->num_cached++;
+    if (db->num_cached == BDB_MAX_CACHED) {
+        cache_lru_to_storage (db);
+        db->num_cached--;
+    }
 
     if (!(cn = cnode_alloc ()))
         return NULL;
@@ -308,12 +308,15 @@ cache_add (bdb *db, dbid_t id, void *data, size_t size)
     cn->id   = id;
     cn->size = size;
     cn->data = malloc (size);
+    if (!cn->data)
+        return NULL;
     memcpy (cn->data, data, size);
 
-    cache_push_mru (db, cn);
+    cache_push_mru   (db, cn);
     cache_insert_key (db, cn);
-    cache_insert_id (db, cn);
+    cache_insert_id  (db, cn);
 
+    db->num_cached++;
     return cn;
 }
 
@@ -321,16 +324,16 @@ void
 cache_flush (bdb *db)
 {
     while (db->num_cached--)
-        cache_swap_out_lru (db);
+        cache_lru_to_storage (db);
 }
 
 // Fetch record from storage and add it to the cache.
 cnode *
 cache_add_stored (bdb *db, dbid_t id)
 {
-    snode  *sn;
-    size_t size;
-    cnode  *cn;
+    snode  *  sn;
+    cnode  *  cn;
+    size_t    size;
 
     if ((sn = storage_map (&size, db, id))) {
         cn = cache_add (db, id, sn->data, size);

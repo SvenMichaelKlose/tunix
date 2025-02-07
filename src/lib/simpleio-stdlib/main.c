@@ -28,6 +28,7 @@
 
 FILE *      channels[MAX_CHANNELS];
 signed char last_error;
+char        con_flags;
 
 #ifdef TARGET_UNIX
 
@@ -93,13 +94,19 @@ void
 cmd_clr (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags &= ~TERM_FLAG_CURSOR;
         fputs ("\033[?25l", stdout);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags &= ~TERM_FLAG_REVERSE;
         fputs ("\033[27m", stdout);
+    }
 #ifdef TARGET_UNIX
-    if (c & TERM_FLAG_DIRECT)
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags &= ~TERM_FLAG_DIRECT;
         reset_terminal_mode ();
+    }
 #endif
     fflush (stdout);
 }
@@ -108,15 +115,27 @@ void
 cmd_set (void)
 {
     char c = cmd_params[0];
-    if (c & TERM_FLAG_CURSOR)
+    if (c & TERM_FLAG_CURSOR) {
+        con_flags |= TERM_FLAG_CURSOR;
         fputs ("\033[?25h", stdout);
-    if (c & TERM_FLAG_REVERSE)
+    }
+    if (c & TERM_FLAG_REVERSE) {
+        con_flags |= TERM_FLAG_REVERSE;
         fputs ("\033[7m", stdout);
+    }
 #ifdef TARGET_UNIX
-    if (c & TERM_FLAG_DIRECT)
+    if (c & TERM_FLAG_DIRECT) {
+        con_flags |= TERM_FLAG_DIRECT;
         set_nonblocking_mode ();
+    }
 #endif
     fflush (stdout);
+}
+
+void
+cmd_get (void)
+{
+    putbackc (con_flags);
 }
 
 void
@@ -149,7 +168,7 @@ getxy (int * col, int * row)
     int old_c_lflag;
     struct termios term;
 
-    // Disable terminal's canonical mode and echo
+    // Disable terminal's canonical mode and echo.
     if (tcgetattr (STDIN_FILENO, &term))
         return false;
     old_c_lflag = term.c_lflag;
@@ -157,22 +176,25 @@ getxy (int * col, int * row)
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
     term.c_lflag = old_c_lflag;
-#endif
 
-    // Request cursor position
-    if (0 > write (STDOUT_FILENO, "\033[6n", 4))
+    // Ensure standard input file number is in blocking mode.
+    int flags = fcntl (STDIN_FILENO, F_GETFL, 0);
+    if (flags & O_NONBLOCK)
+        fcntl (STDIN_FILENO, F_SETFL, flags & ~O_NONBLOCK); // Clear O_NONBLOCK
+
+    // Request cursor position.
+    if (4 != write (STDOUT_FILENO, "\033[6n", 4))
         goto error_with_term_restored;
 
     // Read the response.
-    char buf[16] = {0};
-    if (0 > read (STDIN_FILENO, buf, sizeof(buf) - 1))
+    char buf[32] = {0};
+    if (0 >= read (STDIN_FILENO, buf, sizeof (buf) - 1))
         goto error_with_term_restored;
 
     // Scan the response.
     if (2 != sscanf (buf, "\033[%d;%dR", row, col))
         goto error_with_term_restored;
 
-#ifdef TARGET_UNIX
     // Restore former terminal status.
     if (tcsetattr (STDIN_FILENO, TCSANOW, &term))
         return false;
@@ -182,6 +204,7 @@ getxy (int * col, int * row)
 
 error_with_term_restored:
 #ifdef TARGET_UNIX
+    fcntl (STDIN_FILENO, F_SETFL, flags);
     tcsetattr (STDIN_FILENO, TCSANOW, &term);
 #endif
     return false;
@@ -192,25 +215,25 @@ error_with_term_restored:
 void
 cmd_getx (void)
 {
-#ifndef __CC65__
+#ifdef __CC65__
+    putbackc (0);
+#else
     int row, col;
     getxy (&row, &col);
     putbackc (row);
-#else
-    putbackc (0);
-#endif // #ifndef __CC65__
+#endif // #ifdef __CC65__
 }
 
 void
 cmd_gety (void)
 {
-#ifndef __CC65__
+#ifdef __CC65__
+    putbackc (0);
+#else
     int row, col;
     getxy (&row, &col);
     putbackc (col);
-#else
-    putbackc (0);
-#endif // #ifndef TARGET_SIM6502
+#endif // #ifdef __CC65__
 }
 
 bool
@@ -234,7 +257,11 @@ raw_in (void)
     c = fgetc (channels[(int) fnin]);
     if (c == EOF) {
         c = 0;
-        if (errno)
+#ifdef __CC65__
+        if (errno && errno != EAGAIN)
+#else
+        if (errno && errno != EWOULDBLOCK && errno != EAGAIN)
+#endif
             last_error = errno;
     }
     return c;
@@ -247,9 +274,11 @@ raw_conin (void)
 {
     int c;
 
-    set_nonblocking_mode ();
+    if (!(con_flags & TERM_FLAG_DIRECT))
+        set_nonblocking_mode ();
     c = raw_in ();
-    reset_terminal_mode ();
+    if (!(con_flags & TERM_FLAG_DIRECT))
+        reset_terminal_mode ();
 
     return c;
 }
@@ -266,6 +295,8 @@ raw_out (char c)
         last_error = -1;
     else if (EOF == fputc (c, channels[(int) fnout]))
         last_error = errno;
+    if (fnout == STDOUT && (con_flags & TERM_FLAG_DIRECT))
+        fflush (stdout);
 }
 
 void
@@ -301,24 +332,6 @@ raw_close (simpleio_chn_t c)
     channels[(int) c] = NULL;
 }
 
-simpleio_chn_t 
-simpleio_open (char * name, char mode)
-{
-    FILE * handle;
-    char m[2];
-    simpleio_chn_t chn;
-
-    last_error = 0;
-    m[0] = mode;
-    m[1] = 0;
-    if ((handle = fopen (name, m))) {
-        chn = alloc_channel (handle);
-        simpleio_init_channel (chn);
-        return chn;
-    }
-    return 0;
-}
-
 simpleio vectors = {
     raw_eof,
     raw_err,
@@ -334,11 +347,34 @@ simpleio vectors = {
     raw_close
 };
 
+simpleio_chn_t 
+simpleio_open (char * name, char mode)
+{
+    FILE * handle;
+    char m[2];
+    simpleio_chn_t chn;
+
+    last_error = 0;
+    m[0] = mode;
+    m[1] = 0;
+    if ((handle = fopen (name, m))) {
+        chn = alloc_channel (handle);
+        simpleio_init_channel (chn, &vectors);
+        return chn;
+    }
+    return 0;
+}
+
 void
 simpleio_init ()
 {
-    simpleio_set (&vectors);
     channels[STDIN]  = stdin;
     channels[STDOUT] = stdout;
     channels[STDERR] = stderr;
+    simpleio_clear_channels ();
+    simpleio_init_channel (STDIN,  &vectors);
+    simpleio_init_channel (STDOUT, &vectors);
+    simpleio_init_channel (STDERR, &vectors);
+    simpleio_init_common ();
+    con_flags = TERM_FLAG_CURSOR;
 }

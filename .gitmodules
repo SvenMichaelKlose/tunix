@@ -7,3 +7,6 @@
 [submodule "src/contrib/cc65"]
 	path = src/contrib/cc65
 	url = git@github.com:cc65/cc65.git
+[submodule "src/contrib/z88dk"]
+	path = src/contrib/z88dk
+	url = git@github.com:z88dk/z88dk.git

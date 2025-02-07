@@ -1,4 +1,31 @@
-# Commodore VIC-20
+TUNIX Lisp
+[@] Boot compiled compiler with
+    [tré](https://github.com/SvenMichaelKlose/tre/
+
+Debugger
+[ ] Invoking debugger with Ctrl-C.
+[ ] Invoking debugger with RESTORE key on CBMs.
+
+Input/Output
+[ ] On Unix: OPENDIR, READDIR, CLOSEDIR.
+[@] Working terminal direct mode.
+
+Built-ins
+[ ] STRING (SYMBOL with no look-up to reuse exiting ones.)
+[ ] SYSTEM (program invokation).
+
+Tests
+[ ] READ on syntax errors.
+[ ] Fuzzers
+
+Manual
+[ ] Compile-time options.
+[ ] Complete set of examples.
+[ ] Release rework.
+[ ] Introduction to TUNIX Lisp and REPL use.
+
+Documentation
+[ ] Introduction to (TUNIX) Lisp programming
 
 Ultimem boot (src/sys/boot/)
 [ ] Can run as PRG with any configuration of the UltiMem.
@@ -14,48 +41,3 @@ Ultimem boot (src/sys/boot/)
 Kernel (src/sys/kernel/)
 [ ] Find memory bank allocation bug.
 [@] Soft segmentation fault detection.
-
-# TUNIX Lisp
-
-General
-[@] Make it fun writing the bytecode compiler with it.
-
-Interpreter
-[@] Full heap compression (compressed conses with CAR only).
-[ ] eval0() and related don't have to return a value.
-    Save code size by removing it.
-[ ] Make stack overflows regular errors.
-
-Debugger
-[ ] Error messages without debugger.
-[ ] Conditional breakppoints.
-[ ] Watchpoints.
-[ ] Conditional watchpoints.
-[ ] Invoking debugger with Ctrl-C.
-[ ] Invoking debugger with RESTORE key on CBMs.
-[?] Replace expression while stepping.
-
-Input/Output
-[ ] On Unix: OPENDIR, READDIR, CLOSEDIR.
-
-Built-ins
-[ ] STRING (SYMBOL with no look-up to reuse exiting ones.)
-[ ] SYSTEM (program invokation).
-
-Tests
-[ ] READ on syntax errors.
-
-Text editor
-[ ] GROUP-BY-PREDICATES to convert a line back to symbols,
-    taking advantage of symbol reuse to compress texts in
-    memory.
-[ ] Highlighting (built-ins, macros)
-[ ] Interpreter: Multiple symbol lists to reduce look-up times.
-
-Manual
-[ ] Compile-time options.
-[ ] Complete set of examples.
-[ ] Release rework.
-
-Documentation
-[ ] Introduction to (TUNIX) Lisp programming

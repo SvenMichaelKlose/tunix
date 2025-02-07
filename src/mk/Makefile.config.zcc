@@ -1,7 +1,7 @@
 CC			= zcc
 CFLAGS      = +$(TARGET) -c -Werror -Wall -DTARGET=$(TARGET) -I$(TUNIX_LIB)
-LD		    = z88dk-z80asm
-LDFLAGS     = -b
+LD		    = zcc
+LDFLAGS     = +$(TARGET) -create-app
 NO_EXOMIZER = 1
 AR		    = z88dk-z80asm
 ARFLAGS		=

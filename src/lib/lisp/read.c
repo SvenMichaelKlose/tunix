@@ -4,8 +4,9 @@
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h> // For HOST_DEBUGGER().
@@ -14,6 +15,8 @@
 #include <simpleio/libsimpleio.h>
 
 #include "liblisp.h"
+
+lispptr dot_symbol;
 
 #ifdef __CC65__
 #pragma code-name (push, "CODE_READ")
@@ -31,12 +34,12 @@ our_isalpha (char c)
 lispptr
 missing_closing_paren (void)
 {
-    error (ERROR_NO_PAREN, "Missing ')'");
+    error (ERROR_PAREN_MISSING, "Missing ')'", nil);
     return t;
 }
 
 lispptr
-is_unexpected_eol (void)
+is_unexpected_eof (void)
 {
     return eof () ? missing_closing_paren () : nil;
 }
@@ -72,7 +75,7 @@ read_list (void)
         skip_comments_and_spaces ();
 
 #ifndef NAIVE
-        if (is_unexpected_eol ())
+        if (is_unexpected_eof ())
             return nil;
 #endif
 
@@ -80,7 +83,7 @@ read_list (void)
         if (in () == ')')
             return start;
 #ifndef NAIVE
-        if (is_unexpected_eol ())
+        if (is_unexpected_eof ())
             return nil;
 #endif
         putback ();
@@ -88,8 +91,9 @@ read_list (void)
         PUSH(start);
         PUSH(last);
 
+        c = read_expr ();
         // Dotted pair?
-        if (in () == '.') {
+        if (c == dot_symbol && NOT_NIL(start)) {
             // Read dotted pair's CDR.
             c = read_expr ();
 
@@ -100,11 +104,8 @@ read_list (void)
                 return missing_closing_paren ();
             putback (); // Keep for regular end-of-list detection.
 #endif
-        } else {
-            // Read next element.
-            putback ();
-            c = make_cons (read_expr (), nil);
-        }
+        } else
+            c = make_cons (c, nil);
 
         POP(last);
         POP(start);
@@ -115,7 +116,7 @@ read_list (void)
 #endif
 
         // Append element to last.
-        if (last)
+        if (NOT_NIL(last))
             last->cdr = c;
         else
             start = c;
@@ -134,7 +135,7 @@ read_string (void)
         *p = (lastin () == '\\') ? in () : lastin ();
 #ifndef NAIVE
         if (eof ()) {
-            error (ERROR_QUOTE_MISSING, "No '\"'");
+            error (ERROR_QUOTE_MISSING, "No '\"'", nil);
             return nil;
         }
 #endif
@@ -148,6 +149,8 @@ read_quoted (lispptr which)
     return make_cons (which, make_cons (read_expr (), nil));
 }
 
+#ifndef NO_QUASIQUOTE
+
 lispptr
 read_unquoted (void)
 {
@@ -156,6 +159,8 @@ read_unquoted (void)
     putback ();
     return read_quoted (unquote);
 }
+
+#endif // #ifndef NO_QUASIQUOTE
 
 lispptr
 read_symbol_or_number (void)
@@ -172,7 +177,7 @@ read_symbol_or_number (void)
 #ifndef NAIVE
         // Check if buffer is full.
         if (len == MAX_SYMBOL) {
-            error (ERROR_SYM_TOO_LONG, "Sym len");
+            error (ERROR_SYM_TOO_LONG, "Sym len", nil);
             return nil;
         }
 #endif
@@ -229,18 +234,26 @@ read_expr ()
         return read_string ();
     case '\'':
         return read_quoted (quote);
+#ifndef NO_QUASIQUOTE
     case '$':
         return read_quoted (quasiquote);
     case ',':
         return read_unquoted ();
+#endif
     case '\\':
         return make_number (in ());
 #ifndef NAIVE
     case ')':
-        error (ERROR_STALE_PAREN, "Stale ')'");
+        error (ERROR_STALE_PAREN, "Stale ')'", nil);
         return nil;
 #endif
     }
     putback ();
     return read_symbol_or_number ();
+}
+
+void
+init_read ()
+{
+    dot_symbol = alloc_symbol (".", 1);
 }

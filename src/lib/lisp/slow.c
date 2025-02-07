@@ -1,22 +1,29 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
-#endif
+
+#ifndef DEVELOPMENT
+    #define NOT_SLOW
+    #pragma inline-stdfuncs (on)
+    #pragma codesize (300)
+#endif // #ifndef DEVELOPMENT
+#endif // #ifdef __CC65__
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr tmp_pop;
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("tmp_pop")
 #pragma bss-name (pop)
 #endif

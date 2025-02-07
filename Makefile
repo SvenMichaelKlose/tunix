@@ -4,7 +4,6 @@ TAG 			 := $(shell git describe --tags 2>/dev/null)
 BRANCH 			 := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null)
 DISTDIR_BASE 	   ?= tunix
 DISTDIR 	 	    = $(DISTDIR_BASE)/$(TARGET)/
-RELEASE_LISP_FLAGS ?= -DVERBOSE_LOAD=1 -DVERBOSE_DEFINES=1
 RELEASE_ZIP_NAME   ?= tunix.$(TAG).zip
 
 ULTIMEM_IMG 		= tunix.img
@@ -15,14 +14,14 @@ all: src/include/git-version.h
 	$(MAKE) src
 	$(MAKE) mkfs/mkfs.ultifs
 	$(MAKE) ultimem_image
-#	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lisp
+#	sbcl --noinform --core bender/bender src/lib/gfx/gencode.lsp
 
 src/include/git-version.h: FORCE
 	printf "$(TAG)" >git-version
-	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lisp
-	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lisp
-	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lisp
-	printf ")\")(terpri)\n" >>src/bin/lisp/git-version.lisp
+	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lsp
+	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lsp
+	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lsp
+	printf " on \" +target+ \")\")(terpri)\n" >>src/bin/lisp/git-version.lsp
 	mkdir -p src/include
 	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
 	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h
@@ -51,12 +50,16 @@ world: all
 	rm -f $(DISTDIR)/image
 	cp src/bin/lisp/lisp $(DISTDIR)/
 	cp src/bin/lisp/test-read.bin $(DISTDIR)/
+	cp src/bin/lisp/edit-help.md $(DISTDIR)/
 ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 	cp src/bin/lisp/lisp.lbl $(DISTDIR)/
 	cp src/bin/lisp/lisp.map $(DISTDIR)/
 	cp src/bin/lisp/lisp.dbg $(DISTDIR)/
 endif
-	cp src/bin/lisp/*.lisp $(DISTDIR)/
+	cp src/bin/lisp/*.lsp $(DISTDIR)/
+	cp -r src/bin/lisp/as65 $(DISTDIR)/
+	cp -r src/bin/lisp/compiler $(DISTDIR)/
+	cp -r src/bin/lisp/edit $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/
 	cp src/sbin/ultidump/ultidump $(DISTDIR)/
@@ -86,8 +89,12 @@ allworlds:
 	$(MAKE) worldclean world TARGET=sim6502
 	$(MAKE) worldclean world TARGET=unix
 	$(MAKE) worldclean world TARGET=vic20
+	#printf "# allwords `date +%F`: $(CFLAGS)\n" >> sizes
+	#printf "~~~ls -l tunix/*/lisp\n" >> sizes
+	#ls -l tunix/*/lisp >> sizes
+	#printf "~~~\n\n" >> sizes
 
-test: all
+test: allworlds
 	$(MAKE) -C src test
 	./scripts/test-unix.sh
 
@@ -132,7 +139,7 @@ release:
 	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
 	$(MAKE) host COPTFLAGS="-Ofast -flto -march=native" LDFLAGS="-Ofast -flto -march=native"
 	$(MAKE) test TARGET=unix
-	$(MAKE) allworlds NDEBUG=1 LISP_FLAGS="-DVERBOSE_LOAD -DVERBOSE_DEFINES"
+	$(MAKE) allworlds NDEBUG=1
 	cd src/bin/lisp/doc && ./md2pdf.sh && cd -
 	cp src/bin/lisp/doc/manual.pdf tunix/tunix-lisp.pdf
 	cp src/bin/lisp/doc/manual.md tunix/tunix-lisp.md

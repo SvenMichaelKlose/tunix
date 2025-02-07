@@ -1,12 +1,19 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
 #include <cbm.h>
-#endif
+
+#ifndef DEVELOPMENT
+    #define NOT_SLOW
+    #pragma inline-stdfuncs (on)
+    #pragma codesize (300)
+#endif // #ifndef DEVELOPMENT
+#endif // #ifdef __CC65__
 
 #include <ctype.h>
 #include <string.h>
-#include <stdbool.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <setjmp.h>
 #ifdef TARGET_UNIX
 #include <signal.h>
@@ -15,12 +22,12 @@
 #include <simpleio/libsimpleio.h>
 #include <lisp/liblisp.h>
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 lispptr list_start; // Start of list.
 lispptr list_last;  // Last cons of list.
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (pop)
 #endif
 
@@ -33,18 +40,18 @@ lispptr list_last;  // Last cons of list.
 int FASTCALL
 length (lispptr x)
 {
-    lisp_len = 0;
+    int l = 0;
     while (NOT_NIL(x)) {
-        lisp_len++;
+        l++;
         x = CDR(x);
 
         // Count CDR of dotted pair.
         if (NOT_NIL(x) && ATOM(x)) {
-            lisp_len++;
+            l++;
             break;
         }
     }
-    return lisp_len;
+    return l;
 }
 
 lispptr needle;

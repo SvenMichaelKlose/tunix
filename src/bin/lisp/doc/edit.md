@@ -1,11 +1,20 @@
 TUNIX editor
 ============
 
-The editor is invoked with function EDIT and the pathname
-of the file to edit:
+The editor is invoked with function EDIT.  If no filename
+has been passed as the argument, and no file is in \*LINES\*
+already, the help file "edit-help.md" is loaded.
 
 ~~~lisp
+; Start with help file.
+(edit)
+
+; Load file "mycode.lisp" before start.
 (edit "mycode.lisp")
+; (Exit with Ctrl-K, Q.)
+
+; Continue with "mycode.lisp".
+(edit)
 ~~~
 
 # Basic editing
@@ -19,6 +28,16 @@ cursor position.  Cursor keys move the cursor, backspace
 and delete keys remove chars and enter opens a new line.
 Removing all characters from a line will delete it as well.
 
+CTRL key combinations allow more navigation:
+
+| Command     | Description            |
+|-------------|------------------------|
+| Ctrl+A      | Move to start of line. |
+| Ctrl+E      | Move to end of line.   |
+| Ctrl+D      | Clear line.            |
+| Ctrl+L      | Redraw screen.         |
+| Ctrl+K, <?> | Start command...       |
+
 # Commands
 
 Commands are started by pressing Ctrl-K, followed by one
@@ -27,16 +46,18 @@ of these characters:
 | Command | Description                       |
 |---------|-----------------------------------|
 |    e    | Input and evaluate an expression. |
-|    r    | Run the file.                     |
+|    r    | Save and run file.                |
 |    s    | Save the file.                    |
 |    q    | Exit the editor.                  |
 
 ## Evaluating the file
 
-When pressing Ctrl-K e, the editor will save the test as
-file "etmp.img", remove most of its code from the heap and
-LOAD the saved file.  By calling EDIT again, the editor will
-be restarted where you left off.
+When pressing Ctrl-K r, the editor will save the file by
+the name you provide and LOAD it.  You're asked to press
+ENTER when finished.
+If you had to leave the editor, e.g. by pressing 'q' in the
+debugger, you can continue editing by just calling EDIT
+again.
 
 ## Saving the file
 

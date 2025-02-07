@@ -1,5 +1,8 @@
 See also src/bin/lisp/doc/future-enhancements.md
 
+Lisp interpreter
+[@] Full heap compression (compressed conses with CAR only).
+
 TUNIX Lisp
 [ ] On-demand function/macro loading.
 [ ] Bielefeld DB API.
@@ -7,6 +10,18 @@ TUNIX Lisp
 [ ] Tail call optimization.
 [ ] Relocateable images.
 [ ] Portable images.
+
+Debugger
+[ ] Error messages without debugger.
+[ ] Conditional breakppoints.
+[ ] Watchpoints.
+[ ] Conditional watchpoints.
+
+Editor
+[ ] GROUP-BY-PREDICATES to convert a line back to symbols,
+    taking advantage of symbol reuse to compress texts in
+    memory.
+[ ] Highlighting (built-ins, macros)
 
 Reducing Memory Usage
 [?] GC stack compression, utilizing tag stack.

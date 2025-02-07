@@ -1,11 +1,16 @@
-TUNIX Lisp editor
-=================
+HELP
 
-Move cursor with arrow keys.
-
-# Commands
-
-Ctrl+k, l: Load file
-Ctrl+k, s: Save file
-Ctrl+k, q: Quit
-
+|------------|-------------------------|
+| Arrow keys | Move cursor.            |
+| Ctrl+a/e   | Move to line start/end. |
+| Ctrl+y/x   | Page up/down.           |
+|------------|-------------------------|
+| Ctrl+d     | Clear line.             |
+|------------|-------------------------|
+| Ctrl+k l   | Load file.              |
+| Ctrl+k s   | Save file.              |
+| Ctrl+k n   | New file.               |
+| Ctrl+k d   | List directory.         |
+| Ctrl+k r   | Save and evaluate file. |
+| Ctrl+k e   | Evaluate expression.    |
+| Ctrl+k q   | Exit editor.            |

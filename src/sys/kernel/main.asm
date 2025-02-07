@@ -3511,14 +3511,14 @@ err_first_not_running:
     ldx pid
     ldy proc_flags,x
 
-    ; Restoring its banks.
+    ; Restore banks.
     pop blk2
     pop blk1
     pop ram123
     cpy #PROC_BABY
     beq grow_baby
 
-    ; Restore syscall return values.
+    ; Restore syscall return values and flags.
 :   lda flags
     pha
     load_regs
@@ -3527,8 +3527,8 @@ err_first_not_running:
 
 .export grow_baby
 grow_baby:
-    mvb blk1,tunix_blk1
-    mvb blk2,tunix_blk2
+    mvb blk1, tunix_blk1
+    mvb blk2, tunix_blk2
     mvb {proc_flags,x}, #PROC_RUNNING
     mvb ram123, {proc_ram123,x}
     lda proc_blk1,x

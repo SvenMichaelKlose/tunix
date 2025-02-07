@@ -1,3 +1,5 @@
+NO_EXOMIZER ?= 1
+
 CC65_ROOT    = $(THIS_DIR)/../contrib/cc65
 CC65_BIN     ?= $(CC65_ROOT)/bin
 CC65_SHARE   ?= $(CC65_ROOT)/share/cc65
@@ -19,29 +21,29 @@ LD65CFG   ?= $(THIS_DIR)/../../cfg/ld65/$(CC65_TARGET).cfg
 LDFLAGS    = -C $(LD65CFG) -Ln $(PROGRAM).lbl -m $(PROGRAM).map --dbgfile $(PROGRAM).dbg
 
 ifeq ($(TARGET), apple2)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), apple2enh)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), c128)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), c16)
-COPTFLAGS ?= -O -Or
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), c64)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), pet)
-COPTFLAGS ?= -O -Or
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), plus4)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), sim6502)
-COPTFLAGS ?= -O -Or -Os -Oi
+COPTFLAGS ?= -O
 endif
 ifeq ($(TARGET), vic20)
-COPTFLAGS ?= -O -Or
+COPTFLAGS ?= -O
 endif

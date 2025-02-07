@@ -27,8 +27,11 @@ jobs:
         DATE=`date +"%Y-%m-%d"`
         echo "ZIP_NAME=tunix.${{ env.VERSION }}+$SHORT_SHA.$DATE.zip" >> $GITHUB_ENV
 
+    - name: Update repos
+      run: sudo apt-get update -y
+
     - name: Install prerequisites
-      run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip
+      run: sudo apt-get install -y gcc make texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra pandoc zip texlive-xetex fonts-noto fonts-noto-color-emoji
 
     - name: Create config file
       run: echo -e "TARGET=vic20" > src/config

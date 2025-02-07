@@ -13,12 +13,10 @@ book: true
 
 # Overview
 
-TUNIX Lisp is a highly efficient and scalable Lisp
-interpreter, written in ANSI-C.  It is designed for
-constrained environments, such as classic home computers
-(including 6502-based systems), microcontrollers and
-embedded systems, but also has its place on modern
-machines.
+TUNIX Lisp is a highly efficient and scalable Lisp interpreter, written in
+ANSI-C.  It is designed for constrained environments, such as classic home
+computers (including 6502-based systems), microcontrollers and embedded
+systems, but also has its place on modern machines.
 
 Features:
 
@@ -30,28 +28,25 @@ Features:
 * Supplementary compressed stack.[^stack]
 * List compression.
 * Saving and loading system images.
-* Unified symbol and string handling with data compression
-  features.
+* Unified symbol and string handling with data compression features.
 * UNDER CONSTRUCTION: Integrated text editor.
 
-Most features can be left out during compilation to make
-TUNIX Lisp fit even the most contrained environments.
+Most features can be left out during compilation to make TUNIX Lisp fit
+even the most contrained environments.
 
-[^gc]: Planned to be made interruptible to some degree,
-  optionally truly interruptible providing a copying garbage
-  collector.
-[^io]: Instead of providing a file number for each I/O
-  operation an input and/or output channel must be selected
-  beforehand, bridging the gap between plain standard I/O
-  and multi-stream handling without making the API more
-  complex from the start, supporting operation in maximally
-  constrained environments.
-[^stack]: It holds byte-sized tags instead of larger return
-  addresses.  Also to support architectures with limited CPU
-  stacks, like those with MOS-6502 CPUs.
+[^gc]: Planned to be made interruptible to some degree, optionally truly
+    interruptible providing a copying garbage collector.
+[^io]: Instead of providing a file number for each I/O operation an input
+    and/or output channel must be selected beforehand, bridging the gap
+    between plain standard I/O and multi-stream handling without making the
+    API more complex from the start, supporting operation in maximally
+    constrained environments.
+[^stack]: It holds byte-sized tags instead of larger return addresses.
+    Also to support architectures with limited CPU stacks, like those with
+    MOS-6502 CPUs.
 
-This distribution builds executables for these platforms
-using the cc65 C compiler suite:
+This distribution builds executables for these platforms using the cc65 C
+compiler suite:
 
 * Commodore C128
 * Commodore C16
@@ -59,67 +54,100 @@ using the cc65 C compiler suite:
 * Commodore Plus4
 * Commodore VIC-20 (+27K)
 
-It also compiles on regular Unixoids, using the GNU compiler
-toolchain or compatibles.
+It also compiles on regular Unixoids, using the GNU compiler toolchain or
+compatibles.
 
-## Differences to other dialects
+## Some differences to other dialects
 
-The TUNIX Lisp dialect is very much like any other.  Here
-are some things that raise an eyebrow when seeing them the
-first time:
+Here is how most other Lisps translate to TUNIX Lisp:
 
 | Most other dialects    | TUNIX Lisp      |
 |------------------------|-----------------|
 | backquote sign '`'     | dollar sign '$' |
+| (CONS car cdr)         | (. car cdr)     |
 | (SETQ c v)             | (= c v)         |
-| (RPLACA c v)           | (SETCAR c v)    |
-| (RPLACD c v)           | (SETCDR c v)    |
+| (RPLACA c v)           | (=-CAR c v)     |
+| (RPLACD c v)           | (=-CDR c v)     |
 | (MAKE-SYMBOL x)        | (SYMBOL l)      |
 | (SYMBOL-VALUE s)       | (VALUE s)       |
 | (FILTER f l)           | (@ f l)         |
 | (LAMBDA (args . body)) | (args . body)   |
 | #\\A                   | \\A             |
 | (cond +l)              | (? +l)          |
+| (= num1 num2)          | (== num1 num2)  |
+| package:symbol         | package/symbol  |
 
-Because the backquote (`) is not part of the charsets of old
-machines TUNIX Lisp intends to support, the dollar sign ($)
-is used as the abbreviation for QUASIQUOTE.
+Because the backquote (`) is not part of the charsets of old machines
+TUNIX Lisp intends to support, the dollar sign ($) is used as the
+abbreviation for QUASIQUOTE.
 
-MEMBER and FIND are comparing with EQ instead of EQL as
-these functions are used internally as well and need to be
-fast.  Use NEMBER-IF or FIND-IF together with EQL to match
-numbers by value.
+MEMBER and FIND are comparing with EQ instead of EQL as these functions
+are used internally as well and need to be fast.  Use NEMBER-IF or FIND-IF
+together with EQL to match numbers by value.
 
-LAMBDA is not around yet.  Function expressions are quoted
-when used as arguments to other functions.  That makes
-compiling them to 'native' function impossible, so something
-similar will have to be in later versions.
+LAMBDA is not around yet.  Function expressions are quoted when used as
+arguments to other functions.  That makes compiling them to 'native'
+function impossible, so something similar will have to be in later
+versions.
 
 ### Symbols are strings
 
-Symbols have a case-sensitive name and a value and they also
-serve as strings.  They can be converted to and from
-character value lists:
+Symbols have a case-sensitive name and a value and they also serve as
+strings.  They can be converted to and from character value lists:
 
 ~~~lisp
 (symbol '(\A \B \C)) -> "ABC"
 ~~~
 
-Symbols may also be anonymous, with no name at all.
+Symbols may also be anonymous, with no name at all.  Calling SYMBOL with
+no arguments creates a unique and anonymous symbol that won't get reused
+when SYMBOL is called without arguments again.  As this is true for all
+symbols with no name, an empty string ("") can be used as well.
 
 ~~~lisp
-(symbol) ; Anonymous symbol that won't get re-used.
+(eq (symbol) (symbol))  ; -> NIL
+(eq "" (symbol))        ; -> NIL
+(eq "" "")              ; -> NIL
 ~~~
 
 SYMBOL will issue an error if it is passed a dotted pair.
+
+### Built-in = instead of SETQ
+
+### Macro ?: A more compact version of COND
+
+Macro ? is used instead of COND.  It does not require each
+condition/consequence pair to be a list.  Any remaining expression with
+no following one to make a pair is the default, so no T condition is
+required:
+
+~~~lisp
+; NOT used in TUNIX Lisp.
+(cond
+  ((hungry?) (go 'shop))
+  (t (have-fun)))
+(cond
+  ((hungry?)  (go 'shop))
+  ((thirsty?) (go 'fridge))
+  (t (have-fun)))
+
+; TUNIX Lisp version.
+(? (hungry?)
+   (go 'shop)
+   (have-fun))
+(?
+  (hungry?)  (go 'shop)
+  (thirsty?) (go 'fridge)
+  (have-fun))
+~~~
 
 ## Memory consumption
 
 ### Heap
 
-Object allocation is fast, requiring bumping up the pointer
-to the top of the growing heap, and a boundary check to
-trigger garbage collection when the heap is full.
+Object allocation is fast, requiring bumping up the pointer to the top of
+the growing heap, and a boundary check to trigger garbage collection when
+the heap is full.
 
 | Data type              | heap  |
 |------------------------|-------|
@@ -129,31 +157,38 @@ trigger garbage collection when the heap is full.
 
 ### CPU stack, object stack, and tag stack
 
-Alongside the CPU stack a separate garbage-collected object
-stack holds function arguments and objects that need to be
-relocated during garbage collection.  An additional raw
-stack holds return tags of byte size instead of full return
-addresses, and raw pointers to built-in procedure's argument
-definitions.
+Alongside the CPU stack a separate garbage-collected object stack holds
+function arguments and objects that need to be relocated during garbage
+collection.  An additional raw stack holds return tags of byte size
+instead of full return addresses, and raw pointers to built-in procedure's
+argument definitions.
 
 ### Inevitable creation of list elements
 
 APPLY copies all arguments but the last one.
 
+# About this document
+
+## Short code examples
+
+~~~lisp
+; Comment on example code
+(some-example-fun)  ; -> <result of evaluation>
+~~~
+
 # Installation
 
-"Installing" a binary release is the easiest way to go
-exploring.  I'd rather recommend compiling it yourself.
+"Installing" a binary release is the easiest way to go exploring.  I'd
+rather recommend compiling it yourself.
 
 ## Getting a binary release
 
 Download the latest binary from
 [https://github.com/SvenMichaelKlose/tunix/releases](https://github.com/SvenMichaelKlose/tunix/releases).
 
-The name of the ZIP file contains the project's name
-"tunix", followed by its release version, ID in the
-public Git repository (short SHA hash), and finally the
-release date, followed by the opligatory ZIP suffix.
+The name of the ZIP file contains the project's name "tunix", followed by
+its release version, ID in the public Git repository (short SHA hash), and
+finally the release date, followed by the opligatory ZIP suffix.
 
 It should look like this:
 
@@ -168,66 +203,60 @@ tunix.v0.0.5+bca5411.2024-08-22.zip
 
 *** TODO: See also "Version information". ***
 
-The version, "0.0.5" in this case, contains a major, minor
-and patch version according to
+The version, "0.0.5" in this case, contains a major, minor and patch
+version according to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-TUNIX Lisp is a bit different as it has a major version
-number of "0", indicating that it's not meant for production
-where you expect things to not change from one day to the
-other.  To make it even worse, the minor version also being
-"0" means that absolutely everything could change, no matter
-if there'll be hell or high water.  It's about making TUNIX
-grown up enough to be able to follow the Semantic Versioning
-rules in the first place.  But we're trying to keep the pain
-away.  The patch level increases with every release - that
-happens if a bunch of changes happened that makes everyones
-life easier.  You must download the latest.  The others are
-kept for the protocol only.
+TUNIX Lisp is a bit different as it has a major version number of "0",
+indicating that it's not meant for production where you expect things to
+not change from one day to the other.  To make it even worse, the minor
+version also being "0" means that absolutely everything could change, no
+matter if there'll be hell or high water.  It's about making TUNIX grown
+up enough to be able to follow the Semantic Versioning rules in the first
+place.  But we're trying to keep the pain away.  The patch level increases
+with every release - that happens if a bunch of changes happened that
+makes everyones life easier.  You must download the latest.  The others
+are kept for the protocol only.
 
 Things you must expect to change sooner than later:
 
-- Required special keyword (like the notoriuos LAMBDA) to
-  tell function expressiod from regular expressions.  It'll
-  be required to make the language more comfortable when it
-  comes to lexical scope, and to have a compiler produce
-  effective code.
+* Required special keyword (like the notoriuos LAMBDA) to tell function
+  expressiod from regular expressions.  It'll be required to make the
+  language more comfortable when it comes to lexical scope, and to have a
+  compiler produce effective code.
 
 ## Unpacking
 
-Download the latest release and unpack it.  On a unixoid
-command-line (Linux/Mac) this should do:
+Download the latest release and unpack it.  On a unixoid command-line
+(Linux/Mac) this should do:
 
 ~~~sh
 unzip tunix.<LatestVersion>.zip
 ~~~
 
-It contains directory "tunix" and subdirectories for
-all supported platforms, e.g. "tunix/c64".  You can step
-into one of those and run TUNIX Lisp in your favourite
-emulator, or you can also transfer the files to your
-platform, depending on what it supports.  For Commdore
-8-bit machines there are SD card readers, also known as
-SD2IEC drives, available.
+It contains directory "tunix" and subdirectories for all supported
+platforms, e.g. "tunix/c64".  You can step into one of those and run TUNIX
+Lisp in your favourite emulator, or you can also transfer the files to
+your platform, depending on what it supports.  For Commdore 8-bit machines
+there are SD card readers, also known as SD2IEC drives, available.
 
 ## Running on Linux/Mac/BSD, etc.
 
-If you're running a something Unixoid, step into directory
-"tunix/unix" and shoot it up by typing "./lisp":
+If you're running a something Unixoid, step into directory "tunix/unix"
+and shoot it up by typing "./lisp":
 
 ~~~sh
 cd tunix/unix
 ./lisp
 ~~~
 
-You have to step into "tunix/unix" or TUNIX Lisp won't find
-the other files it needs to get going.
+You have to step into "tunix/unix" or TUNIX Lisp won't find the other
+files it needs to get going.
 
 ## Installing VICE and YAPE mmulators
 
-The "VersatIle Commodore Emulator" is the most popular one
-for Commodore 8-bit machines.  Commodore C16 and Plus/4
-fanatics will insist on using YAPE as it's more compatible
-to the original.
+The "VersatIle Commodore Emulator" is the most popular one for Commodore
+8-bit machines.  Commodore C16 and Plus/4 fanatics will insist on using
+YAPE as it's more compatible to the original.
 
 ### The VersatIle Commdore Emulator (VICE)
 
@@ -251,7 +280,9 @@ For most Linux distributions, VICE can be installed directly from the package ma
   sudo pacman -S vice
   ```
 
-If VICE is not available in your distribution's repositories, you may need to compile it from source. Visit the [VICE website](https://vice-emu.sourceforge.io/) for more information.
+If VICE is not available in your distribution's repositories, you may need
+to compile it from source. Visit the
+[VICE website](https://vice-emu.sourceforge.io/) for more information.
 
 #### **macOS**
 
@@ -262,32 +293,30 @@ VICE can be installed via Homebrew on macOS:
   brew install vice
   ```
 
-Alternatively, you can download the latest macOS binary from
-the [VICE website](https://vice-emu.sourceforge.io/)
-and follow the instructions provided there.
+Alternatively, you can download the latest macOS binary from the
+[VICE website](https://vice-emu.sourceforge.io/) and follow the
+instructions provided there.
 
 #### **Windows**
 
 For Windows, you can download the latest VICE binary from
 the [VICE website](https://vice-emu.sourceforge.io/).
-After downloading, extract the archive to a directory of
-your choice and run the appropriate executable (e.g.,
-`x64.exe` for C64 emulation).
+After downloading, extract the archive to a directory of your choice and
+run the appropriate executable (e.g., `x64.exe` for C64 emulation).
 
 ### Yet Another Plus/4 Emulator (YAPE)
 
 #### **Windows**
 
-YAPE is primarily a Windows-based emulator.  You can
-download it from the
-[YAPE website](http://yape.homeserver.hu/).
-After downloading, extract the archive and run `yape.exe`.
+YAPE is primarily a Windows-based emulator.  You can download it from the
+[YAPE website](http://yape.homeserver.hu/).  After downloading, extract
+the archive and run `yape.exe`.
 
 #### **Linux and macOS**
 
-YAPE is not natively available for Linux or macOS, but you
-can run it using Wine, a compatibility layer for running
-Windows applications on Unix-like operating systems.
+YAPE is not natively available for Linux or macOS, but you can run it
+using Wine, a compatibility layer for running Windows applications on
+Unix-like operating systems.
 
 - **Install Wine**:
   - **Debian/Ubuntu**:
@@ -313,20 +342,19 @@ Windows applications on Unix-like operating systems.
 
 ### Additional Resources
 
-For more detailed installation instructions or
-troubleshooting, please refer to the respective emulator's
-website:
+For more detailed installation instructions or troubleshooting, please
+refer to the respective emulator's website:
 
-- [VICE Emulator](https://vice-emu.sourceforge.io/)
-- [YAPE Emulator](http://yape.homeserver.hu/)
+* [VICE Emulator](https://vice-emu.sourceforge.io/)
+* [YAPE Emulator](http://yape.homeserver.hu/)
 
 *** TODO: Apple IIe emulator installation ***
 
 ## Building TUNIX from source
 
-Building TUNIX from source code is highly recommended if you
-want to stay up to date, especially for getting patches that
-remove bugs - naturally these occur often in early software.
+Building TUNIX from source code is highly recommended if you want to stay
+up to date, especially for getting patches that remove bugs - naturally
+these occur often in early software.
 
 ### General instructions for all platforms
 
@@ -341,8 +369,8 @@ cd tunix
 
 #### Fetching third-party code
 
-After cloning the repository, you must fetch all the
-required third-party code and build that first:
+After cloning the repository, you must fetch all the required third-party
+code and build that first:
 
 ```bash
 git submodule update --init --recursive
@@ -455,100 +483,72 @@ Set up a Unix-like environment using MSYS2 or MinGW:
    make world TARGET=unix
    ```
 
-# Booting TUNIX Lisp
+# Using TUNIX Lisp: REPL, autoloader and debugger
 
-When starting the program the first time, only built-in
-functions and symbols exist.  The most basic function
-required are loaded from Lisp code files to form the basic
-_environment_.  It is saves and an _image file_ which is
-loaded instead of the Lisp code as that is much faster.
-You an have your own code run before that image is created
-by saving it to file "user-pre-image.lisp".  Code that
-should be executed after the image has been loaded can be
-saved to file "user-post-image.lisp".  By setting these
-files up you can set up an environment that fits your
-desires best.
+When firing up the interpreter the first time, it loads the most essential
+code required to load more code on demand, and creates a boot image which
+is loaded instead on next program start.  You then end up in the REPL
+(read-eval-print-loop).  It reads an expression, evaluates it, and prints
+the result.  Then it starts over if the input channel hasn't been closed.
 
 ~~~lisp
-; Example "user-pre-image.lisp"
-; Loads a set of regularly used functions.
-(@ '((x)
-      (load (symbol (append (symbol-name x)
-                            (symbol-name ".lisp")))))
-   '("when" "unless" "dolist" "alet" "while" "awhile"
-     "awhen"))
+(dotimes (i 10) (print i))
+0 1 2 3 4 5 6 7 8 9
 ~~~
 
-File "user-post-image.lisp" could be used for develeopment
-when part of the application code changes constantly.
+If function is missing, the error handler AUTOLOAD tries to load its
+source file by appending the ".lsp" suffix to its name.  This also works
+with macros.
+
+# Symbols
+
+Symbols have a name and a value.  Their names are also used as strings,
+converted to and from lists of character values.
+A symbol is created as soon as it is READ or by calling SYMBOL with a
+character value list.
 
 ~~~lisp
-(load "mycrashycode.lisp")
+(symbol '(65 66 67 68))  ; -> ABC
+(symbol '(\A \B \C \D))  ; -> ABC
 ~~~
 
-Of course TUNIX Lisp shouldn't crash!  Pleas don't hestitate
-to file a
-[bug report](https://github.com/SvenMichaelKlose/tunix/issues)
-regardless of how it affected your temper.
-
-# User interface: The READ/EVAL/PRINT-Loop (REPL)
-
-The REPL is the user interface.  It prompts you for input by
-printing an asterisk '\*' in its regular mode, except on
-Commodore 8-bit machines, to allow using the KERNAL's screen
-editor.  After reading an expression it is evaluated and the
-result of that evaluation is output.  Then it starts over,
-prompting you for the next expression.
-
-REPLs can be nested, e.g. when an error occured, a new REPL
-is launched in debug mode.  With that you can examine the
-environment, execute code step by step and present a
-correct alternative for a faulty expression.
-
-Any REPL, no matter its mode, can be terminated using the
-built-in QUIT function, which takes a return value for the
-REPL as its argument.  It may become the return value of
-a LOAD function when loading a file, or the alternative
-return value of a faulty expression in debug mode.
-Built-in function IGNORE interrupts evaluation of the
-current expression read by the active REPL to start over
-with reading and evaluating the next one.
-
-Built-in function EXIT stops the program and returns to the
-topmost REPL.  When passed an exit code, EXIT terminates the
-interpreter and returns to the operating system.
-
-# Definiton of permanent symbols
-
-FN and VAR assign expressions to symbols which are also
-added to variable \*universe\*, a list of symbols the
-garbage collector starting off with to reach all used
-objects.  The difference between FN and VAR is that VAR
-evaluates its initialization argument and FN assigns its
-argument list unevaluated.
+Double quotes must be used to include all kinds of characters, like spaces.
+Such symbol names are also printed with double quotes.
 
 ~~~lisp
-; Define permanent, named function.
+"Hello world!" ; -> "Hello world!"
+~~~
+
+Calling SYMBOL with no arguments always creates a new, unique symbol with
+no name.
+
+~~~lisp
+(symbol)                ; -> ""
+(eq (symbol) (symbol))  ; -> NIL
+~~~
+
+VAR and FN add a symbol to list \*UNIVERSE\*.  It is the starting point
+of the garbage collector.  Everything not connected to that list in one
+way or another will sooner or later be discarded.
+
+~~~lisp
+; Define function WELCOME.
 (fn welcome ()
   (out '"Hello World!")
   (terpri))
 
-; Define permanent, named variable.
+; Define variable X.
 (var x nil)
 ~~~
 
-If you are using a screen editor, the SOURCE function is
-rather useful.  It returns a defining expression for any
-symbol.
 
 # Functions
 
-Functions are lists starting with an argument definition
-followed by a list of expressions.  The result of the last
-expression is returned.
+Functions are lists starting with an argument definition followed by a
+list of expressions.  The result of the last expression is returned.
 
-The LAMBDA keyword is not around at the moment but it has
-to be to make the compiler work.
+The LAMBDA keyword is not around at the moment but it has to be to make
+the compiler work.
 
 ~~~lisp
 ; Function with no arguments, returning symbol NIL.
@@ -568,11 +568,11 @@ to be to make the compiler work.
 (x
   x)
 ((first . rest)
-  (cons first rest))
+  (. first rest))
 ~~~
 
-Anonymous functions can be used as the first element of an
-expression without quoting:
+Anonymous functions can be used as the first element of an expression
+without quoting:
 
 ~~~lisp
 ; Print number '100'.
@@ -588,8 +588,8 @@ Anonymous functions as arguments need to be quoted though:
 (@ '((n) (++ n)) '(l 2 3))
 ~~~
 
-The QUASIQUOTE (short form "$") can be used to emulate
-read-only lexical scope by unquoting outer values:
+The QUASIQUOTE (short form "$") can be used to emulate read-only lexical
+scope by unquoting outer values:
 
 ~~~lisp
 ; Make a function that adds X to its argument.
@@ -600,17 +600,16 @@ read-only lexical scope by unquoting outer values:
 
 ## Rest arguments
 
-If an argument definition ends with a dotted pair, the last
-argument will contain the rest of the arguments passed to
-the function as a list or NIL.
+If an argument definition ends with a dotted pair, the last argument will
+contain the rest of the arguments passed to the function as a list or NIL.
 
 (fn cool-exmaple-missing (first . rest))
 (fn cool-exmaple-missing (first second . rest))
 
 ## Optional arguments
 
-Rest arguments can be used to implement one or more optional
-arguments with defaults.
+Rest arguments can be used to implement one or more optional arguments
+with defaults.
 
 ~~~lisp
 (fn subeq (first . optional)
@@ -626,16 +625,15 @@ arguments with defaults.
     (terpri)))
 ~~~
 
-In this example, if optional is NIL, CAR will also return
-NIL, making the OR-expression return number 0.
-This scheme can also be applied to multiple arguments:
+In this example, if optional is NIL, CAR will also return NIL, making the
+OR-expression return number 0.  This scheme can also be applied to
+multiple arguments:
 
 ## Argument type descriptions in this manual
 
-Built-in functions have character-based and typed argument
-definitions.  They are also used, padded with spaces, to
-describe arguments in this manual for all procedures
-(functions, macros and special forms).
+Built-in functions have character-based and typed argument definitions.
+They are also used, padded with spaces, to describe arguments in this
+manual for all procedures (functions, macros and special forms).
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -657,19 +655,17 @@ They may also have prefixes:
 
 # Input/output
 
-TUNIX Lisp boils I/O down to its basics: one channel for
-input and one for output, initially wired to "standard I/O",
-like your terminal with screen and keyboard.  Input and
-output can each be switched to other channels.  If you
-launch a LOAD command to execute a Lisp file, the input
-channel is connected to that file until it's been read
-entirely, but in general a channel can be directed to
-another one anytime.
+TUNIX Lisp boils I/O down to its basics: one channel for input and one for
+output, initially wired to "standard I/O", like your terminal with screen
+and keyboard.  Input and output can each be switched to other channels.
+If you launch a LOAD command to execute a Lisp file, the input channel is
+connected to that file until it's been read entirely, but in general a
+channel can be directed to another one anytime.
 
 ## READing and PRINTing expressions
 
-Expressions can be read and written using built-in functions
-READ and PRINT.  Strings and chars have dedicated formats:
+Expressions can be read and written using built-in functions READ and
+PRINT.  Strings and chars have dedicated formats:
 
 | Type format examples | Description                     |
 |----------------------|---------------------------------|
@@ -692,10 +688,9 @@ READ and PRINT also support abbreviations if compiled in:
 
 ## Input and output channel
 
-An input and an output channel can be switched between open
-streams separately using functions SETIN and SETOUT.
-Symbols STDIN and STDOUT contain the standard I/O channel
-numbers.
+An input and an output channel can be switched between open streams
+separately using functions SETIN and SETOUT.  Symbols STDIN and STDOUT
+contain the standard I/O channel numbers.
 
 ~~~lisp
 ; Switch to standard I/O channels.
@@ -703,8 +698,7 @@ numbers.
 (setout stdout)
 ~~~
 
-The currently active channels numbers are in symbols FNIN
-and FNOUT.
+The currently active channels numbers are in symbols FNIN and FNOUT.
 
 New channels are created by OPEN to access files:
 
@@ -729,8 +723,9 @@ New channels are created by OPEN to access files:
 |   1 x y  | Position cursor.   |
 |   2 f    | Clear flags.       |
 |   3 f    | Set flags.         |
-|   4      | Get X position.    |
-|   5      | Get Y position.    |
+|   4      | Get flags.         |
+|   5      | Get X position.    |
+|   6      | Get Y position.    |
 |  10      | Line feed.         |
 |  12      | Clear screen.      |
 |  13      | Carriage return.   |
@@ -743,89 +738,75 @@ New channels are created by OPEN to access files:
 
 Flags may be combined.
 
-# Debugging and advanced error handling
+# Error handling and debugging
 
-The debugger is invoked in case of an error unless ONERROR
-has been defined.  Beatiful things can be done by handling
-errors automatically, but let's get our hands on the
-debugger first.
+The debugger is invoked in case of an error unless ONERROR has been
+defined.  Beatiful things can be done by handling errors automatically,
+but let's get our hands on the debugger first.
 
 ## The debugger REPL
+
+The debugger is the REPL in one of two debug modes.  It prints a status info
+before waiting for user input, so you know where and why the program has been
+interrupted.
+
+The debugger has two modes: *fix mode*, if an error occured, and *inspect mode*
+for user breaks.  The fix mode expects an alternative value to be supplied for a
+failed expression.  You'll probably see this mode before the inspect mode:
+
+~~~
+Error #1: Arg missing: foo
+Info: bar
+In baz ():
+((bar))
+fix!1]
+~~~
+**Fix mode prompt**
+
+The return value of the debugger will change with every expression you
+enter into the prompt, except when using a short command, like 'p', which
+evaluates an expression alongside for inspection.
+
+## Debugger short commands
+
+| Command | Description                                       |
+|---------|---------------------------------------------------|
+|   c     | Continue program execution (fixed only).          |
+|   s     | Step into user-defined procedure (fixed only).    |
+|   n     | Execute current expression in whole (fixed only). |
+|   k     | Ignore expression.                                |
+|   q     | Exit REPL.                                        |
+|   x     | Exit program.                                     |
+|   pX    | Evaluate and print expression X.  (No macros!)    |
+|   bS    | Set breakpoint on procedure S.                    |
+|   b     | Print breakpoints.                                |
+|   dS    | Delete breakpoint on procedure S.                 |
+|   d     | Delete all breakpoints.                           |
+**Debugger short commands**
+
+## Debugger variables
 
 | Variable | Description                            |
 |----------|----------------------------------------|
 |   *b*    | List of symbols that are breakpointed. |
 |   *r*    | Initial return value of current REPL.  |
 
-The debugger is the REPL in debug mode.  It prints a status
-info before waiting for user input, so you know where the
-program execution has been interrupted.  It has this format:
-
-~~~
-Debugger <number of nested debuggers>:
-Error #5: <reason for break>
-Rvalue: <last expression's (and debugger's) return value>
-In:
-<top-level expression with current one highlighted>
-~~~
-
-The debugger takes expressions like the regular REPL, plus
-some commands consisting of a single character to step
-through the code conveniently.  If another error occurs,
-yet another debugger REPL will be invoked and the "number of
-nested debuggers" incremented.
-
-The current expression is either the one that failed, or the
-one that will be evaluated next in cause the debugger
-stopped at a breakpoint (and no error number and description
-is shown).
-
-The return value of the debugger will change with every
-expression you enter, except when using aforementioned short
-commands.  In case of an error, that's the value you want to
-replace with a valid one before continuing program
-execution.  Symbol \*R\* contains the return value when the
-debugger was invoked, should you want to see or use it again
-although you've replaced it already – just enter "*r*" and
-it'll be restored.
-
-These are the available short commands:
-
-| Command | Description                                    |
-|---------|------------------------------------------------|
-| c       | Continue program execution.                    |
-| q       | Stop execution, returning to top level REPL.   |
-| s       | Step into user-defined procedure.              |
-| n       | Execute current expression in whole.           |
-| pX      | Evaluate and print expression X.  (No macros!) |
-| bS      | Set breakpoint on procedure S.                 |
-| b       | Print breakpoints.                             |
-| dS      | Delete breakpoint on procedure S.              |
-| d       | Delete all breakpoints.                        |
-
-Command "p" evaluates the expression immediately following
-it.  A macro expansion is *not* performed and it'll *not*
-change the debugger's return value.
+Symbol \*R\* contains the most recent return value, should you want to
+use it the following expression.
 
 ## Stepping through the code
 
-Short command 's' will step to the next argument of the
-current expression, evaluation what's on the way or enter
-the currently highlighted function if all arguments have
-been dealt with.  With 'n' the function and all its
-arguments are evaluated, taking you to the next expression
-in the list.  If you had it the program, you can exit it
-with short command 'q' and take a break yourself.
-
-IDEA:
-* step into newly entered expression
-* step into restarted expression.  Already changed values
-  are a problem then.
+Short command 's' will step to the next argument of the current
+expression, evaluation what's on the way or enter the currently
+highlighted function if all arguments have been dealt with.  With 'n' the
+function and all its arguments are evaluated, taking you to the next
+expression in the list.  If you had it the program, you can exit it with
+short command 'q' and take a break yourself.
 
 ## Breakpoints
 
-Global variable \*B\* is a list procedures' names which, if
-called, will invoke the debugger.
+Global variable \*B\* is a list procedures' names which, if called, will
+invoke the debugger.
 
 You can modify \*B\* using the regular set of procedures:
 
@@ -840,9 +821,9 @@ You can modify \*B\* using the regular set of procedures:
 (= *b* nil)
 ~~~
 
-Inside the debugger REPL that's inconvenient as every
-regular expression changes the debugger's return value.  Use
-short commands 'b' and 'd' instead.
+Inside the debugger REPL that's inconvenient as every regular expression
+changes the debugger's return value.  Use short commands 'b' and 'd'
+instead.
 
 ~~~lisp
 bsubseq ; Set breakpoint on SUBSEQ.
@@ -857,28 +838,35 @@ d       ; Delete all breakpoints.
 | (onerror n x x) | User-defined error handler.           |
 | (ignore)        | Break and continue with LOAD or REPL. |
 
-If defined, user-defined function ONERROR is called on
-errors, except for internal ones which halt the interpreter
-to avoid unexpected behaviour.  Errors happening inside
-ONERROR will cause it to be called again.  The handler
-must return a correct replacement value insted of calling
-QUIT or use IGNORE.
+If defined, user-defined function ONERROR is called on errors, except for
+internal ones that need to halt the interpreter to avoid unexpected
+behaviour and thus damage.  Errors happening inside ONERROR will cause it
+to be called again.
 
-ONERROR is called with the error code, the current REPL
-(top-level) expression, and the faulty expression within
-it:
+ONERROR is called with the error code, the current REPL (top-level)
+expression, and the faulty expression within it:
 
-IDEA: Calling DEBUGGER inside ONERROR if the error cannot
-be dealt with.
+The handler must return an alternative value for the failed expression.
+If that expression can be evaluated again, you perhaps should not forget
+to macro-expand it beforehand.
+
+To delegate error handling to the debugger as usual, the handler has to
+return symbol %FAIL.
 
 ~~~lisp
 (fn onerror (errcode repl faulty)
   (out "ONERROR handler called!")(terpri)
   ; We don't handle errors so unleash the debugger on it.
-  'debugger)
+  '%fail)
 ~~~
 
+The current REPL's top-level expression can be ignored by calling IGNORE
+instead.
+
 ### Error codes
+
+These are the error codes found in the CODE argument and in the debugger's
+heading printed when invoked:
 
 | ID (ERROR_...)  | Code | Description                     |
 |-----------------|------|---------------------------------|
@@ -888,9 +876,9 @@ be dealt with.
 | TOO\_MANY\_ARGS | 4    | Too many arguments.             |
 | NOT\_FUNCTION   | 5    | Object is not a function.       |
 | ARGNAME\_TYPE   | 6    | Argument name is not a symbol.  |
-| NO\_BLOCK\_NAME | 7    | BLOCK name is missing.          |
+| NO\_BLOCKNAME   | 7    | BLOCK name is missing.          |
 | OUT\_OF\_HEAP   | 8    | Out of heap.                    |
-| NO\_PAREN       | 9    | ')' missing.                    |
+| PAREN\_MISSING  | 9    | ')' missing.                    |
 | STALE\_PAREN    | 10   | Unexpected ')'.                 |
 | SYM\_TOO\_LONG  | 11   | Symbol longer than MAX\_SYMBOL. |
 | QUOTE\_MISSING  | 12   | '"' missing.                    |
@@ -903,12 +891,93 @@ be dealt with.
 
 #### ERROR\_OUT\_OF\_HEAP
 
-Returns to the current REPL and does a garbage collection
-before calling an ONERROR handler or debugger.
+Returns to the current REPL and does a garbage collection before calling
+an ONERROR handler or debugger.
 
-Compile-time option ONETIME\_HEAP\_MARGIN specified the
-number of heap bytes that are kept for calling an ONERROR
-handler.
+Compile-time option ONETIME\_HEAP\_MARGIN specified the number of heap
+bytes that are kept for calling an ONERROR handler.
+
+# Dot notation
+
+The dot notation is a set of abbreviations for CAR, CDR, combinations of
+both, and CDR/ASSOC.  The conversion to regular expressions is performed
+by function DOTEXPAND.  It can be called automatically by the REPL
+(which it isn't by default due to resource constraints on small
+machines):
+
+~~~lisp
+(= *ex* '((x) (macroexpand (dotexpand x))))
+~~~
+
+With dot notation enabled , a symbol starting with a dot is transformed
+into a CDR expression for each dot at the start.
+
+~~~lisp
+.x  ; -> (cdr x)
+..x ; -> (cdr (cdr x))
+~~~
+
+After that a CAR expression is created for each ending dot.
+
+~~~lisp
+x.  ; -> (car x)
+x.. ; -> (car (car x))
+~~~
+
+Both can be combined.  The CDR expressions are made first though.
+
+~~~lisp
+x.    ; -> (car x) ; first
+.x.   ; -> (car (cdr x)) ; second
+..x.  ; -> (car (cdr (cdr x))) ; third
+..x.. ; -> (car (car (cdr (cdr x)))) ; first of third
+~~~
+
+If a dot occurs in the middle of a symbol, that is transformed to a
+CDR/ASSOC expression to access the CDR of elements of associative lists.
+
+~~~lisp
+obj.slot        ; -> (cdr (assoc 'slot obj))
+obj.slot.deeper ; -> (cdr (assoc 'deeper (cdr (assoc 'slot obj))))
+~~~
+
+Finally, all abbreviations can be combined:
+
+~~~lisp
+obj.slot.         ; -> (car (cdr (assoc 'slot obj)))
+.obj.slot.deeper. ; -> (car (cdr (cdr (assoc 'deeper (cdr (assoc 'slot obj))))))
+~~~
+
+## Real life example
+
+Let's compare the mere MACROEXPAND function with a dot-notated version:
+
+~~~lisp
+(fn macroexpand (x)
+  (?
+    (or (atom x)
+        (eq 'quote (car x)))  x
+    (eq (car x) 'quasiquote)  (%unquote x)
+    (macro? (car x))          (macroexpand (apply (cdr (macro? (car x))) (cdr x)))
+    (@ macroexpand x)))
+~~~
+
+~~~lisp
+(fn macroexpand (x)
+  (?
+    (or (atom x)
+        (eq 'quote x.))  x
+    (eq x. 'quasiquote)  (%unquote x)
+    (macro? x.)          (macroexpand (apply (cdr (macro? x.)) .x))
+    (@ macroexpand x)))
+~~~
+
+If DOTEXPAND is too resource intensive, you can disable it again.
+Don't forget to keep the macro expansion active:
+
+~~~lisp
+(= *ex* macroexpand)
+~~~
 
 # Built-in functions
 
@@ -916,25 +985,35 @@ handler.
 
 | Function   | Description                            |
 |------------|----------------------------------------|
-| (gc)       | Free unused objects.                   |
 | (exit ?n)  | Exit program or interpreter with code. |
-
-### (gc): Free unused objects.
-
-Triggers the garbage collector.  It marks all objects
-linked to variable \*UNIVERSE\*, compacts the heap and
-relocates all pointers.
 
 ### (exit ?n): Exit program or interpreter with exit code.
 
-When called without arguments the program is stopped and
-control is returned to the top-level REPL.  When called with
-a number that number is the exit code for the interpreter
-which will terminate immediately.
+When called without arguments the program is stopped and control is
+returned to the top-level REPL.  When called with a number that number is
+the exit code for the interpreter which will terminate immediately.
+
+## Heap
+
+| Function   | Description                            |
+|------------|----------------------------------------|
+| (gc)       | Free unused objects.                   |
+| (free)     | Number of free bytes on heap.          |
+
+### (gc): Free unused objects.
+
+Triggers the garbage collector.  It marks all objects linked to variable
+\*UNIVERSE\*, compacts the heap and relocates all pointers.
+
+### (free): Number of free bytes on heap.
+
+Returns the maximum number of bytes that could be allocated.  That number
+is likely to be less but can amount to the size of a symbol with the
+biggest possible name length.
 
 ## Definitions
 
-| Form                         | Type                      |
+| Special form                  | Type                      |
 |------------------------------|---------------------------|
 | (var 'name x)                | Define symbol with value. |
 | (fn 'name 'args '+body)      | Define function.          |
@@ -944,15 +1023,33 @@ which will terminate immediately.
 |------------|------------------------------------------|
 | (source s) | Return defining expression for a symbol. |
 
+| Variable | Description                                     |
+|----------|-------------------------------------------------|
+|  \*v?\*  | Verbosity of FN, LOAD, SPECIAL and VAR.         |
+| \*alv?\* | AUTOLOAD erbosity of FN, LOAD, SPECIAL and VAR. |
+
+### Verbosity (\*V?\*, \*ALV?\*)
+
+By default \*V\*? is set to T, causing FN, LOAD, SPECIAL and VAR
+to print messages when they are in action.  That's impractical
+when auto-loading procedures on demand as the message are likely
+to spoil the screen.  \*ALV?\* is T by default, to make it easier
+to track down errors.
+
 ### (fn 'name 'args '+body): Define permanent, named function.
+
+Adds NAME to \*UNIVERSE\* and assigns an function expression of
+the form "(args . body)".
 
 ### (special 'name 'args '+body): Make special form.
 
-Special forms are functions that take their arguments
-unevaluated, e.g. QUASIQUOTE and MACRO, so you don't have to
-quote arguments of that function manually.
+Special forms are functions that receive their arguments unevaluated,
+so the caller doesn't have to QUOTE them.  MACRO and QUASIQUOTE are
+such user-defined special forms.
 
 ### (var 'name init): Define permanent, named variable.
+
+Adds NAME to \*UNIVERSE\* and assigns it evaluated INIT.
 
 ### (source s): Return defining expression for a symbol.
 
@@ -973,8 +1070,8 @@ quote arguments of that function manually.
 
 ### (quote x)
 
-Returns argument unevaluated.  Suppresses replacing symbols
-by their values on evaluation.
+Returns argument unevaluated.  Suppresses replacing symbols by their
+values on evaluation.
 
 ~~~lisp
 ; Define variable X, containing the string "What a day!".
@@ -986,22 +1083,20 @@ x         -> "What a day!"
 
 ### (apply fun . args): Apply function.
 
-Calls function FUN.  Unlike the rather straightforward
-FUNCALL, which takes its arguments as provided, APPLY
-expects the last element of ARGS to be a list, which is
-then appended to the previous elements:
+Calls function FUN.  Unlike the rather straightforward FUNCALL, which
+takes its arguments as provided, APPLY expects the last element of ARGS to
+be a list, which is then appended to the previous elements:
 
 ~~~lisp
-(fn list x
+(fn .. x
   x)
 
-(apply list '(10 11))   -> (10 11)
-(apply list 1 2 '(3 4)) -> (1 2 3 4)
+(apply .. '(10 11))   -> (10 11)
+(apply .. 1 2 '(3 4)) -> (1 2 3 4)
 ~~~
 
-The reason for this is that it takes away the need to do
-that kind of concatenation oneself repeatedly, which would
-happen a lot otherwise.
+The reason for this is that it takes away the need to do that kind of
+concatenation oneself repeatedly, which would happen a lot otherwise.
 
 ### (funcall f +x): Call function.
 
@@ -1025,10 +1120,9 @@ Evaluates expression X and it's subexpressions.
 
 ### (? x +x): Conditional evaluation
 
-Returns the second argument if the first one evaluates to
-non-NIL.  Otherwise the process is repeated starting with
-the third argument, unless there is only one argument left
-which is then the default.
+Returns the second argument if the first one evaluates to non-NIL.
+Otherwise the process is repeated starting with the third argument, unless
+there is only one argument left which is then the default.
 
 ~~~lisp
 (? nil
@@ -1048,8 +1142,8 @@ which is then the default.
 
 ### (and +x)
 
-Evaluates all arguments in order unless one evaluates to
-NIL.  The value of the last evaluation is returned.
+Evaluates all arguments in order unless one evaluates to NIL.  The value
+of the last evaluation is returned.
 
 ~~~lisp
 (and 1 2 nil) ; -> nil
@@ -1060,8 +1154,8 @@ AND will issue an error if it is passed a dotted pair.
 
 ### (or +x)
 
-Evaluates all arguments unless one evaluates to non-NIL.
-The value of the last evaluation is returned.
+Evaluates all arguments unless one evaluates to non-NIL.  The value of the
+last evaluation is returned.
 
 ~~~lisp
 (or 1 nil) ; -> 1
@@ -1072,10 +1166,9 @@ OR will issue an error if it is passed a dotted pair.
 
 ### (block name . body), (return x block-name), (go tag)
 
-Evaluates the list of expressions in BODY, returning the
-value of the last unless a RETURN from the block has been
-initiated.  The name of the block passed to RETURN has to
-match.  It is NIL, if not specified.
+Evaluates the list of expressions in BODY, returning the value of the last
+unless a RETURN from the block has been initiated.  The name of the block
+passed to RETURN has to match.  It is NIL, if not specified.
 
 ~~~lisp
 (block foo
@@ -1084,9 +1177,8 @@ match.  It is NIL, if not specified.
   'c)   ; -> b
 ~~~
 
-Blocks of name NIL are used for loops.  For the purpose of
-just butting up expressions use T instead to make RETURNs
-for name NIL drop through.
+Blocks of name NIL are used for loops.  For the purpose of just butting up
+expressions use T instead to make RETURNs for name NIL drop through.
 
 ~~~lisp
 (macro progn body
@@ -1094,11 +1186,10 @@ for name NIL drop through.
      ,@body))
 ~~~
 
-BLOCK also handles jumps initiated by GO.  A jump
-destination, the "tag", must be the same symbol passed to GO
-unquoted.  It is an error if the tag cannot be found in any
-of the parent blocks in the current function.  If no
-expression follows the tag, NIL is returned.
+BLOCK also handles jumps initiated by GO.  A jump destination, the "tag",
+must be the same symbol passed to GO unquoted.  It is an error if the tag
+cannot be found in any of the parent blocks in the current function.  If
+no expression follows the tag, NIL is returned.
 
 ~~~lisp
 ; Print "1".
@@ -1129,18 +1220,18 @@ expression follows the tag, NIL is returned.
 
 Tests if two objects are the very same.
 
-Numbers usually are not as they are not looked-up for reuse
-like symbols.  Use EQL instead.
+Numbers usually are not as they are not looked-up for reuse like symbols.
+Use EQL instead.
 
 ### (eql a b): Test if numbers are the equal or EQ.
 
-Like EQ except for numbers: their true values are compared
-using function == instead.
+Like EQ except for numbers: their true values are compared using function
+== instead.
 
 ### (equal a b): Test if trees are EQL.
 
-Like EQL but traversing down conses, allowing to compare
-lists and trees (lists of lists).
+Like EQL but traversing down conses, allowing to compare lists and trees
+(lists of lists).
 
 ## Predicates
 
@@ -1154,8 +1245,8 @@ lists and trees (lists of lists).
 | (builtin? x) | built-in function |
 | (special? x) | special form      |
 
-All predicates except NOT and SYMOL? return their argument
-instead of T when true.
+All predicates except NOT and SYMOL? return their argument instead of T
+when true.
 
 TODO: Impressive example where it's advantagous.
 
@@ -1165,8 +1256,8 @@ Returns T on NIl and NIL otherwise.
 
 ### (atom x): not a cons
 
-Returns its argument if it's an atom, except for NIL for
-which T is returned.
+Returns its argument if it's an atom, except for NIL for which T is
+returned.
 
 ### (cons? x): cons
 
@@ -1174,8 +1265,8 @@ Returns its argument if it is a cons, NIL otherwise.
 
 ### (symbol? x): symbol
 
-Returns its argument if it is an atom.  T is returned for
-NIL.  And NIL is returned for conses.
+Returns its argument if it is an atom.  T is returned for NIL.  And NIL is
+returned for conses.
 
 ### (number? x): number
 
@@ -1191,42 +1282,99 @@ Returns its argument if it is a special form or NIL.
 
 ## Symbols
 
-| Function         | Description                           |
-|------------------|---------------------------------------|
-| (symbol l)       | Make symbol with name from char list. |
-| (= 's x)         | Set symbol value.                     |
-| (symbol-value s) | Get symbol value.                     |
-| (symbol-name s)  | Symbol name as List of char numbers.  |
-| (char-at s n)    | Char of symbol name.                  |
+| Function          | Description                              |
+|-------------------|------------------------------------------|
+| (symbol l)        | Make symbol with name from char list.    |
+| (= 's x)          | Set symbol value.                        |
+| (symbol-value s)  | Get symbol value.                        |
+| (symbol-name s)   | Get name as List of char numbers.        |
+| (slength s)       | Get name length.                         |
+| (char-at s n)     | Char of symbol name.                     |
+| (in-package s l?) | Prefix set of symbols with package name. |
 
 ### (symbol l): Make symbol with name from char list.
 
+Already existing symbols are reused unless the name is empty.
+
+~~~lisp
+(symbol '(110 105 108)) ; -> nil
+~~~
+
 ### (= 's x): Set symbol value.
+
+The symbol argument is not evaluated.  Returns the value.
 
 ### (symbol-value s): Get symbol value.
 
-This is what evaluation is doing with symbols.
+### (symbol-name s): Get name.
 
-### (symbol-name s): Get symbol name as List of character value numbers.
+Returns the name of a symbol or built-in as a list of numbers being the
+character values.
+
+~~~lisp
+(symbol-name nil) ; -> (110 105 108)
+~~~
+
+### (slength s): Get name length.
+
+Get length of symbol or built-in.
+
+~~~lisp
+(slength nil) ; -> 3
+~~~
 
 ### (char-at s n): Char of symbol name.
 
+~~~lisp
+(char-at nil 1) ; -> 105
+~~~
+
+### (in-package s l?): Prefix set of symbols with package name.
+
+Adds symbol prefixing to \*EX\* in the REPL.  Prefixes all symbols
+in the set, read by the REPL, with the package name and a "/".
+Files can be packaged up in directories that way.
+
+~~~lisp
+; File "my-package/package.lsp" is a good place for this to share
+; across files of a package.
+(in-package my-package sym1 sym2)
+
+sym1 ; -> my-package/sym1
+~~~
+
+It's reasonable to disable the current symbol translations before
+a file with IN-PACKAGE translation ends:
+
+~~~lisp
+(in-package nil)
+~~~
+
+To let a symbol escape from translation cause by IN-PACKAGE, prefix
+it with a "/":
+
+~~~lisp
+(load 'my-package/package.lsp)
+sym1    ; -> my-package/sym1
+/sym1   ; -> sym1
+~~~
+
 ## Conses
 
-| Function     | Description                         |
-|--------------|-------------------------------------|
-| (car l)      | Return first value of cons or NIL.  |
-| (cdr l)      | Return second value of cons or NIL. |
-| (setcar c x) | Set first value of cons.            |
-| (setcdr c x) | Set second value of cons.           |
+| Function    | Description                         |
+|-------------|-------------------------------------|
+| (. x x)     | Create cons object pair.            |
+| (car l)     | Return first value of cons or NIL.  |
+| (cdr l)     | Return second value of cons or NIL. |
+| (=-car c x) | Set first value of cons.            |
+| (=-cdr c x) | Set second value of cons.           |
 
-A 'cons' points to two other objects, called 'car' and 'cdr'
-for historical reasons.  They could also be called 'first'
-and 'second', 'first' and 'rest' or 'head' and 'tail'.
-However: they are just two object pointers packed together
-to form a pair.  A single cons is written with a dot in the
-middle which separates the two objects it contains.  It's
-called a "dotted pair":
+A 'cons' points to two other objects, called 'car' and 'cdr' for
+historical reasons.  They could also be called 'first' and 'second',
+'first' and 'rest' or 'head' and 'tail'.  However: they are just two
+object pointers packed together to form a pair.  A single cons is written
+with a dot in the middle which separates the two objects it contains.
+It's called a "dotted pair":
 
 ~~~lisp
 (obj-a . obj-b)
@@ -1234,9 +1382,8 @@ called a "dotted pair":
 
 ### (car l)/(cdr l): Return first or second value of cons.
 
-CAR and CDR expect a list (cons or NIL) and return the 
-first or second object a cons contains.  If the argument
-is NIL, CAR and CDR return NIL.
+CAR and CDR expect a list (cons or NIL) and return the first or second
+object a cons contains.  If the argument is NIL, CAR and CDR return NIL.
 
 ~~~lisp
 (car nil)   ; -> nil
@@ -1247,8 +1394,8 @@ is NIL, CAR and CDR return NIL.
 (cdr our-cons) ; -> b
 ~~~~
 
-Because lists a conses chained up via their CDRs, this
-happens with conses of lists:
+Because lists a conses chained up via their CDRs, this happens with conses
+of lists:
 
 ~~~lisp
 (var our-list '(a b))
@@ -1256,22 +1403,20 @@ happens with conses of lists:
 (cdr our-list) ; -> (b)
 ~~~
 
-### (setcar c x)/(setcdr c x): Set first/second value of cons.
+### (=-car c x)/(=-cdr c x): Set first/second value of cons.
 
-Sets the first or second value of a cons.  Passing anything
-else but a cons, e.g. NIL, is an error.
-The modified cons is returned otherwise.
+Sets the first or second value of a cons.  Passing anything else but a
+cons, e.g. NIL, is an error.  The modified cons is returned otherwise.
 
 ~~~lisp
 (var our-cons '(a . b))
-(setcar our-cons 'new)     ; -> (new . b)
-(setcdr our-cons 'values)  ; -> (new . value)
-(setcdr our-cons nil)      ; -> (new)
+(=-car our-cons 'new)     ; -> (new . b)
+(=-cdr our-cons 'values)  ; -> (new . value)
+(=-cdr our-cons nil)      ; -> (new)
 ~~~
 
-Setting the CDR of a *compressed cons* is also an error.
-See section [compressed conses](#compressed-conses) for
-details.
+Setting the CDR of a *compressed cons* is also an error.  See section
+[compressed conses](#compressed-conses) for details.
 
 ## Images
 
@@ -1280,15 +1425,13 @@ details.
 | (isave s) | Save heap image.                           |
 | (iload s) | Load heap image and start function ISTART. |
 
-Compile-time option NO\_IMAGES must be undefined to use
-these.  If an image file called 'image' exists in the
-current directory, that is loaded instead of default Lisp
-files.
+Compile-time option NO\_IMAGES must be undefined to use these.  If an
+image file called 'image' exists in the current directory, that is loaded
+instead of default Lisp files.
 
 ## Lists
 
-These functions are around because the interpreter needs them
-internally.
+These functions are around because the interpreter needs them internally.
 
 | Function          | Description                         |
 |-------------------|-------------------------------------|
@@ -1337,8 +1480,7 @@ LENTGH also counts CDRs of dotted pairs:
 (length '(a b . c)))  ; -> 3
 ~~~
 
-Also, the length of symbol names or names of built-ins is
-returned:
+Also, the length of symbol names or names of built-ins is returned:
 
 ~~~lisp
 (length "TUNIX")    ; -> 5
@@ -1351,8 +1493,7 @@ returned:
 (member 'b '(a b c)) ; -> '(b c)
 ~~~
 
-MEMBER uses EQL as the predicate, so numbers will also
-match.
+MEMBER uses EQL as the predicate, so numbers will also match.
 
 ~~~lisp
 (member 2 '(1 2 3)) ; -> '(2 3)
@@ -1360,14 +1501,12 @@ match.
 
 ### (nconc +l): Destructively concatenate lists.
 
-NCON is a function that destructively concatenates a series
-of lists.   It is more efficient than APPEND, because it
-avoids the overhead of copying elements and directly links
-the lists together.
+NCON is a function that destructively concatenates a series of lists.   It
+is more efficient than APPEND, because it avoids the overhead of copying
+elements and directly links the lists together.
 
-⚠️ Lists returned by QUOTE will be modified, changing your
-code!  Use BACKQUOTE ($) instead, or use COPY-LIST before
-passing your list to NCONC.
+⚠️ Lists returned by QUOTE will be modified, changing your code!  Use
+BACKQUOTE ($) instead, or use COPY-LIST before passing your list to NCONC.
 
 ### (remove x l): Copy list except element X.
 
@@ -1375,21 +1514,21 @@ passing your list to NCONC.
 (remove 'b '(a b c)) ; '(a c)
 ~~~
 
-Uses EQ as the predicate, so REMOVE-IF must be used together
-with EQL to match numbers.
+Uses EQ as the predicate, so REMOVE-IF must be used together with EQL to
+match numbers.
 
 ### (@ f l): Filter list by function
 
-Call function F for each element in l and returns a new
-list containing the return values of F.
+Call function F for each element in l and returns a new list containing
+the return values of F.
 
 ~~~lisp
 (@ ++ '(1 2 3)) ; -> (2 3 4)
 ~~~
 
-Also handles dotted pairs, filtering the last atom if it is
-not NIL.  This is supported because of rest argument
-definitions (which are dotted pairs).
+Also handles dotted pairs, filtering the last atom if it is not NIL.  This
+is supported because of rest argument definitions (which are dotted
+pairs).
 
 ~~~lisp
 (@ ++ '(1 2 . 3)) ; -> (2 3 . 4)
@@ -1454,6 +1593,7 @@ x           ; 23
 | (read)           | Read expression.                     |
 | (print x)        | Print expression.                    |
 | (load name)      | Load and evaluate file.              |
+| (require +name)  | Load missing definition of NAME.     |
 | (open name mode) | Open file and return channel.        |
 | (err)            | Return number of last error or NIL.  |
 | (eof)            | Tell if read reached end of file.    |
@@ -1486,32 +1626,23 @@ x           ; 23
 
 ### (load pathname): Load and evaluate file.
 
-Loads a file expression by expression, evaluating each
-right away.
-
-Returns NIL if the file could not be loaded, or T if all
-of the file has been processed successfully.
-
-This expample loads file "subseq.lisp" and returns T when
-finished:
+Reads and evaluates a file expression by expression.  Returns NIL if the
+file could not be opened, T otherwise.  LOAD opens an own input channel
+alongside the current input channel.
 
 ~~~lisp
 (load "subseq.lisp")
 ~~~
 
-If compile-time option VERBOSE\_LOAD was defined when
-TUNIX Lisp was built, a message of the form
+LOAD is printing messages.  It can be muted by making \*V?\* non-NIL, or by compiling the
+interpreter with option NO\_VERBOSE\_LOAD.
 
-~~~lisp
-(load <pathname>)
-~~~
-
-is printed before a load is attempted.
+### (require +name): Load missing definition.
 
 ### (open pathname mode): Open file and channel.
 
-Opens file at PATHNAME for reading or writing.  MODE must
-be a symbol.  Returns the channel number or NIL.
+Opens file at PATHNAME for reading or writing.  MODE must be a symbol.
+Returns the channel number or NIL.
 
 | Mode | Description    |
 |------|----------------|
@@ -1526,14 +1657,13 @@ Illegal modes cause an ERROR\_FILEMODE.
 ### (setout channel): Set output channel.
 ### (in): Read char.
 
-Read character from channel.  It is returned as the
-character number (e.g. ASCII).
+Read character from channel.  It is returned as the character number (e.g.
+ASCII).
 
 ### (conin): Read console char (non-blocking).
 
-Unlinke IN, CONIN does not wait for input but returns NIL
-instead when used with standard input (console, terminal,
-hoewever you name it).
+Unlinke IN, CONIN does not wait for input but returns NIL instead when
+used with standard input (console, terminal, hoewever you name it).
 
 ~~~lisp
 ; Wait for single character input.
@@ -1544,23 +1674,21 @@ hoewever you name it).
 
 ### (read-line): Read line as a symbol.
 
-Reads until CR (10) from file, until LF (13) from standard
-input, not including them.  Unless reading from standard
-input, inital LFs are ignored.
+Reads until CR (10) from file, until LF (13) from standard input, not
+including them.  Unless reading from standard input, inital LFs are
+ignored.
 
 ### (putback): Put last read char back to input.
 
-This is the equivalent of C's ungetc(), putting the
-last character back to input.  Only one character can
-be put back.  If one has already been put back and not
-read by IN or CONIN, it is overwritten.
+This is the equivalent of C's ungetc(), putting the last character back to
+input.  Only one character can be put back.  If one has already been put
+back and not read by IN or CONIN, it is overwritten.
 
 ### (out x): Print char, string or list of both.
 
-Prints numbers as characters, plain symbol names,
-also names of other objects with a name, e.g. built-in
-functions, and lists of both of them.  Lists may also
-be nested (contain other lists).
+Prints numbers as characters, plain symbol names, also names of other
+objects with a name, e.g. built-in functions, and lists of both of them.
+Lists may also be nested (contain other lists).
 
 ~~~lisp
 ; Print nothing.
@@ -1571,6 +1699,9 @@ be nested (contain other lists).
 
 ; Also print 'A'.  (READ converts '\A' to number 65.)
 (out \A)
+
+; Print CR/LF (aka "\r\n").
+(out 13 10)
 
 ; Print 'Hello world' without double qoutes.
 ; Finish with a newline instead of using TERPRI.
@@ -1599,12 +1730,10 @@ be nested (contain other lists).
 
 Commodore 8-bit platforms only.
 
-Opens the current directory and returns the channel number,
-or NIL if no more channels can be allocated or an error
-occured.
+Opens the current directory and returns the channel number, or NIL if no
+more channels can be allocated or an error occured.
 
-Then behaviour when reading from a directory channel is
-undefined.
+Then behaviour when reading from a directory channel is undefined.
 
 See: ERR, READDIR, CLOSEDIR
 
@@ -1612,16 +1741,14 @@ See: ERR, READDIR, CLOSEDIR
 
 Commodore 8-bit platforms only.
 
-Returns a list of the format (name size type) or NIL if an
-error occured.
+Returns a list of the format (name size type) or NIL if an error occured.
 
 See: ERR, OPENDIR, CLOSEDIR
 
 ### (closedir n): Close a directory channel.
 
-Commodore 8-bit platforms only.  Always returns NIL and
-never issues an error.  If a regular channel is applied, the
-behaviour is undefined.
+Commodore 8-bit platforms only.  Always returns NIL and never issues an
+error.  If a regular channel is applied, the behaviour is undefined.
 
 See: OPENDIR, READDIR, CLOSEDIR
 
@@ -1639,19 +1766,15 @@ See: OPENDIR, READDIR, CLOSEDIR
 |------------|----------------------------------|
 | (time)     | Current bekloppie count.         |
 
-Constant +bps+ contains the number of bekloppies per
-second.
+Constant +bps+ contains the number of bekloppies per second.
 
-On CBM machines it's currently set to 50, no
-matter if it's a NTSC or PAL machine.  Please contribute
-some auto-detection to file "cbm-common.lisp".
+On CBM machines it's currently set to 50, no matter if it's a NTSC or PAL
+machine.  Please contribute some auto-detection to file "cbm-common.lisp".
 
-On Unices +BPS+ is 1000 and counting starts with launching
-TUNIX Lisp.
+On Unices +BPS+ is 1000 and counting starts with launching TUNIX Lisp.
 
-Function TIME return the current count of bekloppies.
-It depends on the actual machine TUNIX Lisp is running on
-when the counting from 0 started.
+Function TIME return the current count of bekloppies.  It depends on the
+actual machine TUNIX Lisp is running on when the counting from 0 started.
 
 ## Raw machine access
 
@@ -1680,33 +1803,41 @@ when the counting from 0 started.
     (terpri)))
 ~~~
 
-## Error handling
+## REPL
 
 | Function        | Description                            |
 |-----------------|----------------------------------------|
 | (quit ?x)       | Return from debugger REPL              |
+| (ignore)        | Continue with next REPL expresssion.   |
 | (exit)          | Stop program and go to top-level REPL. |
+| (debugger)      | Invoke debugger with next instruction. |
+
+| Variable | Description                                    |
+|----------|------------------------------------------------|
+| *ex*     | REPL expander (e.g. MACROEXPAND and DOTEXPAND) |
+
+## Error handling
+
+| Function        | Description                            |
+|-----------------|----------------------------------------|
 | (error +x)      | Issue a user error like OUT.           |
 | (onerror n x x) | User-defined error handler.            |
-| (ignore)        | Continue with next REPL expresssion.   |
 | (debug)         | Raises a SIGTRAP signal for debugging. |
-| (debugger)      | Invoke debugger with next instruction. |
 
 ### (quit ?x): Return from debugger REPL.
 ### (exit): Stop program and go to top-level REPL.
 
 ### (error x): Issue a user error.
 
-Prints its arguments to standard output, like OUT, prefixed
-with string "ERROR: ", and invokes a debugger REPL with
-code ERROR\_USER.
+Prints passed names and numbers like OUT and expressions like PRINT
+with prefixed label "USER ERR".
 
 ~~~lisp
 (with ((haystack nil)
        (needle   t))
   (or (assoc needle *haystack*)
       (error "Cannot find " needle " in haystack.")))
-; -> ERROR: Cannot find t in haystack.
+; -> USER ERROR: Cannot find t in haystack.
 ;    DEBUGGER #1:
 ;    Error #14: User error
 ;    ...and so on...
@@ -1737,26 +1868,27 @@ code ERROR\_USER.
 ## (unquote x) | ,x: Insert into QUASIQUOTE.
 ## (unquote-splice x) | ,@x: Splice into QUASIQUOTE.
 
-# Macro system
+# Macros
 
-| Variable        | Description                 |
-|-----------------|-----------------------------|
-| \*macros\*      | Simple list of macro names. |
+| Variable        | Description                           |
+|-----------------|---------------------------------------|
+| \*macros\*      | Simple list of macro names.           |
+| \*umacros\*     | Associative list of user macro names. |
 
-| Function         | Description                     |
-|------------------|---------------------------------|
-| (macro s a ?+x)) | Add macro function to *macros*. |
-| (macro? x)       | Test if symbol is in *macros*.  |
-| (macroexpand x)  | Expand expression.              |
+| Function            | Description                     |
+|---------------------|---------------------------------|
+| (macro s a ?+x))    | Add macro function to *macros*. |
+| (macro? x)          | Test if symbol is in *macros*.  |
+| (macroexpand x)     | Expand expression.              |
+| (umacro s s a ?+x)) | Add macro function to *macros*. |
+| (umacroexpand s x)  | Expand expression.              |
 
-A macro is a special form which is replaced by the
-expression it returns during 'macro expansion'.  Macros are
-expanded in the REPL between READ and EVAL, if the value of
-MACROEXPAND is a user-defined function.
+A macro is a special form which is replaced by the expression it returns
+during 'macro expansion'.  Macros are expanded in the REPL as soon as
+MACROEXPAND is available.
 
-Defined macros are kept in associative list \*MACROS\*.
-Predicate MACRO? checks if a symbol is a defined macro in
-that list.
+Defined macros are kept in associative list \*MACROS\*.  Predicate MACRO?
+checks if a symbol is a defined macro in that list.
 
 Macros are defined with special form MACRO:
 
@@ -1768,8 +1900,8 @@ Macros are defined with special form MACRO:
      ,@body))
 ~~~
 
-Macros can also be used inside other macros, so contructs of
-increasing complexity can be made from simpler components.
+Macros can also be used inside other macros, so contructs of increasing
+complexity can be made from simpler components.
 
 ~~~lisp
 ; Evalute BODY if CONDITION is true.
@@ -1777,11 +1909,15 @@ increasing complexity can be made from simpler components.
   $(? ,condition
       (progn
         ,@body)))
+~~~
+
+UMACRO and UMACROEXPAND allow to define separate groups of macros that
+do not interfere with the standard macros.  MACROEXPAND will use the
+currently selected UMACRO set when such a macro is being expanded.
 
 ## (macro s a +x)): Define macro.
 
-Special form, adding macro S with arguments A and body B to
-\*MACROS\*.
+Special form, adding macro S with arguments A and body B to \*MACROS\*.
 
 ## (macro? x): Test if symbol is in \*macros\*.
 
@@ -1789,11 +1925,141 @@ Predicate to test if a symbol denotes a macro in \*MACROS\*.
 
 ## (macroexpand x): Expand expression.
 
+# Objects
+
+A duck-typed object system with single inheritance based on alists
+supports object-oriented programming with TUNIX Lisp.  It's
+reminiscent of the one provided by JavaScript.
+
+The implementation of the objects is based on associative lists and
+amounts to a whopping 19 lines of code.  \*PROPS\* holds the default
+values for each class that has beend defined with macro CLASS.
+
+~~~lisp
+; (class classname . name-default-pairs)
+; (No class defined before.)
+(class node
+  (parent    nil)
+  (children  nil))
+
+; *PROPS* now contains:
+((node . ((parent   . nil)
+          (children . nil))))
+~~~
+
+Methods are defined using METHOD.  It pushes argument THIS to the
+front of the argument list before defining the function, and adds
+it to the properties of the class it belongs to.
+
+~~~lisp
+; (member classnane methodname arguments . body)
+(member node call-children (f)
+  (dolist (i this.children)
+    ((slot-value i f))))
+
+; *PROPS* now has:
+((node . ((call-children . ((this f)
+                             (dolist (i this.children)
+                               ((slot-value i f)))))
+          (parent        . nil)
+          (children      . nil))))
+~~~
+
+SLOT-VALUE as the function element in a call will make sure that
+the evaluator adds the object to the front of the argument list
+before doing the call.
+
+~~~lisp
+; (slot-value object slot-name)
+((slot-value i f))
+
+becomes
+
+((slot-value i f) i) ; <- Object added as argument "this".
+~~~
+
+An object is created with NEW.  It copies the properties of the
+wanted class and overwrites them with new values specified as pairs
+in the rest of its arguments.  If a slot was not defined with CLASS,
+it is added quietly.
+
+~~~lisp
+(new node)
+
+; Returned object:
+((extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+
+; Call "obj"'s method to call each children's method RENDER.
+(obj.call-children 'render)
+~~~
+
+Objects can be used as prototypes to create new classes.
+
+~~~lisp
+; (make-class classnane object)
+(make-class lm-max-w (new lm w 'max))
+~~~
+
+The need for calling a method of the same name as the currently evaluated
+method will be inevitable for object-oriented programming.  One solution
+would be to prefix methods with their classname to be able to tell them
+apart.  Given the memory constraints of small machines that's a no-go.
+But since all properties including those of the parent are in the object
+in the order of inheritance, it would suffice to start looking for a method
+in inherited properties of the wanted class.  That's where the %TYPE slot
+comes into play.  It's at the front of each inherited class' set of properties.
+Now looking up a method by type would only require the use of MEMBER-IF to
+find the right set of properties.
+
+~~~lisp
+; Example representation of a RECT object derived from NODE.
+; The %TYPE slot allows to find the CALLBACK method of the
+; NODE.
+((x        . 0)
+ (y        . 0)
+ (w        . 0)
+ (h        . 0)
+ (callback . nil)
+ (%type         . node)
+ (callback      . nil)
+ (extra-info    . "Debug here!")
+ (call-children . ((this f)
+                    (dolist (i this.children)
+                      ((slot-value i f)))))
+ (parent        . nil)
+ (children      . nil))
+~~~
+
+That's all of it so far – the implementation amounts to a whopping
+19 lines of code.
+
+So what are we gonna do with these new powers?  How about defining
+user interfaces as LML documents and having a React-like core hold
+and render them to text or graphics, while maintaining state and
+managing layout?
+
+# Components
+
+Under construction.  React-like rendering and user interfacing with
+LML.
+
+~~~lisp
+(html
+  (head
+    (title "TUNIX Lisp"))
+  (body
+    "Hello world!"))
+~~~
+
 # Environment
 
-The environment contains a widely accepted set of functions
-and macros known from most other implementations of the Lisp
-programming languages.
+The environment contains a widely accepted set of functions and macros
+known from most other implementations of the Lisp programming languages.
 
 ## Local variables
 
@@ -1804,8 +2070,7 @@ programming languages.
 
 ### (let n init +b): Block with one local variable.
 
-LET is like WITH but creating only one local variable for
-its body.
+LET is like WITH but creating only one local variable for its body.
 
 ~~~lisp
 (var x 'a)
@@ -1827,8 +2092,6 @@ its body.
 | (awhen cond +b)      | WHEN, assigning cond to !.       |
 | (case x v conseq...) | ?, using values insted of cond.  |
 | (unless cond +b)     | Evaluate if condition is false.  |
-| (while (cond x) +b)  | Loop while condiiton is true.    |
-| (dolist (i init) +b) | Loop over elements of a list.    |
 
 ### (prog1 +b): Return result of first.
 
@@ -1853,8 +2116,8 @@ replaces
 
 ### (case x +l): Evaluate conditionally by matching value.
 
-Evaluates conditionally by matching values in pairs.
-EQL is used as the matching predicate.
+Evaluates conditionally by matching values in pairs.  EQL is used as the
+matching predicate.
 
 ~~~lisp
 (case x
@@ -1871,8 +2134,7 @@ It can have an optional default.
   (out "X is neither A or 5."))
 ~~~
 
-This is the macro-expanded version (TMP would be an
-anonymous symbol):
+This is the macro-expanded version (TMP would be an anonymous symbol):
 
 ~~~lisp
 (let tmp x
@@ -1883,58 +2145,81 @@ anonymous symbol):
 
 ### (unless cond +b): Evaluate if condition is false.
 
-### (while (cond x) +b): Loop while condiiton is true.
-
-### (dolist (i init) +b): Loop over elements of a list.
-
 ## Lists
 
-| Function          | Description                         |
-|-------------------|-------------------------------------|
-| (list +x)         | Return list evaluated.              |
-| (list? x)         | Test if argument is NIL or a cons.  |
-| (cadr l)...       | Nested CAR/CDR combinations.        |
-| (carlist l)       | Get first elements of lists.        |
-| (cdrlist l)       | Get rest elements of lists.         |
-| (append +l)       | Copy and append lists.              |
-| (copy-list x)     | Copy list.                          |
-| (copy-tree x)     | Copy recursively.                   |
-| (count-if f l)    | Count by predicate.                 |
-| (cut-at n l)      | Destructively split list.           |
-| (ensure-list x)   | Turn atom into list.                |
-| (every f x)       | Test if F is T for all X.           |
-| (some f x)        | Test if F is T for some X.          |
-| (find x l)        | Find element X in list.             |
-| (find-if f l)     | Find element X in list by F.        |
-| (group l n)       | Split L in lists of length N.       |
-| (nth n l)         | Get Nth element of list.            |
-| (nthcdr n l)      | Get Nth cons of list.               |
-| (mapcar f +l)     | Map CARs of lists.                  |
-| (mapcan f +l)     | Concatenating MAPCAR.               |
-| (member-if f l)   | Find cons with element in list.     |
-| (remove-if f l)   | Removed elemnts from list.          |
-| (reverse l)       | Reverse list.                       |
-| (position x l ?f) | Find position of object in list.    |
-| (split x l ?f)    | Split list where object occurs.     |
-| (subseq l n n)    | Return sublist.                     |
+| Function          | Description                          |
+|-------------------|--------------------------------------|
+| (dup x n)         | Duplicate X N times.                 |
+| (.. +x)           | Return list of arguments.            |
+| (list? x)         | Test if argument is NIL or a cons.   |
+| (cadr l)...       | Nested CAR/CDR combinations.         |
+| (carlist l)       | Get first elements of lists.         |
+| (cdrlist l)       | Get rest elements of lists.          |
+| (append +l)       | Copy and append lists.               |
+| (copy-list x)     | Copy list.                           |
+| (copy-alist x)    | Copy associative list.               |
+| (copy-tree x)     | Copy recursively.                    |
+| (count-if f l)    | Count by predicate.                  |
+| (cut-at n l)      | Destructively split list.            |
+| (ensure-list x)   | Turn atom into list.                 |
+| (every f x)       | Test if F is T for all X.            |
+| (find x l)        | Find element X in list.              |
+| (find-if f l)     | Find element X in list by F.         |
+| (group l n)       | Split L in lists of length N.        |
+| (insert l n x)    | Non-destructive insert of X at N.    |
+| (ninsert l n x)   | Destructive insert of X at N.        |
+| (nth n l)         | Get Nth element of list.             |
+| (nthcdr n l)      | Get Nth cons of list.                |
+| (mapcar f +l)     | Map CARs of lists.                   |
+| (mapcan f +l)     | Concatenating MAPCAR.                |
+| (member-if f l)   | Find cons with element in list.      |
+| (reshape l n+)    | Reshape list to multiple dimensions. |
+| (remove-if f l)   | Removed elemnts from list.           |
+| (reverse l)       | Reverse list.                        |
+| (position x l ?f) | Find position of object in list.     |
+| (split x l ?f)    | Split list where object occurs.      |
+| (subseq l n n)    | Return sublist.                      |
 
-### (list +x): Make list of arguments.
+### (dup x n): Duplicate X N times
 
-### (list? x): Test if argument is NIL or a cons.
+#### Example
 
-### (cadr l)...: Nested CAR/CDR combinations.
+~~~lisp
+(dup 'x 3) ; -> (x x x)
+~~~
 
-### (carlist l): Get first elements of lists.
+### (.. +x): Make list of arguments
 
-### (cdrlist l): Get rest elements of lists.
+### (list? x): Test if argument is NIL or a cons
 
-### (append +l): Copy and append lists.
+### (cadr l)...: Nested CAR/CDR combinations
 
-### (copy-list x): Copy list.
+As inconvenient as the names CAR and CDR are, as refreshingly practical
+combinations of them appear to be:
 
-### (copy-tree x): Copy recursively.
+~~~lisp
+(fn cadr (x)
+  (car (cdr x)))
+(fn caddr (x)
+  (car (cdr (cdr x))))
+~~~
 
-### (count-if f l): Count by predicate.
+### (carlist l): Get first elements of lists
+
+### (cdrlist l): Get rest elements of lists
+
+### (append +l): Copy and append lists
+
+### (copy-list x): Copy list
+
+### (copy-slist x): Copy associative list
+
+Copies the associative list and the conses it contains, so you can set
+the CARs and CDRs of its elements without affecting the original.
+
+### (copy-tree x): Copy recursively
+
+### (count-if f l): Count by predicate
 
 ~~~lisp
 (count-if number? '(l 1 5 p)) ; -> 2
@@ -1942,8 +2227,8 @@ anonymous symbol):
 
 ### (cut-at n l): Destructively split list at position.
 
-Sets the CDR of the cons before that position of the
-list passed to it to NIL.
+Sets the CDR of the cons before that position of the list passed to it to
+NIL.
 
 ~~~lisp
 (let l '(l i s p)
@@ -1952,10 +2237,9 @@ list passed to it to NIL.
   l)             ; -> (l i)
 ~~~
 
-It's vital to note that a position of 0 will cause the list
-to be returned as is, and that original list will be still
-intact and not NIL.  That makes CUT-AT less of a lispy
-function.
+It's vital to note that a position of 0 will cause the list to be returned
+as is, and that original list will be still intact and not NIL.  That
+makes CUT-AT less of a lispy function.
 
 ~~~lisp
 (let l '(l i s p)
@@ -1975,21 +2259,17 @@ function.
 
 ### (nthcdr n l): Get Nth cons of list.
 
-The name of NTHCDR is misleading, should you think of NTH
-being NTHCAR compared to NTHCDR.  NTHCDR actually returns
-the cons instead of the element that is in it.  And that
-is, of course, much more practical:
+NTHCDR returns the nth cons of a list, not the CAR of it, like NTH does.
 
 ~~~lisp
-(nth 0 '(l i s p)) ; -> (l i s p)
-(nth 2 '(l i s p)) ; -> (s p)
+(nthcdr 0 '(l i s p)) ; -> (l i s p)
+(nthcdr 2 '(l i s p)) ; -> (s p)
 ~~~
 
 ### (position x l ?f) | Find position of X in L.
 
-Returns the position of X in list L, starting with 0 for
-the first position, or NIL if X has not been found.
-Predicate F is EQL by default.
+Returns the position of X in list L, starting with 0 for the first
+position, or NIL if X has not been found.  Predicate F is EQL by default.
 
 ~~~lisp
 (position 'foreign '(mom dad)) ; -> nil
@@ -1997,11 +2277,20 @@ Predicate F is EQL by default.
 (position 'dad '(mom dad))     ; -> 1
 ~~~
 
+### (reshape l n+): Reshape list to multiple dimensions.
+
+~~~lisp
+(reshape '(1 2 3 4 5 6 7 8) 2)
+; -> ((1 2) (3 4) (5 6) (7 8))
+
+(reshape '(1 2 3 4 5 6 7 8) 2 3)
+; -> (((1 2 3) (4 5 6)) ((7 8)))
+~~~
+
 ### (split x l ?f) | Split list at object.
 
-Splits list L where object X occurs, tested by predicate F,
-which is EQL by default.  The object is removed from the
-list.
+Splits list L where object X occurs, tested by predicate F, which is EQL
+by default.  The object is removed from the list.
 
 ~~~lisp
 (split 'b '(a a b c c c)) ; -> ((a a) (c c c))
@@ -2010,11 +2299,10 @@ list.
 
 ### (subseq l start ?end): Get sublist.
 
-Copies part of a list into a new one from 'start' to 'end'.
-If 'end' is not given, everything to the end of the list is
-taken.  'start' and 'end' begin with number 0 for the first
-position in the list.  'end' is exclusive, telling with
-which position copying finishes.
+Copies part of a list into a new one from 'start' to 'end'.  If 'end' is
+not given, everything to the end of the list is taken.  'start' and 'end'
+begin with number 0 for the first position in the list.  'end' is
+exclusive, telling with which position copying finishes.
 
 ~~~lisp
 (subseq '(t u n i x) 2)   ; -> (n i x)
@@ -2022,17 +2310,113 @@ which position copying finishes.
 ;         0 1 2 3 4
 ~~~
 
-## Loops
+## Looping
 
-| Macro                         | Description              |
-|-------------------------------|--------------------------|
-| (do ((iters) (cond res)) . b) | Generic loop.            |
-| (dolist (iter init) . body)   | Loop over list elements. |
-| (dotimes (iter n) . body)     | Loop N times.            |
+| Macro                                | Description                   |
+|--------------------------------------|-------------------------------|
+| (do (+iters (brk-cond res)) . body)  | Generic loop.                 |
+| (do* (+iters (brk-cond res)) . body) | Generic loop.                 |
+| (dolist (iter init) . body)          | Loop over list elements.      |
+| (dotimes (iter n) . body)            | Loop N times.                 |
+| (while (cond x) +b)                  | Loop while condiiton is true. |
+| (awhile (cond x) +b)                 | WHILE with condition in "!".  |
+
+###  DO/DO\*: Generic loop.
+
+Macro DO is used for iterative looping.  It allows for the
+execution of a block of code repeatedly, with controlled variable
+initialization, step updates, and termination conditions.
+
+DO* addtionally allows step updates to reference previously defined
+loop variables.
+
+#### Form
+
+~~~lisp
+(do ((var1 init1 step1)
+     (var2 init2 step2) ...)
+    (exit-condition result)
+  body)
+~~~
+
+- VAR, INIT, STEP: VAR is initialized to INIT, and after each iteration,
+  it is updated by STEP.
+- EXIT-CONDITION: The loop terminates when the `exit-condition`
+  evaluates to true, returning `result`.
+- BODY: The block of code that executes on each iteration until the
+  `exit-condition` is satisfied.
+
+#### Description
+
+DO is one of the most versatile constructs in Lisp, combining the
+functionality of of multiple loop constructs into a single, elegant
+tool.  Most other constructs like DOLIST, DOTIME, WHILE, and so on,
+are implemented using DO.
+
+#### Examples
+
+##### Reversed DOMTIMES
+
+~~~lisp
+(do ((i 0 (+ i 1))) 
+    ((== i 10) i)
+  (print i))
+; -> 0 1 2 3 4 5 6 7 8 9
+~~~
+
+I is initialized to 0, incremented in each iteration, and the loop
+exits when I equals 10, returning I.
+
+##### Iterating over a list's conses
+
+Iterating over conses is required if list elements ahead need to be
+token into consideration.
+
+~~~lisp
+(fn butlast (x)
+  (do ((c x (cdr c)))
+      ((not c))
+    (or (cdr c)
+        (return c))))
+~~~
+
+##### Iterating over a list's conses with indexing
+
+~~~lisp
+(do ((c x (cdr c))
+     (i 0 (++ i)))
+    ((not c))
+  (let e (car c)
+    BODY))
+~~~
 
 ### (dolist (iter init) . body): Loop over list elements.
 
 ### (dotimes (iter n) . body): Loop N times.
+
+#### Syntax
+
+~~~lisp
+(dotimes (var number ?result)
+  body)
+~~~
+
+Counts down from N to 0, evaluation BODY each time.   A non-negative N is an
+error.
+
+#### Example: Make list of duplicates
+
+~~~lisp
+(fn dup (x n)
+  (aprog1 nil
+    (dotimes (i n)
+      (push x !))))
+
+(dup 'x 3) ; -> (x x x)
+~~~
+
+### (while (cond x) +b): Loop while condiiton is true
+### (awhile (cond x) +b): WHILE with condition in "!"
 
 ## Stacks
 
@@ -2041,8 +2425,7 @@ which position copying finishes.
 | (push x l) | Destructively push onto stack L. |
 | (pop l)    | Destructively pop from stack L.  |
 
-Stacks are lists to which elements are pushed to or popped
-off the front.
+Stacks are lists to which elements are pushed to or popped off the front.
 
 ### (push x l): Destructively push onto stack L.
 
@@ -2099,21 +2482,41 @@ x ; '(2)
 
 ### (set-exclusive-or a b): Elements that are not in both.
 
-### (subseq? a b): Test if A is subset of B,
+### (subseq? a b): Test if A is subset of B.
 
 ## Associative lists
 
-| Function        | Description                        |
-|-----------------|------------------------------------|
-| (acons alist c) | Add key/value to associative list. |
-| (assoc x l)     | Return list that start with X.     |
+| Function         | Description                        |
+|------------------|------------------------------------|
+| (acons alist c)  | Add key/value to associative list. |
+| (assoc x l)      | Return list that start with X.     |
+| (aremove x l)    | Remove X from associative L.       |
+| (aremove-if f l) | Remove by F from associative L.    |
+| (pairlist l l)   | Combine lists to associative list. |
 
-A list of lists where the first element of each list is the
-key and the rest is the value.
+A list of lists where the first element is the key and the
+rest is the value.
 
 ### (acons alist c): Add key/value to associative list.
-
 ### (assoc x l): Return list that start with X.
+### (aremove x l): Remove X from associative L.
+### (aremove-if f l): Remove by F from associative L.
+
+### (pairlist l l): Combine lists to associative list.
+
+~~~lisp
+(pairlist '(1 2) '(3 4)) ; -> '((1 3) (2 4))
+~~~
+
+## Console control
+
+### (clrscr): Clear screen.
+### (con-xy x y): Set cursor position.
+### (con-crs x): Set cursor visibility.
+### (con-rvs x): Set reverse mode.
+### (con-direct x): Set direct mode.
+### (con-x): Get cursor X position.
+### (con-y): Get cursor Y position.
 
 ## Version information
 
@@ -2122,31 +2525,60 @@ key and the rest is the value.
 | +target+ | Target machine the interpreter runs on. |
 |   +v+    | Git tag and short SHA.                  |
 |   +vb+   | Git branch.                             |
+|  \*v?\*  | Tell if definitions should be printed.  |
+
+## Autoloader
+
+| Function   | Description             |
+|------------|-------------------------|
+| (autoload) | Load missing procedure. |
+
+| Variable | Description                              |
+|----------|------------------------------------------|
+| \*alx\*  | Name translation map (associative list). |
+| \*alv?\* | Verbose mode during AUTOLOAD.            |
+
+Missing procedures are loaded on demand by AUTOLOAD (assigned to ONERROR), as long as the filename is the same
+(plus the ".lsp" suffix).
+Messages are not printed during AUTOLOAD unless \*ALV?\* is not NIL.
+The default is T (verbose).
+
+~~~lisp
+; Verbose autoloading of LS.
+(with-global *alv?* t
+  (ls))
+Loading ls.lsp
+~~~
+
+If the missing procedure is a macro, the original code is expanded on the
+spot.
+
+For names with wildcards name translations can been added to \*ALX\*.
+Can be used to map many procedures to a single file.
+
+~~~lisp
+; Add translation for macro "!?", which is in file "aif.lsp".
+; (Already done.)
+(push (cons '!? 'aif) *alx*)
+~~~
 
 ## Maintainance
 
 | Function          | Description                       |
 |-------------------|-----------------------------------|
-| (source s)        | Get definition of symbol.         |
 | (compress-tree x) | Find and replace double subtrees. |
-
-### (source s): Print definition of a symbol.
-
-Prints a definition that can be used to re-define the
-symbol later, e.g. by writing it to a file for LOAD.
 
 ### (compress-tree x): Find and replace double subtrees.
 
 ***COMPRESS-TREE Cannot be used with compressed conses.***
 
-This is about finding duplicate subtrees in the heap and
-replacing them by referencing the "original".  This might
-pay out very well, although it is computationally
-demanding and is best performed in the background if the
+This is about finding duplicate subtrees in the heap and replacing them by
+referencing the "original".  This might pay out very well, although it is
+computationally demanding and is best performed in the background if the
 machine is otherwise idle.
 
-This function should only be used on modern machines or in
-acclerating emulators (e.g. "warp mode" in VICE).
+This function should only be used on modern machines or in acclerating
+emulators (e.g. "warp mode" in VICE).
 
 Here is how to compress all of the heap:
 
@@ -2156,34 +2588,31 @@ Here is how to compress all of the heap:
 
 #### The algorithm
 
-This algorithm assumes, that no-one else will modify the
-trees in the heap.  If lists are created, the algorithm
-cannot work alongside.
+This algorithm assumes, that no-one else will modify the trees in the
+heap.  If lists are created, the algorithm cannot work alongside.
 
-Two iterators are being used.  The first starts at the root
-of the tree and traverses in CAR direction.  With each cons
-a second iterator goes through the rest of the tree, starting
-with the CDR of the cons and comparing each cons with the one
-where the first iterator resides.  It is also traversing back to the
-top of the tree to do the same with the CDRs of the conses
-which have already been visited.  Then the first iterator
-steps on and the process repeats until both iterator came
-back to the root of the tree.
+Two iterators are being used.  The first starts at the root of the tree
+and traverses in CAR direction.  With each cons a second iterator goes
+through the rest of the tree, starting with the CDR of the cons and
+comparing each cons with the one where the first iterator resides.  It is
+also traversing back to the top of the tree to do the same with the CDRs
+of the conses which have already been visited.  Then the first iterator
+steps on and the process repeats until both iterator came back to the root
+of the tree.
 
-The movement of the first iterator could be implemented using
-recursion.  The application of the second iterator travelling
-up the same path prohibits that.  Instead, a path list has to
-be created by the first iterator which the second one can use
-to travel back down to the root.  From each cons on it can
-use regular recursion to travel through the rest of the tree.
+The movement of the first iterator could be implemented using recursion.
+The application of the second iterator travelling up the same path
+prohibits that.  Instead, a path list has to be created by the first
+iterator which the second one can use to travel back down to the root.
+From each cons on it can use regular recursion to travel through the rest
+of the tree.
 
-Essentially the first iterator is implemented as function
-COMPRESS-TREE and the second iterator as REPLACE-DUPLICATES.
+Essentially the first iterator is implemented as function COMPRESS-TREE
+and the second iterator as REPLACE-DUPLICATES.
 
 ## Target information
 
-Constant +TARGET+ identifies the target machine, which is
-one of:
+Constant +TARGET+ identifies the target machine, which is one of:
 
 * c128
 * c16
@@ -2193,40 +2622,81 @@ one of:
 * unix
 * vic20
 
-# Optional features
+## UNIX networking sockets
 
-## Compressed conses
+| Built-in                       | Description                 |
+|--------------------------------|-----------------------------|
+| (socket-connect s n)           | Open IP/port.               |
+| (socket-send n s)              | Write symbol to socket.     |
+| (socket-read n)                | Read symbol from socket.    |
+| (socket-getc n)                | Read char from socket.      |
+| (socket-putc n n)              | Write char to socket.       |
+| (socket-block n s)             | Select blocking I/O.        |
+| (socket-listen n)              | Listen on port.             |
+| (socket-accept n)              | Accept incoming connection. |
+| (socket-close s)               | Close socket.               |
 
-When enabled by compile-time option COMPRESSED\_CONS,
-storing the CDR of a cons can be spared if that is following
-immediately on the heap.  Since that makes compressed conses
-immutable (you cannot use SETCDR on them), compression is
-performed if the garbage collector was called by the program
-and not the allocator.  The GC is also called to compress
-conses if the available heap left is smaller than the number
-of bytes specified by compile-time option
-GC\_AFTER\_LOAD\_THRESHOLD, which is 2048 by default.
+Available on systems that support compile-time option HAVE\_SOCKETS.
+Only very basic support, no polling or listening.
 
-If you want to make sure that all conses that can be are
-compressed you have to call the garbage collector twice.
+### (socket-getc n): Read char from socket.
+### (socket-putc n n): Put char to socket.
 
-Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the
-GC will print a 'C' to the currently active output channel.
+~~~lisp
+(!? (socket-connect "127.0.0.1" 8000)
+    (progn
+      (socket-send ! (symbol (append (symbol-name "GET / HTTP/1.1")
+                                     (.. 13 10 13 10))))
+      (print (socket-read !))
+      (socket-close !))
+    (message "Cannot open 127.0.0.1:8000."))
+~~~
 
-# XXX
+### (socket-accept n): Accept incoming connection.
 
-EXIT\_FAILURE\_ON\_ERROR
+Returns T if the call was successful but no connection is waiting.
+
+# Compile-time options to add or remove features
+
+## COMPRESSED\_CONS: Per-GC list compression.
+
+When enabled by compile-time option COMPRESSED\_CONS, storing the CDR of a
+cons can be spared if that is following immediately on the heap.  Since
+that makes compressed conses immutable (you cannot use =-CDR on them),
+compression is performed if the garbage collector was called by the
+program and not the allocator.  The GC is also called to compress conses
+if the available heap left is smaller than the number of bytes specified
+by compile-time option GC\_AFTER\_LOAD\_THRESHOLD, which is 2048 by
+default.
+
+If you want to make sure that all conses that can be are compressed you
+have to call the garbage collector twice.
+
+Compile-time option VERBOSE\_COMPRESSED\_CONS is set, the GC will print a
+'C' to the currently active output channel.
+
+## EXIT\_FAILURE\_ON\_ERROR
 
 # Internals
 
+## Garbage collection
+
+The compacting mark-and-sweep garbage collector first traces and marks all
+objects that are in use, starting with \*UNIVERSE\*, and moves the used
+objects together in the sweep phase, overwriting the unused ones.  Finally
+it relocates all pointers to moved objects.  The more gaps have to be
+removed, the longer the relocation phase takes, because adjacent gaps are
+merged.  On small machines removing all macros and doing a manual GC is
+recommended before program start because macro-expansions create lots of
+gaps.
+
 ## Heap object layouts
 
-You can get the memory address of any object with RAWPTR.
-You can then use it to PEEK and POKE memory directly.
+You can get the memory address of any object with RAWPTR.  You can then
+use it to PEEK and POKE memory directly.
 
-On 32-bit and 64-bit architecture pointers and numbers are
-four or eight bytes in size.  The following tables show the
-layouts for 16-bit systems.
+On 32-bit and 64-bit architecture pointers and numbers are four or eight
+bytes in size.  The following tables show the layouts for 16-bit systems.
 
 All objects start with a type byte:
 
@@ -2267,15 +2737,14 @@ All objects start with a type byte:
 |   2-3  | Pointer to next symbol for look-ups |
 |   4-x  | Name (optional)                     |
 
-Adding the extended type bit turn a symbol to a special
-form.  Arguments its function won't be evaluated then.
+Adding the extended type bit turn a symbol to a special form.  Arguments
+its function won't be evaluated then.
 
 ### Built-in functions
 
-Built-ins are symbols with a pointer to a descriptor of the
-built-in.  It contains an ASCIIZ pointer to the name,
-another to the character-based argument definition and the
-address of its implementation.
+Built-ins are symbols with a pointer to a descriptor of the built-in.  It
+contains an ASCIIZ pointer to the name, another to the character-based
+argument definition and the address of its implementation.
 
 | Offset | Description                         |
 |--------|-------------------------------------|
@@ -2290,9 +2759,9 @@ address of its implementation.
 ## 1. Add a supplementary compiler configuration (cc65)
 
 Copy the configuration file of the desired platform from
-'src/contrib/cc65/cfg' to 'cfg/ld65/', and to
-'src/bin/lisp/cc65-cfg/'.  You'll have to tweak the latter to provide
-enough zeropage locations, and add these segments:
+'src/contrib/cc65/cfg' to 'cfg/ld65/', and to 'src/bin/lisp/cc65-cfg/'.
+You'll have to tweak the latter to provide enough zeropage locations, and
+add these segments:
 
 ~~~
 CODE_BUILTIN:  load = MAIN, type = ro;
@@ -2323,20 +2792,22 @@ MAGIC_TARGETS = sliderule
 
 ## 3. Create build files for the compiler compiler.
 
-Copy one of files 'src/mk/Makefile.config.\*' to 'src/mk/Makefile.config.magic'
-and adapt it to that brand new, incredible MagiC compiler.  It should contain
-alls flags wants to play around with.  These are used by the new file
-'src/mk/Makefile.build.magic', which you can create the same way.
+Copy one of files 'src/mk/Makefile.config.\*' to
+'src/mk/Makefile.config.magic' and adapt it to that brand new, incredible
+MagiC compiler.  It should contain alls flags wants to play around with.
+These are used by the new file 'src/mk/Makefile.build.magic', which you
+can create the same way.
 
 ## 4. Add C preprocessor definition for the target
 
-Add the preprocessor definition of TARGET\_SLIDERULE to the end of 'src/mk/Makefile.config'.
-You will need it to make changes in the C code of TUNIX Lisp.
+Add the preprocessor definition of TARGET\_SLIDERULE to the end of
+'src/mk/Makefile.config'.  You will need it to make changes in the C code
+of TUNIX Lisp.
 
 ## 5. Add default compile-time configuration.
 
-These are in the head of 'src/lib/lisp/liblisp.h'.  Again, copy one that suits you
-best.  For our SlideRule it might look like this:
+These are in the head of 'src/lib/lisp/liblisp.h'.  Again, copy one that
+suits you best.  For our SlideRule it might look like this:
 
 ~~~C
 // Calculation Circus Co. "SlideRule 2000"
@@ -2359,9 +2830,9 @@ best.  For our SlideRule it might look like this:
 
 ## 6. Add libsimple I/O.
 
-Add 'libsimpleio-stdlib' for your target to
-'src/bin/lisp/Makefile'.  You may come up with your own, platform-specific libsimpleio add-on
-for the SlideRule.
+Add 'libsimpleio-stdlib' for your target to 'src/bin/lisp/Makefile'.  You
+may come up with your own, platform-specific libsimpleio add-on for the
+SlideRule.
 
 ## 7. Build, fix, build, fix...
 

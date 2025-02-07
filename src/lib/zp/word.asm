@@ -45,12 +45,11 @@
 .endproc
 
 .proc zpw_dec_x
-    dec 0,x
     lda 0,x
-    cmp #$ff
-    bne :+
+    beq :+
     dec 1,x
-:   rts
+:   dec 0,x
+    rts
 .endproc
 
 .proc zpw_addb_xay

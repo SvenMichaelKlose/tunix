@@ -1,6 +1,7 @@
 (load 'as65/package.lsp)
-(require 'let 'when 'unless 'let-when 'nth 'position
-         'dolist 'dotimes 'dolist-indexed)
+(require 'let 'when 'unless 'let-when
+         'nth 'position 'dolist
+         'dotimes 'dolist-indexed)
 
 (= *alv?* t) ; Verbose AUTOLOAD.
 
@@ -70,7 +71,7 @@
         (when (!= (nth bbb (nth cc *6502*))
                 (or (eq t !)
                     (eq t (nth aaa !))))
-          (list aaa bbb cc))))))
+          (.. aaa bbb cc))))))
 
 (fn mnimm-opc (mn)
   ; "Get opcode of 2nd class instruction."
@@ -83,7 +84,7 @@
         (unless (eq t b) ; (all of row 1st class instructions)
           (let-when aaa (position mn b)
             ; Mnemonic found.
-            (return (list aaa bbb cc) found)))))))
+            (return (.. aaa bbb cc) found)))))))
 
 (fn opcode (mn am)
   ; "Make opcode parts (AAA, BBB, CC) from mnemonic and addressing mode."

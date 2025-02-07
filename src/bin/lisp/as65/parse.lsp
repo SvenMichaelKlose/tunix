@@ -22,21 +22,21 @@
   (block nil
     (awhen x.
       (when (cons? !)
-        (return (. .x (list (. 'type 'expr)
-                            (. 'data !)))))
+        (return (. .x (.. (. 'type 'expr)
+                          (. 'data !)))))
       (unless (symbol? !)
-        (return (. .x (list (. 'type 'data)
-                            (. 'data !)))))
+        (return (. .x (.. (. 'type 'data)
+                          (. 'data !)))))
 
       (when (labeldef? !)
         (return (. .x
-                   (list (. 'type 'label)
-                         (. 'data (symbol (butlast (symbol-name !))))))))
+                   (.. (. 'type 'label)
+                       (. 'data (symbol (butlast (symbol-name !))))))))
       (and (symbol? !)
            (eq ': .x.)
            (return (. ..x
-                      (list (. 'type 'label)
-                            (. 'data !)))))
+                      (.. (. 'type 'label)
+                          (. 'data !)))))
 
       (or (mnem? !)
           (error "No mnem: " !))

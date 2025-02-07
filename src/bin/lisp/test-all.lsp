@@ -227,7 +227,7 @@
        (error))
   (and (mapcan '((x) x) '(nil nil))
        (error))
-  (or (equal (mapcan list '(l i s p))
+  (or (equal (mapcan .. '(l i s p))
              '(l i s p))
        (error)))
 

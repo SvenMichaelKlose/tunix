@@ -7,7 +7,8 @@
 
 ; Name to filename translations.
 (var *alx*
-  '((!?   . aif)
+  '((..   . list)
+    (!?   . aif)
     (do*  . do2)
     (let* . let2)))
 

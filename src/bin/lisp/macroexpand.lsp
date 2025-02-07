@@ -44,7 +44,7 @@
   (((!)
      ; Either add to *MACROS* or update existing entry.
      (? (macro? n)
-        (setcdr (macro? n) (. a !))
+        (=-cdr (macro? n) (. a !))
         (= *macros* (. (. n (. a !))
                     *macros*))))
     (@ macroexpand body)))

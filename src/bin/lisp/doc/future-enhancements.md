@@ -1,8 +1,6 @@
 Future enhancements of the TUNIX Lisp dialect
 =============================================
 
-A couple of ideas to enhance TUNIX Lisp significantly.
-
 # User-defined setters
 
 ~~~lisp
@@ -61,7 +59,3 @@ Submit to your fantasy.
 # Processes
 
 Sharing the heap they forked off from.  With pipelining.
-
-# Wanted
-
-* Math lib for lists of decimals of arbitrary length.

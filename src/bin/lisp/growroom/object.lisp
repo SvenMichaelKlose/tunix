@@ -2,10 +2,10 @@
   (car (assoc slot obj)))
 
 (fn =slot (val obj slot)
-  (setcdr (assoc slot obj) val))
+  (=-cdr (assoc slot obj) val))
 
 (fn make-object x
-  (@ list x))
+  (@ .. x))
 
 (!= (make-object '(name surname age))
   (= (!.name)    "Klose"

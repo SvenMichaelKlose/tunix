@@ -3,6 +3,6 @@
   (!= (or (assoc n nil *sockq*)
           (acons! n nil *sockq*))
     (unless .!
-      (setcdr ! (symbol-name (socket-recv n))))
+      (=-cdr ! (symbol-name (socket-recv n))))
     (prog1 .!.
-      (setcdr ! ..!))))
+      (=-cdr ! ..!))))

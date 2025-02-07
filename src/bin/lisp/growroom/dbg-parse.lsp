@@ -36,5 +36,5 @@
              fields (dbg-parsel (member-if '((c) (not (== \  c))) !)))
         (? sa
            (setcdr sa (. fields (cdr sa)))
-           (acons! s (list fields) sections))))
+           (acons! s (.. fields) sections))))
     (queue-list q)))

@@ -4,5 +4,5 @@
      l
      (let* (end  (nthcdr (-- n) l)
             next (cdr end))
-       (and end (setcdr end nil))
+       (and end (=-cdr end nil))
        next)))

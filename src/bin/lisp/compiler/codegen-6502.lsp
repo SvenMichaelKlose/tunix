@@ -2,8 +2,8 @@
 ;
 ; Required procs:
 ; __enter, __leave.
-; __stack, __obj, __ax2ref,
-; __call_bytecode, __call_native,
+; __stack, __obj, __ax2ref, __pushax
+; __call, __call_native,
 ;
 ; Beware of the limited CPU stack
 ; spoiling the show!
@@ -11,7 +11,6 @@
 (in-package 'c/6502
   '(ofs ref2ax assignment call-bytecode
     call-native arg expr))
-
 
 (fn last? (x)
   (== 128 (bit-and x 128)))
@@ -25,33 +24,27 @@
            '__stack
            '__obj)))
 
-
 (fn assignment (x)
   $(,@(ref2ax .x.)
     ,@(ax2ref x.)))
 
-(fn call-bytecode (x)
+(fn call-lisp (x)
   $(,@(ref2ax (car .x.))
-    jsr call_bc))
-
-(fn call-native (x)
-  $(,@(ref2ax (car .x.))
-    jsr call_native))
+    jsr __call))
 
 (fn arg (x)
   $(,@(ref2ax x)
-    jsr pushax))
+    jsr __pushax))
 
 (fn call (x)
-  $(,@(@ arg (cdr .x.))
-    ,@(? (bytecode-fun? (car .x.))
-         (call-bytecode x)
-         (call-native x))
-    ldy #,(+ (cadr x.)
-             (length *fi*.args))
-    jsr __ax2ref
-    ,@(leave (length *fi*.args))))
-
+  (!= (length *fi*.args)
+    $(,@(@ arg (cdr .x.))
+      ,@(!? (native-fun (car .x.))
+            $(jsr ,!)
+            (call-lisp x))
+      ldy #,(+ ! (cadr x.))
+      jsr __ax2ref
+      ,@(leave !))))
 
 (fn expr (x)
   (? (%ref? x.)
@@ -61,10 +54,12 @@
 
 (fn compiler/gen-6502 (fi x)
   (with-global *fi* fi
-    $(lda #,(length *fi*.vars)
-      jsr __enter
-      ,@(@ expr x)
-      ldy #,(length *fi*.vars))
-      jmp __leave))
+    (!= (length fi.vars)
+      $(,(native-fun fi.name):
+        lda #,!
+        jsr __enter
+        ,@(@ expr x)
+        ldy #,!
+        jmp __leave)))
 
 (in-package nil)

@@ -43,10 +43,6 @@
   (or (%closure? x)
       (%stackarg? x))
     x
-  (named-lambda? x)
-    (copy-lambda x
-      :body (expand (lambda-body x)
-                    (lambda-funinfo x)))
   (or (%=? x)
       (%set-local-fun? x))
     (!= (expand .x. fi)

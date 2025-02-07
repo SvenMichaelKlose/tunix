@@ -56,10 +56,10 @@ pass, so all calls to known functions can be compiled in the next:
 
 7. **Call expasions**: Arguments are expanded and rest arguments are made
    consing.
-8. **Expression expansion**: To _single statement assignments_: All arguments of
-   function calls are assigned to temporary variables.
+8. **Expression expansion**: To _single statement assignments_: All arguments
+   of function calls are assigned to temporary variables.
 9. **Block folding**: Collapses nested %BLOCKs.
-10. **Assigment compaction**: Removes '%=' from expressions.
+10. **Assigment compaction**: Removes %= from assignments' heads.
 11. **Tag compaction**: Replaces %TAGs by numbers.
 
 ## Middleend
@@ -83,6 +83,27 @@ Translate the IR to code.
 21. **Code generation**: Macros generating bytecode
 
 # The frontend passes
+
+As mentioned before, the frontend is responsible for translating its input to a
+simpler _intermediate IR_ and to gather information required for generating
+fast code.
+
+## Dot expansion
+
+Converts abbreviations of CAR, CDR and SLOT-VALUE back to regular expressions.
+See [TUNIX dot-expansion](manual.md#dot-expansion).
+
+## Standard macro expansion
+
+Expands all macros that are in the environemnt.  Required macros must be loaded
+in advance using REQUIRE when compiling files, otherwise they'll be compiled as
+function calls.
+
+~~~
+(fancymacro "Hi there!") ; Function doesn't exist error at run-time.
+(require 'fancymacro)    ; Load FANCYMACRO at compile-time.
+(fancymacro "Hi there!")
+~~~
 
 ## Making IR: Compiler macro expansion
 
@@ -237,8 +258,9 @@ essential to process functions further.
 
 ## Call expansion
 
-Checks and expands arguments and turns rest arguments into CONSes.
-
+Checks and expands arguments and turns rest arguments into CONSes.  If
+functions are unknown, calls of \*> are generated, which are expensive.
+Re-compiling a file after a function became known is correcting that.
 
 ## Expression expansion
 
@@ -328,6 +350,8 @@ The tré compiler brings back %TAGs for _code generation macros_ in its backend.
 Basic compression of what the macro expansions messed up at least, like
 removing assignments with no effect or chained jumps.
 
+# The backend passes
+
 ## Place assignment
 
 Wraps a variable in %STACK alongside the FUNINFO containing the variable.
@@ -347,8 +371,6 @@ Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
   (%go 0)
   1)
 ~~~
-
-# The backend passes
 
 ## Code generation
 

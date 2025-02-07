@@ -11,6 +11,23 @@ and this project adheres to
 [Lisp manual](src/bin/lisp/doc/manual.md)
 
 
+## [v0.0.33] - 2025-01-07
+
+### Lisp
+
+#### Environment
+
+##### Added
+
+- Macro DEF-FILTER.
+- +@ for single-list MAPCAN.
+
+##### Changed
+
+- LIST is now "..".
+- !++/!-- renamed to ++!/--!.
+
+
 ## [v0.0.32] - 2024-12-15
 
 ### Lisp
@@ -20,20 +37,16 @@ and this project adheres to
 ##### Added
 
 - Macro ASSERT.  Just use it... ;)
-- Macro DEF-FILTER.
 - FILTER-FILE: Copy file, filtering expressions.
 - UMACRO, UMACROEXPAND: User-defined sets of macros alongside.
-- +@ for single-list MAPCAN.
 
 ##### Changed
 
-- LIST is now "..".
 - IN-PACKAGE: Symbol prefix "/" is not removed if the stripped
   symbol is not in the package.  For example /PARSE will remain
   to be PARSE if it's not in the current package.
 - REQUIRE has no requirements.
 - DOTEXPAND: Ignore QUOTEd entirely.
-- !++/!-- renamed to ++!/--!.
 
 #### Interpreter
 

@@ -1,10 +1,13 @@
 #ifdef __CC65__
 #include <ingle/cc65-charmap.h>
+#pragma allow-eager-inline(on)
+#pragma inline-stdfuncs(on)
 #endif
 
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <setjmp.h>
 #include <string.h>
 
@@ -14,6 +17,7 @@
 
 #ifdef TARGET_UNIX
 #include <stdio.h>
+#include <signal.h>
 #endif
 
 #ifdef COMPRESSED_CONS
@@ -21,6 +25,10 @@ bool do_compress_cons;
 #endif
 
 lispptr ** gp;
+
+#ifdef VERBOSE_GC
+simpleio_chn_t gc_oldout;
+#endif
 
 #ifdef __CC65__
 #pragma code-name ("CODE_GC")
@@ -31,7 +39,7 @@ void FASTCALL
 mark (lispptr x)
 {
     CHKPTR(x);
-    if (x && !MARKED(x)) {
+    if (NOT_NIL(x) && !MARKED(x)) {
         MARK(x);
         for (; _CONSP(x); x = CDR(x)) {
             CHKPTR(x);
@@ -39,7 +47,7 @@ mark (lispptr x)
             mark (CAR(x));
         }
         CHKPTR(x);
-        if (x) {
+        if (NOT_NIL(x)) {
             MARK(x);
             if (_SYMBOLP(x))
                 mark (SYMBOL_VALUE(x));
@@ -47,12 +55,10 @@ mark (lispptr x)
     }
 }
 
-// End of singly-linked list of named symbols.
-lispptr last_kept_sym;
-
 xlat_item * xlat_end;
+bool        xlat_full;
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma bss-name (push, "ZEROPAGE")
 #endif
 
@@ -63,7 +69,6 @@ char * d;   // Destination
 
 xlat_item * xlat;
 xlat_item * xlat_start;
-bool        xlat_full;
 char *      last_sweeped; // For merging consecutive gaps.
 size_t      gapsize;
 
@@ -74,12 +79,11 @@ xlat_item * r;
 size_t total_removed;
 #endif
 
-#ifdef __CC65__
+#ifdef USE_ZEROPAGE
 #pragma zpsym ("n")
 #pragma zpsym ("s")
 #pragma zpsym ("d")
 #pragma zpsym ("xlat")
-#pragma zpsym ("xlat_full")
 #pragma zpsym ("gapsize")
 #pragma zpsym ("p")
 #pragma zpsym ("r")
@@ -87,7 +91,7 @@ size_t total_removed;
 #ifdef FRAGMENTED_HEAP
 #pragma zpsym ("total_removed")
 #endif // #ifdef FRAGMENTED_HEAP
-#endif // #ifdef __CC65__
+#endif // #ifdef USE_ZEROPAGE
 
 void FASTCALL
 add_gap (lispobj_size_t n)
@@ -108,6 +112,10 @@ add_gap (lispobj_size_t n)
 void
 sweep ()
 {
+#ifdef VERBOSE_GC
+    simpleio_chn_t gc_oldout = fnout;
+#endif
+
 #ifdef FRAGMENTED_HEAP
     // Start with first heap.
     struct heap_fragment * heap = heaps;
@@ -117,15 +125,18 @@ sweep ()
     // Required to merge gaps.
     last_sweeped = nil;
 
-    // Get start of singly-linked list of named symbols.
-    last_kept_sym = universe;
+    first_symbol = nil;
+    last_symbol = nil;
 
     // Initialize relocation table.
     xlat = xlat_end;    // Point to its start.
     xlat_full = false;  // Mark it as not full.
 
 #if defined(DUMP_MARKED) || defined(DUMP_SWEEPED)
-    outs ("Sweep objects:"); terpri ();
+    setout (STDOUT);
+    outs ("Sweep objects:");
+    terpri ();
+    setout (gc_oldout);
 #endif
 
     // Get heap pointers.
@@ -134,23 +145,17 @@ sweep ()
         total_removed = 0;
         heap_start = heap->start;
         heap_free  = heap->free;
-#ifdef PARANOID
-        heap_end   = heap->end;
-#endif
 #endif // #ifdef FRAGMENTED_HEAP
 
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('S');
+    setout (gc_oldout);
 #endif
 
         // Sweep one heap.
         s = d = heap_start;
         while (*s) {
-#ifdef PARANOID
-            if (s >= heap_end)
-                internal_error ("Sweep overflow");
-#endif
-
             // Get size of object.
             n = objsize (s);
 
@@ -161,8 +166,11 @@ sweep ()
 #endif
                 // Link this and last named symbol.
                 if (_NAMEDP(s) && SYMBOL_LENGTH(s)) {
-                    SYMBOL_NEXT(last_kept_sym) = s;
-                    last_kept_sym = d;
+                    if (NOT_NIL(last_symbol))
+                        SET_SYMBOL_NEXT(last_symbol, d);
+                    last_symbol = d;
+                    if (NOT(first_symbol))
+                        first_symbol = d;
                 }
 #ifdef COMPRESSED_CONS
                 // Turn regular cons into compressed cons...
@@ -170,7 +178,9 @@ sweep ()
                     // ...if CDR is pointing to the following object.
                     if (CONS(s)->cdr == s + sizeof (cons)) {
 #ifdef VERBOSE_COMPRESSED_CONS
+                        setout (STDOUT);
                         out ('C');
+                        setout (gc_oldout);
 #endif
 
                         // Copy with mark bit cleard and type extended.
@@ -229,10 +239,10 @@ check_xlat:
 #endif
 #ifdef PARANOID
                 if (xlat < xlat_start)
-                    // Reloc table size must be multiple of entry size!
+                    // Reloc table size must be a multiple of an entry's size!
                     internal_error ("xlat overflow");
 #endif
-                // Flag is relocation table is full, so
+                // Flag if relocation table is full, so
                 // the rest of the objects won't be sweeped
                 // and GC is started again.
                 if (xlat == xlat_start)
@@ -255,7 +265,11 @@ check_xlat:
         if (xlat == xlat_start)
             xlat_full = true;
 #ifdef VERBOSE_GC
-        outn (total_removed); outs ("B freed."); terpri ();
+        setout (STDOUT);
+        outn (total_removed);
+        outs ("B freed.");
+        terpri ();
+        setout (gc_oldout);
 #endif // #ifdef VERBOSE_GC
     } while ((++heap)->start);
 #else // #ifdef FRAGMENTED_HEAP
@@ -263,32 +277,25 @@ check_xlat:
     heap_free = d;
 #endif // #ifdef FRAGMENTED_HEAP
 
-#ifndef NDEBUG
-    memset (d, 0, heap_end - d);
-#endif
-
     // End symbol list.
-    SYMBOL_NEXT(last_kept_sym) = nil;
-
-    // Save last symbol for lookup_symbol().
-    last_symbol = last_kept_sym;
+    SET_SYMBOL_NEXT(last_symbol, nil);
 }
 
-// Relocate object pointer.
-lispptr FASTCALL
-relocate_ptr (char * x)
+// Relocate object pointer in "tmpstr".
+lispptr
+relocate_ptr (void)
 {
     // Sum up gap sizes up to the pointer.
     gapsize = 0;
     for (r = xlat_end; r != xlat;) {
         r--;
-        if (r->pos > (lispptr) x)
+        if (r->pos > (lispptr) tmpstr)
             break;
         gapsize += r->size;
     }
 
     // Subtract it from the pointer.
-    return x - gapsize;
+    return tmpstr - gapsize;
 }
 
 // Relocate object pointers on heap, stack, and in global vars.
@@ -296,8 +303,16 @@ void
 relocate (void)
 {
     // Relocate global pointers.
-    for (gp = global_pointers; *gp; gp++)
-        **gp = relocate_ptr (**gp);
+    for (gp = global_pointers; *gp; gp++) {
+        tmpstr = **gp;
+        **gp = relocate_ptr ();
+    }
+
+    // Relocate GC'ed stack.
+    for (p = stack; p != stack_end; p += sizeof (lispptr)) {
+        tmpstr = *(lispptr *) p;
+        *(lispptr *)p = relocate_ptr ();
+    }
 
 #ifdef FRAGMENTED_HEAP
     heap = heaps;
@@ -305,8 +320,9 @@ relocate (void)
         heap_start = heap->start;
 #endif
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('R');
-    terpri ();
+    setout (gc_oldout);
 #endif
 
         // Relocate elements on heap.
@@ -317,40 +333,60 @@ relocate (void)
                 internal_error ("Reloc: heap overflow");
 #endif
             if (_CONSP(p)) {
-                SETCAR(p, relocate_ptr (CAR(p)));
+                tmpstr = CAR(p);
+                SETCAR(p, relocate_ptr ());
 #ifdef COMPRESSED_CONS
-                if (!_EXTENDEDP(p))
+                if (!_EXTENDEDP(p)) {
 #endif
-                    SETCDR(p, relocate_ptr (CDR(p)));
-            } else if (_SYMBOLP(p))
-                SET_SYMBOL_VALUE(p, relocate_ptr (SYMBOL_VALUE(p)));
-            if (_NAMEDP(p) && SYMBOL_LENGTH(p))
-                SET_SYMBOL_NEXT(p, relocate_ptr (SYMBOL_NEXT(p)));
+                    tmpstr = CDR(p);
+                    SETCDR(p, relocate_ptr ());
+#ifdef COMPRESSED_CONS
+                }
+#endif
+            } else if (_SYMBOLP(p)) {
+                tmpstr = SYMBOL_VALUE(p);
+                SET_SYMBOL_VALUE(p, relocate_ptr ());
+            }
         }
 #ifdef FRAGMENTED_HEAP
     } while ((++heap)->start);
 #endif
 
-    // Relocate GC'ed stack.
-    for (p = stack; p != stack_end; p += sizeof (lispptr))
-        *(lispptr *)p = relocate_ptr (*(lispptr *) p);
+#ifdef VERBOSE_GC
+    setout (STDOUT);
+    terpri ();
+    setout (gc_oldout);
+#endif
 }
+
+#ifdef __CC65__
+#pragma allow-eager-inline (off)
+#pragma inline-stdfuncs (off)
+#endif
 
 // Mark and sweep objects, and relocate object pointers.
 void
 gc (void)
 {
+#ifdef VERBOSE_GC
+    gc_oldout = fnout;
+#endif
+
 #ifdef FRAGMENTED_HEAP
     // Switch to next heap if available.
     if (heap->start) {
 #ifdef VERBOSE_GC
+        setout (STDOUT);
         out ('N');
+        setout (gc_oldout);
 #endif
         goto next_heap;
     }
 #endif
 
+#ifdef RESTART_GC_ON_FULL_RELOC
 restart:
+#endif
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap.
     heap = heaps;
@@ -358,32 +394,46 @@ restart:
 #endif
 
 #ifdef VERBOSE_GC
+    setout (STDOUT);
     out ('M');
+    setout (gc_oldout);
 #endif
 
     // Mark global pointers.
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Mark globals: ");
+    setout (gc_oldout);
 #endif
     for (gp = global_pointers; *gp; gp++) {
 #ifdef GC_DIAGNOSTICS
-        outhw ((int) *gp); out (' ');
+        setout (STDOUT);
+        outhw ((int) *gp);
+        out (' ');
+        setout (gc_oldout);
 #endif
         mark (**gp);
     }
 
     // Mark GC'ed stack.
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Mark stack: ");
+    setout (gc_oldout);
 #endif
     for (p = stack; p != stack_end; p += sizeof (lispptr)) {
 #ifdef GC_DIAGNOSTICS
-        outhw ((int) *p); out (' ');
+        setout (STDOUT);
+        outhw ((int) *p);
+        out (' ');
+        setout (gc_oldout);
 #endif
         mark (*(lispptr *) p);
     }
 #ifdef GC_DIAGNOSTICS
+    setout (STDOUT);
     outs ("Sweep: ");
+    setout (gc_oldout);
 #endif
 
     // Append used objects over unused ones, freeing space.
@@ -393,14 +443,26 @@ restart:
     // Update pointers according to gap list.
     relocate ();
 
+#ifdef RESTART_GC_ON_FULL_RELOC
     // Restart if sweep was interrupted due
     // to full relocation table.
     if (xlat_full) {
 #ifdef VERBOSE_GC
+        setout (STDOUT);
         outs ("!GC restart!");
+        setout (gc_oldout);
 #endif
         goto restart;
     }
+#else // #ifdef RESTART_GC_ON_FULL_RELOC
+#ifdef VERBOSE_GC
+    if (xlat_full) {
+        setout (STDOUT);
+        outs ("!full reloc!");
+        setout (gc_oldout);
+    }
+#endif
+#endif // #ifdef RESTART_GC_ON_FULL_RELOC
 
 #ifdef FRAGMENTED_HEAP
     // Switch to first heap to allocate from there.

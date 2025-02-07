@@ -1,5 +1,4 @@
 PROGRAM=csv2html
-SOURCES= \
-	main.c
+SOURCES= main.c
 
 include ../../mk/Makefile.build

@@ -262,6 +262,9 @@ carry flag set and one of these codes in A:
 Takes the LFN in X and sets the input device of BASIN and
 GETIN to the one assigned to that LFN when OPEN was called.
 
+If the channels is on the serial bus, the device is sent a
+TALK.
+
 One of these error codes may be returned:
 
 | Error | Description                |
@@ -274,6 +277,9 @@ One of these error codes may be returned:
 
 Takes the LFN in X and sets the output device of BASIN and
 GETIN to the one assigned to that LFN when OPEN was called.
+
+If the channels is on the serial bus, the device is sent a
+LISTEN.
 
 One of these error codes may be returned:
 
@@ -311,8 +317,8 @@ Writes a byte to the device selected by CHKOUT, CLRCN or
 CLALL, otherwise it writes to device #3.
 
 NOTE: Care must be taken when using routine to send data to
-a serial device since data will be sent to all open output
-channels on the bus.  Unless this is desired, all open
+a serial device since data will be sent to all listening
+devices on the bus.  Unless this is desired, all open
 output channels on the serial bus other than the actually
 intended destination channel must be closed by a call to
 CLOSE before.
@@ -325,15 +331,25 @@ The Y register is not destroyed.
 
 ## CLRCN - Close default input and output files
 
-Set the the input device to the key- board (0) and the
-output device to the screen (3), the only means to access
-standard I/O.
+Set the the input device to the keyboard (device 0) and the
+output device to the screen (device 3).  CLRCN is the only way
+to select standard I/O channels without a logical file number.
+
+If the current output channel is on the serial bus, an UNLISTEN
+is sent to the device.  An UNTALK is sent if the current input
+channel is on the serial bus.  By not using this function, multiple
+listeners on the serial bus receive what is sent.
 
 CLRCN never returns with an error.
 
 ## CLOSE - Close logical file
 
-Closes the LFN passed A.  Never returns with an error.
+Closes the LFN passed A.
+
+If the channel to close is on the serial bus, the CBM KERNAL sends
+a LISTEN, CLOSE and UNLISTEN to the device associated with the LFN.
+
+CLOSE never returns with an error.
 
 ## CLALL - close all channels and files
 

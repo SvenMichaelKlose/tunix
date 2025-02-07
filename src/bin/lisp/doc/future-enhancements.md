@@ -1,16 +1,5 @@
----
-title: "TUNIX Lisp"
-subtitle: "Future Enhancements"
-author: "Sven Michael Klose"
-lang: "en"
-titlepage: true
-titlepage-color: "389fff"
-titlepage-text-color: "ffffff"
-toc: true
-footnodes-pretty: true
-...
-
-# Overview
+Future enhancements of the TUNIX Lisp dialect
+=============================================
 
 A couple of ideas to enhance TUNIX Lisp significantly.
 
@@ -30,28 +19,6 @@ A couple of ideas to enhance TUNIX Lisp significantly.
 (append a b)
 (+ a b)
 ~~~
-
-# Objects
-
-Using SLOT-VALUE and abbreviating dot notation on
-associative lists.  ASSOC should be a built-in function to
-avoid performance issues.
-
-?: How about immutables?
-
-# Directory access
-
-| Function      | Description                   |
-|---------------|-------------------------------|
-| (mkdir s)     | Create directory.             |
-| (opendir n s) | Open directory on channel.    |
-| (readdir n)   | Read directory info.          |
-| (writedir n)  | Write partial directory info. |
-
-## (mkdir s): Create directory.
-## (opendir n s): Open directory on channel.
-## (readdir n): READ directory info.
-## (writedir n): Write partial directory info.
 
 # Exceptions
 

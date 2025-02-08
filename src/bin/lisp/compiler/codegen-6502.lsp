@@ -1,9 +1,19 @@
-; For "jsr-threaded" 6502 code.
+; "JSR-threaded" 6502 code generator
 ;
 ; Required procs:
-; __enter, __leave.
-; __stack, __obj, __ax2ref, __pushax
-; __call, __call_native,
+;
+; * __enter:
+;   Subtract A from 'sp'.
+; * __leave:
+;   Add Y to 'sp', keeping AX.
+; * __stack2ax:
+;   Read 'sp' + A to AX.
+; * __ax2stack:
+;   Write AX to 'sp' + Y.
+; * __pushax:
+;   Push AX onto the stack.
+; * __call:
+;   Call bytecode/builtin function.
 ;
 ; Beware of the limited CPU stack
 ; spoiling the show!
@@ -19,10 +29,12 @@
   (bit-and x 126))
 
 (fn ref2ax (x)
- $(lda #,.x.
-   jsr ,(? (%s? x)
-           '__stack
-           '__obj)))
+  (? (%s? x)
+     $(lda #,.x.
+       jsr __stack2ax)
+     (!= (objptr x)
+       $(lda #<,!
+         ldx #>,!))))
 
 (fn assignment (x)
   $(,@(ref2ax .x.)
@@ -37,13 +49,13 @@
     jsr __pushax))
 
 (fn call (x)
-  (!= (length *fi*.args)
+  (!= (* 2 (length *fi*.args))
     $(,@(@ arg (cdr .x.))
       ,@(!? (native-fun (car .x.))
             $(jsr ,!)
             (call-lisp x))
       ldy #,(+ ! (cadr x.))
-      jsr __ax2ref
+      jsr __ax2stack
       ,@(leave !))))
 
 (fn expr (x)
@@ -54,7 +66,7 @@
 
 (fn compiler/gen-6502 (fi x)
   (with-global *fi* fi
-    (!= (length fi.vars)
+    (!= (* 2 (length fi.vars))
       $(,(native-fun fi.name):
         lda #,!
         jsr __enter

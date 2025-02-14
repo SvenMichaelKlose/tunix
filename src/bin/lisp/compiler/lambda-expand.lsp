@@ -1,41 +1,39 @@
 (require 'compiler/funinfo)
 (in-package 'c/le
-  '(mk%= inline export expr r))
+  '(make-body inline export expr r))
+
+(fn make-body (args vals body)
+  $(%block
+     ,@(@ #'((a v)
+              $(%= ,a ,v))
+          args vals)
+     ,@body))
 
 (fn inline (binding-lambda)
-  (fn make-body (places values body)
-     (+ (@ $((p v)
-              $(%= ,,p ,,v))
-           stack-places
-           values)
-        body))
   (with-binding-lambda (args vals body
                         binding-lambda)
-    (with (l (argument-expand
-                 'inline-binding-lambda
-                 args vals)
-           a (@ car l)
-           v (@ cdr l))
+    (let (l (argument-expand
+                'inline-binding-lambda
+                args vals)
+          a (@ car l))
       (*fi*.add-var a)
-      (lambda-expand
-          (make-body a v body)))))
+      (r (make-body a (@ cdr l)
+                    body)))))
 
-
-(def-gensym closure-name ~cl)
+(def-gensym closure-name ~closure-)
 
 (fn export (x)
-  (let (name   (closure-name)
-        args   (lambda-args x)
-        body   (lambda-body x)
-        new-fi (create-funinfo
-                   :name   name
-                   :args   args
-                   :parent *fi*))
-    (new-fi.make-scope-arg)
-    (*tr*.add-closure
-      $((fn ,name ,args ,@body)))
+  (let (name (closure-name)
+        args (lambda-args x))
+    (funinfo-make-scope-arg
+        (create-funinfo
+            :name   name
+            :args   args
+            :parent *fi*))
+    (transpiler-add-closure *tr*
+        $((fn ,name ,args
+            ,@(lambda-body x))))
     $(%closure ,name)))
-
 
 (fn expr (x)
   (pcase x
@@ -50,8 +48,6 @@
 (fn r (x)
   (@ expr x))
 
-(fn lambda-expand (x)
-  (with-global-funinfo
-    (r x)))
+(var compiler/lambda-expand r)
 
 (in-package nil)

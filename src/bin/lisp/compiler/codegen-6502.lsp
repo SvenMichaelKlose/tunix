@@ -1,6 +1,6 @@
 ; "JSR-threaded" 6502 code generator
 ;
-; Required procs:
+; Required 6502 procs:
 ;
 ; * __enter:
 ;   Subtract A from 'sp'.

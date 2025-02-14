@@ -3,26 +3,38 @@ TUNIX Lisp compiler
 
 ***By Sven Michael Klose <pixel@hugbox.org>.***
 
-The TUNIX Lisp interpreter is far too slow on 6502-based systems to do anything
-useful with.  Compiling to stack-based bytecode functions removes the overhead
-of interpretation and reduces the code size.
+This compiler translates
+[TUNIX Lisp](https://github.com/SvenMichaelKlose/tunix/src/bin/lisp/doc/manual.md)
+into a compact, efficient bytecode that runs on a lightweight interpreter,
+dramatically improving performance on… …6502-based systems for example.  It is
+intended to compile itself on such systems with help of TUNIX Lisp's
+auto-loader, large disk storage, and extended memory as RAM disk.
 
-Essentially, this compiler is the smaller sister of the
+It is the smaller sister of the
 [tré compiler](https://github.com/SvenMichaelKlose/tre/), which has the same
-architecture.
+architecture but can also compile to high-level languages like JavaScript and
+PHP.  TUNIX Lisp only makes _bytecode_, a very simple and compact code that's
+run with a tiny interpreter, very much like a _virtual CPU_.
+tré is getting a new bytecode target for TUNIX.
 
 # Architecture
 
-The compiler has a _micropass_ architecture where each of the 21 passes is as
-small and independent as possible, making the compiler easier to maintain.  Its
-_frontend_ translates the input into a simpler, machine-level (but still
-machine-independent) _intermediate representation (IR)_ for the _middleend_,
-where every function is a flat list of statements, assignments and (conditional)
-jumps.  That IR is then optimized by the middleend.  The _backend_ finally does
-target-specific adjustments and generates the desired output: serializable
-bytecode functions.
+TUNIX Lisp is a multi-pass compiler that starts with an early analysis phase.
+Before generating any output, it scans the entire program. This helps remove
+much of the overhead of interpretation and allows it to optimize code more
+effectively.  If the compiler generates code immediately, the program won’t run
+much faster.  But for just-in-time compilation of user input, that’s fine.
 
-It illustrate the passes we have our compiler process some highly interesting
+Its _frontend_ translates the input into a simpler, machine-level (but still
+machine-independent) _intermediate representation (IR)_ (still made of Lisp
+expressions) for the _middleend_, where every function is a flat list of
+statements, assignments and (conditional) jumps.  That IR is then optimized by
+the middleend.  The _backend_ finally does target-specific adjustments and
+generates the desired output: serializable bytecode functions.
+
+## The showcase: A countdown
+
+To illustrate the passes we have our compiler process some highly interesting
 and nerdy function, printing a countdown:
 
 ~~~lisp
@@ -43,37 +55,41 @@ and nerdy function, printing a countdown:
 
 1. **Dot expansion**: Dot notation for CAR, CDR and SLOT-VALUE.
 2. **Unquote expansion**: Top-level unquotes to generate code at compile-time.
+   expressions..
 3. **Macro expansion**: Standard macro expansion.
+4. **Gathering imports**: Make a list of functions that are missing.  Invalidated
+   with new function definitions.
 4. **Compiler macro expansion**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
-   QUOTE, QUASIQUOTE, and so on, into IR.   After this pass there must be no
-   more macros.
-5. **Quote expansion**: Makes consing out of QUOTEs and QUASIQUOTEs.
+   and so on, into a functions-only IR.
+5. **Qasiquote expansion**: Compiles QUASIQUOTEs to regular, CONSing
+6. **Renaming arguments**: Renames arguments to ensure that they are unique.
 6. **Lambda expansion**: Inlines binding lamdas and exports closures to own
    functions while building a function info tree required to proceed.
 
 When compiling multiple files, all must have been processed up to the previous
 pass, so all calls to known functions can be compiled in the next:
 
-7. **Call expasions**: Arguments are expanded and rest arguments are made
+7. **Call expansion**: Arguments are expanded and rest arguments are made
    consing.
 8. **Expression expansion**: To _single statement assignments_: All arguments
    of function calls are assigned to temporary variables.
 9. **Block folding**: Collapses nested %BLOCKs.
-10. **Assigment compaction**: Removes %= from assignments' heads.
+10. **Assignment compaction**: Removes %= from assignments' heads.
 11. **Tag compaction**: Replaces %TAGs by numbers.
 
 ## Middleend
 
 12. **Jump optimization**: Remove chained jumps, unnecessary and unused tags,
     and unreachable code.
-13. **Constant elimination**: Do calculations at compile time.
+13. **Constant elimination**: Calculates constant expressions during
+    compilation instead of at runtime.
 14. **Common code elimination**: Remove double calculations.
 15. **Unused place elimination**
 16. **Peephole optimization**: Made of child passes.
-17. **Tailcall optimization**: Make jumps to start of function instead of
-    having it call itself if possible.
+17. **Tailcall optimization**: Rewrites recursive function calls as jumps,
+    reducing stack usage.
 
-## Back-end
+## Backend
 
 Translate the IR to code.
 
@@ -84,23 +100,23 @@ Translate the IR to code.
 
 # The bytecode
 
-Interpreting the bytecode must remove most of the overhead that is not doing the
-program's actual business.  Most of that is calling functions, jumping, moving around
-Lisp object pointers on the stack, and returning from functions.
-Bytecode only comes along as _bytecode functions_, because stack space has to be
-reserved before running any: the bytecode is _stack-based_ with no _registers_,
-except the last return value of a function call.  Aside from stack places objects
-in the function's object list can be referenced.
+The bytecode interpreter avoids unnecessary overhead by focusing only on
+running the actual program.  Most of that is calling functions, jumping, moving
+around Lisp object pointers on the stack, and returning from functions.
+Bytecode is executed as bytecode functions, since stack space must be reserved
+before running them
 
 ## Codes
 
-
-* 1-251:   Reference: an offset into the object list or stack.
-* 128-251: Copy to stack
-* 252:     Jump if not NIL
-* 253:     Jump if NIL
-* 254:     Jump
-* 255:     Return from function
+| Value   | Function                                           |
+|---------|----------------------------------------------------|
+| 0-15    | Registers (or garbage-collected zeropage area)     |
+| 1-127   | Reference: an offset into the object list or stack |
+| 128-251 | Copy to stack                                      |
+| 252     | Jump if not NIL                                    |
+| 253     | Jump if NIL                                        |
+| 254     | Jump                                               |
+| 255     | Return from function                               |
 
 References are used in function calls and assignments only.  Function calls are
 lists of references.  The first reference is the destination where the return
@@ -110,37 +126,42 @@ value will go, followed by the function and its arguments.
 <destination> <function> [<arg>*] ; * last one marked
 ~~~
 
-The last argument is marked as such.  The destination can only reference a
-stack place though to make the function's object list _immutable_.
-Assignments are performed if the function reference is tagged as being the last
-argument.
+The last argument is marked.  The destination can only reference a stack place
+though to make the function's object list _immutable_.  Assignments are
+performed if the function reference is tagged as being the last argument.
 
 Reference offsets are even – object offset have their lowest bit set to tell them
 apart from stack offsets:
 
-* 0: (%s 0)
-* 1: Offset 0/object 0
-* 2: (%s 1)
-* 3: Offset 2/object 1
-* 4: (%s 2)
-* 5: Offset 4/object 2
+| Offset | Type / index    |
+|--------|-----------------|
+|    0   | Stack index 0   |
+|    1   | Object index 0  |
+|    2   | Stack index 1   |
+|    3   | Object index 1  |
+|    4   | Stack index 2   |
+|    5   | Object index 2  |
 
 ...and so on.  **Last arguments and assignment values have their highest bit set.**
 
 ## Spoiler: COUNTDOWN compiled to bytecode
 
 ~~~lisp
+; Function info:
 ((a b)            ; Argument definition
  (== 0 print - 1) ; Object list
- nil              ; Stack frame size (args & locals)
- (2 128     ; ((%s 1) (%s 0))       ; Assignment
-  0 3 2 129 ; (%0 (== (%s 1) 0))    ; Function call
-  253 17    ; (%go-nnil 1)          ; Conditional jump
-  0 5 130   ; (%0 (print (%s 1)))   ; Function call
-  2 7 2 137 ; ((%s 1) (- (%s 1) 1)) ; Function call
-  254 3)    ; (%go 3)               ; Unconditional jump
-  255                               ; end of function
+ 0                ; Stack frame size (args & locals)
+
+ ; Bytecode:
+ (2 128     ; ((%s 1) (%s 0))       | Assigns (%s 1) = (%s 0)
+  0 3 2 129 ; (%0 (== (%s 1) 0))    | Compares (%s 1) to 0
+  253 17    ; (%go-nnil 1)          | If it's NIL, jump to tag 1
+  0 5 130   ; (%0 (print (%s 1)))   | Calls print on (%s 1)
+  2 7 2 137 ; ((%s 1) (- (%s 1) 1)) | Decrements (%s 1)
+  254 3)    ; (%go 3)               | Unconditionally jumps back to 0
+  255)      ;                       | Ends function
 ~~~
+
 
 # The frontend passes
 
@@ -454,7 +475,7 @@ must be PRINT- and READ-able:
 
 Unlike our original COUNTDOWN made of 13 conses of 5 byte each totalling to
 65 bytes, the bytecode function amounts to 18 bytecodes, plus an object table
-of 5 pointers (10B) a stack frame size of 1B, totalling to 29 bytes.
+of 7 pointers (14B) a stack frame size of 1B, totalling to 33 bytes.
 
 A set of code generating macros could be used to generate strings of assembly
 language.  But all we need to do now is to comb out literal objects which must be

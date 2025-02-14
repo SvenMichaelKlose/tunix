@@ -1,4 +1,5 @@
 (require 'compiler/funinfo)
+
 (in-package 'c/le
   '(make-body inline export expr r))
 
@@ -39,10 +40,11 @@
   (pcase x
     atom x
     binding-lambda? (inline x)
-    unnamed-lambda? (export x)
-    named-lambda?
-      (do-lambda x
-        :body (r (lambda-body x)))
+    lambda?
+      (? (lambda-funinfo x)
+         (do-lambda x
+           :body (r (lambda-body x)))
+         (export x))
     (r x)))
 
 (fn r (x)

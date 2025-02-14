@@ -3,6 +3,6 @@
     $(fn ,n ,a
        (?
          ,@body
-         (atom ,g) ,a.
+         (atom ,a.) ,a.
          (. (,n (car ,a.) ,@!)
             (,n (cdr ,a.) ,@!))))))

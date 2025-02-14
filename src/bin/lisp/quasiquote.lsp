@@ -1,14 +1,14 @@
 (fn %qqq (qqf qqx)
   (funcall qqf
-           (? (and (cons? qqx)
-                   (or (eq (cadar qqx)
-                       'unquote)
-                       (eq (cadar qqx)
-                       'unquote-splice)))
-                (. (cadar qqx)
-                   (%qq (cddar qqx)))
-                (eval (cadar qqx)))
-           (%qq (cdr qqx))))
+      (? (and (cons? qqx)
+              (or (eq (cadar qqx)
+                  'unquote)
+                  (eq (cadar qqx)
+                  'unquote-splice)))
+           (. (cadar qqx)
+              (%qq (cddar qqx)))
+           (eval (cadar qqx)))
+      (%qq (cdr qqx))))
 
 (fn %qq (qqx)
   (?

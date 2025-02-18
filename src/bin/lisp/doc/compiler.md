@@ -20,11 +20,13 @@ tré is getting a new bytecode target for TUNIX.
 # Architecture
 
 TUNIX Lisp is a multi-pass compiler that starts with an early analysis phase.
-Before generating any output, it scans the entire program. This helps remove
+Before generating any output, it scans the entire program.  This helps remove
 much of the overhead of interpretation and allows it to optimize code more
 effectively.  If the compiler generates code immediately, the program won’t run
 much faster.  But for just-in-time compilation of user input, that’s fine.
 
+Apart from that the code streams through three ends, each encompassing a set
+of passes that transform the input to the desired output format of the end.
 Its _frontend_ translates the input into a simpler, machine-level (but still
 machine-independent) _intermediate representation (IR)_ (still made of Lisp
 expressions) for the _middleend_, where every function is a flat list of
@@ -314,15 +316,38 @@ $(1 2 ,@x ,y 4 5)
 
 ## Lambda expansion
 
-Inlines binding lambdas and turns closures into regular functions with an
-environment argument for lexical scope while also building a tree of FUNINFO
-objects that describe each function.  FUNINFOs are looked up by function name,
-so closures are baptized with uniquely generated names.  The FUNINFOs are
-essential to process functions further.
+Inlines binding lambdas (that introduce local variables), performs _lambda
+lifting_ (turning closures into top-level functions with an extra scope
+argument), ensures that all lambdas have a name and annotates lambdas with
+an accompanying tree of FUNINFO structures that carry all sorts of data that
+is collected about the function.  After that all lambdas have this form:
 
 ~~~lisp
-; TODO example of anonymous function first in expression.
-~~~
+(FUNCTION name (args body…))
+~~~~
+
+The FUNINFOs are essential to process functions further.  FUNINFOs are looked
+up by function name.  Lambdas are baptized if unnamed:
+
+~~~~lisp
+; Some baptized closure.
+(FUNCTION ~CLOSURE-1 (a1 a2)
+  (= freevar (+ a1 a2)))
+~~~~
+
+The ollowing passes keep *FUNINFO* updated when recursing into or getting out
+of lambdas, so variables can be analyzed and optimized.  Some examples:
+
+~~~~lisp
+; Check if variable is local:
+(funinfo-var? *funinfo* varname)
+
+; Check if variable is an argument:
+(funinfo-arg? *funinfo* varname)
+
+; Check if variable is a lexical::
+(funinfo-free-var? *funinfo* varname)
+~~~~
 
 ~~~lisp
 (lambda countdown (n-total)
@@ -339,21 +364,25 @@ essential to process functions further.
 
 ## Call expansion
 
-Checks and expands arguments and turns rest arguments into CONSes.  If
-functions are unknown, calls of \*> are generated, which are expensive.
-Re-compiling a file after a function became known is correcting that.
+Checks and expands arguments and turns rest arguments into CONSes.
+
+For unknown functions, calls to \*> (APPLY) are generated, which are expensive.
+Re-compiling a file if a missing functions was added fixes that.
 
 ## Expression expansion
 
-**The exit point of the front end.**  Breaks up nested function calls into a list
-of single statement assignments to new temporary variables.
+**The exit point of the front end.**  Breaks up nested function calls into lists
+of single statement assignments with the help of temporary variables that are
+added.  Most temporaries will be removed again during optimization.
 
 It does nothing for our COUNTDOWN example, so let's take a look at this nested
 function call and what it's being transformed into:
 
 ~~~
+; Before expression expansion:
 (fun1 arg1 (fun2 (fun3) (fun4)) (fun5))
 
+; After expression expansion:
 (%= %2 (fun3))
 (%= %3 (fun4))
 (%= %1 (fun2 2 3)
@@ -363,12 +392,8 @@ function call and what it's being transformed into:
 
 ## Block folding
 
-Epression expansion is the last pass generating %BLOCKs to simplify expansions.
-Now we're in need for pure lists of IR statements as bodies to work with them
-in the middleend.
-
-With _block folding_ nested %BLOCKs are collapsed and the remaining %BLOCKs are
-dissolved into their function bodies – gone.
+This pass collapses and removes %BLOCKs to leave flat lists of statements
+behind, ready for the middleend:
 
 ~~~lisp
 (lambda countdown (n-total)

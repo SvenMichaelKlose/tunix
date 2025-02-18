@@ -20,6 +20,9 @@ and this project adheres to
 ##### Added
 
 - Support for nested QUASIQUOTEs: Nested un-quoting quotes.
+- ARGNAMEXPAND: Get list of names in argument definition.
+- DEF-TREE-FILTER: Filter all objects of a tree.
+- GETF/REMF: Get/remove from property lists.
 
 
 ## [v0.0.33] - 2025-01-07

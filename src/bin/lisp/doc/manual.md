@@ -2509,19 +2509,39 @@ x ; '(2)
 
 ## Associative lists
 
-| Function         | Description                        |
-|------------------|------------------------------------|
-| (acons alist c)  | Add key/value to associative list. |
-| (assoc x l)      | Return list that start with X.     |
-| (aremove x l)    | Remove X from associative L.       |
-| (aremove-if f l) | Remove by F from associative L.    |
-| (pairlist l l)   | Combine lists to associative list. |
+An associative list is a list of conses with the key in CAR and the value in
+CDR.
 
-A list of lists where the first element is the key and the
-rest is the value.
+~~~lisp
+; Make an associative list.
+(var *my-alist* '((:name . "Sven")
+                  (:age  . 40)))
+
+; Get element with ASSOC.
+(print (assoc :name *my-alist*))
+  -> (:name . Sven)
+
+; Get value with ASSOC.
+(print (cdr (assoc :name *my-alist*)))
+  -> Sven
+
+; Get value with GETF.
+(print (getf :name *my-alist*))
+  -> Sven
+~~~
+
+| Function         | Description                                   |
+|------------------|-----------------------------------------------|
+| (acons alist c)  | Add key/value to associative list.            |
+| (assoc x l)      | Return element of alist (key . value) by key. |
+| (getf x l)       | Return value of alist by key.                 |
+| (aremove x l)    | Remove X from associative L.                  |
+| (aremove-if f l) | Remove by F from associative L.               |
+| (pairlist l l)   | Combine lists to associative list.            |
 
 ### (acons alist c): Add key/value to associative list.
-### (assoc x l): Return list that start with X.
+### (assoc x l): Return element of alist by key.
+### (getf x l): Return value of alist/plist by key.
 ### (aremove x l): Remove X from associative L.
 ### (aremove-if f l): Remove by F from associative L.
 
@@ -2530,6 +2550,28 @@ rest is the value.
 ~~~lisp
 (pairlist '(1 2) '(3 4)) ; -> '((1 3) (2 4))
 ~~~
+
+## Property lists
+
+This is a flat list of alternating keys and values.
+
+~~~lisp
+; Make a property list.
+(var *my-alist* '(:name "Sven"
+                  :age  40))
+
+; Get value with GETF.
+(print (getf :name *my-alist*))
+  -> Sven
+~~~
+
+| Function         | Description                         |
+|------------------|-------------------------------------|
+| (getf x apl)     | Return value of alist/plist by key. |
+| (remf x pl)      | Remove element from plist.          |
+
+### (getf x apl): Return value of alist/plist by key.
+### (remf x pl): Remove element from plist.
 
 ## Console control
 

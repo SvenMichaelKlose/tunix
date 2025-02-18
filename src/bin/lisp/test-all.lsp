@@ -280,6 +280,42 @@
   (and (assoc 'vic '((c64 t)(amiga t)))
        (error)))
 
+(do-test "GETF over alist"
+  (!= '((:name . Alice) (:age . 30) (:city . Paris))
+    (or (eql 'Alice (getf :name !))
+        (error))
+    (or (eql 30 (getf :age !))
+        (error))
+    (or (eql 'Paris (getf :city !))
+        (error))
+    (or (eql nil (getf :country !))
+    (error))))
+
+(do-test "GETF over plist"
+  (!= '(:name Alice :age 30 :city Paris)
+    (or (eql 'Alice (getf :name !))
+        (error))
+    (or (eql 30 (getf :age !))
+        (error))
+    (or (eql 'Paris (getf :city !))
+        (error))
+    (or (eql nil (getf :country !))
+        (error))))
+
+(do-test 'REMF
+  (!= '(:name Alice :age 30 :city Paris)
+    (or (equal '(:age 30 :city Paris)
+               (remf :name !))
+    (or (equal '(:name Alice :city Paris)
+               (remf :age !))
+        (error))
+    (or (equal '(:name Alice :age 30)
+               (remf :city !))
+        (error))
+    (or (equal '(:name Alice :age 30 :city Paris)
+               (remf nil !))
+        (error)))))
+
 (do-test 'ACONS
   (or (let (x nil)
         (acons 'vic 20 x)

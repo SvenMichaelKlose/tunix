@@ -619,10 +619,10 @@ _charset_4x8:
 ; =
     .byte %0000
     .byte %0000
-    .byte %0000
     .byte %1100
     .byte %0000
     .byte %1100
+    .byte %0000
     .byte %0000
     .byte %0000
 

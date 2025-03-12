@@ -1,5 +1,5 @@
-(macro walker (name x)
-  $(def-filter ,name ,x
+(macro walker (n x)
+  $(def-filter ,n ,x
      ,@body
      (atom ,x) ,x
      (named-lambda? ,x)

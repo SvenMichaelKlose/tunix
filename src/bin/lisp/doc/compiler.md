@@ -1,31 +1,25 @@
 TUNIX Lisp compiler
 ===================
 
-***By Sven Michael Klose <pixel@hugbox.org>.***
+This compiler translates the **TUNIX Lisp** dialect into a compact, efficient
+bytecode that runs on a lightweight interpreter, intended to dramatically
+improve performance of TUNIX Lisp on 6502-based systems.  It is the smaller
+sister of **tré Lisp**, which can also compile to high-level languages like
+JavaScript, PHP, and C.  TUNIX Lisp only makes _bytecode_, a simple and compact
+code on machine level.
 
-This compiler translates
-[TUNIX Lisp](https://github.com/SvenMichaelKlose/tunix/src/bin/lisp/doc/manual.md)
-into a compact, efficient bytecode that runs on a lightweight interpreter,
-dramatically improving performance on… …6502-based systems for example.  It is
-intended to compile itself on such systems with help of TUNIX Lisp's
-auto-loader, large disk storage, and extended memory as RAM disk.
+* [TUNIX Lisp](https://github.com/SvenMichaelKlose/tunix/src/bin/lisp/)
+* [tré Lisp](https://github.com/SvenMichaelKlose/tre/)
 
-It is the smaller sister of the
-[tré compiler](https://github.com/SvenMichaelKlose/tre/), which has the same
-architecture but can also compile to high-level languages like JavaScript and
-PHP.  TUNIX Lisp only makes _bytecode_, a very simple and compact code that's
-run with a tiny interpreter, very much like a _virtual CPU_.
-tré is getting a new bytecode target for TUNIX.
+# Compiler design
 
-# Architecture
-
-TUNIX Lisp is a multi-pass compiler that starts with an early analysis phase.
+This is a multi-pass compiler that starts with an early analysis phase.
 Before generating any output, it scans the entire program.  This helps remove
 much of the overhead of interpretation and allows it to optimize code more
 effectively.  If the compiler generates code immediately, the program won’t run
-much faster.  But for just-in-time compilation of user input, that’s fine.
+much faster.  For just-in-time compilation of user input, that’s fine.
 
-Apart from that the code streams through three ends, each encompassing a set
+Apart from that the code streams through three _ends_, each encompassing a set
 of passes that transform the input to the desired output format of the end.
 Its _frontend_ translates the input into a simpler, machine-level (but still
 machine-independent) _intermediate representation (IR)_ (still made of Lisp
@@ -55,50 +49,50 @@ and nerdy function, printing a countdown:
 
 ## Frontend
 
-1. **Dot expansion**: Dot notation for CAR, CDR and SLOT-VALUE.
-2. **Unquote expansion**: Top-level unquotes to generate code at compile-time.
+1. **DOT-EXPAND**: Dot notation for CAR, CDR and SLOT-VALUE.
+2. **UNQUOTE-EXPAND**: Top-level unquotes to generate code at compile-time.
    expressions..
-3. **Macro expansion**: Standard macro expansion.
-4. **Gathering imports**: Make a list of functions that are missing.  Invalidated
-   with new function definitions.
-4. **Compiler macro expansion**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
+3. **MACROEXPAND**: Standard macro expansion.
+4. **GATHER-IMPORTS**: Make a list of functions that are missing.  Purged
+   by later function definitions.
+4. **COMPILER-MACROEXPAND**: Breaks down AND, OR, ?, BLOCK, RETURN, GO,
    and so on, into a functions-only IR.
-5. **Qasiquote expansion**: Compiles QUASIQUOTEs to regular, CONSing
-6. **Renaming arguments**: Renames arguments to ensure that they are unique.
-6. **Lambda expansion**: Inlines binding lamdas and exports closures to own
+5. **QUASIQUOTE-EXPAND**: Compiles QUASIQUOTEs to regular, CONSing
+6. **RENAME-ARGUMENTS**: Renames arguments to ensure that they are unique.
+6. **LAMBDA-EXPAND**: Inlines binding lamdas and exports closures to own
    functions while building a function info tree required to proceed.
 
 When compiling multiple files, all must have been processed up to the previous
 pass, so all calls to known functions can be compiled in the next:
 
-7. **Call expansion**: Arguments are expanded and rest arguments are made
+7. **CALL-EXPAND**: Arguments are expanded and rest arguments are made
    consing.
-8. **Expression expansion**: To _single statement assignments_: All arguments
+8. **EXPRESSION-EXPAND**: To _single statement assignments_: All arguments
    of function calls are assigned to temporary variables.
-9. **Block folding**: Collapses nested %BLOCKs.
-10. **Assignment compaction**: Removes %= from assignments' heads.
-11. **Tag compaction**: Replaces %TAGs by numbers.
+9. **FOLD-BLOCKS**: Collapses nested %BLOCKs.
+10. **TRIM-%=**: Removes %= from assignments' heads.
+11. **ENUMERATE-TAGS**: Replaces %TAGs by numbers.
 
 ## Middleend
 
-12. **Jump optimization**: Remove chained jumps, unnecessary and unused tags,
+12. **OPT-JUMPS**: Remove chained jumps, unnecessary and unused tags,
     and unreachable code.
-13. **Constant elimination**: Calculates constant expressions during
+13. **FOLD-CONSTANT**: Calculates constant expressions during
     compilation instead of at runtime.
-14. **Common code elimination**: Remove double calculations.
-15. **Unused place elimination**
-16. **Peephole optimization**: Made of child passes.
-17. **Tailcall optimization**: Rewrites recursive function calls as jumps,
+14. **MERGE-COMMON**: Remove double calculations.
+15. **REMOVE-UNUSED**: elimination**
+16. **OPT-PEEPHOLE**: Made of child passes.
+17. **OPT-TAILCALL**: Rewrites recursive function calls as jumps,
     reducing stack usage.
 
 ## Backend
 
 Translate the IR to code.
 
-18. **Wrapping tags**: Wrap tags (numbers) in %TAGs for code generation.
-19. **Place expansion**: Variables are mapped to the lexical scope.
-20. **Place assignment**: Stack frames and environment vectors are laid out.
-21. **Code generation**: Macros generating bytecode
+18. **WRAP-TAGS**: Wrap tags in %TAGs for macros.
+19. **PLACE-EXPAND**: Variables are mapped to the lexical scope.
+20. **PLACE-ASSIGN**: Stack frames and environment vectors are laid out.
+21. **CODE-EXPAND**: Macros generating bytecode
 
 # The bytecode
 
@@ -171,13 +165,15 @@ As mentioned before, the frontend is responsible for translating its input to a
 simpler _intermediate IR_ and to gather information required for generating
 fast code.
 
-## Dot expansion
+## DOT-EXPAND
 
+Also an interpreter pass.
 Converts abbreviations of CAR, CDR and SLOT-VALUE back to regular expressions.
 See [TUNIX dot-expansion](manual.md#dot-expansion).
 
-## Standard macro expansion
+## MACROEXPAND
 
+Also an interpreter pass.
 Expands all macros that are in the environemnt.  Required macros must be loaded
 in advance using REQUIRE when compiling files, otherwise they'll be compiled as
 function calls.
@@ -188,7 +184,7 @@ function calls.
 (fancymacro "Hi there!")
 ~~~
 
-## Making IR: Compiler macro expansion
+## COMPILER-MACROEXPAND: Making IR code
 
 Turns special forms into ensembles of simpler IR code, using a separate,
 machine-independent set of _compiler macros_.
@@ -227,7 +223,7 @@ always a return value, even if a body ends on a %TAG.
 (%tag 2)
 ~~~
 
-### BLOCK expansion
+### BLOCK-EXPAND
 
 A RETURN makes its parent BLOCK, whose name is NIL, return immediately with the
 RETURN's argument:
@@ -291,7 +287,7 @@ will be gone with the _block folding_ pass, leaving only the jump instructions.
     (%tag 1))))
 ~~~
 
-## Quote expansion
+## QUOTE-EXPAND
 
 QUOTEs are turned into CONSes:
 
@@ -314,7 +310,7 @@ $(1 2 ,@x ,y 4 5)
 ~~~
 
 
-## Lambda expansion
+## LAMBDA-EXPAND
 
 Inlines binding lambdas (that introduce local variables), performs _lambda
 lifting_ (turning closures into top-level functions with an extra scope
@@ -362,14 +358,14 @@ of lambdas, so variables can be analyzed and optimized.  Some examples:
     (%tag 1))))
 ~~~
 
-## Call expansion
+## CALL-EXPAND
 
 Checks and expands arguments and turns rest arguments into CONSes.
 
 For unknown functions, calls to \*> (APPLY) are generated, which are expensive.
 Re-compiling a file if a missing functions was added fixes that.
 
-## Expression expansion
+## EXPRESSION-EXPAND
 
 **The exit point of the front end.**  Breaks up nested function calls into lists
 of single statement assignments with the help of temporary variables that are
@@ -390,7 +386,7 @@ function call and what it's being transformed into:
 (%= %0(fun1 arg1 1 4)
 ~~~
 
-## Block folding
+## FOLD-BLOCKS
 
 This pass collapses and removes %BLOCKs to leave flat lists of statements
 behind, ready for the middleend:
@@ -411,7 +407,7 @@ Now, if you'd want to optimize tags for example all you have to do is to scan a
 pure list of statements for tags and jumps, no extra logic for nested structure
 required.
 
-## Assignment compaction
+## TRIM=%=
 
 Symbol %= is not needed to tell function calls apart from jumps and tags, so
 that is removed.
@@ -430,7 +426,7 @@ that is removed.
 
 Admittedly, it's easier to read with %= around.
 
-## Tag compaction
+## ENUMERATE-TAGS
 
 %TAG statements are replaced by numbers, saving space and a bit of function
 calling overhead in the following passes (which is probably not too notable).
@@ -458,11 +454,13 @@ removing assignments with no effect or chained jumps.
 
 # The backend passes
 
-## Place assignment
+## WRAP-TAGS
+
+## PLACE-EXPAND
 
 Wraps a variable in %STACK alongside the FUNINFO containing the variable.
 
-## Place expansion
+## PLACE-ASSIGN
 
 Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
 
@@ -478,7 +476,7 @@ Replaces name/FUNINFO pairs in %STACKs by numerical stack indexes.
   1)
 ~~~
 
-## Code generation
+## CODE-EXPAND
 
 Once again: macro expansion to the rescue!  By merely expanding named LAMBDAs,
 translating tags to offsets and making references to stack places and into a
@@ -505,3 +503,7 @@ of 7 pointers (14B) a stack frame size of 1B, totalling to 33 bytes.
 A set of code generating macros could be used to generate strings of assembly
 language.  But all we need to do now is to comb out literal objects which must be
 referenced in the bytecode function's object table.
+
+# Authors
+
+* Sven Michael Klose <sven@tila.ltd>

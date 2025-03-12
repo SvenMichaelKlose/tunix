@@ -78,8 +78,8 @@ procid_t pid;
 #define PROC_RUNNING    0x40
 #define PROC_SLEEPING   0x80
 
-#define IS_RUNNING(x) (procs[x].flags | PROC_RUNNING)
-#define IS_SLEEPING(x) (procs[x].flags | PROC_SLEEPING)
+#define IS_RUNNING(x)   (procs[x].flags | PROC_RUNNING)
+#define IS_SLEEPING(x)  (procs[x].flags | PROC_SLEEPING)
 
 #define ALLOC_PROC_RUNNING() 0
 

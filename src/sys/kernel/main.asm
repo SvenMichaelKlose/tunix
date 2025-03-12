@@ -196,6 +196,7 @@ zp2:    .res 2
 ;;;;;;;;;;;;;;
 ;
 ; The same for all processes.
+; Located in BLK1 and or BLK2.
 
     .segment "GLOBALBSS"
 
@@ -302,6 +303,7 @@ old_kernal_vectors:
 ;;;;;;;;;;;;;
 ;
 ; Per process.
+; Located in IO23.
 
     .segment "LOCALBSS"
 
@@ -315,14 +317,17 @@ old_kernal_vectors:
 .export multitasking, old_load, old_save
 
 ;; Vitals
+
+; Kernel blocks.
 tunix_blk1:     .res 1  ; Same for all.
 tunix_blk2:     .res 1  ; Same for all.
+
 old_load:       .res 2  ; KERNAL LOAD
 old_save:       .res 2  ; KERNAL SAVE
-pid:            .res 1
-multitasking:   .res 1
+pid:            .res 1  ; Process ID
+multitasking:   .res 1  ; Flag if multiasking.
 
-;; Machine state
+;; Machine state of the syscalling program.
 reg_a:          .res 1
 reg_x:          .res 1
 reg_y:          .res 1
@@ -330,12 +335,15 @@ flags:          .res 1
 stack:          .res 1
 saved_vic:      .res 16
 
-;; Syscall driver responses
+;; Textual syscall driver responses
 is_fresh_line:  .res 1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Additional local bank ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Per process.
+; Located RAM123.
 
     .segment "LOCALBSS2"
 
@@ -358,7 +366,7 @@ first_waiting:  .res 1
 lfns:           .res MAX_LFNS
 lfnsb:          .res MAX_LFNS
 first_lfn:      .res 1
-lfn_gfn:       .res MAX_LFNS
+lfn_gfn:        .res MAX_LFNS
 
 .ifdef BLEEDING_EDGE
 

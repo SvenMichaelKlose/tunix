@@ -26,6 +26,6 @@
            :args (r (lambda-args x) !)
            :body (r (lambda-body x) !)))))
 
-(fn compiler/rename-arguments (x)
+(fn c/rename-arguments (x)
   (= *argument-sym-counter* 0)
   (r x nil))

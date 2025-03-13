@@ -14,7 +14,7 @@
       $(,x. ,@(argexpand ! .x))
       $(*> ,x. (.. ,@.x))))
 
-(walker compiler/callexpand (x)
+(walker c/callexpand (x)
   (and (%=? x)
        (cons? ..x.))
      $(%= ,.x.  (call ..x.)))

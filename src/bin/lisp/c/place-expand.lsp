@@ -54,7 +54,7 @@
     $(%slot-value ,(expand .x. fi)
                   ,..x.))
 
-(fn compiler/place-expand (x)
+(fn c/place-expand (x)
   (expand x (global-funinfo)))
 
 (in-package nil)

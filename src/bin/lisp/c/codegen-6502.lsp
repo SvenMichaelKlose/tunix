@@ -64,7 +64,7 @@
         (assignment x)
         (call x))))
 
-(fn compiler/gen-6502 (fi x)
+(fn c/gen-6502 (fi x)
   (with-global *fi* fi
     (!= (* 2 (length fi.vars))
       $(,(native-fun fi.name):

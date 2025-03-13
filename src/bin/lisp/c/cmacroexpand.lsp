@@ -58,7 +58,7 @@
          (%go ,!))
       (error "Unknown BLOCK " n)))
 
-(fn compiler/cmacroexpand (x)
+(fn c/cmacroexpand (x)
   (umacroexpand 'compiler x))
 
 (in-package nil)

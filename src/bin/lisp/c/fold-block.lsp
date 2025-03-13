@@ -1,18 +1,16 @@
+(in-package 'c/bf '(%block?))
 (require '!= '+@)
-(in-package 'c/bf '(%block? fold))
 
 (fn %block? (x)
   (and (cons? x)
        (eq '%block x.)))
 
-(fn fold (x)
+(fn c/fold-block (x)
   (? (%block? x)
      (!= .x
        (? (cons? !)
-          (+@ fold !)
+          (+@ c/fold-block !)
           (.. !)))
      (.. x)))
-
-(var compiler/fold-block fold)
 
 (in-package nil)

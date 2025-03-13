@@ -1,4 +1,4 @@
-(in-package compiler/qex
+(in-package c/qex
   '(any-qq? enquote enquote-r
     enqq enqqs backq disp r))
 
@@ -25,7 +25,7 @@
      (error "Illegal argument to ,@: "
             (cadr x.))
      (let (g (symbol))
-       (compiler-macroexpand
+       (c-macroexpand
          $(#'((,g)
                 (append
                     (? (json-object? ,g)
@@ -55,5 +55,5 @@
      (. (disp x.))
         (r .x)))
 
-(fn compiler/quote-expand (x)
+(fn c/quote-expand (x)
   (car (r (.. x))))

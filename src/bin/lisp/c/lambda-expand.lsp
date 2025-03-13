@@ -1,4 +1,4 @@
-(require 'compiler/funinfo)
+(require 'c/funinfo)
 
 (in-package 'c/le
   '(make-body inline export expr r))
@@ -50,6 +50,6 @@
 (fn r (x)
   (@ expr x))
 
-(var compiler/lambda-expand r)
+(var c/lambda-expand r)
 
 (in-package nil)

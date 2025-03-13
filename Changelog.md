@@ -24,6 +24,10 @@ and this project adheres to
 - DEF-TREE-FILTER: Filter all objects of a tree.
 - GETF/REMF: Get/remove from property lists.
 
+##### Changed
+
+- Package COMPILER renamed to C.
+
 
 ## [v0.0.33] - 2025-01-07
 

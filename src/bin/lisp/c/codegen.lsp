@@ -6,7 +6,7 @@
 (macro defcode (name args . body)
   $(umacro codegen ,name ,args ,@body))
 
-(fn compiler/codegen (x)
+(fn c/codegen (x)
   (@ '((_) (umacroexpand codegen _)) x))
 
 (const +bc+

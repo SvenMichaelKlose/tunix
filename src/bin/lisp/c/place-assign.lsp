@@ -30,6 +30,6 @@
   (%slot-value? x)
     $(%slot-value ,(assign .x.) ,..x.))
 
-(var compiler/place-assign assign)
+(var c/place-assign assign)
 
 (in-package nil)

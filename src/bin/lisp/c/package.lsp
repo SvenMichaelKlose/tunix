@@ -1,4 +1,4 @@
-(in-package 'compiler
+(in-package 'c
   '(*cmacros* *blocks*
     mklogical mkif cmblock cmreturn cmacroexpand compile-env
     move-arg move-args exexpand %block? fold-block inline-fn

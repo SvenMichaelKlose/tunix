@@ -2,15 +2,13 @@
 
 (message "Testing CMACROEXPAND...")
 (reset!)
-(load 'compiler/cmacroexpand.lsp)
-(load 'compiler/package.lsp)
-(print (cmacroexpand '(and a b c)))
-(print (cmacroexpand '(or a b c)))
-(print (cmacroexpand '(? a b c)))
+(load 'c/cmacroexpand.lsp)
+(print (c/cmacroexpand '(and a b c)))
+(print (c/cmacroexpand '(or a b c)))
+(print (c/cmacroexpand '(? a b c)))
 
 (message "Testing ARGEXPAND...")
 (reset!)
-(load 'compiler/package.lsp)
 (and (argexpand nil nil)
      (error))
 (or (equal (argexpand '(a b c)
@@ -28,14 +26,13 @@
 
 (message "Testing FOLD-BLOCK...")
 (reset!)
-(load 'compiler/package.lsp)
-(or (cequal (fold-block nil)
+(or (cequal (c/fold-block nil)
             '(nil))
     (error))
-(or (cequal (fold-block '(%block a b))
+(or (cequal (c/fold-block '(%block a b))
             '(a b))
     (error))
-(or (cequal (fold-block '(%block
+(or (cequal (c/fold-block '(%block
                            a
                            (%block
                              b
@@ -45,7 +42,6 @@
 
 (message "Testing EXEXPAND...")
 (reset!)
-(load 'compiler/package.lsp)
-(print (exexpand (print '(a b c d))))
-(print (exexpand (print '(a (b c d)))))
-(print (exexpand (print '(a (b (c d))))))
+(print (c/exexpand (print '(a b c d))))
+(print (c/exexpand (print '(a (b c d)))))
+(print (c/exexpand (print '(a (b (c d))))))

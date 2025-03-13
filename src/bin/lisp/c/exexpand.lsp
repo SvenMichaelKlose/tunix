@@ -25,6 +25,6 @@
       (+ (+@ expand (+@ cdr !))
          $((,x. (@ car !)))))))
 
-(var compiler/exexpand expand)
+(var c/exexpand expand)
 
 (in-package nil)

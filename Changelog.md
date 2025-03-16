@@ -24,6 +24,7 @@ and this project adheres to
 - DEF-TREE-FILTER: Filter all objects of a tree.
 - GETF/REMF: Get/remove from property lists.
 - FN as macro to allow nested FNs.
+- ERRSYM: String of last I/O error. (Unixoids only.)
 
 ##### Changed
 

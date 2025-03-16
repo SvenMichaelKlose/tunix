@@ -56,6 +56,7 @@ extern void FASTCALL    directory_close (simpleio_chn_t);
 
 extern bool             eof         (void);
 extern signed char      err         (void);
+extern void             set_err     (signed char);
     
 extern void FASTCALL    setin       (simpleio_chn_t);
 extern void FASTCALL    setout      (simpleio_chn_t);

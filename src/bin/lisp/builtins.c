@@ -738,6 +738,21 @@ bi_err (void)
     return nil;
 }
 
+#ifdef TARGET_UNIX
+
+lispptr
+bi_errsym (void)
+{
+    char * str;
+    if (err ()) {
+        str = strerror (err ());
+        return alloc_symbol (str, strlen (str));
+    }
+    return nil;
+}
+
+#endif // #ifdef TARGET_UNIX
+
 lispptr
 bi_eof (void)
 {
@@ -841,8 +856,11 @@ bi_out_named (lispptr x)
 {
     lispobj_size_t l = SYMBOL_LENGTH(x);
     tmpstr = SYMBOL_NAME(x);
-    while (l--)
+    while (l--) {
         counted_out (*tmpstr++);
+        if (err ())
+            break;
+    }
 }
 
 void FASTCALL
@@ -1393,6 +1411,7 @@ fd_to_simpleio_chn (int fd)
 }
 
 #ifndef NO_LISTENING_SOCKETS
+
 lispptr
 bi_socket_listen (void)
 {
@@ -1400,14 +1419,16 @@ bi_socket_listen (void)
     struct sockaddr_in server_addr;
     int port;
     int opt = 1;
-    lispptr chn;
 
+    set_err (0);
     port = NUMBER_VALUE(arg1);
 
     // Open Internet stream socket.
     sockfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    if (sockfd < 0) {
+        set_err (errno);
         return nil;
+    }
     setsockopt (sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
 
     // Bind and listen to port on all interfaces.
@@ -1417,10 +1438,9 @@ bi_socket_listen (void)
     server_addr.sin_port = htons (port);
     if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) >= 0)
         if (listen (sockfd, 5) >= 0)
-            if ((chn = fd_to_simpleio_chn (sockfd)))
-                return chn;
+            return make_number (sockfd);
 
-    // Fail.
+    set_err (errno);
     close (sockfd);
     return nil;
 }
@@ -1434,6 +1454,7 @@ bi_socket_accept (void)
     int client_sockfd;
     lispptr chn;
 
+    set_err (0);
     listen_sockfd = NUMBER_VALUE(arg1);
 
     // Accept connection.
@@ -1442,12 +1463,13 @@ bi_socket_accept (void)
     if (client_sockfd < 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return t;
+        set_err (errno);
         return nil;
     }
     if ((chn = fd_to_simpleio_chn (client_sockfd)))
         return chn;
 
-    // Fail.
+    set_err (errno);
     close (client_sockfd);
     return nil;
 }
@@ -1563,6 +1585,9 @@ const struct builtin builtins[] = {
 #endif
     { "open",       "ss",   bi_open },
     { "err",        "",     bi_err },
+#ifdef TARGET_UNIX
+    { "errsym",     "",     bi_errsym },
+#endif
     { "eof",        "",     bi_eof },
     { "conin",      "",     bi_conin },
     { "in",         "",     bi_in },

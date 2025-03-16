@@ -248,6 +248,12 @@ raw_err (void)
     return last_error;
 }
 
+void
+set_err (signed char x)
+{
+    last_error = x;
+}
+
 char
 raw_in (void)
 {

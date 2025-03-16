@@ -59,20 +59,23 @@
 
 (fn httpd-serve (socket)
   (!= (socket-accept socket)
-    (unless (number? !)
-      (error "Error accepting connection: " (.. !)))
+    (when (err)
+      (error "Sock accept: " (.. (errsym))))
     (message "Accepting connection on socket " (.. !))
     (let (oldout fnout
           txt "Hello world!")
       (setout !)
       (out txt)
+      (terpri)
+      (when (err)
+        (error "Conn out: " (.. (errsym))))
       (setout oldout)
       (socket-close !))))
 
 (fn httpd (port)
   (let (socket (socket-listen port))
-    (unless socket
-      (error "SOCKET-LISTEN failed"))
+    (when (err)
+      (error "Sock listen: " (.. (errsym))))
     (message "Socket " (.. socket) " listening on port " (.. port))
     (httpd-serve socket)
     (socket-close socket))

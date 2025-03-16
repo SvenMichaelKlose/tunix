@@ -623,8 +623,8 @@ multiple arguments:
 
 ## A matter of style: typical argument names
 
-Built-in functions have character-based and typed argument definitions.
-They are also used to describe arguments in this manual for all procedures:
+Built-in functions have character-based and typed argument definitions.  They
+are also used to describe arguments in this manual.
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -634,8 +634,8 @@ They are also used to describe arguments in this manual for all procedures:
 |  n   | number                                  |
 |  s   | symbol                                  |
 |  a   | memory address (positive number)        |
-|  b   | body (list of statements)               |
-**Typical argument names**
+|  b   | byte                                    |
+**Built-in procedure argument types**
 
 They may also have prefixes:
 
@@ -645,6 +645,22 @@ They may also have prefixes:
 |   ?    | optional              |
 |   '    | unevaluated           |
 **Argument name prefixes (description only, not real code)**
+
+Then there are argument names for user-defined procedures:
+
+| Code  | Type                             |
+|-------|----------------------------------|
+|  x    | anything (should be implied)     |
+|  c    | cons                             |
+|  l    | list (cons or NIL)               |
+|  n    | number                           |
+|  s    | symbol                           |
+|  s    | body (list of statements)        |
+|  i    | input channel                    |
+|  o    | output channel                   |
+|  addr | memory address (positive number) |
+|  byte | byte                             
+**Commonly used argument names**
 
 # Input/output
 
@@ -796,7 +812,7 @@ evaluates an expression alongside for inspection.
 |   *r*    | Initial return value of current REPL.  |
 
 Symbol \*R\* contains the most recent return value, should you want to
-use it the following expression.
+use it in the following expression.
 
 ## Stepping through the code
 
@@ -1597,7 +1613,8 @@ x           ; 23
 | (load name)      | Load and evaluate file.              |
 | (require +name)  | Load missing definition of NAME.     |
 | (open name mode) | Open file and return channel.        |
-| (err)            | Return number of last error or NIL.  |
+| (err)            | Number of last error or NIL.         |
+| (errsym)         | String of last error or NIL.         |
 | (eof)            | Tell if read reached end of file.    |
 | (setin n)        | Set input channel.                   |
 | (setout n)       | Set output channel.                  |
@@ -1653,7 +1670,8 @@ Returns the channel number or NIL.
 
 Illegal modes cause an ERROR\_FILEMODE.
 
-### (err): Return number of last I/O error or NIL.
+### (err): Number of last I/O error or NIL.
+### (errsym): String of last I/O error or NIL.
 ### (eof): Tell if last read reached end of file.
 ### (setin channel): Set input channel.
 ### (setout channel): Set output channel.

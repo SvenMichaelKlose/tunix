@@ -1,4 +1,5 @@
 (macro acase x
+  ;"CASE by SLOT-VALUE."
   (let* (gk  (symbol)
          ga  (symbol)
          f   $((p)
@@ -7,4 +8,4 @@
                    (.. p.))))
     $(let (,gk ,x.
            ,ga ,.x.)
-       (? ,@(mapcan f (group2 ..x))))))
+       (? ,@(+@ f (group2 ..x))))))

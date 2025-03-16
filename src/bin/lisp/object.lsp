@@ -1,4 +1,6 @@
+; Alist of classes' properties.
 (var *props* nil)
+; Most recentl method called (see SUPER).
 (var *m* nil)
 
 (fn %type? (x)
@@ -14,8 +16,7 @@
   (let (name (? (atom cls) cls cls.)
         base (? (cons? cls) .cls.))
     $(push (. (. t ',name)
-              (nconc (.. ,@(@ %cq
-                              (group2 members)))
+              (nconc (.. ,@(@ %cq (group2 members)))
                      (%slot-value *props* ,base)))
            *props*)))
 

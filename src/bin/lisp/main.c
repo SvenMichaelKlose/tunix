@@ -101,7 +101,7 @@ const char * env_files[] = {
 #endif // #ifndef TARGET_C16
 #ifdef TEST_ALL
     "test-all.lsp",
-#endif // #ifdef TEST_ALL
+#endif
     NULL
 };
 

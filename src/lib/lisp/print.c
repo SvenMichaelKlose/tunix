@@ -209,8 +209,6 @@ lispptr FASTCALL
 print (lispptr x)
 {
     print0 (x);
-    if (CONSP(x))
-        terpri ();
     return x;
 }
 

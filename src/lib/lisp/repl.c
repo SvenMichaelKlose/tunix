@@ -54,6 +54,7 @@ read_safe (void)
     error_code = 0;
 #endif
     x = nil;
+    fresh_line ();
     x = read_expr ();
 #ifndef NAIVE
     if (error_code)
@@ -272,8 +273,8 @@ lisp_repl (char mode, simpleio_chn_t load_fn)
     // READ/EVAL/PRINT-Loop.
     while (1) {
         if (mode == REPL_STD && (con_reset () & TERM_FLAG_DIRECT)) {
+            fresh_line ();
             outs ("Console reset.");
-            terpri ();
         }
         if (repl_eof (mode, load_fn))
             break;
@@ -515,8 +516,8 @@ done_short_command:
 
             // Clear break mode.
             do_break_repl = 0;
+            fresh_line ();
             outs ("Program exited.");
-            terpri ();
             continue;
         }
 
@@ -525,7 +526,7 @@ done_short_command:
             fresh_line ();
             outs ((mode == REPL_DEBUGGER) ? "Result: " : " ");
             print (x);
-            fresh_line ();
+            terpri ();
         }
     }
 
@@ -576,7 +577,6 @@ load (char * pathname)
         fresh_line ();
         outs ("Loading ");
         outs (pathname);
-        terpri ();
         setout (old_out);
     }
 #endif

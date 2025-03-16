@@ -20,8 +20,8 @@ src/include/git-version.h: FORCE
 	printf "$(TAG)" >git-version
 	printf "(var +v+ \"$(TAG)\")\n" >src/bin/lisp/git-version.lsp
 	printf "(var +vb+ \"$(BRANCH)\")\n" >>src/bin/lisp/git-version.lsp
-	printf "(out \"TUNIX Lisp (\" +v+ \" \" +vb+ \"" >>src/bin/lisp/git-version.lsp
-	printf " on \" +target+ \")\")(terpri)\n" >>src/bin/lisp/git-version.lsp
+	printf "(fresh-line)\n" >>src/bin/lisp/git-version.lsp
+	printf "(out \"TUNIX Lisp \" +target+ '- +v+ '- +vb+)\n" >>src/bin/lisp/git-version.lsp
 	mkdir -p src/include
 	printf "#define TUNIX_GIT_SHA \"" >src/include/git-version.h
 	printf "$(shell git rev-parse HEAD)" >>src/include/git-version.h
@@ -58,7 +58,7 @@ ifneq (,$(filter $(TARGET), $(CC65_TARGETS)))
 endif
 	cp src/bin/lisp/*.lsp $(DISTDIR)/
 	cp -r src/bin/lisp/as65 $(DISTDIR)/
-	cp -r src/bin/lisp/compiler $(DISTDIR)/
+	cp -r src/bin/lisp/c $(DISTDIR)/
 	cp -r src/bin/lisp/edit $(DISTDIR)/
 ifeq ($(TARGET), vic20)
 	cp src/sbin/ultiburn/ultiburn $(DISTDIR)/

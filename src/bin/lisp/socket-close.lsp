@@ -1,3 +1,4 @@
 (fn socket-close (n)
-  (= *sockq* (aremove n *sockq*))
-  (%sclose n))
+  (%sclose n)
+  (unless (eq *sockq* '*sockq*)
+    (= *sockq* (aremove n *sockq*))))

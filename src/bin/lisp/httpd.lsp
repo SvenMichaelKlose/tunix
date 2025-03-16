@@ -2,6 +2,11 @@
 ; ⚠️  NEVER TESTED ⚠️
 ; ⚠️  JUST BEAUTIFUL ⚠️
 
+;(require 'let 'progn 'while 'do '!=
+;         'unless 'let* 'dup 'aprog1
+;         'dotimes 'push 'split '!?
+;         'position)
+
 (fn send-response-header (mime)
   (out "HTTP/1.1 200 OK" 13 10
        "Content-Type: " mime 13 10
@@ -32,28 +37,43 @@
   (awhile (read-line)
     (? (== 0 (slength !))
        (return))
-    (with (item (split \: !))
+    (let (item (split \: !))
       (acons! item. (apply append (pad \: .item))
               *reqinfo*))))
 
 (fn handle-request ()
-  (out "Received request: " request)
-  (with* (cmd     (split \  (read-line))
-          method  cmd.
-          param   .cmd)
+  (let* (cmd     (split \  (read-line))
+         method  cmd.
+         param   .cmd)
+    (out "Received request: " request)
     (parse-req-info)
     (!? (slot-value *methods* method)
         (funcall ! param)
         (http-error 666 "Unknown method " method))))
 
-(fn http-server (port)
-  (with (socket (socket-listen port))
-    (awhile (socket-accept socket)
-      (with (oldin fnin)
-        (setin !)
-        (setout !)
-        (handle-request)
-        (socket-close !)
-        (setin oldin)))))
+(fn http-readline (socket)
+  (let (oldin fnin)
+    (setin socket)
+    (prog1 (read-line)
+      (setin oldin))))
 
-(http-server 8080)
+(fn httpd-serve (socket)
+  (!= (socket-accept socket)
+    (unless (number? !)
+      (error "Error accepting connection: " (.. !)))
+    (message "Accepting connection on socket " (.. !))
+    (let (oldout fnout
+          txt "Hello world!")
+      (setout !)
+      (out txt)
+      (setout oldout)
+      (socket-close !))))
+
+(fn httpd (port)
+  (let (socket (socket-listen port))
+    (unless socket
+      (error "SOCKET-LISTEN failed"))
+    (message "Socket " (.. socket) " listening on port " (.. port))
+    (httpd-serve socket)
+    (socket-close socket))
+  (message "httpd exiting"))

@@ -312,7 +312,7 @@ raw_setout (simpleio_chn_t c)
 }
 
 simpleio_chn_t
-alloc_channel (FILE * handle)
+simpleio_alloc_channel (void * handle)
 {
     int i;
 
@@ -339,7 +339,7 @@ simpleio vectors = {
     raw_conin,
 #else
     raw_in,
-#endif // #ifdef TARGET_UNIX
+#endif
     raw_in,
     raw_out,
     raw_setin,
@@ -358,11 +358,16 @@ simpleio_open (char * name, char mode)
     m[0] = mode;
     m[1] = 0;
     if ((handle = fopen (name, m))) {
-        chn = alloc_channel (handle);
+        chn = simpleio_alloc_channel (handle);
         simpleio_init_channel (chn, &vectors);
         return chn;
     }
     return 0;
+}
+
+void simpleio_init_channel_std (simpleio_chn_t chn)
+{
+    simpleio_init_channel (chn, &vectors);
 }
 
 void

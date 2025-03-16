@@ -82,9 +82,11 @@ extern void             fresh_line  (void);
 extern simpleio_chn_t   FASTCALL  simpleio_open  (char * pathname, char mode);
 extern void             FASTCALL  simpleio_close (simpleio_chn_t);
 
-extern void             simpleio_init           (void);
-extern void FASTCALL    simpleio_init_channel   (simpleio_chn_t, simpleio *);
-extern void             simpleio_clear_channels (void);
-extern void             simpleio_init_common    (void);
+extern void             simpleio_init             (void);
+extern simpleio_chn_t   simpleio_alloc_channel    (void * handle);
+extern void FASTCALL    simpleio_init_channel     (simpleio_chn_t, simpleio *);
+extern void FASTCALL    simpleio_init_channel_std (simpleio_chn_t);
+extern void             simpleio_clear_channels   (void);
+extern void             simpleio_init_common      (void);
 
 #endif // #ifndef __LIBSIMPLEIO_H__

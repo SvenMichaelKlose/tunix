@@ -38,6 +38,7 @@
   (and *v?*
     (((oldout)
        (setout stdout)
+       (fresh-line)
        (print $(macro ,n ,a))
        (setout oldout))
      fnout))

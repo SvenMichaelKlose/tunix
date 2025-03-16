@@ -8,8 +8,7 @@
   (= *universe* (member 'app-test-all *universe*))
   (= *macros* (member-if '((x)
                             (eq 'do-test (car x)))
-                         *macros*))
-  (fresh-line))
+                         *macros*)))
 
 (macro do-test (title . body)
   $((()
@@ -19,7 +18,6 @@
            (fresh-line)
            (and (< (print (gc)) 4096)
                 (test-reset!)))))
-      (fresh-line)
       ,@body)))
 
 (do-test 'PROGN

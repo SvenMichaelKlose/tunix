@@ -1033,12 +1033,12 @@ bi_define (void)
 
     if (NOT_NIL(SYMBOL_VALUE(vp_symbol))) {
         setout (STDOUT);
+        fresh_line ();
         if (NOT_NIL(member (arg1, SYMBOL_VALUE(universe))))
             outs ("Redefining ");
         else
             outs ("Defining ");
         print (arg1);
-        terpri ();
         setout (old_out);
     }
 #endif
@@ -1368,52 +1368,6 @@ bi_socket_block (void)
 }
 
 lispptr
-bi_socket_listen (void)
-{
-    int sockfd;
-    struct sockaddr_in server_addr;
-    int port = NUMBER_VALUE(arg1);
-
-    sockfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-        return nil;
-
-    memset (&server_addr, 0, sizeof (server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons (port);
-
-    if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) < 0) {
-        close (sockfd);
-        return nil;
-    }
-
-    if (listen (sockfd, 5) < 0) {
-        close (sockfd);
-        return nil;
-    }
-
-    return make_number (sockfd);
-}
-
-lispptr
-bi_socket_accept (void)
-{
-    int listen_sockfd = NUMBER_VALUE(arg1);
-    struct sockaddr_in client_addr;
-    socklen_t client_len = sizeof (client_addr);
-
-    int client_sockfd = accept (listen_sockfd, (struct sockaddr *) &client_addr, &client_len);
-    if (client_sockfd < 0) {
-        if (errno != EAGAIN && errno != EWOULDBLOCK)
-            return nil;
-        return t;
-    }
-
-    return make_number (client_sockfd);
-}
-
-lispptr
 bi_socket_close (void)
 {
     int fd = NUMBER_VALUE(arg1);
@@ -1422,6 +1376,83 @@ bi_socket_close (void)
     return t;
 }
 
+lispptr
+fd_to_simpleio_chn (int fd)
+{
+    FILE * stream;
+    simpleio_chn_t chn;
+
+    if ((stream = fdopen (fd, "r+"))) {
+        if ((chn = simpleio_alloc_channel (stream))) {
+            simpleio_init_channel_std (chn);
+            return make_number (chn);
+        }
+    }
+
+    return NULL;
+}
+
+#ifndef NO_LISTENING_SOCKETS
+lispptr
+bi_socket_listen (void)
+{
+    int sockfd;
+    struct sockaddr_in server_addr;
+    int port;
+    int opt = 1;
+    lispptr chn;
+
+    port = NUMBER_VALUE(arg1);
+
+    // Open Internet stream socket.
+    sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        return nil;
+    setsockopt (sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
+
+    // Bind and listen to port on all interfaces.
+    memset (&server_addr, 0, sizeof (server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons (port);
+    if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) >= 0)
+        if (listen (sockfd, 5) >= 0)
+            if ((chn = fd_to_simpleio_chn (sockfd)))
+                return chn;
+
+    // Fail.
+    close (sockfd);
+    return nil;
+}
+
+lispptr
+bi_socket_accept (void)
+{
+    int listen_sockfd;
+    struct sockaddr_in client_addr;
+    socklen_t client_len;
+    int client_sockfd;
+    lispptr chn;
+
+    listen_sockfd = NUMBER_VALUE(arg1);
+
+    // Accept connection.
+    client_len = sizeof (client_addr);
+    client_sockfd = accept (listen_sockfd, (struct sockaddr *) &client_addr, &client_len);
+    if (client_sockfd < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return t;
+        return nil;
+    }
+    if ((chn = fd_to_simpleio_chn (client_sockfd)))
+        return chn;
+
+    // Fail.
+    close (client_sockfd);
+    return nil;
+}
+
+#endif // #ifndef NO_LISTENING_SOCKETS
 #endif // #ifdef HAVE_SOCKETS
 
 const struct builtin builtins[] = {

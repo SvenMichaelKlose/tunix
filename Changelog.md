@@ -23,10 +23,12 @@ and this project adheres to
 - ARGNAMEXPAND: Get list of names in argument definition.
 - DEF-TREE-FILTER: Filter all objects of a tree.
 - GETF/REMF: Get/remove from property lists.
+- FN as macro to allow nested FNs.
 
 ##### Changed
 
 - Package COMPILER renamed to C.
+- Use FRESH-LINE instead of TERPRI for an extra line on the screen.
 
 
 ## [v0.0.33] - 2025-01-07

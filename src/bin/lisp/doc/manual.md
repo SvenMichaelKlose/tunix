@@ -116,8 +116,9 @@ SYMBOL will issue an error if it is passed a dotted pair.
 
 ### Macro ?: A more compact version of COND
 
-Macro ? is used instead of COND.  It does not require each
-condition/consequence pair to be a list.  Any remaining expression with
+Macro ? is used instead of COND.  Unlike COND it does not expect a list
+of lists, but a list of pairs:
+Any remaining expression with
 no following one to make a pair is the default, so no T condition is
 required:
 
@@ -204,25 +205,10 @@ tunix.v0.0.5+bca5411.2024-08-22.zip
 *** TODO: See also "Version information". ***
 
 The version, "0.0.5" in this case, contains a major, minor and patch
-version according to
+version as described in
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-TUNIX Lisp is a bit different as it has a major version number of "0",
-indicating that it's not meant for production where you expect things to
-not change from one day to the other.  To make it even worse, the minor
-version also being "0" means that absolutely everything could change, no
-matter if there'll be hell or high water.  It's about making TUNIX grown
-up enough to be able to follow the Semantic Versioning rules in the first
-place.  But we're trying to keep the pain away.  The patch level increases
-with every release - that happens if a bunch of changes happened that
-makes everyones life easier.  You must download the latest.  The others
-are kept for the protocol only.
-
-Things you must expect to change sooner than later:
-
-* Required special keyword (like the notoriuos LAMBDA) to tell function
-  expressiod from regular expressions.  It'll be required to make the
-  language more comfortable when it comes to lexical scope, and to have a
-  compiler produce effective code.
+As long as the version number is 0.x.x any new version of TUNIX Lisp may break
+apps already written for it in some way, so always want the latest version.
 
 ## Unpacking
 
@@ -485,18 +471,20 @@ Set up a Unix-like environment using MSYS2 or MinGW:
 
 # Using TUNIX Lisp: REPL, autoloader and debugger
 
-When firing up the interpreter the first time, it loads the most essential
-code required to load more code on demand, and creates a boot image which
-is loaded instead on next program start.  You then end up in the REPL
-(read-eval-print-loop).  It reads an expression, evaluates it, and prints
-the result.  Then it starts over if the input channel hasn't been closed.
+When firing up the interpreter the first time, it loads the most essential code
+required to load more code on demand, and creates a faster loadgin image of
+what's been loaded for the next program start.
+
+You then end up in the REPL (read-eval-print-loop).  It reads an expression,
+evaluates it, and prints the result.  Then it starts over if the input channel
+hasn't been closed.
 
 ~~~lisp
 (dotimes (i 10) (print i))
-0 1 2 3 4 5 6 7 8 9
+  0 1 2 3 4 5 6 7 8 9 ; <- Result of the above line.
 ~~~
 
-If function is missing, the error handler AUTOLOAD tries to load its
+If a function is missing, the error handler AUTOLOAD tries to load its
 source file by appending the ".lsp" suffix to its name.  This also works
 with macros.
 
@@ -519,13 +507,15 @@ Such symbol names are also printed with double quotes.
 "Hello world!" ; -> "Hello world!"
 ~~~
 
-Calling SYMBOL with no arguments always creates a new, unique symbol with
-no name.
+Calling SYMBOL with no arguments creates an anonymous and unique symbol with no
+name:
 
 ~~~lisp
 (symbol)                ; -> ""
 (eq (symbol) (symbol))  ; -> NIL
 ~~~
+
+# Global definitions
 
 VAR and FN add a symbol to list \*UNIVERSE\*.  It is the starting point
 of the garbage collector.  Everything not connected to that list in one
@@ -612,11 +602,17 @@ Rest arguments can be used to implement one or more optional arguments
 with defaults.
 
 ~~~lisp
+; Function where OPTIONAL is 0 by default (unless given).
 (fn subeq (first . optional)
   (= optional (or (car optional) 0)))
 ~~~
 
+In the example above, if optional is NIL, CAR will also return NIL, making the
+OR-expression return number 0.  This scheme can also be applied to
+multiple arguments:
+
 ~~~lisp
+; Function with two optional arguments.
 (fn subeq (first . optionals)
   (with ((optional1 (or (car optionals) 0))
          (optional2 (or (cadr optionals) 0)))
@@ -625,15 +621,10 @@ with defaults.
     (terpri)))
 ~~~
 
-In this example, if optional is NIL, CAR will also return NIL, making the
-OR-expression return number 0.  This scheme can also be applied to
-multiple arguments:
-
-## Argument type descriptions in this manual
+## A matter of style: typical argument names
 
 Built-in functions have character-based and typed argument definitions.
-They are also used, padded with spaces, to describe arguments in this
-manual for all procedures (functions, macros and special forms).
+They are also used to describe arguments in this manual for all procedures:
 
 | Code | Type                                    |
 |------|-----------------------------------------|
@@ -643,37 +634,41 @@ manual for all procedures (functions, macros and special forms).
 |  n   | number                                  |
 |  s   | symbol                                  |
 |  a   | memory address (positive number)        |
-|  b   | byte value                              |
+|  b   | body (list of statements)               |
+**Typical argument names**
 
 They may also have prefixes:
 
 | Prefix | Description           |
 |--------|-----------------------|
-|   +X   | any number of type X  |
-|   ?X   | optional              |
-|   'X   | unevaluated           |
+|   +    | any number of type X  |
+|   ?    | optional              |
+|   '    | unevaluated           |
+**Argument name prefixes (description only, not real code)**
 
 # Input/output
 
 TUNIX Lisp boils I/O down to its basics: one channel for input and one for
-output, initially wired to "standard I/O", like your terminal with screen
-and keyboard.  Input and output can each be switched to other channels.
+output, initially wired to "standard I/O", like your terminal with keyboard (input)
+and screen (output).  Input and output can each be switched to other channels.
 If you launch a LOAD command to execute a Lisp file, the input channel is
-connected to that file until it's been read entirely, but in general a
-channel can be directed to another one anytime.
+connected to that file until it's been read entirely.
+
+I/O is character-oriented.  Screens may decide to buffer output until a line has
+been ended.
 
 ## READing and PRINTing expressions
 
-Expressions can be read and written using built-in functions READ and
-PRINT.  Strings and chars have dedicated formats:
+Expressions can be read and written using built-in functions READ and PRINT.
+Strings and chars have dedicated formats:
 
-| Type format examples | Description                     |
-|----------------------|---------------------------------|
-| (a . d)              | "dotted pair" (must be quoted), |
-| "string"             | String.  Escape is "\\".        |
-| \\A                  | Character value.                |
+| Type format examples | Description                            |
+|----------------------|----------------------------------------|
+| (a . d)              | "dotted pair": a cons with CAR and CDR |
+| "string"             | String.  Escape is "\\".               |
+| \\A                  | Character value.                       |
 
-READ and PRINT also support abbreviations if compiled in:
+READ and PRINT also support abbreviations:
 
 | Expression         | Abbreviation |
 |--------------------|--------------|
@@ -684,7 +679,10 @@ READ and PRINT also support abbreviations if compiled in:
 
 ## Catching I/O errors and state
 
-## Character-based I/O
+I/O functions that would return something useful if successful,
+return NIL if an error occured.  The error code can be fetched by
+calling function ERR.  If an I/O function returns NIL if successful,
+it returns an error code right away if it failed.
 
 ## Input and output channel
 
@@ -698,7 +696,10 @@ contain the standard I/O channel numbers.
 (setout stdout)
 ~~~
 
-The currently active channels numbers are in symbols FNIN and FNOUT.
+The currently active channels numbers are saved to symbols FNIN and FNOUT
+as soon as they're changed.
+
+## Opening files
 
 New channels are created by OPEN to access files:
 
@@ -716,6 +717,9 @@ New channels are created by OPEN to access files:
 ~~~
 
 ## Terminal control codes
+
+TUNIX supports a very primitive terminal of its own kind to support as many
+machines as possible - writing a TUNIX terminal is rather straightforward:
 
 | Code     | Function           |
 |----------|--------------------|
@@ -736,7 +740,7 @@ New channels are created by OPEN to access files:
 |   2  | Reverse mode         |
 |   4  | Direct mode          |
 
-Flags may be combined.
+Flags may be combined by adding or BIT-ORing them.
 
 # Error handling and debugging
 
@@ -856,7 +860,8 @@ return symbol %FAIL.
 ~~~lisp
 (fn onerror (errcode repl faulty)
   (out "ONERROR handler called!")(terpri)
-  ; We don't handle errors so unleash the debugger on it.
+  ; We don't handle errors yet, so unleash the debugger on it.
+  ; See file 'autoload.lsp' for a rather practical example!
   '%fail)
 ~~~
 
@@ -894,16 +899,15 @@ heading printed when invoked:
 Returns to the current REPL and does a garbage collection before calling
 an ONERROR handler or debugger.
 
-Compile-time option ONETIME\_HEAP\_MARGIN specified the number of heap
-bytes that are kept for calling an ONERROR handler.
+Compile-time option ONETIME\_HEAP\_MARGIN specifies the number of heap
+bytes that are kept for the ONERROR handler.
 
 # Dot notation
 
 The dot notation is a set of abbreviations for CAR, CDR, combinations of
-both, and CDR/ASSOC.  The conversion to regular expressions is performed
-by function DOTEXPAND.  It can be called automatically by the REPL
-(which it isn't by default due to resource constraints on small
-machines):
+both, and CDR/ASSOC, to make Lisp code more compact than ever.  Function
+DOTEXPAND translates dot-notation to executable expressions.  It can be called
+automatically by the REPL:
 
 ~~~lisp
 (= *ex* '((x) (macroexpand (dotexpand x))))
@@ -973,7 +977,7 @@ Let's compare the mere MACROEXPAND function with a dot-notated version:
 ~~~
 
 If DOTEXPAND is too resource intensive, you can disable it again.
-Don't forget to keep the macro expansion active:
+Don't forget to keep MACOREXPAND active:
 
 ~~~lisp
 (= *ex* macroexpand)
@@ -1007,9 +1011,7 @@ Triggers the garbage collector.  It marks all objects linked to variable
 
 ### (free): Number of free bytes on heap.
 
-Returns the maximum number of bytes that could be allocated.  That number
-is likely to be less but can amount to the size of a symbol with the
-biggest possible name length.
+Returns the maximum number of bytes left on the heap.
 
 ## Definitions
 

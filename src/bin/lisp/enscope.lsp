@@ -29,7 +29,7 @@
 
 ; Map arguments, turn child LAMBDAs
 ; into QUASIQUOTES.
-(fn enscope (fndecl)
-  $(fn ,.fndecl. ,..fndecl.
-     ,@(lamb ...fndecl 0
-           (argnames .fndecl.))))
+(fn enscope (fn-decl)
+  $(fn ,.fn-decl. ,..fn-decl.
+     ,@(lamb ...fn-decl 0
+           (argnames .fn-decl.))))

@@ -603,7 +603,7 @@ with defaults.
 
 ~~~lisp
 ; Function where OPTIONAL is 0 by default (unless given).
-(fn subeq (first . optional)
+(fn optional-0 (first . optional)
   (= optional (or (car optional) 0)))
 ~~~
 
@@ -613,7 +613,7 @@ multiple arguments:
 
 ~~~lisp
 ; Function with two optional arguments.
-(fn subeq (first . optionals)
+(fn optionals-0 (first . optionals)
   (with ((optional1 (or (car optionals) 0))
          (optional2 (or (cadr optionals) 0)))
     (print optional1)
@@ -621,7 +621,7 @@ multiple arguments:
     (terpri)))
 ~~~
 
-## A matter of style: typical argument names
+## A matter of style: argument names
 
 Built-in functions have character-based and typed argument definitions.  They
 are also used to describe arguments in this manual.
@@ -918,10 +918,15 @@ an ONERROR handler or debugger.
 Compile-time option ONETIME\_HEAP\_MARGIN specifies the number of heap
 bytes that are kept for the ONERROR handler.
 
-# Dot notation
+## Dot notation
 
 The dot notation is a set of abbreviations for CAR, CDR, combinations of
-both, and CDR/ASSOC, to make Lisp code more compact than ever.  Function
+both, and CDR/ASSOC, to make Lisp code more compact.  It's doing its job so
+well that it's expansion to executable expressions is done by default.
+If having DOTEXPAND around is not an option, the environment can be processed
+with FILTER-FILE.
+
+Function
 DOTEXPAND translates dot-notation to executable expressions.  It can be called
 automatically by the REPL:
 
@@ -1308,7 +1313,6 @@ Returns its argument if it is a special form or NIL.
 | (symbol-name s)   | Get name as List of char numbers.        |
 | (slength s)       | Get name length.                         |
 | (char-at s n)     | Char of symbol name.                     |
-| (in-package s l?) | Prefix set of symbols with package name. |
 
 ### (symbol l): Make symbol with name from char list.
 
@@ -1347,35 +1351,45 @@ Get length of symbol or built-in.
 (char-at nil 1) ; -> 105
 ~~~
 
+## Packages
+
+| Function          | Description                                   |
+|-------------------|-----------------------------------------------|
+| (in-package s l?) | Prefix set of symbols with package name.      |
+| (mpkg x)          | Package symbols as specified with IN-PACKAGE. |
+
 ### (in-package s l?): Prefix set of symbols with package name.
 
-Adds symbol prefixing to \*EX\* in the REPL.  Prefixes all symbols
-in the set, read by the REPL, with the package name and a "/".
-Files can be packaged up in directories that way.
+Specifies the current package name, followed by a set of symbols that must be
+prefixed with the package name.  It's used by MKPKG in the REPL and during
+LOADs.
 
 ~~~lisp
-; File "my-package/package.lsp" is a good place for this to share
-; across files of a package.
+; File "my-package/package.lsp" is a
+; good place for this to share across
+; files of a package.
 (in-package my-package sym1 sym2)
 
 sym1 ; -> my-package/sym1
 ~~~
 
-It's reasonable to disable the current symbol translations before
-a file with IN-PACKAGE translation ends:
-
+Packaging should be disabled at file ends by specifying an empty set:
 ~~~lisp
 (in-package nil)
 ~~~
 
-To let a symbol escape from translation cause by IN-PACKAGE, prefix
-it with a "/":
+/ is the special quote to let a symbol escape packaging:
 
 ~~~lisp
 (load 'my-package/package.lsp)
 sym1    ; -> my-package/sym1
 /sym1   ; -> sym1
 ~~~
+
+### (mkpkg x): Package up expression
+
+MKPKG prefixes symbols as set with IN-PACKAGE.  It is enabled in the REPL and
+during LOADs after IN-PACKAGE has been loaded.
 
 ## Conses
 

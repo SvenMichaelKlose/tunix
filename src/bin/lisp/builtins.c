@@ -1415,7 +1415,7 @@ fd_to_simpleio_chn (int fd)
 lispptr
 bi_socket_listen (void)
 {
-    int sockfd;
+    int listen_sockfd;
     struct sockaddr_in server_addr;
     int port;
     int opt = 1;
@@ -1424,24 +1424,24 @@ bi_socket_listen (void)
     port = NUMBER_VALUE(arg1);
 
     // Open Internet stream socket.
-    sockfd = socket (AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) {
+    listen_sockfd = socket (AF_INET, SOCK_STREAM, 0);
+    if (listen_sockfd < 0) {
         set_err (errno);
         return nil;
     }
-    setsockopt (sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
+    setsockopt (listen_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
 
     // Bind and listen to port on all interfaces.
     memset (&server_addr, 0, sizeof (server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons (port);
-    if (bind (sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) >= 0)
-        if (listen (sockfd, 5) >= 0)
-            return make_number (sockfd);
+    if (bind (listen_sockfd, (struct sockaddr *) &server_addr, sizeof (server_addr)) >= 0)
+        if (listen (listen_sockfd, 5) >= 0)
+            return make_number (listen_sockfd);
 
     set_err (errno);
-    close (sockfd);
+    close (listen_sockfd);
     return nil;
 }
 
@@ -1449,9 +1449,9 @@ lispptr
 bi_socket_accept (void)
 {
     int listen_sockfd;
-    struct sockaddr_in client_addr;
-    socklen_t client_len;
     int client_sockfd;
+    socklen_t client_len;
+    struct sockaddr_in client_addr;
     lispptr chn;
 
     set_err (0);
@@ -1460,7 +1460,7 @@ bi_socket_accept (void)
     // Accept connection.
     client_len = sizeof (client_addr);
     client_sockfd = accept (listen_sockfd, (struct sockaddr *) &client_addr, &client_len);
-    if (client_sockfd < 0) {
+    if (client_sockfd <= 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return t;
         set_err (errno);

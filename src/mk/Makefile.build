@@ -58,4 +58,4 @@ endif
 include $(THIS_DIR)/Makefile.build.$(TARGETCC)
 
 test:
-	@printf "No test to be done.\n"
+	@echo "No test to be done."

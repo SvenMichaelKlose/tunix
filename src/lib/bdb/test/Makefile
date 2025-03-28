@@ -26,10 +26,10 @@ test: .passed
 
 .passed:
 	@for i in $(PROGRAMS); do \
-	    printf "Running test '$$i'.\n"; \
+	    echo "Running test '$$i'."; \
 	    (./$$i && exit); \
 	    if [ $$? -ne 0 ]; then \
-	        printf "Tests failed!\n"; exit 1; \
+	        echo "Tests failed!"; exit 1; \
 	    fi \
 	done
 	touch .passed

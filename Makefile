@@ -89,8 +89,8 @@ allworlds:
 	$(MAKE) worldclean world TARGET=sim6502
 	$(MAKE) worldclean world TARGET=unix
 	$(MAKE) worldclean world TARGET=vic20
-	#printf "# allwords `date +%F`: $(CFLAGS)\n" >> sizes
-	#printf "~~~ls -l tunix/*/lisp\n" >> sizes
+	#echo "# allwords `date +%F`: $CFLAGS" >> sizes
+	#echo "~~~ls -l tunix/*/lisp" >> sizes
 	#ls -l tunix/*/lisp >> sizes
 	#printf "~~~\n\n" >> sizes
 
@@ -100,15 +100,15 @@ test: allworlds
 
 mkfs/mkfs.ultifs:
 ifeq ($(TARGET), vic20)
-	@printf "# Making host mkfs.\n"
+	@echo "# Making host mkfs."
 	$(MAKE) -C mkfs all
 endif
 
 ultimem_image:
 ifeq ($(TARGET), vic20)
-	@printf "# Making UltiMem ROM image.\n"
+	@echo "# Making UltiMem ROM image."
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG) n l src/sys/boot/flashboot.bin w
-	@printf "# Making trimmed UltiMem ROM image.\n"
+	@echo "# Making trimmed UltiMem ROM image."
 	./mkfs/mkfs.ultifs $(ULTIMEM_IMG_TRIMMED) n l src/sys/boot/flashboot.bin i compiled W
 endif
 
@@ -126,15 +126,15 @@ release:
 	$(MAKE) clean hostclean
 	git submodule update --init --recursive
 	@git status --porcelain | grep "^??" > /dev/null && { \
-		printf "There are untracked files in the repository which are also not ignored:\n"; \
+		echo "There are untracked files in the repository which are also not ignored:"; \
 		git status --porcelain | grep "^??"; \
 		read -p "Do you want to continue anyway? [y/N] " answer; \
 		if [ "$$answer" != "y" ]; then \
-			printf "User aborted.\n"; \
+			echo "User abort."; \
 			exit 1; \
 		fi \
 	} || { \
-		printf "No untracked files, proceeding with release.\n"; \
+		echo "No untracked files, proceeding with release."; \
 	}
 	@echo "Running the release process for '$(RELEASE_ZIP_NAME)'..."
 	$(MAKE) host COPTFLAGS="-Ofast -flto -march=native" LDFLAGS="-Ofast -flto -march=native"
